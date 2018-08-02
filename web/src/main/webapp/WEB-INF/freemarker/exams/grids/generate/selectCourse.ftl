@@ -184,11 +184,18 @@
 			<#if studyYear == 0><input type="hidden" name="courseYearsToShow" value=""/></#if>
 	</div>
 	<div class="year_info_ftr <#if studyYear == 0>hidden</#if>"><hr/></div>
-	<p>
+
+	<h5>Types of student to include</h5>
+
+	<div style="margin-bottom: 2rem;">
 		<@bs3form.checkbox path="selectCourseCommand.includeTempWithdrawn">
-			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Show temporarily withdrawn students
+			<@f.checkbox path="selectCourseCommand.includeTempWithdrawn" /> Temporarily withdrawn
 		</@bs3form.checkbox>
-	</p>
+		<br>
+		<@bs3form.checkbox path="selectCourseCommand.resitOnly">
+			<@f.checkbox path="selectCourseCommand.resitOnly" /> Resit only
+		</@bs3form.checkbox>
+	</div>
 
 	<@bs3form.errors path="selectCourseCommand" />
 

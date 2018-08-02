@@ -12,7 +12,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 	val module1: Module = Fixtures.module("its01")
 	val module2: Module = Fixtures.module("its02")
 	val academicYear = AcademicYear(2014)
-	val course: Course = Fixtures.course("its1")
+	val course: Course = Fixtures.course("UCSA-ITS1")
 
 	trait Fixture {
 		val student: StudentMember = Fixtures.student("1234")
@@ -511,7 +511,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
 				case _ => Assertions.fail("Incorrect type returned")
 			}
-			result.description should be (FinalYearGrade.Fail.description)
+			result.description should be (FinalYearGrade.Undergraduate.Fail.description)
 		}
 
 		// Not enough credits passed in final year
@@ -553,7 +553,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
 				case _ => Assertions.fail("Incorrect type returned")
 			}
-			result.description should be (FinalYearGrade.Fail.description)
+			result.description should be (FinalYearGrade.Undergraduate.Fail.description)
 		}
 
 		// All good
@@ -597,8 +597,51 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69))
 				case _ => Assertions.fail("Incorrect type returned")
 			}
-			result.description should be (FinalYearGrade.UpperSecondBorderline.description)
+			result.description should be (FinalYearGrade.Undergraduate.UpperSecondBorderline.description)
 		}
+	}
+
+	@Test
+	def suggestedFinalYearGradePostgraduate(): Unit = {
+		val student: StudentMember = Fixtures.student("1234")
+		student.mostSignificantCourse.course = Fixtures.course("TPOS-ITS1")
+		student.mostSignificantCourse.sprStartAcademicYear = academicYear
+		val scyd: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
+		scyd.academicYear = academicYear
+		student.mostSignificantCourse.courseYearLength = "1"
+		scyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
+
+		val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
+			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
+			override val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
+		}
+		def entityYear: ExamGridEntityYear = scyd.toExamGridEntityYear
+
+		val yearWeighting: CourseYearWeighting = Fixtures.yearWeighting(course, new JBigDecimal(100), student.mostSignificantCourse.sprStartAcademicYear, 1)
+		service.moduleRegistrationService.overcattedModuleSubsets(any[ExamGridEntityYear], any[Map[Module, BigDecimal]], any[BigDecimal], any[Seq[UpstreamRouteRule]]) answers(args => Seq())
+
+		student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+			scd = student.mostSignificantCourse,
+			mod = module1,
+			cats = BigDecimal(40).underlying,
+			year = scyd.academicYear,
+			agreedMark = BigDecimal(70)
+		))
+		student.mostSignificantCourse.addModuleRegistration(Fixtures.moduleRegistration(
+			scd = student.mostSignificantCourse,
+			mod = module2,
+			cats = BigDecimal(40).underlying,
+			year = scyd.academicYear,
+			agreedMark = BigDecimal(70)
+		))
+		service.moduleRegistrationService.weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean]) returns Right(BigDecimal(70.0))
+		service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 1) returns Option(yearWeighting)
+		val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear, 70, Map(), calculateYearMarks = false, groupByLevel = false, weightings = Seq(yearWeighting))
+		result match {
+			case withMark: FinalYearMark => withMark.mark should be(BigDecimal(70))
+			case _ => Assertions.fail("Incorrect type returned")
+		}
+		result should be(FinalYearGrade.Postgraduate.Distinction)
 	}
 
 	@Test
@@ -648,7 +691,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 				case withMark: FinalYearMark => withMark.mark should be (BigDecimal(69.5))
 				case _ => Assertions.fail("Incorrect type returned")
 			}
-			result.description should be (FinalYearGrade.UpperSecondBorderline.description)
+			result.description should be (FinalYearGrade.Undergraduate.UpperSecondBorderline.description)
 		}
 	}
 

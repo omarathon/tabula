@@ -36,9 +36,9 @@ class GenerateExamGridSelectCourseCommandInternal(val department: Department, va
 	override def applyInternal(): Seq[ExamGridEntity] = {
 		val scyds = benchmarkTask("findByCourseRoutesYear") {
 			if(yearOfStudy != null){
-				studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
+				studentCourseYearDetailsDao.findByCourseRoutesYear(academicYear, courses.asScala, routes.asScala, yearOfStudy, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true)
 			} else {
-				studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala, routes.asScala, levelCode, includeTempWithdrawn, eagerLoad = true, disableFreshFilter = true)
+				studentCourseYearDetailsDao.findByCourseRoutesLevel(academicYear, courses.asScala, routes.asScala, levelCode, includeTempWithdrawn, resitOnly, eagerLoad = true, disableFreshFilter = true)
 			}.filter(scyd => department.includesMember(scyd.studentCourseDetails.student, Some(department)))
 		}
 		val sorted = benchmarkTask("sorting") {
@@ -112,6 +112,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
 	var levelCode: String = _
 	var courseYearsToShow: JSet[String] = JHashSet()
 	var includeTempWithdrawn: Boolean = false
+	var resitOnly: Boolean = false
 
 	def isLevelGrid = levelCode != null
 
@@ -126,6 +127,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
 		"yearOfStudy" -> yearOfStudy,
 		"levelCode" -> levelCode,
 		"courseYearsToShow" -> courseYearsToShow,
-		"includeTempWithdrawn" -> includeTempWithdrawn
+		"includeTempWithdrawn" -> includeTempWithdrawn,
+		"resitOnly" -> resitOnly
 	)
 }
