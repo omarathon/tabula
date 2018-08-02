@@ -20,7 +20,7 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		click on createAssignmentsLink
 		eventually(timeout(45.seconds), interval(300.millis)) ({
 			Then("I should reach the create assignments from previous page")
-			currentUrl should include("/2017/setup-assignments")
+			currentUrl should include("/2018/setup-assignments")
 		})
 	}
 	private def createSITSAssignment(): Unit = {
