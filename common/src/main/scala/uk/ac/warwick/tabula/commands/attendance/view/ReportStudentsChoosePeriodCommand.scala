@@ -6,7 +6,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.ReportStudentsChoosePeriodCommandNotification
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
@@ -28,23 +27,10 @@ object ReportStudentsChoosePeriodCommand {
 			with ComposableCommand[StudentReport]
 			with AutowiringProfileServiceComponent
 			with AutowiringAttendanceMonitoringServiceComponent
-			with ReportStudentsChoosePeriodCommandNotifications
 			with ReportStudentsChoosePeriodValidation
 			with ReportStudentsChoosePeriodPermissions
 			with ReportStudentsChoosePeriodCommandState
 			with ReadOnly with Unaudited
-}
-
-trait ReportStudentsChoosePeriodCommandNotifications extends Notifies[StudentReport, User] {
-
-	override def emit(result: StudentReport): Seq[ReportStudentsChoosePeriodCommandNotification] = {
-		Seq(Notification.init(
-			new ReportStudentsChoosePeriodCommandNotification,
-			result.currentUser,
-			result.department
-		))
-	}
-
 }
 
 class ReportStudentsChoosePeriodCommandInternal(

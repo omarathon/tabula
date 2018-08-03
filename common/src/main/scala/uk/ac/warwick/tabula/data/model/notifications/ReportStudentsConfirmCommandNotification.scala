@@ -8,8 +8,8 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@DiscriminatorValue("ReportStudentsChoosePeriodCommandNotification")
-class ReportStudentsChoosePeriodCommandNotification extends Notification[Department, Unit]
+@DiscriminatorValue("ReportStudentsConfirmCommandNotification")
+class ReportStudentsConfirmCommandNotification extends Notification[Department, Unit]
 	with SingleRecipientNotification
 	with SingleItemNotification[Department]
 	with MyWarwickNotification {

@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view
 
 import java.net.URLDecoder
-import javax.validation.Valid
 
+import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.attendance.view.ReportStudentsConfirmCommand
+import uk.ac.warwick.tabula.commands.attendance.view.{ReportStudentsConfirmCommand, ReportStudentsConfirmCommandReport}
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -27,7 +27,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 
 	@RequestMapping(method = Array(POST))
 	def form(
-		@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]],
+		@ModelAttribute("command") cmd: Appliable[ReportStudentsConfirmCommandReport],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
@@ -40,7 +40,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 
 	@RequestMapping(method = Array(POST), params = Array("submit-confirm"))
 	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointReport]],
+		@Valid @ModelAttribute("command") cmd: Appliable[ReportStudentsConfirmCommandReport],
 		errors: Errors,
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear,
@@ -60,7 +60,7 @@ class ReportStudentsConfirmController extends AttendanceController {
 				})
 			}
 			val redirectObjects = Seq(
-				"reports" -> reports.size,
+				"reports" -> reports.monitoringPointReports.size,
 				"monitoringPeriod" -> period,
 				"academicYear" -> academicYear
 			) ++ filterMap

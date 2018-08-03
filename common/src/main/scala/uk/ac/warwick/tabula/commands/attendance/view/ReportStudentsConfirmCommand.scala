@@ -5,13 +5,15 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model.notifications.ReportStudentsConfirmCommandNotification
+import uk.ac.warwick.tabula.data.model.{Department, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -19,23 +21,28 @@ import scala.collection.mutable
 object ReportStudentsConfirmCommand {
 	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
 		new ReportStudentsConfirmCommandInternal(department, academicYear, user)
-			with ComposableCommand[Seq[MonitoringPointReport]]
+			with ComposableCommand[ReportStudentsConfirmCommandReport]
 			with AutowiringAttendanceMonitoringServiceComponent
 			with AutowiringProfileServiceComponent
 			with ReportStudentsConfirmValidation
 			with ReportStudentsConfirmDescription
+			with ReportStudentsConfirmCommandNotifications
 			with ReportStudentsConfirmPermissions
 			with ReportStudentsConfirmCommandState
 }
 
+case class ReportStudentsConfirmCommandReport(
+	currentUser: CurrentUser,
+	monitoringPointReports: Seq[MonitoringPointReport]
+)
 
 class ReportStudentsConfirmCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[Seq[MonitoringPointReport]] {
+	extends CommandInternal[ReportStudentsConfirmCommandReport] {
 
 	self: ReportStudentsConfirmCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Seq[MonitoringPointReport] = {
-		studentMissedReportCounts.map{ src => {
+	override def applyInternal(): ReportStudentsConfirmCommandReport = {
+		val monitoringPointReports = studentMissedReportCounts.map{ src => {
 			val scyd = src.student.freshStudentCourseYearDetailsForYear(academicYear).getOrElse(throw new IllegalArgumentException())
 			val report = new MonitoringPointReport
 			report.academicYear = academicYear
@@ -49,8 +56,21 @@ class ReportStudentsConfirmCommandInternal(val department: Department, val acade
 			attendanceMonitoringService.saveOrUpdate(report)
 			report
 		}}
+		ReportStudentsConfirmCommandReport(
+			currentUser = user,
+			monitoringPointReports = monitoringPointReports
+		)
 	}
+}
 
+trait ReportStudentsConfirmCommandNotifications extends Notifies[ReportStudentsConfirmCommandReport, User] {
+	override def emit(result: ReportStudentsConfirmCommandReport): Seq[ReportStudentsConfirmCommandNotification] = {
+		Seq(Notification.init(
+			new ReportStudentsConfirmCommandNotification,
+			user,
+			result.department
+		))
+	}
 }
 
 trait ReportStudentsConfirmValidation extends SelfValidating {
