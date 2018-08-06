@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
 import javax.validation.constraints.{Min, NotNull}
-
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentCourseDetails, StudentCourseYearDetails, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 
 @Entity
-class MonitoringPointReport extends GeneratedId {
+class MonitoringPointReport extends GeneratedId with ToEntityReference{
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="student", referencedColumnName="universityId")
@@ -43,4 +42,8 @@ class MonitoringPointReport extends GeneratedId {
 
 	@NotNull
 	var reporter: String = _
+
+	override type Entity = this.type
+
+	override def toEntityReference: EntityReference[MonitoringPointReport.this.type] = ???
 }
