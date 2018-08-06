@@ -4,18 +4,17 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
+
 
 @Entity
 @DiscriminatorValue("ReportStudentsConfirmCommandNotification")
-class ReportStudentsConfirmCommandNotification extends Notification[Department, Unit]
+class ReportStudentsConfirmNotification extends Notification[MonitoringPointReport, Unit]
 	with SingleRecipientNotification
-	with SingleItemNotification[Department]
+	with AutowiringUserLookupComponent
 	with MyWarwickNotification {
-
-	@transient
-	val userLookup: UserLookupService = Wire[UserLookupService]
 
 	@transient
 	lazy val RecipientUsercode: String = Wire.optionProperty("${sits.notificationrecipient}").getOrElse(
@@ -27,11 +26,14 @@ class ReportStudentsConfirmCommandNotification extends Notification[Department, 
 
 	override def verb: String = "view"
 
-	override def title: String = "A department has uploaded missed monitoring points to SITS"
+	override def title: String = "Missed monitoring points have been uploaded to SITS"
 
 	override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
+
+		"numberOfStudentUpdated" -> this.entities.size,
+		"monitoringPeriods" -> this.entities.map(_.monitoringPeriod).distinct,
 		"agent" -> agent.getUserId,
-		"departmentName" -> entities.head.fullName,
+		"departments" -> this.entities.map(_.studentCourseDetails.department.fullName).distinct,
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 
