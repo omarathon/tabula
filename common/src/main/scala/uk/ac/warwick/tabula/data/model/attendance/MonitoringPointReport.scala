@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
 @Entity
-class MonitoringPointReport extends GeneratedId with ToEntityReference{
+class MonitoringPointReport extends GeneratedId with ToEntityReference {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="student", referencedColumnName="universityId")
@@ -43,7 +43,7 @@ class MonitoringPointReport extends GeneratedId with ToEntityReference{
 	@NotNull
 	var reporter: String = _
 
-	override type Entity = this.type
+	override type Entity = MonitoringPointReport
 
-	override def toEntityReference: EntityReference[MonitoringPointReport.this.type] = ???
+	override def toEntityReference: MonitoringPointReportEntityReference = new MonitoringPointReportEntityReference().put(this)
 }
