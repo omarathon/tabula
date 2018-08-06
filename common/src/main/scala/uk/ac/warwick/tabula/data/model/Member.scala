@@ -559,6 +559,9 @@ trait MemberProperties extends StringId {
 	@Restricted(Array("Profiles.Read.PrivateDetails"))
 	var nationality: String = _
 
+	@Restricted(Array("Profiles.Read.PrivateDetails"))
+	var secondNationality: String = _
+
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
 
