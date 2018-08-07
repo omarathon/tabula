@@ -31,9 +31,10 @@ class ReportStudentsConfirmNotification extends Notification[MonitoringPointRepo
 	override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
 
 		"numberOfStudentUpdated" -> this.entities.size,
-		"monitoringPeriods" -> this.entities.map(_.monitoringPeriod).distinct,
+		"academicYear" -> s"${this.entities.head.academicYear.startYear}/${this.entities.head.academicYear.endYear}",
+		"monitoringPeriod" -> this.entities.head.monitoringPeriod,
 		"agent" -> agent.getUserId,
-		"departments" -> this.entities.map(_.studentCourseDetails.department.fullName).distinct,
+		"department" -> this.entities.head.studentCourseDetails.department.fullName,
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 
