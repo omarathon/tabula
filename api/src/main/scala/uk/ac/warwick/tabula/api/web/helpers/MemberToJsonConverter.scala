@@ -34,6 +34,7 @@ trait MemberToJsonConverter
 			str("jobTitle", member, "jobTitle"),
 			str("phoneNumber", member, "phoneNumber"),
 			str("nationality", member, "nationality"),
+			str("secondNationality", member, "secondNationality"),
 			str("mobileNumber", member, "mobileNumber"),
 			str("groupName", member, "groupName"),
 			if (canViewProperty(member, "affiliatedDepartments"))

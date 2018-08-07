@@ -50,6 +50,7 @@ class ImportStudentRowCommandInternal(
 	studentRow.foreach { row =>
 		// these properties are from membership but may be overwritten by the SITS data (working theory)
 		this.nationality = row.nationality.orNull
+		this.secondNationality = row.secondNationality.orNull
 		this.mobileNumber = row.mobileNumber.orNull
 
 		this.deceased = row.deceased
@@ -116,7 +117,7 @@ class ImportStudentRowCommandInternal(
 	}
 
 	private val basicStudentProperties = Set(
-		"nationality", "mobileNumber", "disability", "deceased"
+		"nationality", "secondNationality", "mobileNumber", "disability", "deceased"
 	)
 
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
