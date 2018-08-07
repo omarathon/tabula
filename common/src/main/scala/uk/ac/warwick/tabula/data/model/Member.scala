@@ -576,11 +576,20 @@ trait MemberProperties extends StringId {
 }
 
 trait StudentProperties extends RestrictedPhoneNumber {
+
+	/**
+		* The students current confirmed correspondence address in SITS. Can be entered by the student themselves so data quality is often poor.
+		* Could be the same as termtimeAddress
+		*/
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
-	var homeAddress: Address = _
+	var currentAddress: Address = _
 
+	/**
+		* The student's hall of residence. Unlike address this is data entered into SITS by an Accommodation process so it should be in a reliable format.
+		* We could rename this to hallOfResidence or similar but we would need to make sure that the Tabula API remains stable or any changes are managed properly
+		*/
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
