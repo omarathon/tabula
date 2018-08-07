@@ -29,12 +29,11 @@ class ReportStudentsConfirmNotification extends Notification[MonitoringPointRepo
 	override def title: String = "Missed monitoring points have been uploaded to SITS"
 
 	override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
-
-		"numberOfStudentUpdated" -> this.entities.size,
-		"academicYear" -> s"${this.entities.head.academicYear.startYear}/${this.entities.head.academicYear.endYear}",
-		"monitoringPeriod" -> this.entities.head.monitoringPeriod,
+		"numberOfStudentUpdated" -> entities.size,
+		"academicYear" -> s"${entities.head.academicYear.startYear}/${entities.head.academicYear.endYear}",
+		"monitoringPeriod" -> entities.head.monitoringPeriod,
 		"agent" -> agent.getUserId,
-		"department" -> this.entities.head.studentCourseDetails.department.fullName,
+		"department" -> entities.head.studentCourseDetails.department.fullName,
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 
