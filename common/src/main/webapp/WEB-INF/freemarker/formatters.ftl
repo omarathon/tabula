@@ -141,6 +141,14 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#compress></#macro>
 
+<#macro module_name_with_link module link withFormatting=true><#compress>
+	<#if withFormatting>
+		<a href=${link}><span class="mod-code">${module.code?upper_case}</span></a> <span class="mod-name">${module.name}</span>
+	<#else>
+		<a href=${link}>${module.code?upper_case}</a> ${module.name}
+	</#if>
+</#compress></#macro>
+
 <#macro groupset_name groupset withFormatting=true><#compress>
 	<#if withFormatting>
 	<span class="mod-code">${groupset.module.code?upper_case}</span> <span class="group-name">${groupset.nameWithoutModulePrefix}</span>

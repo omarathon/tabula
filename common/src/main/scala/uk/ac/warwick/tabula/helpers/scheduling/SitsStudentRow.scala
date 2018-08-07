@@ -25,7 +25,7 @@ class SitsStudentRow(val resultSet: ResultSet)
 		with SitsStudentRowYearDetails
 		with HasResultSet {
 
-	implicit val rs = Option(resultSet)
+	implicit val rs: Option[ResultSet] = Option(resultSet)
 
 	val universityId: Option[String] = optString("university_id")
 	val usercode: Option[String] = optString("user_code")
@@ -44,6 +44,7 @@ class SitsStudentRow(val resultSet: ResultSet)
 		case _ => false
 	}
 	val nationality: Option[String] = optString("nationality")
+	val secondNationality: Option[String] = optString("second_nationality")
 	val mobileNumber: Option[String] = optString("mobile_number")
 }
 
