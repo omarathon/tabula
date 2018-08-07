@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.view
 
 import java.net.URLDecoder
-
 import javax.validation.Valid
+
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
