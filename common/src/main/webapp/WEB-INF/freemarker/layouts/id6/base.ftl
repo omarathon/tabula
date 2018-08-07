@@ -6,15 +6,6 @@
 	</head>
 	<body class="horizontal-nav layout-100 tabula-page ${component.bodyClass?default('component-page')} ${bodyClasses?default('')}">
 		<div id="container">
-			<!--[if IE]>
-				<div id="ie8-notice">
-					Your web browser is unsupported, please upgrade.
-					<a href="http://warwick.ac.uk/tabula/faqs/browser-support" class="btn btn-mini btn-info">
-						More information
-					</a>
-				</div>
-			<![endif]-->
-
 			<#if (user.god)!false>
 				<div id="god-notice" class="sysadmin-only-content">
 					God mode enabled.

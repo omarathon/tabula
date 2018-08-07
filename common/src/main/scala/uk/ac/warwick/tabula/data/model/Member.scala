@@ -250,10 +250,13 @@ class StudentMember extends Member with StudentProperties {
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear == year)
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def allFreshStudentCourseYearDetailsForYear(year: AcademicYear): Seq[StudentCourseYearDetails] =
+		freshOrStaleStudentCourseYearDetails(year).toSeq.filter(scyd => scyd.isFresh)
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseYearDetailsForYear(year: AcademicYear): Option[StudentCourseYearDetails] =
-		freshOrStaleStudentCourseYearDetails(year).filter(scyd => scyd.isFresh).lastOption
+		allFreshStudentCourseYearDetailsForYear(year).lastOption
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshOrStaleStudentCourseYearDetailsForYear(year: AcademicYear): Option[StudentCourseYearDetails] =
@@ -555,6 +558,9 @@ trait MemberProperties extends StringId {
 
 	@Restricted(Array("Profiles.Read.PrivateDetails"))
 	var nationality: String = _
+
+	@Restricted(Array("Profiles.Read.PrivateDetails"))
+	var secondNationality: String = _
 
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _

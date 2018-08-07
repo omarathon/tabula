@@ -14,6 +14,7 @@ trait StudentCourseYearDetailsToJsonConverter extends MemberApiFreemarkerHelper 
 	def jsonStudentCourseYearDetailsObject(scyd: StudentCourseYearDetails): Map[String, Any] = Seq(
 		str("sceSequenceNumber", scyd, "sceSequenceNumber"),
 		int("yearOfStudy", scyd, "yearOfStudy"),
+		str("studyLevel", scyd, "studyLevel"),
 		boolean("casUsed", scyd, "casUsed"),
 		boolean("tier4Visa", scyd, "tier4Visa"),
 		str("academicYear", scyd, "academicYear.toString"),

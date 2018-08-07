@@ -171,7 +171,13 @@
 	<#local assignment = info.assignment />
 	<div class="item-info row assignment-${assignment.id}">
 		<div class="col-md-3">
-			<div class="module-title"><@fmt.module_name assignment.module /></div>
+			<div class="module-title">
+				<#if can.do('Submission.Read', assignment.module)>
+					<@fmt.module_name_with_link assignment.module "/coursework/admin/assignments/${assignment.id}"/>
+				<#else>
+					<@fmt.module_name assignment.module />
+				</#if>
+			</div>
 			<h4 class="name">
 				<a href="<@routes.cm2.assignment assignment />">
 					<span class="ass-name">${assignment.name}</span>
@@ -481,7 +487,13 @@
 	<#local assignment = info.assignment />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
-			<div class="module-title"><@fmt.module_name assignment.module /></div>
+			<div class="module-title">
+				<#if can.do('Submission.Read', assignment.module)>
+					<@fmt.module_name_with_link assignment.module "/coursework/admin/assignments/${assignment.id}"/>
+				<#else>
+					<@fmt.module_name assignment.module />
+				</#if>
+			</div>
 			<h4 class="name">
 				<#-- If the user can administer the assignment, link them to the admin page here -->
 				<#if can.do("Module.ManageAssignments", assignment.module)>
