@@ -149,7 +149,7 @@ object ModuleImporter {
 		      (top.dpt_code is null and mod.dpt_code = :department_code)
 		    ) and
 		    mod.mod_iuse = 'Y' and
-		    mod.mot_code not in ('S-', 'D')
+		    mod.mot_code not in ('D')
 		  group by substr(mod.mod_code,0,5)
 		"""
 
@@ -159,7 +159,7 @@ object ModuleImporter {
 				join $sitsSchema.ins_mod mod
 					on mod.mod_code = top.mod_code and
 						 mod.mod_iuse = 'Y' and
-						 mod.mot_code not in ('S-', 'D')
+						 mod.mot_code not in ('D')
 
 			where
 				substr(top.top_code, 0, 5) = :module_code and
