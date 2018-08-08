@@ -250,6 +250,10 @@
 							Please contact your Departmental Administrator with any queries
 						</#if>
 					</#local>
+				<#elseif info.submission?? && !assignment.publishFeedback>
+					<#local feedbackStatus>
+						Feedback for this assignment is provided outside Tabula
+					</#local>
 				<#elseif info.studentDeadline??>
 					<#local feedbackStatus>
 						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
