@@ -35,7 +35,7 @@ trait StudentCourseYearDetailsDao {
 		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = false
+		includePermWithdrawn: Boolean = true
 	): Seq[StudentCourseYearDetails]
 
 	def findByCourseRoutesLevel(
@@ -47,7 +47,7 @@ trait StudentCourseYearDetailsDao {
 		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = false
+		includePermWithdrawn: Boolean = true
 	): Seq[StudentCourseYearDetails]
 
 	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
@@ -219,7 +219,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = false,
+		includePermWithdrawn: Boolean = true,
 		extraCriteria: Seq[Criterion] = Nil
 	): Seq[StudentCourseYearDetails] = {
 		val result = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = true, extraCriteria).seq
@@ -240,7 +240,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = false
+		includePermWithdrawn: Boolean = true
 	): Seq[StudentCourseYearDetails] = {
 		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
 	}
@@ -254,7 +254,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		resitOnly: Boolean,
 		eagerLoad: Boolean = false,
 		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = false
+		includePermWithdrawn: Boolean = true
 	): Seq[StudentCourseYearDetails] = {
 		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
 	}
