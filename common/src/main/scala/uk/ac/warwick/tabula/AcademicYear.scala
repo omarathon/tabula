@@ -104,6 +104,16 @@ object AcademicYear {
 
 	def forDate(now: DateTime): AcademicYear = forDate(now.toLocalDate)
 	def now(): AcademicYear = forDate(DateTime.now())
+
+	def allForDate(now: LocalDate): Seq[AcademicYear] = {
+		var years: Seq[AcademicYear] = Seq(forDate(now))
+
+		while (years.head.previous.lastDay.isAfter(now))
+			years = years.head.previous +: years
+
+		years
+	}
+	def allForDate(now: DateTime): Seq[AcademicYear] = allForDate(now.toLocalDate)
 }
 
 case class AcademicWeek(underlying: JAcademicWeek) extends Ordered[AcademicWeek] {
