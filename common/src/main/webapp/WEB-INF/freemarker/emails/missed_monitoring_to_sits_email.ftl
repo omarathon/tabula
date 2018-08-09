@@ -2,4 +2,4 @@ ${agent} in ${department} uploaded missed monitoring points from Tabula to SITS 
 
 Academic year: ${academicYear}
 Term: ${monitoringPeriod}
-Students count: ${numberOfStudentUpdated}
+Number of students reported: ${numberOfStudentUpdated}
