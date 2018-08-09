@@ -225,6 +225,12 @@ trait ImportModules {
 						module.name = mod.name
 						module.shortName = mod.shortName
 						module.degreeType = mod.degreeType
+						module.active = mod.status match {
+							case Some("S-") => false
+							case Some("D") => false
+							case _: Some[String] => true
+							case _ => false
+						}
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
 						ImportResult(changed = 1)
