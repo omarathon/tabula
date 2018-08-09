@@ -34,6 +34,7 @@ trait MemberToJsonConverter
 			str("jobTitle", member, "jobTitle"),
 			str("phoneNumber", member, "phoneNumber"),
 			str("nationality", member, "nationality"),
+			str("secondNationality", member, "secondNationality"),
 			str("mobileNumber", member, "mobileNumber"),
 			str("groupName", member, "groupName"),
 			if (canViewProperty(member, "affiliatedDepartments"))
@@ -51,8 +52,8 @@ trait MemberToJsonConverter
 
 		val studentProperties = member match {
 			case student: StudentMember if deep => Seq(
-				if (canViewProperty(student, "homeAddress"))
-					Some("homeAddress" -> addressToJson(student.homeAddress))
+				if (canViewProperty(student, "currentAddress"))
+					Some("currentAddress" -> addressToJson(student.currentAddress))
 				else None,
 				if (canViewProperty(student, "termtimeAddress"))
 					Some("termtimeAddress" -> addressToJson(student.termtimeAddress))

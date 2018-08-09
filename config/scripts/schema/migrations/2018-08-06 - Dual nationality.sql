@@ -1,0 +1,1 @@
+ALTER TABLE MEMBER ADD secondNationality nvarchar2(100);
