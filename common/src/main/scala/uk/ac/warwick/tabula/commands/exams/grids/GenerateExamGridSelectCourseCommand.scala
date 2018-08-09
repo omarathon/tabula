@@ -113,7 +113,7 @@ trait GenerateExamGridSelectCourseCommandRequest {
 	var courseYearsToShow: JSet[String] = JHashSet()
 	var includeTempWithdrawn: Boolean = false
 	var resitOnly: Boolean = false
-	var includePermWithdrawn: Boolean = false
+	var includePermWithdrawn: Boolean = true
 
 	def isLevelGrid = levelCode != null
 

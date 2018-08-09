@@ -224,11 +224,8 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	): Seq[StudentCourseYearDetails] = {
 		val result = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = true, extraCriteria).seq
 
-		if (includePermWithdrawn) {
-			val withdrawn = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = false, extraCriteria).seq
-
-			// Return enrolled/completed rows, plus non-enrolled/completed rows that don't belong to a student who also has an enrolled/completed row
-			result ++ withdrawn.filterNot(pwd => result.exists(_.studentCourseDetails.student.universityId == pwd.studentCourseDetails.student.universityId))
+		if (!includePermWithdrawn) {
+			result.filterNot(_.studentCourseDetails.permanentlyWithdrawn)
 		} else {
 			result
 		}
