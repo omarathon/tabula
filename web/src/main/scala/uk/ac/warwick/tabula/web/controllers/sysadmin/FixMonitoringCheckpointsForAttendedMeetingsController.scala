@@ -15,7 +15,7 @@ class FixMonitoringCheckpointsForAttendedMeetingsController extends BaseSysadmin
 	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 	with AutowiringMeetingRecordServiceComponent {
 
-	def meetingRecords: Seq[MeetingRecord] = meetingRecordService.listAllOnOrAfter(LocalDate.parse("2017-08-01"))
+	def meetingRecords: Seq[MeetingRecord] = meetingRecordService.listAllOnOrAfter(LocalDate.parse("2018-08-01"))
 
 	@GetMapping
 	def form: Mav = {
