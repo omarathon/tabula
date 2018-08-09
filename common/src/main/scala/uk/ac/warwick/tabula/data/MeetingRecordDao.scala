@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Order, Projections, Restrictions}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -22,6 +22,7 @@ trait MeetingRecordDao {
 	def purge(meeting: AbstractMeetingRecord): Unit
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
+	def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord]
 }
 
 @Repository
@@ -86,6 +87,12 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
 			.addOrder(Order.desc("meetingDate"))
 			.addOrder(Order.desc("lastUpdatedDate"))
 			.seq
+	}
+
+	def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord] = {
+		session.newCriteria[MeetingRecord]
+  		.add(Restrictions.ge("meetingDate", localDate.toDateTimeAtStartOfDay))
+  		.seq
 	}
 
 	def countPendingApprovals(universityId: String): Int = {
