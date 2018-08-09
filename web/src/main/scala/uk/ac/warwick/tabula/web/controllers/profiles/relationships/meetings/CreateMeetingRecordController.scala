@@ -39,9 +39,6 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/createmissed"))
 class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController {
 
-	@ModelAttribute("missedMeeting")
-	def missedMeeting: Boolean = true
-
 	@ModelAttribute("command")
 	def getCommand(
 		@PathVariable relationshipType: StudentRelationshipType,

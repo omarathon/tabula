@@ -19,7 +19,7 @@ object CreateMissedMeetingRecordCommand {
 			with ModifyMeetingRecordValidation
 			with CreateMeetingRecordDescription
 			with ModifyMeetingRecordPermissions
-			with CreateMeetingRecordCommandState
+			with CreateMissedMeetingRecordCommandState
 			with MissedMeetingRecordCommandRequest
 			with CreateMissedMeetingRecordCommandNotifications
 			with PopulateOnForm {
@@ -41,6 +41,10 @@ class CreateMissedMeetingRecordCommandInternal(val creator: Member, var relation
 		applyCommon(meeting)
 	}
 
+}
+
+trait CreateMissedMeetingRecordCommandState extends CreateMeetingRecordCommandState {
+	override def missed: Boolean = true
 }
 
 trait CreateMissedMeetingRecordCommandNotifications extends Notifies[MeetingRecord, MeetingRecord] {

@@ -3,6 +3,7 @@
 <#assign student = studentCourseDetails.student/>
 <#assign agent_role = relationshipType.agentRole />
 <#assign member_role = relationshipType.studentRole />
+<#assign missed = command.missed />
 
 <#if success!false>
 
@@ -13,7 +14,7 @@
 	<@modal.wrapper enabled=(isModal!false)>
 
 		<#assign heading>
-			<h2 <#if isModal!false>class="modal-title"</#if>>Record a <#if missedMeeting??>missed </#if>meeting</h2>
+			<h2 <#if isModal!false>class="modal-title"</#if>>Record a <#if missed>missed </#if>meeting</h2>
 			<h6 <#if isModal!false>class="modal-title"</#if>>
 				<span class="very-subtle">between ${agent_role}</span><#if !chooseRelationship> ${command.relationship.agentName!""}</#if>
 				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
@@ -33,7 +34,7 @@
 			<div class="modal-body"></div>
 			<@modal.footer>
 				<form class="double-submit-protection">
-					<#if missedMeeting??>
+					<#if missed>
 						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 							Submit
 						</button>
@@ -206,7 +207,7 @@
 					<@f.textarea rows="6" path="description" cssClass="form-control" />
 				</@bs3form.labelled_form_group>
 
-				<#if missedMeeting??>
+				<#if missed>
 					<@bs3form.labelled_form_group path="missedReason" labelText="Reason meeting was missed">
 						<@f.textarea rows="3" path="missedReason" cssClass="form-control" />
 					</@bs3form.labelled_form_group>
