@@ -11,16 +11,6 @@
 	<a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
 
 	<header class="id7-page-header">
-
-		<!--[if IE]>
-		<div id="ie8-notice">
-			Your web browser is unsupported, please upgrade.
-			<a href="http://warwick.ac.uk/tabula/faqs/browser-support" class="btn btn-mini btn-primary">
-				More information
-			</a>
-		</div>
-		<![endif]-->
-
 		<#if (user.god)!false>
 			<div id="god-notice" class="sysadmin-only-content">
 				God mode enabled.

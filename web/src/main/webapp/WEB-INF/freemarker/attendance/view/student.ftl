@@ -25,7 +25,9 @@
 							<strong>Date of birth:</strong> ${student.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
 						</#if>
 						<#if student.nationality??>
-							<strong>Nationality:</strong> <@fmt.nationality student.nationality!('Unknown') /><br/>
+							<strong>Nationality:</strong> <@fmt.nationality student.nationality!('Unknown') />
+							<#if student.secondNationality??> and <@fmt.nationality student.secondNationality /></#if>
+							<br/>
 						</#if>
 						<#if features.disabilityRenderingInProfiles && (student.disability.reportable)!false>
 							<strong>Disability:</strong>

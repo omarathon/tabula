@@ -381,6 +381,7 @@ object ProfileImporter extends Logging {
 			stu.stu_dsbc as disability,
 
 			nat.nat_name as nationality,
+			nat2.nat_name as second_nationality,
 
 			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
@@ -455,6 +456,9 @@ object ProfileImporter extends Logging {
 
 			left outer join $sitsSchema.srs_nat nat -- Nationality
 				on stu.stu_natc = nat.nat_code
+
+			left outer join $sitsSchema.srs_nat nat2 -- Nationality
+				on stu.stu_nat1 = nat2.nat_code
 
 			left outer join $sitsSchema.srs_sta sts -- Status
 				on spr.sts_code = sts.sta_code

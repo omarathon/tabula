@@ -28,7 +28,9 @@
 						<strong>Date of birth:</strong> ${member.dateOfBirth?date("yyyy-MM-dd")?string("dd/MM/yyyy")}<br/>
 					</#if>
 					<#if member.nationality??>
-						<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') /><br/>
+						<strong>Nationality:</strong> <@fmt.nationality member.nationality!('Unknown') />
+						<#if member.secondNationality??> and <@fmt.nationality member.secondNationality /></#if>
+						<br/>
 					</#if>
 					<#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
 						<strong>Disability:</strong>

@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{Address, StudentMember}
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.scheduling.AddressImporter.AddressInfo
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -16,7 +17,7 @@ object ImportHallOfResidenceInfoForStudentCommand {
 			with ComposableCommand[Unit]
 			with ImportHallOfResidenceCommandPermissions
 			with AutowiringCasUsageImporterComponent
-			with AutowiringHallOfResidenceImporterComponent
+			with AutowiringAddressImporterComponent
 			with AutowiringMemberDaoComponent
 			with AutowiringAddressDaoComponent
 			with Unaudited
@@ -24,37 +25,46 @@ object ImportHallOfResidenceInfoForStudentCommand {
 
 class ImportHallOfResidenceInfoForStudentCommandInternal(student: StudentMember) extends CommandInternal[Unit] with PropertyCopying {
 
-	self: HallOfResidenceImporterComponent with MemberDaoComponent with AddressDaoComponent =>
+	self: AddressImporterComponent with MemberDaoComponent with AddressDaoComponent =>
 
 	def applyInternal(): Unit = {
 
-		val newResidenceInfo = hallOfResidenceImporter.getResidenceInfo(student.universityId)
-		newResidenceInfo match {
-			case Some(rInfo) if !rInfo.isEmpty  =>
-					val address = Option(student.termtimeAddress) match {
-						case Some(adr: Address) => adr
-						case _ => new Address()
-					}
-					val sourceBean = new BeanWrapperImpl(rInfo)
-					val addressBean = new BeanWrapperImpl(address)
-					val hasChanged = copyBasicProperties(properties, sourceBean, addressBean)
-					if (hasChanged) {
-						logger.debug(s"Saving term address changes for $student.universityId  with  residence address $address")
-						addressDao.saveOrUpdate(address)
-						student.termtimeAddress = address
-						student.lastUpdatedDate = DateTime.now
-						memberDao.saveOrUpdate(student)
-					}
-			case _ =>
-				val address = student.termtimeAddress
-				if (address != null) {
-					student.termtimeAddress = null
-					student.lastUpdatedDate = DateTime.now
-					memberDao.saveOrUpdate(student)
-					addressDao.delete(address)
-					logger.debug(s"Removing term address for $student.universityId ")
-				}
+		val newResidenceInfo = addressImporter.getAddressInfo(student.universityId)
+
+		newResidenceInfo.currentAddress match {
+			case Some(rInfo) if !rInfo.isEmpty  => updateAddress("currentAddress", rInfo, student.currentAddress, a => {student.currentAddress = a})
+			case _ => deleteAddress("currentAddress", student.currentAddress, () => {student.currentAddress = null})
 		}
+
+		newResidenceInfo.hallOfResidence match {
+			case Some(rInfo) if !rInfo.isEmpty  => updateAddress("termtimeAddress", rInfo, student.termtimeAddress, a => {student.termtimeAddress = a})
+			case _ => deleteAddress("termtimeAddress", student.termtimeAddress, () => {student.termtimeAddress = null})
+		}
+
+		def updateAddress(fieldName:String, info:AddressInfo, addressCurrentValue:Address, update: Address => Unit): Unit = {
+			val address = Option(addressCurrentValue).getOrElse(new Address())
+			val sourceBean = new BeanWrapperImpl(info)
+			val addressBean = new BeanWrapperImpl(address)
+			val hasChanged = copyBasicProperties(properties, sourceBean, addressBean)
+			if (hasChanged) {
+				logger.debug(s"Saving $fieldName changes for $student.universityId  with  residence address $address")
+				addressDao.saveOrUpdate(address)
+				update(address)
+				student.lastUpdatedDate = DateTime.now
+				memberDao.saveOrUpdate(student)
+			}
+		}
+
+		def deleteAddress(fieldName:String, address:Address, delete: () => Unit): Unit = {
+			if (address != null) {
+				delete()
+				student.lastUpdatedDate = DateTime.now
+				memberDao.saveOrUpdate(student)
+				addressDao.delete(address)
+				logger.debug(s"Removing $fieldName for $student.universityId ")
+			}
+		}
+
 	}
 
 	private val properties = Set(

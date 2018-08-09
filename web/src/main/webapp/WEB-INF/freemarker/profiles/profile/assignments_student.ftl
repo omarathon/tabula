@@ -29,7 +29,13 @@
 				<#list result.upcoming as enhancedAssignment>
 					<div class="row item-info">
 						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>10</#if>">
-							<h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
+							<h4>
+								<#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
+									<@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
+								<#else>
+									<@fmt.module_name enhancedAssignment.assignment.module />
+								</#if>
+							</h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
 						<div class="col-md-5">
@@ -61,7 +67,13 @@
 				<#list result.todo as enhancedAssignment>
 					<div class="row item-info">
 						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>10</#if>">
-							<h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
+							<h4>
+								<#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
+									<@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
+								<#else>
+									<@fmt.module_name enhancedAssignment.assignment.module />
+								</#if>
+							</h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
 						<#if enhancedAssignment.submissionDeadline?has_content>
@@ -189,7 +201,13 @@
 				<#list result.done as enhancedAssignment>
 					<div class="row item-info">
 						<div class="col-md-5">
-							<h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
+							<h4>
+								<#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
+									<@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
+								<#else>
+									<@fmt.module_name enhancedAssignment.assignment.module />
+								</#if>
+							</h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
 						<div class="col-md-5">

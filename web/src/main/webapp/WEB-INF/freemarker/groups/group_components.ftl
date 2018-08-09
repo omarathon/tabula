@@ -1455,13 +1455,14 @@
 							</div>
 						</th>
 						<#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
-							<td class="use-tooltip"
-								title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
-								data-html="true"
-								data-container="body"
-							>
+							<td>
 								<div class="checkbox">
-									<label>
+									<label class="use-tooltip"
+												 title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
+												 data-html="true"
+												 data-container="body"
+												 data-trigger="hover"
+									>
 									<@f.checkbox path=path value="${weekNumber}" cssClass="collection-checkbox" />
 									${weekNumber}
 								</label>
