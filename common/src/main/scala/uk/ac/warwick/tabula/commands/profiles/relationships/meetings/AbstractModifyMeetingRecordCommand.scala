@@ -112,6 +112,8 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
 
 trait ModifyMeetingRecordCommandState extends MeetingRecordCommandState {
 	def relationship: StudentRelationship
+
+	def missed: Boolean = false
 }
 
 

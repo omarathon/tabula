@@ -310,6 +310,13 @@
 						</tr>
 						<tr>
 							<td colspan="4">
+								<#if meeting.missedReason?has_content>
+									<div class="alert alert-danger">
+										<p>This meeting did not take place because:</p>
+										<blockquote>${meeting.missedReason}</blockquote>
+									</div>
+								</#if>
+
 								<#if meeting.description??>
 									<div class="description">
 										<#noescape>${meeting.escapedDescription}</#noescape>
@@ -350,6 +357,7 @@
 				</#if>
 				<#if canCreateMeetings>
 					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Record meeting</a>
+					<a class="btn btn-default new-meeting-record" href="<@routes.profiles.create_missed_meeting_record studentCourseDetails thisAcademicYear relationshipType />">Record missed meeting</a>
 				</#if>
 			</p>
 		</#if>
@@ -376,7 +384,9 @@
 			Scheduled
 		</#if>
 	<#else>
-		<#if meeting.approved>
+		<#if meeting.missed>
+			Missed
+		<#elseif meeting.approved>
 			Approved
 		<#elseif meeting.rejected>
 			Pending revision by ${meeting.creator.fullName}
@@ -449,7 +459,7 @@
 		</div>
 	<#else>
 		<p class="very-subtle">
-			${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}.
+			${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}<#if meeting.missed> recorded as missed</#if>.
 			Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate />.
 			<#if meeting.approved && (meeting.approvedBy?has_content || meeting.approvedDate?has_content)>
 				Approved<#if meeting.approvedBy?has_content> by ${meeting.approvedBy.fullName},</#if><#if meeting.approvedDate?has_content> <@fmt.date meeting.approvedDate /></#if>
