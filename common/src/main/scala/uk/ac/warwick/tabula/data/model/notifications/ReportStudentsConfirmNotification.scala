@@ -34,7 +34,8 @@ class ReportStudentsConfirmNotification extends Notification[MonitoringPointRepo
 		"academicYear" -> s"${entities.head.academicYear.startYear}/${entities.head.academicYear.endYear}",
 		"monitoringPeriod" -> entities.head.monitoringPeriod,
 		"agent" -> agent.getUserId,
-		"department" -> entities.map(_.studentCourseDetails.department.fullName).distinct.mkString(", "),
+		"agentDept" -> agent.getDepartment,
+		"studentDepartments" -> entities.map(_.studentCourseDetails.department.fullName).distinct.mkString(", "),
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 
