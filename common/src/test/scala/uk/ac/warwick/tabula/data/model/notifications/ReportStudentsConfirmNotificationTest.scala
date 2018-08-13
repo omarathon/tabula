@@ -47,7 +47,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 
 		// 20 Dec 2020 00:00:00
 		DateTimeUtils.setCurrentMillisFixed(1608422400000L)
-
+		currentUser.realUser.setDepartment("IT Services")
 		val notification = Notification.init(
 			notification = new ReportStudentsConfirmNotification,
 			agent = currentUser.realUser,
@@ -63,13 +63,45 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 		template.process(notification.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("u1574595 in tabula superhero factory uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: 2")
+		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory")
 
 
 	}
 
 	@Test
 	def rendersCorrectlyWithDifferentDep(): Unit = withUser("u1574595", "1574595") {
+		// 20 Dec 2020 00:00:00
+		DateTimeUtils.setCurrentMillisFixed(1608422400000L)
+		currentUser.realUser.setDepartment("IT Services")
+		mon2.studentCourseDetails = Fixtures.studentCourseDetails(
+			Fixtures.student(
+				"id2",
+				"id2",
+				dept2
+			),
+			dept2
+		)
+		val notificationWithMultipleDepts = Notification.init(
+			notification = new ReportStudentsConfirmNotification,
+			agent = currentUser.realUser,
+			items = Seq(
+				mon1,
+				mon2
+			)
+		)
+		val output = new ByteArrayOutputStream
+		val writer = new OutputStreamWriter(output)
+		val configuration = newFreemarkerConfiguration()
+		val template = configuration.getTemplate(notificationWithMultipleDepts.templateLocation)
+		template.process(notificationWithMultipleDepts.content.model, writer)
+		writer.flush()
+		val renderedResult = output.toString
+		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory, babbage superhero factory")
+
+	}
+
+	@Test
+	def handleAgentWithoutDept(): Unit = withUser("u1574595", "1574595") {
 		// 20 Dec 2020 00:00:00
 		DateTimeUtils.setCurrentMillisFixed(1608422400000L)
 		mon2.studentCourseDetails = Fixtures.studentCourseDetails(
@@ -95,7 +127,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 		template.process(notificationWithMultipleDepts.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("u1574595 in tabula superhero factory, babbage superhero factory uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: 2")
+		renderedResult should be("u1574595 uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory, babbage superhero factory")
 
 	}
 
