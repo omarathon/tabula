@@ -219,18 +219,19 @@ trait ImportModules {
 
 					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
 
+					module.active = mod.status match {
+						case Some("S-") => false
+						case Some("D") => false
+						case _: Some[String] => true
+						case _ => false
+					}
+
 					// HFC-354 Update module name if it changes.
 					if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType ) {
 						logger.info("Updating module info for %s, Name- %s, Shortname- %s, Degreetype- %s".format(mod.code, mod.name, mod.shortName, mod.degreeType))
 						module.name = mod.name
 						module.shortName = mod.shortName
 						module.degreeType = mod.degreeType
-						module.active = mod.status match {
-							case Some("S-") => false
-							case Some("D") => false
-							case _: Some[String] => true
-							case _ => false
-						}
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
 						ImportResult(changed = 1)
