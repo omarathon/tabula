@@ -97,6 +97,11 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	@RestrictionProvider("readPermissions")
 	var description: String = _
 
+	var missed: Boolean = false
+
+	@Column(name="missed_reason")
+	var missedReason: String = _
+
 	def escapedDescription:String = formattedHtml(description)
 
 	def this(creator: Member, relationship: StudentRelationship) {

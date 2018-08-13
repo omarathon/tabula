@@ -55,7 +55,7 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		currentUrl should endWith ("/tutor")
 
 		And("There is a Record meeting button")
-		cssSelector("a.new-meeting-record").findAllElements.size should be (2)
+		cssSelector("a.new-meeting-record").findAllElements.size should be (3)
 
 		Then("They create a new record")
 

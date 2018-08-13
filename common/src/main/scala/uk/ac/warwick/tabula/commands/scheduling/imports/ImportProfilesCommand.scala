@@ -326,7 +326,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					members.headOption
 				case None =>
 					logger.warn("Student is no longer in uow_current_members in membership - not updating")
-					updateMissingForApplicant(universityId)
+					// updateMissingForApplicant(universityId) // TAB-6441 TAB-6442 hot fix -- do not incorrectly stamp
 					None
 			}
 		}

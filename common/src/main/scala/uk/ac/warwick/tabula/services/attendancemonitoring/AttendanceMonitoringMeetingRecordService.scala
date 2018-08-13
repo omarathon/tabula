@@ -32,12 +32,14 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 		} else {
 			meeting.relationship.studentMember.flatMap{
 				case studentMember: StudentMember =>
-					val academicYear = AcademicYear.forDate(meeting.meetingDate)
-					val relevantPoints = getRelevantPoints(
-						attendanceMonitoringService.listStudentsPoints(studentMember, None, academicYear),
-						meeting,
-						studentMember
-					)
+					val relevantPoints = AcademicYear.allForDate(meeting.meetingDate).flatMap { academicYear =>
+						getRelevantPoints(
+							attendanceMonitoringService.listStudentsPoints(studentMember, None, academicYear),
+							meeting,
+							studentMember
+						)
+					}
+
 					val checkpoints = relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
 						val checkpoint = new AttendanceMonitoringCheckpoint
 						checkpoint.autoCreated = true
