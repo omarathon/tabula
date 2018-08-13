@@ -158,7 +158,7 @@ object ModuleImporter {
 				join $sitsSchema.ins_mod mod
 					on mod.mod_code = top.mod_code and
 						 mod.mod_iuse = 'Y' and
-						 mod.mot_code not in ('D')
+						 mod.mot_code not in ('S-', 'D')
 
 			where
 				substr(top.top_code, 0, 5) = :module_code and
