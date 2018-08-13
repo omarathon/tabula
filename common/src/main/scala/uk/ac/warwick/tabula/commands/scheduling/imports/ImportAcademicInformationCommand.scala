@@ -222,7 +222,7 @@ trait ImportModules {
 					module.active = mod.status match {
 						case Some("S-") => false
 						case Some("D") => false
-						case _: Some[String] => true
+						case Some(_) => true
 						case _ => false
 					}
 
