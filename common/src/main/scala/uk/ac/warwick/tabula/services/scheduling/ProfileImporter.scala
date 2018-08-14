@@ -108,7 +108,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
 		// Magic student recruitment department - get membership information directly from SITS for applicants
 		if (department.code == applicantDepartmentCode) {
-			val members = applicantQuery.execute().asScala.toSeq
+			val members = applicantQuery.execute().asScala
 			val universityIds = members.map { _.universityId }
 
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
@@ -124,14 +124,23 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			}
 		}
 
+	// this would not get applicants
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
-		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList match {
-			case Nil => None
-			case mem: List[MembershipMember] => Some (
+		val query = Map("universityIds" -> universityId).asJava
+		membershipByUniversityIdQuery.executeByNamedParam(query).asScala.toList match {
+			case Nil => applicantQuery.executeByNamedParam(query).asScala.toList match {
+				case Nil => None
+				case mem: List[MembershipMember] => Some(
 					MembershipInformation(
 						mem.head
 					)
 				)
+			}
+			case mem: List[MembershipMember] => Some(
+				MembershipInformation(
+					mem.head
+				)
+			)
 		}
 	}
 }
