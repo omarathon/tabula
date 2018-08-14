@@ -124,11 +124,10 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			}
 		}
 
-	// this would not get applicants
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
 		val query = Map("universityIds" -> universityId).asJava
 		membershipByUniversityIdQuery.executeByNamedParam(query).asScala.toList match {
-			case Nil => applicantQuery.executeByNamedParam(query).asScala.toList match {
+			case Nil => applicantQuery.execute().asScala.filter(_.universityId == universityId).toList match {
 				case Nil => None
 				case mem: List[MembershipMember] => Some(
 					MembershipInformation(
