@@ -219,6 +219,13 @@ trait ImportModules {
 
 					seenModuleCodesForDepartment = seenModuleCodesForDepartment :+ module.code
 
+					module.active = mod.status match {
+						case Some("S-") => false
+						case Some("D") => false
+						case Some(_) => true
+						case _ => false
+					}
+
 					// HFC-354 Update module name if it changes.
 					if (mod.name != module.name || mod.shortName != module.shortName || mod.degreeType != module.degreeType ) {
 						logger.info("Updating module info for %s, Name- %s, Shortname- %s, Degreetype- %s".format(mod.code, mod.name, mod.shortName, mod.degreeType))
