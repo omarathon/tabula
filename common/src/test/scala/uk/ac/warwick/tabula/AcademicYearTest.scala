@@ -43,4 +43,9 @@ class AcademicYearTest extends TestBase {
 		AcademicYear(999)
 	}
 
+	@Test def allForDate: Unit = {
+		AcademicYear.allForDate(dateTime(2018, 8, 10)) should be (Seq(AcademicYear(2017), AcademicYear(2018)))
+		AcademicYear.allForDate(dateTime(2019, 8, 10)) should be (Seq(AcademicYear(2019)))
+	}
+
 }

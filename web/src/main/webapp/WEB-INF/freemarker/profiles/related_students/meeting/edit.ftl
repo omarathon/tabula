@@ -3,6 +3,7 @@
 <#assign student = studentCourseDetails.student/>
 <#assign agent_role = relationshipType.agentRole />
 <#assign member_role = relationshipType.studentRole />
+<#assign missed = command.missed />
 
 <#if success!false>
 
@@ -13,7 +14,7 @@
 	<@modal.wrapper enabled=(isModal!false)>
 
 		<#assign heading>
-			<h2 <#if isModal!false>class="modal-title"</#if>>Record a meeting</h2>
+			<h2 <#if isModal!false>class="modal-title"</#if>>Record a <#if missed>missed </#if>meeting</h2>
 			<h6 <#if isModal!false>class="modal-title"</#if>>
 				<span class="very-subtle">between ${agent_role}</span><#if !chooseRelationship> ${command.relationship.agentName!""}</#if>
 				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
@@ -33,10 +34,16 @@
 			<div class="modal-body"></div>
 			<@modal.footer>
 				<form class="double-submit-protection">
-					<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
-					<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-						Submit for approval
-					</button>
+					<#if missed>
+						<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Submit
+						</button>
+					<#else>
+						<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
+						<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+							Submit for approval
+						</button>
+					</#if>
 					<button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
 				</form>
 			</@modal.footer>
@@ -199,6 +206,12 @@
 				<@bs3form.labelled_form_group path="description" labelText="Description">
 					<@f.textarea rows="6" path="description" cssClass="form-control" />
 				</@bs3form.labelled_form_group>
+
+				<#if missed>
+					<@bs3form.labelled_form_group path="missedReason" labelText="Reason meeting was missed">
+						<@f.textarea rows="3" path="missedReason" cssClass="form-control" />
+					</@bs3form.labelled_form_group>
+				</#if>
 
 				<#if isIframe!false>
 					<input type="hidden" name="modal" value="true" />

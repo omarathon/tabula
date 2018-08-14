@@ -61,7 +61,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def isApproved: Boolean = !approvals.asScala.exists(approval => !(approval.state == Approved))
 
 	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
-	def isAttendanceApproved: Boolean = (creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved
+	def isAttendanceApproved: Boolean = ((creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved) && !missed
 
 	def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)

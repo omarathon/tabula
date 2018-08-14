@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -32,6 +33,7 @@ trait MeetingRecordService {
 	def getAcademicYear(id: String): Option[AcademicYear]
 	def migrate(from: StudentRelationship, to: StudentRelationship): Unit
 	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
+	def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord]
 }
 
 
@@ -64,6 +66,7 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 		meetingRecordDao.migrate(from, to)
 	def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int] =
 		meetingRecordDao.unconfirmedScheduledCount(relationships)
+	override def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord] = meetingRecordDao.listAllOnOrAfter(localDate)
 }
 
 @Service("meetingRecordService")
