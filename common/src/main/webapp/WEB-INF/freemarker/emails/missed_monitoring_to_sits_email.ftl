@@ -2,5 +2,5 @@ ${agent} <#if agentDept??>in ${agentDept} </#if>uploaded missed monitoring point
 
 Academic year: ${academicYear}
 Term: ${monitoringPeriod}
-Number of students reported: ${monitoringPeriod}
+Number of students reported: ${numberOfStudentUpdated}
 Student departments: ${studentDepartments}

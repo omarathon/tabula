@@ -15,7 +15,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 	val dept = Fixtures.department("TSF", "tabula superhero factory")
 	val dept2 = Fixtures.department("BBF", "babbage superhero factory")
 
-	val mon1 = new MonitoringPointReport()
+	val mon1: MonitoringPointReport = new MonitoringPointReport()
 	mon1.academicYear = acadYear
 	mon1.monitoringPeriod = period
 	mon1.studentCourseDetails = Fixtures.studentCourseDetails(
@@ -63,7 +63,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 		template.process(notification.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory")
+		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: 2\nStudent departments: tabula superhero factory")
 
 
 	}
@@ -96,7 +96,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 		template.process(notificationWithMultipleDepts.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory, babbage superhero factory")
+		renderedResult should be("u1574595 in IT Services uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: 2\nStudent departments: tabula superhero factory, babbage superhero factory")
 
 	}
 
@@ -127,7 +127,7 @@ class ReportStudentsConfirmNotificationTest extends TestBase {
 		template.process(notificationWithMultipleDepts.content.model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("u1574595 uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: inner peace vacation\nStudent departments: tabula superhero factory, babbage superhero factory")
+		renderedResult should be("u1574595 uploaded missed monitoring points from Tabula to SITS on 20 December 2020 at 00:00:00.\n\nAcademic year: 2017/2018\nTerm: inner peace vacation\nNumber of students reported: 2\nStudent departments: tabula superhero factory, babbage superhero factory")
 
 	}
 
