@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import org.apache.commons.validator.UrlValidator
 import org.joda.time.LocalTime
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -42,12 +43,14 @@ object ModifySmallGroupEventCommand {
 			with AutowiringSmallGroupServiceComponent
 }
 
-trait ModifySmallGroupEventCommandState extends CurrentAcademicYear {
+trait ModifySmallGroupEventCommandState {
 	def module: Module
 	def set: SmallGroupSet
 	def group: SmallGroup
 	def existingEvent: Option[SmallGroupEvent]
 	def isImport: Boolean // true if this isn't a UI action
+
+	def academicYear: AcademicYear = set.academicYear
 
 	var weeks: JSet[JInteger] = JSet()
 	var day: DayOfWeek = _
