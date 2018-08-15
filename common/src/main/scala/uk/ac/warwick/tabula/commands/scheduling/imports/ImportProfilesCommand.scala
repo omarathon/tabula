@@ -331,8 +331,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		}
 	}
 
-	def updateMissingForStaff(member: StaffMember): Member = {
-		val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+	def updateMissingForStaffOrApplicant(member: Member): Member = {
+		val missingFromImport: Boolean = member match {
+			case _: ApplicantMember => profileImporter.getApplicantMemberFromSits(member.universityId).isEmpty
+			case _: StaffMember =>  profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+			case _ => throw IllegalArgumentException
+		}
 		if (member.isFresh && missingFromImport) {
 			// The member has gone missing
 			member.missingFromImportSince = DateTime.now
@@ -345,22 +349,9 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		member
 	}
 
-	def updateMissingForApplicant(applicant: ApplicantMember): Member = {
-		val missingFromSits = profileImporter.getApplicantMemberFromSits(applicant.universityId).isEmpty
-		if (applicant.missingFromImportSince != null && !missingFromSits) {
-			applicant.missingFromImportSince = null
-			memberDao.saveOrUpdate(applicant)
-		} else if (applicant.missingFromImportSince == null && missingFromSits) {
-			applicant.missingFromImportSince = DateTime.now
-			memberDao.saveOrUpdate(applicant)
-		}
-		applicant
-	}
-
 	def updateMissingForIndividual(universityId: String): Option[Member] = {
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId).flatMap {
-			case member: StaffMember => Some(updateMissingForStaff(member))
-			case member: ApplicantMember => Some(updateMissingForApplicant(member))
+			case member@(_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
 			case stu: StudentMember =>
 				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
