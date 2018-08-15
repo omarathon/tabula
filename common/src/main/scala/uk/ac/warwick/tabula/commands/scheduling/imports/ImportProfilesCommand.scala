@@ -351,9 +351,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 			applicant.missingFromImportSince = null
 			memberDao.saveOrUpdate(applicant)
 		} else if (applicant.missingFromImportSince == null && missingFromSits) {
-			var missingSince = applicant.missingFromImportSince
 			applicant.missingFromImportSince = DateTime.now
-			missingSince = applicant.missingFromImportSince
 			memberDao.saveOrUpdate(applicant)
 		}
 		applicant
