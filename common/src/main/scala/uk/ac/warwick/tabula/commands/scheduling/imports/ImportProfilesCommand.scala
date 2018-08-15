@@ -344,13 +344,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		}
 	}
 
-	def updateMissingForApplicant(uniId: String): Unit = {
-		profileService.getMemberByUniversityIdStaleOrFresh(uniId).foreach {
-			case member: ApplicantMember => updateMissingForApplicantOrStaff(member)
-			case _ =>
-		}
-	}
-
 	def updateMissingForIndividual(universityId: String): Unit = {
 		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
 			case member@(_: StaffMember | _: ApplicantMember) => updateMissingForApplicantOrStaff(member)
