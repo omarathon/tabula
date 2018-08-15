@@ -38,9 +38,12 @@ trait ProfileImporter {
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
+
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
+
 	def multipleStudentInformationQuery: MultipleStudentInformationQuery
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
+	def getMemberFromSits(universityId: String): Option[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -125,18 +128,20 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			}
 		}
 
-	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
-		val query = Map("universityIds" -> universityId).asJava
-		val possibleMemberShips = Option(membershipByUniversityIdQuery.executeByNamedParam(query).asScala.toList)
-		val possibleApplicants = Option(applicantByUniversityIdQuery.executeByNamedParam(query).asScala.toList)
-
-		def head(result: Any): Option[MembershipInformation] = result match {
-			case result: List[MembershipMember] => result.headOption.map(MembershipInformation)
-			case _ => None
-		}
-
-		possibleMemberShips.flatMap(head).orElse(possibleApplicants.flatMap(head))
+	def head(result: Any): Option[MembershipInformation] = result match {
+		case result: List[MembershipMember] => result.headOption.map(MembershipInformation)
+		case _ => None
 	}
+
+	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
+		Option(membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+	}
+
+	def getMemberFromSits(universityId: String): Option[MembershipInformation] = {
+		Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+	}
+
+
 }
 
 @Profile(Array("sandbox")) @Service
@@ -357,6 +362,8 @@ class SandboxProfileImporter extends ProfileImporter {
 
 	def multipleStudentInformationQuery = throw new UnsupportedOperationException
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
+
+	def getMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
