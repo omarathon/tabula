@@ -127,21 +127,15 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
 		val query = Map("universityIds" -> universityId).asJava
-		membershipByUniversityIdQuery.executeByNamedParam(query).asScala.toList match {
-			case Nil => applicantByUniversityIdQuery.executeByNamedParam(query).asScala.toList match {
-				case Nil => None
-				case mem: List[MembershipMember] => Some(
-					MembershipInformation(
-						mem.head
-					)
-				)
-			}
-			case mem: List[MembershipMember] => Some(
-				MembershipInformation(
-					mem.head
-				)
-			)
+		val possibleMemberShips = Option(membershipByUniversityIdQuery.executeByNamedParam(query).asScala.toList)
+		val possibleApplicants = Option(applicantByUniversityIdQuery.executeByNamedParam(query).asScala.toList)
+
+		def head(result: Any): Option[MembershipInformation] = result match {
+			case result: List[MembershipMember] => result.headOption.map(MembershipInformation)
+			case _ => None
 		}
+
+		possibleMemberShips.flatMap(head).orElse(possibleApplicants.flatMap(head))
 	}
 }
 
