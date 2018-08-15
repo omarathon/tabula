@@ -25,7 +25,6 @@ import uk.ac.warwick.tabula.{AcademicYear, Features}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
@@ -541,7 +540,7 @@ object ProfileImporter extends Logging {
 			stu.stu_udf3 is null -- no IT account
 		"""
 
-	val GetApplicantByUniversityIdInformation = f"""
+	val GetApplicantsByUniversityIdInformation = f"""
 		select
 			stu.stu_code as universityId,
 			'SL' as deptCode,
@@ -565,7 +564,7 @@ object ProfileImporter extends Logging {
 			stu.stu_sta1 like '%%A' and -- applicant
 			stu.stu_sta2 is null and -- no student status
 			stu.stu_udf3 is null and -- no IT account
-			stu.stu_code in (:universityId)
+			stu.stu_code in (:universityIds)
 		"""
 
 	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
@@ -587,7 +586,7 @@ object ProfileImporter extends Logging {
 		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
 	}
 
-	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantByUniversityIdInformation) {
+	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantsByUniversityIdInformation) {
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		val SqlDatePattern = "yyyy/MM/dd"
 		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
