@@ -31,18 +31,25 @@ import scala.util.Try
 case class MembershipInformation(member: MembershipMember)
 
 trait ProfileImporter {
+
 	import ProfileImporter._
 
 	var features: Features = Wire[Features]
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
-		: Seq[ImportMemberCommand]
+	def getMemberDetails(
+		memberInfo: Seq[MembershipInformation],
+		users: Map[UniversityId, User],
+		importCommandFactory: ImportCommandFactory
+	): Seq[ImportMemberCommand]
+
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
 
 	def multipleStudentInformationQuery: MultipleStudentInformationQuery
+
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
+
 	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
 }
 
