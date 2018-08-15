@@ -346,7 +346,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	}
 
 	def updateMissingForApplicant(applicant: ApplicantMember): Member = {
-		val missingFromSits = profileImporter.getMemberFromSits(applicant.universityId).isEmpty
+		val missingFromSits = profileImporter.getApplicantMemberFromSits(applicant.universityId).isEmpty
 		if (applicant.missingFromImportSince != null && !missingFromSits) {
 			applicant.missingFromImportSince = null
 			memberDao.saveOrUpdate(applicant)
