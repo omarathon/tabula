@@ -4,18 +4,17 @@ import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
-@Entity
-@DiscriminatorValue("ReportStudentsChoosePeriodCommandNotification")
-class ReportStudentsChoosePeriodCommandNotification extends Notification[Department, Unit]
-	with SingleRecipientNotification
-	with SingleItemNotification[Department]
-	with MyWarwickNotification {
 
-	@transient
-	val userLookup: UserLookupService = Wire[UserLookupService]
+@Entity
+@DiscriminatorValue("ReportStudentsConfirmCommandNotification")
+class ReportStudentsConfirmNotification extends Notification[MonitoringPointReport, Unit]
+	with SingleRecipientNotification
+	with AutowiringUserLookupComponent
+	with MyWarwickNotification {
 
 	@transient
 	lazy val RecipientUsercode: String = Wire.optionProperty("${sits.notificationrecipient}").getOrElse(
@@ -27,11 +26,16 @@ class ReportStudentsChoosePeriodCommandNotification extends Notification[Departm
 
 	override def verb: String = "view"
 
-	override def title: String = "A department has uploaded missed monitoring points to SITS"
+	override def title: String = "Missed monitoring points have been uploaded to SITS"
+
 
 	override def content: FreemarkerModel = FreemarkerModel(templateLocation, Map(
+		"numberOfStudentUpdated" -> entities.size,
+		"academicYear" -> s"${entities.head.academicYear.startYear}/${entities.head.academicYear.endYear}",
+		"monitoringPeriod" -> entities.head.monitoringPeriod,
 		"agent" -> agent.getUserId,
-		"departmentName" -> entities.head.fullName,
+		"agentDept" -> agent.getDepartment,
+		"studentDepartments" -> entities.map(_.studentCourseDetails.department.fullName).distinct.mkString(", "),
 		"created" -> created.toString(DateFormats.NotificationDateTimePattern)
 	))
 

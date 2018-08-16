@@ -53,6 +53,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 
 <#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>
+<#macro create_missed_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/createmissed" /></#macro>
 <#macro edit_meeting_record scd academicYear meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/edit/${meeting_record.id}" /></#macro>
 <#macro create_bulk_meeting_record relationshipType><@_u page="/${relationshipType.urlPart}/meeting/bulk/create?studentCourseDetails=" /></#macro>
 

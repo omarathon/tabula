@@ -1243,6 +1243,7 @@
 					});
 
 					$m.modal("hide");
+					window.location.reload();
 				} else {
 					$m.find('.modal-body').slideDown();
 					var $form = $m.find('form.double-submit-protection');

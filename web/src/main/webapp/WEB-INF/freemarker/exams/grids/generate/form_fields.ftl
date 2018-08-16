@@ -14,6 +14,7 @@
 	<#if selectCourseCommand.levelCode??><input type="hidden" name="levelCode" value="${selectCourseCommand.levelCode}" /></#if>
 	<input type="hidden" name="includeTempWithdrawn" value="${selectCourseCommand.includeTempWithdrawn?string('true','false')}" />
 	<input type="hidden" name="resitOnly" value="${selectCourseCommand.resitOnly?string('true','false')}" />
+	<input type="hidden" name="includePermWithdrawn" value="${selectCourseCommand.includePermWithdrawn?string('true','false')}" />
 	<#list selectCourseCommand.courseYearsToShow as column>
 		<input  type ="hidden" name="courseYearsToShow" value="${column}" />
 	</#list>

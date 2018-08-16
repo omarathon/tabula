@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 import scala.util.parsing.json.JSON
 
 case class DepartmentInfo(fullName: String, shortName: String, code: String, faculty: String, parentCode: Option[String] = None, filterName: Option[String] = None)
-case class ModuleInfo(name: String, shortName: String, code: String, group: String, degreeType: DegreeType)
+case class ModuleInfo(name: String, shortName: String, code: String, group: String, degreeType: DegreeType, status: Option[String] = None)
 case class ModuleTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
 case class RouteInfo(name: String, code: String, degreeType: DegreeType)
 case class RouteTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
@@ -138,7 +138,7 @@ object ModuleImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
 	final val GetModulesSql = """
-		select substr(mod.mod_code,0,5) as code, max(mod.mod_name) as name, max(mod.mod_snam) as short_name, max(mod.sch_code) as scheme_code
+		select substr(mod.mod_code,0,5) as code, max(mod.mod_name) as name, max(mod.mod_snam) as short_name, max(mod.sch_code) as scheme_code, max(mod.mot_code) as status
 		  from ins_mod mod
 		    left outer join cam_top top on mod.mod_code = top.mod_code
 		  where
@@ -148,8 +148,7 @@ object ModuleImporter {
 		      (top.sub_code is not null and top.top_perc <> 100 and substr(top.sub_code, 0, length(mod.dpt_code)) = :department_code) or
 		      (top.dpt_code is null and mod.dpt_code = :department_code)
 		    ) and
-		    mod.mod_iuse = 'Y' and
-		    mod.mot_code not in ('S-', 'D')
+		    mod.mod_iuse = 'Y'
 		  group by substr(mod.mod_code,0,5)
 		"""
 
@@ -199,11 +198,13 @@ object ModuleImporter {
 			val deptCode = params(0).toString.toLowerCase
 			val degreeType: DegreeType = DegreeType.getFromSchemeCode(rs.getString("scheme_code"))
 			ModuleInfo(
-				rs.getString("name").safeTrim,
-				rs.getString("short_name"),
-				moduleCode,
-				deptCode + "-" + moduleCode,
-				degreeType)
+				name = rs.getString("name").safeTrim,
+				shortName = rs.getString("short_name"),
+				code = moduleCode,
+				group = deptCode + "-" + moduleCode,
+				degreeType = degreeType,
+				status = Option(rs.getString("status"))
+			)
 		}
 	}
 

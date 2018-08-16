@@ -18,11 +18,6 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 		this.relationship = relationship
 	}
 
-	var missed: Boolean = false
-
-	@Column(name="missed_reason")
-	var missedReason: String = _
-
 	def isPendingAction: Boolean = meetingDate.isBeforeNow && !missed
 
 	@transient

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, MonitoringPointReport}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 
@@ -162,6 +161,12 @@ class AttendanceMonitoringSchemeEntityReference extends EntityReference[Attendan
 
 @Entity @DiscriminatorValue(value="attendanceMonitoringCheckpointTotal")
 class AttendanceMonitoringCheckpointTotalEntityReference extends EntityReference[AttendanceMonitoringCheckpointTotal] {
+	@ManyToOne
+	var entity: Entity = _
+}
+
+@Entity @DiscriminatorValue(value="MonitoringPointReport")
+class MonitoringPointReportEntityReference extends EntityReference[MonitoringPointReport] {
 	@ManyToOne
 	var entity: Entity = _
 }
