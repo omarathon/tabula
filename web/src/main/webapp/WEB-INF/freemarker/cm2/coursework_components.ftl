@@ -937,7 +937,7 @@
 		<#list student.stages?keys as stage_name>
 			<@workflow_stage student.stages[stage_name]><#compress>
 				<#if stage_name == 'Submission'>
-					<@submission_details submission />
+					<@submission_details submission true student />
 				<#elseif stage_name == 'CheckForPlagiarism'>
 					<#if submission??>
 						<@fmt.p submission.allAttachments?size "file" />
@@ -1246,12 +1246,16 @@
 	</#if>
 </#macro>
 
-<#macro submission_details submission=[]><@compress single_line=true>
+<#macro submission_details submission=[] showDisabilityDisclosure=false student=""><@compress single_line=true>
 	<#if submission?has_content>
 		<#if submission.submittedDate??>
 			<span class="date use-tooltip" title="<@lateness submission />" data-container="body">
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</span>
+		</#if>
+
+		<#if features.disabilityOnSubmission && showDisabilityDisclosure && student.disability??>
+			<@disability_disclosure student_disability=student.disability/>
 		</#if>
 
 		<#if submission.allAttachments?size gt 0>
@@ -1272,11 +1276,7 @@
 			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
 		</#if>
 		<#if features.disabilityOnSubmission && student.disability??>
-			<a href="#" class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true"
-			   data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"
-			>
-				<span class="label label-info">Disability disclosed</span>
-			</a>
+			<@disability_disclosure student_disability=student.disability/>
 		</#if>
 	<#else>
 		<span class="label label-info">Unsubmitted</span>
@@ -1300,6 +1300,14 @@
 			</#if>
 		</#if>
 	</#if>
+</#macro>
+
+<#macro disability_disclosure student_disability>
+	<a href="#" class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true"
+		data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student_disability.code}</h6><small>${(student_disability.sitsDefinition)!}</small></div>"
+	>
+		<span class="label label-info">Disability disclosed</span>
+	</a>
 </#macro>
 
 <#macro originalityReport attachment>
