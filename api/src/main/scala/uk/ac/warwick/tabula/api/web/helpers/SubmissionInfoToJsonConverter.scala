@@ -25,10 +25,8 @@ trait SubmissionInfoToJsonConverter {
 						"name" -> assignment.module.adminDepartment.name
 					)
 				),
-				"archived" -> !assignment.isAlive, // TODO don't like this inferred value but don't want to change API spec
 				"academicYear" -> assignment.academicYear.toString,
 				"name" -> assignment.name,
-				"studentUrl" -> (toplevelUrl + Routes.cm2.assignment(assignment)),
 				"collectMarks" -> assignment.collectMarks,
 				"markingWorkflow" -> {
 					if (assignment.cm2Assignment)
@@ -53,9 +51,7 @@ trait SubmissionInfoToJsonConverter {
 		)
 
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(submission.usercode))
-		// isExtended: is within an approved extension
-		val isExtended = assignment.isWithinExtension(submission.usercode)
-		// hasActiveExtension: active = approved
+		val isWithinApprovedExtension = assignment.isWithinExtension(submission.usercode)
 		val hasActiveExtension = extension.exists(_.approved)
 		val extensionRequested = extension.isDefined && !extension.get.isManual
 
@@ -63,13 +59,19 @@ trait SubmissionInfoToJsonConverter {
 			Map(
 				"id" -> e.id,
 				"state" -> e.state.description,
+				"isWithinApprovedExtension" -> isWithinApprovedExtension,
+				"hasActiveExtension" -> hasActiveExtension,
+				"extensionRequested" -> extensionRequested,
 				"requestedExpiryDate" -> e.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull,
-				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull
+				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
+				"attachments" -> e.attachments.asScala.map { attachment => Map(
+					"url" -> (toplevelUrl + Routes.cm2.admin.assignment.extensionAttachment(e, attachment.name))
+				)}
 			)
 		}.orNull)
 
 
-		val submissioninfo = Map(
+		val submissionInfo = Map(
 			"id" -> submission.id,
 			"late" -> submission.isLate,
 			"authorisedLate" -> submission.isAuthorisedLate,
@@ -90,7 +92,7 @@ trait SubmissionInfoToJsonConverter {
 			"suspectPlagiarised" -> submission.suspectPlagiarised
 		)
 
-		assignmentBasicInfo ++ extensionInfo ++ submissioninfo
+		assignmentBasicInfo ++ extensionInfo ++ submissionInfo
 	}
 
 }
