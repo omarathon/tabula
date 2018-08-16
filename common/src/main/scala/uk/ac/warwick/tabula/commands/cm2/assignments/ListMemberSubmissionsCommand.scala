@@ -43,12 +43,12 @@ trait ListMemberSubmissionsValidation extends SelfValidating {
 		Option(fromDate) match {
 			case Some(fromDate: LocalDate) =>
 				if (Option(toDate).isEmpty)
-					errors.reject("", "fromDate but no toDate defined")
+					errors.reject( "listSubmissions.api.noToDate")
 				else if (fromDate.isAfter(toDate))
-					errors.reject("", "fromDate is after toDate")
+					errors.reject("listSubmissions.api.fromDateAfterToDate")
 			case _ =>
 				if (Option(toDate).isDefined)
-					errors.reject("", "toDate but no fromDate defined")
+					errors.reject("listSubmissions.api.noFromDate")
 		}
 	}
 }
@@ -60,6 +60,7 @@ trait ListMemberSubmissionsPermissions extends RequiresPermissionsChecking with 
 		p.PermissionCheck(Permissions.Submission.Read, member)
 		p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, member)
 		p.PermissionCheck(Permissions.Extension.Read, member)
+		p.PermissionCheck(Permissions.Module.ManageAssignments, member)
 	}
 }
 

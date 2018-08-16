@@ -66,7 +66,9 @@ trait SubmissionInfoToJsonConverter {
 				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"attachments" -> e.attachments.asScala.map { attachment => Map(
 					"url" -> (toplevelUrl + Routes.cm2.admin.assignment.extensionAttachment(e, attachment.name))
-				)}
+				)},
+				"reason" -> e.reason,
+				"reviewerComments" -> e.reviewerComments
 			)
 		}.orNull)
 
