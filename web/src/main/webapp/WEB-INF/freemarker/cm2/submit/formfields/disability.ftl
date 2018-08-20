@@ -13,7 +13,7 @@
 		</@form.field>
 		<div class="help-block">
 			Choose whether the marker should be made aware of your ${disability.definition?lower_case?replace('impaired', 'impairment')}.
-			They make take this into consideration when marking.
+			They may take this into consideration when marking.
 		</div>
 	</@bs3form.labelled_form_group>
 </#if>
