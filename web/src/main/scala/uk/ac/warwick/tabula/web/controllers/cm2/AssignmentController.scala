@@ -101,16 +101,14 @@ class AssignmentController extends CourseworkController
 
 	@RequestMapping(method = Array(POST))
 	def submit(
+		@PathVariable assignment: Assignment, user: CurrentUser,
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
 		errors: Errors
 	): Mav = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
-			val errorMessage = errors.getAllErrors.asScala.map(_.toString)
-			val assignmentId = Try(s" ${form.assignment.id}").getOrElse("")
-			val studentId = Try(s" by student ${form.user.usercode}").getOrElse("")
-			logger.error(s"Validation failed for assignment$assignmentId$studentId.${if(errorMessage.nonEmpty)s" $errorMessage"}")
+			logger.error(s"Validation failed for assignment ${assignment.id} by ${user.apparentId}. ${errors.getAllErrors.asScala.map(_.toString)}")
 			view(infoCommand, form, errors)
 		} else {
 			try {
