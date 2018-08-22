@@ -727,8 +727,8 @@
 				<#if assignment.collectSubmissions || assignment.extensionsPossible>
 					<ul class="list-unstyled">
 						<#if assignment.collectSubmissions>
-						  <#if assignment.submissionsFromUnenrolledStudents?size == 0>
-							  <li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
+							<#if assignment.submissionsFromUnenrolledStudents?size == 0>
+								<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
 							<#else>
 								<li><strong>Submissions received:</strong> ${assignment.submissions?size} (${assignment.submissionsFromUnenrolledStudents?size} from students not enrolled on the assignment)</li>
 							</#if>
