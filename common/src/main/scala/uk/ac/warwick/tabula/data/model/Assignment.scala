@@ -184,6 +184,11 @@ class Assignment
 	@BatchSize(size = 200)
 	var submissions: JList[Submission] = JArrayList()
 
+	@Transient
+	def submissionsFromUnenrolledStudents: JList[Submission] = this.submissions.asScala.filterNot{ submission =>
+		this.membershipInfo.items.flatMap(_.universityId).contains(submission.universityId.getOrElse(None))
+	}.asJava
+
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var extensions: JList[Extension] = JArrayList()
