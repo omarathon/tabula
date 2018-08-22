@@ -703,7 +703,7 @@
 					</#if>
 
 					<li>
-						<strong>Assigned students:</strong>
+						<strong>Enrolled students:</strong>
 						<#if assignment.membershipInfo.totalCount == 0>
 							0
 						<#elseif assignment.membershipInfo.sitsCount gt 0>
