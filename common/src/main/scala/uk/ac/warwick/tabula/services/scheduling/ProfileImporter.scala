@@ -25,23 +25,32 @@ import uk.ac.warwick.tabula.{AcademicYear, Features}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
 case class MembershipInformation(member: MembershipMember)
 
 trait ProfileImporter {
+
 	import ProfileImporter._
 
 	var features: Features = Wire[Features]
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
-		: Seq[ImportMemberCommand]
+	def getMemberDetails(
+		memberInfo: Seq[MembershipInformation],
+		users: Map[UniversityId, User],
+		importCommandFactory: ImportCommandFactory
+	): Seq[ImportMemberCommand]
+
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
+
 	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
+
 	def multipleStudentInformationQuery: MultipleStudentInformationQuery
+
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
+
+	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -59,6 +68,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
 	lazy val applicantQuery = new ApplicantQuery(sits)
+
+	lazy val applicantByUniversityIdQuery = new ApplicantByUniversityIdQuery(sits)
 
 	def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
@@ -108,7 +119,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
 		// Magic student recruitment department - get membership information directly from SITS for applicants
 		if (department.code == applicantDepartmentCode) {
-			val members = applicantQuery.execute().asScala.toSeq
+			val members = applicantQuery.execute().asScala
 			val universityIds = members.map { _.universityId }
 
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
@@ -124,16 +135,20 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			}
 		}
 
-	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
-		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList match {
-			case Nil => None
-			case mem: List[MembershipMember] => Some (
-					MembershipInformation(
-						mem.head
-					)
-				)
-		}
+	def head(result: Any): Option[MembershipInformation] = result match {
+		case result: List[MembershipMember] => result.headOption.map(MembershipInformation)
+		case _ => None
 	}
+
+	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
+		Option(membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+	}
+
+	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = {
+		Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+	}
+
+
 }
 
 @Profile(Array("sandbox")) @Service
@@ -354,6 +369,8 @@ class SandboxProfileImporter extends ProfileImporter {
 
 	def multipleStudentInformationQuery = throw new UnsupportedOperationException
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
+
+	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
@@ -531,6 +548,33 @@ object ProfileImporter extends Logging {
 			stu.stu_udf3 is null -- no IT account
 		"""
 
+	val GetApplicantsByUniversityIdInformation = f"""
+		select
+			stu.stu_code as universityId,
+			'SL' as deptCode,
+			stu.stu_caem as mail,
+			'Applicant' as targetGroup,
+			stu.stu_titl as title,
+			stu.stu_fusd as preferredFirstname,
+			stu.stu_surn as preferredSurname,
+			'Applicant' as jobTitle,
+			to_char(stu.stu_dob, 'yyyy/mm/dd') as dateOfBirth,
+			null as cn,
+			to_char(stu.stu_begd, 'yyyy/mm/dd') as startDate,
+			to_char(stu.stu_endd, 'yyyy/mm/dd') as endDate,
+			stu.stu_updd as last_modification_date,
+			null as telephoneNumber,
+			stu.stu_gend as gender,
+			stu.stu_haem as externalEmail,
+	 		'N' as warwickTeachingStaff
+		from $sitsSchema.ins_stu stu
+		where
+			stu.stu_sta1 like '%%A' and -- applicant
+			stu.stu_sta2 is null and -- no student status
+			stu.stu_udf3 is null and -- no IT account
+			stu.stu_code in (:universityIds)
+		"""
+
 	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
 
 		val SqlDatePattern = "yyyy/MM/dd"
@@ -548,6 +592,15 @@ object ProfileImporter extends Logging {
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
+	}
+
+	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantsByUniversityIdInformation) {
+		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+		val SqlDatePattern = "yyyy/MM/dd"
+		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
+
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetUniversityIdsPresentInMembership = """

@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
+import scala.collection.JavaConverters._
 
 /**
 	* This is the main student-facing and non-student-facing controller for handling esubmission and return of feedback.
@@ -99,12 +100,14 @@ class AssignmentController extends CourseworkController
 
 	@RequestMapping(method = Array(POST))
 	def submit(
+		@PathVariable assignment: Assignment, user: CurrentUser,
 		@ModelAttribute("studentSubmissionAndFeedbackCommand") infoCommand: StudentSubmissionAndFeedbackCommand,
 		@Valid @ModelAttribute("submitAssignmentCommand") form: SubmitAssignmentCommand,
 		errors: Errors
 	): Mav = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
+			logger.error(s"Validation failed for assignment ${assignment.id} by ${user.apparentId}. ${errors.getAllErrors.asScala.map(_.toString)}")
 			view(infoCommand, form, errors)
 		} else {
 			try {

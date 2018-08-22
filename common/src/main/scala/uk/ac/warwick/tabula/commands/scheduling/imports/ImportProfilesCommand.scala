@@ -293,9 +293,6 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply() }
 
-					// update missingFromSitsSince field in this student's member and course records:
-					updateMissingForIndividual(universityId)
-
 					session.flush()
 
 					updateVisa(importMemberCommands)
@@ -326,14 +323,20 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					members.headOption
 				case None =>
 					logger.warn("Student is no longer in uow_current_members in membership - not updating")
-					// updateMissingForApplicant(universityId) // TAB-6441 TAB-6442 hot fix -- do not incorrectly stamp
 					None
 			}
+
+			// update missingFromSitsSince field
+			updateMissingForIndividual(universityId)
 		}
 	}
 
-	def updateMissingForApplicantOrStaff(member: Member): Unit = {
-		val missingFromImport = profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+	def updateMissingForStaffOrApplicant(member: Member): Member = {
+		val missingFromImport: Boolean = member match {
+			case _: ApplicantMember => profileImporter.getApplicantMemberFromSits(member.universityId).isEmpty
+			case _: StaffMember =>  profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+			case _ => throw new IllegalArgumentException("This function is only supposed to handle Applicant and Staff member.")
+		}
 		if (member.isFresh && missingFromImport) {
 			// The member has gone missing
 			member.missingFromImportSince = DateTime.now
@@ -343,18 +346,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 			member.missingFromImportSince = null
 			memberDao.saveOrUpdate(member)
 		}
+		member
 	}
 
-	def updateMissingForApplicant(uniId: String): Unit = {
-		profileService.getMemberByUniversityIdStaleOrFresh(uniId).foreach {
-			case member: ApplicantMember => updateMissingForApplicantOrStaff(member)
-			case _ =>
-		}
-	}
-
-	def updateMissingForIndividual(universityId: String): Unit = {
-		profileService.getMemberByUniversityIdStaleOrFresh(universityId).foreach {
-			case member@(_: StaffMember | _: ApplicantMember) => updateMissingForApplicantOrStaff(member)
+	def updateMissingForIndividual(universityId: String): Option[Member] = {
+		profileService.getMemberByUniversityIdStaleOrFresh(universityId).flatMap {
+			case member@(_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
 			case stu: StudentMember =>
 				val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
 				val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
@@ -396,8 +393,8 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 						}
 					}
 				}
-			case _ =>
-
+				Some(stu)
+			case _ => None
 		}
 	}
 

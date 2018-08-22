@@ -512,7 +512,10 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 				else
 					Nil
 
-			val weekRanges = extractWeekRanges(sheetName, row.values(ExtractedSmallGroupEvent.WeekRangesColumn), result)
+			val weekRanges =
+				if (row.values.contains(ExtractedSmallGroupEvent.WeekRangesColumn))
+					extractWeekRanges(sheetName, row.values(ExtractedSmallGroupEvent.WeekRangesColumn), result)
+				else Nil
 			val dayOfWeek =
 				if (row.values.contains(ExtractedSmallGroupEvent.DayColumn))
 					extractDayOfWeek(sheetName, row.values(ExtractedSmallGroupEvent.DayColumn), result)
