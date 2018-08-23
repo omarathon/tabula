@@ -185,7 +185,7 @@ class Assignment
 	var submissions: JList[Submission] = JArrayList()
 
 	@Transient
-	def submissionsFromUnenrolledStudents: JList[Submission] = {
+	private lazy val submissionsFromUnenrolledStudents: JList[Submission] = {
 		submissions.asScala.filterNot(sub => membershipInfo.items.flatMap(_.userId).contains(sub.usercode)).asJava
 	}
 
