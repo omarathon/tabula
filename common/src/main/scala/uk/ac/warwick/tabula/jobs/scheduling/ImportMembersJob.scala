@@ -24,7 +24,7 @@ class ImportMembersJob extends Job {
 
 	val identifier: String = ImportMembersJob.identifier
 
-	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
+	override def run(implicit job: JobInstance): Unit = new RunnProcessTurnitinLtiQueueJober(job).run()
 
 	class Runner(job: JobInstance) {
 		implicit private val _job: JobInstance = job
