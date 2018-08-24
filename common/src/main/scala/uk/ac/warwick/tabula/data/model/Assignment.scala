@@ -185,8 +185,11 @@ class Assignment
 	var submissions: JList[Submission] = JArrayList()
 
 	@Transient
+	private lazy val usercodeSet = membershipInfo.items.flatMap(_.userId).toSet
+
+	@Transient
 	def submissionsFromUnenrolledStudents: JList[Submission] = {
-		submissions.asScala.filterNot(sub => membershipInfo.items.flatMap(_.userId).contains(sub.usercode)).asJava
+		submissions.asScala.filterNot(sub => usercodeSet.contains(sub.usercode)).asJava
 	}
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
