@@ -67,6 +67,7 @@ trait GetMembersApi {
 			"status" -> "ok",
 			"results" -> members.map(member => Map(
 				"universityId" -> member.universityId,
+				"userId" -> member.userId,
 				"firstName" -> member.firstName,
 				"lastName" -> member.lastName,
 				"email" -> member.email,
