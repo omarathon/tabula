@@ -184,7 +184,6 @@ class Assignment
 	@BatchSize(size = 200)
 	var submissions: JList[Submission] = JArrayList()
 
-	@Transient
 	def submissionsFromUnenrolledStudents: JList[Submission] = {
 		submissions.asScala.filterNot(sub => membershipInfo.usercodeSet.contains(sub.usercode)).asJava
 	}
