@@ -226,6 +226,7 @@ class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
 	val excludeCount: Int = items.count(_.itemType == ExcludeType)
 	val usedIncludeCount: Int = items.count(i => i.itemType == IncludeType && !i.extraneous)
 	val usedExcludeCount: Int = items.count(i => i.itemType == ExcludeType && !i.extraneous)
+	val usercodeSet: Set[String] = items.flatMap(_.userId).toSet
 }
 
 trait AssessmentMembershipMethods extends Logging {
