@@ -50,7 +50,7 @@ class ScientiaConfigurationImpl extends ScientiaConfiguration {
 		// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
 		val month = clock.now.getMonthOfYear
 		if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
-			currentAcademicYear.map(_.previous.extended)
+			Some(AcademicYear.forDate(clock.now).extended).map(_.previous.extended)
 		else
 			None
 	}
