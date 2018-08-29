@@ -161,7 +161,7 @@ class TurnitinLtiService extends Logging with DisposableBean
 				"resource_link_title" -> removeAccent(StringUtils.safeSubstring(assignmentNameFor(assignment).value, 0, turnitinAssignmentNameMaxCharacters)),
 				"resource_link_description" -> removeAccent(assignmentNameFor(assignment).value),
 				"context_id" -> classIdFor(assignment, classPrefix).value,
-				"context_title" -> classNameFor(assignment).value,
+				"context_title" -> removeAccent(classNameFor(assignment).value),
 				"custom_duedate" -> isoFormatter.print(customDueDate),
 				"custom_late_accept_flag" -> "1",
 				"ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
@@ -183,26 +183,29 @@ class TurnitinLtiService extends Logging with DisposableBean
 	 */
 	def submitPaper(
 		assignment: Assignment,	paperUrl: String, userId: String, userEmail: String, attachment: FileAttachment, userFirstName: String, userLastName: String
-	 ): TurnitinLtiResponse = doRequest(
-		s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
-		Map(
-			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
-			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
-			"context_title" -> TurnitinLtiService.classNameFor(assignment).value,
-			"custom_xmlresponse" -> "1",
-			// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
-			"roles" -> "Learner",
-			// I hoped this would be the callback Turnitin uses when a paper has been processed - apparently not
-			// "ext_outcomes_tool_placement_url" ->  s"$topLevelUrl/api/tunitin-outcomes",
-			"custom_submission_url" -> paperUrl,
-			"custom_submission_title" -> attachment.id,
-			"custom_submission_filename" -> attachment.name
-		) ++ userParams(userId, userEmail, userFirstName, userLastName))(ApacheHttpClientUtils.handler {
-		case response =>
-			// Call handleEntity to avoid AbstractResponseHandler throwing exceptions for >=300 status codes
-			ApacheHttpClientUtils.xmlResponseHandler(TurnitinLtiResponse.fromXml)
-				.handleEntity(response.getEntity)
-	})
+	 ): TurnitinLtiResponse = {
+		import TurnitinLtiService._
+		doRequest(
+			s"$apiSubmitPaperEndpoint/${assignment.turnitinId}",
+			Map(
+				"resource_link_id" -> assignmentIdFor(assignment).value,
+				"context_id" -> classIdFor(assignment, classPrefix).value,
+				"context_title" -> removeAccent(classNameFor(assignment).value),
+				"custom_xmlresponse" -> "1",
+				// or Instructor, but must supply an author user id, whatever the parameter for that is!!!
+				"roles" -> "Learner",
+				// I hoped this would be the callback Turnitin uses when a paper has been processed - apparently not
+				// "ext_outcomes_tool_placement_url" ->  s"$topLevelUrl/api/tunitin-outcomes",
+				"custom_submission_url" -> paperUrl,
+				"custom_submission_title" -> attachment.id,
+				"custom_submission_filename" -> attachment.name
+			) ++ userParams(userId, userEmail, userFirstName, userLastName))(ApacheHttpClientUtils.handler {
+			case response =>
+				// Call handleEntity to avoid AbstractResponseHandler throwing exceptions for >=300 status codes
+				ApacheHttpClientUtils.xmlResponseHandler(TurnitinLtiResponse.fromXml)
+					.handleEntity(response.getEntity)
+		})
+	}
 
 	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse =
 		doRequest(s"$apiSubmissionDetails/$turnitinSubmissionId", Map())(ApacheHttpClientUtils.handler {
@@ -214,12 +217,13 @@ class TurnitinLtiService extends Logging with DisposableBean
 	def getOriginalityReportEndpoint(attachment: FileAttachment) = s"$apiReportLaunch/${attachment.originalityReport.turnitinId}"
 
 	def getOriginalityReportParams(endpoint: String, assignment: Assignment, attachment: FileAttachment, userId: String, email: String, firstName: String, lastName: String):Map[String, String] = {
+		import TurnitinLtiService._
 		getSignedParams(
 			Map(
-			"resource_link_id" -> TurnitinLtiService.assignmentIdFor(assignment).value,
+			"resource_link_id" -> assignmentIdFor(assignment).value,
 			"roles" -> "Instructor",
-			"context_id" -> TurnitinLtiService.classIdFor(assignment, classPrefix).value,
-			"context_title" -> TurnitinLtiService.classNameFor(assignment).value
+			"context_id" -> classIdFor(assignment, classPrefix).value,
+			"context_title" -> removeAccent(classNameFor(assignment).value)
 		) ++ userParams(userId, email, firstName, lastName), getOriginalityReportEndpoint(attachment))
 	}
 
@@ -253,6 +257,7 @@ class TurnitinLtiService extends Logging with DisposableBean
 				"resource_link_id" -> assignment.id,
 				"roles" -> role,
 				"role_scope_mentor" -> mentee,
+				// turnitin does not handle accented unicode like á, until they fix it, we are specially handling these with `removeAccent`
 				"context_title" -> removeAccent(assignment.module.name),
 				"context_id" -> assignment.module.code,
 				"context_label" -> "A label for this context",
