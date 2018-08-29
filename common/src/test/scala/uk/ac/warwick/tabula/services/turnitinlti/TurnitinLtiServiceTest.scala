@@ -48,4 +48,11 @@ class TurnitinLtiServiceTest extends TestBase {
 		TurnitinLtiService.assignmentNameFor(assignment).value should be("12345 (14/15) 1500 word assignment")
 	}}
 
+	@Test def removeAccent(): Unit = {
+		val badString = "orčpžsíáýd"
+		TurnitinLtiService.removeAccent(badString) should be ("orcpzsiayd")
+
+		val goodString = "kailan"
+		TurnitinLtiService.removeAccent(goodString) should be ("kailan")
+	}
 }
