@@ -5,7 +5,7 @@ import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.joda.time.{DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -28,46 +28,47 @@ trait ScientiaConfigurationComponent {
 	val scientiaConfiguration: ScientiaConfiguration
 }
 
-trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent with ClockComponent {
-	val scientiaConfiguration = new AutowiringScientiaConfiguration
-	class AutowiringScientiaConfiguration extends ScientiaConfiguration with AutowiringFeaturesComponent {
-		def scientiaFormat(year: AcademicYear): String = {
-			// e.g. 1314
-			(year.startYear % 100).toString + (year.endYear % 100).toString
-		}
+class ScientiaConfigurationImpl extends ScientiaConfiguration {
+	self: ClockComponent with FeaturesComponent =>
 
-		lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
-
-		// TAB-6462- Current academic year is enabled on 1st Aug but timetabling feed becomes active later in Sept so we can disable in Aug to stop 404 errors
-		lazy val currentAcademicYear: Option[AcademicYear] =  {
-			if (features.timetableFeedCurrentAcademicYear) {
-				Some(AcademicYear.forDate(clock.now).extended)
-			} else
-				None
-		}
-
-		lazy val prevAcademicYear: Option[AcademicYear] = {
-			// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
-			val month = clock.now.getMonthOfYear
-			if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
-				currentAcademicYear.map(_.previous.extended)
-			else
-				None
-		}
-
-		def yearProperty: Option[Seq[AcademicYear]] =
-			Wire.optionProperty("${scientia.years}").map { _.split(",").map(AcademicYear.parse) }
-
-		lazy val academicYears: Seq[AcademicYear] = yearProperty.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
-
-		lazy val perYearUris: Seq[(String, AcademicYear)] = academicYears.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
-
-		lazy val cacheSuffix: String = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
-
-		override val cacheExpiryTime: Int = 60 * 60 // 1 hour in seconds
-
+	def scientiaFormat(year: AcademicYear): String = {
+		// e.g. 1314
+		(year.startYear % 100).toString + (year.endYear % 100).toString
 	}
 
+	lazy val scientiaBaseUrl: String = Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml")
+
+	// TAB-6462- Current academic year is enabled on 1st Aug but timetabling feed becomes active later in Sept so we can disable in Aug to stop 404 errors
+	lazy val currentAcademicYear: Option[AcademicYear] =  {
+		if (features.timetableFeedCurrentAcademicYear) {
+			Some(AcademicYear.forDate(clock.now).extended)
+		} else
+			None
+	}
+
+	lazy val prevAcademicYear: Option[AcademicYear] = {
+		// TAB-3074 we only fetch the previous academic year if the month is >= AUGUST and < OCTOBER
+		val month = clock.now.getMonthOfYear
+		if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER)
+			currentAcademicYear.map(_.previous.extended)
+		else
+			None
+	}
+
+	def yearProperty: Option[Seq[AcademicYear]] =
+		Wire.optionProperty("${scientia.years}").map { _.split(",").map(AcademicYear.parse) }
+
+	lazy val academicYears: Seq[AcademicYear] = yearProperty.getOrElse { Seq(prevAcademicYear, currentAcademicYear).flatten }
+
+	lazy val perYearUris: Seq[(String, AcademicYear)] = academicYears.map { year => (scientiaBaseUrl + scientiaFormat(year) + "/", year) }
+
+	lazy val cacheSuffix: String = Wire.optionProperty("${scientia.cacheSuffix}").getOrElse("")
+
+	override val cacheExpiryTime: Int = 60 * 60 // 1 hour in seconds
+}
+
+trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent {
+	val scientiaConfiguration = new ScientiaConfigurationImpl with SystemClockComponent with AutowiringFeaturesComponent
 }
 
 trait ScientiaHttpTimetableFetchingServiceComponent extends CompleteTimetableFetchingServiceComponent {
