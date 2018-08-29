@@ -4,10 +4,11 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, MembershipInformation, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -16,6 +17,7 @@ object StampMissingRowsCommand {
 	def apply() =
 		new StampMissingRowsCommandInternal
 			with AutowiringMemberDaoComponent
+			with AutowiringProfileServiceComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
 			with AutowiringStudentCourseDetailsDaoComponent
 			with AutowiringProfileImporterComponent
@@ -25,14 +27,52 @@ object StampMissingRowsCommand {
 }
 
 
-class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging with Daoisms with ChecksStudentsInSits with ChecksStaffInMembership {
+class StampMissingRowsCommandInternal
+	extends CommandInternal[Unit]
+		with Logging
+		with Daoisms
+		with ChecksStudentsInSits
+		with ChecksStaffInMembership {
 
-	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent with StudentCourseDetailsDaoComponent
-		with ProfileImporterComponent =>
+	self: MemberDaoComponent
+		with StudentCourseYearDetailsDaoComponent
+		with StudentCourseDetailsDaoComponent
+		with ProfileImporterComponent
+		with ProfileServiceComponent =>
 
 	override def applyInternal(): Unit = {
 		applyStudents()
 		applyStaff()
+		applyApplicants()
+	}
+
+	def applyApplicants(): Unit = {
+
+//		case class ApplicantStatus(uniId: String, missingFromSits: Boolean)
+		val allApplicantsIDs = transactional() { memberDao.getFreshStudentUniversityIds.toSet }
+
+		logger.info(s"${allApplicantsIDs.size} applicants fo be fetched from SITS.")
+
+		allApplicantsIDs.foreach { uniId =>
+			profileImporter.getApplicantMemberFromSits(uniId) match {
+				case _: Some[MembershipInformation] =>
+					// do nothing
+				case _ =>
+					profileService.getMemberByUniversityIdStaleOrFresh(uniId) match {
+						case possibleMember: Some[Member] =>
+							val member = possibleMember.get
+							if (member.isFresh ) {
+								member.missingFromImportSince = DateTime.now
+								memberDao.saveOrUpdate(member)
+							}
+					}
+
+
+			}
+		}
+
+
+
 	}
 
 	def applyStudents(): Unit = {
@@ -135,6 +175,17 @@ trait MissingRowsPermissions extends RequiresPermissionsChecking with Permission
 trait StampMissingRowsDescription extends Describable[Unit] {
 	override lazy val eventName = "StampMissingRows"
 	override def describe(d: Description) {
+	}
+}
+
+trait ChecksApplicantsInSites {
+
+	self: ProfileImporterComponent with Logging =>
+
+	def getApplicantInfoFromSits(uniIds: Set[String]): Unit = {
+
+
+		???
 	}
 }
 
