@@ -1,19 +1,21 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings.{ConvertScheduledMeetingRecordCommand, _}
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
+
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/schedule/{meetingRecord}/confirm"))
@@ -34,7 +36,9 @@ class ConvertScheduledMeetingRecordController extends ProfilesController {
 	@ModelAttribute("command")
 	def getCreateCommand(@PathVariable meetingRecord: ScheduledMeetingRecord): CreateMeetingRecordCommandInternal with AutowiringMeetingRecordServiceComponent with AutowiringFeaturesComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with AutowiringFileAttachmentServiceComponent with ComposableCommand[MeetingRecord] with MeetingRecordCommandBindListener with ModifyMeetingRecordValidation with CreateMeetingRecordDescription with ModifyMeetingRecordPermissions with CreateMeetingRecordCommandState with MeetingRecordCommandRequest with CreateMeetingRecordCommandNotifications with PopulateOnForm = {
 		Option(meetingRecord).map(mr => {
-			CreateMeetingRecordCommand(currentMember, mr.relationship)
+			val cmd = CreateMeetingRecordCommand(currentMember, mr.relationships)
+			cmd.relationships = JArrayList(mr.relationships.asJava)
+			cmd
 		}).orNull
 	}
 

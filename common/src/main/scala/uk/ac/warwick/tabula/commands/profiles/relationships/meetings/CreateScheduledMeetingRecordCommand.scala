@@ -9,15 +9,15 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions._
 
 import scala.collection.JavaConverters._
 
 object CreateScheduledMeetingRecordCommand {
-	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
-		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives)
+	def apply(creator: Member, studentCourseDetails: StudentCourseDetails, allRelationships: Seq[StudentRelationship]) =
+		new CreateScheduledMeetingRecordCommand(creator, studentCourseDetails, allRelationships)
 			with ComposableCommand[ScheduledMeetingRecord]
 			with CreateScheduledMeetingPermissions
 			with CreateScheduledMeetingRecordState
@@ -31,13 +31,13 @@ object CreateScheduledMeetingRecordCommand {
 		}
 }
 
-class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
+class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourseDetails: StudentCourseDetails, val allRelationships: Seq[StudentRelationship])
 	extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState with BindListener {
 
 	self: MeetingRecordServiceComponent =>
 
 	def applyInternal(): ScheduledMeetingRecord = {
-		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationship)
+		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala)
 		scheduledMeeting.title = title
 		scheduledMeeting.description = description
 
@@ -81,10 +81,9 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 	self: CreateScheduledMeetingRecordState with MeetingRecordServiceComponent =>
 
 	override def validate(errors: Errors) {
-
 		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
-		meetingRecordService.listScheduled(Set(relationship), Some(creator)).foreach(
+		meetingRecordService.listScheduled(relationships.asScala.toSet, Some(creator)).foreach(
 			m =>
 				if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 
@@ -96,34 +95,19 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 	}
 }
 
-trait CreateScheduledMeetingRecordState {
+trait CreateScheduledMeetingRecordState extends ModifyScheduledMeetingRecordState {
 	def creator: Member
-	def relationship: StudentRelationship
-	def considerAlternatives: Boolean
-
-	var title: String = _
-	var description: String = _
-
-	var meetingDateStr: String = _
-	var meetingTimeStr: String = _
-	var meetingEndTimeStr: String = _
-
-	var format: MeetingFormat = _
-
-	var meetingLocation: String  = _
-	var meetingLocationId: String = _
-
-	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] = _
-
-	var attachmentTypes: Seq[String] = Seq[String]()
+	def studentCourseDetails: StudentCourseDetails
+	def allRelationships: Seq[StudentRelationship]
 }
 
 trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: CreateScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationship.relationshipType), mandatory(relationship.studentMember))
+		allRelationships.map(_.relationshipType).foreach { relationshipType =>
+			p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), mandatory(studentCourseDetails.student))
+		}
 	}
 }
 
@@ -133,16 +117,16 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 	override lazy val eventName = "CreateScheduledMeetingRecord"
 
 	override def describe(d: Description) {
-		relationship.studentMember.map { d.member(_) }
+		relationships.asScala.flatMap(_.studentMember).headOption.map(d.member)
 		d.properties(
 			"creator" -> creator.universityId,
-			"relationship" -> relationship.relationshipType.toString()
+			"relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", ")
 		)
 	}
 }
 
 trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
-	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+	def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		val user = meeting.creator.asSsoUser
 		val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting)
 		if(!meeting.universityIdInRelationship(user.getWarwickId)) {

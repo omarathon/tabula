@@ -14,19 +14,19 @@ trait MissedMeetingRecordNotification
 
 	def meeting: MeetingRecord = item.entity
 
-	def relationship: StudentRelationship = meeting.relationship
-
 	def verb = "view"
 
-	def title: String = "Missed meeting recorded"
+	override def titleSuffix: String = "recorded as missed"
+	override def title: String = "Missed meeting recorded"
+	override def titleFor(user: User): String = "Missed meeting recorded"
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
-		"role" -> agentRole,
+		"agentRoles" -> agentRoles,
 		"dateFormatter" -> dateTimeFormatter,
-		"student" -> relationship.studentMember.orNull,
+		"student" -> meeting.student,
 		"actorIsRecipient" -> recipients.contains(agent),
-		"studentIsRecipient" -> relationship.studentMember.map(_.asSsoUser).exists(recipients.contains),
+		"studentIsRecipient" -> recipients.contains(meeting.student.asSsoUser),
 		"meetingRecord" -> meeting
 	))
 
@@ -40,7 +40,7 @@ class MissedMeetingRecordStudentNotification
 
 	priority = NotificationPriority.Warning
 
-	def recipients: Seq[User] = relationship.studentMember.map(_.asSsoUser).toSeq
+	def recipients: Seq[User] = Seq(meeting.student.asSsoUser)
 }
 
 @Entity
@@ -51,5 +51,5 @@ class MissedMeetingRecordAgentNotification
 
 	priority = NotificationPriority.Info
 
-	def recipients: Seq[User] = relationship.agentMember.map(_.asSsoUser).toSeq
+	def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
 }

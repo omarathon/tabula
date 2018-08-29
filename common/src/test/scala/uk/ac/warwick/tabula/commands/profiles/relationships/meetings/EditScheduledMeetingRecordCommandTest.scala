@@ -20,10 +20,11 @@ class EditScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 		val newMeetingDate = new DateTime().plusMonths(1)
 		scheduledMeetingRecord.meetingDate = newMeetingDate
 		scheduledMeetingRecord.meetingEndDate = newMeetingDate.plusHours(1)
-		scheduledMeetingRecord.relationship = relationship
+		scheduledMeetingRecord.relationships = Seq(relationship)
 		val command = new EditScheduledMeetingRecordCommand(creator, scheduledMeetingRecord) with EditScheduledMeetingRecordCommandValidation with EditScheduledMeetingRecordCommandSupport with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
 		}
+		command.relationships.add(relationship)
 	}
 
 	@Test

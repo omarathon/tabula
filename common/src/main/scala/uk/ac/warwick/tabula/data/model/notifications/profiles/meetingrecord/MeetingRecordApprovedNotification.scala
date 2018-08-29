@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.userlookup.User
 
 @Entity
 @DiscriminatorValue("meetingRecordApproved")
@@ -14,21 +14,14 @@ class MeetingRecordApprovedNotification
 
 	def approval: MeetingRecordApproval = item.entity
 	def meeting: MeetingRecord = approval.meetingRecord
-	def relationship: StudentRelationship = meeting.relationship
 
 	def verb = "approve"
 
-	def title: String = {
-		val name =
-			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
-			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
-
-		s"${agentRole.capitalize} meeting record with $name approved"
-	}
+	override def titleSuffix: String = "approved"
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> agent,
-		"role"->agentRole,
+		"agentRoles" -> agentRoles,
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "approved"
@@ -36,6 +29,6 @@ class MeetingRecordApprovedNotification
 
 	def urlTitle = "view the meeting record"
 
-	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
+	def recipients: Seq[User] = Seq(meeting.creator, meeting.student).filterNot(_.asSsoUser == agent).distinct.map(_.asSsoUser)
 }
 

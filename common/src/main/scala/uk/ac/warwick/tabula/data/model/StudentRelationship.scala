@@ -34,6 +34,11 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 	@JoinColumn(name = "scjcode")
 	var studentCourseDetails: StudentCourseDetails = _
 
+	@ManyToMany
+	@JoinTable(name = "meetingrecordrelationship", joinColumns = Array(new JoinColumn(name = "relationship_id")), inverseJoinColumns = Array(new JoinColumn(name = "meeting_record_id")))
+	@JoinColumn(name = "meeting_record_id")
+	var meetingRecords: JList[AbstractMeetingRecord] = JArrayList()
+
 	@Column(name = "uploaded_date")
 	var uploadedDate: DateTime = new DateTime
 

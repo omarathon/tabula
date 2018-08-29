@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/create"))
@@ -15,21 +17,22 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 	def getCommand(
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship,
-		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
 	): Appliable[MeetingRecord] with CreateMeetingRecordCommandState = {
-		allRelationships match {
+		manageableRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.
 				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
-				val chosenRelationship = relationship match {
-					case r: StudentRelationship => r
+				val chosenRelationship = relationships match {
+					case Seq(r) => r
 					case _ => relationships.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
 						.getOrElse(relationships.head)
 				}
 
-				CreateMeetingRecordCommand(currentMember, chosenRelationship)
+				val cmd = CreateMeetingRecordCommand(currentMember, manageableRelationships)
+				cmd.relationships = JArrayList(chosenRelationship)
+				cmd
 		}
 	}
 
@@ -43,21 +46,22 @@ class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordCon
 	def getCommand(
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@RequestParam(value = "relationship", required = false) relationship: StudentRelationship,
-		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
 	): Appliable[MeetingRecord] = {
-		allRelationships match {
+		manageableRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.
 				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
-				val chosenRelationship = relationship match {
-					case r: StudentRelationship => r
+				val chosenRelationship = relationships match {
+					case Seq(r) => r
 					case _ => relationships.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
 						.getOrElse(relationships.head)
 				}
 
-				CreateMissedMeetingRecordCommand(currentMember, chosenRelationship)
+				val cmd = CreateMissedMeetingRecordCommand(currentMember, relationships)
+				cmd.relationships = JArrayList(chosenRelationship)
+				cmd
 		}
 	}
 

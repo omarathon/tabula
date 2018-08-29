@@ -25,7 +25,7 @@ class EditMeetingRecordControllerTest extends TestBase with Mockito{
 		relationship.relationshipType = new StudentRelationshipType
 		relationship.studentMember = Fixtures.student()
 		val meeting = new MeetingRecord()
-		meeting.relationship = relationship
+		meeting.relationships = Seq(relationship)
 		// end setup
 
 		controller.getCommand(meeting) should be(anInstanceOf[EditMeetingRecordCommandInternal])

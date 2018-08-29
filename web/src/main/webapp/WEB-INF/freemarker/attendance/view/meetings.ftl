@@ -59,7 +59,7 @@
 						<tr>
 							<td>
 								${(meeting.format.description)!"Unknown format"} with
-								${meeting.relationship.relationshipType.agentRole}
+								<#list meeting.relationshipTypes as relationshipType>${relationshipType.agentRole}<#if relationshipType_has_next>, </#if></#list>
 								on <@fmt.date date=meeting.meetingDate includeTime=false/>
 								created <@fmt.date meeting.lastUpdatedDate />
 							</td>

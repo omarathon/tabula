@@ -94,7 +94,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		val relationship2 = StudentRelationship(staffMember, relationshipType, courseDetails2.student, DateTime.now)
 
 		val meetingRecord = new MeetingRecord
-		meetingRecord.relationship = relationship1
+		meetingRecord.relationships = Seq(relationship1)
 
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord

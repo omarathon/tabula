@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
+
 import javax.persistence.CascadeType._
 import javax.persistence._
-
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
@@ -15,6 +15,9 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -42,7 +45,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	type Entity = AbstractMeetingRecord
 
 	def isScheduled: Boolean = this match {
-		case (_: ScheduledMeetingRecord) => true
+		case _: ScheduledMeetingRecord => true
 		case _ => false
 	}
 
@@ -54,7 +57,42 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "relationship_id")
+	@deprecated(message = "use relationships instead", since = "now")
 	var relationship: StudentRelationship = _
+
+	@ManyToMany
+	@JoinTable(name = "meetingrecordrelationship", joinColumns = Array(new JoinColumn(name = "meeting_record_id")), inverseJoinColumns = Array(new JoinColumn(name = "relationship_id")))
+	@JoinColumn(name = "relationship_id")
+	var _relationships: JList[StudentRelationship] = JArrayList()
+
+	def relationships: Seq[StudentRelationship] = {
+		if (relationship != null) {
+			Seq(relationship)
+		} else {
+			_relationships.asScala
+		}
+	}
+
+	def relationships_=(r: Seq[StudentRelationship]): Unit = {
+		relationship = null
+
+		if (_relationships == null) {
+			_relationships = JArrayList(r.asJava)
+		} else {
+			_relationships.clear()
+			_relationships.addAll(r.asJava)
+		}
+	}
+
+	def replaceParticipant(original: StudentRelationship, replacement: StudentRelationship): Unit = {
+		if (relationship == original) {
+			relationship = null
+			_relationships = JArrayList(replacement)
+		} else if (_relationships.contains(original)) {
+			_relationships.remove(original)
+			_relationships.add(replacement)
+		}
+	}
 
 	@Column(name="meeting_date")
 	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
@@ -77,7 +115,8 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-	def readPermissions(): Seq[Permission] = Seq(Permissions.Profiles.MeetingRecord.ReadDetails(relationship.relationshipType))
+	def readPermissions(): Seq[Seq[Permission]] =
+		relationshipTypes.map(relationshipType => Seq(Permissions.Profiles.MeetingRecord.ReadDetails(relationshipType)))
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
 	@RestrictionProvider("readPermissions")
@@ -107,8 +146,31 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	def this(creator: Member, relationship: StudentRelationship) {
 		this()
 		this.creator = creator
-		this.relationship = relationship
+		this.relationships = Seq(relationship)
 	}
+
+	def this(creator: Member, relationships: Seq[StudentRelationship]) {
+		this()
+		this.creator = creator
+		this.relationships = relationships
+	}
+
+	def student: StudentMember = relationships.flatMap(_.studentMember).headOption.getOrElse(throw new IllegalStateException("Meeting record student member not found"))
+	def relationshipTypes: Seq[StudentRelationshipType] = relationships.map(_.relationshipType).distinct
+	def agents: Seq[Member] = relationships.flatMap(_.agentMember).distinct
+
+	def participants: Seq[Member] = student +: agents
+
+	def allParticipantNames: String = memberNames(participants)
+	def allAgentNames: String = memberNames(agents)
+	def participantNamesExcept(user: User): String = memberNames(participants.filterNot(_.asSsoUser == user))
+
+	protected def memberNames(members: Seq[Member]): String =
+		members.sortBy(p => (p.lastName, p.firstName, p.universityId)).map(p => p.fullName.getOrElse(p.universityId)) match {
+			case Nil => "nobody"
+			case Seq(single) => single
+			case init :+ last => s"${init.mkString(", ")} and $last"
+		}
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence]
 
@@ -127,17 +189,17 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 					_.description
 				}.map(NamedLocation)
 			},
-			parent = TimetableEvent.Parent(relationship.relationshipType),
+			parent = TimetableEvent.Parent(relationships.map(_.relationshipType).distinct),
 			comments = None,
 			staff = context match {
-				case TimetableEvent.Context.Staff => relationship.studentMember.map { _.asSsoUser }.toSeq
-				case TimetableEvent.Context.Student => relationship.agentMember.map { _.asSsoUser }.toSeq
+				case TimetableEvent.Context.Staff => Seq(student.asSsoUser)
+				case TimetableEvent.Context.Student => agents.map(_.asSsoUser)
 			},
 			relatedUrl = Some(RelatedUrl(
 				urlString = Routes.Profile.relationshipType(
-					relationship.studentCourseDetails,
+					relationships.head.studentCourseDetails,
 					AcademicYear.forDate(meetingDate.toDateTime),
-					relationship.relationshipType
+					relationships.head.relationshipType
 				),
 				title = Some("Meeting records")
 			)),
@@ -145,13 +207,14 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		))
 	}
 
-	def permissionsParents: Stream[StudentCourseDetails] = Option(relationship.studentCourseDetails).toStream
+	def permissionsParents: Stream[StudentCourseDetails] = relationships.map(_.studentCourseDetails).toStream
 
 	def toStringProps = Seq(
 		"creator" -> creator,
 		"creationDate" -> creationDate,
 		"meetingDate"  -> meetingDate,
-		"relationship" -> relationship)
+		"relationships" -> relationships
+	)
 
 	override def toEntityReference: MeetingRecordEntityReference = new MeetingRecordEntityReference().put(this)
 }

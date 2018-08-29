@@ -56,6 +56,10 @@ object TimetableEvent {
 		def apply(relationship: StudentRelationshipType): Relationship = {
 			Relationship(Option(relationship.description), Option(relationship.description))
 		}
+		def apply(relationshipTypes: Seq[StudentRelationshipType]): Relationship = {
+			val string = relationshipTypes.map(_.description).distinct.mkString(", ")
+			Relationship(Option(string), Option(string))
+		}
 	}
 
 	def apply(sge: SmallGroupEvent, attendance: Map[WeekRange.Week, AttendanceState], withoutWeeks: Seq[SmallGroupEventOccurrence.WeekNumber] = Seq()): TimetableEvent =

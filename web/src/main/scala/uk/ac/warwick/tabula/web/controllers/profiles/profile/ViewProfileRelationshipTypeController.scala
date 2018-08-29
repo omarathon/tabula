@@ -125,8 +125,8 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				"scheduledRelationshipChanges" -> scheduledRelationshipChanges,
 				"meetings" -> meetings,
 				"meetingApprovalWillCreateCheckpoint" -> meetings.map {
-					case (meeting: MeetingRecord) => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
-					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+					case meeting: MeetingRecord => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+					case meeting: ScheduledMeetingRecord => meeting.id -> false
 				}.toMap,
 				"isSelf" -> isSelf,
 				"canEditRelationship" -> canEditRelationship,
@@ -147,7 +147,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		if (meeting.meetingDate.toLocalDate.isAfter(academicYear.lastDay))
 			true
 		else if (meeting.meetingDate.toLocalDate.isBefore(academicYear.firstDay))
-			meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty && meeting.relationship.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
+			meeting.relationships.head.studentCourseDetails.freshStudentCourseYearDetails.nonEmpty && meeting.relationships.head.studentCourseDetails.freshStudentCourseYearDetails.min.academicYear != academicYear
 		else
 			false
 	}

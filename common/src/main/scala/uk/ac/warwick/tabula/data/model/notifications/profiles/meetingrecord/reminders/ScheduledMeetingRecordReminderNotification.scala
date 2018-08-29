@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.userlookup.User
 
 abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeetingRecordNotification
-	with SingleRecipientNotification
 	with MyWarwickNotification {
 
 	verbSetting.value = "remind"
@@ -25,28 +24,23 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 		today == meetingDate
 	}
 
-	def title: String = {
-		val name =
-			if (isAgent) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
-			else meeting.relationship.agentName
-
+	def dateForTitle: String = {
 		val timeFormat = ConfigurableIntervalFormatter.Hour12OptionalMins
-		val date =
-			if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
-			else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
 
-		s"${agentRole.capitalize} meeting with $name $date"
+		if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
+		else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
 	}
+
+	def title: String = s"Meeting with ${meeting.allParticipantNames} $dateForTitle"
+
+	override def titleFor(user: User): String = s"Meeting with ${meeting.participantNamesExcept(user)} $dateForTitle"
 
 	def isAgent: Boolean
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"isAgent" -> isAgent,
-		"role" -> agentRole,
-		"partner" -> (isAgent match {
-			case true => meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage))
-			case false => meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
-		}),
+		"agentRoles" -> agentRoles,
+		"otherParticipants" -> meeting.participants.filterNot(_ == meeting.creator),
 		"dateTimeFormatter" -> dateTimeFormatter,
 		"meetingRecord" -> meeting
 	))
@@ -58,7 +52,7 @@ class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeeting
 
 	override def isAgent = false
 
-	override def recipient: User = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
+	override def recipients: Seq[User] = Seq(meeting.student.asSsoUser)
 
 }
 
@@ -68,6 +62,6 @@ class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRe
 
 	override def isAgent = true
 
-	override def recipient: User = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+	override def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
 
 }

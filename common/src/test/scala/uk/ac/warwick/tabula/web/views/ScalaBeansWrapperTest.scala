@@ -41,7 +41,7 @@ class MyObject extends PermissionsTarget {
 
 
 	var restrictAccess:Boolean = false
-	def providePermission():Seq[Permission] = if (restrictAccess) Seq(Permissions.Module.ManageAssignments) else Nil
+	def providePermission():Seq[Seq[Permission]] = if (restrictAccess) Seq(Seq(Permissions.Module.ManageAssignments)) else Nil
 	@RestrictionProvider("providePermission") def getRuntimeRestricted() ="Ho Ho Ho"
 
 }
@@ -210,7 +210,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		wrapped.get("runtimeRestricted") should be(null)
 
 		// finally, give the current user permissions, and make sure he can see the value again.
-		securityService.can(currentUser, target.providePermission().head, target) returns (true)
+		securityService.can(currentUser, target.providePermission().head.head, target) returns (true)
 		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
 

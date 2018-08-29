@@ -186,6 +186,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def url: String
 
 	def urlFor(user: User): String = url
+	def titleFor(user: User): String = title
 
 	/**
 	 * URL title will be used to generate the links in notifications

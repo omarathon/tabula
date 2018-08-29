@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings
 
 import javax.validation.Valid
-
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
@@ -17,32 +17,52 @@ abstract class AbstractManageScheduledMeetingRecordController extends ProfilesCo
 
 	@ModelAttribute("allRelationships")
 	def allRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails
 	): Seq[StudentRelationship] = {
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+		relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
 	}
 
 	@ModelAttribute("schedulableRelationships")
 	def schedulableRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails
 	): Seq[StudentRelationship] = {
 		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
 
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+		relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
 			.filter(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
 	}
 
 	@ModelAttribute("nonSchedulableRelationships")
 	def nonSchedulableRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails
 	): Seq[StudentRelationship] = {
 		val isSelf = user.universityId.maybeText.contains(studentCourseDetails.student.universityId)
 
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+		relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
 			.filterNot(relationship => !isSelf || relationship.agentMember.exists(_.homeDepartment.studentsCanScheduleMeetings))
+	}
+
+	@ModelAttribute("manageableRelationships")
+	def manageableRelationships(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+	): Seq[StudentRelationship] = {
+		allRelationships.filter(r => securityService.can(user, Permissions.Profiles.ScheduledMeetingRecord.Manage(r.relationshipType), studentCourseDetails.student))
+	}
+
+	@ModelAttribute("manageableSchedulableRelationships")
+	def manageableSchedulableRelationships(
+		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship],
+		@ModelAttribute("schedulableRelationships") schedulableRelationships: Seq[StudentRelationship]
+	): Seq[StudentRelationship] = schedulableRelationships.filter(manageableRelationships.contains)
+
+	@ModelAttribute("nonManageableRelationships")
+	def nonManageableRelationships(
+		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship],
+		@ModelAttribute("nonSchedulableRelationships") nonSchedulableRelationships: Seq[StudentRelationship],
+		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
+	): Seq[StudentRelationship] = {
+		allRelationships.filterNot(nonSchedulableRelationships.contains).filterNot(manageableRelationships.contains)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))

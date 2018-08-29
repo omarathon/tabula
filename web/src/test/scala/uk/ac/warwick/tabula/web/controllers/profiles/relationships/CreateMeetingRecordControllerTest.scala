@@ -26,7 +26,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsWithoutRelationships() {
 		withUser("tutor") {
-			controller.getCommand(relationshipType, studentCourseDetails, null, Nil)
+			controller.getCommand(relationshipType, studentCourseDetails, Nil)
 		}
 	}
 
@@ -39,8 +39,8 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 			relationship.studentMember = student
 			relationship.relationshipType = relationshipType
 
-			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails, relationship, Seq(relationship))
-			tutorCommand.relationship.relationshipType should be(relationshipType)
+			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails, Seq(relationship))
+			tutorCommand.allRelationships.head.relationshipType should be(relationshipType)
 		}
 	}
 
@@ -66,9 +66,9 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 			studentCourseDetails.relationshipService = relationshipService
 			controller.profileService = profileService
 
-			val supervisorCommand = controller.getCommand(relationshipType, studentCourseDetails, null, Seq(rel1, rel2))
-			supervisorCommand.relationship.relationshipType should be(relationshipType)
-			supervisorCommand.relationship.agent should be(firstAgent)
+			val supervisorCommand = controller.getCommand(relationshipType, studentCourseDetails, Seq(rel1, rel2))
+			supervisorCommand.allRelationships.head.relationshipType should be(relationshipType)
+			supervisorCommand.allRelationships.head.agent should be(firstAgent)
 			supervisorCommand.creator.universityId should be(uniId)
 		}
 	}
