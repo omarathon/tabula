@@ -44,7 +44,7 @@ class StampMissingRowsCommandInternal
 	}
 
 	def applyApplicants(): Unit = transactional() {
-		val allApplicantsIDs = memberDao.getFreshStudentUniversityIds.toSet
+		val allApplicantsIDs = memberDao.getFreshApplicantsIds.toSet
 		logger.info(s"${allApplicantsIDs.size} applicants to be fetched from SITS.")
 		allApplicantsIDs.foreach { uniId =>
 			profileImporter.getApplicantMemberFromSits(uniId) match {
