@@ -44,24 +44,20 @@ class StampMissingRowsCommandInternal
 	}
 
 	def applyApplicants(): Unit = transactional() {
-		val allApplicantsIDs = memberDao.getFreshApplicantsIds.toSet
-		logger.info(s"${allApplicantsIDs.size} applicants to be fetched from SITS.")
-		allApplicantsIDs.foreach { uniId =>
-			profileImporter.getApplicantMemberFromSits(uniId) match {
-				case _: Some[MembershipInformation] =>
-				// this applicant is in SITS, do nothing.
-				case _ =>
-					memberDao.getByUniversityId(uniId) match {
-						case possibleMember: Some[Member] =>
-							val member = possibleMember.get
-							if (member.isFresh) {
-								member.missingFromImportSince = DateTime.now
-								logger.info(s"Stamping applicant $uniId missing from import.")
-								memberDao.saveOrUpdate(member)
-							}
-					}
+
+		val applicantsFromTabula = memberDao.getFreshApplicantsIds.toSet
+		logger.info(s"${applicantsFromTabula.size} applicants to be fetched from SITS.")
+
+		val applicantsFromSits: Set[String] = applicantsFromTabula.flatMap(profileImporter.getApplicantMemberFromSits).map(_.member.universityId)
+
+		applicantsFromTabula.diff(applicantsFromSits)
+			.flatMap(universityId => memberDao.getByUniversityId(universityId))
+			.filter(_.isFresh)
+			.foreach { applicantMember =>
+				applicantMember.missingFromImportSince = DateTime.now
+				logger.info(s"Stamping applicant ${applicantMember.universityId} missing from import.")
+				memberDao.saveOrUpdate(applicantMember)
 			}
-		}
 	}
 
 	def applyStudents(): Unit = {
