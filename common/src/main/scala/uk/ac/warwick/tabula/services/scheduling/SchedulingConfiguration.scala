@@ -116,7 +116,7 @@ object SchedulingConfiguration {
 
 		CronTriggerJob[RemoveAgedApplicantsJob](cronExpression = "0 0 3 * * ?"), // 3am everyday
 
-		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 2 * * ?"), // 2am
+		CronTriggerJob[CleanupTemporaryFilesJob](cronExpression = "0 0 10 ? * SUN *"), // 10am every Sunday
 
 		CronTriggerJob[UpdateMonitoringPointSchemeMembershipJob](cronExpression = "0 0 4 * * ?"), // 4am
 		CronTriggerJob[UpdateLinkedDepartmentSmallGroupSetJob](cronExpression = "0 0 5 * * ?"), // 5am
