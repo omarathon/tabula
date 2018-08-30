@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, MembershipInformation, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -46,11 +45,11 @@ class StampMissingRowsCommandInternal
 
 	def applyApplicants(): Unit = {
 		val allApplicantsIDs = transactional() { memberDao.getFreshStudentUniversityIds.toSet }
-		logger.info(s"${allApplicantsIDs.size} applicants fo be fetched from SITS.")
+		logger.info(s"${allApplicantsIDs.size} applicants to be fetched from SITS.")
 		allApplicantsIDs.foreach { uniId =>
 			profileImporter.getApplicantMemberFromSits(uniId) match {
 				case _: Some[MembershipInformation] =>
-					// do nothing
+					// this applicant is in SITS, do nothing.
 				case _ =>
 					memberDao.getByUniversityId(uniId) match {
 						case possibleMember: Some[Member] =>
@@ -63,9 +62,6 @@ class StampMissingRowsCommandInternal
 					}
 			}
 		}
-
-
-
 	}
 
 	def applyStudents(): Unit = {
@@ -168,17 +164,6 @@ trait MissingRowsPermissions extends RequiresPermissionsChecking with Permission
 trait StampMissingRowsDescription extends Describable[Unit] {
 	override lazy val eventName = "StampMissingRows"
 	override def describe(d: Description) {
-	}
-}
-
-trait ChecksApplicantsInSites {
-
-	self: ProfileImporterComponent with Logging =>
-
-	def getApplicantInfoFromSits(uniIds: Set[String]): Unit = {
-
-
-		???
 	}
 }
 
