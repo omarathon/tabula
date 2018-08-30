@@ -73,7 +73,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		val chosenYearColumnCategories = rightColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
 		val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
 
-		var currentColumnIndex = 3 // Move to the right of the key
+		var currentColumnIndex = 0
 		var categoryRowMaxCellWidth = 0
 		var headerRowMaxCellWidth = 0
 
@@ -525,8 +525,5 @@ object ExamGridSummaryAndKey {
 			val valueCell = row.createCell(1)
 			valueCell.setCellValue("Bold module name indicates a duplicate table entry")
 		}
-
-		sheet.autoSizeColumn(0)
-		sheet.autoSizeColumn(1)
 	}
 }

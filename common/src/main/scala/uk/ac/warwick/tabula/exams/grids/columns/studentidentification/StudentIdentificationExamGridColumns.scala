@@ -24,7 +24,7 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "First Name"
 
-		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
@@ -38,7 +38,7 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 		override val title: String = "Last Name"
 
-		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
+		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
 		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->

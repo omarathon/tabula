@@ -68,7 +68,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
 		val chosenYearColumnCategories = rightColumns.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category)
 
-		var currentColumnIndex = 3 // Move to the right of the key
+		var currentColumnIndex = 0
 		var categoryRowMaxCellWidth = 0
 		var headerRowMaxCellWidth = 0
 		var entityHeaderRowMaxCellWidth = 0
