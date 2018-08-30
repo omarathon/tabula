@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.ModuleRegistrationsQuery
+import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -67,13 +67,19 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	lazy val query = new ModuleRegistrationsQuery(sits)
+	lazy val queries = Seq(
+		new UnconfirmedModuleRegistrationsQuery(sits),
+		new ConfirmedModuleRegistrationsQuery(sits)
+	)
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
 		benchmarkTask("Fetch module registrations") {
 			val rows = membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
 				val universityId = mac.member.universityId
-				query.executeByNamedParam(HashMap("universityId" -> universityId).asJava).asScala
+				val params = HashMap(("universityId", universityId))
+				queries.flatMap { query =>
+					query.executeByNamedParam(params.asJava).asScala
+				}.distinct
 			}.seq
 			applyForRows(rows).toSeq
 		}
@@ -147,7 +153,39 @@ object ModuleRegistrationImporter {
 	// a list of all the markscheme codes that we consider to be pass/fail modules
 	final val PassFailMarkSchemeCodes = Seq("PF")
 
-	def ModuleRegistrations = s"""
+	// union 2 things -
+	// 1. unconfirmed module registrations from the SMS table
+	// 2. confirmed module registrations from the SMO table
+
+	def UnconfirmedModuleRegistrations = s"""
+			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
+			sms.ses_code, -- e.g. C for core or O for option
+			sms.ayr_code, sms_occl as occurrence,
+			smr_actm, -- actual overall module mark
+			smr_actg, -- actual overall module grade
+			smr_agrm, -- agreed overall module mark
+			smr_agrg, -- agreed overall module grade
+	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
+				from $sitsSchema.ins_stu stu -- student
+					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
+						on spr.spr_stuc = stu.stu_code
+
+					join $sitsSchema.srs_scj scj -- Student Course Join, needed for SCJ code
+						on scj.scj_sprc = spr.spr_code
+
+					join $sitsSchema.cam_sms sms -- Student Module Selection (unconfirmed module choices)
+						on sms.spr_code = spr.spr_code
+
+					left join $sitsSchema.ins_smr smr -- Student Module Result
+						on sms.spr_code = smr.spr_code
+						and sms.ayr_code = smr.ayr_code
+						and sms.mod_code = smr.mod_code
+						and sms.sms_occl = smr.mav_occur
+
+				where stu.stu_code = :universityId"""
+
+	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
+	def ConfirmedModuleRegistrations = s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
 			smr_actm, -- actual overall module mark
@@ -191,8 +229,15 @@ object ModuleRegistrationImporter {
 		)
 	}
 
-	class ModuleRegistrationsQuery(ds: DataSource)
-		extends MappingSqlQuery[ModuleRegistrationRow](ds, ModuleRegistrations) {
+	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
+		extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
+			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+			compile()
+			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+	}
+
+	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
+		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
