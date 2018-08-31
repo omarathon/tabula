@@ -425,8 +425,6 @@ class Assignment
 
 	def lateSubmissionCount: Int = submissions.asScala.count(submission => isLate(submission))
 
-	def onTimeSubmissionCount: Int = submissions.size() - lateSubmissionCount
-
 	/**
 		* Deadline taking into account any approved extension
 		*/
