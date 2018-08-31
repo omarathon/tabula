@@ -4,10 +4,10 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, MembershipInformation, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -25,14 +25,42 @@ object StampMissingRowsCommand {
 }
 
 
-class StampMissingRowsCommandInternal extends CommandInternal[Unit] with Logging with Daoisms with ChecksStudentsInSits with ChecksStaffInMembership {
+class StampMissingRowsCommandInternal
+	extends CommandInternal[Unit]
+		with Logging
+		with Daoisms
+		with ChecksStudentsInSits
+		with ChecksStaffInMembership {
 
-	self: MemberDaoComponent with StudentCourseYearDetailsDaoComponent with StudentCourseDetailsDaoComponent
+	self: MemberDaoComponent
+		with StudentCourseYearDetailsDaoComponent
+		with StudentCourseDetailsDaoComponent
 		with ProfileImporterComponent =>
 
 	override def applyInternal(): Unit = {
 		applyStudents()
 		applyStaff()
+		applyApplicants()
+	}
+
+	def applyApplicants(): Unit = transactional() {
+
+		val applicantsFromTabula = memberDao.getFreshApplicantsIds.toSet
+		logger.info(s"${applicantsFromTabula.size} applicants to be fetched from SITS.")
+
+		val tabulaApplicantsInExistInSits = profileImporter
+			.getApplicantMembersFromSits(applicantsFromTabula)
+			.map(_.member.universityId)
+
+		applicantsFromTabula
+			.diff(tabulaApplicantsInExistInSits)
+			.flatMap(universityId => memberDao.getByUniversityId(universityId))
+			.filter(_.isFresh)
+			.foreach { applicantMember =>
+				applicantMember.missingFromImportSince = DateTime.now
+				logger.info(s"Stamping applicant ${applicantMember.universityId} missing from import.")
+				memberDao.saveOrUpdate(applicantMember)
+			}
 	}
 
 	def applyStudents(): Unit = {

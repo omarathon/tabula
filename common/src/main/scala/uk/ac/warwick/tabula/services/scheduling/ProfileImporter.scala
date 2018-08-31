@@ -51,6 +51,8 @@ trait ProfileImporter {
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 
 	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
+
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -148,6 +150,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
 	}
 
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
+		universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+			Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
+				.asScala
+				.map(MembershipInformation))
+				.getOrElse(Seq.empty)
+		}.toSet
+	}
 
 }
 
@@ -371,6 +381,8 @@ class SandboxProfileImporter extends ProfileImporter {
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 
 	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
+
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
