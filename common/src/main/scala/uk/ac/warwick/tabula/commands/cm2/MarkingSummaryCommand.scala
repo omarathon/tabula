@@ -51,7 +51,6 @@ object MarkingSummaryCommand {
 		extensionCount: Int,
 		unsubmittedCount: Int,
 		lateSubmissionsCount: Int,
-		onTimeSubmissionCount: Int,
 		currentStages: Seq[MarkingStage],
 		stages: Seq[MarkingStage],
 		nextStages: Seq[MarkingNextStage]
@@ -293,7 +292,6 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
 			extensionCount = assignment.extensions.asScala.count { e => students.exists(e.isForUser) },
 			unsubmittedCount = students.count { u => !assignment.submissions.asScala.exists(_.isForUser(u)) },
 			lateSubmissionsCount = assignment.submissions.asScala.count { s => s.isLate && students.exists(s.isForUser) },
-			onTimeSubmissionCount = assignment.onTimeSubmissionCount,
 			currentStages,
 			stages,
 			nextStages
