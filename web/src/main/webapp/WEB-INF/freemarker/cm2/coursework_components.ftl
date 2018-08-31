@@ -489,6 +489,7 @@
 
 <#macro marker_assignment_info info verb="Mark" marker=user.apparentUser show_actions=true>
 	<#local assignment = info.assignment />
+	<#local studentCount = assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
 			<div class="module-title">
@@ -540,15 +541,21 @@
 						</div>
 					</#if>
 
+				  <#if info.onTimeSubmissionCount gt 0>
+						<div class="col-sm-6">
+							<strong>Submitted on time:</strong> (${info.onTimeSubmissionCount} of ${studentCount})
+						</div>
+					</#if>
+
 					<#if info.unsubmittedCount gt 0>
 						<div class="col-sm-6">
-							<strong>Not submitted:</strong> ${info.unsubmittedCount}
+							<strong>Not submitted:</strong> (${info.unsubmittedCount} of ${studentCount})
 						</div>
 					</#if>
 
 					<#if info.lateSubmissionsCount gt 0>
 						<div class="col-sm-6">
-							<strong>Submitted late:</strong> ${info.lateSubmissionsCount}
+							<strong>Submitted late:</strong> (${info.lateSubmissionsCount} of ${studentCount})
 						</div>
 					</#if>
 				</div>
@@ -732,11 +739,6 @@
 							<#else>
 								<li><strong>Submissions received:</strong> ${assignment.submissions?size} (${assignment.submissionsFromUnenrolledStudents?size} from students not enrolled on the assignment)</li>
 							</#if>
-						  <ul>
-								<li><strong>Submitted on time:</strong> (${assignment.onTimeSubmissionCount} of ${studentCount})</li>
-								<li><strong>Not submitted:</strong> (${assignment.membershipInfo.totalCount - assignment.submissions?size} of ${studentCount})</li>
-								<li><strong>Submitted late:</strong> (${assignment.lateSubmissionCount} of ${studentCount})</li>
-							</ul>
 						</#if>
 
 						<#if assignment.extensionsPossible>
