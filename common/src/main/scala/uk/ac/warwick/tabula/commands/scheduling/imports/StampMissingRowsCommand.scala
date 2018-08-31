@@ -48,8 +48,12 @@ class StampMissingRowsCommandInternal
 		val applicantsFromTabula = memberDao.getFreshApplicantsIds.toSet
 		logger.info(s"${applicantsFromTabula.size} applicants to be fetched from SITS.")
 
+		val tabulaApplicantsInExistInSits = profileImporter
+			.getApplicantMembersFromSits(applicantsFromTabula)
+			.map(_.member.universityId)
+
 		applicantsFromTabula
-			.diff(applicantsFromTabula.flatMap(profileImporter.getApplicantMemberFromSits).map(_.member.universityId))
+			.diff(tabulaApplicantsInExistInSits)
 			.flatMap(universityId => memberDao.getByUniversityId(universityId))
 			.filter(_.isFresh)
 			.foreach { applicantMember =>
