@@ -489,7 +489,6 @@
 
 <#macro marker_assignment_info info verb="Mark" marker=user.apparentUser show_actions=true>
 	<#local assignment = info.assignment />
-	<#local studentCount = assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size />
 	<div class="item-info row marker-assignment-${assignment.id}">
 		<div class="col-md-3">
 			<div class="module-title">
@@ -541,21 +540,15 @@
 						</div>
 					</#if>
 
-				  <#if info.onTimeSubmissionCount gt 0>
-						<div class="col-sm-6">
-							<strong>Submitted on time:</strong> (${info.onTimeSubmissionCount} of ${studentCount})
-						</div>
-					</#if>
-
 					<#if info.unsubmittedCount gt 0>
 						<div class="col-sm-6">
-							<strong>Not submitted:</strong> (${info.unsubmittedCount} of ${studentCount})
+							<strong>Not submitted:</strong> ${info.unsubmittedCount}
 						</div>
 					</#if>
 
 					<#if info.lateSubmissionsCount gt 0>
 						<div class="col-sm-6">
-							<strong>Submitted late:</strong> (${info.lateSubmissionsCount} of ${studentCount})
+							<strong>Submitted late:</strong> ${info.lateSubmissionsCount}
 						</div>
 					</#if>
 				</div>
@@ -656,7 +649,7 @@
 
 <#macro admin_assignment_info info>
 	<#local assignment = info.assignment />
-	<#local studentCount = assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size />
+	<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
 
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
