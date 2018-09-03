@@ -156,8 +156,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
 			Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
 				.asScala
-				.map(MembershipInformation))
-				.getOrElse(Seq.empty)
+				.map { case (m,a) => MembershipInformation(m, Some(a)) }
+			).getOrElse(Seq.empty)
 		}.toSet
 	}
 
