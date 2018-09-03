@@ -679,10 +679,6 @@ case class MembershipMember(
 	phoneNumber: String = null,
 	gender: Gender = null,
 	alternativeEmailAddress: String = null,
-	/*mobileNumber: String = null,
-	disability: String = null,
-	nationality: String = null,
-	secondNationality: String = null,*/
 	userType: MemberUserType,
 	teachingStaff: JBoolean
 )
