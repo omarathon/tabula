@@ -50,19 +50,25 @@ trait MemberToJsonConverter
 			date("dateOfBirth", member, "dateOfBirth")
 		).flatten.toMap
 
+		val applicantAndStudentProperties = member match {
+			case m : ApplicantProperties if deep => Seq(
+				if (canViewProperty(m, "currentAddress"))
+					Some("currentAddress" -> addressToJson(m.currentAddress))
+				else None,
+				if (canViewProperty(m, "disability"))
+					m.disability.filter(_.reportable).map { "disability" -> disabilityToJson(_) }
+				else None,
+			).flatten.toMap
+			case _ => Map()
+		}
+
 		val studentProperties = member match {
 			case student: StudentMember if deep => Seq(
-				if (canViewProperty(student, "currentAddress"))
-					Some("currentAddress" -> addressToJson(student.currentAddress))
-				else None,
 				if (canViewProperty(student, "termtimeAddress"))
 					Some("termtimeAddress" -> addressToJson(student.termtimeAddress))
 				else None,
 				if (canViewProperty(student, "nextOfKins"))
 					Some("nextOfKins" -> student.nextOfKins.asScala.map(nextOfKinToJson))
-				else None,
-				if (canViewProperty(student, "disability"))
-					student.disability.filter(_.reportable).map { "disability" -> disabilityToJson(_) }
 				else None,
 				if (canViewProperty(student, "freshStudentCourseDetails"))
 					Some("studentCourseDetails" -> student.freshStudentCourseDetails.map(jsonStudentCourseDetailsObject))
@@ -77,7 +83,7 @@ trait MemberToJsonConverter
 			case _ => Map()
 		}
 
-		memberProperties ++ studentProperties ++ staffProperties
+		memberProperties ++ applicantAndStudentProperties ++ studentProperties ++ staffProperties
 	}
 
 }
