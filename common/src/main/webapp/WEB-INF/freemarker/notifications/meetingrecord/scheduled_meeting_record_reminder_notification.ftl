@@ -1,1 +1,1 @@
-Your ${role} meeting with ${meetingRecord.allParticipantNames} is on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
+Your meeting with ${meetingRecord.allParticipantNames} is on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
