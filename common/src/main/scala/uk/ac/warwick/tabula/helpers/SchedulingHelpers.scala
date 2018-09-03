@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.quartz.TriggerBuilder._
-import org.quartz.{TriggerKey, JobDataMap, JobKey, Scheduler}
+import org.quartz.{JobDataMap, JobKey, Scheduler, TriggerKey}
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
 import scala.collection.JavaConverters._
@@ -18,7 +19,7 @@ trait SchedulingHelpers {
 					.startNow()
 					.build()
 
-			scheduler.scheduleJob(trigger)
+			transactional()(scheduler.scheduleJob(trigger))
 
 			trigger.getKey
 		}
