@@ -184,6 +184,10 @@ class Assignment
 	@BatchSize(size = 200)
 	var submissions: JList[Submission] = JArrayList()
 
+	def submissionsFromUnenrolledStudents: JList[Submission] = {
+		submissions.asScala.filterNot(sub => membershipInfo.usercodes.contains(sub.usercode)).asJava
+	}
+
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var extensions: JList[Extension] = JArrayList()

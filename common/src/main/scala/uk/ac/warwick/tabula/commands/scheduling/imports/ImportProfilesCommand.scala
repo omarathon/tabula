@@ -172,6 +172,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 			  .collect { case s: StudentMember => s }
 	}
 
+	private def toStudentOrApplicantMembers(rowCommands: Seq[ImportMemberCommand]): Seq[Member] = {
+		memberDao.getAllWithUniversityIds(rowCommands.collect { case s @ (_:ImportStudentRowCommandInternal | _:ImportOtherMemberCommand) => s }.map(_.universityId))
+			.collect { case s @ (_:StudentMember | _:ApplicantMember) => s }
+	}
+
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
 
@@ -235,9 +240,9 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 
 	def updateAddress(rowCommands: Seq[ImportMemberCommand]) {
-		logger.info("Updating hall of residence address")
+		logger.info("Updating address")
 
-		toStudentMembers(rowCommands).foreach(student => ImportHallOfResidenceInfoForStudentCommand(student).apply())
+		toStudentOrApplicantMembers(rowCommands).foreach(member => ImportAddressCommand(member).apply())
 
 		session.flush()
 		session.clear()
