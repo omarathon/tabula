@@ -70,7 +70,7 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
 			isLevelGrid = selectCourseCommand.isLevelGrid
 		)
 
-		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state))
+		val studentInformationColumns = predefinedColumnOptions.collect { case c: StudentExamGridColumnOption => c }.flatMap(_.getColumns(state)).filterNot(_.title.isEmpty)
 		val summaryColumns = predefinedColumnOptions.collect { case c: ChosenYearExamGridColumnOption => c }.flatMap(_.getColumns(state)) ++
 			customColumnTitles.flatMap(BlankColumnOption.getColumn)
 		val selectedYears = selectCourseCommand.courseYearsToShow.asScala.map(_.stripPrefix("Year").toInt).toSeq
