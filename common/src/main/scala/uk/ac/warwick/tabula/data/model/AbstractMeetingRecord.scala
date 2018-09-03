@@ -57,7 +57,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "relationship_id")
-	@deprecated(message = "use relationships instead", since = "now")
+	@deprecated(message = "use relationships instead", since = "2018.9.1")
 	var relationship: StudentRelationship = _
 
 	@ManyToMany
