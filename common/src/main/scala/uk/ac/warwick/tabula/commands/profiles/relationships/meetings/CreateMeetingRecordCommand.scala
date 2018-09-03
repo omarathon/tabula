@@ -8,9 +8,11 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
+import scala.collection.JavaConverters._
+
 object CreateMeetingRecordCommand {
-	def apply(creator: Member, relationship: StudentRelationship) =
-		new CreateMeetingRecordCommandInternal(creator, relationship)
+	def apply(creator: Member, allRelationships: Seq[StudentRelationship]) =
+		new CreateMeetingRecordCommandInternal(creator, allRelationships)
 			with AutowiringMeetingRecordServiceComponent
 			with AutowiringFeaturesComponent
 			with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
@@ -29,7 +31,7 @@ object CreateMeetingRecordCommand {
 }
 
 
-class CreateMeetingRecordCommandInternal(val creator: Member, var relationship: StudentRelationship)
+class CreateMeetingRecordCommandInternal(val creator: Member, val allRelationships: Seq[StudentRelationship])
 	extends AbstractModifyMeetingRecordCommand {
 
 	self: CreateMeetingRecordCommandState with MeetingRecordCommandRequest with MeetingRecordServiceComponent
@@ -37,7 +39,7 @@ class CreateMeetingRecordCommandInternal(val creator: Member, var relationship: 
 		with FileAttachmentServiceComponent =>
 
 	override def applyInternal(): MeetingRecord = {
-		val meeting = new MeetingRecord(creator, relationship)
+		val meeting = new MeetingRecord(creator, relationships.asScala)
 		applyCommon(meeting)
 	}
 
@@ -45,7 +47,7 @@ class CreateMeetingRecordCommandInternal(val creator: Member, var relationship: 
 
 trait CreateMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
-	self: ModifyMeetingRecordCommandState =>
+	self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
 	override lazy val eventName = "CreateMeetingRecord"
 
@@ -53,7 +55,6 @@ trait CreateMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
 trait CreateMeetingRecordCommandState extends ModifyMeetingRecordCommandState {
 	override def creator: Member
-	override def relationship: StudentRelationship
 }
 
 trait CreateMeetingRecordCommandNotifications extends Notifies[MeetingRecord, MeetingRecord]

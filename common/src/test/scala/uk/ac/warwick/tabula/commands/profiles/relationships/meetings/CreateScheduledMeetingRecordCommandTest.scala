@@ -16,9 +16,10 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 		mockMeetingRecordService.listScheduled(Set(relationship), Some(creator)) returns Seq()
 
 		var creator: StaffMember = _
-		val command = new CreateScheduledMeetingRecordCommand(creator, relationship, false) with CreateScheduledMeetingRecordCommandValidation with MeetingRecordServiceComponent {
+		val command = new CreateScheduledMeetingRecordCommand(creator, mock[StudentCourseDetails], Seq(relationship)) with CreateScheduledMeetingRecordCommandValidation with MeetingRecordServiceComponent {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
 		}
+		command.relationships.add(relationship)
 	}
 
 	@Test

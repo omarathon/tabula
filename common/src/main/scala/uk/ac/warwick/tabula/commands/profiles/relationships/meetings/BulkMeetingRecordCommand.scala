@@ -39,7 +39,7 @@ class BulkMeetingRecordCommandInternal(val studentRelationships: Seq[StudentRela
 
 	override def applyInternal(): Seq[MeetingRecord] = {
 		val meetingRecords = studentRelationships.map { studentRelationship =>
-			new MeetingRecord(creator, studentRelationship)
+			new MeetingRecord(creator, Seq(studentRelationship))
 		}
 		benchmarkTask("BulkMeetingRecord") {
 			meetingRecords.map { meeting => applyCommon(meeting) }

@@ -32,6 +32,7 @@ trait RelationshipDao {
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
+	def getCurrentRelationships(scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getAllFutureRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
@@ -201,6 +202,10 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		currentRelationsipBaseCriteria(scd, None)
 			.add(is("relationshipType", relationshipType))
 			.seq
+	}
+
+	def getCurrentRelationships(scd: StudentCourseDetails): Seq[StudentRelationship] = {
+		currentRelationsipBaseCriteria(scd, None).seq
 	}
 
 	def getFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {

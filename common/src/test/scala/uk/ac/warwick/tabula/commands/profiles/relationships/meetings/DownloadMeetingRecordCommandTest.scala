@@ -40,7 +40,7 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 		fileAttach.fileDao = smartMock[FileDao]
 		uploadedFile.attached.add(fileAttach)
 
-		val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, relationship)
+		val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, Seq(relationship))
 			with MeetingRecordCommandRequest
 			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
@@ -53,6 +53,7 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 		}
 
+		createMeetingRecordCommand.relationships.add(relationship)
 		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
 		createMeetingRecordCommand.meetingDateStr  = dateTime(3903, DateTimeConstants.MARCH).toString(DatePickerFormatter) // it's the future

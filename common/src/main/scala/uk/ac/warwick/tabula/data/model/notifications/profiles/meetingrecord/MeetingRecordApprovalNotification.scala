@@ -23,21 +23,15 @@ abstract class MeetingRecordApprovalNotification(val verb: String)
 	}
 
 	def meeting: MeetingRecord = item.entity
-	def relationship: StudentRelationship = meeting.relationship
 
-	def title: String = {
-		val name =
-			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
-			else meeting.relationship.agentName
+	def titleSuffix: String = "needs review"
 
-		s"${agentRole.capitalize} meeting record with $name needs review"
-	}
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"actor" -> meeting.creator.asSsoUser,
-		"role"-> agentRole,
+		"agentRoles" -> agentRoles,
 		"dateFormatter" -> dateOnlyFormatter,
 		"verbed" ->  (if (verb == "create") "created" else "edited"),
-		"meetingRecord" -> meeting
+		"meetingRecord" -> meeting,
 	))
 	def recipients: List[User] = meeting.pendingApprovers.map(_.asSsoUser)
 	def urlTitle = "review the meeting record"

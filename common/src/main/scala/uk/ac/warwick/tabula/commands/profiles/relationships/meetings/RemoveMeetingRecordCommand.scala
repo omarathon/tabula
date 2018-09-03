@@ -14,10 +14,14 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		mandatory(meetingRecord) match {
-			case (m: MeetingRecord) =>
-				p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(meetingRecord.relationship.relationshipType), meetingRecord)
-			case (m: ScheduledMeetingRecord) =>
-				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(meetingRecord.relationship.relationshipType), meetingRecord)
+			case m: MeetingRecord =>
+				m.relationshipTypes.foreach { relationshipType =>
+					p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(relationshipType), meetingRecord)
+				}
+			case m: ScheduledMeetingRecord =>
+				m.relationshipTypes.foreach { relationshipType =>
+					p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), meetingRecord)
+				}
 		}
 	}
 }
@@ -75,7 +79,7 @@ trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingR
 
 	self: RemoveMeetingRecordState =>
 
-	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user.apparentUser, m)
@@ -116,7 +120,7 @@ trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeeting
 
 	self: RemoveMeetingRecordState =>
 
-	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+	def emit(meeting: AbstractMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		meeting match {
 			case m: ScheduledMeetingRecord =>
 				val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user.apparentUser, m)

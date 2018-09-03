@@ -30,7 +30,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 		if (!meeting.isAttendanceApproved) {
 			Seq()
 		} else {
-			meeting.relationship.studentMember.flatMap{
+			meeting.relationships.flatMap(_.studentMember).flatMap {
 				case studentMember: StudentMember =>
 					val relevantPoints = AcademicYear.allForDate(meeting.meetingDate).flatMap { academicYear =>
 						getRelevantPoints(
@@ -40,23 +40,22 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 						)
 					}
 
-					val checkpoints = relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
+					relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
 						val checkpoint = new AttendanceMonitoringCheckpoint
 						checkpoint.autoCreated = true
 						checkpoint.point = point
 						checkpoint.attendanceMonitoringService = attendanceMonitoringService
 						checkpoint.student = studentMember
-						checkpoint.updatedBy = meeting.relationship.agentMember match {
+						checkpoint.updatedBy = meeting.relationships.head.agentMember match {
 							case Some(agent: Member) => agent.userId
-							case _ => meeting.relationship.agent
+							case _ => meeting.relationships.head.agent
 						}
 						checkpoint.updatedDate = DateTime.now
 						checkpoint.state = AttendanceState.Attended
 						checkpoint
 					})
-					Option(checkpoints)
-				case _ => None
-			}.getOrElse(Seq())
+				case _ => Nil
+			}
 		}
 	}
 
@@ -77,7 +76,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 				// Is the meeting's date inside the point's weeks
 				&& point.isDateValidForPoint(meeting.meetingDate.toLocalDate)
 				// Is the meeting's relationship valid
-				&& point.meetingRelationships.contains(meeting.relationship.relationshipType)
+				&& meeting.relationships.map(_.relationshipType).exists(point.meetingRelationships.contains)
 				// Is the meeting's format valid
 				&& point.meetingFormats.contains(meeting.format)
 				// Is there no existing checkpoint

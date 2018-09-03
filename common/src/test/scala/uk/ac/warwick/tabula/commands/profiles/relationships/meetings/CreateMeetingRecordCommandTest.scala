@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
 
+import JavaImports._
 import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
@@ -34,7 +35,9 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 			with MeetingRecordCommandRequest
 			with CreateMeetingRecordCommandState {
 			override val creator: Member = thisCreator
-			override val relationship: StudentRelationship = thisRelationship
+			override val allRelationships: Seq[StudentRelationship] = Seq(thisRelationship)
+
+			relationships = JArrayList(thisRelationship)
 		}
 	}
 	
@@ -185,7 +188,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validMeeting() = withUser("cuscav") { withFakeTime(aprilFool) {
-		val cmd = new CreateMeetingRecordCommandInternal(thisCreator, thisRelationship)
+		val cmd = new CreateMeetingRecordCommandInternal(thisCreator, Seq(thisRelationship))
 			with MeetingRecordCommandRequest
 			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
@@ -198,6 +201,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 		}
 
+		cmd.relationships.add(thisRelationship)
 		cmd.title = "A good title"
 		cmd.format = Email
 		cmd.meetingDateTime = marchHare

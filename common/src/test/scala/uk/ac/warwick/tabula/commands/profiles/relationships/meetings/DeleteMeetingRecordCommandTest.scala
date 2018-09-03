@@ -20,7 +20,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 	trait Fixture {
 		val meeting = new MeetingRecord
 		meeting.creator = creator
-		meeting.relationship = relationship
+		meeting.relationships = Seq(relationship)
 	}
 
 	@Test

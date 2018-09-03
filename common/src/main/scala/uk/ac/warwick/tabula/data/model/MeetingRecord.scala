@@ -28,10 +28,10 @@ object MeetingRecord {
 @DiscriminatorValue("standard")
 class MeetingRecord extends AbstractMeetingRecord {
 
-	def this(creator: Member, relationship: StudentRelationship) {
+	def this(creator: Member, relationships: Seq[StudentRelationship]) {
 		this()
 		this.creator = creator
-		this.relationship = relationship
+		this.relationships = relationships
 	}
 
 	@transient
@@ -57,11 +57,11 @@ class MeetingRecord extends AbstractMeetingRecord {
 	// true if the specified user needs to perform a workflow action on this meeting record
 	def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
 
-	// if there are no approvals with a state of approved return true - otherwise, all approvals need to be true
-	def isApproved: Boolean = !approvals.asScala.exists(approval => !(approval.state == Approved))
+	// The meeting record is approved when all approvals are in the Approved state
+	def isApproved: Boolean = approvals.asScala.forall(approval => approval.state == Approved)
 
 	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
-	def isAttendanceApproved: Boolean = ((creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved) && !missed
+	def isAttendanceApproved: Boolean = ((creator != null && relationships.map(_.agent).contains(creator.universityId)) || isApproved) && !missed
 
 	def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)
@@ -73,7 +73,8 @@ class MeetingRecord extends AbstractMeetingRecord {
 					securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
 	)
 
-	def pendingApprovers:List[Member] = pendingApprovals.map(_.approver).toList
+	def pendingApprovers: List[Member] = pendingApprovals.map(_.approver).toList
+	def pendingApproverNames: String = memberNames(pendingApprovers)
 
 	def isRejected: Boolean =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
@@ -81,10 +82,17 @@ class MeetingRecord extends AbstractMeetingRecord {
 	// people who have had a draft version rejected
 	def pendingRevisionBy(user: CurrentUser): Boolean = isRejected && user.universityId == creator.universityId
 
+	def willBeApprovedFollowingApprovalBy(user: CurrentUser): Boolean = pendingApprovers.map(_.universityId).forall(_ == user.universityId)
+
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.state == Approved).map(_.lastUpdatedDate).sorted.headOption
 
 	def approvedBy: Option[Member] = approvals.asScala.filter(_.state == Approved).flatMap(a => Option(a.approvedBy)).headOption
+
+	def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
+		case Seq(single) => single
+		case init :+ last => s"${init.mkString(", ")} and $last"
+	}
 
 	// End of workflow definitions
 }

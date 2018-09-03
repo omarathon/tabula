@@ -338,7 +338,7 @@ abstract class Description {
 	def meeting(meeting: AbstractMeetingRecord): Description = {
 		property("meeting" -> meeting.id)
 		if (meeting.creator != null) member(meeting.creator)
-		if (meeting.relationship != null) property("relationship" -> meeting.relationship.relationshipType.toString())
+		if (meeting.relationshipTypes.nonEmpty) property("relationships" -> meeting.relationshipTypes.map(_.toString).mkString(", "))
 		this
 	}
 

@@ -128,8 +128,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				.filter(m => !m.meetingDate.isBefore(startOfYear.toDateTimeAtStartOfDay) && m.meetingDate.isBefore(endOfYear.plusDays(1).toDateTimeAtStartOfDay) && m.isApproved)
 				.sortBy(_.meetingDate)
 				.map(meeting => MeetingData(
-					meeting.relationship.relationshipType.agentRole.capitalize,
-					meeting.relationship.agentName,
+					meeting.relationships.map(_.relationshipType.agentRole.capitalize).distinct.mkString(", "),
+					meeting.relationships.map(_.agentName).mkString(", "),
 					meeting.meetingDate.toString(ProfileExportSingleCommand.TimeFormat),
 					meeting.title,
 					meeting.format.description,

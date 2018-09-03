@@ -45,8 +45,8 @@ class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 	): Mav = {
 		Redirect(
 			Routes.Profile.relationshipType(
-				meetingRecord.relationship.studentMember.getOrElse(throw new IllegalArgumentException),
-				meetingRecord.relationship.relationshipType
+				meetingRecord.student,
+				meetingRecord.relationshipTypes.head
 			)
 		)
 	}

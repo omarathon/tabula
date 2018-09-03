@@ -37,7 +37,7 @@ class ApproveMeetingRecordController  extends ProfilesController {
 					"status" -> "successful"
 				)))
 			} else {
-				Redirect(Routes.Profile.relationshipType(meetingRecord.relationship.studentCourseDetails.student, meetingRecord.relationship.relationshipType))
+				Redirect(Routes.Profile.relationshipType(meetingRecord.relationships.head.studentCourseDetails.student, meetingRecord.relationshipTypes.head))
 			}
 		} else {
 			Mav(new JSONErrorView(errors, Map("formId" -> "meeting-%s".format(meetingRecord.id))))

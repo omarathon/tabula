@@ -46,7 +46,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 
 trait EditMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
-	self: ModifyMeetingRecordCommandState =>
+	self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
 	override lazy val eventName = "EditMeetingRecord"
 
@@ -54,8 +54,9 @@ trait EditMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
 trait EditMeetingRecordCommandState extends ModifyMeetingRecordCommandState {
 	def meetingRecord: AbstractMeetingRecord
+
+	override def allRelationships: Seq[StudentRelationship] = meetingRecord.relationships
 	override def creator: Member = meetingRecord.creator
-	override def relationship: StudentRelationship = meetingRecord.relationship
 }
 
 trait EditMeetingRecordCommandNotifications extends Notifies[MeetingRecord, MeetingRecord]

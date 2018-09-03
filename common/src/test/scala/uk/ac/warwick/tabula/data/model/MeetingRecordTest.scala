@@ -27,7 +27,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 		}
 
 		val (meetingRecord, meetingRecordkAttachment) = flushing(session) {
-			val meetingRecord = new MeetingRecord(creator, relationship)
+			val meetingRecord = new MeetingRecord(creator, Seq(relationship))
 			meetingRecord.id = idFormat(2)
 
 			val attachment = new FileAttachment
@@ -68,7 +68,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 		meeting.lastUpdatedDate should be (aprilFool)
 
 		meeting.creator should be (null)
-		meeting.relationship should be (null)
+		meeting.relationships should be (empty)
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
 		meeting should be ('approved)
@@ -82,16 +82,74 @@ class MeetingRecordTest extends PersistenceTestBase {
 		val creator = new StaffMember
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 
-		val meeting = new MeetingRecord(creator, relationship)
+		val meeting = new MeetingRecord(creator, Seq(relationship))
 
 		meeting.creationDate should be (aprilFool)
 		meeting.lastUpdatedDate should be (aprilFool)
 
 		meeting.creator should be (creator)
-		meeting.relationship should be (relationship)
+		meeting.relationships should contain only relationship
 		meeting.meetingDate should be (null)
 		meeting.format should be (null)
 		meeting should be ('approved)
+	}
+
+	@Test def relationships(): Unit = {
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+		val student = Fixtures.student(universityId = "1000001", userId="student")
+
+		val creator = new StaffMember
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
+
+		val meeting = new MeetingRecord
+		meeting.creator = creator
+
+		meeting.relationships should be (empty)
+
+		meeting.relationship = relationship
+		meeting.relationships should contain only relationship
+
+		meeting.relationships = Seq(relationship)
+		meeting.relationship should be (null)
+		meeting.relationships should contain only relationship
+	}
+
+	@Test def replaceParticipant(): Unit = {
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+		val student = Fixtures.student(universityId = "1000001", userId="student")
+
+		val creator = new StaffMember
+		val original = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
+		val replacement = ExternalStudentRelationship("Professor B Tutor", relationshipType, student, DateTime.now)
+
+		val meeting = new MeetingRecord(creator, Seq(original))
+
+		meeting.replaceParticipant(original, replacement)
+		meeting.relationships should contain only replacement
+	}
+
+	@Test def people(): Unit = {
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+		val student = Fixtures.student(universityId = "1000001", userId="student")
+		student.firstName = "Student"
+		student.lastName = "Member"
+
+		val agent = Fixtures.staff()
+		agent.firstName = "Staff"
+		agent.lastName = "Member"
+
+		val relationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
+
+		val meeting = new MeetingRecord(agent, Seq(relationship))
+
+		meeting.student should be (student)
+		meeting.agents should contain only agent
+		meeting.participants should contain allOf (student, agent)
+		meeting.allParticipantNames should be ("Staff Member and Student Member")
+		meeting.allAgentNames should be ("Staff Member")
 	}
 
 	/** Zero-pad integer to a 7 digit string */

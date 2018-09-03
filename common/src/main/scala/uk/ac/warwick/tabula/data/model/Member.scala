@@ -580,7 +580,7 @@ trait MemberProperties extends StringId {
 
 	var deceased: Boolean = _
 
-	def phoneNumberPermissions: Seq[Permission]
+	def phoneNumberPermissions: Seq[Seq[Permission]]
 
 }
 
@@ -617,7 +617,7 @@ trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {
 }
 
 trait RestrictedPhoneNumber {
-	def phoneNumberPermissions = Seq(Permissions.Profiles.Read.TelephoneNumber)
+	def phoneNumberPermissions = Seq(Seq(Permissions.Profiles.Read.TelephoneNumber))
 }
 
 trait StaffProperties {

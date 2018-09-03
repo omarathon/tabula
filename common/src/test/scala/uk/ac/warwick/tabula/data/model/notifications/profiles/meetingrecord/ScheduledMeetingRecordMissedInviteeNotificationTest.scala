@@ -15,18 +15,18 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 		val relationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 		// Scheduled by the agent
-		val scheduledMeeting = new ScheduledMeetingRecord(agent, relationship)
+		val scheduledMeeting = new ScheduledMeetingRecord(agent, Seq(relationship))
 		scheduledMeeting.title = "my meeting"
 		scheduledMeeting.description = "discuss things"
 		scheduledMeeting.meetingDate = DateTime.now
 		scheduledMeeting.format = MeetingFormat.FaceToFace
 
 		val notification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), currentUser.apparentUser, scheduledMeeting)
-		notification.recipient.getUserId should be (student.userId)
+		notification.recipients.head.getUserId should be (student.userId)
 
 		// if the student creates the meeting instead, recipient should be staff
 		scheduledMeeting.creator = student
-		notification.recipient.getUserId should be (agent.userId)
+		notification.recipients.head.getUserId should be (agent.userId)
 	}
 
 	trait TitleFixture {
@@ -48,19 +48,19 @@ class ScheduledMeetingRecordMissedInviteeNotificationTest extends TestBase with 
 	}
 
 	@Test def titleStudent() { new TitleFixture {
-		val meeting = new ScheduledMeetingRecord(agent, relationship)
+		val meeting = new ScheduledMeetingRecord(agent, Seq(relationship))
 
 		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, agent.asSsoUser, meeting)
-		notification.title should be ("Scheduled personal tutor meeting with Tutor Name did not take place")
-		notification.recipient.getUserId should be (student.userId)
+		notification.titleFor(student.asSsoUser) should be ("Scheduled meeting with Tutor Name did not take place")
+		notification.recipients should contain only student.asSsoUser
 	}}
 
 	@Test def titleTutor() { new TitleFixture {
-		val meeting = new ScheduledMeetingRecord(student, relationship)
+		val meeting = new ScheduledMeetingRecord(student, Seq(relationship))
 
 		val notification: ScheduledMeetingRecordMissedInviteeNotification = Notification.init(new ScheduledMeetingRecordMissedInviteeNotification, student.asSsoUser, meeting)
-		notification.title should be ("Scheduled personal tutor meeting with Student Name did not take place")
-		notification.recipient.getUserId should be (agent.userId)
+		notification.titleFor(agent.asSsoUser) should be ("Scheduled meeting with Student Name did not take place")
+		notification.recipients should contain only agent.asSsoUser
 	}}
 
 }

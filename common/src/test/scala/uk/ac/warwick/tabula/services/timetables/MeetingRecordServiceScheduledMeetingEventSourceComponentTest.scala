@@ -19,10 +19,9 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
 	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student, DateTime.now))
 	val meetings = Seq(new AbstractMeetingRecord {
-		relationship = relationships.head
-
 		override def toEventOccurrence(context: TimetableEvent.Context) = Some(occurrence)
 	})
+	meetings.head.relationships = relationships
 
 	val source = new MeetingRecordServiceScheduledMeetingEventSourceComponent
 		with RelationshipServiceComponent

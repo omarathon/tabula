@@ -1,19 +1,13 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.joda.time.{DateTime, DateTimeConstants}
-import org.springframework.validation.BindException
-import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.tabula.DateFormats.{DatePickerFormatter, TimePickerFormatter}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
 import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
-
-import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class CreateMissedMeetingRecordCommandTest extends TestBase with Mockito {
@@ -31,7 +25,7 @@ class CreateMissedMeetingRecordCommandTest extends TestBase with Mockito {
 	
 	@Test
 	def testCreateMissedMeeting(): Unit = withUser("cuscav") { withFakeTime(aprilFool) {
-		val cmd = new CreateMissedMeetingRecordCommandInternal(thisCreator, thisRelationship)
+		val cmd = new CreateMissedMeetingRecordCommandInternal(thisCreator, Seq(thisRelationship))
 			with MissedMeetingRecordCommandRequest
 			with CreateMeetingRecordCommandState
 			with MeetingRecordServiceComponent
@@ -42,6 +36,8 @@ class CreateMissedMeetingRecordCommandTest extends TestBase with Mockito {
 			override val features: Features = Features.empty
 			override val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
 			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+
+			relationships = JArrayList(thisRelationship)
 		}
 
 		cmd.title = "A good title"

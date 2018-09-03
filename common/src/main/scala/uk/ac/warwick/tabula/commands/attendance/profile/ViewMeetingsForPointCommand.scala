@@ -35,16 +35,16 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
 
 		allMeetings.map{meeting => meeting -> {
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
-			if (!point.meetingRelationships.contains(meeting.relationship.relationshipType))
+			if (!meeting.relationshipTypes.exists(point.meetingRelationships.contains))
 				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"
 
 			if (!point.meetingFormats.contains(meeting.format))
 				reasons += s"Meeting was not a ${point.meetingFormats.map{_.description}.mkString(" or ")}"
 
 			if (meeting.isRejected)
-				reasons += s"Rejected by ${meeting.relationship.relationshipType.agentRole}"
+				reasons += s"Rejected"
 			else if (!meeting.isAttendanceApproved)
-				reasons += s"Awaiting approval by ${meeting.relationship.relationshipType.agentRole}"
+				reasons += s"Awaiting approval"
 
 			if (meeting.meetingDate.toLocalDate.isBefore(point.startDate))
 				reasons += "Took place before"
