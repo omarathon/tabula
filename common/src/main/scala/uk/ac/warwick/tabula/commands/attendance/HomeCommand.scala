@@ -49,11 +49,14 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 
 		val viewRoutes = courseAndRouteService.routesWithPermission(user, Permissions.MonitoringPoints.View)
 
-		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter { d =>
-			d.routes.asScala.nonEmpty || d.modules.asScala.nonEmpty || attendanceMonitoringService.listAllSchemes(d).nonEmpty
+
+		def withSubDepartments(d: Department) = Set(d) ++ d.children.asScala.toSet
+
+		def withSubDepartmentsHavingSchemes(dept: Department) = withSubDepartments(dept).filter { d =>
+			attendanceMonitoringService.listAllSchemes(d).nonEmpty
 		}
 
-		val allViewDepartments = (viewDepartments ++ viewRoutes.map(_.adminDepartment)).flatMap(withSubDepartments).toSeq.sortBy(_.name)
+		val allViewDepartments = (viewDepartments ++ viewRoutes.map(_.adminDepartment)).flatMap(withSubDepartmentsHavingSchemes).toSeq.sortBy(_.name)
 		val allManageDepartments = manageDepartments.flatMap(withSubDepartments).toSeq.sortBy(_.name)
 
 		// These return Sets so no need to distinct the result
