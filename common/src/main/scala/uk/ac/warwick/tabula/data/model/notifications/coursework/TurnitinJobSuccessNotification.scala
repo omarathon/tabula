@@ -16,7 +16,7 @@ class TurnitinJobSuccessNotification
 	def title: String = "%s: The Turnitin check for \"%s\" has finished".format(assignment.module.code.toUpperCase, assignment.name)
 
 	def content: FreemarkerModel = {
-		val (failedReports, successfulReports) = items.asScala.map(_.entity).partition(_.lastTurnitinError != null)
+		val (successfulReports, failedReports) = items.asScala.map(_.entity).partition(_.reportReceived)
 		FreemarkerModel("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
 			"assignment" -> assignment,
 			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
