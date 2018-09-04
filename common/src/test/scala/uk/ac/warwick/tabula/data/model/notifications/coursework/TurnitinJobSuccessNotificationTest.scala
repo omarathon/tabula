@@ -25,6 +25,10 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 		val report2 = new OriginalityReport
 		val report3 = new OriginalityReport
 
+		report1.reportReceived = true
+		report2.reportReceived = true
+		report3.reportReceived = true
+
 		val notification = Notification.init(new TurnitinJobSuccessNotification, currentUser.apparentUser, Seq(report1, report2, report3), assignment)
 		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent.trim should be(
@@ -35,6 +39,8 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 
 	@Test def partialSuccess(): Unit = withUser("cuscav", "0672089") {
 		val report1 = new OriginalityReport
+		report1.lastTurnitinError = "This job failed previously, but we have since received the report"
+		report1.reportReceived = true
 
 		val report2 = new OriginalityReport
 		report2.lastTurnitinError = "Failed to retrieve results"
