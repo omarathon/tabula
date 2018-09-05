@@ -104,6 +104,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			sessionWithoutFreshFilters.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from FileAttachment where member_note_id in (select id from MemberNote where memberId like '3000%')").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from MemberNote where memberId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newQuery("delete from MeetingRecord where creator.universityId like '3100%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
 			sessionWithoutFreshFilters.newQuery("delete from StaffMember where universityId like '3000%'").executeUpdate()
 		}
@@ -220,6 +221,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from module where department_id not in (select id from department)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from route where department_id not in (select id from department)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from assignment where module_id not in (select id from module)").list.size() == 0)
+				assert(sessionWithoutFreshFilters.createSQLQuery("select id from meetingrecord where creator_id like '3100%'").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Department' and SCOPE_ID not in (select id from department)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from grantedrole where SCOPE_TYPE = 'Module' and SCOPE_ID not in (select id from module)").list.size() == 0)
 				assert(sessionWithoutFreshFilters.createSQLQuery("select id from smallgroupset where module_id not in (select id from module)").list.size() == 0)
