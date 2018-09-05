@@ -26,7 +26,7 @@ class ImportProfilesJob extends AutowiredJobBean {
 		if (features.schedulingProfilesImport)
 			transactional() {
 				exceptionResolver.reportExceptions {
-					moduleAndDepartmentService.allDepartments.foreach(dept => {
+					moduleAndDepartmentService.allRootDepartments.foreach(dept => {
 						scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
 					})
 				}
