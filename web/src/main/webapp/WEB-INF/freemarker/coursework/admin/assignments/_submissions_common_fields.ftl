@@ -214,7 +214,7 @@ so that they can be passed around between requests.
 						<@f.errors path="comment" cssClass="error" />
 						<@f.textarea path="comment" id="assignmentComment" rows="6" cssClass="span6" />
 						<div class="help-block">
-							You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
+							You can use markdown syntax (e.g. press Enter twice to make a new paragraph).
 						</div>
 					</@form.field>
 				</@form.row>
