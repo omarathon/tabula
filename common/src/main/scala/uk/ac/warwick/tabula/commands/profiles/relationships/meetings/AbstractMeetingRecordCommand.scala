@@ -103,8 +103,16 @@ abstract class AbstractMeetingRecordCommand {
 			meetingRecordService.purge(approval)
 		}
 
-		// Approval is required from all participants except the person who created the record
-		meetingRecord.participants.filter(_ != meetingRecord.creator).map(createOrUpdateApproval)
+		val approvers = if (meetingRecord.participants.contains(meetingRecord.creator)) {
+			// Approval is required from all participants except the person who created the record
+			meetingRecord.participants.filter(_ != meetingRecord.creator)
+		} else {
+			// The record was created on behalf of the agents
+			// Only the student needs to approve the record
+			Seq(meetingRecord.student)
+		}
+
+		approvers.map(createOrUpdateApproval)
 	}
 }
 

@@ -56,7 +56,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
-	def editMeetingAddedParticipantNeedsToApprove() = withUser(thisCreator.userId) { withFakeTime(aprilFool) {
+	def editMeetingAddedParticipantNeedsToApprove() = withUser(student.userId) { withFakeTime(aprilFool) {
 		val thatStaff = Fixtures.staff()
 		val thatStaffCurrentUser = new CurrentUser(thatStaff.asSsoUser, thatStaff.asSsoUser)
 		val thatRelationship = StudentRelationship(
@@ -66,7 +66,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 			DateTime.now
 		)
 
-		val meeting = new MeetingRecord(thisCreator, Seq(thisRelationship))
+		val meeting = new MeetingRecord(student, Seq(thisRelationship))
 		meeting.securityService = smartMock[SecurityService]
 
 		val cmd = new EditMeetingRecordCommandInternal(meeting)
