@@ -243,15 +243,6 @@ trait AssessmentMembershipMethods extends Logging {
 		universityIds.filter(universityId => !profiles.find(_.universityId == universityId).exists(_.deceased))
 	}
 
-	private def permanentlyWithdrawnFilter(items: Seq[MembershipItem]): Seq[MembershipItem] = {
-		val members = profileService.getAllMembersWithUniversityIds(items.flatMap(_.universityId))
-		items.filter { item =>
-			val student = members.find(m => item.universityId.contains(m.universityId)).filter(_.isStudent).map(_.asInstanceOf[StudentMember])
-
-			student.forall(!_.mostSignificantCourse.permanentlyWithdrawn)
-		}
-	}
-
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo = {
 		val sitsUsers =
 			userLookup.getUsersByWarwickUniIds(upstream.flatMap { _.members.asScala.map(_.universityId).filter(_.hasText) }.distinct).toSeq
@@ -268,7 +259,7 @@ trait AssessmentMembershipMethods extends Logging {
 		val sorted = (includeItems ++ excludeItems ++ sitsItems)
 			.sortBy(membershipItem => (membershipItem.user.getLastName, membershipItem.user.getFirstName))
 
-		new AssessmentMembershipInfo(permanentlyWithdrawnFilter(deceasedItemsFilter(sorted)))
+		new AssessmentMembershipInfo(deceasedItemsFilter(sorted))
 	}
 
 	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {
