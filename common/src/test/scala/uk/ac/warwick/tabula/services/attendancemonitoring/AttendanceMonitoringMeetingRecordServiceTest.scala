@@ -54,7 +54,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		meetingPoint.relationshipService = service.relationshipService
 		meetingPoint.meetingFormats = Seq(meeting.format)
 
-		service.attendanceMonitoringService.listStudentsPoints(student, None, academicYear2013) returns Seq(meetingPoint)
+		service.attendanceMonitoringService.listStudentsPointsForDate(student, None, meeting.meetingDate) returns Seq(meetingPoint)
 		service.attendanceMonitoringService.getCheckpoints(Seq(meetingPoint), Seq(student)) returns Map()
 		service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, meetingPoint) returns false
 		service.attendanceMonitoringService.setAttendance(student, Map(meetingPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns

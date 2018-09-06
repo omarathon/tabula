@@ -65,7 +65,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 		assignmentPoint.assignmentService = mockAssignmentService
 		assignmentPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
 
-		mockAttendanceMonitoringService.listStudentsPoints(student, None, assignment.academicYear) returns Seq(assignmentPoint)
+		mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
 		mockAttendanceMonitoringService.getCheckpoints(Seq(assignmentPoint), Seq(student)) returns Map()
 		mockAttendanceMonitoringService.studentAlreadyReportedThisTerm(student, assignmentPoint) returns false
 		mockAttendanceMonitoringService.setAttendance(student, Map(assignmentPoint -> AttendanceState.Attended), student.userId, autocreated = true) returns
@@ -101,6 +101,7 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 	@Test
 	def lateSubmissionInPointPeriod() { new Fixture {
 		submission.submittedDate = assignment.closeDate.plusDays(1)
+		mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
 		service.getCheckpoints(submission).size should be (1)
 
 		service.updateCheckpoints(submission)
@@ -110,12 +111,13 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
 	@Test
 	def lateSubmissionOutsidePointPeriod() { new Fixture {
 		submission.submittedDate = assignmentPoint.endDate.plusDays(1).toDateTimeAtStartOfDay()
+		mockAttendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq(assignmentPoint)
 		service.getCheckpoints(submission).size should be (0)
 	}}
 
 	@Test
 	def noPoints() { new Fixture {
-		service.attendanceMonitoringService.listStudentsPoints(student, None, assignment.academicYear) returns Seq()
+		service.attendanceMonitoringService.listStudentsPointsForDate(student, None, submission.submittedDate) returns Seq()
 		service.getCheckpoints(submission).size should be (0)
 	}}
 
