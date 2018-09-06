@@ -80,6 +80,7 @@ trait SubmissionInfoToJsonConverter {
 			"attachments" -> submission.allAttachments.map { attachment => Map(
 				"filename" -> attachment.name,
 				"id" -> attachment.id,
+				"attachmentUrl" -> (toplevelUrl + Routes.cm2.admin.assignment.submissionAttachmentDownload(submission, attachment.name)),
 				"originalityReport" -> Option(attachment.originalityReport).map { report => Map(
 					"similarity" -> JInteger(report.similarity),
 					"overlap" -> JInteger(report.overlap),
