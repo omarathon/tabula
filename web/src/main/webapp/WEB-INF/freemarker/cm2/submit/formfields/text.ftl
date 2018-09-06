@@ -12,30 +12,41 @@
 				return inputString.replace('<p>', '').replace('</p>', '').trim();
 			}
 
-			previewBlock.hide();
-			setInterval(function () {
-				if (trimPTag(previewText.html()) !== feedbackTextArea.val().trim()) {
-					$.ajax('/markdown/toHtml', {
-						'type': 'POST',
-						'data': {
-							markdownString: feedbackTextArea.val()
-						},
-						success: function (data) {
-							// update content as long as they are different
-							if (data.html.trim() !== previewText.html().trim()) {
-								previewText.html(data.html);
-							}
-
-							// do not render the preview block if they look the same
-							if (trimPTag(previewText.html()) === feedbackTextArea.val().trim()) {
-								previewBlock.hide();
-							} else {
-								previewBlock.show();
-							}
-						}
-					});
+			// do not render the preview block if they look the same
+			function hidePreviewIfNotNeeded() {
+				if (trimPTag(previewText.html()) === feedbackTextArea.val().trim()) {
+					previewBlock.hide();
+				} else {
+					previewBlock.show();
 				}
-			}, 1000); // update every 1 sec
+			}
+
+			previewBlock.hide();
+
+			var timeout = null;
+			feedbackTextArea.keyup(function () {
+				if (timeout != null) {
+					clearTimeout(timeout);
+				}
+				timeout = setTimeout(function () {
+					timeout = null;
+					if (trimPTag(previewText.html()) !== feedbackTextArea.val().trim()) {
+						$.ajax('/markdown/toHtml', {
+							'type': 'POST',
+							'data': {
+								markdownString: feedbackTextArea.val()
+							},
+							success: function (data) {
+								// update content as long as they are different
+								if (data.html.trim() !== previewText.html().trim()) {
+									previewText.html(data.html);
+								}
+								hidePreviewIfNotNeeded();
+							}
+						});
+					}
+				}, 300);
+			});
 		});
 	</script>
 	<#if showHelpText?? && showHelpText>
