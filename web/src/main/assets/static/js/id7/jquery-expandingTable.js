@@ -230,6 +230,17 @@ jQuery.fn.expandingTable = function(options) {
 
 		$(window).on('id7:reflow', repositionContentBoxes);
 
+		function removeContent() {
+			$table.find(tableContainerSelector).each(function() {
+				var contentID = $(this).attr('data-contentid');
+				var $content = $('#content-' + contentID);
+
+				$content.remove();
+			});
+		}
+
+		$(window).on('tabula.beforeFilterResultsChanged', removeContent);
+
 		if(allowTableSort) {
 			$.tablesorter.addWidget({
 				id: 'repositionContentBoxes',

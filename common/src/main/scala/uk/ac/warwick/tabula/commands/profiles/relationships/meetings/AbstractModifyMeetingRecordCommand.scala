@@ -27,6 +27,9 @@ trait PopulateMeetingRecordCommand extends PopulateOnForm {
 	override def populate(): Unit = {
 		title = meetingRecord.title
 		description = meetingRecord.description
+
+		relationships = meetingRecord.relationships.asJava
+
 		HibernateHelpers.initialiseAndUnproxy(meetingRecord) match {
 			case meeting: MeetingRecord =>
 				isRealTime = meeting.isRealTime
@@ -71,7 +74,9 @@ trait ModifyMeetingRecordValidation extends MeetingRecordValidation {
 
 		super.validate(errors)
 
-		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
+		if (relationships.isEmpty) {
+			errors.rejectValue("relationships", "meetingRecord.relationships.none")
+		}
 
 	}
 
@@ -82,28 +87,30 @@ trait ModifyMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 	self: ModifyMeetingRecordCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(relationship.relationshipType), mandatory(relationship.studentMember))
+		allRelationships.foreach { relationship =>
+			p.PermissionCheck(Permissions.Profiles.MeetingRecord.Manage(relationship.relationshipType), mandatory(relationship.studentMember))
+		}
 	}
 
 }
 
 trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
 
-	self: ModifyMeetingRecordCommandState =>
+	self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
 	override def describe(d: Description) {
-		relationship.studentMember.map(d.member)
+		relationships.asScala.flatMap(_.studentMember).map(d.member)
 		d.properties(
 			"creator" -> creator.universityId,
-			"relationship" -> relationship.relationshipType.toString()
+			"relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", ")
 		)
 	}
 
 	override def describeResult(d: Description, meeting: MeetingRecord) {
-		relationship.studentMember.map(d.member)
+		relationships.asScala.flatMap(_.studentMember).map(d.member)
 		d.properties(
 			"creator" -> creator.universityId,
-			"relationship" -> relationship.relationshipType.toString(),
+			"relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", "),
 			"meeting" -> meeting.id
 		)
 		d.fileAttachments(meeting.attachments.asScala)
@@ -111,9 +118,8 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
 }
 
 trait ModifyMeetingRecordCommandState extends MeetingRecordCommandState {
-	def relationship: StudentRelationship
-
 	def missed: Boolean = false
+	def allRelationships: Seq[StudentRelationship]
 }
 
 

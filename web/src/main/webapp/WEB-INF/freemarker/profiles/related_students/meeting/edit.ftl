@@ -15,10 +15,6 @@
 
 		<#assign heading>
 			<h2 <#if isModal!false>class="modal-title"</#if>>Record a <#if missed>missed </#if>meeting</h2>
-			<h6 <#if isModal!false>class="modal-title"</#if>>
-				<span class="very-subtle">between ${agent_role}</span><#if !chooseRelationship> ${command.relationship.agentName!""}</#if>
-				<span class="very-subtle">and ${member_role}</span> ${student.fullName}
-			</h6>
 		</#assign>
 
 		<#if isModal!false>
@@ -56,19 +52,42 @@
 				</@bs3form.labelled_form_group>
 
 				<#if chooseRelationship>
-					<#assign isCreatorAgent = command.creator.id == command.relationship.agent />
-					<@bs3form.labelled_form_group path="relationship" labelText=agent_role?cap_first>
-						<@f.select path="relationship" cssClass="form-control">
-							<@f.option disabled=true selected="true" label="Please select one..." />
-							<@f.options items=allRelationships itemLabel="agentName" />
-						</@f.select>
-						<div class="help-block <#if !isCreatorAgent>alert alert-info</#if>">
-							<#if isCreatorAgent>
-								You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
-							<#else>
-								The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="fa fa-check"></i>
-							</#if>
-						</div>
+					<@bs3form.labelled_form_group path="relationships" labelText="Participants">
+						<@bs3form.checkbox>
+							<input type="checkbox" checked="checked" disabled="disabled" />
+							${student.fullName}
+						</@bs3form.checkbox>
+						<#if schedulableRelationships??>
+							<#list manageableSchedulableRelationships as relationship>
+								<@bs3form.checkbox>
+									<@f.checkbox path="relationships" value=relationship />
+									${relationship.agentName} (${relationship.relationshipType.agentRole})
+								</@bs3form.checkbox>
+							</#list>
+							<#list nonSchedulableRelationships as relationship>
+								<@bs3form.checkbox>
+									<span class="text-muted use-tooltip" title="You can't use Tabula to schedule a meeting with ${relationship.agentName}. This isn't allowed by their department">
+										<input type="checkbox" disabled="disabled" />
+										${relationship.agentName} (${relationship.relationshipType.agentRole})
+									</span>
+								</@bs3form.checkbox>
+							</#list>
+						<#else>
+							<#list manageableRelationships as relationship>
+								<@bs3form.checkbox>
+									<@f.checkbox path="relationships" value=relationship />
+									${relationship.agentName} (${relationship.relationshipType.agentRole})
+								</@bs3form.checkbox>
+							</#list>
+						</#if>
+						<#list nonManageableRelationships as relationship>
+							<@bs3form.checkbox>
+									<span class="text-muted use-tooltip" title="You don't have permission to manage<#if schedulableRelationships??> scheduled</#if> ${relationship.relationshipType.agentRole} meetings for ${student.firstName}">
+										<input type="checkbox" disabled="disabled" />
+										${relationship.agentName} (${relationship.relationshipType.agentRole})
+									</span>
+							</@bs3form.checkbox>
+						</#list>
 					</@bs3form.labelled_form_group>
 				</#if>
 

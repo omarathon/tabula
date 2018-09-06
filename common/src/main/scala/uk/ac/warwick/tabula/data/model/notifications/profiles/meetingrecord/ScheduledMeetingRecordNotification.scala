@@ -28,20 +28,17 @@ abstract class ScheduledMeetingRecordNotification
 	def verbSetting = StringSetting("verb", "")
 	def verb: String = verbSetting.value
 
-	def studentNotFoundMessage: String = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
-	def agentNotFoundMessage: String = "Agent member for code " + meeting.relationship.agent + " not found"
-
 	def academicYear: AcademicYear = AcademicYear.forDate(meeting.meetingDate)
 
 	def url: String = Routes.Profile.relationshipType(
-		meeting.relationship.studentCourseDetails,
+		meeting.relationships.head.studentCourseDetails,
 		academicYear,
-		meeting.relationship.relationshipType
+		meeting.relationships.head.relationshipType
 	)
 
 	def urlTitle = "view this meeting"
 
-	def agentRole: String = meeting.relationship.relationshipType.agentRole
+	def agentRoles: Seq[String] = meeting.relationshipTypes.map(_.agentRole)
 }
 
 private case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {

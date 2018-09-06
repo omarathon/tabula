@@ -489,7 +489,7 @@ class EmeritusMember extends Member with StaffProperties {
 
 @Entity
 @DiscriminatorValue("P")
-class ApplicantMember extends Member with RestrictedPhoneNumber {
+class ApplicantMember extends Member with ApplicantProperties with RestrictedPhoneNumber {
 	this.userType = MemberUserType.Applicant
 
 	def this(id: String) = {
@@ -569,22 +569,33 @@ trait MemberProperties extends StringId {
 	@Column(name = "timetable_hash")
 	var timetableHash: String = _
 
-	var deceased: Boolean = _
-
-	def phoneNumberPermissions: Seq[Permission]
-
-}
-
-trait StudentProperties extends RestrictedPhoneNumber {
-
 	/**
-		* The students current confirmed correspondence address in SITS. Can be entered by the student themselves so data quality is often poor.
-		* Could be the same as termtimeAddress
+		* The members current confirmed correspondence address in SITS. Can be entered by the user themselves so data quality is often poor.
+		* Could be the same as StudentProperties.termtimeAddress
 		*/
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAndTermTimeAddresses"))
 	var currentAddress: Address = _
+
+	var deceased: Boolean = _
+
+	def phoneNumberPermissions: Seq[Seq[Permission]]
+
+}
+
+trait ApplicantProperties {
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "disability")
+	@Restricted(Array("Profiles.Read.Disability"))
+	private var _disability: Disability = _
+	def disability_=(d: Disability): Unit = { _disability = d }
+
+	@Restricted(Array("Profiles.Read.Disability"))
+	def disability: Option[Disability] = Option(_disability)
+}
+
+trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {
 
 	/**
 		* The student's hall of residence. Unlike address this is data entered into SITS by an Accommodation process so it should be in a reliable format.
@@ -600,27 +611,18 @@ trait StudentProperties extends RestrictedPhoneNumber {
 	@BatchSize(size=200)
 	var nextOfKins:JList[NextOfKin] = JArrayList()
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "disability")
-	@Restricted(Array("Profiles.Read.Disability"))
-	private var _disability: Disability = _
-	def disability_=(d: Disability): Unit = { _disability = d }
-
-	@Restricted(Array("Profiles.Read.Disability"))
-	def disability: Option[Disability] = Option(_disability)
-
 	@Column(name="tier4_visa_requirement")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
 }
 
 trait RestrictedPhoneNumber {
-	def phoneNumberPermissions = Seq(Permissions.Profiles.Read.TelephoneNumber)
+	def phoneNumberPermissions = Seq(Seq(Permissions.Profiles.Read.TelephoneNumber))
 }
 
 trait StaffProperties {
 	// Anyone can view staff phone number
-	def phoneNumberPermissions = Nil
+	def phoneNumberPermissions: Nil.type = Nil
 
 	@deprecated("TeachingStaff attribute is not reliable", since = "2018.2.2") var teachingStaff: JBoolean = _
 }

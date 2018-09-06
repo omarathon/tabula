@@ -28,7 +28,7 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
-case class MembershipInformation(member: MembershipMember)
+case class MembershipInformation(member: MembershipMember,  sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
 trait ProfileImporter {
 
@@ -51,6 +51,8 @@ trait ProfileImporter {
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 
 	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
+
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
@@ -120,7 +122,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		// Magic student recruitment department - get membership information directly from SITS for applicants
 		if (department.code == applicantDepartmentCode) {
 			val members = applicantQuery.execute().asScala
-			val universityIds = members.map { _.universityId }
+			val universityIds = members.map { case (membershipInfo, _) =>  membershipInfo.universityId }
 
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
 			val universityIdsInMembership =
@@ -128,7 +130,9 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
 				}
 
-			members.filterNot { m => universityIdsInMembership.contains(m.universityId) }.map { member => MembershipInformation(member) }
+			members
+				.filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
+				.map { case (m, a) => MembershipInformation(m, Some(a)) }
 		} else {
 			membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
 				MembershipInformation(member)
@@ -136,7 +140,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}
 
 	def head(result: Any): Option[MembershipInformation] = result match {
-		case result: List[MembershipMember] => result.headOption.map(MembershipInformation)
+		case result: List[MembershipMember] => result.headOption.map(m => MembershipInformation(m))
 		case _ => None
 	}
 
@@ -148,6 +152,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
 	}
 
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
+		universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+			Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
+				.asScala
+				.map { case (m,a) => MembershipInformation(m, Some(a)) }
+			).getOrElse(Seq.empty)
+		}.toSet
+	}
 
 }
 
@@ -371,9 +383,14 @@ class SandboxProfileImporter extends ProfileImporter {
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 
 	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
+
+	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
+
+	import ImportMemberHelpers._
+
 	var features: Features = Wire[Features]
 
 	type UniversityId = String
@@ -540,48 +557,29 @@ object ProfileImporter extends Logging {
 			null as telephoneNumber,
 			stu.stu_gend as gender,
 			stu.stu_haem as externalEmail,
+			stu.stu_dsbc as disability,
+			stu.stu_cat3 as mobile_number,
+			nat.nat_name as nationality,
+			nat2.nat_name as second_nationality,
 	 		'N' as warwickTeachingStaff
 		from $sitsSchema.ins_stu stu
+			left outer join $sitsSchema.srs_nat nat on stu.stu_natc = nat.nat_code
+			left outer join $sitsSchema.srs_nat nat2 on stu.stu_nat1 = nat2.nat_code
 		where
 			stu.stu_sta1 like '%%A' and -- applicant
 			stu.stu_sta2 is null and -- no student status
 			stu.stu_udf3 is null -- no IT account
 		"""
 
-	val GetApplicantsByUniversityIdInformation = f"""
-		select
-			stu.stu_code as universityId,
-			'SL' as deptCode,
-			stu.stu_caem as mail,
-			'Applicant' as targetGroup,
-			stu.stu_titl as title,
-			stu.stu_fusd as preferredFirstname,
-			stu.stu_surn as preferredSurname,
-			'Applicant' as jobTitle,
-			to_char(stu.stu_dob, 'yyyy/mm/dd') as dateOfBirth,
-			null as cn,
-			to_char(stu.stu_begd, 'yyyy/mm/dd') as startDate,
-			to_char(stu.stu_endd, 'yyyy/mm/dd') as endDate,
-			stu.stu_updd as last_modification_date,
-			null as telephoneNumber,
-			stu.stu_gend as gender,
-			stu.stu_haem as externalEmail,
-	 		'N' as warwickTeachingStaff
-		from $sitsSchema.ins_stu stu
-		where
-			stu.stu_sta1 like '%%A' and -- applicant
-			stu.stu_sta2 is null and -- no student status
-			stu.stu_udf3 is null and -- no IT account
-			stu.stu_code in (:universityIds)
-		"""
+	val GetApplicantsByUniversityIdInformation = f"""$GetApplicantInformation and stu.stu_code in (:universityIds)"""
 
-	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantInformation) {
+	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantInformation) {
 
 		val SqlDatePattern = "yyyy/MM/dd"
 		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
 
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
+		override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetMembershipByUniversityIdInformation = """
@@ -594,13 +592,13 @@ object ProfileImporter extends Logging {
 		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
 	}
 
-	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetApplicantsByUniversityIdInformation) {
+	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantsByUniversityIdInformation) {
 		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		val SqlDatePattern = "yyyy/MM/dd"
 		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
 
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs, guessUsercode = false, SqlDateTimeFormat)
+		override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
 	}
 
 	val GetUniversityIdsPresentInMembership = """
@@ -644,6 +642,20 @@ object ProfileImporter extends Logging {
 			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup")),
 			teachingStaff           = JBoolean(Option(rs.getString("warwickTeachingStaff")).map(_ == "Y"))
 		)
+	
+	private def toApplicantMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) = {
+
+		implicit val resultSet: Option[ResultSet] = Some(rs)
+
+		val applicantInfo = SitsApplicantInfo(
+			mobileNumber = optString("mobile_number").orNull,
+			disability = optString("disability").orNull,
+			nationality = optString("nationality").orNull,
+			secondNationality = optString("second_nationality").orNull
+		)
+
+		(membershipToMember(rs, guessUsercode, dateTimeFormatter), applicantInfo)
+	}
 
 	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
 		(Option(date) map { new DateTime(_) }).orNull
@@ -669,6 +681,13 @@ case class MembershipMember(
 	alternativeEmailAddress: String = null,
 	userType: MemberUserType,
 	teachingStaff: JBoolean
+)
+
+case class SitsApplicantInfo(
+	mobileNumber: String = null,
+	disability: String = null,
+	nationality: String = null,
+	secondNationality: String = null
 )
 
 

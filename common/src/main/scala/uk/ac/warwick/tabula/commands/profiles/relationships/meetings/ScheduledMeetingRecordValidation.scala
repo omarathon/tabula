@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.util.Try
 
 trait ScheduledMeetingRecordValidation {
+	self: ModifyScheduledMeetingRecordState =>
 
 	def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
@@ -21,7 +22,10 @@ trait ScheduledMeetingRecordValidation {
 			errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
 		}
 
-		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
+		if (relationships.isEmpty) {
+			errors.rejectValue("relationships", "meetingRecord.relationships.none")
+		}
+
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "meetingDateStr", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "meetingTimeStr", "NotEmpty")

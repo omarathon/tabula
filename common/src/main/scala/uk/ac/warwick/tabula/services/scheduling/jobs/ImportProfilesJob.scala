@@ -6,6 +6,7 @@ import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -23,10 +24,12 @@ class ImportProfilesJob extends AutowiredJobBean {
 
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingProfilesImport)
-			exceptionResolver.reportExceptions {
-				moduleAndDepartmentService.allDepartments.foreach(dept =>
-					scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
-				)
+			transactional() {
+				exceptionResolver.reportExceptions {
+					moduleAndDepartmentService.allRootDepartments.foreach(dept => {
+						scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
+					})
+				}
 			}
 	}
 

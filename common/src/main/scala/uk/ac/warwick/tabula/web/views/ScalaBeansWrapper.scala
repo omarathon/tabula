@@ -105,18 +105,18 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 			val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
 			val perms: PermissionsFetcher =
 				if (restrictedAnnotation != null) {
-					(_) => restrictedAnnotation.value map { name => Permissions.of(name) }
+					(_) => Seq(restrictedAnnotation.value map { name => Permissions.of(name) })
 				}
 				else if (restrictionProviderAnnotation != null) {
 					Try(cls.getMethod(restrictionProviderAnnotation.value())) match {
-						case Success(method) => (x) => method.invoke(x).asInstanceOf[Seq[Permission]]
+						case Success(method) => (x) => method.invoke(x).asInstanceOf[Seq[Seq[Permission]]]
 						case Failure(e) => throw new IllegalStateException(
-							"Couldn't find restriction provider method %s():Seq[Permission]".format(restrictionProviderAnnotation.value()), e)
+							"Couldn't find restriction provider method %s(): Seq[Seq[Permission]]".format(restrictionProviderAnnotation.value()), e)
 					}
 				}
 				else (_) => Nil
 
-			name ->(m, perms)
+			name -> (m, perms)
 		}
 
 		val scalaPairs = for (m <- cls.getMethods if isGetter(m) && !isJavaGetter(m)) yield {
@@ -156,13 +156,15 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 
 	private def user: CurrentUser = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
 
-	private def canDo(perms: Seq[Permission]) = perms forall {
-		case permission: ScopelessPermission => securityService.can(user, permission)
-		case permission if classOf[PermissionsTarget].isInstance(sobj) =>
-			securityService.can(user, permission, sobj.asInstanceOf[PermissionsTarget])
-		case permission =>
-			logger.warn("Couldn't check for permission %s against object %s because it isn't a PermissionsTarget".format(permission.toString, sobj.toString))
-			false
+	private def canDo(anyPerms: Seq[Seq[Permission]]) = anyPerms.isEmpty || anyPerms.exists { allPerms =>
+	 allPerms.forall {
+		 case permission: ScopelessPermission => securityService.can(user, permission)
+		 case permission if classOf[PermissionsTarget].isInstance(sobj) =>
+			 securityService.can(user, permission, sobj.asInstanceOf[PermissionsTarget])
+		 case permission =>
+			 logger.warn("Couldn't check for permission %s against object %s because it isn't a PermissionsTarget".format(permission.toString, sobj.toString))
+			 false
+	 }
 	}
 
 	override def get(key: String): TemplateModel = {
@@ -201,6 +203,6 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 
 object ScalaHashModel {
 	type Getter = java.lang.reflect.Method
-	type PermissionsFetcher = Any => Seq[Permission]
+	type PermissionsFetcher = Any => Seq[Seq[Permission]]
 	val gettersCache: ConcurrentHashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]] with ScalaConcurrentMapHelpers[Class[_], Map[String, (Getter, PermissionsFetcher)]] = JConcurrentMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]()
 }

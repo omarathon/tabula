@@ -94,7 +94,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 
 			Some(new Activity[Any](
 				id = notification.id,
-				title = notification.title,
+				title = notification.titleFor(user),
 				date = notification.created,
 				priority = priority.toNumericalValue,
 				agent = notification.agent,

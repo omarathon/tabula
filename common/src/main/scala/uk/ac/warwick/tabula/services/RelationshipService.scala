@@ -48,6 +48,7 @@ trait RelationshipService {
 
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
+	def findCurrentRelationships(scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship]
@@ -112,6 +113,10 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
 		relationshipDao.getCurrentRelationships(relationshipType, scd)
+	}
+
+	def findCurrentRelationships(scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){
+		relationshipDao.getCurrentRelationships(scd)
 	}
 
 	def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(){

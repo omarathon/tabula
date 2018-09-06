@@ -26,25 +26,18 @@ class ScheduledMeetingRecordConfirmNotification
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_confirm_notification.ftl"
 
-	def title: String = {
-		val name =
-			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
-			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
+	def title: String = s"Meeting record with ${meeting.allParticipantNames} needs confirmation"
 
-		s"${agentRole.capitalize} meeting record with $name needs confirmation"
-	}
+	override def titleFor(user: User): String = s"Meeting record with ${meeting.participantNamesExcept(user)} needs confirmation"
 
 	override def urlTitle = "confirm whether this meeting took place"
 
-	def isAgent: Boolean = meeting.creator == meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
+	def isAgent: Boolean = meeting.agents.contains(meeting.creator)
 
 	def content = FreemarkerModel(FreemarkerTemplate, Map(
 		"isAgent" -> isAgent,
-		"partner" -> (isAgent match {
-			case true => meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage))
-			case false => meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
-		}),
-		"role" -> agentRole,
+		"otherParticipants" -> meeting.participants.filterNot(_ == meeting.creator),
+		"agentRoles" -> agentRoles,
 		"dateTimeFormatter" -> dateTimeFormatter,
 		"meetingRecord" -> meeting
 	))

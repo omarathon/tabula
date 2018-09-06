@@ -42,10 +42,10 @@ trait MeetingRecordServiceScheduledMeetingEventSourceComponent extends Scheduled
 			val meetings = meetingRecordService.listAll(relationships, currentUser.profile)
 
 			// group the meetings by relationship type and check the permissions for each type only once
-			val eventOccurrences = meetings.groupBy(m => HibernateHelpers.initialiseAndUnproxy(m.relationship.relationshipType))
+			val eventOccurrences = meetings.groupBy(m => HibernateHelpers.initialiseAndUnproxy(m.relationshipTypes))
 				.mapValues(records => records.flatMap(_.toEventOccurrence(context)))
 				.flatMap {
-					case (relType, occurrences) if canReadMeetings(relType) => occurrences
+					case (relType, occurrences) if relType.exists(canReadMeetings) => occurrences
 					// No permission to read meeting details, just show as busy
 					case (_, occurrences) => occurrences.map(EventOccurrence.busy)
 				}

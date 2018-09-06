@@ -391,8 +391,7 @@
 		<#elseif meeting.rejected>
 			Pending revision by ${meeting.creator.fullName}
 		<#else>
-			Pending approval by
-			<#list meeting.approvals as approval>${approval.approver.fullName}<#if approval_has_next>, </#if></#list>
+			Pending approval by ${meeting.pendingApprovalsDescription}
 		</#if>
 	</#if>
 </#macro>
@@ -401,13 +400,13 @@
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(user)>
 		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
 		<div class="alert alert-info">
-			This meeting record needs to be approved by <#list meeting.pendingApprovers as approver>${approver.fullName}<#if approver_has_next>, </#if></#list>.
+			This meeting record needs to be approved by ${meeting.pendingApprovalsDescription}.
 		</div>
 	<#elseif meeting.pendingApprovalBy(user)>
 		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
 		<div class="alert alert-info">
 			This record needs your approval. Please review, then approve or return it with comments.
-			<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
+			<#if meeting.willBeApprovedFollowingApprovalBy(user) && meetingApprovalWillCreateCheckpoint[meeting.id]>
 				<br />
 				Approving this meeting record will mark a monitoring point as attended.
 			</#if>
@@ -422,7 +421,7 @@
 				</@bs3form.radio>
 				<@bs3form.radio>
 					<input class="reject" type="radio" name="approved" value="false">
-					Return with comments
+					Return with comment
 				</@bs3form.radio>
 				<div class="rejection-comment" style="display:none">
 					<textarea class="form-control" name="rejectionComments"></textarea>
@@ -459,7 +458,7 @@
 		</div>
 	<#else>
 		<p class="very-subtle">
-			${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}<#if meeting.missed> recorded as missed</#if>.
+			${(meeting.format.description)!"Unknown format"} between ${meeting.allParticipantNames}<#if meeting.missed> recorded as missed</#if>.
 			Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate />.
 			<#if meeting.approved && (meeting.approvedBy?has_content || meeting.approvedDate?has_content)>
 				Approved<#if meeting.approvedBy?has_content> by ${meeting.approvedBy.fullName},</#if><#if meeting.approvedDate?has_content> <@fmt.date meeting.approvedDate /></#if>
@@ -480,7 +479,7 @@
 			</div>
 		</#if>
 	<#elseif pendingAction && canConvertMeeting>
-		<p class="very-subtle">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
+		<p class="very-subtle">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${meeting.allParticipantNames}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
 		<#if meeting.deleted>
 			<p class="very-subtle">This meeting has been deleted</p>
 		<#else>
@@ -488,10 +487,10 @@
 				Please confirm whether this scheduled meeting took place.
 			</div>
 
-			<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationship.relationshipType />" >
+			<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationships[0].relationshipType />" >
 				<@bs3form.form_group>
 					<@bs3form.radio>
-						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.profiles.confirm_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationship.relationshipType />">
+						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.profiles.confirm_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationships[0].relationshipType />">
 						Confirm
 					</@bs3form.radio>
 					<@bs3form.radio>
@@ -499,7 +498,7 @@
 						Reschedule
 					</@bs3form.radio>
 					<@bs3form.radio>
-						<input type="radio" name="action" value="missed" class="reject" data-formhref="<@routes.profiles.missed_scheduled_meeting_record meeting meeting.relationship.relationshipType />">
+						<input type="radio" name="action" value="missed" class="reject" data-formhref="<@routes.profiles.missed_scheduled_meeting_record meeting meeting.relationships[0].relationshipType />">
 						Record that the meeting did not take place
 					</@bs3form.radio>
 					<div class="rejection-comment" style="display:none">
@@ -520,9 +519,9 @@
 				<p>This meeting did not take place (no reason given)</p>
 			</#if>
 		</div>
-		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
+		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${meeting.allParticipantNames}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
 	<#else>
-		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
+		<p class="very-subtle">${(meeting.format.description)!"Unknown format"} between ${meeting.allParticipantNames}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></p>
 	</#if>
 </#macro>
 

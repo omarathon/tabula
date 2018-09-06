@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -117,6 +117,8 @@ trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
 
 		format = meetingRecord.format
 		attachedFiles = meetingRecord.attachments
+
+		relationships = meetingRecord.relationships.asJava
 	}
 
 }
@@ -128,7 +130,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 
 		sharedValidation(errors, title, meetingDateStr, meetingTimeStr, meetingEndTimeStr, meetingLocation)
 
-		meetingRecordService.listScheduled(Set(meetingRecord.relationship), Some(editor)).foreach(
+		meetingRecordService.listScheduled(meetingRecord.relationships.toSet, Some(editor)).foreach(
 			m => if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 				if (m.meetingDate.toString(DateTimePickerFormatter).equals(meetingDateStr+" "+meetingTimeStr) && (m.id != meetingRecord.id) ) errors.rejectValue("meetingDateStr", "meetingRecord.date.duplicate")
 			}
@@ -136,10 +138,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
 	}
 }
 
-trait EditScheduledMeetingRecordState {
-	def editor: Member
-	def meetingRecord: ScheduledMeetingRecord
-
+trait ModifyScheduledMeetingRecordState {
 	var title: String = _
 	var description: String = _
 
@@ -153,19 +152,26 @@ trait EditScheduledMeetingRecordState {
 	var meetingLocationId: String = _
 
 	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] = _
+	var attachedFiles: JList[FileAttachment] = _
 
 	var attachmentTypes: Seq[String] = Seq[String]()
 
-	lazy val relationship: StudentRelationship = meetingRecord.relationship
+	var relationships: JList[StudentRelationship] = JArrayList()
+}
+
+trait EditScheduledMeetingRecordState extends ModifyScheduledMeetingRecordState {
+	def editor: Member
+	def meetingRecord: ScheduledMeetingRecord
 }
 
 trait EditScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: EditScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		mandatory(meetingRecord) // Otherwise we'll get an NPE evaluating relationship.relationshipType
-		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationship.relationshipType), meetingRecord)
+		mandatory(meetingRecord)
+		meetingRecord.relationships.map(_.relationshipType).distinct.foreach { relationshipType =>
+			p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Manage(relationshipType), meetingRecord)
+		}
 	}
 }
 
@@ -175,10 +181,10 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 	override lazy val eventName = "EditScheduledMeetingRecord"
 
 	override def describe(d: Description) {
-		meetingRecord.relationship.studentMember.map { d.member }
+		d.member(meetingRecord.student)
 		d.properties(
 			"creator" -> editor.universityId,
-			"relationship" -> meetingRecord.relationship.relationshipType.toString()
+			"relationship" -> meetingRecord.relationshipTypes.mkString(", ")
 		)
 	}
 }
@@ -186,7 +192,7 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
 	self: EditScheduledMeetingRecordState =>
 
-	def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification with SingleRecipientNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
+	def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
 		val meeting = result.meetingRecord
 		val user = editor.asSsoUser
 		val verb =

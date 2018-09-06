@@ -57,6 +57,7 @@ trait MemberDao {
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
 
 	def getFreshStudentUniversityIds: Seq[String]
+	def getFreshApplicantsIds: Seq[String]
 	def getFreshStaffUniversityIds: Seq[String]
 	def getMissingSince(from: DateTime): Seq[String]
 	def getMissingBefore[A <: Member: ClassTag](from: DateTime): Seq[String]
@@ -160,6 +161,11 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
 	def getFreshStudentUniversityIds: Seq[String] =
 			session.newCriteria[StudentMember]
+			.project[String](Projections.property("universityId"))
+			.seq
+
+	def getFreshApplicantsIds: Seq[String] =
+		session.newCriteria[ApplicantMember]
 			.project[String](Projections.property("universityId"))
 			.seq
 

@@ -13,10 +13,12 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = smartMock[SecurityService]
 
 	val agent: StaffMember = Fixtures.staff("1234567")
+	agent.userId = "agent"
 	agent.firstName = "Tutor"
 	agent.lastName = "Name"
 
 	val student: StudentMember = Fixtures.student("7654321")
+	student.userId = "student"
 	student.firstName = "Student"
 	student.lastName = "Name"
 
@@ -25,10 +27,10 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
 
 	@Test def titleNewMeetingStudent(): Unit = withUser("cuscav", "0672089") {
-		val meeting = new MeetingRecord(agent, relationship)
+		val meeting = new MeetingRecord(agent, Seq(relationship))
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
-		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
+		notification.titleFor(student.asSsoUser) should be ("Personal tutor meeting record with Tutor Name needs review")
 	}
 
 	// TAB-5119
@@ -38,7 +40,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 		u.setFoundUser(true)
 		u.setWarwickId("0672089")
 
-		val meeting = new MeetingRecord(agent, relationship)
+		val meeting = new MeetingRecord(agent, Seq(relationship))
 		meeting.meetingDate = new DateTime(2017, DateTimeConstants.MARCH, 21, 18, 30, 0, 0)
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, u, meeting)
@@ -48,24 +50,24 @@ class MeetingRecordApprovalNotificationTest extends TestBase with FreemarkerRend
 	}
 
 	@Test def titleNewMeetingTutor(): Unit = withUser("cuscav", "0672089") {
-		val meeting = new MeetingRecord(student, relationship)
+		val meeting = new MeetingRecord(student, Seq(relationship))
 
 		val notification = Notification.init(new NewMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
-		notification.title should be ("Personal tutor meeting record with Student Name needs review")
+		notification.titleFor(agent.asSsoUser) should be ("Personal tutor meeting record with Student Name needs review")
 	}
 
 	@Test def titleEditMeetingStudent(): Unit = withUser("cuscav", "0672089") {
-		val meeting = new MeetingRecord(agent, relationship)
+		val meeting = new MeetingRecord(agent, Seq(relationship))
 
 		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
-		notification.title should be ("Personal tutor meeting record with Tutor Name needs review")
+		notification.titleFor(student.asSsoUser) should be ("Personal tutor meeting record with Tutor Name needs review")
 	}
 
 	@Test def titleEditMeetingTutor(): Unit = withUser("cuscav", "0672089") {
-		val meeting = new MeetingRecord(student, relationship)
+		val meeting = new MeetingRecord(student, Seq(relationship))
 
 		val notification = Notification.init(new EditedMeetingRecordApprovalNotification, currentUser.apparentUser, meeting)
-		notification.title should be ("Personal tutor meeting record with Student Name needs review")
+		notification.titleFor(agent.asSsoUser) should be ("Personal tutor meeting record with Student Name needs review")
 	}
 
 }

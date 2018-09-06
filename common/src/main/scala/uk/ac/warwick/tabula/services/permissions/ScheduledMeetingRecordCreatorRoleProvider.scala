@@ -13,10 +13,10 @@ class ScheduledMeetingRecordCreatorRoleProvider extends RoleProvider with TaskBe
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordCreatorRoleProvider") {
 		scope match {
 			case meeting: ScheduledMeetingRecord if meeting.creator.universityId == user.universityId =>
-				Stream(
-					customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordCreatorRoleDefinition(meeting.relationship.relationshipType), meeting)
-						.getOrElse(ScheduledMeetingRecordCreator(meeting, meeting.relationship.relationshipType))
-				)
+				meeting.relationshipTypes.map { relationshipType =>
+					customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordCreatorRoleDefinition(relationshipType), meeting)
+						.getOrElse(ScheduledMeetingRecordCreator(meeting, relationshipType))
+				}.toStream
 
 			// ScheduledMeetingRecordCreator is only checked at the meeting level
 			case _ => Stream.empty

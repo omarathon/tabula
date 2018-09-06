@@ -25,7 +25,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 
 	@Test
 	def creatorEditMeeting() = withUser(thisCreator.userId) {  withFakeTime(aprilFool) {
-		val meeting = new MeetingRecord(thisCreator, thisRelationship)
+		val meeting = new MeetingRecord(thisCreator, Seq(thisRelationship))
 		meeting.securityService = smartMock[SecurityService]
 
 		val cmd = new EditMeetingRecordCommandInternal(meeting)
@@ -41,6 +41,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 		}
 
+		cmd.relationships.add(thisRelationship)
 		cmd.title = "Updated title fools"
 		cmd.features.meetingRecordApproval = true
 		cmd.features.attendanceMonitoringMeetingPointType = false
@@ -55,12 +56,53 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test
+	def editMeetingAddedParticipantNeedsToApprove() = withUser(student.userId) { withFakeTime(aprilFool) {
+		val thatStaff = Fixtures.staff()
+		val thatStaffCurrentUser = new CurrentUser(thatStaff.asSsoUser, thatStaff.asSsoUser)
+		val thatRelationship = StudentRelationship(
+			thatStaff,
+			StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
+			student,
+			DateTime.now
+		)
+
+		val meeting = new MeetingRecord(student, Seq(thisRelationship))
+		meeting.securityService = smartMock[SecurityService]
+
+		val cmd = new EditMeetingRecordCommandInternal(meeting)
+			with MeetingRecordCommandRequest
+			with EditMeetingRecordCommandState
+			with MeetingRecordServiceComponent
+			with FeaturesComponent
+			with AttendanceMonitoringMeetingRecordServiceComponent
+			with FileAttachmentServiceComponent {
+			override val meetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
+			override val features: Features = Features.empty
+			override val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+		}
+
+		cmd.relationships.add(thisRelationship)
+		cmd.relationships.add(thatRelationship)
+
+		cmd.features.meetingRecordApproval = true
+		cmd.features.attendanceMonitoringMeetingPointType = false
+
+		meeting.pendingApprovalBy(thatStaffCurrentUser) should be (false)
+
+		cmd.applyInternal()
+
+		meeting.isPendingApproval should be (true)
+		meeting.pendingApprovalBy(thatStaffCurrentUser) should be (true)
+	}}
+
+	@Test
 	def meetingRecordWorkflow() = withUser("cuslaj") { withFakeTime(aprilFool) {
 
 		// Here is a story about the meeting record workflow ...
 		// A student sees a meeting record with an inaccurate description. She tries to reject but forgets to add a comment
 		val studentCurrentUser = new CurrentUser(student.asSsoUser, student.asSsoUser)
-		val meeting = new MeetingRecord(thisCreator, thisRelationship)
+		val meeting = new MeetingRecord(thisCreator, Seq(thisRelationship))
 		meeting.securityService = smartMock[SecurityService]
 		val origApproval = new MeetingRecordApproval
 		origApproval.approver = thisRelationship.studentMember.get
@@ -110,6 +152,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
 		}
 
+		editCmd.relationships.add(thisRelationship)
 		editCmd.description = "The meeting room was full of angry herons. It was truly harrowing."
 		val meeting2 = editCmd.applyInternal()
 		meeting2.isPendingApproval should be (true)

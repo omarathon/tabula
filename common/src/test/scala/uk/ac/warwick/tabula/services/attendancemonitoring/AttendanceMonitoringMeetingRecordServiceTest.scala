@@ -40,7 +40,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		service.relationshipService.getRelationships(tutorRelationshipType, student) returns Seq(meetingRelationship)
 
 		val meeting = new MeetingRecord
-		meeting.relationship = meetingRelationship
+		meeting.relationships = Seq(meetingRelationship)
 		meeting.format = MeetingFormat.FaceToFace
 		meeting.creator = Fixtures.student("student", "student")
 		meeting.meetingDate = dateTime(2014, 1, 7)
@@ -50,7 +50,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		meetingPoint.startDate = meeting.meetingDate.minusDays(2).toLocalDate
 		meetingPoint.endDate = meeting.meetingDate.plusDays(2).toLocalDate
 		meetingPoint.pointType = AttendanceMonitoringPointType.Meeting
-		meetingPoint.meetingRelationships = Seq(meeting.relationship.relationshipType)
+		meetingPoint.meetingRelationships = meeting.relationships.map(_.relationshipType)
 		meetingPoint.relationshipService = service.relationshipService
 		meetingPoint.meetingFormats = Seq(meeting.format)
 
@@ -75,7 +75,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val thisMeetingRelationship = new ExternalStudentRelationship
 		thisMeetingRelationship.agent = agent
 		thisMeetingRelationship.relationshipType = supervisorRelationshipType
-		thisMeeting.relationship = thisMeetingRelationship
+		thisMeeting.relationships = Seq(thisMeetingRelationship)
 		service.getCheckpoints(thisMeeting).size should be (0)
 	}}
 
@@ -136,7 +136,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val otherMeeting = new MeetingRecord
 		otherMeeting.id = "123"
 		otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-		otherMeeting.relationship = meetingRelationship
+		otherMeeting.relationships = Seq(meetingRelationship)
 		otherMeeting.meetingDate = meeting.meetingDate
 		otherMeeting.format = MeetingFormat.Email
 		service.meetingRecordDao.list(meetingRelationship) returns Seq(meeting, otherMeeting)
@@ -150,7 +150,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val otherMeeting = new MeetingRecord
 		otherMeeting.id = "123"
 		otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-		otherMeeting.relationship = meetingRelationship
+		otherMeeting.relationships = Seq(meetingRelationship)
 		otherMeeting.meetingDate = meetingPoint.startDate.minusDays(1).toDateTimeAtStartOfDay
 		otherMeeting.format = meeting.format
 		service.meetingRecordDao.list(meetingRelationship) returns Seq(meeting, otherMeeting)
@@ -164,7 +164,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val otherMeeting = new MeetingRecord
 		otherMeeting.id = "123"
 		otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-		otherMeeting.relationship = meetingRelationship
+		otherMeeting.relationships = Seq(meetingRelationship)
 		otherMeeting.meetingDate = meetingPoint.endDate.plusDays(1).toDateTimeAtStartOfDay
 		otherMeeting.format = meeting.format
 		service.meetingRecordDao.list(meetingRelationship) returns Seq(meeting, otherMeeting)
@@ -177,7 +177,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val otherMeeting = new MeetingRecord
 		otherMeeting.id = "123"
 		otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-		otherMeeting.relationship = meetingRelationship
+		otherMeeting.relationships = Seq(meetingRelationship)
 		otherMeeting.meetingDate = meeting.meetingDate
 		otherMeeting.format = meeting.format
 		service.meetingRecordDao.list(meetingRelationship) returns Seq(meeting, otherMeeting)
@@ -199,7 +199,7 @@ class AttendanceMonitoringMeetingRecordServiceTest extends TestBase with Mockito
 		val otherMeeting = new MeetingRecord
 		otherMeeting.id = "123"
 		otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
-		otherMeeting.relationship = meetingRelationship
+		otherMeeting.relationships = Seq(meetingRelationship)
 		otherMeeting.meetingDate = meeting.meetingDate
 		otherMeeting.format = meeting.format
 		otherMeeting.creator = agentMember

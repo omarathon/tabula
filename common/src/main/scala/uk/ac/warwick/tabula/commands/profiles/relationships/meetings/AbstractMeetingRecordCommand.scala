@@ -25,8 +25,10 @@ abstract class AbstractMeetingRecordCommand {
 		with FileAttachmentServiceComponent =>
 
 	protected def applyCommon(meeting: MeetingRecord): MeetingRecord = {
+		meeting.relationships = relationships.asScala
 		meeting.title = title
 		meeting.description = description
+
 		if (meeting.isRealTime) {
 			if (meetingDateStr.hasText && meetingTimeStr.hasText) {
 				meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
@@ -80,10 +82,8 @@ abstract class AbstractMeetingRecordCommand {
 		newAttachments.foreach(meeting.addAttachment)
 	}
 
-	private def updateMeetingApproval(meetingRecord: MeetingRecord): Option[MeetingRecordApproval] = {
-
-		def getMeetingRecord(approver: Member): MeetingRecordApproval = {
-
+	private def updateMeetingApproval(meetingRecord: MeetingRecord): Seq[MeetingRecordApproval] = {
+		def createOrUpdateApproval(approver: Member): MeetingRecordApproval = {
 			val meetingRecordApproval = meetingRecord.approvals.asScala.find(_.approver == approver).getOrElse {
 				val newMeetingRecordApproval = new MeetingRecordApproval()
 				newMeetingRecordApproval.approver = approver
@@ -96,8 +96,23 @@ abstract class AbstractMeetingRecordCommand {
 			meetingRecordApproval
 		}
 
-		val approver = Seq(meetingRecord.relationship.agentMember, meetingRecord.relationship.studentMember).flatten.find(_ != meetingRecord.creator)
-		approver.map(getMeetingRecord)
+		// Remove approvals for any removed participants
+		meetingRecord.approvals.asScala.filterNot(a => meetingRecord.participants.contains(a.approver)).foreach { approval =>
+			approval.meetingRecord = null
+			meetingRecord.approvals.remove(approval)
+			meetingRecordService.purge(approval)
+		}
+
+		val approvers = if (meetingRecord.participants.contains(meetingRecord.creator)) {
+			// Approval is required from all participants except the person who created the record
+			meetingRecord.participants.filter(_ != meetingRecord.creator)
+		} else {
+			// The record was created on behalf of the agents
+			// Only the student needs to approve the record
+			Seq(meetingRecord.student)
+		}
+
+		approvers.map(createOrUpdateApproval)
 	}
 }
 
@@ -179,6 +194,8 @@ trait MeetingRecordCommandState {
 trait MeetingRecordCommandRequest {
 	var title: String = _
 	var description: String = _
+
+	var relationships: JList[StudentRelationship] = JArrayList()
 
 	var meetingDate: LocalDate = _
 	var meetingDateStr: String  = _

@@ -101,6 +101,7 @@ $.fn.enableFilters = function(options) {
 			$results.addClass('loading');
 
 			$form.data('request', $.get(url + '&_ts=' + new Date().getTime(), function(data) {
+				$(document).trigger('tabula.beforeFilterResultsChanged');
 				$results.html(data);
 				$form.data('request', null);
 				$results.removeClass('loading');

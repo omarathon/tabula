@@ -13,7 +13,9 @@ import scala.collection.JavaConverters._
 
 class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecord) extends Command[Option[RenderableFile]] with ReadOnly {
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.ReadDetails(meetingRecord.relationship.relationshipType), meetingRecord)
+	meetingRecord.relationships.foreach { relationship =>
+		PermissionCheck(Permissions.Profiles.MeetingRecord.ReadDetails(relationship.relationshipType), meetingRecord)
+	}
 
 	var filename: String = _
 

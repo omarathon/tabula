@@ -27,7 +27,7 @@ class CheckMeetingRecordCheckpointCommandInternal(val student: StudentMember, va
 		relationship.relationshipType = relationshipType
 		relationship.studentMember = student
 		val meeting = new MeetingRecord
-		meeting.relationship = relationship
+		meeting.relationships = Seq(relationship)
 		meeting.format = meetingFormat
 		meeting.meetingDate = meetingDate
 		attendanceMonitoringMeetingRecordService.getCheckpoints(meeting)

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.data.{MemberDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{AutoUploadedConfirmedModuleRegistrationsQuery, ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
+import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationImporter.{ConfirmedModuleRegistrationsQuery, UnconfirmedModuleRegistrationsQuery}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -69,8 +69,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 	lazy val queries = Seq(
 		new UnconfirmedModuleRegistrationsQuery(sits),
-		new ConfirmedModuleRegistrationsQuery(sits),
-		new AutoUploadedConfirmedModuleRegistrationsQuery(sits)
+		new ConfirmedModuleRegistrationsQuery(sits)
 	)
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
@@ -154,24 +153,19 @@ object ModuleRegistrationImporter {
 	// a list of all the markscheme codes that we consider to be pass/fail modules
 	final val PassFailMarkSchemeCodes = Seq("PF")
 
-	// union 3 things -
+	// union 2 things -
 	// 1. unconfirmed module registrations from the SMS table
-	// 2. confirmed module registrations from the SMO table where there is a module registration status of confirmed
-	// 3. confirmed module registrations from the SMO table where no status is recorded, i.e. where MRs have been imported
-	//
-	// the 3 queries should be mutually exclusive - 1st has SSN_MRGS != CON, 2nd has SSN_MRGS == CON and 3rd has no SSN.
-	//
-	// Although the 3 queries aren't unioned in SQL now, the column names still need to match.
+	// 2. confirmed module registrations from the SMO table
 
 	def UnconfirmedModuleRegistrations = s"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
 			sms.ses_code, -- e.g. C for core or O for option
 			sms.ayr_code, sms_occl as occurrence,
-			null as smr_actm, -- actual mark
-			null as smr_actg, -- actual grade
-			null as smr_agrm, -- agreed mark
-			null as smr_agrg, -- agreed grade
-	 		null as smr_mksc -- mark scheme
+			smr_actm, -- actual overall module mark
+			smr_actg, -- actual overall module grade
+			smr_agrm, -- agreed overall module mark
+			smr_agrg, -- agreed overall module grade
+	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
 				from $sitsSchema.ins_stu stu -- student
 					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
@@ -182,8 +176,12 @@ object ModuleRegistrationImporter {
 					join $sitsSchema.cam_sms sms -- Student Module Selection (unconfirmed module choices)
 						on sms.spr_code = spr.spr_code
 
-					join $sitsSchema.cam_ssn ssn -- holds student module registration status
-						on sms.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = sms.ayr_code and ssn.ssn_mrgs != 'CON' -- module choices not confirmed
+					left join $sitsSchema.ins_smr smr -- Student Module Result
+						on sms.spr_code = smr.spr_code
+						and sms.ayr_code = smr.ayr_code
+						and sms.mod_code = smr.mod_code
+						and sms.sms_occl = smr.mav_occur
+
 				where stu.stu_code = :universityId"""
 
 	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
@@ -212,37 +210,7 @@ object ModuleRegistrationImporter {
 						and smo.mod_code = smr.mod_code
 						and smo.mav_occur = smr.mav_occur
 
-					join $sitsSchema.cam_ssn ssn
-						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code and ssn.ssn_mrgs = 'CON'
 				where stu.stu_code = :universityId"""
-
-	// the left outer join to SSN excludes rows with a matching SSN since is only matching where SSN_SPRC is null
-	// but that column has a non-null constraint
-	def AutoUploadedConfirmedModuleRegistrations = s"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
-			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence, smr_actm, smr_actg, smr_agrm, smr_agrg, smr_mksc
-				from $sitsSchema.ins_stu stu
-					join $sitsSchema.ins_spr spr
-						on spr.spr_stuc = stu.stu_code
-
-					join $sitsSchema.srs_scj scj
-						on scj.scj_sprc = spr.spr_code
-
-					join $sitsSchema.cam_smo smo
-						on smo.spr_code = spr.spr_code
-						and (smo_rtsc is null or (smo_rtsc not like 'X%' and smo_rtsc != 'Z'))
-
-					left join $sitsSchema.ins_smr smr
-						on smo.spr_code = smr.spr_code
-						and smo.ayr_code = smr.ayr_code
-						and smo.mod_code = smr.mod_code
-						and smo.mav_occur = smr.mav_occur
-
-					left outer join $sitsSchema.cam_ssn ssn
-						on smo.spr_code = ssn.ssn_sprc and ssn.ssn_ayrc = smo.ayr_code
-				where stu.stu_code = :universityId
-					and ssn.ssn_sprc is null
-			"""
 
 	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
 		new ModuleRegistrationRow(
@@ -270,13 +238,6 @@ object ModuleRegistrationImporter {
 
 	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
-			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
-	}
-
-	class AutoUploadedConfirmedModuleRegistrationsQuery(ds: DataSource)
-		extends MappingSqlQuery[ModuleRegistrationRow](ds, AutoUploadedConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)

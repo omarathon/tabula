@@ -7,10 +7,12 @@ import uk.ac.warwick.tabula.data.model._
 class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
 
 	val agent: StaffMember = Fixtures.staff("1234567")
+	agent.userId = "agent"
 	agent.firstName = "Tutor"
 	agent.lastName = "Name"
 
 	val student: StudentMember = Fixtures.student("7654321")
+	student.userId = "student"
 	student.firstName = "Student"
 	student.lastName = "Name"
 
@@ -23,10 +25,11 @@ class ScheduledMeetingRecordBehalfNotificationTest extends TestBase {
 	thirdParty.lastName = "Party"
 
 	@Test def title() {
-		val meeting = new ScheduledMeetingRecord(thirdParty, relationship)
+		val meeting = new ScheduledMeetingRecord(thirdParty, Seq(relationship))
 
 		val notification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), thirdParty.asSsoUser, meeting)
-		notification.title should be ("Personal tutor meeting with Student Name created on your behalf by Third Party")
+		notification.title should be ("Meeting with Student Name and Tutor Name created on your behalf by Third Party")
+		notification.titleFor(agent.asSsoUser) should be ("Meeting with Student Name created on your behalf by Third Party")
 	}
 
 }

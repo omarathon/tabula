@@ -26,7 +26,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 		val meetingRecord = new MeetingRecord
-		meetingRecord.relationship = relationship
+		meetingRecord.relationships = Seq(relationship)
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord
 		proposedApproval.approver = student
@@ -68,7 +68,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
-		meetingRecord.relationship = relationship
+		meetingRecord.relationships = Seq(relationship)
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord
 		proposedApproval.approver = student
@@ -93,7 +93,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
-		meetingRecord.relationship = relationship
+		meetingRecord.relationships = Seq(relationship)
 		val proposedApproval = new MeetingRecordApproval
 		proposedApproval.meetingRecord = meetingRecord
 		proposedApproval.approver = student

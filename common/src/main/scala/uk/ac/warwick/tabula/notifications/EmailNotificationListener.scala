@@ -61,7 +61,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 				message.setFrom(fromAddress)
 				message.setReplyTo(replyAddress)
 				message.setTo(recipient.getEmail)
-				message.setSubject(notification.title)
+				message.setSubject(notification.titleFor(recipient))
 
 				val content: String = {
 					// Access to restricted properties requires user inside RequestInfo

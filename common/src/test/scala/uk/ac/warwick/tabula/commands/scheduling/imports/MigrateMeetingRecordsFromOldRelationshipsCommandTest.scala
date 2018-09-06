@@ -39,7 +39,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
 		relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
 		testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq(relationshipOnCurrentCourse, relationshipOnEndedCourse)
 		val relationshipOnEndedCourseMeeting = new MeetingRecord
-		relationshipOnEndedCourseMeeting.relationship = relationshipOnEndedCourse
+		relationshipOnEndedCourseMeeting.relationships = Seq(relationshipOnEndedCourse)
 		testObject.meetingRecordService.listAll(relationshipOnEndedCourse) returns Seq(relationshipOnEndedCourseMeeting)
 	}
 

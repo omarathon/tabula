@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.relationships.meetings
 
 import javax.validation.Valid
-
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
@@ -17,10 +17,25 @@ abstract class AbstractManageMeetingRecordController extends ProfilesController 
 
 	@ModelAttribute("allRelationships")
 	def allRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable relationshipType: StudentRelationshipType
+		@PathVariable studentCourseDetails: StudentCourseDetails
 	): Seq[StudentRelationship] = {
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails))
+		relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
+	}
+
+	@ModelAttribute("manageableRelationships")
+	def manageableRelationships(
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+	): Seq[StudentRelationship] = {
+		allRelationships.filter(r => securityService.can(user, Permissions.Profiles.MeetingRecord.Manage(r.relationshipType), studentCourseDetails.student))
+	}
+
+	@ModelAttribute("nonManageableRelationships")
+	def nonManageableRelationships(
+		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship],
+		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
+	): Seq[StudentRelationship] = {
+		allRelationships.filterNot(manageableRelationships.contains)
 	}
 
 	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))

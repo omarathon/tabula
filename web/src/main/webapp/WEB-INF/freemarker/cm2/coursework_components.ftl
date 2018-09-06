@@ -649,7 +649,7 @@
 
 <#macro admin_assignment_info info>
 	<#local assignment = info.assignment />
-	<#local studentCount = assignment.membershipInfo.totalCount />
+	<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
 
 	<div class="item-info admin-assignment-${assignment.id}">
 		<div class="clearfix">
@@ -703,7 +703,7 @@
 					</#if>
 
 					<li>
-						<strong>Assigned students:</strong>
+						<strong>Enrolled students:</strong>
 						<#if assignment.membershipInfo.totalCount == 0>
 							0
 						<#elseif assignment.membershipInfo.sitsCount gt 0>
@@ -727,8 +727,11 @@
 				<#if assignment.collectSubmissions || assignment.extensionsPossible>
 					<ul class="list-unstyled">
 						<#if assignment.collectSubmissions>
-							<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
-							<li><strong>Late submissions:</strong> ${assignment.lateSubmissionCount}</li>
+							<#if assignment.submissionsFromUnenrolledStudents?size == 0>
+								<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
+							<#else>
+								<li><strong>Submissions received:</strong> ${assignment.submissions?size} (${assignment.submissionsFromUnenrolledStudents?size} from students not enrolled on the assignment)</li>
+							</#if>
 						</#if>
 
 						<#if assignment.extensionsPossible>

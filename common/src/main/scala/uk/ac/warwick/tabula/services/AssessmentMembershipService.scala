@@ -226,6 +226,7 @@ class AssessmentMembershipInfo(val items: Seq[MembershipItem]) {
 	val excludeCount: Int = items.count(_.itemType == ExcludeType)
 	val usedIncludeCount: Int = items.count(i => i.itemType == IncludeType && !i.extraneous)
 	val usedExcludeCount: Int = items.count(i => i.itemType == ExcludeType && !i.extraneous)
+	val usercodes: Set[String] = items.filterNot(_.itemType == ExcludeType).flatMap(_.userId).toSet
 }
 
 trait AssessmentMembershipMethods extends Logging {
@@ -240,15 +241,6 @@ trait AssessmentMembershipMethods extends Logging {
 	private def deceasedUniIdsFilter(universityIds: Seq[String]) = {
 		val profiles = profileService.getAllMembersWithUniversityIds(universityIds)
 		universityIds.filter(universityId => !profiles.find(_.universityId == universityId).exists(_.deceased))
-	}
-
-	private def permanentlyWithdrawnFilter(items: Seq[MembershipItem]): Seq[MembershipItem] = {
-		val members = profileService.getAllMembersWithUniversityIds(items.flatMap(_.universityId))
-		items.filter { item =>
-			val student = members.find(m => item.universityId.contains(m.universityId)).filter(_.isStudent).map(_.asInstanceOf[StudentMember])
-
-			student.forall(!_.mostSignificantCourse.permanentlyWithdrawn)
-		}
 	}
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo = {
@@ -267,7 +259,7 @@ trait AssessmentMembershipMethods extends Logging {
 		val sorted = (includeItems ++ excludeItems ++ sitsItems)
 			.sortBy(membershipItem => (membershipItem.user.getLastName, membershipItem.user.getFirstName))
 
-		new AssessmentMembershipInfo(permanentlyWithdrawnFilter(deceasedItemsFilter(sorted)))
+		new AssessmentMembershipInfo(deceasedItemsFilter(sorted))
 	}
 
 	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {

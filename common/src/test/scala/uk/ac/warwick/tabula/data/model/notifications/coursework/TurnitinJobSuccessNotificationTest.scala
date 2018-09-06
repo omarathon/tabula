@@ -25,6 +25,10 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 		val report2 = new OriginalityReport
 		val report3 = new OriginalityReport
 
+		report1.reportReceived = true
+		report2.reportReceived = true
+		report3.reportReceived = true
+
 		val notification = Notification.init(new TurnitinJobSuccessNotification, currentUser.apparentUser, Seq(report1, report2, report3), assignment)
 		val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
 		notificationContent.trim should be(
@@ -35,8 +39,11 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 
 	@Test def partialSuccess(): Unit = withUser("cuscav", "0672089") {
 		val report1 = new OriginalityReport
+		report1.lastTurnitinError = "This job failed previously, but we have since received the report"
+		report1.reportReceived = true
 
 		val report2 = new OriginalityReport
+		report2.reportReceived = false
 		report2.lastTurnitinError = "Failed to retrieve results"
 		report2.attachment = new FileAttachment
 		report2.attachment.name = "CS118 Essay.docx"
@@ -44,6 +51,7 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 		report2.attachment.submissionValue.submission = Fixtures.submission(universityId = "0000002")
 
 		val report3 = new OriginalityReport
+		report3.reportReceived = false
 		report3.lastTurnitinError = "Failed to retrieve results"
 		report3.attachment = new FileAttachment
 		report3.attachment.name = "myessay.pdf"
@@ -66,6 +74,7 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 
 	@Test def allFailed(): Unit = withUser("cuscav", "0672089") {
 		val report1 = new OriginalityReport
+		report1.reportReceived = false
 		report1.lastTurnitinError = "Failed to retrieve results"
 		report1.attachment = new FileAttachment
 		report1.attachment.name = "My special essay - 0000001.docx"
@@ -73,6 +82,7 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 		report1.attachment.submissionValue.submission = Fixtures.submission(universityId = "0000001")
 
 		val report2 = new OriginalityReport
+		report2.reportReceived = false
 		report2.lastTurnitinError = "Failed to retrieve results"
 		report2.attachment = new FileAttachment
 		report2.attachment.name = "CS118 Essay.docx"
@@ -80,6 +90,7 @@ class TurnitinJobSuccessNotificationTest extends TestBase with FreemarkerRenderi
 		report2.attachment.submissionValue.submission = Fixtures.submission(universityId = "0000002")
 
 		val report3 = new OriginalityReport
+		report3.reportReceived = false
 		report3.lastTurnitinError = "Failed to retrieve results"
 		report3.attachment = new FileAttachment
 		report3.attachment.name = "myessay.pdf"

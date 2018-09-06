@@ -12,10 +12,10 @@ import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
 @DiscriminatorValue("scheduled")
 class ScheduledMeetingRecord extends AbstractMeetingRecord {
 
-	def this(creator: Member, relationship: StudentRelationship) {
+	def this(creator: Member, relationships: Seq[StudentRelationship]) {
 		this()
 		this.creator = creator
-		this.relationship = relationship
+		this.relationships = relationships
 	}
 
 	def isPendingAction: Boolean = meetingDate.isBeforeNow && !missed
@@ -30,9 +30,5 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 
 	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = asEventOccurrence(context)
 
-	def universityIdInRelationship(universityId: String): Boolean = {
-		def isStudent = universityId == relationship.studentId
-		def isAgent = relationship.agentMember.exists(_.universityId == universityId)
-		isStudent || isAgent
-	}
+	def universityIdInRelationship(universityId: String): Boolean = participants.map(_.universityId).contains(universityId)
 }
