@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
@@ -52,7 +53,9 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
 			currentMarkerFeedback.foreach(mf => {
 				mf.mark = if(StringUtils.hasText(markItem.actualMark)) Some(markItem.actualMark.toInt) else None
 				mf.grade = Option(markItem.actualGrade)
-				mf.comments = markItem.feedbackComment
+				markItem.fieldValues.asScala.foreach { case (fieldName, value) =>
+					mf.setFieldValue(fieldName, value)
+				}
 				mf.feedback.updatedDate = DateTime.now
 				mf.updatedOn = DateTime.now
 				feedbackService.saveOrUpdate(mf.feedback)
@@ -108,7 +111,7 @@ trait MarkerAddMarksState extends AddMarksState with CanProxy {
 		markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
 		markItem.actualMark = markerFeedback.mark.map(_.toString).getOrElse("")
 		markItem.actualGrade = markerFeedback.grade.getOrElse("")
-		markItem.feedbackComment = markerFeedback.comments.getOrElse("")
+		markItem.fieldValues = markerFeedback.fieldNameValuePairsMap.asJava
 		markItem.stage = Some(stage)
 		markItem
 	}).sortBy(_.user(assignment))
@@ -129,7 +132,10 @@ trait AddMarksState {
 		markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
 		markItem.actualMark = feedback.flatMap(_.actualMark).map(_.toString).getOrElse("")
 		markItem.actualGrade = feedback.flatMap(_.actualGrade).getOrElse("")
-		markItem.feedbackComment = feedback.flatMap(_.comments).getOrElse("")
+		feedback.foreach { feedback =>
+			markItem.fieldValues = feedback.fieldNameValuePairsMap.asJava
+		}
+
 		markItem
 	}).sortBy(_.user(assignment))
 

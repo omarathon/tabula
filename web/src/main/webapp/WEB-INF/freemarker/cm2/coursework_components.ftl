@@ -1120,12 +1120,22 @@
 		Not moderated
 	<#else>
 		<#if feedback.customFormValues?has_content>
-			<#list feedback.customFormValues as formValue>
-				<#if formValue.value?has_content>
-					<@bs3form.form_group><textarea class="form-control feedback-comments" readonly="readonly">${formValue.value!""}</textarea></@bs3form.form_group>
-				<#else>
-				<p>No feedback comments added.</p>
-				</#if>
+			<#list assignment.feedbackFields as field>
+				<#list feedback.customFormValues as fv>
+					<#if fv.name == field.name>
+						<#assign formValue = fv>
+						<#break>
+					</#if>
+				</#list>
+
+				<@bs3form.form_group>
+					<label for="form-value-${formValue.id}">${field.label}</label>
+					<#if formValue?? && formValue.value?has_content>
+						<textarea id="form-value-${formValue.id}" class="form-control feedback-comments" readonly="readonly" data-form-value-name="${formValue.name}">${formValue.value!""}</textarea>
+					<#else>
+						<p>No comments added.</p>
+					</#if>
+				</@bs3form.form_group>
 			</#list>
 		<#else>
 			<p>No feedback comments added.</p>

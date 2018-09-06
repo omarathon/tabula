@@ -37,16 +37,27 @@
 					<h5>No mark or grade added.</h5>
 				</#if>
 
-				<#list markerFeedback.customFormValues as formValue>
-					<#if formValue.value?has_content>
+				<#local hasFeedback = false>
+				<#list assignment.feedbackFields as field>
+					<#list markerFeedback.customFormValues as fv>
+						<#if fv.name == field.name>
+							<#local formValue = fv>
+							<#break>
+						</#if>
+					</#list>
+
+					<#if formValue?? && formValue.value?has_content>
+						<#local hasFeedback = true>
 						<div class="feedback-comments">
-							<h5>Feedback comments</h5>
+							<h5>${field.label!field.name}</h5>
 							<p>${formValue.valueFormattedHtml!""}</p>
 						</div>
-					<#else>
-						<h5>No feedback comments added.</h5>
 					</#if>
 				</#list>
+
+				<#if !hasFeedback>
+					<h5>No feedback comments added.</h5>
+				</#if>
 			</div>
 
 			<#if markerFeedback.attachments?has_content >

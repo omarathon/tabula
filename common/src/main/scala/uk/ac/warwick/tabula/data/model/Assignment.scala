@@ -31,6 +31,7 @@ object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
 	val defaultFeedbackTextFieldName = "feedbackText"
+	val defaultNotesFieldName = "notes"
 	val defaultMarkerSelectorName = "marker"
 	val defaultWordCountName = "wordcount"
 	final val NotDeletedFilter = "notDeleted"
@@ -369,10 +370,19 @@ class Assignment
 	override def addDefaultFeedbackFields() {
 		val feedback = new TextField
 		feedback.name = defaultFeedbackTextFieldName
+		feedback.label = "Feedback"
 		feedback.value = ""
 		feedback.context = FormFieldContext.Feedback
 
 		addField(feedback)
+
+		val notes = new TextField
+		notes.name = defaultNotesFieldName
+		notes.label = "Notes"
+		notes.value = ""
+		notes.context = FormFieldContext.Feedback
+
+		addField(notes)
 	}
 
 	override def addDefaultFields() {

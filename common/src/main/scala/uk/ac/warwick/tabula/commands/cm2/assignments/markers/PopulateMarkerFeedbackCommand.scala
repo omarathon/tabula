@@ -43,7 +43,7 @@ abstract class PopulateMarkerFeedbackCommandInternal(val assignment: Assignment,
 	private def copyPreviousFeedback(previous: MarkerFeedback, markerFeedback: MarkerFeedback): MarkerFeedback = {
 		markerFeedback.clearCustomFormValues()
 
-		val previousFormValues = previous.customFormValues.asScala.map { formValue =>
+		val previousFormValues = previous.customFormValues.asScala.filterNot(_.name == Assignment.defaultNotesFieldName).map { formValue =>
 			val newValue = new SavedFormValue()
 			newValue.name = formValue.name
 			newValue.markerFeedback = markerFeedback

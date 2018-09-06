@@ -16,6 +16,7 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
+import uk.ac.warwick.tabula.data.model.forms.FormField
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -28,7 +29,7 @@ class MarkItem extends AutowiringUserLookupComponent {
 	var id: String = _
 	var actualMark: String = _
 	var actualGrade: String = _
-	var feedbackComment: String = _
+	var fieldValues: JMap[String, String] = JHashMap()
 	var stage: Option[MarkingWorkflowStage] = None
 	var isValid = true
 	var isModified = false
@@ -64,7 +65,7 @@ class MarksExtractor {
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 		val markItems: JList[MarkItem] = JArrayList()
-		val sheetHandler = MarkItemXslxSheetHandler(styles, sst, markItems)
+		val sheetHandler = MarkItemXslxSheetHandler(styles, sst, markItems, assignment)
 		val parser = sheetHandler.fetchSheetParser
 		for (sheet <- reader.getSheetsData.asScala) {
 			val sheetSource = new InputSource(sheet)
@@ -84,11 +85,11 @@ trait AutowiringMarksExtractorComponent extends MarksExtractorComponent {
 }
 
 object MarkItemXslxSheetHandler {
-	def apply(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem]) =
-		new MarkItemXslxSheetHandler(styles, sst, markItems)
+	def apply(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem], assignment: Assignment) =
+		new MarkItemXslxSheetHandler(styles, sst, markItems, assignment)
 }
 
-class MarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem])
+class MarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[MarkItem], assignment: Assignment)
 	extends AbstractXslxSheetHandler(styles, sst, markItems) with SheetContentsHandler with Logging {
 
 	override def newCurrentItem = new MarkItem()
@@ -106,8 +107,8 @@ class MarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTa
 						currentItem.actualMark = formattedValue
 				case "Grade" =>
 					currentItem.actualGrade = formattedValue
-				case "Feedback" =>
-					currentItem.feedbackComment = formattedValue
+				case label if assignment.feedbackFields.exists(_.label == label) =>
+					currentItem.fieldValues.put(assignment.feedbackFields.find(_.label == label).map(_.name).get, formattedValue)
 				case _ => // ignore anything else
 			}
 		}

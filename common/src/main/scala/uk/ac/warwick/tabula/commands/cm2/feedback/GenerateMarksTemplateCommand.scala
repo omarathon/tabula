@@ -5,6 +5,7 @@ import org.apache.poi.ss.util.{CellRangeAddress, WorkbookUtil}
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.FullyAnonymous
+import uk.ac.warwick.tabula.data.model.forms.TextField
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -91,12 +92,17 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		header.createCell(0).setCellValue(idHeader)
 		header.createCell(1).setCellValue("Mark")
 		header.createCell(2).setCellValue("Grade")
-		header.createCell(3).setCellValue("Feedback")
+
+		val textFields = assignment.feedbackFields.filter(_.isInstanceOf[TextField])
+
+		textFields.zipWithIndex.foreach { case (field, index) =>
+			header.createCell(3 + index).setCellValue(field.label)
+		}
 
 		val baseRows = if (assignment.showSeatNumbers) {
-			header.createCell(4).setCellValue("Seat number")
-			4
-		} else 3
+			header.createCell(3 + textFields.length).setCellValue("Seat number")
+			3 + textFields.length
+		} else 2 + textFields.length
 
 		val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).reduceOption(_ max _).getOrElse(0)
 		val stages = assignment.cm2MarkingWorkflow.allStages.filter(_.order < maxCurrentStage)
@@ -121,7 +127,10 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 
 			val markCell = createUnprotectedCell(row, 1)
 			val gradeCell = createUnprotectedCell(row, 2)
-			val commentsCell = createUnprotectedCell(row, 3)
+
+			val fieldCells = textFields.zipWithIndex.map { case (field, index) =>
+				field -> createUnprotectedCell(row, 3 + index)
+			}
 
 			if (assignment.showSeatNumbers) {
 				assignment.getSeatNumber(currentMarkerFeedback.student).foreach(row.createCell(4).setCellValue(_))
@@ -129,7 +138,9 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 
 			for (mark <- currentMarkerFeedback.mark) markCell.setCellValue(mark)
 			for (grade <- currentMarkerFeedback.grade) gradeCell.setCellValue(grade)
-			for (comments <- currentMarkerFeedback.comments) commentsCell.setCellValue(comments)
+			for ((field, cell) <- fieldCells; customFormValue <- currentMarkerFeedback.customFormValues.asScala.find(_.name == field.name)) {
+				cell.setCellValue(customFormValue.value)
+			}
 
 			for((stage, i) <- stages.zipWithIndex){
 				val cell = baseRows + ((i+1)*2)

@@ -19,6 +19,11 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		val assignment = new Assignment
 		assignment.collectMarks = true
 		assignment.addDefaultFeedbackFields()
+
+		// Take out the Notes field
+		assignment.feedbackFields.last.assignment = null
+		assignment.fields.remove(assignment.feedbackFields.last)
+
 		val module = new Module
 		module.adminDepartment = new Department
 

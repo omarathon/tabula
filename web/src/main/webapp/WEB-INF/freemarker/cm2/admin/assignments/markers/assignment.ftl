@@ -88,10 +88,10 @@
 				if(!$this.hasClass('disabled')) {
 					var $prevFeedback = $this.closest('.previous-marker-feedback');
 					var $row = $this.closest('tr');
-					var $comments = $prevFeedback.find('.feedback-comments');
+					var $comments = $prevFeedback.find('.feedback-comments:first');
 					var $attachments = $prevFeedback.find('.feedback-attachments li');
 					var $form = $('.marking-and-feedback form', $row);
-					var $newComments = $form.find('textarea');
+					var $newComments = $form.find('textarea:first');
 					if ($newComments.val()) {
 						$newComments.val($newComments.val() + '\n\n')
 					}

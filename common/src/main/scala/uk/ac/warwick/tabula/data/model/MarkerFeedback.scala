@@ -149,19 +149,33 @@ class MarkerFeedback extends GeneratedId
 		customFormValues.asScala.find( _.name == field.name )
 	}
 
-	def comments: Option[String] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
-	def comments_=(value: String) {
+	def comments: Option[String] = fieldValue(Assignment.defaultFeedbackTextFieldName)
+	def comments_=(value: String): Unit = setFieldValue(Assignment.defaultFeedbackTextFieldName, value)
+
+	def fieldValue(fieldName: String): Option[String] = customFormValues.asScala.find(_.name == fieldName).map(_.value)
+
+	def setFieldValue(fieldName: String, value: String): Unit = {
 		customFormValues.asScala
-			.find(_.name == Assignment.defaultFeedbackTextFieldName)
-			.getOrElse({
-				val newValue = new SavedFormValue()
-				newValue.name = Assignment.defaultFeedbackTextFieldName
+			.find(_.name == fieldName)
+			.getOrElse {
+				val newValue = new SavedFormValue
+				newValue.name = fieldName
 				newValue.markerFeedback = this
-				this.customFormValues.add(newValue)
+				customFormValues.add(newValue)
 				newValue
-			}).value = value
+			}.value = value
 	}
 
+	def fieldNameValuePairsMap: Map[String, String] =
+		feedback.assessment match {
+			case assignment: Assignment =>
+				customFormValues.asScala.flatMap { formValue =>
+					assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
+						feedbackField.name -> formValue.value
+					}
+				}.toMap
+			case _ => Map.empty
+		}
 
 	def hasBeenModified: Boolean = updatedOn != null
 

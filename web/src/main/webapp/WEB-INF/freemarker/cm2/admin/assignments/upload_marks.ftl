@@ -12,12 +12,14 @@
 	<!-- Tab panes -->
 	<div class="tab-content">
 		<div role="tabpanel" class="tab-pane active" id="upload">
-			<p>You can upload marks and feedback in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>, <strong>Grade</strong> and <strong>Feedback</strong>. You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.</p>
+			<p>You can upload marks and feedback in a spreadsheet, which must be an XLSX file (i.e. created in Microsoft Office 2007 or later). The spreadsheet should have the following column headings: <strong>University ID</strong>, <strong>Mark</strong>, <strong>Grade</strong><#list assignment.feedbackFields as field><#if field_has_next>,<#else> and</#if> <strong>${field.label}</strong></#list>. You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.</p>
       <p>Enter the results in the following columns (all other columns are locked):</p>
       <ul>
         <li>Column B - Mark</li>
         <li>Column C - Grade</li>
-        <li>Column D - Feedback</li>
+				<#list assignment.feedbackFields as field>
+					<li>Column ${"DEFGHIJKLMNOPQRSTUVXYZ"[field_index]} - ${field.label}</li>
+				</#list>
       </ul>
       <p>Note that you can upload any of the following: marks only; marks and grades only; marks, grades and feedback.</p>      
 		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">

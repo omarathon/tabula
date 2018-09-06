@@ -1,6 +1,17 @@
-<@bs3form.labelled_form_group "fields[${field.id}].value" "Feedback" help>
+<#if field.name == "notes">
+	<#assign rows = "3" />
+	<#assign helpText>
+		Notes are visible to markers, moderators and administrators for this assignment. Notes are not normally shared with students.
+	</#assign>
+<#else>
+	<#assign rows = "6" />
+	<#assign helpText>
+		You can use markdown syntax <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a>
+	</#assign>
+</#if>
+<@bs3form.labelled_form_group "fields[${field.id}].value" field.label help>
 	<@form.field>
-		<@f.textarea id="fields[${field.id}].value" cssClass="big-textarea form-control" path="fields[${field.id}].value" />
+		<@f.textarea id="fields[${field.id}].value" cssClass="form-control" path="fields[${field.id}].value" rows=rows />
 	</@form.field>
 	<script>
 		jQuery(function ($) {
@@ -50,9 +61,7 @@
 		});
 	</script>
 	<#if showHelpText?? && showHelpText>
-		<div class="help-block">
-			You can use markdown syntax <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a>
-		</div>
+		<div class="help-block">${helpText}</div>
 	</#if>
 </@bs3form.labelled_form_group>
 

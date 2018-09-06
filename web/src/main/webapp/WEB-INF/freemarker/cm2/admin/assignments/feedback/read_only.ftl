@@ -13,13 +13,20 @@
 						</@bs3form.labelled_form_group>
 					</#if>
 
-					<#if feedback.customFormValues?has_content>
-						<@bs3form.labelled_form_group labelText="Feedback">
-							<#list feedback.customFormValues as formValue>
+					<#list assignment.feedbackFields as field>
+						<#list feedback.customFormValues as fv>
+							<#if fv.name == field.name>
+								<#assign formValue = fv>
+								<#break>
+							</#if>
+						</#list>
+
+						<#if formValue?? && formValue.value?has_content>
+							<@bs3form.labelled_form_group labelText=field.label!field.name>
 								<#noescape>${formValue.valueFormattedHtml!""}</#noescape>
-							</#list>
-						</@bs3form.labelled_form_group>
-					</#if>
+							</@bs3form.labelled_form_group>
+						</#if>
+					</#list>
 
 					<#if assignment.collectMarks>
 						<@bs3form.labelled_form_group labelText="Mark">
