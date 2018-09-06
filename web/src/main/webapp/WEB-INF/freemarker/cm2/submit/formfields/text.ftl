@@ -51,7 +51,7 @@
 	</script>
 	<#if showHelpText?? && showHelpText>
 		<div class="help-block">
-			You can use markdown syntax (e.g. press Enter twice to make a new paragraph).
+			You can use <a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/">markdown syntax</a>.
 		</div>
 	</#if>
 </@bs3form.labelled_form_group>

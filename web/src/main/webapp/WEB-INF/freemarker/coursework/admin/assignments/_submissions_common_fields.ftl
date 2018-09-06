@@ -214,7 +214,7 @@ so that they can be passed around between requests.
 						<@f.errors path="comment" cssClass="error" />
 						<@f.textarea path="comment" id="assignmentComment" rows="6" cssClass="span6" />
 						<div class="help-block">
-							You can use markdown syntax (e.g. press Enter twice to make a new paragraph).
+							You can use <a href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/">markdown syntax</a>.
 						</div>
 					</@form.field>
 				</@form.row>

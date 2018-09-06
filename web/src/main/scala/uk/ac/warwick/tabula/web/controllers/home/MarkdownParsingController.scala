@@ -21,6 +21,4 @@ class MarkdownParsingController extends BaseController with MarkdownRendererImpl
 			Mav(new JSONView(Map.empty))
 		}
 	}
-
-
 }
