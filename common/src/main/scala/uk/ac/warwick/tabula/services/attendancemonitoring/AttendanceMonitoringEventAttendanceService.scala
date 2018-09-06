@@ -36,11 +36,12 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 		attendances.filter(a => a.state == AttendanceState.Attended && a.occurrence.event.day != null).flatMap(attendance => {
 			profileService.getMemberByUniversityId(attendance.universityId).flatMap{
 				case studentMember: StudentMember =>
-					val relevantPoints = getRelevantPoints(
-						attendanceMonitoringService.listStudentsPoints(studentMember, None, attendance.occurrence.event.group.groupSet.academicYear),
+					val relevantPoints = attendance.occurrence.date.map(eventDate =>
+						getRelevantPoints(
+						attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, eventDate),
 						attendance,
 						studentMember
-					)
+					)).getOrElse(Seq())
 					val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
 						val checkpoint = new AttendanceMonitoringCheckpoint
 						checkpoint.autoCreated = true

@@ -65,7 +65,9 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		smallGroupPoint.smallGroupEventQuantity = 1
 		smallGroupPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
 
-		service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq(smallGroupPoint)
+		service.attendanceMonitoringService.listStudentsPointsForDate(student, None, occurrence.date.get) returns Seq(smallGroupPoint)
+
+
 		service.attendanceMonitoringService.getCheckpoints(Seq(smallGroupPoint), Seq(student)) returns Map()
 		service.attendanceMonitoringService.studentAlreadyReportedThisTerm(student, smallGroupPoint) returns false
 		service.attendanceMonitoringService.setAttendance(student, Map(smallGroupPoint -> AttendanceState.Attended), attendance.updatedBy, autocreated = true) returns
@@ -127,7 +129,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 
 	@Test
 	def noPoints() { new Fixture {
-		service.attendanceMonitoringService.listStudentsPoints(student, None, groupSet.academicYear) returns Seq()
+		service.attendanceMonitoringService.listStudentsPointsForDate(student, None, occurrence.date.get) returns Seq()
 		service.getCheckpoints(Seq(attendance)).size should be (0)
 	}}
 
@@ -140,8 +142,10 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 	@Test
 	def wrongWeek() { new Fixture {
 		occurrence.week = 3
+		service.attendanceMonitoringService.listStudentsPointsForDate(student, None, occurrence.date.get) returns Seq(smallGroupPoint)
 		service.getCheckpoints(Seq(attendance)).size should be (0)
 	}}
+
 
 	@Test
 	def wrongModule() { new Fixture {

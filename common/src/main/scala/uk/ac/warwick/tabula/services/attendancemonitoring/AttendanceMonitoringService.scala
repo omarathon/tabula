@@ -62,6 +62,8 @@ trait AttendanceMonitoringService {
 	): Seq[AttendanceMonitoringPoint]
 	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
 	def listStudentsPoints(studentData: AttendanceMonitoringStudentData, department: Department, academicYear: AcademicYear): Seq[AttendanceMonitoringPoint]
+	def listStudentsPointsForDate(student: StudentMember, departmentOption: Option[Department], date: LocalDate): Seq[AttendanceMonitoringPoint]
+	def listStudentsPointsForDate(student: StudentMember, departmentOption: Option[Department], date: DateTime): Seq[AttendanceMonitoringPoint]
 	def getAllCheckpoints(point: AttendanceMonitoringPoint): Seq[AttendanceMonitoringCheckpoint]
 	def getAllCheckpointData(points: Seq[AttendanceMonitoringPoint]): Seq[AttendanceMonitoringCheckpointData]
 	def getCheckpoints(points: Seq[AttendanceMonitoringPoint], student: StudentMember, withFlush: Boolean = false): Map[AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint]
@@ -253,6 +255,16 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 		schemes.flatMap(_.points.asScala).filter(p =>
 			p.applies(studentData.scdBeginDate, studentData.scdEndDate)
 		)
+	}
+
+	def listStudentsPointsForDate(student: StudentMember, departmentOption: Option[Department], date: LocalDate): Seq[AttendanceMonitoringPoint] = {
+		AcademicYear.allForDate(date).flatMap { academicYear =>
+			listStudentsPoints(student, departmentOption, academicYear)
+		}
+	}
+
+	def listStudentsPointsForDate(student: StudentMember, departmentOption: Option[Department], date: DateTime): Seq[AttendanceMonitoringPoint] = {
+		listStudentsPointsForDate(student, departmentOption, date.toLocalDate)
 	}
 
 	private def findSchemesForStudent(universityId: String, userId: String, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] = {
