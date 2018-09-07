@@ -30,7 +30,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 		member.flatMap{
 			case studentMember: StudentMember =>
 					val relevantPoints = getRelevantPoints(
-						attendanceMonitoringService.listStudentsPoints(studentMember, None, submission.assignment.academicYear),
+						attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, submission.submittedDate),
 						submission,
 						studentMember
 					)
