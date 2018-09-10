@@ -109,6 +109,7 @@ object AcademicYear {
 
 	def forDate(now: DateTime): AcademicYear = forDate(now.toLocalDate)
 	def now(): AcademicYear = forDate(DateTime.now())
+	def allCurrent(): Seq[AcademicYear] = allForDate(DateTime.now())
 
 	def allForDate(now: LocalDate): Seq[AcademicYear] = {
 		var years: Seq[AcademicYear] = Seq(forDate(now))
