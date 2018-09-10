@@ -96,9 +96,10 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
 
 	def listScheduled(rel: StudentRelationship): Seq[ScheduledMeetingRecord] = {
 		session.newCriteria[ScheduledMeetingRecord]
+			.createAlias("_relationships", "relationships")
 			.add(Restrictions.or(
 				Restrictions.eq("relationship", rel),
-				Restrictions.eq("_relationships", rel)
+				Restrictions.eq("relationships.id", rel.id)
 			))
 			.add(is("deleted", false))
 			.addOrder(Order.desc("meetingDate"))
