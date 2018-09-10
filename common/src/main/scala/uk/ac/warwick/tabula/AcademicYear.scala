@@ -55,6 +55,11 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 		Iterable.iterate(first, length) { y => y.next }.toSeq
 	}
 
+	override def equals(that: Any): Boolean = that match {
+		case other: AcademicYear => startYear == other.startYear
+		case _ => false
+	}
+
 	def compare(that: AcademicYear): Int = this.underlying.compareTo(that.underlying)
 
 	def isSITSInFlux(date: LocalDate): Boolean = {
