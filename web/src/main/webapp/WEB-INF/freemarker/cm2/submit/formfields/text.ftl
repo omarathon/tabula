@@ -36,10 +36,10 @@
 							'data': {
 								markdownString: feedbackTextArea.val()
 							},
-							success: function (data) {
+							success: function (res) {
 								// update content as long as they are different
-								if (data.html.trim() !== previewText.html().trim()) {
-									previewText.html(data.html);
+								if (res.trim() !== previewText.html().trim()) {
+									previewText.html(res);
 								}
 								hidePreviewIfNotNeeded();
 							}
