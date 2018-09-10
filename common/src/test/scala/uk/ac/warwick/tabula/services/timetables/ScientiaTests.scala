@@ -20,20 +20,21 @@ class ScientiaTests extends TestBase with Mockito with FunctionalContextTesting 
 	import ScientiaTests._
 
 	def createConfiguration = new ScientiaConfigurationImpl with StoppedClockComponent with FeaturesComponent {
-		override val stoppedTime: DateTime = new DateTime().withDate(2016,2,1)
+		override val stoppedTime: DateTime = new DateTime().withDate(2018,9,10)
 		override val features: Features = new FeaturesImpl
 	}
 
 	@Test def propertyYears = inContext[ManualYears] {
 		createConfiguration.perYearUris should be (Seq(
-			("https://test-timetable.example.com/xml1617/", AcademicYear.parse("16/17")),
-			("https://test-timetable.example.com/xml1213/", AcademicYear.parse("12/13"))
+			("https://test-timetable.example.com/xml1617/", AcademicYear.parse("16/17").extended),
+			("https://test-timetable.example.com/xml1213/", AcademicYear.parse("12/13").extended)
 		))
 	}
 
 	@Test def autoYears = inContext[AutoYears] {
 		createConfiguration.perYearUris should be (Seq(
-			("https://test-timetable.example.com/xml1516/", AcademicYear.parse("15/16"))
+			("https://test-timetable.example.com/xml1718/", AcademicYear.parse("17/18").extended),
+			("https://test-timetable.example.com/xml1819/", AcademicYear.parse("18/19").extended)
 		))
 	}
 
