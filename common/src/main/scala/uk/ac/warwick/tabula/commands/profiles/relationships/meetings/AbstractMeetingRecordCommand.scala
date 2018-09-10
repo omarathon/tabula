@@ -25,7 +25,6 @@ abstract class AbstractMeetingRecordCommand {
 		with FileAttachmentServiceComponent =>
 
 	protected def applyCommon(meeting: MeetingRecord): MeetingRecord = {
-		meeting.relationships = relationships.asScala
 		meeting.title = title
 		meeting.description = description
 
