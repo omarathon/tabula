@@ -214,7 +214,7 @@ so that they can be passed around between requests.
 						<@f.errors path="comment" cssClass="error" />
 						<@f.textarea path="comment" id="assignmentComment" rows="6" cssClass="span6" />
 						<div class="help-block">
-							You can use <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/">markdown syntax</a>.
+							You can use markdown syntax <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a>
 						</div>
 					</@form.field>
 				</@form.row>
