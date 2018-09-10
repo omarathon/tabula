@@ -48,4 +48,11 @@ class AcademicYearTest extends TestBase {
 		AcademicYear.allForDate(dateTime(2019, 8, 10)) should be (Seq(AcademicYear(2019)))
 	}
 
+	@Test def equals(): Unit = {
+		(AcademicYear(2018) == AcademicYear(2018)) should be (true)
+		(AcademicYear(2018) == AcademicYear(2019)) should be (false)
+		// An AcademicYear and an ExtendedAcademicYear are still equal, as long as the start years are equal
+		(AcademicYear(2018).extended == AcademicYear(2018)) should be (true)
+	}
+
 }
