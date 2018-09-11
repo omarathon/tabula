@@ -53,39 +53,41 @@ class GenerateModuleExamGridCommandInternal(val department: Department, val acad
 
 	override def applyInternal(): ModuleExamGridResult = {
 		val result: Seq[(AssessmentIdentity, ModuleGridDetailRecord)] = benchmarkTask("GenerateMRComponents") {
-			moduleRegistrationService.getByModuleAndYear(module, academicYear).flatMap { mr =>
-				val student: StudentMember = mr.studentCourseDetails.student
-				val componentInfo: Seq[(AssessmentIdentity, AssessmentComponentInfo)] = mr.upstreamAssessmentGroupMembers.flatMap { uagm =>
-					val code = s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}"
-					assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup).filter(_.inUse).map { comp =>
-						AssessmentIdentity(
-							code = code,
-							name = comp.name
-						) -> AssessmentComponentInfo(
-							mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
-							grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
-							isActualMark = uagm.agreedMark.isEmpty,
-							isActualGrade = uagm.agreedGrade.isEmpty,
-							resitInfo = ResitComponentInfo(
-								resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.orNull),
-								resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.orNull),
-								isActualResitMark = uagm.resitAgreedMark.isEmpty,
-								isActualResitGrade = uagm.resitAgreedGrade.isEmpty
+			moduleRegistrationService.getByModuleAndYear(module, academicYear)
+				.filter(mr => mr.studentCourseDetails == mr.studentCourseDetails.student.mostSignificantCourse)
+				.flatMap { mr =>
+					val student: StudentMember = mr.studentCourseDetails.student
+					val componentInfo: Seq[(AssessmentIdentity, AssessmentComponentInfo)] = mr.upstreamAssessmentGroupMembers.flatMap { uagm =>
+						val code = s"${uagm.upstreamAssessmentGroup.assessmentGroup}-${uagm.upstreamAssessmentGroup.sequence}-${uagm.upstreamAssessmentGroup.occurrence}"
+						assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup).filter(_.inUse).map { comp =>
+							AssessmentIdentity(
+								code = code,
+								name = comp.name
+							) -> AssessmentComponentInfo(
+								mark = uagm.agreedMark.getOrElse(uagm.actualMark.orNull),
+								grade = uagm.agreedGrade.getOrElse(uagm.actualGrade.orNull),
+								isActualMark = uagm.agreedMark.isEmpty,
+								isActualGrade = uagm.agreedGrade.isEmpty,
+								resitInfo = ResitComponentInfo(
+									resitMark = uagm.resitAgreedMark.getOrElse(uagm.resitActualMark.orNull),
+									resitGrade = uagm.resitAgreedGrade.getOrElse(uagm.resitActualGrade.orNull),
+									isActualResitMark = uagm.resitAgreedMark.isEmpty,
+									isActualResitGrade = uagm.resitAgreedGrade.isEmpty
+								)
 							)
+						}
+					}.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }
+
+					componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
+						ModuleGridDetailRecord(
+							moduleRegistration = mr,
+							componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
+							name = s"${student.firstName} ${student.lastName}",
+							universityId = student.universityId,
+							lastImportDate = Option(student.lastImportDate)
 						)
 					}
-				}.sortBy { case (assessmentIdentity, _) => assessmentIdentity.code }
-
-				componentInfo.map { case (assessmentIdentity, _) => assessmentIdentity ->
-					ModuleGridDetailRecord(
-						moduleRegistration = mr,
-						componentInfo = componentInfo.map { case (id, info) => (id.code, info) }.toMap,
-						name = s"${student.firstName} ${student.lastName}",
-						universityId = student.universityId,
-						lastImportDate = Option(student.lastImportDate)
-					)
 				}
-			}
 		}
 
 		ModuleExamGridResult(
