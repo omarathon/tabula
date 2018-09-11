@@ -406,7 +406,7 @@
 		<p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
 		<div class="alert alert-info">
 			This record needs your approval. Please review, then approve or return it with comments.
-			<#if meeting.willBeApprovedFollowingApprovalBy(user) && meetingApprovalWillCreateCheckpoint[meeting.id]>
+			<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
 				<br />
 				Approving this meeting record will mark a monitoring point as attended.
 			</#if>
