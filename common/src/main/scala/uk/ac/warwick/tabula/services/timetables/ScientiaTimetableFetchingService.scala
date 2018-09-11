@@ -190,14 +190,8 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				val studentCourseEndedInThePast: Boolean = profileService.getMemberByUniversityId(param)
 					.flatMap {
 						case student: StudentMember =>
-							val endYears = student.freshOrStaleStudentCourseDetails
-								.map(_.latestStudentCourseYearDetails)
-								.map(_.academicYear.endYear)
-							if (endYears.isEmpty) {
-								None
-							} else {
-								Some(endYears.max)
-							}
+							val endYears = student.freshOrStaleStudentCourseDetails.map(_.latestStudentCourseYearDetails.academicYear.endYear)
+							if (endYears.isEmpty) None else Some(endYears.max)
 					}.exists(_ < AcademicYear.now().startYear)
 
 				if (studentCourseEndedInThePast) {
