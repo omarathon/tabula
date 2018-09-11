@@ -65,7 +65,7 @@ trait SubmissionInfoToJsonConverter {
 				"requestedExpiryDate" -> e.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"attachments" -> e.attachments.asScala.map { attachment => Map(
-					"url" -> (toplevelUrl + Routes.cm2.admin.assignment.extensionAttachment(e, attachment.name, encodeFilename = false))
+					"url" -> (toplevelUrl + Routes.cm2.admin.assignment.extensionAttachment(e, attachment.name))
 				)},
 				"reason" -> e.reason,
 				"reviewerComments" -> e.reviewerComments
@@ -80,7 +80,7 @@ trait SubmissionInfoToJsonConverter {
 			"attachments" -> submission.allAttachments.map { attachment => Map(
 				"filename" -> attachment.name,
 				"id" -> attachment.id,
-				"attachmentUrl" -> (toplevelUrl + Routes.cm2.admin.assignment.submissionAttachmentDownload(submission, attachment.name, encodeFilename = false)),
+				"attachmentUrl" -> (toplevelUrl + Routes.cm2.admin.assignment.submissionAttachmentDownload(submission, attachment.name)),
 				"originalityReport" -> Option(attachment.originalityReport).map { report => Map(
 					"similarity" -> JInteger(report.similarity),
 					"overlap" -> JInteger(report.overlap),
