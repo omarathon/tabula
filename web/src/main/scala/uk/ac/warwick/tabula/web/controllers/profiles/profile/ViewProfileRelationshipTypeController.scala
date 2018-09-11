@@ -125,7 +125,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 				"scheduledRelationshipChanges" -> scheduledRelationshipChanges,
 				"meetings" -> meetings,
 				"meetingApprovalWillCreateCheckpoint" -> meetings.map {
-					case meeting: MeetingRecord => meeting.id -> attendanceMonitoringMeetingRecordService.getCheckpoints(meeting).nonEmpty
+					case meeting: MeetingRecord => meeting.id -> meetingApprovalWillCreateCheckpoint(meeting)
 					case meeting: ScheduledMeetingRecord => meeting.id -> false
 				}.toMap,
 				"isSelf" -> isSelf,
@@ -138,6 +138,15 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
 		}
 
 	}
+
+	// An attendance checkpoint will be created when the current user approves this meeting if:
+	private def meetingApprovalWillCreateCheckpoint(meeting: MeetingRecord): Boolean =
+	// The meeting isn't already approved for attendance purposes, and
+		!meeting.isAttendanceApproved &&
+	// once this user approves the meeting, it will be approved, and
+			meeting.willBeApprovedFollowingApprovalBy(user) &&
+	// approval of this meeting would record an attendance point
+			attendanceMonitoringMeetingRecordService.getCheckpointsWhenApproved(meeting).nonEmpty
 
 	private def applyCrumbs(mav: Mav, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType): Mav =
 		mav.crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.RelationshipTypeIdentifier(relationshipType)): _*)
