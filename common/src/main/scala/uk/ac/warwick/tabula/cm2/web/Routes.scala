@@ -208,11 +208,13 @@ object Routes {
 				def report(assignment: Assignment, report: OriginalityReport): String = assignmentroot(assignment) + s"/turnitin/report/${encoded(report.attachment.id)}"
 			}
 
-			def submissionAttachmentDownload(submission: Submission, filename: String): String = assignmentroot(submission.assignment) + s"/submissions/download/${submission.id}/${filename}?single=true"
+			def submissionAttachmentDownload(submission: Submission, filename: String, encodeFilename: Boolean = true): String =
+				assignmentroot(submission.assignment) + s"/submissions/download/${submission.id}/" + (if(encodeFilename) s"${encoded(filename)}" else s"$filename") + s"?single=true"
 
 			def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 			def extension(assignment: Assignment, student: User): String = extensions(assignment) + s"?usercode=${encoded(student.getUserId)}"
-			def extensionAttachment(extension: Extension, filename: String): String = admin() + s"/extensions/${extension.id}/supporting-file/${filename}"
+			def extensionAttachment(extension: Extension, filename: String, encodeFilename: Boolean = true): String =
+				admin() + s"/extensions/${extension.id}/supporting-file/" + (if(encodeFilename) s"${encoded(filename)}" else s"$filename")
 
 			def submitToTurnitin(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin"
 		}
