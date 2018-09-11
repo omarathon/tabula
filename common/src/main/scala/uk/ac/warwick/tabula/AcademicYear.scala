@@ -86,26 +86,13 @@ object AcademicYear {
 	// An implicit for the UserType to create instances
 	implicit val factory: (JInteger) => AcademicYear = (year: JInteger) => AcademicYear(year)
 
-	// The year at which we stop having ExtendedAcademicYears and just have AcademicYears
-	val extendedAcademicYearCrossover: Int = 2018
-
-	def apply(startYear: Int): AcademicYear =
-		if (startYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(startYear)
-		else JAcademicYear.starting(startYear)
+	def apply(startYear: Int): AcademicYear = JExtendedAcademicYear.starting(startYear)
 
 	def starting(startYear: Int): AcademicYear = apply(startYear)
 
-	def parse(string: String): AcademicYear = {
-		val year = JAcademicYear.parse(string)
-		if (year.getStartYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(year.getStartYear)
-		else year
-	}
+	def parse(string: String): AcademicYear = JExtendedAcademicYear.starting(JAcademicYear.parse(string).getStartYear)
 
-	def forDate(now: LocalDate): AcademicYear = {
-		val year = JAcademicYear.forDate(now.asJava)
-		if (year.getStartYear < extendedAcademicYearCrossover) JExtendedAcademicYear.starting(year.getStartYear)
-		else year
-	}
+	def forDate(now: LocalDate): AcademicYear = JExtendedAcademicYear.starting(JAcademicYear.forDate(now.asJava).getStartYear)
 
 	def forDate(now: DateTime): AcademicYear = forDate(now.toLocalDate)
 	def now(): AcademicYear = forDate(DateTime.now())
