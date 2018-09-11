@@ -5,7 +5,7 @@ import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{FileAttachment, FileAttachmentToken, Submission}
 
 object RoutesUtils {
-	def encoded(string: String): String = URLEncoder.encode(string, "UTF-8")
+	def encoded(string: String): String = URLEncoder.encode(string, "UTF-8").replaceAll("\\+", "%20")
 }
 
 object Routes {
