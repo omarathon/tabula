@@ -26,6 +26,7 @@ trait MissedMeetingRecordNotification
 		"dateFormatter" -> dateTimeFormatter,
 		"student" -> meeting.student,
 		"actorIsRecipient" -> recipients.contains(agent),
+		"studentIsActor" -> (meeting.student.asSsoUser == agent),
 		"studentIsRecipient" -> recipients.contains(meeting.student.asSsoUser),
 		"meetingRecord" -> meeting
 	))
