@@ -224,6 +224,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 				with AutowiringWAI2GoConfigurationComponent
 				with AutowiringUserLookupComponent
 				with AutowiringApacheHttpClientComponent
+				with AutowiringProfileServiceComponent
 
 		if (scientiaConfiguration.perYearUris.exists(_._1.contains("stubTimetable"))) {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
