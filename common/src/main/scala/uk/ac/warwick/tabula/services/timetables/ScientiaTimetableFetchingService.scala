@@ -190,8 +190,15 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				val studentCourseEndedInThePast: Boolean = profileService.getMemberByUniversityId(param)
 					.flatMap {
 						case student: StudentMember =>
-							student.freshOrStaleStudentCourseDetails.headOption.map(_.latestStudentCourseYearDetails.academicYear.endYear)
-					}.exists(_ < DateTime.now().getYear)
+							val endYears = student.freshOrStaleStudentCourseDetails
+								.map(_.latestStudentCourseYearDetails)
+								.map(_.academicYear.endYear)
+							if (endYears.isEmpty) {
+								None
+							} else {
+								Some(endYears.max)
+							}
+					}.exists(_ < AcademicYear.now().startYear)
 
 				if (studentCourseEndedInThePast) {
 					// TAB-6421 do not throw exception when student with a course end date in the past
