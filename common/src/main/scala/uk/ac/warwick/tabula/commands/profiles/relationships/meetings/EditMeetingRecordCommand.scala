@@ -39,6 +39,7 @@ class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
 		with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
 	override def applyInternal(): MeetingRecord = {
+		meetingRecord.relationships = relationships.asScala
 		applyCommon(meetingRecord)
 	}
 
