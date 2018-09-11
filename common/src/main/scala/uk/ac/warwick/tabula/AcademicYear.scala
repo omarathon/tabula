@@ -86,13 +86,13 @@ object AcademicYear {
 	// An implicit for the UserType to create instances
 	implicit val factory: (JInteger) => AcademicYear = (year: JInteger) => AcademicYear(year)
 
-	def apply(startYear: Int): AcademicYear = JAcademicYear.starting(startYear)
+	def apply(startYear: Int): AcademicYear = JExtendedAcademicYear.starting(startYear)
 
 	def starting(startYear: Int): AcademicYear = apply(startYear)
 
-	def parse(string: String): AcademicYear = JAcademicYear.parse(string)
+	def parse(string: String): AcademicYear = JExtendedAcademicYear.starting(JAcademicYear.parse(string).getStartYear)
 
-	def forDate(now: LocalDate): AcademicYear = JAcademicYear.forDate(now.asJava)
+	def forDate(now: LocalDate): AcademicYear = JExtendedAcademicYear.starting(JAcademicYear.forDate(now.asJava).getStartYear)
 
 	def forDate(now: DateTime): AcademicYear = forDate(now.toLocalDate)
 	def now(): AcademicYear = forDate(DateTime.now())
