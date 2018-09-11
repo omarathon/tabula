@@ -59,7 +59,9 @@ class MonthNamesTest extends TestBase {
 			"April 2019",
 			"May 2019",
 			"June 2019",
-			"July 2019"
+			"July 2019",
+			"August 2019",
+			"September 2019"
 		))
 	}
 
@@ -77,7 +79,10 @@ class MonthNamesTest extends TestBase {
 			"April 2020",
 			"May 2020",
 			"June 2020",
-			"July 2020"
+			"July 2020",
+			"August 2020",
+			"September 2020",
+			"October 2020"
 		))
 	}
 
