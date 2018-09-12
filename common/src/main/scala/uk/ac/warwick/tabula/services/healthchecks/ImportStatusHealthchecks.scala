@@ -127,10 +127,10 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
 	@Scheduled(fixedRate = 60 * 1000) // 1 minute
 	override def run(): Unit = transactional(readOnly = true) {
-		val allDepartments = moduleAndDepartmentService.allDepartments
+		val allRootDepartments = moduleAndDepartmentService.allRootDepartments
 		val imports = auditEvents
 
-		val healthchecks = allDepartments.map(department => checkDepartment(imports, department))
+		val healthchecks = allRootDepartments.map(department => checkDepartment(imports, department))
 
 		val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
 			val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
