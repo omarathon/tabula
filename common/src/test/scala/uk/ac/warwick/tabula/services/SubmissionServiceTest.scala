@@ -50,16 +50,24 @@ class SubmissionServiceTest extends PersistenceTestBase {
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
 		val assignment3 = new Assignment
+		val assignment4 = new Assignment
+		val assignment5 = new Assignment
 		assignment1.addSubmission(submissionBefore)
-		assignment1.addSubmission(submissionInside)
-		assignment3.addSubmission(submissionAfter)
+		assignment2.addSubmission(submissionOnStartDate)
+		assignment3.addSubmission(submissionInside)
+		assignment4.addSubmission(submissionOnEndDate)
+		assignment5.addSubmission(submissionAfter)
 
 		session.save(assignment1)
 		session.save(assignment2)
 		session.save(assignment3)
+		session.save(assignment4)
+		session.save(assignment5)
 
 		session.save(submissionBefore)
+		session.save(submissionOnStartDate)
 		session.save(submissionInside)
+		session.save(submissionOnEndDate)
 		session.save(submissionAfter)
 
 		val result = submissionService.getSubmissionsBetweenDates(universityId, startDate, endDate)
@@ -69,5 +77,4 @@ class SubmissionServiceTest extends PersistenceTestBase {
 		result.contains(submissionOnEndDate) should be (true)
 
 	}
-
 }
