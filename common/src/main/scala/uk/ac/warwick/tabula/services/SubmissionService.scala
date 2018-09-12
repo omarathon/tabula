@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.services
 
 
+import org.hibernate.criterion.Restrictions.{ge, lt}
+import org.joda.time.DateTime
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, OriginalityReport, Submission}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 
@@ -16,6 +19,7 @@ trait SubmissionService {
 	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
 	def getSubmission(id: String): Option[Submission]
 	def getPreviousSubmissions(user: User): Seq[Submission]
+	def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 	def delete(submission: Submission): Unit
 }
 
@@ -55,6 +59,13 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 			.add(is("usercode", user.getUserId))
 			.seq
 	}
+
+	def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+		session.newCriteria[Submission]
+			.add(is("usercode", usercode))
+			.add(ge("submittedDate", startInclusive))
+			.add(lt("submittedDate", endExclusive))
+			.seq
 
 	def delete(submission: Submission) {
 		submission.assignment.submissions.remove(submission)

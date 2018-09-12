@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.commands.cm2.assignments
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.data.model.{Member, Submission}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 case class ListSubmissionsResult (
@@ -22,7 +22,7 @@ object ListMemberSubmissionsCommand {
 			with ComposableCommand[ListSubmissionsResult]
 		  with ListMemberSubmissionsRequest
 			with ListMemberSubmissionsPermissions
-			with AutowiringAssessmentServiceComponent
+			with AutowiringSubmissionServiceComponent
 		  with ListMemberSubmissionsValidation
 			with Unaudited with ReadOnly
 }
@@ -67,7 +67,7 @@ trait ListMemberSubmissionsPermissions extends RequiresPermissionsChecking with 
 abstract class ListMemberSubmissionsCommandInternal(val member: Member, val fromDate: LocalDate, val toDate: LocalDate)
 	extends CommandInternal[ListSubmissionsResult] with ListMemberSubmissionsState with TaskBenchmarking {
 
-		self: AssessmentServiceComponent
+		self: SubmissionServiceComponent
 		with ListMemberSubmissionsRequest
 		with ListMemberSubmissionsPermissions =>
 
@@ -80,7 +80,7 @@ abstract class ListMemberSubmissionsCommandInternal(val member: Member, val from
 			DateTime.now.withTimeAtStartOfDay
 		)
 
-		val submissions = assessmentService.getSubmissionsForAssignmentsBetweenDates(member.userId, submissionsFromDate, submissionsToDate)
+		val submissions = submissionService.getSubmissionsBetweenDates(member.userId, submissionsFromDate, submissionsToDate)
 
 		ListSubmissionsResult (
 			fromDate = submissionsFromDate,
