@@ -196,6 +196,7 @@
 		<bean class="uk.ac.warwick.tabula.commands.cm2.assignments.markers.MarkerAdjustmentDirectionConverter" />
 		<bean class="uk.ac.warwick.tabula.exams.grids.columns.StringToExamGridStudentIdentificationColumnValue" />
 		<bean class="uk.ac.warwick.tabula.exams.grids.columns.StringToExamGridDisplayModuleNameColumnValue" />
+		<bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordApprovalTypeConverter" />
 	</util:list>
 
 	<bean id="typeConverter"
@@ -222,6 +223,7 @@
 					<bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
 					<bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 					<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
+					<bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordApprovalTypeConverter" />
 				</list>
 	    </property>
 	</bean>

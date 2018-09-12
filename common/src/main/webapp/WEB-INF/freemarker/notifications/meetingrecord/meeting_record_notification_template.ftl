@@ -10,5 +10,5 @@ Because: "${reason}"
 This meeting record has been approved.
 <#else>
 
-This meeting record is pending approval by ${meetingRecord.pendingApproverNames}.
+This meeting record is pending approval by ${meetingRecord.pendingApprovalsDescription}.
 </#if>

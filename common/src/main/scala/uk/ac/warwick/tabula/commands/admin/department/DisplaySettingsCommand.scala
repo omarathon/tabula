@@ -4,12 +4,13 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{CourseType, StudentRelationshipType, Department}
-import uk.ac.warwick.tabula.services.{ AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent }
+import uk.ac.warwick.tabula.data.model.{CourseType, Department, MeetingRecordApprovalType, StudentRelationshipType}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
-import uk.ac.warwick.tabula.system.permissions.{ PermissionsChecking, RequiresPermissionsChecking }
-import org.springframework.validation.{ BindingResult, Errors }
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.system.BindListener
+
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
@@ -54,6 +55,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 	var studentRelationshipExpected: JMap[StudentRelationshipType, JMap[CourseType, JBoolean]] =
 		LazyMaps.create{_: StudentRelationshipType => JMap[CourseType, JBoolean]() }.asJava
 	var autoMarkMissedMonitoringPoints: Boolean = department.autoMarkMissedMonitoringPoints
+	var meetingRecordApprovalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
 
 	def populate() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
@@ -91,6 +93,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
 			}
 		}
 		department.autoMarkMissedMonitoringPoints = autoMarkMissedMonitoringPoints
+		department.meetingRecordApprovalType = meetingRecordApprovalType
 
 		moduleAndDepartmentService.saveOrUpdate(department)
 		department

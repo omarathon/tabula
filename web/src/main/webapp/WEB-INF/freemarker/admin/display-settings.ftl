@@ -230,6 +230,20 @@
 						If unchecked, students won't be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
 					</div>
 				</@bs3form.checkbox>
+
+				<@bs3form.labelled_form_group labelText="Meeting record approval">
+					<div class="help-block">
+						Meeting records for students in this department are approved when:
+					</div>
+					<@bs3form.radio>
+						<@f.radiobutton path="meetingRecordApprovalType" value="one" />
+						One person approves it
+					</@bs3form.radio>
+					<@bs3form.radio>
+						<@f.radiobutton path="meetingRecordApprovalType" value="all" />
+						Everyone approves it
+					</@bs3form.radio>
+				</@bs3form.labelled_form_group>
 			</fieldset>
 		</#if>
 
