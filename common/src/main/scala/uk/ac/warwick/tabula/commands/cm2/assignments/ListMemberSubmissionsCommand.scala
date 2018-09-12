@@ -76,7 +76,7 @@ abstract class ListMemberSubmissionsCommandInternal(val member: Member, val from
 		val submissionsFromDate = Option(fromDate).map(_.toDateTimeAtStartOfDay).getOrElse(
 			DateTime.now.minusYears(1).withTimeAtStartOfDay
 		)
-		val submissionsToDate = Option(toDate).map(_.toDateTimeAtStartOfDay).getOrElse(
+		val submissionsToDate = Option(toDate).map(_.plusDays(1).toDateTimeAtStartOfDay).getOrElse(
 			DateTime.now.withTimeAtStartOfDay
 		)
 
