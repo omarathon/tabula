@@ -19,17 +19,29 @@ class SubmissionServiceTest extends PersistenceTestBase {
 	@Test def submissionsBetweenDates() {
 		val universityId = "1234"
 
-		val startDate = new DateTime(2014, 3, 1, 0, 0, 0)
-		val endDate = new DateTime(2014, 3, 8, 0, 0, 0)
+		val startDate = new DateTime(2018, 3, 1, 0, 0, 0)
+		val endDate = new DateTime(2018, 3, 8, 0, 0, 0)
 
 		val submissionBefore = new Submission
 		submissionBefore._universityId = universityId
 		submissionBefore.usercode = universityId
 		submissionBefore.submittedDate = startDate.minusDays(1)
+
+		val submissionOnStartDate = new Submission
+		submissionOnStartDate._universityId = universityId
+		submissionOnStartDate.usercode = universityId
+		submissionOnStartDate.submittedDate = startDate
+
 		val submissionInside = new Submission
 		submissionInside._universityId = universityId
 		submissionInside.usercode = universityId
-		submissionInside.submittedDate = startDate
+		submissionInside.submittedDate = startDate.plusDays(1)
+
+		val submissionOnEndDate = new Submission
+		submissionOnEndDate._universityId = universityId
+		submissionOnEndDate.usercode = universityId
+		submissionOnEndDate.submittedDate = endDate
+
 		val submissionAfter = new Submission
 		submissionAfter._universityId = universityId
 		submissionAfter.usercode = universityId
@@ -51,8 +63,11 @@ class SubmissionServiceTest extends PersistenceTestBase {
 		session.save(submissionAfter)
 
 		val result = submissionService.getSubmissionsBetweenDates(universityId, startDate, endDate)
-		result.size should be (1)
-		result.head should be (submissionInside)
+		result.size should be (3)
+		result.contains(submissionOnStartDate) should be (true)
+		result.contains(submissionInside) should be (true)
+		result.contains(submissionOnEndDate) should be (true)
+
 	}
 
 }
