@@ -19,6 +19,7 @@ trait AutowiringAttendanceMonitoringMeetingRecordServiceComponent extends Attend
 
 trait AttendanceMonitoringMeetingRecordService {
 	def getCheckpoints(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint]
+	def getCheckpointsWhenApproved(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint]
 	def updateCheckpoints(meeting: MeetingRecord): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
 
@@ -30,32 +31,34 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 		if (!meeting.isAttendanceApproved) {
 			Seq()
 		} else {
-			meeting.relationships.flatMap(_.studentMember).flatMap {
-				case studentMember: StudentMember =>
-					val relevantPoints = AcademicYear.allForDate(meeting.meetingDate).flatMap { academicYear =>
-						getRelevantPoints(
-							attendanceMonitoringService.listStudentsPoints(studentMember, None, academicYear),
-							meeting,
-							studentMember
-						)
-					}
+			getCheckpointsWhenApproved(meeting)
+		}
+	}
 
-					relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
-						val checkpoint = new AttendanceMonitoringCheckpoint
-						checkpoint.autoCreated = true
-						checkpoint.point = point
-						checkpoint.attendanceMonitoringService = attendanceMonitoringService
-						checkpoint.student = studentMember
-						checkpoint.updatedBy = meeting.relationships.head.agentMember match {
-							case Some(agent: Member) => agent.userId
-							case _ => meeting.relationships.head.agent
-						}
-						checkpoint.updatedDate = DateTime.now
-						checkpoint.state = AttendanceState.Attended
-						checkpoint
-					})
-				case _ => Nil
-			}
+	def getCheckpointsWhenApproved(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint] = {
+		meeting.relationships.flatMap(_.studentMember).flatMap {
+			case studentMember: StudentMember =>
+				val relevantPoints = getRelevantPoints(
+					attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, meeting.meetingDate),
+					meeting,
+					studentMember
+				)
+
+				relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
+					val checkpoint = new AttendanceMonitoringCheckpoint
+					checkpoint.autoCreated = true
+					checkpoint.point = point
+					checkpoint.attendanceMonitoringService = attendanceMonitoringService
+					checkpoint.student = studentMember
+					checkpoint.updatedBy = meeting.relationships.head.agentMember match {
+						case Some(agent: Member) => agent.userId
+						case _ => meeting.relationships.head.agent
+					}
+					checkpoint.updatedDate = DateTime.now
+					checkpoint.state = AttendanceState.Attended
+					checkpoint
+				})
+			case _ => Nil
 		}
 	}
 

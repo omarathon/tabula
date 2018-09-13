@@ -2,7 +2,7 @@
 	<@f.textarea id="fields[${field.id}].value" cssClass="big-textarea" path="fields[${field.id}].value" />
 	<#if showHelpText?? && showHelpText>
 		<div class="help-block">
-			You can make a new paragraph by leaving a blank line (i.e. press Enter twice).
+			You can use markdown syntax <a target="_blank" href="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a>
 		</div>
 	</#if>
 </@form.labelled_row>
