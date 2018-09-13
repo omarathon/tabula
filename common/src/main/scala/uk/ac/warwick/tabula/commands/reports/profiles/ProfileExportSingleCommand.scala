@@ -71,7 +71,26 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		module: String,
 		name: String,
 		submissionDeadline: String,
-		submissionDate: String
+		submissionDate: String,
+		attachments: Seq[FileAttachment],
+		feedback: Option[FeedbackData]
+	)
+
+	case class FeedbackData(
+		releasedDate: String,
+		mark: Option[Int],
+		grade: Option[String],
+		comments: Option[String],
+		attachments: Seq[FileAttachment],
+		adjustments: Seq[AdjustmentData]
+	)
+
+	case class AdjustmentData(
+		mark: Int,
+		grade: Option[String],
+		reason: String,
+		comments: String,
+		date: String
 	)
 
 	case class SmallGroupData(
@@ -111,7 +130,26 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 							assignment.module.code.toUpperCase,
 							assignment.name,
 							Option(assignment.submissionDeadline(submission)).map(_.toString(ProfileExportSingleCommand.TimeFormat)).getOrElse(""),
-							submission.submittedDate.toString(ProfileExportSingleCommand.TimeFormat)
+							submission.submittedDate.toString(ProfileExportSingleCommand.TimeFormat),
+							submission.allAttachments,
+							assignment.findFeedback(student.userId).filter(_.released).map(feedback =>
+								FeedbackData(
+									releasedDate = feedback.releasedDate.toString(ProfileExportSingleCommand.TimeFormat),
+									mark = feedback.latestMark,
+									grade = feedback.latestGrade,
+									comments = feedback.comments,
+									attachments = feedback.attachments.asScala,
+									adjustments = feedback.adminViewableAdjustments.map(mark =>
+										AdjustmentData(
+											mark = mark.mark,
+											grade = mark.grade,
+											reason = mark.reason,
+											comments = mark.comments,
+											date = mark.uploadedDate.toString(ProfileExportSingleCommand.TimeFormat)
+										)
+									)
+								)
+							)
 						)
 					})
 				})
@@ -169,7 +207,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		// Return results
 		Seq(pdfFileAttachment) ++
 			pointData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
-			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment)))
+			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
+			assignmentData.flatMap(_.attachments) ++
+			assignmentData.flatMap(_.feedback).flatMap(_.attachments)
 	}
 
 	private def getPointData: Seq[PointData] = {

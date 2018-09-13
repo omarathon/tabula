@@ -209,6 +209,89 @@
 						<td>Submission date</td>
 						<td>${assignment.submissionDate}</td>
 					</tr>
+					<tr>
+						<td>Submitted files</td>
+						<td>
+							<ul>
+								<#list assignment.attachments as attachment>
+									<li>${attachment.id}-${attachment.name}</li>
+								</#list>
+							</ul>
+						</td>
+					</tr>
+					<#if assignment.feedback?has_content>
+						<#assign feedback = assignment.feedback>
+						<tr>
+							<td>Feedback publication date</td>
+							<td>${feedback.releasedDate}</td>
+						</tr>
+						<tr>
+							<td>Mark</td>
+							<td>${feedback.mark!"No mark given"}</td>
+						</tr>
+						<tr>
+							<td>Grade</td>
+							<td>${feedback.grade!"No grade given"}</td>
+						</tr>
+						<tr>
+							<td>Comments</td>
+							<td>${feedback.comments!"No comments added"}</td>
+						</tr>
+						<tr>
+							<td>File attachments</td>
+							<td>
+								<#if feedback.attachments?has_content>
+									<ul>
+										<#list feedback.attachments as attachment>
+											<li>${attachment.id}-${attachment.name}</li>
+										</#list>
+									</ul>
+								<#else>
+									No feedback files attached.
+								</#if>
+							</td>
+						</tr>
+						<tr>
+							<td>Adjustments</td>
+							<td>
+								<#if feedback.adjustments?has_content>
+									<#list feedback.adjustments as adjustment>
+										<table>
+											<tbody>
+												<tr>
+													<td>Date</td>
+													<td>${adjustment.date}</td>
+												</tr>
+												<tr>
+													<td>Reason</td>
+													<td>${adjustment.reason!"No reason given"}</td>
+												</tr>
+												<tr>
+													<td>Adjusted mark</td>
+													<td>${adjustment.mark!"No mark given"}</td>
+												</tr>
+												<tr>
+													<td>Adjusted grade</td>
+													<td>${adjustment.grade!"No grade given"}</td>
+												</tr>
+												<tr>
+													<td>Comments</td>
+													<td>${adjustment.comments!"No comments added"}</td>
+												</tr>
+											</tbody>
+										</table>
+									</#list>
+								<#else>
+									No adjustments have been made to this mark.
+								</#if>
+							</td>
+						</tr>
+					<#else>
+						<tr>
+							<td>Feedback publication date</td>
+							<td>Feedback has not been published for this assignment.</td>
+						</tr>
+					</#if>
 				</tbody>
 			</table>
 		</#list>
