@@ -3,8 +3,9 @@ package uk.ac.warwick.tabula.services.timetables
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
-import org.joda.time.{DateTimeConstants, LocalTime}
+import org.joda.time.{DateTime, DateTimeConstants, LocalTime}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRangeListUserType}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
@@ -84,6 +85,7 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 		with SmallGroupServiceComponent
 		with ModuleAndDepartmentServiceComponent
 		with UserLookupComponent
+		with ProfileServiceComponent
 		with ApacheHttpClientComponent =>
 
 	import ScientiaHttpTimetableFetchingService._
@@ -184,7 +186,20 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
 				EventList.empty
 			} else if (eventsList.events.isEmpty) {
 				logger.info(s"All timetable years are empty for $param")
-				throw new TimetableEmptyException(uris, param)
+
+				val studentCourseEndedInThePast: Boolean = profileService.getMemberByUniversityId(param)
+					.flatMap {
+						case student: StudentMember =>
+							val endYears = student.freshOrStaleStudentCourseDetails.map(_.latestStudentCourseYearDetails.academicYear.endYear)
+							if (endYears.isEmpty) None else Some(endYears.max)
+					}.exists(_ < AcademicYear.now().startYear)
+
+				if (studentCourseEndedInThePast) {
+					// TAB-6421 do not throw exception when student with a course end date in the past
+					EventList.empty
+				} else {
+					throw new TimetableEmptyException(uris, param)
+				}
 			} else {
 				eventsList
 			}
@@ -209,6 +224,7 @@ object ScientiaHttpTimetableFetchingService extends Logging {
 				with AutowiringWAI2GoConfigurationComponent
 				with AutowiringUserLookupComponent
 				with AutowiringApacheHttpClientComponent
+				with AutowiringProfileServiceComponent
 
 		if (scientiaConfiguration.perYearUris.exists(_._1.contains("stubTimetable"))) {
 			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
