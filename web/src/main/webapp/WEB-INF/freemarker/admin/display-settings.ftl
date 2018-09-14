@@ -233,15 +233,15 @@
 
 				<@bs3form.labelled_form_group labelText="Meeting record approval">
 					<div class="help-block">
-						Meeting records for students in this department are approved when:
+						Meeting records with multiple tutors/supervisors require approval from:
 					</div>
 					<@bs3form.radio>
 						<@f.radiobutton path="meetingRecordApprovalType" value="one" />
-						One person approves it
+						Any of the approvers
 					</@bs3form.radio>
 					<@bs3form.radio>
 						<@f.radiobutton path="meetingRecordApprovalType" value="all" />
-						Everyone approves it
+						All of the approvers
 					</@bs3form.radio>
 				</@bs3form.labelled_form_group>
 			</fieldset>
