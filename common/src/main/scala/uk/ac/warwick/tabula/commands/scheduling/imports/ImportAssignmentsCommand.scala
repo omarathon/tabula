@@ -213,7 +213,13 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 			val assessmentComponents = assessmentMembershipService.getAssessmentComponents(head.moduleCode, inUseOnly = false)
 				.filter(_.assessmentGroup == head.assessmentGroup)
 			val assessmentGroups = head.toUpstreamAssessmentGroups(assessmentComponents.map(_.sequence).distinct)
-				.map(assessmentGroup => assessmentMembershipService.replaceMembers(assessmentGroup, registrations))
+  			.map { assessmentGroup =>
+					if (importEverything) {
+						assessmentMembershipService.replaceMembers(assessmentGroup, registrations)
+					} else {
+						assessmentMembershipService.getUpstreamAssessmentGroup(assessmentGroup).getOrElse(assessmentGroup)
+					}
+				}
 
 			// Now sort out properties
 			val hasSequence = registrations.filter(r => r.sequence != null)
