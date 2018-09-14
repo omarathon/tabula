@@ -148,6 +148,9 @@ class Department extends GeneratedId
 	def uploadExamMarksToSits: Boolean = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
 	def uploadExamMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadExamMarksToSits -> enabled) }
 
+	def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
+	def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
+
 	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
 			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
@@ -528,6 +531,7 @@ object Department {
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
+		val MeetingRecordApprovalType = "meetingRecordApprovalType"
 
 		val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
 		val MissedMonitoringPointsNotificationLevelLow = "missedMonitoringPointsNotificationLevelLow"
