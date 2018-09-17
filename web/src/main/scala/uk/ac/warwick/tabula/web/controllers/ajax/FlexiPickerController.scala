@@ -217,7 +217,7 @@ object FlexiPickerController {
 			Map("type" -> "group", "title" -> group.getTitle, "groupType" -> group.getType, "value" -> group.getName)
 		}
 
-		private def item(name: String, value: String): Map[String, String] = value match {
+		private def item(name: String, value: String): Map[String, AnyRef] = value match {
 			case s: String if s.hasText => Map(name -> (value + "*"))
 			case _ => Map.empty
 		}
