@@ -77,12 +77,12 @@ object UserPickerController {
 		def query: String = if (firstName == "") lastName else firstName + " " + lastName
 		def query_=(q: String): Unit = setQuery(q)
 
-		def filter: Map[String, String] = {
+		def filter: Map[String, AnyRef] = {
 			item("givenName", firstName) ++ item("sn", lastName)
 		}
 
 		// filter with surname as firstname and viceversa, in case we get no results
-		def filterBackwards: Map[String, String] = {
+		def filterBackwards: Map[String, AnyRef] = {
 			item("givenName", lastName) ++ item("sn", firstName)
 		}
 
