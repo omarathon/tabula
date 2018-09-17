@@ -71,9 +71,10 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
 		getUsersByWarwickUniIds(warwickIds)
 
-	override def findUsersWithFilter(filterValues: JMap[String, String]): JList[User] = {
+	override def findUsersWithFilter(filterValues: JMap[String, AnyRef]): JList[User] = {
 		if (filterValues.size() == 1 && filterValues.containsKey("warwickuniid")) {
-			JArrayList(getUserByWarwickUniId(filterValues.get("warwickuniid")))
+			val uniId: String = filterValues.get("warwickuniid").asInstanceOf[String]
+			JArrayList(getUserByWarwickUniId(uniId))
 		} else if (findUsersEnabled) {
 			val list: JList[User] = JArrayList()
 			list.addAll(filterUserResult)
@@ -83,7 +84,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 		}
 	}
 
-	override def findUsersWithFilter(filterValues: JMap[String, String], returnDisabledUsers: Boolean): JList[User] = findUsersWithFilter(filterValues)
+	override def findUsersWithFilter(filterValues: JMap[String, AnyRef], returnDisabledUsers: Boolean): JList[User] = findUsersWithFilter(filterValues)
 
 	override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
 		val map: Map[String, User] = userIds.asScala.map { id => id -> getUserByUserId(id)}.toMap

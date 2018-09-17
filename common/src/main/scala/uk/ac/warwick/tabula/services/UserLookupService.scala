@@ -11,11 +11,11 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
-
 import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.core.OnCampusService
+import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
@@ -101,7 +101,8 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 		 * TAB-2004 We go directly to the UserLookup filter method in order to change the behaviour. In particular,
 		 * we want to prefer loginDisabled=FALSE over ones whose logins are disabled.
 		 */
-		val filter = Map("warwickuniid" -> id)
+		val filter: Map[Usercode, AnyRef] = Map("warwickuniid" -> id)
+
 		findUsersWithFilter(filter.asJava, true)
 			.asScala
 			.map { user => getUserByUserId(user.getUserId) }
@@ -264,8 +265,15 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	override def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
 	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User] = delegate.getUsersByWarwickUniIds(ids)
 	override def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User] = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
-	override def findUsersWithFilter(map: JMap[String, String]): JList[User] = delegate.findUsersWithFilter(map)
-	override def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean): JList[User] = delegate.findUsersWithFilter(map, includeInactive)
+
+	override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId]): JMap[UniversityId, User] = delegate.getUsersByWarwickUniIds(warwickUniIds.asScala).asJava
+
+	override def getUsersByWarwickUniIds(warwickUniIds: JList[UniversityId], includeDisabledLogins: Boolean): JMap[UniversityId, User] = delegate.getUsersByWarwickUniIdsUncached(warwickUniIds.asScala, includeDisabledLogins).asJava
+
+	override def findUsersWithFilter(filterValues: JMap[Usercode, AnyRef]): JList[User] = delegate.findUsersWithFilter(filterValues)
+
+	override def findUsersWithFilter(filterValues: JMap[Usercode, AnyRef], returnDisabledUsers: Boolean): JList[User] = delegate.findUsersWithFilter(filterValues, returnDisabledUsers)
+
 	override def getGroupService: LenientGroupService = delegate.getGroupService
 	override def getOnCampusService: OnCampusService = delegate.getOnCampusService
 	override def getUserByUserId(id: String): User = delegate.getUserByUserId(id)
@@ -298,7 +306,7 @@ class LenientGroupService(delegate: GroupService) extends GroupService with Logg
 	def getRelatedGroups(group: String): JList[Group] = tryOrElse(delegate.getRelatedGroups(group), JArrayList())
 	def getGroupsForDeptCode(deptCode: String): JList[Group] = tryOrElse(delegate.getGroupsForDeptCode(deptCode), JArrayList())
 
-	def getCaches: JMap[String, JSet[Cache[_, _]]] = delegate.getCaches
+	def getCaches: JMap[Usercode, JSet[Cache[_ <: Serializable, _ <: Serializable]]] = delegate.getCaches
 	def clearCaches(): Unit = delegate.clearCaches()
 	def setTimeoutConfig(config: WebServiceTimeoutConfig): Unit = delegate.setTimeoutConfig(config)
 }
