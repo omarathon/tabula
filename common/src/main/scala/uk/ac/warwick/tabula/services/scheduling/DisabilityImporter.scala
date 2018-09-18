@@ -95,7 +95,11 @@ class SandboxDisabilityImporter extends DisabilityImporter {
 			// a sample range of disabilities which might affect administrative decisions in Tabula:
 			new ImportDisabilitiesCommand(DisabilityInfo("04", "WHEELCHAIR", "Wheelchair user/mobility difficulties")),
 			new ImportDisabilitiesCommand(DisabilityInfo("07", "UNSEEN DISAB.", "An unseen disability, e.g. diabetes, epilepsy, asthma")),
-			new ImportDisabilitiesCommand(DisabilityInfo("10", "AS/DIS/ASP SYN", "Autistic Spectrum Disorder or Aspergers Syndrome"))
+			new ImportDisabilitiesCommand(DisabilityInfo("99", "NOT KNOWN", "Not Known - please select another option")),
+			new ImportDisabilitiesCommand(DisabilityInfo("A", "NO DISABILITY", "No disability")),
+			new ImportDisabilitiesCommand(DisabilityInfo("F", "MENTAL HEALTH", "You have a mental health condition")),
+			new ImportDisabilitiesCommand(DisabilityInfo("G", "SPEC LEARN DIFF", "You have a specific learning difficulty")),
+			new ImportDisabilitiesCommand(DisabilityInfo("I", "OTHER", "Condition not listed"))
 		)
 }
 
