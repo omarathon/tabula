@@ -34,7 +34,7 @@ class Tier4RequirementImporterImpl extends Tier4RequirementImporter {
 
 @Profile(Array("sandbox")) @Service
 class SandboxTier4RequirementImporter extends Tier4RequirementImporter {
-	def hasTier4Requirement(universityId: String): Boolean = false
+	def hasTier4Requirement(universityId: String): Boolean = universityId.toLong % 3 == 0
 }
 
 object Tier4RequirementImporter {

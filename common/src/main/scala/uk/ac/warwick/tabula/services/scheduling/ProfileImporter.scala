@@ -201,9 +201,10 @@ class SandboxProfileImporter extends ProfileImporter {
 				"user_code" -> member.usercode,
 				"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
 				"in_use_flag" -> "Active",
-				"alternative_email_address" -> null,
-				"mobile_number" -> null,
-				"nationality" -> "British (ex. Channel Islands & Isle of Man)",
+				"alternative_email_address" -> "%s%s@hotmail.com".format(member.preferredSurname.toLowerCase, member.preferredForenames.toLowerCase),
+				"mobile_number" -> (if (member.universityId.toLong % 3 == 0) null else s"0700${member.universityId}"),
+				"nationality" -> (if (member.universityId.toLong % 3 == 0) "Kittitian/Nevisian" else "British (ex. Channel Islands & Isle of Man)"),
+				"second_nationality" -> (if (member.universityId.toLong % 3 == 0) "Syrian" else null),
 				"course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
 				"course_year_length" -> "3",
 				"spr_code" -> "%s/1".format(member.universityId),
@@ -233,7 +234,13 @@ class SandboxProfileImporter extends ProfileImporter {
 				"sce_route_code" -> route.code.toUpperCase,
 				"enrolment_department_code" -> member.departmentCode.toUpperCase,
 				"mod_reg_status" -> "CON",
-				"disability" -> "A",
+				"disability" -> (member.universityId.toLong % 100 match {
+					case 1 => "G" // Learning difficulty
+					case 4 => "F" // Mental health condition
+					case 5 => "I" // Unclassified disability
+					case n if n > 70 => "99" // Not known
+					case _ => "A" // No disability
+				}),
 				"mst_type" -> "L",
 				"sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
 					char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
