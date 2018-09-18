@@ -28,7 +28,7 @@ dependencies {
     compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
 
-    compile 'uk.ac.warwick.sso:sso-client:2.30'
+    compile 'uk.ac.warwick.sso:sso-client:2.54'
     compile 'xalan:xalan:2.7.2'
 
     compile 'org.apache.httpcomponents:httpclient:4.5.1'
