@@ -421,7 +421,10 @@
 			$('.key table').css('max-width', '');
 		});
 
-		$('.table-responsive').css('overflow-x', 'hidden');
+		// Chrome has "Safari" in its ua
+		if (!(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1)) {
+			$('.table-responsive').css('overflow-x', 'hidden');
+		}
 
 		$('#examGridContainer').css('opacity', 1);
 		$('#examGridSpinner').hide();
