@@ -35,6 +35,7 @@ object ProfileExportSingleCommand {
 			with AutowiringMeetingRecordServiceComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringSecurityServiceComponent
+			with AutowiringMemberNoteServiceComponent
 			with AutowiringFileDaoComponent
 			with AutowiringTopLevelUrlComponent
 			with ComposableCommand[Seq[FileAttachment]]
@@ -50,7 +51,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	self: FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AttendanceMonitoringServiceComponent
 		with AssessmentServiceComponent	with RelationshipServiceComponent with MeetingRecordServiceComponent
 		with SmallGroupServiceComponent	with UserLookupComponent
-		with SecurityServiceComponent
+		with SecurityServiceComponent with MemberNoteServiceComponent
 		with FileDaoComponent =>
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -117,6 +118,14 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		description: String
 	)
 
+	case class AdministrativeNote(
+		date: String,
+		title: String,
+		note: String,
+		noteHTML: String,
+		attachments: Seq[FileAttachment]
+	)
+
 	override def applyInternal(): Seq[FileAttachment] = {
 		// Get point data
 		val pointData = if (securityService.can(user, Permissions.MonitoringPoints.View, student)) {
@@ -132,6 +141,26 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 				feedback.studentViewableAdjustments
 			}
 		}
+
+		val (administrativeNotesData, extenuatingCircumstancesData) =
+			if (securityService.can(user, Permissions.MemberNotes.Read, student)) (
+				memberNoteService.listNonDeletedNotes(student)
+					.map(memberNote => AdministrativeNote(
+						date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
+						title = memberNote.title,
+						note = memberNote.note,
+						noteHTML = memberNote.escapedNote,
+						attachments =  memberNote.attachments.asScala
+					)),
+				memberNoteService.listNonDeletedExtenuatingCircumstances(student)
+					.map(memberNote => AdministrativeNote(
+						date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
+						title = memberNote.title,
+						note = memberNote.note,
+						noteHTML = memberNote.escapedNote,
+						attachments =  memberNote.attachments.asScala
+					))
+			) else (Nil, Nil)
 
 		// Get coursework
 		val assignmentData = benchmarkTask("assignmentData") {
@@ -215,13 +244,16 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			s"Tabula-${student.universityId}-profile.pdf",
 			Map(
 				"student" -> student,
+				"studentCourseDetails" -> student.freshStudentCourseDetails,
 				"academicYear" -> academicYear,
 				"user" -> user,
 				"summary" -> summary,
 				"groupedPoints" -> groupedPoints,
 				"assignmentData" -> assignmentData,
 				"smallGroupData" -> smallGroupData.groupBy(_.eventId),
-				"meetingData" -> meetingData.groupBy(_.relationshipType)
+				"meetingData" -> meetingData.groupBy(_.relationshipType),
+				"administrativeNotesData" -> administrativeNotesData,
+				"extenuatingCircumstancesData" -> extenuatingCircumstancesData
 			)
 		)
 
@@ -230,7 +262,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			pointData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
 			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
 			assignmentData.flatMap(_.attachments) ++
-			assignmentData.flatMap(_.feedback).flatMap(_.attachments)
+			assignmentData.flatMap(_.feedback).flatMap(_.attachments) ++
+			administrativeNotesData.flatMap(_.attachments) ++
+			extenuatingCircumstancesData.flatMap(_.attachments)
 	}
 
 	private def getPointData: Seq[PointData] = {
