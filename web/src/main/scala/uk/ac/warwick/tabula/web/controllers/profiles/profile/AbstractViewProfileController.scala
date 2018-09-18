@@ -81,6 +81,9 @@ abstract class AbstractViewProfileController extends ProfilesController
 				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser, Some(scyd.academicYear)) match {
 					case Nil => Nil
 					case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
+				}) ++ (scd.student == currentMember match {
+					case false => Nil
+					case true => Seq(ProfileBreadcrumbs.Profile.DownloadForScyd(scyd).setActive(activeIdentifier))
 				})
 		}
 
