@@ -126,12 +126,14 @@ trait ApproveMeetingRecordNotificationCompletion extends CompletesNotifications[
 	self: NotificationHandling with ApproveMeetingRecordState =>
 
 	def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
-		CompletesNotificationsResult(
-			notificationService.findActionRequiredNotificationsByEntityAndType[NewMeetingRecordApprovalNotification](commandResult) ++
-				notificationService.findActionRequiredNotificationsByEntityAndType[EditedMeetingRecordApprovalNotification](commandResult)
-			,
-			user.apparentUser
-		)
+		if (commandResult.isApproved) {
+			CompletesNotificationsResult(
+				notificationService.findActionRequiredNotificationsByEntityAndType[NewMeetingRecordApprovalNotification](commandResult) ++
+					notificationService.findActionRequiredNotificationsByEntityAndType[EditedMeetingRecordApprovalNotification](commandResult)
+				,
+				user.apparentUser
+			)
+		} else EmptyCompletesNotificationsResult
 	}
 }
 
