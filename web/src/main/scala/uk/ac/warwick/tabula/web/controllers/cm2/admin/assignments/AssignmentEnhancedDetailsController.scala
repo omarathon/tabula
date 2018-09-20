@@ -26,7 +26,7 @@ abstract class AbstractAssignmentEnhancedDetailsController extends CourseworkCon
 
 	@RequestMapping
 	def enhancedDetailsAjax(@ModelAttribute("command") command: AssignmentCommand, @PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/home/single_enhanced_assignment.ftl", "assignmentInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
+		Mav("cm2/admin/home/single_enhanced_assignment", "assignmentInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 }
 
 @Profile(Array("cm2Enabled"))

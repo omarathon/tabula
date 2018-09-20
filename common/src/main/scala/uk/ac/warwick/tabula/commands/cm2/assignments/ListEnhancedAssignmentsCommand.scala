@@ -66,11 +66,19 @@ object ListEnhancedAssignmentsCommand {
 		assignments: Seq[AssignmentInfo]
 	)
 
+//	case class ModuleSkeletonAssignmentsInfo(
+//		module: Module,
+//		assignments: Seq[AssignmentInfo]
+//	)
+
 	type DepartmentResult = Seq[ModuleAssignmentsInfo]
 	type DepartmentCommand = Appliable[DepartmentResult] with ListAssignmentsCommandRequest with ListDepartmentAssignmentsCommandState with ListAssignmentsModulesWithPermission
 
 	type ModuleResult = ModuleAssignmentsInfo
 	type ModuleCommand = Appliable[ModuleResult] with ListModuleAssignmentsCommandState
+
+//	type ModuleSkeletonResult = ModuleSkeletonAssignmentsInfo
+//	type ModuleSkeletonCommand = Appliable[ModuleSkeletonResult] with ListModuleAssignmentsCommandState
 
 	type AssignmentResult = EnhancedAssignmentInfo
 	type AssignmentCommand = Appliable[AssignmentResult] with ListEnhancedAssignmentCommandState
@@ -98,6 +106,19 @@ object ListEnhancedAssignmentsCommand {
 			with ComposableCommand[ModuleResult]
 			with Unaudited with ReadOnly
 
+	def moduleSkeleton(module: Module, academicYear: AcademicYear, user: CurrentUser): ModuleCommand =
+		new ListModuleSkeletonAssignmentsCommandInternal(module, academicYear, user)
+			with ListModuleAssignmentsPermissions
+			with AutowiringModuleAndDepartmentServiceComponent
+			with AutowiringSecurityServiceComponent
+			with CachedAssignmentProgress
+			with AutowiringAssessmentServiceComponent
+			with AutowiringCM2WorkflowProgressServiceComponent
+			with AutowiringCacheStrategyComponent
+			with ComposableCommand[ModuleResult]
+			with Unaudited with ReadOnly
+
+
 	def assignment(assignment: Assignment, academicYear: AcademicYear, user: CurrentUser): AssignmentCommand =
 		new ListEnhancedAssignmentCommandInternal(assignment, academicYear, user)
 			with ListEnhancedAssignmentPermissions
@@ -109,6 +130,8 @@ object ListEnhancedAssignmentsCommand {
 			with AutowiringCacheStrategyComponent
 			with ComposableCommand[AssignmentResult]
 			with Unaudited with ReadOnly
+
+
 
 }
 
@@ -182,6 +205,24 @@ class ListModuleAssignmentsCommandInternal(val module: Module, academicYear: Aca
 		info.copy(assignments = info.assignments.map { a => enhance(a.assignment) })
 	}
 
+}
+
+class ListModuleSkeletonAssignmentsCommandInternal(val module: Module, academicYear: AcademicYear, user: CurrentUser)
+	extends ListAssignmentsCommandInternal(academicYear, user)
+		with CommandInternal[ModuleResult]
+		with ListModuleAssignmentsCommandState {
+	self: AssignmentProgress
+		with CM2WorkflowProgressServiceComponent =>
+
+	override def applyInternal(): ModuleResult = {
+
+		ModuleAssignmentsInfo(
+			module,
+			//refactor - reuse
+			module.assignments.asScala.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }.map { assignment =>
+				BasicAssignmentInfo(assignment)
+			})
+	}
 }
 
 class ListEnhancedAssignmentCommandInternal(val assignment: Assignment, academicYear: AcademicYear, user: CurrentUser)

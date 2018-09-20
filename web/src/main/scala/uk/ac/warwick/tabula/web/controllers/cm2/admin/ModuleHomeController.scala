@@ -22,19 +22,36 @@ abstract class AbstractModuleHomeController
 	@ModelAttribute("command")
 	def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
 		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
-
 		ListEnhancedAssignmentsCommand.module(module, academicYear, user)
 	}
 
-	@RequestMapping(params=Array("!ajax"), headers=Array("!X-Requested-With"))
+	@ModelAttribute("skeletonCommand")
+	def skeletonCommand(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
+		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+		ListEnhancedAssignmentsCommand.moduleSkeleton(module, academicYear, user)
+	}
+
+	@RequestMapping(params=Array("!ajax", "!skeleton"), headers=Array("!X-Requested-With"))
 	def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
 		Mav("cm2/admin/home/module", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear)
 			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
+	// actually might just need the ajax one???
+	@RequestMapping(params=Array("skeleton"), headers=Array("!X-Requested-With"))
+	def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand, @PathVariable module: Module): Mav =
+		Mav("cm2/admin/home/module_list_skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear)
+			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(skeletonCommand.academicYear)))
+			.secondCrumbs(academicYearBreadcrumbs(skeletonCommand.academicYear)(Routes.admin.module(module, _)): _*)
+
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
 		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
+
+//	@RequestMapping(params=Array("skeleton", "ajax"), headers=Array("X-Requested-With"))
+	@RequestMapping(params=Array("skeleton", "ajax"))
+	def homeSkeletonAjax(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand): Mav =
+		Mav("cm2/admin/home/assignments", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear).noLayout()
 
 }
 
@@ -73,5 +90,3 @@ class ModuleHomeRedirectController extends CourseworkController
 		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
 
 }
-
-
