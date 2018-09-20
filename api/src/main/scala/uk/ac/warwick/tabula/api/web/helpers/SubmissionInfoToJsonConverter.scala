@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Submission
+import uk.ac.warwick.tabula.services.ExtensionServiceComponent
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
@@ -9,7 +10,7 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 trait SubmissionInfoToJsonConverter {
-	self: TopLevelUrlComponent =>
+	self: TopLevelUrlComponent with ExtensionServiceComponent =>
 
 	def jsonSubmissionInfoObject(submission: Submission): Map[String, Any] = {
 
@@ -62,6 +63,7 @@ trait SubmissionInfoToJsonConverter {
 				"isWithinApprovedExtension" -> isWithinApprovedExtension,
 				"hasActiveExtension" -> hasActiveExtension,
 				"extensionRequested" -> extensionRequested,
+				"extensionRequestedOn" -> e.requestedOn,
 				"requestedExpiryDate" -> e.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"attachments" -> e.attachments.asScala.map { attachment => Map(
