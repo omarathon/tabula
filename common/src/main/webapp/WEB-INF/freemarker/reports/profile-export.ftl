@@ -26,11 +26,11 @@
 		td { border: 1px solid black; padding: 8px 8px; font-size: 10px; font-weight: bold; background: #f2f2f2; width: 1px; white-space: nowrap; vertical-align: top; }
 		td + td { font-size: 10px; font-weight: normal; background: white; width: auto; white-space: normal; }
 
-		div.cover { page-break-after: always; text-align: center; }
-		div.cover h1 { padding-top: 200px; }
+		.cover { page-break-after: always; text-align: center; }
+		.cover h1 { padding-top: 200px; }
 
-		div.summary, div.term, div.state, div.department, div.assignments, div.small-groups, div.meetings { page-break-after: always; }
-		table, div.point, div.summary-department, div.event, div.assignment { page-break-inside: avoid; }
+		.page { page-break-after: always; }
+		table, .point, .summary-department, .event, .assignment { page-break-inside: avoid; }
 	</style>
 </head>
 <body>
@@ -45,8 +45,264 @@
 		<p>${.now?string("short")}</p>
 	</div>
 
+	<div class="page">
+		<h1>Profile</h1>
+
+		<h2>Identity</h2>
+
+		<table>
+			<tbody>
+				<tr>
+					<td>Official name</td>
+					<td>${student.officialName}</td>
+				</tr>
+				<tr>
+					<td>Preferred name</td>
+					<td>${student.fullName}</td>
+				</tr>
+				<#if student.gender??>
+					<tr>
+						<td>Gender</td>
+						<td>${student.gender.description}</td>
+					</tr>
+				</#if>
+				<#if student.nationality??>
+					<tr>
+						<td>Nationality</td>
+						<td>
+							<@fmt.nationality student.nationality!'Unknown' />
+							<#if student.secondNationality??>
+								and <@fmt.nationality student.secondNationality />
+							</#if>
+						</td>
+					</tr>
+				</#if>
+				<#if student.disability.reportable!false>
+					<tr>
+						<td>Disability</td>
+						<td>${student.disability.definition}</td>
+					</tr>
+				</#if>
+				<#if student.hasTier4Visa?? && student.casUsed??>
+					<tr>
+						<td>Tier 4 requirements</td>
+						<td>
+							<#if student.casUsed && student.hasTier4Visa>
+								Yes
+							<#elseif !student.casUsed && !student.hasTier4Visa>
+								No
+							<#else>
+								Contact the Immigration Service
+							</#if>
+						</td>
+					</tr>
+				</#if>
+				<#if student.email??>
+					<tr>
+						<td>Warwick email</td>
+						<td>${student.email}</td>
+					</tr>
+				</#if>
+				<#if student.homeEmail??>
+					<tr>
+						<td>Alternative email</td>
+						<td>${student.homeEmail}</td>
+					</tr>
+				</#if>
+				<#if student.mobileNumber??>
+					<tr>
+						<td>Mobile phone</td>
+						<td>${phoneNumberFormatter(student.mobileNumber)}</td>
+					</tr>
+				</#if>
+				<#if student.universityId??>
+					<tr>
+						<td>University ID</td>
+						<td>${student.universityId}</td>
+					</tr>
+				</#if>
+				<#if student.userId??>
+					<tr>
+						<td>Username</td>
+						<td>${student.userId}</td>
+					</tr>
+				</#if>
+				<#if student.homeDeaprtment??>
+					<tr>
+						<td>Home department</td>
+						<td>${student.homeDepartment.name}</td>
+					</tr>
+				</#if>
+			</tbody>
+		</table>
+
+		<h2>Course</h2>
+
+		<#list studentCourseDetails as scd>
+			<#assign scyd = scd.latestStudentCourseYearDetails>
+			<table>
+				<tbody>
+					<tr>
+						<td>Course</td>
+						<td>
+							${scd.course.name}, ${scd.course.code}
+							(${(scd.beginYear?string("0000"))!} - ${(scd.endYear?string("0000"))!})
+						</td>
+					</tr>
+					<#if scd.department??>
+						<tr>
+							<td>Department</td>
+							<td>
+								${scd.department.name!""}
+								(${(scd.department.code!"")?upper_case})
+							</td>
+						</tr>
+					</#if>
+					<#if scd.currentRoute?? && scd.currentRoute.degreeType??>
+						<tr>
+							<td>UG/PG</td>
+							<td>${scd.currentRoute.degreeType.toString!""}</td>
+						</tr>
+					</#if>
+					<#if scd.award??>
+						<tr>
+							<td>Intended award</td>
+							<td>${scd.award.name!""}</td>
+						</tr>
+					</#if>
+					<#if scyd.modeOfAttendance??>
+						<tr>
+							<td>Attendance</td>
+							<td>${scyd.modeOfAttendance.fullNameAliased}</td>
+						</tr>
+					</#if>
+					<#if scd.statusOnCourse??>
+						<tr>
+							<td>Status on course</td>
+							<td><@fmt.status_on_course scd /></td>
+						</tr>
+					</#if>
+					<#if scd.endDate??>
+						<tr>
+							<td>End date</td>
+							<td><@fmt.date date=scd.endDate includeTime=false /></td>
+						</tr>
+					</#if>
+					<#if scd.expectedEndDate??>
+						<tr>
+							<td>Expected end date</td>
+							<td><@fmt.date date=scd.expectedEndDate includeTime=false /></td>
+						</tr>
+					</#if>
+					<#if scyd.route??>
+						<tr>
+							<td>Route</td>
+							<td>
+								${scyd.route.name!""}
+								(${(scyd.route.code!"")?upper_case})
+							</td>
+						</tr>
+					</#if>
+					<#if scyd.yearOfStudy??>
+						<tr>
+							<td>Study block or year</td>
+							<td>${scyd.yearOfStudy}</td>
+						</tr>
+					</#if>
+					<#if scd.hasCurrentEnrolment && scd.level?? && scyd.latest>
+						<tr>
+							<td>Current course level</td>
+							<td>
+								${scd.level.code} (${scd.level.name?lower_case?cap_first})
+							</td>
+						</tr>
+					</#if>
+					<#if scd.sprCode??>
+						<tr>
+							<td>Programme route code</td>
+							<td>${scd.sprCode}</td>
+						</tr>
+					</#if>
+					<#if scd.scjCode??>
+						<tr>
+							<td>Course join code</td>
+							<td>${scd.scjCode}</td>
+						</tr>
+					</#if>
+				</tbody>
+			</table>
+		</#list>
+	</div>
+
+	<#macro memberNote note>
+		<table>
+			<tbody>
+				<tr>
+					<td>Title</td>
+					<td>${note.title}</td>
+				</tr>
+				<tr>
+					<td>Created</td>
+					<td>${note.date}</td>
+				</tr>
+				<tr>
+					<td>Note</td>
+					<td>
+						<#noescape>
+							${note.noteHTML}
+						</#noescape>
+					</td>
+				</tr>
+				<tr>
+					<td>Attachments</td>
+					<td>
+						<#if note.attachments?has_content>
+							<ul>
+							<#list note.attachments as attachment>
+								<li>
+									${attachment.id}-${attachment.name}
+								</li>
+							</#list>
+							</ul>
+						<#else>
+							<em>No files attached.</em>
+						</#if>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</#macro>
+
+	<div class="page">
+		<h1>Administrative notes</h1>
+
+		<#if administrativeNotesData?has_content>
+			<#list administrativeNotesData as note>
+				<@memberNote note />
+			</#list>
+		<#else>
+			<p>
+				<em>No administrative notes found.</em>
+			</p>
+		</#if>
+	</div>
+
+	<div class="page">
+		<h1>Extenuating circumstances</h1>
+
+		<#if extenuatingCircumstancesData?has_content>
+			<#list extenuatingCircumstancesData as note>
+				<@memberNote note />
+			</#list>
+		<#else>
+			<p>
+				<em>No extenuating circumstances found.</em>
+			</p>
+		</#if>
+	</div>
+
 	<#-- SUMMARY -->
-	<div class="summary">
+	<div class="page">
 		<h1>Attendance Summary</h1>
 		<#if !summary?keys?has_content><p><em>No monitoring points found.</em></p></#if>
 		<#list summary?keys?sort as department>
@@ -84,7 +340,7 @@
 
 	<#-- POINTS -->
 	<#macro pointInATerm points state term>
-		<div class="term">
+		<div class="page">
 			<h2>${state} Monitoring Points, Term: ${term}</h2>
 
 			<#list points?sort_by("startDate") as point>
@@ -188,7 +444,7 @@
 	</#list>
 
 	<#-- ASSIGNMENTS -->
-	<div class="assignments">
+	<div class="page">
 		<h1>Assignment submissions</h1>
 		<#if !assignmentData?has_content><p><em>No assignments found.</em></p></#if>
 		<#list assignmentData as assignment>
@@ -209,13 +465,96 @@
 						<td>Submission date</td>
 						<td>${assignment.submissionDate}</td>
 					</tr>
+					<tr>
+						<td>Submitted files</td>
+						<td>
+							<ul>
+								<#list assignment.attachments as attachment>
+									<li>${attachment.id}-${attachment.name}</li>
+								</#list>
+							</ul>
+						</td>
+					</tr>
+					<#if assignment.feedback?has_content>
+						<#assign feedback = assignment.feedback>
+						<tr>
+							<td>Feedback publication date</td>
+							<td>${feedback.releasedDate}</td>
+						</tr>
+						<tr>
+							<td>Mark</td>
+							<td>${feedback.mark!"No mark given"}</td>
+						</tr>
+						<tr>
+							<td>Grade</td>
+							<td>${feedback.grade!"No grade given"}</td>
+						</tr>
+						<tr>
+							<td>Comments</td>
+							<td>${feedback.comments!"No comments added"}</td>
+						</tr>
+						<tr>
+							<td>File attachments</td>
+							<td>
+								<#if feedback.attachments?has_content>
+									<ul>
+										<#list feedback.attachments as attachment>
+											<li>${attachment.id}-${attachment.name}</li>
+										</#list>
+									</ul>
+								<#else>
+									No feedback files attached.
+								</#if>
+							</td>
+						</tr>
+						<tr>
+							<td>Adjustments</td>
+							<td>
+								<#if feedback.adjustments?has_content>
+									<#list feedback.adjustments as adjustment>
+										<table>
+											<tbody>
+												<tr>
+													<td>Date</td>
+													<td>${adjustment.date}</td>
+												</tr>
+												<tr>
+													<td>Reason</td>
+													<td>${adjustment.reason!"No reason given"}</td>
+												</tr>
+												<tr>
+													<td>Adjusted mark</td>
+													<td>${adjustment.mark!"No mark given"}</td>
+												</tr>
+												<tr>
+													<td>Adjusted grade</td>
+													<td>${adjustment.grade!"No grade given"}</td>
+												</tr>
+												<tr>
+													<td>Comments</td>
+													<td>${adjustment.comments!"No comments added"}</td>
+												</tr>
+											</tbody>
+										</table>
+									</#list>
+								<#else>
+									No adjustments have been made to this mark.
+								</#if>
+							</td>
+						</tr>
+					<#else>
+						<tr>
+							<td>Feedback publication date</td>
+							<td>Feedback has not been published for this assignment.</td>
+						</tr>
+					</#if>
 				</tbody>
 			</table>
 		</#list>
 	</div>
 
 	<#-- SMALL GROUP ATTENDANCE -->
-	<div class="small-groups">
+	<div class="page">
 		<h1>Small group event attendance</h1>
 		<#if !smallGroupData?keys?has_content><p><em>No small group event attendance found.</em></p></#if>
 		<#list smallGroupData?keys as eventId>
@@ -260,7 +599,7 @@
 	</div>
 
 	<#-- MEETINGS -->
-	<div class="meetings">
+	<div class="page">
 		<h1>Meeting records</h1>
 		<#if !meetingData?keys?has_content><p><em>No meetings found.</em></p></#if>
 		<#list meetingData?keys as relationshipType>
