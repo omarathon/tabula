@@ -92,6 +92,7 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def approvedBy: Option[Member] = approvals.asScala.filter(_.approved).flatMap(a => Option(a.approvedBy)).headOption
 
 	def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
+		case Nil => "nobody"
 		case Seq(single) => single
 		case init :+ last =>
 			val andOr = approvalType match {

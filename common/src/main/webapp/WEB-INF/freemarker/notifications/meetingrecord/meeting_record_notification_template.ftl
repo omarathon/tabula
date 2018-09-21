@@ -8,6 +8,9 @@ Because: "${reason}"
 <#if meetingRecord.approved>
 
 This meeting record has been approved.
+<#elseif meetingRecord.rejected>
+
+This meeting record is pending revision.
 <#else>
 
 This meeting record is pending approval by ${meetingRecord.pendingApprovalsDescription}.
