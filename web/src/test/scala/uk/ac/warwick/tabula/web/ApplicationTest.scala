@@ -14,7 +14,7 @@ class ApplicationTest extends AppContextTestBase {
 
 	// Can resolve message codes from any controller
 	@Test def messageResolving(): Unit = {
-		sysadminController.getMessage("NotEmpty") should be("You need to put something here.")
+		sysadminController.getMessage("NotEmpty") should be("A required field was empty.")
 		sysadminController.getMessage("userId.notingroup", "alvin") should be("The usercode alvin isn't in this group.")
 	}
 

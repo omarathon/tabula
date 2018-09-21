@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
-import javax.persistence._
 
+import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, NotRequired}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
@@ -38,6 +39,9 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
 	override def toEntityReference: EntityReference[MeetingRecordApproval] = new MeetingRecordApprovalEntityReference().put(this)
 
 	override def permissionsParents: Stream[PermissionsTarget] = Stream(meetingRecord)
+
+	def approved: Boolean = state == Approved
+	def required: Boolean = state != NotRequired
 }
 
 sealed abstract class MeetingApprovalState(val code: String, val description: String) {
@@ -48,9 +52,10 @@ object MeetingApprovalState {
 	case object Pending extends MeetingApprovalState("pending", "Pending approval")
 	case object Approved extends MeetingApprovalState("approved", "Approved")
 	case object Rejected extends MeetingApprovalState("rejected", "Rejected")
+	case object NotRequired extends MeetingApprovalState("notRequired", "Not required")
 
 	// lame manual collection. Keep in sync with the case objects above
-	val states = Set(Pending, Approved, Rejected)
+	val states = Set(Pending, Approved, Rejected, NotRequired)
 
 	def fromCode(code: String): MeetingApprovalState =
 		if (code == null) null

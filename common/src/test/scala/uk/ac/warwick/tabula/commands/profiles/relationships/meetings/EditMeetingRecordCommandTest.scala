@@ -16,6 +16,7 @@ class EditMeetingRecordCommandTest extends TestBase with Mockito {
 	val marchHare: DateTime = dateTime(2013, DateTimeConstants.MARCH)
 	val thisCreator: StaffMember = Fixtures.staff("9876543")
 	val student: StudentMember = Fixtures.student(universityId="1170836", userId="studentmember")
+	student.homeDepartment = Fixtures.department(code = "IN")
 	val thisRelationship = ExternalStudentRelationship(
 		"Professor A Tutor",
 		StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),

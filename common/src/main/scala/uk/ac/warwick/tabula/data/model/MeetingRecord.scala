@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence._
-
 import org.hibernate.annotations.BatchSize
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
@@ -57,8 +57,8 @@ class MeetingRecord extends AbstractMeetingRecord {
 	// true if the specified user needs to perform a workflow action on this meeting record
 	def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
 
-	// The meeting record is approved when all approvals are in the Approved state
-	def isApproved: Boolean = approvals.asScala.forall(approval => approval.state == Approved)
+	// The meeting record is approved when all required approvals are Approved
+	def isApproved: Boolean = approvals.asScala.filter(_.required).forall(_.approved)
 
 	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
 	def isAttendanceApproved: Boolean = ((creator != null && relationships.map(_.agent).contains(creator.universityId)) || isApproved) && !missed
@@ -74,7 +74,6 @@ class MeetingRecord extends AbstractMeetingRecord {
 	)
 
 	def pendingApprovers: List[Member] = pendingApprovals.map(_.approver).toList
-	def pendingApproverNames: String = memberNames(pendingApprovers)
 
 	def isRejected: Boolean =  approvals.asScala.exists(approval => approval.state == Rejected)
 	def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
@@ -82,17 +81,28 @@ class MeetingRecord extends AbstractMeetingRecord {
 	// people who have had a draft version rejected
 	def pendingRevisionBy(user: CurrentUser): Boolean = isRejected && user.universityId == creator.universityId
 
-	def willBeApprovedFollowingApprovalBy(user: CurrentUser): Boolean = pendingApprovers.map(_.universityId).forall(_ == user.universityId)
+	def willBeApprovedFollowingApprovalBy(user: CurrentUser): Boolean = approvalType match {
+		case OneApproval => pendingApprovers.map(_.universityId).contains(user.universityId)
+		case AllApprovals => pendingApprovers.map(_.universityId).forall(_ == user.universityId)
+	}
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.state == Approved).map(_.lastUpdatedDate).sorted.headOption
+	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.approved).map(_.lastUpdatedDate).sorted.headOption
 
-	def approvedBy: Option[Member] = approvals.asScala.filter(_.state == Approved).flatMap(a => Option(a.approvedBy)).headOption
+	def approvedBy: Option[Member] = approvals.asScala.filter(_.approved).flatMap(a => Option(a.approvedBy)).headOption
 
 	def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
 		case Seq(single) => single
-		case init :+ last => s"${init.mkString(", ")} and $last"
+		case init :+ last =>
+			val andOr = approvalType match {
+				case OneApproval => "or"
+				case AllApprovals => "and"
+			}
+			s"${init.mkString(", ")} $andOr $last"
 	}
+
+	def department: Department = student.homeDepartment
+	def approvalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
 
 	// End of workflow definitions
 }

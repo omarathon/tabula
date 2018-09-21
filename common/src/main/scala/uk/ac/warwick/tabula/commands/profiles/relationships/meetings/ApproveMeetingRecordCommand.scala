@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord._
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval, Notification, SingleItemNotification}
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
@@ -41,19 +42,25 @@ class ApproveMeetingRecordCommand (val meeting: MeetingRecord, val user: Current
 
 	def applyInternal(): MeetingRecord = transactional() {
 		if (approved) {
-			approvals.foreach(approval => {
+			approvals.foreach { approval =>
 				approval.state = Approved
 				user.profile.foreach(approval.approvedBy = _)
 				approval.lastUpdatedDate = DateTime.now
 				meetingRecordDao.saveOrUpdate(approval)
-			})
+			}
+
+			notRequiredApprovals.foreach { approval =>
+				approval.state = NotRequired
+				approval.lastUpdatedDate = DateTime.now
+				meetingRecordDao.saveOrUpdate(approval)
+			}
 		} else {
-			approvals.foreach(approval => {
+			approvals.foreach { approval =>
 				approval.state = Rejected
 				approval.comments = rejectionComments
 				approval.lastUpdatedDate = DateTime.now
 				meetingRecordDao.saveOrUpdate(approval)
-			})
+			}
 		}
 
 		if (features.attendanceMonitoringMeetingPointType) {
@@ -139,4 +146,9 @@ trait ApproveMeetingRecordState {
 
 	lazy val approvals: Seq[MeetingRecordApproval] =
 		meeting.approvals.asScala.filter(approval => securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
+
+	lazy val notRequiredApprovals: Seq[MeetingRecordApproval] = meeting.approvalType match {
+		case AllApprovals => Nil
+		case OneApproval => meeting.approvals.asScala -- approvals
+	}
 }
