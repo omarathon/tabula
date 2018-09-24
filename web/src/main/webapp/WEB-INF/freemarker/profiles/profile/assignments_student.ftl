@@ -105,11 +105,7 @@
 							<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">Submit</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
 									<#assign extensionUrl>
-										<#if enhancedAssignment.assignment.cm2Assignment>
-											<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
-										<#else>
-											<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
-										</#if>
+										<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
 									</#assign>
 									<#if enhancedAssignment.extensionRequested>
 										<a href="${extensionUrl}" class="btn btn-default btn-block">
@@ -182,11 +178,7 @@
 								<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View receipt</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
 									<#assign extensionUrl>
-										<#if enhancedAssignment.assignment.cm2Assignment>
-											<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
-										<#else>
-											<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
-										</#if>
+										<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
 									</#assign>
 									<#if enhancedAssignment.extensionRequested>
 										<a href="${extensionUrl}" class="btn btn-default btn-block">
