@@ -15,6 +15,7 @@
 	<li>Coursework submissions and files</li>
 	<li>Marks, online feedback and feedback files</li>
 	<li>Small group teaching attendance</li>
+	<li>Monitoring point attendance</li>
 </ul>
 
 <form method="post" action="<@routes.profiles.download studentCourseDetails academicYear/>">

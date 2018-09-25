@@ -34,7 +34,7 @@
 	</style>
 </head>
 <body>
-	<#assign terms = ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] />
+	<#assign terms = ["Pre-term vacation", "Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] />
 
 	<#-- COVER SHEET -->
 	<div class="cover">
