@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.services.ExtensionServiceComponent
+import uk.ac.warwick.tabula.services.{ExtensionServiceComponent, SubmissionServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
@@ -10,9 +10,17 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 trait SubmissionInfoToJsonConverter {
-	self: TopLevelUrlComponent with ExtensionServiceComponent =>
+	self: TopLevelUrlComponent with ExtensionServiceComponent with UserLookupComponent with SubmissionServiceComponent =>
 
 	def jsonSubmissionInfoObject(submission: Submission): Map[String, Any] = {
+
+		val submitter = userLookup.getUserByUserId(submission.usercode)
+
+		val submitterInfo = Map(
+			"student" -> Map(
+				"totalExtensionRequestsEver" -> extensionService.getAllExtensionRequests(submitter).size,
+				"totalSubmissionsEver" -> submissionService.getAllSubmissions(submitter).size
+			))
 
 		val assignment = submission.assignment
 		val assignmentBasicInfo = Map(
@@ -63,17 +71,18 @@ trait SubmissionInfoToJsonConverter {
 				"isWithinApprovedExtension" -> isWithinApprovedExtension,
 				"hasActiveExtension" -> hasActiveExtension,
 				"extensionRequested" -> extensionRequested,
-				"extensionRequestedOn" -> e.requestedOn,
+				"extensionRequestedOn" -> DateFormats.IsoDateTime.print(e.requestedOn),
 				"requestedExpiryDate" -> e.requestedExpiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"expiryDate" -> e.expiryDate.map(DateFormats.IsoDateTime.print).orNull,
 				"attachments" -> e.attachments.asScala.map { attachment => Map(
 					"url" -> (toplevelUrl + Routes.cm2.admin.assignment.extensionAttachment(e, attachment.name))
 				)},
 				"reason" -> e.reason,
-				"reviewerComments" -> e.reviewerComments
+				"reviewerComments" -> e.reviewerComments,
+				"extensionRequestedExtraDaysDuration" -> e.requestedExtraDuration,
+				"feedbackDueDate" -> e.feedbackDueDate.map(DateFormats.IsoDateTime.print).orNull
 			)
 		}.orNull)
-
 
 		val submissionInfo = Map(
 			"id" -> submission.id,
@@ -97,7 +106,7 @@ trait SubmissionInfoToJsonConverter {
 			"suspectPlagiarised" -> submission.suspectPlagiarised
 		)
 
-		assignmentBasicInfo ++ extensionInfo ++ submissionInfo
+		submitterInfo ++ assignmentBasicInfo ++ extensionInfo ++ submissionInfo
 	}
 
 }
