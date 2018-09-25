@@ -1,20 +1,42 @@
+<#escape x as x?html>
 <h1>Mapped Syllabus+ Rooms</h1>
-<p>This is a list of all hardcoded Syllabus+ locations in Tabula. Tabula names have initially been derived from the map API but can be hardcoded to any value.</p>
+<p>This is a list of all Syllabus+ locations in Tabula.</p>
+
+<p>
+	<a href="<@routes.admin.addLocation />" class="btn btn-primary">Add location</a>
+</p>
+
+<#if locations?size == 0>
+	<form action="/admin/scientia-rooms/populate" method="post">
+		<p>
+			<button class="btn btn-primary">Populate from hard-coded data</button>
+		</p>
+	</form>
+</#if>
+
 <table class="table table-bordered table-striped table-condensed sortable">
 	<thead>
 		<tr>
 			<th class="sortable">Syllabus+ name</th>
 			<th class="sortable">Tabula name</th>
 			<th class="sortable">Location ID</th>
+			<th></th>
 		</tr>
 	</thead>
 	<tbody>
-		<#list rooms as room>
+		<#list locations as location>
 			<tr>
-				<#-- None of these should ever be null but if we guard we can see which one is if a mistake is made. -->
-				<td><#if room.syllabusPlusName??>${room.syllabusPlusName}</#if></td>
-				<td><#if room.name??>${room.name}</#if></td>
-				<td><#if room.locationId??><span class="map" data-lid="${room.locationId}">${room.locationId}</span></#if></td>
+				<td>${location.upstreamName!""}</td>
+				<td>${location.name!""}</td>
+				<td>
+					<#if location.mapLocationId??>
+						<span class="map" data-lid="${location.mapLocationId}">${location.mapLocationId}</span>
+					</#if>
+				</td>
+				<td class="text-right">
+					<a href="<@routes.admin.editLocation location />" class="btn btn-default btn-xs">Edit</a>
+					<a href="<@routes.admin.deleteLocation location />" type="submit" class="btn btn-danger btn-xs">Delete</a>
+				</td>
 			</tr>
 		</#list>
 	</tbody>
@@ -31,3 +53,4 @@
 		$('table.sortable').sortableTable();
 	});
 </script>
+</#escape>
