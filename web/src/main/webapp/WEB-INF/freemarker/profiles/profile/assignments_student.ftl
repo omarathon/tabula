@@ -104,12 +104,15 @@
 							<#if isSelf>
 							<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">Submit</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
+									<#assign extensionUrl>
+										<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
+									</#assign>
 									<#if enhancedAssignment.extensionRequested>
-										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
+										<a href="${extensionUrl}" class="btn btn-default btn-block">
 											Review extension request
 										</a>
 									<#elseif !enhancedAssignment.withinExtension && enhancedAssignment.assignment.newExtensionsCanBeRequested>
-										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
+										<a href="${extensionUrl}" class="btn btn-default btn-block">
 											Request an extension
 										</a>
 									</#if>
@@ -174,12 +177,15 @@
 							<#if isSelf>
 								<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View receipt</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
+									<#assign extensionUrl>
+										<@routes.cm2.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}
+									</#assign>
 									<#if enhancedAssignment.extensionRequested>
-										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
+										<a href="${extensionUrl}" class="btn btn-default btn-block">
 											Review extension request
 										</a>
 									<#elseif !enhancedAssignment.withinExtension && enhancedAssignment.assignment.newExtensionsCanBeRequested>
-										<a href="<@routes.coursework.extensionRequest assignment=enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-default btn-block">
+										<a href="${extensionUrl}" class="btn btn-default btn-block">
 											Request an extension
 										</a>
 									</#if>
