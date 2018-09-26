@@ -77,7 +77,7 @@
 						</td>
 					</tr>
 				</#if>
-				<#if student.disability.reportable!false>
+				<#if student.disability?? && student.disability.reportable!false>
 					<tr>
 						<td>Disability</td>
 						<td>${student.disability.definition}</td>
@@ -127,7 +127,7 @@
 						<td>${student.userId}</td>
 					</tr>
 				</#if>
-				<#if student.homeDeaprtment??>
+				<#if student.homeDepartment??>
 					<tr>
 						<td>Home department</td>
 						<td>${student.homeDepartment.name}</td>
