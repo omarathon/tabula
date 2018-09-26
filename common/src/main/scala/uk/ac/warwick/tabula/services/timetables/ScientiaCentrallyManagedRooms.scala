@@ -373,15 +373,15 @@ object ScientiaCentrallyManagedRooms {
 		// Additions for 18/19
 		"CO_D1.07" -> MapLocation("D1.07", "2998", Some("CO_D1.07")),
 		"CS_CS0.06" -> MapLocation("CS0.06", "26814", Some("CS_CS0.06")),
-//		"EN_G.06" -> MapLocation("G.06", "", Some("EN_G.06")),
+		"EN_G.06" -> MapLocation("G.06", "52320", Some("EN_G.06")),
 		"ES_EBS1.1" -> MapLocation("EBS1.1", "30933", Some("ES_EBS1.1")),
 		"ES_EBS1.3" -> MapLocation("EBS1.3", "53127", Some("ES_EBS1.3")),
 		"FAC.ART_H1.04" -> MapLocation("H1.04", "21429", Some("FAC.ART_H1.04")),
 		"MS.D0.06" -> MapLocation("D0.06", "40832", Some("MS.D0.06")),
-//		"SH3.25" -> MapLocation("SH3.25", "", Some("SH3.25")),
-//		"WM_2.17" -> MapLocation("IMC2.17", "", Some("WM_2.17")),
-//		"MB0.07" -> MapLocation("MB0.07", "", Some("MB0.07")),
-//		"MB0.08" -> MapLocation("MB0.08", "", Some("MB0.08")),
+		"SH3.25" -> MapLocation("SH3.25", "38566", Some("SH3.25")),
+		"WM_2.17" -> MapLocation("IMC2.17", "19817", Some("WM_2.17")),
+//		"MB0.07" -> MapLocation("MB0.07", "", Some("MB0.07")), // building under construction
+//		"MB0.08" -> MapLocation("MB0.08", "", Some("MB0.08")), // building under construction
 		"WA0.15a" -> MapLocation("WA0.15a", "19150", Some("WA0.15a")), // map location is WA0.15
 		"WA0.15b" -> MapLocation("WA0.15b", "19149", Some("WA0.15b")), // map location is WA0.15
 		"WA1.15a" -> MapLocation("WA1.15a", "19198", Some("WA1.15a")), // map location is WA1.15
