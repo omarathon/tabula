@@ -115,7 +115,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		meetingDate: String,
 		title: String,
 		format: String,
-		description: String
+		description: String,
+		attachments: Seq[FileAttachment]
 	)
 
 	case class AdministrativeNote(
@@ -129,7 +130,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	override def applyInternal(): Seq[FileAttachment] = {
 		// Get point data
 		val pointData = if (securityService.can(user, Permissions.MonitoringPoints.View, student)) {
-			benchmarkTask("pointData") { getPointData }
+			benchmarkTask("pointData") { getPointData(academicYear) }
 		} else {
 			Nil
 		}
@@ -205,7 +206,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		}
 
 		// Get small groups
-		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData }
+		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData(academicYear) }
 
 		// Get meetings
 		val startOfYear = academicYear.firstDay
@@ -221,7 +222,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 					meeting.meetingDate.toString(ProfileExportSingleCommand.TimeFormat),
 					meeting.title,
 					meeting.format.description,
-					meeting.escapedDescription
+					meeting.escapedDescription,
+					meeting.attachments.asScala
 				))
 		}
 
@@ -264,12 +266,13 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			assignmentData.flatMap(_.attachments) ++
 			assignmentData.flatMap(_.feedback).flatMap(_.attachments) ++
 			administrativeNotesData.flatMap(_.attachments) ++
-			extenuatingCircumstancesData.flatMap(_.attachments)
+			extenuatingCircumstancesData.flatMap(_.attachments) ++
+			meetingData.flatMap(_.attachments)
 	}
 
-	private def getPointData: Seq[PointData] = {
+	private def getPointData(academicYear: AcademicYear): Seq[PointData] = {
 		val checkpoints = benchmarkTask("attendanceMonitoringService.getAllAttendance") {
-			attendanceMonitoringService.getAllAttendance(student.universityId)
+			attendanceMonitoringService.getAllAttendanceInAcademicYear(student, academicYear)
 		}
 		val attendanceNoteMap = benchmarkTask("attendanceMonitoringService.getAttendanceNoteMap") {
 			attendanceMonitoringService.getAttendanceNoteMap(student)
@@ -340,9 +343,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		}
 	}
 
-	private def getSmallGroupData: Seq[SmallGroupData] = {
+	private def getSmallGroupData(academicYear: AcademicYear): Seq[SmallGroupData] = {
 		val allAttendance = benchmarkTask("smallGroupService.findAttendanceForStudentInModulesInWeeks") {
-			smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 52, Seq())
+			smallGroupService.findAllAttendanceForStudentInAcademicYear(student, academicYear)
 		}
 		val users = benchmarkTask("userLookup.getUsersByUserIds") {
 			userLookup.getUsersByUserIds(allAttendance.map(_.updatedBy).asJava).asScala
