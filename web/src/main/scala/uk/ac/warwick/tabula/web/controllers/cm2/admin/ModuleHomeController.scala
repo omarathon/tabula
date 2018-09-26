@@ -37,12 +37,12 @@ abstract class AbstractModuleHomeController
 			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
 			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
-	// actually might just need the ajax one???
-	@RequestMapping(params=Array("skeleton"), headers=Array("!X-Requested-With"))
-	def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand, @PathVariable module: Module): Mav =
-		Mav("cm2/admin/home/module_list_skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear)
-			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(skeletonCommand.academicYear)))
-			.secondCrumbs(academicYearBreadcrumbs(skeletonCommand.academicYear)(Routes.admin.module(module, _)): _*)
+//	// actually might just need the ajax one???
+//	@RequestMapping(params=Array("skeleton"), headers=Array("!X-Requested-With"))
+//	def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand, @PathVariable module: Module): Mav =
+//		Mav("cm2/admin/home/module_list_skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear)
+//			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(skeletonCommand.academicYear)))
+//			.secondCrumbs(academicYearBreadcrumbs(skeletonCommand.academicYear)(Routes.admin.module(module, _)): _*)
 
 	@RequestMapping
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
@@ -51,7 +51,7 @@ abstract class AbstractModuleHomeController
 //	@RequestMapping(params=Array("skeleton", "ajax"), headers=Array("X-Requested-With"))
 	@RequestMapping(params=Array("skeleton", "ajax"))
 	def homeSkeletonAjax(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear).noLayout()
+		Mav("cm2/admin/home/assignments", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear, "skeleton" -> true).noLayout()
 
 }
 
