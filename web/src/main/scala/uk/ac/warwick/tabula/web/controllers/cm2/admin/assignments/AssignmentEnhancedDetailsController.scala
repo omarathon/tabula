@@ -37,14 +37,3 @@ class AssignmentEnhancedDetailsController extends AbstractAssignmentEnhancedDeta
 	override def activeAcademicYear: Option[AcademicYear] =
 		retrieveActiveAcademicYear(None)
 }
-
-//@Profile(Array("cm2Enabled"))
-//@Controller
-//@RequestMapping(Array("/${cm2.prefix}/admin/assignments/detail/{assignment}/{academicYear:\\d{4}}"))
-//class AssignmentEnhancedDetailsForYearController extends AbstractAssignmentEnhancedDetailsController {
-//
-//	@ModelAttribute("activeAcademicYear")
-//	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-//		retrieveActiveAcademicYear(Option(academicYear))
-//
-//}
