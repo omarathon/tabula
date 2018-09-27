@@ -235,7 +235,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		val startOfYear = academicYear.firstDay
 		val endOfYear = academicYear.lastDay
 		val meetingData = benchmarkTask("meetingData") {
-			relationshipService.getAllPastAndPresentRelationships(student).flatMap(meetingRecordService.list)
+			meetingRecordService.list(relationshipService.getAllPastAndPresentRelationships(student).toSet, None)
+				.distinct
 				.filter(m => !m.meetingDate.isBefore(startOfYear.toDateTimeAtStartOfDay) && m.meetingDate.isBefore(endOfYear.plusDays(1).toDateTimeAtStartOfDay) && m.isApproved)
 				.filter(_.relationshipTypes.exists(relationshipType => securityService.can(user, Permissions.Profiles.MeetingRecord.ReadDetails(relationshipType), student)))
 				.sortBy(_.meetingDate)
