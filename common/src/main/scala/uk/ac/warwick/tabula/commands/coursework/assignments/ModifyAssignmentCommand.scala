@@ -78,8 +78,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		} else {
 			//disallow assignments with open date >= 1st Aug 2017
 			var validOpenDate: DateTime = DateTime.parse("2017-08-01")
-			//bypass validation if it is cm2 assignment
-			if(!cm2Assignment && openDate.isAfter(validOpenDate) || openDate.isEqual(validOpenDate) ) {
+			if(openDate.isAfter(validOpenDate) || openDate.isEqual(validOpenDate)) {
 				errors.rejectValue("openDate", "openDate.invalid")
 			}
 		}
@@ -101,7 +100,6 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		assignment.closeDate = closeDate
 		assignment.academicYear = academicYear
 		assignment.feedbackTemplate = feedbackTemplate
-		assignment.cm2Assignment = cm2Assignment
 
 		assignment.assessmentGroups.clear()
 		assignment.assessmentGroups.addAll(assessmentGroups)

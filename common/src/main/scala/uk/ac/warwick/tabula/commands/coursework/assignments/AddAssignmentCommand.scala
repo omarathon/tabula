@@ -18,6 +18,7 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 		val assignment = new Assignment(module)
 		assignment.addDefaultFields()
 		copyTo(assignment)
+		assignment.cm2Assignment = true // TAB-6539 create new assignment as cm2
 		service.save(assignment)
 		assignment
 	}
