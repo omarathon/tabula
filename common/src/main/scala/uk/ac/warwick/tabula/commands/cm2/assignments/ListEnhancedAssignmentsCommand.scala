@@ -170,8 +170,6 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 			dueDateFilter(info)
 		}
 	)
-
-
 }
 
 class ListDepartmentAssignmentsCommandInternal(val department: Department, academicYear: AcademicYear, user: CurrentUser)
@@ -210,7 +208,6 @@ class ListModuleSkeletonAssignmentsCommandInternal(val module: Module, academicY
 		with CM2WorkflowProgressServiceComponent =>
 
 	override def applyInternal(): ModuleResult = {
-
 		ModuleAssignmentsInfo(
 			module,
 			sortedModuleAssignments(module, academicYear).map { assignment =>
