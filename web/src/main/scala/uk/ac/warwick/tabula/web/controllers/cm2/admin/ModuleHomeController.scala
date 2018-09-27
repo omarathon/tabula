@@ -41,9 +41,9 @@ abstract class AbstractModuleHomeController
 	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
 		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
-	@RequestMapping(params=Array("skeleton"))
+	@RequestMapping(params=Array("skeleton", "!statusFilters"))
 	def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear, "skeleton" -> true).noLayout()
+		Mav("cm2/admin/home/assignments-skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear, "skeleton" -> true).noLayout()
 
 }
 

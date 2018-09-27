@@ -66,19 +66,11 @@ object ListEnhancedAssignmentsCommand {
 		assignments: Seq[AssignmentInfo]
 	)
 
-//	case class ModuleSkeletonAssignmentsInfo(
-//		module: Module,
-//		assignments: Seq[AssignmentInfo]
-//	)
-
 	type DepartmentResult = Seq[ModuleAssignmentsInfo]
 	type DepartmentCommand = Appliable[DepartmentResult] with ListAssignmentsCommandRequest with ListDepartmentAssignmentsCommandState with ListAssignmentsModulesWithPermission
 
 	type ModuleResult = ModuleAssignmentsInfo
 	type ModuleCommand = Appliable[ModuleResult] with ListModuleAssignmentsCommandState
-
-//	type ModuleSkeletonResult = ModuleSkeletonAssignmentsInfo
-//	type ModuleSkeletonCommand = Appliable[ModuleSkeletonResult] with ListModuleAssignmentsCommandState
 
 	type AssignmentResult = EnhancedAssignmentInfo
 	type AssignmentCommand = Appliable[AssignmentResult] with ListEnhancedAssignmentCommandState
@@ -131,7 +123,9 @@ object ListEnhancedAssignmentsCommand {
 			with ComposableCommand[AssignmentResult]
 			with Unaudited with ReadOnly
 
-
+	def sortedModuleAssignments(module: Module, academicYear: AcademicYear) = {
+		module.assignments.asScala.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }
+	}
 
 }
 
@@ -167,7 +161,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 
 	protected def moduleInfo(module: Module) = ModuleAssignmentsInfo(
 		module,
-		module.assignments.asScala.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }.map { assignment =>
+		sortedModuleAssignments(module, academicYear).map { assignment =>
 			BasicAssignmentInfo(assignment)
 		}.filter { info =>
 			(moduleFilters.asScala.isEmpty || moduleFilters.asScala.exists(_(info))) &&
@@ -176,6 +170,7 @@ abstract class ListAssignmentsCommandInternal(val academicYear: AcademicYear, va
 			dueDateFilter(info)
 		}
 	)
+
 
 }
 
@@ -218,8 +213,7 @@ class ListModuleSkeletonAssignmentsCommandInternal(val module: Module, academicY
 
 		ModuleAssignmentsInfo(
 			module,
-			//refactor - reuse
-			module.assignments.asScala.filterNot(_.deleted).filter(_.academicYear == academicYear).sortBy { a => (a.openDate, a.name) }.map { assignment =>
+			sortedModuleAssignments(module, academicYear).map { assignment =>
 				BasicAssignmentInfo(assignment)
 			})
 	}

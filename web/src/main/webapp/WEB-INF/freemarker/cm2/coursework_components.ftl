@@ -572,7 +572,7 @@
 	</div>
 </#macro>
 
-<#macro admin_assignment_list module assignments academicYear expand_by_default=true skeleton=false>
+<#macro admin_assignment_list module assignments academicYear expand_by_default=true>
 	<#local id>module-${module.id}</#local>
 	<#local title><@fmt.module_name module /></#local>
 
@@ -581,7 +581,7 @@
 		<div id="${id}" class="striped-section admin-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>" data-name="${id}"
 			<#if has_assignments && !expand_by_default>
 				 data-populate=".striped-section-contents"
-				 data-href="<@routes.cm2.modulehome module academicYear />?${info.requestedUri.query!}&skeleton&ajax"
+				 data-href="<@routes.cm2.modulehome module academicYear />?${info.requestedUri.query!}&skeleton"
 				 data-name="${id}"
 			</#if>
 		>
@@ -651,7 +651,8 @@
 	<#local assignment = info.assignment />
 	<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
 
-	<div class="item-info admin-assignment-${assignment.id}" data-detailurl="<@routes.cm2.enhancedAssignmentDetails info.assignment />">
+	<div class="item-info admin-assignment-${assignment.id}" data-detailurl="<@routes.cm2.enhancedAssignmentDetails info.assignment />" >
+
 		<div class="clearfix">
 			<div class="pull-right">
 				<#if assignment.cm2Assignment>
