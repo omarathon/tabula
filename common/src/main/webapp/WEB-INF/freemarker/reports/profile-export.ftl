@@ -634,6 +634,20 @@
 							<td>Description</td>
 							<td><#noescape>${meeting.description!""}</#noescape></td>
 						</tr>
+						<tr>
+							<td>File attachments</td>
+							<td>
+								<#if meeting.attachments?has_content>
+									<ul>
+										<#list meeting.attachments as attachment>
+											<li>${attachment.id}-${attachment.name}</li>
+										</#list>
+									</ul>
+								<#else>
+									No files attached.
+								</#if>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</#list>
