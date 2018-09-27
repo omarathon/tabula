@@ -127,6 +127,29 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		attachments: Seq[FileAttachment]
 	)
 
+	case class CourseData(
+		courseName: Option[String],
+		courseCode: Option[String],
+		beginYear: Option[String],
+		endYear: Option[String],
+		departmentName: Option[String],
+		departmentCode: Option[String],
+		degreeType: Option[String],
+		awardName: Option[String],
+		modeOfAttendance: Option[String],
+		statusOnCourse: Option[String],
+		endDate: Option[String],
+		expectedEndDate: Option[String],
+		routeName: Option[String],
+		routeCode: Option[String],
+		yearOfStudy: String,
+		hasCurrentEnrolment: Boolean,
+		courseLevelCode: Option[String],
+		courseLevelName: Option[String],
+		sprCode: String,
+		scjCode: String
+	)
+
 	override def applyInternal(): Seq[FileAttachment] = {
 		// Get point data
 		val pointData = if (securityService.can(user, Permissions.MonitoringPoints.View, student)) {
@@ -240,13 +263,40 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			.groupBy(_.state).mapValues(_
 			.groupBy(_.term)))
 
+		val courseData = student.freshStudentCourseDetails.map { scd =>
+			val scyd = scd.latestStudentCourseYearDetails
+
+			CourseData(
+				courseName = Option(scd.course).map(_.name),
+				courseCode = Option(scd.course).map(_.code),
+				beginYear = Option(scd.beginYear).map(_.formatted("%04d")),
+				endYear = Option(scd.endYear).map(_.formatted("%04d")),
+				departmentName = Option(scd.department).map(_.name),
+				departmentCode = Option(scd.department).map(_.code.toUpperCase),
+				degreeType = Option(scd.currentRoute).map(_.degreeType.toString),
+				awardName = Option(scd.award).map(_.name),
+				modeOfAttendance = Option(scyd.modeOfAttendance).map(_.fullNameAliased),
+				statusOnCourse = Option(scd.statusOnCourse).map(_.fullName.toLowerCase.capitalize),
+				endDate = Option(scd.endDate).map(_.toString(ProfileExportSingleCommand.DateFormat)),
+				expectedEndDate = Option(scd.expectedEndDate).map(_.toString(ProfileExportSingleCommand.DateFormat)),
+				routeName = Option(scyd.route).map(_.name),
+				routeCode = Option(scyd.route).map(_.code.toUpperCase),
+				yearOfStudy = scyd.yearOfStudy.toString,
+				hasCurrentEnrolment = scd.hasCurrentEnrolment,
+				courseLevelCode = scd.level.map(_.code),
+				courseLevelName = scd.level.map(_.name),
+				sprCode = scd.sprCode,
+				scjCode = scd.scjCode
+			)
+		}
+
 		// Render PDF and create file
 		val pdfFileAttachment = pdfGenerator.renderTemplateAndStore(
 			"/WEB-INF/freemarker/reports/profile-export.ftl",
 			s"Tabula-${student.universityId}-profile.pdf",
 			Map(
 				"student" -> student,
-				"studentCourseDetails" -> student.freshStudentCourseDetails,
+				"courseData" -> courseData,
 				"academicYear" -> academicYear,
 				"user" -> user,
 				"summary" -> summary,
