@@ -20,7 +20,6 @@ abstract class AbstractAssignmentEnhancedDetailsController extends CourseworkCon
 	@ModelAttribute("command")
 	def command(@PathVariable assignment: Assignment, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): AssignmentCommand = {
 		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
-
 		ListEnhancedAssignmentsCommand.assignment(assignment, academicYear, user)
 	}
 
@@ -39,13 +38,13 @@ class AssignmentEnhancedDetailsController extends AbstractAssignmentEnhancedDeta
 		retrieveActiveAcademicYear(None)
 }
 
-@Profile(Array("cm2Enabled"))
-@Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/detail/{assignment}/{academicYear:\\d{4}}"))
-class AssignmentEnhancedDetailsForYearController extends AbstractAssignmentEnhancedDetailsController {
-
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(academicYear))
-
-}
+//@Profile(Array("cm2Enabled"))
+//@Controller
+//@RequestMapping(Array("/${cm2.prefix}/admin/assignments/detail/{assignment}/{academicYear:\\d{4}}"))
+//class AssignmentEnhancedDetailsForYearController extends AbstractAssignmentEnhancedDetailsController {
+//
+//	@ModelAttribute("activeAcademicYear")
+//	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+//		retrieveActiveAcademicYear(Option(academicYear))
+//
+//}
