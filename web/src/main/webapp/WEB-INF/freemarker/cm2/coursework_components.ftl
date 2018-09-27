@@ -651,7 +651,7 @@
 	<#local assignment = info.assignment />
 	<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
 
-	<div class="item-info admin-assignment-${assignment.id}">
+	<div class="item-info admin-assignment-${assignment.id}" data-detailurl="<@routes.cm2.enhancedAssignmentDetails info.assignment />">
 		<div class="clearfix">
 			<div class="pull-right">
 				<#if assignment.cm2Assignment>
