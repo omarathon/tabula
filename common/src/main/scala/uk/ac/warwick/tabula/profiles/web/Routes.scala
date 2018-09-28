@@ -53,6 +53,9 @@ object Routes {
 		def students(department: Department, academicYear: AcademicYear): String = context + "/department/%s/students/%s" format(encoded(department.code), encoded(academicYear.startYear.toString))
 
 		def examTimetable(universityId: String): String = context + "/view/%s/exams" format encoded(universityId)
+
+		def download(member: Member): String = s"$context/view/${member.universityId}/download"
+		def download(scyd: StudentCourseYearDetails): String = s"$context/view/${scyd.studentCourseDetails.urlSafeId}/${scyd.academicYear.value.toString}/download"
 	}
 
 	def students(relationshipType: StudentRelationshipType): String = context + "/%s/students" format encoded(relationshipType.urlPart)

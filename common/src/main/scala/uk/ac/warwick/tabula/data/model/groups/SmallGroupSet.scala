@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.LocalTime
 import uk.ac.warwick.spring.Wire
@@ -11,6 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -39,14 +39,14 @@ object SmallGroupSet {
 }
 
 /**
- * Represents a set of small groups, within an instance of a module.
- */
+	* Represents a set of small groups, within an instance of a module.
+	*/
 @FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = 0")
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)
 class SmallGroupSet
-		extends GeneratedId
+	extends GeneratedId
 		with CanBeDeleted
 		with ToString
 		with PermissionsTarget
@@ -55,7 +55,7 @@ class SmallGroupSet
 		with PostLoadBehaviour
 		with ToEntityReference
 		with TaskBenchmarking
-		with HasManualMembership  {
+		with HasManualMembership {
 	type Entity = SmallGroupSet
 
 	import SmallGroupSet.Settings
@@ -81,51 +81,64 @@ class SmallGroupSet
 
 	var archived: JBoolean = false
 
-  @Column(name="released_to_students")
-	var releasedToStudents: JBoolean = false
-  @Column(name="released_to_tutors")
-  var releasedToTutors: JBoolean = false
+	@Column(name = "released_to_students")
+	private var _releasedToStudents: JBoolean = false
 
-	@Column(name="email_students")
+	def releasedToStudents: Boolean = {
+		allocationMethod match {
+			case StudentSignUp => true
+			case _ =>
+				_releasedToStudents
+		}
+	}
+
+	def releasedToStudents_=(releasedToStudents: Boolean) {
+		_releasedToStudents = releasedToStudents
+	}
+
+	@Column(name = "released_to_tutors")
+	var releasedToTutors: JBoolean = false
+
+	@Column(name = "email_students")
 	var emailStudentsOnChange: JBoolean = true
-	@Column(name="email_tutors")
+	@Column(name = "email_tutors")
 	var emailTutorsOnChange: JBoolean = true
 
-  def visibleToStudents: Boolean = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
+	def visibleToStudents: Boolean = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
-  def fullyReleased: Boolean = releasedToStudents && releasedToTutors
+	def fullyReleased: Boolean = releasedToStudents && releasedToTutors
 
-	@Column(name="group_format")
+	@Column(name = "group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
 	@NotNull
 	var format: SmallGroupFormat = _
 
-	@Column(name="allocation_method")
+	@Column(name = "allocation_method")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
-	@Column(name="self_group_switching")
+	@Column(name = "self_group_switching")
 	var allowSelfGroupSwitching: Boolean = true
 
 	// TODO consider changing this to be a string, and setting it to the name of the SmallGroupSetSelfSignUpState
 	// to allow for more states than just "open" and "closed"
-	@Column(name="open_for_signups")
+	@Column(name = "open_for_signups")
 	var openForSignups: Boolean = false
 
-  def openState: SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed
+	def openState: SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed
 
- 	def openState_=(value:SmallGroupSetSelfSignUpState) : Unit = value match {
-	 	case SmallGroupSetSelfSignUpState.Open => openForSignups = true
-	 	case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
-  }
+	def openState_=(value: SmallGroupSetSelfSignUpState): Unit = value match {
+		case SmallGroupSetSelfSignUpState.Open => openForSignups = true
+		case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
 	var module: Module = _
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@JoinColumn(name = "set_id")
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	@OrderBy("name")
 	var groups: JList[SmallGroup] = JArrayList()
 
@@ -153,10 +166,10 @@ class SmallGroupSet
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
+	@BatchSize(size = 200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
-	@Column(name="collect_attendance")
+	@Column(name = "collect_attendance")
 	var collectAttendance: Boolean = true
 
 	// Default properties for creating/applying to SGEs
@@ -211,7 +224,8 @@ class SmallGroupSet
 	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
-		}}
+		}
+	}
 
 	def unallocatedStudents: Seq[User] = {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {

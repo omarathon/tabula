@@ -3,11 +3,11 @@ package uk.ac.warwick.tabula.commands.reports.profiles
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceMonitoringPointType}
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, FileDaoComponent}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -34,6 +34,8 @@ object ProfileExportSingleCommand {
 			with AutowiringRelationshipServiceComponent
 			with AutowiringMeetingRecordServiceComponent
 			with AutowiringSmallGroupServiceComponent
+			with AutowiringSecurityServiceComponent
+			with AutowiringMemberNoteServiceComponent
 			with AutowiringFileDaoComponent
 			with AutowiringTopLevelUrlComponent
 			with ComposableCommand[Seq[FileAttachment]]
@@ -49,6 +51,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	self: FreemarkerXHTMLPDFGeneratorWithFileStorageComponent with AttendanceMonitoringServiceComponent
 		with AssessmentServiceComponent	with RelationshipServiceComponent with MeetingRecordServiceComponent
 		with SmallGroupServiceComponent	with UserLookupComponent
+		with SecurityServiceComponent with MemberNoteServiceComponent
 		with FileDaoComponent =>
 
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -71,7 +74,26 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		module: String,
 		name: String,
 		submissionDeadline: String,
-		submissionDate: String
+		submissionDate: String,
+		attachments: Seq[FileAttachment],
+		feedback: Option[FeedbackData]
+	)
+
+	case class FeedbackData(
+		releasedDate: String,
+		mark: Option[Int],
+		grade: Option[String],
+		comments: Option[String],
+		attachments: Seq[FileAttachment],
+		adjustments: Seq[AdjustmentData]
+	)
+
+	case class AdjustmentData(
+		mark: Int,
+		grade: Option[String],
+		reason: String,
+		comments: String,
+		date: String
 	)
 
 	case class SmallGroupData(
@@ -93,39 +115,130 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		meetingDate: String,
 		title: String,
 		format: String,
-		description: String
+		description: String,
+		attachments: Seq[FileAttachment]
+	)
+
+	case class AdministrativeNote(
+		date: String,
+		title: String,
+		note: String,
+		noteHTML: String,
+		attachments: Seq[FileAttachment]
+	)
+
+	case class CourseData(
+		courseName: Option[String],
+		courseCode: Option[String],
+		beginYear: Option[String],
+		endYear: Option[String],
+		departmentName: Option[String],
+		departmentCode: Option[String],
+		degreeType: Option[String],
+		awardName: Option[String],
+		modeOfAttendance: Option[String],
+		statusOnCourse: Option[String],
+		endDate: Option[String],
+		expectedEndDate: Option[String],
+		routeName: Option[String],
+		routeCode: Option[String],
+		yearOfStudy: String,
+		hasCurrentEnrolment: Boolean,
+		courseLevelCode: Option[String],
+		courseLevelName: Option[String],
+		sprCode: String,
+		scjCode: String
 	)
 
 	override def applyInternal(): Seq[FileAttachment] = {
 		// Get point data
-		val pointData = benchmarkTask("pointData") { getPointData }
+		val pointData = if (securityService.can(user, Permissions.MonitoringPoints.View, student)) {
+			benchmarkTask("pointData") { getPointData(academicYear) }
+		} else {
+			Nil
+		}
+
+		def viewableAdjustments(feedback: Feedback): Seq[Mark] = {
+			if (securityService.can(user, Permissions.AssignmentFeedback.Manage, feedback)) {
+				feedback.adminViewableAdjustments
+			} else {
+				feedback.studentViewableAdjustments
+			}
+		}
+
+		val (administrativeNotesData, extenuatingCircumstancesData) =
+			if (securityService.can(user, Permissions.MemberNotes.Read, student)) (
+				memberNoteService.listNonDeletedNotes(student)
+					.map(memberNote => AdministrativeNote(
+						date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
+						title = memberNote.title,
+						note = memberNote.note,
+						noteHTML = memberNote.escapedNote,
+						attachments =  memberNote.attachments.asScala
+					)),
+				memberNoteService.listNonDeletedExtenuatingCircumstances(student)
+					.map(memberNote => AdministrativeNote(
+						date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
+						title = memberNote.title,
+						note = memberNote.note,
+						noteHTML = memberNote.escapedNote,
+						attachments =  memberNote.attachments.asScala
+					))
+			) else (Nil, Nil)
 
 		// Get coursework
 		val assignmentData = benchmarkTask("assignmentData") {
 			assessmentService.getAssignmentsWithSubmission(student.userId)
 				.filter(_.academicYear == academicYear)
-				.sortBy (assignment => Option(assignment.closeDate).getOrElse(assignment.openDate))
-				.flatMap(assignment => {
-					assignment.findSubmission(student.userId).map(submission => {
+  			.filter(assignment => securityService.can(user, Permissions.Assignment.Read, assignment) || securityService.can(user, Permissions.Submission.Create, assignment))
+				.sortBy(assignment => Option(assignment.closeDate).getOrElse(assignment.openDate))
+				.flatMap(assignment =>
+					assignment.findSubmission(student.userId)
+  				.filter(securityService.can(user, Permissions.Submission.Read, _))
+						.map(submission =>
 						AssignmentData(
 							assignment.module.code.toUpperCase,
 							assignment.name,
 							Option(assignment.submissionDeadline(submission)).map(_.toString(ProfileExportSingleCommand.TimeFormat)).getOrElse(""),
-							submission.submittedDate.toString(ProfileExportSingleCommand.TimeFormat)
+							submission.submittedDate.toString(ProfileExportSingleCommand.TimeFormat),
+							submission.allAttachments,
+							assignment.findFeedback(student.userId)
+								.filter(_.released)
+  							.filter(securityService.can(user, Permissions.AssignmentFeedback.Read, _))
+								.map(feedback =>
+								FeedbackData(
+									releasedDate = feedback.releasedDate.toString(ProfileExportSingleCommand.TimeFormat),
+									mark = feedback.latestMark,
+									grade = feedback.latestGrade,
+									comments = feedback.comments,
+									attachments = feedback.attachments.asScala,
+									adjustments = viewableAdjustments(feedback).map(mark =>
+										AdjustmentData(
+											mark = mark.mark,
+											grade = mark.grade,
+											reason = mark.reason,
+											comments = mark.comments,
+											date = mark.uploadedDate.toString(ProfileExportSingleCommand.TimeFormat)
+										)
+									)
+								)
+							)
 						)
-					})
-				})
+					)
+				)
 		}
 
 		// Get small groups
-		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData }
+		val smallGroupData = benchmarkTask("smallGroupData") { getSmallGroupData(academicYear) }
 
 		// Get meetings
 		val startOfYear = academicYear.firstDay
 		val endOfYear = academicYear.lastDay
 		val meetingData = benchmarkTask("meetingData") {
-			relationshipService.getAllPastAndPresentRelationships(student).flatMap(meetingRecordService.list)
+			meetingRecordService.list(relationshipService.getAllPastAndPresentRelationships(student).toSet, None)
+				.distinct
 				.filter(m => !m.meetingDate.isBefore(startOfYear.toDateTimeAtStartOfDay) && m.meetingDate.isBefore(endOfYear.plusDays(1).toDateTimeAtStartOfDay) && m.isApproved)
+				.filter(_.relationshipTypes.exists(relationshipType => securityService.can(user, Permissions.Profiles.MeetingRecord.ReadDetails(relationshipType), student)))
 				.sortBy(_.meetingDate)
 				.map(meeting => MeetingData(
 					meeting.relationships.map(_.relationshipType.agentRole.capitalize).distinct.mkString(", "),
@@ -133,7 +246,8 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 					meeting.meetingDate.toString(ProfileExportSingleCommand.TimeFormat),
 					meeting.title,
 					meeting.format.description,
-					meeting.escapedDescription
+					meeting.escapedDescription,
+					meeting.attachments.asScala
 				))
 		}
 
@@ -150,31 +264,66 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 			.groupBy(_.state).mapValues(_
 			.groupBy(_.term)))
 
+		val courseData = student.freshStudentCourseDetails.map { scd =>
+			val scyd = scd.latestStudentCourseYearDetails
+
+			CourseData(
+				courseName = Option(scd.course).map(_.name),
+				courseCode = Option(scd.course).map(_.code),
+				beginYear = Option(scd.beginYear).map(_.formatted("%04d")),
+				endYear = Option(scd.endYear).map(_.formatted("%04d")),
+				departmentName = Option(scd.department).map(_.name),
+				departmentCode = Option(scd.department).map(_.code.toUpperCase),
+				degreeType = Option(scd.currentRoute).map(_.degreeType.toString),
+				awardName = Option(scd.award).map(_.name),
+				modeOfAttendance = Option(scyd.modeOfAttendance).map(_.fullNameAliased),
+				statusOnCourse = Option(scd.statusOnCourse).map(_.fullName.toLowerCase.capitalize),
+				endDate = Option(scd.endDate).map(_.toString(ProfileExportSingleCommand.DateFormat)),
+				expectedEndDate = Option(scd.expectedEndDate).map(_.toString(ProfileExportSingleCommand.DateFormat)),
+				routeName = Option(scyd.route).map(_.name),
+				routeCode = Option(scyd.route).map(_.code.toUpperCase),
+				yearOfStudy = scyd.yearOfStudy.toString,
+				hasCurrentEnrolment = scd.hasCurrentEnrolment,
+				courseLevelCode = scd.level.map(_.code),
+				courseLevelName = scd.level.map(_.name),
+				sprCode = scd.sprCode,
+				scjCode = scd.scjCode
+			)
+		}
+
 		// Render PDF and create file
 		val pdfFileAttachment = pdfGenerator.renderTemplateAndStore(
 			"/WEB-INF/freemarker/reports/profile-export.ftl",
 			s"Tabula-${student.universityId}-profile.pdf",
 			Map(
 				"student" -> student,
+				"courseData" -> courseData,
 				"academicYear" -> academicYear,
 				"user" -> user,
 				"summary" -> summary,
 				"groupedPoints" -> groupedPoints,
 				"assignmentData" -> assignmentData,
 				"smallGroupData" -> smallGroupData.groupBy(_.eventId),
-				"meetingData" -> meetingData.groupBy(_.relationshipType)
+				"meetingData" -> meetingData.groupBy(_.relationshipType),
+				"administrativeNotesData" -> administrativeNotesData,
+				"extenuatingCircumstancesData" -> extenuatingCircumstancesData
 			)
 		)
 
 		// Return results
 		Seq(pdfFileAttachment) ++
 			pointData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
-			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment)))
+			smallGroupData.flatMap(_.attendanceNote.flatMap(note => Option(note.attachment))) ++
+			assignmentData.flatMap(_.attachments) ++
+			assignmentData.flatMap(_.feedback).flatMap(_.attachments) ++
+			administrativeNotesData.flatMap(_.attachments) ++
+			extenuatingCircumstancesData.flatMap(_.attachments) ++
+			meetingData.flatMap(_.attachments)
 	}
 
-	private def getPointData: Seq[PointData] = {
+	private def getPointData(academicYear: AcademicYear): Seq[PointData] = {
 		val checkpoints = benchmarkTask("attendanceMonitoringService.getAllAttendance") {
-			attendanceMonitoringService.getAllAttendance(student.universityId)
+			attendanceMonitoringService.getAllAttendanceInAcademicYear(student, academicYear)
 		}
 		val attendanceNoteMap = benchmarkTask("attendanceMonitoringService.getAttendanceNoteMap") {
 			attendanceMonitoringService.getAttendanceNoteMap(student)
@@ -245,9 +394,9 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 		}
 	}
 
-	private def getSmallGroupData: Seq[SmallGroupData] = {
+	private def getSmallGroupData(academicYear: AcademicYear): Seq[SmallGroupData] = {
 		val allAttendance = benchmarkTask("smallGroupService.findAttendanceForStudentInModulesInWeeks") {
-			smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 52, Seq())
+			smallGroupService.findAllAttendanceForStudentInAcademicYear(student, academicYear)
 		}
 		val users = benchmarkTask("userLookup.getUsersByUserIds") {
 			userLookup.getUsersByUserIds(allAttendance.map(_.updatedBy).asJava).asScala
@@ -280,7 +429,10 @@ trait ProfileExportSinglePermissions extends RequiresPermissionsChecking with Pe
 	self: ProfileExportSingleCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Reports, student)
+		p.PermissionCheckAny(Seq(
+			CheckablePermission(Permissions.Department.Reports, student),
+			CheckablePermission(Permissions.Profiles.Read.Core, student)
+		))
 	}
 
 }

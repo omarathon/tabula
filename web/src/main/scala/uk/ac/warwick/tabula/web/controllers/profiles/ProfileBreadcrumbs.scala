@@ -24,6 +24,7 @@ object ProfileBreadcrumbs {
 		case object MarkingIdentifier extends ProfileBreadcrumbIdentifier("marking")
 		case object StudentsIdentifier extends ProfileBreadcrumbIdentifier("students")
 		case object AttendanceIdentifier extends ProfileBreadcrumbIdentifier("attendance")
+		case object DownloadIdentifier extends ProfileBreadcrumbIdentifier("download")
 
 
 		abstract class ProfileBreadcrumb extends BreadCrumb {
@@ -115,6 +116,18 @@ object ProfileBreadcrumbs {
 			val identifier = AttendanceIdentifier
 			val title = "Attendance"
 			val url = Some(Routes.Profile.attendance(scyd))
+		}
+
+		case class Download(member: Member) extends ProfileBreadcrumb {
+			val identifier = DownloadIdentifier
+			val title = "Download my info"
+			val url = Some(Routes.Profile.download(member))
+		}
+
+		case class DownloadForScyd(scyd: StudentCourseYearDetails) extends ProfileBreadcrumb {
+			val identifier = DownloadIdentifier
+			val title = "Download my info"
+			val url = Some(Routes.Profile.download(scyd))
 		}
 
 	}

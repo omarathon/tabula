@@ -110,7 +110,7 @@
 </#macro>
 
 <#macro debugPermission permission scope={} showScopes=true>
-	<#local isTarget=permissionsHelperCommand?? && permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == results.resolvedScope.id)))>
+	<#local isTarget=permissionsHelperCommand?? && permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || results.scopeMissing || (scope.id == results.resolvedScope.id)))>
 
 	<#if isTarget!false><strong class="text-success"></#if>
 
