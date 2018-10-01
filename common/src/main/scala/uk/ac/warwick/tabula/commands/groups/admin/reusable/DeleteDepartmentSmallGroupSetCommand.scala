@@ -52,9 +52,9 @@ trait DeleteDepartmentSmallGroupSetValidation extends SelfValidating {
 	def validateCanDelete(errors: Errors) {
 		if (set.deleted) {
 			errors.reject("smallGroupSet.delete.deleted")
-		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod ==  SmallGroupAllocationMethod.StudentSignUp  && set.releasedToTutors }) {
+		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod ==  SmallGroupAllocationMethod.StudentSignUp  &&  !set.canBeDeleted }) {
 			errors.reject("smallGroupSet.delete.studentSignUpReleased")
-		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod !=  SmallGroupAllocationMethod.StudentSignUp && (set.releasedToStudents || set.releasedToTutors) }) {
+		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod !=  SmallGroupAllocationMethod.StudentSignUp &&  !set.canBeDeleted }) {
 			errors.reject("smallGroupSet.delete.released")
 		}
 	}
