@@ -6,11 +6,11 @@ import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.commands.admin.syllabusplus.{AddSyllabusPlusLocationCommand, DeleteSyllabusPlusLocationCommand, EditSyllabusPlusLocationCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.SyllabusPlusLocation
 import uk.ac.warwick.tabula.services.AutowiringSyllabusPlusLocationServiceComponent
 import uk.ac.warwick.tabula.services.timetables.ScientiaCentrallyManagedRooms
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.data.Transactions._
 
 @Controller
 @RequestMapping(Array("/admin/scientia-rooms"))
@@ -109,6 +109,8 @@ class EditSyllabusPlusLocationController extends AdminController {
 @Controller
 @RequestMapping(Array("/admin/scientia-rooms/{location}/delete"))
 class DeleteSyllabusPlusLocationController extends AdminController {
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("command")
 	def command(@PathVariable location: SyllabusPlusLocation): Appliable[SyllabusPlusLocation] = DeleteSyllabusPlusLocationCommand(location)
 
@@ -118,8 +120,12 @@ class DeleteSyllabusPlusLocationController extends AdminController {
 	}
 
 	@PostMapping
-	def delete(@Valid @ModelAttribute("command") command: Appliable[SyllabusPlusLocation]): Mav = {
-		command.apply()
-		Redirect("/admin/scientia-rooms")
+	def delete(@PathVariable location: SyllabusPlusLocation, @Valid @ModelAttribute("command") command: Appliable[SyllabusPlusLocation], bindingResult: BindingResult): Mav = {
+		if (bindingResult.hasErrors) {
+			form(location)
+		} else {
+			command.apply()
+			Redirect("/admin/scientia-rooms")
+		}
 	}
 }
