@@ -64,8 +64,6 @@ trait SubmissionInfoToJsonConverter {
 			)
 		)
 
-
-
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(submission.usercode))
 		val isWithinApprovedExtension = assignment.isWithinExtension(submission.usercode)
 		val hasActiveExtension = extension.exists(_.approved)
