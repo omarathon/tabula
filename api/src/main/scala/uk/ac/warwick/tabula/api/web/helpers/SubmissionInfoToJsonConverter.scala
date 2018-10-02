@@ -34,6 +34,11 @@ trait SubmissionInfoToJsonConverter {
 						"name" -> assignment.module.adminDepartment.name
 					)
 				),
+				"openEnded" -> assignment.openEnded,
+				"opened" -> assignment.isOpened,
+				"closed" -> assignment.isClosed,
+				"openDate" -> DateFormats.IsoDateTime.print(assignment.openDate),
+				"closeDate" -> (if (assignment.openEnded) "" else DateFormats.IsoDateTime.print(assignment.closeDate)),
 				"academicYear" -> assignment.academicYear.toString,
 				"name" -> assignment.name,
 				"collectMarks" -> assignment.collectMarks,
@@ -58,6 +63,8 @@ trait SubmissionInfoToJsonConverter {
 				"publishFeedback" -> assignment.publishFeedback
 			)
 		)
+
+
 
 		val extension = assignment.extensions.asScala.find(e => e.isForUser(submission.usercode))
 		val isWithinApprovedExtension = assignment.isWithinExtension(submission.usercode)
