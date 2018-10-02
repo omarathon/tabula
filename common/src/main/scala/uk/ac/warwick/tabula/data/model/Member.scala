@@ -535,6 +535,7 @@ trait MemberProperties extends StringId {
 	@Column(insertable = false, updatable = false)
 	var userType: MemberUserType = _
 
+	@Deprecated
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
 	var gender: Gender = _
 
