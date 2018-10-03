@@ -1,9 +1,13 @@
 <#escape x as x?html>
-<h1>Mapped Syllabus+ Rooms</h1>
+<h1>Mapped Syllabus+ rooms</h1>
 <p>This is a list of all Syllabus+ locations in Tabula.</p>
 
 <p>
-	<a href="<@routes.admin.addLocation />" class="btn btn-primary">Add location</a>
+	<#if canManage>
+		<a href="<@routes.admin.addLocation />" class="btn btn-primary">Add location</a>
+	<#else>
+		<span class="btn btn-primary disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Add location</span>
+	</#if>
 </p>
 
 <#if locations?size == 0>
@@ -34,8 +38,13 @@
 					</#if>
 				</td>
 				<td class="text-right">
-					<a href="<@routes.admin.editLocation location />" class="btn btn-default btn-xs">Edit</a>
-					<a href="<@routes.admin.deleteLocation location />" type="submit" class="btn btn-danger btn-xs">Delete</a>
+					<#if canManage>
+						<a href="<@routes.admin.editLocation location />" class="btn btn-default btn-xs">Edit</a>
+						<a href="<@routes.admin.deleteLocation location />" class="btn btn-danger btn-xs">Delete</a>
+					<#else>
+						<span class="btn btn-default btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Edit</span>
+						<span class="btn btn-danger btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Delete</span>
+					</#if>
 				</td>
 			</tr>
 		</#list>

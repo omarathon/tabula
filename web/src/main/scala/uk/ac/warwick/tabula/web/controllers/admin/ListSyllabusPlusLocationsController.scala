@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.commands.admin.syllabusplus.{AddSyllabusPlusLocation
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.SyllabusPlusLocation
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringSyllabusPlusLocationServiceComponent
 import uk.ac.warwick.tabula.services.timetables.ScientiaCentrallyManagedRooms
 import uk.ac.warwick.tabula.web.Mav
@@ -19,7 +20,10 @@ class ListSyllabusPlusLocationsController extends AdminController
 
 	@GetMapping
 	def list(): Mav = {
-		Mav("admin/scientia/list", "locations" -> syllabusPlusLocationService.all())
+		Mav("admin/scientia/list",
+			"canManage" -> securityService.can(user, Permissions.ManageSyllabusPlusLocations),
+			"locations" -> syllabusPlusLocationService.all()
+		)
 	}
 }
 
