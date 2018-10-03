@@ -42,11 +42,10 @@ trait SyllabusPlusLocationCommandValidation extends SelfValidating
 	with SyllabusPlusLocationCommandRequest {
 	override def validate(errors: Errors): Unit = {
 		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "upstreamName", "NotEmpty")
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "NotEmpty")
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "mapLocationId", "NotEmpty")
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "name", "syllabusPlusLocation.name.notEmpty")
 
 		if (!mapLocationId.matches("^\\d+$")) {
-			errors.rejectValue("mapLocationId", "syllabusPlusLocation.mapLocationId.numeric")
+			errors.rejectValue("name", "syllabusPlusLocation.noMapLocationId")
 		}
 	}
 }
