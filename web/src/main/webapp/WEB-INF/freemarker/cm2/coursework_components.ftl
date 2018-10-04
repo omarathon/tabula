@@ -706,7 +706,6 @@
 							<li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
 						</#if>
 
-
 						<li>
 							<strong>Enrolled students:</strong>
 							<#if assignment.membershipInfo.totalCount == 0>
