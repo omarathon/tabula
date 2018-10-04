@@ -763,9 +763,6 @@
 						<li><a href="<@routes.cm2.assignment assignment />">Link for students</a></li>
 					</ul>
 				</div>
-
-
-
 					<#if info.stages??>
 						<div class="col-md-4">
 							<h6>Progress</h6>
@@ -834,7 +831,6 @@
 						</div>
 					</#if>
 				</div>
-			</div>
 		</#if>
 	</div>
 </#macro>
