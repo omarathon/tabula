@@ -4,6 +4,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.client.ResponseHandler
 import org.apache.http.client.methods.RequestBuilder
 import org.joda.time.{DateTimeConstants, LocalTime}
+import org.springframework.beans.factory.annotation.{Autowired, Qualifier}
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -311,7 +312,10 @@ class ScientiaHttpTimetableFetchingServiceFactory extends ScalaFactoryBean[Compl
 }
 
 @Service("scientiaTimetableFetchingService")
-class ScientiaTimetableFetchingService extends ScalaFactoryBean[CompleteTimetableFetchingService] with AutowiringScientiaHttpTimetableFetchingServiceComponent {
+class ScientiaTimetableFetchingService extends ScalaFactoryBean[CompleteTimetableFetchingService] {
+	@Qualifier("scientiaHttpTimetableFetchingService") @Autowired
+	var scientiaHttpTimetableFetchingService: CompleteTimetableFetchingService = _
+
 	override def createInstance(): CompleteTimetableFetchingService =
 		new CombinedTimetableFetchingService(scientiaHttpTimetableFetchingService)
 }
