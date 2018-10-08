@@ -130,7 +130,11 @@ class RoleServiceImpl extends RoleService with Logging {
 			}
 		}
 
-		streamScoped(permissionsProviders.toStream, scope)
+		def streamUnscoped(providers: Stream[PermissionsProvider]): Stream[PermissionDefinition] = {
+			providers.flatMap(_.getPermissionsFor(user, null)).filter(_.scope.isEmpty)
+		}
+
+		streamScoped(permissionsProviders.toStream, scope) #::: streamUnscoped(permissionsProviders.toStream)
 	}
 
 
