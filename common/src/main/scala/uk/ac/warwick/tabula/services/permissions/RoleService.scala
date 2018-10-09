@@ -116,25 +116,26 @@ class RoleServiceImpl extends RoleService with Logging {
 	 */
 	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = {
 		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {
-			if (scope == null) Stream.empty
-			else {
-				val results = providers map { provider => (provider, provider.getPermissionsFor(user, scope)) }
-				val (hasResults, noResults) = results.partition { _._2.nonEmpty }
+			val results = providers map { provider => (provider, provider.getPermissionsFor(user, scope)) }
+			val (hasResults, noResults) = results.partition { _._2.nonEmpty }
 
-				val stream = hasResults flatMap { _._2 }
+			val stream = hasResults flatMap { _._2 }
 
-				// For each of the parents, call the stack again, excluding any exhaustive providers that have returned results
-				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
+			// For each of the parents, call the stack again, excluding any exhaustive providers that have returned results
+			val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
 
-				stream #::: next
-			}
+			stream #::: next
 		}
 
 		def streamUnscoped(providers: Stream[PermissionsProvider]): Stream[PermissionDefinition] = {
 			providers.flatMap(_.getPermissionsFor(user, null)).filter(_.scope.isEmpty)
 		}
 
-		streamScoped(permissionsProviders.toStream, scope) #::: streamUnscoped(permissionsProviders.toStream)
+		if (scope == null) {
+			streamUnscoped(permissionsProviders.toStream)
+		} else {
+			streamScoped(permissionsProviders.toStream, scope)
+		}
 	}
 
 

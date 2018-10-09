@@ -161,14 +161,19 @@ class RoleServiceTest extends TestBase with Mockito {
 		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream.empty)
 		when(provider1.getPermissionsFor(currentUser, null)) thenReturn Stream(PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
 
-		service.getExplicitPermissionsFor(currentUser, module) should contain (PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow))
+		val explicitPermissionsForModule = service.getExplicitPermissionsFor(currentUser, module)
+		val explicitScopelessPermissions = service.getExplicitPermissionsFor(currentUser, null)
 
-		service.getExplicitPermissionsFor(currentUser, null) should contain (PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
+		explicitPermissionsForModule should contain (PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow))
+		explicitPermissionsForModule should not contain PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow)
+
+		explicitScopelessPermissions should contain (PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
 
 		verify(provider1, times(0)).getPermissionsFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
 		verify(provider1, times(1)).getPermissionsFor(currentUser, module)
 		verify(provider2, times(1)).getPermissionsFor(currentUser, dept)
 		verify(provider2, times(1)).getPermissionsFor(currentUser, module)
+		verify(provider1, times(1)).getPermissionsFor(currentUser, null)
 	}
 
 	@Test def dontCheckAllParents() = withUser("cuscav", "0672089") {
