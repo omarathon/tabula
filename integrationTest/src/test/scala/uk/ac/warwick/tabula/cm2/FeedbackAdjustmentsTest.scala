@@ -59,36 +59,38 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			find(cssSelector(s"#row-${P.Student1.usercode} button.btn-primary")).get.underlying.click()
 			Then("the students marks get adjusted")
 
-      eventually {
-        id(s"row-${P.Student1.usercode}").webElement.isDisplayed should be (false)
-      }
+			eventually {
+				id(s"row-${P.Student1.usercode}").webElement.isDisplayed should be (false)
+			}
 
 			When("I click on the student's ID again")
 			click on cssSelector("h6.toggle-icon")
 			Then("I see the form and the adusted mark")
-      eventually(pageSource contains "Adjusted mark - 31" should be {true})
+			eventually(pageSource contains "Adjusted mark - 31" should be {true})
 
-      click on partialLinkText("XXX02 Test Module 2")
+			click on partialLinkText("XXX02 Test Module 2")
 			click on getModule("XXX02").get.findElement(By.className("mod-code"))
 
 			When("I publish the feedback")
-			click on partialLinkText("Feedback needs publishing (2 of 2)")
 
+			eventually {
+				click on partialLinkText("Feedback needs publishing (2 of 2)")
+			}
 			click on checkbox("confirm")
 			cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
 			Then("all is well in the world for all the Herons are in a deep slumber")
 			eventually(pageSource contains "The feedback has been published." should be {true})
 		}
 
-    click on partialLinkText("Premarked assignment")
-    val assignmentId = currentUrl.split("/")(6)
+		click on partialLinkText("Premarked assignment")
+		val assignmentId = currentUrl.split("/")(6)
 
 		Then("The student can see the adjustment")
 		as(P.Student1) {
 			When("I visit the feedback page")
 			go to Path(s"/coursework/submission/$assignmentId")
 			Then("I can see the adjusted mark only")
-			pageSource contains "Adjusted mark: 31" should be {true}
+			eventually(pageSource contains "Adjusted mark: 31" should be {true})
 			pageSource contains "Mark: 41" should be {true}
 		}
 
