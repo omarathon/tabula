@@ -25,6 +25,8 @@ class ReleaseToMarkerNotification
 	with Logging
 	with AllCompletedActionRequiredNotification {
 
+	val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment)
+
 	def workflowVerb: String = items.asScala.headOption.map(_.entity.stage.verb).getOrElse(MarkingWorkflowStage.DefaultVerb)
 
 	def verb = "released"
@@ -50,6 +52,8 @@ class ReleaseToMarkerNotification
 			Map(
 				"assignment" -> assignment,
 				"numAllocated" -> allocatedStudents,
+				"numAllocatedAsFirstMarker" -> helper.firstMarkers.count(_ == recipient),
+				"numAllocatedAsSecondMarker" -> helper.secondMarkers.count(_ == recipient),
 				"numReleasedFeedbacks" -> items.size,
 				"numReleasedSubmissionsFeedbacks" -> submissionsCnt,
 				"numReleasedNoSubmissionsFeedbacks" -> (allocatedStudents - submissionsCnt),
