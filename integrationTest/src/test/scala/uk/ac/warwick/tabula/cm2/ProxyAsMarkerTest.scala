@@ -26,6 +26,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 			moderatedMarkingAssignment.getText should startWith("Single marking - single use")
 			click on moderatedMarkingAssignment
 		}
+
 		currentUrl.contains("/summary") should be (true)
 
 		val expandAssignmentUser = id("main").webElement.findElements(By.cssSelector(".student")).get(0) //tabula-functest-student1

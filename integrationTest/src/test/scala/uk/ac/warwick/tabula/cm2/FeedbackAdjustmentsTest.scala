@@ -72,10 +72,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on getModule("XXX02").get.findElement(By.className("mod-code"))
 
 			When("I publish the feedback")
-
-			eventually {
-				click on partialLinkText("Feedback needs publishing (2 of 2)")
-			}
+			eventually(click on partialLinkText("Feedback needs publishing (2 of 2)"))
 			click on checkbox("confirm")
 			cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
 			Then("all is well in the world for all the Herons are in a deep slumber")
