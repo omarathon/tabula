@@ -21,9 +21,11 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
 		click on testModulerow
 
-		val moderatedMarkingAssignment = id("main").webElement.findElements(By.cssSelector(".striped-section-contents span div h5 a")).get(0)
-		moderatedMarkingAssignment.getText should startWith("Single marking - single use")
-		click on moderatedMarkingAssignment
+		eventually {
+			val moderatedMarkingAssignment = id("main").webElement.findElements(By.cssSelector(".striped-section-contents span div h5 a")).get(0)
+			moderatedMarkingAssignment.getText should startWith("Single marking - single use")
+			click on moderatedMarkingAssignment
+		}
 
 		currentUrl.contains("/summary") should be (true)
 
