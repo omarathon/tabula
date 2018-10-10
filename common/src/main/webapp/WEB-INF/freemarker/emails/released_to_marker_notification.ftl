@@ -3,6 +3,11 @@
 Note:
 <#if assignment.collectSubmissions>
  - <@fmt.p number=numAllocated!0 singular="student" plural="students" /> <@fmt.p number=numAllocated!0 singular="is" plural="are" shownumber=false /> allocated to you for marking
+   <#list studentsAtStagesCount as info>
+     <#if info.count gt 0>
+       ${info.stageName}: <@fmt.p number=info.count!0 singular="student" plural="students" /> <@fmt.p number=numAllocated!0 singular="is" plural="are" shownumber=false />
+     </#if>
+   </#list>
  <#if assignment.numAllocatedAsFirstMarker gt 0>
    - First/final marker for <@fmt.p number=numAllocatedAsFirstMarker!0 singular="student" plural="students" /> <@fmt.p number=numAllocated!0 singular="is" plural="are" shownumber=false />
  </#if>

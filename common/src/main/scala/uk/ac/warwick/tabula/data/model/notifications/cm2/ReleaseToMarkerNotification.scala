@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent, CM2MarkingWorkflowServiceComponent}
 
 import scala.collection.JavaConverters._
 
@@ -23,9 +22,10 @@ class ReleaseToMarkerNotification
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
 	with Logging
+	with AutowiringCM2MarkingWorkflowServiceComponent
 	with AllCompletedActionRequiredNotification {
 
-	val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment)
+	val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, recipient, cm2MarkingWorkflowService)
 
 	def workflowVerb: String = items.asScala.headOption.map(_.entity.stage.verb).getOrElse(MarkingWorkflowStage.DefaultVerb)
 
@@ -52,8 +52,7 @@ class ReleaseToMarkerNotification
 			Map(
 				"assignment" -> assignment,
 				"numAllocated" -> allocatedStudents,
-				"numAllocatedAsFirstMarker" -> helper.firstMarkers.count(_ == recipient),
-				"numAllocatedAsSecondMarker" -> helper.secondMarkers.count(_ == recipient),
+				"studentsAtStagesCount" -> helper.studentsAtStagesCount,
 				"numReleasedFeedbacks" -> items.size,
 				"numReleasedSubmissionsFeedbacks" -> submissionsCnt,
 				"numReleasedNoSubmissionsFeedbacks" -> (allocatedStudents - submissionsCnt),
