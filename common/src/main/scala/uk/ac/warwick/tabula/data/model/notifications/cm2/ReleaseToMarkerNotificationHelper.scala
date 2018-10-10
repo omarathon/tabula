@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.data.model.{Assignment, FirstMarkersMap, SecondMarkersMap}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Student
-import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService}
+import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConverters._
 
 case class StudentAtStagesCount(stageName: String, count: Int)
 
