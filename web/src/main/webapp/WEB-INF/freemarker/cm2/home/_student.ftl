@@ -37,7 +37,7 @@
 		expand_by_default=(!studentInformation.actionRequiredAssignments?has_content && !studentInformation.noActionRequiredAssignments?has_content && !studentInformation.upcomingAssignments?has_content)
 	/>
 <#else>
-	You do not currently have any assignments on Tabula.
+	You do not currently have any assignments in Tabula.
 </#if>
 
 </#escape>
