@@ -2,7 +2,7 @@
 	<ul class="nav navbar-nav">
 		<#if user.staff>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">Profiles</a></li>
-		<#elseif user.student>
+		<#elseif user.student || user.alumni>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">My Student Profile</a></li>
 		<#elseif canViewProfiles>
 			<li class="profiles-active"><a href="<@url page="/" context="/profiles" />">Profiles</a></li>
@@ -21,7 +21,7 @@
 		<#if features.attendanceMonitoring>
 			<#if user.staff>
 				<li class="attendance-active"><a href="<@url page="/" context="/attendance" />">Monitoring Points</a></li>
-			<#elseif user.student>
+			<#elseif user.student || user.alumni>
 				<li class="attendance-active"><a href="<@url page="/profile" context="/attendance" />">My Monitoring Points</a></li>
 			</#if>
 		</#if>
@@ -41,7 +41,7 @@
 			<li><h2><a href="<@url page="/" context="/profiles" />">Profiles</a></h2>
 				<span class="hint">View staff and student information, your personal timetable, and your department's timetable</span>
 			</li>
-		<#elseif user.student>
+		<#elseif user.student || user.alumni>
 			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
 				<span class="hint">View your student information and timetable</span>
 			</li>
@@ -88,7 +88,7 @@
 					<h2><a href="<@url page="/" context="/attendance" />">Monitoring Points</a></h2>
 					<span class="hint">View and record attendance at specified monitoring points</span>
 				</li>
-			<#elseif user.student>
+			<#elseif user.student || user.alumni>
 				<li>
 					<h2><a href="<@url page="/profile" context="/attendance" />">My Monitoring Points</a></h2>
 					<span class="hint">View your attendance at specified monitoring points</span>
