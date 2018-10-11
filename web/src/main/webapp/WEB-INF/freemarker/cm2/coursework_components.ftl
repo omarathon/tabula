@@ -649,8 +649,9 @@
 
 <#macro admin_assignment_info info skeleton=false>
 	<#local assignment = info.assignment />
-	<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
-
+	<#if !skeleton>
+		<#local studentCount = (assignment.membershipInfo.totalCount + assignment.submissionsFromUnenrolledStudents?size) />
+	</#if>
 	<div class="item-info admin-assignment-${assignment.id}" data-detailurl="<@routes.cm2.enhancedAssignmentDetails info.assignment />" >
 
 		<div class="clearfix">
@@ -687,149 +688,149 @@
 			</h5>
 		</div>
 
-		<div class="row">
-			<div class="col-md-4">
-				<h6 class="sr-only">Assignment information</h6>
+		<#if skeleton><p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
+		<#else>
+			<div class="row">
+				<div class="col-md-4">
+					<h6 class="sr-only">Assignment information</h6>
 
-				<ul class="list-unstyled">
-					<#if assignment.archived><li><strong>Archived</strong></li></#if>
-					<#if !assignment.opened>
-						<li><strong>Assignment opens:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
-					</#if>
-
-					<#if assignment.openEnded>
-						<li><strong>Open-ended</strong></li>
-					<#else>
-						<li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
-					</#if>
-
-					<li>
-						<strong>Enrolled students:</strong>
-						<#if assignment.membershipInfo.totalCount == 0>
-							0
-						<#elseif assignment.membershipInfo.sitsCount gt 0>
-							${assignment.membershipInfo.sitsCount} from SITS<#--
-							--><#if assignment.membershipInfo.usedExcludeCount gt 0> after ${assignment.membershipInfo.usedExcludeCount} removed manually</#if><#--
-							--><#if assignment.membershipInfo.usedIncludeCount gt 0>, ${assignment.membershipInfo.usedIncludeCount} added manually</#if>
-						<#else>
-							${assignment.membershipInfo.usedIncludeCount} added manually
-						</#if>
-					</li>
-
-					<#if (assignment.markingWorkflow.markingMethod)??>
-						<li><strong>Workflow type:</strong> ${assignment.markingWorkflow.markingMethod.description}</li>
-					</#if>
-
-					<#if assignment.feedbackDeadline??>
-						<li><strong>Feedback due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />" data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span></li>
-					</#if>
-				</ul>
-
-				<#if assignment.collectSubmissions || assignment.extensionsPossible>
 					<ul class="list-unstyled">
-						<#if assignment.collectSubmissions>
-							<#if assignment.submissionsFromUnenrolledStudents?size == 0>
-								<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
-							<#else>
-								<li><strong>Submissions received:</strong> ${assignment.submissions?size} (${assignment.submissionsFromUnenrolledStudents?size} from students not enrolled on the assignment)</li>
-							</#if>
+						<#if assignment.archived><li><strong>Archived</strong></li></#if>
+						<#if !assignment.opened>
+							<li><strong>Assignment opens:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
 						</#if>
 
-						<#if assignment.extensionsPossible>
-							<li>
-								<#if can.do('Extension.Update', assignment)>
-									<#local ext_caption="Manage assignment's extensions" />
-								<#else>
-									<#local ext_caption="View assignment's extensions" />
-								</#if>
-								<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
-								<@fmt.permission_button
-									permission='Extension.Read'
-									scope=assignment
-									action_descr=ext_caption?lower_case
-									href=ext_url>
-										<strong>Extensions:</strong> ${assignment.countExtensions}
-								</@fmt.permission_button>
-							</li>
+						<#if assignment.openEnded>
+							<li><strong>Open-ended</strong></li>
+						<#else>
+							<li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
+						</#if>
+
+						<li>
+							<strong>Enrolled students:</strong>
+							<#if assignment.membershipInfo.totalCount == 0>
+								0
+							<#elseif assignment.membershipInfo.sitsCount gt 0>
+								${assignment.membershipInfo.sitsCount} from SITS<#--
+								--><#if assignment.membershipInfo.usedExcludeCount gt 0> after ${assignment.membershipInfo.usedExcludeCount} removed manually</#if><#--
+								--><#if assignment.membershipInfo.usedIncludeCount gt 0>, ${assignment.membershipInfo.usedIncludeCount} added manually</#if>
+							<#else>
+								${assignment.membershipInfo.usedIncludeCount} added manually
+							</#if>
+						</li>
+
+						<#if (assignment.markingWorkflow.markingMethod)??>
+							<li><strong>Workflow type:</strong> ${assignment.markingWorkflow.markingMethod.description}</li>
+						</#if>
+
+						<#if assignment.feedbackDeadline??>
+							<li><strong>Feedback due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />" data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span></li>
 						</#if>
 					</ul>
-				</#if>
 
-				<ul class="list-unstyled">
-					<li><a href="<@routes.cm2.assignment assignment />">Link for students</a></li>
-				</ul>
-			</div>
-			<#if skeleton><p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
-			<#else>
-				<#if info.stages??>
-					<div class="col-md-4">
-						<h6>Progress</h6>
-
+					<#if assignment.collectSubmissions || assignment.extensionsPossible>
 						<ul class="list-unstyled">
-							<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
-
-							<#if assignment.opened>
-								<li><strong>Opened:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
-							</#if>
-
-							<#if !assignment.openEnded && assignment.closed>
-								<li><strong>Closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
-							</#if>
-
-							<#list info.stages as category>
-								<li class="category">
-									<strong><@workflowMessage category.category.code /></strong>:
-									<ul>
-										<#list category.stages as stage>
-											<#list stage.progress as progress>
-												<li><@workflowMessage progress.progress.messageCode /> (${progress.count} of ${studentCount})</li>
-											</#list>
-										</#list>
-									</ul>
-								</li>
-							</#list>
-						</ul>
-					</div>
-				</#if>
-				<#if info.nextStages??>
-					<div class="col-md-4">
-						<h6>Next steps</h6>
-
-						<ul class="list-unstyled">
-							<#if info.nextStages?size == 0>
-								<#if !assignment.opened>
-									<#-- Not open yet -->
-									<li>Not open yet</li>
-								<#elseif !assignment.openEnded && !assignment.closed>
-									<#-- Not closed yet -->
-									<li>Not closed yet</li>
+							<#if assignment.collectSubmissions>
+								<#if assignment.submissionsFromUnenrolledStudents?size == 0>
+									<li><strong>Submissions received:</strong> ${assignment.submissions?size}</li>
 								<#else>
-									<#-- Complete? -->
-									<#if assignment.hasReleasedFeedback>
-										<#-- As of TAB-5388 show nothing -->
-									<#elseif assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
-										<li>Assignment needs submitting (${studentCount} of ${studentCount})</li>
-									<#else>
-										<li>Awaiting feedback</li>
-									</#if>
+									<li><strong>Submissions received:</strong> ${assignment.submissions?size} (${assignment.submissionsFromUnenrolledStudents?size} from students not enrolled on the assignment)</li>
 								</#if>
-							<#else>
-								<#list info.nextStages as nextStage>
-									<li>
-										<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (${nextStage.count} of ${studentCount})</#local>
-										<#if nextStage.url??>
-											<a href="${nextStage.url}">${nextStageDescription}</a>
-										<#else>
-											${nextStageDescription}
-										</#if>
+							</#if>
+
+							<#if assignment.extensionsPossible>
+								<li>
+									<#if can.do('Extension.Update', assignment)>
+										<#local ext_caption="Manage assignment's extensions" />
+									<#else>
+										<#local ext_caption="View assignment's extensions" />
+									</#if>
+									<#local ext_url><@routes.cm2.assignmentextensions assignment /></#local>
+									<@fmt.permission_button
+										permission='Extension.Read'
+										scope=assignment
+										action_descr=ext_caption?lower_case
+										href=ext_url>
+											<strong>Extensions:</strong> ${assignment.countExtensions}
+									</@fmt.permission_button>
+								</li>
+							</#if>
+						</ul>
+					</#if>
+
+					<ul class="list-unstyled">
+						<li><a href="<@routes.cm2.assignment assignment />">Link for students</a></li>
+					</ul>
+				</div>
+					<#if info.stages??>
+						<div class="col-md-4">
+							<h6>Progress</h6>
+
+							<ul class="list-unstyled">
+								<li><strong>Created:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />" data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
+
+								<#if assignment.opened>
+									<li><strong>Opened:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span></li>
+								</#if>
+
+								<#if !assignment.openEnded && assignment.closed>
+									<li><strong>Closed:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
+								</#if>
+
+								<#list info.stages as category>
+									<li class="category">
+										<strong><@workflowMessage category.category.code /></strong>:
+										<ul>
+											<#list category.stages as stage>
+												<#list stage.progress as progress>
+													<li><@workflowMessage progress.progress.messageCode /> (${progress.count} of ${studentCount})</li>
+												</#list>
+											</#list>
+										</ul>
 									</li>
 								</#list>
-							</#if>
-						</ul>
-					</div>
-				</#if>
-			</#if>
-		</div>
+							</ul>
+						</div>
+					</#if>
+					<#if info.nextStages??>
+						<div class="col-md-4">
+							<h6>Next steps</h6>
+
+							<ul class="list-unstyled">
+								<#if info.nextStages?size == 0>
+									<#if !assignment.opened>
+										<#-- Not open yet -->
+										<li>Not open yet</li>
+									<#elseif !assignment.openEnded && !assignment.closed>
+										<#-- Not closed yet -->
+										<li>Not closed yet</li>
+									<#else>
+										<#-- Complete? -->
+										<#if assignment.hasReleasedFeedback>
+											<#-- As of TAB-5388 show nothing -->
+										<#elseif assignment.openEnded && assignment.collectSubmissions && studentCount gt 0>
+											<li>Assignment needs submitting (${studentCount} of ${studentCount})</li>
+										<#else>
+											<li>Awaiting feedback</li>
+										</#if>
+									</#if>
+								<#else>
+									<#list info.nextStages as nextStage>
+										<li>
+											<#local nextStageDescription><@workflowMessage nextStage.stage.actionCode /> (${nextStage.count} of ${studentCount})</#local>
+											<#if nextStage.url??>
+												<a href="${nextStage.url}">${nextStageDescription}</a>
+											<#else>
+												${nextStageDescription}
+											</#if>
+										</li>
+									</#list>
+								</#if>
+							</ul>
+						</div>
+					</#if>
+				</div>
+		</#if>
 	</div>
 </#macro>
 

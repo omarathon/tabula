@@ -140,7 +140,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 		// This works, but it doesn't reload the page automatically properly. Do it manually
 		reloadPage
 
-		id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (beforeDelete-1)
+		eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (beforeDelete-1))
 
   }
 

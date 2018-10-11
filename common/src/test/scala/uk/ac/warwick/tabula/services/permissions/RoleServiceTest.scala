@@ -159,15 +159,21 @@ class RoleServiceTest extends TestBase with Mockito {
 		when(provider1.getPermissionsFor(currentUser, module)) thenReturn(Stream(PermissionDefinition(Permissions.Module.ManageAssignments, Some(module), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, dept)) thenReturn(Stream(PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)))
 		when(provider2.getPermissionsFor(currentUser, module)) thenReturn(Stream.empty)
+		when(provider1.getPermissionsFor(currentUser, null)) thenReturn Stream(PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
 
-		(service.getExplicitPermissionsFor(currentUser, module) exists {
-			_ == PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow)
-		}) should be (true)
+		val explicitPermissionsForModule = service.getExplicitPermissionsFor(currentUser, module)
+		val explicitScopelessPermissions = service.getExplicitPermissionsFor(currentUser, null)
+
+		explicitPermissionsForModule should contain (PermissionDefinition(Permissions.Module.Create, Some(dept), GrantedPermission.Allow))
+		explicitPermissionsForModule should not contain PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow)
+
+		explicitScopelessPermissions should contain (PermissionDefinition(Permissions.ManageSyllabusPlusLocations, None, GrantedPermission.Allow))
 
 		verify(provider1, times(0)).getPermissionsFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
 		verify(provider1, times(1)).getPermissionsFor(currentUser, module)
 		verify(provider2, times(1)).getPermissionsFor(currentUser, dept)
 		verify(provider2, times(1)).getPermissionsFor(currentUser, module)
+		verify(provider1, times(1)).getPermissionsFor(currentUser, null)
 	}
 
 	@Test def dontCheckAllParents() = withUser("cuscav", "0672089") {
