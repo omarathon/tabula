@@ -11,7 +11,7 @@ case class StudentAtStagesCount(stageName: String, count: Int)
 class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User, cm2MarkingWorkflowService: CM2MarkingWorkflowService) {
 
 	// all students assigned to recipient (marker) for this assignment
-§	val studentsAllocatedToThisMarker: Set[Student] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, recipient).toSet
+	val studentsAllocatedToThisMarker: Set[Student] = cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, recipient).toSet
 
 	// students at each stage that's assigned to the recipient for this assignment
 	def studentsAtStages: Seq[(MarkingWorkflowStage, Set[Student])] = {
