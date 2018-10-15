@@ -58,6 +58,7 @@ class ReleaseToMarkerNotification
 		with AutowiringCM2MarkingWorkflowServiceComponent
 		with AllCompletedActionRequiredNotification {
 
+	@transient
 	lazy val helper: ReleaseToMarkerNotificationHelper = new ReleaseToMarkerNotificationHelper(assignment, recipient, cm2MarkingWorkflowService)
 
 	def workflowVerb: String = items.asScala.headOption.map(_.entity.stage.verb).getOrElse(MarkingWorkflowStage.DefaultVerb)
