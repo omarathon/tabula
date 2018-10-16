@@ -247,7 +247,6 @@ trait ProfileElasticsearchConfig extends ElasticsearchConfig {
 		// id field stores the universityId
 		stringField("firstName") analyzer "name",
 		stringField("lastName") analyzer "name",
-		stringField("fullFirstName") analyzer "name",
 		stringField("fullName") analyzer "name",
 
 		stringField("inUseFlag") analyzer KeywordAnalyzer,
