@@ -45,7 +45,6 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		m.universityId = "0672089"
 		m.userId = "cuscav"
 		m.firstName = "Mathew"
-		m.fullFirstName = "Mathew James"
 		m.lastName = "Mannion"
 		m.homeDepartment = Fixtures.department("CS", "Computer Science")
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
@@ -70,7 +69,7 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.find("mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
 		queryService.find("mann", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
 		queryService.find("m mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
-		queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
+		queryService.find("mathew james mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be ('empty)
 		queryService.find("mat mannion", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
 		queryService.find("m m", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
 		queryService.find("m m", Seq(m.homeDepartment), Set(Student, Staff), searchAllDepts = false, activeOnly = true).head should be (m)
@@ -84,7 +83,6 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		m.universityId = "0672089"
 		m.userId = "cuscav"
 		m.firstName = "Mathew"
-		m.fullFirstName = "Mathew James"
 		m.lastName = "Mannion"
 		m.homeDepartment = Fixtures.department("CS", "Computer Science")
 		m.lastUpdatedDate = new DateTime(2000, 1, 2, 0, 0, 0)
@@ -109,7 +107,6 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		m.universityId = "0000001"
 		m.userId = "helpme"
 		m.firstName = "Johnny"
-		m.fullFirstName = "Jonathan"
 		m.lastName = "O'Connell"
 		m.homeDepartment = Fixtures.department("CS", "Computer Science")
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
@@ -139,7 +136,6 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		m.universityId = "1300623"
 		m.userId = "smrlar"
 		m.firstName = "Aist\u0117"
-		m.fullFirstName = "Aist\u0117"
 		m.lastName = "Kiltinavi\u010Di\u016Ba"
 		m.homeDepartment = Fixtures.department("CS", "Computer Science")
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)

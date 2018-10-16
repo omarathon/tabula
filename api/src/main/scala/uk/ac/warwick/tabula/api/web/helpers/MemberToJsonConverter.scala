@@ -25,9 +25,9 @@ trait MemberToJsonConverter
 			str("email", member, "email"),
 			str("userType", member, "userType.description"),
 			str("fullName", member, "fullName"),
-			str("officialName", member, "fullName"),
+			str("officialName", member, "fullName"), // officialName no longer supported  - TAB-6621
 			str("homeEmail", member, "homeEmail"),
-			str("fullFirstName", member, "fullFirstName"),
+			str("fullFirstName", member, "firstName"), // fullFirstName no longer supported - TAB-6621
 			str("title", member, "title"),
 			str("gender", member, "gender.description"),
 			str("inUseFlag", member, "inUseFlag"),

@@ -34,7 +34,6 @@ object ProfileIndexService {
 
 			Option(item.firstName).foreach { fields += "firstName" -> _ }
 			Option(item.lastName).foreach { fields += "lastName" -> _ }
-			Option(item.fullFirstName).foreach { fields += "fullFirstName" -> _ }
 			item.fullName.foreach { fields += "fullName" -> _ }
 
 			Option(item.userType).foreach { fields += "userType" -> _.dbValue }
