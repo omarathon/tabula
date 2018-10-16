@@ -46,7 +46,13 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
 		).model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("\n\nNote:\n- 10 students are allocated to you for marking\n- This assignment does not require students to submit work to Tabula\n")
+		renderedResult should be(
+			"""
+				|
+				|Note:
+				|- 10 students are allocated to you for marking
+				|- This assignment does not require students to submit work to Tabula
+				|""".stripMargin)
 
 	}
 
@@ -72,7 +78,17 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
 		).model, writer)
 		writer.flush()
 		val renderedResult = output.toString
-		renderedResult should be("\n\nNote:\n- 6 students are allocated to you for marking\n - First marker: 2 students\n - Second marker: 1 student\n - Final marker: 3 students\n- 12 students allocated to you have been released for marking\n - 13 students have submitted work\n - 14 students have not submitted work\n")
-
+		renderedResult should be(
+			"""
+				|
+				|Note:
+				|- 6 students are allocated to you for marking
+				| -- First marker: 2 students
+				| -- Second marker: 1 student
+				| -- Final marker: 3 students
+				|- 12 students allocated to you have been released for marking
+				| -- 13 students have submitted work
+				| -- 14 students have not submitted work
+				|""".stripMargin)
 	}
 }
