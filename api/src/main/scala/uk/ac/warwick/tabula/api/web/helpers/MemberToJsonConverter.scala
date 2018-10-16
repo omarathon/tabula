@@ -25,7 +25,7 @@ trait MemberToJsonConverter
 			str("email", member, "email"),
 			str("userType", member, "userType.description"),
 			str("fullName", member, "fullName"),
-			str("officialName", member, "officialName"),
+			str("officialName", member, "fullName"),
 			str("homeEmail", member, "homeEmail"),
 			str("fullFirstName", member, "fullFirstName"),
 			str("title", member, "title"),

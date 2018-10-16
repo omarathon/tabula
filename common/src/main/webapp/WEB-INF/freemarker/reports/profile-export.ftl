@@ -53,11 +53,7 @@
 		<table>
 			<tbody>
 				<tr>
-					<td>Official name</td>
-					<td>${student.officialName}</td>
-				</tr>
-				<tr>
-					<td>Preferred name</td>
+					<td>Name</td>
 					<td>${student.fullName}</td>
 				</tr>
 				<#if student.nationality??>

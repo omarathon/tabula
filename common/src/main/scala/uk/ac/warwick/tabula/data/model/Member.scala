@@ -106,6 +106,8 @@ abstract class Member
 	}
 
 	def routeName: String = ""
+
+	@deprecated("Preferred Name (fullName) should be used", since = "2018.10.3")
 	def officialName: String = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
 
 	def description: String = {
@@ -114,7 +116,6 @@ abstract class Member
 			else Option(groupName).getOrElse("")
 
 		val deptName = Option(homeDepartment).fold("")(", " + _.name)
-
 		userTypeString + routeName + deptName
 	}
 

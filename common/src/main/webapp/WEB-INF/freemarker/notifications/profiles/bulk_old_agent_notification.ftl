@@ -9,7 +9,7 @@
 <#if scheduledDate?has_content>As of ${formattedDate} you will be<#else>You are</#if> no longer assigned as ${relationshipType.agentRole} to the following students:
 
 <#list modifiedRelationships as rel>
-* ${rel.studentMember.officialName}<#--
+* ${rel.studentMember.fullName}<#--
 --><#if rel.replacedBy?has_content><#--
 --> (new ${relationshipType.agentRole} ${rel.replacedBy.agentName})<#--
 -->	</#if>
