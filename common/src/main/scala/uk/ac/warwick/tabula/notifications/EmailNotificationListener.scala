@@ -58,8 +58,6 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
 			val recipient = recipientInfo.recipient
 
 			Some(createMessage(mailSender) { message =>
-//				or perhaps set more generally for all email types (not just notifications)
-				message.getMimeMessage.addHeader("X-Auto-Response-Suppress", "OOF")
 				message.setFrom(fromAddress)
 				message.setReplyTo(replyAddress)
 				message.setTo(recipient.getEmail)
