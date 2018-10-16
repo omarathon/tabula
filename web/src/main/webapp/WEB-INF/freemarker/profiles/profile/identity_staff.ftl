@@ -16,8 +16,7 @@
 				<@fmt.member_photo member />
 			</div>
 			<div class="col-md-7 col-lg-8">
-				<strong>Official name:</strong> ${member.officialName}<br/>
-				<strong>Preferred name:</strong> ${member.fullName}<br/>
+				<strong>Name:</strong> ${member.fullName}<br/>
 				<#if member.jobTitle??>
 					<strong>Job title:</strong> ${member.jobTitle}<br/>
 				</#if>

@@ -12,8 +12,7 @@
 					<@fmt.member_photo student />
 				</div>
 				<div class="col-md-7 col-lg-8">
-					<strong>Official name:</strong> ${student.officialName}<br/>
-					<strong>Preferred name:</strong> ${student.fullName}<br/>
+					<strong>Name:</strong> ${student.fullName}<br/>
 					<details class="indent">
 						<summary>
 							<strong>More info</strong>

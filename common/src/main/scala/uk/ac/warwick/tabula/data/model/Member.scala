@@ -106,7 +106,6 @@ abstract class Member
 	}
 
 	def routeName: String = ""
-	def officialName: String = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
 
 	def description: String = {
 		val userTypeString =
@@ -114,7 +113,6 @@ abstract class Member
 			else Option(groupName).getOrElse("")
 
 		val deptName = Option(homeDepartment).fold("")(", " + _.name)
-
 		userTypeString + routeName + deptName
 	}
 
@@ -529,6 +527,8 @@ trait MemberProperties extends StringId {
 	var homeEmail: String = _
 
 	var title: String = _
+
+	@deprecated("firstName should be used", since = "2018.10.3")
 	var fullFirstName: String = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MemberUserTypeUserType")

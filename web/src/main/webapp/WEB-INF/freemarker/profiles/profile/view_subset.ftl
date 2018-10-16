@@ -13,8 +13,8 @@
 					<table class="profile-or-course-info">
 						<tbody>
 						<tr>
-							<th>Official name</th>
-							<td>${profile.officialName}</td>
+							<th>Name</th>
+							<td>${profile.fullName}</td>
 						</tr>
 
 							<#if profile.email??>
