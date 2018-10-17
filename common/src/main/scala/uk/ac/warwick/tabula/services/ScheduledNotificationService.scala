@@ -19,7 +19,7 @@ trait ScheduledNotificationService {
 @Service
 class ScheduledNotificationServiceImpl extends ScheduledNotificationService with Logging with Daoisms {
 
-	val RunBatchSize = 10
+	val RunBatchSize = 100
 
 	var dao: ScheduledNotificationDao = Wire.auto[ScheduledNotificationDao]
 	var notificationService: NotificationService = Wire.auto[NotificationService]
