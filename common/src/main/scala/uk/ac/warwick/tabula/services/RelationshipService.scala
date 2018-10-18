@@ -315,6 +315,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 		department.filterRule.matches(member, Option(department)) &&
 			member.freshStudentCourseDetails
 				.filter(scd => Option(scd.currentRoute).exists(route => route.adminDepartment == department || route.adminDepartment == department.rootDepartment)) // there needs to be an SCD for the right department ...
+				.filter(_.mostSignificant)
 				.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
 				.exists(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
 	}
