@@ -97,7 +97,7 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 				queryStringQuery(autoWildcard(sanitiseQuery(q)))
 					.defaultOperator(Operator.AND)
 				  .analyzeWildcard(true)
-				  .asfields("firstName", "lastName", "fullFirstName", "fullName")
+				  .asfields("firstName", "lastName", "fullName")
 			}
 
 			val deptQuery =

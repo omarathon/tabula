@@ -13,7 +13,7 @@
 
 <#if !isSelf>
 	<details class="indent">
-		<summary>${member.officialName}</summary>
+		<summary>${member.fullName}</summary>
 		<#if member.userId??>
 		${member.userId}<br/>
 		</#if>

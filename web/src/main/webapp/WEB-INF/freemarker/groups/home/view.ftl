@@ -34,10 +34,11 @@
 	</#if>
 
 	<#assign is_student=user.student /> <#-- Non-students may also have groups, but we still show them the intro text -->
+	<#assign is_alumni=user.alumni />
 	<#assign is_tutor=nonempty(taughtGroups) />
 	<#assign is_admin=(nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)) />
 
-	<#if !is_student && !is_tutor && !is_admin> <#-- Don't just show an empty page -->
+	<#if !is_student && !is_tutor && !is_admin && !is_alumni> <#-- Don't just show an empty page -->
 		<p class="lead muted">
 			This is a service for managing small group teaching (e.g. seminars, tutorials and lab groups).
 		</p>

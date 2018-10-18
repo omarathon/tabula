@@ -52,7 +52,6 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		m.universityId = "0672089"
 		m.userId = "cuscav"
 		m.firstName = "Mathew"
-		m.fullFirstName = "Mathew James"
 		m.lastName = "Mannion"
 		m.homeDepartment = Fixtures.department("CS", "Computer Science")
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
@@ -68,7 +67,6 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		doc.source.asScala.toMap should be (Map(
 			"userId" -> "cuscav",
 			"firstName" -> "Mathew",
-			"fullFirstName" -> "Mathew James",
 			"lastName" -> "Mannion",
 			"fullName" -> "Mathew Mannion",
 			"department" -> Array("CS").toList.asJava,

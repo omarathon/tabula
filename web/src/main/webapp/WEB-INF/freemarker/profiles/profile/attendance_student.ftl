@@ -7,7 +7,7 @@
 
 <#if !isSelf>
 	<details class="indent">
-		<summary>${student.officialName}</summary>
+		<summary>${student.fullName}</summary>
 		<#if student.userId??>
 			${student.userId}<br/>
 		</#if>

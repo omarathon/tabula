@@ -34,7 +34,6 @@ object ProfileIndexService {
 
 			Option(item.firstName).foreach { fields += "firstName" -> _ }
 			Option(item.lastName).foreach { fields += "lastName" -> _ }
-			Option(item.fullFirstName).foreach { fields += "fullFirstName" -> _ }
 			item.fullName.foreach { fields += "fullName" -> _ }
 
 			Option(item.userType).foreach { fields += "userType" -> _.dbValue }
@@ -248,7 +247,6 @@ trait ProfileElasticsearchConfig extends ElasticsearchConfig {
 		// id field stores the universityId
 		stringField("firstName") analyzer "name",
 		stringField("lastName") analyzer "name",
-		stringField("fullFirstName") analyzer "name",
 		stringField("fullName") analyzer "name",
 
 		stringField("inUseFlag") analyzer KeywordAnalyzer,

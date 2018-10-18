@@ -447,7 +447,7 @@ preposition: Text to relate the title to the department name in the second line,
 			<#if emails?size gt limit>
 		   		title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
-				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+				href="mailto:${user.email}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
@@ -519,7 +519,7 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro format_list_of_members members><#compress>
 	<#list members as item><#--
--->		${item.officialName}<#--
+-->		${item.fullName}<#--
 -->		<#if item_has_next><#--
 -->			<#if item_index == members?size -2>and<#else>,</#if><#--
 -->		</#if><#--

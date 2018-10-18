@@ -10,7 +10,7 @@
 <#if scheduledDate?has_content>As of ${formattedDate} you will be<#else>You have been</#if> assigned as ${relationshipType.agentRole} to the following students:
 
 <#list modifiedRelationships as rel>
-* ${rel.studentMember.officialName}<#--
+* ${rel.studentMember.fullName}<#--
 --><#if rel.replacesRelationships?has_content><#--
 --> (previous <@fmt.p number=rel.replacesRelationships?size singular=relationshipType.agentRole shownumber=false /> <#list rel.replacesRelationships as replaced>${replaced.agentName}<#if replaced_has_next>, </#if></#list>)<#--
 -->	</#if>
