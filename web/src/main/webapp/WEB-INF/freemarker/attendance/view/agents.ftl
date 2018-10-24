@@ -10,7 +10,7 @@
 		<div class="col-md-4">
 			<div class="input-group">
 				<input class="form-control" type="text" placeholder="Search for a student or ${relationshipType.agentRole}&hellip;"/>
-				<span class="input-group-btn"><button class="btn btn-default"><i class="fa fa-search"></i></button></span>
+				<span class="input-group-btn"><button aria-label="search" class="btn btn-default"><i class="fa fa-search"></i></button></span>
 			</div>
 		</div>
 		<div class="col-md-4">
