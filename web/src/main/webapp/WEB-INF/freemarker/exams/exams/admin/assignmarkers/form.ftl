@@ -75,6 +75,7 @@
 										<a id="show-list-${markerMapName}-${marker.userCode}"
 										   class="show-list"
 										   title="View students"
+										   aria-label="View students"
 										   data-container=".agent-${markerMapName}-${marker.userCode}"
 										   data-title="Students assigned to ${marker.fullName}"
 										   data-placement="left"

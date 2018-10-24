@@ -62,6 +62,7 @@
 				   data-trigger="click"
 				   data-placement="bottom"
 				   data-html="true"
+					 aria-label="help"
 				   data-content="${introText}"><i class="fa fa-question-circle"></i></a></p>
 
 			<ol>

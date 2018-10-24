@@ -48,7 +48,7 @@
 					</button>
 					<ul class="dropdown-menu">
 						<#list target.permissionsParents as parent>
-							<li><a href="<@routes.admin.permissions parent />"><i class="fa fa-lock"></i> ${parent.humanReadableId}</a></li>
+							<li><a href="<@routes.admin.permissions parent />" aria-label="${parent.humanReadableId}"><i class="fa fa-lock"></i> ${parent.humanReadableId}</a></li>
 						</#list>
 					</ul>
 				</div>
@@ -186,7 +186,7 @@
 											</#assign>
 
 											<button class="btn btn-danger btn-xs use-tooltip disabled" type="button"
-													data-html="true"
+													data-html="true" aria-label="${popoverText}"
 													data-title="${popoverText}"><i class="fa fa-inverse fa-times"></i></button>
 										</#if>
 									</td>

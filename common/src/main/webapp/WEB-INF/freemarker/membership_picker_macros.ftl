@@ -163,7 +163,8 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				   data-hash="${introHash("tier4-filtering", "anywhere")}"
 				   data-placement="bottom"
 				   data-html="true"
-				   data-container="#${classifier}EnrolmentFields"
+					 aria-label="help"
+					 data-container="#${classifier}EnrolmentFields"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 
@@ -401,7 +402,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			$enrolment.find('.use-popover').popover({
 				trigger: 'click',
 				container: '#container',
-				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button aria-label="close" type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 			}).click(function(){ return false; });
 
 			// ensure that the close handler for any popovers still work

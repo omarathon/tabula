@@ -159,7 +159,7 @@
 														<#assign count = existingStudents?size />
 														<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-														<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".group-${group.id}" data-title="${popoverHeader}" data-placement="left"><i class="fa fa-pencil-square-o"></i></a>
+														<a id="show-list-${group.id}" class="show-list" title="View students" aria-label="View students" data-container=".group-${group.id}" data-title="${popoverHeader}" data-placement="left"><i class="fa fa-pencil-square-o"></i></a>
 													</div>
 												</div>
 

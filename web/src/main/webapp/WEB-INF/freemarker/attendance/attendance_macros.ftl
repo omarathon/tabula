@@ -9,6 +9,7 @@
 					class="btn btn-default use-tooltip"
 					data-state=""
 					title="Set to 'Not recorded'"
+					aria-label="Set to 'Not recorded'"
 					data-html="true"
 					data-container="body"
 					>
@@ -19,6 +20,7 @@
 					class="btn btn-default btn-unauthorised use-tooltip"
 					data-state="unauthorised"
 					title="Set to 'Missed (unauthorised)'"
+					aria-label="Set to 'Missed (unauthorised)'"
 					data-html="true"
 					data-container="body"
 					>
@@ -29,6 +31,7 @@
 					class="btn btn-default btn-authorised use-tooltip"
 					data-state="authorised"
 					title="Set to 'Missed (authorised)'"
+					aria-label="Set to 'Missed (authorised)'"
 					data-html="true"
 					data-container="body"
 					>
@@ -39,6 +42,7 @@
 					class="btn btn-default btn-attended use-tooltip"
 					data-state="attended"
 					title="Set to 'Attended'"
+					aria-label="Set to 'Attended'"
 					data-html="true"
 					data-container="body"
 					>
@@ -296,7 +300,7 @@
 			<p>
 				This attendance can no longer be edited, because it was recorded for a monitoring scheme (${checkpoint.point.scheme.displayName})
 				that no longer applies to this student.
-				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank'><i class='fa fa-question-circle'></i></a>
+				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank' aria-label="help"><i class='fa fa-question-circle'></i></a>
 			</p>
 		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>

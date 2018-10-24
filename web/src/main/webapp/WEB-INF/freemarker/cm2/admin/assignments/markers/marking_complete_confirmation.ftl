@@ -87,7 +87,7 @@
 				</#assign>
 				<div class="alert alert-info">
 					${count} not been given a mark. These students will not be sent to the ${nextStagesDescription?lower_case}.
-					<a class="use-popover" id="popover-files" data-html="true"
+					<a class="use-popover" id="popover-files" data-html="true" aria-label="help"
 						 data-original-title="<span class='text-info'><strong>Not marked</strong></span>"
 						 data-content="${noContentIds}">
 						<i class="fa fa-question-circle"></i>

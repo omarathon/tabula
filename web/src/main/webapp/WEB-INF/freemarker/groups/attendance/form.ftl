@@ -37,16 +37,16 @@
 <div class="recordCheckpointForm" data-check-checkpoints="true">
 	<div style="display:none;" class="forCloning">
 		<div class="btn-group" data-toggle="radio-buttons">
-			<button type="button" class="btn btn-default" data-state="">
+			<button type="button" class="btn btn-default" data-state="" aria-label="Set to 'Not recorded'">
 				<i class="fa fa-fw fa-minus" title="Set to 'Not recorded'"></i>
 			</button>
-			<button type="button" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="unauthorised">
+			<button type="button" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="unauthorised" aria-label="Set to 'Missed (unauthorised)'">
 				<i class="fa fa-fw fa-times" title="Set to 'Missed (unauthorised)'"></i>
 			</button>
-			<button type="button" class="btn btn-default btn-authorised" data-state="authorised">
+			<button type="button" class="btn btn-default btn-authorised" data-state="authorised" aria-label="Set to 'Missed (authorised)'">
 				<i class="fa fa-fw fa-times-circle-o" title="Set to 'Missed (authorised)'"></i>
 			</button>
-			<button type="button" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="attended">
+			<button type="button" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="attended" aria-label="Set to 'Attended'">
 				<i class="fa fa-fw fa-check" title="Set to 'Attended'"></i>
 			</button>
 		</div>
@@ -174,6 +174,7 @@
 										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
 										class="btn btn-default use-tooltip attendance-note edit"
 										title="Edit attendance note"
+										aria-label="Edit attendance note"
 										data-container="body"
 										href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />&dt=${.now?string('iso')}"
 									>
@@ -184,6 +185,7 @@
 										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
 										class="btn btn-default use-tooltip attendance-note"
 										title="Add attendance note"
+										aria-label="Add attendance note"
 										data-container="body"
 										href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 									>
@@ -195,6 +197,7 @@
 									id="attendanceNote-${student.universityId}-${command.occurrence.id}"
 									class="btn btn-default use-tooltip attendance-note"
 									title="Add attendance note"
+									aria-label="Add attendance note"
 									data-container="body"
 									href="<@routes.groups.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
 								>
@@ -275,7 +278,7 @@
 											<input type="hidden" name="additionalStudent" />
 											<input style="width: 300px;" class="form-control" type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for a student to add&hellip;" />
 											<span class="input-group-btn">
-												<button class="btn btn-default" type="button">
+												<button class="btn btn-default" type="button" aria-label="search">
 													<i class="fa fa-search"></i>
 												</button>
 											</span>
@@ -305,6 +308,7 @@
 												<p><i class="fa fa-check fa-fw attended"></i> Attended</p>
 										</#assign>
 										<a class="use-popover"
+											 aria-label="help"
 										   data-title="Key"
 										   data-placement="bottom"
 										   data-container="body"
@@ -314,16 +318,16 @@
 										</#compress></a>
 										</span>
 									<div class="btn-group">
-										<button type="button" class="btn btn-default">
+										<button type="button" aria-label="Set all to 'Not recorded'" class="btn btn-default">
 											<i class="fa fa-minus fa-fw" title="Set all to 'Not recorded'"></i>
 										</button>
-										<button type="button" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+										<button type="button" aria-label="Set all to 'Missed (unauthorised)'" class="btn btn-default btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
 											<i class="fa fa-times fa-fw" title="Set all to 'Missed (unauthorised)'"></i>
 										</button>
-										<button type="button" class="btn btn-default btn-authorised">
+										<button type="button" aria-label="Set all to 'Missed (authorised)'" class="btn btn-default btn-authorised">
 											<i class="fa fa fa-times-circle-o fa-fw" title="Set all to 'Missed (authorised)'"></i>
 										</button>
-										<button type="button" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+										<button type="button" aria-label="Set all to 'Attended'" class="btn btn-default btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
 											<i class="fa fa-check fa-fw" title="Set all to 'Attended'"></i>
 										</button>
 									</div>

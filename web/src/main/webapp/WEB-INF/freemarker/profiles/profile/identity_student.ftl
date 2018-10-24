@@ -45,7 +45,7 @@
 							</#if>
 							Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
 							<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
-							requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="fa fa-question-circle"></i></a>
+							requirements apply to this student. (${inconsistency})" data-toggle="popover" aria-label="help"><i class="fa fa-question-circle"></i></a>
 						</#if>
 						<br/>
 					</#if>
