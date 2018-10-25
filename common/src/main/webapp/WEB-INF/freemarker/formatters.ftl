@@ -63,7 +63,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				   data-hash="${introHash("related-depts", "anywhere")}"
 				   data-title="Related departments"
 				   data-placement="bottom"
-				   data-html="true"
+				   data-html="true" aria-label="Help"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 			<#-- the dropdown itself -->
@@ -111,10 +111,8 @@ preposition: Text to relate the title to the department name in the second line,
 					   id="departmentsWithPermission-intro"
 					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
 					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
-					   data-title="Other departments"
-					   data-placement="bottom"
-					   data-html="true"
-					   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+					   data-title="Other departments" aria-label="Help" data-placement="bottom"
+					   data-html="true" data-content="${introText}"><i class="fa fa-question-circle"></i></a>
 				</#if>
 				<#-- the dropdown itself -->
 				<div class="dept-switcher dropdown">
@@ -455,10 +453,8 @@ preposition: Text to relate the title to the department name in the second line,
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
-		   title=""
-		   data-container="body"
-		   data-placement="left"
-		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
+		   title="" aria-label="Help" data-container="body"
+		   data-placement="left" href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
 
@@ -498,9 +494,8 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro help_popover id title="" content="" html=false cssClass="">
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
-	   <#if title?has_content> data-title="${title}"</#if>
-	   data-content="${content}"
-	   data-container="body"
+	   <#if title?has_content> datcommon/src/main/webapp/WEB-INF/freemarker/formatters.ftla-title="${title}"</#if>
+	   data-content="${content}" data-container="body" aria-label="Help"
 	   <#if html>data-html="true"</#if>
 	><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>

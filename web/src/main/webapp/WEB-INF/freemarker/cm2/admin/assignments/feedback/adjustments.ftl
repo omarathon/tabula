@@ -78,6 +78,7 @@
 					<a class="use-popover cue-popover" id="popover-${marking.extractId(command.student)}" data-html="true"
 						 data-original-title="Late penalty calculation"
 						 data-container="body"
+						 aria-label="Help"
 						 data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
 							 was derived by subtracting ${latePenalty} marks from the actual mark for each day the submission
 							 was late.">

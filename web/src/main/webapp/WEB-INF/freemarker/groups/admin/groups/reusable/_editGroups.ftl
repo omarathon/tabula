@@ -10,7 +10,7 @@
 						<@f.input path="groupNames[${group_index}]" cssClass="form-control" />
 						<@f.hidden path="groupIds[${group_index}]" />
 						<span class="input-group-btn">
-							<button type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button>
+							<button type="button" aria-label="Remove" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button>
 						</span>
 					</div>
 				</div>
@@ -73,7 +73,7 @@
 
 				$clone.insertBefore($group);
 				$clone.find('.input-group')
-					.append('<span class="input-group-btn"><button type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button></span>');
+					.append('<span class="input-group-btn"><button aria-label="Remove" type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button></span>');
 
 				var nextIndex = index + 1;
 				var $name = $group.find('input[type="text"]');

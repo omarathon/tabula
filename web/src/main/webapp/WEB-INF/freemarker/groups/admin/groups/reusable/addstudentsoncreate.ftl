@@ -38,7 +38,7 @@
 						<a class="use-popover"
 						   id="popover-linkToSits"
 						   data-content="${popoverContent}"
-						   data-html="true"
+						   data-html="true" aria-label="Help"
 						>
 							<i class="fa fa-question-circle"></i>
 						</a>
@@ -51,7 +51,7 @@
 						<a class="use-popover"
 						   id="popover-linkToSits"
 						   data-content="${popoverContent}"
-						   data-html="true"
+						   data-html="true" aria-label="Help"
 						>
 							<i class="fa fa-question-circle"></i>
 						</a>

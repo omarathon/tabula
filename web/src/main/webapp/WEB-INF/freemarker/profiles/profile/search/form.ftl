@@ -4,7 +4,7 @@
 			<div class="input-group">
 				<@f.input path="query" placeholder="Find people by name or University ID" cssClass="form-control" />
 				<div class="input-group-btn">
-					<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+					<button class="btn btn-default" aria-label="Search" type="submit"><i class="fa fa-search"></i></button>
 				</div>
 			</div>
 			<@bs3form.form_group>

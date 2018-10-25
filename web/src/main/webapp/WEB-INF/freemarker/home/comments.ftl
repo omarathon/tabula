@@ -47,7 +47,7 @@
 					<div class="input-group input-group-lg">
 						<input type="search" class="form-control" name="q" autocomplete="off" spellcheck="false" placeholder="Search manual" maxlength="640" />
 						<span class="input-group-btn">
-							<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+							<button class="btn btn-default" aria-label="Search" type="submit"><i class="fa fa-search"></i></button>
 						</span>
 					</div>
 				</div>

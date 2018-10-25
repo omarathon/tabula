@@ -36,7 +36,7 @@
 								<input type="hidden" name="newAgent" />
 							</#if>
 							<span class="input-group-btn">
-								<button class="inline-search-button btn btn-default" type="button"><i class="fa fa-search"></i></button>
+								<button class="inline-search-button btn btn-default" aria-label="Search" type="button"><i class="fa fa-search"></i></button>
 							</span>
 						</div>
 					</div>

@@ -78,7 +78,7 @@
 						<div class="col-md-12">
 							<div class="pull-right">
 								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/edit"/>">Edit</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/delete"/>"><i class="fa fa-times"></i></a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/${point.id}/delete"/>" aria-label="Delete"><i class="fa fa-times"></i></a>
 							</div>
 							<#if template.pointStyle.dbValue == "week">
 								${point.name} (week ${point.startWeek} - ${point.endWeek})

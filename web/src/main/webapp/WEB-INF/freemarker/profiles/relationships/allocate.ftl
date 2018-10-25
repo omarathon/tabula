@@ -61,7 +61,7 @@
 				   data-title="${relationshipType.agentRole} spreadsheet"
 				   data-trigger="click"
 				   data-placement="bottom"
-				   data-html="true"
+				   data-html="true" aria-label="Help"
 				   data-content="${introText}"><i class="fa fa-question-circle"></i></a></p>
 
 			<ol>
