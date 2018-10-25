@@ -63,8 +63,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				   data-hash="${introHash("related-depts", "anywhere")}"
 				   data-title="Related departments"
 				   data-placement="bottom"
-				   data-html="true"
-					 aria-label="help"
+				   data-html="true" aria-label="help"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 			<#-- the dropdown itself -->
@@ -112,8 +111,7 @@ preposition: Text to relate the title to the department name in the second line,
 					   id="departmentsWithPermission-intro"
 					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
 					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
-					   data-title="Other departments"
-						 aria-label="help"
+					   data-title="Other departments" aria-label="help"
 						 data-placement="bottom"
 					   data-html="true"
 					   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
@@ -457,8 +455,7 @@ preposition: Text to relate the title to the department name in the second line,
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
-		   title=""
-			 aria-label="help"
+		   title="" aria-label="help"
 			 data-container="body"
 		   data-placement="left"
 		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
@@ -502,9 +499,7 @@ preposition: Text to relate the title to the department name in the second line,
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
-	   data-content="${content}"
-	   data-container="body"
-		 aria-label="help"
+	   data-content="${content}" data-container="body" aria-label="help"
 	   <#if html>data-html="true"</#if>
 	><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>
