@@ -39,7 +39,7 @@
 
 
 				<div class="student-filter btn-group-group well well-small well-sm">
-					<button aria-label="toggle filter" type="button" class="clear-all-filters btn btn-link">
+					<button aria-label="clear all filters" type="button" class="clear-all-filters btn btn-link">
 						<span class="icon-stack fa-stack">
 							<i class="icon-filter fa fa-filter fa-stack-1x"></i>
 							<i class="icon-ban-circle fa fa-ban icon-stack-base fa-stack-2x"></i>
