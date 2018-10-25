@@ -18,7 +18,7 @@
 		</#assign>
 		<a href="#"
 		   class="use-introductory<#if showIntro("sgt-import-events-splus", "anywhere")> auto</#if>"
-		   data-title="Create events from Syllabus+" aria-label="help"
+		   data-title="Create events from Syllabus+" aria-label="Help"
 		   data-trigger="click"
 		   data-placement="bottom"
 		   data-html="true"
@@ -54,7 +54,7 @@
 		</#assign>
 		<a href="#"
 		   class="use-introductory<#if showIntro("sgt-default-event-properties", "anywhere")> auto</#if>"
-		   data-title="Default properties for events" aria-label="help"
+		   data-title="Default properties for events" aria-label="Help"
 		   data-trigger="click"
 		   data-placement="bottom"
 		   data-html="true"

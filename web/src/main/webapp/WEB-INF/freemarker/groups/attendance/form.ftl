@@ -278,7 +278,7 @@
 											<input type="hidden" name="additionalStudent" />
 											<input style="width: 300px;" class="form-control" type="text" name="query" value="" id="additionalStudentQuery" placeholder="Search for a student to add&hellip;" />
 											<span class="input-group-btn">
-												<button class="btn btn-default" type="button" aria-label="search">
+												<button class="btn btn-default" type="button" aria-label="Search">
 													<i class="fa fa-search"></i>
 												</button>
 											</span>
@@ -308,7 +308,7 @@
 												<p><i class="fa fa-check fa-fw attended"></i> Attended</p>
 										</#assign>
 										<a class="use-popover"
-											 aria-label="help"
+											 aria-label="Help"
 										   data-title="Key"
 										   data-placement="bottom"
 										   data-container="body"

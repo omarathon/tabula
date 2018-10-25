@@ -53,7 +53,7 @@
 					 data-hash="${introHash("no-route-departments-intro", "anywhere")}"
 					 data-placement="bottom"
 					 data-html="true"
-					 aria-label="help"
+					 aria-label="Help"
 					 data-content="${introText}"><i class="fa fa-question-circle"></i></a>
 			</#if>
 		</h2>

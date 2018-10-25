@@ -29,7 +29,7 @@
 			<div class="col-md-9 hover-highlight">
 				<div class="pull-right" style="line-height:30px">
 					<a class="btn btn-primary btn-xs" href="<@routes.groups.editcrossmodulegroups set />">Edit</a>
-					<a class="btn btn-danger btn-xs" href="<@routes.groups.deletecrossmodulegroups set />" aria-label="delete"><i class="fa fa-times"></i></a>
+					<a class="btn btn-danger btn-xs" href="<@routes.groups.deletecrossmodulegroups set />" aria-label="Delete"><i class="fa fa-times"></i></a>
 				</div>
 				<span class="lead">${set.name}</span>
 				<span class="very-subtle">

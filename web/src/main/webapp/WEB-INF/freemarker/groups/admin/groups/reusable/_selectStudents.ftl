@@ -53,7 +53,7 @@
 				<@f.hidden path="findCommand.sortOrder" />
 
 				<div class="student-filter btn-group-group well well-sm">
-					<button type="button" class="clear-all-filters btn btn-link" aria-label="clear all filters">
+					<button type="button" class="clear-all-filters btn btn-link" aria-label="Clear all filters">
 						<span class="fa-stack">
 							<i class="fa fa-filter fa-stack-1x"></i>
 							<i class="fa fa-ban fa-stack-2x"></i>

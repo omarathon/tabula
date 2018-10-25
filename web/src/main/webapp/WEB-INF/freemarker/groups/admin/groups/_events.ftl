@@ -58,17 +58,17 @@
 
 												<#if event.hasRecordedAttendance>
 													<div class="use-tooltip" data-container="body" style="display: inline-block;" title="This event can't be deleted as there is attendance recorded against it">
-														<button type="button" class="btn btn-danger btn-xs disabled use-tooltip" aria-label="close">
+														<button type="button" class="btn btn-danger btn-xs disabled use-tooltip" aria-label="Close">
 															<i class="fa fa-times"></i>
 														</button>
 													</div>
 												<#else>
-													<button type="button" class="btn btn-danger btn-xs" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete" aria-label="delete">
+													<button type="button" class="btn btn-danger btn-xs" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete" aria-label="Delete">
 														<i class="fa fa-times"></i>
 													</button>
 												</#if>
 
-												<button type="button" class="btn btn-primary btn-xs" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete" aria-label="undo">
+												<button type="button" class="btn btn-primary btn-xs" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete" aria-label="Undo">
 													<i class="fa fa-undo"></i>
 												</button>
 

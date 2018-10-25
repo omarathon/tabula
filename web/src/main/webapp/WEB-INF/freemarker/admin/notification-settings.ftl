@@ -55,7 +55,7 @@
 				<h4 class="section-title" style="display: inline-block;">
 					Small group attendance notifications
 				</h4>
-				<a data-toggle="modal" data-target="#small-group-attendance-modal" aria-label="help"><i class="fa fa-question-circle"></i></a>
+				<a data-toggle="modal" data-target="#small-group-attendance-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
 			</div>
 			<div class="col-md-2">
 				<@bs3form.checkbox path="smallGroupEventAttendanceReminderEnabled">
@@ -139,7 +139,7 @@
 				<h4 class="section-title" style="display: inline-block;">
 					Coursework marking workflow "send to administrator" notifications
 				</h4>
-				<a data-toggle="modal" data-target="#coursework-marking-workflow-admin-modal" aria-label="help"><i class="fa fa-question-circle"></i></a>
+				<a data-toggle="modal" data-target="#coursework-marking-workflow-admin-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
 			</div>
 			<div class="col-md-2">
 				<@bs3form.checkbox path="finaliseFeedbackNotificationEnabled">

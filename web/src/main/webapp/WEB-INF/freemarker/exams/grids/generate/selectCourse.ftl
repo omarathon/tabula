@@ -27,7 +27,7 @@
 	<@form_fields.grid_options_fields />
 
 	<div class="well well-sm filters">
-		<button type="button" class="clear-all-filters btn btn-link" aria-label="clear all filters">
+		<button type="button" class="clear-all-filters btn btn-link" aria-label="Clear all filters">
 			<span class="fa-stack">
 				<i class="fa fa-filter fa-stack-1x"></i>
 				<i class="fa fa-ban fa-stack-2x"></i>

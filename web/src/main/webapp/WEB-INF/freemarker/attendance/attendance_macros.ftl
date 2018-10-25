@@ -300,7 +300,7 @@
 			<p>
 				This attendance can no longer be edited, because it was recorded for a monitoring scheme (${checkpoint.point.scheme.displayName})
 				that no longer applies to this student.
-				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank' aria-label="help"><i class='fa fa-question-circle'></i></a>
+				<a href='http://warwick.ac.uk/tabula/manual/monitoring-points/recording-viewing-points/#nonactivepoints' target='_blank' aria-label="Help"><i class='fa fa-question-circle'></i></a>
 			</p>
 		</#if>
 		<#if formatResult.status?has_content><p>${formatResult.status}</p></#if>

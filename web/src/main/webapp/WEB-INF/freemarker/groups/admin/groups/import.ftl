@@ -37,7 +37,7 @@
 
 							<#local popoverContent><@components.timetableEventDetails event academicYear department /></#local>
 							<a class="use-popover"
-							   data-html="true" aria-label="help"
+							   data-html="true" aria-label="Help"
 							   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 						</div>
 					</div>

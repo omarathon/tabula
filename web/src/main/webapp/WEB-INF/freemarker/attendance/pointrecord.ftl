@@ -79,7 +79,7 @@
 										</#assign>
 										<a class="use-popover"
 										   data-title="Key"
-										   aria-label="help"
+										   aria-label="Help"
 										   data-placement="bottom"
 										   data-container="body"
 										   data-content='${popoverContent}'

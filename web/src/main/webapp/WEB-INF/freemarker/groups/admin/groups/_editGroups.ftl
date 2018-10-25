@@ -91,11 +91,11 @@
 					<#if !no_remove_button>
 						<div class="col-md-2">
 							<#if is_new>
-								<button type="button" class="btn btn-danger" aria-label="remove" data-toggle="remove"><i class="fa fa-times"></i></button>
+								<button type="button" class="btn btn-danger" aria-label="Remove" data-toggle="remove"><i class="fa fa-times"></i></button>
 							<#else>
 								<@f.hidden path="delete" />
-								<button type="button" class="btn btn-danger" aria-label="mark as deleted" data-toggle="mark-deleted"><i class="fa fa-times"></i></button>
-								<button type="button" class="btn btn-primary" aria-label="undo mark as deleted" data-toggle="undo-deleted"><i class="fa fa-undo"></i></button>
+								<button type="button" class="btn btn-danger" aria-label="Mark as deleted" data-toggle="mark-deleted"><i class="fa fa-times"></i></button>
+								<button type="button" class="btn btn-primary" aria-label="Undo mark as deleted" data-toggle="undo-deleted"><i class="fa fa-undo"></i></button>
 							</#if>
 						</div>
 
@@ -171,7 +171,7 @@
 
 					$clone.insertBefore($group);
 					$clone.find('.row')
-						.append('<div class="col-md-2"><button aria-label="remove" type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button></div>');
+						.append('<div class="col-md-2"><button aria-label="Remove" type="button" class="btn btn-danger" data-toggle="remove"><i class="fa fa-times"></i></button></div>');
 
 					var nextIndex = index + 1;
 					var $name = $group.find('input[type="text"]');
