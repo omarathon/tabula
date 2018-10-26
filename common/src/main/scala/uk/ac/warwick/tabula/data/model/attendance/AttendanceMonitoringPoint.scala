@@ -111,7 +111,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
 			assignmentSubmissionType == AttendanceMonitoringPoint.Settings.AssignmentSubmissionTypes.Assignments
 	}
 
-	def applies(beginDate: LocalDate, finishDate: Option[LocalDate]): Boolean = endDate.isAfter(beginDate.minusDays(28)) && (finishDate.isEmpty || startDate.isBefore(finishDate.get))
+	def applies(beginDate: LocalDate, finishDate: Option[LocalDate]): Boolean = (beginDate != null && endDate.isAfter(beginDate.minusDays(28))) && (finishDate.isEmpty || startDate.isBefore(finishDate.get))
 }
 
 trait AttendanceMonitoringPointSettings extends HasSettings with PostLoadBehaviour {
