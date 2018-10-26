@@ -445,7 +445,7 @@ preposition: Text to relate the title to the department name in the second line,
 			<#if emails?size gt limit>
 		   		title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
-				href="mailto:${user.email}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+				href="mailto:${user.email}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>&subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
