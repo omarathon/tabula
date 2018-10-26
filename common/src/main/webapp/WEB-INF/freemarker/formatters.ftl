@@ -451,7 +451,7 @@ preposition: Text to relate the title to the department name in the second line,
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-		<a data-content="There is a known issue with sending emails to long lists of staff or students. If the '${title}' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
