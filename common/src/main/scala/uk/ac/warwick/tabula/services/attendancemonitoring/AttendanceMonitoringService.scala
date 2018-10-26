@@ -230,7 +230,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
 	def listStudentsPoints(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): Seq[AttendanceMonitoringPoint] = {
 		val validCourses = student.freshStudentCourseDetails.filter(_.freshStudentCourseYearDetails.exists(_.academicYear == academicYear))
-		val beginDates = validCourses.map(_.beginDate)
+		val beginDates = validCourses.map(_.beginDate).filter(_!= null)
 		val endDates = validCourses.map(c => Option(c.endDate))
 		if (beginDates.nonEmpty) {
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
