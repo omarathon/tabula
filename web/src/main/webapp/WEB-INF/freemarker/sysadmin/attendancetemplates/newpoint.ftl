@@ -14,7 +14,7 @@
 
 			<@bs3form.labelled_form_group path="startWeek" labelText="Start">
 				<@f.select path="startWeek" cssClass="startDateTime selectOffset form-control">
-					<#list -8..43 as week>
+					<#list 1..61 as week>
 						<@f.option value="${week}">Week ${week}</@f.option>
 					</#list>
 				</@f.select>
@@ -22,7 +22,7 @@
 
 			<@bs3form.labelled_form_group path="endWeek" labelText="End">
 				<@f.select path="endWeek" cssClass="endDateTime selectOffset form-control">
-					<#list -8..43 as week>
+					<#list 1..61 as week>
 						<@f.option value="${week}">Week ${week}</@f.option>
 					</#list>
 				</@f.select>
