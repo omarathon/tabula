@@ -594,6 +594,16 @@ trait ApplicantProperties {
 
 	@Restricted(Array("Profiles.Read.Disability"))
 	def disability: Option[Disability] = Option(_disability)
+
+	@Column(name="disability_funding")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.DisabilityFundingStatusUserType")
+	private var _disabilityFundingStatus: DisabilityFundingStatus = _
+	def disabilityFundingStatus_=(d: DisabilityFundingStatus): Unit = { _disabilityFundingStatus = d }
+
+	@Restricted(Array("Profiles.Read.Disability"))
+	def disabilityFundingStatus: Option[DisabilityFundingStatus] = Option(_disabilityFundingStatus)
+
+
 }
 
 trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {

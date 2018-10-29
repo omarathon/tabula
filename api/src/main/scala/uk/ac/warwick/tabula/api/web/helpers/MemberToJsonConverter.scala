@@ -58,6 +58,9 @@ trait MemberToJsonConverter
 				if (canViewProperty(m, "disability"))
 					m.disability.filter(_.reportable).map { "disability" -> disabilityToJson(_) }
 				else None,
+				if (canViewProperty(m, "disabilityFundingStatus"))
+					m.disabilityFundingStatus.map { "disabilityFundingStatus" -> disabilityFundingStatusToJson(_) }
+				else None,
 			).flatten.toMap
 			case _ => Map()
 		}

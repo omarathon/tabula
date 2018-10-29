@@ -39,6 +39,7 @@ class SitsStudentRow(val resultSet: ResultSet)
 	val inUseFlag: Option[String] = optString("in_use_flag")
 	val alternativeEmailAddress: Option[String] = optString("alternative_email_address")
 	val disabilityCode: Option[String] = optString("disability")
+	val disabilityFunding: Option[String] = optString("disabilityFunding")
 	val deceased: Boolean = optString("mst_type") match {
 		case Some("D") | Some("d") => true
 		case _ => false

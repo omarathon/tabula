@@ -52,6 +52,7 @@ class ImportStudentRowCommandInternal(
 		this.nationality = row.nationality.orNull
 		this.secondNationality = row.secondNationality.orNull
 		this.mobileNumber = row.mobileNumber.orNull
+		this.disabilityFundingStatus = Disability.FundingStatus.fromCode(row.disabilityFunding.orNull)
 
 		this.deceased = row.deceased
 	}
@@ -117,7 +118,7 @@ class ImportStudentRowCommandInternal(
 	}
 
 	private val basicStudentProperties = Set(
-		"nationality", "secondNationality", "mobileNumber", "disability", "deceased"
+		"nationality", "secondNationality", "mobileNumber", "disability", "disabilityFundingStatus", "deceased"
 	)
 
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
