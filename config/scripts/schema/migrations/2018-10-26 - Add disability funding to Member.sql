@@ -1,0 +1,1 @@
+ALTER TABLE MEMBER ADD disability_funding nvarchar2(2);
