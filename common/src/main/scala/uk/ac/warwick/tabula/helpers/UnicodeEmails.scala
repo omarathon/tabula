@@ -17,7 +17,7 @@ trait UnicodeEmails {
 		})
 
 		preparator.prepare(message)
-		message.addHeader("X-Auto-Response-Suppress", "OOF")
+		message.addHeader("X-Auto-Response-Suppress", "DR, OOF, AutoReply")
 
 		message
 	}
