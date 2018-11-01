@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.groups.admin
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.notifications.groups.SmallGroupSetChangedNotification
+import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedUserIdRecipientNotification}
 import uk.ac.warwick.tabula.services.{UserLookupComponent, UserLookupService}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.Notification
@@ -112,7 +112,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     notifications.size should be(2)
 
 		notifications.foreach{
-			case n: SmallGroupSetChangedNotification => n.userLookup = userLookup
+			case n: SmallGroupSetChangedUserIdRecipientNotification => n.userLookup = userLookup
 		}
 
     notifications.exists(_.recipients == Seq(user1)) should be { true }

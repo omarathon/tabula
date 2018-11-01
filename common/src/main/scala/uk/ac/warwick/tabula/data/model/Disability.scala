@@ -1,10 +1,42 @@
 package uk.ac.warwick.tabula.data.model
 
+import java.sql.Types
+
 import org.joda.time.DateTime
 import javax.persistence.{Entity, Id}
+import org.hibernate.`type`.{StandardBasicTypes, StringType}
+
+sealed abstract class DisabilityFundingStatus(val code: String, val description: String)
 
 object Disability {
 	val notReportableDefinition = "NONE"
+
+	object FundingStatus {
+		case object InReceipt extends DisabilityFundingStatus("4", "In receipt")
+		case object NotInReceipt extends DisabilityFundingStatus("5", "Not in receipt of DSA")
+		case object Pending extends DisabilityFundingStatus("9", "Pending")
+
+		def fromCode(code: String): DisabilityFundingStatus = code match {
+			case "4" => InReceipt
+			case "5" => NotInReceipt
+			case "9" => Pending
+			case _ => null
+		}
+	}
+}
+
+class DisabilityFundingStatusUserType extends AbstractBasicUserType[DisabilityFundingStatus, String] {
+
+	val basicType: StringType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.VARCHAR)
+
+	val nullValue: String = null
+	val nullObject: DisabilityFundingStatus = null
+
+	override def convertToObject(string: String): DisabilityFundingStatus = Disability.FundingStatus.fromCode(string)
+
+	override def convertToValue(status: DisabilityFundingStatus): String = status.code
+
 }
 
 @Entity

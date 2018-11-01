@@ -33,7 +33,7 @@
 			data-trigger="click"
 			data-placement="right"
 			data-html="true"
-			data-content="${helpText}"><i class="fa fa-question-circle fa-fw" style="font-size:11pt"></i></a>
+			data-content="${helpText}"><i class="fa fa-question-circle fa-fw" style="font-size:11pt" aria-label="Help"></i></a>
 	</#assign>
 
 	<@f.form commandName="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form">

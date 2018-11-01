@@ -33,12 +33,13 @@
 						 data-title="Tier 4 Filtering"
 						 data-placement="bottom"
 						 data-html="true"
+						 aria-label="Help"
 						 data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 				</#if>
 
 
 				<div class="student-filter btn-group-group well well-small well-sm">
-					<button type="button" class="clear-all-filters btn btn-link">
+					<button aria-label="Clear all filters" type="button" class="clear-all-filters btn btn-link">
 						<span class="icon-stack fa-stack">
 							<i class="icon-filter fa fa-filter fa-stack-1x"></i>
 							<i class="icon-ban-circle fa fa-ban icon-stack-base fa-stack-2x"></i>

@@ -241,6 +241,12 @@ class SandboxProfileImporter extends ProfileImporter {
 					case n if n > 70 => "99" // Not known
 					case _ => "A" // No disability
 				}),
+				"disabilityFunding" -> (member.universityId.toLong % 100 match {
+					case 4 => "4" // In receipt
+					case 5 => "5" // Not in receipt
+					case 9 => "9" // Pending
+					case _ => null
+				}),
 				"mst_type" -> "L",
 				"sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
 					char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
@@ -420,6 +426,7 @@ object ProfileImporter extends Logging {
 			stu.stu_haem as alternative_email_address,
 			stu.stu_cat3 as mobile_number,
 			stu.stu_dsbc as disability,
+			stu.stu_dsba as disabilityFunding,
 
 			nat.nat_name as nationality,
 			nat2.nat_name as second_nationality,
@@ -565,6 +572,7 @@ object ProfileImporter extends Logging {
 			stu.stu_gend as gender,
 			stu.stu_haem as externalEmail,
 			stu.stu_dsbc as disability,
+			stu_stu_dsba as disabilityFunding,
 			stu.stu_cat3 as mobile_number,
 			nat.nat_name as nationality,
 			nat2.nat_name as second_nationality,
@@ -657,6 +665,7 @@ object ProfileImporter extends Logging {
 		val applicantInfo = SitsApplicantInfo(
 			mobileNumber = optString("mobile_number").orNull,
 			disability = optString("disability").orNull,
+			disabilityFunding = optString("disabilityFunding").orNull,
 			nationality = optString("nationality").orNull,
 			secondNationality = optString("second_nationality").orNull
 		)
@@ -693,6 +702,7 @@ case class MembershipMember(
 case class SitsApplicantInfo(
 	mobileNumber: String = null,
 	disability: String = null,
+	disabilityFunding: String = null,
 	nationality: String = null,
 	secondNationality: String = null
 )

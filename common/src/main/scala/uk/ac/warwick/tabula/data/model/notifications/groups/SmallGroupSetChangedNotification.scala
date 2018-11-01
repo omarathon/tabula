@@ -11,7 +11,7 @@ object SmallGroupSetChangedNotification {
 	val templateLocation = "/WEB-INF/freemarker/notifications/groups/small_group_modified_notification.ftl"
 }
 
-abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
+trait SmallGroupSetChangedUserIdRecipientNotification
 	extends NotificationWithTarget[SmallGroup, SmallGroupSet]
 	with UserIdRecipientNotification
 	with AutowiringUserLookupComponent
@@ -30,13 +30,6 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 			"profileUrl" -> url
 		) ++ extraModel)
 
-	def url: String = {
-		recipientRole match {
-			case UserRoleOnGroup.Student => Routes.profiles.Profile.events(recipient.getWarwickId)
-			case UserRoleOnGroup.Tutor => Routes.groups.tutor.mygroups
-		}
-	}
-
 	def urlTitle = "view this small group"
 
 	def extraModel: Map[String, Any] = Map()
@@ -44,11 +37,17 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 @Entity
 @DiscriminatorValue(value="SmallGroupSetChangedStudent")
-class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedNotification(UserRoleOnGroup.Student)
+class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedUserIdRecipientNotification {
+
+	def url: String = Routes.profiles.Profile.events(recipient.getWarwickId)
+
+}
 
 @Entity
 @DiscriminatorValue(value="SmallGroupSetChangedTutor")
-class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotification(UserRoleOnGroup.Tutor) {
+class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedUserIdRecipientNotification {
+
+	def url: String = Routes.groups.tutor.mygroups
 
 	private def changedGroupInfo = {
 		entities.map { newSmallGroup =>
@@ -58,10 +57,3 @@ class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedNotifica
 
 	override  def extraModel = Map("groupsWithOldSizeInfo" -> changedGroupInfo)
 }
-
-sealed trait UserRoleOnGroup
-object UserRoleOnGroup {
-	case object Student extends UserRoleOnGroup
-	case object Tutor extends UserRoleOnGroup
-}
-

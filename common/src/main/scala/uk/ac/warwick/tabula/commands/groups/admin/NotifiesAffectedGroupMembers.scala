@@ -3,13 +3,12 @@ package uk.ac.warwick.tabula.commands.groups.admin
 import java.util
 
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedNotification, SmallGroupSetChangedStudentNotification, SmallGroupSetChangedTutorNotification}
+import uk.ac.warwick.tabula.data.model.notifications.groups.{SmallGroupSetChangedStudentNotification, SmallGroupSetChangedTutorNotification, SmallGroupSetChangedUserIdRecipientNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority}
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupComponent
 
 trait SmallGroupSetCommand {
 	def set: SmallGroupSet
@@ -17,7 +16,7 @@ trait SmallGroupSetCommand {
 }
 
 trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet] {
-	this: SmallGroupSetCommand with UserLookupComponent =>
+	this: SmallGroupSetCommand =>
 
 	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(transient = false)
 
@@ -76,8 +75,8 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet
 		createNotification(set, filteredGroups.asScala, student, new SmallGroupSetChangedStudentNotification, set.emailStudentsOnChange)
 	}
 
-	def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedNotification, sendEmail: Boolean): Option[SmallGroupSetChangedNotification] = {
-		filteredGroups.toSeq match {
+	def createNotification(set: SmallGroupSet, filteredGroups: Seq[SmallGroup], user: User, blankNotification: SmallGroupSetChangedUserIdRecipientNotification, sendEmail: Boolean): Option[SmallGroupSetChangedUserIdRecipientNotification] = {
+		filteredGroups match {
 			case Nil => None
 			case groups =>
 				val n = Notification.init(blankNotification, apparentUser, groups, groups.head.groupSet)

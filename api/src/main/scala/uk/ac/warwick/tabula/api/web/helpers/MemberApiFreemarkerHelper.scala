@@ -93,4 +93,9 @@ object MemberApiFreemarkerHelper {
 		"sitsDefinition" -> disability.sitsDefinition,
 		"definition" -> disability.definition
 	)
+
+	def disabilityFundingStatusToJson(status: DisabilityFundingStatus): Map[String, Any] = Map(
+		"code" -> status.code,
+		"description" -> status.description
+	)
 }

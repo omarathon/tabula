@@ -113,7 +113,7 @@
 						<div class="input-group">
 							<input class="form-control" name="query" type="text" placeholder="Search these students" value="${command.query!}"/>
 							<span class="input-group-btn">
-								<button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+								<button class="btn btn-default" aria-label="Search" type="submit"><i class="fa fa-search"></i></button>
 							</span>
 						</div>
 					</div>
