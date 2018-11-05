@@ -572,7 +572,7 @@ object ProfileImporter extends Logging {
 			stu.stu_gend as gender,
 			stu.stu_haem as externalEmail,
 			stu.stu_dsbc as disability,
-			stu_stu_dsba as disabilityFunding,
+			stu.stu_dsba as disabilityFunding,
 			stu.stu_cat3 as mobile_number,
 			nat.nat_name as nationality,
 			nat2.nat_name as second_nationality,
