@@ -71,7 +71,8 @@ case class AuditEvent(
 
 	/** Was there an "error" stage, indicating an exception was thrown? */
 	def hadError: Boolean = findStage("error").isDefined
-	def isIncomplete: Boolean = findStage("after").isEmpty
+	def isComplete: Boolean = findStage("after").isDefined
+	def isRunning: Boolean = !isComplete && !hadError
 
 	def findStage(stage: String): Option[AuditEvent] = related.find(_.eventStage == stage)
 	def findBeforeStage: Option[AuditEvent] = findStage("before")
