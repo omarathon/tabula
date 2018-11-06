@@ -53,7 +53,9 @@
 	SPR (Student Programme Route) start year, and is specified for each year of study on their course. 
 </p>
 <p>
-	Enter weightings as a percentage, usually totalling 100 for a degree.
+	Enter weightings as a percentage. These usually total 100 for a degree, though weightings for 
+	courses with a year abroad can exceed 100. Tabula disregards the year abroad and associated 
+	weighting when calculating the final degree mark.
 </p>
 
 <#assign formUrl><@routes.exams.manageWeightings department academicYear /></#assign>
