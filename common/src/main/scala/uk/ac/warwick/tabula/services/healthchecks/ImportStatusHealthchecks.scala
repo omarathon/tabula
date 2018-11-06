@@ -28,7 +28,7 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 	protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
 		//we currently fetch latest 1000 audit events and then extract related department events. It is possible no successful event will be among that big lot (TAB-6681 - all failed in the lot). In that case lastSuccessful will be none.
 		// Get the last one that's successful
-		val lastSuccessful = imports.find(_.isComplete)
+		val lastSuccessful = imports.find(_.isSuccessful)
 
 		// Do we have a current running import?
 		val isRunning = imports.headOption.filter(_.isRunning)
