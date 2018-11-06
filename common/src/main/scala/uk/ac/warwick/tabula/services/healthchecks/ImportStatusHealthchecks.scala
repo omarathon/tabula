@@ -138,7 +138,7 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 		val allRootDepartments = moduleAndDepartmentService.allRootDepartments
 		val imports = auditEvents
 
-		val healthchecks = allRootDepartments.filter (_.code.equalsIgnoreCase("sl")).map(department => checkDepartment(imports, department))
+		val healthchecks = allRootDepartments.map(department => checkDepartment(imports, department))
 
 		val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
 			val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
