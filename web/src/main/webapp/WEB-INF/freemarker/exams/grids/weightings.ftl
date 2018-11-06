@@ -50,7 +50,7 @@
 	Course year weightings are the percentage of a final degree mark contributed by each year. 
 	These are not imported from SITS. The weighting for each year must be specified in Tabula to 
 	generate a final degree mark in an exam grid. The weighting chosen corresponds to the student's 
-	SPR (Student Programme Route) start year for each year of study on their course. 
+	SPR (Student Programme Route) start year, and is specified for each year of study on their course. 
 </p>
 <p>
 	Enter weightings as a percentage, usually totalling 100 for a degree.
