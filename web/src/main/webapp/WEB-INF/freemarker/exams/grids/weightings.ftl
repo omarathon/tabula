@@ -47,11 +47,15 @@
 <@fmt.id7_deptheader title="Manage course year weightings for ${academicYear.toString}" route_function=route_function preposition="in" />
 
 <p>
-	In order to generate a final degree mark when creating an exam grid the weighting for each year needs to be specified.
-	The weighting chosen corresponds to the student's SPR start year, for each year of study on their course.
+	Course year weightings are the percentage of a final degree mark contributed by each year. 
+	These are not imported from SITS. The weighting for each year must be specified in Tabula to 
+	generate a final degree mark in an exam grid. The weighting chosen corresponds to the student's 
+	SPR (Student Programme Route) start year, and is specified for each year of study on their course. 
 </p>
 <p>
-	Weightings should be entered as a percentage, totalling 100 for the degree.
+	Enter weightings as a percentage. These usually total 100 for a degree, though weightings for 
+	courses with a year abroad can exceed 100. Tabula disregards the year abroad and associated 
+	weighting when calculating the final degree mark.
 </p>
 
 <#assign formUrl><@routes.exams.manageWeightings department academicYear /></#assign>

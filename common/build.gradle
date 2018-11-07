@@ -130,6 +130,8 @@ dependencies {
 
     compile 'com.github.mfornos:humanize-slim:1.2.2'
 
+    compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20180219.1'
+
     // Test dependencies
     testCompile "org.springframework:spring-test:${springVersion}"
 

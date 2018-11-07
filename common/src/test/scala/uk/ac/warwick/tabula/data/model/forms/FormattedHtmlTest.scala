@@ -32,7 +32,10 @@ class FormattedHtmlTest extends TestBase {
 		val input = """<a href="http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf">View Generic Feedback</a>"""
 		val output = formatter.formattedHtml(input)
 
-		output.trim should be ("<p>&lt;a href=&quot;<a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf</a>&quot;&gt;View Generic Feedback&lt;/a&gt;</p>")
+		// TAB-6685 changed &quot; to &#34;
+		// they are the same thing, and &quot; is preferred, but OWASP sanitiser preferred the latter, so i have to chenge this test case
+		// this does not technically affect the purpose of this test tho
+		output.trim should be ("<p>&lt;a href&#61;&#34;<a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf</a>&#34;&gt;View Generic Feedback&lt;/a&gt;</p>")
 	}
 
 	@Test

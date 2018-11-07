@@ -26,19 +26,27 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 	protected def auditEvents: Seq[AuditEvent]
 
 	protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
+		//we currently fetch latest 1000 audit events and then extract related department events. It is possible no successful event will be among that big lot (TAB-6681 - all failed in the lot). In that case lastSuccessful will be none.
 		// Get the last one that's successful
-		val lastSuccessful = imports.find { event => !event.hadError && !event.isIncomplete }
+		val lastSuccessful = imports.find(_.isSuccessful)
 
 		// Do we have a current running import?
-		val isRunning = imports.headOption.filter(_.isIncomplete)
+		val isRunning = imports.headOption.filter(_.isRunning)
 
-		// Did the last import fail
-		val lastFailed = imports.find(!_.isIncomplete).filter(_.hadError)
+		// Find the last failed import
+		val lastFailed = imports.find(_.hadError)
+
+		// if there is lastFailed after lastSuccessful we treat it as error and don't check threshold. Errors need sorting asap
+		val isError = lastFailed.isDefined && lastSuccessful.isDefined &&  lastFailed.get.eventDate.isAfter(lastSuccessful.get.eventDate)
+
+		// if all are failed events among the lot for this specific dept (TAB-6681) - classified as warning
+		val isWarning = lastFailed.isDefined && !lastSuccessful.isDefined
+
 		//TAB-5698 - ensure we have some audit
 		val status =
-			if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow))
+			if ((lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow)) || isError)
 				ServiceHealthcheck.Status.Error
-			else if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || lastFailed.nonEmpty)
+			else if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || isWarning)
 				ServiceHealthcheck.Status.Warning
 			else
 				ServiceHealthcheck.Status.Okay

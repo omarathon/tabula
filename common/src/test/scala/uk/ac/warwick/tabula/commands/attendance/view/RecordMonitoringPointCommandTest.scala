@@ -167,15 +167,8 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
 		validator.attendanceMonitoringService.getPointById(point2.id) returns Option(point2)
 		validator.attendanceMonitoringService.getCheckpoints(Seq(point1, point2), Seq(student1, student2, student3)) returns Map()
 
-		val memberUniversityIdConverter = new MemberUniversityIdConverter
-		memberUniversityIdConverter.service = validator.profileService
-		conversionService.addConverter(memberUniversityIdConverter)
-
 		validator.profileService.getAllMembersWithUniversityIds(Seq(student1.universityId, student2.universityId)) returns Seq(student1, student2)
 		validator.profileService.getAllMembersWithUniversityIds(Seq(student2.universityId, student3.universityId)) returns Seq(student2, student3)
-		validator.profileService.getMemberByUniversityIdStaleOrFresh(student1.universityId) returns Option(student1)
-		validator.profileService.getMemberByUniversityIdStaleOrFresh(student2.universityId) returns Option(student2)
-		validator.profileService.getMemberByUniversityIdStaleOrFresh(student3.universityId) returns Option(student3)
 
 		var binder = new WebDataBinder(validator, "command")
 		binder.setConversionService(conversionService)
