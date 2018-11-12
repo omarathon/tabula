@@ -12,14 +12,14 @@ object Disability {
 	val notReportableDefinition = "NONE"
 
 	object FundingStatus {
-		case object InReceipt extends DisabilityFundingStatus("4", "In receipt")
+		case object InReceipt extends DisabilityFundingStatus("4", "In receipt of DSA")
 		case object NotInReceipt extends DisabilityFundingStatus("5", "Not in receipt of DSA")
-		case object Pending extends DisabilityFundingStatus("9", "Pending")
+		case object Unknown extends DisabilityFundingStatus("9", "Information about DSA is not known/not sought")
 
 		def fromCode(code: String): DisabilityFundingStatus = code match {
 			case "4" => InReceipt
 			case "5" => NotInReceipt
-			case "9" => Pending
+			case "9" => Unknown
 			case _ => null
 		}
 	}
