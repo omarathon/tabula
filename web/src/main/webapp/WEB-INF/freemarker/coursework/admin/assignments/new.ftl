@@ -39,8 +39,7 @@ the comments textarea needs to maintain newlines.
 
 <#include "_fields.ftl" />
 
-	<div class="submit-buttons form-actions">
-		<input type="submit" value="Create" class="btn btn-primary">
+	<div class="form-actions">
 		<a class="btn" href="<@routes.cm2.departmenthome department=module.adminDepartment />">Cancel</a>
 	</div>
 </@f.form>
