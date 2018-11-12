@@ -244,7 +244,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				"disabilityFunding" -> (member.universityId.toLong % 100 match {
 					case 4 => "4" // In receipt
 					case 5 => "5" // Not in receipt
-					case 9 => "9" // Pending
+					case 9 => "9" // Unknown
 					case _ => null
 				}),
 				"mst_type" -> "L",
