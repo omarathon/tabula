@@ -5,11 +5,9 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
-import uk.ac.warwick.tabula.commands.{Command, ViewViewableCommand}
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONView}
