@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.api.web.controllers.profiles
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
-import uk.ac.warwick.tabula.api.web.helpers.{MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
+import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
@@ -48,13 +48,12 @@ trait GetMemberApi {
 		new ViewProfileCommand(user, mandatory(member))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand): Mav = {
+	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "member") fields: String): Mav =
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"member" -> jsonMemberObject(mandatory(command.apply()))
+			"member" -> jsonMemberObject(mandatory(command.apply()), APIFieldRestriction.restriction("member", fields))
 		)))
-	}
 }
 
 trait GetAllMemberCoursesApi {
@@ -65,7 +64,7 @@ trait GetAllMemberCoursesApi {
 		new ViewProfileCommand(user, mandatory(member))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getCourses(@ModelAttribute("getCommand") command: ViewProfileCommand): Mav = {
+	def getCourses(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "studentCourseDetails") fields: String): Mav = {
 		val member = mandatory(command.apply())
 		val studentCourseDetails = member match {
 			case student: StudentMember if canViewProperty(student, "freshStudentCourseDetails") =>
@@ -77,7 +76,7 @@ trait GetAllMemberCoursesApi {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"studentCourseDetails" -> mandatory(studentCourseDetails).map(jsonStudentCourseDetailsObject)
+			"studentCourseDetails" -> mandatory(studentCourseDetails).map(jsonStudentCourseDetailsObject(_, APIFieldRestriction.restriction("studentCourseDetails", fields)))
 		)))
 	}
 }
@@ -92,11 +91,11 @@ trait GetMemberCourseApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getCourse(@ModelAttribute("getCommand") command: ViewViewableCommand[StudentCourseDetails]): Mav = {
+	def getCourse(@ModelAttribute("getCommand") command: ViewViewableCommand[StudentCourseDetails], @RequestParam(defaultValue = "studentCourseDetails") fields: String): Mav = {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"studentCourseDetails" -> jsonStudentCourseDetailsObject(mandatory(command.apply()))
+			"studentCourseDetails" -> jsonStudentCourseDetailsObject(mandatory(command.apply()), APIFieldRestriction.restriction("studentCourseDetails", fields))
 		)))
 	}
 }
@@ -111,7 +110,7 @@ trait GetMemberCourseYearApi {
 	}
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getCourseYear(@ModelAttribute("getCommand") command: ViewViewableCommand[StudentCourseDetails], @PathVariable academicYear: AcademicYear): Mav = {
+	def getCourseYear(@ModelAttribute("getCommand") command: ViewViewableCommand[StudentCourseDetails], @PathVariable academicYear: AcademicYear, @RequestParam(defaultValue = "studentCourseYearDetails") fields: String): Mav = {
 		val studentCourseDetails = mandatory(command.apply())
 		val studentCourseYearDetails =
 			if (canViewProperty(studentCourseDetails, "freshStudentCourseYearDetails"))
@@ -121,7 +120,7 @@ trait GetMemberCourseYearApi {
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"studentCourseYearDetails" -> mandatory(studentCourseYearDetails).map(jsonStudentCourseYearDetailsObject)
+			"studentCourseYearDetails" -> mandatory(studentCourseYearDetails).map(jsonStudentCourseYearDetailsObject(_, APIFieldRestriction.restriction("studentCourseYearDetails", fields)))
 		)))
 	}
 }

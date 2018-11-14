@@ -60,6 +60,8 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 		case _ => false
 	}
 
+	override def hashCode(): Int = startYear.hashCode()
+
 	def compare(that: AcademicYear): Int = this.underlying.compareTo(that.underlying)
 
 	def isSITSInFlux(date: LocalDate): Boolean = {
@@ -84,7 +86,7 @@ object AcademicYear {
 	implicit def warwickUtilsAcademicYearToAcademicYear(year: JAcademicYear): AcademicYear = AcademicYear(year)
 
 	// An implicit for the UserType to create instances
-	implicit val factory: (JInteger) => AcademicYear = (year: JInteger) => AcademicYear(year)
+	implicit val factory: JInteger => AcademicYear = (year: JInteger) => AcademicYear(year)
 
 	def apply(startYear: Int): AcademicYear = JExtendedAcademicYear.starting(startYear)
 
