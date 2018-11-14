@@ -16,67 +16,85 @@ trait MemberToJsonConverter
 		with MemberApiFreemarkerHelper {
 	self: ScalaFreemarkerConfigurationComponent =>
 
-	def jsonMemberObject(member: Member, deep: Boolean = true): Map[String, Any] = {
+	def jsonMemberObject(member: Member, fieldRestriction: APIFieldRestriction, deep: Boolean = true): Map[String, Any] = {
 		val memberProperties = Seq(
-			str("universityId", member, "universityId"),
-			str("userId", member, "userId"),
-			str("firstName", member, "firstName"),
-			str("lastName", member, "lastName"),
-			str("email", member, "email"),
-			str("userType", member, "userType.description"),
-			str("fullName", member, "fullName"),
-			str("officialName", member, "fullName"), // officialName no longer supported  - TAB-6621
-			str("homeEmail", member, "homeEmail"),
-			str("fullFirstName", member, "firstName"), // fullFirstName no longer supported - TAB-6621
-			str("title", member, "title"),
-			str("gender", member, "gender.description"),
-			str("inUseFlag", member, "inUseFlag"),
-			str("jobTitle", member, "jobTitle"),
-			str("phoneNumber", member, "phoneNumber"),
-			str("nationality", member, "nationality"),
-			str("secondNationality", member, "secondNationality"),
-			str("mobileNumber", member, "mobileNumber"),
-			str("groupName", member, "groupName"),
-			if (canViewProperty(member, "affiliatedDepartments"))
-				Some("affiliatedDepartments" -> member.affiliatedDepartments.map(departmentToJson))
-			else None,
-			if (canViewProperty(member, "touchedDepartments"))
-				Some("touchedDepartments" -> member.touchedDepartments.map(departmentToJson))
-			else None,
-			if (canViewProperty(member, "homeDepartment"))
-				Some("homeDepartment", departmentToJson(member.homeDepartment))
-			else None,
-			date("inactivationDate", member, "inactivationDate"),
-			date("dateOfBirth", member, "dateOfBirth")
+			str("universityId", member, "universityId", fieldRestriction),
+			str("userId", member, "userId", fieldRestriction),
+			str("firstName", member, "firstName", fieldRestriction),
+			str("lastName", member, "lastName", fieldRestriction),
+			str("email", member, "email", fieldRestriction),
+			str("userType", member, "userType.description", fieldRestriction),
+			str("fullName", member, "fullName", fieldRestriction),
+			str("officialName", member, "fullName", fieldRestriction), // officialName no longer supported  - TAB-6621
+			str("homeEmail", member, "homeEmail", fieldRestriction),
+			str("fullFirstName", member, "firstName", fieldRestriction), // fullFirstName no longer supported - TAB-6621
+			str("title", member, "title", fieldRestriction),
+			str("gender", member, "gender.description", fieldRestriction),
+			str("inUseFlag", member, "inUseFlag", fieldRestriction),
+			str("jobTitle", member, "jobTitle", fieldRestriction),
+			str("phoneNumber", member, "phoneNumber", fieldRestriction),
+			str("nationality", member, "nationality", fieldRestriction),
+			str("secondNationality", member, "secondNationality", fieldRestriction),
+			str("mobileNumber", member, "mobileNumber", fieldRestriction),
+			str("groupName", member, "groupName", fieldRestriction),
+			fieldRestriction.nested("affiliatedDepartments").flatMap { restriction =>
+				if (canViewProperty(member, "affiliatedDepartments"))
+					Some("affiliatedDepartments" -> member.affiliatedDepartments.map(departmentToJson(_, restriction)))
+				else None
+			},
+			fieldRestriction.nested("touchedDepartments").flatMap { restriction =>
+				if (canViewProperty(member, "touchedDepartments"))
+					Some("touchedDepartments" -> member.touchedDepartments.map(departmentToJson(_, restriction)))
+				else None
+			},
+			fieldRestriction.nested("homeDepartment").flatMap { restriction =>
+				if (canViewProperty(member, "homeDepartment"))
+					Some("homeDepartment", departmentToJson(member.homeDepartment, restriction))
+				else None
+			},
+			date("inactivationDate", member, "inactivationDate", fieldRestriction),
+			date("dateOfBirth", member, "dateOfBirth", fieldRestriction)
 		).flatten.toMap
 
 		val applicantAndStudentProperties = member match {
 			case m : ApplicantProperties if deep => Seq(
-				if (canViewProperty(m, "currentAddress"))
-					Some("currentAddress" -> addressToJson(m.currentAddress))
-				else None,
-				if (canViewProperty(m, "disability"))
-					m.disability.filter(_.reportable).map { "disability" -> disabilityToJson(_) }
-				else None,
-				if (canViewProperty(m, "disabilityFundingStatus"))
-					m.disabilityFundingStatus.map { "disabilityFundingStatus" -> disabilityFundingStatusToJson(_) }
-				else None,
+				fieldRestriction.nested("currentAddress").flatMap { restriction =>
+					if (canViewProperty(m, "currentAddress"))
+						Some("currentAddress" -> addressToJson(m.currentAddress, restriction))
+					else None
+				},
+				fieldRestriction.nested("disability").flatMap { restriction =>
+					if (canViewProperty(m, "disability"))
+						m.disability.filter(_.reportable).map { "disability" -> disabilityToJson(_, restriction) }
+					else None
+				},
+				fieldRestriction.nested("disabilityFundingStatus").flatMap { restriction =>
+					if (canViewProperty(m, "disabilityFundingStatus"))
+						m.disabilityFundingStatus.map { "disabilityFundingStatus" -> disabilityFundingStatusToJson(_, restriction) }
+					else None
+				},
 			).flatten.toMap
 			case _ => Map()
 		}
 
 		val studentProperties = member match {
 			case student: StudentMember if deep => Seq(
-				if (canViewProperty(student, "termtimeAddress"))
-					Some("termtimeAddress" -> addressToJson(student.termtimeAddress))
-				else None,
-				if (canViewProperty(student, "nextOfKins"))
-					Some("nextOfKins" -> student.nextOfKins.asScala.map(nextOfKinToJson))
-				else None,
-				if (canViewProperty(student, "freshStudentCourseDetails"))
-					Some("studentCourseDetails" -> student.freshStudentCourseDetails.map(jsonStudentCourseDetailsObject))
-				else None,
-				boolean("tier4VisaRequirement", student, "tier4VisaRequirement")
+				fieldRestriction.nested("termtimeAddress").flatMap { restriction =>
+					if (canViewProperty(student, "termtimeAddress"))
+						Some("termtimeAddress" -> addressToJson(student.termtimeAddress, restriction))
+					else None
+				},
+				fieldRestriction.nested("nextOfKins").flatMap { restriction =>
+					if (canViewProperty(student, "nextOfKins"))
+						Some("nextOfKins" -> student.nextOfKins.asScala.map(nextOfKinToJson(_, restriction)))
+					else None
+				},
+				fieldRestriction.nested("studentCourseDetails").flatMap { restriction =>
+					if (canViewProperty(student, "freshStudentCourseDetails"))
+						Some("studentCourseDetails" -> student.freshStudentCourseDetails.map(jsonStudentCourseDetailsObject(_, restriction)))
+					else None
+				},
+				boolean("tier4VisaRequirement", student, "tier4VisaRequirement", fieldRestriction)
 			).flatten.toMap
 			case _ => Map()
 		}

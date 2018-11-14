@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.permissions.Permissions._
 
-class ViewProfileCommand(user: CurrentUser, profile: Member)
+class ViewProfileCommand(user: CurrentUser, val profile: Member)
 	extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with AutowiringSecurityServiceComponent with Logging {
 
 	private val viewingOwnProfile = user.apparentUser.getWarwickId == profile.universityId
