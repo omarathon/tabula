@@ -176,6 +176,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 	): Mav = {
 		findCommand.deserializeFilter("")
 		findCommand.staticStudentIds.clear()
+		findCommand.doFind = false // disable the lookup until the filter is changed again
 		val editMembershipCommandResult = editMembershipCommand.apply()
 		render(scheme, FindStudentsForSchemeCommandResult(findCommand.staticStudentIds, Seq()), editMembershipCommandResult, expandFind = true)
 	}
