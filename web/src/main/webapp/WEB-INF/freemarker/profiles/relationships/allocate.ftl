@@ -50,7 +50,7 @@
 					<li><b>agent_id</b> - contains the ${relationshipType.agentRole}'s University ID number</li>
 				</ul>
 				<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
-				<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
+				<p>The spreadsheet may also contain other columns and information for your own reference, such as the ${relationshipType.agentRole}'s usercode (these will be ignored by Tabula).</p>
 			</#assign>
 
 			<p>You can set ${relationshipType.agentRole}s for many students at once by uploading a spreadsheet.
