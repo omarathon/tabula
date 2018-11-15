@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringUserLookupComponent, RelationshipServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.web.views.ExcelView
@@ -77,7 +78,10 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 	private def generateWorkbook(unallocated: Seq[StudentAssociationData], allocations: Seq[StudentAssociationEntityData]) = {
 		val workbook = new SXSSFWorkbook
 		val sheet = generateAllocationSheet(workbook)
-		generateAgentLookupSheet(workbook, allocations)
+		val allUniversityIds = allocations.map(_.entityId) ++ allocations.flatMap(_.students.map(_.universityId)) ++ unallocated.map(_.universityId)
+		val usercodes = userLookup.getUsersByWarwickUniIds(allUniversityIds).mapValues(_.getUserId)
+
+		generateAgentLookupSheet(workbook, allocations, usercodes)
 		generateAgentDropdowns(sheet, allocations, unallocated)
 
 		val agentLookupRange = StudentRelationshipTemplateCommand.agentLookupSheetName + "!$A2:$C" + (allocations.length + 1)
@@ -88,16 +92,17 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 
 				row.createCell(0).setCellValue(student.universityId)
 				row.createCell(1).setCellValue(s"${student.firstName} ${student.lastName}")
+				row.createCell(2).setCellValue(usercodes.getOrElse(student.universityId, ""))
 
-				val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
+				val agentNameCell = createUnprotectedCell(workbook, row, 3) // unprotect cell for the dropdown agent name
 				agentNameCell.setCellValue(agent.displayName)
 
-				row.createCell(3).setCellFormula(
-					"IF(AND(ISTEXT($C" + (row.getRowNum + 1) + "), LEN($C" + (row.getRowNum + 1) + ") > 0), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
+				row.createCell(4).setCellFormula(
+					"IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
 				)
 
-				row.createCell(4).setCellFormula(
-					"IF(AND(ISTEXT($C" + (row.getRowNum + 1) + "), LEN($C" + (row.getRowNum + 1) + ") > 0), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
+				row.createCell(5).setCellFormula(
+					"IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
 				)
 			}
 		}
@@ -106,16 +111,17 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
 			row.createCell(0).setCellValue(student.universityId)
-			row.createCell(1).setCellValue(s"${student.firstName} ${student.lastName}")
+			row.createCell(1).setCellValue(usercodes.getOrElse(student.universityId, ""))
+			row.createCell(2).setCellValue(s"${student.firstName} ${student.lastName}")
 
-			createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
-
-			row.createCell(3).setCellFormula(
-				"IF(AND(ISTEXT($C" + (row.getRowNum + 1) + "), LEN($C" + (row.getRowNum + 1) + ") > 0), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
-			)
+			createUnprotectedCell(workbook, row, 3) // unprotect cell for the dropdown agent name
 
 			row.createCell(4).setCellFormula(
-				"IF(AND(ISTEXT($C" + (row.getRowNum + 1) + "), LEN($C" + (row.getRowNum + 1) + ") > 0), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
+				"IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
+			)
+
+			row.createCell(5).setCellFormula(
+				"IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
 			)
 		}
 
@@ -123,17 +129,14 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		workbook
 	}
 
-	private def generateAgentLookupSheet(workbook: SXSSFWorkbook, allocations: Seq[StudentAssociationEntityData]) = {
+	private def generateAgentLookupSheet(workbook: SXSSFWorkbook, allocations: Seq[StudentAssociationEntityData], usercodes: Map[UniversityId, String] ) = {
 		val agentSheet = workbook.createSheet(StudentRelationshipTemplateCommand.agentLookupSheetName)
 
-		val usercodes = userLookup.getUsersByWarwickUniIds(allocations.map(_.entityId))
-
 		for (agent <- allocations) {
-			val usercode = usercodes.get(agent.entityId).map(_.getUserId).getOrElse("")
 			val row = agentSheet.createRow(agentSheet.getLastRowNum + 1)
 			row.createCell(0).setCellValue(agent.displayName)
-			row.createCell(1).setCellValue(agent.entityId)
-			row.createCell(2).setCellValue(usercode)
+			row.createCell(1).setCellValue(usercodes.getOrElse(agent.entityId, ""))
+			row.createCell(2).setCellValue(agent.entityId)
 		}
 
 		agentSheet.protectSheet(StudentRelationshipTemplateCommand.sheetPassword)
@@ -196,10 +199,11 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		// add header row
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("student_id")
-		header.createCell(1).setCellValue(s"${relationshipType.studentRole.capitalize} name")
-		header.createCell(2).setCellValue(s"${relationshipType.agentRole.capitalize} name")
-		header.createCell(3).setCellValue("agent_id")
-		header.createCell(4).setCellValue(s"${relationshipType.agentRole.capitalize} usercode")
+		header.createCell(1).setCellValue(s"${relationshipType.studentRole.capitalize} usercode")
+		header.createCell(2).setCellValue(s"${relationshipType.studentRole.capitalize} name")
+		header.createCell(3).setCellValue(s"${relationshipType.agentRole.capitalize} name")
+		header.createCell(4).setCellValue("agent_id")
+		header.createCell(5).setCellValue(s"${relationshipType.agentRole.capitalize} usercode")
 
 		// using apache-poi, we can't protect certain cells - rather we have to protect
 		// the entire sheet and then unprotect the ones we want to remain editable
