@@ -53,7 +53,7 @@
 		</@bs3form.radio>
 		<@bs3form.radio>
 			<@f.radiobutton path="bulkEmailSeparator" value="," />
-			Comma (Thunderbird, Gmail, Apple Mail)
+			Comma (Thunderbird, Gmail, Apple Mail, Evolution)
 		</@bs3form.radio>
 	</@bs3form.labelled_form_group>
 

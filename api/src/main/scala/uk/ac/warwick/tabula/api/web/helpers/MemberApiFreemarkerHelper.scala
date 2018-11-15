@@ -22,23 +22,33 @@ trait MemberApiFreemarkerHelper {
 		writer.toString.maybeText
 	}
 
-	def str(name: String, model: Any, propertyName: String): Option[(String, String)] =
-		eval(s"$${($propertyName)!}", model).map { name -> _ }
+	def str(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, String)] =
+		fieldRestriction.restrict(name) {
+			eval(s"$${($propertyName)!}", model).map { name -> _ }
+		}
 
-	def int(name: String, model: Any, propertyName: String): Option[(String, Int)] =
-		eval(s"$${($propertyName?c)!}", model).map { name -> _.toInt }
+	def int(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Int)] =
+		fieldRestriction.restrict(name) {
+			eval(s"$${($propertyName?c)!}", model).map { name -> _.toInt }
+		}
 
-	def double(name: String, model: Any, propertyName: String): Option[(String, Double)] =
-		eval(s"$${($propertyName?c)!}", model).map { name -> _.toDouble }
+	def double(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Double)] =
+		fieldRestriction.restrict(name) {
+			eval(s"$${($propertyName?c)!}", model).map { name -> _.toDouble }
+		}
 
-	def date(name: String, model: Any, propertyName: String): Option[(String, String)] =
-		eval(s"$${($propertyName.toString())!}", model).map { name -> _ }
+	def date(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, String)] =
+		fieldRestriction.restrict(name) {
+			eval(s"$${($propertyName.toString())!}", model).map { name -> _ }
+		}
 
-	def boolean(name: String, model: Any, propertyName: String): Option[(String, Boolean)] =
-		eval(s"$${($propertyName?string('true', 'false'))!}", model) match {
-			case Some("true") => Some(name -> true)
-			case Some("false") => Some(name -> false)
-			case _ => None
+	def boolean(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Boolean)] =
+		fieldRestriction.restrict(name) {
+			eval(s"$${($propertyName?string('true', 'false'))!}", model) match {
+				case Some("true") => Some(name -> true)
+				case Some("false") => Some(name -> false)
+				case _ => None
+			}
 		}
 
 	def canViewProperty(model: Any, propertyName: String): Boolean =
@@ -49,53 +59,83 @@ trait MemberApiFreemarkerHelper {
 object MemberApiFreemarkerHelper {
 	val templateCache: ConcurrentHashMap[String, Template] with ScalaConcurrentMapHelpers[String, Template] = JConcurrentMap[String, Template]()
 
-	def departmentToJson(department: Department): Map[String, Any] =
-		Map("code" -> department.code, "name" -> department.name)
-
-	def moduleToJson(module: Module): Map[String, Any] =
-		Map("code" -> module.code, "name" -> module.name, "adminDepartment" -> departmentToJson(module.adminDepartment))
-
-	def courseToJson(course: Course): Map[String, Any] =
-		Map("code" -> course.code, "name" -> course.name, "type" -> CourseType.fromCourseCode(course.code).code)
-
-	def routeToJson(route: Route): Map[String, Any] =
-		Map("code" -> route.code, "name" -> route.name, "adminDepartment" -> departmentToJson(route.adminDepartment))
-
-	def awardToJson(award: Award): Map[String, Any] =
-		Map("code" -> award.code, "name" -> award.name)
-
-	def sitsStatusToJson(status: SitsStatus): Map[String, Any] =
-		Map("code" -> status.code, "name" -> status.fullName)
-
-	def modeOfAttendanceToJson(moa: ModeOfAttendance): Map[String, Any] =
-		Map("code" -> moa.code, "name" -> moa.fullName)
-
-	def addressToJson(address: Address): Map[String, Any] =
+	def departmentToJson(department: Department, fieldRestriction: APIFieldRestriction): Map[String, Any] =
 		Seq(
-			address.line1.maybeText.map { "line1" -> _ },
-			address.line2.maybeText.map { "line2" -> _ },
-			address.line3.maybeText.map { "line3" -> _ },
-			address.line4.maybeText.map { "line4" -> _ },
-			address.line5.maybeText.map { "line5" -> _ },
-			address.postcode.maybeText.map { "postcode" -> _ },
-			address.telephone.maybeText.map { "telephone" -> _ }
+			fieldRestriction.restrict("code") { Some("code" -> department.code) },
+			fieldRestriction.restrict("name") { Some("name" -> department.name) },
 		).flatten.toMap
 
-	def nextOfKinToJson(nextOfKin: NextOfKin): Map[String, Any] =
+	def moduleToJson(module: Module, fieldRestriction: APIFieldRestriction): Map[String, Any] =
 		Seq(
-			nextOfKin.firstName.maybeText.map { "firstName" -> _ },
-			nextOfKin.lastName.maybeText.map { "lastName" -> _ },
-			nextOfKin.relationship.maybeText.map { "relationship" -> _ }
+			fieldRestriction.restrict("code") { Some("code" -> module.code) },
+			fieldRestriction.restrict("name") { Some("name" -> module.name) },
+			fieldRestriction.nested("adminDepartment").flatMap { restriction =>
+				Some("adminDepartment" -> departmentToJson(module.adminDepartment, restriction))
+			},
 		).flatten.toMap
 
-	def disabilityToJson(disability: Disability): Map[String, Any] = Map(
-		"code" -> disability.code,
-		"sitsDefinition" -> disability.sitsDefinition,
-		"definition" -> disability.definition
-	)
+	def courseToJson(course: Course, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> course.code) },
+			fieldRestriction.restrict("name") { Some("name" -> course.name) },
+			fieldRestriction.restrict("type") { Some("type" -> CourseType.fromCourseCode(course.code).code) },
+		).flatten.toMap
 
-	def disabilityFundingStatusToJson(status: DisabilityFundingStatus): Map[String, Any] = Map(
-		"code" -> status.code,
-		"description" -> status.description
-	)
+	def routeToJson(route: Route, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> route.code) },
+			fieldRestriction.restrict("name") { Some("name" -> route.name) },
+			fieldRestriction.nested("adminDepartment").flatMap { restriction =>
+				Some("adminDepartment" -> departmentToJson(route.adminDepartment, restriction))
+			},
+		).flatten.toMap
+
+	def awardToJson(award: Award, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> award.code) },
+			fieldRestriction.restrict("name") { Some("name" -> award.name) },
+		).flatten.toMap
+
+	def sitsStatusToJson(status: SitsStatus, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> status.code) },
+			fieldRestriction.restrict("name") { Some("name" -> status.fullName) },
+		).flatten.toMap
+
+	def modeOfAttendanceToJson(moa: ModeOfAttendance, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> moa.code) },
+			fieldRestriction.restrict("name") { Some("name" -> moa.fullName) },
+		).flatten.toMap
+
+	def addressToJson(address: Address, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("line1") { address.line1.maybeText.map { "line1" -> _ } },
+			fieldRestriction.restrict("line2") { address.line2.maybeText.map { "line2" -> _ } },
+			fieldRestriction.restrict("line3") { address.line3.maybeText.map { "line3" -> _ } },
+			fieldRestriction.restrict("line4") { address.line4.maybeText.map { "line4" -> _ } },
+			fieldRestriction.restrict("line5") { address.line5.maybeText.map { "line5" -> _ } },
+			fieldRestriction.restrict("postcode") { address.postcode.maybeText.map { "postcode" -> _ } },
+			fieldRestriction.restrict("telephone") { address.telephone.maybeText.map { "telephone" -> _ } }
+		).flatten.toMap
+
+	def nextOfKinToJson(nextOfKin: NextOfKin, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("firstName") { nextOfKin.firstName.maybeText.map { "firstName" -> _ } },
+			fieldRestriction.restrict("lastName") { nextOfKin.lastName.maybeText.map { "lastName" -> _ } },
+			fieldRestriction.restrict("relationship") { nextOfKin.relationship.maybeText.map { "relationship" -> _ } }
+		).flatten.toMap
+
+	def disabilityToJson(disability: Disability, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> disability.code) },
+			fieldRestriction.restrict("sitsDefinition") { Some("sitsDefinition" -> disability.sitsDefinition) },
+			fieldRestriction.restrict("definition") { Some("definition" -> disability.definition) },
+		).flatten.toMap
+
+	def disabilityFundingStatusToJson(status: DisabilityFundingStatus, fieldRestriction: APIFieldRestriction): Map[String, Any] =
+		Seq(
+			fieldRestriction.restrict("code") { Some("code" -> status.code) },
+			fieldRestriction.restrict("description") { Some("description" -> status.description) },
+		).flatten.toMap
 }
