@@ -224,7 +224,7 @@ trait AddMarksCommandBindListener extends BindListener {
 			})
 
 			// If a row has no mark or grade, we will quietly ignore it
-			if (!mark.actualMark.hasText && !mark.actualGrade.hasText) {
+			if (!mark.actualMark.hasText && !mark.actualGrade.hasText && !mark.feedbackComment.hasText) {
 				mark.isValid = false
 			}
 
