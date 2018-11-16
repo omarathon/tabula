@@ -14,8 +14,9 @@ the comments textarea needs to maintain newlines.
 
 	<div class="alert alert-success">
 		<i class="icon-info-sign"></i>
-		We've built a new version of coursework management.
-		<a target='_blank' href="http://www2.warwick.ac.uk/services/its/servicessupport/web/tabula/cm2-transition/">Learn more</a> about the changes.
+		This assignment was created in an old version of coursework management (CM1). 
+		It's no longer possible to save changes to the assignment details. 
+		For assistance, contact <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
 	</div>
 
 <#--
@@ -67,7 +68,7 @@ the comments textarea needs to maintain newlines.
 	You may <a href="<@routes.coursework.assignmentdelete assignment=assignment />" class="btn btn-danger">delete</a> it if you definitely won't need it again.</p>
 <#else>
 	<p class="alert alert-info">
-	It's not possible to delete this assignment, probably because it already has some submissions and/or published feedback.
+	It's not possible to delete or edit this assignment. For assistance, contact <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
 	</p>
 </#if>
 
