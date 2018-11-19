@@ -126,8 +126,8 @@
 			</label>
 		</@filter>
 
-		<#-- level grids only for CAL at this point -->
-		<#if department.code == 'et'>
+		<#-- Currently CAL  uses level grids but this will work for other depts also once we enable dept setting -->
+		<#if department.generateLevelGrids>
 			<div class="btn-group" style="margin: 0 10px;">
 				Generate grid on:&nbsp;
 				<label class="radio-inline">
@@ -150,7 +150,7 @@
 			</label>
 		</@filter>
 
-		<#if department.code == 'et'>
+		<#if department.generateLevelGrids>
 			<#assign placeholder = "Study level" />
 			<#assign currentfilter><@current_filter_value "selectCourseCommand.levelCode" placeholder; levelCode>${levelCode}</@current_filter_value></#assign>
 			<@filter path="selectCourseCommand.levelCode" placeholder=placeholder currentFilter=currentfilter allItems=selectCourseCommand.allLevels prefix="Level " cssClass="level"; level>
@@ -410,7 +410,7 @@
 			hideYearCheckboxesArea();
 		});
 
-		<#if department.code == 'et'>
+		<#if department.generateLevelGrids >
 			$('.level,.block').hide();
 			var $gridScopeRadio = $('input[name=gridScope]');
 			$gridScopeRadio.on('change', function(){
@@ -419,6 +419,6 @@
 			});
 		</#if>
 
-	});
+	})
 </script>
 </#escape>
