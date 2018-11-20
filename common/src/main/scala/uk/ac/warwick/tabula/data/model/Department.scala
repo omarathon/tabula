@@ -295,6 +295,9 @@ class Department extends GeneratedId
 		settings += (Settings.ExamGridOptions.EntitiesPerPage -> options.entitiesPerPage.getOrElse(0))
 	}
 
+	def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = false)
+	def enableLevelGrids_=(enabled: Boolean) { settings += (Settings.EnableLevelGrids -> enabled) }
+
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
@@ -529,6 +532,8 @@ object Department {
 		val UploadExamMarksToSits = "uploadExamMarksToSits"
 		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
 		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
+
+		val EnableLevelGrids = "enableLevelGrids"
 
 		val AssignmentGradeValidation = "assignmentGradeValidation"
 		val MeetingRecordApprovalType = "meetingRecordApprovalType"
