@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.services.UserLookupService.Usercode
 import uk.ac.warwick.tabula.services.scheduling.{SupervisorImportDebugRow, SupervisorImporter}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -19,6 +20,7 @@ case class CheckStudentRelationshipImport (
 	isUpstreamStudent: Boolean,
 	isCurrentStudent: Boolean,
 	isFreshCourse: Boolean,
+	studentUser: User,
 	department: Option[Department],
 	relationships: Seq[RelationshipTypeCheck]
 )
@@ -68,6 +70,7 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
 			isUpstreamStudent = studentMember.exists(_.isFresh),
 			isCurrentStudent = !studentMember.exists(_.permanentlyWithdrawn),
 			isFreshCourse = mostSignificantCourse.isDefined,
+			studentUser = studentUser,
 			department = mostSignificantCourse.flatMap(c => Option(c.department)),
 			relationships =
 				relationshipService.getStudentRelationshipTypesWithRdxType.map { relationshipType =>

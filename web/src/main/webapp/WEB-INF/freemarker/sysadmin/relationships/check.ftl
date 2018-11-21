@@ -4,6 +4,7 @@
 <#macro check label property>
 	<li class="${property?string("success", "fail")}">
 		<strong>${label}</strong>
+		<#nested />
 	</li>
 </#macro>
 
@@ -32,7 +33,7 @@
 		<div class="col-md-4">
 			<h2>Student details</h2>
 			<ul class="boolean-list">
-				<@check "Is a student in Tabula" result.student />
+				<@check "Is a student in Tabula" result.student><#if result.studentUser.warwickId??> <@pl.profile_link result.studentUser.warwickId/></#if></@check>
 				<@check "Is present in SITS" result.upstreamStudent />
 				<@check "Is a current student" result.currentStudent />
 				<@check "Has current course details in SITS" result.freshCourse />
@@ -56,7 +57,7 @@
 						</thead>
 						<tbody>
 							<#foreach row in r.rows>
-								<tr class="${row.canImport()?string("success", "fail")}">
+								<tr class="${row.canImport?string("success", "fail")}">
 									<td>
 										<#assign popover>
 											<ul class="boolean-list">
@@ -67,7 +68,7 @@
 											</ul>
 										</#assign>
 										<a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">
-											<strong><#if row.canImport()>&#x2714;<#else>&#x2718; see why</#if></strong>
+											<strong><#if row.canImport>&#x2714;<#else>&#x2718; see why</#if></strong>
 										</a>
 									</td>
 									<td>${row.rawData.scjCode!"NULL"}</td>
