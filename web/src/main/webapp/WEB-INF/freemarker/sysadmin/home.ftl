@@ -11,6 +11,7 @@
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/permissions-helper" />">Permissions helper</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/departments/" />">List all departments in the system</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/relationships" />">Student relationship types</a></p>
+		<p><a class="btn btn-default" href="<@url page="/sysadmin/relationships/check" />">Student relationship checker</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/attendancetemplates" />">Attendance monitoring templates</a></p>
 		<p><a class="btn btn-default" href="<@url page="/masquerade" context="/admin" />">Masquerade</a></p>
 		<p><a class="btn btn-default" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
