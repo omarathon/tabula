@@ -191,7 +191,7 @@
 					<p>You can allocate students to groups using a spreadsheet.</p>
 
 					<ol>
-						<li><strong><a href="<@routes.groups.crossmodulegroupstemplate smallGroupSet />">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in ${smallGroupSet.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+						<li><strong><a href="<@routes.groups.crossmodulegroupstemplate smallGroupSet />">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in ${smallGroupSet.name}. In Excel you may need to <a href="https://support.office.com/en-us/article/what-is-protected-view-d6f09ac7-e6b9-4495-8e43-2bbcdbcb6653#bm2">exit protected view</a> to edit the spreadsheet.
 						</li>
 						<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for ${smallGroupSet.name}. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
 							You can select additional students to be in ${smallGroupSet.name} by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>

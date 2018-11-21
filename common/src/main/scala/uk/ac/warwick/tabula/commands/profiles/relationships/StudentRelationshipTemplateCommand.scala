@@ -111,8 +111,8 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
 			row.createCell(0).setCellValue(student.universityId)
-			row.createCell(1).setCellValue(usercodes.getOrElse(student.universityId, ""))
-			row.createCell(2).setCellValue(s"${student.firstName} ${student.lastName}")
+			row.createCell(1).setCellValue(s"${student.firstName} ${student.lastName}")
+			row.createCell(2).setCellValue(usercodes.getOrElse(student.universityId, ""))
 
 			createUnprotectedCell(workbook, row, 3) // unprotect cell for the dropdown agent name
 
