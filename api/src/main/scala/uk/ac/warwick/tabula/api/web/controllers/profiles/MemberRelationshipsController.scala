@@ -4,7 +4,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.profiles.ViewRelatedStudentsCommand
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.{Member, StudentRelationshipType}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -19,11 +20,15 @@ trait GetMemberRelationshipsApi {
 
 	self: ApiController with RelationshipServiceComponent =>
 
+	private def validRelationships(member: Member): Seq[StudentRelationshipType] = {
+		relationshipService.allStudentRelationshipTypes.filter(r => securityService.can(user, Permissions.Profiles.StudentRelationship.Read(r), member))
+	}
+
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def getMember(@PathVariable member: Member): Mav = {
-		val allRelationships = relationshipService.allStudentRelationshipTypes.map(relationshipType =>
+		val allRelationships = validRelationships(member).map(relationshipType =>
 			relationshipType -> ViewRelatedStudentsCommand(mandatory(member), relationshipType).apply()
-		).filter { case (_, result) => result.entities.nonEmpty }
+		).filter { case (_, result) => result.entities.nonEmpty	}
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
