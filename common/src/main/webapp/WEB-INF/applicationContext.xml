@@ -388,6 +388,7 @@
 
 
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
+	<bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter" />
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter" />
 
