@@ -199,8 +199,8 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		// add header row
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("student_id")
-		header.createCell(1).setCellValue(s"${relationshipType.studentRole.capitalize} usercode")
-		header.createCell(2).setCellValue(s"${relationshipType.studentRole.capitalize} name")
+		header.createCell(1).setCellValue(s"${relationshipType.studentRole.capitalize} name")
+		header.createCell(2).setCellValue(s"${relationshipType.studentRole.capitalize} usercode")
 		header.createCell(3).setCellValue(s"${relationshipType.agentRole.capitalize} name")
 		header.createCell(4).setCellValue("agent_id")
 		header.createCell(5).setCellValue(s"${relationshipType.agentRole.capitalize} usercode")
