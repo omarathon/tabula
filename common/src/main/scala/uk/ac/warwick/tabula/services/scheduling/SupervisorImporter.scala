@@ -61,4 +61,36 @@ object SupervisorImporter {
 			(rs.getString("prs_udf1"), rs.getBigDecimal("rdx_perc"))
 		}
 	}
+
+	def GetSupervisorsDebugSql = f"""
+		select
+			rdx_scjc,
+			prs_udf1,
+			rdx_prsc,
+			rdx_perc -- percentage
+		from $sitsSchema.srs_rdx rdx -- Research Degree Examiner
+			left join $sitsSchema.ins_prs prs on rdx.rdx_prsc = prs.prs_code -- Personnel
+			where rdx_scjc like :scj_code and rdx_extc = :sits_examiner_type
+	"""
+
+	class SupervisorMappingDebugQuery(ds: DataSource) extends MappingSqlQueryWithParameters[SupervisorImportDebugRow](ds, GetSupervisorsDebugSql) {
+		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))
+		this.declareParameter(new SqlParameter("sits_examiner_type", Types.VARCHAR))
+		this.compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): SupervisorImportDebugRow = {
+			SupervisorImportDebugRow(
+				rs.getString("rdx_scjc"),
+				rs.getString("prs_udf1"),
+				rs.getString("rdx_prsc"),
+				rs.getBigDecimal("rdx_perc")
+			)
+		}
+	}
 }
+
+case class SupervisorImportDebugRow (
+	scjCode: String,
+	agentId: String,
+	personnelRecord: String,
+	percentage: JBigDecimal
+)

@@ -1,0 +1,42 @@
+@import (reference) "colours.less";
+
+ul.boolean-list {
+	list-style: none;
+
+	li {
+		:before {
+			margin: 0 1em;
+		}
+
+		&.success{
+			color:@tabulaGreen;
+			&:before {
+				content: '\2714';
+			}
+		}
+
+		&.fail{
+			color:@tabulaRedDark;
+			&:before {
+				content: '\2718';
+			}
+		}
+	}
+}
+
+table.sits-debug {
+	tr {
+		&.success {
+			color:@tabulaGreen;
+			a {
+				color: @tabulaGreen;
+			}
+		}
+		&.fail {
+			color:@tabulaRedDark;
+			a {
+				color: @tabulaRedDark;
+			}
+		}
+	}
+}
