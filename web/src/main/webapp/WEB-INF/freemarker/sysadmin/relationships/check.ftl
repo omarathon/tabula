@@ -80,6 +80,8 @@
 							</#foreach>
 						</tbody>
 					</table>
+				<#else>
+					<ul class="boolean-list"><@check "No ${r.relationshipType.description} data in SITS" false /></ul>
 				</#if>
 			</#foreach>
 		</div>
