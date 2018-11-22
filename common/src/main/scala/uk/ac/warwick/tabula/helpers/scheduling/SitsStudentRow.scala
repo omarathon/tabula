@@ -67,11 +67,7 @@ trait SitsStudentRowCourseDetails
 	//WMG uses a different table and column for their tutors
 	var tutorUniId: String =
 		if(departmentCode != null && departmentCode.toLowerCase == "wm") {
-			if(resultSet.getString("scj_tutor1") != null) {
-				resultSet.getString("scj_tutor1").substring(2)
-			} else {
-				resultSet.getString("scj_tutor1")
-			}
+			Option(resultSet.getString("scj_tutor1")).map(_.substring(2)).orNull
 		} else {
 			resultSet.getString("spr_tutor1")
 		}

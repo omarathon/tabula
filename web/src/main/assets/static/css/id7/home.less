@@ -8,14 +8,14 @@ ul.boolean-list {
 			margin: 0 1em;
 		}
 
-		&.success{
+		&.true{
 			color:@tabulaGreen;
 			&:before {
 				content: '\2714';
 			}
 		}
 
-		&.fail{
+		&.false{
 			color:@tabulaRedDark;
 			&:before {
 				content: '\2718';
@@ -26,17 +26,22 @@ ul.boolean-list {
 
 table.sits-debug {
 	tr {
-		&.success {
+		&.true {
 			color:@tabulaGreen;
 			a {
 				color: @tabulaGreen;
 			}
 		}
-		&.fail {
+		&.false {
 			color:@tabulaRedDark;
 			a {
 				color: @tabulaRedDark;
 			}
+		}
+
+		td.selected {
+			font-weight: bold;
+			color: @tabulaOrangeDark;
 		}
 	}
 }
