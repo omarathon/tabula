@@ -146,7 +146,7 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 	// attaches the data validation to the sheet
 	private def generateAgentDropdowns(sheet: Sheet, allocations: Seq[StudentAssociationEntityData], unallocated: Seq[StudentAssociationData]) {
 		if (allocations.nonEmpty) {
-			val dropdownRange = new CellRangeAddressList(1, allocations.flatMap(_.students).length + unallocated.length, 2, 2)
+			val dropdownRange = new CellRangeAddressList(1, allocations.flatMap(_.students).length + unallocated.length, 3, 3)
 			val validation = getDataValidation(allocations, sheet, dropdownRange)
 
 			sheet.addValidationData(validation)
