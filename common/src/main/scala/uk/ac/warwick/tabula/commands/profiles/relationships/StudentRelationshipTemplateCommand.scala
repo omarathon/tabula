@@ -202,8 +202,9 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
 		header.createCell(1).setCellValue(s"${relationshipType.studentRole.capitalize} name")
 		header.createCell(2).setCellValue(s"${relationshipType.studentRole.capitalize} usercode")
 		header.createCell(3).setCellValue(s"${relationshipType.agentRole.capitalize} name")
-		header.createCell(4).setCellValue("agent_id")
-		header.createCell(5).setCellValue(s"${relationshipType.agentRole.capitalize} usercode")
+		header.createCell(4).setCellValue(s"${relationshipType.agentRole.capitalize} usercode")
+		header.createCell(5).setCellValue("agent_id")
+
 
 		// using apache-poi, we can't protect certain cells - rather we have to protect
 		// the entire sheet and then unprotect the ones we want to remain editable
