@@ -81,7 +81,7 @@
 					data-target="#change-agent"
 					data-toggle="modal"
 				>
-					Add a ${relationshipType.agentRole}
+					Add ${relationshipType.agentRole}
 				</a>
 			</#if>
 			<a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
