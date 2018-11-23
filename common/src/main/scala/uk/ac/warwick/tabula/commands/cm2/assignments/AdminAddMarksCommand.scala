@@ -34,7 +34,7 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
 	self: FeedbackServiceComponent with AssessmentMembershipServiceComponent with FeedbackServiceComponent =>
 
 	def isModified(markItem: MarkItem): Boolean = {
-		markItem.currentFeedback(assignment).exists(f => f.hasMarkOrGrade || f.hasOnlineFeedback)
+		markItem.currentFeedback(assignment).exists(_.hasContent)
 	}
 
 	def canMark(markItem: MarkItem): Boolean = true

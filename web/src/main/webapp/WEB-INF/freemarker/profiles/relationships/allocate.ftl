@@ -50,7 +50,7 @@
 					<li><b>agent_id</b> - contains the ${relationshipType.agentRole}'s University ID number</li>
 				</ul>
 				<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
-				<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
+				<p>The spreadsheet may also contain other columns and information for your own reference, such as the ${relationshipType.agentRole}'s usercode (these will be ignored by Tabula).</p>
 			</#assign>
 
 			<p>You can set ${relationshipType.agentRole}s for many students at once by uploading a spreadsheet.
@@ -68,7 +68,7 @@
 				<li>
 					<button type="submit" class="btn btn-default dirty-check-ignore" name="templateWithChanges" value="true">Download a template spreadsheet</button>
 					<br />
-					This will be prefilled with the names and University ID numbers of students and their ${relationshipType.agentRole} (if they have one) in ${department.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+					This will be prefilled with the names and University ID numbers of students and their ${relationshipType.agentRole} (if they have one) in ${department.name}. In Excel you may need to <a href="https://support.office.com/en-us/article/what-is-protected-view-d6f09ac7-e6b9-4495-8e43-2bbcdbcb6653#bm2">exit protected view</a> to edit the spreadsheet.
 					<br /><br />
 					<div class="alert alert-info">
 						<p>This will include any changes made in the manually allocate tab. You can also <a href="<@routes.profiles.relationship_template department relationshipType />">download a template without these changes</a>.</p>

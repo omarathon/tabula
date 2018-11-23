@@ -343,6 +343,7 @@
 						<prop key="mail.smtp.port">${mail.smtp.port}</prop>
 						<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
 						<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+						<prop key="mail.smtp.timeout">${mail.smtp.timeout}</prop>
 					</props>
 				</property>
 			</bean>
@@ -388,6 +389,7 @@
 
 
 	<bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter" />
+	<bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter" />
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter" />
 
