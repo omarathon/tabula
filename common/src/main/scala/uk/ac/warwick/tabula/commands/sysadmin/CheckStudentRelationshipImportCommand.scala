@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import TutorSource._
 
 case class CheckStudentRelationshipImport(
 	isStudent: Boolean,
@@ -34,9 +35,12 @@ case class CheckStudentRelationshipImport(
 	personalTutorCheck: PersonalTutorCheck
 )
 
-sealed class TutorSource(val value: String)
-object SCJ extends TutorSource(value = "SCJ")
-object SPR extends TutorSource(value = "SPR")
+object TutorSource {
+	sealed class TutorSource(val value: String)
+	object SCJ extends TutorSource(value = "SCJ")
+	object SPR extends TutorSource(value = "SPR")
+}
+
 
 case class PersonalTutorCheck(
 	sitsIsSource: Boolean,
