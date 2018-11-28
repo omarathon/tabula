@@ -52,14 +52,14 @@ class OnlineMarkerFeedbackCommandInternal(
 	self: ProfileServiceComponent with CM2MarkingWorkflowServiceComponent with FileAttachmentServiceComponent with SavedFormValueDaoComponent
 		with FeedbackServiceComponent =>
 
-	private val markerFeedback = currentMarkerFeedback.getOrElse(
-		// this should be impossible - we don't show the form if there is no current marker feedback for this marker
-		throw new IllegalMarkingStateException("There is no outstanding feedback for this marker and stage")
-	)
-
-	copyFrom(markerFeedback)
+	currentMarkerFeedback.foreach(copyFrom)
 
 	def applyInternal(): MarkerFeedback = {
+
+		val markerFeedback = currentMarkerFeedback.getOrElse(
+			throw new IllegalMarkingStateException("There is no outstanding feedback for this marker and stage")
+		)
+
 		copyTo(markerFeedback)
 		markerFeedback.updatedOn = DateTime.now
 		feedbackService.save(markerFeedback)
