@@ -184,15 +184,21 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
 		}
 
+
+		/** TAB-6715- Hibernate routes method paras are not inflated somehow for non god mode in some cases (course are though). These routes are lazily objects( Objects get initialised via  spring  in command request.
+			*  This causes issue in hibernate afterwards when it tries to set sql parameters which are null properties for these lazily objects. You need non lazily ones
+			*/
 		if (routes.nonEmpty) {
-			c.add(disjunction(
-				safeIn("route", routes),
-				conjunction(
-					isNull("route"),
-					safeIn("scd.currentRoute", routes)
-				)
-			))
+			c.setFetchMode("route", FetchMode.JOIN)
+				.add(disjunction(
+					safeIn("route.code", routes.map(_.code)),
+					conjunction(
+						isNull("route"),
+						safeIn("scd.currentRoute.code", routes.map(_.code))
+					)
+				))
 		}
+
 
 		if(resitOnly) {
 			val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
