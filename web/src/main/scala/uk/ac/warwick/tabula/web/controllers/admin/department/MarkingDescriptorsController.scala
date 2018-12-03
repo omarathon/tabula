@@ -23,7 +23,7 @@ class MarkingDescriptorsController extends AdminController with AutowiringMarkin
 
 	@ModelAttribute("universityDescriptors")
 	def universityDescriptors: JMap[MarkPoint, UniversityMarkingDescriptor] = {
-		val descriptors = markingDescriptorService.getMarkingDescriptors
+		val descriptors = markingDescriptorService.getUniversityMarkingDescriptors
 
 		(for {
 			markPoint <- MarkPoint.all

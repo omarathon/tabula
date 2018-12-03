@@ -16,9 +16,11 @@ trait AutowiringMarkingDescriptorServiceComponent extends MarkingDescriptorServi
 trait MarkingDescriptorService {
 	def get(id: String): Option[MarkingDescriptor]
 
-	def getMarkingDescriptors: Seq[UniversityMarkingDescriptor]
+	def getUniversityMarkingDescriptors: Seq[UniversityMarkingDescriptor]
 
 	def getDepartmentMarkingDescriptors(department: Department): Seq[DepartmentMarkingDescriptor]
+
+	def getMarkingDescriptors(department: Department): Seq[MarkingDescriptor]
 
 	def getForMark(mark: Int, department: Department): MarkingDescriptor
 
@@ -31,9 +33,11 @@ trait MarkingDescriptorService {
 class MarkingDescriptorServiceImpl extends MarkingDescriptorService with AutowiringMarkingDescriptorDaoComponent {
 	private def dao = markingDescriptorDao
 
-	override def getMarkingDescriptors: Seq[UniversityMarkingDescriptor] = dao.getMarkingDescriptors
+	override def getUniversityMarkingDescriptors: Seq[UniversityMarkingDescriptor] = dao.getMarkingDescriptors
 
 	override def getDepartmentMarkingDescriptors(department: Department): Seq[DepartmentMarkingDescriptor] = dao.getDepartmentMarkingDescriptors(department)
+
+	override def getMarkingDescriptors(department: Department): Seq[MarkingDescriptor] = (toMarkPointMap(getUniversityMarkingDescriptors) ++ toMarkPointMap(getDepartmentMarkingDescriptors(department))).values.toSeq.distinct
 
 	override def getForMark(mark: Int, department: Department): MarkingDescriptor = dao.getForMark(mark, department)
 
@@ -42,4 +46,8 @@ class MarkingDescriptorServiceImpl extends MarkingDescriptorService with Autowir
 	override def delete(markingDescriptor: MarkingDescriptor): Unit = dao.delete(markingDescriptor)
 
 	override def get(id: String): Option[MarkingDescriptor] = dao.get(id)
+
+	private def toMarkPointMap(markingDescriptors: Seq[MarkingDescriptor]): Map[MarkPoint, MarkingDescriptor] = markingDescriptors.flatMap(zipWithMarkPoints).toMap
+
+	private def zipWithMarkPoints(markingDescriptor: MarkingDescriptor): Seq[(MarkPoint, MarkingDescriptor)] = markingDescriptor.markPoints.map(markPoint => markPoint -> markingDescriptor)
 }

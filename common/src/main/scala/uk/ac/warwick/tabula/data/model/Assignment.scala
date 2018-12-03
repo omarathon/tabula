@@ -99,6 +99,9 @@ class Assignment
 	@transient
 	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
 
+	@transient
+	var markingDescriptorService: MarkingDescriptorService = Wire[MarkingDescriptorService]("markingDescriptorService")
+
 	def this(_module: Module) {
 		this()
 		this.module = _module
@@ -211,6 +214,10 @@ class Assignment
 
 	def useMarkPoints: Boolean = getBooleanSetting(Settings.UseMarkPoints, default = false)
 	def useMarkPoints_=(markPoints: Boolean): Unit = settings += (Settings.UseMarkPoints -> markPoints)
+
+	def availableMarkPoints: Seq[MarkPoint] = if (useMarkPoints) MarkPoint.all else Nil
+
+	def availableMarkingDescriptors: Seq[MarkingDescriptor] = markingDescriptorService.getMarkingDescriptors(module.adminDepartment)
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
