@@ -487,11 +487,11 @@
 		<#if assignment.useMarkPoints>
 			<@f.select path="mark" cssClass="form-control">
 				<@f.option value="" label="" />
-				<#assign lastMarkClassName = "" />
+				<#local lastMarkClassName = "" />
 				<#list assignment.availableMarkPoints?reverse as markPoint>
 					<#if lastMarkClassName != markPoint.markClass.name>
 						<option disabled="disabled">${markPoint.markClass.name}</option>
-						<#assign lastMarkClassName = markPoint.markClass.name />
+						<#local lastMarkClassName = markPoint.markClass.name />
 					</#if>
 					<@f.option value=markPoint.mark label="${markPoint.mark} (${markPoint.name})" />
 				</#list>
