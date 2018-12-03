@@ -75,6 +75,21 @@
 	</div>
 </div>
 </#if>
+<#if feedback.markPoint?? && feedback.markingDescriptor??>
+	<div class="feedback-notes">
+	<h4>About
+	<#if isSelf>
+		your
+	<#else>
+		the student's
+	</#if>
+	grade</h4>
+	<p>
+	<strong><em>${feedback.markPoint.name}</em></strong>
+	</p>
+	<p><em>${feedback.markingDescriptor.text}</em></p>
+	</div>
+</#if>
 
 <p>
 	<#assign feedbackcount=feedback.attachments?size>
