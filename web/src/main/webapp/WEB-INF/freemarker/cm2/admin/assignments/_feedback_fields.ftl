@@ -31,6 +31,9 @@
 		<@bs3form.checkbox path="collectMarks">
 			<@f.checkbox path="collectMarks" id="collectMarks" /> Collect marks
 		</@bs3form.checkbox>
+		<@bs3form.checkbox path="useMarkPoints">
+			<@f.checkbox path="useMarkPoints" id="useMarkPoints" /> Use 20-point marking scale
+		</@bs3form.checkbox>
 	</@bs3form.labelled_form_group>
 
 	<@bs3form.labelled_form_group labelText="Credit bearing">

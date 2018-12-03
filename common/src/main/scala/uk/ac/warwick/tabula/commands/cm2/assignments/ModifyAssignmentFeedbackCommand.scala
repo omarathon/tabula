@@ -61,6 +61,7 @@ trait ModifyAssignmentFeedbackDescription extends Describable[Assignment] {
 		},
 		"automaticallyReleaseToMarkers" -> automaticallyReleaseToMarkers,
 		"collectMarks" -> collectMarks,
+		"useMarkPoints" -> useMarkPoints,
 		"summative" -> summative,
 		"dissertation" -> dissertation
 		)
