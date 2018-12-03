@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.reports.profiles.ProfileExportCommand
+import uk.ac.warwick.tabula.commands.reports.profiles.{AttendanceMonitoringStudentDataWithSCD, ProfileExportCommand}
 import uk.ac.warwick.tabula.data.AttendanceMonitoringStudentData
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
@@ -20,11 +20,11 @@ class ProfileExportController extends ReportsController {
 
 	@RequestMapping
 	def generateReport(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringStudentData]],
+		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringStudentDataWithSCD]],
 		@PathVariable department: Department,
 		@PathVariable academicYear: AcademicYear
 	): Mav = {
-		val results = cmd.apply()
+		val results: Seq[AttendanceMonitoringStudentDataWithSCD] = cmd.apply()
 		if (ajax) {
 			Mav("reports/profiles/_filter", "results" -> results).noLayout()
 		} else {
@@ -35,6 +35,4 @@ class ProfileExportController extends ReportsController {
 			)
 		}
 	}
-
-
 }

@@ -33,6 +33,13 @@
 				<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
 				<td>${(student.mostSignificantCourseDetails.currentRoute.name)!""}</td>
 			</#if>
+			<td>
+				<#list student.mostSignificantCourseDetails.allRelationships as relationship>
+					<#if relationship.relationshipType.toString == "StudentRelationshipType(supervisor)">
+						${relationship._agentMember.fullName}<#if relationship_has_next>, </#if>
+					</#if>
+				</#list>
+			</td>
 		</tr>
 	</#macro>
 
@@ -47,6 +54,7 @@
 					<th class="type-col ${sortClass("groupName")}" data-field="groupName">Type</th>
 					<th class="year-col ${sortClass("studentCourseYearDetails.yearOfStudy")}" data-field="studentCourseYearDetails.yearOfStudy">Year</th>
 					<th class="course-but-photo-col ${sortClass("route.name")}" data-field="route.name">Course</th>
+					<th class="supervisor-col ${sortClass("supervisor")}" data-field="supervisor">Supervisor</th>
 				</tr>
 			</thead>
 

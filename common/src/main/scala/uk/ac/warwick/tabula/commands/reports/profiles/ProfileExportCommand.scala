@@ -16,19 +16,23 @@ object ProfileExportCommand {
 		new ProfileExportCommandInternal(department, academicYear, user)
 			with AutowiringSecurityServiceComponent
 			with AutowiringProfileServiceComponent
-			with ComposableCommand[Seq[AttendanceMonitoringStudentData]]
+			with ComposableCommand[Seq[AttendanceMonitoringStudentDataWithSCD]]
 			with Unaudited with ReadOnly
 			with ProfileExportPermissions
 			with ProfileExportCommandState
 }
 
+case class AttendanceMonitoringStudentDataWithSCD(
+	studentData: AttendanceMonitoringStudentData,
+	significantSCDs: Seq[StudentCourseDetails]
+)
 
 class ProfileExportCommandInternal(val department: Department, val academicYear: AcademicYear, user: CurrentUser)
-	extends CommandInternal[Seq[AttendanceMonitoringStudentData]] with TaskBenchmarking {
+	extends CommandInternal[Seq[AttendanceMonitoringStudentDataWithSCD]] with TaskBenchmarking {
 
 	self: ProfileServiceComponent with ProfileExportCommandState with SecurityServiceComponent =>
 
-	override def applyInternal(): Seq[AttendanceMonitoringStudentData] = {
+	override def applyInternal(): Seq[AttendanceMonitoringStudentDataWithSCD] = {
 		val result = {
 			if (searchSingle || searchMulti) {
 				val members = {
@@ -72,7 +76,12 @@ class ProfileExportCommandInternal(val department: Department, val academicYear:
 				Seq()
 			}
 		}
-		result.sortBy(s => (s.lastName, s.firstName))
+		result.sortBy(s => (s.lastName, s.firstName)).map{studentData =>
+			AttendanceMonitoringStudentDataWithSCD(
+				studentData,
+				profileService.getStudentCourseDetailsBySprCode(studentData.sprCode).filter(_.mostSignificant)
+			)
+		}
 	}
 }
 
