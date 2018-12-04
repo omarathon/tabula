@@ -212,6 +212,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 		session.newCriteria[MemberStudentRelationship]
 			.add(is("studentCourseDetails", scd))
 			.add(Restrictions.gt("startDate", DateTime.now))
+			.add(is("relationshipType", relationshipType))
 			.seq
 	}
 
