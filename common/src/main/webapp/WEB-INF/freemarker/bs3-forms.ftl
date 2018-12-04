@@ -268,5 +268,11 @@ Macros for customised form elements, containers and more complex pickers.
 	<#if multiple></div></#if>
 </#macro>
 
+<#macro static>
+	<div class="form-control-static">
+		<#nested />
+	</div>
+</#macro>
+
 </#escape>
 </#compress>

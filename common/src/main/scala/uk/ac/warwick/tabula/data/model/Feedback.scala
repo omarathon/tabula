@@ -434,6 +434,9 @@ class AssignmentFeedback extends Feedback {
 		else stage.order < currentPosition
 	}
 
+	def markPoint: Option[MarkPoint] = if (assignment.useMarkPoints) actualMark.flatMap(MarkPoint.forMark) else None
+
+	def markingDescriptor: Option[MarkingDescriptor] = markPoint.flatMap(mp => assignment.availableMarkingDescriptors.find(_.isForMarkPoint(mp)))
 }
 
 @Entity @DiscriminatorValue("exam")

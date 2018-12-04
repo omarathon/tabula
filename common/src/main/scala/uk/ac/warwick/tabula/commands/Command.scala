@@ -500,6 +500,10 @@ abstract class Description {
 		property("extensionState", state.description)
 	}
 
+	def markingDescriptor(markingDescriptor: MarkingDescriptor): Description = {
+		property("markingDescriptor", markingDescriptor.id)
+	}
+
 	// delegate equality to the underlying map
 	override def hashCode: Int = map.hashCode()
 	override def equals(that: Any): Boolean = that match {

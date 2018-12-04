@@ -29,12 +29,7 @@
 			</#list>
 
 			<#if assignment.collectMarks>
-				<@bs3form.labelled_form_group path="mark" labelText="Mark">
-					<div class="input-group">
-						<@f.input type="number" path="mark" cssClass="form-control" />
-						<div class="input-group-addon">%</div>
-					</div>
-				</@bs3form.labelled_form_group>
+				<@marking_macros.markField assignment command />
 
 				<#if isGradeValidation>
 					<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>

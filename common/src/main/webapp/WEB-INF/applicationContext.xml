@@ -199,6 +199,8 @@
 		<bean class="uk.ac.warwick.tabula.exams.grids.columns.StringToExamGridDisplayModuleNameColumnValue" />
 		<bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordApprovalTypeConverter" />
 		<bean class="uk.ac.warwick.tabula.data.convert.SyllabusPlusLocationConverter"/>
+		<bean class="uk.ac.warwick.tabula.data.convert.MarkPointConverter" />
+		<bean class="uk.ac.warwick.tabula.data.convert.MarkingDescriptorConverter" />
 	</util:list>
 
 	<bean id="typeConverter"

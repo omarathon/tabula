@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkPoint, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists}
@@ -207,6 +207,9 @@ trait AddMarksCommandBindListener extends BindListener {
 					val asInt = mark.actualMark.toInt
 					if (asInt < 0 || asInt > 100) {
 						rejectValue("actualMark", "actualMark.range")
+					}
+					if (assignment.useMarkPoints && MarkPoint.forMark(asInt).isEmpty) {
+						rejectValue("actualMark", "actualMark.markPoint")
 					}
 				} catch { case _ @ (_: NumberFormatException | _: IllegalArgumentException) => rejectValue("actualMark", "actualMark.format") }
 			} else if (assignment.module.adminDepartment.assignmentGradeValidation && mark.actualGrade.hasText) {
