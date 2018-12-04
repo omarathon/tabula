@@ -4,4 +4,6 @@ import org.joda.time.DateTime
 
 trait CanBeStale {
 	def missingFromImportSince: DateTime
+
+	def stale: Boolean = missingFromImportSince != null
 }

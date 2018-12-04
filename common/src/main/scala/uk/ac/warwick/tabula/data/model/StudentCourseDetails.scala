@@ -66,7 +66,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
-	def freshStudentCourseYearDetails: Seq[StudentCourseYearDetails] = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).toSeq.sorted
+	def freshStudentCourseYearDetails: Seq[StudentCourseYearDetails] = studentCourseYearDetails.asScala.filter(scyd => !scyd.stale).toSeq.sorted
 	def freshOrStaleStudentCourseYearDetails: mutable.Set[StudentCourseYearDetails] = studentCourseYearDetails.asScala
 
 	def freshOrStaleStudentCourseYearDetailsForYear(academicYear: AcademicYear): Option[StudentCourseYearDetails] =  {
@@ -178,8 +178,6 @@ class StudentCourseDetails
 
 		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
-
-	def isFresh: Boolean = missingFromImportSince == null
 
 	// use these methods ONLY for tests, as they don't automagically update latestStudentCourseYearDetails
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails): Boolean = studentCourseYearDetails.add(scyd)

@@ -100,8 +100,6 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		(this.studentCourseDetails.scjCode == that.studentCourseDetails.scjCode) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
 
-	def isFresh: Boolean = missingFromImportSince == null
-
 	// There can be more than one StudentCourseYearDetails per year if there are multiple sequence numbers,
 	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
 	// filtering by year:

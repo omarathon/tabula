@@ -55,7 +55,7 @@ class StampMissingRowsCommandInternal
 		applicantsFromTabula
 			.diff(tabulaApplicantsInExistInSits)
 			.flatMap(universityId => memberDao.getByUniversityId(universityId))
-			.filter(_.isFresh)
+			.filterNot(_.stale)
 			.foreach { applicantMember =>
 				applicantMember.missingFromImportSince = DateTime.now
 				logger.info(s"Stamping applicant ${applicantMember.universityId} missing from import.")

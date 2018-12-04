@@ -208,8 +208,6 @@ abstract class Member
 	// Overridden in StudentMember
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
 
-	def isFresh: Boolean = missingFromImportSince == null
-
 	override final def equals(other: Any): Boolean = other match {
 		case that: Member =>
 			new EqualsBuilder()
@@ -237,7 +235,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails: Seq[StudentCourseDetails] = {
-		studentCourseDetails.asScala.filter(scd => scd.isFresh).toSeq.sorted
+		studentCourseDetails.asScala.filter(scd => !scd.stale).toSeq.sorted
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -251,7 +249,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def allFreshStudentCourseYearDetailsForYear(year: AcademicYear): Seq[StudentCourseYearDetails] =
-		freshOrStaleStudentCourseYearDetails(year).toSeq.filter(scyd => scyd.isFresh)
+		freshOrStaleStudentCourseYearDetails(year).toSeq.filter(scyd => !scyd.stale)
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseYearDetailsForYear(year: AcademicYear): Option[StudentCourseYearDetails] =
@@ -371,7 +369,7 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
+	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => !course.stale)
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def mostSignificantCourseDetailsForYear(academicYear: AcademicYear): Option[StudentCourseDetails] =

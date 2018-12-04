@@ -168,7 +168,7 @@ trait PermissionsCheckingMethods extends Logging {
 		else entity
 
 	def notStale[A <: CanBeStale](entity: A): A =
-		if(entity.missingFromImportSince == null) entity
+		if(!entity.stale) entity
 		else throw new ItemNotFoundException(entity, "Item is missing: " + entity)
 
 	/**
