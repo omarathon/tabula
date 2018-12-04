@@ -12,10 +12,10 @@ class MemberUniversityIdConverter extends TwoWayConverter[String, Member] {
 	override def convertRight(universityId: String): Member = {
 		if ("me" == universityId) {
 			RequestInfo.fromThread.flatMap { info =>
-				service.getMemberByUniversityId(info.user.universityId)
+				service.getMemberByUniversityIdStaleOrFresh(info.user.universityId)
 			}.orNull
 		} else {
-			service.getMemberByUniversityId(universityId).orNull
+			service.getMemberByUniversityIdStaleOrFresh(universityId).orNull
 		}
 	}
 	override def convertLeft(member: Member): String = (Option(member) map {_.universityId}).orNull
