@@ -66,7 +66,7 @@ object StudentCourseYearDetails {
 ))
 @javax.persistence.Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
-	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
+	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget with CanBeStale
 	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger, year:AcademicYear) {

@@ -36,6 +36,7 @@ class StudentCourseDetails
 	extends StudentCourseProperties
 	with ToString
 	with HibernateVersioned
+	with CanBeStale
 	with PermissionsTarget
 	with Ordered[StudentCourseDetails] {
 

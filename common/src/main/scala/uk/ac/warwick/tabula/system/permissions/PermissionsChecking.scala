@@ -167,6 +167,10 @@ trait PermissionsCheckingMethods extends Logging {
 		if (entity.deleted) throw new ItemNotFoundException(entity, "Item is deleted: " + entity)
 		else entity
 
+	def notStale[A <: CanBeStale](entity: A): A =
+		if(entity.missingFromImportSince == null) entity
+		else throw new ItemNotFoundException(entity, "Item is missing: " + entity)
+
 	/**
 	 * Checks target.permissionsAllChecks for ANDed permission, then target.permissionsAnyChecks for ORed permissions.
 	 * Throws PermissionDeniedException if permissions are unmet or ItemNotFoundException (-> 404) if scope is missing.

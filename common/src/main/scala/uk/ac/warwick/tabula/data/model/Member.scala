@@ -61,6 +61,7 @@ abstract class Member
 		with ToString
 		with HibernateVersioned
 		with PermissionsTarget
+		with CanBeStale
 		with Logging
 		with Serializable {
 
