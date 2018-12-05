@@ -24,6 +24,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 			click on module.findElement(By.className("mod-code"))
 
 			Then("Fully featured assignment should be visible")
+			eventually(linkText("Fully featured assignment").webElement.isDisplayed should be(true))
 
 			click on linkText("Fully featured assignment")
 			currentUrl should endWith(assignmentId+"/summary")

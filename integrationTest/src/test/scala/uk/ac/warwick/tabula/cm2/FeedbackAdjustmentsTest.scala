@@ -72,6 +72,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on getModule("XXX02").get.findElement(By.className("mod-code"))
 
 			When("I publish the feedback")
+			// Need to be very specific about which feedback link to click on - as we have 2 assignments with very similar names
 			val premarkedAssignmentFeedbackLink = eventually {
 				id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]"))
 				.findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Feedback needs publishing (2 of 2)"))
