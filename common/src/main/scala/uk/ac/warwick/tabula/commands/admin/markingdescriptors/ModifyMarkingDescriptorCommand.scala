@@ -30,11 +30,10 @@ trait ModifyMarkingDescriptorValidation extends SelfValidating {
 	}
 
 	private def markPointsAreContiguous: Boolean = {
-		val sortedMarkPoints = markPoints.asScala.sorted
-
-		sortedMarkPoints.zipWithIndex.drop(1).forall { case (markPoint, index) =>
-			markPoint.previous.contains(sortedMarkPoints(index - 1))
-		}
+		sortedMarkPoints.size == 1 ||
+			sortedMarkPoints.zipWithIndex.drop(1).forall { case (markPoint, index) =>
+				markPoint.previous.contains(sortedMarkPoints(index - 1))
+			}
 	}
 
 	def markPointsAlreadyExist: Boolean
@@ -45,6 +44,8 @@ trait ModifyMarkingDescriptorState {
 
 	var markPoints: JList[MarkPoint] = _
 	var text: String = _
+
+  def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.sorted.distinct
 }
 
 trait ModifyMarkingDescriptorPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
