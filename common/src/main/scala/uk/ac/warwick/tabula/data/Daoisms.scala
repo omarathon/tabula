@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.data
 
 import javax.sql.DataSource
-
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{Criterion, DetachedCriteria, Projection, PropertySubqueryExpression}
 import org.hibernate.proxy.HibernateProxy
 import org.hibernate.{Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
-import uk.ac.warwick.tabula.data.model.{CanBeDeleted, Member, StudentCourseDetails, StudentCourseYearDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 
 import scala.collection.JavaConverters._
@@ -150,6 +149,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.enableFilter(Member.FreshOnlyFilter)
 				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session.enableFilter(Route.ActiveOnlyFilter)
 				session
 			}
 
