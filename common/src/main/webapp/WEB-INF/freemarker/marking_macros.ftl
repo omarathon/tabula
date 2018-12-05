@@ -504,30 +504,32 @@
 		</#if>
 	</@bs3form.labelled_form_group>
 
-	<@bs3form.labelled_form_group labelText="Mark descriptor">
-		<@bs3form.static>
-			<#list assignment.availableMarkingDescriptors as markingDescriptor>
-				<div class="hidden" data-mark-points="<#list markingDescriptor.markPoints as markPoint>${markPoint.mark};</#list>">
-					${markingDescriptor.text}
-				</div>
-			</#list>
-		</@bs3form.static>
-	</@bs3form.labelled_form_group>
+	<#if assignment.useMarkPoints>
+		<@bs3form.labelled_form_group labelText="Mark descriptor">
+			<@bs3form.static>
+				<#list assignment.availableMarkingDescriptors as markingDescriptor>
+					<div class="hidden" data-mark-points="<#list markingDescriptor.markPoints as markPoint>${markPoint.mark};</#list>">
+						${markingDescriptor.text}
+					</div>
+				</#list>
+			</@bs3form.static>
+		</@bs3form.labelled_form_group>
 
-	<script>
-		jQuery(function ($) {
-			var $form = $('form[studentid=${command.student.userId}]');
+		<script>
+			jQuery(function ($) {
+				var $form = $('form[studentid=${command.student.userId}]');
 
-			$form.find('select[name=mark]').on('change', function () {
-				var mark = $(this).val();
+				$form.find('select[name=mark]').on('change', function () {
+					var mark = $(this).val();
 
-				$form.find('[data-mark-points]').addClass('hidden').each(function () {
-					if (mark !== '' && $(this).data('markPoints').indexOf(mark + ';') !== -1) {
-						$(this).removeClass('hidden');
-					}
-				});
-			}).trigger('change');
-		});
-	</script>
+					$form.find('[data-mark-points]').addClass('hidden').each(function () {
+						if (mark !== '' && $(this).data('markPoints').indexOf(mark + ';') !== -1) {
+							$(this).removeClass('hidden');
+						}
+					});
+				}).trigger('change');
+			});
+		</script>
+	</#if>
 </#macro>
 </#escape>
