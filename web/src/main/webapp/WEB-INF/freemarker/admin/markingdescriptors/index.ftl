@@ -5,11 +5,11 @@
 <table class="table table-bordered">
 	<thead>
 	<tr>
-		<th>Class</th>
-		<th>Scale</th>
-		<th>Mark point</th>
-		<th>University descriptor</th>
-		<th>Departmental descriptor</th>
+		<th style="width: 10%">Class</th>
+		<th style="width: 10%">Scale</th>
+		<th style="width: 10%">Mark point</th>
+		<th style="width: 35%">University descriptor</th>
+		<th style="width: 35%">Departmental descriptor</th>
 	</tr>
 	</thead>
 	<tbody>
