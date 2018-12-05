@@ -125,6 +125,7 @@
 		<nav class="pull-right" style="margin-top: 0;">
 			<#if can.do("Department.Reports", department) >
 				<a href="<@routes.profiles.exportProfiles department academicYear filterStudentsCommand.serializeFilter />" class="btn btn-sm btn-default" style="vertical-align: top;">Export profiles</a>
+				<a href="<@routes.profiles.exportProfilesCSV department academicYear filterStudentsCommand.serializeFilter />" class="btn btn-sm btn-default" style="vertical-align: top;">Export as CSV</a>
 			</#if>
 			<ul class="pagination pagination-sm "style="margin-top: 0;">
 				<#if currentPage lte 1>

@@ -124,6 +124,14 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	</#if>
 	<@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/export${filterString}"/>
 </#macro>
+
+<#macro exportProfilesCSV department academicYear filterString>
+	<#if filterString?has_content>
+		<#local filterString>?hasBeenFiltered=true&${filterString}</#local>
+	</#if>
+	<@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/exportCSV${filterString}"/>
+</#macro>
+
 <#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>
 
 <#macro download studentCourseDetails academicYear><@_u page="/view/${studentCourseDetails.urlSafeId}/${academicYear.value}.zip"/></#macro>

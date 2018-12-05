@@ -65,3 +65,6 @@
 <#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
 <#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>
 <#macro profileExportReportZip department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report/zip?jobId=${jobId}" /></#macro>
+
+<#macro profileExportCSVProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/exportCSV?jobId=${jobId}" /></#macro>
+<#macro profileExportCSVZip department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/exportCSV/zip?jobId=${jobId}" /></#macro>
