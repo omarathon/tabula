@@ -17,13 +17,13 @@ class MemberUniversityIdConverterTest extends TestBase with Mockito {
 		val member = new StaffMember
 		member.universityId = "0672089"
 
-		service.getMemberByUniversityId("0672089") returns (Some(member))
+		service.getMemberByUniversityIdStaleOrFresh("0672089") returns (Some(member))
 
 		converter.convertRight("0672089") should be (member)
 	}
 
 	@Test def invalidInput {
-		service.getMemberByUniversityId("20X6") returns (None)
+		service.getMemberByUniversityIdStaleOrFresh("20X6") returns (None)
 
 		converter.convertRight("20X6") should be (null)
 	}

@@ -342,11 +342,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 			case _: StaffMember =>  profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
 			case _ => throw new IllegalArgumentException("This function is only supposed to handle Applicant and Staff member.")
 		}
-		if (member.isFresh && missingFromImport) {
+		if (!member.stale && missingFromImport) {
 			// The member has gone missing
 			member.missingFromImportSince = DateTime.now
 			memberDao.saveOrUpdate(member)
-		} else if (!member.isFresh && !missingFromImport) {
+		} else if (member.stale && !missingFromImport) {
 			// The member has re-appeared
 			member.missingFromImportSince = null
 			memberDao.saveOrUpdate(member)
@@ -364,11 +364,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 				val studentCourseYearKeysSeen = sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct
 
 				// update missingFromImportSince on member
-				if (stu.missingFromImportSince != null && universityIdsSeen.contains(stu.universityId)) {
+				if (stu.stale && universityIdsSeen.contains(stu.universityId)) {
 					stu.missingFromImportSince = null
 					memberDao.saveOrUpdate(stu)
 				}
-				else if (stu.missingFromImportSince == null && !universityIdsSeen.contains(stu.universityId)) {
+				else if (!stu.stale && !universityIdsSeen.contains(stu.universityId)) {
 					var missingSince = stu.missingFromImportSince
 					stu.missingFromImportSince = DateTime.now
 					missingSince = stu.missingFromImportSince
@@ -381,7 +381,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 					if (scd.missingFromImportSince != null && scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = null
 						studentCourseDetailsDao.saveOrUpdate(scd)
-					} else if (scd.missingFromImportSince == null && !scjCodesSeen.contains(scd.scjCode)) {
+					} else if (!scd.stale && !scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = DateTime.now
 						studentCourseDetailsDao.saveOrUpdate(scd)
 					}
@@ -392,7 +392,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 						if (scyd.missingFromImportSince != null && studentCourseYearKeysSeen.contains(key)) {
 							scyd.missingFromImportSince = null
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
-						} else if (scyd.missingFromImportSince == null && !studentCourseYearKeysSeen.contains(key)) {
+						} else if (!scyd.stale && !studentCourseYearKeysSeen.contains(key)) {
 							scyd.missingFromImportSince = DateTime.now
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
 						}

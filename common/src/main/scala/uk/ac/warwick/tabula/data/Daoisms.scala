@@ -40,18 +40,19 @@ trait ExtendedSessionComponent extends SessionComponent {
 		val runtimeClass = classTag[A].runtimeClass
 		session.get(runtimeClass.getName, id) match {
 			case entity: CanBeDeleted if entity.deleted && isFilterEnabled("notDeleted") => None
-			case entity: Any if runtimeClass.isInstance(entity) => Some(entity.asInstanceOf[A])
+			case entity: Any if runtimeClass.isInstance(entity) => Some(HibernateHelpers.initialiseAndUnproxy(entity).asInstanceOf[A])
 			case _ => None
 		}
 	}
 }
 
 trait HelperRestrictions extends Logging {
-	@transient protected val maxInClause = Daoisms.MaxInClauseCount
-	def is: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.eqOrIsNull _
-	def isNot: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.neOrIsNotNull _
+	@transient protected val maxInClause: Int = Daoisms.MaxInClauseCount
+	def is: (String, Any) => Criterion = (s, o) => org.hibernate.criterion.Restrictions.eqOrIsNull(s, HibernateHelpers.initialiseAndUnproxy(o))
+	def isNot: (String, Any) => Criterion = (s, o) => org.hibernate.criterion.Restrictions.neOrIsNotNull(s, HibernateHelpers.initialiseAndUnproxy(o))
 	def isSubquery(propertyName: String, subquery: DetachedCriteria) = new PropertySubqueryExpressionWithToString(propertyName, subquery)
-	def safeIn[A](propertyName: String, iterable: Seq[A]): Criterion = {
+	def safeIn[A](propertyName: String, elements: Seq[A]): Criterion = {
+		val iterable = elements.map(HibernateHelpers.initialiseAndUnproxy)
 		if (iterable.isEmpty) {
 			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
 			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
@@ -66,14 +67,16 @@ trait HelperRestrictions extends Logging {
 			or
 		}
 	}
-	def safeInSeq[A](criteriaFactory: () => ScalaCriteria[A], propertyName: String, iterable: Seq[_]): Seq[A] = {
+	def safeInSeq[A](criteriaFactory: () => ScalaCriteria[A], propertyName: String, elements: Seq[_]): Seq[A] = {
+		val iterable = elements.map(e => HibernateHelpers.initialiseAndUnproxy(e))
 		// HALT soldier, you may be thinking of changing this .toList to a .toSeq but that will return a Stream and it's probably not what you want
 		iterable.grouped(maxInClause).toList.flatMap(maxedIterable => {
 			val c = criteriaFactory.apply()
 			c.add(org.hibernate.criterion.Restrictions.in(propertyName, maxedIterable.asJavaCollection)).seq
 		})
 	}
-	def safeInSeqWithProjection[A, B](criteriaFactory: () => ScalaCriteria[A], projection: Projection, propertyName: String, iterable: Seq[_]): Seq[B] = {
+	def safeInSeqWithProjection[A, B](criteriaFactory: () => ScalaCriteria[A], projection: Projection, propertyName: String, elements: Seq[_]): Seq[B] = {
+		val iterable = elements.map(e => HibernateHelpers.initialiseAndUnproxy(e))
 		// HALT soldier, you may be thinking of changing this .toList to a .toSeq but that will return a Stream and it's probably not what you want
 		iterable.grouped(maxInClause).toList.flatMap(maxedIterable => {
 			val c = criteriaFactory.apply()
@@ -81,17 +84,19 @@ trait HelperRestrictions extends Logging {
 			c.project[B](projection).seq
 		})
 	}
-	def like: (String, Any) => Criterion = org.hibernate.criterion.Restrictions.like
+	def like: (String, Any) => Criterion = (s, o) => org.hibernate.criterion.Restrictions.like(s, HibernateHelpers.initialiseAndUnproxy(o))
 	def likeIgnoreCase: (String, Any) => Criterion =
-		(property, value) => org.hibernate.criterion.Restrictions.like(property, value).ignoreCase
+		(property, value) => org.hibernate.criterion.Restrictions.like(property, HibernateHelpers.initialiseAndUnproxy(value)).ignoreCase
 }
 
 trait HibernateHelpers {
 	def initialiseAndUnproxy[A >: Null](entity: A): A =
 		Option(entity).map { proxy =>
 			Hibernate.initialize(proxy)
-			if (proxy.isInstanceOf[HibernateProxy]) proxy.asInstanceOf[HibernateProxy].getHibernateLazyInitializer.getImplementation.asInstanceOf[A]
-			else proxy
+			proxy match {
+				case p: HibernateProxy => p.getHibernateLazyInitializer.getImplementation.asInstanceOf[A]
+				case p => p
+			}
 		}.orNull
 }
 
@@ -170,17 +175,17 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	 * a session, you can access it through the `session` getter (within
 	 * the callback of this method, it should work too).
 	 */
-	protected def inSession(fn: (Session) => Unit) {
+	protected def inSession(fn: Session => Unit) {
 		val sess = sessionFactory.openSession()
 		try fn(sess) finally sess.close()
 	}
 
-	implicit def implicitNiceSession(session: Session) = new NiceQueryCreator(session)
+	implicit def implicitNiceSession(session: Session): NiceQueryCreator = new NiceQueryCreator(session)
 
 }
 
 class PropertySubqueryExpressionWithToString(propertyName: String, dc: DetachedCriteria) extends PropertySubqueryExpression(propertyName, "=", null, dc) {
 
-	override def toString(): String = propertyName + "=" + dc
+	override def toString: String = propertyName + "=" + dc
 
 }

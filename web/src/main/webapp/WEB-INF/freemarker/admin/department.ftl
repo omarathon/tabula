@@ -63,6 +63,12 @@
 						Arrange routes
 					</a></li>
 				</#if>
+				<#if can.do("Department.Manage", department)>
+					<li class="divider"></li>
+					<li><a href="<@routes.admin.markingdescriptors department />">
+						Marking descriptors
+					</a></li>
+				</#if>
 			</ul>
 		</div>
 	</div>

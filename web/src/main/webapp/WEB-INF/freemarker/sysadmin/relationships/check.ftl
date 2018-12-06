@@ -21,7 +21,7 @@
 
 	<@bs3form.form_group>
 		<input type="submit" value="Check" class="btn btn-primary">
-		<a class="btn btn-default" href="<@url page="/sysadmin/relationships" />">Cancel</a>
+		<a class="btn btn-default" href="<@url page="/sysadmin" />">Cancel</a>
 	</@bs3form.form_group>
 
 </@f.form>

@@ -304,7 +304,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
 	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
 		Option(rel.studentCourseDetails).exists(
-			scd => !scd.permanentlyWithdrawn && scd.missingFromImportSince == null)
+			scd => !scd.permanentlyWithdrawn && !scd.stale)
 	}
 
 	def studentDepartmentFilterMatches(department: Department)(member: StudentMember): Boolean = department.filterRule.matches(member, Option(department))

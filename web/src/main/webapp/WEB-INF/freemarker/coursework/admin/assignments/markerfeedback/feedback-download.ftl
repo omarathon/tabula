@@ -76,6 +76,15 @@
 		<#noescape>${feedback.commentsFormattedHtml!""}</#noescape>
 	</div>
 </#if>
+<#if feedback.markPoint?? && feedback.markingDescriptor??>
+	<div class="feedback-notes">
+		<h4>About your grade</h4>
+		<p>
+      <strong><em>${feedback.markPoint.name}</em></strong>
+		</p>
+		<p><em>${feedback.markingDescriptor.text}</em></p>
+	</div>
+</#if>
 
 <#if feedback.attachments?has_content>
 	<div class="feedback-notes">
