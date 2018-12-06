@@ -26,7 +26,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 			Then("Fully featured assignment should be visible")
 			eventually(linkText("Fully featured assignment").webElement.isDisplayed should be(true))
 
-			click on linkText("Fully featured assignment")
+			eventually(click on linkText("Fully featured assignment"))
 			currentUrl should endWith(assignmentId+"/summary")
 
 		}
@@ -76,7 +76,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		click on confirmBtn
 
 		Then("The user assignemnt should be updated")
-		id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing")
+		eventually(id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing"))
 
 	}
 
@@ -130,7 +130,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		val confirmBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 		click on confirmBtn2
 
-		Then("The user assignemnt should be updated")
+		Then("The user assignment should be updated")
 		id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing")
 
 	}

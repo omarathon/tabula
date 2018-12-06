@@ -30,8 +30,10 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 
 	private def checkUndeletableAssignment(title: String): Unit = {
 		val path = "//*[contains(text(),'" ++ title ++ "')]"
-		val assignmentRow = id("main").webElement.findElements(By.xpath(path))
-		click on assignmentRow.get(0)
+		eventually {
+			val assignmentRow = id("main").webElement.findElements(By.xpath(path))
+			click on assignmentRow.get(0)
+		}
 		eventually(currentUrl should endWith("/summary"))
 		When("I click on the edit button")
 		click on partialLinkText("Edit assignment")
@@ -47,8 +49,10 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 	private def deleteAssignment(title: String): Unit = {
 		val path = "//*[contains(text(),'" ++ title ++ "')]"
 
-		val assignmentRow = id("main").webElement.findElements(By.xpath(path))
-		click on assignmentRow.get(0)
+		eventually {
+			val assignmentRow = id("main").webElement.findElements(By.xpath(path))
+			click on assignmentRow.get(0)
+		}
 		eventually(currentUrl should endWith("/summary"))
 		When("I click on the edit button")
 		click on partialLinkText("Edit assignment")
