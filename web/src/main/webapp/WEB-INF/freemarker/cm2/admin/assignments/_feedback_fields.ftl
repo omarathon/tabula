@@ -12,7 +12,7 @@
 
 	<@bs3form.labelled_form_group path="automaticallyReleaseToMarkers" labelText="Automated release for marking">
 		<@bs3form.checkbox path="automaticallyReleaseToMarkers">
-			<#assign popoverContent>
+			<#assign automaticallyReleaseToMarkersPopoverContent>
 				<p>
 					When using a marking workflow, automatically release students to markers when the assignment closes. Students who do not submit work by the deadline or have an extension are still released automatically on the closing date. Ensure you assign markers to students before the assignment closes.
 				</p>
@@ -20,7 +20,7 @@
 
 			<@f.checkbox path="automaticallyReleaseToMarkers" id="automaticallyReleaseToMarkers" />
 			Automatically release assignment to markers on the assignment closing date
-			<@fmt.help_popover id="help-automaticallyReleaseToMarkers" content=popoverContent html=true />
+			<@fmt.help_popover id="help-automaticallyReleaseToMarkers" content=automaticallyReleaseToMarkersPopoverContent html=true />
 		</@bs3form.checkbox>
 		<div class="help-block">
 			Markers are notified of all students allocated to them, including students who have not submitted work.
@@ -32,7 +32,14 @@
 			<@f.checkbox path="collectMarks" id="collectMarks" /> Collect marks
 		</@bs3form.checkbox>
 		<@bs3form.checkbox path="useMarkPoints">
+			<#assign useMarkPointsPopoverContent>
+				<p>
+					The University's undergraduate marking scale uses 20 identified grade points which map to fixed percentages on the 0-100% scale. For guidance on when and how to use the marking scale, visit the <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Teaching Quality</a> website.
+				</p>
+			</#assign>
+
 			<@f.checkbox path="useMarkPoints" id="useMarkPoints" /> Use 20-point marking scale
+			<@fmt.help_popover id="help-useMarkPoints" content=useMarkPointsPopoverContent html=true />
 		</@bs3form.checkbox>
 	</@bs3form.labelled_form_group>
 
