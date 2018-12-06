@@ -2,14 +2,32 @@
 
 <h1>Manage marking descriptors</h1>
 
+<#assign universityDescriptorPopoverContent>
+	<p>
+		These are the generic descriptors for the 20-point undergraduate marking scale provided by <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Teaching Quality</a> for reference. Departments should create their own descriptors to explain the discipline-specific skills and knowledge that a student is required to demonstrate to achieve the respective points on the scale.
+	</p>
+</#assign>
+
+<#assign departmentalDescriptorPopoverContent>
+	<p>
+		Enter your department's descriptors for the 20-point undergraduate marking scale. The descriptors should explain the discipline-specific skills and knowledge that a student is required to demonstrate to achieve the respective points on the scale. For guidance on when and how to use the marking scale, visit the <a target="_blank" href="https://warwick.ac.uk/quality/categories/examinations/marking/ug2017/staff">Teaching Quality</a> website.
+	</p>
+</#assign>
+
 <table class="table table-bordered">
 	<thead>
 	<tr>
 		<th style="width: 10%">Class</th>
 		<th style="width: 10%">Scale</th>
 		<th style="width: 10%">Mark point</th>
-		<th style="width: 35%">University descriptor</th>
-		<th style="width: 35%">Departmental descriptor</th>
+		<th style="width: 35%">
+			University descriptor 
+			<@fmt.help_popover id="help-universityDescriptor" content=universityDescriptorPopoverContent html=true />
+		</th>
+		<th style="width: 35%">
+			Departmental descriptor 
+			<@fmt.help_popover id="help-departmentalDescriptor" content=departmentalDescriptorPopoverContent html=true />
+		</th>
 	</tr>
 	</thead>
 	<tbody>
