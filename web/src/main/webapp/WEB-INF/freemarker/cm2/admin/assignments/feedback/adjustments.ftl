@@ -53,7 +53,7 @@
 			<@f.select path="reason" class="form-control">
 				<@f.option></@f.option>
 				<@f.option value="Late submission penalty">Late submission penalty</@f.option>
-				<@f.option value="Plagarism penalty">Plagarism penalty</@f.option>
+				<@f.option value="Plagiarism penalty">Plagiarism penalty</@f.option>
 				<@f.option value="Other">Other</@f.option>
 			</@f.select>
 			<@f.input type="text" path="reason" cssClass="form-control hide other-input" placeholder="Enter your reason" disabled=true/>
