@@ -11,10 +11,10 @@ import scala.collection.mutable
 
 
 @FilterDefs(Array(
-	new FilterDef(name = Route.ActiveOnlyFilter, defaultCondition = "active = 1"),
+	new FilterDef(name = Route.ActiveRoutesOnlyFilter, defaultCondition = "active = 1"),
 ))
 @Filters(Array(
-	new Filter(name = Route.ActiveOnlyFilter),
+	new Filter(name = Route.ActiveRoutesOnlyFilter),
 ))
 @Entity
 @NamedQueries(Array(
@@ -85,5 +85,5 @@ object Route {
 	// this will be the default when ordering a list of routes.
 	implicit val defaultOrdering: Ordering[Route] = CodeOrdering
 
-	final val ActiveOnlyFilter = "activeOnly"
+	final val ActiveRoutesOnlyFilter = "activeRoutesOnly"
 }

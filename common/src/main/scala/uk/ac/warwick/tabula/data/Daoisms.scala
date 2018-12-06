@@ -149,7 +149,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.enableFilter(Member.FreshOnlyFilter)
 				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-				session.enableFilter(Route.ActiveOnlyFilter)
+				session.enableFilter(Route.ActiveRoutesOnlyFilter)
 				session
 			}
 
