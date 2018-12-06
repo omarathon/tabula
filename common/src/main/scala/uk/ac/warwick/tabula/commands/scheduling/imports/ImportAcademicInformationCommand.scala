@@ -325,11 +325,20 @@ trait ImportRoutes {
 					ImportResult(added = 1)
 				case Some(route) =>
 					// HFC-354 Update route name if it changes.
-					if (rot.name != route.name) {
+					val nameChanged = rot.name != route.name
+					if (nameChanged) {
 						logger.info("Updating name of %s to %s".format(rot.code, rot.name))
 						route.name = rot.name
-						courseAndRouteService.save(route)
+					}
 
+					val activeChanged = rot.active != route.active
+					if(activeChanged) {
+						logger.info(s"Setting ${route.code} to ${if(rot.active) "active" else "inactive"}")
+						route.active = rot.active
+					}
+
+					if(nameChanged || activeChanged) {
+						courseAndRouteService.save(route)
 						ImportResult(changed = 1)
 					} else {
 						ImportResult()
