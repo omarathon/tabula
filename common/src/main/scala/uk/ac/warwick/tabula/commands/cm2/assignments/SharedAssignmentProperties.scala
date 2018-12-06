@@ -43,6 +43,7 @@ trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProper
 
 	def copySharedFeedbackFrom(assignment: Assignment): Unit = {
 		collectMarks = assignment.collectMarks
+		useMarkPoints = assignment.useMarkPoints
 		summative = assignment.summative
 		dissertation = assignment.dissertation
 		publishFeedback = assignment.publishFeedback

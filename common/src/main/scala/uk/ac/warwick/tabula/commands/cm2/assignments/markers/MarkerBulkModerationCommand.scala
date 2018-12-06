@@ -6,7 +6,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.convert.NullableConvertibleConverter
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.ModerationModerator
 import uk.ac.warwick.tabula.data.model.{Assignment, Convertible, GradeBoundary, MarkerFeedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -26,25 +27,32 @@ object MarkerBulkModerationCommand {
 			with MarkerBulkModerationDescription
 			with AutowiringCM2MarkingWorkflowServiceComponent
 			with AutowiringFeedbackServiceComponent
+			with PopulateMarkerFeedbackComponentImpl
 }
 
 class MarkerBulkModerationCommandInternal(
 	val assignment: Assignment, val marker: User, val submitter: CurrentUser, val currentStage: MarkingWorkflowStage, val gradeGenerator: GeneratesGradesFromMarks
 ) extends CommandInternal[Seq[MarkerFeedback]] with MarkerBulkModerationState with MarkerBulkModerationValidation {
 
-	self: CM2MarkingWorkflowServiceComponent with FeedbackServiceComponent =>
+	self: CM2MarkingWorkflowServiceComponent with FeedbackServiceComponent with PopulateMarkerFeedbackComponent =>
 
 	def applyInternal(): Seq[MarkerFeedback] = {
 
-		val toAdjust = validForAdjustment(previousMarker).map(markerFeedback => {
+		// populate any feedback that wasn't moderated
+		populateMarkerFeedback(assignment, validForAdjustment(previousMarker).filterNot(_.hasContent))
+
+		val toAdjust = validForAdjustment(previousMarker).map(moderatorFeedback => {
+
+			val preAdjustmentMark = moderatorFeedback.mark
+				.getOrElse(throw new IllegalArgumentException(s"No mark to be adjusted for ${moderatorFeedback.student.getUserId}"))
 
 			val amountToAdjust: Double = (adjustmentType match {
-				case Percentage => for(mark <- markerFeedback.mark; percent <- percentageAdjustment) yield mark * (percent / 100)
+				case Percentage => percentageAdjustment.map(percentage => preAdjustmentMark * (percentage / 100))
 				case Points => pointAdjustment.map(_.toDouble)
 			}).getOrElse(0)
 
-			markerFeedback.mark = markerFeedback.mark.map(mark => direction.op(mark.toDouble, amountToAdjust).ceil.toInt)
-			markerFeedback
+			moderatorFeedback.mark = Some(direction.op(preAdjustmentMark.toDouble, amountToAdjust).ceil.toInt.max(0).min(100)) // round and cap between 0 and 100
+			moderatorFeedback
 		})
 
 		val newMarks = (for (mf <- toAdjust; mark <- mf.mark) yield mf.student.getWarwickId -> mark).toMap
@@ -54,6 +62,11 @@ class MarkerBulkModerationCommandInternal(
 			markerFeedback.grade = grades(markerFeedback.student.getWarwickId).find(_.isDefault).map(_.grade)
 			markerFeedback.updatedOn = DateTime.now
 			feedbackService.save(markerFeedback)
+
+			if(markerFeedback.feedback.outstandingStages.asScala.forall(_.isInstanceOf[FinalStage])) {
+				cm2MarkingWorkflowService.finaliseFeedback(markerFeedback)
+			}
+
 			markerFeedback
 		})
 	}
@@ -75,7 +88,7 @@ trait MarkerBulkModerationValidation extends SelfValidating {
 	def validate(errors: Errors) {
 
 		if (!previousMarker.isFoundUser) {
-			val previousRole = currentStage.previousStages.headOption.map(_.roleName).getOrElse(MarkingWorkflowStage.DefaultRole)
+			val previousRole = ModerationModerator.previousStages.headOption.map(_.roleName).getOrElse(MarkingWorkflowStage.DefaultRole)
 			errors.rejectValue("previousMarker", "markerFeedback.bulkAdjustment.marker", Array(previousRole), "")
 		}
 
@@ -170,16 +183,22 @@ trait MarkerBulkModerationState {
 		}
 	}
 
+	private lazy val adjustmentsApplied: Map[User, Seq[User]] = previousMarkerFeedback.map { case (marker, markerFeedback) =>
+		marker -> markerFeedback.filter(_.feedback.hasPrivateOrNonPrivateAdjustments).map(_.student)
+	}
+
 	lazy val skipReasons: Map[User, Map[User, Seq[String]]] = previousMarkers.map(marker => {
 		val mark = noMark.getOrElse(marker, Seq())
 		val published = alreadyPublished.getOrElse(marker, Seq())
 		val noGrade = noGradeGradeBoundaries.getOrElse(marker, Seq())
+		val adjustments = adjustmentsApplied.getOrElse(marker, Seq())
 
-		val allSkipped = (mark ++ published ++ noGrade).toSet
+		val allSkipped = (mark ++ published ++ noGrade ++ adjustments).toSet
 		val markersReasons = allSkipped.map(student => {
 			val reasons = mark.find(_ == student).map(_ => "Feedback has no mark").toSeq ++
 				published.find(_ == student).map(_ => "Feedback has already been published").toSeq ++
-				noGrade.find(_ == student).map(_ => "No appropriate mark scheme is available from SITS").toSeq
+				noGrade.find(_ == student).map(_ => "No appropriate mark scheme is available from SITS").toSeq ++
+				adjustments.find(_ == student).map(_ => "Post-marking adjustments have been made to this feedback").toSeq
 			student -> reasons
 		}).toMap
 		marker -> markersReasons
@@ -203,7 +222,7 @@ case object Points extends MarkerAdjustmentType { val value = "points"; val desc
 
 object MarkerAdjustmentType {
 	val values: Seq[MarkerAdjustmentType] = Seq(Points, Percentage)
-	implicit val factory: (String) => MarkerAdjustmentType = { name: String =>
+	implicit val factory: String => MarkerAdjustmentType = { name: String =>
 		values.find(_.getName == name).getOrElse(throw new IllegalArgumentException(s"$name not found"))
 	}
 }
@@ -220,7 +239,7 @@ case object Down extends MarkerAdjustmentDirection { val value = "Down" ; def op
 
 object MarkerAdjustmentDirection {
 	val values: Seq[MarkerAdjustmentDirection] = Seq(Up, Down)
-	implicit val factory: (String) => MarkerAdjustmentDirection = { name: String =>
+	implicit val factory: String => MarkerAdjustmentDirection = { name: String =>
 		values.find(_.getName == name).getOrElse(throw new IllegalArgumentException(s"$name not found"))
 	}
 }

@@ -150,6 +150,9 @@ trait OnlineFeedbackValidation extends SelfValidating {
 				if (asInt < 0 || asInt > 100) {
 					errors.rejectValue("mark", "actualMark.range")
 				}
+				if (assignment.useMarkPoints && MarkPoint.forMark(asInt).isEmpty) {
+					errors.rejectValue("mark", "actualMark.markPoint")
+				}
 			} catch {
 				case _ @ (_: NumberFormatException | _: IllegalArgumentException) =>
 					errors.rejectValue("mark", "actualMark.format")

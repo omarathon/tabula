@@ -54,6 +54,7 @@ object Assignment {
 		val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
 		val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
 		val PublishFeedback = "publishFeedback"
+		val UseMarkPoints = "useMarkPoints"
 	}
 }
 
@@ -97,6 +98,9 @@ class Assignment
 
 	@transient
 	var userLookup: UserLookupService = Wire[UserLookupService]("userLookup")
+
+	@transient
+	var markingDescriptorService: MarkingDescriptorService = Wire[MarkingDescriptorService]("markingDescriptorService")
 
 	def this(_module: Module) {
 		this()
@@ -207,6 +211,13 @@ class Assignment
 
 	def publishFeedback: Boolean = getBooleanSetting(Settings.PublishFeedback, default = true)
 	def publishFeedback_=(publish: Boolean): Unit = settings += (Settings.PublishFeedback -> publish)
+
+	def useMarkPoints: Boolean = getBooleanSetting(Settings.UseMarkPoints, default = false)
+	def useMarkPoints_=(markPoints: Boolean): Unit = settings += (Settings.UseMarkPoints -> markPoints)
+
+	def availableMarkPoints: Seq[MarkPoint] = if (useMarkPoints) MarkPoint.all else Nil
+
+	def availableMarkingDescriptors: Seq[MarkingDescriptor] = markingDescriptorService.getMarkingDescriptors(module.adminDepartment)
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
@@ -906,6 +917,7 @@ trait BooleanAssignmentDetailProperties {
 
 trait BooleanAssignmentFeedbackProperties {
 	@BeanProperty var collectMarks: JBoolean = true
+	@BeanProperty var useMarkPoints: JBoolean = false
 	@BeanProperty var automaticallyReleaseToMarkers: JBoolean = false
 	@BeanProperty var summative: JBoolean = true
 	@BeanProperty var dissertation: JBoolean = false
@@ -914,6 +926,7 @@ trait BooleanAssignmentFeedbackProperties {
 
 	def copyFeedbackBooleansTo(assignment: Assignment) {
 		assignment.collectMarks = collectMarks
+		assignment.useMarkPoints = useMarkPoints
 		assignment.summative = summative
 		assignment.dissertation = dissertation
 		assignment.publishFeedback = publishFeedback

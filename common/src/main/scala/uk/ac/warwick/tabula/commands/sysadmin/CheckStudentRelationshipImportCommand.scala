@@ -159,7 +159,7 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
 						isForCurrentCourse = mostSignificantCourse.exists(_.scjCode == row.scjCode),
 						hasPersonnelRecord = row.agentId != null,
 						isMember = agentMember.isDefined,
-						isUpstreamMember = agentMember.exists(_.isFresh),
+						isUpstreamMember = agentMember.exists(m => !m.stale),
 						rawData = row
 					)
 				}
@@ -168,7 +168,7 @@ class CheckStudentRelationshipImportCommandInternal extends CommandInternal[Chec
 
 		CheckStudentRelationshipImport(
 			isStudent = studentMember.isDefined,
-			isUpstreamStudent = studentMember.exists(_.isFresh),
+			isUpstreamStudent = studentMember.exists(m => !m.stale),
 			isCurrentStudent = !studentMember.exists(_.permanentlyWithdrawn),
 			isFreshCourse = mostSignificantCourse.isDefined,
 			studentUser = studentUser,

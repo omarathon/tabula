@@ -66,7 +66,7 @@ object StudentCourseYearDetails {
 ))
 @javax.persistence.Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
-	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
+	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget with CanBeStale
 	with Ordered[StudentCourseYearDetails] with PostLoadBehaviour {
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger, year:AcademicYear) {
@@ -99,8 +99,6 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def equals(that: StudentCourseYearDetails): Boolean = {
 		(this.studentCourseDetails.scjCode == that.studentCourseDetails.scjCode) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
-
-	def isFresh: Boolean = missingFromImportSince == null
 
 	// There can be more than one StudentCourseYearDetails per year if there are multiple sequence numbers,
 	// so moduleRegistrations are not attached directly - instead, get them from StudentCourseDetails,
