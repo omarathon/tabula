@@ -45,14 +45,14 @@ trait GetMemberApi {
 
 	@ModelAttribute("getCommand")
 	def getCommand(@PathVariable member: Member): ViewProfileCommand =
-		new ViewProfileCommand(user, mandatory(notStale(member)))
+		new ViewProfileCommand(user, notStale(mandatory(member)))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "member") fields: String): Mav =
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"member" -> jsonMemberObject(mandatory(notStale(command.apply())), APIFieldRestriction.restriction("member", fields))
+			"member" -> jsonMemberObject(notStale(mandatory(command.apply())), APIFieldRestriction.restriction("member", fields))
 		)))
 }
 
@@ -61,11 +61,11 @@ trait GetAllMemberCoursesApi {
 
 	@ModelAttribute("getCommand")
 	def getCommand(@PathVariable member: Member): ViewProfileCommand =
-		new ViewProfileCommand(user, mandatory(notStale(member)))
+		new ViewProfileCommand(user, notStale(mandatory(member)))
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def getCourses(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "studentCourseDetails") fields: String): Mav = {
-		val member = mandatory(notStale(command.apply()))
+		val member = notStale(mandatory(command.apply()))
 		val studentCourseDetails = member match {
 			case student: StudentMember if canViewProperty(student, "freshStudentCourseDetails") =>
 				Some(student.freshStudentCourseDetails)
@@ -86,7 +86,7 @@ trait GetMemberCourseApi {
 
 	@ModelAttribute("getCommand")
 	def getCommand(@PathVariable member: Member, @PathVariable studentCourseDetails: StudentCourseDetails): ViewViewableCommand[StudentCourseDetails] = {
-		mustBeLinked(studentCourseDetails, notStale(member))
+		mustBeLinked(studentCourseDetails, notStale(mandatory(member)))
 		new ViewViewableCommand(Permissions.Profiles.Read.StudentCourseDetails.Core, studentCourseDetails)
 	}
 
