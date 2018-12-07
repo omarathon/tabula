@@ -317,7 +317,7 @@ trait ImportRoutes {
 
 	def importRoutes(routes: Seq[RouteInfo], dept: Department): ImportResult = {
 		val results = for (rot <- routes) yield {
-			courseAndRouteService.getRouteByCode(rot.code) match {
+			courseAndRouteService.getRouteByCodeActiveOrInactive(rot.code) match {
 				case None =>
 					debug("Route code %s not found in database, so inserting", rot.code)
 					courseAndRouteService.save(newRouteFrom(rot, dept))
