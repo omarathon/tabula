@@ -339,7 +339,7 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3598 - Add study departments and routes for any current course
 		val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
 		val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
-		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.currentRoute }.toStream
+		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.flatMap { c => Option(c.currentRoute) }.toStream
 
 		// Cache the def result
 		val mostSignificantCourse = mostSignificantCourseDetails
