@@ -25,5 +25,5 @@ class ViewProfileCommand(user: CurrentUser, val profile: Member)
 }
 
 class ViewStaleProfileCommand(user: CurrentUser, profile: Member) extends ViewProfileCommand(user, profile){
-	PermissionCheck(Permissions.Profiles.Read.CoreStale, notStale(mandatory(profile)))
+	PermissionCheck(Permissions.Profiles.Read.CoreStale, profile)
 }
