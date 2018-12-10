@@ -6,18 +6,26 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.helpers.{APIFieldRestriction, MemberToJsonConverter, StudentCourseDetailsToJsonConverter, StudentCourseYearDetailsToJsonConverter}
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.commands.profiles.profile.ViewProfileCommand
+import uk.ac.warwick.tabula.commands.profiles.profile.{ViewProfileCommand, ViewStaleProfileCommand}
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{AutowiringScalaFreemarkerConfigurationComponent, JSONView}
 
 @Controller
-@RequestMapping(Array("/v1/member/{member}"))
+@RequestMapping(value = Array("/v1/member/{member}"), params = Array("!includeStale"))
 class MemberController extends ApiController
-	with GetMemberApi
+	with FreshMemberApi
 	with MemberToJsonConverter
 	with AutowiringScalaFreemarkerConfigurationComponent
+
+@Controller
+@RequestMapping(value = Array("/v1/member/{member}"), params = Array("includeStale"))
+class StaleMemberController extends ApiController
+	with StaleMemberApi
+	with MemberToJsonConverter
+	with AutowiringScalaFreemarkerConfigurationComponent {
+}
 
 @Controller
 @RequestMapping(Array("/v1/member/{member}/course"))
@@ -43,17 +51,36 @@ class MemberCourseYearController extends ApiController
 trait GetMemberApi {
 	self: ApiController with MemberToJsonConverter =>
 
-	@ModelAttribute("getCommand")
-	def getCommand(@PathVariable member: Member): ViewProfileCommand =
-		new ViewProfileCommand(user, notStale(mandatory(member)))
+	def checkMember(m: Member): Member
+	def getCommand(m: Member): ViewProfileCommand
 
 	@RequestMapping(method = Array(GET), produces = Array("application/json"))
 	def getMember(@ModelAttribute("getCommand") command: ViewProfileCommand, @RequestParam(defaultValue = "member") fields: String): Mav =
 		Mav(new JSONView(Map(
 			"success" -> true,
 			"status" -> "ok",
-			"member" -> jsonMemberObject(notStale(mandatory(command.apply())), APIFieldRestriction.restriction("member", fields))
+			"member" -> jsonMemberObject(checkMember(command.apply()), APIFieldRestriction.restriction("member", fields))
 		)))
+}
+
+trait FreshMemberApi extends GetMemberApi {
+	self: ApiController with MemberToJsonConverter =>
+
+	def checkMember(m: Member): Member = notStale(mandatory(m))
+
+	@ModelAttribute("getCommand")
+	def getCommand(@PathVariable member: Member): ViewProfileCommand =
+		new ViewProfileCommand(user, member)
+}
+
+trait StaleMemberApi extends GetMemberApi {
+	self: ApiController with MemberToJsonConverter =>
+
+	def checkMember(m: Member): Member = mandatory(m)
+
+	@ModelAttribute("getCommand")
+	def getCommand(@PathVariable member: Member): ViewProfileCommand =
+		new ViewStaleProfileCommand(user, member)
 }
 
 trait GetAllMemberCoursesApi {
