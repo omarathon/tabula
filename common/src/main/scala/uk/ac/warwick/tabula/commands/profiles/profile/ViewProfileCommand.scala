@@ -24,7 +24,6 @@ class ViewProfileCommand(user: CurrentUser, val profile: Member)
 	}
 }
 
-// Assumes that restricting of stale profiles is done by a PermissionsChecking.notStale call in the controller
 class ViewStaleProfileCommand(user: CurrentUser, profile: Member) extends ViewProfileCommand(user, profile){
-	PermissionCheck(Permissions.Profiles.Read.CoreStale, profile)
+	PermissionCheck(Permissions.Profiles.Read.CoreStale, notStale(mandatory(profile)))
 }
