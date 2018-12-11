@@ -131,7 +131,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		click on confirmBtn2
 
 		Then("The user assignment should be updated")
-		id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing")
+		eventually(id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing"))
 
 	}
 
