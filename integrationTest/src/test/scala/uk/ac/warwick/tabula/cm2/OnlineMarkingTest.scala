@@ -30,7 +30,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 			eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
 
 			When("I expand the student")
-			click on cssSelector(".toggle-icon-large.student-col").webElement
+			eventually(click on cssSelector(".toggle-icon-large.student-col").webElement)
 			Then("Marking and feedback")
 			eventually(pageSource contains "Marking and feedback" should be {true})
 
@@ -78,7 +78,7 @@ class OnlineMarkingTest  extends BrowserTest with CourseworkFixtures with GivenW
 			cssSelector("input[type=submit]").webElement.click()
 			Then("I end up back on the marker overview page")
 			eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
-			cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be {true}
+			eventually(cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be {true})
 
 		}
 
