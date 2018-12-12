@@ -100,14 +100,17 @@ class BaseControllerTest extends TestBase with Mockito {
 
 	@Test def returnToDoesEscape: Unit = {
 		val controller = new BaseController {}
-		val badPath1 = "javascript:alert(1)" // not safe
+		val badPath1 = "javascript:alert(1)" // not safe at all, should be killed
 		controller.getReturnTo(badPath1) should be ("")
 
-		val badPath2 = "<script>alert(2)</script>" // not safe
-		controller.getReturnTo(badPath2) should be ("")
+		val badPath2 = "<script>alert(2)</script>" // not safe, should be escaped
+		controller.getReturnTo(badPath2) should be ("&lt;script&gt;alert(2)&lt;/script&gt;")
 
 		val badPath3 = "%20javascript:alert(1)" // crashes URI
 		controller.getReturnTo(badPath3) should be ("")
+
+		val notEntirelyBadPath = "/<div>hi</div>/<span>ack</span>" // html should be escaped
+		controller.getReturnTo(notEntirelyBadPath) should be ("/&lt;div&gt;hi&lt;/div&gt;/&lt;span&gt;ack&lt;/span&gt;")
 
 		val goodPath = "/i/eat/choclate" // good one
 		controller.getReturnTo(goodPath) should be ("/i/eat/choclate")

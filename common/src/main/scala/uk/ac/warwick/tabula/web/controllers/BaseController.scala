@@ -49,8 +49,9 @@ trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
 	def getReturnTo(defaultUrl: String): String = {
-		Try(Option(new URI(getReturnToUnescaped(defaultUrl)).getPath))
-			.map(_.get)
+		Try(new URI(getReturnToUnescaped(StringEscapeUtils.escapeHtml4(defaultUrl))).getPath)
+			.toOption
+			.flatMap(Option(_))
 			.getOrElse("")
 	}
 
