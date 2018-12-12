@@ -72,7 +72,7 @@ trait SmallGroupService {
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
 	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance]
 
-	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, academicYear: AcademicYear, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 	def findAllAttendanceForStudentInAcademicYear(student: StudentMember, academicYear: AcademicYear): Seq[SmallGroupEventAttendance]
 
 	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
@@ -288,8 +288,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findStudentAttendanceInEvents(universityId: String, events: Seq[SmallGroupEvent]): Seq[SmallGroupEventAttendance] =
 		smallGroupDao.findStudentAttendanceInEvents(universityId, events)
 
-	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance] =
-		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, academicYear: AcademicYear, modules: Seq[Module]): Seq[SmallGroupEventAttendance] =
+		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, academicYear, modules)
 
 	override def findAllAttendanceForStudentInAcademicYear(student: StudentMember, academicYear: AcademicYear) =
 		smallGroupDao.findAllAttendanceForStudentInAcademicYear(student, academicYear)
