@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers
 
+import java.net.URI
+
 import org.apache.commons.lang3.StringEscapeUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Required
@@ -10,7 +12,6 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute}
 import javax.annotation.Resource
 import javax.servlet.http.HttpServletResponse
-
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.events.EventHandling
@@ -24,6 +25,8 @@ import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import scala.util.Try
 
 trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
@@ -45,7 +48,11 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl: String): String = StringEscapeUtils.escapeHtml4(getReturnToUnescaped(defaultUrl))
+	def getReturnTo(defaultUrl: String): String = {
+		Try(Option(new URI(getReturnToUnescaped(defaultUrl)).getPath))
+			.map(_.get)
+			.getOrElse("")
+	}
 
 	def getReturnToUnescaped(defaultUrl: String): String =
 		requestInfo.flatMap {
