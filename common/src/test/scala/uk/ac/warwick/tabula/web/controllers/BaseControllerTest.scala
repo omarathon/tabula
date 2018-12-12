@@ -98,4 +98,20 @@ class BaseControllerTest extends TestBase with Mockito {
 		verify(mockSession, times(1)).enableFilter("notDeleted")
 	}
 
+	@Test def returnToDoesEscape: Unit = {
+		val controller = new BaseController {}
+		val badPath1 = "javascript:alert(1)" // not safe
+		controller.getReturnTo(badPath1) should be ("")
+
+		val badPath2 = "<script>alert(2)</script>" // not safe
+		controller.getReturnTo(badPath2) should be ("")
+
+		val badPath3 = "%20javascript:alert(1)" // crashes URI
+		controller.getReturnTo(badPath3) should be ("")
+
+		val goodPath = "/i/eat/choclate" // good one
+		controller.getReturnTo(goodPath) should be ("/i/eat/choclate")
+
+	}
+
 }
