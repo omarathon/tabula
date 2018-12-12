@@ -395,7 +395,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 	}
 
 	private def getSmallGroupData(academicYear: AcademicYear): Seq[SmallGroupData] = {
-		val allAttendance = benchmarkTask("smallGroupService.findAttendanceForStudentInModulesInWeeks") {
+		val allAttendance = benchmarkTask("smallGroupService.findAllAttendanceForStudentInAcademicYear") {
 			smallGroupService.findAllAttendanceForStudentInAcademicYear(student, academicYear)
 		}
 		val users = benchmarkTask("userLookup.getUsersByUserIds") {

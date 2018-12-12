@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
-import org.joda.time.{DateTime, DateTimeConstants, Interval}
-import uk.ac.warwick.tabula.JavaImports._
+import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
@@ -92,7 +91,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		otherAttendance.occurrence.event.day = DayOfWeek.Monday
 		otherAttendance.universityId = student.universityId
 
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
 
 		smallGroupPoint.smallGroupEventQuantity = 2
 
@@ -175,14 +174,14 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 	@Test
 	def notEnoughAttendanceCurrentNotPersisted() { new Fixture {
 		smallGroupPoint.smallGroupEventQuantity = 2
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
 		service.getCheckpoints(Seq(attendance)).size should be (0)
 	}}
 
 	@Test
 	def notEnoughAttendanceCurrentPersisted() { new Fixture {
 		smallGroupPoint.smallGroupEventQuantity = 2
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(attendance)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(attendance)
 		service.getCheckpoints(Seq(attendance)).size should be (0)
 	}}
 
@@ -196,7 +195,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		otherAttendance.occurrence.event.day = DayOfWeek.Monday
 		otherAttendance.universityId = student.universityId
 
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
 
 		smallGroupPoint.smallGroupEventQuantity = 2
 
@@ -213,7 +212,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
 		otherAttendance.occurrence.event.day = DayOfWeek.Friday
 		otherAttendance.universityId = student.universityId
 
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
 
 		smallGroupPoint.smallGroupEventQuantity = 2
 
