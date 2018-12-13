@@ -80,7 +80,7 @@ trait SmallGroupDao {
 
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup]
 	def findManuallyAddedAttendance(studentId: String): Seq[SmallGroupEventAttendance]
-	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, academicYear: AcademicYear, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
 	def findAllAttendanceForStudentInAcademicYear(student: StudentMember, academicYear: AcademicYear): Seq[SmallGroupEventAttendance]
 	def findOccurrencesInModulesInWeeks(startWeek: Int, endWeek: Int, modules: Seq[Module], academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
 	def findOccurrencesInWeeks(startWeek: Int, endWeek: Int, academicYear: AcademicYear): Seq[SmallGroupEventOccurrence]
@@ -274,11 +274,15 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.add(is("addedManually", true))
 			.seq
 
-	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance] = {
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, academicYear: AcademicYear, modules: Seq[Module]): Seq[SmallGroupEventAttendance] = {
 		if (modules.isEmpty) {
 			session.newCriteria[SmallGroupEventAttendance]
 				.createAlias("occurrence", "occurrence")
+				.createAlias("occurrence.event", "event")
+				.createAlias("event.group", "group")
+				.createAlias("group.groupSet", "groupSet")
 				.add(is("universityId", student.universityId))
+				.add(is("groupSet.academicYear", academicYear))
 				.add(ge("occurrence.week", startWeek))
 				.add(le("occurrence.week", endWeek))
 				.seq
@@ -290,6 +294,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					.createAlias("event.group", "group")
 					.createAlias("group.groupSet", "groupSet")
 					.add(is("universityId", student.universityId))
+					.add(is("groupSet.academicYear", academicYear))
 					.add(ge("occurrence.week", startWeek))
 					.add(le("occurrence.week", endWeek))
 			}

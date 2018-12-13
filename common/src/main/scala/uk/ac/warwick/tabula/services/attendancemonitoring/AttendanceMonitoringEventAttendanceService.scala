@@ -201,7 +201,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 	): Seq[SmallGroupEventAttendance] = {
 		val startWeek = academicYear.weekForDate(startDate).weekNumber
 		val endWeek = academicYear.weekForDate(endDate).weekNumber
-		val weekAttendances = smallGroupService.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
+		val weekAttendances = smallGroupService.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, academicYear, modules)
 		// weekAttendances may contain attendance before the startDate and after the endDate, so filter those out
 		// don't need to filter if the startDate is a MOnday and the endDate is a Sunday, as that's the whole week
 		if (startDate.getDayOfWeek == DayOfWeek.Monday.jodaDayOfWeek && endDate.getDayOfWeek == DayOfWeek.Sunday.jodaDayOfWeek) {

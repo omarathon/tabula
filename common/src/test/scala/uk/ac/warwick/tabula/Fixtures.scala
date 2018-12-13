@@ -132,6 +132,13 @@ object Fixtures extends Mockito {
 		s
 	}
 
+	def smallGroupEventOccurrence(event: SmallGroupEvent, week:Int): SmallGroupEventOccurrence = {
+		val s = new SmallGroupEventOccurrence
+		s.event = event
+		s.week = week
+		s
+	}
+
 	def departmentSmallGroupSet(name:String): DepartmentSmallGroupSet = {
 		val s = new DepartmentSmallGroupSet
 		s.smallGroupService = None
@@ -468,7 +475,7 @@ object Fixtures extends Mockito {
 		  target #:: target.permissionsParents.flatMap(withParents)
 	}
 
-	def userLookupService(users: User*) = {
+	def userLookupService(users: User*): UserLookupService = {
 		val userLookup = smartMock[UserLookupService]
 		for (user <- users) {
 			userLookup.getUserByUserId(user.getUserId) returns user
