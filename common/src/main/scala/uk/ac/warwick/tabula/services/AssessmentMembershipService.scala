@@ -293,7 +293,7 @@ trait AssessmentMembershipMethods extends Logging {
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
-		determineMembership(upstream, others).items filter notExclude map toUser filter notNull filter notAnonymous
+		determineMembership(upstream, others).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
 	}
 
 	/**

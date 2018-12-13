@@ -45,6 +45,7 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
+		//we are allowing PWD to upload to SITS as long as they are in the assessment components so find grades for them also (if present)
 		val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter{ case (_, mark) => isNotNullAndInt(mark)}
@@ -58,10 +59,9 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 
-		val test = studentMarks.asScala.map{case(uniId, mark) =>
+		studentMarks.asScala.map{case(uniId, mark) =>
 			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
 		}.toMap
-		test
 	}
 
 	override def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]] = {

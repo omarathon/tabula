@@ -45,7 +45,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
-		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
+		val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter(s => isNotNullAndInt(s._2))
 			.flatMap{case(uniID, mark) =>

@@ -135,7 +135,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			command.assessmentMembershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) answers { t =>
 				val template = t.asInstanceOf[UpstreamAssessmentGroup]
 				if (template.occurrence == "A")
-					Some(Fixtures.assessmentGroupWithActiveMembers(template1.academicYear, ag1.assessmentComponent.assessmentGroup, ag1.assessmentComponent.moduleCode, ag1.occurrence))
+					Some(Fixtures.upstreamAssessmentGroupInfo(template1.academicYear, ag1.assessmentComponent.assessmentGroup, ag1.assessmentComponent.moduleCode, ag1.occurrence))
 				else
 					None
 			}

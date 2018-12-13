@@ -172,7 +172,7 @@ object Fixtures extends Mockito {
 		group
 	}
 
-	def assessmentGroupWithActiveMembers(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
+	def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
 		val uag = assessmentGroup(academicYear, code, module, occurrence)
 		val activeMembers =  uag.members
 		//add one PWD

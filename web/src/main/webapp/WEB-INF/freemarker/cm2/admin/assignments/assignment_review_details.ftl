@@ -72,7 +72,7 @@
 			<#assign studentDetailsUrl><@routes.cm2.assignmentstudents assignment 'edit' /></#assign>
 
 			<@review_details_header 'Student details' studentDetailsUrl />
-			<@review_details 'SITS' assignment.upstreamAssessmentGroups?has_content?string('Linked','Not linked') />
+			<@review_details 'SITS' assignment.upstreamAssessmentGroupInfos?has_content?string('Linked','Not linked') />
 
 			<div><label class="review-label">Total number of students enrolled:</label> ${membershipInfo.totalCount}
 				<#if membershipInfo.excludeCount gt 0 || membershipInfo.includeCount gt 0>

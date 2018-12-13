@@ -149,7 +149,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		wireUserLookup(set1.members)
 
 		set1.membershipService = membershipService
-		membershipService.determineMembershipUsers(set1.upstreamAssessmentGroups, Some(set1.members)) returns (set1.members.users)
+		membershipService.determineMembershipUsers(set1.upstreamAssessmentGroupInfos, Some(set1.members)) returns (set1.members.users)
 
 		val s1: Seq[User] = set1.members.users
 
@@ -160,7 +160,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		wireUserLookup(set2.members)
 
 		set2.membershipService = membershipService
-		membershipService.determineMembershipUsers(set2.upstreamAssessmentGroups, Some(set2.members)) returns (set2.members.users)
+		membershipService.determineMembershipUsers(set2.upstreamAssessmentGroupInfos, Some(set2.members)) returns (set2.members.users)
 
 		val s2: Seq[User] = set2.members.users
 
