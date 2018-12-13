@@ -19,6 +19,7 @@ trait RouteDao {
 	def allRoutes: Seq[Route]
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
+	def getByCodeActiveOrInactive(code: String): Option[Route]
 	def getAllByCodes(codes: Seq[String]): Seq[Route]
 	def getById(id: String): Option[Route]
 	def findByDepartment(department:Department):Seq[Route]
@@ -42,6 +43,13 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def getByCode(code: String): Option[Route] =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
+
+	def getByCodeActiveOrInactive(code: String): Option[Route] = {
+		val noFilterSession = session
+		noFilterSession.disableFilter(Route.ActiveRoutesOnlyFilter)
+		noFilterSession.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
+	}
+
 
 	def getAllByCodes(codes: Seq[String]): Seq[Route] = {
 		safeInSeq(() => { session.newCriteria[Route] }, "code", codes)

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
-
-import org.hibernate.annotations.{BatchSize, Type}
+import javax.persistence.{CascadeType, Entity, _}
+import org.hibernate.annotations.{NamedQueries => _, NamedQuery => _, _}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -10,6 +9,13 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
+
+@FilterDefs(Array(
+	new FilterDef(name = Route.ActiveRoutesOnlyFilter, defaultCondition = "active = 1"),
+))
+@Filters(Array(
+	new Filter(name = Route.ActiveRoutesOnlyFilter),
+))
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
@@ -77,5 +83,7 @@ object Route {
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of routes.
-	implicit val defaultOrdering = CodeOrdering
+	implicit val defaultOrdering: Ordering[Route] = CodeOrdering
+
+	final val ActiveRoutesOnlyFilter = "activeRoutesOnly"
 }

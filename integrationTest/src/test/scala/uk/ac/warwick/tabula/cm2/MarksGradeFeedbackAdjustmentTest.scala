@@ -26,7 +26,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 			Then("Fully featured assignment should be visible")
 			eventually(linkText("Fully featured assignment").webElement.isDisplayed should be(true))
 
-			click on linkText("Fully featured assignment")
+			eventually(click on linkText("Fully featured assignment"))
 			currentUrl should endWith(assignmentId+"/summary")
 
 		}
@@ -56,27 +56,27 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		currentUrl should include("/marks#webform")
 
 		When("I create marks, grades and feedback")
-		var markPercentage = id("main").webElement.findElement(By.name("marks[0].actualMark"))
+		val markPercentage = id("main").webElement.findElement(By.name("marks[0].actualMark"))
 		markPercentage.sendKeys("68")
 
-		var grade = id("main").webElement.findElement(By.name("marks[0].actualGrade"))
+		val grade = id("main").webElement.findElement(By.name("marks[0].actualGrade"))
 		grade.sendKeys("2.2")
 
-		var feedbackComment = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
+		val feedbackComment = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
 		feedbackComment.sendKeys("Interesting essay")
 
 		And("I save them")
-		var saveBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(1)
+		val saveBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(1)
 		click on saveBtn
 
 		Then("The marks, grades and feedback should be received")
 		id("main").webElement.findElement(By.cssSelector("form#command p")).getText should equal("You are submitting marks for 1 students.")
 
-		var confirmBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
+		val confirmBtn = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 		click on confirmBtn
 
 		Then("The user assignemnt should be updated")
-		id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing")
+		eventually(id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing"))
 
 	}
 
@@ -105,20 +105,20 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		currentUrl should include("/marks#webform")
 
 		When("I create marks, grades and feedback")
-		var markPercentage2 = id("main").webElement.findElement(By.name("marks[0].actualMark"))
+		val markPercentage2 = id("main").webElement.findElement(By.name("marks[0].actualMark"))
 		markPercentage2.clear()
 		markPercentage2.sendKeys("71")
 
-		var grade2 = id("main").webElement.findElement(By.name("marks[0].actualGrade"))
+		val grade2 = id("main").webElement.findElement(By.name("marks[0].actualGrade"))
 		grade2.clear()
 		grade2.sendKeys("2.1")
 
-		var feedbackComment2 = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
+		val feedbackComment2 = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
 		feedbackComment2.clear()
 		feedbackComment2.sendKeys("Very good")
 
 		And("I save them")
-		var saveBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(1)
+		val saveBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(1)
 		click on saveBtn2
 
 		Then("The marks, grades and feedback should be received")
@@ -127,11 +127,11 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 		And("The user should be warned this will replace the existing marks,grades and feedback")
 		id("main").webElement.findElement(By.cssSelector("span.warning")).getText should equal("Feedback and/or marks have already been uploaded for this student. These will be overwritten when you click confirm.")
 
-		var confirmBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
+		val confirmBtn2 = id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
 		click on confirmBtn2
 
-		Then("The user assignemnt should be updated")
-		id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing")
+		Then("The user assignment should be updated")
+		eventually(id("main").webElement.findElements(By.cssSelector("td.action-col")).get(1).getText should equal("Feedback needs publishing"))
 
 	}
 

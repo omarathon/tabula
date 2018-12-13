@@ -89,6 +89,7 @@ object Fixtures extends Mockito {
 		val r = new Route
 		r.code = code.toLowerCase
 		r.name = Option(name).getOrElse("Route " + code)
+		r.active = true
 		r
 	}
 
