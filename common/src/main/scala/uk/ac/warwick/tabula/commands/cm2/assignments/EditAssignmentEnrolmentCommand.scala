@@ -50,7 +50,7 @@ trait ModifiesAssignmentMembership extends UpdatesStudentMembership with Specifi
 	self: EditAssignmentMembershipCommandState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(assignment).map {
-		_.upstreamAssessmentGroups
+		_.upstreamAssessmentGroupInfos
 	}
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 

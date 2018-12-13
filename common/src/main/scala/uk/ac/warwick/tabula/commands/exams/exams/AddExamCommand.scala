@@ -149,7 +149,7 @@ trait ExamValidation extends SelfValidating {
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
 	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(exam).map { _.upstreamAssessmentGroups }
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(exam).map { _.upstreamAssessmentGroupInfos }
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None // Needs to be none as we're using massAddUsers for existing members
 
 	def updateAssessmentGroups() {

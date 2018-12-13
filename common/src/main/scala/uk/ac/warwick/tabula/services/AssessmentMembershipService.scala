@@ -285,8 +285,8 @@ trait AssessmentMembershipMethods extends Logging {
 		generateAssessmentMembershipInfo(upstream, others)
 
 	def determineMembership(assessment: Assessment) : AssessmentMembershipInfo = assessment match {
-		case a: Assignment => determineMembership(a.upstreamAssessmentGroups, Option(a.members))
-		case e: Exam => determineMembership(e.upstreamAssessmentGroups, Option(e.members))
+		case a: Assignment => determineMembership(a.upstreamAssessmentGroupInfos, Option(a.members))
+		case e: Exam => determineMembership(e.upstreamAssessmentGroupInfos, Option(e.members))
 	}
 
 	/**
@@ -300,19 +300,19 @@ trait AssessmentMembershipMethods extends Logging {
 	 * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
 	 */
 	def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
-		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroups, Option(a.members))
+		case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroupInfos, Option(a.members))
 		case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
 	}
 
 	def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User] = assessment match {
-		case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroups, Option(a.members), true).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
+		case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), true).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
 		case e: Exam => generateMembershipUsersWithOrder(e, true).map(_._1)
 	}
 
 
 	private def generateMembershipUsersWithOrder(exam: Assessment, includePWD: Boolean = false): Seq[(User, Option[Int])] = {
 		val sitsMembers =
-			exam.upstreamAssessmentGroups.flatMap { uagInfo =>
+			exam.upstreamAssessmentGroupInfos.flatMap { uagInfo =>
 				if (includePWD) uagInfo.allMembers else uagInfo.nonPWDMembers
 			}.distinct.sortBy(_.position)
 		val sitsUniIds = sitsMembers.map(_.universityId)
