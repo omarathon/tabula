@@ -127,14 +127,14 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			session.flush()
 			session.clear()
 
-			law2010.upstreamAssessmentGroups.foreach { group =>
-				group.id should be (group2010.id)
-				group.membersIncludes("bib") should be (true)
+			law2010.upstreamAssessmentGroups.foreach { groupInfo =>
+				groupInfo.upstreamAssessmentGroup.id should be (group2010.id)
+				groupInfo.upstreamAssessmentGroup.membersIncludes("bib") should be (true)
 			}
 
-			law2011.upstreamAssessmentGroups.foreach { group =>
-				group.id should be (group2011.id)
-				group.membersIncludes("dod") should be (true)
+			law2011.upstreamAssessmentGroups.foreach { groupInfo =>
+				groupInfo.upstreamAssessmentGroup.id should be (group2011.id)
+				groupInfo.upstreamAssessmentGroup.membersIncludes("dod") should be (true)
 			}
 
 			law2012.upstreamAssessmentGroups.isEmpty should be (true)

@@ -47,7 +47,7 @@ class AssessmentGroup extends GeneratedId {
 
 	var occurrence: String = _
 
-	def toUpstreamAssessmentGroup(academicYear: AcademicYear): Option[UpstreamAssessmentGroup] = {
+	def toUpstreamAssessmentGroupInfo(academicYear: AcademicYear): Option[UpstreamAssessmentGroupInfo] = {
 		if (academicYear == null || assessmentComponent == null || occurrence == null) {
 			None
 		} else {
@@ -57,7 +57,7 @@ class AssessmentGroup extends GeneratedId {
 			template.moduleCode = assessmentComponent.moduleCode
 			template.sequence = assessmentComponent.sequence
 			template.occurrence = occurrence
-			membershipService.getUpstreamAssessmentGroup(template)
+			membershipService.getUpstreamAssessmentGroupInfo(template)
 		}
 	}
 

@@ -26,8 +26,8 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroup]] = assessment.assessmentGroups.asScala.map(group =>
-		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
+	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
+		group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
 	).toMap
 
 	private def isNotNullAndInt(intString: String): Boolean = {
@@ -45,7 +45,7 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
-		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
+		val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter{ case (_, mark) => isNotNullAndInt(mark)}
 			.flatMap{case(uniID, mark) =>
@@ -54,13 +54,14 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
 			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
-				upstreamGroup.exists(_.membersIncludes(student))
+				upstreamGroup.exists(_.upstreamAssessmentGroup.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 
-		studentMarks.asScala.map{case(uniId, mark) =>
+		val test = studentMarks.asScala.map{case(uniId, mark) =>
 			uniId -> studentAssesmentComponentMap.get(uniId).map(component => assessmentMembershipService.gradesForMark(component, mark.toInt)).getOrElse(Seq())
 		}.toMap
+		test
 	}
 
 	override def applyForMarks(marks: Map[String, Int]): Map[String, Seq[GradeBoundary]] = {

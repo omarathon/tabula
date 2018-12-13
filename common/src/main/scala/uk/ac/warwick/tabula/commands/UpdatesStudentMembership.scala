@@ -16,7 +16,7 @@ trait UpdatesStudentMembership {
 
 	// needs a module to determine the possible options from SITS
 	def module: Module
-	def existingGroups: Option[Seq[UpstreamAssessmentGroup]]
+	def existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]]
 	def existingMembers: Option[UnspecifiedTypeUserGroup]
 
 	/**
@@ -157,8 +157,8 @@ trait UpdatesStudentMembership {
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module)
-			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
-		} yield new UpstreamGroup(ua, uag)
+			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
 	}
 
 	/**
@@ -167,8 +167,8 @@ trait UpdatesStudentMembership {
 	lazy val allUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false)
-			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
-		} yield new UpstreamGroup(ua, uag)
+			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
 	}
 
 	/**
@@ -177,14 +177,14 @@ trait UpdatesStudentMembership {
 	lazy val notInUseUpstreamGroups: Seq[UpstreamGroup] = {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false) if !ua.inUse
-			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
-		} yield new UpstreamGroup(ua, uag)
+			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
 	}
 
 	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
-	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroupInfo] =
 		if (assessmentGroups == null) Seq()
-		else assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
+		else assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroupInfo(academicYear) }
 
 	/**
 	 * Returns a sequence of MembershipItems
@@ -196,7 +196,7 @@ trait UpdatesStudentMembership {
 /**
  * convenience classes
  */
-class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup) {
+class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup, val nonPWDMembers: Seq[UpstreamAssessmentGroupMember]) {
 	val id: String = assessmentComponent.id + ";" + group.id
 
 	val name: String = assessmentComponent.name
@@ -222,7 +222,8 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 			case Array(uaId: String, groupId: String) =>
 				val ua = membershipService.getAssessmentComponent(uaId).getOrElse(explode)
 				val uag = membershipService.getUpstreamAssessmentGroup(groupId).getOrElse(explode)
-				new UpstreamGroup(ua, uag)
+				val uagm = membershipService.getNonPWDUpstreamAssessmentGroupMembers(groupId)
+				new UpstreamGroup(ua, uag, uagm)
 			case _ => explode
 		}
 	}

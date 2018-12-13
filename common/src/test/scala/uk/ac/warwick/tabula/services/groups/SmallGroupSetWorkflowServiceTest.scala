@@ -64,7 +64,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 
 		// Start with no students
 		set.membershipService = mock[AssessmentMembershipService]
-		set.membershipService.countMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (0)
+		set.membershipService.countNonPWDMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (0)
 
 		// lines were getting a bit long...
 		import SmallGroupSetWorkflowStages._
@@ -112,7 +112,7 @@ class SmallGroupSetWorkflowServiceTest extends TestBase with Mockito {
 
 		// Add some students
 		set.membershipService = mock[AssessmentMembershipService]
-		set.membershipService.countMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (2)
+		set.membershipService.countNonPWDMembershipWithUniversityIdGroup(set.upstreamAssessmentGroups, Some(set.members)) returns (2)
 
 		{
 			val p = service.progress(set)

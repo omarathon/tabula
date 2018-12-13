@@ -72,7 +72,7 @@ trait AssignmentToJsonConverter {
 			}
 
 		val membershipInfo = assignment.membershipInfo
-		val studentMembershipInfo = jsonAssessmentMembershipInfoObject(membershipInfo, assignment.upstreamAssessmentGroups)
+		val studentMembershipInfo = jsonAssessmentMembershipInfoObject(membershipInfo, assignment.upstreamAssessmentGroups.groupBy(_.upstreamAssessmentGroup).keys.toSeq)
 
 		val datesInfo =
 			if (assignment.openEnded) {

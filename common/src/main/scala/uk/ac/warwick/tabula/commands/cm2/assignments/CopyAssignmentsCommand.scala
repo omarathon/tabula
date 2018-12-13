@@ -118,7 +118,7 @@ abstract class AbstractCopyAssignmentsCommandInternal
 		// TAB-1175 Guess SITS links
 		assignment.assessmentGroups.asScala
 			.filter {
-				_.toUpstreamAssessmentGroup(newAssignment.academicYear).isDefined
+				_.toUpstreamAssessmentGroupInfo(newAssignment.academicYear).isDefined
 			} // Only where defined in the new year
 			.foreach { group =>
 			val newGroup = new AssessmentGroup

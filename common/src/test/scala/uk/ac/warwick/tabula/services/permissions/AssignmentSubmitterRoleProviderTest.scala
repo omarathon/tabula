@@ -3,12 +3,10 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo, UserGroup}
 import uk.ac.warwick.tabula.roles.AssignmentSubmitter
 import uk.ac.warwick.tabula.services.AssessmentService
 import org.mockito.Matchers._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
@@ -34,9 +32,9 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 
-		assignmentMembershipService.isStudentMember(
+		assignmentMembershipService.isStudentNonPWDMember(
 				isEq(currentUser.apparentUser),
-				isA[Seq[UpstreamAssessmentGroup]],
+				isA[Seq[UpstreamAssessmentGroupInfo]],
 				isA[Option[UserGroup]]) returns (true)
 
 		provider.getRolesFor(currentUser, assignment) should be (Seq(AssignmentSubmitter(assignment)))
@@ -47,9 +45,9 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 
-		assignmentMembershipService.isStudentMember(
+		assignmentMembershipService.isStudentNonPWDMember(
 				isEq(currentUser.apparentUser),
-				isA[Seq[UpstreamAssessmentGroup]],
+				isA[Seq[UpstreamAssessmentGroupInfo]],
 				isA[Option[UserGroup]]) returns (false)
 
 		provider.getRolesFor(currentUser, assignment) should be (Seq())

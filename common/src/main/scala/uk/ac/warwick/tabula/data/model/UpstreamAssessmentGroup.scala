@@ -130,3 +130,7 @@ trait UpstreamAssessmentGroupMemberProperties {
 
 
 }
+
+case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, nonPWDMembers:Seq[UpstreamAssessmentGroupMember]) {
+	def allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala
+}

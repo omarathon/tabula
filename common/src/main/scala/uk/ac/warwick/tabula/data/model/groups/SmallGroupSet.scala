@@ -206,8 +206,8 @@ class SmallGroupSet
 
 	def showAttendanceReports: Boolean = !archived && !deleted && collectAttendance
 
-	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
+	// converts the assessmentGroups to UpstreamAssessmentGroupWithActiveMembers
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroupInfo] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroupInfo(academicYear) }
 
 	// Gets a breakdown of the membership for this small group set.
 	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroups, Some(members))
@@ -215,7 +215,7 @@ class SmallGroupSet
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||
 		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
-			membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+			membershipService.isStudentNonPWDMember(user, upstreamAssessmentGroups, Option(members))
 		}
 	}
 
@@ -231,7 +231,7 @@ class SmallGroupSet
 
 	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
-			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
+			membershipService.countNonPWDMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
 		}
 	}
 

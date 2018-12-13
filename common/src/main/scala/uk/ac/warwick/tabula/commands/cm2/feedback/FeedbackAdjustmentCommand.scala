@@ -67,7 +67,8 @@ class FeedbackAdjustmentCommandInternal(val assessment: Assessment, val student:
 	val feedback: Feedback = assessment.findFeedback(student.getUserId)
 		.getOrElse(throw new ItemNotFoundException("Can't adjust for non-existent feedback"))
 
-	lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroup(assessment.academicYear)).exists(_.exists(_.membersIncludes(student)))
+	//Allowing PWD upload to SITS as long as record exists there
+	lazy val canBeUploadedToSits: Boolean = assessment.assessmentGroups.asScala.map(_.toUpstreamAssessmentGroupInfo(assessment.academicYear)).exists(_.exists(aa => aa.upstreamAssessmentGroup.membersIncludes(student)))
 
 	def applyInternal(): Feedback = {
 		val newMark = copyTo(feedback)

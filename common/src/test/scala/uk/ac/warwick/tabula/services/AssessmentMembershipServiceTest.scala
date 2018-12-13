@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UserGroup}
+  import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import scala.collection.JavaConverters._
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
@@ -36,7 +37,9 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		uag.members.add(new UpstreamAssessmentGroupMember(uag, user3.getWarwickId))
 		uag.members.add(new UpstreamAssessmentGroupMember(uag, user1.getWarwickId))
 		uag.members.add(new UpstreamAssessmentGroupMember(uag, user2.getWarwickId))
-		uag.members.add(new UpstreamAssessmentGroupMember(uag, new AnonymousUser().getWarwickId))
+		val usr4 =  new AnonymousUser()
+		uag.members.add(new UpstreamAssessmentGroupMember(uag, usr4.getWarwickId))
+		val activeMembers = uag.members.asScala.filter(_.universityId !=  usr4.getWarwickId )
 
 		val other = UserGroup.ofUsercodes
 		other.userLookup = userLookup
@@ -46,10 +49,11 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		other.add(user6)
 
 		val upstream = Seq[UpstreamAssessmentGroup](uag)
+		val uInfo = UpstreamAssessmentGroupInfo(uag, uag.members.asScala.filter(_.universityId !=  usr4.getWarwickId ) )
 
 		val others = Some(other)
 
-		val info = assignmentMembershipService.determineMembership(upstream, others)
+		val info = assignmentMembershipService.determineMembership(Seq(uInfo), others)
 		info.items.size should be (6)
 		info.items.head.userId should be (Some("aaaaa"))
 		info.items(1).userId should be (Some("bbbbb"))
@@ -64,38 +68,42 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		val excludedGroup = mock[UnspecifiedTypeUserGroup]
 		excludedGroup.excludesUser(user) returns true
 
-		service.isStudentMember(user, Nil, Some(excludedGroup)) should be (false)
+		service.isStudentNonPWDMember(user, Nil, Some(excludedGroup)) should be (false)
 		verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
 		val includedGroup = mock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns false
 		includedGroup.includesUser(user) returns true
 
-		service.isStudentMember(user, Nil, Some(includedGroup)) should be (true)
+		service.isStudentNonPWDMember(user, Nil, Some(includedGroup)) should be (true)
 
 		val notInGroup = mock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns false
 		includedGroup.includesUser(user) returns false
 
-		service.isStudentMember(user, Nil, Some(notInGroup)) should be (false)
+		service.isStudentNonPWDMember(user, Nil, Some(notInGroup)) should be (false)
 
 		val module = Fixtures.module("in101")
+
 		val upstream1 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
+		//member 0123458 as PWD
+		val upstreamWithActiveMembers1 = UpstreamAssessmentGroupInfo(upstream1, upstream1.members.asScala.filter(m =>  m.universityId !=  "0123458"))
+
 		val upstream2 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
-		val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
-		val upstreams = Seq(upstream1, upstream2, upstream3)
-
-		service.isStudentMember(user, upstreams, None) should be (false)
-
 		// Include the user in upstream2
-		upstream2.members = JArrayList(new UpstreamAssessmentGroupMember(upstream2, "0672089"))
+		upstream2.members.add(new UpstreamAssessmentGroupMember(upstream2, "0672089"))
+		val upstreamWithActiveMembers2 = UpstreamAssessmentGroupInfo(upstream2, upstream2.members.asScala.filter(m =>  m.universityId !=  "0123458"))
 
-		service.isStudentMember(user, upstreams, None) should be (true)
+		val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment(module, 101))
+		val upstreamWithActiveMembers3 = UpstreamAssessmentGroupInfo(upstream3, upstream3.members.asScala.filter(m =>  m.universityId !=  "0123458"))
+
+		val upstreams = Seq(upstreamWithActiveMembers1, upstreamWithActiveMembers2, upstreamWithActiveMembers3)
+		service.isStudentNonPWDMember(user, upstreams, None) should be (true)
 
 		// Doesn't affect results from the usergroup itself
-		service.isStudentMember(user, upstreams, Some(excludedGroup)) should be (false)
-		service.isStudentMember(user, upstreams, Some(includedGroup)) should be (true)
-		service.isStudentMember(user, upstreams, Some(notInGroup)) should be (true)
+		service.isStudentNonPWDMember(user, upstreams, Some(excludedGroup)) should be (false)
+		service.isStudentNonPWDMember(user, upstreams, Some(includedGroup)) should be (true)
+		service.isStudentNonPWDMember(user, upstreams, Some(notInGroup)) should be (true)
 	}
 
 }

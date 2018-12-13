@@ -45,8 +45,8 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		val nonMember = new CurrentUser(nonMemberUser, nonMemberUser)
 		userLookup.getUserByWarwickUniId("test2") returns nonMemberUser
 
-		membershipService.isStudentMember(memberUser, Nil, Some(groupSet.members)) returns (true)
-		membershipService.isStudentMember(nonMemberUser, Nil, Some(groupSet.members)) returns (false)
+		membershipService.isStudentNonPWDMember(memberUser, Nil, Some(groupSet.members)) returns (true)
+		membershipService.isStudentNonPWDMember(nonMemberUser, Nil, Some(groupSet.members)) returns (false)
 
 		val roleProvider = new SmallGroupSetMemberRoleProvider
 	}

@@ -26,8 +26,8 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroup]] = assessment.assessmentGroups.asScala.map(group =>
-		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
+	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
+		group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
 	).toMap
 
 	private def isNotNullAndInt(intString: String): Boolean = {
@@ -54,7 +54,7 @@ class GenerateGradesFromMarkCommandInternal(val module: Module, val assessment: 
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
 			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
-				upstreamGroup.exists(_.membersIncludes(student))
+				upstreamGroup.exists(_.upstreamAssessmentGroup.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 

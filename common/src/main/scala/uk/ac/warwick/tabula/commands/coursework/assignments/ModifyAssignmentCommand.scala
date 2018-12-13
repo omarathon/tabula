@@ -167,7 +167,7 @@ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembe
 		copyNonspecificFrom(assignment)
 	}
 
-	val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(assignment).map(_.upstreamAssessmentGroups)
+	val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(assignment).map(_.upstreamAssessmentGroups)
 	val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(assignment).map(_.members)
 
 	/**

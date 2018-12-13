@@ -42,7 +42,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	override def populate(): Unit = {
 		if (availableUpstreamGroups.size == 1) {
 			name = availableUpstreamGroups.head.name
-			upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group))
+			upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group, availableUpstreamGroups.head.nonPWDMembers))
 		}
 	}
 
@@ -149,7 +149,7 @@ trait ExamValidation extends SelfValidating {
 trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGroupType {
 	self: ExamState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(exam).map { _.upstreamAssessmentGroups }
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(exam).map { _.upstreamAssessmentGroups }
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None // Needs to be none as we're using massAddUsers for existing members
 
 	def updateAssessmentGroups() {
@@ -174,8 +174,8 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 		}
 		for {
 			ua <- examAssessmentComponents
-			uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
-		} yield new UpstreamGroup(ua, uag)
+			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
 	}
 
 }
