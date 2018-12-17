@@ -109,7 +109,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		val badPath3 = "%20javascript:alert(1)" // crashes URI
 		controller.getReturnTo(badPath3) should be ("")
 
-		val badPath4 = "https://blah/wara" // we dont want any schema
+		val badPath4 = "https://blah/wara" // we dont want any scheme
 		controller.getReturnTo(badPath4) should be ("")
 
 		val badPath5 = "%20javascript:alert(1)" // crashes URI
