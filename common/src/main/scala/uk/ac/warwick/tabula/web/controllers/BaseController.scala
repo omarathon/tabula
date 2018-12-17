@@ -53,7 +53,10 @@ trait ControllerViews extends Logging {
 			val uri = new URI(getReturnToUnescaped(defaultUrl))
 			val scheme = Option(uri.getScheme)
 			val host = Option(uri.getHost)
-			if (scheme.isDefined || host.isDefined) "" else uri.getPath
+			val qs = Option(uri.getQuery)
+			if (scheme.isDefined || host.isDefined) "" else {
+				uri.getPath + qs.map("?" + _).getOrElse("")
+			}
 		}.toOption.flatMap(Option(_)).getOrElse("")
 	}
 

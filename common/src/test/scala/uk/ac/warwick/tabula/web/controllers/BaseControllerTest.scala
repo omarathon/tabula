@@ -124,6 +124,12 @@ class BaseControllerTest extends TestBase with Mockito {
 		val goodPath2 = "this/is/what"
 		controller.getReturnTo(goodPath2) should be ("this/is/what")
 
+		val goodPath3 = "/assignment?teacher=duck&room=[1,2,3]"
+		controller.getReturnTo(goodPath3) should be ("/assignment?teacher=duck&room=[1,2,3]")
+
+		val goodPath4 = "/assignment?teacher=duck"
+		controller.getReturnTo(goodPath4) should be ("/assignment?teacher=duck")
+
 	}
 
 }
