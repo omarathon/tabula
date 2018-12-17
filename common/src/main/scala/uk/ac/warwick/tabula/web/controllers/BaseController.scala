@@ -49,15 +49,21 @@ trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
 	def getReturnTo(defaultUrl: String): String = {
-		Try{
+		Try {
 			val uri = new URI(getReturnToUnescaped(defaultUrl))
-			val scheme = Option(uri.getScheme)
-			val host = Option(uri.getHost)
-			val qs = Option(uri.getQuery)
-			if (scheme.isDefined || host.isDefined) "" else {
-				uri.getPath + qs.map("?" + _).getOrElse("")
-			}
-		}.toOption.flatMap(Option(_)).getOrElse("")
+
+			implicit def nonEmpty(s: String): Option[String] = Option(s).filterNot(_ == "").filterNot(_ == null)
+
+			val scheme: Option[String] = uri.getScheme
+			val host: Option[String] = uri.getHost
+			val qs: Option[String] = uri.getQuery
+			val path: Option[String] = uri.getPath
+
+			if (scheme.nonEmpty || host.nonEmpty)
+				None
+			else
+				path.map(_ + qs.map("?" + _).getOrElse(""))
+		}.toOption.flatten.getOrElse("")
 	}
 
 	def getReturnToUnescaped(defaultUrl: String): String =
