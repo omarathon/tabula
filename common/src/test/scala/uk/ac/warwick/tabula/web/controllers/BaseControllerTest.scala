@@ -98,7 +98,7 @@ class BaseControllerTest extends TestBase with Mockito {
 		verify(mockSession, times(1)).enableFilter("notDeleted")
 	}
 
-	@Test def returnToDoesEscape: Unit = {
+	@Test def sanitiseReturnTo(): Unit = {
 		val controller = new BaseController {}
 		val badPath1 = "javascript:alert(1)" // not safe at all, should be killed
 		controller.getReturnTo(badPath1) should be ("")
@@ -118,6 +118,18 @@ class BaseControllerTest extends TestBase with Mockito {
 		val badPath7 = "https://ss.co/this/is/what"
 		controller.getReturnTo(badPath7) should be ("")
 
+		val badPath8 = "https://ss.co/this/is/what"
+		controller.getReturnTo(badPath8) should be ("")
+
+		val badPath9 = s"""\"\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath9) should be ("")
+
+		val badPath10 = s"""\"strange\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath10) should be ("")
+
+		val badPath11 = s"://ss.co/this/is/what"
+		controller.getReturnTo(badPath11) should be ("")
+
 		val goodPath1 = "/i/eat/chocolate" // good one
 		controller.getReturnTo(goodPath1) should be ("/i/eat/chocolate")
 
@@ -129,6 +141,9 @@ class BaseControllerTest extends TestBase with Mockito {
 
 		val goodPath4 = "/assignment?teacher=duck"
 		controller.getReturnTo(goodPath4) should be ("/assignment?teacher=duck")
+
+		val emptyString = ""
+		controller.getReturnTo(emptyString) should be ("")
 
 	}
 
