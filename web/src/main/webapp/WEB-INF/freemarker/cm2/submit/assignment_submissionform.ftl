@@ -1,4 +1,3 @@
-<#escape x as x?html>
 	<#if ((canSubmit && !submission??) || canReSubmit) && submitAssignmentCommand??>
 		<#if submission??>
 			<hr>
@@ -226,4 +225,3 @@
 		</#if>
 
 	</#if>
-</#escape>
