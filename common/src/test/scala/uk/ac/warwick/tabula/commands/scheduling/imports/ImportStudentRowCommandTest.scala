@@ -49,8 +49,8 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 
 	val courseAndRouteService: CourseAndRouteService = smartMock[CourseAndRouteService]
 	val route: Route = smartMock[Route]
-	courseAndRouteService.getRouteByCode("C100") returns Some(new Route("c100", smartMock[Department]))
-	courseAndRouteService.getRouteByCode(null) returns None
+	courseAndRouteService.getRouteByCodeActiveOrInactive("C100") returns Some(new Route("c100", smartMock[Department]))
+	courseAndRouteService.getRouteByCodeActiveOrInactive(null) returns None
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
 	val courseImporter: CourseImporter = smartMock[CourseImporter]
