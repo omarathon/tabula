@@ -1,4 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
+<#include 'redirect.ftl' />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -13,9 +14,9 @@
 		<h2>Preview and download</h2>
 
 		<p class="progress-arrows">
-			<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString?url}">Select courses</a></span>
-			<span class="arrow-right arrow-left"><a class="btn btn-link" href="<@routes.exams.generateGridOptions department academicYear />?${gridOptionsQueryString?url}">Set grid options</a></span>
-			<span class="arrow-right arrow-left active">Preview and download</span>
+			<span class="arrow-right"><a class="btn btn-link" onclick="redirect('<@routes.exams.generateGrid department academicYear />', '${gridOptionsQueryString}')">Select courses</a></span>
+			<span class="arrow-right arrow-left"><a class="btn btn-link" onclick="redirect('<@routes.exams.generateGridOptions department academicYear />', '${gridOptionsQueryString}'">Set grid options</a></span>
+            <span class="arrow-right arrow-left active">Preview and download</span>
 		</p>
 
 		<div id="examGridSpinner">

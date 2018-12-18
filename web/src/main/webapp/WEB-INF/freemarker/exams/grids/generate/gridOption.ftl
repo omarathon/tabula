@@ -1,5 +1,6 @@
 <#import 'form_fields.ftl' as form_fields />
 <#import "*/modal_macros.ftl" as modal />
+<#include 'redirect.ftl' />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -16,7 +17,7 @@
 	<h2>Set grid options</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString?url}">Select courses</a></span>
+		<span class="arrow-right"><a class="btn btn-link" onclick="redirect('<@routes.exams.generateGrid department academicYear />', '${gridOptionsQueryString}')">Select courses</a></span>
 		<span class="arrow-right arrow-left active">Set grid options</span>
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>
