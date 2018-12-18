@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data
 
 
-import org.joda.time.LocalTime
+import org.joda.time.{DateTime, LocalTime}
 import org.junit.Before
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.Attended
 import uk.ac.warwick.tabula.data.model.{Module, UserGroup}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, MockUserLookup, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.groups._
@@ -35,12 +36,8 @@ class SmallGroupDaoTest extends PersistenceTestBase {
 
 	@Test def findByModuleAndYear(): Unit = transactional { tx =>
 		moduleDao.saveOrUpdate(module)
-		session.flush()
 		smallGroupDao.saveOrUpdate(smallGroupSet)
-		session.flush()
 		smallGroupDao.saveOrUpdate(smallGroup)
-		session.flush()
-
 		smallGroupDao.findByModuleAndYear(module, AcademicYear(2013)) should be (Seq(smallGroup))
 	}
 
@@ -55,6 +52,65 @@ class SmallGroupDaoTest extends PersistenceTestBase {
 
 		smallGroupDao.hasSmallGroups(module) should be(true)
 		smallGroupDao.hasSmallGroups(moduleWithNoGroups) should be(false)
+	}
+
+	@Test def findAttendanceForStudentInModulesInWeeks: Unit = transactional { tx =>
+		val event1 = Fixtures.smallGroupEvent("event1")
+		event1.group = smallGroup
+		event1.day = DayOfWeek.Monday
+		event1.startTime = new LocalTime(12, 30)
+		event1.endTime = new LocalTime(12, 45, 16)
+		event1.weekRanges = Seq(WeekRange(1,1))
+		event1.tutors.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		event1.tutors.add(new User("cusfal"))
+		smallGroup.addEvent(event1)
+		val eventOccurrence = Fixtures.smallGroupEventOccurrence(event1, 1)
+		val eventAttendance = new SmallGroupEventAttendance
+		eventOccurrence.attendance.add(eventAttendance)
+		eventAttendance.universityId = "1234567"
+		eventAttendance.occurrence = eventOccurrence
+		eventAttendance.state = Attended
+		eventAttendance.updatedBy = "cusfal"
+		eventAttendance.updatedDate = DateTime.now
+
+		val smallGroupSetOld: SmallGroupSet = Fixtures.smallGroupSet("Old Small Group Set")
+		smallGroupSetOld.academicYear = AcademicYear(2012)
+		smallGroupSetOld.format = SmallGroupFormat.Seminar
+		smallGroupSetOld.module = module
+		val smallGroupOld: SmallGroup = Fixtures.smallGroup("Old Small Group")
+		smallGroupOld.groupSet = smallGroupSet
+
+		val event2 = Fixtures.smallGroupEvent("event1")
+		event2.group = smallGroup
+		event2.day = DayOfWeek.Monday
+		event2.startTime = new LocalTime(12, 30)
+		event2.endTime = new LocalTime(12, 45, 16)
+		event2.weekRanges = Seq(WeekRange(1,1))
+		event2.tutors.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		event2.tutors.add(new User("cusfal"))
+		smallGroupOld.addEvent(event2)
+		val eventOccurrence2 = Fixtures.smallGroupEventOccurrence(event2, 1)
+		val eventAttendance2 = new SmallGroupEventAttendance
+		eventOccurrence2.attendance.add(eventAttendance)
+		eventAttendance2.universityId = "1234567"
+		eventAttendance2.occurrence = eventOccurrence2
+		eventAttendance2.state = Attended
+		eventAttendance2.updatedBy = "cusfal"
+		eventAttendance2.updatedDate = DateTime.now
+
+		session.save(module)
+		session.save(smallGroupSet)
+		session.save(smallGroupSetOld)
+		session.save(smallGroup)
+		session.save(smallGroupOld)
+		session.save(event1)
+		session.save(eventOccurrence)
+		session.save(eventAttendance)
+		session.save(event2)
+		session.save(eventOccurrence2)
+		session.save(eventAttendance2)
+
+		smallGroupDao.findAttendanceForStudentInModulesInWeeks(Fixtures.student("1234567"), 1, 1, AcademicYear(2013), Seq()) should be (Seq(eventAttendance))
 	}
 
 	@Test def listSmallGroupEventsForReport(): Unit = transactional { tx =>

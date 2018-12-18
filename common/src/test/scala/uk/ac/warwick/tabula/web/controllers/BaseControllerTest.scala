@@ -98,4 +98,53 @@ class BaseControllerTest extends TestBase with Mockito {
 		verify(mockSession, times(1)).enableFilter("notDeleted")
 	}
 
+	@Test def sanitiseReturnTo(): Unit = {
+		val controller = new BaseController {}
+		val badPath1 = "javascript:alert(1)" // not safe at all, should be killed
+		controller.getReturnTo(badPath1) should be ("")
+
+		val badPath2 = "/javascript:alert(1)" // looks bad, but actually valid
+		controller.getReturnTo(badPath2) should be ("/javascript:alert(1)")
+
+		val badPath3 = "%20javascript:alert(1)" // crashes URI
+		controller.getReturnTo(badPath3) should be ("")
+
+		val badPath4 = "https://blah/wara" // we dont want any scheme
+		controller.getReturnTo(badPath4) should be ("")
+
+		val badPath5 = "%20javascript:alert(1)" // crashes URI
+		controller.getReturnTo(badPath5) should be ("")
+
+		val badPath7 = "https://ss.co/this/is/what"
+		controller.getReturnTo(badPath7) should be ("")
+
+		val badPath8 = "https://ss.co/this/is/what"
+		controller.getReturnTo(badPath8) should be ("")
+
+		val badPath9 = s"""\"\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath9) should be ("")
+
+		val badPath10 = s"""\"strange\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath10) should be ("")
+
+		val badPath11 = s"://ss.co/this/is/what"
+		controller.getReturnTo(badPath11) should be ("")
+
+		val goodPath1 = "/i/eat/chocolate" // good one
+		controller.getReturnTo(goodPath1) should be ("/i/eat/chocolate")
+
+		val goodPath2 = "this/is/what"
+		controller.getReturnTo(goodPath2) should be ("this/is/what")
+
+		val goodPath3 = "/assignment?teacher=duck&room=[1,2,3]"
+		controller.getReturnTo(goodPath3) should be ("/assignment?teacher=duck&room=[1,2,3]")
+
+		val goodPath4 = "/assignment?teacher=duck"
+		controller.getReturnTo(goodPath4) should be ("/assignment?teacher=duck")
+
+		val emptyString = ""
+		controller.getReturnTo(emptyString) should be ("")
+
+	}
+
 }
