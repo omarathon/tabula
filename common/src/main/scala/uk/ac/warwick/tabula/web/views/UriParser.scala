@@ -10,12 +10,12 @@ import scala.util.Try
 	*
 	* this wraps `UriBuilder.parse` function which is from warwick utility.
 	*
-	* added since TAB-6776 not exactly for parsing URI, but for parsing a complex querystring happens in
+	* added since TAB-6776 not exactly for parsing URI, but for parsing a complex query string happens in
 	* /tabula/web/src/main/webapp/WEB-INF/freemarker/exams/grids/generate/jobProgress.ftl
 	* /tabula/web/src/main/webapp/WEB-INF/freemarker/exams/grids/generate/preview.ftl
 	* /tabula/web/src/main/webapp/WEB-INF/freemarker/exams/grids/generate/gridOption.ftl
 	* /tabula/web/src/main/webapp/WEB-INF/freemarker/exams/grids/generate/coreRequiredModules.ftl
-	* as Freemarker's `?url` would escape valid special characters (for querystring) such as `&`, but not escaping characters like `[` or `]`
+	* as Freemarker's `?url` would escape valid special characters (for query string) such as `&`, but not escaping characters like `[` or `]`
 	*
 	*/
 class UriParser extends TemplateMethodModelEx {
@@ -25,6 +25,6 @@ class UriParser extends TemplateMethodModelEx {
 		* @return encoded version of the passed in String.
 		*/
 	override def exec(args: java.util.List[_]): Object = Try {
-		args.get(0).toString
-	}.toOption.map(UriBuilder.parse).getOrElse("")
+		UriBuilder.parse(args.get(0).toString).toString
+	}.toOption.getOrElse("")
 }
