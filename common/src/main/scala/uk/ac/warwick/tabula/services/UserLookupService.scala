@@ -106,7 +106,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 		findUsersWithFilter(filter.asJava, true)
 			.asScala
 			.map { user => getUserByUserId(user.getUserId) }
-			.filter { user => user.getExtraProperty("urn:websignon:usertype") != "Applicant" }
+			.filter { user => !user.isApplicant }
 			.sortBy(user => (user.isLoginDisabled, !user.getEmail.hasText))
 			.headOption
 			.getOrElse {
@@ -134,8 +134,8 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 		dbUsers ++ others
 	}
 
-	private def filterApplicantUsers(user: User) = user.getExtraProperty("urn:websignon:usertype") match {
-		case "Applicant" => {
+	private def filterApplicantUsers(user: User) = user.isApplicant match {
+		case true => {
 			val result = new AnonymousUser()
 			result.setUserId(user.getUserId)
 			result.setWarwickId(user.getWarwickId)

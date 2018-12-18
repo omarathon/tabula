@@ -23,3 +23,7 @@ class ViewProfileCommand(user: CurrentUser, val profile: Member)
 		throw PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
 	}
 }
+
+class ViewStaleProfileCommand(user: CurrentUser, profile: Member) extends ViewProfileCommand(user, profile){
+	PermissionCheck(Permissions.Profiles.Read.CoreStale, profile)
+}

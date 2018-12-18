@@ -28,8 +28,8 @@ class EditMarkingDescriptorCommandInternal(val department: Department, val marki
 	markPoints = markingDescriptor.markPoints.asJava
 
 	override def applyInternal(): MarkingDescriptor = {
-		markingDescriptor.minMarkPoint = markPoints.asScala.min
-		markingDescriptor.maxMarkPoint = markPoints.asScala.max
+		markingDescriptor.minMarkPoint = sortedMarkPoints.min
+		markingDescriptor.maxMarkPoint = sortedMarkPoints.max
 		markingDescriptor.text = text
 
 		markingDescriptorService.save(markingDescriptor)

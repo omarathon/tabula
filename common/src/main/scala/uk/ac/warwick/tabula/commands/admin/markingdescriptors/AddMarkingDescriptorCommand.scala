@@ -24,8 +24,8 @@ class AddMarkingDescriptorCommandInternal(val department: Department) extends Co
 		val markingDescriptor = new DepartmentMarkingDescriptor()
 
 		markingDescriptor.department = department
-		markingDescriptor.minMarkPoint = markPoints.asScala.min
-		markingDescriptor.maxMarkPoint = markPoints.asScala.max
+		markingDescriptor.minMarkPoint = sortedMarkPoints.min
+		markingDescriptor.maxMarkPoint = sortedMarkPoints.max
 		markingDescriptor.text = text
 
 		markingDescriptorService.save(markingDescriptor)

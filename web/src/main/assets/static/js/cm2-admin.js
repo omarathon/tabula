@@ -102,10 +102,10 @@
 			if ($otherInput.val() === "Late submission penalty") {
 				$content.find('option[value="Late submission penalty"]').prop('selected', true);
 			}
-			if ($otherInput.val() === "Plagarism penalty") {
-				$content.find('option[value="Plagarism penalty"]').prop('selected', true);
+			if ($otherInput.val() === "Plagiarism penalty") {
+				$content.find('option[value="Plagiarism penalty"]').prop('selected', true);
 			}
-			if ($otherInput.val() !== "Plagarism penalty" && $otherInput.val() !== "Late submission penalty" && $otherInput.val() !== "") {
+			if ($otherInput.val() !== "Plagiarism penalty" && $otherInput.val() !== "Late submission penalty" && $otherInput.val() !== "") {
 				$content.find('option[value=Other]').prop('selected', true);
 				$otherInput.prop("disabled", false);
 				$otherInput.removeClass("hide");

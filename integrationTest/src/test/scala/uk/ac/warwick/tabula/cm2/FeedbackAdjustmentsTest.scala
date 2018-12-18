@@ -17,7 +17,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on module.findElement(By.className("mod-code"))
 			Then("I should see the premarked assignment")
 			eventually(pageSource contains "Premarked assignment" should be {true})
-			click on linkText("Premarked assignment")
+			eventually(click on linkText("Premarked assignment"))
 
 			When("I go to the adjustments page")
 
@@ -72,15 +72,20 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on getModule("XXX02").get.findElement(By.className("mod-code"))
 
 			When("I publish the feedback")
-			eventually(click on partialLinkText("Feedback needs publishing (2 of 2)"))
-
+			// Need to be very specific about which feedback link to click on - as we have 2 assignments with very similar names
+			val premarkedAssignmentFeedbackLink = eventually {
+				id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]"))
+				.findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Feedback needs publishing (2 of 2)"))
+			}
+			click on premarkedAssignmentFeedbackLink
 			click on checkbox("confirm")
 			cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
 			Then("all is well in the world for all the Herons are in a deep slumber")
 			eventually(pageSource contains "The feedback has been published." should be {true})
 		}
 
-		click on partialLinkText("Premarked assignment")
+		eventually(pageSource contains "Premarked assignment" should be {true})
+		eventually(click on partialLinkText("Premarked assignment"))
 		val assignmentId = currentUrl.split("/")(6)
 
 		Then("The student can see the adjustment")

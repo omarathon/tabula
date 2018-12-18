@@ -25,7 +25,7 @@ import scala.util.parsing.json.JSON
 case class DepartmentInfo(fullName: String, shortName: String, code: String, faculty: String, parentCode: Option[String] = None, filterName: Option[String] = None)
 case class ModuleInfo(name: String, shortName: String, code: String, group: String, degreeType: DegreeType, status: Option[String] = None)
 case class ModuleTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
-case class RouteInfo(name: String, code: String, degreeType: DegreeType)
+case class RouteInfo(name: String, code: String, degreeType: DegreeType, active: Boolean)
 case class RouteTeachingDepartmentInfo(code: String, departmentCode: String, percentage: JBigDecimal)
 
 /**
@@ -117,7 +117,7 @@ class SandboxModuleImporter extends ModuleImporter {
 			}
 
 	def getRoutes(deptCode: String): Seq[RouteInfo] =
-		SandboxData.Departments.get(deptCode).map(_.routes.toSeq map { case (code, r) => RouteInfo(r.name, r.code, r.degreeType) }).getOrElse(Seq())
+		SandboxData.Departments.get(deptCode).map(_.routes.toSeq map { case (code, r) => RouteInfo(r.name, r.code, r.degreeType, active=true) }).getOrElse(Seq())
 
 	def getRouteTeachingDepartments(routeCode: String): Seq[RouteTeachingDepartmentInfo] =
 		SandboxData.Departments.values
@@ -172,11 +172,11 @@ object ModuleImporter {
 		select
 		  pwy.pwy_code as code,
 		  pwy.pwy_name as name,
-		  pwy.pwy_pwtc as degree_type
+		  pwy.pwy_pwtc as degree_type,
+		  pwy.pwy_iuse as in_use
 		from ins_pwy pwy
 		where
 		  pwy.pwy_pwgc = :department_code and
-		  pwy.pwy_iuse = 'Y' and
 		  pwy.pwy_pwtc in ('UG', 'PG', 'PGCE', 'IS')
 		"""
 
@@ -228,7 +228,9 @@ object ModuleImporter {
 			RouteInfo(
 				rs.getString("name").safeTrim,
 				routeCode,
-				DegreeType.fromCode(rs.getString("degree_type").safeTrim))
+				DegreeType.fromCode(rs.getString("degree_type").safeTrim),
+				rs.getString("in_use").safeTrim.equals("Y")
+			)
 		}
 	}
 
