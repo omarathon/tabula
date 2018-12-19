@@ -4,6 +4,7 @@ import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandWithoutTransaction, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
@@ -41,15 +42,14 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 
   var deptCode: String = _
+  var componentMarkYears: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 
   val BatchSize = 100
 
   def applyInternal() {
     if (features.profiles) {
       benchmarkTask("Import members") {
-        doMemberDetails(transactional(readOnly = true) {
-          madService.getDepartmentByCode(deptCode)
-        }.getOrElse(
+        doMemberDetails(transactional(readOnly = true) { madService.getDepartmentByCode(deptCode)}.getOrElse(
           throw new IllegalArgumentException(s"Could not find department with code $deptCode")
         ))
       }
@@ -170,13 +170,13 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   }
 
   private def toStudentMembers(rowCommands: Seq[ImportMemberCommand]): Seq[StudentMember] = {
-    memberDao.getAllWithUniversityIds(rowCommands.collect { case s: ImportStudentRowCommandInternal => s }.map(_.universityId))
+    memberDao.getAllWithUniversityIds(rowCommands.collect { case s: ImportStudentRowCommandInternal=> s }.map(_.universityId))
       .collect { case s: StudentMember => s }
   }
 
   private def toStudentOrApplicantMembers(rowCommands: Seq[ImportMemberCommand]): Seq[Member] = {
-    memberDao.getAllWithUniversityIds(rowCommands.collect { case s@(_: ImportStudentRowCommandInternal | _: ImportOtherMemberCommand) => s }.map(_.universityId))
-      .collect { case s@(_: StudentMember | _: ApplicantMember) => s }
+    memberDao.getAllWithUniversityIds(rowCommands.collect { case s @ (_:ImportStudentRowCommandInternal | _:ImportOtherMemberCommand) => s }.map(_.universityId))
+      .collect { case s @ (_:StudentMember | _:ApplicantMember) => s }
   }
 
   def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
@@ -189,10 +189,10 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     logger.info("Saving or updating module registrations")
 
     val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
-      importModRegCommands.flatMap(_.apply())
+      importModRegCommands flatMap { _.apply() }
     }
 
-    val usercodesProcessed: Seq[String] = membershipInfo.map(_.member.usercode)
+    val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }
 
     logger.info("Removing old module registrations")
 
@@ -210,7 +210,9 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
     val importAccreditedPriorLearningCommands = accreditedPriorLearningImporter.getAccreditedPriorLearning(membershipInfo, users)
 
-    importAccreditedPriorLearningCommands.flatMap(_.apply())
+    importAccreditedPriorLearningCommands flatMap {
+      _.apply()
+    }
   }
 
   def updateStudentCourseDetailsNotes(): Seq[StudentCourseDetailsNote] = {
@@ -296,7 +298,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           // retrieve details for this student from SITS and store the information in Tabula
           val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(universityId -> user), importCommandFactory)
           if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
-          val members = importMemberCommands.map(_.apply())
+          val members = importMemberCommands map { _.apply() }
 
           session.flush()
 
@@ -339,7 +341,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
   def updateMissingForStaffOrApplicant(member: Member): Member = {
     val missingFromImport: Boolean = member match {
       case _: ApplicantMember => profileImporter.getApplicantMemberFromSits(member.universityId).isEmpty
-      case _: StaffMember => profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
+      case _: StaffMember =>  profileImporter.getUniversityIdsPresentInMembership(Set(member.universityId)).isEmpty
       case _ => throw new IllegalArgumentException("This function is only supposed to handle Applicant and Staff member.")
     }
     if (!member.stale && missingFromImport) {
@@ -420,7 +422,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
     if (studentMembers.nonEmpty) {
       logger.info("Updating component marks")
-      ImportAssignmentsCommand.applyForMembers(studentMembers).apply()
+      ImportAssignmentsCommand.applyForMembers(studentMembers, componentMarkYears).apply()
 
       session.flush()
       session.clear()
