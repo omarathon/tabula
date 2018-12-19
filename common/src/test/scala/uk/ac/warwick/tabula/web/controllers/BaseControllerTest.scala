@@ -113,14 +113,14 @@ class BaseControllerTest extends TestBase with Mockito {
 		val badPath4 = "javascript%253Aalert(1)" // looks bad, but actually valid
 		controller.getReturnTo(badPath4) should be ("javascript%253Aalert(1)")
 
-		val badPath6 = s"""\"\""://ss.co/this/is/what"""
+		val badPath5 = s"""\"\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath5) should be ("")
+
+		val badPath6 = s"""\"strange\""://ss.co/this/is/what"""
 		controller.getReturnTo(badPath6) should be ("")
 
-		val badPath7 = s"""\"strange\""://ss.co/this/is/what"""
+		val badPath7 = s"://ss.co/this/is/what"
 		controller.getReturnTo(badPath7) should be ("")
-
-		val badPath8 = s"://ss.co/this/is/what"
-		controller.getReturnTo(badPath8) should be ("")
 
 		val goodPath1 = "/i/eat/chocolate" // good one
 		controller.getReturnTo(goodPath1) should be ("/i/eat/chocolate")
