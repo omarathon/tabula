@@ -140,11 +140,8 @@ class BaseControllerTest extends TestBase with Mockito {
 		val absoluteUrlNotTabula = "https://ss.co/this/is/what"
 		controller.getReturnTo(absoluteUrlNotTabula) should be ("/this/is/what")
 
-		val absoluteUrlNotTabula2 = "https://ss.co/this/is/what"
-		controller.getReturnTo(absoluteUrlNotTabula2) should be ("/this/is/what")
-
-		val absoluteUrlNotTabula3 = "https://blah/wara" // we dont want any scheme
-		controller.getReturnTo(absoluteUrlNotTabula3) should be ("/wara")
+		val absoluteUrlNotTabula2 = "https://blah/wara"
+		controller.getReturnTo(absoluteUrlNotTabula2) should be ("/wara")
 
 		val emptyString = ""
 		controller.getReturnTo(emptyString) should be ("")
