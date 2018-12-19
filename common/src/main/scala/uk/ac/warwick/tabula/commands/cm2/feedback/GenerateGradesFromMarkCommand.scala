@@ -26,7 +26,7 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
+	lazy val assignmentUpstreamAssessmentGroupInfoMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
 		group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
 	).toMap
 
@@ -54,8 +54,8 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 			}.toMap
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
-			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
-				upstreamGroup.exists(_.upstreamAssessmentGroup.membersIncludes(student))
+			assignmentUpstreamAssessmentGroupInfoMap.find { case (group, upstreamGroupInfo) =>
+				upstreamGroupInfo.exists(_.upstreamAssessmentGroup.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 
