@@ -100,6 +100,7 @@ class BaseControllerTest extends TestBase with Mockito {
 
 	@Test def sanitiseReturnTo(): Unit = {
 		val controller = new BaseController {}
+
 		val badPath1 = "javascript:alert(1)" // not safe at all, should be killed
 		controller.getReturnTo(badPath1) should be ("")
 
@@ -109,26 +110,17 @@ class BaseControllerTest extends TestBase with Mockito {
 		val badPath3 = "%20javascript:alert(1)" // crashes URI
 		controller.getReturnTo(badPath3) should be ("")
 
-		val badPath4 = "https://blah/wara" // we dont want any scheme
-		controller.getReturnTo(badPath4) should be ("")
+		val badPath4 = "javascript%253Aalert(1)" // looks bad, but actually valid
+		controller.getReturnTo(badPath4) should be ("javascript%253Aalert(1)")
 
-		val badPath5 = "%20javascript:alert(1)" // crashes URI
+		val badPath5 = s"""\"\""://ss.co/this/is/what"""
 		controller.getReturnTo(badPath5) should be ("")
 
-		val badPath7 = "https://ss.co/this/is/what"
+		val badPath6 = s"""\"strange\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath6) should be ("")
+
+		val badPath7 = s"://ss.co/this/is/what"
 		controller.getReturnTo(badPath7) should be ("")
-
-		val badPath8 = "https://ss.co/this/is/what"
-		controller.getReturnTo(badPath8) should be ("")
-
-		val badPath9 = s"""\"\""://ss.co/this/is/what"""
-		controller.getReturnTo(badPath9) should be ("")
-
-		val badPath10 = s"""\"strange\""://ss.co/this/is/what"""
-		controller.getReturnTo(badPath10) should be ("")
-
-		val badPath11 = s"://ss.co/this/is/what"
-		controller.getReturnTo(badPath11) should be ("")
 
 		val goodPath1 = "/i/eat/chocolate" // good one
 		controller.getReturnTo(goodPath1) should be ("/i/eat/chocolate")
@@ -141,6 +133,15 @@ class BaseControllerTest extends TestBase with Mockito {
 
 		val goodPath4 = "/assignment?teacher=duck"
 		controller.getReturnTo(goodPath4) should be ("/assignment?teacher=duck")
+
+		val absoluteUrlTabula = "https://tabula-test.warwick.ac.uk/assignment?teacher=duck"
+		controller.getReturnTo(absoluteUrlTabula) should be ("/assignment?teacher=duck")
+
+		val absoluteUrlNotTabula = "https://ss.co/this/is/what"
+		controller.getReturnTo(absoluteUrlNotTabula) should be ("/this/is/what")
+
+		val absoluteUrlNotTabula2 = "https://blah/wara"
+		controller.getReturnTo(absoluteUrlNotTabula2) should be ("/wara")
 
 		val emptyString = ""
 		controller.getReturnTo(emptyString) should be ("")
