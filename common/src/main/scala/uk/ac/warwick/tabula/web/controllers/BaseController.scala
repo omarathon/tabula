@@ -59,10 +59,7 @@ trait ControllerViews extends Logging {
 			val qs: Option[String] = uri.getQuery
 			val path: Option[String] = uri.getPath
 
-			if (scheme.nonEmpty || host.nonEmpty)
-				None
-			else
-				path.map(_ + qs.map("?" + _).getOrElse(""))
+			path.map(_ + qs.map("?" + _).getOrElse(""))
 		}.toOption.flatten.getOrElse("")
 	}
 
