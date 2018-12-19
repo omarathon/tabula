@@ -28,7 +28,6 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.ListMap
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -207,7 +206,14 @@ class GenerateExamGridController extends ExamsController
 				if (!maintenanceModeService.enabled) {
 					stopOngoingImportForStudents(students)
 
-					val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
+					val yearsToImport = students
+						.flatMap(_.years.values.flatten)
+						.flatMap(_.studentCourseYearDetails)
+						.map(_.academicYear)
+						.distinct
+						.sorted
+
+					val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId), yearsToImport))
 
 					allRequestParams.set("jobId", jobInstance.id)
 				}

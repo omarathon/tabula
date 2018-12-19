@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
-import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, DateFormats}
+import uk.ac.warwick.tabula.{AcademicYear, AutowiringTopLevelUrlComponent, DateFormats}
 import uk.ac.warwick.util.web.Uri
 
 import scala.concurrent.Await
@@ -220,7 +220,10 @@ class ImportProfilesController extends BaseSysadminController with AutowiringJob
 
 	@RequestMapping(method = Array(POST), params = Array("members"))
 	def importSpecificProfiles(@RequestParam members: String): Mav = {
-		val jobInstance = jobService.add(None, ImportMembersJob(members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)))
+		val jobInstance = jobService.add(None, ImportMembersJob(
+			members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty),
+			AcademicYear.allCurrent() :+ AcademicYear.now().next
+		))
 		Redirect(Routes.sysadmin.jobs.status(jobInstance))
 	}
 

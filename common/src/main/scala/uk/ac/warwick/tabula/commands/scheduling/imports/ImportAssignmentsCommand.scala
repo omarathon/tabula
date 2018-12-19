@@ -34,13 +34,14 @@ object ImportAssignmentsCommand {
 		override lazy val eventName = "ImportAssignmentsAllYears"
 	}
 
-	def applyForMembers(applyMembers: Seq[MembershipMember]): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
+	def applyForMembers(applyMembers: Seq[MembershipMember], applyYears: Seq[AcademicYear]): ComposableCommandWithoutTransaction[Unit] = new ComposableCommandWithoutTransaction[Unit]
 		with ImportAssignmentsCommand
 		with ImportAssignmentsSpecificMembers
 		with ImportAssignmentsDescription
 		with AutowiringAssignmentImporterComponent
 		with Daoisms {
 		override val members: Seq[MembershipMember] = applyMembers
+		override val yearsToImport: Seq[AcademicYear] = applyYears
 	}
 
 	case class Result(
@@ -71,9 +72,10 @@ trait ImportAssignmentsSpecificMembers extends ImportAssignmentsMembersToImport 
 	self: AssignmentImporterComponent =>
 
 	val members: Seq[MembershipMember]
+	val yearsToImport: Seq[AcademicYear]
 
 	override def membersToImport(callback: UpstreamModuleRegistration => Unit): Unit = {
-		assignmentImporter.specificMembers(members)(callback)
+		assignmentImporter.specificMembers(members, yearsToImport)(callback)
 	}
 
 	val importEverything: Boolean = false

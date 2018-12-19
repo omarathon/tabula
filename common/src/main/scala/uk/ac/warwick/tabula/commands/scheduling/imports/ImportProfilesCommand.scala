@@ -4,6 +4,7 @@ import org.hibernate.StaleObjectStateException
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandWithoutTransaction, Description, TaskBenchmarking}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
@@ -41,6 +42,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 
 	var deptCode: String = _
+	var componentMarkYears: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 
 	val BatchSize = 100
 
@@ -420,7 +422,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
 		if (studentMembers.nonEmpty) {
 			logger.info("Updating component marks")
-			ImportAssignmentsCommand.applyForMembers(studentMembers).apply()
+			ImportAssignmentsCommand.applyForMembers(studentMembers, componentMarkYears).apply()
 
 			session.flush()
 			session.clear()
