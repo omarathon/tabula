@@ -215,7 +215,7 @@ class SmallGroupSet
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||
 		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
-			membershipService.isStudentNonPWDMember(user, upstreamAssessmentGroupInfos, Option(members))
+			membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
 		}
 	}
 
@@ -231,7 +231,7 @@ class SmallGroupSet
 
 	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
-			membershipService.countNonPWDMembershipWithUniversityIdGroup(upstreamAssessmentGroupInfos, Some(members))
+			membershipService.countCurrentMembershipWithUniversityIdGroup(upstreamAssessmentGroupInfos, Some(members))
 		}
 	}
 

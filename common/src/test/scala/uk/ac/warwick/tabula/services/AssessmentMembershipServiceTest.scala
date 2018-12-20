@@ -68,20 +68,20 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		val excludedGroup = mock[UnspecifiedTypeUserGroup]
 		excludedGroup.excludesUser(user) returns true
 
-		service.isStudentNonPWDMember(user, Nil, Some(excludedGroup)) should be (false)
+		service.isStudentCurrentMember(user, Nil, Some(excludedGroup)) should be (false)
 		verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
 		val includedGroup = mock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns false
 		includedGroup.includesUser(user) returns true
 
-		service.isStudentNonPWDMember(user, Nil, Some(includedGroup)) should be (true)
+		service.isStudentCurrentMember(user, Nil, Some(includedGroup)) should be (true)
 
 		val notInGroup = mock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns false
 		includedGroup.includesUser(user) returns false
 
-		service.isStudentNonPWDMember(user, Nil, Some(notInGroup)) should be (false)
+		service.isStudentCurrentMember(user, Nil, Some(notInGroup)) should be (false)
 
 		val module = Fixtures.module("in101")
 
@@ -98,12 +98,12 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 		val upstreamWithActiveMembers3 = UpstreamAssessmentGroupInfo(upstream3, upstream3.members.asScala.filter(m =>  m.universityId !=  "0123458"))
 
 		val upstreams = Seq(upstreamWithActiveMembers1, upstreamWithActiveMembers2, upstreamWithActiveMembers3)
-		service.isStudentNonPWDMember(user, upstreams, None) should be (true)
+		service.isStudentCurrentMember(user, upstreams, None) should be (true)
 
 		// Doesn't affect results from the usergroup itself
-		service.isStudentNonPWDMember(user, upstreams, Some(excludedGroup)) should be (false)
-		service.isStudentNonPWDMember(user, upstreams, Some(includedGroup)) should be (true)
-		service.isStudentNonPWDMember(user, upstreams, Some(notInGroup)) should be (true)
+		service.isStudentCurrentMember(user, upstreams, Some(excludedGroup)) should be (false)
+		service.isStudentCurrentMember(user, upstreams, Some(includedGroup)) should be (true)
+		service.isStudentCurrentMember(user, upstreams, Some(notInGroup)) should be (true)
 	}
 
 }

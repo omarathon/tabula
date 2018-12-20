@@ -631,7 +631,7 @@ class Assignment
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.usercode == user.getUserId) ||
 				fullFeedback.exists(_.usercode == user.getUserId) ||
-				assessmentMembershipService.isStudentNonPWDMember(user, upstreamAssessmentGroupInfos, Option(members))
+				assessmentMembershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
 		} else {
 			true
 		})

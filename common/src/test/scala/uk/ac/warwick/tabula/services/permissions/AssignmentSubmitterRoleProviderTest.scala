@@ -32,7 +32,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 
-		assignmentMembershipService.isStudentNonPWDMember(
+		assignmentMembershipService.isStudentCurrentMember(
 				isEq(currentUser.apparentUser),
 				isA[Seq[UpstreamAssessmentGroupInfo]],
 				isA[Option[UserGroup]]) returns (true)
@@ -45,7 +45,7 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 
-		assignmentMembershipService.isStudentNonPWDMember(
+		assignmentMembershipService.isStudentCurrentMember(
 				isEq(currentUser.apparentUser),
 				isA[Seq[UpstreamAssessmentGroupInfo]],
 				isA[Option[UserGroup]]) returns (false)

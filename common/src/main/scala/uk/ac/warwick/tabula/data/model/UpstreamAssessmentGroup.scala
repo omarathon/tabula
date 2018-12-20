@@ -130,7 +130,7 @@ trait UpstreamAssessmentGroupMemberProperties {
 
 
 }
-
-case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, nonPWDMembers:Seq[UpstreamAssessmentGroupMember]) {
+/** currentMembers are all members excluding PWD)  **/
+case class UpstreamAssessmentGroupInfo(upstreamAssessmentGroup: UpstreamAssessmentGroup, currentMembers:Seq[UpstreamAssessmentGroupMember]) {
 	def allMembers: Seq[UpstreamAssessmentGroupMember] = upstreamAssessmentGroup.members.asScala
 }

@@ -61,8 +61,8 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
-	def getNonPWDUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
-	def getNonPWDUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
+	def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
 
 	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
@@ -282,7 +282,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.seq
 	}
 
-	 def getNonPWDUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
+	 def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
 		 session.createSQLQuery(s"""
 			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
 				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear and uag.moduleCode = :moduleCode and uag.assessmentGroup = :assessmentGroup and uag.sequence = :sequence
@@ -299,7 +299,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	 }
 
 
-	def getNonPWDUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember] = {
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember] = {
 		session.createSQLQuery(s"""
 			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
 				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.id = :uagid

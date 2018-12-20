@@ -257,8 +257,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.flush()
 				val uagInfo = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
 				uagInfo.size should be (1)
-				val nonPWDMembers = uagInfo.head.nonPWDMembers
-				nonPWDMembers.size should be (1)
+				val currentMembers = uagInfo.head.currentMembers
+				currentMembers.size should be (1)
 
 				//now add one more PWD member. We should still have just 1 member
 				upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "1000006"))
@@ -267,8 +267,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 				val uagInfo1 = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
 				uagInfo1.size should be (1)
-				val nonPWDMembers1 = uagInfo1.head.nonPWDMembers
-				nonPWDMembers1.size should be (1)
+				val currentMembers1 = uagInfo1.head.currentMembers
+				currentMembers1.size should be (1)
 
 				//add one more fully enrolled member.
 				val stu3 = Fixtures.student("0000007", "u1000007", department=dept1)
@@ -281,10 +281,10 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.flush()
 
 				val uagInfo2 = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
-				val nonPWDMembers2 = uagInfo2.filter(_.upstreamAssessmentGroup == upstreamGroup2).head.nonPWDMembers
-				nonPWDMembers2.size should be (2)
+				val currentMembers2 = uagInfo2.filter(_.upstreamAssessmentGroup == upstreamGroup2).head.currentMembers
+				currentMembers2.size should be (2)
 
-				nonPWDMembers2.foreach{ uagm =>
+				currentMembers2.foreach{ uagm =>
 					uagm.universityId should not be ("1000006")
 				}
 			}

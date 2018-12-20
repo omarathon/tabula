@@ -908,15 +908,15 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def countMembershipWithUniversityIdGroup() { transactional { tx =>
 		new AssignmentMembershipFixture() {
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo1), None) should be (2)
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo2), None) should be (2)
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo3), None) should be (5)
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), None) should be (5)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1), None) should be (2)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo2), None) should be (2)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo3), None) should be (5)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), None) should be (5)
 
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)) should be (7)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)) should be (7)
 
 			// UserID Group should fall back to using the other strategy, but get the same result
-			assignmentMembershipService.countNonPWDMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)) should be (7)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)) should be (7)
 		}
 	}}
 

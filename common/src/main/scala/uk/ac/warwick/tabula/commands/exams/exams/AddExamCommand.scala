@@ -42,7 +42,7 @@ class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
 	override def populate(): Unit = {
 		if (availableUpstreamGroups.size == 1) {
 			name = availableUpstreamGroups.head.name
-			upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group, availableUpstreamGroups.head.nonPWDMembers))
+			upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group, availableUpstreamGroups.head.currentMembers))
 		}
 	}
 
@@ -175,7 +175,7 @@ trait ModifiesExamMembership extends UpdatesStudentMembership with SpecifiesGrou
 		for {
 			ua <- examAssessmentComponents
 			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
-		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.currentMembers)
 	}
 
 }

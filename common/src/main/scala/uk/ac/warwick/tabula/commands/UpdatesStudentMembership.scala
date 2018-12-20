@@ -158,7 +158,7 @@ trait UpdatesStudentMembership {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module)
 			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
-		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.currentMembers)
 	}
 
 	/**
@@ -168,7 +168,7 @@ trait UpdatesStudentMembership {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false)
 			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
-		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.currentMembers)
 	}
 
 	/**
@@ -178,7 +178,7 @@ trait UpdatesStudentMembership {
 		for {
 			ua <- assessmentMembershipService.getAssessmentComponents(module, inUseOnly = false) if !ua.inUse
 			uagInfo <- assessmentMembershipService.getUpstreamAssessmentGroupInfo(ua, academicYear)
-		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.nonPWDMembers)
+		} yield new UpstreamGroup(ua, uagInfo.upstreamAssessmentGroup, uagInfo.currentMembers)
 	}
 
 	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
@@ -194,9 +194,9 @@ trait UpdatesStudentMembership {
 }
 
 /**
- * convenience classes
+ * convenience classes (currentMembers are all members excluding PWD)
  */
-class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup, val nonPWDMembers: Seq[UpstreamAssessmentGroupMember]) {
+class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup, val currentMembers: Seq[UpstreamAssessmentGroupMember]) {
 	val id: String = assessmentComponent.id + ";" + group.id
 
 	val name: String = assessmentComponent.name
@@ -222,7 +222,7 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 			case Array(uaId: String, groupId: String) =>
 				val ua = membershipService.getAssessmentComponent(uaId).getOrElse(explode)
 				val uag = membershipService.getUpstreamAssessmentGroup(groupId).getOrElse(explode)
-				val uagm = membershipService.getNonPWDUpstreamAssessmentGroupMembers(groupId)
+				val uagm = membershipService.getCurrentUpstreamAssessmentGroupMembers(groupId)
 				new UpstreamGroup(ua, uag, uagm)
 			case _ => explode
 		}
