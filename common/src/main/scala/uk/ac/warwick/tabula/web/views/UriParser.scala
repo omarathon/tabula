@@ -26,5 +26,5 @@ class UriParser extends TemplateMethodModelEx {
 		*/
 	override def exec(args: java.util.List[_]): Object = Try {
 		UriBuilder.parse(args.get(0).toString).toString
-	}.toOption.getOrElse("")
+	}.getOrElse("")
 }
