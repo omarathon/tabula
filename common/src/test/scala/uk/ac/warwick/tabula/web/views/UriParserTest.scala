@@ -20,6 +20,7 @@ class UriParserTest extends TestBase {
 	@Test def handleBadURI(): Unit = {
 		uriParser.exec(Seq("").asJava).asInstanceOf[String] should be("")
 		uriParser.exec(Seq.empty.asJava).asInstanceOf[String] should be("")
+		uriParser.exec(Seq("!@£$%^&*").asJava).asInstanceOf[String] should be("")
 	}
 
 
