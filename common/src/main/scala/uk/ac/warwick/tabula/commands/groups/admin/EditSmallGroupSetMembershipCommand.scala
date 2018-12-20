@@ -90,7 +90,7 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 
 	// start complicated membership stuff
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(set).map { _.upstreamAssessmentGroups }
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map { _.upstreamAssessmentGroupInfos }
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map { _.members }
 
 	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
@@ -121,7 +121,7 @@ trait SmallGroupAutoDeregistration {
 
 	def autoDeregister(fn: () => SmallGroupSet): SmallGroupSet = {
 		val oldUsers =
-			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet
+			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Option(set.members)).toSet
 
 		val newUsers =
 			assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet

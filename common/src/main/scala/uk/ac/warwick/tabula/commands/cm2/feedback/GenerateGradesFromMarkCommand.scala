@@ -26,8 +26,8 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroup]] = assessment.assessmentGroups.asScala.map(group =>
-		group -> group.toUpstreamAssessmentGroup(assessment.academicYear)
+	lazy val assignmentUpstreamAssessmentGroupInfoMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
+		group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
 	).toMap
 
 	private def isNotNullAndInt(intString: String): Boolean = {
@@ -45,7 +45,8 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 	}
 
 	override def applyInternal(): Map[String, Seq[GradeBoundary]] = {
-		val membership = assessmentMembershipService.determineMembershipUsers(assessment)
+		//we are allowing PWD to upload to SITS as long as they are in the assessment components so find grades for them also (if present)
+		val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment)
 		val studentMarksMap: Map[User, Int] = studentMarks.asScala
 			.filter{ case (_, mark) => isNotNullAndInt(mark)}
 			.flatMap{case(uniID, mark) =>
@@ -53,8 +54,8 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 			}.toMap
 
 		val studentAssesmentComponentMap: Map[String, AssessmentComponent] = studentMarksMap.flatMap { case (student, _) =>
-			assignmentUpstreamAssessmentGroupMap.find { case (group, upstreamGroup) =>
-				upstreamGroup.exists(_.membersIncludes(student))
+			assignmentUpstreamAssessmentGroupInfoMap.find { case (group, upstreamGroupInfo) =>
+				upstreamGroupInfo.exists(_.upstreamAssessmentGroup.membersIncludes(student))
 			}.map { case (group, _) => student.getWarwickId -> group.assessmentComponent }
 		}
 

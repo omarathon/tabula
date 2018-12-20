@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence._
-
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -90,6 +89,9 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 
 	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
 		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
+
+	def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId && !studentCourseDetails.statusOnCourse.code.startsWith("P"))
 
 	override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
 

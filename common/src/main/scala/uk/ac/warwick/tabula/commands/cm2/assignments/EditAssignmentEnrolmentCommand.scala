@@ -49,8 +49,8 @@ trait StubEditAssignmentMembershipPermissions extends RequiresPermissionsCheckin
 trait ModifiesAssignmentMembership extends UpdatesStudentMembership with SpecifiesGroupType {
 	self: EditAssignmentMembershipCommandState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(assignment).map {
-		_.upstreamAssessmentGroups
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(assignment).map {
+		_.upstreamAssessmentGroupInfos
 	}
 	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 

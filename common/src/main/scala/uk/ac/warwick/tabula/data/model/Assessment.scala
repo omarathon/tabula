@@ -44,10 +44,10 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	// returns feedback for a specified student
 	def findFullFeedback(usercode: String): Option[Feedback] = fullFeedback.find(_.usercode == usercode)
 
-	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+	// converts the assessmentGroups to UpstreamAssessmentGroupInfo
+	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] =
 		assessmentGroups.asScala.flatMap {
-			_.toUpstreamAssessmentGroup(academicYear)
+			_.toUpstreamAssessmentGroupInfo(academicYear)
 		}
 
 	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat number

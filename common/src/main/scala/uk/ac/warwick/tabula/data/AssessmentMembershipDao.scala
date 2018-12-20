@@ -61,6 +61,9 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
+
 	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
@@ -277,6 +280,35 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.add(is("assessmentGroup", component.assessmentGroup))
 			.add(is("sequence", component.sequence))
 			.seq
+	}
+
+	 def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
+		 session.createSQLQuery(s"""
+			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear and uag.moduleCode = :moduleCode and uag.assessmentGroup = :assessmentGroup and uag.sequence = :sequence
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+			""")
+			 .addEntity(classOf[UpstreamAssessmentGroupMember])
+			 .setString("academicYear", academicYear.startYear.toString)
+			 .setString("moduleCode", component.moduleCode)
+			 .setString("assessmentGroup", component.assessmentGroup)
+			 .setString("sequence", component.sequence)
+			 .list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+
+	 }
+
+
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember] = {
+		session.createSQLQuery(s"""
+			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.id = :uagid
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+			""")
+			.addEntity(classOf[UpstreamAssessmentGroupMember])
+			.setString("uagid", uagid)
+			.list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
 	}
 
 	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =

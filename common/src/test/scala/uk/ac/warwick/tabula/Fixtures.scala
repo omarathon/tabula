@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import uk.ac.warwick.tabula.Fixtures.assessmentGroup
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -177,6 +178,15 @@ object Fixtures extends Mockito {
 			new UpstreamAssessmentGroupMember(group, "0123458")
 		).asJava)
 		group
+	}
+
+	def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
+		val uag = assessmentGroup(academicYear, code, module, occurrence)
+		val activeMembers =  uag.members
+		//add one PWD
+		val uagm = new UpstreamAssessmentGroupMember(uag, "1000006")
+		uag.members.add(uagm)
+		UpstreamAssessmentGroupInfo(uag, activeMembers.asScala)
 	}
 
 	def assessmentGroup(assignment:AssessmentComponent): UpstreamAssessmentGroup =
