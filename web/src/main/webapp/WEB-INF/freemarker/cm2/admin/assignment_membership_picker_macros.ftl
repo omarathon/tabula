@@ -24,7 +24,7 @@
 				<span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span>
 			</label>
 		</td>
-		<td class="sortable">${ug.nonPWDMembers?size}</td>
+		<td class="sortable">${ug.currentMembers?size}</td>
 		<td>${ug.group.assessmentGroup}</td>
 		<td>${ug.cats!'-'}</td>
 		<td>${ug.occurrence}</td>
