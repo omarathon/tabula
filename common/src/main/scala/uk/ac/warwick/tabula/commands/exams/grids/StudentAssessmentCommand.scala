@@ -42,7 +42,7 @@ class StudentAssessmentCommandInternal(val studentCourseYearDetails: StudentCour
 			val studentAssessmentInfo = for {
 				uagm <- mr.upstreamAssessmentGroupMembers
 				aComponent <- assessmentMembershipService.getAssessmentComponent(uagm.upstreamAssessmentGroup)
-			} yield StudentAssessmentComponentInfo(new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.nonPWDUpstreamAssessmentGroupMembers), uagm)
+			} yield StudentAssessmentComponentInfo(new UpstreamGroup(aComponent, uagm.upstreamAssessmentGroup, mr.currentUpstreamAssessmentGroupMembers), uagm)
 			GridAssessmentComponentDetails(mr, studentAssessmentInfo)
 		}
 	}
