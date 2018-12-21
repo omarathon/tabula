@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model._
-import org.hibernate.criterion.{Order, Restrictions}
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
-import uk.ac.warwick.tabula.AcademicYear
+import org.hibernate.criterion.{Order, Restrictions}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ManualMembershipInfo
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -61,10 +62,11 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+
 	def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
 	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
 
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
@@ -311,13 +313,20 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
 	}
 
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =
-		session.newCriteria[UpstreamAssessmentGroup]
-			.add(is("academicYear", registration.academicYear))
-			.add(is("moduleCode", registration.toSITSCode))
-			.add(is("assessmentGroup", registration.assessmentGroup))
-			.add(is("occurrence", registration.occurrence))
-			.seq
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
+		val criteria =
+			session.newCriteria[UpstreamAssessmentGroup]
+				.add(is("academicYear", registration.academicYear))
+				.add(is("moduleCode", registration.toSITSCode))
+				.add(is("assessmentGroup", registration.assessmentGroup))
+				.add(is("occurrence", registration.occurrence))
+
+		if (eagerLoad) {
+			criteria.setFetchMode("members", FetchMode.JOIN).distinct
+		}
+
+		criteria.seq
+	}
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]

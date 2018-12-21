@@ -337,7 +337,5 @@ class SmallGroupSet
 	def postLoad() {
 		ensureSettings
 	}
-
-	override def toEntityReference: SmallGroupSetEntityReference = new SmallGroupSetEntityReference().put(this)
 }
 

@@ -58,7 +58,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
                         .location(ScriptTaskProperties.Location.FILE)
                         .fileFromPath("gradlew")
-                        .argument("clean check war")
+                        .argument("clean check war --no-daemon")
                         .environmentVariables("JAVA_OPTS=\"-Xmx256m -Xms128m\""),
                     new ScriptTask()
                         .description("Touch test files so Bamboo doesn't ignore them")
@@ -119,7 +119,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                     "Run functional tests",
                     "Test",
                     "TEST",
-                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-build-cache",
+                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-build-cache --no-daemon",
                     "**/test-results/**/*.xml",
                     new Artifact()
                         .name("Failed test screenshots")
@@ -142,7 +142,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
             .linkedRepository(LINKED_REPOSITORY).noBranches()
             .description(description)
             .triggers(new ScheduledTrigger().scheduleOnceDaily(schedule))
-            .gradle("Run tests", "Cucumber", "SPECS", "cucumber -Dserver.environment=" + environment, "**/build/cucumber/results/*.xml")
+            .gradle("Run tests", "Cucumber", "SPECS", "cucumber -Dserver.environment=" + environment + " --no-daemon", "**/build/cucumber/results/*.xml")
             .build();
     }
 

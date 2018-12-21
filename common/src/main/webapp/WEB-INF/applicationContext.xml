@@ -259,7 +259,7 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ConditionalInterceptor" p:excludePath="/static/*">
 				<constructor-arg>
-					<bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor" autowire="byName" />
+					<bean class="org.springframework.orm.hibernate5.support.OpenSessionInViewInterceptor" autowire="byName" />
 				</constructor-arg>
 			</bean>
 		</mvc:interceptor>

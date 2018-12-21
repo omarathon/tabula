@@ -203,7 +203,7 @@ trait CopySmallGroupSetsScheduledNotifications
 		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
 		sets.flatMap(_.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences)))
 
-	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
 		generateNotifications(occurrence)
 	}
 }

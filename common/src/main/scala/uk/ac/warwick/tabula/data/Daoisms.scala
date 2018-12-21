@@ -109,16 +109,18 @@ object Daoisms {
 	implicit class NiceQueryCreator(session: Session) {
 		def newCriteria[A: ClassTag] =
 			new ScalaCriteria[A](
-				session.createCriteria(
-					classTag[A]
-						.runtimeClass
-				)
+				session.createCriteria(classTag[A].runtimeClass)
 			)
 		def newCriteria[A: ClassTag](clazz: Class[_]) =
 			new ScalaCriteria[A](
 				session.createCriteria(clazz)
 			)
-		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
+		def newQuery[A: ClassTag](hql: String) =
+			new ScalaQuery[A](
+				session.createQuery(hql, classTag[A].runtimeClass.asInstanceOf[Class[A]])
+			)
+		def newUpdateQuery(hql: String) =
+			new ScalaUpdateQuery(session.createQuery(hql))
 	}
 
 	// The maximum number of clauses supported in an IN(..) before it will
@@ -164,6 +166,7 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.disableFilter(Member.FreshOnlyFilter)
 				session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+				session.disableFilter(Route.ActiveRoutesOnlyFilter)
 				session
 			}
 

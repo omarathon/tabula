@@ -27,7 +27,7 @@ class ScheduledNotification[A >: Null <: ToEntityReference](
 	}.orNull
 
 	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[_]], fetch = FetchType.LAZY)
 	def getTarget: EntityReference[A] = _target
 	def target: EntityReference[A] = getTarget
 	def setTarget(target: EntityReference[A]): Unit = _target = target

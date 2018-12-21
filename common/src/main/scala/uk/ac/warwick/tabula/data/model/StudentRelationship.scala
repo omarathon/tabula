@@ -74,8 +74,6 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 
 	override def toString: String = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> studentId)
 
-	def toEntityReference: StudentRelationshipEntityReference = new StudentRelationshipEntityReference().put(this)
-
 	def isCurrent: Boolean = (startDate == null || startDate.isBeforeNow) && (endDate == null || endDate.isAfterNow)
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "replacedBy")
@@ -103,8 +101,6 @@ class MemberStudentRelationship extends StudentRelationship {
 	def agentLastName: String = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 
 	def agent: String = agentMember.map { _.universityId }.orNull
-
-	override def toEntityReference: StudentRelationshipEntityReference = new StudentRelationshipEntityReference().put(this)
 }
 
 @Entity

@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.services.elasticsearch
 import java.io.Closeable
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.sksamuel.elastic4s.ElasticClient
-import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
-import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
-import com.sksamuel.elastic4s.source.Indexable
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.mappings.FieldDefinition
+import com.sksamuel.elastic4s.searches.sort.SortOrder
+import com.sksamuel.elastic4s.{Index, IndexAndType, Indexable}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.{DateFormats, JsonObjectMapperFactory}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.util.Success
 
 abstract class AbstractIndexService[A <: Identifiable]
 	extends ElasticsearchClientComponent
@@ -37,7 +38,7 @@ trait ElasticsearchIndexName {
 	/**
 		* The name of the index that this service writes to
 		*/
-	def indexName: String
+	def index: Index
 }
 
 trait ElasticsearchIndexType {
@@ -68,10 +69,14 @@ trait ElasticsearchIndexInitialisation extends ElasticsearchIndexEnsure {
 
 	def ensureIndexExists(): Future[Boolean] = {
 		// Initialise the index if it doesn't already exist
-		def exists() = client.execute { indexExists(indexName) }.map(_.isExists)
-		def aliasExists() = client.execute { indexExists(s"$indexName-alias") }.map(_.isExists)
-		def create() = client.execute { createIndex(indexName) mappings(mapping(indexType) fields fields) analysis analysers }.map(_.isAcknowledged)
-		def createAlias() = client.execute { add alias s"$indexName-alias" on indexName }.map(_.isAcknowledged)
+		def exists() = client.execute { indexExists(index.name) }.map(_.result.isExists)
+		def aliasExists() = client.execute { indexExists(s"${index.name}-alias") }.map(_.result.isExists)
+		def create() = client.execute {
+			createIndex(index.name)
+				.mappings(mapping(indexType).fields(fields))
+				.analysis(analysers)
+		}.map(_.result.acknowledged)
+		def createAlias() = client.execute { addAlias(s"${index.name}-alias").on(index.name) }.map(_.result.acknowledged)
 
 		exists().flatMap {
 			case true => aliasExists().flatMap {
@@ -87,7 +92,7 @@ trait ElasticsearchIndexInitialisation extends ElasticsearchIndexEnsure {
 
 trait ElasticsearchConfig {
 	def analysers: Seq[AnalyzerDefinition]
-	def fields: Seq[TypedFieldDefinition]
+	def fields: Seq[FieldDefinition]
 }
 
 object ElasticsearchIndexingResult {
@@ -134,9 +139,12 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 	private def guardMultipleIndexes[T](work: => T): T = this.synchronized(work)
 
 	def newestItemInIndexDate: Future[Option[DateTime]] = client.execute {
-		search in indexName / indexType sourceInclude UpdatedDateField sort ( field sort UpdatedDateField order SortOrder.DESC ) limit 1
+		search(index)
+			.sourceInclude(UpdatedDateField)
+			.sortBy(fieldSort(UpdatedDateField).order(SortOrder.Desc))
+			.limit(1)
 	}.map { response =>
-		response.hits.headOption.map { hit =>
+		response.result.hits.hits.headOption.map { hit =>
 			DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap(UpdatedDateField).toString)
 		}
 	}
@@ -177,32 +185,39 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		if (in.isEmpty) {
 			Future.successful(ElasticsearchIndexingResult.empty)
 		} else {
-			logger.debug(s"Writing to the $indexName/$indexType index")
+			logger.debug(s"Writing to the $index/$indexType index")
 
 			// ID to item
-			val items = in.map { i => i.id -> i }.toMap
+			val items = in.map { i => i.id.toString -> i }.toMap
 			val maxDate = items.values.map(indexable.lastUpdatedDate).max
 
 			val upserts =
 				items.map { case (id, item) =>
-					update(id) in s"$indexName/$indexType" docAsUpsert true doc item
+					update(id)
+						.in(IndexAndType(index.name, indexType))
+						.docAsUpsert(true)
+						.doc(item)
 				}
 
 			val future =
 				client.execute {
 					bulk(upserts)
-				}.map { result =>
-					if (result.hasFailures) {
-						result.failures.foreach { item =>
-							logger.warn("Error indexing item", item.failure.getCause)
+				}.map { response =>
+					if (response.result.hasFailures) {
+						response.result.failures.foreach { item =>
+							logger.warn(s"Error indexing item: ${item.error}")
 						}
 					}
 
-					ElasticsearchIndexingResult(result.successes.length, result.failures.length, result.took, Some(maxDate))
+					ElasticsearchIndexingResult(response.result.successes.length, response.result.failures.length, response.result.took.millis, Some(maxDate))
 				}
 
 			if (logger.isDebugEnabled)
-				future.onSuccess { case result => logger.debug(s"Indexed ${result.successful} items in ${result.timeTaken}") }
+				future.onComplete {
+					case Success(result) =>
+						logger.debug(s"Indexed ${result.successful} items in ${result.timeTaken}")
+					case _ =>
+				}
 
 			future
 		}

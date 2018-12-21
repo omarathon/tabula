@@ -19,7 +19,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	extends CSVLineWriter[AttendanceMonitoringStudentData] {
 
 	val intervalFormatter = new IntervalFormatter
-	val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
+	val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28)
 	val isoFormatter = DateFormats.IsoDateTime
 
 	val result: Map[AttendanceMonitoringStudentData, Map[PointData, AttendanceState]] = processorResult.attendance

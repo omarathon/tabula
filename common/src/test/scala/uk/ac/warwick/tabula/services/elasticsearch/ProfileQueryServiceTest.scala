@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{Index, IndexAndType}
+import com.sksamuel.elastic4s.http.ElasticDsl._
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -11,33 +12,33 @@ import uk.ac.warwick.tabula.services.ProfileService
 
 class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
-	val indexName = "profiles"
+	val index = Index("profiles")
 	val indexType: String = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new ProfileQueryServiceImpl
 		queryService.profileService = mock[ProfileService]
 		queryService.client = ProfileQueryServiceTest.this.client
-		queryService.indexName = ProfileQueryServiceTest.this.indexName
+		queryService.indexName = ProfileQueryServiceTest.this.index.name
 
-		implicit val indexable = ProfileIndexService.MemberIndexable
+		implicit val indexable: ElasticsearchIndexable[Member] = ProfileIndexService.MemberIndexable
 	}
 
 	@Before def setUp(): Unit = {
 		new ProfileElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
-			}.await.isAcknowledged should be(true)
+				createIndex(index.name).mappings(mapping(indexType).fields(fields)).analysis(analysers)
+			}.await.result.acknowledged should be(true)
 		}
-		blockUntilIndexExists(indexName)
+		blockUntilIndexExists(index.name)
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }
-		blockUntilIndexNotExists(indexName)
+		deleteIndex(index.name)
+		blockUntilIndexNotExists(index.name)
 	}
 
 	@Test def find(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
@@ -54,14 +55,14 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.profileService.getMemberByUniversityId("0672089") returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(m.asInstanceOf[Member]).id(m.id) }
+		blockUntilCount(1, index.name)
 
 		// General sanity that this is working before we go into the tests of the query service
-		search in indexName / indexType should containResult(m.universityId)
-		search in indexName / indexType query queryStringQuery("Mathew") should containResult(m.universityId)
-		search in indexName / indexType query queryStringQuery("mat*") should containResult(m.universityId)
-		search in indexName / indexType query termQuery("userType", "S") should containResult(m.universityId)
+		search(index) should containId(m.universityId)
+		search(index).query(queryStringQuery("Mathew")) should containId(m.universityId)
+		search(index).query(queryStringQuery("mat*")) should containId(m.universityId)
+		search(index).query(termQuery("userType", "S")) should containId(m.universityId)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be ('empty)
 		queryService.find("Mathew", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)
@@ -92,8 +93,8 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.profileService.getMemberByUniversityIdStaleOrFresh("0672089") returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(m.asInstanceOf[Member]).id(m.id) }
+		blockUntilCount(1, index.name)
 
 		// Check inactive student is filtered out
 		queryService.find(query = "mat", departments = Seq(m.homeDepartment), userTypes = Set(), searchAllDepts = false, activeOnly = true) should be('empty)
@@ -116,8 +117,8 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.profileService.getMemberByUniversityId(m.universityId) returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(m.asInstanceOf[Member]).id(m.id) }
+		blockUntilCount(1, index.name)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be ('empty)
 		queryService.find("joconnell", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be ('empty)
@@ -145,11 +146,11 @@ class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.profileService.getMemberByUniversityId(m.universityId) returns Some(m)
 
 		// Index the profile
-		client.execute { index into indexName / indexType source m.asInstanceOf[Member] id m.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(m.asInstanceOf[Member]).id(m.id) }
+		blockUntilCount(1, index.name)
 
 		// General sanity that this is working before we go into the tests of the query service
-		search in indexName / indexType should containResult(m.universityId)
+		search(index) should containId(m.universityId)
 
 		queryService.find("bob thornton", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true) should be ('empty)
 		queryService.find("Aist\u0117", Seq(m.homeDepartment), Set(), searchAllDepts = false, activeOnly = true).head should be (m)

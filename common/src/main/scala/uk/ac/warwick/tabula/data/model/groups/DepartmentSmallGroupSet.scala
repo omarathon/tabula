@@ -145,6 +145,4 @@ class DepartmentSmallGroupSet
 		newSet
 	}
 
-	override def toEntityReference: DepartmentSmallGroupSetEntityReference = new DepartmentSmallGroupSetEntityReference().put(this)
-
 }

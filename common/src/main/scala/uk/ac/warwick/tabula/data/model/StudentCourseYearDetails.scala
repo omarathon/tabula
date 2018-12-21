@@ -8,6 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{LevelService, ModuleAndDepartmentService, UserLookupService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -30,31 +31,30 @@ object StudentCourseYearDetails {
 
 	//ensure we have  a single module code from module registration records. Some students have same module codes for different years but the latest year is the valid one with board marks
 	def extractValidModuleRegistrations(mrRecords: Seq[ModuleRegistration]): Seq[ModuleRegistration] =
-		mrRecords.groupBy(_.module.code).values.map(_.sortBy(_.academicYear.startYear).last).toSeq
+		mrRecords.groupBy(_.module.code).values.map(_.maxBy(_.academicYear.startYear)).toSeq
 
 	// makes an ExamGridEntityYear that is really multiple study years that contribute to a single level or block (groups related StudentCourseYearDetails together)
-	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails *): ExamGridEntityYear = {
+	def toExamGridEntityYearGrouped(yearOfStudy: YearOfStudy, scyds: StudentCourseYearDetails*): ExamGridEntityYear =
+	  RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYearGrouped", s"$yearOfStudy-${scyds.map(_.id).sorted.mkString("-")}") {
+			if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
+			val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
+			val route = {
+				val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
+				allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
+			}
+			val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
 
-		if (scyds.map(_.studyLevel).distinct.size > 1) throw new IllegalArgumentException("Cannot group StudentCourseYearDetails from different levels")
-		val moduleRegistrations = extractValidModuleRegistrations(scyds.flatMap(_.moduleRegistrations))
-		val route = {
-			val allRoutes = scyds.sorted.flatMap(scyd => Option(scyd.route)).toSet // ignore any nulls
-			allRoutes.lastOption.getOrElse(scyds.head.studentCourseDetails.currentRoute)
+			ExamGridEntityYear(
+				moduleRegistrations = moduleRegistrations,
+				cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+				route = route,
+				overcattingModules = overcattingModules,
+				markOverrides = None,
+				studentCourseYearDetails = scyds.sorted.lastOption,
+				level = scyds.head.level,
+				yearOfStudy
+			)
 		}
-		val overcattingModules = scyds.map(_.overcattingModules).fold(Option(Seq()))((m1, m2) => Option((m1 ++ m2).flatten.toList.distinct).filter(_.nonEmpty))
-
-		ExamGridEntityYear(
-			moduleRegistrations = moduleRegistrations,
-			cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
-			route = route,
-			overcattingModules = overcattingModules,
-			markOverrides = None,
-			studentCourseYearDetails = scyds.sorted.lastOption,
-			level = scyds.head.level,
-			yearOfStudy
-		)
-	}
-
 
 }
 
@@ -80,9 +80,14 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@JoinColumn(name = "scjCode", referencedColumnName = "scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
 
-	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails, "sceSequenceNumber" -> sceSequenceNumber, "academicYear" -> academicYear)
+	def toStringProps: Seq[(String, Any)] = Seq(
+		"studentCourseDetails" -> studentCourseDetails,
+		"sceSequenceNumber" -> sceSequenceNumber,
+		"academicYear" -> academicYear
+	)
 
-	def permissionsParents: Stream[PermissionsTarget] = Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
+	def permissionsParents: Stream[PermissionsTarget] =
+		Stream(Option(studentCourseDetails), Option(enrolmentDepartment)).flatten
 
 	/**
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
@@ -173,7 +178,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def overcattingModules: Option[Seq[Module]] = (Option(overcatting).flatMap(_.get(StudentCourseYearDetails.Overcatting.Modules)) match {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
-	}).map(moduleCodes => moduleCodes.flatMap(moduleAndDepartmentService.getModuleByCode))
+	}).map(moduleAndDepartmentService.getModulesByCodes)
 	def overcattingModules_= (modules: Seq[Module]): Unit = overcatting += (StudentCourseYearDetails.Overcatting.Modules -> modules.map(_.code))
 
 	@transient
@@ -196,19 +201,22 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
 	final var agreedMarkUploadedBy: User = _
 
-	def toExamGridEntityYear: ExamGridEntityYear = ExamGridEntityYear(
-		moduleRegistrations = moduleRegistrations, //ones that are not deleted
-		cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
-		route = route match {
-			case _: Route => route
-			case _ => studentCourseDetails.currentRoute
-		},
-		overcattingModules = overcattingModules,
-		markOverrides = None,
-		studentCourseYearDetails = Some(this),
-		level = level,
-		yearOfStudy = this.yearOfStudy
-	)
+	def toExamGridEntityYear: ExamGridEntityYear =
+		RequestLevelCache.cachedBy("StudentCourseYearDetails.toExamGridEntityYear", id) {
+			ExamGridEntityYear(
+				moduleRegistrations = moduleRegistrations, //ones that are not deleted
+				cats = moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum,
+				route = route match {
+					case _: Route => route
+					case _ => studentCourseDetails.currentRoute
+				},
+				overcattingModules = overcattingModules,
+				markOverrides = None,
+				studentCourseYearDetails = Some(this),
+				level = level,
+				yearOfStudy = this.yearOfStudy
+			)
+		}
 
 	override def postLoad() {
 		ensureOvercatting()
@@ -233,8 +241,10 @@ trait BasicStudentCourseYearProperties {
 	@transient
 	var levelService: LevelService = Wire.auto[LevelService]
 
-	def level: Option[Level] = levelService.levelFromCode(studyLevel)
-
+	def level: Option[Level] =
+		RequestLevelCache.cachedBy("StudentCourseYearDetails.level", studyLevel) {
+			levelService.levelFromCode(studyLevel)
+		}
 
 	@Column(name = "cas_used")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))

@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.analyzers.{AnalyzerDefinition, WhitespaceAnalyzer}
-import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
-import org.elasticsearch.common.xcontent.XContentBuilder
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.json.XContentBuilder
+import com.sksamuel.elastic4s.mappings.FieldDefinition
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -29,7 +30,7 @@ object AuditEventIndexService {
 		"attachments"
 	)
 
-	def auditEventIndexable(auditEventService: AuditEventService) = new ElasticsearchIndexable[AuditEvent] {
+	def auditEventIndexable(auditEventService: AuditEventService): ElasticsearchIndexable[AuditEvent] = new ElasticsearchIndexable[AuditEvent] {
 		override def fields(item: AuditEvent): Map[String, Any] = {
 			if (item.related == null || item.related.isEmpty) {
 				// Populate related item info so we can put it in the map
@@ -83,6 +84,7 @@ class AuditEventIndexService
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.audit.name}") var indexName: String = _
+	lazy val index = Index(indexName)
 
 	@Autowired var auditEventService: AuditEventService = _
 
@@ -96,12 +98,12 @@ class AuditEventIndexService
 }
 
 trait AuditEventElasticsearchConfig extends ElasticsearchConfig {
-	override val fields: Seq[TypedFieldDefinition] = Seq(
-		stringField("students") analyzer WhitespaceAnalyzer,
-		stringField("feedbacks") analyzer WhitespaceAnalyzer,
-		stringField("submissions") analyzer WhitespaceAnalyzer,
-		stringField("attachments") analyzer WhitespaceAnalyzer,
-		dateField("eventDate") format "strict_date_time_no_millis"
+	override val fields: Seq[FieldDefinition] = Seq(
+		keywordField("students"),
+		keywordField("feedbacks"),
+		keywordField("submissions"),
+		keywordField("attachments"),
+		dateField("eventDate").format("strict_date_time_no_millis")
 	)
 
 	override val analysers: Seq[AnalyzerDefinition] = Seq(
@@ -110,7 +112,7 @@ trait AuditEventElasticsearchConfig extends ElasticsearchConfig {
 }
 
 case class KeywordAnalyzerDefinition(override val name: String) extends AnalyzerDefinition(name) {
-	def build(source: XContentBuilder): Unit = {
+	override def build(source: XContentBuilder): Unit = {
 		source.field("type", "keyword")
 	}
 }

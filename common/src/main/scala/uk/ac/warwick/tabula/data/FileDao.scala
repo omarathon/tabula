@@ -165,7 +165,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 				)
 			}
 
-			session.newQuery[FileAttachment]("delete FileAttachment f where f.id in :ids")
+			session.newUpdateQuery("delete FileAttachment f where f.id in :ids")
 				.setParameterList("ids", okayToDelete.map(_.id))
 				.run()
 

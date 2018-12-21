@@ -140,7 +140,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}
 
 	def head(result: Any): Option[MembershipInformation] = result match {
-		case result: List[MembershipMember] => result.headOption.map(m => MembershipInformation(m))
+		case result: List[MembershipMember @unchecked] => result.headOption.map(m => MembershipInformation(m))
 		case _ => None
 	}
 

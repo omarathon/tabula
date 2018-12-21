@@ -215,8 +215,6 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 		"meetingDate"  -> meetingDate,
 		"relationships" -> relationships
 	)
-
-	override def toEntityReference: MeetingRecordEntityReference = new MeetingRecordEntityReference().put(this)
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {

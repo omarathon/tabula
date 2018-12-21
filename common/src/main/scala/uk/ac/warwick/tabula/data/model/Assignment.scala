@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
-
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
@@ -11,17 +10,15 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
-import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect._
@@ -776,11 +773,6 @@ class Assignment
 		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
 
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
-
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -886,8 +878,6 @@ class Assignment
 			extensionRequested = extension.isDefined && !extension.get.isManual
 		)
 	}
-
-	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 
 	def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
 

@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import org.joda.time.{DateTime, DateTimeConstants}
-import uk.ac.warwick.tabula.data.model.permissions._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.{PermissionsTarget, Permissions}
-import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
-import uk.ac.warwick.tabula.services.{UserSettingsService, SecurityService, UserGroupCacheManager, UserLookupService}
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.permissions._
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.{SecurityService, UserGroupCacheManager, UserSettingsService}
 
 class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 
@@ -161,11 +161,11 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		val targetDept = assignmentWithParents(2);
 		val targetParentDept = assignmentWithParents(3);
 
-		val moduleGrantedRole = new ModuleGrantedRole(module, ModuleManagerRoleDefinition)
+		val moduleGrantedRole = GrantedRole(module, ModuleManagerRoleDefinition)
 		moduleGrantedRole.users.add(moduleManager)
 		wireUserLookup(moduleGrantedRole.users)
 
-		val deptGrantedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
+		val deptGrantedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 		deptGrantedRole.users.add(deptAdmin)
 		wireUserLookup(deptGrantedRole.users)
 

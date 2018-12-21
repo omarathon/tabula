@@ -62,6 +62,4 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId with ToEntityRefer
 	@Column(name = "high_level_notified")
 	var unauthorisedHighLevelNotified: DateTime = _
 
-	override def toEntityReference: AttendanceMonitoringCheckpointTotalEntityReference = new AttendanceMonitoringCheckpointTotalEntityReference().put(this)
-
 }

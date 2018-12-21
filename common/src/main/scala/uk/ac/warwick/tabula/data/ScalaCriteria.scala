@@ -69,12 +69,12 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	 * Returns a Java List of the given type. If the result of the query
 	 * doesn't match the requested type you will get a runtime error.
 	 */
-	def listOf[A]: JList[A] = untypedList.asInstanceOf[JList[A]]
+	def listOf[B]: JList[B] = untypedList.asInstanceOf[JList[B]]
 
 	/** Return Some(result), or None if no row matched. */
 	def uniqueResult: Option[A] = uniqueResultOf[A]
 
-	def uniqueResultOf[A]: Option[A] = Option(c.uniqueResult().asInstanceOf[A])
+	def uniqueResultOf[B]: Option[B] = Option(c.uniqueResult().asInstanceOf[B])
 
 	def setResultTransformer[B](resultTransformer: ResultTransformer): ProjectedScalaCriteria[A, B] = {
 		c.setResultTransformer(resultTransformer)

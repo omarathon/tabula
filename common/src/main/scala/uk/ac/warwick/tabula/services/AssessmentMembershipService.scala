@@ -11,8 +11,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
-
 trait AssessmentMembershipService {
 	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
 	def examManualMembershipHelper: UserGroupMembershipHelperMethods[Exam]
@@ -49,7 +47,7 @@ trait AssessmentMembershipService {
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupInfo(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup): Unit
@@ -203,8 +201,8 @@ class AssessmentMembershipServiceImpl
 		uagMap.map { case (uag, currentMembers) =>  UpstreamAssessmentGroupInfo(uag, currentMembers)}.toSeq ++ additional
 	}
 
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =
-		dao.getUpstreamAssessmentGroups(registration)
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] =
+		dao.getUpstreamAssessmentGroups(registration, eagerLoad)
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		dao.getUpstreamAssessmentGroupsNotIn(ids, academicYears)

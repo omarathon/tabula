@@ -377,8 +377,16 @@ object Fixtures extends Mockito {
 	}
 
 	def notification(agent:User, recipient: User): HeronWarningNotification = {
-		val heron = new Heron(recipient)
-		Notification.init(new HeronWarningNotification, agent, heron)
+		val staff = Fixtures.staff("1234567")
+		val student = Fixtures.student("9876543")
+		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+		val meeting = new MeetingRecord
+		meeting.creator = staff
+
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+		meeting.relationships = Seq(relationship)
+		Notification.init(new HeronWarningNotification, agent, meeting)
 	}
 
 	def attendanceMonitoringPoint(

@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.RichSearchHit
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.search.SearchHit
+import com.sksamuel.elastic4s.searches.sort.SortOrder
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -33,6 +34,7 @@ class NotificationQueryServiceImpl extends AbstractQueryService
 		* The name of the index alias that this service reads from
 		*/
 	@Value("${elasticsearch.index.notifications.alias}") var indexName: String = _
+	lazy val index: Index = Index(indexName)
 
 	@Autowired var notificationDao: NotificationDao = _
 
@@ -43,14 +45,14 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 		with ElasticsearchSearching
 		with NotificationDaoComponent =>
 
-	private def toNotifications(hits: Iterable[RichSearchHit]): Seq[Notification[_, _]] =
+	private def toNotifications(hits: Iterable[SearchHit]): Seq[Notification[_, _]] =
 		hits.flatMap { hit =>
 			notificationDao.getById(hit.sourceAsMap("notification").toString)
 		}.toSeq
 
 	override def userStream(req: ActivityStreamRequest): PagedNotifications = {
 		val recipientQuery = Some(termQuery("recipient", req.user.getUserId))
-		val priorityQuery = Some(rangeQuery("priority") from req.priority to 1.0)
+		val priorityQuery = Some(rangeQuery("priority").gte(req.priority).lte(1.0))
 
 		val dismissedQuery =
 			if (req.includeDismissed) None
@@ -58,26 +60,29 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 
 		val typesQuery = req.types.map {
 			case types if types.size == 1 => termQuery("notificationType", types.head)
-			case types => bool { should(types.map { t => termQuery("notificationType", t) }) }
+			case types => boolQuery().should(types.map { t => termQuery("notificationType", t) })
 		}
 
 		val pagingQuery = req.lastUpdatedDate.map { date =>
-			rangeQuery("created") lte DateFormats.IsoDateTime.print(date) includeUpper false
+			rangeQuery("created").lt(DateFormats.IsoDateTime.print(date))
 		}
 
-		val query = bool { must(Seq(recipientQuery, priorityQuery, dismissedQuery, typesQuery, pagingQuery).flatten) }
+		val query = boolQuery().must(Seq(recipientQuery, priorityQuery, dismissedQuery, typesQuery, pagingQuery).flatten)
 
 		// Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread
-		val results =
-			client.execute { searchFor query query sort (field sort "created" order SortOrder.DESC) limit req.max }
-				.await(10.seconds)
+		val response =
+			client.execute {
+				searchRequest.query(query)
+					.sortBy(fieldSort("created").order(SortOrder.Desc))
+					.limit(req.max)
+			}.await(10.seconds)
 
-		val items = toNotifications(results.hits)
+		val items = toNotifications(response.result.hits.hits)
 
 		PagedNotifications(
 			items = items,
 			lastUpdatedDate = items.lastOption.map { _.created },
-			totalHits = results.totalHits
+			totalHits = response.result.totalHits
 		)
 	}
 }

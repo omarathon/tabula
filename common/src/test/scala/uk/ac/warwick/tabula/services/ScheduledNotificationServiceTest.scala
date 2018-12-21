@@ -1,17 +1,11 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification, HeronWarningNotification, Heron, ScheduledNotification}
+import org.hibernate.{Session, SessionFactory}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.{MockScrollableResults, Scrollable, ScheduledNotificationDao}
 import org.mockito.Mockito._
-import org.hibernate.{SessionFactory, Session, ScrollableResults}
-import java.sql.{Clob, Blob}
-import java.util.{Locale, TimeZone, Calendar, Date}
-import java.math.{BigDecimal, BigInteger}
-import java.lang.{Double, Float, Long, Byte, Short}
-import java.lang
-import org.hibernate.`type`.Type
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.{MockScrollableResults, ScheduledNotificationDao, Scrollable}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
@@ -29,26 +23,36 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
 	service.sessionFactory = sessionFactory
 
-	val heron = new Heron()
-	val sn1 = new ScheduledNotification("HeronWarning", heron, DateTime.now.minusDays(1))
+	val staff = Fixtures.staff("1234567")
+	val student = Fixtures.student("9876543")
+	val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+	val meeting = new MeetingRecord
+	meeting.creator = staff
+
+	val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+	meeting.relationships = Seq(relationship)
+
+	val sn1: ScheduledNotification[MeetingRecord] = new ScheduledNotification("HeronWarning", meeting, DateTime.now.minusDays(1))
 	sn1.id = "sn1"
 
-	val sn2 = new ScheduledNotification("HeronDefeat", heron, DateTime.now.minusDays(2))
+	val sn2: ScheduledNotification[MeetingRecord] = new ScheduledNotification("HeronDefeat", meeting, DateTime.now.minusDays(2))
 	sn2.id = "sn2"
 
-	val sn3 = new ScheduledNotification("HeronWarning", heron, DateTime.now.minusDays(3))
+	val sn3: ScheduledNotification[MeetingRecord] = new ScheduledNotification("HeronWarning", meeting, DateTime.now.minusDays(3))
 	sn3.id = "sn3"
 
-	session.get(classOf[ScheduledNotification[_]], "sn1") returns (sn1)
-	session.get(classOf[ScheduledNotification[_]], "sn2") returns (sn2)
-	session.get(classOf[ScheduledNotification[_]], "sn3") returns (sn3)
+	type Entity = MeetingRecord
+	session.get(classOf[ScheduledNotification[Entity]], "sn1") returns sn1.asInstanceOf[ScheduledNotification[Entity]]
+	session.get(classOf[ScheduledNotification[Entity]], "sn2") returns sn2.asInstanceOf[ScheduledNotification[Entity]]
+	session.get(classOf[ScheduledNotification[Entity]], "sn3") returns sn3.asInstanceOf[ScheduledNotification[Entity]]
 
 	val scheduledNotifications = Seq(sn1, sn2, sn3)
 	//val itr = scheduledNotifications.iterator
 
 	val scrollingScheduledNotifications = new MockScrollableResults(scheduledNotifications)
 
-	when (dao.notificationsToComplete) thenReturn (Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]](scrollingScheduledNotifications, session))
+	when (dao.notificationsToComplete) thenReturn Scrollable[ScheduledNotification[_  >: Null <: ToEntityReference]](scrollingScheduledNotifications, session)
 
 	@Test
 	def generateNotifications() {

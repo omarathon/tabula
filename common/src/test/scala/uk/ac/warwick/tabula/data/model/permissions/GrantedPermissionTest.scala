@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.permissions
 
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Fixtures, TestBase}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 
 class GrantedPermissionTest extends TestBase {
 
@@ -17,7 +17,7 @@ class GrantedPermissionTest extends TestBase {
 	val overrideType = true
 
 	@Test def initDepartment {
-		GrantedPermission.canDefineFor(dept) should be (true)
+		GrantedPermission.canDefineFor[Department] should be (true)
 		val gp = GrantedPermission(dept, permission, overrideType)
 		gp.scope should be (dept)
 		gp.permission should be (permission)
@@ -25,7 +25,7 @@ class GrantedPermissionTest extends TestBase {
 	}
 
 	@Test def initModule {
-		GrantedPermission.canDefineFor(module) should be (true)
+		GrantedPermission.canDefineFor[Module] should be (true)
 		val gp = GrantedPermission(module, permission, overrideType)
 		gp.scope should be (module)
 		gp.permission should be (permission)
@@ -33,7 +33,7 @@ class GrantedPermissionTest extends TestBase {
 	}
 
 	@Test def initAssignment {
-		GrantedPermission.canDefineFor(assignment) should be (true)
+		GrantedPermission.canDefineFor[Assignment] should be (true)
 		val gp = GrantedPermission(assignment, permission, overrideType)
 		gp.scope should be (assignment)
 		gp.permission should be (permission)
@@ -41,7 +41,7 @@ class GrantedPermissionTest extends TestBase {
 	}
 
 	@Test def initMember {
-		GrantedPermission.canDefineFor(member) should be (true)
+		GrantedPermission.canDefineFor[Member] should be (true)
 		val gp = GrantedPermission(member, permission, overrideType)
 		gp.scope should be (member)
 		gp.permission should be (permission)
@@ -49,8 +49,13 @@ class GrantedPermissionTest extends TestBase {
 	}
 
 	@Test(expected = classOf[IllegalArgumentException]) def initInvalid {
-		GrantedPermission.canDefineFor(feedback) should be (false)
+		GrantedPermission.canDefineFor[AssignmentFeedback] should be (false)
 		GrantedPermission(feedback, permission, overrideType)
+	}
+
+	@Test def scopeType(): Unit = {
+		GrantedPermission.scopeType[Assignment] should be (Some("Assignment"))
+		GrantedPermission.scopeType[PermissionsTarget] should be (None)
 	}
 
 }

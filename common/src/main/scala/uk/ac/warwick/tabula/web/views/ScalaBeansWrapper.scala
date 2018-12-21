@@ -25,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 	* A implementation of BeansWrapper that support native Scala basic and collection types
 	* in Freemarker template engine.
 	*/
-class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_21) with Logging
+class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_28) with Logging
 	with AutowiringSecurityServiceComponent {
 
 	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
@@ -105,16 +105,16 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 			val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
 			val perms: PermissionsFetcher =
 				if (restrictedAnnotation != null) {
-					(_) => Seq(restrictedAnnotation.value map { name => Permissions.of(name) })
+					_ => Seq(restrictedAnnotation.value map { name => Permissions.of(name) })
 				}
 				else if (restrictionProviderAnnotation != null) {
 					Try(cls.getMethod(restrictionProviderAnnotation.value())) match {
-						case Success(method) => (x) => method.invoke(x).asInstanceOf[Seq[Seq[Permission]]]
+						case Success(method) => x => method.invoke(x).asInstanceOf[Seq[Seq[Permission]]]
 						case Failure(e) => throw new IllegalStateException(
 							"Couldn't find restriction provider method %s(): Seq[Seq[Permission]]".format(restrictionProviderAnnotation.value()), e)
 					}
 				}
-				else (_) => Nil
+				else _ => Nil
 
 			name -> (m, perms)
 		}
@@ -189,7 +189,7 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 		try {
 			Some(wrapper.wrap(Class.forName(objectClass.getName + key + "$").getField("MODULE$").get(null)))
 		} catch {
-			case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
+			case _ @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
 				None
 		}
 	}
