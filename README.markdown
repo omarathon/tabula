@@ -150,7 +150,7 @@ When I ran it locally, it wouldn't start on boot by default, but I could start i
 Set the following properties in your `tabula.properties`:
 
 ```
-elasticsearch.cluster.nodes=lamso-tabula-dev-es.lnx.warwick.ac.uk:9300,lamvi-tabula-dev-es.lnx.warwick.ac.uk:9300,lanlo-tabula-dev-es.lnx.warwick.ac.uk:9300
+elasticsearch.cluster.nodes=amoru.lnx.warwick.ac.uk:9200,amogu.lnx.warwick.ac.uk:9200,amomu.lnx.warwick.ac.uk:9200
 elasticsearch.cluster.name=tabula-dev
 elasticsearch.index.prefix=your-name-goes-here
 ```
