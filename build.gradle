@@ -25,7 +25,7 @@ ext {
     hibernateVersion = "5.4.0.Final"
     jacksonVersion = "2.9.8"
     jacksonScalaModuleVersion = "2.9.8"
-    elasticsearchVersion = "6.5.1"
+    elasticsearchVersion = "6.5.2"
     elastic4sVersion = "6.5.0"
     poiVersion = "4.0.1"
     tilesVersion = "3.0.8"
