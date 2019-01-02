@@ -98,11 +98,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		val query =
 			session.newQuery[Assignment](s"""select a
 			from
-				Assignment a
+				Assignment a, UpstreamAssessmentGroup uag
 					join a.assessmentGroups ag
-					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members uagms with uagms.universityId = :universityId
 			where
+	 				ag.assessmentComponent.moduleCode = uag.moduleCode and
+					ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
 					${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
@@ -116,11 +117,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
-			from SmallGroupSet sgs
+			from SmallGroupSet sgs, UpstreamAssessmentGroup uag
 				join sgs.assessmentGroups ag
-				join ag.assessmentComponent.upstreamAssessmentGroups uag
 				join uag.members uagms with uagms.universityId = :universityId
 			where
+	 			ag.assessmentComponent.moduleCode = uag.moduleCode and
+				ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
 				sgs.deleted = false and sgs.archived = false""")
