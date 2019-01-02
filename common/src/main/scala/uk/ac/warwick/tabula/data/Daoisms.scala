@@ -180,7 +180,14 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	 */
 	protected def inSession(fn: Session => Unit) {
 		val sess = sessionFactory.openSession()
-		try fn(sess) finally sess.close()
+		val tx = sess.beginTransaction()
+
+		try {
+			fn(sess)
+		} finally {
+			tx.commit()
+			sess.close()
+		}
 	}
 
 	implicit def implicitNiceSession(session: Session): NiceQueryCreator = new NiceQueryCreator(session)

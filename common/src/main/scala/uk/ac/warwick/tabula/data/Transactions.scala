@@ -85,8 +85,7 @@ object Transactions extends TransactionAspectSupport {
 			commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
 			result
 		} catch {
-			case t: Throwable => {
-
+			case t: Throwable =>
 				val info = TransactionSupport.currentTransactionInfo
 				if (info != null) {
 					val status = info.getTransactionStatus
@@ -96,9 +95,8 @@ object Transactions extends TransactionAspectSupport {
 				}
 
 				throw t
-			}
 		} finally {
-			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo);
+			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo)
 		}
 	}
 
