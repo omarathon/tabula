@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import org.hibernate.{Session, SessionFactory}
+import org.hibernate.{Session, SessionFactory, Transaction}
 import org.joda.time.DateTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model._
@@ -17,9 +17,11 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 
 	val sessionFactory: SessionFactory = mock[SessionFactory]
 	val session: Session = mock[Session]
+	val transaction: Transaction = mock[Transaction]
 
-	sessionFactory.getCurrentSession() returns (session)
-	sessionFactory.openSession() returns (session)
+	sessionFactory.getCurrentSession() returns session
+	sessionFactory.openSession() returns session
+	session.beginTransaction() returns transaction
 
 	service.sessionFactory = sessionFactory
 
@@ -73,6 +75,8 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
 		for(sn <- scheduledNotifications) {
 			sn.completed should be (true)
 		}
+
+		verify(transaction, times(3)).commit()
 	}
 
 }
