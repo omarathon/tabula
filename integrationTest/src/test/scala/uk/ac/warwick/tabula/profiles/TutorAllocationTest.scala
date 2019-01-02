@@ -130,7 +130,7 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 
 		Then("The changes are saved and I am redirected")
 		eventually {
-			currentUrl should include("/profiles/department/xxx/tutor")
+			currentUrl should endWith("/profiles/department/xxx/tutor")
 		}
 	}
 
