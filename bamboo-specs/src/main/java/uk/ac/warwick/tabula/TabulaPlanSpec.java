@@ -8,6 +8,7 @@ import com.atlassian.bamboo.specs.api.builders.plan.Job;
 import com.atlassian.bamboo.specs.api.builders.plan.Plan;
 import com.atlassian.bamboo.specs.api.builders.plan.Stage;
 import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact;
+import com.atlassian.bamboo.specs.api.builders.plan.configuration.ConcurrentBuilds;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
@@ -114,7 +115,12 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .description("1pm run")
                         .scheduleOnceDaily(LocalTime.of(13, 0))
                 )
-                .customConfig(plan -> plan.variables(new Variable("functionaltestserver", "tabula-test")))
+                .customConfig(plan -> plan
+                    .variables(new Variable("functionaltestserver", "tabula-test"))
+                    .pluginConfigurations(
+                        new ConcurrentBuilds().maximumNumberOfConcurrentBuilds(1)
+                    )
+                )
                 .gradle(
                     "Run functional tests",
                     "Test",
