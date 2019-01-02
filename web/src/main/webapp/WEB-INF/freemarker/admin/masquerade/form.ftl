@@ -14,7 +14,7 @@
 				<p>You are no longer masquerading.</p>
 			</#if>
 
-			<@f.form method="post" action="${url('/admin/masquerade')}" commandName="masqueradeCommand" cssClass="form-inline">
+			<@f.form method="post" action="${url('/admin/masquerade')}" modelAttribute="masqueradeCommand" cssClass="form-inline">
 				<input type="hidden" name="returnTo" value="${returnTo!""}" />
 				<@f.errors cssClass="error form-errors" />
 				<@bs3form.form_group>
@@ -31,7 +31,7 @@
 
 				<p>Masquerading as ${user.apparentId} (${user.apparentUser.fullName}).</p>
 
-				<@f.form method="post" action="${url('/admin/masquerade')}">
+				<@f.form method="post" action="${url('/admin/masquerade')}" modelAttribute="">
 					<input type="hidden" name="returnTo" value="${returnTo!""}" />
 					<input type="hidden" name="action" value="remove" />
 					<button type="submit" class="btn btn-default">Unmask</button>

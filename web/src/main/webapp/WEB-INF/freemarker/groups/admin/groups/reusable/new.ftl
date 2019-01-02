@@ -2,7 +2,7 @@
 <#escape x as x?html>
 	<h1>Create a set of reusable small groups</h1>
 
-	<@f.form id="newGroups" method="POST" commandName="createDepartmentSmallGroupSetCommand">
+	<@f.form id="newGroups" method="POST" modelAttribute="createDepartmentSmallGroupSetCommand">
 		<#assign fakeSet = {'groups':[]} />
 		<@components.reusable_set_wizard true 'properties' fakeSet />
 

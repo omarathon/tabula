@@ -22,7 +22,7 @@
 
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 
-		<@f.form method="post" action="${url('/sysadmin/permissions-helper')}">
+		<@f.form method="post" action="${url('/sysadmin/permissions-helper')}" modelAttribute="">
 			<input type="hidden" name="user" value="${originalException.user.userId}" />
 
 			<#if originalException.scope??>

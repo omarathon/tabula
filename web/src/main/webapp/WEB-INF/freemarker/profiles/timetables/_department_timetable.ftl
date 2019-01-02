@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<@f.form commandName="command" action=submitUrl method="POST" cssClass="form-inline">
+<@f.form modelAttribute="command" action=submitUrl method="POST" cssClass="form-inline">
 	<@f.hidden path="from" />
 	<@f.hidden path="to" />
 

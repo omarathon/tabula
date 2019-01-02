@@ -6,7 +6,7 @@
 	</div>
 
 	<div class="fix-area">
-		<@f.form id="newGroups" method="POST" commandName="command" class="dirty-check">
+		<@f.form id="newGroups" method="POST" modelAttribute="command" class="dirty-check">
 			<@components.set_wizard true 'groups' smallGroupSet />
 
 			<#include "_editGroups.ftl" />

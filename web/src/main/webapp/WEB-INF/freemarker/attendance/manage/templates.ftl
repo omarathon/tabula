@@ -36,7 +36,7 @@
 		</div>
 	</#if>
 
-	<@f.form action="" method="POST" commandName="command">
+	<@f.form action="" method="POST" modelAttribute="command">
 
 		<#list schemes as scheme>
 			<@f.hidden path="schemes"/>

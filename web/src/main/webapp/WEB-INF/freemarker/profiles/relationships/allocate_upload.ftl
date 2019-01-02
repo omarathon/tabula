@@ -22,7 +22,7 @@
 
 	<#assign hasRows = validRows?has_content />
 
-	<@f.form method="post" action="${previewFormAction}" commandName="command">
+	<@f.form method="post" action="${previewFormAction}" modelAttribute="command">
 		<div class="fix-area">
 			<div class="deptheader">
 				<h1>Spreadsheet upload of ${relationshipType.description} changes</h1>

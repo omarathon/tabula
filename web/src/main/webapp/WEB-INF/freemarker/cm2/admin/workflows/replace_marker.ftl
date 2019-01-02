@@ -9,7 +9,7 @@
 	method="POST"
 	class="double-submit-protection"
 	action="${formAction}"
-	commandName="replaceMarkerCommand"
+	modelAttribute="replaceMarkerCommand"
 >
 	<@f.errors cssClass="error form-errors" />
 

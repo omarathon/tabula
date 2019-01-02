@@ -6,7 +6,7 @@
 	method="post"
 	class="form-horizontal"
 	action=submitUrl
-	commandName="editFeedbackTemplateCommand">
+	modelAttribute="editFeedbackTemplateCommand">
 		<@f.hidden path="id"/>
 		<@form.labelled_row "file.upload" "Update feedback template">
 			<input type="file" name="file.upload" />

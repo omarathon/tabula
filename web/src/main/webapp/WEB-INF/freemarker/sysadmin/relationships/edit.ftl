@@ -2,7 +2,7 @@
 
 <h1>Edit student relationship type: ${relationshipType.description}</h1>
 
-<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/edit')}" commandName="editStudentRelationshipTypeCommand">
+<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/edit')}" modelAttribute="editStudentRelationshipTypeCommand">
 
 	<@f.errors cssClass="error form-errors" />
 

@@ -9,7 +9,7 @@
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.groups.printRegisters department academicYear /></#assign>
-	<@f.form method="post" action="${submitUrl}.pdf" commandName="command">
+	<@f.form method="post" action="${submitUrl}.pdf" modelAttribute="command">
 
 		<@bs3form.errors path="" />
 

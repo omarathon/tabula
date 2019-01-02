@@ -2,7 +2,7 @@
 
 <#assign hasRows = command.sheetFirstMarkers?has_content || command.sheetSecondMarkers?has_content />
 
-<@f.form method="post" action=assignMarkersURL commandName="command">
+<@f.form method="post" action=assignMarkersURL modelAttribute="command">
 
 	<h1>Spreadsheet upload of marker assignment</h1>
 	<h4><span class="muted">for</span> ${assessment.name}</h4>

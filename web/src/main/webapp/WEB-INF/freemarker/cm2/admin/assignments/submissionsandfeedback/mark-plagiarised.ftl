@@ -4,7 +4,7 @@
 <@cm2.assignmentHeader "Plagiarism investigation" assignment "for" />
 
 <#assign formAction><@routes.cm2.plagiarismInvestigation assignment /></#assign>
-<@f.form method="post" action=formAction commandName="command">
+<@f.form method="post" action=formAction modelAttribute="command">
 	<@bs3form.errors path="" />
 	<@f.hidden path="markPlagiarised" />
 	<input type="hidden" name="confirmScreen" value="true" />

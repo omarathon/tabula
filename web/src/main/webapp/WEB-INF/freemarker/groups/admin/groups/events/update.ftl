@@ -14,7 +14,7 @@
 
 <p>Here are all the small group events for <@fmt.module_name module false /> in the central timetabling system Syllabus+.</p>
 
-	<@f.form method="post" action="" commandName="command" cssClass="form-horizontal">
+	<@f.form method="post" action="" modelAttribute="command" cssClass="form-horizontal">
 		<@f.errors cssClass="error form-errors" />
 		<@f.errors path="index" cssClass="error form-errors" />
 

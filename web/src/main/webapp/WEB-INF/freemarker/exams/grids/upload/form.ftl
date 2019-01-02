@@ -29,7 +29,7 @@
 			Any students without an academic year specified will default to <b>${academicYear.toString}</b>.
 		</p>
 
-		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 			<input name="isfile" value="true" type="hidden"/>
 			<h3>Select file</h3>
 			<p id="multifile-column-description">
@@ -61,7 +61,7 @@
 			</div>
 		</div>
 
-		<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+		<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 			<div class="fix-area">
 				<input name="isfile" value="false" type="hidden"/>
 				<div class="marksUpload">

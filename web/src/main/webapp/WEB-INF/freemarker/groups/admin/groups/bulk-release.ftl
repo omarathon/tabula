@@ -7,7 +7,7 @@
 	</div>
 </#if>
 
-<@f.form method="post" action="" commandName="moduleList">
+<@f.form method="post" action="" modelAttribute="moduleList">
 	<p>Publish these groups so they are shown in Tabula to:</p>
 	<@bs3form.checkbox path="notifyStudents">
 		<@f.checkbox path="notifyStudents"/> Students

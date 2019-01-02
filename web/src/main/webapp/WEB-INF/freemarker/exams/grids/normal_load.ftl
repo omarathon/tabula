@@ -67,7 +67,7 @@
 
 <div class="fix-area normal-load-editor">
 
-	<@f.form method="post" action="${formUrl}" commandName="command" cssClass="dirty-check">
+	<@f.form method="post" action="${formUrl}" modelAttribute="command" cssClass="dirty-check">
 
 		<@spring.bind path="command">
 			<#if (status.errors.allErrors?size > 0)>

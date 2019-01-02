@@ -23,7 +23,7 @@
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.coursework.marksmanagementdepts /></#assign>
-<@f.form commandName="command" action=submitUrl>
+<@f.form modelAttribute="command" action=submitUrl>
 
 
 	<@form.label checkbox=true>

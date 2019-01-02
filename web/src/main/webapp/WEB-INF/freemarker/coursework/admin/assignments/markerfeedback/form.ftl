@@ -2,7 +2,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 <#assign submitUrl><@routes.coursework.uploadmarkerfeedback assignment marker /></#assign>
-<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addMarkerFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action=submitUrl modelAttribute="addMarkerFeedbackCommand">
 <input type="hidden" name="batch" value="true">
 <h1>Submit feedback for ${assignment.name}</h1>
 <p>

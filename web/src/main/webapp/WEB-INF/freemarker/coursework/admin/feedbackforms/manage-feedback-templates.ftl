@@ -7,7 +7,7 @@
 		 method="post"
 		 class="form-horizontal"
 		 action=submitUrl
-		 commandName="bulkFeedbackTemplateCommand">
+		 modelAttribute="bulkFeedbackTemplateCommand">
 	<@form.labelled_row "file.upload" "Upload feedback forms">
 		<input type="file" id="file.upload" name="file.upload" multiple />
 		<div id="multifile-column-description" class="help-block">

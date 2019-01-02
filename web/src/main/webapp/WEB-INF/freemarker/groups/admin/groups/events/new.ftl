@@ -9,7 +9,7 @@
 		<h4 class="with-related"><span class="muted">for</span> ${smallGroup.name}</h4>
 	</div>
 
-	<@f.form method="post" action="" commandName="createSmallGroupEventCommand">
+	<@f.form method="post" action="" modelAttribute="createSmallGroupEventCommand">
 		<@f.errors cssClass="error form-errors" />
 
 		<#assign newRecord=true />

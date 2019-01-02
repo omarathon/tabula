@@ -1,7 +1,7 @@
 <#compress>
 <#escape x as x?html>
 
-<@f.form action="/app/tell-us" method="post" commandName="appCommentCommand" id="app-comment-form">
+<@f.form action="/app/tell-us" method="post" modelAttribute="appCommentCommand" id="app-comment-form">
 
 	<p>
 		Do you have a comment, complaint or suggestion related to this application? Let us know here.

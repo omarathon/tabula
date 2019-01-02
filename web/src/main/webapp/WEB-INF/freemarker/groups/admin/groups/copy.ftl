@@ -23,7 +23,7 @@
 </#if>
 
 <div class="fix-area">
-	<@f.form method="post" action=submitUrl commandName="copySmallGroupSetsCommand">
+	<@f.form method="post" action=submitUrl modelAttribute="copySmallGroupSetsCommand">
 		<input type="hidden" name="action" value="submit" id="action-submit">
 
 		<@bs3form.labelled_form_group path="sourceAcademicYear" labelText="From academic year">

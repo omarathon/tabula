@@ -119,7 +119,7 @@
 		method="post"
 		class="modify-extension double-submit-protection"
 		action="${formAction}"
-		commandName="editExtensionCommand"
+		modelAttribute="editExtensionCommand"
 		>
 	</@f.form>
 
@@ -140,7 +140,7 @@
 <#escape x as x?html>
 	<div class="content extension-detail">
 		<#assign actionUrl><@routes.cm2.extensiondetail assignment usercode /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" action=actionUrl id="editExtensionCommand" commandName="editExtensionCommand" cssClass="form-horizontal double-submit-protection modify-extension">
+		<@f.form method="post" enctype="multipart/form-data" action=actionUrl id="editExtensionCommand" modelAttribute="editExtensionCommand" cssClass="form-horizontal double-submit-protection modify-extension">
 			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate!""}" />
 
 			<#if detail.extension?has_content>

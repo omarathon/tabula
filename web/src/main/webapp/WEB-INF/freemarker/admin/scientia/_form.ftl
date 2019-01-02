@@ -1,4 +1,4 @@
-<@f.form method="post" commandName="command">
+<@f.form method="post" modelAttribute="command">
 	<@bs3form.labelled_form_group labelText="Syllabus+ name" path="upstreamName">
 		<@f.input class="form-control" path="upstreamName" />
 	</@bs3form.labelled_form_group>

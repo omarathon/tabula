@@ -2,7 +2,7 @@
 
 <h1>Upload missed monitoring points to SITS e:Vision</h1>
 
-<@f.form commandName="command" action="" method="POST">
+<@f.form modelAttribute="command" action="" method="POST">
 
 	<#if command.availablePeriods?size == 0>
 		<div class="alert alert-info">

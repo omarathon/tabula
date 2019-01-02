@@ -78,7 +78,7 @@
 					You can use this <a href="${templateUrl}" >generated spreadsheet</a> as a template.
 					Note that you can upload just marks, or marks and grades.
 				</p>
-				<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
+				<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="${commandName}">
 					<input name="isfile" value="true" type="hidden"/>
 					<h3>Select file</h3>
 					<@bs3form.filewidget
@@ -123,7 +123,7 @@
 						</div>
 					</div>
 				</#if>
-				<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" commandName="${commandName}">
+				<@f.form id="marks-web-form" method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="${commandName}">
 					<div class="fix-area">
 						<input name="isfile" value="false" type="hidden"/>
 						<div class="marksUpload">

@@ -278,7 +278,7 @@
 </#if>
 
 <#if errors.hasErrors()>
-	<@f.form method="post" enctype="multipart/form-data" action="" commandName="command" cssClass="double-submit-protection">
+	<@f.form method="post" enctype="multipart/form-data" action="" modelAttribute="command" cssClass="double-submit-protection">
 		<@bs3form.filewidget basename="file" types=[] multiple=false labelText="Choose your spreadsheet" />
 
 		<div class="fix-footer">
@@ -287,7 +287,7 @@
 		</div>
 	</@f.form>
 <#else>
-	<@f.form method="post" action="" commandName="command" cssClass="double-submit-protection">
+	<@f.form method="post" action="" modelAttribute="command" cssClass="double-submit-protection">
 		<#list command.file.attached as attached>
 			<input type="hidden" name="file.attached" value="${attached.id}">
 		</#list>

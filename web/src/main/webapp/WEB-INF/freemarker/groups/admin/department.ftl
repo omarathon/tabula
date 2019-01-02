@@ -211,7 +211,7 @@
 		<#-- Filtering -->
 		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">
-				<@f.form commandName="adminCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
+				<@f.form modelAttribute="adminCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
 					<@f.errors cssClass="error form-errors" />
 
 					<div class="small-groups-filter btn-group-group well well-sm">

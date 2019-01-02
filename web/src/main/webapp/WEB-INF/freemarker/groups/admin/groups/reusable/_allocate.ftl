@@ -64,7 +64,7 @@
 				</@spring.hasBindErrors>
 
 				<div class="fix-area">
-					<@f.form method="post" action="${submitUrl}" commandName="command" cssClass="allocateStudentsToGroupsCommand">
+					<@f.form method="post" action="${submitUrl}" modelAttribute="command" cssClass="allocateStudentsToGroupsCommand">
 						<div class="tabula-dnd"
 							 data-item-name="student"
 							 data-text-selector=".name h6"
@@ -186,7 +186,7 @@
 
 			<div class="tab-pane" id="allocategroups-tab2">
 
-				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" commandName="command">
+				<@f.form method="post" enctype="multipart/form-data" action="${submitUrl}" modelAttribute="command">
 
 					<p>You can allocate students to groups using a spreadsheet.</p>
 

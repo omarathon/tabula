@@ -73,7 +73,7 @@
 				<@attendance_macros.checkpointDescription department=checkpoint.point.scheme.department checkpoint=checkpoint point=point student=attendanceNote.student/>
 			</#if>
 
-			<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
+			<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" modelAttribute="command" class="double-submit-protection">
 
 				<@bs3form.labelled_form_group "absenceType" "Absence type">
 					<@f.select path="absenceType" cssClass="form-control">

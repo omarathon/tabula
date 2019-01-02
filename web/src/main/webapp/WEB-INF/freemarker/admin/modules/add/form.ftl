@@ -5,7 +5,7 @@
 <#assign commandName="addModuleCommand" />
 <#assign command=addModuleCommand />
 <#assign submitUrl><@routes.admin.createmodule department /></#assign>
-<@f.form method="post" action="${submitUrl}" commandName=commandName>
+<@f.form method="post" action="${submitUrl}" modelAttribute=commandName>
 	<@f.errors cssClass="error form-errors" />
 
 	<@f.hidden path="department" />

@@ -5,7 +5,7 @@
 		<@cm2.assignmentHeader "Generic feedback" assignment "for" />
 	</#if>
 
-	<@f.form  method="post" commandName="command" action="${submit_url}">
+	<@f.form  method="post" modelAttribute="command" action="${submit_url}">
 		<@bs3form.labelled_form_group>
 			<@f.textarea path="genericFeedback" cssClass="form-control text big-textarea" maxlength=4000 />
 		</@bs3form.labelled_form_group>

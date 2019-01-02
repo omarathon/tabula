@@ -2,7 +2,7 @@
 
 <h1>Add a new student relationship type</h1>
 
-<@f.form method="post" action="${url('/sysadmin/relationships/add')}" commandName="addStudentRelationshipTypeCommand">
+<@f.form method="post" action="${url('/sysadmin/relationships/add')}" modelAttribute="addStudentRelationshipTypeCommand">
 
 	<@f.errors cssClass="error form-errors" />
 
