@@ -57,7 +57,7 @@
 							$('.progress .progress-bar').addClass('progress-bar-success').removeClass('active');
 							$('#downloadLink').removeClass('hidden');
 
-							window.location = '<@routes.exams.downloadGridDocument department academicYear job />';
+							window.location = '<#noescape><@routes.exams.downloadGridDocument department academicYear job /></#noescape>';
 						} else {
 							$('.progress .progress-bar').addClass('progress-bar-danger').removeClass('active');
 							$('.job-status').text(data.status);

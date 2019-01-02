@@ -57,7 +57,7 @@
 		var updateProgress = function(){
 			$.post('<@routes.exams.generateModuleGridProgress department academicYear />', {'jobId': '${jobId}'}, function(data){
 				if (data.finished) {
-					window.location = '<@routes.exams.generateModuleGridPreview department academicYear />?module=${module.code}';
+					window.location = '<#noescape><@routes.exams.generateModuleGridPreview department academicYear />?module=${module.code}</#noescape>';
 				} else {
 					if (data.progress) {
 						$('.progress .progress-bar').css('width', data.progress + '%');

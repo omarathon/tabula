@@ -80,7 +80,7 @@
 				},
 				success: function(data){
 					if (data.finished) {
-						window.location = '<#noescape><@routes.exams.generateGridPreview department academicYear />?${gridOptionsQueryString?url}</#noescape>';
+						window.location = '<#noescape><@routes.exams.generateGridPreview department academicYear />?${gridOptionsQueryString}</#noescape>';
 					} else {
 						if (data.progress) {
 							$('.progress .progress-bar').css('width', data.progress + '%');

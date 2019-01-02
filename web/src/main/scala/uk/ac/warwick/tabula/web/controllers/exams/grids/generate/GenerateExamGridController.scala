@@ -326,22 +326,21 @@ class GenerateExamGridController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
-		val jobInstance = Option(jobId).flatMap(jobService.getInstance)
-		if (jobInstance.isDefined && !jobInstance.get.finished) {
+		Option(jobId).flatMap(jobService.getInstance).filterNot(_.finished).map { jobInstance =>
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
 				(Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
 			).sortBy(_._2)
 			commonCrumbs(
 				Mav("exams/grids/generate/jobProgress",
 					"jobId" -> jobId,
-					"jobProgress" -> jobInstance.get.progress,
-					"jobStatus" -> jobInstance.get.status,
+					"jobProgress" -> jobInstance.progress,
+					"jobStatus" -> jobInstance.status,
 					"studentLastImportDates" -> studentLastImportDates
 				),
 				department,
 				academicYear
 			)
-		} else {
+		}.getOrElse {
 			redirectToAndClearModel(Grids.preview(department, academicYear), allRequestParams)
 		}
 	}
