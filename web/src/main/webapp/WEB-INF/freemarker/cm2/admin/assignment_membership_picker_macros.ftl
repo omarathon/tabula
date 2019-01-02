@@ -72,16 +72,18 @@
 					</a>
 				</p>
 				<script>
-					$(function() {
-						var visible = false;
+					(function ($) {
+						$(function() {
+							var visible = false;
 
-						$('#toggleNotInUseComponents').on('click', function () {
-							visible = !visible;
-							$('#sits-table [data-in-use=false]').toggle('fast');
-							$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
-							return false;
+							$('#toggleNotInUseComponents').on('click', function () {
+								visible = !visible;
+								$('#sits-table [data-in-use=false]').toggle('fast');
+								$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
+								return false;
+							});
 						});
-					});
+					})(jQuery);
 				</script>
 			</#if>
 			<div class="sits-picker">
