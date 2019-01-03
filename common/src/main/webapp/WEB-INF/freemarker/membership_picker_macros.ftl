@@ -511,7 +511,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 						$m.modal('hide');
 					},
 					success: function(data, status) {
-						$m.on('hidden.bs.modal', function() {
+						$m.one('hidden.bs.modal', function() {
 							$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
 							//TAB-3975 - to fix footer window positioning, trigger resize
 							$(window).trigger('resize');
@@ -520,7 +520,6 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							$enrolment.data('open', true);
 							initEnrolment();
 							alertPending();
-							$m.off('hidden.bs.modal');
 						});
 						$m.modal('hide');
 					}
