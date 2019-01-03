@@ -347,18 +347,16 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							</a>
 						</p>
 						<script>
-							(function($) {
-								$(function() {
-									var visible = false;
+							jQuery(function($) {
+								var visible = false;
 
-									$('#toggleNotInUseComponents').on('click', function () {
-										visible = !visible;
-										$('#sits-table [data-in-use=false]').toggle('fast');
-										$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
-										return false;
-									});
+								$('#toggleNotInUseComponents').on('click', function () {
+									visible = !visible;
+									$('#sits-table [data-in-use=false]').toggle('fast');
+									$(this).blur().children('span').text(visible ? 'Hide' : 'Show');
+									return false;
 								});
-							})(jQuery);
+							});
 						</script>
 					</#if>
 				</@modal.body>
