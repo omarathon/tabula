@@ -511,15 +511,17 @@ Generates the bulk of the picker HTML, inside a fieldset element
 						$m.modal('hide');
 					},
 					success: function(data, status) {
+						$m.one('hidden.bs.modal', function() {
+							$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
+							//TAB-3975 - to fix footer window positioning, trigger resize
+							$(window).trigger('resize');
+							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+							$enrolment.find('.${classifier}Modals').html($(data).find('.${classifier}Modals').contents());
+							$enrolment.data('open', true);
+							initEnrolment();
+							alertPending();
+						});
 						$m.modal('hide');
-						$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
-						//TAB-3975 - to fix footer window positioning, trigger resize
-						$(window).trigger('resize');
-						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
-						$enrolment.find('.${classifier}Modals').html($(data).find('.${classifier}Modals').contents());
-						$enrolment.data('open', true);
-						initEnrolment();
-						alertPending();
 					}
 				});
 			}
@@ -539,13 +541,15 @@ Generates the bulk of the picker HTML, inside a fieldset element
 						$m.modal('hide');
 					},
 					success: function(data, status) {
+						$m.one('hidden.bs.modal', function() {
+							$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
+							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+							$enrolment.find('.${classifier}Modals').html($(data).find('.${classifier}Modals').contents());
+							$enrolment.data('open', true);
+							initEnrolment();
+							alertPending();
+						});
 						$m.modal('hide');
-						$enrolment.find('.${classifier}EnrolmentInner').html($(data).find('.${classifier}EnrolmentInner').contents());
-						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
-						$enrolment.find('.${classifier}Modals').html($(data).find('.${classifier}Modals').contents());
-						$enrolment.data('open', true);
-						initEnrolment();
-						alertPending();
 					}
 				});
 			}
