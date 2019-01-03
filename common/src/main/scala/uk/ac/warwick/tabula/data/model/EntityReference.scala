@@ -69,8 +69,7 @@ object EntityReference {
 		case t if isSubtype(t, classOf[Module]) => true
 		case t if isSubtype(t, classOf[Extension]) => true
 		case t if isSubtype(t, classOf[StudentRelationship]) => true
-		case t if isSubtype(t, classOf[MeetingRecord]) => true
-		case t if isSubtype(t, classOf[ScheduledMeetingRecord]) => true
+		case t if isSubtype(t, classOf[AbstractMeetingRecord]) => true
 		case t if isSubtype(t, classOf[MeetingRecordApproval]) => true
 		case t if isSubtype(t, classOf[SmallGroup]) => true
 		case t if isSubtype(t, classOf[SmallGroupSet]) => true
