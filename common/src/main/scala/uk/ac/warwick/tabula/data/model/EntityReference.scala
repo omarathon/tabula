@@ -64,8 +64,7 @@ object EntityReference {
 	def supports(cls: Class[_]): Boolean = cls match {
 		case t if isSubtype(t, classOf[Assignment]) => true
 		case t if isSubtype(t, classOf[Submission]) => true
-		case t if isSubtype(t, classOf[AssignmentFeedback]) => true
-		case t if isSubtype(t, classOf[ExamFeedback]) => true
+		case t if isSubtype(t, classOf[Feedback]) => true
 		case t if isSubtype(t, classOf[MarkerFeedback]) => true
 		case t if isSubtype(t, classOf[Module]) => true
 		case t if isSubtype(t, classOf[Extension]) => true
