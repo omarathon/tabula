@@ -61,34 +61,5 @@ class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
 }
 
 object EntityReference {
-	def supports(cls: Class[_]): Boolean = cls match {
-		case t if isSubtype(t, classOf[Assignment]) => true
-		case t if isSubtype(t, classOf[Submission]) => true
-		case t if isSubtype(t, classOf[Feedback]) => true
-		case t if isSubtype(t, classOf[MarkerFeedback]) => true
-		case t if isSubtype(t, classOf[Module]) => true
-		case t if isSubtype(t, classOf[Extension]) => true
-		case t if isSubtype(t, classOf[StudentRelationship]) => true
-		case t if isSubtype(t, classOf[AbstractMeetingRecord]) => true
-		case t if isSubtype(t, classOf[MeetingRecordApproval]) => true
-		case t if isSubtype(t, classOf[SmallGroup]) => true
-		case t if isSubtype(t, classOf[SmallGroupSet]) => true
-		case t if isSubtype(t, classOf[SmallGroupEvent]) => true
-		case t if isSubtype(t, classOf[SmallGroupEventOccurrence]) => true
-		case t if isSubtype(t, classOf[DepartmentSmallGroupSet]) => true
-		case t if isSubtype(t, classOf[DepartmentSmallGroup]) => true
-		case t if isSubtype(t, classOf[OriginalityReport]) => true
-		case t if isSubtype(t, classOf[Department]) => true
-		case t if isSubtype(t, classOf[Exam]) => true
-		case t if isSubtype(t, classOf[AttendanceMonitoringScheme]) => true
-		case t if isSubtype(t, classOf[AttendanceMonitoringCheckpointTotal]) => true
-		case t if isSubtype(t, classOf[MonitoringPointReport]) => true
-		case _ => false
-	}
-
-	private def isSubtype[A, B](self: Class[A], other: Class[B]) = other.isAssignableFrom(self)
-
-	def apply[A >: Null <: ToEntityReference](entity: A): EntityReference[A] =
-		if (supports(entity.getClass)) new EntityReference[A].put(entity)
-		else throw new IllegalArgumentException(s"Unsupported EntityReference for ${entity.getClass}")
+	def apply[A >: Null <: ToEntityReference](entity: A): EntityReference[A] = new EntityReference[A].put(entity)
 }
