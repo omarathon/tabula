@@ -72,7 +72,7 @@
 					</a>
 				</p>
 				<script>
-					$(function() {
+					jQuery(function($) {
 						var visible = false;
 
 						$('#toggleNotInUseComponents').on('click', function () {

@@ -347,7 +347,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							</a>
 						</p>
 						<script>
-							$(function() {
+							jQuery(function($) {
 								var visible = false;
 
 								$('#toggleNotInUseComponents').on('click', function () {
