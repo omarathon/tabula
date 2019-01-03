@@ -75,7 +75,7 @@ jQuery.fn.expandingTable = function(options) {
 						var $contentCell = $(this).closest(contentCellSelector);
 
 						// Add bottom padding equivalent to the height of the content to the content cell
-						var cellPosition = $contentCell.position();
+						var cellTop = $contentCell.offset().top;
 
 						var tablePosition = $table.position();
 
@@ -85,8 +85,7 @@ jQuery.fn.expandingTable = function(options) {
 							var offsetParentPosition = $offsetParent.position();
 
 							// Adjust the cell position to account for the placement of the table
-							cellPosition.top += offsetParentPosition.top;
-							cellPosition.left += offsetParentPosition.left;
+							cellTop += offsetParentPosition.top;
 
 							tablePosition.left += offsetParentPosition.left;
 							tablePosition.left += $offsetParent.scrollLeft();
@@ -101,7 +100,7 @@ jQuery.fn.expandingTable = function(options) {
 
 						// Position the content div in the correct location
 						$content.css({
-							top: cellPosition.top + cellHeight,
+							top: cellTop + cellHeight,
 							left: tablePosition.left
 						});
 					}
