@@ -122,7 +122,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 	/**
 		* Indexes a specific given list of items.
 		*/
-	def indexItems(items: TraversableOnce[A]): Future[ElasticsearchIndexingResult] = transactional(readOnly = true) {
+	def indexItems(items: TraversableOnce[A]): Future[ElasticsearchIndexingResult] = {
 		doIndexItems(items)
 	}
 
@@ -149,7 +149,7 @@ trait ElasticsearchIndexing[A <: Identifiable] extends Logging {
 		}
 	}
 
-	def indexFrom(startDate: DateTime): Future[ElasticsearchIndexingResult] = transactional(readOnly = true) {
+	def indexFrom(startDate: DateTime): Future[ElasticsearchIndexingResult] = {
 		guardMultipleIndexes { ensureIndexExists().flatMap { _ =>
 			// Keep going until we run out
 
