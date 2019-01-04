@@ -41,13 +41,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		And("student1-4 are members")
 		createRoute(TEST_ROUTE_CODE, TEST_DEPARTMENT_CODE, "Test Route")
 		createCourse(TEST_COURSE_CODE, "Test Course")
-		createStudentMember(
-			P.Student1.usercode,
-			routeCode = TEST_ROUTE_CODE,
-			courseCode = TEST_COURSE_CODE,
-			deptCode = TEST_DEPARTMENT_CODE,
-			academicYear = AcademicYear.now().startYear.toString
-		)
+
 		// Make them at the same time.
 		val concurrentJobs = Seq(
 			assessmentFuture,

@@ -424,8 +424,6 @@ class AssignmentFeedback extends Feedback {
 
 	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
-	override def toEntityReference: AssignmentFeedbackEntityReference = new AssignmentFeedbackEntityReference().put(this)
-
 	override def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
 		val currentStages = outstandingStages.asScala
 		val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
@@ -464,8 +462,6 @@ class ExamFeedback extends Feedback {
 	override def assessmentGroups: JavaImports.JList[AssessmentGroup] = exam.assessmentGroups
 
 	def permissionsParents: Stream[Exam] = Option(exam).toStream
-
-	override def toEntityReference: ExamFeedbackEntityReference = new ExamFeedbackEntityReference().put(this)
 
 }
 

@@ -12,8 +12,8 @@ object HeronWarningNotification {
 
 @Entity
 @DiscriminatorValue(value="HeronWarning")
-class HeronWarningNotification extends Notification[Heron, Unit]
-	with SingleItemNotification[Heron] with SingleRecipientNotification
+class HeronWarningNotification extends Notification[MeetingRecord, Unit]
+	with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
 	with MyWarwickActivity {
 
 	import HeronWarningNotification._
@@ -24,14 +24,14 @@ class HeronWarningNotification extends Notification[Heron, Unit]
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
 	def urlTitle = "see how evil herons really are"
-	def recipient: User = item.entity.victim
+	def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
 }
 
 @Entity
 @DiscriminatorValue(value="HeronDefeat")
-class HeronDefeatedNotification extends Notification[Heron, Unit]
-with SingleItemNotification[Heron] with SingleRecipientNotification
+class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
+with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
 	with MyWarwickActivity {
 
 	import HeronWarningNotification._
@@ -42,30 +42,10 @@ with SingleItemNotification[Heron] with SingleRecipientNotification
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
 	def urlTitle = "wallow in glory"
-	def recipient: User = item.entity.victim
+	def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
 }
 
-@Entity
-class Heron extends GeneratedId with ToEntityReference {
-
-	def this(v: User) = {
-		this()
-		victim = v
-	}
-
-	type Entity = Heron
-	def toEntityReference: HeronEntityReference = new HeronEntityReference().put(this)
-
-	@Type(`type`="uk.ac.warwick.tabula.data.model.SSOUserType")
-	var victim: User = null
-}
-
-@Entity @DiscriminatorValue(value="heron")
-class HeronEntityReference extends EntityReference[Heron] {
-	@ManyToOne()
-	var entity: Entity = null
-}
 /*
                                        _____
                                  _.::::::::::::-.

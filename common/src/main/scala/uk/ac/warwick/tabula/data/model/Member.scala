@@ -7,13 +7,11 @@ import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
@@ -138,11 +136,6 @@ abstract class Member
 	def permissionsParents: Stream[PermissionsTarget] = touchedDepartments
 	override def humanReadableId: String = fullName.getOrElse(toString())
 	override final def urlCategory = "member"
-
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
 
 	override def postLoad() {
 		ensureSettings
@@ -339,7 +332,7 @@ class StudentMember extends Member with StudentProperties {
 		// TAB-3598 - Add study departments and routes for any current course
 		val currentCourses = freshStudentCourseDetails.filterNot(_.isEnded)
 		val studyDepartments = currentCourses.flatMap { scd => Option(scd.department) }
-		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.map { _.currentRoute }.toStream
+		val currentCourseRoutes: Stream[PermissionsTarget] = currentCourses.flatMap { c => Option(c.currentRoute) }.toStream
 
 		// Cache the def result
 		val mostSignificantCourse = mostSignificantCourseDetails
@@ -423,37 +416,38 @@ class StudentMember extends Member with StudentProperties {
 	def isPGT: Boolean = groupName == "Postgraduate (taught) FT" || groupName == "Postgraduate (taught) PT"
 	def isUG: Boolean = groupName == "Undergraduate - full-time" || groupName == "Undergraduate - part-time"
 
-	def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false): ExamGridEntity = {
-		val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
-			.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
-			.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
+	def toExamGridEntity(baseSCYD: StudentCourseYearDetails, basedOnLevel: Boolean = false): ExamGridEntity =
+		RequestLevelCache.cachedBy("StudentMember.toExamGridEntity", s"$universityId-${baseSCYD.id}-$basedOnLevel") {
+			val allSCYDs: Seq[StudentCourseYearDetails] = freshOrStaleStudentCourseDetails.toSeq.sorted
+				.flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
+				.takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 
-		val years = if (basedOnLevel) {
-			// groups by level preserving the order in which they appear for this student
-			// add index to the scyd list and group by level
-			//student can be on multiple courses but we need only the one based on baseSCYD level
-			val groupedByLevelUnordered = allSCYDs.filter(_.studyLevel == baseSCYD.studyLevel).zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
-			// sort by the index
-			val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
-			// remove the index once sorted
-			val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map { case(scyds, _) => scyds })
-			groupedByLevel.values.toSeq.zipWithIndex
-				.map{ case (scyds, index) => (index+1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index+1, scyds: _*))) }.toMap
-		} else {
-			(1 to baseSCYD.yearOfStudy).map(year =>
-				year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
-			).toMap
+			val years = if (basedOnLevel) {
+				// groups by level preserving the order in which they appear for this student
+				// add index to the scyd list and group by level
+				//student can be on multiple courses but we need only the one based on baseSCYD level
+				val groupedByLevelUnordered = allSCYDs.filter(_.studyLevel == baseSCYD.studyLevel).zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
+				// sort by the index
+				val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
+				// remove the index once sorted
+				val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map { case(scyds, _) => scyds })
+				groupedByLevel.values.toSeq.zipWithIndex
+					.map{ case (scyds, index) => (index+1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index+1, scyds: _*))) }.toMap
+			} else {
+				(1 to baseSCYD.yearOfStudy).map(year =>
+					year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
+				).toMap
+			}
+
+			ExamGridEntity(
+				firstName = Option(firstName).getOrElse("[Unknown]"),
+				lastName = Option(lastName).getOrElse("[Unknown]"),
+				universityId = universityId,
+				lastImportDate = Option(lastImportDate),
+				years = years,
+				yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
+			)
 		}
-
-		ExamGridEntity(
-			firstName = Option(firstName).getOrElse("[Unknown]"),
-			lastName = Option(lastName).getOrElse("[Unknown]"),
-			universityId = universityId,
-			lastImportDate = Option(lastImportDate),
-			years = years,
-			yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
-		)
-	}
 }
 
 @Entity

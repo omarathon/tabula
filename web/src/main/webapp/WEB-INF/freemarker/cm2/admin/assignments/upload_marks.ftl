@@ -20,7 +20,7 @@
         <li>Column D - Feedback</li>
       </ul>
       <p>Note that you can upload any of the following: marks only; marks and grades only; marks, grades and feedback.</p>      
-		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 			<h3>Select file</h3>
 			<p id="multifile-column-description">
 				<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
@@ -39,7 +39,7 @@
 		</div>
 		<div role="tabpanel" class="tab-pane" id="webform">
 			<p>Click the add button below to enter marks and feedback for a student.</p>
-			<@f.form cssClass="marks-web-form" method="post" action="${formUrl}" commandName="command">
+			<@f.form cssClass="marks-web-form" method="post" action="${formUrl}" modelAttribute="command">
 				<div class="row hidden-xs hidden-sm">
 					<div class="col-md-2">
 						<label>University ID</label>

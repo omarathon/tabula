@@ -13,7 +13,7 @@
 <#assign command = sharedAssignmentPropertiesForm />
 
 <#assign submitUrl><@routes.coursework.setupSitsAssignmentsSharedOptions department /></#assign>
-<@f.form method="post" action=submitUrl commandName="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
+<@f.form method="post" action=submitUrl modelAttribute="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
 
 <#if submitted?? && submitted && !hasErrors>
 	<span class="ajax-response" data-status="success"></span>

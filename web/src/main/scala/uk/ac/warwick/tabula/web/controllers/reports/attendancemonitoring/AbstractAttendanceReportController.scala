@@ -84,7 +84,7 @@ abstract class AbstractAttendanceReportController extends ReportsController
 				)
 			)
 			val intervalFormatter = new IntervalFormatter
-			val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
+			val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28)
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
 				Map(

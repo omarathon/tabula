@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.{AutowiringCourseDaoComponent, AutowiringRouteDaoComponent, CourseDaoComponent, RouteDaoComponent}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
@@ -39,6 +40,7 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	def allRoutes: Seq[Route]
 	def getRouteById(id: String): Option[Route]
 	def getRouteByCode(code: String): Option[Route]
+	def getRouteByCodeActiveOrInactive(code: String): Option[Route]
 	def getRoutesByCodes(codes: Seq[String]): Seq[Route]
 	def findRoutesInDepartment(department: Department): Seq[Route]
 	def findRoutesNamedLike(query: String): Seq[Route]
@@ -72,6 +74,10 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 
 	def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap {
 		rcode => transactional(readOnly = true) { routeDao.getByCode(rcode.toLowerCase) }
+	}
+
+	def getRouteByCodeActiveOrInactive(code: String): Option[Route] = code.maybeText.flatMap {
+		rcode => transactional(readOnly = true) { routeDao.getByCodeActiveOrInactive(rcode.toLowerCase) }
 	}
 
 	def getRoutesByCodes(codes: Seq[String]): Seq[Route] = transactional(readOnly = true) {
@@ -145,7 +151,9 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 		courseDao.getCourseYearWeighting(courseCode, academicYear, yearOfStudy)
 
 	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting] =
-		courseDao.findAllCourseYearWeightings(courses, academicYear)
+		RequestLevelCache.cachedBy("CourseAndRouteService.findAllCourseYearWeightings", s"${courses.map(_.code).sorted.mkString("-")}-$academicYear") {
+			courseDao.findAllCourseYearWeightings(courses, academicYear)
+		}
 
 	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit =
 		courseDao.saveOrUpdate(courseYearWeighting)

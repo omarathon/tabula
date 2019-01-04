@@ -27,7 +27,7 @@
 			enctype="multipart/form-data"
 			class="double-submit-protection"
 			action="${formAction}"
-			commandName="command">
+			modelAttribute="command">
 			<#if isModification>
 				<#if existingRequest.approved>
 					<div class="alert alert-info">

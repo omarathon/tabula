@@ -11,7 +11,7 @@ class CourseworkAssignmentMembershipTest extends BrowserTest with CourseworkFixt
 		}
 
 		withAssignment("xxx01", "Fully featured assignment", submissionSettings=submissionSettings) { assignmentId =>
-		// Student1 and Student2 are enrolled by default
+			// Student1 and Student2 are enrolled by default
 			as(P.Student3) {
 				// Not on the coursework homepage
 				linkText("Fully featured assignment").findElement should be (None)

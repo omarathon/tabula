@@ -8,6 +8,7 @@ import com.atlassian.bamboo.specs.api.builders.plan.Job;
 import com.atlassian.bamboo.specs.api.builders.plan.Plan;
 import com.atlassian.bamboo.specs.api.builders.plan.Stage;
 import com.atlassian.bamboo.specs.api.builders.plan.artifact.Artifact;
+import com.atlassian.bamboo.specs.api.builders.plan.configuration.ConcurrentBuilds;
 import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
@@ -58,7 +59,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
                         .location(ScriptTaskProperties.Location.FILE)
                         .fileFromPath("gradlew")
-                        .argument("clean check war")
+                        .argument("clean check war --no-daemon")
                         .environmentVariables("JAVA_OPTS=\"-Xmx256m -Xms128m\""),
                     new ScriptTask()
                         .description("Touch test files so Bamboo doesn't ignore them")
@@ -114,12 +115,17 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .description("1pm run")
                         .scheduleOnceDaily(LocalTime.of(13, 0))
                 )
-                .customConfig(plan -> plan.variables(new Variable("functionaltestserver", "tabula-test")))
+                .customConfig(plan -> plan
+                    .variables(new Variable("functionaltestserver", "tabula-test"))
+                    .pluginConfigurations(
+                        new ConcurrentBuilds().maximumNumberOfConcurrentBuilds(1)
+                    )
+                )
                 .gradle(
                     "Run functional tests",
                     "Test",
                     "TEST",
-                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-build-cache",
+                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-build-cache --no-daemon",
                     "**/test-results/**/*.xml",
                     new Artifact()
                         .name("Failed test screenshots")
@@ -142,7 +148,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
             .linkedRepository(LINKED_REPOSITORY).noBranches()
             .description(description)
             .triggers(new ScheduledTrigger().scheduleOnceDaily(schedule))
-            .gradle("Run tests", "Cucumber", "SPECS", "cucumber -Dserver.environment=" + environment, "**/build/cucumber/results/*.xml")
+            .gradle("Run tests", "Cucumber", "SPECS", "cucumber -Dserver.environment=" + environment + " --no-daemon", "**/build/cucumber/results/*.xml")
             .build();
     }
 

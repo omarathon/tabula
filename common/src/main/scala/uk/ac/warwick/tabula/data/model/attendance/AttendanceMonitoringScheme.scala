@@ -82,8 +82,6 @@ class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with
 		attendanceMonitoringService.exists { service =>
 			points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0}
 		}
-
-	override def toEntityReference: EntityReference[Entity] = new AttendanceMonitoringSchemeEntityReference().put(this)
 }
 
 

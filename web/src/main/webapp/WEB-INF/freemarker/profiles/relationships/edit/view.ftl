@@ -17,7 +17,7 @@
 	<#assign student = studentCourseDetails.student />
 
 	<@modal.body>
-		<@f.form method="post" commandName="command" action="" cssClass="dirty-check-ignore">
+		<@f.form method="post" modelAttribute="command" action="" cssClass="dirty-check-ignore">
 
 			<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
 

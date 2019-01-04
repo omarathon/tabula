@@ -17,7 +17,7 @@
 		they must include the columns in the template (though you can add extra columns if you want, they'll be ignored).</p>
 </div>
 
-<@f.form method="post" enctype="multipart/form-data" action="" commandName="command" cssClass="double-submit-protection">
+<@f.form method="post" enctype="multipart/form-data" action="" modelAttribute="command" cssClass="double-submit-protection">
 	<@bs3form.filewidget basename="file" types=[] multiple=false labelText="Choose your spreadsheet" />
 
 	<div class="fix-footer">

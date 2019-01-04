@@ -12,7 +12,7 @@
 	<div class="fix-area">
 		<div class="fix-header pad-when-fixed">
 			<div class="filters admin-assignment-filters btn-group-group well well-sm" data-lazy="true">
-				<@f.form commandName="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
+				<@f.form modelAttribute="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline">
 					<@f.errors cssClass="error form-errors" />
 
 					<#assign placeholder = "All modules" />

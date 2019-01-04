@@ -80,6 +80,4 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
 	var urkundResponseCode: String = _
 
-
-	override def toEntityReference: OriginalityReportEntityReference = new OriginalityReportEntityReference().put(this)
 }

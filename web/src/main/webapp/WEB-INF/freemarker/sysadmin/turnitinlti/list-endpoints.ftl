@@ -2,7 +2,7 @@
 
 <h1>Turnitin LTI - list endpoints for an assignment</h1>
 
-	<@f.form method="post" action="${url('/sysadmin/turnitinlti/listendpoints')}" commandName="turnitinLtiListEndpointsCommand">
+	<@f.form method="post" action="${url('/sysadmin/turnitinlti/listendpoints')}" modelAttribute="turnitinLtiListEndpointsCommand">
 
 		<@f.errors cssClass="error form-errors" />
 

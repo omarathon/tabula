@@ -19,7 +19,7 @@
 	<div class="marking-and-feedback">
 		<h4>Marking and feedback</h4>
 		<#assign actionUrl><@routes.cm2.onlinefeedbackform command.assignment command.student /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" commandName="command" action=actionUrl cssClass="dirty-check double-submit-protection ajax-form">
+		<@f.form method="post" enctype="multipart/form-data" modelAttribute="command" action=actionUrl cssClass="dirty-check double-submit-protection ajax-form">
 
 			<@f.errors cssClass="error form-errors" />
 

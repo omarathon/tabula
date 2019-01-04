@@ -28,7 +28,6 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.ListMap
 
 object GenerateExamGridMappingParameters {
 	final val selectCourse = "selectCourse"
@@ -64,10 +63,12 @@ class GenerateExamGridController extends ExamsController
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
 	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+	override def activeDepartment(@PathVariable department: Department): Option[Department] =
+		benchmarkTask("activeDepartment") { retrieveActiveDepartment(Option(department)) }
 
 	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+		benchmarkTask("activeAcademicYear") { retrieveActiveAcademicYear(Option(academicYear)) }
 
 	validatesSelf[SelfValidating]
 
@@ -77,10 +78,12 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("selectCourseCommand")
 	def selectCourseCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
+		benchmarkTask("selectCourseCommand") {
+			GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
+		}
 
 	@ModelAttribute("gridOptionsCommand")
-	def gridOptionsCommand(@PathVariable department: Department) = {
+	def gridOptionsCommand(@PathVariable department: Department) = benchmarkTask("gridOptionsCommand") {
 		if (maintenanceModeService.enabled)
 			GenerateExamGridGridOptionsCommand.applyReadOnly(mandatory(department))
 		else
@@ -89,17 +92,21 @@ class GenerateExamGridController extends ExamsController
 
 	@ModelAttribute("coreRequiredModulesCommand")
 	def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
+		benchmarkTask("coreRequiredModulesCommand") {
+			GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
+		}
 
 	@ModelAttribute("checkOvercatCommand")
 	def checkOvercatCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		GenerateExamGridCheckAndApplyOvercatCommand(department, academicYear, user)
+		benchmarkTask("checkOvercatCommand") {
+			GenerateExamGridCheckAndApplyOvercatCommand(department, academicYear, user)
+		}
 
 	@ModelAttribute("GenerateExamGridMappingParameters")
-	def params = GenerateExamGridMappingParameters
+	def params = benchmarkTask("GenerateExamGridMappingParameters") { GenerateExamGridMappingParameters }
 
 	@ModelAttribute("gridOptionsQueryString")
-	def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = {
+	def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = benchmarkTask("gridOptionsQueryString") {
 		params.keySet.asScala.filter(_.startsWith("modules[")).foreach(params.remove)
 		UriComponentsBuilder.newInstance().queryParams(params).build().getQuery
 	}
@@ -109,7 +116,7 @@ class GenerateExamGridController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger,
 		@RequestParam(value = "levelCode", required = false) levelCode: String
-	): CoreRequiredModuleLookup = {
+	): CoreRequiredModuleLookup = benchmarkTask("coreRequiredModuleLookup") {
 		if (Option(yearOfStudy).nonEmpty) {
 			new CoreRequiredModuleLookupImpl(academicYear, yearOfStudy, moduleRegistrationService)
 		} else if (levelCode != null){
@@ -120,7 +127,7 @@ class GenerateExamGridController extends ExamsController
 	}
 
 	@ModelAttribute("ExamGridColumnValueType")
-	def examGridColumnValueType = ExamGridColumnValueType
+	def examGridColumnValueType = benchmarkTask("ExamGridColumnValueType") { ExamGridColumnValueType }
 
 	@GetMapping
 	def selectCourseRender(
@@ -319,22 +326,21 @@ class GenerateExamGridController extends ExamsController
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam allRequestParams: MultiValueMap[String, String]
 	): Mav = {
-		val jobInstance = Option(jobId).flatMap(jobService.getInstance)
-		if (jobInstance.isDefined && !jobInstance.get.finished) {
+		Option(jobId).flatMap(jobService.getInstance).filterNot(_.finished).map { jobInstance =>
 			val studentLastImportDates = selectCourseCommand.apply().map(e =>
 				(Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
 			).sortBy(_._2)
 			commonCrumbs(
 				Mav("exams/grids/generate/jobProgress",
 					"jobId" -> jobId,
-					"jobProgress" -> jobInstance.get.progress,
-					"jobStatus" -> jobInstance.get.status,
+					"jobProgress" -> jobInstance.progress,
+					"jobStatus" -> jobInstance.status,
 					"studentLastImportDates" -> studentLastImportDates
 				),
 				department,
 				academicYear
 			)
-		} else {
+		}.getOrElse {
 			redirectToAndClearModel(Grids.preview(department, academicYear), allRequestParams)
 		}
 	}
@@ -414,7 +420,7 @@ class GenerateExamGridController extends ExamsController
 
 		val entitiesPerPage = Option(gridOptionsCommand.entitiesPerPage).filter(_ > 0)
 
-		val mavObjects = Map(
+		val mavObjects = benchmarkTask("Generate model") { Map(
 			"oldestImport" -> oldestImport,
 			"studentInformationColumns" -> studentInformationColumns,
 			"perYearColumns" -> perYearColumns,
@@ -433,7 +439,7 @@ class GenerateExamGridController extends ExamsController
 			"generatedDate" -> DateTime.now,
 			"normalLoadLookup" -> normalLoadLookup,
 			"routeRules" -> routeRules
-		) ++ shortFormLayoutData
+		) ++ shortFormLayoutData }
 
 		commonCrumbs(
 			Mav("exams/grids/generate/preview", mavObjects).bodyClasses("grid-preview"),
@@ -457,7 +463,6 @@ class GenerateExamGridController extends ExamsController
 		checkOvercatCmd: CheckOvercatCommand,
 		coreRequiredModuleLookup: CoreRequiredModuleLookup
 	): GridData = {
-
 		checkOvercatCmd.selectCourseCommand = selectCourseCommand
 		val checkOvercatCommandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
 		checkOvercatCmd.validate(checkOvercatCommandErrors)

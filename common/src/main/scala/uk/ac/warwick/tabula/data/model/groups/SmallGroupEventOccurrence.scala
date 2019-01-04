@@ -36,8 +36,6 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	def endDateTime: Option[LocalDateTime] = event.endDateTimeForWeek(week)
 
 	override def humanReadableId: String = s"${event.humanReadableId} week $week"
-
-	override def toEntityReference: SmallGroupEventOcurrenceEntityReference = new SmallGroupEventOcurrenceEntityReference().put(this)
 }
 
 object SmallGroupEventOccurrence {

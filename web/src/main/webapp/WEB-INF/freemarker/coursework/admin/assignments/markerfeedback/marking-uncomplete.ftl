@@ -2,7 +2,7 @@
 
 <h1>Request changes from ${previousStageRole}</h1>
 
-<@f.form cssClass="submission-form double-submit-protection form-horizontal" method="post" action="${formAction}" commandName="markingUncompletedCommand">
+<@f.form cssClass="submission-form double-submit-protection form-horizontal" method="post" action="${formAction}" modelAttribute="markingUncompletedCommand">
 
 	<@form.errors path="" />
 

@@ -30,7 +30,7 @@
 	<div class="col-md-4">
 		<h2>God mode</h2>
 
-		<@f.form method="post" action="${url('/sysadmin/god')}">
+		<@f.form method="post" action="${url('/sysadmin/god')}" modelAttribute="">
 			<#if user.god>
 				<input type="hidden" name="action" value="remove" />
 				<button id="disable-godmode-button" class="btn btn-primary">Disable God mode</button>
@@ -42,14 +42,14 @@
 		<h2>Imports</h2>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import')}">
+			<@f.form method="post" action="${url('/sysadmin/import')}" modelAttribute="">
 			  <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." onclick="return confirm('Really? Could take a minute.')" />
 			</@f.form>
 		</p>
 
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-department')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-department')}" modelAttribute="blankForm">
 				<div class="input-group">
 					<@f.input id="import-modules-dept" path="deptCode" cssClass="form-control" placeholder="deptCodes" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Modules" onclick="return confirm('Really? Could take a minute.')" /></span>
 				</div>
@@ -57,25 +57,25 @@
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-sits')}">
+			<@f.form method="post" action="${url('/sysadmin/import-sits')}" modelAttribute="">
 			  <input class="btn btn-danger" type="submit" value="SITS assignments" onclick="return confirm('Really? Could take a minute.')">
 			</@f.form>
 		</p>
 
 		<p>
-		<@f.form method="post" action="${url('/sysadmin/import-sits-all-years')}">
+		<@f.form method="post" action="${url('/sysadmin/import-sits-all-years')}" modelAttribute="">
 			<input class="btn btn-danger" type="submit" value="SITS assignments, ALL YEARS" onclick="return confirm('Really? Could take a minute.') && confirm('No seriously. This one takes forever. Really sure?')">
 		</@f.form>
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-module-lists')}">
+			<@f.form method="post" action="${url('/sysadmin/import-module-lists')}" modelAttribute="">
 				<input class="btn btn-danger" type="submit" value="SITS module lists" onclick="return confirm('Really? Could take a minute.')">
 			</@f.form>
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="blankForm">
 				<div class="input-group">
 					<@f.input id="import-profiles-dept" path="deptCode" cssClass="form-control" placeholder="deptCode (optional)" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')" /></span>
 				</div>
@@ -83,14 +83,14 @@
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="blankForm">
 				<textarea id="import-profiles-specific" name="members" class="form-control" placeholder="University IDs (one per line)" rows="2"></textarea>
 				<input class="btn btn-danger" type="submit" value="Specific profile(s)">
 			</@f.form>
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/recheck-missing')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/recheck-missing')}" modelAttribute="blankForm">
 				Recheck missing stamps from
 				<div class="input-group">
 					<@f.input id="check-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Re-check" onclick="return confirm('Really? Could take a while.')" /></span>
@@ -99,7 +99,7 @@
 		</p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/import-locations')}" commandName="blankForm">
+			<@f.form method="post" action="${url('/sysadmin/import-locations')}" modelAttribute="blankForm">
 				Check for missing event locations
 				<div class="input-group">
 					<select name="academicYear" class="form-control">
@@ -123,7 +123,7 @@
 
 		<#macro reindex_form name text>
 			<p>
-				<@f.form method="post" action="${url('/sysadmin/index/run-'+name)}" commandName="blankForm">
+				<@f.form method="post" action="${url('/sysadmin/index/run-'+name)}" modelAttribute="blankForm">
 					Rebuild ${text} from
 					<div class="input-group">
 						<@f.input id="index-${name}-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')" /></span>
@@ -159,7 +159,7 @@
 		<p><a href="<@url page="/sysadmin/emergencymessage"/>">Update settings</a></p>
 
 		<p>
-			<@f.form method="post" action="${url('/sysadmin/jobs/create-test')}">
+			<@f.form method="post" action="${url('/sysadmin/jobs/create-test')}" modelAttribute="">
 				<input class="btn btn-default" type="submit" value="Create test job">
 			</@f.form>
 		</p>

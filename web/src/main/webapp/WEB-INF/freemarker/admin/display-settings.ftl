@@ -14,7 +14,7 @@
 	</#if>
 
 	<#assign submitUrl><@routes.admin.displaysettings department /></#assign>
-	<@f.form method="post" class="department-settings-form" action=submitUrl commandName="displaySettingsCommand">
+	<@f.form method="post" class="department-settings-form" action=submitUrl modelAttribute="displaySettingsCommand">
 		<input type="hidden" name="returnTo" value="${returnTo}">
 
 		<@bs3form.labelled_form_group labelText="Week numbering system">

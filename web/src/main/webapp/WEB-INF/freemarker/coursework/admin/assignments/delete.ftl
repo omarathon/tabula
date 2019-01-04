@@ -5,7 +5,7 @@
 <h1>Delete assignment</h1>
 
 <#assign submitUrl><@routes.coursework.assignmentdelete assignment /></#assign>
-<@f.form method="post" action=submitUrl commandName="deleteAssignmentCommand">
+<@f.form method="post" action=submitUrl modelAttribute="deleteAssignmentCommand">
 
 <h2>${assignment.name} (${assignment.academicYear.label})</h2>
 

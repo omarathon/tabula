@@ -5,7 +5,7 @@
 		<@cm2.assignmentHeader "Send to ${nextStagesDescription?lower_case}" assignment "for" />
 	</#if>
 
-	<@f.form method="post" action="${formAction}" commandName="command" cssClass="double-submit-protection">
+	<@f.form method="post" action="${formAction}" modelAttribute="command" cssClass="double-submit-protection">
 		<@form.errors path="" />
 		<input type="hidden" name="confirmScreen" value="true" />
 

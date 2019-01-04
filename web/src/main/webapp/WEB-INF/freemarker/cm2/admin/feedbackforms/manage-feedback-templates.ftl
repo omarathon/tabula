@@ -11,7 +11,7 @@
 	<@f.form enctype="multipart/form-data"
 			 method="post"
 			 action="${actionUrl}"
-			 commandName="bulkFeedbackTemplateCommand">
+			 modelAttribute="bulkFeedbackTemplateCommand">
 
 		<@bs3form.filewidget
 			basename="file"

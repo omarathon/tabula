@@ -2,7 +2,7 @@
 <#if memberNoteSuccess??>
 <#else>
 	<div class="alert alert-info">Administrative notes are visible to students.</div>
-	<@f.form id="edit-member-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
+	<@f.form id="edit-member-note-form" method="post" enctype="multipart/form-data" action="" modelAttribute="command" class="double-submit-protection">
 
 		<@bs3form.labelled_form_group path="title" labelText="Title">
 			<@f.input type="text" path="title" cssClass="form-control" maxlength="255" />

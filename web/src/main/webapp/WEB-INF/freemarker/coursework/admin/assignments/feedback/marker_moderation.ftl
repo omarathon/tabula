@@ -20,7 +20,7 @@
 			<@routes.coursework.markerModerationform assignment=assignment studentid=command.student.userId marker=marker />
 		</#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection" method="post" enctype="multipart/form-data"
-			commandName="command" action="${submit_url}">
+			modelAttribute="command" action="${submit_url}">
 
 			<@form.row>
 				<@form.field>

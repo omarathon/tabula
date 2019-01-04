@@ -19,7 +19,7 @@
 	</div>
 </#if>
 
-<@f.form method="post" action="" commandName="setList" cssClass="form-horizonatal form-tiny">
+<@f.form method="post" action="" modelAttribute="setList" cssClass="form-horizonatal form-tiny">
 	<p> ${setState?cap_first} these groups for self sign-up.
 		<#if setState == "open"> Students will be notified via email that they can now sign up for these groups in Tabula. </#if>
 	</p>

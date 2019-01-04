@@ -628,6 +628,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val student3 = new User("student3") { setWarwickId("0000003"); setFoundUser(true); setVerified(true); }
 		val student4 = new User("student4") { setWarwickId("0000004"); setFoundUser(true); setVerified(true); }
 		val student5 = new User("student5") { setWarwickId("0000005"); setFoundUser(true); setVerified(true); }
+		val student6pwd = new User("student6") { setWarwickId("10000006"); setFoundUser(true); setVerified(true); }
 		val manual1 = new User("manual1") { setWarwickId("0000006"); setFoundUser(true); setVerified(true); }
 		val manual2 = new User("manual2") { setWarwickId("0000007"); setFoundUser(true); setVerified(true); }
 		val manual3 = new User("manual3") { setWarwickId("0000008"); setFoundUser(true); setVerified(true); }
@@ -635,7 +636,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val manual5 = new User("manual5") { setWarwickId("0000010"); setFoundUser(true); setVerified(true); }
 		val manual10 = new User("manual10") { setWarwickId("0000015"); setFoundUser(true); setVerified(true); }
 
-		userLookup.registerUserObjects(student1, student2, student3, student4, student5, manual1, manual2, manual3, manual4, manual5, manual10)
+		userLookup.registerUserObjects(student1, student2, student3, student4, student5, student6pwd, manual1, manual2, manual3, manual4, manual5, manual10)
 
 		val year: AcademicYear = AcademicYear.now()
 
@@ -737,12 +738,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 			new UpstreamAssessmentGroupMember(upstreamAg3, "0000002"),
 			new UpstreamAssessmentGroupMember(upstreamAg3, "0000003"),
 			new UpstreamAssessmentGroupMember(upstreamAg3, "0000004"),
-			new UpstreamAssessmentGroupMember(upstreamAg3, "0000005")
+			new UpstreamAssessmentGroupMember(upstreamAg3, "0000005"),
+			new UpstreamAssessmentGroupMember(upstreamAg3, "1000006")   //PWD stu
 		)
 
 		assignmentMembershipService.save(upstreamAg1)
 		assignmentMembershipService.save(upstreamAg2)
 		assignmentMembershipService.save(upstreamAg3)
+
+		val uagInfo1 = UpstreamAssessmentGroupInfo(upstreamAg1, upstreamAg1.members.asScala)
+		val uagInfo2 = UpstreamAssessmentGroupInfo(upstreamAg2, upstreamAg2.members.asScala)
+		val uagInfo3 = UpstreamAssessmentGroupInfo(upstreamAg3, upstreamAg3.members.asScala.filter(_.universityId != "1000006"))
+
 
 		assignment1.members.knownType.addUserId("manual1")
 		assignment1.members.knownType.addUserId("manual2")
@@ -826,6 +833,36 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 			// EXC: student2/0000002, student3/0000003, manual3/0000008
 			// Ass Groups: ag1 (0000001, 0000002), ag3 (0000001, 0000002, 0000003, 0000004, 0000005)
 			// Actual membership: manual1/0000006, manual2/0000007, 0000001, 0000004, 0000005
+			val dept1 = Fixtures.department("CH")
+			val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+			val sprPWDStatus: SitsStatus = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
+			session.saveOrUpdate(dept1)
+			session.saveOrUpdate(sprFullyEnrolledStatus)
+			session.saveOrUpdate(sprPWDStatus)
+
+
+			val stu1 = Fixtures.student("0000001", "student1", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu1.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+			val stu2 = Fixtures.student("0000002", "student2", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu2.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+			val stu3 = Fixtures.student("0000003", "student3", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu3.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+			val stu4 = Fixtures.student("0000004", "student4", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu4.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+			val stu5 = Fixtures.student("0000005", "student5", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu5.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+			val stu6 = Fixtures.student("1000006", "student6", department=dept1, sprStatus=sprFullyEnrolledStatus)
+			stu6.mostSignificantCourse.statusOnCourse = sprPWDStatus
+
+			session.save(stu1)
+			session.save(stu2)
+			session.save(stu3)
+			session.save(stu4)
+			session.save(stu5)
+			session.save(stu6)
+
+			session.flush()
+
 
 			assignmentMembershipService.determineMembershipUsers(assignment1).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000004", "0000005", "0000006", "0000007"
@@ -841,28 +878,29 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 					"0000007", "0000008", "0000009", "0000002"
 			))
 
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1), None).map { _.getWarwickId }.toSet should be (Set(
+
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1), None).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000002"
 			))
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg2), None).map { _.getWarwickId }.toSet should be (Set(
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo2), None).map { _.getWarwickId }.toSet should be (Set(
 					"0000002", "0000003"
 			))
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg3), None).map { _.getWarwickId }.toSet should be (Set(
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo3), None).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000002", "0000003", "0000004", "0000005"
 			))
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), None).map { _.getWarwickId }.toSet should be (Set(
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), None).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000002", "0000003", "0000004", "0000005"
 			))
 
 			// UniversityID Group: 0000001, 0000010, 0000015
 
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(universityIdGroup)).map { _.getWarwickId }.toSet should be (Set(
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
 			))
 
 			// UserID Group: student1/0000001, manual5/0000010, manual10/0000015
 
-			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)).map { _.getWarwickId }.toSet should be (Set(
+			assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)).map { _.getWarwickId }.toSet should be (Set(
 					"0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
 			))
 		}
@@ -870,15 +908,15 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 	@Test def countMembershipWithUniversityIdGroup() { transactional { tx =>
 		new AssignmentMembershipFixture() {
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1), None) should be (2)
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg2), None) should be (2)
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg3), None) should be (5)
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), None) should be (5)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1), None) should be (2)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo2), None) should be (2)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo3), None) should be (5)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), None) should be (5)
 
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(universityIdGroup)) should be (7)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)) should be (7)
 
 			// UserID Group should fall back to using the other strategy, but get the same result
-			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)) should be (7)
+			assignmentMembershipService.countCurrentMembershipWithUniversityIdGroup(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)) should be (7)
 		}
 	}}
 

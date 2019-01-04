@@ -22,6 +22,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 	val mads: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	mads.getModuleByCode(module1.code) returns Some(module1)
 	mads.getModuleByCode(module2.code) returns Some(module2)
+	mads.getModulesByCodes(Seq(module1.code, module2.code)) returns Seq(module1, module2)
 	val scd: StudentCourseDetails = Fixtures.student("1234").mostSignificantCourse
 	scd.levelCode = "3"
 

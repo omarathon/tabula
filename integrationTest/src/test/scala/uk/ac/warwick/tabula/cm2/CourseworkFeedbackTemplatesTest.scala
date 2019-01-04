@@ -165,7 +165,9 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 				ifr map { _.isDisplayed } should be (Some(true))
 			}
 
-			switch to frame(find(cssSelector(".modal-body iframe")).get)
+			val iframe = frame(find(cssSelector(".modal-body iframe")).get)
+			switch to iframe
+			eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be {true})
 
 			executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
 
@@ -175,6 +177,6 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			reloadPage
 
 			And("File should have been deleted so count should be 1 less")
-			id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (currCnt-1)
+			eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (currCnt-1))
 	}
 }

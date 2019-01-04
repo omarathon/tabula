@@ -1,7 +1,7 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#assign action><@routes.cm2.moderationSamplingAllocation assignment /></#assign>
-<@f.form cssClass="double-submit-protection" method="post" action="${action}" commandName="allocateCommand">
+<@f.form cssClass="double-submit-protection" method="post" action="${action}" modelAttribute="allocateCommand">
 
 	<@cm2.assignmentHeader "Allocate to moderators" assignment "for" />
 	<input type="hidden" name="confirmScreen" value="true" />

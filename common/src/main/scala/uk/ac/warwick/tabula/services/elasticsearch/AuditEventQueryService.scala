@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{QueryDefinition, RichSearchHit, RichSearchResponse}
-import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.Response
+import com.sksamuel.elastic4s.http.search.{SearchHit, SearchResponse}
+import com.sksamuel.elastic4s.searches.queries.Query
+import com.sksamuel.elastic4s.searches.sort.SortOrder
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -94,6 +96,7 @@ class AuditEventQueryServiceImpl extends AbstractQueryService
 		* The name of the index alias that this service reads from
 		*/
 	@Value("${elasticsearch.index.audit.alias}") var indexName: String = _
+	lazy val index = Index(indexName)
 
 	@Autowired var auditEventService: AuditEventService = _
 	@Autowired var userLookup: UserLookupService = _
@@ -112,7 +115,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		* events with whatever data we kept in ElasticSearch, just in case
 		* an event went missing and we'd like to see the data.
 		*/
-	private def toAuditEvents(hits: Iterable[RichSearchHit]): Seq[AuditEvent] = {
+	private def toAuditEvents(hits: Iterable[SearchHit]): Seq[AuditEvent] = {
 		if (hits.isEmpty) Seq()
 		else {
 			val databaseResults: Map[Long, AuditEvent] =
@@ -121,7 +124,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 					.toMap
 
 			/** A placeholder AuditEvent to display if a hit has no matching event in the DB. */
-			def placeholderEvent(hit: RichSearchHit) = {
+			def placeholderEvent(hit: SearchHit) = {
 				val event = AuditEvent()
 				event.eventStage = "before"
 				event.data = "{}" // We can't restore this if it's not from the db
@@ -150,30 +153,35 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		event
 	}
 
-	def query(queryString: String, start: Int, count: Int): Future[Seq[AuditEvent]] = client.execute {
-		searchFor query queryStringQuery(queryString).defaultOperator(Operator.AND) sort ( field sort "eventDate" order SortOrder.DESC ) start start limit count
-	}.map { results =>
-		toAuditEvents(results.hits)
-	}
+	def query(queryString: String, start: Int, count: Int): Future[Seq[AuditEvent]] =
+		client.execute {
+			searchRequest
+				.query(queryStringQuery(queryString).defaultOperator("AND"))
+				.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
+				.start(start)
+				.limit(count)
+		}.map { response => toAuditEvents(response.result.hits.hits) }
 
-	def listRecent(start: Int, count: Int): Future[Seq[AuditEvent]] = client.execute {
-		searchFor sort ( field sort "eventDate" order SortOrder.DESC ) start start limit count
-	}.map { results =>
-		toAuditEvents(results.hits)
-	}
+	def listRecent(start: Int, count: Int): Future[Seq[AuditEvent]] =
+		client.execute {
+			searchRequest
+				.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
+				.start(start)
+				.limit(count)
+		}.map { response => toAuditEvents(response.result.hits.hits) }
 
-	private def eventsOfType(eventType: String, restrictions: QueryDefinition*): Future[Seq[AuditEvent]] = {
+	private def eventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] = {
 		val eventTypeQuery = termQuery("eventType", eventType)
 
 		val searchQuery =
-			if (restrictions.nonEmpty) bool { must(restrictions :+ eventTypeQuery) }
+			if (restrictions.nonEmpty) boolQuery().must(restrictions :+ eventTypeQuery)
 			else eventTypeQuery
 
-		def scrollNextResults(results: RichSearchResponse): Future[Seq[AuditEvent]] = {
-			val events = toAuditEvents(results.hits)
+		def scrollNextResults(response: Response[SearchResponse]): Future[Seq[AuditEvent]] = {
+			val events = toAuditEvents(response.result.hits.hits)
 
-			if (events.isEmpty || results.scrollIdOpt.isEmpty) Future.successful(events)
-			else forScroll(results.scrollId).map { nextEvents => events ++ nextEvents }
+			if (events.isEmpty || response.result.scrollId.isEmpty) Future.successful(events)
+			else forScroll(response.result.scrollId.get).map { nextEvents => events ++ nextEvents }
 		}
 
 		def forScroll(id: String): Future[Seq[AuditEvent]] =
@@ -181,14 +189,14 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 		// Keep scroll context open for 15 seconds, fetch 100 at a time for performance
 		client.execute {
-			searchFor.query(searchQuery).scroll("15s").limit(100)
+			searchRequest.query(searchQuery).scroll("15s").limit(100)
 		}.flatMap(scrollNextResults)
 	}
 
-	private def parsedEventsOfType(eventType: String, restrictions: QueryDefinition*): Future[Seq[AuditEvent]] =
+	private def parsedEventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] =
 		eventsOfType(eventType, restrictions: _*).map(_.map(parse))
 
-	private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]): QueryDefinition = referenceDate match {
+	private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]): Query = referenceDate match {
 		case Some(createdDate) => must(
 			termQuery("assignment", assignment.id),
 			rangeQuery("eventDate") gte DateFormats.IsoDateTime.print(createdDate)
@@ -236,7 +244,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	}
 
 	// Only look at events since the first time feedback was released
-	private def afterFeedbackPublishedRestriction(assignment: Assignment): QueryDefinition =
+	private def afterFeedbackPublishedRestriction(assignment: Assignment): Query =
 		assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
 
 	def feedbackDownloads(assignment: Assignment): Future[Seq[(User, DateTime)]] =
@@ -281,34 +289,37 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 		parsedEventsOfType(
 			"PublishFeedback",
-			bool {
-				should ( queries )
-			},
+			boolQuery().should(queries),
 			afterFeedbackPublishedRestriction(assignment)
 		).map { events =>
 			events.sortBy(_.eventDate).reverse
 		}
 	}
 
-	private def submissionEventsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int, restrictions: QueryDefinition*): Future[PagedAuditEvents] = {
+	private def submissionEventsForModules(modules: Seq[Module], lastUpdatedDate: Option[DateTime], max: Int, restrictions: Query*): Future[PagedAuditEvents] = {
 		val eventTypeQuery = termQuery("eventType", "SubmitAssignment")
 
-		val queries: Seq[QueryDefinition] = lastUpdatedDate match {
+		val queries: Seq[Query] = lastUpdatedDate match {
 			case None => restrictions :+ eventTypeQuery
-			case Some(date) => Seq(eventTypeQuery, rangeQuery("eventDate") lte DateFormats.IsoDateTime.print(date) includeUpper false) ++ restrictions
+			case Some(date) => Seq(eventTypeQuery, rangeQuery("eventDate").lt(DateFormats.IsoDateTime.print(date))) ++ restrictions
 		}
 
 		client.execute {
-			searchFor query bool {
-				must(queries: _*).should(modules.map { module => termQuery("module", module.id) })
-			} limit max sort ( field sort "eventDate" order SortOrder.DESC )
-		}.map { results =>
-			val items = toAuditEvents(results.hits)
+			searchRequest
+				.query(
+					boolQuery()
+						.must(queries)
+  					.should(modules.map { module => termQuery("module", module.id) })
+				)
+				.limit(max)
+				.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
+		}.map { response =>
+			val items = toAuditEvents(response.result.hits.hits)
 
 			PagedAuditEvents(
 				items = items,
 				lastUpdatedDate = items.lastOption.map { _.eventDate },
-				totalHits = results.totalHits
+				totalHits = response.result.totalHits
 			)
 		}
 	}

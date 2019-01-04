@@ -3,7 +3,7 @@
 	<h1>Delete small groups for <@fmt.module_name module /></h1>
 
 	<#assign submitAction><@routes.groups.deleteset smallGroupSet /></#assign>
-	<@f.form method="post" action="${submitAction}" commandName="deleteSmallGroupSetCommand">
+	<@f.form method="post" action="${submitAction}" modelAttribute="deleteSmallGroupSetCommand">
 		<h2>${smallGroupSet.name} (${smallGroupSet.academicYear.label})</h2>
 
 		<!-- global errors -->

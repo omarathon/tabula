@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.events
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{ScheduledNotificationService, NotificationService}
-import uk.ac.warwick.tabula.commands.{CompletesNotifications, SchedulesNotifications, Notifies, Command}
+import uk.ac.warwick.tabula.services.{NotificationService, ScheduledNotificationService}
+import uk.ac.warwick.tabula.commands.{Command, CompletesNotifications, Notifies, SchedulesNotifications}
 import uk.ac.warwick.tabula.jobs.{Job, NotifyingJob}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{Notification, ToEntityReference}
 import uk.ac.warwick.tabula.helpers.Logging
 
 trait NotificationHandling extends Logging {
@@ -13,7 +13,7 @@ trait NotificationHandling extends Logging {
 	var notificationService: NotificationService = Wire[NotificationService]
 	var scheduledNotificationService: ScheduledNotificationService = Wire[ScheduledNotificationService]
 
-	def notify[A, B, C](cmd: Command[A])(f: => A): A = {
+	def notify[A, B, C >: Null <: ToEntityReference](cmd: Command[A])(f: => A): A = {
 		val result = f
 
 		cmd match {

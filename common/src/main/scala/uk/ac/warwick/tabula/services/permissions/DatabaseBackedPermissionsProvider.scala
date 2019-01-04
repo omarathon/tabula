@@ -3,8 +3,8 @@ package uk.ac.warwick.tabula.services.permissions
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.permissions.GloballyGrantedPermission
 
 @Component
 class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
@@ -13,7 +13,7 @@ class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =
 		service.getGrantedPermissionsFor[PermissionsTarget](user) map {
-			case global: GloballyGrantedPermission =>
+			case global: GrantedPermission[_] if global.scopeType == "___GLOBAL___" =>
 				PermissionDefinition(global.permission, None, global.overrideType)
 
 			case grantedPermission =>

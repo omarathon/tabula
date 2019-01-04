@@ -1,6 +1,6 @@
 <#if searchProfilesCommand?has_content>
 	<section class="profile-search profile-search-results">
-		<@f.form method="get" action="${url('/profiles/search')}" commandName="searchProfilesCommand">
+		<@f.form method="get" action="${url('/profiles/search')}" modelAttribute="searchProfilesCommand">
 			<div class="input-group">
 				<@f.input path="query" placeholder="Find people by name or University ID" cssClass="form-control" />
 				<div class="input-group-btn">

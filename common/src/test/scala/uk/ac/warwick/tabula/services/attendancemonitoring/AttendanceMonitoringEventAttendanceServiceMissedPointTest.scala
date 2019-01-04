@@ -75,7 +75,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 
 	@Test
 	def updatesMissedCheckpoint() { new Fixture {
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
 		service.smallGroupService.findOccurrencesInWeeks(1, 2, academicYear2013) returns Seq()
 		service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
 		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (1)
@@ -87,7 +87,7 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 	def updatesMissedCheckpointSpecificModule() {
 		new Fixture {
 			smallGroupPoint.smallGroupEventModules = Seq(groupSet.module)
-			service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq()
+			service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq()
 			service.smallGroupService.findOccurrencesInModulesInWeeks(1, 2, smallGroupPoint.smallGroupEventModules, academicYear2013) returns Seq()
 			service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
 			service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (1)
@@ -108,7 +108,38 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 		otherAttendance.updatedBy = "cusxx"
 
 		smallGroupPoint.smallGroupEventQuantity = 2
-		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
+		service.smallGroupService.findOccurrencesInWeeks(1, 2, academicYear2013) returns Seq()
+		service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
+
+		service.getMissedCheckpoints(Seq(attendanceMarkedAsMissed)).size should be (1)
+		service.updateMissedCheckpoints(Seq(attendanceMarkedAsMissed), currentUser)
+		verify(service.attendanceMonitoringService, times(1)).setAttendance(student, Map(smallGroupPoint -> AttendanceState.MissedAuthorised), attendanceMarkedAsMissed.updatedBy, autocreated = true)
+	}}
+
+	@Test
+	def ignoresAttendanceFromPreviousYears() { new Fixture {
+		val groupOld = new SmallGroup
+		val groupSetOld = new SmallGroupSet
+		groupSetOld.academicYear = AcademicYear(2012)
+		groupOld.groupSet = groupSetOld
+		groupSetOld.module = module1
+
+		val eventOld = new SmallGroupEvent(group)
+		eventOld.day = DayOfWeek.Wednesday
+
+		val occurrenceOld = new SmallGroupEventOccurrence
+		occurrenceOld.event = event
+		occurrenceOld.week = 1
+
+		val attendanceOldMarkedAsAttended = new SmallGroupEventAttendance
+		attendanceOldMarkedAsAttended.occurrence = occurrence
+		attendanceOldMarkedAsAttended.universityId = student.universityId
+		attendanceOldMarkedAsAttended.state = AttendanceState.Attended
+		occurrenceOld.attendance.add(attendanceOldMarkedAsAttended)
+		attendanceOldMarkedAsAttended.updatedBy = "cusfal"
+
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(attendanceMarkedAsMissed)
 		service.smallGroupService.findOccurrencesInWeeks(1, 2, academicYear2013) returns Seq()
 		service.smallGroupService.findAttendanceNotes(Seq("1234"), Seq()) returns Seq()
 

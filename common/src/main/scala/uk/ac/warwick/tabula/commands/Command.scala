@@ -49,9 +49,9 @@ trait Notifies[A, B] {
 }
 
 
-trait SchedulesNotifications[A, B] {
+trait SchedulesNotifications[A, B >: Null <: ToEntityReference] {
 	def transformResult(commandResult: A): Seq[B]
-	def scheduledNotifications(notificationTarget: B): Seq[ScheduledNotification[_]]
+	def scheduledNotifications(notificationTarget: B): Seq[ScheduledNotification[B]]
 }
 
 trait CompletesNotifications[A] {

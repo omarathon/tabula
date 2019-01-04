@@ -64,78 +64,101 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedRole[A]] = getById[GrantedRole[A]](id)
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedPermission[A]] = getById[GrantedPermission[A]](id)
 
+	private def newGrantedRoleCriteria[A <: PermissionsTarget: ClassTag]: ScalaCriteria[GrantedRole[A]] = {
+		val c = session.newCriteria[GrantedRole[A]]
+
+		GrantedRole.scopeType[A].foreach { scopeType =>
+			c.add(is("scopeType", scopeType))
+		}
+
+		c
+	}
+
+	private def newGrantedPermissionCriteria[A <: PermissionsTarget: ClassTag]: ScalaCriteria[GrantedPermission[A]] = {
+		val c = session.newCriteria[GrantedPermission[A]]
+
+		GrantedPermission.scopeType[A].foreach { scopeType =>
+			c.add(is("scopeType", scopeType))
+		}
+
+		c
+	}
+
 	def getGrantedRolesById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedRole[A]] =
 		if (ids.isEmpty) Nil
-		else session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
-					 .add(in("id", ids.asJava))
-					 .seq
+		else newGrantedRoleCriteria[A]
+			.add(in("id", ids.asJava))
+		 	.seq
 
 	def getGrantedPermissionsById[A <: PermissionsTarget: ClassTag](ids: Seq[String]): Seq[GrantedPermission[A]] =
 		if (ids.isEmpty) Nil
-		else session.newCriteria[GrantedPermission[A]]
-					 .add(in("id", ids.asJava))
-					 .seq
+		else newGrantedPermissionCriteria[A]
+			.add(in("id", ids.asJava))
+			.seq
 
 	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedRole[A]] = canDefineRoleSeq(scope) {
-		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
-					 .add(is("scope", scope))
-					 .seq
+		newGrantedRoleCriteria[A]
+			.add(is("scope", scope))
+			.seq
 	}
 
 	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](scope: A): Seq[GrantedPermission[A]] = canDefinePermissionSeq(scope) {
-		session.newCriteria[GrantedPermission[A]]
-					 .add(is("scope", scope))
-					 .seq
+		newGrantedPermissionCriteria[A]
+			.add(is("scope", scope))
+			.seq
 	}
 
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, customRoleDefinition: CustomRoleDefinition): Option[GrantedRole[A]] = canDefineRole(scope) {
-		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
-					 .add(is("scope", scope))
-					 .add(is("customRoleDefinition", customRoleDefinition))
-					 .seq.headOption
+		newGrantedRoleCriteria[A]
+			.add(is("scope", scope))
+			.add(is("customRoleDefinition", customRoleDefinition))
+			.seq.headOption
 	}
 
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, builtInRoleDefinition: BuiltInRoleDefinition): Option[GrantedRole[A]] = canDefineRole(scope) {
 		// TAB-2959
-		session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
-					 .add(is("scope", scope))
-					 .add(is("builtInRoleDefinition", builtInRoleDefinition))
-					 .seq.headOption
+		newGrantedRoleCriteria[A]
+			.add(is("scope", scope))
+			.add(is("builtInRoleDefinition", builtInRoleDefinition))
+			.seq.headOption
 	}
 
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]] = canDefinePermission(scope) {
-		session.newCriteria[GrantedPermission[A]]
-					 .add(is("scope", scope))
-					 .add(is("permission", permission))
-					 .add(is("overrideType", overrideType))
-					 .seq.headOption
+		newGrantedPermissionCriteria[A]
+			.add(is("scope", scope))
+			.add(is("permission", permission))
+			.add(is("overrideType", overrideType))
+			.seq.headOption
 	}
 
-	private def canDefinePermissionSeq[A <: PermissionsTarget](scope: A)(f: => Seq[GrantedPermission[A]]) = {
-		if (GrantedPermission.canDefineFor(scope)) f
+	private def canDefinePermissionSeq[A <: PermissionsTarget : ClassTag](scope: A)(f: => Seq[GrantedPermission[A]]) = {
+		if (GrantedPermission.canDefineFor[A]) f
 		else Seq()
 	}
 
-	private def canDefineRoleSeq[A <: PermissionsTarget](scope: A)(f: => Seq[GrantedRole[A]]) = {
-		if (GrantedRole.canDefineFor(scope)) f
+	private def canDefineRoleSeq[A <: PermissionsTarget : ClassTag](scope: A)(f: => Seq[GrantedRole[A]]) = {
+		if (GrantedRole.canDefineFor[A]) f
 		else Seq()
 	}
 
-	private def canDefinePermission[A <: PermissionsTarget](scope: A)(f: => Option[GrantedPermission[A]]) = {
-		if (GrantedPermission.canDefineFor(scope)) f
+	private def canDefinePermission[A <: PermissionsTarget : ClassTag](scope: A)(f: => Option[GrantedPermission[A]]) = {
+		if (GrantedPermission.canDefineFor[A]) f
 		else None
 	}
 
-	private def canDefineRole[A <: PermissionsTarget](scope: A)(f: => Option[GrantedRole[A]]) = {
-		if (GrantedRole.canDefineFor(scope)) f
+	private def canDefineRole[A <: PermissionsTarget : ClassTag](scope: A)(f: => Option[GrantedRole[A]]) = {
+		if (GrantedRole.canDefineFor[A]) f
 		else None
 	}
 
-	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedRole[A]] =
-		session.newQuery[GrantedRole[A]]("""
+	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedRole[A]] = {
+		val scopeType = GrantedPermission.scopeType[A]
+		val q =
+			session.newQuery[GrantedRole[A]](s"""
 				select distinct r
-				from """ + GrantedRole.className[A] + """ r
+				from GrantedRole r
 				where
+					${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
 					(
 						r._users.universityIds = false and
 						((:userId in elements(r._users.staticIncludeUsers)
@@ -150,31 +173,28 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.seq
+
+		scopeType.foreach(q.setString("scopeType", _))
+
+		q.seq
+	}
 
 	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedRole[A]] = {
 		if (groupNames.nonEmpty) {
-			val criteriaFactory = () => {
-				val c =
-					session.newCriteria[GrantedRole[A]](GrantedRole.classObject[A])
-						.createAlias("_users", "users")
-
-				GrantedRole.discriminator[A] foreach { discriminator =>
-					c.add(is("class", discriminator))
-				}
-
-				c
-			}
+			val criteriaFactory = () => newGrantedRoleCriteria[A].createAlias("_users", "users")
 
 			safeInSeq(criteriaFactory, "users.baseWebgroup", groupNames)
 		} else Nil
 	}
 
-	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]] =
-		session.newQuery[GrantedPermission[A]]("""
+	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]] = {
+		val scopeType = GrantedPermission.scopeType[A]
+		val q =
+			session.newQuery[GrantedPermission[A]](s"""
 				select distinct r
-				from """ + GrantedPermission.className[A] + """ r
+				from GrantedPermission r
 				where
+					${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
 					(
 						r._users.universityIds = false and
 						((:userId in elements(r._users.staticIncludeUsers)
@@ -189,22 +209,16 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 		""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.seq
 
+		scopeType.foreach(q.setString("scopeType", _))
+
+		q.seq
+	}
 
 	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedPermission[A]] = {
 		if (groupNames.isEmpty) Nil
 		else {
-			val criteriaFactory = () => {
-				val c = session.newCriteria[GrantedPermission[A]]
-					.createAlias("_users", "users")
-
-				GrantedPermission.discriminator[A] map { discriminator =>
-					c.add(is("class", discriminator))
-				}
-
-				c
-			}
+			val criteriaFactory = () => newGrantedPermissionCriteria[A].createAlias("_users", "users")
 
 			safeInSeq(criteriaFactory, "users.baseWebgroup", groupNames)
 		}

@@ -17,7 +17,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			click on module.findElement(By.className("mod-code"))
 			Then("I should see the premarked assignment")
 			eventually(pageSource contains "Premarked assignment" should be {true})
-			click on linkText("Premarked assignment")
+			eventually(click on linkText("Premarked assignment"))
 
 			When("I go to the adjustments page")
 
@@ -85,7 +85,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 		}
 
 		eventually(pageSource contains "Premarked assignment" should be {true})
-		click on partialLinkText("Premarked assignment")
+		eventually(click on partialLinkText("Premarked assignment"))
 		val assignmentId = currentUrl.split("/")(6)
 
 		Then("The student can see the adjustment")

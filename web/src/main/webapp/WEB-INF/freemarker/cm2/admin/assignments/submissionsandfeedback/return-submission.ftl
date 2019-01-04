@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <#assign formAction><@routes.cm2.returnToMarker assignment /></#assign>
 
-<@f.form method="post" action="${formAction}" commandName="command">
+<@f.form method="post" action="${formAction}" modelAttribute="command">
 
 	<@cm2.assignmentHeader "Return students to markers" assignment "for" />
 

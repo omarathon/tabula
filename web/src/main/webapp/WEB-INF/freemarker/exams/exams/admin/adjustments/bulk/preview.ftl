@@ -27,7 +27,7 @@
 	</#if>
 
 	<#assign formUrl><@routes.exams.bulkAdjustment exam /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 		<#list command.students as universityId>
 			<input type="hidden" name="students" value="${universityId}" />
 		</#list>

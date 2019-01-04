@@ -10,7 +10,7 @@ the comments textarea needs to maintain newlines.
 <#assign commandName="addAssignmentCommand" />
 <#assign command=addAssignmentCommand />
 <#assign submitUrl><@routes.coursework.createAssignment module /></#assign>
-<@f.form method="post" action=submitUrl commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action=submitUrl modelAttribute=commandName cssClass="form-horizontal">
 
 	<div class="alert alert-success">
 		<i class="icon-info-sign"></i>

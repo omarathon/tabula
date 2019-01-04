@@ -3,7 +3,7 @@
 <h1>Edit ${template.templateName}</h1>
 
 <#assign action><@url page="/sysadmin/attendancetemplates/${template.id}/edit"/></#assign>
-<@f.form id="newScheme" method="POST" commandName="command" action="${action}">
+<@f.form id="newScheme" method="POST" modelAttribute="command" action="${action}">
 
 	<@bs3form.labelled_form_group path="name" labelText="Name">
 		<@f.input path="name" cssClass="form-control" />

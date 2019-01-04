@@ -62,7 +62,7 @@
 
 <div class="fix-area course-weightings-editor">
 
-	<@f.form method="post" action="${formUrl}" commandName="command" cssClass="dirty-check">
+	<@f.form method="post" action="${formUrl}" modelAttribute="command" cssClass="dirty-check">
 
 		<@spring.bind path="command">
 			<#if (status.errors.allErrors?size > 0)>

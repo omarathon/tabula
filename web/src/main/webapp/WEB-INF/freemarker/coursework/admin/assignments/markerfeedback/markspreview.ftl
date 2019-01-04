@@ -11,7 +11,7 @@
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.coursework.markeraddmarks assignment marker /></#assign>
-	<@f.form method="post" action=submitUrl commandName=commandName>
+	<@f.form method="post" action=submitUrl modelAttribute=commandName>
 
 		<#assign isfile=RequestParameters.isfile/>
 

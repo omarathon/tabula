@@ -17,7 +17,7 @@
 
 <div class="fix-area">
 	<#assign actionUrl><@routes.cm2.manageMarksClosure /></#assign>
-	<@f.form commandName="command" action=actionUrl>
+	<@f.form modelAttribute="command" action=actionUrl>
 		<@bs3form.labelled_form_group path="" labelText="">
 			<@bs3form.radio>
 				<@f.radiobutton path="updatePostgrads" value="false" />

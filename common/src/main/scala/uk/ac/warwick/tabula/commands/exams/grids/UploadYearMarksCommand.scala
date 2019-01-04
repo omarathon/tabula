@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
 import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringYearMarksExtractorComponent, YearMarkItem, YearMarksExtractorComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, SprCode}
@@ -39,6 +40,7 @@ object UploadYearMarksCommand {
 			with ComposableCommand[Seq[StudentCourseYearDetails]]
 			with AutowiringYearMarksExtractorComponent
 			with AutowiringStudentCourseYearDetailsDaoComponent
+			with AutowiringPermissionsServiceComponent
 			with UploadYearMarksCommandBindListener
 			with UploadYearMarksDescription
 			with UploadYearMarksPermissions
@@ -69,9 +71,11 @@ class UploadYearMarksCommandInternal(val department: Department, val academicYea
 }
 
 trait UploadYearMarksCommandBindListener extends BindListener {
-
-	self: UploadYearMarksCommandRequest with UploadYearMarksCommandState with YearMarksExtractorComponent
-		with StudentCourseYearDetailsDaoComponent =>
+	self: UploadYearMarksCommandRequest
+		with UploadYearMarksCommandState
+		with YearMarksExtractorComponent
+		with StudentCourseYearDetailsDaoComponent
+		with PermissionsServiceComponent =>
 
 	override def onBind(result: BindingResult) {
 		val fileNames = file.fileNames.map(_.toLowerCase)
@@ -111,15 +115,15 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 
 	private def postProcessYearMarks(): Unit = {
 		// Deal with rows with invalid academic years
-		val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.partition(item => item.academicYear.maybeText.map(academicYearString => {
+		val (validAcademicYearItems, invalidAcademicYearItems) = marks.asScala.partition(item => item.academicYear.maybeText.forall(academicYearString => {
 			try {
 				AcademicYear.parse(academicYearString)
 				true
 			} catch {
-				case e: Exception =>
+				case _: Exception =>
 					false
 			}
-		}).getOrElse(true))
+		}))
 
 		// Pair the items with the associated real academic year. If it isn't defined, use the command's
 		val academicYearItems = validAcademicYearItems.map(item => (item, item.academicYear.maybeText.map(AcademicYear.parse).getOrElse(academicYear)))
@@ -127,10 +131,10 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 		// Partition studentIds into Uni IDs and SCJ codes, the query for all of them from the DB
 		val (lookupByUniID, lookupByScjCode) = academicYearItems.partition(item => SprCode.getUniversityId(item._1.studentId) == item._1.studentId)
 		val studentsByScjCode = studentCourseYearDetailsDao.findByScjCodeAndAcademicYear(
-			lookupByScjCode.map(item => (item._1.studentId, item._2)).toSeq
+			lookupByScjCode.map(item => (item._1.studentId, item._2))
 		)
 		val studentsByUniId = studentCourseYearDetailsDao.findByUniversityIdAndAcademicYear(
-			lookupByUniID.map(item => (item._1.studentId, item._2)).toSeq
+			lookupByUniID.map(item => (item._1.studentId, item._2))
 		)
 
 		// Translate into ProcessedYearMarks
@@ -177,7 +181,7 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 			case Some(scyd) if !departmentAndParents(scyd.enrolmentDepartment).contains(department) =>
 				val enrolmentRootDepartment = scyd.enrolmentDepartment.rootDepartment
 
-				val userAccessManagers = enrolmentRootDepartment.grantedRoles.asScala.filter(_.builtInRoleDefinition == UserAccessMgrRoleDefinition).flatMap(_.users.users).map(u => s"${u.getFullName} (${u.getEmail})")
+				val userAccessManagers = permissionsService.getAllGrantedRolesFor(enrolmentRootDepartment).filter(_.builtInRoleDefinition == UserAccessMgrRoleDefinition).flatMap(_.users.users).map(u => s"${u.getFullName} (${u.getEmail})")
 
 				Seq(s"You do not have permission to upload marks for this student. Their enrolment department is ${enrolmentRootDepartment.name}.${if (userAccessManagers.nonEmpty) s" To get permission, contact the Tabula User Access Manager for ${enrolmentRootDepartment.name}, ${userAccessManagers.mkString(" or ")}." else ""}")
 			case _ =>
@@ -212,7 +216,7 @@ trait UploadYearMarksDescription extends Describable[Seq[StudentCourseYearDetail
 trait UploadYearMarksCommandState {
 	def department: Department
 	def academicYear: AcademicYear
-	val validAttachmentStrings = Seq(".xlsx")
+	val validAttachmentStrings: Seq[String] = Seq(".xlsx")
 	var processedYearMarks: collection.mutable.ArrayBuffer[ProcessedYearMark] = collection.mutable.ArrayBuffer()
 }
 

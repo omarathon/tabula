@@ -14,7 +14,7 @@
 </#if>
 
 <div class="fix-area">
-	<@f.form method="post" action="${formUrl}" commandName=commandName>
+	<@f.form method="post" action="${formUrl}" modelAttribute=commandName>
 
 	<#assign isfile=RequestParameters.isfile/>
 

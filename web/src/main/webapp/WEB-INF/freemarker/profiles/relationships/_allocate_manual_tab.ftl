@@ -59,7 +59,7 @@
 			<#return false />
 		</#function>
 
-		<@f.form commandName="command" action="${manualFormAction}" method="POST" cssClass="fetch">
+		<@f.form modelAttribute="command" action="${manualFormAction}" method="POST" cssClass="fetch">
 			<#list command.additions?keys as entity>
 				<#list command.additions[entity] as student>
 					<input type="hidden" name="additions[${entity}]" value="${student}" />
@@ -256,7 +256,7 @@
 			</div>
 		</@f.form>
 
-		<@f.form commandName="command" action="${previewFormAction}" method="POST" cssClass="preview">
+		<@f.form modelAttribute="command" action="${previewFormAction}" method="POST" cssClass="preview">
 			<#assign allocatedStudents = [] />
 			<#list command.additions?keys as entity>
 				<#list command.additions[entity] as student>

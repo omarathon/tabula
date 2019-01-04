@@ -6,7 +6,7 @@
 	<@routes.coursework.plagiarismInvestigation assignment=assignment />
 </#assign>
 
-<@f.form method="post" action="${formAction}" commandName="command">
+<@f.form method="post" action="${formAction}" modelAttribute="command">
 
 	<#if command.markPlagiarised>
 		<#assign verb = "mark">

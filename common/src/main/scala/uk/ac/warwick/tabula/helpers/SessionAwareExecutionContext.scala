@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.helpers
 import java.util.concurrent.Executors
 
 import org.hibernate.{FlushMode, SessionFactory}
-import org.springframework.orm.hibernate4.{SessionFactoryUtils, SessionHolder}
+import org.springframework.orm.hibernate5.{SessionFactoryUtils, SessionHolder}
 import org.springframework.transaction.support.TransactionSynchronizationManager
 import uk.ac.warwick.spring.Wire
 

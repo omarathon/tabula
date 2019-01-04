@@ -19,18 +19,18 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-    scalaVersion = "2.12.7"
+    scalaVersion = "2.12.8"
     scalaMajorVersion = "2.12"
-    springVersion = "4.3.14.RELEASE"
-    hibernateVersion = "4.3.11.Final"
-    jacksonVersion = "2.6.7"
-    jacksonScalaModuleVersion = "2.6.7.1"
-    elasticsearchVersion = "2.1.2"
-    elastic4sVersion = "2.1.3-warwick"
-    poiVersion = "3.17"
+    springVersion = "5.1.3.RELEASE"
+    hibernateVersion = "5.4.0.Final"
+    jacksonVersion = "2.9.8"
+    jacksonScalaModuleVersion = "2.9.8"
+    elasticsearchVersion = "6.5.2"
+    elastic4sVersion = "6.5.0"
+    poiVersion = "4.0.1"
     tilesVersion = "3.0.8"
-    jcloudsVersion = "2.0.2"
-    warwickUtilsVersion = "20180430"
+    jcloudsVersion = "2.1.1"
+    warwickUtilsVersion = "20181130"
     surefireVersion = "2.19.1"
 }
 
@@ -120,7 +120,6 @@ subprojects {
             exclude group: 'xerces', module: 'xerces'
             exclude group: 'javax.servlet', module: 'servletapi'
             exclude group: 'servletapi', module: 'servletapi'
-            exclude group: 'log4j', module: 'log4j'
             exclude group: 'jboss', module: 'javassist'
 
             resolutionStrategy {
@@ -206,6 +205,6 @@ subprojects {
 // value then running `./gradlew wrapper`. Next time gradlew
 // is run it will fetch and use that version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
+    gradleVersion = '4.10.3'
     distributionType = 'ALL'
 }

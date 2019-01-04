@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
-import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
-import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.userlookup.User
 import org.junit.Before
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedPermission, GrantedRole, RoleOverride}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+import uk.ac.warwick.userlookup.User
 
 class PermissionsDaoTest extends PersistenceTestBase {
 
@@ -29,7 +24,7 @@ class PermissionsDaoTest extends PersistenceTestBase {
 		session.save(dept2)
 		session.flush()
 
-		val gr1 = new DepartmentGrantedRole(dept1, DepartmentalAdministratorRoleDefinition)
+		val gr1 = GrantedRole(dept1, DepartmentalAdministratorRoleDefinition)
 		gr1.users.knownType.addUserId("cusbruv")
 		gr1.users.knownType.addUserId("cusxar")
 		dao.saveOrUpdate(gr1)
@@ -47,12 +42,12 @@ class PermissionsDaoTest extends PersistenceTestBase {
 
 		dao.saveOrUpdate(crd)
 
-		val gr2 = new DepartmentGrantedRole(dept1, crd)
+		val gr2 = GrantedRole(dept1, crd)
 		gr2.users.knownType.addUserId("cusbruv")
 		gr2.users.knownType.addUserId("cuscao")
 		dao.saveOrUpdate(gr2)
 
-		val gp = new DepartmentGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow)
+		val gp = GrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow)
 		gp.users.knownType.addUserId("cusbruv")
 		gp.users.knownType.addUserId("cuscao")
 		dao.saveOrUpdate(gp)

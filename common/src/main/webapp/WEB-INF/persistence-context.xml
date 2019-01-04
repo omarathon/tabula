@@ -25,12 +25,12 @@
 
 	<import resource="hibernate-packages-context.xml" />
 
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan-ref="hibernatePackages"
 		p:hibernateProperties-ref="hibernateProperties" />
 
-	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
+	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 
 	<beans profile="console">
@@ -72,13 +72,13 @@
 		</util:properties>
 		<util:properties id="hibernateProperties">
 			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.oracle.Oracle10gDialect</prop>
+			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.oracle.Oracle12cDialect</prop>
 			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
 			<prop key="defaultNChar">true</prop>
 			<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
 		</util:properties>
 
-		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />
+		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle12cDialect" />
 
 	</beans>
 

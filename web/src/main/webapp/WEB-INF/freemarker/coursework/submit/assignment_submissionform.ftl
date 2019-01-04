@@ -132,8 +132,8 @@
 
 							<#if assignment.allowLateSubmissions>
 								<p>
-								  You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
-								  may be affected.
+									You can submit<#if assignment.allowResubmission> once only</#if> to this assignment after the deadline, but your mark
+									may be affected.
 								</p>
 							</#if>
 						<#else>

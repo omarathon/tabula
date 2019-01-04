@@ -19,7 +19,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
-import uk.ac.warwick.util.files.impl.AbstractBlobBackedFileData
+import uk.ac.warwick.util.files.FileReferenceCreationStrategy.Target
+import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
+import uk.ac.warwick.util.files.hash.FileHashResolver
+import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
 
 import scala.collection.JavaConverters._
 
@@ -55,7 +58,7 @@ object RichByteSource {
 	def empty: RichByteSource = new BlobBackedByteSource(None, None)
 }
 
-class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(blobStore, containerName, blobName) {
+class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(new LocalFilesystemFileStore(Map.empty[String, FileHashResolver].asJava, new StaticFileReferenceCreationStrategy(Target.local)), blobStore, containerName, blobName) {
 	override def overwrite(in: ByteSource) = throw new UnsupportedOperationException
 }
 

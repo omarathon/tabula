@@ -8,7 +8,7 @@
 
 	<#assign createExamUrl><@routes.exams.createExam module academicYear /></#assign>
 
-	<@f.form id="newExamForm" method="post" action="${createExamUrl}" commandName="command">
+	<@f.form id="newExamForm" method="post" action="${createExamUrl}" modelAttribute="command">
 
 		<#include "_common_fields.ftl" />
 

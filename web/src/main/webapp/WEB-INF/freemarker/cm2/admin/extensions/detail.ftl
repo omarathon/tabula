@@ -68,7 +68,7 @@
 	method="post"
 	class="modify-extension double-submit-protection"
 	action="${formAction}"
-	commandName="modifyExtensionCommand"
+	modelAttribute="modifyExtensionCommand"
 >
 
 	<@bs3form.labelled_form_group "expiryDate" "Extended deadline">

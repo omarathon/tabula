@@ -184,8 +184,6 @@ class MarkerFeedback extends GeneratedId
 	def outstanding: Boolean = feedback.outstandingStages.contains(stage)
 
 	def finalised: Boolean = hasContent && !outstanding
-
-	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }
 
 trait CM1MarkerFeedbackSupport {
