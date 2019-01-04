@@ -44,6 +44,4 @@ class MonitoringPointReport extends GeneratedId with ToEntityReference {
 	var reporter: String = _
 
 	override type Entity = MonitoringPointReport
-
-	override def toEntityReference: MonitoringPointReportEntityReference = new MonitoringPointReportEntityReference().put(this)
 }

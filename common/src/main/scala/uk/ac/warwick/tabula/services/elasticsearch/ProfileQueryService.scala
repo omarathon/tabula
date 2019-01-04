@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.services.elasticsearch
 
 import java.util.concurrent.TimeoutException
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator
+import com.sksamuel.elastic4s.Index
+import com.sksamuel.elastic4s.http.ElasticDsl._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -50,6 +50,7 @@ class ProfileQueryServiceImpl extends AbstractQueryService
 		* The name of the index alias that this service reads from
 		*/
 	@Value("${elasticsearch.index.profiles.alias}") var indexName: String = _
+	lazy val index = Index(indexName)
 
 	@Autowired var profileService: ProfileService = _
 
@@ -95,7 +96,7 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 		else try {
 			val textQuery = query.maybeText.map { q =>
 				queryStringQuery(autoWildcard(sanitiseQuery(q)))
-					.defaultOperator(Operator.AND)
+					.defaultOperator("AND")
 				  .analyzeWildcard(true)
 				  .asfields("firstName", "lastName", "fullName")
 			}
@@ -108,24 +109,21 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 						if (includeTouched) departments.map { dept => termQuery("touchedDepartments", dept.code) }
 						else Nil
 
-					Some(bool {
-						should(deptQueries ++ touchedQueries)
-					})
+					Some(boolQuery().should(deptQueries ++ touchedQueries))
 				}
 
 			val userTypeQuery =
 				if (userTypes.isEmpty) None
-				else Some(bool {
-					should(userTypes.map { userType => termQuery("userType", userType.dbValue) })
-				})
+				else Some(boolQuery().should(userTypes.map { userType => termQuery("userType", userType.dbValue) }))
 
 			// Active only
-			val inUseQuery = if (activeOnly) Some(bool {
-				should(
-					termQuery("inUseFlag", "Active"),
-					prefixQuery("inUseFlag", "Inactive - Starts")
-				)
-			}) else None
+			val inUseQuery = if (activeOnly) Some(
+				boolQuery()
+					.should(
+						termQuery("inUseFlag", "Active"),
+						prefixQuery("inUseFlag", "Inactive - Starts")
+					)
+			) else None
 
 			// Course ended in the previous 6 months
 			val courseEndedQuery = if (activeOnly) Some(
@@ -136,8 +134,8 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
 
 			val queries = Seq(textQuery, deptQuery, userTypeQuery, inUseQuery, courseEndedQuery).flatten
 
-			val universityIds = client.execute { searchFor query bool { must(queries) } }
-				.map { response => response.hits.map { _.id }.toSeq }
+			val universityIds = client.execute { searchRequest.query(boolQuery().must(queries)) }
+				.map { response => response.result.hits.hits.map { _.id }.toSeq }
 				.recover { case _ => Nil } // ignore any error
 				.await(15.seconds) // Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread
 

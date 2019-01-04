@@ -37,7 +37,7 @@ tabula/
 ├── lib/
 │   ├── jtds-1.3.1.jar
 │   ├── logback.xml
-│   ├── ojdbc7.jar
+│   ├── ojdbc8.jar
 │   ├── tabula.properties
 │   ├── tabula-sso-config.xml
 │   └── warwick-logging-1.0-all.xml
@@ -83,9 +83,9 @@ Note that this dependency replaces previous dependencies on logback, logstash-lo
 
 You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
 
-### `lib/ojdbc7.jar`
+### `lib/ojdbc8.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc7.jar
+You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
 
 ### `lib/logback.xml`
 
@@ -131,32 +131,28 @@ activemq.broker=tcp://localhost:61616
 
 To run this locally, you have a few options:
 
-#### Run an ElasticSearch cluster in the JVM
-
-You should be able to set `elasticsearch.cluster.local_jvm=true` in your `tabula.properties` and just start the app as normal, it'll store in whatever you have `filesystem.index.dir` set as (you'll already have this set as this is where it stores the fs indexes at the moment)
-
 #### Install ElasticSearch locally
 
 For Ubuntu:
 
 ```
-wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-echo "deb http://packages.elastic.co/elasticsearch/2.x/debian stable main" | sudo tee -a /etc/apt/sources.list.d/elasticsearch-2.x.list
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
 sudo apt-get update && sudo apt-get install elasticsearch -y
 ```
 
 You'll need to edit `/etc/elasticsearch/elasticsearch.yml` to set `cluster.name: tabula` (or set `elasticsearch.cluster.name=elasticsearch` in `tabula.properties`.
 
-When I ran it locally, it wouldn't start on boot by default, but I could start it with `sudo systemctl start elasticsearch`
+When I ran it locally, it wouldn't start on boot by default, but I could start it with `sudo systemctl start elasticsearch`. Run `sudo systemctl enable elasticsearch` for it to run on boot.
 
 #### Connect to the tabula-dev Elasticsearch cluster
 
 Set the following properties in your `tabula.properties`:
 
 ```
-elasticsearch.cluster.nodes=lamso-tabula-dev-es.lnx.warwick.ac.uk:9300,lamvi-tabula-dev-es.lnx.warwick.ac.uk:9300,lanlo-tabula-dev-es.lnx.warwick.ac.uk:9300
+elasticsearch.cluster.nodes=amoru.lnx.warwick.ac.uk:9200,amogu.lnx.warwick.ac.uk:9200,amomu.lnx.warwick.ac.uk:9200
 elasticsearch.cluster.name=tabula-dev
-elasticsearch.index.prefix=mmannion
+elasticsearch.index.prefix=your-name-goes-here
 ```
 
 *Please* make sure you change your `elasticsearch.index.prefix` or you might end up overwriting someone else's index. If you run into firewall problems, shout in #ops

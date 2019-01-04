@@ -7,7 +7,7 @@
 <#assign command=addSubDepartmentCommand />
 <#assign submitUrl><@routes.admin.createsubdepartment department /></#assign>
 
-<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="double-submit-protection">
+<@f.form method="post" action="${submitUrl}" modelAttribute=commandName cssClass="double-submit-protection">
 	<@f.errors cssClass="error form-errors" />
 
 	<@bs3form.labelled_form_group path="code" labelText="Department code">

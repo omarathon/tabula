@@ -17,8 +17,8 @@
 	<h2>Importing student data</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString}">Select courses</a></span>
-		<span class="arrow-right arrow-left"><a class="btn btn-link" href="<@routes.exams.generateGridOptions department academicYear />?${gridOptionsQueryString}">Set grid options</a></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${uriParser(gridOptionsQueryString)}">Select courses</a></span>
+		<span class="arrow-right arrow-left"><a class="btn btn-link" href="<@routes.exams.generateGridOptions department academicYear />?${uriParser(gridOptionsQueryString)}">Set grid options</a></span>
 		<span class="arrow-right arrow-left active">Preview and download</span>
 	</p>
 

@@ -12,7 +12,7 @@ first page of the form to setup a bunch of assignments from SITS.
 <#assign step=action!'select'/>
 
 <#assign submitUrl><@routes.coursework.setupSitsAssignments department /></#assign>
-<@f.form method="post" id="batch-add-form" action=submitUrl commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" id="batch-add-form" action=submitUrl modelAttribute=commandName cssClass="form-horizontal">
 
 	<#if step='select'>
 

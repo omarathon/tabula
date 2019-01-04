@@ -284,14 +284,15 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				(sr.endDate is null or sr.endDate >= SYSDATE)
+				(sr.endDate is null or sr.endDate >= :now)
 			and
-				(sr.startDate is null or sr.startDate <= SYSDATE)
+				(sr.startDate is null or sr.startDate <= :now)
 			order by
 				sr._agentMember, sr.studentCourseDetails
 																					""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
+  		.setParameter("now", DateTime.now())
 			.seq
 	}
 
@@ -333,13 +334,14 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 					where
 						sr.relationshipType = :relationshipType
 					and
-						(sr.endDate is null or sr.endDate >= SYSDATE)
+						(sr.endDate is null or sr.endDate >= :now)
 					and
-						(sr.startDate is null or sr.startDate <= SYSDATE)
+						(sr.startDate is null or sr.startDate <= :now)
 				)
 		""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
+			.setParameter("now", DateTime.now())
 			.seq.distinct
 
 	def getScheduledRelationshipChangesByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] =

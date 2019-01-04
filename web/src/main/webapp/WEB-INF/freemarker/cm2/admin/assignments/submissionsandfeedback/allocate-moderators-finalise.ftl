@@ -1,7 +1,7 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 <#assign action><@routes.cm2.moderationSamplingFinalise assignment /></#assign>
-<@f.form cssClass="double-submit-protection" method="post" action="${action}" commandName="finaliseCommand">
+<@f.form cssClass="double-submit-protection" method="post" action="${action}" modelAttribute="finaliseCommand">
 
 	<@cm2.assignmentHeader "Finalise feedback" assignment "for" />
 	<input type="hidden" name="confirmScreen" value="true" />

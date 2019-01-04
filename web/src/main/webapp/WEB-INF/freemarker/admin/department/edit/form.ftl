@@ -5,7 +5,7 @@
 <#assign commandName="editDepartmentCommand" />
 <#assign command=editDepartmentCommand />
 <#assign submitUrl><@routes.admin.editdepartment department /></#assign>
-<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="double-submit-protection">
+<@f.form method="post" action="${submitUrl}" modelAttribute=commandName cssClass="double-submit-protection">
 
 	<@f.errors cssClass="error form-errors" />
 

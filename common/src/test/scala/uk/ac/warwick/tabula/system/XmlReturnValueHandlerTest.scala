@@ -21,9 +21,9 @@ class XmlReturnValueHandlerTest extends TestBase {
 	def returnsUnit() {}
 	def returnsAny: Any = null
 
-	val xmlMethod  = new MethodParameter(getClass.getMethod("returnsXml"), 1)
-	val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), 1)
-	val anyMethod  = new MethodParameter(getClass.getMethod("returnsAny"), 1)
+	val xmlMethod  = new MethodParameter(getClass.getMethod("returnsXml"), -1)
+	val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), -1)
+	val anyMethod  = new MethodParameter(getClass.getMethod("returnsAny"), -1)
 
 	@Test def supports() {
 		handler.supportsReturnType(xmlMethod) should be (true)

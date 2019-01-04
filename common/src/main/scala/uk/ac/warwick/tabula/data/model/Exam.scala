@@ -132,6 +132,4 @@ class Exam
 
 	override def permissionsParents: Stream[Module] = Option(module).toStream
 
-	override def toEntityReference: ExamEntityReference = new ExamEntityReference().put(this)
-
 }

@@ -2,7 +2,7 @@
 <#escape x as x?html>
 <h1>Extension settings for ${department.name}</h1>
 <#assign submitUrl><@routes.coursework.extensionsettings department /></#assign>
-<@f.form method="post" class="form-horizontal" action=submitUrl commandName="extensionSettingsCommand">
+<@f.form method="post" class="form-horizontal" action=submitUrl modelAttribute="extensionSettingsCommand">
 <#if features.extensions>
 	<@form.row>
 		<@form.label></@form.label>

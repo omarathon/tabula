@@ -22,7 +22,7 @@
 	</script>
 
 	<#assign submitUrl><@routes.cm2.unPublishFeedback assignment /></#assign>
-	<@f.form method="post" action=submitUrl commandName="command">
+	<@f.form method="post" action=submitUrl modelAttribute="command">
 		<@bs3form.errors path="" />
 
 		<#list command.feedbackToUnPublish as feedback>

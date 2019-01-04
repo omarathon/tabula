@@ -8,7 +8,6 @@ dependencies {
     compile "org.springframework:spring-core:${springVersion}"
     compile "org.springframework:spring-expression:${springVersion}"
     compile "org.springframework:spring-instrument:${springVersion}"
-    compile "org.springframework:spring-instrument-tomcat:${springVersion}"
     compile "org.springframework:spring-jdbc:${springVersion}"
     compile "org.springframework:spring-jms:${springVersion}"
     compile "org.springframework:spring-orm:${springVersion}"
@@ -28,7 +27,7 @@ dependencies {
     compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
 
-    compile 'uk.ac.warwick.sso:sso-client:2.60'
+    compile 'uk.ac.warwick.sso:sso-client:2.60.1'
     compile 'xalan:xalan:2.7.2'
 
     compile 'org.apache.httpcomponents:httpclient:4.5.1'
@@ -38,27 +37,26 @@ dependencies {
 
     compile "uk.ac.warwick:spring-scala-glue_${scalaMajorVersion}:1.7"
 
-    compile 'org.apache.tika:tika-core:1.1'
+    compile 'org.apache.tika:tika-core:1.19.1'
     compile "org.apache.poi:poi:${poiVersion}"
     compile "org.apache.poi:poi-ooxml:${poiVersion}"
     compile "org.apache.poi:poi-ooxml-schemas:${poiVersion}"
-    compile 'org.apache.poi:ooxml-schemas:1.1'
+    compile 'org.apache.poi:ooxml-schemas:1.4'
     compile "org.apache.poi:poi-scratchpad:${poiVersion}"
 
-    compile 'org.freemarker:freemarker:2.3.21'
+    compile 'org.freemarker:freemarker:2.3.28'
 
     compile "org.hibernate:hibernate-core:${hibernateVersion}"
     compile "org.hibernate:hibernate-entitymanager:${hibernateVersion}"
-    compile "org.hibernate.javax.persistence:hibernate-jpa-2.1-api:1.0.0.Final"
+    compile "org.hibernate.javax.persistence:hibernate-jpa-2.2-api:1.0.0.Beta2"
 
-    compile "org.hibernate:hibernate-validator:5.1.3.Final"
-    annotationProcessor "org.hibernate:hibernate-validator-annotation-processor:5.1.3.Final"
-    compile "javax.el:javax.el-api:2.2.4"
-    compile "org.glassfish.web:javax.el:2.2.4"
+    compile "org.hibernate:hibernate-validator:6.0.13.Final"
+    annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:6.0.13.Final"
+    testCompile "org.glassfish:javax.el:3.0.1-b09"
 
     compile "joda-time:joda-time:2.8.2"
     compile "joda-time:joda-time-jsptags:1.1.1"
-    compile "org.jadira.usertype:usertype.core:3.2.0.GA"
+    compile "org.jadira.usertype:usertype.core:6.0.1.GA"
     compile "org.joda:joda-convert:1.1"
 
     compile "com.google.guava:guava:18.0"
@@ -117,6 +115,7 @@ dependencies {
 
     compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
     compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
+    compile "com.sksamuel.elastic4s:elastic4s-http_${scalaMajorVersion}:${elastic4sVersion}"
 
     compile "org.apache.jclouds:jclouds-blobstore:${jcloudsVersion}"
     compile "org.apache.jclouds.driver:jclouds-slf4j:${jcloudsVersion}"
@@ -125,8 +124,8 @@ dependencies {
 
     compile 'org.tuckey:urlrewritefilter:4.0.4'
 
-    compile 'org.quartz-scheduler:quartz:2.2.1'
-    compile 'org.quartz-scheduler:quartz-jobs:2.2.1'
+    compile 'org.quartz-scheduler:quartz:2.2.3'
+    compile 'org.quartz-scheduler:quartz-jobs:2.2.3'
 
     compile 'com.github.mfornos:humanize-slim:1.2.2'
 
@@ -136,12 +135,11 @@ dependencies {
     testCompile "org.springframework:spring-test:${springVersion}"
 
     // FIXME We need this for the sandbox (because it uses jdbc:embedded-datasource to mock up SITS and FIM databases) but that seems incredibly wasteful
-    compile 'org.hsqldb:hsqldb:2.2.9'
+    compile 'org.hsqldb:hsqldb:2.4.1'
 
-    testCompile "org.elasticsearch:elasticsearch:${elasticsearchVersion}:tests"
-    testCompile ("com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}") {
-        exclude group: 'org.scalatest'
-    }
+    testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}"
+    testCompile "com.sksamuel.elastic4s:elastic4s-embedded_${scalaMajorVersion}:${elastic4sVersion}"
+    testCompile "org.apache.logging.log4j:log4j-core:2.11.1" // Thanks, Elasticsearch
 }
 
 jar.dependsOn(generateRebel)

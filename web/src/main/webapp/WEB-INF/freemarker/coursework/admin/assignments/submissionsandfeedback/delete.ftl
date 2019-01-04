@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 <#assign submitUrl><@routes.coursework.deleteSubmissionsFeedback assignment /></#assign>
-<@f.form method="post" action=submitUrl commandName="deleteSubmissionsAndFeedbackCommand">
+<@f.form method="post" action=submitUrl modelAttribute="deleteSubmissionsAndFeedbackCommand">
 <h1>Delete submissions and/or feedback for ${assignment.name}</h1>
 
 <@form.errors path="" />

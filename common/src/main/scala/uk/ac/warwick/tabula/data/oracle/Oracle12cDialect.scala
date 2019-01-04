@@ -8,7 +8,7 @@ import org.hibernate.`type`.StandardBasicTypes
  * org.hibernate.MappingException: No Dialect mapping for JDBC type: -9
  * -9 is the value of Types.NVARCHAR, for some reason it can't figure out what type it is.
  */
-class Oracle10gDialect extends org.hibernate.dialect.Oracle10gDialect {
+class Oracle12cDialect extends org.hibernate.dialect.Oracle12cDialect {
 	registerHibernateType(Types.NVARCHAR, StandardBasicTypes.STRING.getName)
 	registerHibernateType(Types.NCLOB, StandardBasicTypes.CLOB.getName)
 	registerHibernateType(Types.NCHAR, StandardBasicTypes.STRING.getName)

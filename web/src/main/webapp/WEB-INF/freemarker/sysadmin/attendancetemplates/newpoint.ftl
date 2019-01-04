@@ -3,7 +3,7 @@
 <h1>Add monitoring point to ${template.templateName}</h1>
 
 <#assign action><@url page="/sysadmin/attendancetemplates/${template.id}/points/add"/></#assign>
-<@f.form action="${action}" method="POST" commandName="command">
+<@f.form action="${action}" method="POST" modelAttribute="command">
 
 	<@bs3form.labelled_form_group path="name" labelText="Name">
 		<@f.input path="name" cssClass="form-control"/>

@@ -10,7 +10,7 @@
 	method="POST"
 	class="double-submit-protection"
 	action="${formAction}"
-	commandName="${commandName}"
+	modelAttribute="${commandName}"
 	>
 		<@f.errors cssClass="error form-errors" />
 

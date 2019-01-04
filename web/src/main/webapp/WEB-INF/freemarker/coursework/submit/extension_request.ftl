@@ -66,7 +66,7 @@
 		</#if>
 
 		<#assign submitUrl><@routes.coursework.extensionRequest assignment /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection extension-request" action=submitUrl commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection extension-request" action=submitUrl modelAttribute="command">
 
 			<#if isModification>
 				<@f.hidden path="modified" value="true" />

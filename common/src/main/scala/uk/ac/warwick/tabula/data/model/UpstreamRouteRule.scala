@@ -38,7 +38,7 @@ class UpstreamRouteRule extends GeneratedId {
 	}
 	def academicYear: Option[AcademicYear] = Option(_academicYear)
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _
 
@@ -68,7 +68,5 @@ class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleServ
 				cache.put((route, l), upstreamRouteRuleService.list(route, academicYear, l))
 				cache((route, l))
 		}).getOrElse(Seq())
-
-
 
 }

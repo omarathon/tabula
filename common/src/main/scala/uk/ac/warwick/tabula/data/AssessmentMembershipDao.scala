@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FetchMode
 import org.hibernate.`type`.StandardBasicTypes
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model._
-import org.hibernate.criterion.{Order, Restrictions}
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
-import uk.ac.warwick.tabula.AcademicYear
+import org.hibernate.criterion.{Order, Restrictions}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ManualMembershipInfo
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -61,7 +62,11 @@ trait AssessmentMembershipDao {
 	 * assessment group code, which most of the time is just 1.
 	 */
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup]
+
+	def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember]
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
+
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String]
 
 	def emptyMembers(groupsToEmpty:Seq[String]): Int
@@ -93,11 +98,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		val query =
 			session.newQuery[Assignment](s"""select a
 			from
-				Assignment a
+				Assignment a, UpstreamAssessmentGroup uag
 					join a.assessmentGroups ag
-					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members uagms with uagms.universityId = :universityId
 			where
+	 				ag.assessmentComponent.moduleCode = uag.moduleCode and
+					ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
 					uag.academicYear = a.academicYear and
 					uag.occurrence = ag.occurrence and
 					${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
@@ -111,11 +117,12 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
 	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
-			from SmallGroupSet sgs
+			from SmallGroupSet sgs, UpstreamAssessmentGroup uag
 				join sgs.assessmentGroups ag
-				join ag.assessmentComponent.upstreamAssessmentGroups uag
 				join uag.members uagms with uagms.universityId = :universityId
 			where
+	 			ag.assessmentComponent.moduleCode = uag.moduleCode and
+				ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
 				uag.academicYear = sgs.academicYear and
 				uag.occurrence = ag.occurrence and
 				sgs.deleted = false and sgs.archived = false""")
@@ -163,14 +170,17 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	def save(assignment: AssessmentComponent): AssessmentComponent =
 		find(assignment)
 			.map { existing =>
-			if (existing needsUpdatingFrom assignment) {
-				existing.copyFrom(assignment)
-				session.update(existing)
-			}
+				if (existing needsUpdatingFrom assignment) {
+					existing.copyFrom(assignment)
+					session.update(existing)
+				}
 
-			existing
-		}
-			.getOrElse { session.save(assignment); assignment }
+				existing
+			}
+			.getOrElse {
+				session.save(assignment)
+				assignment
+			}
 
 	def save(group: UpstreamAssessmentGroup): Unit =
 		find(group).getOrElse { session.save(group) }
@@ -279,13 +289,49 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.seq
 	}
 
-	def getUpstreamAssessmentGroups(registration: ModuleRegistration): Seq[UpstreamAssessmentGroup] =
-		session.newCriteria[UpstreamAssessmentGroup]
-			.add(is("academicYear", registration.academicYear))
-			.add(is("moduleCode", registration.toSITSCode))
-			.add(is("assessmentGroup", registration.assessmentGroup))
-			.add(is("occurrence", registration.occurrence))
-			.seq
+	 def getCurrentUpstreamAssessmentGroupMembers(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroupMember] = {
+		 session.createSQLQuery(s"""
+			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.academicYear = :academicYear and uag.moduleCode = :moduleCode and uag.assessmentGroup = :assessmentGroup and uag.sequence = :sequence
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+			""")
+			 .addEntity(classOf[UpstreamAssessmentGroupMember])
+			 .setString("academicYear", academicYear.startYear.toString)
+			 .setString("moduleCode", component.moduleCode)
+			 .setString("assessmentGroup", component.assessmentGroup)
+			 .setString("sequence", component.sequence)
+			 .list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+
+	 }
+
+
+	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember] = {
+		session.createSQLQuery(s"""
+			select distinct uagm.* from UpstreamAssessmentGroupMember uagm
+				join UpstreamAssessmentGroup uag on uagm.group_id = uag.id and uag.id = :uagid
+				join StudentCourseDetails scd on scd.universityId = uagm.universityId
+				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
+			""")
+			.addEntity(classOf[UpstreamAssessmentGroupMember])
+			.setString("uagid", uagid)
+			.list.asScala.asInstanceOf[Seq[UpstreamAssessmentGroupMember]]
+	}
+
+	def getUpstreamAssessmentGroups(registration: ModuleRegistration, eagerLoad: Boolean): Seq[UpstreamAssessmentGroup] = {
+		val criteria =
+			session.newCriteria[UpstreamAssessmentGroup]
+				.add(is("academicYear", registration.academicYear))
+				.add(is("moduleCode", registration.toSITSCode))
+				.add(is("assessmentGroup", registration.assessmentGroup))
+				.add(is("occurrence", registration.occurrence))
+
+		if (eagerLoad) {
+			criteria.setFetchMode("members", FetchMode.JOIN).distinct
+		}
+
+		criteria.seq
+	}
 
 	def getUpstreamAssessmentGroupsNotIn(ids: Seq[String], academicYears: Seq[AcademicYear]): Seq[String] =
 		session.newCriteria[UpstreamAssessmentGroup]

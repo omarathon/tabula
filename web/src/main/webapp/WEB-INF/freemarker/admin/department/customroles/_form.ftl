@@ -15,7 +15,7 @@ Adding or editing a custom role definition
 <h1><#if view_type = "add">Create<#else>Edit</#if> custom role definition</h1>
 <#assign commandName="command" />
 
-<@f.form method="post" action="${form_url}" commandName=commandName>
+<@f.form method="post" action="${form_url}" modelAttribute=commandName>
 	<@f.errors cssClass="error form-errors" />
 
 	<#--

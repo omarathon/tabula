@@ -2,7 +2,7 @@
 <#import "*/modal_macros.ftl" as modal />
 <@modal.wrapper>
 	<#assign submitAction><@routes.groups.archiveset smallGroupSet /></#assign>
-	<@f.form method="post" action="${submitAction}" commandName="archiveSmallGroupSetCommand" cssClass="double-submit-protection">
+	<@f.form method="post" action="${submitAction}" modelAttribute="archiveSmallGroupSetCommand" cssClass="double-submit-protection">
 		<@modal.header>
 			<#if smallGroupSet.archived>
 				<h3 class="modal-title">Unarchive these groups</h3>

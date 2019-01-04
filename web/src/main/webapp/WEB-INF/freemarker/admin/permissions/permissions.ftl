@@ -205,7 +205,7 @@
 	<div class="add-permission well">
 		<h2>Explicitly grant or revoke permissions</h2>
 
-		<@f.form action="${perms_url}" commandName="addSingleCommand">
+		<@f.form action="${perms_url}" modelAttribute="addSingleCommand">
 			<@f.errors cssClass="error form-errors" />
 
 			<input type="hidden" name="_command" value="addSingle">

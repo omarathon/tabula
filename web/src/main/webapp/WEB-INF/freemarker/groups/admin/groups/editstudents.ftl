@@ -13,7 +13,7 @@
 	</#if>
 
 	<div class="fix-area">
-		<@f.form id="editStudents" method="POST" commandName="command" class="dirty-check">
+		<@f.form id="editStudents" method="POST" modelAttribute="command" class="dirty-check">
 			<@components.set_wizard false 'students' smallGroupSet />
 
 			<#include "_editStudents.ftl" />

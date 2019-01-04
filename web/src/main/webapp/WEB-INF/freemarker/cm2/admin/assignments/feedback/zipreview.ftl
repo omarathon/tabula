@@ -8,7 +8,7 @@
 	</@spring.bind>
 
 	<#assign submitUrl><@routes.cm2.addFeedback assignment /></#assign>
-	<@f.form method="post" action=submitUrl commandName=commandName cssClass="submission-form double-submit-protection">
+	<@f.form method="post" action=submitUrl modelAttribute=commandName cssClass="submission-form double-submit-protection">
 		<input type="hidden" name="batch" value="true">
 		<@spring.bind path="fromArchive"><#assign fromArchive=status.actualValue /></@spring.bind>
 		<#if fromArchive>

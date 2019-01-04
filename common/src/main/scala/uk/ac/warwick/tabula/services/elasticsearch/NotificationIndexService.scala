@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import javax.persistence.DiscriminatorValue
-
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.analyzers.AnalyzerDefinition
-import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.mappings.FieldDefinition
+import javax.persistence.DiscriminatorValue
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
@@ -51,12 +51,13 @@ class NotificationIndexService
 		with NotificationElasticsearchConfig
 		with NotificationIndexType {
 
-	override implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
+	override implicit val indexable: ElasticsearchIndexable[IndexedNotification] = NotificationIndexService.IndexedNotificationIndexable
 
 	/**
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.notifications.name}") var indexName: String = _
+	lazy val index: Index = Index(indexName)
 
 	@Autowired var notificationDao: NotificationDao = _
 
@@ -88,11 +89,11 @@ trait NotificationIndexType extends ElasticsearchIndexType {
 }
 
 trait NotificationElasticsearchConfig extends ElasticsearchConfig {
-	override def fields: Seq[TypedFieldDefinition] = Seq(
+	override def fields: Seq[FieldDefinition] = Seq(
 		doubleField("priority"),
 		booleanField("dismissed"),
-		stringField("notificationType") index "not_analyzed",
-		dateField("created") format "strict_date_time_no_millis"
+		keywordField("notificationType"),
+		dateField("created").format("strict_date_time_no_millis")
 	)
 
 	override def analysers: Seq[AnalyzerDefinition] = Seq() // default standard analyzer

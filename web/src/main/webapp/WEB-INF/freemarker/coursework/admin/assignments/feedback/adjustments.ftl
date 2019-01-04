@@ -53,7 +53,7 @@
 
 <@f.form cssClass="form-horizontal double-submit-protection"
 		 method="post"
-		 commandName="command"
+		 modelAttribute="command"
 		 action="${submit_url}">
 
 	<@form.row>

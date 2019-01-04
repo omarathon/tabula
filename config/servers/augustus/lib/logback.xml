@@ -145,9 +145,10 @@
 	<logger name="facelets.compiler" level="WARN" />
 	<logger name="org.ajax4jsf.cache" level="WARN" />
 	<logger name="org.rhq" level="WARN" />
-	<logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+	<logger name="org.hibernate.orm.deprecation" level="OFF" />
+	<!--<logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
 		<appender-ref ref="DEBUG" />
-	</logger>
+	</logger>-->
 
 	<root level="INFO">
 		<appender-ref ref="CONSOLE" />

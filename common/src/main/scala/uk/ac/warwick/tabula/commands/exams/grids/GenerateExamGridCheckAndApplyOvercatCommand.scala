@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOvercatCommand.{Result, SelectCourseCommand}
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRuleLookup}
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
@@ -12,7 +13,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
 object GenerateExamGridCheckAndApplyOvercatCommand {
@@ -126,7 +127,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	var selectCourseCommand: SelectCourseCommand = _
 
 	def fetchEntities: Seq[ExamGridEntity] = selectCourseCommand.apply()
-	lazy val entities: Seq[ExamGridEntity] =  {
+	lazy val entities: Seq[ExamGridEntity] = {
 		val courseYears = selectCourseCommand.courseYearsToShow
 		if (courseYears.size == selectCourseCommand.studyYearByLevelOrBlock) {
 			fetchEntities // all years
@@ -145,15 +146,15 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 	lazy val overcatSubsets: Map[ExamGridEntity, Map[YearOfStudy, Seq[(BigDecimal, Seq[ModuleRegistration])]]] =
 		entities.map(entity => {
 			val subsets = entity.validYears
-				.filter{case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty}
-		  	.mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
+				.filter { case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty }
+				.mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
 					entityYear,
 					entityYear.markOverrides.getOrElse(Map()),
 					normalLoadLookup(entityYear.route),
 					routeRulesLookup(entityYear.route, entityYear.level)
 				))
-				.map{case (year, overcattedModuleSubsets) =>
-					if(overcattedModuleSubsets.size > 1) year -> overcattedModuleSubsets
+				.map { case (year, overcattedModuleSubsets) =>
+					if (overcattedModuleSubsets.size > 1) year -> overcattedModuleSubsets
 					else year -> Seq()
 				}
 			entity -> subsets

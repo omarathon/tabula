@@ -259,7 +259,7 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ConditionalInterceptor" p:excludePath="/static/*">
 				<constructor-arg>
-					<bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor" autowire="byName" />
+					<bean class="org.springframework.orm.hibernate5.support.OpenSessionInViewInterceptor" autowire="byName" />
 				</constructor-arg>
 			</bean>
 		</mvc:interceptor>
@@ -427,6 +427,7 @@
 				<entry key="componentName" value="${module.name}" />
 				<entry key="activeSpringProfiles" value="${spring.profiles.active}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
+				<entry key="uriParser"><bean class="uk.ac.warwick.tabula.web.views.UriParser" /></entry>
 				<entry key="manageRole"><bean class="uk.ac.warwick.tabula.web.views.ManageRoleTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>

@@ -2,7 +2,7 @@
 
 <h1>LTI Conformance tester (basic-lti-launch-request)</h1>
 
-<@f.form method="post" action="${url('${endpoint}')}" commandName="ltiConformanceTesterPopulateFormCommand">
+<@f.form method="post" action="${url('${endpoint}')}" modelAttribute="ltiConformanceTesterPopulateFormCommand">
 
 	<#list response?keys as key>
 		<#if response[key]?has_content>

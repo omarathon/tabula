@@ -81,7 +81,7 @@
 			<h2>Contact your administrator</h2>
 			<p>If you're having problems with Tabula, use the form below to contact your department's Tabula administrator.</p>
 
-			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
+			<@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
 				<@bs3form.labelled_form_group path="name" labelText="Your name">
 					<@f.input path="name" cssClass="form-control"/>
 				</@bs3form.labelled_form_group>
@@ -105,7 +105,7 @@
 			<h2>Technical support</h2>
 			<p>If you're experiencing technical issues with Tabula, please  <a href="#comment-modal" data-toggle="modal">contact the IT Services Web Team</a>.</p>
 
-			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
+			<@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
 
 				<div class="modal fade" id="comment-modal">
 					<@modal.wrapper>
@@ -127,7 +127,7 @@
 		<#else>
 			<h2>Technical support</h2>
 			<p>If you're experiencing technical issues with Tabula, please contact the web team who can help with your query.</p>
-			<@f.form commandName="command" action="${url('/help')}" cssClass="comment-form">
+			<@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
 				<@webTeamForm />
 				<button type="submit" class="btn btn-primary" name="recipient" value="${Recipients.WebTeam}">Send</button>
 			</@f.form>

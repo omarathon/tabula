@@ -206,32 +206,32 @@ class SmallGroupSet
 
 	def showAttendanceReports: Boolean = !archived && !deleted && collectAttendance
 
-	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
+	// converts the assessmentGroups to UpstreamAssessmentGroupInfo
+	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroupInfo(academicYear) }
 
 	// Gets a breakdown of the membership for this small group set.
-	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroups, Some(members))
+	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroupInfos, Some(members))
 
 	def isStudentMember(user: User): Boolean = {
 		groups.asScala.exists(_.students.includesUser(user)) ||
 		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
-			membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+			membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
 		}
 	}
 
 	def allStudents: Seq[User] =
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudents }.getOrElse {
-			membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
+			membershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Some(members))
 		}
 
 	def allStudentIds: Seq[String] =
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentIds }.getOrElse {
-			membershipService.determineMembershipIds(upstreamAssessmentGroups, Some(members))
+			membershipService.determineMembershipIds(upstreamAssessmentGroupInfos, Some(members))
 		}
 
 	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
-			membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
+			membershipService.countCurrentMembershipWithUniversityIdGroup(upstreamAssessmentGroupInfos, Some(members))
 		}
 	}
 
@@ -337,7 +337,5 @@ class SmallGroupSet
 	def postLoad() {
 		ensureSettings
 	}
-
-	override def toEntityReference: SmallGroupSetEntityReference = new SmallGroupSetEntityReference().put(this)
 }
 

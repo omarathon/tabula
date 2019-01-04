@@ -27,14 +27,21 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	val agentMember: Member = Fixtures.member(userType=MemberUserType.Staff)
 	val agent: User = agentMember.asSsoUser
 
-	val victim: User = Fixtures.user("heronVictim", "heronVictim")
-	val heron = new Heron(victim)
+	val staff = Fixtures.staff("1234567")
+	val student = Fixtures.student("9876543")
+	val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+	val meeting = new MeetingRecord
+	meeting.creator = staff
+
+	val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+	meeting.relationships = Seq(relationship)
 
 	@Before
 	def setup() {
 		notificationDao.sessionFactory = sessionFactory
 		SSOUserType.userLookup = smartMock[UserLookupService]
-		SSOUserType.userLookup.getUserByUserId("heronVictim") returns victim
+		SSOUserType.userLookup.getUserByUserId("heronVictim") returns staff.asSsoUser
 		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
 		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
 	}
@@ -45,48 +52,50 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		DateTimeUtils.setCurrentMillisSystem()
 	}
 
-	def newHeronNotification(agent: User, heron: Heron): HeronWarningNotification = {
-		Notification.init(new HeronWarningNotification, agent, heron)
+	def newHeronNotification(agent: User, meeting: MeetingRecord): HeronWarningNotification = {
+		Notification.init(new HeronWarningNotification, agent, meeting)
 	}
 
 	@Test def saveAndFetch() {
+		val notification = newHeronNotification(agent, meeting)
+		session.save(staff)
+		session.save(student)
+		session.save(relType)
+		session.save(relationship)
+		session.save(meeting)
 
-			val notification = newHeronNotification(agent, heron)
+		notificationDao.getById("heronWarningNotification") should be (None)
+		notificationDao.save(notification)
+		notificationDao.getById(notification.id) should be (Option(notification))
 
-			session.save(heron)
+		session.flush()
+		session.clear()
 
-			notificationDao.getById("heronWarningNotification") should be (None)
-			notificationDao.save(notification)
-			notificationDao.getById(notification.id) should be (Option(notification))
+		val retrievedNotification = notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+		retrievedNotification.title should be ("You all need to know. Herons would love to kill you in your sleep")
+		retrievedNotification.url should be ("/beware/herons")
+		retrievedNotification.item.entity should be(meeting)
+		retrievedNotification.recipient should be (staff.asSsoUser)
+		retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
 
-			session.flush()
-			session.clear()
+		session.clear()
+		session.delete(meeting)
+		session.flush()
 
-			val retrievedNotification = notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
-			retrievedNotification.title should be ("You all need to know. Herons would love to kill you in your sleep")
-			retrievedNotification.url should be ("/beware/herons")
-			retrievedNotification.item.entity should be(heron)
-			retrievedNotification.recipient should be (victim)
-			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
+		// If an attached entityreference points to a now non-existent thing, we shouldn't explode
+		// when loading the Notification but only when accessing the lazy entityreference.
 
-			session.clear()
-			session.delete(heron)
-			session.flush()
+		val notificationWithNoItem = try {
+			notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+		} catch {
+			case _: ObjectNotFoundException =>
+				fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
+		}
 
-			// If an attached entityreference points to a now non-existent thing, we shouldn't explode
-			// when loading the Notification but only when accessing the lazy entityreference.
-
-			val notificationWithNoItem = try {
-				 notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
-			} catch {
-				case e: ObjectNotFoundException =>
-					fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
-			}
-
-			// asserts that this type of exception is thrown
-			intercept[ObjectNotFoundException] {
-				notificationWithNoItem.item
-			}
+		// asserts that this type of exception is thrown
+		intercept[ObjectNotFoundException] {
+			notificationWithNoItem.item.entity.id
+		}
 	}
 
 	@Test
@@ -154,8 +163,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.save(relationship)
 		session.save(meeting)
 
-		val r: StudentRelationship = relationship
-
 		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting))
 		notificationDao.save(notification)
 
@@ -173,10 +180,11 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val now = DateTime.now
 		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
 
-		session.save(heron)
+		session.save(relationship)
+		session.save(meeting)
 
 		for (i <- 1 to 1000) {
-			val notification = newHeronNotification(agent, heron)
+			val notification = newHeronNotification(agent, meeting)
 			notification.created = now.minusMinutes(i)
 			notificationDao.save(notification)
 		}
@@ -197,9 +205,9 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	}
 
 	/**
-	 * Ensure there's nothing obviously wrong with the Notification subclass mappings. This will detect e.g.
-	 * if an @Entity or @DiscriminatorValue are missing.
-	 */
+		* Ensure there's nothing obviously wrong with the Notification subclass mappings. This will detect e.g.
+		* if an @Entity or @DiscriminatorValue are missing.
+		*/
 	@Test def nooneDied() {
 		val notificationClasses = PackageScanner.subclassesOf[Notification[_,_]]("uk.ac.warwick.tabula.data.model")
 		withClue("Package scanner should find a sensible number of classes") {
@@ -237,10 +245,11 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val now = DateTime.now
 		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
 
-		session.save(heron)
+		session.save(relationship)
+		session.save(meeting)
 
 		val notifications = (1 to 50).map(i => {
-			val notification = newHeronNotification(agent, heron)
+			val notification = newHeronNotification(agent, meeting)
 			notification.created = now.minusMinutes(i)
 			notificationDao.save(notification)
 			notification

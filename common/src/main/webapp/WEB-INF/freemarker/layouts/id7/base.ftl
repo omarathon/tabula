@@ -14,7 +14,7 @@
 		<#if (user.god)!false>
 			<div id="god-notice" class="sysadmin-only-content">
 				God mode enabled.
-				<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}">
+				<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}" modelAttribute="">
 					<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 					<input type="hidden" name="action" value="remove" />
 					<button class="btn btn-xs btn-info">Disable God mode</button>

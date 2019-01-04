@@ -13,7 +13,7 @@
 			<@components.module_info memberGroupsetModules />
 		</div><!--student-groups-view-->
 		<div class="modal fade timetable-clash-info" id="timetable-clash-modal">
-			<@f.form method="post" commandName="command">
+			<@f.form method="post" modelAttribute="command">
 				<input type="hidden" name="group" value=""/>
 				<@modal.wrapper>
 					<@modal.header>

@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
 <#assign submitUrl><@routes.coursework.addFeedbackSingle assignment /></#assign>
-<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action=submitUrl modelAttribute="addFeedbackCommand">
 
 <h1>Submit feedback</h1>
 <h5><span class="muted">for</span> ${assignment.name}</h5>

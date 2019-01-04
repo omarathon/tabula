@@ -80,7 +80,7 @@ abstract class CopySmallGroupSetsCommandInternal(val department: Department, val
 
 			// Try and guess SITS links for the new year
 			set.assessmentGroups.asScala
-				.filter { _.toUpstreamAssessmentGroup(targetAcademicYear).isDefined } // Only where defined in the new year
+				.filter { _.toUpstreamAssessmentGroupInfo(targetAcademicYear).isDefined } // Only where defined in the new year
 				.foreach { group =>
 					val newGroup = new AssessmentGroup
 					newGroup.assessmentComponent = group.assessmentComponent
@@ -203,7 +203,7 @@ trait CopySmallGroupSetsScheduledNotifications
 		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
 		sets.flatMap(_.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences)))
 
-	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
 		generateNotifications(occurrence)
 	}
 }

@@ -3,7 +3,7 @@
 	<@cm2.assignmentHeader "Delete assignment" assignment "" />
 
 	<#assign submitUrl><@routes.cm2.assignmentdelete assignment /></#assign>
-	<@f.form method="post" action=submitUrl commandName="deleteAssignmentCommand">
+	<@f.form method="post" action=submitUrl modelAttribute="deleteAssignmentCommand">
 		<!-- global errors -->
 		<@f.errors cssClass="error" />
 

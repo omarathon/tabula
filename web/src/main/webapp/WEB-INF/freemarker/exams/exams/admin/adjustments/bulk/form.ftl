@@ -8,7 +8,7 @@
 	Note that you can upload just marks, or both marks and grades.
 </p>
 	<#assign formUrl><@routes.exams.bulkAdjustment exam /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 		<input name="isfile" value="true" type="hidden"/>
 
 		<h3>Select file</h3>

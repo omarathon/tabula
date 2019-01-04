@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{ElasticClient, SearchDefinition}
+import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.searches.SearchRequest
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractQueryService
@@ -19,6 +20,6 @@ trait ElasticsearchSearching {
 		with ElasticsearchIndexName
 		with ElasticsearchIndexType =>
 
-	protected def searchFor: SearchDefinition = search in indexName / indexType
+	protected def searchRequest: SearchRequest = search(index)
 
 }

@@ -4,7 +4,7 @@
 	<h1>Replace marker in ${markingWorkflow.name}</h1>
 
 	<#assign form_url><@routes.exams.markingWorkflowReplace department markingWorkflow /></#assign>
-	<@f.form method="post" action="${form_url}" commandName="command" cssClass="form-horizontal">
+	<@f.form method="post" action="${form_url}" modelAttribute="command" cssClass="form-horizontal">
 		<@f.errors cssClass="error form-errors" />
 
 		<@form.labelled_row "oldMarker" "Marker to replace">

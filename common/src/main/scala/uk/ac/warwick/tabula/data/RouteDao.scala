@@ -71,8 +71,8 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 		"""
 
 		val query =
-			if (seenCodes.isEmpty) session.newQuery(hql)
-			else session.newQuery(hql + " and r.code not in (:seenCodes)").setParameterList("seenCodes", seenCodes)
+			if (seenCodes.isEmpty) session.newUpdateQuery(hql)
+			else session.newUpdateQuery(hql + " and r.code not in (:seenCodes)").setParameterList("seenCodes", seenCodes)
 
 		query
 			.setParameter("now", DateTime.now)

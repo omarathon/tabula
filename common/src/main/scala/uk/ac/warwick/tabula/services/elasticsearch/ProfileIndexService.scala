@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.services.elasticsearch
 
 import java.io.Closeable
 
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.analyzers._
-import com.sksamuel.elastic4s.mappings.TypedFieldDefinition
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.mappings.FieldDefinition
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, MemberDao, MemberDaoComponent}
 import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember}
+import uk.ac.warwick.tabula.data.{MemberDao, MemberDaoComponent}
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -72,7 +73,7 @@ object ProfileIndexService {
 
 		// Turn scalastyle off because string literals are ok(-ish) here
 		// scalastyle:off
-		val names = Map(
+		val names: Map[String, Set[String]] = Map(
 			"alan" -> Set("allan"),
 			"allan" -> Set("alan"),
 			"amanda" -> Set("mandy"),
@@ -213,12 +214,13 @@ class ProfileIndexService
 		with ProfileElasticsearchConfig
 		with ProfileIndexType {
 
-	override implicit val indexable = ProfileIndexService.MemberIndexable
+	override implicit val indexable: ElasticsearchIndexable[Member] = ProfileIndexService.MemberIndexable
 
 	/**
 		* The name of the index that this service writes to
 		*/
 	@Value("${elasticsearch.index.profiles.name}") var indexName: String = _
+	lazy val index = Index(indexName)
 
 	@Autowired var memberDao: MemberDao = _
 
@@ -243,20 +245,20 @@ trait ProfileIndexType extends ElasticsearchIndexType {
 }
 
 trait ProfileElasticsearchConfig extends ElasticsearchConfig {
-	override def fields: Seq[TypedFieldDefinition] = Seq(
+	override def fields: Seq[FieldDefinition] = Seq(
 		// id field stores the universityId
-		stringField("firstName") analyzer "name",
-		stringField("lastName") analyzer "name",
-		stringField("fullName") analyzer "name",
+		textField("firstName").analyzer("name"),
+		textField("lastName").analyzer("name"),
+		textField("fullName").analyzer("name"),
 
-		stringField("inUseFlag") analyzer KeywordAnalyzer,
-		stringField("userType") analyzer KeywordAnalyzer,
+		keywordField("inUseFlag"),
+		keywordField("userType"),
 
-		stringField("department") analyzer WhitespaceAnalyzer,
-		stringField("touchedDepartments") analyzer WhitespaceAnalyzer,
+		keywordField("department"),
+		keywordField("touchedDepartments"),
 
-		dateField("courseEndDate") format "strict_date",
-		dateField("lastUpdatedDate") format "strict_date_time_no_millis"
+		dateField("courseEndDate").format("strict_date"),
+		dateField("lastUpdatedDate").format("strict_date_time_no_millis")
 	)
 
 	override def analysers: Seq[AnalyzerDefinition] = Seq(

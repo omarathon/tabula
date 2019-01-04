@@ -46,21 +46,16 @@ object Transactions extends TransactionAspectSupport {
 
 	/** Does some code in a transaction.
 	 */
-	def transactional[A](
-			readOnly: Boolean = false,
-			propagation: Propagation = Propagation.REQUIRED
-		)(f: => A): A = {
-
+	def transactional[A](readOnly: Boolean = false, propagation: Propagation = Propagation.REQUIRED)(f: => A): A =
 		if (enabled) {
-				val attribute = new DefaultTransactionAttribute
-				attribute.setReadOnly(readOnly)
-				attribute.setPropagationBehavior(propagation.value())
-			  handle(f, attribute)
+			val attribute = new DefaultTransactionAttribute
+			attribute.setReadOnly(readOnly)
+			attribute.setPropagationBehavior(propagation.value())
+			handle(f, attribute)
 		} else {
 			// transactions disabled, just do the work.
 			f
 		}
-	}
 
 	/** Similar to transactional but a bit more involved. Provides access
 	  * to the TransactionStatus.
@@ -90,8 +85,7 @@ object Transactions extends TransactionAspectSupport {
 			commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
 			result
 		} catch {
-			case t: Throwable => {
-
+			case t: Throwable =>
 				val info = TransactionSupport.currentTransactionInfo
 				if (info != null) {
 					val status = info.getTransactionStatus
@@ -101,9 +95,8 @@ object Transactions extends TransactionAspectSupport {
 				}
 
 				throw t
-			}
 		} finally {
-			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo);
+			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo)
 		}
 	}
 

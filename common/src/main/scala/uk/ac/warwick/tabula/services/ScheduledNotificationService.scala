@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ScheduledNotificationService {
-	def removeInvalidNotifications(target: Any)
+	def removeInvalidNotifications[A >: Null <: ToEntityReference](target: A)
 	def push(sn: ScheduledNotification[_])
 	def generateNotification(sn: ScheduledNotification[_ >: Null <: ToEntityReference]) : Option[Notification[_,_]]
 	def processNotifications()
@@ -29,7 +29,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 
 	override def push(sn: ScheduledNotification[_]): Unit = dao.save(sn)
 
-	override def removeInvalidNotifications(target: Any): Unit = {
+	override def removeInvalidNotifications[A >: Null <: ToEntityReference](target: A): Unit = {
 		val existingNotifications = dao.getScheduledNotifications(target)
 		existingNotifications.foreach(dao.delete)
 	}
@@ -62,10 +62,8 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 		ids.foreach { id =>
 			inSession { session =>
 				transactional(readOnly = true) { // Some things that use notification require a read-only session to be bound to the thread
-					Option(session.get(classOf[ScheduledNotification[_]], id)).foreach {
-						rawSn =>
-							val sn = rawSn.asInstanceOf[ScheduledNotification[_ >: Null <: ToEntityReference]]
-
+					Option(session.get(classOf[ScheduledNotification[_ >: Null <: ToEntityReference]], id)).foreach {
+						sn =>
 							logger.info(s"Processing scheduled notification $sn")
 							// Even if we threw an error above and didn't actually push a notification, still mark it as completed
 							sn.completed = true

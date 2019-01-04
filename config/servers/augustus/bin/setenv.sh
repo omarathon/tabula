@@ -15,8 +15,8 @@ fi
 # The following 2 settings control the minimum and maximum given to the Java virtual machine.
 # In larger instances, the maximum amount will need to be increased.
 #
-JVM_MINIMUM_MEMORY="1g"
-JVM_MAXIMUM_MEMORY="4g"
+JVM_MINIMUM_MEMORY="8g"
+JVM_MAXIMUM_MEMORY="8g"
 
 #
 # File encoding passed into the Java virtual machine

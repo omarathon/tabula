@@ -38,7 +38,7 @@
 			</@modal.footer>
 		<#else>
 			<!-- blank action = post to current path. needs to be left blank so we know if we should post to create or edit -->
-			<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="double-submit-protection">
+			<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" modelAttribute="command" class="double-submit-protection">
 
 				<@bs3form.labelled_form_group path="title" labelText="Title">
 					<@f.input type="text" path="title" cssClass="form-control" maxlength="255" placeholder="Subject of meeting" />

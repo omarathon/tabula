@@ -451,7 +451,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 					universityId in (:newStaleUniversityIds)
 				"""
 
-				session.newQuery(hqlString)
+				session.newUpdateQuery(hqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate()
@@ -461,7 +461,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	def unstampPresentInImport(notStaleUniversityIds: Seq[String]): Unit = {
 		notStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { notStaleIds =>
 			val hqlString = "update Member set missingFromImportSince = null where universityId in (:notStaleIds)"
-			sessionWithoutFreshFilters.newQuery(hqlString)
+			sessionWithoutFreshFilters.newUpdateQuery(hqlString)
 				.setParameterList("notStaleIds", notStaleIds)
 				.executeUpdate()
 		}
@@ -482,7 +482,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	def setTimetableHash(member: Member, timetableHash: String): Unit = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ =>
-			session.newQuery("update Member set timetableHash = :timetableHash where universityId = :universityId")
+			session.newUpdateQuery("update Member set timetableHash = :timetableHash where universityId = :universityId")
 				.setParameter("timetableHash", timetableHash)
 				.setParameter("universityId", member.universityId)
 				.executeUpdate()

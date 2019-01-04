@@ -3,7 +3,7 @@
 	<@cm2.assignmentHeader "Submit feedback" assignment "for" />
 	<div id="batch-feedback-form">
 		<#assign submitUrl><@routes.cm2.addFeedback assignment /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addFeedbackCommand">
+		<@f.form method="post" enctype="multipart/form-data" action=submitUrl modelAttribute="addFeedbackCommand">
 			<input type="hidden" name="batch" value="true">
 			<p>The feedback filenames need to contain the student's University ID
 				(e.g. <span class="example-filename">0123456 feedback.doc</span>) in order to match each

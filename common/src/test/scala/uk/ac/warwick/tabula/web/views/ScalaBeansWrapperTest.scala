@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.web.views
 
 import scala.collection.mutable
 import scala.collection.mutable.Buffer
-import freemarker.template.SimpleSequence
+import freemarker.template.{DefaultListAdapter, SimpleSequence, TemplateBooleanModel}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permission
-import freemarker.template.TemplateBooleanModel
 import freemarker.ext.beans.SimpleMethodModel
+
 import scala.collection.JavaConverters._
 
 class MyObject extends PermissionsTarget {
@@ -95,13 +95,13 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 				hash.get("name").toString should be("text")
 				hash.get("motto").toString should be("do be good, don't be bad")
 				hash.get("grotto").toString should be("Santa's")
-				hash.get("departments").getClass should be (classOf[SimpleSequence])
+				hash.get("departments").getClass should be (classOf[DefaultListAdapter])
 			}
 			case _ => fail()
 		}
 		val list:JList[String] = Seq("yes","yes").asJava
 		wrapper.wrap(list) match {
-			case listy:SimpleSequence =>
+			case _: DefaultListAdapter =>
 			case nope => fail("nope" + nope.getClass().getName())
 		}
 
@@ -114,7 +114,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		wrapper.wrap(new ListHolder()) match {
 			case hash: ScalaHashModel => {
 				hash.get("list") match {
-					case listy:SimpleSequence => listy.size should be (2)
+					case listy: DefaultListAdapter => listy.size should be (2)
 					case somethingElse => fail("unexpected match; expected listy:SimpleSequence but was a " + somethingElse + ":" + somethingElse.getClass.getSimpleName)
 				}
 			}

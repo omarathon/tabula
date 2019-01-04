@@ -2,7 +2,7 @@
 
 <h1>Turnitin LTI - submit a test paper</h1>
 
-	<@f.form method="post" action="${url('/sysadmin/turnitinlti/submitpaper')}" commandName="turnitinLtiSubmitPaperCommand">
+	<@f.form method="post" action="${url('/sysadmin/turnitinlti/submitpaper')}" modelAttribute="turnitinLtiSubmitPaperCommand">
 
 		<@f.errors cssClass="error form-errors" />
 

@@ -124,7 +124,7 @@
 		</div>
 	</div>
 	<div class="clearfix"></div>
-	<@f.form method="post" enctype="multipart/form-data" action="${url(assignMarkersURL)}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${url(assignMarkersURL)}" modelAttribute="command">
 		<div id="assign-markers" class="tabbable">
 			<ul class="nav nav-tabs">
 				<li class="active"><a href="#first-markers">${firstMarkerRoleName}s</a></li>

@@ -5,6 +5,6 @@ package uk.ac.warwick.tabula.data.model
  * referenced by a notification.
  */
 trait ToEntityReference {
-	type Entity >: Null <: AnyRef
-	def toEntityReference: EntityReference[Entity]
+	type Entity >: Null <: ToEntityReference
+	final def toEntityReference: EntityReference[Entity] = EntityReference(this.asInstanceOf[Entity])
 }

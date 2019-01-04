@@ -1,18 +1,17 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
+import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.{DepartmentGrantedRole, GrantedRole}
 import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.mutable
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.services.permissions.PermissionsServiceComponent
-import uk.ac.warwick.tabula.web.Mav
 
 class DepartmentPermissionControllerTest extends TestBase with Mockito {
 
@@ -64,13 +63,13 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def add { new Fixture {
-		val addedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
+		val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
 		val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Department = department
 			def grantedRole = Some(addedRole)
-			def apply: DepartmentGrantedRole = addedRole
+			def apply: GrantedRole[Department] = addedRole
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -89,7 +88,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def addValidationErrors { new Fixture {
-		val addedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
+		val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
 		val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
@@ -116,13 +115,13 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def remove { new Fixture {
-		val removedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
+		val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
 		val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null
 			def scope: Department = department
 			def grantedRole = Some(removedRole)
-			def apply: Option[DepartmentGrantedRole] = Some(removedRole)
+			def apply: Option[GrantedRole[Department]] = Some(removedRole)
 		}
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
@@ -141,7 +140,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
 	}}
 
 	@Test def removeValidationErrors { new Fixture {
-		val removedRole = new DepartmentGrantedRole(department, DepartmentalAdministratorRoleDefinition)
+		val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
 		val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
 			val permissionsService = null

@@ -22,8 +22,8 @@ dependencies {
     compile project(':common')
     testCompile project(path: ':common', configuration: 'testArtifacts')
 
-    cucumber 'org.jruby:jruby-complete:9.1.6.0'
-    cucumber 'ch.qos.logback:logback-classic:1.1.7'
+    cucumber 'org.jruby:jruby-complete:9.2.5.0'
+    cucumber 'ch.qos.logback:logback-classic:1.2.3'
 
     testCompile 'org.seleniumhq.selenium:selenium-server:3.3.1'
 }

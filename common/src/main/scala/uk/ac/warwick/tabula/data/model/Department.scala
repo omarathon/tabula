@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.CascadeType.ALL
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
 import org.hibernate.criterion.Restrictions._
@@ -11,7 +10,7 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -332,11 +331,6 @@ class Department extends GeneratedId
 		ensureSettings
 	}
 
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles: JList[DepartmentGrantedRole] = JArrayList()
-
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
 	@Column(name="FilterRuleName")
 	var filterRule: FilterRule = AllMembersFilterRule
@@ -345,7 +339,6 @@ class Department extends GeneratedId
 		case None => filterRule.matches(m, d)
 		case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
 	}
-
 
 	def subDepartmentsContaining(member: Member): Stream[Department] = {
 		if (!includesMember(member, Option(this))) {
@@ -396,15 +389,13 @@ class Department extends GeneratedId
 
 	override def toString: String = "Department(" + code + ")"
 
-	def toEntityReference: DepartmentEntityReference = new DepartmentEntityReference().put(this)
-
 }
 
 object Department {
 
 	object FilterRule {
 		// Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
-		implicit val factory: (String) => FilterRule = { name: String => withName(name) }
+		implicit val factory: String => FilterRule = { name: String => withName(name) }
 
 		val allFilterRules: Seq[FilterRule] = {
 			val inYearRules = (1 until 9).map(InYearFilterRule)

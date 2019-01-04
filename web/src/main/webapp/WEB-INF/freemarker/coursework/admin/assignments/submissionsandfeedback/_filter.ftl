@@ -1,4 +1,4 @@
-<@f.form method="post" action="${info.requestedUri.path}" cssClass="form-inline filter-form" commandName="submissionAndFeedbackCommand">
+<@f.form method="post" action="${info.requestedUri.path}" cssClass="form-inline filter-form" modelAttribute="submissionAndFeedbackCommand">
 	<div class="filter">
 		<label for="filter">Show all</label>
 		&nbsp;
