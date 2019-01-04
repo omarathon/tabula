@@ -40,9 +40,8 @@ trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent wi
 	def allRoutes: Seq[Route]
 	def getRouteById(id: String): Option[Route]
 	def getRouteByCode(code: String): Option[Route]
-	def getRouteByCodeActiveOrInactive(code: String): Option[Route]
 	def getRoutesByCodes(codes: Seq[String]): Seq[Route]
-	def findRoutesInDepartment(department: Department): Seq[Route]
+	def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route]
 	def findRoutesNamedLike(query: String): Seq[Route]
 	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int
 	def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route]
@@ -76,10 +75,6 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 		rcode => transactional(readOnly = true) { routeDao.getByCode(rcode.toLowerCase) }
 	}
 
-	def getRouteByCodeActiveOrInactive(code: String): Option[Route] = code.maybeText.flatMap {
-		rcode => transactional(readOnly = true) { routeDao.getByCodeActiveOrInactive(rcode.toLowerCase) }
-	}
-
 	def getRoutesByCodes(codes: Seq[String]): Seq[Route] = transactional(readOnly = true) {
 		routeDao.getAllByCodes(codes.map(_.toLowerCase))
 	}
@@ -94,8 +89,11 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 	def findCoursesInDepartment(department: Department): Seq[Course] =
 		courseDao.findByDepartment(department)
 
-	def findRoutesInDepartment(department: Department): Seq[Route] =
+	def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route] = if(activeOnly){
+		routeDao.findActiveByDepartment(department)
+	} else {
 		routeDao.findByDepartment(department)
+	}
 
 	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit = transactional() {
 		routeDao.saveOrUpdate(teachingInfo)
