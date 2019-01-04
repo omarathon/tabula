@@ -8,17 +8,16 @@ import uk.ac.warwick.spring.Wire
 
 trait TransactionalComponent {
 	def transactional[A](
-												readOnly: Boolean = false,
-												propagation: Propagation = Propagation.REQUIRED
-												)(f: => A): A
+		readOnly: Boolean = false,
+		propagation: Propagation = Propagation.REQUIRED
+	)(f: => A): A
 }
 
 trait AutowiringTransactionalComponent extends TransactionalComponent {
 	def transactional[A](
-												readOnly: Boolean = false,
-												propagation: Propagation = Propagation.REQUIRED
-												)(f: => A): A = Transactions.transactional(readOnly, propagation)(f)
-
+		readOnly: Boolean = false,
+		propagation: Propagation = Propagation.REQUIRED
+	)(f: => A): A = Transactions.transactional(readOnly, propagation)(f)
 }
 
 object Transactions extends TransactionAspectSupport {
@@ -27,7 +26,7 @@ object Transactions extends TransactionAspectSupport {
 	setTransactionAttributeSource(new MatchAlwaysTransactionAttributeSource)
 
 	var transactionManager: PlatformTransactionManager = Wire.auto[PlatformTransactionManager]
-	override def getTransactionManager(): PlatformTransactionManager = transactionManager
+	override def getTransactionManager: PlatformTransactionManager = transactionManager
 
 	var enabled = true
 
@@ -61,44 +60,36 @@ object Transactions extends TransactionAspectSupport {
 	  * to the TransactionStatus.
 	  */
 	def useTransaction[A](
-			readOnly: Boolean = false,
-			propagation: Propagation = Propagation.REQUIRED
-		)(f: TransactionStatus => A): Any = {
-
+		readOnly: Boolean = false,
+		propagation: Propagation = Propagation.REQUIRED
+	)(f: TransactionStatus => A): Any =
 		if (enabled) {
 			val template = new TransactionTemplate(getTransactionManager())
 			template.setReadOnly(readOnly)
 			template.setPropagationBehavior(propagation.value())
-			template.execute(new TransactionCallback[A] {
-				override def doInTransaction(status: TransactionStatus): A = f(status)
-			})
+			template.execute(status => f(status))
 		} else {
 			f
 		}
 
-	}
-
 	private def handle[A](f: => A, attribute: TransactionAttribute): A = {
-		try {
-			createTransactionIfNecessary(getTransactionManager(), attribute, "Transactions.transactional()")
-			val result = f
-			commitTransactionAfterReturning(TransactionSupport.currentTransactionInfo)
-			result
-		} catch {
-			case t: Throwable =>
-				val info = TransactionSupport.currentTransactionInfo
-				if (info != null) {
-					val status = info.getTransactionStatus
-					if (status != null && !status.isCompleted) {
-						completeTransactionAfterThrowing(info, t)
-					}
-				}
+		val info = createTransactionIfNecessary(getTransactionManager(), attribute, "Transactions.transactional()")
 
-				throw t
-		} finally {
-			cleanupTransactionInfo(TransactionSupport.currentTransactionInfo)
-		}
+		val result =
+			try {
+				f
+			} catch {
+				case t: Throwable =>
+					logger.error("Exception thrown within transaction", t)
+					completeTransactionAfterThrowing(info, t)
+					throw t
+			} finally {
+				cleanupTransactionInfo(info)
+			}
+
+		commitTransactionAfterReturning(info)
+
+		result
 	}
-
 
 }
