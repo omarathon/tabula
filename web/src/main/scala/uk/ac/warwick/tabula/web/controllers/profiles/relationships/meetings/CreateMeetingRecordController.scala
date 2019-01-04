@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/create"))
-class CreateMeetingRecordController extends AbstractManageMeetingRecordController {
+class CreateMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
 	@ModelAttribute("command")
 	def getCommand(
@@ -24,7 +24,7 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				val cmd = CreateMeetingRecordCommand(currentMember, manageableRelationships)
-				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships))
+				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
 				cmd
 		}
 	}
@@ -33,7 +33,7 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/createmissed"))
-class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController {
+class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
 	@ModelAttribute("command")
 	def getCommand(
@@ -45,7 +45,7 @@ class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordCon
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				val cmd = CreateMissedMeetingRecordCommand(currentMember, relationships)
-				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships))
+				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
 				cmd
 		}
 	}
