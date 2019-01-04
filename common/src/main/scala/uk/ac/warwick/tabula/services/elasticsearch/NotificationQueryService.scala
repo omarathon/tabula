@@ -8,13 +8,13 @@ import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.DateFormats
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{Notification, ToEntityReference}
 import uk.ac.warwick.tabula.data.{NotificationDao, NotificationDaoComponent}
 import uk.ac.warwick.tabula.services.ActivityStreamRequest
 
 import scala.concurrent.duration._
 
-case class PagedNotifications(items: Seq[Notification[_, _]], lastUpdatedDate: Option[DateTime], totalHits: Long)
+case class PagedNotifications(items: Seq[Notification[_ >: Null <: ToEntityReference, _]], lastUpdatedDate: Option[DateTime], totalHits: Long)
 
 trait NotificationQueryService
 	extends NotificationQueryMethods
@@ -45,7 +45,7 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 		with ElasticsearchSearching
 		with NotificationDaoComponent =>
 
-	private def toNotifications(hits: Iterable[SearchHit]): Seq[Notification[_, _]] =
+	private def toNotifications(hits: Iterable[SearchHit]): Seq[Notification[_ >: Null <: ToEntityReference, _]] =
 		hits.flatMap { hit =>
 			notificationDao.getById(hit.sourceAsMap("notification").toString)
 		}.toSeq
