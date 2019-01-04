@@ -233,7 +233,7 @@
 <script type="text/javascript">
 	// TIMETABLE STUFF
 	jQuery(function($) {
-		var weeks = ${weekRangesDumper()};
+		var weeks = <#noescape>${weekRangesDumper()}</#noescape>;
 
 		var $form = $('#command');
 
