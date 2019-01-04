@@ -116,4 +116,16 @@ abstract class AbstractManageMeetingRecordController extends ProfilesController 
 		}
 	}
 
+	def chosenRelationships(
+		relationshipType: StudentRelationshipType,
+		manageableRelationships: Seq[StudentRelationship],
+	): Seq[StudentRelationship] = {
+		// Go through the relationships for this SPR code and find one where the current user is the agent.
+		// and also the correct relationType
+		// we do not default to anyone if there's no match
+		manageableRelationships
+			.filter(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
+			.filter(_.relationshipType == relationshipType)
+	}
+
 }
