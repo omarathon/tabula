@@ -52,16 +52,11 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def getById(id: String): Option[Route] = getById[Route](id)
 
-	def findByDepartment(department:Department): Seq[Route] = departmentRoutes(session, department)
-
-	def findActiveByDepartment(department:Department): Seq[Route] = {
-		val activeOnly = session
-		activeOnly.enableFilter(Route.ActiveRoutesOnlyFilter)
-		departmentRoutes(activeOnly, department)
-	}
-
-	private def departmentRoutes(session:Session, department:Department): Seq[Route] =
+	def findByDepartment(department:Department): Seq[Route] =
 		session.newQuery[Route]("from Route r where adminDepartment = :dept").setEntity("dept",department).seq
+
+	def findActiveByDepartment(department:Department): Seq[Route] =
+		session.newQuery[Route]("from Route r where adminDepartment = :dept and active = 1").setEntity("dept",department).seq
 
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int = {
 		val hql = """

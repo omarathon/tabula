@@ -151,7 +151,6 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.enableFilter(Member.FreshOnlyFilter)
 				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-				session.disableFilter(Route.ActiveRoutesOnlyFilter) // don't hide active routes by default
 				session
 			}
 
@@ -166,7 +165,6 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.disableFilter(Member.FreshOnlyFilter)
 				session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-				session.disableFilter(Route.ActiveRoutesOnlyFilter) // don't hide active routes by default
 				session
 			}
 
