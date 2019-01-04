@@ -6,9 +6,11 @@ import uk.ac.warwick.tabula.web.views.BaseTemplateMethodModelEx
 class DurationFormatterTag extends BaseTemplateMethodModelEx {
 	override def execMethod(args: Seq[_]): String = args match {
 		// TAB-688 when passed null values, return a null value
-		case Seq(null) | Seq(null, null) => null
-		case Seq(end: DateTime) => DurationFormatter.format(new DateTime(), end)
-		case Seq(start: DateTime, end: DateTime) => DurationFormatter.format(start, end)
+		case Seq(null) | Seq(null, _: Boolean) | Seq(null, null) | Seq(null, null, _: Boolean) => null
+		case Seq(end: DateTime) => DurationFormatter.format(new DateTime(), end, roundUp = false)
+		case Seq(end: DateTime, roundUp: Boolean) => DurationFormatter.format(new DateTime(), end, roundUp)
+		case Seq(start: DateTime, end: DateTime) => DurationFormatter.format(start, end, roundUp = false)
+		case Seq(start: DateTime, end: DateTime, roundUp: Boolean) => DurationFormatter.format(start, end, roundUp)
 		case _ => throw new IllegalArgumentException("Bad args")
 	}
 }
@@ -44,15 +46,20 @@ object DurationFormatter {
 	 * Prints the given Interval as a period. It uses years, months, days, and the time,
 	 * but it does not use weeks.
 	 */
-	def format(start: DateTime, end: DateTime): String =
+	def format(start: DateTime, end: DateTime, roundUp: Boolean): String =
 		if ((start isAfter end) || (start isEqual end))
-			formatter.print(toPeriod(end, start)).trim + ago
+			formatter.print(toPeriod(end, start, roundUp)).trim + ago
 		else
-			formatter.print(toPeriod(start, end)).trim
+			formatter.print(toPeriod(start, end, roundUp)).trim
 
-	private def toPeriod(start: DateTime, end: DateTime): ReadablePeriod = {
+	private def toPeriod(start: DateTime, end: DateTime, roundUp: Boolean): ReadablePeriod = {
 		val duration = new Duration(start, end)
 		var period = new Period(start, end, periodType)
+
+		if (roundUp && (duration.getStandardHours > 0 || duration.getStandardMinutes > 0 || duration.getStandardSeconds > 0)) {
+			period = period.plusDays(1)
+		}
+
 		period = stripTime(period, duration)
 		period = stripSeconds(period, duration)
 		period = stripMinutes(period, duration)
