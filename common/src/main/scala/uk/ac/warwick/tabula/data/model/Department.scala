@@ -69,8 +69,6 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
 
-	def activeRoutes: Seq[Route] = routes.asScala.filter(_.active)
-
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var moduleTeachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
