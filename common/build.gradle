@@ -85,7 +85,9 @@ dependencies {
     compile "org.apache.tiles:tiles-api:${tilesVersion}"
     compile "org.apache.tiles:tiles-core:${tilesVersion}"
     compile "org.apache.tiles:tiles-el:${tilesVersion}"
-    compile "org.apache.tiles:tiles-extras:${tilesVersion}"
+    compile ("org.apache.tiles:tiles-extras:${tilesVersion}") {
+      exclude module: 'tiles-ognl'
+    }
     compile "org.apache.tiles:tiles-freemarker:${tilesVersion}"
     compile "org.apache.tiles:tiles-jsp:${tilesVersion}"
     compile "org.apache.tiles:tiles-servlet:${tilesVersion}"
