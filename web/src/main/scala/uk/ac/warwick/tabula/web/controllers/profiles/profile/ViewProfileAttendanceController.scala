@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.attendance.profile.AttendanceProfileCommand
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand
 import uk.ac.warwick.tabula.data.model._
@@ -44,6 +45,10 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
 		studentCourseDetails: StudentCourseDetails,
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
+		if (activeAcademicYear.exists(_.startYear < yearZero)) {
+			throw new ItemNotFoundException(activeAcademicYear.get, s"Not displaying attendance as the year pre-dates Tabula: ${activeAcademicYear.get}")
+		}
+
 		val student = studentCourseDetails.student
 
 		val monitoringPointAttendanceCommand = restricted(AttendanceProfileCommand(mandatory(student), mandatory(activeAcademicYear)))
