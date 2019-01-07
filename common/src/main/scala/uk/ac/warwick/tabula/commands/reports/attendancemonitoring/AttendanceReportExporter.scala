@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.reports.attendancemonitoring
 import freemarker.template.{Configuration, DefaultObjectWrapper}
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import org.apache.poi.ss.usermodel.Sheet
+import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
@@ -83,7 +84,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
 	}
 
 	private def generateNewSheet(workbook: SXSSFWorkbook) = {
-		val sheet = workbook.createSheet(department.name)
+		val sheet = workbook.createSheet(WorkbookUtil.createSafeSheetName(department.name))
 		sheet.trackAllColumnsForAutoSizing()
 
 		// add header row
