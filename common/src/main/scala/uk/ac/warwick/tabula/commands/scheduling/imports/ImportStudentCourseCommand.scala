@@ -115,7 +115,7 @@ class ImportStudentCourseCommand(rows: Seq[SitsStudentRow], stuMem: StudentMembe
 	private def copyStudentCourseProperties(rowBean: BeanWrapper, studentCourseDetailsBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseProperties, rowBean, studentCourseDetailsBean) |
 		copyObjectProperty("department", courseRow.departmentCode, studentCourseDetailsBean, toDepartment(courseRow.departmentCode)) |
-		copyObjectProperty("currentRoute", courseRow.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCodeActiveOrInactive(courseRow.routeCode)) |
+		copyObjectProperty("currentRoute", courseRow.routeCode, studentCourseDetailsBean, courseAndRouteService.getRouteByCode(courseRow.routeCode)) |
 		copyObjectProperty("course", courseRow.courseCode, studentCourseDetailsBean, courseImporter.getCourseByCodeCached(courseRow.courseCode)) |
 		copyObjectProperty("award", courseRow.awardCode, studentCourseDetailsBean, awardImporter.getAwardByCodeCached(courseRow.awardCode)) |
 		copyObjectProperty("statusOnRoute", courseRow.sprStatusCode, studentCourseDetailsBean, toSitsStatus(courseRow.sprStatusCode)) |

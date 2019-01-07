@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.Session
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Restrictions._
 import org.joda.time.DateTime
@@ -19,10 +20,10 @@ trait RouteDao {
 	def allRoutes: Seq[Route]
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
-	def getByCodeActiveOrInactive(code: String): Option[Route]
 	def getAllByCodes(codes: Seq[String]): Seq[Route]
 	def getById(id: String): Option[Route]
 	def findByDepartment(department:Department):Seq[Route]
+	def findActiveByDepartment(department:Department): Seq[Route]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
 	def findRoutesNamedLike(query: String): Seq[Route]
 	def saveOrUpdate(teachingInfo: RouteTeachingInformation)
@@ -44,12 +45,6 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 	def getByCode(code: String): Option[Route] =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
 
-	def getByCodeActiveOrInactive(code: String): Option[Route] = {
-		val noFilterSession = session
-		noFilterSession.disableFilter(Route.ActiveRoutesOnlyFilter)
-		noFilterSession.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
-	}
-
 
 	def getAllByCodes(codes: Seq[String]): Seq[Route] = {
 		safeInSeq(() => { session.newCriteria[Route] }, "code", codes)
@@ -59,6 +54,9 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def findByDepartment(department:Department): Seq[Route] =
 		session.newQuery[Route]("from Route r where adminDepartment = :dept").setEntity("dept",department).seq
+
+	def findActiveByDepartment(department:Department): Seq[Route] =
+		session.newQuery[Route]("from Route r where adminDepartment = :dept and active = 1").setEntity("dept",department).seq
 
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int = {
 		val hql = """
