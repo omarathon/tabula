@@ -136,7 +136,7 @@ subprojects {
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
         providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
         compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
-        compile 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.2'
+        compile 'org.apache.taglibs:taglibs-standard-jstlel:1.2.5'
 
         /* LOGGING */
         providedCompile 'uk.ac.warwick:warwick-logging:1.1:all'
@@ -201,10 +201,7 @@ subprojects {
     war.dependsOn(generateRebel)
 }
 
-// upgrade to a different version of Gradle by changing this
-// value then running `./gradlew wrapper`. Next time gradlew
-// is run it will fetch and use that version.
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10.3'
+wrapper {
+    gradleVersion = '5.1'
     distributionType = 'ALL'
 }
