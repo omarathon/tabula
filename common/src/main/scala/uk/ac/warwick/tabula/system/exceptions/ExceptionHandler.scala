@@ -3,12 +3,14 @@ package uk.ac.warwick.tabula.system.exceptions
 import java.io.IOException
 import java.io.PrintWriter
 import java.io.StringWriter
+
+import com.itextpdf.text.ExceptionConverter
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.mail.MailException
-import freemarker.template.{ Configuration => FreemarkerConfiguration }
+import freemarker.template.{Configuration => FreemarkerConfiguration}
 import freemarker.template.Template
 import javax.annotation.Resource
 import javax.servlet.http.HttpServletRequest
@@ -19,9 +21,10 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.system.exceptions._
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
 import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
-case class ExceptionContext(val token: String, val exception: Throwable, val request: Option[HttpServletRequest] = None)
+case class ExceptionContext(token: String, exception: Throwable, request: Option[HttpServletRequest] = None)
 
 object ExceptionHandler {
 	def renderStackTrace(exception: Throwable): String = {
@@ -64,17 +67,17 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 	var template: Template = _
 
 	override def exception(context: ExceptionContext): Unit = context.exception match {
-		case userError: UserError => {}
-		case handled: HandledException => {}
-		case e: IOException if ExceptionHandler.isClientAbortException(e) => {} // cancelled download.
-		case e => {
+		case _: UserError =>
+		case _: HandledException =>
+		case e: IOException if ExceptionHandler.isClientAbortException(e) => // cancelled download.
+		case e: ExceptionConverter if e.getException.isInstanceOf[IOException] && ExceptionHandler.isClientAbortException(e.getException.asInstanceOf[IOException]) => // cancelled PDF download
+		case _ =>
 			try {
 				val message = makeEmail(context)
 				mailSender.send(message)
 			} catch {
 				case e: MailException => logger.error("Error emailing exception " + context.token + "!", e)
 			}
-		}
 	}
 
 	private def makeEmail(context: ExceptionContext) = createMessage(mailSender) { message =>
@@ -97,7 +100,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
 
 	private def userId(info: Option[RequestInfo]) = info.map { _.user }.map { _.realId }.getOrElse("ANON")
 
-	override def afterPropertiesSet {
+	override def afterPropertiesSet(): Unit = {
 		template = freemarker.getTemplate("/WEB-INF/freemarker/emails/exception.ftl")
 	}
 }

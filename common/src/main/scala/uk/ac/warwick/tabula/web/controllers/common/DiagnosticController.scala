@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers.common
 
 import java.io._
 
+import com.itextpdf.text.ExceptionConverter
 import javax.servlet.http.HttpServletResponse
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.stereotype.Controller
@@ -41,6 +42,12 @@ class DiagnosticController extends Logging {
 	@RequestMapping(Array("/error/client-abort")) def clientAbortError(response: HttpServletResponse): Nothing = {
 		response.getOutputStream.print("Partial content downlo")
 		throw Class.forName("org.apache.catalina.connector.ClientAbortException").newInstance().asInstanceOf[IOException]
+	}
+
+	@RequestMapping(Array("/error/pdf-client-abort")) def iTextClientAbortError(response: HttpServletResponse): Nothing = {
+		response.getOutputStream.print("Partial content downlo")
+		val e = Class.forName("org.apache.catalina.connector.ClientAbortException").newInstance().asInstanceOf[IOException]
+		throw new ExceptionConverter(e)
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/upload"))
