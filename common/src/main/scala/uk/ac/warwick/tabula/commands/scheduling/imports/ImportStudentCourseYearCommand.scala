@@ -69,7 +69,7 @@ class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: 
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
 		copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, toDepartment(row.enrolmentDepartmentCode)) |
 		copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
-		copyObjectProperty("route", row.sceRouteCode, studentCourseYearBean, courseAndRouteService.getRouteByCodeActiveOrInactive(row.sceRouteCode)) |
+		copyObjectProperty("route", row.sceRouteCode, studentCourseYearBean, courseAndRouteService.getRouteByCode(row.sceRouteCode)) |
 		copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
 		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean) |
 		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean) |

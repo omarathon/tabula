@@ -4,15 +4,16 @@ import org.hibernate.ObjectNotFoundException
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{Daoisms, NotificationDao}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.data.{Daoisms, HibernateHelpers, NotificationDao}
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, NotificationIndexService, NotificationQueryService}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
 
 case class ActivityStreamRequest(
@@ -69,7 +70,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 		)
 	}
 
-	def toActivity(user: User)(notification: Notification[_, _]) : Option[Activity[Any]] = {
+	def toActivity(user: User)(notification: Notification[_ >: Null <: ToEntityReference, _]) : Option[Activity[Any]] = {
 		try {
 			val (message, priority) =
 				notification match {
@@ -86,6 +87,8 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 						(message, priority)
 
 					case _ =>
+						// This is just to make sure the ObjectNotFoundException happens here, not inside renderTemplate (which triggers emails)
+						notification.items.asScala.foreach { ref => HibernateHelpers.initialiseAndUnproxy(ref.entity) }
 						val content = notification.content
 						val message = renderTemplate(content.template, content.model)
 						val priority = notification.priorityOrDefault
@@ -106,7 +109,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
 			))
 		} catch {
 			// referenced entity probably missing, oh well.
-			case e: ObjectNotFoundException => None
+			case _: ObjectNotFoundException => None
 		}
 	}
 

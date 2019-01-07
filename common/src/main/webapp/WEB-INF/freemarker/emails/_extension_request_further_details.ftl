@@ -4,7 +4,7 @@ Further details related to this request:
 Module Manager<#if (moduleManagers?size > 1)>s</#if>
 <#list moduleManagers as manager>
 <#if manager.foundUser>
-${manager.fullName} (${manager.warwickId!}) (${manager.email})
+${manager.fullName} (${manager.warwickId!}) <#if manager.email??>(${manager.email})</#if>
 </#if>
 </#list>
 </#if>
