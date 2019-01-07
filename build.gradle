@@ -135,8 +135,8 @@ subprojects {
 
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
         providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
-        compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.1'
-        compile 'javax.servlet:jstl:1.2'
+        compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+        compile 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.2'
 
         /* LOGGING */
         providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'

@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.pdf
 
-import uk.ac.warwick.tabula.{TestBase, TopLevelUrlComponent}
 import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 
-import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGeneratorComponent, PhotosWarwickConfig, PhotosWarwickConfigComponent, PhotosWarwickMemberPhotoUrlGenerator}
+import uk.ac.warwick.tabula.commands.profiles._
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
+import uk.ac.warwick.tabula.{TestBase, TopLevelUrlComponent}
 
-class PdfGeneratorTest extends TestBase{
+class PdfGeneratorTest extends TestBase {
 
 	trait MockMemberPhotoUrlGeneratorComponent extends MemberPhotoUrlGeneratorComponent {
-		val photoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
+		val photoUrlGenerator: MemberPhotoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
 			def photosWarwickConfiguration = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
 		}
 	}
@@ -19,21 +19,19 @@ class PdfGeneratorTest extends TestBase{
 	}
 
 	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent with MockTopLevelUrlComponent {
-		def textRenderer:TextRenderer = new TextRenderer {
-			def renderTemplate(templateId: String, model: Any): String = {
-				templateId match {
-					case "minimal"=>minimalXhtml
-				}
+		def textRenderer: TextRenderer = (templateId: String, _: Any) => {
+			templateId match {
+				case "minimal" => minimalXhtml
 			}
 		}
 	}.pdfGenerator
 
 	@Test
-	def renderXHTML(){
+	def renderXHTML() {
 		val baos = new ByteArrayOutputStream()
-		pdfGenerator.renderTemplate("minimal",Map(),baos)
+		pdfGenerator.renderTemplate("minimal", Map(), baos)
 		val of = new FileOutputStream(new File("/tmp/test.pdf"))
-		val pdfBytes =baos.toByteArray
+		val pdfBytes = baos.toByteArray
 		of.write(pdfBytes)
 		of.close()
 		val pdf = new String(pdfBytes)
