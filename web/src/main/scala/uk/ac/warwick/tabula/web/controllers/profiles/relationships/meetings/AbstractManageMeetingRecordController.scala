@@ -115,5 +115,4 @@ abstract class AbstractManageMeetingRecordController extends ProfilesController 
 			Redirect(Routes.Profile.relationshipType(studentCourseDetails, academicYear, relationshipType))
 		}
 	}
-
 }

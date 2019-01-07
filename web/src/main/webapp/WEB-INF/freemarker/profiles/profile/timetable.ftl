@@ -133,7 +133,7 @@
 			});
 		});
 
-		var weeks = ${weekRangesDumper()};
+		var weeks = <#noescape>${weekRangesDumper()}</#noescape>;
 
 		var createCalendarOnce = _.once(function () {
 			var $calendar = $('.calendar');

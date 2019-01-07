@@ -72,7 +72,7 @@ class NotificationIndexService
 			} catch {
 				// Can happen if reference to an entity has since been deleted, e.g.
 				// a submission is resubmitted and the old submission is removed. Skip this notification.
-				case onf: ObjectNotFoundException =>
+				case _: ObjectNotFoundException =>
 					debug("Skipping notification %s as a referenced object was not found", notification)
 					Nil
 			}
