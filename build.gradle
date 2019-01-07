@@ -139,11 +139,11 @@ subprojects {
         compile 'javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.2'
 
         /* LOGGING */
-        providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'
+        providedCompile 'uk.ac.warwick:warwick-logging:1.1:all'
 
         // Provided by the above
         providedCompile 'ch.qos.logback:logback-classic:1.2.3'
-        providedCompile('net.logstash.logback:logstash-logback-encoder:4.11') {
+        providedCompile('net.logstash.logback:logstash-logback-encoder:5.2') {
             exclude group: 'com.fasterxml.jackson.core'
         }
         providedCompile 'org.slf4j:slf4j-api:1.7.25'

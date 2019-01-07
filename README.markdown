@@ -40,7 +40,7 @@ tabula/
 │   ├── ojdbc8.jar
 │   ├── tabula.properties
 │   ├── tabula-sso-config.xml
-│   └── warwick-logging-1.0-all.xml
+│   └── warwick-logging-1.1-all.xml
 ├── logs/
 ├── temp/
 ├── webapps/
@@ -73,9 +73,9 @@ There is a sample `server.xml` in `config/servers/augustus/conf`
 
 This is just copied from the `conf` directory in the Tomcat 8 install. I couldn't get Tomcat to run without it being copied, which sucks a bit.
 
-### `lib/warwick-logging-1.0.jar`
+### `lib/warwick-logging-1.1.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.0-all.jar
+You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.1-all.jar
 
 Note that this dependency replaces previous dependencies on logback, logstash-logback-encoder, jackson and slf4j-api
 
