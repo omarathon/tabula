@@ -37,7 +37,7 @@ dependencies {
 
     compile "uk.ac.warwick:spring-scala-glue_${scalaMajorVersion}:1.7"
 
-    compile 'org.apache.tika:tika-core:1.19.1'
+    compile 'org.apache.tika:tika-core:1.20'
     compile "org.apache.poi:poi:${poiVersion}"
     compile "org.apache.poi:poi-ooxml:${poiVersion}"
     compile "org.apache.poi:poi-ooxml-schemas:${poiVersion}"
@@ -98,7 +98,8 @@ dependencies {
 
     compile "org.springframework.scala:spring-scala_${scalaMajorVersion}:1.0.0.RC1"
 
-    compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.0.4'
+    compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.1.16'
+    compile 'com.itextpdf:itextpdf:5.5.13' // Upgrade from above to fix https://snyk.io/vuln/SNYK-JAVA-COMITEXTPDF-32005
 
     compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.3-warwick"
 
