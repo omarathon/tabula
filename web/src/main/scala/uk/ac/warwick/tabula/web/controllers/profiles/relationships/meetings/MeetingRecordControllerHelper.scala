@@ -9,12 +9,23 @@ trait MeetingRecordControllerHelper {
 		manageableRelationships: Seq[StudentRelationship],
 		currentUser: CurrentUser
 	): Seq[StudentRelationship] = {
-		// Go through the relationships for this SPR code and find one where the current user is the agent.
-		// and also the correct relationType
-		val filteredRelationships = manageableRelationships
-			.filter(rel => rel.agentMember.map(_.universityId).contains(currentUser.universityId))
-			.filter(_.relationshipType == relationshipType)
 
-		if(filteredRelationships.isEmpty) manageableRelationships else filteredRelationships
+		implicit class FilterOrAll[A](s: Seq[A]) {
+			// filters a collection on the specified predicate but returns the original collection if that leaves no elements
+			def filterOrAll(p: A => Boolean): Seq[A] = {
+				val result = s.filter(p)
+				if(result.isEmpty) s else result
+			}
+		}
+
+		val isStudent = manageableRelationships.exists(_.studentCourseDetails.student.universityId == currentUser.universityId)
+
+		if(isStudent) {
+			manageableRelationships.filterOrAll(_.relationshipType == relationshipType).headOption.toSeq
+		} else {
+			manageableRelationships
+				.filterOrAll(rel => rel.agentMember.map(_.universityId).contains(currentUser.universityId))
+				.filterOrAll(_.relationshipType == relationshipType)
+		}
 	}
 }
