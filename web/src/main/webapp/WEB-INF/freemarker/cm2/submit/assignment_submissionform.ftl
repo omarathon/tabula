@@ -12,7 +12,7 @@
 					until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
 				</#if>
 			</p>
-			<p>Ensure you attach all your assignment files. Any files you have submitted previously will be replaced.</p>
+			<p>Ensure you attach <strong>all</strong> your assignment files. Any files you have submitted previously will be replaced.</p>
 		</#if>
 	</#if>
 
