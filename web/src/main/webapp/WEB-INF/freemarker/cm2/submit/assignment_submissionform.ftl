@@ -3,15 +3,16 @@
 		<hr>
 		<h2>Resubmit</h2>
 		<#if assignment.openEnded>
-			<p>You can still resubmit your work in case you've made a mistake.</p>
+			<p>You can still resubmit your work.</p>
 		<#else>
-			<p>You can resubmit your work in case you've made a mistake,
+			<p>You can resubmit your work
 				<#if isExtended>
-					up until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
+					until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
 				<#else>
-					up until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
+					until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
 				</#if>
 			</p>
+			<p>Ensure you attach <strong>all</strong> your assignment files. Any files you have submitted previously will be replaced.</p>
 		</#if>
 	</#if>
 
@@ -97,7 +98,7 @@
 
 					<#if assignment.allowLateSubmissions>
 						<p class="very-subtle">
-							If do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
+							If you do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
 						</p>
 					</#if>
 				<#else>
