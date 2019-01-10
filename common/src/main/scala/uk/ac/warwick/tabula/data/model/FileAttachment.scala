@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.CascadeType._
-import javax.persistence._
-
 import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
+import javax.persistence.CascadeType._
+import javax.persistence._
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,6 +13,7 @@ import uk.ac.warwick.tabula.helpers.DetectMimeType._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
+import scala.collection.JavaConverters._
 import scala.language.postfixOps
 import scala.util.matching.Regex
 
@@ -52,17 +52,36 @@ class FileAttachment extends GeneratedId {
 	@JoinColumn(name = "meetingrecord_id")
 	var meetingRecord: AbstractMeetingRecord = _
 
+	// optional link to MarkerFeedback via MarkerFeedbackAttachment
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinTable(name="MarkerFeedbackAttachment",
 		joinColumns=Array( new JoinColumn(name="file_attachment_id") ),
 		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
 	var markerFeedback:MarkerFeedback = _
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
-	var originalityReport: OriginalityReport = _
+	/*
+	 * Both of these are really One-to-One relationships (and are @OneToOne on the other side)
+	 * but Hibernate can't lazy-load a One-to-One because it doesn't know whether to set the
+	 * property to a proxy or null, so we pretend it's OneToMany to avoid eagerly loading
+	 * originality reports and feedback templates every time we fetch a file attachment from
+	 * the database.
+	 */
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
-	var feedbackForm: FeedbackTemplate = _
+	@OneToMany(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
+	private val _originalityReport: JList[OriginalityReport] = JArrayList()
+	def originalityReport: OriginalityReport = _originalityReport.asScala.headOption.orNull
+	def originalityReport_=(originalityReport: OriginalityReport): Unit = {
+		_originalityReport.clear()
+		_originalityReport.add(originalityReport)
+	}
+
+	@OneToMany(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
+	private val _feedbackForm: JList[FeedbackTemplate] = JArrayList()
+	def feedbackForm: FeedbackTemplate = _feedbackForm.asScala.headOption.orNull
+	def feedbackForm_=(feedbackForm: FeedbackTemplate): Unit = {
+		_feedbackForm.clear()
+		_feedbackForm.add(feedbackForm)
+	}
 
 	/**
 	 * WARNING this method isn't exhaustive. It only checks fields that are directly on this
