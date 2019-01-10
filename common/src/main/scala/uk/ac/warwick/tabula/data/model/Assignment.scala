@@ -186,7 +186,8 @@ class Assignment
 	var submissions: JList[Submission] = JArrayList()
 
 	def submissionsFromUnenrolledStudents: JList[Submission] = {
-		submissions.asScala.filterNot(sub => membershipInfo.usercodes.contains(sub.usercode)).asJava
+		val enrolledUsercodes = membershipInfo.usercodes
+		submissions.asScala.filterNot(sub => enrolledUsercodes.contains(sub.usercode)).asJava
 	}
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
@@ -828,6 +829,8 @@ class Assignment
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
 		Option(cm2MarkingWorkflow)
 			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
 				workflow.markers.toSeq
 					.sortBy { case (stage, _) => stage.order }
 					.flatMap { case (stage, markers) =>
@@ -836,11 +839,50 @@ class Assignment
 								stage.roleName,
 								stage.description,
 								marker,
-								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+								markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)
 						}
 					}
 			}.getOrElse(Nil)
+
+	def cm2MarkerAllocations(marker: User): Seq[MarkerAllocation] =
+		Option(cm2MarkingWorkflow)
+			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
+				workflow.markers.toSeq
+					.filter { case (_, markers) => markers.contains(marker) }
+					.sortBy { case (stage, _) => stage.order }
+					.map { case (stage, _) =>
+						MarkerAllocation(
+							stage.roleName,
+							stage.description,
+							marker,
+							markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+						)
+					}
+			}.getOrElse(Nil)
+
+	def cm2MarkerStudentUsercodes(marker: User): Set[String] =
+		Option(cm2MarkingWorkflow)
+			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
+				workflow.markers.toSeq
+					.filter { case (_, markers) => markers.contains(marker) }
+					.sortBy { case (stage, _) => stage.order }
+					.flatMap { case (stage, _) =>
+						markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.feedback.usercode)
+					}
+					.toSet
+			}.getOrElse(Set.empty)
+
+	def cm2MarkerSubmissions(marker: User): Seq[Submission] = {
+		val usercodes = cm2MarkerStudentUsercodes(marker)
+
+		if (usercodes.isEmpty) Nil
+		else submissions.asScala.filter { s => usercodes.contains(s.usercode) }
+	}
 
 	def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
 	def automaticallyReleaseToMarkers_= (include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)

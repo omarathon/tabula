@@ -177,9 +177,7 @@ trait DownloadMarkerSubmissionsForPrintingCommandRequest extends DownloadSubmiss
 
 		val allMarkerSubmissions =
 			if (assignment.cm2Assignment)
-				assignment.cm2MarkerAllocations.filter(_.marker == marker)
-					.flatMap(_.students.map(_.getUserId)).distinct
-					.flatMap { s => assignment.submissions.asScala.find(_.usercode == s) }
+				assignment.cm2MarkerSubmissions(marker)
 			else
 				assignment.getMarkersSubmissions(marker).filter { submission =>
 					val markerFeedback = assignment.getMarkerFeedbackForCurrentPosition(submission.usercode, marker)
