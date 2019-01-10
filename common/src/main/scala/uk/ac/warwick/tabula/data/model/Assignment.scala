@@ -186,7 +186,8 @@ class Assignment
 	var submissions: JList[Submission] = JArrayList()
 
 	def submissionsFromUnenrolledStudents: JList[Submission] = {
-		submissions.asScala.filterNot(sub => membershipInfo.usercodes.contains(sub.usercode)).asJava
+		val enrolledUsercodes = membershipInfo.usercodes
+		submissions.asScala.filterNot(sub => enrolledUsercodes.contains(sub.usercode)).asJava
 	}
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
