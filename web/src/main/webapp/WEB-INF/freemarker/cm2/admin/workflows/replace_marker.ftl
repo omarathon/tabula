@@ -38,7 +38,7 @@
 
 			<@bs3form.labelled_form_group path="includeCompleted" labelText="Should the marker be replaced for completed assignments?">
 				<@bs3form.checkbox path="includeCompleted">
-					<@f.checkbox path="includeCompleted" /> Replace the marker for assginments where marking has finished.
+					<@f.checkbox path="includeCompleted" /> Replace the marker for assignments where marking has finished.
 				</@bs3form.checkbox>
 			</@bs3form.labelled_form_group>
 		</#if>
