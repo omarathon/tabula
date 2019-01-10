@@ -75,7 +75,7 @@ trait DownloadMarkersSubmissionsCommandState {
 	var markerFeedback: JList[MarkerFeedback] = JArrayList()
 	def students: Seq[User] = markerFeedback.asScala.map(_.student)
 	// can only download these students submissions or a subset
-	def markersStudents: Seq[User] = assignment.cm2MarkerAllocations.filter(_.marker == marker).flatMap(_.students).distinct
+	def markersStudents: Seq[User] = assignment.cm2MarkerAllocations(marker).flatMap(_.students).distinct
 
 	lazy val submissions: Seq[Submission] = {
 		// filter out ones we aren't the marker for
