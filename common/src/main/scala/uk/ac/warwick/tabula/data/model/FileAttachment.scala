@@ -59,6 +59,14 @@ class FileAttachment extends GeneratedId {
 		inverseJoinColumns=Array( new JoinColumn(name="marker_feedback_id")) )
 	var markerFeedback:MarkerFeedback = _
 
+	/*
+	 * Both of these are really One-to-One relationships (and are @OneToOne on the other side)
+	 * but Hibernate can't lazy-load a One-to-One because it doesn't know whether to set the
+	 * property to a proxy or null, so we pretend it's OneToMany to avoid eagerly loading
+	 * originality reports and feedback templates every time we fetch a file attachment from
+	 * the database.
+	 */
+
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(PERSIST), mappedBy = "attachment")
 	private val _originalityReport: JList[OriginalityReport] = JArrayList()
 	def originalityReport: OriginalityReport = _originalityReport.asScala.headOption.orNull
