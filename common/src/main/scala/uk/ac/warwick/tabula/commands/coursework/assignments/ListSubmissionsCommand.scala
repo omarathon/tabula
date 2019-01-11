@@ -46,8 +46,8 @@ abstract class ListSubmissionsCommandInternal(val module: Module, val assignment
 		val submissions = assignment.submissions.asScala.sortBy(_.submittedDate).reverse
 		val downloads =
 			if (checkIndex) try {
-				Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment), 15.seconds)
-			} catch { case timeout: TimeoutException => Nil }
+				Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment, submissions), 15.seconds)
+			} catch { case _: TimeoutException => Nil }
 			else Nil
 
 		submissions.map { submission =>

@@ -438,9 +438,9 @@
 					</#if>
 				</ul>
 			</div>
-</div>
+		</div>
 		<div class="btn-group">
-		<div class="btn-group">
+			<div class="btn-group">
 				<a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
 					Save as
 					<span class="caret"></span>

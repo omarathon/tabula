@@ -92,7 +92,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 				f.uploaderId = "tabula-functest-admin1"
 				f.actualMark = Some(41)
 				val currentStage = singleMarkerWorkflow.initialStages.head
-				f.outstandingStages = currentStage.nextStages.asJava
+				f.outstandingStages = currentStage.nextStages.toSet.asJava
 				feedbackService.saveOrUpdate(f)
 
 				val mf = new MarkerFeedback(f)

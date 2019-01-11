@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
@@ -197,7 +198,9 @@ class Assignment
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var feedbacks: JList[AssignmentFeedback] = JArrayList()
-	override def allFeedback: mutable.Buffer[AssignmentFeedback] = feedbacks.asScala
+	override def allFeedback: Seq[AssignmentFeedback] = RequestLevelCache.cachedBy("Assignment.allFeedback", id) {
+		feedbackService.loadFeedbackForAssignment(this)
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")

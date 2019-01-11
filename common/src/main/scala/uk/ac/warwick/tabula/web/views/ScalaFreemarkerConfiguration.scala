@@ -35,8 +35,8 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 		wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
 
 		// TAB-351 TAB-469 Don't enable caching
-		wrapper.setUseCache(false)
-		wrapper.useWrapperCache = false
+		wrapper.setUseCache(useCache)
+		wrapper.useWrapperCache = useCache
 		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE)
 
 		wrapper

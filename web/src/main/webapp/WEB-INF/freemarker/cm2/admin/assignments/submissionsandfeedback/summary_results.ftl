@@ -31,6 +31,7 @@
 					</tr>
 				</thead>
 				<tbody>
+					<#assign canProxy = can.do("Assignment.MarkOnBehalf", assignment) />
 					<#macro details student>
 						<#local coursework = student.coursework />
 						<#if coursework.enhancedSubmission??>
@@ -69,7 +70,7 @@
 							</ul>
 							<div class="tab-content tab-content-equal-height">
 								<div role="tabpanel" class="tab-pane active" id="${identifier}-submission">
-									<@components.student_workflow_details student />
+									<@components.student_workflow_details assignment student canProxy />
 								</div>
 
 								<#-- One tab for each stage in the workflow; previous stages are active, incomplete stages are not -->

@@ -12,7 +12,7 @@ import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
@@ -185,7 +185,7 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 		})
 	}
 
-	private def checkInnerClasses(key: String): Option[TemplateModel] = {
+	private def checkInnerClasses(key: String): Option[TemplateModel] = RequestLevelCache.cachedBy("ScalaBeansWrapper.checkInnerClasses", objectClass.getName + key + "$") {
 		try {
 			Some(wrapper.wrap(Class.forName(objectClass.getName + key + "$").getField("MODULE$").get(null)))
 		} catch {

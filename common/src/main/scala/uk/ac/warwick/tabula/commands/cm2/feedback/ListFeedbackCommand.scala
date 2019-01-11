@@ -30,6 +30,7 @@ object ListFeedbackCommand {
 			with ListFeedbackPermissions
 			with UserConversion
 			with AutowiringAuditEventQueryServiceComponent
+			with AutowiringFeedbackServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringTaskSchedulerServiceComponent
 			with Unaudited with ReadOnly
@@ -60,15 +61,18 @@ abstract class ListFeedbackCommandInternal(val assignment: Assignment)
 		with ListFeedbackState {
 	self: ListFeedbackRequest with UserConversion
 		with AuditEventQueryServiceComponent
+		with FeedbackServiceComponent
 		with TaskSchedulerServiceComponent =>
 
 	override def applyInternal(): ListFeedbackResult = {
+		val allFeedback = assignment.allFeedback
+
 		// The time to wait for a query to complete
 		val timeout = 15.seconds
 
 		// Wrap each future in Future.optionalTimeout, which will return None if it times out early
-		val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment), timeout)
-		val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment), timeout)
+		val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment, allFeedback), timeout)
+		val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment, allFeedback), timeout)
 		val latestOnlineAdded = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackAdded(assignment), timeout)
 		val latestGenericFeedback = Futures.optionalTimeout(auditEventQueryService.latestGenericFeedbackAdded(assignment), timeout)
 
@@ -81,7 +85,7 @@ abstract class ListFeedbackCommandInternal(val assignment: Assignment)
 			downloads.getOrElse(Nil),
 			latestOnlineViews.getOrElse(Map.empty),
 			latestOnlineAdded.getOrElse(Map.empty),
-			latestGenericFeedback.getOrElse(None)
+			latestGenericFeedback.flatten
 		)
 
 		// We arbitrarily wait a longer time for the result, safe in the knowledge that if they don't return in a reasonable

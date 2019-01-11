@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceCompon
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -70,8 +71,8 @@ abstract class ListFeedbackCommandInternal(val module: Module, val assignment: A
 		val timeout = 15.seconds
 
 		// Wrap each future in Future.optionalTimeout, which will return None if it times out early
-		val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment), timeout)
-		val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment), timeout)
+		val downloads = Futures.optionalTimeout(auditEventQueryService.feedbackDownloads(assignment, assignment.feedbacks.asScala), timeout)
+		val latestOnlineViews = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackViews(assignment, assignment.feedbacks.asScala), timeout)
 		val latestOnlineAdded = Futures.optionalTimeout(auditEventQueryService.latestOnlineFeedbackAdded(assignment), timeout)
 		val latestGenericFeedback = Futures.optionalTimeout(auditEventQueryService.latestGenericFeedbackAdded(assignment), timeout)
 

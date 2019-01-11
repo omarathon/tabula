@@ -98,8 +98,8 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		)
 		feedback.foreach(f => {
 			f.assignment = assignment
-			f.outstandingStages = workflow.initialStages.asJava
-			f.markerFeedback = Seq(
+			f.outstandingStages = workflow.initialStages.toSet.asJava
+			f.markerFeedback = Set(
 				new MarkerFeedback{stage = DblBlndInitialMarkerA}, new MarkerFeedback{stage = DblBlndInitialMarkerB}, new MarkerFeedback{stage = DblBlndFinalMarker}
 			).asJava
 		})
@@ -143,7 +143,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		val feedback = markerFeedback.map(_.feedback)
 
 		feedback.foreach(f => {
-			f.outstandingStages = workflow.initialStages.asJava
+			f.outstandingStages = workflow.initialStages.toSet.asJava
 			f.allMarkerFeedback.head.stage = ModerationMarker
 			f.markerFeedback.add(new MarkerFeedback{stage = ModerationModerator})
 		})

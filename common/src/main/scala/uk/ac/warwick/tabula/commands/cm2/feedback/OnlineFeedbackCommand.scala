@@ -3,12 +3,11 @@ package uk.ac.warwick.tabula.commands.cm2.feedback
 import org.joda.time.DateTime
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.JavaImports.{JList, JMap}
+import uk.ac.warwick.tabula.JavaImports.{JList, JMap, _}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, FormValue, SavedFormValue, StringFormValue}
+import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -86,7 +85,7 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 		}
 
 		// get attachments
-		attachedFiles = feedback.attachments
+		attachedFiles = JArrayList[FileAttachment](feedback.attachments.asScala)
 	}
 
 	private def copyTo(feedback: AssignmentFeedback) {
@@ -102,11 +101,11 @@ class OnlineFeedbackCommandInternal(val assignment: Assignment, val student: Use
 		// save attachments
 		if (feedback.attachments != null) {
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
-			val existingFiles = Option(feedback.attachments).getOrElse(JList()).asScala
+			val existingFiles = Option(feedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
 			val filesToRemove = existingFiles -- filesToKeep
 			val filesToReplicate = filesToKeep -- existingFiles
 			fileAttachmentService.deleteAttachments(filesToRemove)
-			feedback.attachments = JArrayList[FileAttachment](filesToKeep)
+			feedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
 			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
 			replicatedFiles.foreach(feedback.addAttachment)
 		}

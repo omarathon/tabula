@@ -27,7 +27,7 @@ class AdminGetSingleFeedbackFileCommand(assignment: Assignment, feedback: Feedba
 	private var fileFound: Boolean = _
 
 	def applyInternal(): Option[RenderableAttachment] = {
-		val attachment = Option(new RenderableAttachment(feedback.attachments.get(0)))
+		val attachment = Option(new RenderableAttachment(feedback.attachments.iterator().next()))
 		fileFound = attachment.isDefined
 		attachment
 	}
