@@ -16,7 +16,7 @@ object Gender {
 	  	case Male.dbValue => Male
 	  	case Female.dbValue => Female
 	  	case Other.dbValue => Other
-			case NonBinary.dbValue => NonBinary
+	  	case NonBinary.dbValue => NonBinary
 	  	case Unspecified.dbValue => Unspecified
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
