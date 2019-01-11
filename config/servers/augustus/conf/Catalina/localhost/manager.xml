@@ -1,5 +1,0 @@
-<Context privileged="true" antiResourceLocking="false"
-         docBase="${catalina.home}/webapps/manager">
-  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
-         allow="137\.205\.19[134]\.\d+|127\.0\.0\.1" />
-</Context>
