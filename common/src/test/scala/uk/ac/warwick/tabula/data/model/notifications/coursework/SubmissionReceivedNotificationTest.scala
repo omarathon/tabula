@@ -7,10 +7,11 @@ import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.{SecurityService, UserGroupCacheManager, UserSettingsService}
+import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserGroupCacheManager, UserSettingsService}
+
+import scala.collection.JavaConverters._
 
 class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
-
 
 	val userLookup = new MockUserLookup
 
@@ -116,7 +117,6 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 
 
 	@Test def recipientsForLateNotificationWithNoAdminForSubDept() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) { withUser("cuscav", "0672089") {
-
 		val securityService = mock[SecurityService]
 		val permissionsService = mock[PermissionsService]
 		val service = mock[UserSettingsService]
@@ -130,6 +130,9 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		val module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.module = module
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		val submission = Fixtures.submission()
 		submission.assignment = assignment

@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
-
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 object OldOnlineMarkerFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -120,7 +120,7 @@ trait OldMarkerFeedbackStateCopy {
 		}
 
 		// get attachments
-		attachedFiles = markerFeedback.attachments
+		attachedFiles = JArrayList[FileAttachment](markerFeedback.attachments.asScala)
 	}
 
 	def copyTo(markerFeedback: MarkerFeedback) {
@@ -142,11 +142,11 @@ trait OldMarkerFeedbackStateCopy {
 		// save attachments
 		if (markerFeedback.attachments != null) {
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
-			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
+			val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
 			val filesToRemove = existingFiles -- filesToKeep
 			val filesToReplicate = filesToKeep -- existingFiles
 			fileAttachmentService.deleteAttachments(filesToRemove)
-			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
+			markerFeedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
 			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
 			replicatedFiles.foreach(markerFeedback.addAttachment)
 		}

@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants}
 import org.joda.time.DateTimeConstants._
-import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.commands.coursework.feedback.SubmissionsReport
 import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 import uk.ac.warwick.tabula.data.model.forms.{Extension, FormFieldContext, TextField}
+import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase with Mockito {
@@ -49,6 +50,9 @@ class AssignmentTest extends TestBase with Mockito {
 
 	@Test def unreleasedFeedback() {
 		val assignment = new Assignment
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		assignment.feedbacks should be ('empty)
 		assignment.unreleasedFeedback should be ('empty)
 
@@ -62,6 +66,9 @@ class AssignmentTest extends TestBase with Mockito {
 
 	@Test def placeholderFeedback() {
 		val assignment = new Assignment
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		assignment.fullFeedback should be ('empty)
 		assignment.markingWorkflow = new FirstMarkerOnlyWorkflow
 
@@ -79,6 +86,10 @@ class AssignmentTest extends TestBase with Mockito {
 		val assignment = new Assignment
 		assignment.collectSubmissions = false
 		assignment.collectMarks = false
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		SubmissionsReport(assignment) should not be 'hasProblems
 
 		for (i <- 1 to 10) {// 0000001 .. 0000010
@@ -120,6 +131,9 @@ class AssignmentTest extends TestBase with Mockito {
 
 	@Test def assignmentCanPublishFeedback() {
 		val assignment = new Assignment
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		assignment.feedbacks add mockFeedback(assignment)
 
 		assignment.openDate = new DateTime().minusDays(3)

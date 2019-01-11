@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-
+import org.hibernate.FetchMode
 import org.hibernate.criterion.Restrictions.{ge, le}
+import org.hibernate.criterion.Order._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
@@ -12,11 +13,11 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUsercode(assignment: Assignment, usercode: String): Option[Submission]
 	def getSubmissionsByAssignment(assignment: Assignment): Seq[Submission]
+	def loadSubmissionsForAssignment(assignment: Assignment): Seq[Submission]
 	def getSubmission(id: String): Option[Submission]
 	def getAllSubmissions(user: User): Seq[Submission]
 	def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
@@ -51,6 +52,16 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
 		session.newCriteria[Submission]
 			.add(is("assignment", assignment)).seq
 	}
+
+	def loadSubmissionsForAssignment(assignment: Assignment) : Seq[Submission] =
+		session.newCriteria[Submission]
+			.add(is("assignment", assignment))
+  		.addOrder(desc("submittedDate"))
+			.setFetchMode("values", FetchMode.JOIN)
+			.setFetchMode("values.attachments", FetchMode.JOIN)
+			.setFetchMode("values.attachments._originalityReport", FetchMode.JOIN)
+  		.distinct
+			.seq
 
 	def getSubmission(id: String): Option[Submission] = getById[Submission](id)
 

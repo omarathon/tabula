@@ -1,13 +1,17 @@
 package uk.ac.warwick.tabula.services.cm2.docconversion
 
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
-import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.userlookup.AnonymousUser
+
+import scala.collection.JavaConverters._
 
 class MarkItemTest extends TestBase with Mockito {
 
 	val assignment: Assignment = Fixtures.assignment("Essay")
+	assignment.feedbackService = smartMock[FeedbackService]
+	assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 	private def markItem(): MarkItem = {
 		val item = new MarkItem

@@ -52,19 +52,19 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService {
 		* Work out which submissions have been downloaded from the admin interface
 		* based on the audit events.
 		*/
-	def adminDownloadedSubmissions(assignment: Assignment): Future[Seq[Submission]]
+	def adminDownloadedSubmissions(assignment: Assignment, submissions: Seq[Submission]): Future[Seq[Submission]]
 
 	/**
 		* Get a sequence of User-datetime pairs for when feedback was downloaded for
 		* this assignment.
 		*/
-	def feedbackDownloads(assignment: Assignment): Future[Seq[(User, DateTime)]]
+	def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]]
 
 	/**
 		* Get a map of usercode-datetime for when online feedback was last viewed on
 		* a per-student basis for this assignment.
 		*/
-	def latestOnlineFeedbackViews(assignment: Assignment): Future[Map[User, DateTime]]
+	def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]]
 
 	/**
 		* Get a map of universityId-datetime for when online feedback was last
@@ -204,8 +204,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		case _ => termQuery("assignment", assignment.id)
 	}
 
-	def adminDownloadedSubmissions(assignment: Assignment): Future[Seq[Submission]] = {
-		val assignmentTerm = assignmentRangeRestriction(assignment, assignment.submissions.asScala.map { _.submittedDate }.sorted.headOption.orElse { Option(assignment.createdDate )})
+	def adminDownloadedSubmissions(assignment: Assignment, submissions: Seq[Submission]): Future[Seq[Submission]] = {
+		val assignmentTerm = assignmentRangeRestriction(assignment, submissions.map(_.submittedDate).sorted.headOption.orElse(Option(assignment.createdDate)))
 
 		// find events where you downloaded all available submissions
 		val allDownloaded =
@@ -217,7 +217,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 			case None => Nil
 			case Some(event) =>
 				val latestDate = event.eventDate
-				assignment.submissions.asScala.filter { _.submittedDate.isBefore(latestDate) }
+				submissions.filter(_.submittedDate.isBefore(latestDate))
 		}}
 
 		// find events where selected submissions were downloaded
@@ -226,7 +226,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		val submissions2: Future[Seq[Submission]] = someDownloaded.map { events =>
 			events.flatMap { _.submissionIds }
 				.flatMap { id =>
-					assignment.submissions.asScala.find(_.id == id)
+					submissions.find(_.id == id)
 				}
 		}
 
@@ -236,7 +236,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		val submissions3: Future[Seq[Submission]] = individualDownloads.map { events =>
 			events.flatMap { _.submissionId }
 				.flatMap { id =>
-					assignment.submissions.asScala.find(_.id == id)
+					submissions.find(_.id == id)
 				}
 		}
 
@@ -244,11 +244,11 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	}
 
 	// Only look at events since the first time feedback was released
-	private def afterFeedbackPublishedRestriction(assignment: Assignment): Query =
-		assignmentRangeRestriction(assignment, assignment.feedbacks.asScala.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
+	private def afterFeedbackPublishedRestriction(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Query =
+		assignmentRangeRestriction(assignment, feedback.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
 
-	def feedbackDownloads(assignment: Assignment): Future[Seq[(User, DateTime)]] =
-		eventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment)).map {
+	def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]] =
+		eventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment, feedback)).map {
 			_.filterNot { _.hadError }
 			.map { event => userLookup.getUserByUserId(event.masqueradeUserId) -> event.eventDate }
 		}
@@ -258,8 +258,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		in.groupBy { case (user, _) => user.getWarwickId.maybeText.getOrElse(user.getUserId) }
 			.map { case (_, eventDates) => eventDates.maxBy { case (_, eventDate) => eventDate } }
 
-	def latestOnlineFeedbackViews(assignment: Assignment): Future[Map[User, DateTime]] = // User ID to DateTime
-		eventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment)).map {
+	def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]] = // User ID to DateTime
+		eventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment, feedback)).map {
 			_.filterNot { _.hadError }
 			.map { event => userLookup.getUserByUserId(event.masqueradeUserId) -> event.eventDate }
 		}.map(mapToLatest)
@@ -290,7 +290,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		parsedEventsOfType(
 			"PublishFeedback",
 			boolQuery().should(queries),
-			afterFeedbackPublishedRestriction(assignment)
+			afterFeedbackPublishedRestriction(assignment, assignment.feedbacks.asScala)
 		).map { events =>
 			events.sortBy(_.eventDate).reverse
 		}

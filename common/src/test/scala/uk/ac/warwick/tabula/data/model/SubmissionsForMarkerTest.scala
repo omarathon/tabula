@@ -1,15 +1,20 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
-import uk.ac.warwick.tabula.{Fixtures, TestBase, RequestInfo}
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, SavedFormValue}
+import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.{Fixtures, Mockito, RequestInfo, TestBase}
 
-class SubmissionsForMarkerTest extends TestBase {
+import scala.collection.JavaConverters._
+
+class SubmissionsForMarkerTest extends TestBase with Mockito {
 
 	@Test def markersSubmissionsTest() {
 
 		val assignment = new Assignment
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		assignment.addDefaultFields()
 		assignment.markingWorkflow = newMarkingWorkflow()
 

@@ -927,7 +927,7 @@
 	- <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
 </#macro>
 
-<#macro student_workflow_details student>
+<#macro student_workflow_details assignment student canProxy>
 	<#if student.coursework.enhancedSubmission??>
 		<#local enhancedSubmission=student.coursework.enhancedSubmission>
 		<#local submission=enhancedSubmission.submission>
@@ -963,7 +963,7 @@
 
 					<#if firstMarker!?length gt 0>
 						(${firstMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink fm "marker" />
 						</#if>
 					</#if>
@@ -975,7 +975,7 @@
 
 					<#if secondMarker!?length gt 0>
 						(${secondMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink sm "marker" />
 						</#if>
 					</#if>
@@ -987,7 +987,7 @@
 
 					<#if secondMarker!?length gt 0>
 						(${secondMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink sm "moderator" />
 						</#if>
 					</#if>
@@ -999,7 +999,7 @@
 
 					<#if firstMarker!?length gt 0>
 						(${firstMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink fm "marker" />
 						</#if>
 					</#if>
@@ -1012,7 +1012,7 @@
 
 						<#if (marker.userId)??>
 							${marker.fullName}
-							<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<#if canProxy>
 								<@uniIdSafeCM2MarkerLink markingStage marker student.user />
 							</#if>
 						<#elseif stage_name != "CM2MarkingWorkflowStage(admin-moderation-admin)">

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.sql.DataSource
-
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
@@ -18,6 +17,8 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.userlookup.AnonymousUser
+
+import scala.collection.JavaConverters._
 
 class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
@@ -172,6 +173,9 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		val submission = Fixtures.submission("1234567", "1234567")
 		submission.submittedDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
 		assignment.submissions.add(submission)
@@ -219,6 +223,9 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		val managers = UserGroup.ofUsercodes
 		userLookup.registerUsers("cuscav", "cusebr")
 		managers.addUserId("cuscav")
@@ -260,6 +267,9 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 		val assignment = Fixtures.assignment("5,000 word essay")
 		assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
 		assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 14, 9, 0, 0, 0)
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		val submission1 = Fixtures.submission("0000001", "0000001")
 		val submission2 = Fixtures.submission("0000002", "0000002")

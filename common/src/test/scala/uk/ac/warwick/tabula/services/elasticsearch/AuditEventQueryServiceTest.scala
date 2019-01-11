@@ -92,13 +92,13 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be ('empty)
 
 		// Index the audit event
 		client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
 		blockUntilCount(1, index.name)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be (assignment.submissions.asScala)
 	}}
 
 	@Test def individuallyDownloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
@@ -134,13 +134,13 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be ('empty)
 
 		// Index the audit event
 		client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
 		blockUntilCount(1, index.name)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be (assignment.submissions.asScala)
 	}}
 
 	@Test def noteworthySubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {

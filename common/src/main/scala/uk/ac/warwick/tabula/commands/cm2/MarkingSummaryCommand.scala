@@ -197,7 +197,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
 		}
 
 		allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
-			info.assignment.feedbacks.asScala.exists(_.markingInProgress.exists(_.marker == markerUser)) || cm1AssignmentsForMarking.contains(info.assignment)
+			info.assignment.allFeedback.exists(_.markingInProgress.exists(_.marker == markerUser)) || cm1AssignmentsForMarking.contains(info.assignment)
 		}
 	}
 

@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, MarkerFe
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator}
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService._
-import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.services.{FeedbackService, UserLookupComponent}
+
 import scala.collection.JavaConverters._
 
 class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpers {
@@ -69,6 +70,8 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 				mf.feedback = feedback
 				feedback.markerFeedback.add(mf)
 				a1.feedbacks.add(feedback)
+				a1.feedbackService = smartMock[FeedbackService]
+				a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
 
 				mf should not be 'finalised
 
@@ -113,6 +116,8 @@ class AssignMarkersCommandTest extends TestBase with Mockito with ValidatorHelpe
 				mf.feedback = feedback
 				feedback.markerFeedback.add(mf)
 				a1.feedbacks.add(feedback)
+				a1.feedbackService = smartMock[FeedbackService]
+				a1.feedbackService.loadFeedbackForAssignment(a1) returns a1.feedbacks.asScala
 
 				mf shouldBe 'finalised
 

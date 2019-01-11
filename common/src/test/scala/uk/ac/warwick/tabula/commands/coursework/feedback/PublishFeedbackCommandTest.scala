@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.commands.coursework.feedback
 
-import uk.ac.warwick.tabula.services.GeneratesGradesFromMarks
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback}
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback}
+import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks}
+import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 class PublishFeedbackCommandTest extends TestBase with Mockito {
@@ -54,6 +56,9 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
 		feedback.actualMark = Option(41)
 		feedback.assignment = assignment
 		assignment.feedbacks = JArrayList( feedback )
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 	}
 
 }

@@ -30,10 +30,12 @@ trait MemberDao {
 	def delete(member: Member)
 	def deleteByUniversityIds(universityIds: Seq[String])
 	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
+	def getByUniversityIds(universityIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
+	def getAllByUserIds(userIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime): Scrollable[Member]
@@ -111,7 +113,10 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		}
 	}
 
-	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] = {
+	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member] =
+		getByUniversityIds(Seq(universityId), disableFilter, eagerLoad).headOption
+
+	def getByUniversityIds(universityIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member] = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
@@ -119,7 +124,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
 			val criteria =
 				session.newCriteria[Member]
-					.add(is("universityId", universityId.safeTrim))
+					.add(safeIn("universityId", universityIds.map(_.safeTrim)))
 
 			if (eagerLoad) {
 				criteria
@@ -130,13 +135,13 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 					.setFetchMode("homeDepartment.children", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
-					.uniqueResult.map { m =>
+					.distinct.seq.map { m =>
 						// This is the worst hack of all time
 						m.permissionsParents.force
 						m
 					}
 			} else {
-				criteria.uniqueResult
+				criteria.seq
 			}
 		} finally {
 			if (disableFilter && filterEnabled)
@@ -196,7 +201,10 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 		else safeInSeq(() => { sessionWithoutFreshFilters.newCriteria[Member] }, "universityId", universityIds map { _.safeTrim })
 	}
 
-	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] = {
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] =
+		getAllByUserIds(Seq(userId), disableFilter, eagerLoad, activeOnly)
+
+	def getAllByUserIds(userIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
@@ -204,7 +212,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
 			val criteria =
 				session.newCriteria[Member]
-					.add(is("userId", userId.safeTrim.toLowerCase))
+					.add(safeIn("userId", userIds.map(_.safeTrim.toLowerCase)))
 					.addOrder(asc("universityId"))
 			if (activeOnly)
 				criteria.add(disjunction()
@@ -224,10 +232,10 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
 					.distinct
 					.seq.map { m =>
-						// This is the worst hack of all time
-						m.permissionsParents.force
-						m
-					}
+					// This is the worst hack of all time
+					m.permissionsParents.force
+					m
+				}
 			} else {
 				criteria.seq
 			}

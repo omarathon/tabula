@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import javax.persistence.DiscriminatorValue
-
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.junit.{After, Before}
@@ -13,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
+import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PackageScanner, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -117,6 +116,9 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		assignment.module = module
 		session.save(assignment)
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		/** Had to construct this stream and then  extract assignment,module,dept from there to set expectations. If we set expectation
 			* on assignemnet,dept,module objects directly they are somehow still null (expectation don't work). SubmissionReceivedNotification works on stream
