@@ -31,6 +31,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment]
 
 	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
 	def progress(markerStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
@@ -89,6 +90,9 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
+
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment] =
+		markingWorkflowDao.getAssignmentsUsingMarkingWorkflows(workflows)
 
 	override def progress(currentStage: MarkingWorkflowStage , feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
 		// don't progress if nextStages is empty
