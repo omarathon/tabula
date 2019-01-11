@@ -1,7 +1,7 @@
 Tabula
 ==========
 
-This is Tabula, the MyDepartment system including a number of modules. It has a [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
+This is Tabula, the 'MyDepartment' system including a number of modules. It has a [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
 
 Currently, the modules that are in Tabula are:
 
