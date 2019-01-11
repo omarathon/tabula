@@ -579,7 +579,7 @@ trait MemberProperties extends StringId {
 }
 
 trait ApplicantProperties {
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "disability")
 	@Restricted(Array("Profiles.Read.Disability"))
 	private var _disability: Disability = _
