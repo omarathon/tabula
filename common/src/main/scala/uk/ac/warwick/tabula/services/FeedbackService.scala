@@ -62,7 +62,6 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 			.setFetchMode("attachments", FetchMode.JOIN)
 			.distinct
   		.seq
-  		.filterNot(_.isPlaceholder)
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")

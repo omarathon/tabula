@@ -301,8 +301,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def markingInProgress: Seq[MarkerFeedback] = allMarkerFeedback.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
-	@JoinTable(name = "OutstandingStages", joinColumns = Array(
-		new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
+	@JoinTable(name = "OutstandingStages", joinColumns = Array(new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var outstandingStages: JSet[MarkingWorkflowStage] = JHashSet()
 
