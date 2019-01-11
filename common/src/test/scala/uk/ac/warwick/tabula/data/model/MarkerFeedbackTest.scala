@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.data.model
-import scala.util.Random
-
-import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
+
+import scala.collection.JavaConverters._
+import scala.util.Random
 
 // scalastyle:off magic.number
 
-class MarkerFeedbackTest extends PersistenceTestBase {
+class MarkerFeedbackTest extends PersistenceTestBase with Mockito {
 
 	@Test def fields() {
 		val random = new Random
@@ -57,7 +59,7 @@ class MarkerFeedbackTest extends PersistenceTestBase {
 			val attachment = new FileAttachment
 			mf.addAttachment(attachment)
 
-			session.save(mf)
+			session.save(feedback)
 			(mf, attachment)
 		}
 
@@ -73,10 +75,14 @@ class MarkerFeedbackTest extends PersistenceTestBase {
 		session.get(classOf[MarkerFeedback], markerFeedback.id) should be (markerFeedback)
 		session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (markerFeedbackAttachment)
 
+		session.clear()
 
 		flushing(session) {
-			feedback.markerFeedback.remove(markerFeedback)
-			session.delete(markerFeedback)
+			val feedback2 = session.load(classOf[AssignmentFeedback], feedback.id)
+			val mf2 = session.load(classOf[MarkerFeedback], markerFeedback.id)
+
+			feedback2.markerFeedback.remove(mf2) should be (true)
+			session.delete(mf2)
 		}
 
 		session.clear()

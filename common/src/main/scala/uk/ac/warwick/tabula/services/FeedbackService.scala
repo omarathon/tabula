@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.services
-import scala.collection.JavaConverters._
+import org.hibernate.FetchMode
 
+import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.Transactions._
@@ -14,6 +14,7 @@ import uk.ac.warwick.spring.Wire
 
 trait FeedbackService {
 	def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback]
+	def loadFeedbackForAssignment(assignment: Assignment): Seq[AssignmentFeedback]
 	def countPublishedFeedback(assignment: Assignment): Int
 	def getUsersForFeedback(assignment: Assignment): Seq[(String, User)]
 	def getAssignmentFeedbackByUsercode(assignment: Assignment, usercode: String): Option[AssignmentFeedback]
@@ -48,6 +49,19 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	def getStudentFeedback(assessment: Assessment, usercode: String): Option[Feedback] = {
 		assessment.findFullFeedback(usercode)
 	}
+
+	def loadFeedbackForAssignment(assignment: Assignment): Seq[AssignmentFeedback] =
+		session.newCriteria[AssignmentFeedback]
+  		.add(is("assignment", assignment))
+			.setFetchMode("_marks", FetchMode.JOIN)
+			.setFetchMode("markerFeedback", FetchMode.JOIN)
+			.setFetchMode("markerFeedback.attachments", FetchMode.JOIN)
+			.setFetchMode("markerFeedback.customFormValues", FetchMode.JOIN)
+			.setFetchMode("outstandingStages", FetchMode.JOIN)
+			.setFetchMode("customFormValues", FetchMode.JOIN)
+			.setFetchMode("attachments", FetchMode.JOIN)
+			.distinct
+  		.seq
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
 		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")

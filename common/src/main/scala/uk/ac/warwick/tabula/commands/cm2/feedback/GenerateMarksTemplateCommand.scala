@@ -109,7 +109,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
 		// populate the mark sheet with ids and existing data
 		for ((currentMarkerFeedback, i) <- markerFeedbackToDo.zipWithIndex) {
 			val feedback = currentMarkerFeedback.feedback
-			val previousMarkerFeedback: Seq[MarkerFeedback] = feedback.markerFeedback.asScala.filter(_.stage.order < feedback.currentStageIndex)
+			val previousMarkerFeedback: Seq[MarkerFeedback] = feedback.markerFeedback.asScala.toSeq.filter(_.stage.order < feedback.currentStageIndex)
 
 			val row = sheet.createRow(i + 1)
 			val id = if(assignment.anonymity == FullyAnonymous) {

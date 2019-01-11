@@ -126,7 +126,7 @@ class MarkerFeedback extends GeneratedId
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
 	@Fetch(FetchMode.JOIN)
-	var attachments: JList[FileAttachment] = JArrayList()
+	var attachments: JSet[FileAttachment] = JHashSet()
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

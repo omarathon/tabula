@@ -13,6 +13,8 @@ import scala.collection.JavaConverters._
 class AddMarksCommandTest extends TestBase with Mockito {
 
 	val thisAssignment: Assignment = newDeepAssignment()
+	thisAssignment.feedbackService = smartMock[FeedbackService]
+	thisAssignment.feedbackService.loadFeedbackForAssignment(thisAssignment) returns Nil
 
 	/**
 	 * Check that validation marks an empty mark as an invalid row
@@ -153,6 +155,9 @@ class AddMarksCommandTest extends TestBase with Mockito {
 		trait Fixture {
 			val currentUser: CurrentUser = RequestInfo.fromThread.get.user
 			val newAssignment: Assignment = newDeepAssignment()
+			newAssignment.feedbackService = smartMock[FeedbackService]
+			newAssignment.feedbackService.loadFeedbackForAssignment(newAssignment) returns Nil
+
 			val validator = new PostExtractValidation with OldAdminAddMarksCommandState with ValidatesMarkItem with UserLookupComponent with OldAdminAddMarksCommandValidation {
 				val module: Module = newAssignment.module
 				val assessment: Assignment = newAssignment

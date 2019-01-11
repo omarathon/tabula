@@ -4,7 +4,6 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,7 +15,6 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.{SortedMap, TreeMap}
-import scala.collection.mutable
 
 trait FeedbackAttachments {
 
@@ -24,7 +22,7 @@ trait FeedbackAttachments {
 	// Should be import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
-	var attachments: JList[FileAttachment]
+	var attachments: JSet[FileAttachment]
 	def addAttachment(attachment: FileAttachment)
 
 	def hasAttachments: Boolean = !attachments.isEmpty
@@ -272,8 +270,8 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	@OneToMany(mappedBy = "feedback", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
 	@BatchSize(size = 200)
-	var markerFeedback: JList[MarkerFeedback] = JArrayList()
-	def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala
+	var markerFeedback: JSet[MarkerFeedback] = JHashSet()
+	def allMarkerFeedback: Seq[MarkerFeedback] = markerFeedback.asScala.toSeq
 
 	def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
 		val unsortedMap =  allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
@@ -303,10 +301,9 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	def markingInProgress: Seq[MarkerFeedback] = allMarkerFeedback.filter(mf => outstandingStages.asScala.contains(mf.stage))
 
 	@ElementCollection @Column(name = "stage")
-	@JoinTable(name = "OutstandingStages", joinColumns = Array(
-		new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
+	@JoinTable(name = "OutstandingStages", joinColumns = Array(new JoinColumn(name = "feedback_id", referencedColumnName = "id")))
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
-	var outstandingStages: JList[MarkingWorkflowStage] = JArrayList()
+	var outstandingStages: JSet[MarkingWorkflowStage] = JHashSet()
 
 	def isPlaceholder: Boolean = assessment match {
 		case a: Assignment if a.cm2Assignment => if(a.cm2MarkingWorkflow != null) !isMarkingCompleted else !hasContent
@@ -314,7 +311,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 	}
 
 	def isMarkingCompleted: Boolean = outstandingStages.asScala.toList match {
-		case (s: FinalStage) :: Nil => true
+		case (_: FinalStage) :: Nil => true
 		case _ => false
 	}
 
@@ -376,7 +373,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
-	var attachments: JList[FileAttachment] = JArrayList()
+	var attachments: JSet[FileAttachment] = JHashSet()
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

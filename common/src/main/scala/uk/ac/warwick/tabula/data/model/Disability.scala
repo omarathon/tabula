@@ -63,7 +63,7 @@ class Disability {
 	 * If tabulaDefinition is null (ie. there's been a new SITS definition added), fail safe to true.
 	 * Otherwise, true only for tabulaDefinitions we have defined as not reportably disabled in the database
 	 */
-	def reportable: Boolean = Option(tabulaDefinition).forall(_ != Disability.notReportableDefinition)
+	def reportable: Boolean = !Option(tabulaDefinition).contains(Disability.notReportableDefinition)
 
 	override def toString: String = definition
 }

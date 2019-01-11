@@ -15,10 +15,13 @@ import scala.collection.JavaConverters._
 class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
-
 		val assignment = new Assignment
 		assignment.collectMarks = true
 		assignment.addDefaultFeedbackFields()
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
 		val module = new Module
 		module.adminDepartment = new Department
 

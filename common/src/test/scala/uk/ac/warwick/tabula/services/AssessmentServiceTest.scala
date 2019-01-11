@@ -184,6 +184,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		assignment.foreach(_.cm2Assignment = false)
 
 		assignment.foreach { assmt =>
+			assmt.feedbackService = smartMock[FeedbackService]
+			assmt.feedbackService.loadFeedbackForAssignment(assmt) answers { _ => assmt.feedbacks.asScala }
+
 			// create a feedback for the assignment, not yet released
 			val feedback = new AssignmentFeedback
 			feedback._universityId = "0070790"

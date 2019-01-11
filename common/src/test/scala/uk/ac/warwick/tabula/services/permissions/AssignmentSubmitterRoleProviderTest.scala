@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.{Assignment, UpstreamAssessmentGroup, UpstreamAssessmentGroupInfo, UserGroup}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroupInfo, UserGroup}
 import uk.ac.warwick.tabula.roles.AssignmentSubmitter
-import uk.ac.warwick.tabula.services.AssessmentService
-import org.mockito.Matchers._
-import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService}
+
+import scala.collection.JavaConverters._
 
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 
@@ -28,6 +26,8 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.module = Fixtures.module("in101")
 		assignment.module.adminDepartment = Fixtures.department("in")
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
@@ -44,6 +44,8 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.assessmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		assignmentMembershipService.isStudentCurrentMember(
 				isEq(currentUser.apparentUser),

@@ -69,9 +69,10 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val IdIndex = 10
 
 	private val idSql = baseSelect + " where id = :id"
-	private def idsSql = baseSelect + " where id in (:ids)"
+	private val idsSql = baseSelect + " where id in (:ids)"
 
 	private val eventIdSql = baseSelect + " where eventid = :id"
+	private val eventIdsSql = baseSelect + " where eventid in (:ids)"
 
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
@@ -136,8 +137,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	def getById(id: Long): Option[AuditEvent] = {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
-		//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
-		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map { addRelated }
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map(addRelated)
 	}
 
 	def latest: DateTime = {
@@ -150,9 +150,16 @@ class AuditEventServiceImpl extends AuditEventService {
 			val query = session.createSQLQuery(idsSql)
 			query.setParameterList("ids", group.asJava)
 			val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
-			results.map(mapListToObject).map(addRelated)
+			addRelated(results.map(mapListToObject))
 		}.toSeq
 
+	def getByEventIds(ids: Seq[String]): Map[String, Seq[AuditEvent]] =
+		ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
+			val query = session.createSQLQuery(eventIdsSql)
+			query.setParameterList("ids", group.asJava)
+			val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
+			results.map(mapListToObject).groupBy(_.eventId)
+		}.toMap
 
 	def addParsedData(event: AuditEvent): Unit = {
 		event.parsedData = parseData(event.data)
@@ -161,6 +168,13 @@ class AuditEventServiceImpl extends AuditEventService {
 	def addRelated(event: AuditEvent): AuditEvent = {
 		event.related = getByEventId(event.eventId)
 		event
+	}
+
+	def addRelated(events: Seq[AuditEvent]): Seq[AuditEvent] = {
+		getByEventIds(events.map(_.eventId)).foreach { case (eventId, related) =>
+			events.filter(_.eventId == eventId).foreach(_.related = related)
+		}
+		events
 	}
 
 	def save(event: Event, stage: String) {
