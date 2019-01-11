@@ -354,7 +354,7 @@ object AssignmentImporter {
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
+							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') //dirty way of doing but here we go...TAB-6840
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
