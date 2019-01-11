@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.forms.{MarkerSelectField, SavedFormValue}
 
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
+import uk.ac.warwick.tabula.services.{FeedbackService, SubmissionService, UserLookupService}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking, SeenSecondMarkingLegacy}
 import uk.ac.warwick.tabula.web.Routes
@@ -20,6 +20,8 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 		val module: Module = Fixtures.module("heron101")
 		val assignment: Assignment = Fixtures.assignment("my assignment")
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 		assignment.id = "1"
 		assignment.module = module
 

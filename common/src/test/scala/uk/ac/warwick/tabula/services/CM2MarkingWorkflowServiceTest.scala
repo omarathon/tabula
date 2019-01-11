@@ -23,6 +23,8 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 	val dept = Fixtures.department("in")
 	val assignment = Fixtures.assignment("test")
+	assignment.feedbackService = smartMock[FeedbackService]
+	assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 	val service = new CM2MarkingWorkflowServiceImpl {
 		feedbackService = fs
@@ -78,7 +80,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 		feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
 
 		releasedFeedback.foreach(rf => {
-			rf.outstandingStages.asScala should be (Seq(SingleMarker))
+			rf.outstandingStages.asScala should be (Set(SingleMarker))
 		})
 	}
 
@@ -106,26 +108,26 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 		val doneA = service.progress(DblBlndInitialMarkerA, Seq(feedback.head))
 		val doneB = service.progress(DblBlndInitialMarkerB, feedback.tail)
-		Seq(feedback.head).foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerB)))
-		feedback.tail.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndInitialMarkerA)))
+		Seq(feedback.head).foreach(f => f.outstandingStages.asScala should be (Set(DblBlndInitialMarkerB)))
+		feedback.tail.foreach(f => f.outstandingStages.asScala should be (Set(DblBlndInitialMarkerA)))
 		feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
 		(doneA ++ doneB).isEmpty should be {true}
 
 		val initialDone = service.progress(DblBlndInitialMarkerB, Seq(feedback.head)) ++
 			service.progress(DblBlndInitialMarkerA, feedback.tail)
 
-		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
+		feedback.foreach(f => f.outstandingStages.asScala should be (Set(DblBlndFinalMarker)))
 		feedback.foreach(f => verify(fs, times(2)).saveOrUpdate(f))
 		initialDone.size should be (3)
 		initialDone.forall(_.stage == DblBlndFinalMarker) should be {true}
 
 		val finalDone = service.progress(DblBlndFinalMarker, feedback)
-		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndCompleted)))
+		feedback.foreach(f => f.outstandingStages.asScala should be (Set(DblBlndCompleted)))
 		feedback.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
 		finalDone.isEmpty should be {true}
 
 		val previous = service.returnFeedback(Seq(DblBlndFinalMarker), feedback)
-		feedback.foreach(f => f.outstandingStages.asScala should be (Seq(DblBlndFinalMarker)))
+		feedback.foreach(f => f.outstandingStages.asScala should be (Set(DblBlndFinalMarker)))
 		feedback.foreach(f => verify(fs, times(4)).saveOrUpdate(f))
 
 		// throws the expected IllegalArgumentException
@@ -157,8 +159,8 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 
 		val done = service.finish(ModerationMarker, feedback)
 		done.size should be (2)
-		mf1.feedback.outstandingStages.asScala should be (Seq(ModerationCompleted))
-		mf2.feedback.outstandingStages.asScala should be (Seq(ModerationCompleted))
+		mf1.feedback.outstandingStages.asScala should be (Set(ModerationCompleted))
+		mf2.feedback.outstandingStages.asScala should be (Set(ModerationCompleted))
 		verify(fs, times(1)).saveOrUpdate(mf1.feedback)
 		verify(zs, times(1)).invalidateIndividualFeedbackZip(mf1.feedback)
 		verify(fs, times(1)).saveOrUpdate(mf2.feedback)
