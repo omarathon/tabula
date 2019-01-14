@@ -1,15 +1,12 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Order, Projections, Restrictions}
-import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-
-import scala.collection.JavaConverters._
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
@@ -69,16 +66,12 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
 			}
 
 			criteria.addOrder(Order.desc("meetingDate")).addOrder(Order.desc("lastUpdatedDate"))
-
-			criteria.createAlias("_relationships", "relationships", JoinType.LEFT_OUTER_JOIN)
-				.add(Restrictions.or(
-					safeIn("relationship", rel.toSeq),
-					safeIn("relationships.id", rel.toSeq.map(_.id))
-				))
 		}
 
-		val meetings = c.apply().seq
-		meetings.sortBy(m => (m.meetingDate, m.lastUpdatedDate))(Ordering[(DateTime,DateTime)].reverse)
+		val meetings1 = c.apply().add(safeIn("relationship", rel.toSeq)).seq
+		val meetings2 = c.apply().createAlias("_relationships", "relationships").add(safeIn("relationships.id", rel.toSeq.map(_.id))).seq
+
+		(meetings1 ++ meetings2).sortBy(m => (m.meetingDate, m.lastUpdatedDate))(Ordering[(DateTime, DateTime)].reverse)
 	}
 
 	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
