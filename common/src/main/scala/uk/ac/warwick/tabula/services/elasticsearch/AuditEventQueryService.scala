@@ -217,12 +217,12 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		client.execute {
 			searchRequest
 				.query(searchQuery).limit(0)
-  			.aggregations(
+				.aggregations(
 					termsAggregation("userIds")
 						.field("userId.keyword")
 						.addSubAggregation(
 							topHitsAggregation("latestEvent")
-  							.size(1)
+								.size(1)
 								.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
 						)
 				)
