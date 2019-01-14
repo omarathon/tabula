@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.http.ElasticDsl._
-import com.sksamuel.elastic4s.http.Response
-import com.sksamuel.elastic4s.http.search.{SearchHit, SearchResponse}
+import com.sksamuel.elastic4s.http.search.{SearchResponse, TopHit}
+import com.sksamuel.elastic4s.http.{Response, SourceAsContentBuilder}
 import com.sksamuel.elastic4s.searches.queries.Query
 import com.sksamuel.elastic4s.searches.sort.SortOrder
+import com.sksamuel.elastic4s.{Hit, Index}
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.stereotype.Service
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.helpers.Futures
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -115,7 +115,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		* events with whatever data we kept in ElasticSearch, just in case
 		* an event went missing and we'd like to see the data.
 		*/
-	private def toAuditEvents(hits: Iterable[SearchHit]): Seq[AuditEvent] = {
+	private def toAuditEvents(hits: Iterable[Hit]): Seq[AuditEvent] = {
 		if (hits.isEmpty) Seq()
 		else {
 			val databaseResults: Map[Long, AuditEvent] =
@@ -124,7 +124,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 					.toMap
 
 			/** A placeholder AuditEvent to display if a hit has no matching event in the DB. */
-			def placeholderEvent(hit: SearchHit) = {
+			def placeholderEvent(hit: Hit) = {
 				val event = AuditEvent()
 				event.eventStage = "before"
 				event.data = "{}" // We can't restore this if it's not from the db
@@ -196,6 +196,52 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 	private def parsedEventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] =
 		eventsOfType(eventType, restrictions: _*).map(_.map(parse))
 
+	case class TopHitHit(hit: TopHit) extends Hit {
+		override def id: String = hit.id
+		override def index: String = hit.index
+		override def `type`: String = hit.`type`
+		override def version: Long = 1
+		override def sourceAsString: String = SourceAsContentBuilder(sourceAsMap).string()
+		override def sourceAsMap: Map[String, AnyRef] = hit.source.asInstanceOf[Map[String, AnyRef]]
+		override def exists: Boolean = true
+		override def score: Float = hit.score.map(_.toFloat).getOrElse(0.0f)
+	}
+
+	private def latestEventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] = {
+		val eventTypeQuery = termQuery("eventType", eventType)
+
+		val searchQuery =
+			if (restrictions.nonEmpty) boolQuery().must(restrictions :+ eventTypeQuery)
+			else eventTypeQuery
+
+		client.execute {
+			searchRequest
+				.query(searchQuery).limit(0)
+				.aggregations(
+					termsAggregation("userIds")
+						.field("userId.keyword")
+						.addSubAggregation(
+							topHitsAggregation("latestEvent")
+								.size(1)
+								.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
+						)
+				)
+		}.map { response =>
+			val hits =
+				response.result
+					.aggregations
+					.terms("userIds")
+					.buckets.map { bucket =>
+						TopHitHit(bucket.tophits("latestEvent").hits.head)
+					}
+
+			toAuditEvents(hits)
+		}
+	}
+
+	private def parsedLatestEventsOfType(eventType: String, restrictions: Query*): Future[Seq[AuditEvent]] =
+		latestEventsOfType(eventType, restrictions: _*).map(_.map(parse))
+
 	private def assignmentRangeRestriction(assignment: Assignment, referenceDate: Option[DateTime]): Query = referenceDate match {
 		case Some(createdDate) => must(
 			termQuery("assignment", assignment.id),
@@ -258,22 +304,49 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		in.groupBy { case (user, _) => user.getWarwickId.maybeText.getOrElse(user.getUserId) }
 			.map { case (_, eventDates) => eventDates.maxBy { case (_, eventDate) => eventDate } }
 
+	private def batchedUsersByUserId(userIds: Seq[String]): Map[String, User] = {
+		if (userIds.isEmpty) Map.empty[String, User]
+		else userIds.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+	}.withDefault { userId => new AnonymousUser(userId) }
+
+	private def batchedUsersByWarwickId(warwickIds: Seq[String]): Map[String, User] = {
+		if (warwickIds.isEmpty) Map.empty[String, User]
+		else warwickIds.grouped(100).map(userLookup.getUsersByWarwickUniIds).reduce(_ ++ _)
+	}.withDefault { warwickId =>
+		val u = new AnonymousUser(s"u$warwickId")
+		u.setWarwickId(warwickId)
+		u
+	}
+
 	def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]] = // User ID to DateTime
-		eventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment, feedback)).map {
-			_.filterNot { _.hadError }
-			.map { event => userLookup.getUserByUserId(event.masqueradeUserId) -> event.eventDate }
-		}.map(mapToLatest)
+		latestEventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
+  		.map(_.filterNot(_.hadError))
+  		.map { events =>
+				val userIds = events.map(_.masqueradeUserId).distinct
+				val userIdToUser = batchedUsersByUserId(userIds)
+
+				events.map { event =>
+					userIdToUser(event.masqueradeUserId) -> event.eventDate
+				}.toMap
+			}
 
 	def latestOnlineFeedbackAdded(assignment: Assignment): Future[Map[User, DateTime]] =
-		parsedEventsOfType("OnlineFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate))).map {
-			_.filterNot(_.hadError)
-			.flatMap { event =>
-				val usersById = event.students.map(userLookup.getUserByUserId)
-				val usersByUsercode = event.studentUsercodes.map(userLookup.getUserByWarwickUniId)
-				val allUsers = (usersById ++ usersByUsercode).toSet
-				allUsers.map { u => u -> event.eventDate }.toSeq
+		parsedLatestEventsOfType("OnlineFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate)))
+  		.map(_.filterNot(_.hadError))
+  		.map { events =>
+				val studentUniversityIds = events.flatMap(_.students).distinct
+				val studentUsercodes = events.flatMap(_.studentUsercodes).distinct
+
+				val allUsersByUniversityId = batchedUsersByWarwickId(studentUniversityIds)
+				val allUsersByUsercode = batchedUsersByUserId(studentUsercodes)
+
+				events.flatMap { event =>
+					val usersById = event.students.map(allUsersByUniversityId)
+					val usersByUsercode = event.studentUsercodes.map(allUsersByUsercode)
+					val allUsers = (usersById ++ usersByUsercode).toSet
+					allUsers.map { u => u -> event.eventDate }.toSeq
+				}.toMap
 			}
-		}.map(mapToLatest)
 
 	def latestGenericFeedbackAdded(assignment: Assignment): Future[Option[DateTime]] =
 		eventsOfType("GenericFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate))).map {

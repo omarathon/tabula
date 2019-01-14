@@ -75,8 +75,10 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 			.seq
 
 	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment] =
-		session.newCriteria[Assignment]
-			.add(safeIn("cm2MarkingWorkflow", workflows))
-			.add(is("deleted", false))
-			.seq
+		if (workflows.isEmpty) Nil
+		else
+			session.newCriteria[Assignment]
+				.add(safeIn("cm2MarkingWorkflow", workflows))
+				.add(is("deleted", false))
+				.seq
 }
