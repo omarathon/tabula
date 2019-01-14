@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.services
 
 import java.io.StringWriter
 import java.sql.Clob
-import java.util.TimeZone
-
 import javax.annotation.Resource
+
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
 import org.hibernate.dialect.Dialect
@@ -87,7 +86,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	private val timestampColumnMapper = {
 		val mapper = new TimestampColumnDateTimeMapper
-		mapper.setDatabaseZone(TimeZone.getTimeZone("Europe/London"))
+		mapper.setDatabaseZone(DateTimeZone.forID("Europe/London"))
 		mapper.setJavaZone(DateTimeZone.forID("Europe/London"))
 		mapper
 	}
