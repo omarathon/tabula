@@ -21,7 +21,7 @@ class ElasticsearchClientFactoryBean extends ScalaFactoryBean[ElasticClient] {
 		if (localJvmCluster) {
 			throw new IllegalStateException("Sorry, local JVM cluster ElasticSearch is no longer supported.")
 		} else {
-			ElasticClient(ElasticProperties(nodes.map { n => s"http://$n" }.mkString(",")))
+			ElasticClient(ElasticProperties(s"http://${nodes.mkString(",")}"))
 		}
 	}
 

@@ -28,7 +28,8 @@ dependencies {
     compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
 
     compile 'uk.ac.warwick.sso:sso-client:2.61'
-    compile 'xalan:xalan:2.7.2'
+    compile 'xalan:xalan:2.7.2' // Can go once sso-client:2.62
+    compile 'xerces:xercesImpl:2.12.0' // Can go once sso-client:2.62
 
     compile 'org.apache.httpcomponents:httpclient:4.5.6'
     compile 'org.apache.httpcomponents:httpcore:4.4.10'
@@ -110,8 +111,6 @@ dependencies {
     compile 'com.atlassian.commonmark:commonmark-ext-autolink:0.12.1'
 
     compile 'org.mnode.ical4j:ical4j:3.0.5'
-
-    compile 'com.google.code.gson:gson:2.8.5'
 
     compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
     compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
