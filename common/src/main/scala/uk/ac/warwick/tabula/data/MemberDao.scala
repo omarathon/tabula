@@ -383,15 +383,17 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	): Seq[StudentMember] = {
 		val universityIds = findUniversityIdsByRestrictions(restrictions)
 
-		if (universityIds.isEmpty)
-			return Seq()
+		if (universityIds.isEmpty) Nil
+		else {
+			val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
 
-		val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
+			// TODO Is there a way of doing multiple safeIn queries with DB-set prders and max results?
+			orders.foreach {
+				c.addOrder
+			}
 
-		// TODO Is there a way of doing multiple safeIn queries with DB-set prders and max results?
-		orders.foreach { c.addOrder }
-
-		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
+			c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
+		}
 	}
 
 	def getSCDsByAgentRelationshipAndRestrictions(

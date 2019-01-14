@@ -58,7 +58,7 @@ trait HelperRestrictions extends Logging {
 		} else if (iterable.length <= maxInClause) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
 		} else {
-			logger.warn("TAB-3888 - Use multiple queries where possible instead of passing more than 1000 entities", new Exception)
+			logger.warn("TAB-3888 - Use multiple queries where possible instead of passing more than 1000 entities")
 			val or = disjunction()
 			iterable.grouped(maxInClause).foreach { subitr =>
 				or.add(org.hibernate.criterion.Restrictions.in(propertyName, subitr.asJavaCollection))
