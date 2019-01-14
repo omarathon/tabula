@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Futures
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService.{UniversityId, Usercode}
 import uk.ac.warwick.tabula.services.{AuditEventService, AuditEventServiceComponent, UserLookupComponent, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
@@ -254,39 +253,85 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		val assignmentTerm = assignmentRangeRestriction(assignment, submissions.map(_.submittedDate).sorted.headOption.orElse(Option(assignment.createdDate)))
 
 		// find events where you downloaded all available submissions
-		val allDownloaded =
-			parsedEventsOfType("DownloadAllSubmissions", assignmentTerm)
-				.map { _.sortBy(_.eventDate).reverse }
+		val latestDownloadEvent =
+			client.execute {
+				searchRequest
+					.query(
+						boolQuery()
+							.must(
+								termQuery("eventType", "DownloadAllSubmissions"),
+								assignmentTerm
+							)
+					)
+					.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
+					.start(0)
+					.limit(1)
+			}.map { response => toAuditEvents(response.result.hits.hits).headOption }
 
 		// take most recent event and find submissions made before then.
-		val submissions1: Future[Seq[Submission]] = allDownloaded.map { _.headOption match {
+		val submissions1: Future[Seq[Submission]] = latestDownloadEvent.map {
 			case None => Nil
 			case Some(event) =>
 				val latestDate = event.eventDate
 				submissions.filter(_.submittedDate.isBefore(latestDate))
-		}}
+		}
 
 		// find events where selected submissions were downloaded
-		val someDownloaded = parsedEventsOfType("DownloadSubmissions", assignmentTerm)
+		val selectedSubmissionsUsers =
+			client.execute {
+				searchRequest
+					.query(
+						boolQuery()
+							.must(
+								termQuery("eventType", "DownloadSubmissions"),
+								assignmentTerm
+							)
+					)
+  				.limit(0)
+  				.aggregations(
+						termsAggregation("studentUsercodes")
+							.field("studentUsercodes.keyword"),
+						termsAggregation("studentUniversityIds")
+							.field("students.keyword")
+					)
+			}.map { response =>
+				val studentUsercodes = response.result.aggregations.terms("studentUsercodes").buckets.map(_.key)
+				val studentUniversityIds = response.result.aggregations.terms("studentUniversityIds").buckets.map(_.key)
 
-		val submissions2: Future[Seq[Submission]] = someDownloaded.map { events =>
-			events.flatMap { _.submissionIds }
-				.flatMap { id =>
-					submissions.find(_.id == id)
-				}
+				(studentUsercodes, studentUniversityIds)
+			}
+
+		val submissions2: Future[Seq[Submission]] = selectedSubmissionsUsers.map { case (usercodes, universityIds) =>
+			submissions.filter { submission =>
+				usercodes.contains(submission.usercode) || submission.universityId.exists(universityIds.contains)
+			}
 		}
 
 		// find events where individual submissions were downloaded
-		val individualDownloads = parsedEventsOfType("AdminGetSingleSubmission", assignmentTerm)
+		val individualDownloadSubmissionIds =
+			client.execute {
+				searchRequest
+					.query(
+						boolQuery()
+							.must(
+								termQuery("eventType", "AdminGetSingleSubmission"),
+								assignmentTerm
+							)
+					)
+					.limit(0)
+					.aggregations(
+						termsAggregation("submissionId")
+							.field("submission.keyword")
+					)
+			}.map { response =>
+				response.result.aggregations.terms("submissionId").buckets.map(_.key)
+			}
 
-		val submissions3: Future[Seq[Submission]] = individualDownloads.map { events =>
-			events.flatMap { _.submissionId }
-				.flatMap { id =>
-					submissions.find(_.id == id)
-				}
+		val submissions3: Future[Seq[Submission]] = individualDownloadSubmissionIds.map { submissionIds =>
+			submissionIds.flatMap { id => submissions.find(_.id == id) }
 		}
 
-		Futures.flatten(submissions1, submissions2, submissions3).map { _.distinct }
+		Futures.flatten(submissions1, submissions2, submissions3).map(_.distinct)
 	}
 
 	// Only look at events since the first time feedback was released
@@ -294,15 +339,16 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 		assignmentRangeRestriction(assignment, feedback.flatMap { f => Option(f.releasedDate) }.sorted.headOption.orElse { Option(assignment.createdDate )})
 
 	def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]] =
-		eventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment, feedback)).map {
-			_.filterNot { _.hadError }
-			.map { event => userLookup.getUserByUserId(event.masqueradeUserId) -> event.eventDate }
-		}
+		latestEventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
+  		.map(_.filterNot(_.hadError))
+  		.map { events =>
+				val userIds = events.map(_.masqueradeUserId).distinct
+				val userIdToUser = batchedUsersByUserId(userIds)
 
-	private def mapToLatest(in: Seq[(User, DateTime)]): Map[User, DateTime] =
-		// We take warwick ID as the key to match first, to try and cope with users using multiple IDs for the same uni ID
-		in.groupBy { case (user, _) => user.getWarwickId.maybeText.getOrElse(user.getUserId) }
-			.map { case (_, eventDates) => eventDates.maxBy { case (_, eventDate) => eventDate } }
+				events.map { event =>
+					userIdToUser(event.masqueradeUserId) -> event.eventDate
+				}
+			}
 
 	private def batchedUsersByUserId(userIds: Seq[String]): Map[String, User] = {
 		if (userIds.isEmpty) Map.empty[String, User]
