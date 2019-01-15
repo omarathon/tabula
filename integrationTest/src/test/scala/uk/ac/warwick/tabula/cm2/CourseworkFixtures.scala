@@ -336,14 +336,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			currentUrl should include("/markingworkflows")
 		}
 
-		// Dismiss the introductory popover
-		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
-			click on cssSelector(".popover.introductory button.close")
-
-			eventually {
-				find(cssSelector(".popover.introductory")).exists(_.isDisplayed) should be (false)
-			}
-		}
+		dismissIntroductoryPopovers()
 	}
 
 	def createMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*): String = as(P.Admin1) {

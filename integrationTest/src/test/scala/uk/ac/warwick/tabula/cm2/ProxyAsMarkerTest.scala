@@ -17,9 +17,10 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		loadCurrentAcademicYearTab()
+		dismissIntroductoryPopovers()
 
 		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
-		click on testModulerow
+		eventually(click on testModulerow)
 
 		eventually {
 			val moderatedMarkingAssignment = id("main").webElement.findElements(By.cssSelector(".striped-section-contents span div h5 a")).get(0)
@@ -53,9 +54,11 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 				click on linkText("Test Services")
 
 				loadCurrentAcademicYearTab()
+				dismissIntroductoryPopovers()
+
 				currentUrl.contains("/department/xxx") should be (true)
 
-				click on cssSelector("span.mod-code")
+				eventually(click on cssSelector("span.mod-code"))
 
 				eventually {
 					releaseForMarking(id)

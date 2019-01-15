@@ -13,8 +13,11 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 		as(P.Admin1) {
 			When("I go to the department admin page")
 			go to Path("/coursework/admin/department/xxx")
+
+			dismissIntroductoryPopovers()
+
 			val module = getModule("XXX02").get
-			click on module.findElement(By.className("mod-code"))
+			eventually(click on module.findElement(By.className("mod-code")))
 			Then("I should see the premarked assignment")
 			eventually(pageSource contains "Premarked assignment" should be {true})
 			eventually(click on linkText("Premarked assignment"))
@@ -57,7 +60,10 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			eventually(pageSource contains "Adjusted mark - 31" should be {true})
 
 			click on partialLinkText("XXX02 Test Module 2")
-			click on getModule("XXX02").get.findElement(By.className("mod-code"))
+
+			dismissIntroductoryPopovers()
+
+			eventually(click on getModule("XXX02").get.findElement(By.className("mod-code")))
 
 			When("I publish the feedback")
 			// Need to be very specific about which feedback link to click on - as we have 2 assignments with very similar names

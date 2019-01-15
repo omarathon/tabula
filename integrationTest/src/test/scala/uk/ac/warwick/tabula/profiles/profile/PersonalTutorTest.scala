@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.profiles.profile
 
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.web.FeaturesDriver
+import scala.collection.JavaConverters._
 
 class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriver with StudentProfileFixture {
-
-	val dateFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy")
-	val timeFormatter: DateTimeFormatter = DateTimeFormat.forPattern("HH:mm:ss")
 
 	"An admin" should "be able to view personal tutor details" in {
 
@@ -65,10 +64,37 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 		eventually(textField(name("title")).isDisplayed should be (true))
 
 		textField("title").value = "Created meeting"
+
 		val datetime = DateTime.now.minusDays(1).withHourOfDay(11)
-		textField("meetingDateStr").value = dateFormatter.print(datetime)
-		textField("meetingTimeStr").value = timeFormatter.print(datetime)
-		textField("meetingEndTimeStr").value = timeFormatter.print(datetime.plusHours(1))
+
+		click on textField("meetingDateStr")
+
+		eventually {
+			val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
+
+			dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be(datetime.toString("MMMM yyyy"))
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == datetime.toString("d") }.head
+		}
+
+		click on textField("meetingTimeStr")
+
+		eventually {
+			val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == datetime.toString("H") + ":00" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == datetime.toString("H") + ":00" }.head
+		}
+
+		click on textField("meetingEndTimeStr")
+
+		eventually {
+			val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == datetime.plusHours(1).toString("H") + ":00" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == datetime.plusHours(1).toString("H") + ":00" }.head
+		}
+
 		singleSel("format").value = "f2f"
 
 		switch to defaultContent

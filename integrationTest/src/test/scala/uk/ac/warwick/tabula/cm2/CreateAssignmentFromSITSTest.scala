@@ -25,13 +25,7 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		})
 
 		// If the introductory popover is visible, dismiss it
-		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
-			click on cssSelector(".popover.introductory button.close")
-
-			eventually {
-				find(cssSelector(".popover.introductory")) should be (None)
-			}
-		}
+		dismissIntroductoryPopovers()
 	}
 	private def createSITSAssignment(): Unit = {
 		When("I select the assignment checkbox")

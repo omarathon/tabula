@@ -99,13 +99,17 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 			)
 
 		And("The administrator is logged in and viewing the groups home page")
-		  signIn as P.Admin1  to groupsetSummaryPage.url
+		  signIn as P.Admin1 to groupsetSummaryPage.url
+
+			dismissIntroductoryPopovers()
 
 		  groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
 		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		Then("The Bulk Open Groups menu button is enabled")
 		  groupsetSummaryPage.getBatchOpenButton should be ('enabled)
+			// Close the Manage popover again
+			click on linkText("Manage")
 
 		And("The open individual group button is enabled for the specified groupset")
       setInfo.getOpenButton should be ('enabled)

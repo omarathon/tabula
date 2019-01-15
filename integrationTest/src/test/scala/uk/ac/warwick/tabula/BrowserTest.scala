@@ -81,7 +81,7 @@ abstract class BrowserTest
 
 		// Set the most common screen resolution for Tabula
 		// Set a large height so we don't have to deal with fixed footers occluding forms
-		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 2000))
+		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 3000))
 		driver
 	}
 
@@ -128,6 +128,17 @@ abstract class BrowserTest
 				(el, s"[name=${el.getAttribute("name")}]")
 		}
 		new DateTimePickerField(el, selector)
+	}
+
+	def dismissIntroductoryPopovers(): Unit = {
+		// If the introductory popover is visible, dismiss it
+		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
+			click on cssSelector(".popover.introductory button.close")
+
+			eventually {
+				find(cssSelector(".popover.introductory")) should be (None)
+			}
+		}
 	}
 }
 

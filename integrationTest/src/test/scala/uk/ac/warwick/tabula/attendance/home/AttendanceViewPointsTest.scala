@@ -18,14 +18,7 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 		 pageSource should include("View monitoring points")
 		 className("monitoring-points").findElement should be (None)
 
-		 // If the introductory popover is visible, dismiss it
-		 if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
-			 click on cssSelector(".popover.introductory button.close")
-
-			 eventually {
-				 find(cssSelector(".popover.introductory")).exists(_.isDisplayed) should be (false)
-			 }
-		 }
+		 dismissIntroductoryPopovers()
 
 		 When("I filter only Undergraduate")
 		 click on id("filterCommand").webElement.findElement(By.className("filter-short-values"))
