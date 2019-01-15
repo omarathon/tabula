@@ -54,6 +54,15 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
 		gotoPermissionsScreen(parentElement, preExistingCount)
 
+		// If the introductory popover is visible, dismiss it
+		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
+			click on cssSelector(".popover.introductory button.close")
+
+			eventually {
+				find(cssSelector(".popover.introductory")).exists(_.isDisplayed) should be (false)
+			}
+		}
+
 		When("I enter a usercode in the picker")
 		click on cssSelector(s"$parentElement .pickedUser")
 		enter(permittedUser.usercode)
@@ -93,15 +102,13 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			And("I should not see anyone else with any other roles")
 			nowhereElse(parentElement)
 
-      // PhantomJS doesn't support confirm()
-//      ifPhantomJSDriver { _ =>
-//        executeScript("window.confirm = function(msg) { return true; };")
-//      }
-
 			When("I remove the new entry")
 			val removable = find(cssSelector(s"$parentElement .remove-permissions [name=usercodes][value=${permittedUser.usercode}]"))
 			removable should not be None
       removable.get.underlying.findElement(By.xpath("../button[@type='submit']")).click()
+
+			// Confirm removing the permission
+			webDriver.switchTo().alert().accept()
 
 			Then("There should be no users listed")
 			noNewUsersListed(parentElement, preExistingCount)

@@ -52,6 +52,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		eventually {
 			findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall { _.isDisplayed } should be {true}
 		}
+
 		click on cssSelector("input[name=manuallyAddForm]")
 		eventually(pageSource should include("Add students manually"))
 		click on cssSelector("textarea[name=massAddUsers]")
@@ -72,6 +73,15 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		eventually(currentUrl should endWith(s"/attendance/manage/xxx/$thisAcademicYearString"))
 		pageSource should include(s"Manage monitoring points for ${AcademicYear.now().toString}")
 		pageSource should include(schemeName)
+
+		// If the introductory popover is visible, dismiss it
+		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
+			click on cssSelector(".popover.introductory button.close")
+
+			eventually {
+				find(cssSelector(".popover.introductory")).exists(_.isDisplayed) should be (false)
+			}
+		}
 
 		When("The I click the 'Add points' link")
 		click on linkText("Add points")

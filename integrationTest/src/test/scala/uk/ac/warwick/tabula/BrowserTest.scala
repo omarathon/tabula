@@ -80,7 +80,8 @@ abstract class BrowserTest
 		}
 
 		// Set the most common screen resolution for Tabula
-		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 1080))
+		// Set a large height so we don't have to deal with fixed footers occluding forms
+		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 2000))
 		driver
 	}
 
@@ -236,7 +237,7 @@ trait TestScreenshots extends Logging {
 			case failed: Failed =>
 				val e = ExceptionUtils.retrieveException(failed.exception, classOf[ScreenshotException])
 
-				val screenshot =
+				val screenshot = Try(
 					if (e != null)
 						Some(Base64.getDecoder.decode(e.getBase64EncodedScreenshot.getBytes(Charsets.UTF_8)))
 					else
@@ -244,6 +245,7 @@ trait TestScreenshots extends Logging {
 							case d: TakesScreenshot => Some(d.getScreenshotAs(OutputType.BYTES))
 							case _ => None
 						}
+				).toOption.flatten
 
 				screenshot.foreach { screenshot =>
 					val outputFile = new File(screenshotDirectory, s"${test.name}.png")

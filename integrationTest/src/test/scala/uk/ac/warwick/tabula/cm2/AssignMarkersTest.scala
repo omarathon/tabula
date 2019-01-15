@@ -28,12 +28,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			Then("The allocations have been saved")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("1"))
 
-			// PhantomJS doesn't support confirm() - (we have a confirmation box when we click remove all)
-//			ifPhantomJSDriver { _ =>
-//				executeScript("window.confirm = function(msg) { return true; };")
-//			}
 			When("I remove the markers")
 			click on partialLinkText("Remove all")
+
+			webDriver.switchTo().alert().accept()
+
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
@@ -71,13 +70,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
 
-			// PhantomJS doesn't support confirm() - (we have confirmation box)
-//			ifPhantomJSDriver { _ =>
-//				executeScript("window.confirm = function(msg) { return true; };")
-//			}
-
 			When("I remove the markers")
 			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
+
+			webDriver.switchTo().alert().accept()
+
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
@@ -115,13 +112,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
 
-			// PhantomJS doesn't support confirm() - (we have confirmation box)
-//			ifPhantomJSDriver { _ =>
-//				executeScript("window.confirm = function(msg) { return true; };")
-//			}
-
 			When("I remove the markers")
-			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
+			findAll(partialLinkText("Remove all")).toSeq.foreach(e => {
+				click on e.underlying
+				webDriver.switchTo().alert().accept()
+			})
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()

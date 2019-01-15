@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.support.ui.Select
-import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
@@ -228,6 +229,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
 				m.zipWithIndex.foreach{ case(marker, i) =>
 					new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+					// Dismiss the flexi picker
+					new Actions(webDriver).sendKeys(Keys.ESCAPE).perform()
 					click on className(field).webElement.findElement(By.cssSelector("button.btn"))
 					eventually {
 						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
