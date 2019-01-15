@@ -38,7 +38,9 @@ test {
     }
 
     systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
-    systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+    if (new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles().length > 0) {
+        systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+    }
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
 }
 
