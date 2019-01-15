@@ -197,7 +197,6 @@ trait CM1MarkerFeedbackSupport {
 
 	@Deprecated
 	def getMarkerUsercode: Option[String] = {
-		// Very fuck you, Hibernate
 		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				val student = feedback.usercode

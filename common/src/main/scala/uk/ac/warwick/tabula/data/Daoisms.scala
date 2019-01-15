@@ -53,7 +53,7 @@ trait HelperRestrictions extends Logging {
 	def safeIn[A](propertyName: String, elements: Seq[A]): Criterion = {
 		val iterable = elements.map(HibernateHelpers.initialiseAndUnproxy)
 		if (iterable.isEmpty) {
-			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
+			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary", new Exception)
 			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
 		} else if (iterable.length <= maxInClause) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
