@@ -3,16 +3,12 @@ package uk.ac.warwick.tabula
 import java.io.{File, FileInputStream, IOException}
 import java.util.{Base64, Properties}
 
-import com.gargoylesoftware.htmlunit.BrowserVersion
 import com.google.common.base.Charsets
 import com.google.common.io.{ByteSource, Files}
 import org.joda.time.DateTime
 import org.junit.runner.RunWith
-import org.openqa.selenium.chrome.ChromeDriver
+import org.openqa.selenium.chrome.{ChromeDriver, ChromeDriverService, ChromeOptions}
 import org.openqa.selenium.firefox.FirefoxDriver
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import org.openqa.selenium.ie.InternetExplorerDriver
-import org.openqa.selenium.phantomjs.PhantomJSDriver
 import org.openqa.selenium.remote.ScreenshotException
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
 import org.scalatest._
@@ -43,11 +39,11 @@ abstract class BrowserTest
 	with TestScreenshots
 	with BeforeAndAfterAll {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	// Shorthand to expose properties to test classes
-	val P = FunctionalTestProperties
+	val P: FunctionalTestProperties.type = FunctionalTestProperties
 
 	/** Generates a full URL to browse to,
 	  * e.g. Path("/coursework") -> "https://tabula-test.warwick.ac.uk/coursework"
@@ -58,25 +54,29 @@ abstract class BrowserTest
 
 	// Run at the end of this Suite (regular after() doesn't work because ScalaTest
 	// reuses an instance for all tests, unlike JUnit which makes a new instance per test)
-	override def afterAll() = {
+	override def afterAll(): Unit = {
 		super.afterAll()
 		webDriver.quit()
 	}
 
 	implicit lazy val webDriver: WebDriver = {
 		val driver = P.Browser match {
-			case "htmlunit" =>
-				val d = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
-				d.setJavascriptEnabled(true)
-				d
-			case "chrome" => new ChromeDriver
-			case "firefox" => new FirefoxDriver
-			case "ie" => new InternetExplorerDriver
-			case "phantomjs" =>
-				if (System.getProperty("phantomjs.binary.path") == null)
-					System.setProperty("phantomjs.binary.path", P.PhantomJSLocation)
+			case "chrome" =>
+				val service = new ChromeDriverService.Builder()
+  				.usingDriverExecutable(new File(System.getProperty("webdriver.chrome.driver", P.ChromeDriverLocation)))
+  				.usingAnyFreePort()
+  				.withVerbose(true)
+  				.withSilent(false)
+  				.withLogFile(new File("chromedriver.log"))
+  				.build()
 
-				new PhantomJSDriver
+				val options = new ChromeOptions
+				options.setBinary(new File(System.getProperty("chrome.binary.path", P.ChromeLocation)))
+				options.setHeadless(true)
+
+				new ChromeDriver(service, options)
+
+			case "firefox" => new FirefoxDriver
 		}
 
 		// Set the most common screen resolution for Tabula
@@ -84,26 +84,11 @@ abstract class BrowserTest
 		driver
 	}
 
-	// Can be overridden by a test if necessary.
-	val htmlUnitBrowserVersion = BrowserVersion.BEST_SUPPORTED
-
-	def ifHtmlUnitDriver(operation: HtmlUnitDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
+	def ifChromeDriver(operation: ChromeDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
 		webDriver match {
-			case h: HtmlUnitDriver => operation(h)
+			case c: ChromeDriver => operation(c)
 			case d => otherwise(d)
 		}
-
-	def ifPhantomJSDriver(operation: PhantomJSDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
-		webDriver match {
-			case p: PhantomJSDriver => operation(p)
-			case d => otherwise(d)
-		}
-
-	def disableJQueryAnimationsOnHtmlUnit() {
-		ifHtmlUnitDriver { driver =>
-			executeScript("jQuery.support.transition = false")
-		}
-	}
 
 	// Sometimes you need to wait for a page to load after clicking on a link
 	def verifyPageLoaded(fun: => Unit): Unit = eventually(fun)
@@ -166,7 +151,8 @@ object FunctionalTestProperties {
 
 	val SiteRoot: String = prop("toplevel.url")
 	val Browser: String = prop("browser")
-  val PhantomJSLocation: String = prop("phantomjs.binary.path")
+  val ChromeLocation: String = prop("chrome.binary.path")
+	val ChromeDriverLocation: String = prop("webdriver.chrome.driver")
   val ScreenshotDirectory: String = prop("screenshot.dir")
 
 	/* Test user accounts who can sign in during tests. Populated from properties.

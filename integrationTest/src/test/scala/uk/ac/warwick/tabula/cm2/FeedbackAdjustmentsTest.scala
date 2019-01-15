@@ -21,24 +21,12 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
 			When("I go to the adjustments page")
 
-			// For some dumb reason all of the hrefs in the toolbar links are stripped out by htmlunit lame!
-			ifHtmlUnitDriver(
-				operation = { _ =>
-					val assignmentId = currentUrl.split("/").reverse.toList match {
-						case _ :: id :: _ => id
-						case _ => ""
-					}
-					go to Path(s"/coursework/admin/module/xxx02/assignments/$assignmentId/feedback/adjustments")
-				},
-				otherwise = { _ =>
-					eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
-					click on className("collection-check-all")
-					eventually(pageSource contains "Feedback" should be {true})
-					click on linkText("Feedback")
-					eventually(pageSource contains "Adjustments" should be {true})
-					click on linkText("Adjustments")
-				}
-			)
+			eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be {true})
+			click on className("collection-check-all")
+			eventually(pageSource contains "Feedback" should be {true})
+			click on linkText("Feedback")
+			eventually(pageSource contains "Adjustments" should be {true})
+			click on linkText("Adjustments")
 
 			Then("I see a list of students")
 			pageSource contains "Feedback adjustment" should be {true}

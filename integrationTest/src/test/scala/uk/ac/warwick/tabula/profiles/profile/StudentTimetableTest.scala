@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.profiles.profile
 
-import com.gargoylesoftware.htmlunit.BrowserVersion
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{BrowserTest, AcademicYear}
 
@@ -8,7 +7,7 @@ import scala.util.{Failure, Success, Try}
 import scala.xml.Elem
 
 /**
-	* N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
+	* N.B. To run this test, you must set a system property (in tabula.properties) to tell tabula
 	* to use a local proxy for the scientia timetabling service; i.e.
 	*
 	* scientia.base.url=https://yourhost.warwick.ac.uk/stubTimetable/

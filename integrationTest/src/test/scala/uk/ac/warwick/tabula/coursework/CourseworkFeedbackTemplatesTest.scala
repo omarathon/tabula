@@ -6,7 +6,7 @@ import org.openqa.selenium.By
 
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
-	def currentCount() = {
+	def currentCount(): Int = {
 		if (id("feedback-template-list").findElement.isEmpty) 0
 		else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
 	}
@@ -19,28 +19,13 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
 		def uploadNewTemplate(file: String) {
 
-			ifPhantomJSDriver(
-				operation = { d =>
-          // This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-					d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-				},
-				otherwise = { _ =>
-					click on getInputByLabel("Upload feedback forms").get
-					pressKeys(getClass.getResource(file).getFile)
-				}
-			)
+			click on getInputByLabel("Upload feedback forms").get
+			pressKeys(getClass.getResource(file).getFile)
+
 			currCnt = currentCount()
 
-			ifPhantomJSDriver(
-				operation = { d =>
-					// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-					d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-				},
-				otherwise = { _ =>
-					click on getInputByLabel("Upload feedback forms").get
-					pressKeys(getClass.getResource(file).getFile)
-				}
-			)
+			click on getInputByLabel("Upload feedback forms").get
+			pressKeys(getClass.getResource(file).getFile)
 
 			click on cssSelector(".btn-primary")
 
@@ -70,7 +55,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			})
 			row should be('defined)
 
-			click on (row.get.findElement(By.partialLinkText("Edit")))
+			click on row.get.findElement(By.partialLinkText("Edit"))
 		}
 
 		eventually {
@@ -117,7 +102,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 			})
 			row should be('defined)
 
-			click on (row.get.findElement(By.partialLinkText("Delete")))
+			click on row.get.findElement(By.partialLinkText("Delete"))
 		}
 
 		eventually {

@@ -127,9 +127,9 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			lastUsers.size should be >= 1
 
 			// PhantomJS doesn't support confirm()
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
+//			ifPhantomJSDriver { _ =>
+//				executeScript("window.confirm = function(msg) { return true; };")
+//			}
 
 			When("I remove the first entry")
 			({
@@ -187,9 +187,9 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			lastUsers.size should be >= 1
 
 			// PhantomJS doesn't support confirm()
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
+//			ifPhantomJSDriver { _ =>
+//				executeScript("window.confirm = function(msg) { return true; };")
+//			}
 
 			When("I remove the first entry")
 			({

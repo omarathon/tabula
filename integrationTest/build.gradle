@@ -1,5 +1,5 @@
 plugins {
-    id 'com.moowork.node' version '1.1.1'
+    id 'com.moowork.node' version '1.2.0'
 }
 
 // Define cucumber configuration
@@ -12,10 +12,8 @@ configurations {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'org.seleniumhq.selenium:selenium-support:3.3.1'
-    }
+ext {
+    seleniumVersion = '3.141.59'
 }
 
 dependencies {
@@ -25,7 +23,7 @@ dependencies {
     cucumber 'org.jruby:jruby-complete:9.2.5.0'
     cucumber 'ch.qos.logback:logback-classic:1.2.3'
 
-    testCompile 'org.seleniumhq.selenium:selenium-server:3.3.1'
+    testCompile "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
 }
 
 test {
@@ -39,17 +37,25 @@ test {
         mkdir 'build/integrationTest-screenshots'
     }
 
-    systemProperty 'phantomjs.binary.path', new File(projectDir, "node_modules/.bin/phantomjs").absolutePath
+    systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
+    systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
 }
 
 // run npm install
-task installPhantomJSDependency(type: NpmTask) {
-    outputs.dir 'node_modules/phantomjs'
-    args = ['install', 'phantomjs-prebuilt', '--no-save']
+task installHeadlessChromeDependency(type: NpmTask) {
+    outputs.dir 'node_modules/puppeteer/.local-chromium'
+    args = ['install', 'puppeteer', '--no-save']
 }
 
-test.dependsOn 'installPhantomJSDependency'
+// run npm install
+task installChromeDriverDependency(type: NpmTask) {
+    outputs.dir 'chromedriver/lib/chromedriver/chromedriver'
+    args = ['install', 'chromedriver', '--no-save']
+}
+
+test.dependsOn 'installHeadlessChromeDependency'
+test.dependsOn 'installChromeDriverDependency'
 
 def bundlerEnvironment = [
     GEM_HOME: 'vendor/gem_home',

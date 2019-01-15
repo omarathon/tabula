@@ -39,30 +39,25 @@ class CourseworkAddAssignmentsTest extends BrowserTest with CourseworkFixtures w
 		val nextRows = page.itemRows
 		page.setTitleForRow(nextRows.head, "GOOD NEWS")
 
-		ifHtmlUnitDriver(
-      operation = _ => {},
-      otherwise = { _ =>
-        And("I should be able to set some options")
-        partialLinkText("Set options").webElement.click()
+		And("I should be able to set some options")
+		partialLinkText("Set options").webElement.click()
 
-        eventually {
-          cssSelector(".modal-footer .btn-primary").webElement.isDisplayed should be(true)
-        }
+		eventually {
+			cssSelector(".modal-footer .btn-primary").webElement.isDisplayed should be(true)
+		}
 
-        // Enable the button manually because trying to do the scrolling is stressful
-        executeScript("document.getElementsByClassName('btn-primary')[1].disabled = ''") // ew
+		// Enable the button manually because trying to do the scrolling is stressful
+		executeScript("document.getElementsByClassName('btn-primary')[1].disabled = ''") // ew
 
-        eventually {
-          cssSelector(".modal-footer .btn-primary").webElement.isEnabled should be(true)
-        }
+		eventually {
+			cssSelector(".modal-footer .btn-primary").webElement.isEnabled should be(true)
+		}
 
-        click on cssSelector(".modal-footer .btn-primary")
+		click on cssSelector(".modal-footer .btn-primary")
 
-        eventually {
-          page.getOptionIdForRow(page.itemRows.head) should be(Some("A"))
-        }
-      }
-    )
+		eventually {
+			page.getOptionIdForRow(page.itemRows.head) should be(Some("A"))
+		}
 
 		And("I can click back")
 		page.clickBack()

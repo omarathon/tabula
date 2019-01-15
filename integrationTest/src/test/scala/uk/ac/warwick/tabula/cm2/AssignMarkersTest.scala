@@ -29,9 +29,9 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("1"))
 
 			// PhantomJS doesn't support confirm() - (we have a confirmation box when we click remove all)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
+//			ifPhantomJSDriver { _ =>
+//				executeScript("window.confirm = function(msg) { return true; };")
+//			}
 			When("I remove the markers")
 			click on partialLinkText("Remove all")
 			Then("No markers should be assigned")
@@ -72,9 +72,9 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			second1.foreach(_.underlying.getText should be ("2"))
 
 			// PhantomJS doesn't support confirm() - (we have confirmation box)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
+//			ifPhantomJSDriver { _ =>
+//				executeScript("window.confirm = function(msg) { return true; };")
+//			}
 
 			When("I remove the markers")
 			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
@@ -116,9 +116,9 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			second1.foreach(_.underlying.getText should be ("2"))
 
 			// PhantomJS doesn't support confirm() - (we have confirmation box)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
+//			ifPhantomJSDriver { _ =>
+//				executeScript("window.confirm = function(msg) { return true; };")
+//			}
 
 			When("I remove the markers")
 			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)

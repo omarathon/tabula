@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.admin
 
-import java.io.File
-
-import com.google.common.io.{ByteSource, Files}
-import org.openqa.selenium.{By, OutputType, TakesScreenshot}
+import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
@@ -17,7 +14,7 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		usercodes(parentElement).size should be (expectedCount)
 	}
 
-	private def nowhereElse(parentElement: String) = {
+	private def nowhereElse(parentElement: String): Unit = {
 		// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
 		val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 		// then delve further to get the usercodes included
@@ -90,18 +87,16 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			find(cssSelector(s"$parentElement form.add-permissions")).get.underlying.submit()
 
 			Then("I should see the new entry")
-			({
-				usercodes(parentElement).size should be (preExistingCount+1)
-				usercodes(parentElement) should contain (permittedUser.usercode)
-			})
+			usercodes(parentElement).size should be (preExistingCount+1)
+			usercodes(parentElement) should contain (permittedUser.usercode)
 
 			And("I should not see anyone else with any other roles")
 			nowhereElse(parentElement)
 
       // PhantomJS doesn't support confirm()
-      ifPhantomJSDriver { _ =>
-        executeScript("window.confirm = function(msg) { return true; };")
-      }
+//      ifPhantomJSDriver { _ =>
+//        executeScript("window.confirm = function(msg) { return true; };")
+//      }
 
 			When("I remove the new entry")
 			val removable = find(cssSelector(s"$parentElement .remove-permissions [name=usercodes][value=${permittedUser.usercode}]"))

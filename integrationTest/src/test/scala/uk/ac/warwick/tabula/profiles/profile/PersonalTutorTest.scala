@@ -59,20 +59,10 @@ class PersonalTutorTest extends BrowserTest with GivenWhenThen with FeaturesDriv
 
 		Then("They create a new record")
 
-		// Modals don't work in HtmlUnit, so screw them
-		ifHtmlUnitDriver(
-			operation = { d =>
-				d.setJavascriptEnabled(false)
-				click on linkText("Record meeting")
-				d.setJavascriptEnabled(true)
-			},
-			otherwise = { d =>
-				click on linkText("Record meeting")
-        eventually(find(cssSelector(".modal-body iframe")) should be ('defined))
-				switch to frame(find(cssSelector(".modal-body iframe")).get)
-				eventually(textField(name("title")).isDisplayed should be (true))
-			}
-		)
+		click on linkText("Record meeting")
+		eventually(find(cssSelector(".modal-body iframe")) should be ('defined))
+		switch to frame(find(cssSelector(".modal-body iframe")).get)
+		eventually(textField(name("title")).isDisplayed should be (true))
 
 		textField("title").value = "Created meeting"
 		val datetime = DateTime.now.minusDays(1).withHourOfDay(11)

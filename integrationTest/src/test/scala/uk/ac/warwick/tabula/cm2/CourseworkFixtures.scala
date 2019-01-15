@@ -409,16 +409,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		click on find(cssSelector("input[type=file]")).get
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource(file).getFile)
-			}
-		)
+		pressKeys(getClass.getResource(file).getFile)
 
 		submit()
 	}

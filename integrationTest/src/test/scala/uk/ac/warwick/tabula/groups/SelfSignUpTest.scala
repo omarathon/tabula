@@ -48,9 +48,6 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		Then("The 'sign up' link button becomes enabled")
 		groupsetInfo.getSignupButton should be('enabled)
 
-		// Stop HTMLUnit screwing up buttons
-		ifHtmlUnitDriver(_.setJavascriptEnabled(false))
-
 		When("I click the sign up button")
 		groupsetInfo.getSignupButton.submit()
 
@@ -87,8 +84,6 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		val groupsPage = new GroupsHomePage
 
-		// HTMLUnit javascript messes up the DOM when you have use-tooltip on a form element you want to query for
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
 		go to groupsPage.url
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
@@ -112,9 +107,6 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
 		group2Checkbox should be('enabled)
-
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(true))
-
 	}
 
 	"A student" should "not see a non-self-sign-up groupset for which they have not been allocated a group" in {

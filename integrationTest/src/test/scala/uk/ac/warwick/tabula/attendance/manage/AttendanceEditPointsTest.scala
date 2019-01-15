@@ -25,9 +25,6 @@ class AttendanceEditPointsTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include("3 points on this scheme")
 		cssSelector(".item-info.point").findAllElements.size should be (3)
 
-		// Stop HTMLUnit screwing up buttons
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
-
 		When("I choose to edit a point")
 		click on linkText("Edit")
 
