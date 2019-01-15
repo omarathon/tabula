@@ -126,17 +126,12 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			changedUsers
 			lastUsers.size should be >= 1
 
-			// PhantomJS doesn't support confirm()
-//			ifPhantomJSDriver { _ =>
-//				executeScript("window.confirm = function(msg) { return true; };")
-//			}
-
 			When("I remove the first entry")
-			({
-				val removable = find(cssSelector(s".modulemanager-table .remove-permissions [name=usercodes][value=${P.ModuleManager1.usercode}]"))
-				removable should not be (None)
-				removable.get.underlying.submit()
-			})
+			val removable = find(cssSelector(s".modulemanager-table .remove-permissions [name=usercodes][value=${P.ModuleManager1.usercode}]"))
+			removable should not be None
+			removable.get.underlying.submit()
+
+			webDriver.switchTo().alert().accept()
 
 			Then("I should see it's gone")
 			changedUsers should be (Set(P.ModuleManager1.usercode))
@@ -179,24 +174,19 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	}
 
 	"Module manager" should "be able to remove a module assistant" in {
-		implicit val currentElement = ".moduleassistant-table"
+		implicit val currentElement: String = ".moduleassistant-table"
 		withRoleInElement("xxx01", currentElement, Seq(P.Marker1.usercode, P.Marker2.usercode)) {
 
 			When("I should see at least one user that I can remove")
 			changedUsers
 			lastUsers.size should be >= 1
 
-			// PhantomJS doesn't support confirm()
-//			ifPhantomJSDriver { _ =>
-//				executeScript("window.confirm = function(msg) { return true; };")
-//			}
-
 			When("I remove the first entry")
-			({
-				val removable = find(cssSelector(s".moduleassistant-table .remove-permissions [name=usercodes][value=${P.Marker1.usercode}]"))
-				removable should not be (None)
-				removable.get.underlying.submit()
-			})
+			val removable = find(cssSelector(s".moduleassistant-table .remove-permissions [name=usercodes][value=${P.Marker1.usercode}]"))
+			removable should not be None
+			removable.get.underlying.submit()
+
+			webDriver.switchTo().alert().accept()
 
 			Then("I should see it's gone")
 			changedUsers should be (Set(P.Marker1.usercode))

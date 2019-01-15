@@ -4,8 +4,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, ModeratedMarking, SingleMarking}
 
-
-class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenWhenThen {
+class AssignMarkersTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
 	"Department admin" should "be able to allocate markers to a single marker workflow " in {
 
@@ -71,9 +70,10 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			second1.foreach(_.underlying.getText should be ("2"))
 
 			When("I remove the markers")
-			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
-
-			webDriver.switchTo().alert().accept()
+			findAll(partialLinkText("Remove all")).toSeq.foreach(e => {
+				click on e.underlying
+				webDriver.switchTo().alert().accept()
+			})
 
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))

@@ -227,13 +227,19 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			eventually(pageSource contains "Add marker" should be {true})
 
 			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
-				m.zipWithIndex.foreach{ case(marker, i) =>
-					new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
-					// Dismiss the flexi picker
-					new Actions(webDriver).sendKeys(Keys.ESCAPE).perform()
+				m.zipWithIndex.foreach{ case (marker, i) =>
+					val markerField = findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i)
+					markerField.underlying.sendKeys(marker.usercode)
+
+					// Wait for the flexi picker to find a result, then select it
+					eventually {
+						findAll(cssSelector(".flexi-picker-result")).toList.count(_.isDisplayed) should be (1)
+					}
+					markerField.underlying.sendKeys(Keys.TAB)
+
 					click on className(field).webElement.findElement(By.cssSelector("button.btn"))
 					eventually {
-						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (1)
 					}
 				}
 			}
@@ -329,6 +335,15 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually {
 			currentUrl should include("/markingworkflows")
 		}
+
+		// Dismiss the introductory popover
+		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
+			click on cssSelector(".popover.introductory button.close")
+
+			eventually {
+				find(cssSelector(".popover.introductory")).exists(_.isDisplayed) should be (false)
+			}
+		}
 	}
 
 	def createMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*): String = as(P.Admin1) {
@@ -346,10 +361,18 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		var markerA = markers.headOption.getOrElse(Nil)
 		Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
 			m.zipWithIndex.foreach{ case(marker, i) =>
-				new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+				val markerField = findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i)
+				markerField.underlying.sendKeys(marker.usercode)
+
+				// Wait for the flexi picker to find a result, then select it
+				eventually {
+					findAll(cssSelector(".flexi-picker-result")).toList.count(_.isDisplayed) should be (1)
+				}
+				markerField.underlying.sendKeys(Keys.TAB)
+
 				click on className(field).webElement.findElement(By.cssSelector("button.btn"))
 				eventually {
-					findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+					findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (1)
 				}
 			}
 		}
