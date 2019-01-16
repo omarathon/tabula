@@ -2,12 +2,16 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarker
+import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserGroupCacheManager, UserSettingsService}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -220,6 +224,53 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 	}
 
 
+	@Test def lateNotificationUrlsDifferForMarkersAndAdmins() = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
+		withUser("cusca", "55556666") {
 
+			val department = Fixtures.department("ch")
+			val assignment = Fixtures.assignment("Another 5,000 word essay")
+			val module = Fixtures.module("cs118", "Programming for Computer Scientists")
+			assignment.module = module
+			assignment.closeDate = new DateTime(2017, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
+			assignment.id = "1234"
 
+			assignment.feedbackService = smartMock[FeedbackService]
+			assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
+			val submission = Fixtures.submission(userId = "7654321", universityId = "7654321")
+			submission.assignment = assignment
+			submission.submittedDate = DateTime.now
+			module.adminDepartment = department
+
+			val admin: User = Fixtures.user("admin", "admin")
+			val student: User = Fixtures.user("7654321", "7654321")
+			val marker: User = Fixtures.user("1234567", "1234567")
+
+			val mockLookup: UserLookupService = mock[UserLookupService]
+			mockLookup.getUserByUserId(marker.getUserId) returns marker
+			mockLookup.getUserByUserId(admin.getUserId) returns admin
+
+			val feedback: AssignmentFeedback = Fixtures.assignmentFeedback(student.getWarwickId)
+			feedback.assignment = assignment
+
+			assignment.feedbacks.add(feedback)
+
+			val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
+			markerFeedback.marker = marker
+			markerFeedback.stage = SingleMarker
+			markerFeedback.userLookup = mockLookup
+
+			val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
+			assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava
+			assignment.cm2MarkingWorkflow = workflow
+
+			val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
+
+			Routes._cm2Prefix = Some("cm2Prefix")
+
+			n.urlFor(admin) should be("/cm2Prefix/admin/assignments/1234/list")
+			n.urlFor(marker) should be("/cm2Prefix/admin/assignments/1234/marker/1234567")
+
+		}
+	}
 }
