@@ -243,7 +243,7 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 
 			val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
 
-			val cm2Prefix = "theCm2Prefix"
+			val cm2Prefix = "cm2"
 			Routes.cm2._cm2Prefix = Some(cm2Prefix)
 
 			n.urlFor(admin) should be(s"/$cm2Prefix/admin/assignments/1234/list")
