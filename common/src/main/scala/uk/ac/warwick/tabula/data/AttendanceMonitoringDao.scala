@@ -201,84 +201,81 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 			"""
 			).seq
 
-	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
-		if (students.isEmpty)
-			return Seq()
-
-		val termCounts = {
-			safeInSeqWithProjection[MonitoringPointReport, Array[java.lang.Object]](
-				() => {
-					session.newCriteria[MonitoringPointReport]
-						.add(is("academicYear", academicYear))
-				},
-				Projections.projectionList()
-					.add(Projections.groupProperty("monitoringPeriod"))
-					.add(Projections.count("monitoringPeriod")),
-				"student.universityId",
-				students.map(_.universityId)
-			).map { objArray =>
-				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] =
+		if (students.isEmpty) Nil
+		else {
+			val termCounts = {
+				safeInSeqWithProjection[MonitoringPointReport, Array[java.lang.Object]](
+					() => {
+						session.newCriteria[MonitoringPointReport]
+							.add(is("academicYear", academicYear))
+					},
+					Projections.projectionList()
+						.add(Projections.groupProperty("monitoringPeriod"))
+						.add(Projections.count("monitoringPeriod")),
+					"student.universityId",
+					students.map(_.universityId)
+				).map { objArray =>
+					objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+				}
 			}
+
+			// the safeInSeq does multiple queries which will mess up the group-by, returning e.g. (Autumn,1) and (Autumn,3)
+			// separately. This will merge it back into (Autumn,4)
+			val mergedTermCounts = termCounts.groupBy(_._1)
+				.mapValues { value => value.map(_._2).sum } // christ.
+
+			val reportedTerms = mergedTermCounts.toSeq
+				.filter { case (term, count) => count.intValue() == students.size}
+				.map { _._1 }
+			AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
 		}
 
-		// the safeInSeq does multiple queries which will mess up the group-by, returning e.g. (Autumn,1) and (Autumn,3)
-		// separately. This will merge it back into (Autumn,4)
-		val mergedTermCounts = termCounts.groupBy(_._1)
-			.mapValues { value => value.map(_._2).sum } // christ.
-
-		val reportedTerms = mergedTermCounts.toSeq
-			.filter { case (term, count) => count.intValue() == students.size}
-			.map { _._1 }
-		AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
-	}
-
-	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {
+	def findReports(studentsIds: Seq[String], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] =
 		if (studentsIds.isEmpty)
-			return Seq()
-
-		safeInSeq(() => {
-			session.newCriteria[MonitoringPointReport]
-				.add(is("academicYear", academicYear))
-				.add(is("monitoringPeriod", period))
-			},
-			"student.universityId",
-			studentsIds
-		)
-	}
+			Nil
+		else
+			safeInSeq(() => {
+				session.newCriteria[MonitoringPointReport]
+					.add(is("academicYear", academicYear))
+					.add(is("monitoringPeriod", period))
+				},
+				"student.universityId",
+				studentsIds
+			)
 
 	def listUnreportedReports: Seq[MonitoringPointReport] = {
 		session.newCriteria[MonitoringPointReport].add(isNull("pushedDate")).seq
 	}
 
-	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] = {
-		if (universityIds.isEmpty)
-			return Seq()
+	def findSchemeMembershipItems(universityIds: Seq[String], itemType: SchemeMembershipItemType): Seq[SchemeMembershipItem] =
+		if (universityIds.isEmpty) Nil
+		else {
+			val items = safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](
+				() => {
+					session.newCriteria[StudentMember]
+				},
+					Projections.projectionList()
+						.add(Projections.property("firstName"))
+						.add(Projections.property("lastName"))
+						.add(Projections.property("universityId"))
+						.add(Projections.property("userId")),
+					"universityId",
+					universityIds
+				).seq.map { objArray =>
+				SchemeMembershipItem(
+					itemType,
+					objArray(0).asInstanceOf[String],
+					objArray(1).asInstanceOf[String],
+					objArray(2).asInstanceOf[String],
+					objArray(3).asInstanceOf[String],
+					Seq() // mixed in by the service
+				)
+			}
 
-		val items = safeInSeqWithProjection[StudentMember, Array[java.lang.Object]](
-			() => {
-				session.newCriteria[StudentMember]
-			},
-				Projections.projectionList()
-					.add(Projections.property("firstName"))
-					.add(Projections.property("lastName"))
-					.add(Projections.property("universityId"))
-					.add(Projections.property("userId")),
-				"universityId",
-				universityIds
-			).seq.map { objArray =>
-			SchemeMembershipItem(
-				itemType,
-				objArray(0).asInstanceOf[String],
-				objArray(1).asInstanceOf[String],
-				objArray(2).asInstanceOf[String],
-				objArray(3).asInstanceOf[String],
-				Seq() // mixed in by the service
-			)
+			// keep the same order
+			universityIds.flatMap(uniId => items.find(_.universityId == uniId))
 		}
-
-		// keep the same order
-		universityIds.flatMap(uniId => items.find(_.universityId == uniId))
-	}
 
 	def findPoints(
 		department: Department,

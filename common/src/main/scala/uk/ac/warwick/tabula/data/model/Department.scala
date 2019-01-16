@@ -150,30 +150,29 @@ class Department extends GeneratedId
 	def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
 	def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
 
-	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
+	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean =
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
 			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
-			return false
-		}
-		canUploadMarksToSitsForYear(year, module.degreeType)
-	}
+			false
+		} else canUploadMarksToSitsForYear(year, module.degreeType)
 
 	def canUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType): Boolean = {
-		val markUploadMap: Option[Map[String, String]] = degreeType match {
-			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
-			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
-			case _ =>
-				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
-				return false
-		}
 		// marks are uploadable until a department is explicitly closed for the year by the Exams Office
-		markUploadMap match {
+		def canUploadForYear(markUploadMap: Option[Map[String, String]]): Boolean = markUploadMap match {
 			case None => true // there isn't even a settings map at all for this so hasn't been closed yet for the year
 			case Some(markMap: Map[String, String]) =>
 				markMap.get(year.toString) match {
 					case None => true // no setting for this year/ugpg combo for the department - so hasn't been closed yet for the year
 					case Some(booleanStringValue: String) => booleanStringValue.toBoolean
 				}
+		}
+
+		degreeType match {
+			case DegreeType.Undergraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg))
+			case DegreeType.Postgraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg))
+			case _ =>
+				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
+				false
 		}
 	}
 
