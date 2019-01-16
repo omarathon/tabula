@@ -1508,7 +1508,7 @@ create index idx_studentcoursedetailsnote_scd on studentcoursedetailsnote (scjco
 create table studentcourseyeardetails (
 	id varchar(250) not null,
 	scjcode varchar(20) not null,
-	scesequencenumber varchar(4) not null,
+	scesequencenumber smallint not null,
 	academicyear smallint not null,
 	enrolmentstatuscode varchar(10),
 	modeofattendancecode varchar(10),

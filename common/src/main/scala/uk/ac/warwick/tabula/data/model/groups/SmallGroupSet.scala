@@ -41,7 +41,7 @@ object SmallGroupSet {
 /**
 	* Represents a set of small groups, within an instance of a module.
 	*/
-@FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = 0")
+@FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)

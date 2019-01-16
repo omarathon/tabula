@@ -46,7 +46,7 @@ trait StudentCourseDetailsToJsonConverter
 		date("beginDate", scd, "beginDate", fieldRestriction),
 		date("endDate", scd, "endDate", fieldRestriction),
 		date("expectedEndDate", scd, "expectedEndDate", fieldRestriction),
-		str("courseYearLength", scd, "courseYearLength", fieldRestriction),
+		int("courseYearLength", scd, "courseYearLength", fieldRestriction),
 		boolean("mostSignificant", scd, "mostSignificant", fieldRestriction),
 		str("reasonForTransferCode", scd, "reasonForTransferCode", fieldRestriction),
 		fieldRestriction.nested("course").flatMap { restriction =>

@@ -222,7 +222,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				val thisYear: AcademicYear = AcademicYear.now()
 				val membershipInfo: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
 
-				membershipInfo.assignments should be {Seq(assignment1, assignment5)}
+				membershipInfo.assignments.toSet should be (Set(assignment1, assignment5))
 
 				assignment1.members.knownType.removeUserId("cuscav")
 				session.save(assignment1)

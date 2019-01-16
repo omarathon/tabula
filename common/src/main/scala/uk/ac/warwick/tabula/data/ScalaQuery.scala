@@ -16,6 +16,7 @@ class ScalaQuery[A](c: org.hibernate.query.Query[A]) {
 	def distinct: ScalaQuery[A] = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
 
 	def setString(name: String, value: String): ScalaQuery[A] = chainable { c.setString(name, value) }
+	def setBoolean(name: String, value: Boolean): ScalaQuery[A] = chainable { c.setBoolean(name, value) }
 	def setEntity(name: String, entity: Any): ScalaQuery[A] = chainable { c.setEntity(name, entity) }
 	def setParameter(name: String, value: Any): ScalaQuery[A] = chainable { c.setParameter(name, value) }
 	def setParameterList(name: String, list: Seq[_]): ScalaQuery[A] = chainable { c.setParameterList(name, list.toList.asJava) }

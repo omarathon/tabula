@@ -85,7 +85,7 @@ trait SitsStudentRowCourseDetails
 	this.beginDate = toLocalDate(resultSet.getDate("begin_date"))
 	this.endDate = toLocalDate(resultSet.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(resultSet.getDate("expected_end_date"))
-	this.courseYearLength = resultSet.getString("course_year_length")
+	this.courseYearLength = resultSet.getString("course_year_length").toInt
 	this.levelCode = resultSet.getString("level_code")
 	this.reasonForTransferCode = resultSet.getString("scj_transfer_reason_code")
 }
