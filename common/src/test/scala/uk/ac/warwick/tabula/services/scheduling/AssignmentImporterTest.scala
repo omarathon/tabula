@@ -25,7 +25,6 @@ class AssignmentImporterTest extends TestBase with Mockito with EmbeddedSits {
 	val assignmentImporter = new AssignmentImporterImpl
 	assignmentImporter.sits = sits
 	AssignmentImporter.sitsSchema = "public"
-	AssignmentImporter.sqlStringCastFunction = ""
 	AssignmentImporter.dialectRegexpLike = "regexp_matches"
 	assignmentImporter.afterPropertiesSet()
 

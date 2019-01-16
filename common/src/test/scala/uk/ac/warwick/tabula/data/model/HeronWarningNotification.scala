@@ -18,7 +18,7 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 
 	import HeronWarningNotification._
 
-	val verb: String = "Heron"
+	@transient val verb: String = "Heron"
 
 	def title: String = "You all need to know. Herons would love to kill you in your sleep"
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
@@ -36,7 +36,7 @@ with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
 
 	import HeronWarningNotification._
 
-	val verb: String = "Heron"
+	@transient val verb: String = "Heron"
 
 	def title: String = "A heron has been defeated. Rejoice"
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))

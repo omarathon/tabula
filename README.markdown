@@ -38,6 +38,7 @@ tabula/
 │   ├── jtds-1.3.1.jar
 │   ├── logback.xml
 │   ├── ojdbc8.jar
+│   ├── postgresql-42.2.5.jar
 │   ├── tabula.properties
 │   ├── tabula-sso-config.xml
 │   └── warwick-logging-1.1-all.xml
@@ -86,6 +87,10 @@ You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.
 ### `lib/ojdbc8.jar`
 
 You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
+
+### `lib/postgresql-42.2.5.jar`
+
+You can get this from http://central.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar
 
 ### `lib/logback.xml`
 

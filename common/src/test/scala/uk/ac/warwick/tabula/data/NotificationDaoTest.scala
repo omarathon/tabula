@@ -41,8 +41,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		notificationDao.sessionFactory = sessionFactory
 		SSOUserType.userLookup = smartMock[UserLookupService]
 		SSOUserType.userLookup.getUserByUserId("heronVictim") returns staff.asSsoUser
-		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
-		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
 	}
 
 	@After

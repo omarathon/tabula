@@ -13,7 +13,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 
@@ -211,13 +210,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
 object AssignmentImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
-	var sqlStringCastFunction: String = "to_char"
 	var dialectRegexpLike = "regexp_like"
-
-	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
-	def castToString(orig: String): String =
-		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
-		else orig
 
 	/** Get AssessmentComponents, and also some fake ones for linking to
 		* the group of students with no selected assessment group.
@@ -268,12 +261,12 @@ object AssignmentImporter {
 	union all
 		select
 			mab.map_code as module_code,
-			${castToString("mab.mab_seq")} as seq,
-			${castToString("mab.mab_name")} as name,
-			${castToString("mab.mab_agrp")} as assessment_group,
-			${castToString("mab.ast_code")} as assessment_code,
-			${castToString("mab.mab_udf1")} as in_use,
-			${castToString("mab.mks_code")} as marks_code,
+			mab.mab_seq as seq,
+			mab.mab_name as name,
+			mab.mab_agrp as assessment_group,
+			mab.ast_code as assessment_code,
+			mab.mab_udf1 as in_use,
+			mab.mks_code as marks_code,
 			mab_perc as weight
 			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
 				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are avaiable in the year
@@ -306,9 +299,9 @@ object AssignmentImporter {
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
-			${castToString("mav.mav_occur")} as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
-			${castToString("mab.mab_agrp")} as assessment_group, -- group of assessment components forming one assessment choice
-			${castToString("mab.mab_seq")} as seq -- individual assessments (e.g each exam or coursework component)
+			mav.mav_occur as mav_occurrence, -- module occurrence (representing eg day or evening - usually 'A')
+			mab.mab_agrp as assessment_group, -- group of assessment components forming one assessment choice
+			mab.mab_seq as seq -- individual assessments (e.g each exam or coursework component)
 			from $sitsSchema.cam_mab mab -- Module Assessment Body, containing assessment components
 				join $sitsSchema.cam_mav mav -- Module Availability which indicates which modules are available in the year
 					on mab.map_code = mav.mod_code
