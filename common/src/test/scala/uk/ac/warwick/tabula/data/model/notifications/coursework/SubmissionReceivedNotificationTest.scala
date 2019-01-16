@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarkingCompleted
 import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
@@ -243,10 +243,11 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 
 			val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
 
-			Routes._cm2Prefix = Some("cm2Prefix")
+			val cm2Prefix = "theCm2Prefix"
+			Routes.cm2._cm2Prefix = Some(cm2Prefix)
 
-			n.urlFor(admin) should be("/cm2Prefix/admin/assignments/1234/list")
-			n.urlFor(marker) should be("/cm2Prefix/admin/assignments/1234/marker/1234567")
+			n.urlFor(admin) should be(s"/$cm2Prefix/admin/assignments/1234/list")
+			n.urlFor(marker) should be(s"/$cm2Prefix/admin/assignments/1234/marker/1234567")
 		}}
 
 	def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
