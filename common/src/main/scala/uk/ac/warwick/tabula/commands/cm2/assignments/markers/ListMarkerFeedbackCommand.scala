@@ -2,22 +2,22 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.{EnhancedFeedbackForOrderAndStage, FeedbackByActionability}
+import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
 import uk.ac.warwick.tabula.commands.cm2.{CommandWorkflowStudentsForAssignment, WorkflowStudentsForAssignment}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter
 import uk.ac.warwick.tabula.helpers.cm2.{AssignmentSubmissionStudentInfo, SubmissionAndFeedbackInfoFilter, SubmissionAndFeedbackInfoMarkerFilter, WorkflowItems}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.cm2.{AutowiringCM2WorkflowProgressServiceComponent, CM2WorkflowProgressServiceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, CM2MarkingWorkflowServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceComponent, AutowiringUserLookupComponent, CM2MarkingWorkflowServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{CurrentUser, WorkflowStages}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
 
 case class EnhancedMarkerFeedback(
 	markerFeedback: MarkerFeedback,
@@ -79,6 +79,7 @@ object ListMarkerFeedbackCommand {
 		with ListMarkerFeedbackPermissions
 		with AutowiringCM2MarkingWorkflowServiceComponent
 		with AutowiringCM2WorkflowProgressServiceComponent
+		with AutowiringUserLookupComponent
 		with MarkerProgress
 		with CommandWorkflowStudentsForAssignment
 		with Unaudited with ReadOnly
@@ -154,7 +155,7 @@ trait CanProxy {
 
 trait MarkerProgress extends TaskBenchmarking {
 
-	self: WorkflowStudentsForAssignment with CM2WorkflowProgressServiceComponent =>
+	self: WorkflowStudentsForAssignment with CM2WorkflowProgressServiceComponent with UserLookupComponent =>
 
 	type FeedbackByStage = SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
 	type EnhancedFeedbackByStage = SortedMap[MarkingWorkflowStage, Seq[EnhancedMarkerFeedback]]
@@ -163,8 +164,14 @@ trait MarkerProgress extends TaskBenchmarking {
 		val allMarkingStages = workflowProgressService.getStagesFor(assignment).filter(_.markingRelated)
 		val workflowStudents = workflowStudentsFor(assignment)
 
+		val usercodes = feedbackByStage.values.flatten.map(_.feedback.usercode).toSet
+		val students = {
+			if (usercodes.isEmpty) Map.empty[String, User]
+			else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+		}.withDefault(new AnonymousUser(_))
+
 		feedbackByStage.mapValues(mfs => mfs.flatMap(mf => {
-			workflowStudents.find(_.user == mf.student).map(ws => {
+			workflowStudents.find(_.user == students(mf.feedback.usercode)).map(ws => {
 				val markingStages = allMarkingStages.flatMap(ms => ws.stages.get(ms.toString))
 				EnhancedMarkerFeedback(mf, MarkingWorkflowStudent(markingStages, ws))
 			})
