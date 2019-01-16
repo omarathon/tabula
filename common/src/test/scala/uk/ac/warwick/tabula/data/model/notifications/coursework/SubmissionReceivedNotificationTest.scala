@@ -4,7 +4,7 @@ import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarker
+import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.SingleMarkingCompleted
 import uk.ac.warwick.tabula.data.model.markingworkflow.SingleMarkerWorkflow
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
@@ -117,9 +117,6 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		notification.title should be ("CS118: Late submission received for \"5,000 word essay\"")
 	}}
 
-
-
-
 	@Test def recipientsForLateNotificationWithNoAdminForSubDept() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) { withUser("cuscav", "0672089") {
 		val securityService = mock[SecurityService]
 		val permissionsService = mock[PermissionsService]
@@ -181,8 +178,6 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetModule) returns (Stream(moduleGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
 		permissionsService.getAllGrantedRolesFor[PermissionsTarget](targetParentDept) returns (Stream(deptGrantedRole).asInstanceOf[Stream[GrantedRole[PermissionsTarget]]])
 
-
-
 		val existing = GrantedPermission(targetDept, Permissions.Submission.Delete, true)
 		existing.users.knownType.addUserId("admin3")
 
@@ -191,7 +186,6 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		permissionsService.getGrantedPermission(targetModule, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
 		permissionsService.getGrantedPermission(targetDept, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
 		permissionsService.getGrantedPermission(targetParentDept, Permissions.Submission.Delete, RoleOverride.Allow) returns (None)
-
 
 		val subNotification = new SubmissionReceivedNotification
 		subNotification.permissionsService = permissionsService
@@ -208,24 +202,14 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 		val n = Notification.init(subNotification, currentUser.apparentUser, submission, assignment)
 
 		n.recipients.size should be (2)
-
-
-
-
-		//notification.title should be ("CS118: Late submission received for \"5,000 word essay\"")
-	}
-
-
-	}
-
-	def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
-		case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
-		case ug: UserGroup => ug.userLookup = userLookup
-	}
-
+	}}
 
 	@Test def lateNotificationUrlsDifferForMarkersAndAdmins() = withFakeTime(new DateTime(2018, DateTimeConstants.SEPTEMBER, 1, 12, 39, 0, 0)) {
 		withUser("cusca", "55556666") {
+
+			val admin: User = Fixtures.user("admin", "admin")
+			val marker: User = Fixtures.user("1234567", "1234567")
+			val student: User = Fixtures.user("7654321", "7654321")
 
 			val department = Fixtures.department("ch")
 			val assignment = Fixtures.assignment("Another 5,000 word essay")
@@ -237,32 +221,25 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 			assignment.feedbackService = smartMock[FeedbackService]
 			assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
+			val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
+			assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava
+			assignment.cm2MarkingWorkflow = workflow
+
 			val submission = Fixtures.submission(userId = "7654321", universityId = "7654321")
 			submission.assignment = assignment
 			submission.submittedDate = DateTime.now
-			module.adminDepartment = department
-
-			val admin: User = Fixtures.user("admin", "admin")
-			val student: User = Fixtures.user("7654321", "7654321")
-			val marker: User = Fixtures.user("1234567", "1234567")
 
 			val mockLookup: UserLookupService = mock[UserLookupService]
 			mockLookup.getUserByUserId(marker.getUserId) returns marker
 			mockLookup.getUserByUserId(admin.getUserId) returns admin
 
 			val feedback: AssignmentFeedback = Fixtures.assignmentFeedback(student.getWarwickId)
-			feedback.assignment = assignment
-
 			assignment.feedbacks.add(feedback)
 
 			val markerFeedback: MarkerFeedback = Fixtures.markerFeedback(feedback)
 			markerFeedback.marker = marker
-			markerFeedback.stage = SingleMarker
+			markerFeedback.stage = SingleMarkingCompleted
 			markerFeedback.userLookup = mockLookup
-
-			val workflow = SingleMarkerWorkflow("Test", department, Seq(marker))
-			assignment.firstMarkers = Seq(FirstMarkersMap(assignment, "1234567", Fixtures.userGroup(student))).asJava
-			assignment.cm2MarkingWorkflow = workflow
 
 			val n = Notification.init(new SubmissionReceivedNotification, currentUser.apparentUser, submission, assignment)
 
@@ -270,7 +247,11 @@ class SubmissionReceivedNotificationTest extends TestBase  with Mockito {
 
 			n.urlFor(admin) should be("/cm2Prefix/admin/assignments/1234/list")
 			n.urlFor(marker) should be("/cm2Prefix/admin/assignments/1234/marker/1234567")
+		}}
 
-		}
+	def wireUserLookup(userGroup: UnspecifiedTypeUserGroup): Unit = userGroup match {
+		case cm: UserGroupCacheManager => wireUserLookup(cm.underlying)
+		case ug: UserGroup => ug.userLookup = userLookup
 	}
+	
 }
