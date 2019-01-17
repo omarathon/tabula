@@ -6,8 +6,7 @@ import freemarker.template.{DefaultListAdapter, SimpleSequence, TemplateBooleanM
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{EarlyRequestInfo, Mockito, RequestInfo, TestBase}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -56,7 +55,6 @@ object World {
 }
 
 class ScalaBeansWrapperTest extends TestBase with Mockito {
-
 
 	@Test def nestedObjects {
 		World.Scotland.plant should be ("Thistle")
@@ -187,32 +185,39 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def runtimePermisionsRestriction = withUser("cuscav") {
+	def runtimePermisionsRestriction = withUser("cuscav") { // provides a request level cache
 
 		val wrapper = new ScalaBeansWrapper()
 		val securityService = mock[SecurityService]
+		wrapper.securityService = securityService
 
 		val m = JConcurrentMap[Permission, Boolean]()
 		m.put(Permissions.Assignment.Read, true)
 		m.containsKey(Permissions.Assignment.Read) should be (true)
 
-		wrapper.securityService = securityService
 		val target = new MyObject
 		var wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		// initially, there are no permissions set, so we can read the value
-		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
-		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
+		wrapped.get("runtimeRestricted").toString should be("Ho Ho Ho")
+		wrapped.get("runtimeRestricted").toString should be("Ho Ho Ho")
 
 		// now change the object's state so that it applies permissions
 		// wrappers assume that objects are immutable, so we'll have to create a new one.
 		target.restrictAccess = true
+
+		// The request level cache is still in effect, so we see the same value
+		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
+		wrapped.get("runtimeRestricted").toString should be("Ho Ho Ho")
+
+		// Now clear the cache and it should update and restrict access
+		EarlyRequestInfo.fromThread.get.requestLevelCache.shutdown()
 		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("runtimeRestricted") should be(null)
 
 		// finally, give the current user permissions, and make sure he can see the value again.
 		securityService.can(currentUser, target.providePermission().head.head, target) returns (true)
 		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
-		wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
+		wrapped.get("runtimeRestricted").toString should be("Ho Ho Ho")
 
 	}
 
