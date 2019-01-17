@@ -225,6 +225,11 @@ trait TestHelpers extends TestFixtures {
 		withCurrentUser(new CurrentUser(user, user, profile))(fn)
 	}
 
+	def clearRequestLevelCache(): Unit =
+		RequestInfo.fromThread
+			.getOrElse(throw new IllegalStateException("No RequestInfo active"))
+			.requestLevelCache.shutdown() // withUser maintains a cache
+
 	def withCurrentUser(user: CurrentUser)(fn: => Unit) {
 		val requestInfo = RequestInfo.fromThread match {
 			case Some(info) => throw new IllegalStateException("A RequestInfo is already open")

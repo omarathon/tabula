@@ -210,7 +210,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		wrapped.get("runtimeRestricted").toString should be("Ho Ho Ho")
 
 		// Now clear the cache and it should update and restrict access
-		EarlyRequestInfo.fromThread.get.requestLevelCache.shutdown()
+		clearRequestLevelCache()
 		wrapped = wrapper.wrap(target).asInstanceOf[ScalaHashModel]
 		wrapped.get("runtimeRestricted") should be(null)
 

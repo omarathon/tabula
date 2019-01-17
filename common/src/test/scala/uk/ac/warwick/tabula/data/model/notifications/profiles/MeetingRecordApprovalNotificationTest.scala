@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.NewM
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, ScalaFreemarkerConfiguration, UrlMethodModel}
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula._
 
 class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 
@@ -122,8 +122,9 @@ This meeting record is pending approval by 1218503 Student.
 			notification.titleFor(student.asSsoUser) should be ("Meeting record with Supervisor Name and Tutor Name needs review")
 			notification.titleFor(supervisor.asSsoUser) should be ("Meeting record with Student Name and Tutor Name needs review")
 
-			def notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
-			notificationContent should be(
+			def notificationContent() = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+
+			notificationContent() should be(
 				"""Tutor Name has created a record of your meeting with Student Name, Supervisor Name and Tutor Name:
 
 End of term progress meeting at 5 December 2013
@@ -131,11 +132,15 @@ End of term progress meeting at 5 December 2013
 This meeting record is pending approval by Student Name and Supervisor Name.
 """)
 
+			clearRequestLevelCache()
+
 			supervisorApproval.state = MeetingApprovalState.Approved
-			notificationContent should endWith ("This meeting record is pending approval by Student Name.\n")
+			notificationContent() should endWith ("This meeting record is pending approval by Student Name.\n")
+
+			clearRequestLevelCache()
 
 			studentApproval.state = MeetingApprovalState.Approved
-			notificationContent should endWith ("This meeting record has been approved.\n")
+			notificationContent() should endWith ("This meeting record has been approved.\n")
 		}
 	}
 
