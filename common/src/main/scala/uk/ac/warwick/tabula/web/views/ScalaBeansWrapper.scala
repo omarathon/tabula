@@ -37,7 +37,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedBy("ScalaBeansWrapper", obj) {
+	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedBy("ScalaBeansWrapper.wrap", obj) {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
