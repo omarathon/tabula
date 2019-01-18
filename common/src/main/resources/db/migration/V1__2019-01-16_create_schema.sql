@@ -93,7 +93,6 @@ create table assignment (
 	submittoturnitinretries smallint default 0,
 	openendedreminderdate timestamp (6),
 	workflow_category varchar(50),
-	anonymous_marking boolean default false not null,
 	cm2_workflow_id varchar(255),
 	cm2assignment boolean default false not null,
 	anonymous_marking_method varchar(255),
