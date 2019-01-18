@@ -37,7 +37,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = {
+	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedBy("ScalaBeansWrapper.wrap", obj) {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
@@ -51,7 +51,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
 			case directive: TemplateDirectiveModel => superWrap(directive)
-			case method: TemplateMethodModel => superWrap(method)
+			case method: TemplateMethodModelEx => superWrap(method)
 			case model: TemplateModel => superWrap(model)
 			case sobj if isScalaCompiled(sobj) =>
 				new ScalaHashModel(obj, this, useWrapperCache) with SecurityServiceComponent {
@@ -63,11 +63,11 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 
 	// scalastyle:on
 
-	// whether or not to cache results of get() methods for the life of this wrapper.
+	// whether or not to cache results of get() methods for the life of a ScalaHashModel
 	var useWrapperCache = true
 
 	private def isScalaCompiled(obj: Any) = Option(obj) match {
-		case Some(o) if !o.getClass.isArray => o.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
+		case Some(o) if !o.getClass.isArray => o.getClass.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
 	}
 
@@ -88,13 +88,13 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 
 	import ScalaHashModel._
 
-	private val objectClass = HibernateProxyHelper.getClassWithoutInitializingProxy(sobj)
+	private lazy val objectClass = HibernateProxyHelper.getClassWithoutInitializingProxy(sobj)
+
+	private lazy val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 	private def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
 
 	private def isGetter(m: Getter) = !m.getName.endsWith("_$eq") && m.getParameterTypes.isEmpty
-
-	private val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 	private def generateGetterInformation(cls: Class[_]) = {
 		val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
