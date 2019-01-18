@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
 import java.io.PrintWriter
-import java.sql.{Array => SQLArray, _}
+import java.sql._
+import java.time.OffsetDateTime
 
 import javax.servlet.http.HttpServletResponse
 import javax.sql.DataSource
@@ -16,27 +17,33 @@ import scala.collection.mutable
 
 object DatabaseMigrationController {
 	case class Migration(tableName: String, migrations: Seq[MigrationColumn[_]])
-	class MigrationColumn[A](val columnName: String, val read: (ResultSet, Int) => A, val write: (PreparedStatement, Int, A) => Unit) {
-		def process(index: Int, rs: ResultSet, ps: PreparedStatement): Unit =
-			write(ps, index, read(rs, index))
+	class MigrationColumn[A](val columnName: String, val read: (ResultSet, Int) => A, val write: (PreparedStatement, Int, A) => Unit, val jdbcType: JDBCType) {
+		def process(index: Int, rs: ResultSet, ps: PreparedStatement): Unit = {
+			val value = read(rs, index)
+			if (rs.wasNull()) {
+				ps.setNull(index, jdbcType.getVendorTypeNumber)
+			} else {
+				write(ps, index, value)
+			}
+		}
 	}
 
-	case class StringColumn(col: String) extends MigrationColumn[String](col, _.getString(_), _.setString(_, _))
-	case class IntColumn(col: String) extends MigrationColumn[JInteger](col, _.getInt(_), _.setInt(_, _))
-	case class BigDecimalColumn(col: String) extends MigrationColumn[JBigDecimal](col, _.getBigDecimal(_), _.setBigDecimal(_, _))
-	case class TimestampColumn(col: String) extends MigrationColumn[Timestamp](col, _.getTimestamp(_), _.setTimestamp(_, _))
-	case class BooleanColumn(col: String) extends MigrationColumn[JBoolean](col, _.getInt(_) == 1, _.setBoolean(_, _))
-	case class DateColumn(col: String) extends MigrationColumn[Date](col, _.getDate(_), _.setDate(_, _))
+	case class StringColumn(col: String) extends MigrationColumn[String](col, _.getString(_), _.setString(_, _), JDBCType.VARCHAR)
+	case class IntColumn(col: String) extends MigrationColumn[JInteger](col, _.getInt(_), _.setInt(_, _), JDBCType.INTEGER)
+	case class BigDecimalColumn(col: String) extends MigrationColumn[JBigDecimal](col, _.getBigDecimal(_), _.setBigDecimal(_, _), JDBCType.BIGINT)
+	case class TimestampColumn(col: String) extends MigrationColumn[Timestamp](col, _.getTimestamp(_), _.setTimestamp(_, _), JDBCType.TIMESTAMP)
+	case class BooleanColumn(col: String) extends MigrationColumn[JBoolean](col, _.getInt(_) == 1, _.setBoolean(_, _), JDBCType.BOOLEAN)
+	case class DateColumn(col: String) extends MigrationColumn[Date](col, _.getDate(_), _.setDate(_, _), JDBCType.DATE)
 
 	def generateMappings(connection: Connection, writer: PrintWriter): Unit = {
-		val tables = connection.getMetaData.getTables(null, null, "%", Array("TABLE"))
+		val tables = connection.getMetaData.getTables(null, null, "%", scala.Array("TABLE"))
 		val tableNames: mutable.ListBuffer[String] = mutable.ListBuffer()
 		while (tables.next()) {
 			tableNames += tables.getString("TABLE_NAME")
 		}
 		tables.close()
 
-		tableNames.filterNot(_ == "objectcache").filterNot(_.startsWith("qrtz_")).foreach { table =>
+		tableNames.filterNot(_ == "objectcache").filterNot(_ == "flyway_schema_history").filterNot(_.startsWith("qrtz_")).foreach { table =>
 			writer.println(s"""Migration("$table", Seq(""")
 
 			val columns = connection.getMetaData.getColumns(null, null, table, "%")
@@ -62,7 +69,7 @@ object DatabaseMigrationController {
 			columns.close()
 
 			writer.println(")),")
-			writer.println
+			writer.println()
 		}
 	}
 
@@ -100,6 +107,28 @@ object DatabaseMigrationController {
 			StringColumn("exam_id"),
 		)),
 
+		// Department must come before MarkingWorkflow
+		Migration("department", Seq(
+			StringColumn("id"),
+			StringColumn("code"),
+			StringColumn("name"),
+			StringColumn("settings"),
+			StringColumn("parent_id"),
+			StringColumn("filterrulename"),
+			StringColumn("shortname"),
+		)),
+
+		// MarkingWorkflow must come before Assignment (and StageMarkers)
+		Migration("markingworkflow", Seq(
+			StringColumn("id"),
+			StringColumn("workflowtype"),
+			StringColumn("name"),
+			StringColumn("department_id"),
+			BooleanColumn("is_reusable"),
+			IntColumn("academicyear"),
+			StringColumn("settings"),
+		)),
+
 		Migration("assignment", Seq(
 			StringColumn("id"),
 			IntColumn("academicyear"),
@@ -120,7 +149,6 @@ object DatabaseMigrationController {
 			BooleanColumn("archived"),
 			TimestampColumn("createddate"),
 			BooleanColumn("allowextensions"),
-			BooleanColumn("allowextensionrequests"),
 			StringColumn("markscheme_id"),
 			StringColumn("feedback_template_id"),
 			BooleanColumn("openended"),
@@ -128,7 +156,6 @@ object DatabaseMigrationController {
 			StringColumn("genericfeedback"),
 			BooleanColumn("dissertation"),
 			StringColumn("settings"),
-			BooleanColumn("uploadmarkstosits"),
 			StringColumn("turnitin_id"),
 			BooleanColumn("hidden_from_students"),
 			BooleanColumn("submittoturnitin"),
@@ -225,20 +252,6 @@ object DatabaseMigrationController {
 			TimestampColumn("updated_date"),
 		)),
 
-		Migration("auditevent", Seq(
-			IntColumn("id"),
-			TimestampColumn("eventdate"),
-			StringColumn("eventtype"),
-			StringColumn("eventstage"),
-			StringColumn("real_user_id"),
-			StringColumn("masquerade_user_id"),
-			StringColumn("data"),
-			StringColumn("eventid"),
-			StringColumn("ip_address"),
-			StringColumn("user_agent"),
-			BooleanColumn("read_only"),
-		)),
-
 		Migration("award", Seq(
 			StringColumn("code"),
 			StringColumn("shortname"),
@@ -281,16 +294,6 @@ object DatabaseMigrationController {
 			IntColumn("hib_version"),
 			BooleanColumn("candelegate"),
 			BooleanColumn("replaces_parent"),
-		)),
-
-		Migration("department", Seq(
-			StringColumn("id"),
-			StringColumn("code"),
-			StringColumn("name"),
-			StringColumn("settings"),
-			StringColumn("parent_id"),
-			StringColumn("filterrulename"),
-			StringColumn("shortname"),
 		)),
 
 		Migration("departmentsmallgroup", Seq(
@@ -343,7 +346,6 @@ object DatabaseMigrationController {
 			StringColumn("universityid"),
 			StringColumn("userid"),
 			StringColumn("assignment_id"),
-			StringColumn("reason_old"),
 			TimestampColumn("approvedon"),
 			StringColumn("approvalcomments"),
 			TimestampColumn("requestedexpirydate"),
@@ -418,19 +420,6 @@ object DatabaseMigrationController {
 			TimestampColumn("expires"),
 			TimestampColumn("date_used"),
 			StringColumn("fileattachment_id"),
-		)),
-
-		Migration("flyway_schema_history", Seq(
-			IntColumn("installed_rank"),
-			StringColumn("version"),
-			StringColumn("description"),
-			StringColumn("type"),
-			StringColumn("script"),
-			IntColumn("checksum"),
-			StringColumn("installed_by"),
-			TimestampColumn("installed_on"),
-			IntColumn("execution_time"),
-			BooleanColumn("success"),
 		)),
 
 		Migration("formfield", Seq(
@@ -539,16 +528,6 @@ object DatabaseMigrationController {
 			IntColumn("min_mark"),
 			IntColumn("max_mark"),
 			StringColumn("text"),
-		)),
-
-		Migration("markingworkflow", Seq(
-			StringColumn("id"),
-			StringColumn("workflowtype"),
-			StringColumn("name"),
-			StringColumn("department_id"),
-			BooleanColumn("is_reusable"),
-			IntColumn("academicyear"),
-			StringColumn("settings"),
 		)),
 
 		Migration("markscheme", Seq(
@@ -931,7 +910,6 @@ object DatabaseMigrationController {
 		Migration("smallgroupeventoccurrence", Seq(
 			StringColumn("id"),
 			IntColumn("week"),
-			StringColumn("membersgroup_id"),
 			StringColumn("event_id"),
 		)),
 
@@ -944,7 +922,6 @@ object DatabaseMigrationController {
 			BooleanColumn("deleted"),
 			StringColumn("group_format"),
 			StringColumn("membersgroup_id"),
-			BooleanColumn("released"),
 			StringColumn("allocation_method"),
 			BooleanColumn("released_to_students"),
 			BooleanColumn("released_to_tutors"),
@@ -1092,7 +1069,6 @@ object DatabaseMigrationController {
 			StringColumn("universityid"),
 			StringColumn("userid"),
 			StringColumn("assignment_id"),
-			BooleanColumn("suspectplagiarised"),
 			StringColumn("state"),
 			StringColumn("plagiarisminvestigation"),
 		)),
@@ -1143,7 +1119,6 @@ object DatabaseMigrationController {
 			StringColumn("modulecode"),
 			StringColumn("assessmentgroup"),
 			StringColumn("sequence"),
-			StringColumn("departmentcode"),
 			StringColumn("name"),
 			StringColumn("assessmenttype"),
 			StringColumn("module_id"),
@@ -1216,17 +1191,36 @@ object DatabaseMigrationController {
 			StringColumn("userid"),
 			StringColumn("settings"),
 		)),
+
+		Migration("auditevent", Seq(
+			IntColumn("id"),
+			TimestampColumn("eventdate"),
+			StringColumn("eventtype"),
+			StringColumn("eventstage"),
+			StringColumn("real_user_id"),
+			StringColumn("masquerade_user_id"),
+			StringColumn("data"),
+			StringColumn("eventid"),
+			StringColumn("ip_address"),
+			StringColumn("user_agent"),
+			BooleanColumn("read_only"),
+		)),
 	)
 }
 
 @Controller
-@RequestMapping(value = Array("/sysadmin/db-migrate"))
+@RequestMapping(value = scala.Array("/sysadmin/db-migrate"))
 class DatabaseMigrationController extends BaseSysadminController {
 
 	val newDataSource: DataSource = Wire.named[DataSource]("dataSource")
 
 	@RequestMapping
 	def form(): Mav = Mav("sysadmin/db-migrate")
+
+	private def logAndWrite(msg: String)(implicit writer: PrintWriter): Unit = {
+		logger.info(msg)
+		logAndWrite(msg)
+	}
 
 	@PostMapping
 	def migrate(
@@ -1248,18 +1242,39 @@ class DatabaseMigrationController extends BaseSysadminController {
 		val newConnection = newDataSource.getConnection
 		newConnection.setAutoCommit(false)
 
-		val writer = response.getWriter
+		implicit val writer: PrintWriter = response.getWriter
 
+		// Do the AuditEvent sequence first
+		logAndWrite(s"[${OffsetDateTime.now()}] Migrating auditevent_seq")
+		logAndWrite("------------")
+
+		val st = oldConnection.createStatement()
+		val rs = st.executeQuery("select auditevent_seq.nextval from dual")
+		rs.next()
+		val nextVal = rs.getLong(1)
+
+		val update = newConnection.createStatement()
+		update.executeQuery(s"SELECT setval('auditevent_seq', $nextVal, false)")
+		update.close()
+
+		logAndWrite(s"[${OffsetDateTime.now()}] Set auditevent_seq next value to $nextVal")
+
+		rs.close()
+		st.close()
+
+		writer.println()
+
+		// Do all the truncating first
 		DatabaseMigrationController.mappings.foreach { mapping =>
-			writer.println(s"Migrating ${mapping.tableName}")
-			writer.println("------------")
-
 			val truncate = newConnection.createStatement()
-			truncate.executeUpdate(s"truncate ${mapping.tableName}")
+			truncate.executeUpdate(s"truncate ${mapping.tableName} cascade")
 			newConnection.commit()
 			truncate.close()
+		}
 
-			writer.println("Truncated existing table")
+		DatabaseMigrationController.mappings.foreach { mapping =>
+			logAndWrite(s"[${OffsetDateTime.now()}] Migrating ${mapping.tableName}")
+			logAndWrite("------------")
 
 			val insert = newConnection.prepareStatement(
 				s"""
@@ -1273,6 +1288,17 @@ class DatabaseMigrationController extends BaseSysadminController {
 				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName}"
 			)
 
+			// Get the total count
+			results.last()
+			val count = results.getRow
+			results.beforeFirst()
+
+			logAndWrite(s"[${OffsetDateTime.now()}] $count rows to insert")
+
+			def perc(i: Int): Int =
+				if (count > 0) i * 100 / count
+				else 100
+
 			var i = 0
 			while (results.next()) {
 				mapping.migrations.zipWithIndex.foreach { case (migration, index) =>
@@ -1281,18 +1307,22 @@ class DatabaseMigrationController extends BaseSysadminController {
 				insert.addBatch()
 
 				i = i + 1
-				if (i % 100 == 0) {
+				if (i % 1000 == 0) {
 					insert.executeBatch()
-					writer.println(s"Inserted $i rows")
+					logAndWrite(s"[${OffsetDateTime.now()}] [${perc(i)}%] Inserted $i rows")
 					insert.clearBatch()
 				}
 			}
 
+			insert.executeBatch()
+			logAndWrite(s"[${OffsetDateTime.now()}] [${perc(i)}%] Inserted $i rows")
+			insert.clearBatch()
+
 			results.close()
+			statement.close()
 			insert.close()
 			newConnection.commit()
 
-			writer.println(s"Inserted $i rows")
 			writer.println()
 		}
 

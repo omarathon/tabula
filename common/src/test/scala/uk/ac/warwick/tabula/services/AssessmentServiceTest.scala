@@ -85,8 +85,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 	@Transactional @Test def notDeletedFilter() {
 		val module = new Module
 		session.save(module)
-		val assignment = new Assignment
-		assignment.name = "Essay"
+		val assignment = Fixtures.assignment("Essay")
 		assignment.module = module
 		assignment.academicYear = AcademicYear(2009)
 		assignment.markDeleted()
@@ -149,8 +148,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 
 		assignmentService.getAssignmentByNameYearModule("Essay", AcademicYear(2009), module) should be ('empty)
 
-		val assignment = new Assignment
-		assignment.name = "Essay"
+		val assignment = Fixtures.assignment("Essay")
 		assignment.module = module
 		assignment.academicYear = AcademicYear(2009)
 		assignmentService.save(assignment)
@@ -295,9 +293,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		deletedFeedback.usercode = ThisUser
 		deletedFeedback.released = true
 
-		val assignment1 = new Assignment
-		val assignment2 = new Assignment
-		val assignment3 = new Assignment
+		val assignment1 = Fixtures.assignment("1")
+		val assignment2 = Fixtures.assignment("2")
+		val assignment3 = Fixtures.assignment("3")
 		assignment3.markDeleted()
 
 		assignment1.addFeedback(myFeedback)
@@ -345,9 +343,9 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		deletedSubmission._universityId = ThisUser
 		deletedSubmission.usercode = ThisUser
 
-		val assignment1 = new Assignment
-		val assignment2 = new Assignment
-		val assignment3 = new Assignment
+		val assignment1 = Fixtures.assignment("1")
+		val assignment2 = Fixtures.assignment("2")
+		val assignment3 = Fixtures.assignment("3")
 		assignment3.markDeleted()
 
 		assignment1.addSubmission(mySubmission)
@@ -930,13 +928,13 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		val startDate = new DateTime(2014, 3, 1, 0, 0, 0)
 		val endDate = new DateTime(2014, 3, 8, 0, 0, 0)
 
-		val assignmentBefore = new Assignment
+		val assignmentBefore = Fixtures.assignment("Before")
 		assignmentBefore.closeDate = startDate.minusDays(1)
-		val assignmentInside = new Assignment
+		val assignmentInside = Fixtures.assignment("Inside")
 		assignmentInside.closeDate = startDate
-		val assignmentAfter = new Assignment
+		val assignmentAfter = Fixtures.assignment("After")
 		assignmentAfter.closeDate = endDate
-		val assignmentNoSubmission = new Assignment
+		val assignmentNoSubmission = Fixtures.assignment("No submission")
 		assignmentNoSubmission.closeDate = startDate.plusDays(1)
 
 		val submissionBefore = new Submission

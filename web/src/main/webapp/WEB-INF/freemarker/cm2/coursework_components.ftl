@@ -43,7 +43,7 @@
 					</#if>
 					<#if !has_assignments>
 						<div class="item-info empty-message">
-							${empty_message}  ${assignments!?size}
+							${empty_message}
 						</div>
 					</#if>
 					<#list assignments as info>

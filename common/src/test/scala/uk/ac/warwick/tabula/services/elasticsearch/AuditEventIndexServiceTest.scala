@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.{Index, IndexAndType}
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.http.Response
 import com.sksamuel.elastic4s.http.get.GetResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
 import com.sksamuel.elastic4s.searches.sort.SortOrder
 import com.sksamuel.elastic4s.testkit.IndexMatchers
+import com.sksamuel.elastic4s.{Index, IndexAndType}
 import org.hibernate.Session
-import org.hibernate.dialect.HSQLDialect
+import org.hibernate.dialect.PostgreSQL95Dialect
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -35,7 +35,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
 			val session: Session = sessionFactory.getCurrentSession
 		}
-		service.dialect = new HSQLDialect()
+		service.dialect = new PostgreSQL95Dialect
 
 		val indexer = new AuditEventIndexService
 		indexer.indexName = AuditEventIndexServiceTest.this.index.name

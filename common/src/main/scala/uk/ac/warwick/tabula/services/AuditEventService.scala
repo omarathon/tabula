@@ -196,7 +196,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 			val query = session.createSQLQuery("insert into auditevent " +
 				"(id, eventid, eventdate, eventtype, eventstage, real_user_id, masquerade_user_id, ip_address, user_agent, read_only, data) " +
-				"values(" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
+				"values (" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
 			query.setString("eventid", event.id)
 			query.setTimestamp("date", timestampColumnMapper.toNonNullValue(event.date))
 			query.setString("name", event.name)

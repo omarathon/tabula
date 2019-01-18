@@ -77,7 +77,6 @@ create table assignment (
 	archived boolean default false not null,
 	createddate timestamp (6),
 	allowextensions boolean default false,
-	allowextensionrequests boolean default false,
 	markscheme_id varchar(255),
 	feedback_template_id varchar(255),
 	openended boolean default false not null,
@@ -85,7 +84,6 @@ create table assignment (
 	genericfeedback text,
 	dissertation boolean default false not null,
 	settings text,
-	uploadmarkstosits boolean default false not null,
 	turnitin_id varchar(255),
 	hidden_from_students boolean default false,
 	submittoturnitin boolean default false not null,
@@ -440,7 +438,6 @@ create table extension (
 	universityid varchar(255),
 	userid varchar(255) not null,
 	assignment_id varchar(255),
-	reason_old varchar(4000),
 	approvedon timestamp (6),
 	approvalcomments varchar(4000),
 	requestedexpirydate timestamp (6),
@@ -1395,7 +1392,6 @@ create index idx_smallgroupeventattendance_replaces on smallgroupeventattendance
 create table smallgroupeventoccurrence (
 	id varchar(255) not null,
 	week int not null,
-	membersgroup_id varchar(255),
 	event_id varchar(255) not null,
 	constraint pk_smallgroupeventoccurrence primary key (id),
 	constraint idx_smallgroupeventoccurrence_ck unique (event_id, week)
@@ -1414,7 +1410,6 @@ create table smallgroupset (
 	deleted boolean default false,
 	group_format varchar(255) not null,
 	membersgroup_id varchar(255),
-	released boolean default false,
 	allocation_method varchar(50) default 'Manual',
 	released_to_students boolean default false,
 	released_to_tutors boolean default false,
@@ -1634,7 +1629,6 @@ create table submission (
 	universityid varchar(255),
 	userid varchar(255) not null,
 	assignment_id varchar(255),
-	suspectplagiarised boolean default false,
 	state varchar(255),
 	plagiarisminvestigation varchar(50) default 'NotInvestigated',
 	constraint pk_submission primary key (id),
@@ -1725,7 +1719,6 @@ create table upstreamassignment (
 	modulecode varchar(100) not null,
 	assessmentgroup varchar(100) not null,
 	sequence varchar(100) not null,
-	departmentcode varchar(10),
 	name varchar(4000) not null,
 	assessmenttype varchar(32),
 	module_id varchar(255),
@@ -1736,7 +1729,6 @@ create table upstreamassignment (
 	constraint idx_upstreamassignment_ck unique (modulecode, sequence)
 );
 
-create index idx_upstreamassignment_department on upstreamassignment (departmentcode);
 create index idx_upstreamassignment_module on upstreamassignment (module_id);
 create index idx_upstreamassignment_inuse on upstreamassignment (in_use);
 
