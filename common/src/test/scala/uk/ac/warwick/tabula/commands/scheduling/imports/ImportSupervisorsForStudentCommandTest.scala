@@ -58,12 +58,12 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		}
 
 		class CourseFixture (scjCode: String, sprCode: String) {
-
 			val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 			studentCourseDetails.sprCode = sprCode
 			studentCourseDetails.department = department
 
 			supervisee.attachStudentCourseDetails(studentCourseDetails)
+			supervisee.mostSignificantCourse = studentCourseDetails
 
 			val route = new Route
 			route.active = true

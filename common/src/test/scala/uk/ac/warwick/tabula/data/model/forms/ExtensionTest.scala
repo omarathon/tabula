@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data.model.forms
-import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Submission}
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 
@@ -82,7 +83,7 @@ class ExtensionTest extends PersistenceTestBase {
 			extension._universityId = idFormat(1)
 			extension.usercode = "steve"
 
-			val assignment = new Assignment
+			val assignment = Fixtures.assignment("Steven")
 			session.save(assignment)
 
 			extension.assignment = assignment

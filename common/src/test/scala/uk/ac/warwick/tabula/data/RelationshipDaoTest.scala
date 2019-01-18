@@ -66,6 +66,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff2)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
@@ -122,6 +123,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff2)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
@@ -155,6 +157,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
@@ -206,6 +209,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff2)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu2 = StudentRelationship(staff2, relationshipType, stu1, DateTime.now)
@@ -256,6 +260,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff2)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
@@ -307,6 +312,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff, relationshipType, studentWithMultipleScdsSameSpr, DateTime.now)

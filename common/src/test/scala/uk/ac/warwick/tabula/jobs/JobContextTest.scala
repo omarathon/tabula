@@ -15,6 +15,7 @@ class JobContextTest extends AppContextTestBase {
 	def jobInstanceSerialization() {
 			val id = {
 				val jsi = new JobInstanceImpl
+				jsi.jobType = "Steven"
 				jsi.data = """{"How" : "Data"}"""
 				jsi.json = Map("How" -> "Json")
 				jsi.succeeded = true
@@ -24,7 +25,7 @@ class JobContextTest extends AppContextTestBase {
 				jsi.id
 			}
 
-			val jsiLoaded = session.get(classOf[JobInstanceImpl], id).asInstanceOf[JobInstanceImpl]
+			val jsiLoaded = session.get(classOf[JobInstanceImpl], id)
 			jsiLoaded.data should be ("""{"How":"Json"}""")
 			jsiLoaded.succeeded should be {true}
 		}

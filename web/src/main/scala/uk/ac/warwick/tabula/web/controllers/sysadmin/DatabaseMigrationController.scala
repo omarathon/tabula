@@ -1219,7 +1219,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 
 	private def logAndWrite(msg: String)(implicit writer: PrintWriter): Unit = {
 		logger.info(msg)
-		logAndWrite(msg)
+		writer.println(msg)
 	}
 
 	@PostMapping

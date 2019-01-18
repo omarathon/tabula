@@ -15,6 +15,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 	val staff = Fixtures.staff("1234567")
 	val student = Fixtures.student("9876543")
 	val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+	relType.description = "Personal tutor"
 
 	val meeting1 = new MeetingRecord
 	meeting1.creator = staff
@@ -43,6 +44,8 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		val notification = testNotification(meeting1, tomorrow)
 
 		session.save(relType)
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 
@@ -73,6 +76,8 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	@Test def scheduledNotifications() {
 		session.save(relType)
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 		session.save(meeting2)
@@ -98,6 +103,8 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	@Test def getNotificationsToComplete() {
 		session.save(relType)
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 

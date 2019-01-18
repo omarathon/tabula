@@ -558,10 +558,10 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					join e.group as g
 					join g.groupSet as s
 					where s.academicYear = :academicYear and location not like '%|%'
-		 			and s.deleted = 0
+		 			and s.deleted = false
 		 			$departmentCondition
 			""")
-			.setString("academicYear", academicYear.getStoreValue.toString)
+			.setParameter("academicYear", academicYear)
 
 		department.foreach(d => query.setEntity("department", d))
 

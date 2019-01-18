@@ -348,10 +348,11 @@ object Fixtures extends Mockito {
 		memberNote
 	}
 
-	def memberNote(note: String, student: Member ): MemberNote = {
+	def memberNote(note: String, student: Member, creatorId: String): MemberNote = {
 		val memberNote = new MemberNote
 		memberNote.note = note
 		memberNote.member = student
+		memberNote.creatorId = creatorId
 		memberNote
 	}
 

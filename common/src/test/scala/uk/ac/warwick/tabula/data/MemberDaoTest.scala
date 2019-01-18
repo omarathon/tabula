@@ -19,7 +19,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl
 
 	val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
-	val sprPermanentlyWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+	val sprPermanentlyWithdrawnStatus: SitsStatus = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
 
 	val moaFT: ModeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 	val moaPT: ModeOfAttendance = Fixtures.modeOfAttendance("P", "PT", "Part time")
@@ -159,6 +159,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(staff2)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.description = "Personal tutor"
 		relationshipDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
@@ -220,6 +221,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu1.mostSignificantCourse
+			scyd.sceSequenceNumber = 2
 			stu1.mostSignificantCourse.addStudentCourseYearDetails(scyd)
 			stu1.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
@@ -227,6 +229,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu2.mostSignificantCourse
+			scyd.sceSequenceNumber = 2
 			stu2.mostSignificantCourse.addStudentCourseYearDetails(scyd)
 			stu2.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
@@ -234,6 +237,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu3.mostSignificantCourse
+			scyd.sceSequenceNumber = 2
 			stu3.mostSignificantCourse.addStudentCourseYearDetails(scyd)
 			stu3.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
@@ -241,6 +245,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaPT)
 			scyd.studentCourseDetails = stu4.mostSignificantCourse
+			scyd.sceSequenceNumber = 2
 			stu4.mostSignificantCourse.addStudentCourseYearDetails(scyd)
 			stu4.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}

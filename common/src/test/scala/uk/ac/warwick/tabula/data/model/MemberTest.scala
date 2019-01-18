@@ -340,7 +340,7 @@ class MemberPersistenceTest extends PersistenceTestBase with Mockito {
 
 		val status1 = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
 		session.save(status1)
-		val status2 = Fixtures.sitsStatus("P1", "Perm Wd", "Another slightly more esoteric kind of permanently withdrawn")
+		val status2 = Fixtures.sitsStatus("P1", "Perm Wd", "A more esoteric kind of permanently withdrawn")
 		session.save(status2)
 		val status3 = Fixtures.sitsStatus("F", "Fully Enrolled", "Definitely not permanently withdrawn at all")
 		session.save(status3)
