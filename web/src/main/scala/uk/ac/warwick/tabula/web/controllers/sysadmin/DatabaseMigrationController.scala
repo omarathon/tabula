@@ -322,13 +322,6 @@ object DatabaseMigrationController {
 			TimestampColumn("lastupdateddate"),
 		)),
 
-		Migration("entityreference", Seq(
-			StringColumn("id"),
-			StringColumn("entity_type"),
-			StringColumn("entity_id"),
-			StringColumn("notification_id"),
-		)),
-
 		Migration("exam", Seq(
 			StringColumn("id"),
 			StringColumn("name"),
@@ -765,19 +758,6 @@ object DatabaseMigrationController {
 			BigDecimalColumn("normalload"),
 		)),
 
-		Migration("notification", Seq(
-			StringColumn("id"),
-			StringColumn("notification_type"),
-			StringColumn("agent"),
-			TimestampColumn("created"),
-			StringColumn("target_id"),
-			StringColumn("settings"),
-			StringColumn("recipientuserid"),
-			StringColumn("recipientuniversityid"),
-			StringColumn("priority"),
-			BooleanColumn("listeners_processed"),
-		)),
-
 		Migration("originalityreport", Seq(
 			StringColumn("id"),
 			StringColumn("submission_id"),
@@ -815,15 +795,6 @@ object DatabaseMigrationController {
 			StringColumn("stage"),
 		)),
 
-		Migration("recipientnotificationinfo", Seq(
-			StringColumn("id"),
-			StringColumn("notification_id"),
-			StringColumn("recipient"),
-			BooleanColumn("dismissed"),
-			BooleanColumn("email_sent"),
-			TimestampColumn("attemptedat"),
-		)),
-
 		Migration("roleoverride", Seq(
 			StringColumn("id"),
 			StringColumn("custom_role_definition_id"),
@@ -848,22 +819,6 @@ object DatabaseMigrationController {
 			StringColumn("department_id"),
 			StringColumn("route_id"),
 			BigDecimalColumn("percentage"),
-		)),
-
-		Migration("scheduled_notification", Seq(
-			StringColumn("id"),
-			StringColumn("notification_type"),
-			TimestampColumn("scheduled_date"),
-			StringColumn("target_id"),
-			BooleanColumn("completed"),
-		)),
-
-		Migration("scheduledtrigger", Seq(
-			StringColumn("id"),
-			StringColumn("trigger_type"),
-			TimestampColumn("scheduled_date"),
-			StringColumn("target_id"),
-			TimestampColumn("completed_date"),
 		)),
 
 		Migration("sitsstatus", Seq(
@@ -984,7 +939,7 @@ object DatabaseMigrationController {
 			IntColumn("academicyear"),
 			StringColumn("enrolmentstatuscode"),
 			StringColumn("modeofattendancecode"),
-			StringColumn("yearofstudy"),
+			IntColumn("yearofstudy"),
 			TimestampColumn("lastupdateddate"),
 			IntColumn("hib_version"),
 			StringColumn("moduleregistrationstatus"),
@@ -1192,6 +1147,51 @@ object DatabaseMigrationController {
 			StringColumn("settings"),
 		)),
 
+		Migration("entityreference", Seq(
+			StringColumn("id"),
+			StringColumn("entity_type"),
+			StringColumn("entity_id"),
+			StringColumn("notification_id"),
+		)),
+
+		Migration("notification", Seq(
+			StringColumn("id"),
+			StringColumn("notification_type"),
+			StringColumn("agent"),
+			TimestampColumn("created"),
+			StringColumn("target_id"),
+			StringColumn("settings"),
+			StringColumn("recipientuserid"),
+			StringColumn("recipientuniversityid"),
+			StringColumn("priority"),
+			BooleanColumn("listeners_processed"),
+		)),
+
+		Migration("recipientnotificationinfo", Seq(
+			StringColumn("id"),
+			StringColumn("notification_id"),
+			StringColumn("recipient"),
+			BooleanColumn("dismissed"),
+			BooleanColumn("email_sent"),
+			TimestampColumn("attemptedat"),
+		)),
+
+		Migration("scheduled_notification", Seq(
+			StringColumn("id"),
+			StringColumn("notification_type"),
+			TimestampColumn("scheduled_date"),
+			StringColumn("target_id"),
+			BooleanColumn("completed"),
+		)),
+
+		Migration("scheduledtrigger", Seq(
+			StringColumn("id"),
+			StringColumn("trigger_type"),
+			TimestampColumn("scheduled_date"),
+			StringColumn("target_id"),
+			TimestampColumn("completed_date"),
+		)),
+
 		Migration("auditevent", Seq(
 			IntColumn("id"),
 			TimestampColumn("eventdate"),
@@ -1219,7 +1219,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 
 	private def logAndWrite(msg: String)(implicit writer: PrintWriter): Unit = {
 		logger.info(msg)
-		writer.println(msg)
+		writer.println(s"[${OffsetDateTime.now()}] $msg")
 	}
 
 	@PostMapping
@@ -1245,7 +1245,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 		implicit val writer: PrintWriter = response.getWriter
 
 		// Do the AuditEvent sequence first
-		logAndWrite(s"[${OffsetDateTime.now()}] Migrating auditevent_seq")
+		logAndWrite(s"Migrating auditevent_seq")
 		logAndWrite("------------")
 
 		val st = oldConnection.createStatement()
@@ -1257,7 +1257,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 		update.executeQuery(s"SELECT setval('auditevent_seq', $nextVal, false)")
 		update.close()
 
-		logAndWrite(s"[${OffsetDateTime.now()}] Set auditevent_seq next value to $nextVal")
+		logAndWrite(s"Set auditevent_seq next value to $nextVal")
 
 		rs.close()
 		st.close()
@@ -1273,7 +1273,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 		}
 
 		DatabaseMigrationController.mappings.foreach { mapping =>
-			logAndWrite(s"[${OffsetDateTime.now()}] Migrating ${mapping.tableName}")
+			logAndWrite(s"Migrating ${mapping.tableName}")
 			logAndWrite("------------")
 
 			val insert = newConnection.prepareStatement(
@@ -1283,19 +1283,22 @@ class DatabaseMigrationController extends BaseSysadminController {
 					|(${mapping.migrations.map(_ => "?").mkString(",")})
 				""".stripMargin)
 
+			// Get the total count
+			val st = oldConnection.createStatement()
+			val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName}")
+			rs.next()
+			val count = rs.getLong(1)
+			rs.close()
+			st.close()
+
 			val statement = oldConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
 			val results = statement.executeQuery(
 				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName}"
 			)
 
-			// Get the total count
-			results.last()
-			val count = results.getRow
-			results.beforeFirst()
+			logAndWrite(s"$count rows to insert")
 
-			logAndWrite(s"[${OffsetDateTime.now()}] $count rows to insert")
-
-			def perc(i: Int): Int =
+			def perc(i: Int): Long =
 				if (count > 0) i * 100 / count
 				else 100
 
@@ -1309,13 +1312,13 @@ class DatabaseMigrationController extends BaseSysadminController {
 				i = i + 1
 				if (i % 1000 == 0) {
 					insert.executeBatch()
-					logAndWrite(s"[${OffsetDateTime.now()}] [${perc(i)}%] Inserted $i rows")
+					logAndWrite(s"[${perc(i)}%] Inserted $i rows")
 					insert.clearBatch()
 				}
 			}
 
 			insert.executeBatch()
-			logAndWrite(s"[${OffsetDateTime.now()}] [${perc(i)}%] Inserted $i rows")
+			logAndWrite(s"[${perc(i)}%] Inserted $i rows")
 			insert.clearBatch()
 
 			results.close()
