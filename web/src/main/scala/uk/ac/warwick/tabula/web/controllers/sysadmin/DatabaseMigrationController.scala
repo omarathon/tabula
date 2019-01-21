@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.Mav
 import scala.collection.mutable
 
 object DatabaseMigrationController {
-	case class Migration(tableName: String, migrations: Seq[MigrationColumn[_]])
+	case class Migration(tableName: String, migrations: Seq[MigrationColumn[_]], restriction: Option[String] = None)
 	class MigrationColumn[A](val columnName: String, val read: (ResultSet, Int) => A, val write: (PreparedStatement, Int, A) => Unit, val jdbcType: JDBCType) {
 		def process(index: Int, rs: ResultSet, ps: PreparedStatement): Unit = {
 			val value = read(rs, index)
@@ -1152,6 +1152,14 @@ object DatabaseMigrationController {
 			StringColumn("entity_type"),
 			StringColumn("entity_id"),
 			StringColumn("notification_id"),
+		), restriction = Some(
+			"""
+				|where
+				|  notification_id in (select id from notification where created >= trunc(sysdate - 30)) or
+				|  id in (select target_id from notification where created >= trunc(sysdate - 30)) or
+				|  id in (select target_id from scheduled_notification where scheduled_date >= trunc(sysdate - 30)) or
+				|  id in (select target_id from scheduledtrigger where scheduled_date >= trunc(sysdate - 30))
+			""".stripMargin
 		)),
 
 		Migration("notification", Seq(
@@ -1165,7 +1173,7 @@ object DatabaseMigrationController {
 			StringColumn("recipientuniversityid"),
 			StringColumn("priority"),
 			BooleanColumn("listeners_processed"),
-		)),
+		), restriction = Some("where created >= trunc(sysdate - 30)")),
 
 		Migration("recipientnotificationinfo", Seq(
 			StringColumn("id"),
@@ -1174,7 +1182,7 @@ object DatabaseMigrationController {
 			BooleanColumn("dismissed"),
 			BooleanColumn("email_sent"),
 			TimestampColumn("attemptedat"),
-		)),
+		), restriction = Some("where notification_id in (select id from notification where created >= trunc(sysdate - 30))")),
 
 		Migration("scheduled_notification", Seq(
 			StringColumn("id"),
@@ -1182,7 +1190,7 @@ object DatabaseMigrationController {
 			TimestampColumn("scheduled_date"),
 			StringColumn("target_id"),
 			BooleanColumn("completed"),
-		)),
+		), restriction = Some("where scheduled_date >= trunc(sysdate - 30)")),
 
 		Migration("scheduledtrigger", Seq(
 			StringColumn("id"),
@@ -1190,7 +1198,7 @@ object DatabaseMigrationController {
 			TimestampColumn("scheduled_date"),
 			StringColumn("target_id"),
 			TimestampColumn("completed_date"),
-		)),
+		), restriction = Some("where scheduled_date >= trunc(sysdate - 30)")),
 
 		Migration("auditevent", Seq(
 			IntColumn("id"),
@@ -1204,7 +1212,74 @@ object DatabaseMigrationController {
 			StringColumn("ip_address"),
 			StringColumn("user_agent"),
 			BooleanColumn("read_only"),
+		), restriction = Some("where eventdate >= trunc(sysdate - 30)")),
+
+		Migration("entityreference", Seq(
+			StringColumn("id"),
+			StringColumn("entity_type"),
+			StringColumn("entity_id"),
+			StringColumn("notification_id"),
+		), restriction = Some(
+			"""
+				|where
+				|  notification_id not in (select id from notification where created >= trunc(sysdate - 30)) and
+				|  id not in (select target_id from notification where created >= trunc(sysdate - 30)) and
+				|  id not in (select target_id from scheduled_notification where scheduled_date >= trunc(sysdate - 30)) and
+				|  id not in (select target_id from scheduledtrigger where scheduled_date >= trunc(sysdate - 30))
+			""".stripMargin
 		)),
+
+		Migration("notification", Seq(
+			StringColumn("id"),
+			StringColumn("notification_type"),
+			StringColumn("agent"),
+			TimestampColumn("created"),
+			StringColumn("target_id"),
+			StringColumn("settings"),
+			StringColumn("recipientuserid"),
+			StringColumn("recipientuniversityid"),
+			StringColumn("priority"),
+			BooleanColumn("listeners_processed"),
+		), restriction = Some("where created < trunc(sysdate - 30)")),
+
+		Migration("recipientnotificationinfo", Seq(
+			StringColumn("id"),
+			StringColumn("notification_id"),
+			StringColumn("recipient"),
+			BooleanColumn("dismissed"),
+			BooleanColumn("email_sent"),
+			TimestampColumn("attemptedat"),
+		), restriction = Some("where notification_id not in (select id from notification where created >= trunc(sysdate - 30))")),
+
+		Migration("scheduled_notification", Seq(
+			StringColumn("id"),
+			StringColumn("notification_type"),
+			TimestampColumn("scheduled_date"),
+			StringColumn("target_id"),
+			BooleanColumn("completed"),
+		), restriction = Some("where scheduled_date < trunc(sysdate - 30)")),
+
+		Migration("scheduledtrigger", Seq(
+			StringColumn("id"),
+			StringColumn("trigger_type"),
+			TimestampColumn("scheduled_date"),
+			StringColumn("target_id"),
+			TimestampColumn("completed_date"),
+		), restriction = Some("where scheduled_date < trunc(sysdate - 30)")),
+
+		Migration("auditevent", Seq(
+			IntColumn("id"),
+			TimestampColumn("eventdate"),
+			StringColumn("eventtype"),
+			StringColumn("eventstage"),
+			StringColumn("real_user_id"),
+			StringColumn("masquerade_user_id"),
+			StringColumn("data"),
+			StringColumn("eventid"),
+			StringColumn("ip_address"),
+			StringColumn("user_agent"),
+			BooleanColumn("read_only"),
+		), restriction = Some("where eventdate < trunc(sysdate - 30)")),
 	)
 }
 
@@ -1265,9 +1340,9 @@ class DatabaseMigrationController extends BaseSysadminController {
 		writer.println()
 
 		// Do all the truncating first
-		DatabaseMigrationController.mappings.foreach { mapping =>
+		DatabaseMigrationController.mappings.map(_.tableName).distinct.foreach { tableName =>
 			val truncate = newConnection.createStatement()
-			truncate.executeUpdate(s"truncate ${mapping.tableName} cascade")
+			truncate.executeUpdate(s"truncate $tableName cascade")
 			newConnection.commit()
 			truncate.close()
 		}
@@ -1285,7 +1360,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 
 			// Get the total count
 			val st = oldConnection.createStatement()
-			val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName}")
+			val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}")
 			rs.next()
 			val count = rs.getLong(1)
 			rs.close()
@@ -1293,7 +1368,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 
 			val statement = oldConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
 			val results = statement.executeQuery(
-				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName}"
+				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}"
 			)
 
 			logAndWrite(s"$count rows to insert")
