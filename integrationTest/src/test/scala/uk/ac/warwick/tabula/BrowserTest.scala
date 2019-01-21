@@ -10,8 +10,10 @@ import org.junit.runner.RunWith
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeDriverService, ChromeOptions}
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.ScreenshotException
+import org.openqa.selenium.support.events.{AbstractWebDriverEventListener, EventFiringWebDriver}
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
 import org.scalatest._
+import org.scalatest.concurrent.Eventually
 import org.scalatest.exceptions.TestFailedException
 import org.scalatest.junit._
 import org.scalatest.selenium.WebBrowser
@@ -59,7 +61,7 @@ abstract class BrowserTest
 		webDriver.quit()
 	}
 
-	implicit lazy val webDriver: WebDriver = {
+	implicit lazy val webDriver: EventFiringWebDriver = {
 		val driver = P.Browser match {
 			case "chrome" =>
 				val service = new ChromeDriverService.Builder()
@@ -82,14 +84,9 @@ abstract class BrowserTest
 		// Set the most common screen resolution for Tabula
 		// Set a large height so we don't have to deal with fixed footers occluding forms
 		driver.manage().window().setSize(new org.openqa.selenium.Dimension(1920, 3000))
-		driver
+		new EventFiringWebDriver(driver)
+			.register(new DismissIntroductoryPopovers)
 	}
-
-	def ifChromeDriver(operation: ChromeDriver => Unit, otherwise: WebDriver => Unit = _ => {}): Unit =
-		webDriver match {
-			case c: ChromeDriver => operation(c)
-			case d => otherwise(d)
-		}
 
 	// Sometimes you need to wait for a page to load after clicking on a link
 	def verifyPageLoaded(fun: => Unit): Unit = eventually(fun)
@@ -128,17 +125,6 @@ abstract class BrowserTest
 				(el, s"[name=${el.getAttribute("name")}]")
 		}
 		new DateTimePickerField(el, selector)
-	}
-
-	def dismissIntroductoryPopovers(): Unit = {
-		// If the introductory popover is visible, dismiss it
-		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
-			click on cssSelector(".popover.introductory button.close")
-
-			eventually {
-				find(cssSelector(".popover.introductory")) should be (None)
-			}
-		}
 	}
 }
 
@@ -271,6 +257,30 @@ trait TestScreenshots extends Logging {
 
 				failed
 			case other => other
+		}
+	}
+}
+
+class DismissIntroductoryPopovers extends AbstractWebDriverEventListener with WebBrowser with Eventually with Matchers {
+	override implicit val patienceConfig: PatienceConfig =
+		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
+
+	override def afterNavigateTo(url: String, driver: WebDriver): Unit = {
+		implicit val webDriver: WebDriver = driver
+
+		// Disable JavaScript transitions
+		executeScript("jQuery.support.transition = false;")
+
+		// If the introductory popover is visible, dismiss it
+		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
+			click on cssSelector(".popover.introductory button.close")
+
+			eventually {
+				if (find(cssSelector(".popover.introductory")).nonEmpty)
+					click on cssSelector(".popover.introductory button.close")
+
+				find(cssSelector(".popover.introductory")) should be (None)
+			}
 		}
 	}
 }

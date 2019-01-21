@@ -101,8 +101,6 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		And("The administrator is logged in and viewing the groups home page")
 		  signIn as P.Admin1 to groupsetSummaryPage.url
 
-			dismissIntroductoryPopovers()
-
 		  groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
 		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 

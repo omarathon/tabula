@@ -12,8 +12,6 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 			When("I go the admin page")
 			click on linkText("Test Services")
 
-			dismissIntroductoryPopovers()
-
 			// check that we can see some modules on the page.
 			Then("Module XXX01 should be displayed")
 			getModule("XXX01").get.isDisplayed should be {

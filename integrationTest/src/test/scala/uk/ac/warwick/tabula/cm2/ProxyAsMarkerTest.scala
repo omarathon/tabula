@@ -17,7 +17,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		loadCurrentAcademicYearTab()
-		dismissIntroductoryPopovers()
 
 		val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
 		eventually(click on testModulerow)
@@ -54,7 +53,6 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 				click on linkText("Test Services")
 
 				loadCurrentAcademicYearTab()
-				dismissIntroductoryPopovers()
 
 				currentUrl.contains("/department/xxx") should be (true)
 

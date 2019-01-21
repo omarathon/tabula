@@ -74,8 +74,6 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
 		pageSource should include(s"Manage monitoring points for ${AcademicYear.now().toString}")
 		pageSource should include(schemeName)
 
-		dismissIntroductoryPopovers()
-
 		When("The I click the 'Add points' link")
 		click on linkText("Add points")
 

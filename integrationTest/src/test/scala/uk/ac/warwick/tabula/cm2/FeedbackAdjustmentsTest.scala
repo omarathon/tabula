@@ -14,8 +14,6 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I go to the department admin page")
 			go to Path("/coursework/admin/department/xxx")
 
-			dismissIntroductoryPopovers()
-
 			val module = getModule("XXX02").get
 			eventually(click on module.findElement(By.className("mod-code")))
 			Then("I should see the premarked assignment")
@@ -60,8 +58,6 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			eventually(pageSource contains "Adjusted mark - 31" should be {true})
 
 			click on partialLinkText("XXX02 Test Module 2")
-
-			dismissIntroductoryPopovers()
 
 			eventually(click on getModule("XXX02").get.findElement(By.className("mod-code")))
 
