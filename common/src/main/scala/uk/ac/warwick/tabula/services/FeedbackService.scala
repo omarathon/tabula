@@ -64,7 +64,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
   		.seq
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
-		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
+		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")
 			.setString("assignmentId", assignment.id)
 			.uniqueResult
 			.asInstanceOf[Number].intValue
