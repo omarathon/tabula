@@ -105,12 +105,12 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		Then("The Bulk Open Groups menu button is enabled")
-		  groupsetSummaryPage.getBatchOpenButton should be ('enabled)
+		  groupsetSummaryPage.getBatchOpenButton.isEnabled should be (true)
 			// Close the Manage popover again
 			click on linkText("Manage")
 
 		And("The open individual group button is enabled for the specified groupset")
-      setInfo.getOpenButton should be ('enabled)
+      setInfo.getOpenButton.isEnabled should be (true)
 
 		When("I click the batch open button")
 		  groupsetSummaryPage.getBatchOpenButton.click()
@@ -120,7 +120,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  batchOpen.isCurrentPage should be {true}
 
 		When("I check the checkbox next to the groupset")
-		  batchOpen.checkboxForGroupSet(setInfo) should be('enabled)
+		  batchOpen.checkboxForGroupSet(setInfo).isEnabled should be (true)
 		  batchOpen.checkboxForGroupSet(setInfo).click()
 
 		And("I click 'Open'")
@@ -130,10 +130,10 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
   		batchOpen should be ('currentPage)
 
 		And("The checkbox to open the groupset is disabled")
-  		batchOpen.checkboxForGroupSet(setInfo) should not be 'enabled
+  		batchOpen.checkboxForGroupSet(setInfo).isEnabled should not be true
 
 		When("I go back to the groups home page")
-		val updatedSummary = new SmallGroupTeachingPage("xxx", academicYearString)
+			val updatedSummary = new SmallGroupTeachingPage("xxx", academicYearString)
 		  go to updatedSummary.url
 
 		Then("The option to open the groupset is absent")
