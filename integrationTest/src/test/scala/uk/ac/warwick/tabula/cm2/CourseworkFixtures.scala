@@ -335,8 +335,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		eventually {
 			currentUrl should include("/markingworkflows")
 		}
-
-		dismissIntroductoryPopovers()
 	}
 
 	def createMarkingWorkflow(workflowName: String, workflowType: MarkingWorkflowType, markers: Seq[LoginDetails]*): String = as(P.Admin1) {

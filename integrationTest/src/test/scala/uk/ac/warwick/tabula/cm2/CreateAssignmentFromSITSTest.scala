@@ -23,9 +23,6 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 			Then("I should reach the create assignments from previous page")
 			currentUrl should include(s"/${AcademicYear.now().startYear}/setup-assignments")
 		})
-
-		// If the introductory popover is visible, dismiss it
-		dismissIntroductoryPopovers()
 	}
 	private def createSITSAssignment(): Unit = {
 		When("I select the assignment checkbox")

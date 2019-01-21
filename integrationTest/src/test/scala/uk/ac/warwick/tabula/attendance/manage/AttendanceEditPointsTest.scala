@@ -9,8 +9,6 @@ class AttendanceEditPointsTest extends AttendanceFixture with GivenWhenThen {
 	val newPointName = "Renamed point"
 
 	"A Member of staff" should "be able to edit and delete existing points on a scheme" in {
-
-
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 

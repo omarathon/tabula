@@ -18,8 +18,6 @@ class AttendanceViewPointsTest extends AttendanceFixture with GivenWhenThen{
 		 pageSource should include("View monitoring points")
 		 className("monitoring-points").findElement should be (None)
 
-		 dismissIntroductoryPopovers()
-
 		 When("I filter only Undergraduate")
 		 click on id("filterCommand").webElement.findElement(By.className("filter-short-values"))
 		 cssSelector(".dropdown-menu.filter-list").findElement.get.isDisplayed should be (true)

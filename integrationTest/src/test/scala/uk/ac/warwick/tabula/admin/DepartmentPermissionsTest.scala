@@ -53,7 +53,6 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 
 	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
 		gotoPermissionsScreen(parentElement, preExistingCount)
-		dismissIntroductoryPopovers()
 
 		When("I enter a usercode in the picker")
 		click on cssSelector(s"$parentElement .pickedUser")
