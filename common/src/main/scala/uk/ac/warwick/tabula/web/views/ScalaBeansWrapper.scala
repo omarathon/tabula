@@ -11,6 +11,7 @@ import freemarker.ext.beans.BeanModel
 import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
@@ -26,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 	* in Freemarker template engine.
 	*/
 class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_28) with Logging
-	with AutowiringSecurityServiceComponent {
+	with AutowiringSecurityServiceComponent with TaskBenchmarking {
 
 	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
 	// won't know to clear this singleton variable.
@@ -37,7 +38,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedBy("ScalaBeansWrapper.wrap", obj) {
+	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedByIdentity("ScalaBeansWrapper.wrap", obj) {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
