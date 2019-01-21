@@ -297,7 +297,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
 			""")
 			 .addEntity(classOf[UpstreamAssessmentGroupMember])
-			 .setString("academicYear", academicYear.startYear.toString)
+			 .setInteger("academicYear", academicYear.startYear)
 			 .setString("moduleCode", component.moduleCode)
 			 .setString("assessmentGroup", component.assessmentGroup)
 			 .setString("sequence", component.sequence)
@@ -379,7 +379,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				where a.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 			""")
 			.addEntity(classOf[Assignment])
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.setString("departmentCode", department.code)
 			.list.asScala.asInstanceOf[Seq[Assignment]]
 
@@ -390,7 +390,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				where s.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
 			""")
 			.addEntity(classOf[SmallGroupSet])
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.setString("departmentCode", department.code)
 			.list.asScala.asInstanceOf[Seq[SmallGroupSet]]
 
@@ -420,7 +420,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.addScalar("id", StandardBasicTypes.STRING)
 			.addScalar("assignments", StandardBasicTypes.INTEGER)
 			.addScalar("smallGroupSets", StandardBasicTypes.INTEGER)
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.list.asScala.asInstanceOf[Seq[Array[Object]]]
 
 		results.map(columns => DepartmentWithManualUsers(

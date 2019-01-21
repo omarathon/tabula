@@ -561,7 +561,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		 			and s.deleted = 0
 		 			$departmentCondition
 			""")
-			.setString("academicYear", academicYear.getStoreValue.toString)
+			.setParameter("academicYear", academicYear)
 
 		department.foreach(d => query.setEntity("department", d))
 
