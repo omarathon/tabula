@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.cm2
 
-import org.joda.time.DateTime
 import org.openqa.selenium.By
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
 import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
@@ -29,7 +28,7 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
 		currentUrl.contains("/summary") should be (true)
 
-		val expandAssignmentUser = id("main").webElement.findElements(By.cssSelector(".student")).get(0) //tabula-functest-student1
+		val expandAssignmentUser = eventually(id("main").webElement.findElements(By.className("student")).get(0)) //tabula-functest-student1
 		click on expandAssignmentUser
 
 		val proxyLink = id("main").webElement.findElement(By.partialLinkText("Proxy"))

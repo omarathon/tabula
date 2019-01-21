@@ -34,19 +34,19 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsetInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		val group1Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 1")
-		group1Checkbox should be('enabled)
+		group1Checkbox.isEnabled should be (true)
 
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
-		group2Checkbox should be('enabled)
+		group2Checkbox.isEnabled should be (true)
 
 		And("The 'sign up' button should be disabled")
-		groupsetInfo.getSignupButton should not be 'enabled
+		groupsetInfo.getSignupButton.isEnabled should not be true
 
 		When("I select one of the groups")
 		group1Checkbox.click()
 
 		Then("The 'sign up' link button becomes enabled")
-		groupsetInfo.getSignupButton should be('enabled)
+		groupsetInfo.getSignupButton.isEnabled should be (true)
 
 		When("I click the sign up button")
 		groupsetInfo.getSignupButton.submit()
@@ -89,7 +89,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		Then("The 'leave' button for group 1 should be enabled")
 		val leaveButton  = groupInfo.findLeaveButtonFor("Group 1").get
-		leaveButton should be('enabled)
+		leaveButton.isEnabled should be (true)
 
 		When("I click the 'leave' button")
 		leaveButton.submit()
@@ -103,10 +103,10 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 			.getOrElse(fail(s"No group set info found for $TEST_MODULE_CODE - $TEST_GROUPSET_NAME"))
 
 		val group1Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 1")
-		group1Checkbox should be('enabled)
+		group1Checkbox.isEnabled should be (true)
 
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
-		group2Checkbox should be('enabled)
+		group2Checkbox.isEnabled should be (true)
 	}
 
 	"A student" should "not see a non-self-sign-up groupset for which they have not been allocated a group" in {
@@ -247,11 +247,11 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		And("Group 1's checkbox should be disabled")
 		val group1Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 1")
-		group1Checkbox should not be 'enabled
+		group1Checkbox.isEnabled should not be true
 
 		And("Group 2's checkbox should be enabled")
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
-		group2Checkbox should be('enabled)
+		group2Checkbox.isEnabled should be (true)
 
 		And("The group locked icon is not shown")
 		groupsetInfo.showsGroupLockedIcon should be {false}
