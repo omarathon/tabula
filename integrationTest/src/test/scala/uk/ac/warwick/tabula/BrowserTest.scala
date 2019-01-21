@@ -11,7 +11,7 @@ import org.openqa.selenium.chrome.{ChromeDriver, ChromeDriverService, ChromeOpti
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.remote.ScreenshotException
 import org.openqa.selenium.support.events.{AbstractWebDriverEventListener, EventFiringWebDriver}
-import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver}
+import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebElement}
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.exceptions.TestFailedException
@@ -265,12 +265,7 @@ class DismissIntroductoryPopovers extends AbstractWebDriverEventListener with We
 	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
-	override def afterNavigateTo(url: String, driver: WebDriver): Unit = {
-		implicit val webDriver: WebDriver = driver
-
-		// Disable JavaScript transitions
-		executeScript("jQuery.support.transition = false;")
-
+	private def dismissIntroductoryPopovers(implicit driver: WebDriver): Unit = {
 		// If the introductory popover is visible, dismiss it
 		if (cssSelector(".popover.introductory").findElement.exists(_.isDisplayed)) {
 			click on cssSelector(".popover.introductory button.close")
@@ -283,4 +278,10 @@ class DismissIntroductoryPopovers extends AbstractWebDriverEventListener with We
 			}
 		}
 	}
+
+	override def beforeClickOn(element: WebElement, driver: WebDriver): Unit =
+		dismissIntroductoryPopovers(driver)
+
+	override def afterNavigateTo(url: String, driver: WebDriver): Unit =
+		dismissIntroductoryPopovers(driver)
 }
