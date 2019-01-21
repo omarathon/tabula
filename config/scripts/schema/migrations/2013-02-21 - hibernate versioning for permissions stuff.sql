@@ -1,6 +1,0 @@
---- TAB-536
-
-ALTER TABLE CustomRoleDefinition ADD (HIB_VERSION NUMBER default 0);
-ALTER TABLE RoleOverride ADD (HIB_VERSION NUMBER default 0);
-ALTER TABLE GrantedRole ADD (HIB_VERSION NUMBER default 0);
-ALTER TABLE GrantedPermission ADD (HIB_VERSION NUMBER default 0);

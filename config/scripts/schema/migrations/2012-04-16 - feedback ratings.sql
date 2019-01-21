@@ -1,6 +1,0 @@
-
-ALTER TABLE FEEDBACK
-ADD ( ratingPrompt NUMBER(1,0) );
-
-ALTER TABLE FEEDBACK
-ADD ( ratingHelpful NUMBER(1,0) );
