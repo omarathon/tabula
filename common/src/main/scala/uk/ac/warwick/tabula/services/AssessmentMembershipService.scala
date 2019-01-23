@@ -25,6 +25,7 @@ trait AssessmentMembershipService {
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo]
 	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
 	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember]
 	def getAssessmentComponent(id: String): Option[AssessmentComponent]
@@ -157,6 +158,7 @@ class AssessmentMembershipServiceImpl
 	def getAssessmentGroup(id:String): Option[AssessmentGroup] = dao.getAssessmentGroup(id)
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup] = find(template)
 	def getUpstreamAssessmentGroups(module: Module, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]= dao.getUpstreamAssessmentGroups(module, academicYear)
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroups(student, academicYear, resitOnly)
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = find(template)
 	def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo] = {
 		find(template).map( grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
