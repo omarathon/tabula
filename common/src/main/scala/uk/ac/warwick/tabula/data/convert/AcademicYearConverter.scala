@@ -13,7 +13,7 @@ class AcademicYearConverter extends TwoWayConverter[String, AcademicYear] {
 		if ("current" == year || "sits" == year) AcademicYear.now()
 		else if (year.hasText)
 			try { AcademicYear.parse(year) } catch {
-				case e: IllegalArgumentException =>
+				case _: IllegalArgumentException =>
 					try { AcademicYear(year.toInt) } catch { case _: NumberFormatException => null }
 			}
 		else null

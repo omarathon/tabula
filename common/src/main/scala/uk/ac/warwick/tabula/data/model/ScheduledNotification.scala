@@ -6,17 +6,15 @@ import scala.annotation.meta.field
 
 @Entity(name = "Scheduled_Notification")
 class ScheduledNotification[A >: Null <: ToEntityReference](
+	// holds the discriminator value for the notification that will be spawned when this is completed
+	@(Column @field)(name="notification_type")
+	var notificationType: String,
 
-		// holds the discriminator value for the notification that will be spawned when this is completed
-		@(Column @field)(name="notification_type")
-		var notificationType: String,
+	targetEntity: ToEntityReference,
 
-		targetEntity: ToEntityReference,
-
-		@(Column @field)(name="scheduled_date")
-		var scheduledDate: DateTime
-
-	) extends GeneratedId with Serializable {
+	@(Column @field)(name="scheduled_date")
+	var scheduledDate: DateTime
+) extends GeneratedId with Serializable {
 
 	def this() {
 		this(null, null, null)

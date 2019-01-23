@@ -57,16 +57,8 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		When("I upload a file for submission")
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file1.txt").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/file1.txt").getFile)
-			}
-		)
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource("/file1.txt").getFile)
 
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
@@ -78,16 +70,8 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		When("I upload another file")
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file2.txt").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/file2.txt").getFile)
-			}
-		)
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource("/file2.txt").getFile)
 
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)

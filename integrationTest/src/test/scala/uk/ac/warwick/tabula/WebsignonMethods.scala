@@ -1,19 +1,14 @@
 package uk.ac.warwick.tabula
 
-import collection.JavaConverters._
-import org.scalatest.selenium.WebBrowser
-import org.scalatest.Assertions
-import org.scalatest.Matchers
-import org.openqa.selenium.{Cookie, WebDriver}
+import org.openqa.selenium.WebDriver
+import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.Eventually
+import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.SpanSugar._
-import WebsignonMethods._
+import org.scalatest.time.{Millis, Seconds, Span}
+import uk.ac.warwick.tabula.WebsignonMethods._
 
 import scala.util.matching.Regex
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import com.gargoylesoftware.htmlunit
-import com.gargoylesoftware.htmlunit.WebClient
-import org.scalatest.time.{Millis, Seconds, Span}
 
 object WebsignonMethods {
 	def parseSignedInDetail(html: String): String = {
@@ -23,68 +18,11 @@ object WebsignonMethods {
 			case _ => "couldn't parse anything useful from the HTML"
 		}
 	}
-
-	// Doesn't work yet.
-	//val sessions = new SessionCache
-}
-
-/**
- * Maintains a JVM-level cache of each user's cookies, so signing in
- * as a user should be faster after the first time in a run - we can
- * just switch their cookies back in, simulating each user being online
- * at the same time in different browsers.
- */
-class SessionCache {
-	private var map = Map[String, Set[Cookie]]()
-
-	// Get HTMLUnit WebClient if one is available.
-	def getWebClient(driver: WebDriver): Option[WebClient] = driver match {
-		case hud: HtmlUnitDriver =>
-			val getWebClient = hud.getClass.getDeclaredMethod("getWebClient")
-			getWebClient.setAccessible(true)
-			Some(getWebClient.invoke(hud).asInstanceOf[WebClient])
-//		case _ =>
-	}
-
-	// Clears ALL cookies, not just the current page's.
-	def clearCookies(webDriver: WebDriver) {
-		getWebClient(webDriver).foreach { wc =>
-			wc.getCookieManager.clearCookies()
-		}
-	}
-
-	/** If we have stored cookies and are using HtmlUnit, we can
-		* dig in to the cookie manager and reinsert those cookies
-		* without having to sign in again.
-		*/
-	def retrieve(usercode: String, webDriver: WebDriver) {
-		getWebClient(webDriver).foreach { wc =>
-			map.get(usercode).foreach { cookies =>
-				val cm = wc.getCookieManager
-				cm.clearCookies()
-				cookies.foreach { cookie =>
-					cm.addCookie(new htmlunit.util.Cookie(
-						cookie.getDomain,
-						cookie.getName,
-						cookie.getValue,
-						cookie.getPath,
-						cookie.getExpiry,
-						false
-					))
-				}
-			}
-		}
-
-	}
-
-	def store(usercode: String, webDriver: WebDriver) {
-		map += (usercode -> webDriver.manage().getCookies.asScala.toSet)
-	}
 }
 
 trait WebsignonMethods extends Matchers with Eventually {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	import WebBrowser._ // include methods like "go to"

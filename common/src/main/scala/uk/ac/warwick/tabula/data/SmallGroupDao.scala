@@ -250,15 +250,14 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.uniqueResult
 	}
 
-	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] = {
-		if(studentIds.isEmpty || occurrences.isEmpty)
-			return Seq()
-
-		session.newCriteria[SmallGroupEventAttendanceNote]
-			.add(safeIn("student.id", studentIds))
-			.add(safeIn("occurrence", occurrences))
-			.seq
-	}
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] =
+		if (studentIds.isEmpty || occurrences.isEmpty)
+			Nil
+		else
+			session.newCriteria[SmallGroupEventAttendanceNote]
+				.add(safeIn("student.id", studentIds))
+				.add(safeIn("occurrence", occurrences))
+				.seq
 
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup] =
 		session.newCriteria[SmallGroupEventAttendance]
@@ -562,7 +561,7 @@ class SmallGroupDaoImpl extends SmallGroupDao
 		 			and s.deleted = 0
 		 			$departmentCondition
 			""")
-			.setString("academicYear", academicYear.getStoreValue.toString)
+			.setParameter("academicYear", academicYear)
 
 		department.foreach(d => query.setEntity("department", d))
 

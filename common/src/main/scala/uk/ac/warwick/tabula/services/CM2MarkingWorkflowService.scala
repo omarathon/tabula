@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -70,7 +71,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with Logging {
+	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with Logging {
 
 	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
@@ -263,14 +264,22 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		markingWorkflowDao.markerFeedbackForAssignmentAndStage(assignment, stage)
 
 	override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations = {
-		feedbackByMarker(assignment,stage).map{ case (marker, markerFeedbacks) =>
-			marker -> markerFeedbacks.map(_.student).toSet
+		val feedback = feedbackByMarker(assignment, stage)
+		val usercodes = feedback.values.flatten.map(_.feedback.usercode).toSet
+
+		val students = {
+			if (usercodes.isEmpty) Map.empty[String, User]
+			else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+		}.withDefault(new AnonymousUser(_))
+
+		feedback.map { case (marker, markerFeedbacks) =>
+			marker -> markerFeedbacks.map { mf => students(mf.feedback.usercode) }.toSet
 		}
 	}
 
 	// marker can be an Anon marker if marking
 	override def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]] = {
-		allMarkerFeedbackForStage(assignment,stage).groupBy(_.marker)
+		allMarkerFeedbackForStage(assignment, stage).groupBy(_.marker)
 	}
 
 	override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {

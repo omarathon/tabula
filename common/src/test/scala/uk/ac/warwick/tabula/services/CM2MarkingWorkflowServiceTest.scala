@@ -39,6 +39,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
 	val student3 = Fixtures.user("student3", "student3")
 
 	val userLookup = Fixtures.userLookupService(marker1, marker2, student1, student2, student3)
+	service.userLookup = userLookup
 
 	trait MarkerFeedbackFixture extends Mockito {
 		val mf1 = Fixtures.markerFeedback(Fixtures.assignmentFeedback(userId = "student1"))

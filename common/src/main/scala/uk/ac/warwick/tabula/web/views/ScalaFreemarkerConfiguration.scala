@@ -29,15 +29,16 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 
 	this.setObjectWrapper(createWrapper(true))
 
-	private def createWrapper(useCache: Boolean) = {
+	private def createWrapper(useCache: Boolean): ScalaBeansWrapper = {
 		val wrapper = new ScalaBeansWrapper
 		wrapper.setMethodsShadowItems(false) // do not lookup method first.
 		wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
 
 		// TAB-351 TAB-469 Don't enable caching
-		wrapper.setUseCache(useCache)
+		wrapper.setUseCache(false)
 		wrapper.useWrapperCache = useCache
 		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE)
+		wrapper.writeProtect()
 
 		wrapper
 	}

@@ -204,46 +204,48 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] =
 		getAllByUserIds(Seq(userId), disableFilter, eagerLoad, activeOnly)
 
-	def getAllByUserIds(userIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] = {
-		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
-		try {
-			if (disableFilter)
-				session.disableFilter(Member.StudentsOnlyFilter)
+	def getAllByUserIds(userIds: Seq[String], disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] =
+		if (userIds.isEmpty) Nil
+		else {
+			val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
+			try {
+				if (disableFilter)
+					session.disableFilter(Member.StudentsOnlyFilter)
 
-			val criteria =
-				session.newCriteria[Member]
-					.add(safeIn("userId", userIds.map(_.safeTrim.toLowerCase)))
-					.addOrder(asc("universityId"))
-			if (activeOnly)
-				criteria.add(disjunction()
-					.add(is("inUseFlag", "Active"))
-					.add(like("inUseFlag", "Inactive - Starts %"))
-				)
+				val criteria =
+					session.newCriteria[Member]
+						.add(safeIn("userId", userIds.map(_.safeTrim.toLowerCase)))
+						.addOrder(asc("universityId"))
+				if (activeOnly)
+					criteria.add(disjunction()
+						.add(is("inUseFlag", "Active"))
+						.add(like("inUseFlag", "Inactive - Starts %"))
+					)
 
 
-			if (eagerLoad) {
-				criteria
-					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
-					.setFetchMode("homeDepartment", FetchMode.JOIN)
-					.setFetchMode("homeDepartment.children", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
-					.distinct
-					.seq.map { m =>
-					// This is the worst hack of all time
-					m.permissionsParents.force
-					m
+				if (eagerLoad) {
+					criteria
+						.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+						.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+						.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+						.setFetchMode("homeDepartment", FetchMode.JOIN)
+						.setFetchMode("homeDepartment.children", FetchMode.JOIN)
+						.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
+						.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
+						.distinct
+						.seq.map { m =>
+						// This is the worst hack of all time
+						m.permissionsParents.force
+						m
+					}
+				} else {
+					criteria.seq
 				}
-			} else {
-				criteria.seq
+			} finally {
+				if (disableFilter && filterEnabled)
+					session.enableFilter(Member.StudentsOnlyFilter)
 			}
-		} finally {
-			if (disableFilter && filterEnabled)
-				session.enableFilter(Member.StudentsOnlyFilter)
 		}
-	}
 
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): mutable.Buffer[Member] = {
 		val homeDepartmentMatches = session.newCriteria[Member]
@@ -381,15 +383,17 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 	): Seq[StudentMember] = {
 		val universityIds = findUniversityIdsByRestrictions(restrictions)
 
-		if (universityIds.isEmpty)
-			return Seq()
+		if (universityIds.isEmpty) Nil
+		else {
+			val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
 
-		val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
+			// TODO Is there a way of doing multiple safeIn queries with DB-set prders and max results?
+			orders.foreach {
+				c.addOrder
+			}
 
-		// TODO Is there a way of doing multiple safeIn queries with DB-set prders and max results?
-		orders.foreach { c.addOrder }
-
-		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
+			c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
+		}
 	}
 
 	def getSCDsByAgentRelationshipAndRestrictions(

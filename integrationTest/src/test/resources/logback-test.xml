@@ -13,17 +13,9 @@
 			<pattern>%d{yyyy-MM-dd HH:mm:ss} %c{1} [%p] %m%n</pattern>
 		</encoder>
 	</appender>
-	<logger name="com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement" level="ERROR"/>
-	<logger name="com.gargoylesoftware.htmlunit.javascript.host.css.CSSStyleSheet" level="ERROR"/>
 	<logger name="org.springframework.jdbc.core" level="DEBUG"/>
-	<logger name="com.gargoylesoftware.htmlunit.IncorrectnessListenerImpl" level="OFF"/>
-	<logger name="com.gargoylesoftware.htmlunit.javascript.host.ActiveXObject" level="OFF"/>
-	<logger name="com.gargoylesoftware.htmlunit.html.HtmlScript" level="OFF"/>
 	<logger name="org.hibernate" level="WARN"/>
-	<logger name="com.gargoylesoftware.htmlunit.javascript.StrictErrorReporter" level="OFF"/>
-	<logger name="com.gargoylesoftware.htmlunit.javascript.host.html.HTMLDocument" level="OFF"/>
 	<logger name="uk.ac.warwick.tabula" level="INFO"/>
-	<logger name="com.gargoylesoftware.htmlunit.DefaultCssErrorHandler" level="OFF"/>
 	<root level="WARN">
 		<appender-ref ref="S"/>
 	</root>

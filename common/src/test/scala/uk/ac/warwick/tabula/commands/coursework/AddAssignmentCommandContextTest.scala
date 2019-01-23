@@ -45,7 +45,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 			session.flush()
 			session.clear()
 
-			val assignment = session.get(classOf[Assignment], assignmentNew.id).asInstanceOf[Assignment]
+			val assignment = session.get(classOf[Assignment], assignmentNew.id)
 
 			assignment.fields.size should be >= 2
 			assignment.submissionFields.size should be (2)
