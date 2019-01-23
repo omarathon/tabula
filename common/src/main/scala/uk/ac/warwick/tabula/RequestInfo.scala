@@ -33,8 +33,8 @@ class RequestInfo(
 ) extends EarlyRequestInfo
 
 object RequestInfo {
-	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {
-		override def initialValue = None
+	private val threadLocal: ThreadLocal[Option[RequestInfo]] = new ThreadLocal[Option[RequestInfo]] {
+		override def initialValue: Option[RequestInfo] = None
 	}
 
 	def fromThread: Option[RequestInfo] = threadLocal.get
@@ -71,8 +71,8 @@ trait EarlyRequestInfo {
 }
 
 object EarlyRequestInfo {
-	private val threadLocal = new ThreadLocal[Option[EarlyRequestInfo]] {
-		override def initialValue = None
+	private val threadLocal: ThreadLocal[Option[EarlyRequestInfo]] = new ThreadLocal[Option[EarlyRequestInfo]] {
+		override def initialValue: Option[RequestInfo] = None
 	}
 
 	def open(info: EarlyRequestInfo): Unit = threadLocal.set(Some(info))
