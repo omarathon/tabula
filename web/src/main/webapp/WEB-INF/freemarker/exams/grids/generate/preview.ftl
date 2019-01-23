@@ -28,7 +28,7 @@
 
 		<div id="examGridContainer">
 			<div class="row">
-				<div class="alert alert-info col-sm-8">
+				<div class="alert alert-info <#if user?? && user.sysadmin>col-sm-8<#else>col-sm-12</#if>">
 					<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
 
 					<#if oldestImport??>
@@ -67,21 +67,23 @@
 					</p>
 				</div>
 
-				<div class="alert col-sm-4">
-					<h3>Check for missing students</h3>
-					<p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
-					<form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
-						<@bs3form.form_group>
-							<@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
-								<span class="input-group-btn">
-									<button class="btn btn-default" type="submit">Check</button>
-								</span>
-							</@bs3form.flexipicker>
-						</@bs3form.form_group>
-						<@form_fields.select_course_fields />
-					</form>
-					<div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
-				</div>
+				<#if user?? && user.sysadmin>
+					<div class="alert col-sm-4">
+						<h3>Check for missing students</h3>
+						<p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
+						<form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
+							<@bs3form.form_group>
+								<@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
+									<span class="input-group-btn">
+										<button class="btn btn-default" type="submit">Check</button>
+									</span>
+								</@bs3form.flexipicker>
+							</@bs3form.form_group>
+							<@form_fields.select_course_fields />
+						</form>
+						<div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+					</div>
+				</#if>
 
 			</div>
 
