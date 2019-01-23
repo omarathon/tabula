@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula
 
 import org.springframework.web.context.request.{RequestAttributes, RequestContextHolder, ServletRequestAttributes}
 import org.springframework.web.servlet.HandlerMapping
-import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
-import uk.ac.warwick.tabula.services.jobs.JobInfo
 import uk.ac.warwick.util.web.Uri
 
 /**
@@ -84,7 +82,7 @@ object EarlyRequestInfo {
 		* the EarlyRequestInfo. This is so tests can set up a RequestInfo
 		* as normal and don't need updating.
 		*/
-	def fromThread: Option[EarlyRequestInfo] = RequestInfo.fromThread orElse JobInfo.fromThread orElse threadLocal.get
+	def fromThread: Option[EarlyRequestInfo] = RequestInfo.fromThread orElse threadLocal.get
 
 	def close() {
 		fromThread foreach { _.requestLevelCache.shutdown() }
