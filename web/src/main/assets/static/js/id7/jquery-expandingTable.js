@@ -84,9 +84,6 @@ jQuery.fn.expandingTable = function(options) {
 						if ($offsetParent.is('.table-responsive')) {
 							var offsetParentPosition = $offsetParent.position();
 
-							// Adjust the cell position to account for the placement of the table
-							cellTop += offsetParentPosition.top;
-
 							tablePosition.left += offsetParentPosition.left;
 							tablePosition.left += $offsetParent.scrollLeft();
 
