@@ -7,9 +7,9 @@ import javax.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, EarlyRequestInfo}
 import uk.ac.warwick.tabula.events.JobNotificationHandling
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.userlookup.User
@@ -126,6 +126,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	}
 
 	def run(instance: JobInstance, job: Job) {
+		JobInfo.open(new JobInfoImpl)
 		try job.run(instance)
 		catch {
 			case e: Exception if stopping =>
@@ -155,6 +156,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 			// Otherwise, the status set by `cleanUp` is overwritten.
 			finish(instance)
 		}
+		JobInfo.close()
 	}
 
 	private def start(instance: JobInstance) {
@@ -194,4 +196,27 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 		})
 	}
 
+}
+
+trait JobInfo extends EarlyRequestInfo {
+	val requestLevelCache: RequestLevelCache
+}
+
+object JobInfo {
+	private val threadLocal: ThreadLocal[Option[JobInfo]] = new ThreadLocal[Option[JobInfo]] {
+		override def initialValue: Option[JobInfo] = None
+	}
+
+	def open(info: JobInfo): Unit = threadLocal.set(Some(info))
+
+	def fromThread: Option[JobInfo] = threadLocal.get
+
+	def close() {
+		fromThread foreach { _.requestLevelCache.shutdown() }
+		threadLocal.remove()
+	}
+}
+
+class JobInfoImpl extends JobInfo {
+	val requestLevelCache: RequestLevelCache = new RequestLevelCache
 }
