@@ -4,8 +4,7 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{DoubleMarking, ModeratedMarking, SingleMarking}
 
-
-class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenWhenThen {
+class AssignMarkersTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
 	"Department admin" should "be able to allocate markers to a single marker workflow " in {
 
@@ -28,12 +27,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			Then("The allocations have been saved")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("1"))
 
-			// PhantomJS doesn't support confirm() - (we have a confirmation box when we click remove all)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
 			When("I remove the markers")
 			click on partialLinkText("Remove all")
+
+			webDriver.switchTo().alert().accept()
+
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
@@ -71,13 +69,12 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
 
-			// PhantomJS doesn't support confirm() - (we have confirmation box)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
-
 			When("I remove the markers")
-			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
+			findAll(partialLinkText("Remove all")).toSeq.foreach(e => {
+				click on e.underlying
+				webDriver.switchTo().alert().accept()
+			})
+
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
@@ -115,13 +112,11 @@ class AssignMarkersTest  extends BrowserTest with CourseworkFixtures with GivenW
 			first1.foreach(_.underlying.getText should be ("1"))
 			second1.foreach(_.underlying.getText should be ("2"))
 
-			// PhantomJS doesn't support confirm() - (we have confirmation box)
-			ifPhantomJSDriver { _ =>
-				executeScript("window.confirm = function(msg) { return true; };")
-			}
-
 			When("I remove the markers")
-			findAll(partialLinkText("Remove all")).toSeq.foreach(e => click on e.underlying)
+			findAll(partialLinkText("Remove all")).toSeq.foreach(e => {
+				click on e.underlying
+				webDriver.switchTo().alert().accept()
+			})
 			Then("No markers should be assigned")
 			findAll(cssSelector(".drag-count"))foreach(_.underlying.getText should be ("0"))
 			cssSelector(s"input[name=createAndAddMarkers]").webElement.click()

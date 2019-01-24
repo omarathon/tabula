@@ -69,17 +69,19 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		}
 		When("I select the automatically submission release checkbox")
 		val automaticallyReleaseToMarkersCheckbox = id("automaticallyReleaseToMarkers").webElement
-		eventually({
+		eventually {
 			automaticallyReleaseToMarkersCheckbox.isDisplayed should be (true)
-		})
-		automaticallyReleaseToMarkersCheckbox.click()
-		Then("The Automatically Release To Markers Checkbox should be checked")
-		automaticallyReleaseToMarkersCheckbox.isSelected should be (true)
+			click on automaticallyReleaseToMarkersCheckbox
+			Then("The Automatically Release To Markers Checkbox should be checked")
+			automaticallyReleaseToMarkersCheckbox.isSelected should be(true)
+		}
 		When("I change the credit bearing radio button to Formative")
 		val formativeRadioBtn = id("summative2").webElement
-		formativeRadioBtn.click()
-		Then("The credit bearing radio button should be selected")
-		formativeRadioBtn.isSelected should be (true)
+		eventually {
+			click on formativeRadioBtn
+			Then("The credit bearing radio button should be selected")
+			formativeRadioBtn.isSelected should be(true)
+		}
 		When("I select the automatically submission release checkbox")
 		val dissertationCheckbox = id("dissertation").webElement
 		dissertationCheckbox.click()
@@ -94,36 +96,57 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		When("The I click on the Save options button")
 		val saveButton = id("main").webElement.findElement(By.cssSelector("div.submit-buttons button.btn-primary"))
 		click on saveButton
-		/*val closeButton = id("main").webElement.findElement(By.cssSelector("button.close"))
-		eventually {
-			closeButton.isDisplayed should be (true)
-			click on closeButton
-		}
-		Then("The modal screen should close")
+		Then("The modal screen should be closed")
 		eventually {
 			id("sharedAssignmentPropertiesForm").webElement.isDisplayed should be (false)
-		}*/
+		}
 		When("The I click on the Set dates button")
 		val datesButton = id("set-dates-button").webElement
-		click on datesButton
+		eventually {
+			click on datesButton
+		}
 		var openDate = id("main").webElement.findElement(By.id("modal-open-date"))
 		eventually {
 			Then("The modal screen for Set dates opens")
 			openDate.isDisplayed should be (true)
 		}
 		When("I change the open date")
-		openDate.clear()
-		openDate.sendKeys("02-Aug-2017 18:00:00")
+		openDate.click()
+
+		eventually {
+			val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).next()
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
+			dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "2" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == "18:00" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == "18:00" }.head
+		}
+
 		Then("The open date should be the new value")
 		openDate.getAttribute("value") should be ("02-Aug-2017 18:00:00")
-		var closeDate = id("main").webElement.findElement(By.id("modal-close-date"))
+
+		val closeDate = id("main").webElement.findElement(By.id("modal-close-date"))
 		When("I change the close date")
-		closeDate.clear()
-		closeDate.sendKeys("08-Aug-2017 09:30:00")
+		closeDate.click()
+
+		eventually {
+			val dateTimePicker = className("datetimepicker").findAllElements.filter(_.isDisplayed).toSeq.last
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("fa-arrow-left")).asScala.filter(_.isDisplayed).head
+			dateTimePicker.underlying.findElements(By.className("switch")).asScala.filter(_.isDisplayed).head.getText should be("August 2017")
+
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-days")).findElements(By.className("day")).asScala.filter { el => el.isDisplayed && el.getText == "8" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-hours")).findElements(By.className("hour")).asScala.filter { el => el.isDisplayed && el.getText == "9:00" }.head
+			click on dateTimePicker.underlying.findElement(By.className("datetimepicker-minutes")).findElements(By.className("minute")).asScala.filter { el => el.isDisplayed && el.getText == "9:30" }.head
+		}
+
 		Then("The close date should be the new value")
 		closeDate.getAttribute("value") should be ("08-Aug-2017 09:30:00")
+
 		When("I click on the Set dates button")
-		val setDatesButton = id("main").webElement.findElement(By.cssSelector(".btn-primary"))
+		val setDatesButton = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Save dates')]")).get(0)
 		click on setDatesButton
 		eventually {
 			Then("The modal screen for Set dates closes")
@@ -133,8 +156,8 @@ class CreateAssignmentFromSITSTest extends BrowserTest with CourseworkFixtures {
 		id("selected-count").webElement.getText should be ("1 selected")
 		When("I click on the submit button")
 		val submitButton = id("main").webElement.findElement(By.cssSelector(".btn-primary"))
-		click on submitButton
 		eventually {
+			click on submitButton
 			Then("The page should go to the assignments page")
 			currentUrl should include("/department/xxx/20")
 		}

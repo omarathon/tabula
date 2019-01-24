@@ -45,6 +45,7 @@ trait AssessmentMembershipDao {
 	def getAssessmentComponent(id: String): Option[AssessmentComponent]
 	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup]
 
 	/**
 	 * Get all AssessmentComponents that appear to belong to this module.
@@ -216,6 +217,27 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.addOrder(Order.asc("sequence"))
 			.seq
 	}
+
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup] = {
+		val criteria = session.newCriteria[UpstreamAssessmentGroup]
+			.createAlias("members", "member")
+  		.add(is("member.universityId", student.universityId))
+
+		if(resitOnly) {
+			criteria.add(or(
+				or(isNotNull("member.resitActualMark"), isNotNull("member.resitActualGrade")),
+				or(isNotNull("member.resitAgreedMark"), isNotNull("member.resitAgreedGrade"))
+			))
+		}
+
+		criteria.add(is("academicYear", academicYear))
+			.addOrder(Order.asc("moduleCode"))
+			.addOrder(Order.asc("assessmentGroup"))
+			.addOrder(Order.asc("sequence"))
+			.seq
+	}
+
+
 	/** Just gets components of type Assignment for this module, not all components. */
 	def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent] = {
 		val c = session.newCriteria[AssessmentComponent]
@@ -297,7 +319,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				join StudentCourseYearDetails scyd on scyd.scjCode = scd.scjCode and  scyd.academicyear = uag.academicYear and scd.scjStatusCode not like  'P%'
 			""")
 			 .addEntity(classOf[UpstreamAssessmentGroupMember])
-			 .setString("academicYear", academicYear.startYear.toString)
+			 .setInteger("academicYear", academicYear.startYear)
 			 .setString("moduleCode", component.moduleCode)
 			 .setString("assessmentGroup", component.assessmentGroup)
 			 .setString("sequence", component.sequence)
@@ -379,7 +401,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				where a.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = a.membersgroup_id)
 			""")
 			.addEntity(classOf[Assignment])
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.setString("departmentCode", department.code)
 			.list.asScala.asInstanceOf[Seq[Assignment]]
 
@@ -390,7 +412,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 				where s.membersgroup_id in (select distinct(i.group_id) from usergroupinclude i join member m on i.usercode = m.userid where i.group_id = s.membersgroup_id)
 			""")
 			.addEntity(classOf[SmallGroupSet])
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.setString("departmentCode", department.code)
 			.list.asScala.asInstanceOf[Seq[SmallGroupSet]]
 
@@ -420,7 +442,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.addScalar("id", StandardBasicTypes.STRING)
 			.addScalar("assignments", StandardBasicTypes.INTEGER)
 			.addScalar("smallGroupSets", StandardBasicTypes.INTEGER)
-			.setString("academicYear", academicYear.startYear.toString)
+			.setInteger("academicYear", academicYear.startYear)
 			.list.asScala.asInstanceOf[Seq[Array[Object]]]
 
 		results.map(columns => DepartmentWithManualUsers(

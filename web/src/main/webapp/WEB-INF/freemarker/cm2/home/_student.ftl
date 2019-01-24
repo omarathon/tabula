@@ -11,6 +11,7 @@
 		empty_message="You have no assignments that you need to submit in Tabula."
 		expand_by_default=true
 		show_submission_progress=true
+		hide_late_formative=true
 	/>
 
 	<@components.student_assignment_list

@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.support.ui.Select
-import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.data.model.WorkflowCategory
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType
@@ -226,11 +227,19 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			eventually(pageSource contains "Add marker" should be {true})
 
 			Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
-				m.zipWithIndex.foreach{ case(marker, i) =>
-					new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+				m.zipWithIndex.foreach{ case (marker, i) =>
+					val markerField = findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i)
+					markerField.underlying.sendKeys(marker.usercode)
+
+					// Wait for the flexi picker to find a result, then select it
+					eventually {
+						findAll(cssSelector(".flexi-picker-result")).toList.count(_.isDisplayed) should be (1)
+					}
+					markerField.underlying.sendKeys(Keys.TAB)
+
 					click on className(field).webElement.findElement(By.cssSelector("button.btn"))
 					eventually {
-						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+						findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (1)
 					}
 				}
 			}
@@ -343,10 +352,18 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		var markerA = markers.headOption.getOrElse(Nil)
 		Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach{case (field, m) =>
 			m.zipWithIndex.foreach{ case(marker, i) =>
-				new TextField(findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i).underlying).value = marker.usercode
+				val markerField = findAll(cssSelector(s".$field input.flexi-picker")).toList.apply(i)
+				markerField.underlying.sendKeys(marker.usercode)
+
+				// Wait for the flexi picker to find a result, then select it
+				eventually {
+					findAll(cssSelector(".flexi-picker-result")).toList.count(_.isDisplayed) should be (1)
+				}
+				markerField.underlying.sendKeys(Keys.TAB)
+
 				click on className(field).webElement.findElement(By.cssSelector("button.btn"))
 				eventually {
-					findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (i+2)
+					findAll(cssSelector(s".$field input.flexi-picker")).toList.count(_.isDisplayed) should be (1)
 				}
 			}
 		}
@@ -409,16 +426,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		click on find(cssSelector("input[type=file]")).get
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource(file).getFile)
-			}
-		)
+		pressKeys(getClass.getResource(file).getFile)
 
 		submit()
 	}

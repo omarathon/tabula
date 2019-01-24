@@ -125,7 +125,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                     "Run functional tests",
                     "Test",
                     "TEST",
-                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-build-cache --no-daemon",
+                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-daemon",
                     "**/test-results/**/*.xml",
                     new Artifact()
                         .name("Failed test screenshots")

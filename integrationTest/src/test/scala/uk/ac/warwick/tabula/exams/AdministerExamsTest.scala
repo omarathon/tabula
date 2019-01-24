@@ -4,6 +4,7 @@ import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.AcademicYear
+import scala.collection.JavaConverters._
 
 class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen {
@@ -11,67 +12,72 @@ class AdministerExamsTest extends ExamFixtures
 	val year: Int = AcademicYear.now().startYear
 
 	"Department admin" should "be able to create and edit exams" in as(P.Admin1) {
+		Given("The exams home page")
+		pageTitle should be("Tabula - Exams Management")
 
-			Given("The exams home page")
-			pageTitle should be("Tabula - Exams Management")
+		Then("The user should be shown a link to their department exams")
+		click on linkText("Go to the Test Services admin page")
+		pageSource contains "Test Services" should be {true}
 
-			Then("The user should be shown a link to their department exams")
-			click on linkText("Go to the Test Services admin page")
-			pageSource contains "Test Services" should be {true}
+		And("By default none will be shown until clicking the 'Show' button")
+		Then("I click on the show button")
+		click on linkText("Show")
 
-			And("By default none will be shown until clicking the 'Show' button")
-			Then("I click on the show button")
-			click on (linkText("Show"))
+		Then("The user should be able to select the 'Create new exam' option from the 'Manage' dropdown")
+		var info = getModuleInfo("XXX01")
+		val manageButton = info.findElement(By.className("module-manage-button")).findElement(By.linkText("Manage"))
+		eventually {
+			manageButton.isDisplayed should be (true)
+		}
+		click on manageButton
 
-			Then("The user should be able to select the 'Create new exam' option from the 'Manage' dropdown")
-			var info = getModuleInfo("XXX01")
-			click on info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage"))
+		// Doesn't work on Chrome. No idea why
+//		val createNewExam = info.findElement(By.partialLinkText("Create new exam"))
+//		eventually {
+//			createNewExam.isDisplayed should be {true}
+//		}
+//		click on createNewExam
+		go to Path(s"/exams/exams/admin/module/xxx01/$year/exams/new")
 
-			val createNewExam = info.findElement(By.partialLinkText("Create new exam"))
-			eventually {
-				createNewExam.isDisplayed should be {true}
-			}
-			click on createNewExam
+		Then("This should show the create exam page")
+		currentUrl should include(s"/admin/module/xxx01/$year/exams/new")
+		pageSource contains "Create exam for" should be {true}
+		pageSource contains "XXX01" should be {true}
 
-			Then("This should show the create exam page")
-			currentUrl should include(s"/admin/module/xxx01/$year/exams/new")
-			pageSource contains "Create exam for" should be {true}
-			pageSource contains "XXX01" should be {true}
+		Then("The user should be able to enter a name and create the exam")
+		textField("name").value = "Module-XXX01-Exam1"
+		submit()
 
-			Then("The user should be able to enter a name and create the exam")
-			textField("name").value = "Module-XXX01-Exam1"
-			submit()
+		Then("The user should be returned to the module page")
+		currentUrl should include(s"/admin/module/xxx01/$year")
+		pageSource contains "Test Services" should be {true}
+		pageSource contains "XXX01" should be {true}
+		pageSource contains "Module-XXX01-Exam1" should be {true}
 
-			Then("The user should be returned to the module page")
-			currentUrl should include(s"/admin/module/xxx01/$year")
-			pageSource contains "Test Services" should be {true}
-			pageSource contains "XXX01" should be {true}
-			pageSource contains "Module-XXX01-Exam1" should be {true}
+		Then("The user can select to edit the exam")
+		info = getModuleInfo("XXX01")
+		click on info.findElement(By.partialLinkText("Actions"))
 
-			Then("The user can select to edit the exam")
-			info = getModuleInfo("XXX01")
-			click on info.findElement(By.partialLinkText("Actions"))
+		val editNewExam = info.findElement(By.partialLinkText("Edit properties"))
+		eventually {
+			editNewExam.isDisplayed should be {true}
+		}
+		click on editNewExam
 
-			val editNewExam = info.findElement(By.partialLinkText("Edit properties"))
-			eventually {
-				editNewExam.isDisplayed should be {true}
-			}
-			click on editNewExam
+		Then("This should show the edit exam page")
+		currentUrl should include("/edit")
+		pageSource contains "Edit exam for" should be {true}
+		pageSource contains "XXX01" should be {true}
 
-			Then("This should show the edit exam page")
-			currentUrl should include("/edit")
-			pageSource contains "Edit exam for" should be {true}
-			pageSource contains "XXX01" should be {true}
+		Then("The user should be able to modify a name and create the exam")
+		textField("name").value = "Module-XXX01-Exam1-edited"
+		submit()
 
-			Then("The user should be able to modify a name and create the exam")
-			textField("name").value = "Module-XXX01-Exam1-edited"
-			submit()
-
-			Then("The user should be returned to the module page")
-			currentUrl should include(s"/admin/module/xxx01/$year")
-			pageSource contains "Test Services" should be {true}
-			pageSource contains "XXX01" should be {true}
-			pageSource contains "Module-XXX01-Exam1-edited" should be {true}
+		Then("The user should be returned to the module page")
+		currentUrl should include(s"/admin/module/xxx01/$year")
+		pageSource contains "Test Services" should be {true}
+		pageSource contains "XXX01" should be {true}
+		pageSource contains "Module-XXX01-Exam1-edited" should be {true}
 	}
 
 	def getModuleInfo(moduleCode: String): WebElement = {

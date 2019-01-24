@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
-abstract class MeetingRecordApprovalNotification(val verb: String)
+abstract class MeetingRecordApprovalNotification(@transient val verb: String)
 	extends Notification[MeetingRecord, Unit]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecord]

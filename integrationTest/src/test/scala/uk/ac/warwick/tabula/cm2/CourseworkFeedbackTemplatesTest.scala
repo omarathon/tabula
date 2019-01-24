@@ -37,16 +37,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 					else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
 
 				click on id("file.upload")
-
-				ifPhantomJSDriver(
-					operation = { d =>
-						// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-						d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-					},
-					otherwise = { _ =>
-						pressKeys(getClass.getResource(file).getFile)
-					}
-				)
+				pressKeys(getClass.getResource(file).getFile)
 
 				click on cssSelector(".btn-primary")
 

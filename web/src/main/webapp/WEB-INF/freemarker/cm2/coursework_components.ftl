@@ -8,34 +8,50 @@
 
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false>
+<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
 	<span id="${id}-container">
+		<#local has_late_formative = false />
+		<#if hide_late_formative><#list assignments as info><#if info.lateFormative><#local has_late_formative = true /><#break></#if></#list></#if>
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
 			<div class="clearfix">
 				<h4 class="section-title">${title}</h4>
 
-				<#if has_assignments>
-					<div class="striped-section-contents">
+				<#if hide_late_formative && has_late_formative>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="lateFormative" /> Show late formative assignments
+							<@fmt.help_popover id="route" content="Formative assignments do not count towards the final module mark." />
+						</label>
+					</div>
+					<script type="text/javascript">
+						jQuery(function($){
+							$('input[name=lateFormative]:checkbox').on('change', function(){
+								$('span.late_formative').toggleClass('hidden', !this.checked);
+							});
+						});
+					</script>
+				</#if>
+
+				<div class="striped-section-contents">
+					<#if has_assignments || has_late_formative>
 						<div class="row">
 							<div class="col-md-3">Details</div>
 							<div class="col-md-4 col-lg-5">Progress</div>
 							<div class="col-md-5 col-lg-4">Actions</div>
 						</div>
-
-						<#list assignments as info>
-							<span id="assignment-container-${info.assignment.id}">
-								<@student_assignment_info info show_submission_progress />
-							</span>
-						</#list>
-					</div>
-				<#else>
-					<div class="striped-section-contents">
-						<div class="item-info">
+					</#if>
+					<#if !has_assignments>
+						<div class="item-info empty-message">
 							${empty_message}
 						</div>
-					</div>
-				</#if>
+					</#if>
+					<#list assignments as info>
+						<span id="assignment-container-${info.assignment.id}" class="<#if hide_late_formative && info.lateFormative>late_formative hidden</#if>">
+							<@student_assignment_info info show_submission_progress />
+						</span>
+					</#list>
+				</div>
 			</div>
 		</div>
 	</span>

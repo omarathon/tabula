@@ -9,7 +9,6 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 	private def openAssignmentsScreen(): Unit = {
 		Given("There is an assignment with feedback")
 		withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
-
 			When("I go the admin page")
 			click on linkText("Test Services")
 
@@ -21,7 +20,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 
 			When("I click on the XXX01 module it should open")
 			val module = getModule("XXX01").get
-			click on module.findElement(By.className("mod-code"))
+			eventually(click on module.findElement(By.className("mod-code")))
 
 			Then("Fully featured assignment should be visible")
 			eventually(linkText("Fully featured assignment").webElement.isDisplayed should be(true))
