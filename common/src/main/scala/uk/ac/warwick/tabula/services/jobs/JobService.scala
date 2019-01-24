@@ -7,9 +7,9 @@ import javax.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{CurrentUser, EarlyRequestInfo, EarlyRequestInfoImpl}
 import uk.ac.warwick.tabula.events.JobNotificationHandling
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.jobs._
 import uk.ac.warwick.userlookup.User
@@ -126,6 +126,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	}
 
 	def run(instance: JobInstance, job: Job) {
+		EarlyRequestInfo.open(new EarlyRequestInfoImpl)
 		try job.run(instance)
 		catch {
 			case e: Exception if stopping =>
@@ -144,6 +145,9 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 				logger.info(s"Job ${instance.id} failed", e)
 				instance.status = s"Sorry, there was an error: ${e.getMessage.safeSubstring(0, 1000)}"
 				fail(instance)
+		}
+		finally {
+			EarlyRequestInfo.close()
 		}
 
 		if (!stopping) {
