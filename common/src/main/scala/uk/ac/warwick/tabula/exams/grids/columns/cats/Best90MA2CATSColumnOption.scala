@@ -21,8 +21,8 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 
 	final val TransferCourseTitle = "Transferred to G100 (3 year programme)"
 
-	//extract  weighted mean mark for selected records...
-	def result(records: Seq[ModuleRegistration]): Either[String, BigDecimal] = {
+	// extract weighted mean mark for selected records...
+	def weightedMeanYearMarks(records: Seq[ModuleRegistration]): Either[String, BigDecimal] = {
 		moduleRegistrationService.weightedMeanYearMark(records, Map(), allowEmpty = false)
 	}
 
@@ -36,7 +36,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 			modRegs.toSeq.map(mr => BigDecimal(mr.cats)).sum == 90
 		)
 
-		val validSubsetsWithWieghtedMeanMark = validSubsets.map(modRegs => (result(modRegs.toSeq), modRegs.toSeq.sortBy(_.module.code)))
+		val validSubsetsWithWieghtedMeanMark = validSubsets.map(modRegs => (weightedMeanYearMarks(modRegs.toSeq), modRegs.toSeq.sortBy(_.module.code)))
 		validSubsetsWithWieghtedMeanMark.collect { case (Right(mark), modRegs) => (mark, modRegs) }
 			.sortBy { case (mark, modRegs) =>
 				// Add a definitive sort so subsets with the same mark always come out the same order
@@ -56,7 +56,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			//add logic to display best 90 cats for each ExamGridEntity
 			if (state.department.rootDepartment.code == "ma") {
 				state.entities.map { entity =>
@@ -67,7 +67,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 					}
 					//if cats are <= 90 then only one possible option
 					if (validRecords.map(mr => BigDecimal(mr.cats)).sum <= 90) {
-						val gridColumnValue = result(validRecords) match {
+						val gridColumnValue = weightedMeanYearMarks(validRecords) match {
 							case Right(mark) => if (isResultRequired) ExamGridColumnValueString(getResultTitle(mark)) else ExamGridColumnValueDecimal(mark)
 							case Left(message) => ExamGridColumnValueMissing(message)
 						}

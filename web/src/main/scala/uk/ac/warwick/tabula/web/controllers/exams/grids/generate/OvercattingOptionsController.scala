@@ -240,7 +240,7 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Spacer
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> {
 				val entityId = GenerateExamGridOvercatCommand.overcatIdentifier(entity.validYears(state.yearOfStudy).moduleRegistrations)
 				ExamGridColumnValueStringHtmlOnly(
@@ -278,7 +278,7 @@ class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> (value match {
 				case Some(mark) => ExamGridColumnValueDecimal(mark)
 				case _ => ExamGridColumnValueString("")
