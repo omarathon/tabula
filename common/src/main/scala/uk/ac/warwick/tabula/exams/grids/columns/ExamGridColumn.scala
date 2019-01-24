@@ -35,17 +35,22 @@ object ExamGridColumnOption {
 		val CATSThreshold50 = 22
 		val CATSThreshold60 = 23
 		val CATSThreshold70 = 24
-		val TotalCATS = 25
-		val PassedCATS = 26
-		val PreviousYears = 30
-		val CurrentYear = 31
-		val OvercattedYearMark = 32
-		val BoardAgreedMark = 33
-		val FinalOverallMark = 34
-		val SuggestedResult = 40
-		val SuggestedFinalYearGrade = 41
-		val MitigatingCircumstances = 50
-		val Comments = 60
+		val CATSThreshold30NotUnusual = 25
+		val CATSThreshold40NotUnusual = 26
+		val CATSThreshold50NotUnusual = 27
+		val CATSThreshold60NotUnusual = 28
+		val CATSThreshold70NotUnusual = 29
+		val TotalCATS = 30
+		val PassedCATS = 31
+		val PreviousYears = 40
+		val CurrentYear = 41
+		val OvercattedYearMark = 42
+		val BoardAgreedMark = 43
+		val FinalOverallMark = 44
+		val SuggestedResult = 50
+		val SuggestedFinalYearGrade = 51
+		val MitigatingCircumstances = 60
+		val Comments = 70
 	}
 
 	object ExcelColumnSizes {
@@ -182,10 +187,10 @@ abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGri
 abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) with TaskBenchmarking {
 
 	def values: Map[ExamGridEntity, ExamGridColumnValue] = benchmarkTask(s"Value for $title") {
-		result()
+		result
 	}
 
-	protected def result(): Map[ExamGridEntity, ExamGridColumnValue]
+	protected def result: Map[ExamGridEntity, ExamGridColumnValue]
 }
 
 
