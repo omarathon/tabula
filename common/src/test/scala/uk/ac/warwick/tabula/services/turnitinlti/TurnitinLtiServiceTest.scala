@@ -55,7 +55,7 @@ class TurnitinLtiServiceTest extends TestBase {
 		val goodString = "kailan"
 		TurnitinLtiService.removeAccent(goodString) should be ("kailan")
 
-		val halfGoodString = "káilán"
-		TurnitinLtiService.removeAccent(halfGoodString) should be ("kailan")
+		val halfGoodString = "kái\tlán"
+		TurnitinLtiService.removeAccent(halfGoodString) should be ("kai lan")
 	}
 }

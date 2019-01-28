@@ -105,6 +105,7 @@ object TurnitinLtiService {
 	def removeAccent(input: String): String = Normalizer
 		.normalize(input, Normalizer.Form.NFD)
 		.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+		.replaceAll("\\s+", " ")
 }
 
 /**
