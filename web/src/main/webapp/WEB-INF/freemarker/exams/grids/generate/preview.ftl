@@ -1,4 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
+<#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 
 <#function route_function dept>
@@ -26,43 +27,64 @@
 		</div>
 
 		<div id="examGridContainer">
-			<div class="alert alert-info">
-				<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
+			<div class="row">
+				<div class="alert alert-info <#if user?? && user.sysadmin>col-sm-8<#else>col-sm-12</#if>">
+					<h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
 
-				<#if oldestImport??>
-					<p>
-						This grid has been generated from the data available in SITS at
-						<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
-						time, you'll need to generate the grid again to see the most recent information.
-					</p>
-				</#if>
-
-				<#if !(info.maintenance!false)>
-					<form action="<@routes.exams.generateGrid department academicYear />" method="post">
-						<@form_fields.select_course_fields />
-						<@form_fields.grid_options_fields />
-
+					<#if oldestImport??>
 						<p>
-							<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+							This grid has been generated from the data available in SITS at
+							<@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+							time, you'll need to generate the grid again to see the most recent information.
+						</p>
+					</#if>
+
+					<#if !(info.maintenance!false)>
+						<form action="<@routes.exams.generateGrid department academicYear />" method="post">
+							<@form_fields.select_course_fields />
+							<@form_fields.grid_options_fields />
+
+							<p>
+								<button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+									Refresh SITS data and regenerate grid
+								</button>
+							</p>
+						</form>
+					<#else>
+						<p>
+							<button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
 								Refresh SITS data and regenerate grid
 							</button>
 						</p>
-					</form>
-				<#else>
+					</#if>
+
 					<p>
-						<button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
-							Refresh SITS data and regenerate grid
-						</button>
+						<strong>
+							Please note that all Examination Boards are required to be conducted anonymously and student names should be
+							removed from/hidden in electronic or hard-copy versions of the grid used at the Exam Board meeting.
+							If you wish to query this requirement, please contact Teaching Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
+						</strong>
 					</p>
+				</div>
+
+				<#if user?? && user.sysadmin>
+					<div class="alert col-sm-4">
+						<h3>Check for missing students</h3>
+						<p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
+						<form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
+							<@bs3form.form_group>
+								<@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
+									<span class="input-group-btn">
+										<button class="btn btn-default" type="submit">Check</button>
+									</span>
+								</@bs3form.flexipicker>
+							</@bs3form.form_group>
+							<@form_fields.select_course_fields />
+						</form>
+						<div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+					</div>
 				</#if>
 
-				<p>
-					<strong>
-						Please note that all Examination Boards are required to be conducted anonymously and student names should be
-						removed from/hidden in electronic or hard-copy versions of the grid used at the Exam Board meeting.
-						If you wish to query this requirement, please contact Teaching Quality (<a href="mailto:quality@warwick.ac.uk">quality@warwick.ac.uk</a>).
-					</strong>
-				</p>
 			</div>
 
 			<#if !routeRules?has_content>
@@ -436,6 +458,21 @@
 				container: 'body'
 			});
 		});
+
+		$('.student-checker').on('submit', function(e){
+			e.preventDefault();
+			var $form = $(this);
+			$.ajax({
+				type: "POST",
+				url: $form.attr('action'),
+				data: $form.serialize(),
+				success: function(response) {
+					$('.student-checker-modal').find('.modal-content').html(response);
+					$('.student-checker-modal').modal('show')
+				}
+			});
+		})
+
 	});
 </script>
 

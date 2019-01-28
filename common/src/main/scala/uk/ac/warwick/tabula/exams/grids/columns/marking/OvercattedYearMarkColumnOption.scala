@@ -22,7 +22,7 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear => result(entityYear) match {
 					case Right(mark) => ExamGridColumnValueDecimal(mark)

@@ -21,7 +21,7 @@ class CommentsColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> ExamGridColumnValueString("")).toMap
 		}
 

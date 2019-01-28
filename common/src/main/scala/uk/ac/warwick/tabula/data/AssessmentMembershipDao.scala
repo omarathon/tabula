@@ -45,6 +45,7 @@ trait AssessmentMembershipDao {
 	def getAssessmentComponent(id: String): Option[AssessmentComponent]
 	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup]
 
 	/**
 	 * Get all AssessmentComponents that appear to belong to this module.
@@ -216,6 +217,27 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 			.addOrder(Order.asc("sequence"))
 			.seq
 	}
+
+	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup] = {
+		val criteria = session.newCriteria[UpstreamAssessmentGroup]
+			.createAlias("members", "member")
+  		.add(is("member.universityId", student.universityId))
+
+		if(resitOnly) {
+			criteria.add(or(
+				or(isNotNull("member.resitActualMark"), isNotNull("member.resitActualGrade")),
+				or(isNotNull("member.resitAgreedMark"), isNotNull("member.resitAgreedGrade"))
+			))
+		}
+
+		criteria.add(is("academicYear", academicYear))
+			.addOrder(Order.asc("moduleCode"))
+			.addOrder(Order.asc("assessmentGroup"))
+			.addOrder(Order.asc("sequence"))
+			.seq
+	}
+
+
 	/** Just gets components of type Assignment for this module, not all components. */
 	def getAssessmentComponents(module: Module, inUseOnly: Boolean): Seq[AssessmentComponent] = {
 		val c = session.newCriteria[AssessmentComponent]

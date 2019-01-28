@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.exams.grids.columns
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -34,17 +35,22 @@ object ExamGridColumnOption {
 		val CATSThreshold50 = 22
 		val CATSThreshold60 = 23
 		val CATSThreshold70 = 24
-		val TotalCATS = 25
-		val PassedCATS = 26
-		val PreviousYears = 30
-		val CurrentYear = 31
-		val OvercattedYearMark = 32
-		val BoardAgreedMark = 33
-		val FinalOverallMark = 34
-		val SuggestedResult = 40
-		val SuggestedFinalYearGrade = 41
-		val MitigatingCircumstances = 50
-		val Comments = 60
+		val CATSThreshold30NotUnusual = 25
+		val CATSThreshold40NotUnusual = 26
+		val CATSThreshold50NotUnusual = 27
+		val CATSThreshold60NotUnusual = 28
+		val CATSThreshold70NotUnusual = 29
+		val TotalCATS = 30
+		val PassedCATS = 31
+		val PreviousYears = 40
+		val CurrentYear = 41
+		val OvercattedYearMark = 42
+		val BoardAgreedMark = 43
+		val FinalOverallMark = 44
+		val SuggestedResult = 50
+		val SuggestedFinalYearGrade = 51
+		val MitigatingCircumstances = 60
+		val Comments = 70
 	}
 
 	object ExcelColumnSizes {
@@ -163,9 +169,9 @@ sealed abstract class ExamGridColumn(state: ExamGridColumnState) {
 
 case class ExamGridColumnValues(values: Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]], isEmpty: Boolean)
 
-abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
+abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) with TaskBenchmarking {
 
-	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] = {
+	def values: Map[ExamGridEntity, Map[YearOfStudy, Map[ExamGridColumnValueType, Seq[ExamGridColumnValue]]]] =  benchmarkTask(s"Value for $title") {
 		state.entities.map(entity =>
 			entity -> entity.validYears.map { case (academicYear, entityYear) =>
 				academicYear -> result(entityYear).values
@@ -178,8 +184,13 @@ abstract class PerYearExamGridColumn(state: ExamGridColumnState) extends ExamGri
 	def result(entity: ExamGridEntityYear): ExamGridColumnValues
 }
 
-abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) {
-	def values: Map[ExamGridEntity, ExamGridColumnValue]
+abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends ExamGridColumn(state) with TaskBenchmarking {
+
+	def values: Map[ExamGridEntity, ExamGridColumnValue] = benchmarkTask(s"Value for $title") {
+		result
+	}
+
+	protected def result: Map[ExamGridEntity, ExamGridColumnValue]
 }
 
 

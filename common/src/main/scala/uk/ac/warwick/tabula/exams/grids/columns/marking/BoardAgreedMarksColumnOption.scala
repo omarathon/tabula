@@ -21,7 +21,7 @@ class BoardAgreedMarksColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					entity.validYears.get(state.yearOfStudy)
