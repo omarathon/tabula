@@ -19,6 +19,9 @@ class DurationFormatterTest extends TestBase {
 		check(start.plusHours(1).plusMinutes(2).plusSeconds(1), "1 hour and 2 minutes")
 		check(start.plusMinutes(2).plusSeconds(1), "2 minutes and 1 second")
 
+		// TAB-6886
+		check(start.plusMinutes(28).plusSeconds(39), roundUp = true, "28 minutes and 39 seconds")
+
 		check(start.minusHours(2).minusMinutes(25), "2 hours and 25 minutes ago")
 		check(start, "0 seconds ago")
 	}

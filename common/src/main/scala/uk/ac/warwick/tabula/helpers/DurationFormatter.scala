@@ -56,7 +56,7 @@ object DurationFormatter {
 		val duration = new Duration(start, end)
 		var period = new Period(start, end, periodType)
 
-		if (roundUp && (duration.getStandardHours > 0 || duration.getStandardMinutes > 0 || duration.getStandardSeconds > 0)) {
+		if (roundUp && duration.getStandardDays >= 1 && (duration.getStandardHours > 0 || duration.getStandardMinutes > 0 || duration.getStandardSeconds > 0)) {
 			period = period.plusDays(1)
 		}
 
@@ -87,7 +87,9 @@ object DurationFormatter {
 	 * Returns the updated Period or the same one if no change.
 	 */
 	private def stripMinutes(period: Period, duration: Duration): Period =
-		if (duration.getStandardDays >= 1) period.withMinutes(0)
-		else period
+		if (duration.getStandardDays >= 1)
+			period.withMinutes(0).withSeconds(0)
+		else
+			period
 
 }
