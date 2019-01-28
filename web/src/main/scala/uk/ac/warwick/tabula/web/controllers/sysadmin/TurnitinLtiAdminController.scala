@@ -97,7 +97,7 @@ class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("turnitinLtiSubmissionDetailsCommand")
-	def turnitinLtiSubmissionDetailsCommand(user: CurrentUser) = TurnitinLtiSubmissionDetailsCommand(user)
+	def turnitinLtiSubmissionDetailsCommand = TurnitinLtiSubmissionDetailsCommand()
 
 	@annotation.RequestMapping(method=Array(GET, HEAD))
 	def form() = Mav("sysadmin/turnitinlti/submission-details")
