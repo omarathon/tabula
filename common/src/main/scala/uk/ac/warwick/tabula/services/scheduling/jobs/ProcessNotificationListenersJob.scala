@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.services.scheduling.jobs
 
-import org.quartz.{JobExecutionContext, DisallowConcurrentExecution}
+import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.BeanDefinition
-import org.springframework.context.annotation.{Scope, Profile}
+import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.services.NotificationService
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
@@ -19,7 +20,9 @@ class ProcessNotificationListenersJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingProcessNotificationListeners)
 			exceptionResolver.reportExceptions {
-				notificationService.processListeners()
+				EarlyRequestInfo.wrap() {
+					notificationService.processListeners()
+				}
 			}
 	}
 

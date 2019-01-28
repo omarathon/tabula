@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.services.ScheduledNotificationService
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
@@ -19,7 +20,9 @@ class ProcessScheduledNotificationsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingProcessScheduledNotifications)
 			exceptionResolver.reportExceptions {
-				scheduledNotificationService.processNotifications()
+				EarlyRequestInfo.wrap() {
+					scheduledNotificationService.processNotifications()
+				}
 			}
 	}
 

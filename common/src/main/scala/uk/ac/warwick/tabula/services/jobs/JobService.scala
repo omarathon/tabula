@@ -126,7 +126,6 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	}
 
 	def run(instance: JobInstance, job: Job) {
-		EarlyRequestInfo.open(new EarlyRequestInfoImpl)
 		try job.run(instance)
 		catch {
 			case e: Exception if stopping =>
@@ -145,9 +144,6 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 				logger.info(s"Job ${instance.id} failed", e)
 				instance.status = s"Sorry, there was an error: ${e.getMessage.safeSubstring(0, 1000)}"
 				fail(instance)
-		}
-		finally {
-			EarlyRequestInfo.close()
 		}
 
 		if (!stopping) {
