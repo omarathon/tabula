@@ -40,6 +40,7 @@ test {
 
     systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
+    systemProperty 'toplevel.url', System.getProperty("toplevel.url")
 }
 
 // run npm install
