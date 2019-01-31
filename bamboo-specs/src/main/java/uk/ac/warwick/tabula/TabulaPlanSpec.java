@@ -133,6 +133,37 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .location("integrationTest/build/integrationTest-screenshots")
                 )
                 .build(),
+            build(PROJECT, "FUNCPG", "Tabula Functional Tests - PostgreSQL")
+                .linkedRepository(LINKED_REPOSITORY).noBranches()
+                .description("Run functional tests with a headless browser against tabula-dev.warwick.ac.uk")
+                .triggers(
+                    new ScheduledTrigger()
+                        .name("Daily morning build")
+                        .description("5:45am run")
+                        .scheduleOnceDaily(LocalTime.of(5, 45)),
+                    new ScheduledTrigger()
+                        .name("Daily afternoon build")
+                        .description("1pm run")
+                        .scheduleOnceDaily(LocalTime.of(13, 0))
+                )
+                .customConfig(plan -> plan
+                    .variables(new Variable("functionaltestserver", "tabula-dev"))
+                    .pluginConfigurations(
+                        new ConcurrentBuilds().maximumNumberOfConcurrentBuilds(1)
+                    )
+                )
+                .gradle(
+                    "Run functional tests",
+                    "Test",
+                    "TEST",
+                    "clean -PintegrationTest test -Dtoplevel.url=https://${bamboo.functionaltestserver}.warwick.ac.uk --no-daemon",
+                    "**/test-results/**/*.xml",
+                    new Artifact()
+                        .name("Failed test screenshots")
+                        .copyPattern("*.png")
+                        .location("integrationTest/build/integrationTest-screenshots")
+                )
+                .build(),
             specsPlan(
                 "CUKEPROD",
                 "Tabula Specs Live",

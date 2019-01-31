@@ -573,9 +573,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 
 		val termConditions = indexedTerms.zipWithIndex.map{ case (_, i) => s"""(
 			(
-			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :ot$i or
-			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :fw$i or
-       lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :lw$i
+			 lower(g._name) like :ot$i or
+			 lower(g._name) like :fw$i or
+       lower(g._name) like :lw$i
 			 )
 			or
 			(

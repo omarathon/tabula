@@ -24,7 +24,7 @@ class PassedCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> relevantEntityYear(entity).map(entityYear => result(entityYear))
 					.getOrElse(ExamGridColumnValueMissing(s"Could not find course details for ${entity.universityId} for year $thisYearOfStudy"))
