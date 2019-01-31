@@ -29,7 +29,7 @@
 			</#list>
 
 			<#if assignment.collectMarks>
-				<@marking_macros.markField assignment command />
+				<@marking.markField assignment command />
 
 				<#if isGradeValidation>
 					<#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
