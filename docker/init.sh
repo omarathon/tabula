@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 read -p "Enter the fully qualified domain name of your local machine (e.g. localdev.warwick.ac.uk): " domain
 
@@ -14,7 +15,9 @@ rsa_key_size=4096
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 data_path="${script_dir}/data/certbot"
 nginx_data_path="${script_dir}/data/nginx"
-staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
+nginx_certbot_data_path="${script_dir}/data/nginx-certbot"
+tomcat_data_path="${script_dir}/data/tomcat"
+staging=1 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domain. Continue and replace existing certificate? (y/N) " decision
@@ -34,7 +37,7 @@ fi
 echo "### Creating dummy certificate for $domain ..."
 path="/etc/letsencrypt/live/$domain"
 mkdir -p "$data_path/conf/live/$domain"
-sudo docker-compose run --rm --entrypoint "\
+sudo docker-compose -f docker-compose-certbot.yml run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:1024 -days 1\
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
@@ -71,7 +74,7 @@ server {
     client_max_body_size 10G;
 
     location / {
-				proxy_pass http://127.0.0.1:8080;
+				proxy_pass http://tabula-tomcat:8080;
 				proxy_set_header Host \$host;
 				proxy_set_header X-Real-IP \$remote_addr;
 				proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -86,12 +89,25 @@ server {
 }
 EOF
 
+mkdir -p $nginx_certbot_data_path
+cat <<EOF > $nginx_certbot_data_path/app.conf
+server {
+    listen 80;
+    server_name $domain;
+    server_tokens off;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}
+EOF
+
 echo "### Starting nginx ..."
-sudo docker-compose up --force-recreate -d nginx
+sudo docker-compose -f docker-compose-certbot.yml up --force-recreate -d nginx-certbot
 echo
 
 echo "### Deleting dummy certificate for $domain ..."
-sudo docker-compose run --rm --entrypoint "\
+sudo docker-compose -f docker-compose-certbot.yml run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/$domain && \
   rm -Rf /etc/letsencrypt/archive/$domain && \
   rm -Rf /etc/letsencrypt/renewal/$domain.conf" certbot
@@ -110,7 +126,7 @@ esac
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
-sudo docker-compose run --rm --entrypoint "\
+sudo docker-compose -f docker-compose-certbot.yml run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     $staging_arg \
     $email_arg \
@@ -121,5 +137,145 @@ sudo docker-compose run --rm --entrypoint "\
     --force-renewal" certbot
 echo
 
-echo "### Reloading nginx ..."
-sudo docker-compose exec nginx nginx -s reload
+echo "### Stopping nginx ..."
+sudo docker-compose -f docker-compose-certbot.yml down
+
+mkdir -p $tomcat_data_path/lib
+echo "### Writing Tabula properties file"
+cat <<EOF > $tomcat_data_path/lib/tabula.properties
+spring.profiles.active=sandbox
+scheduling.enabled=false
+environment.production=false
+environment.nonproduction=true
+environment.standby=false
+
+toplevel.url=https://$domain
+
+# Set these after running init.sh if you have sandbox credentials
+turnitin.aid=
+turnitin.said=
+turnitin.key=
+
+TurnitinLti.aid=
+TurnitinLti.key=
+TurnitinLti.url=
+
+elasticsearch.cluster.nodes=tabula-elasticsearch:9200
+elasticsearch.cluster.name=tabula
+elasticsearch.index.prefix=tabula
+
+activemq.broker=tcp://tabula-activemq:61616
+
+base.data.dir=/usr/local/tomcat/temp
+filesystem.create.missing=true
+
+objectstore.provider=swift
+objectstore.container=tabula
+objectstore.swift.endpoint=http://tabula-objectstorage:8080/auth/v2.0
+objectstore.swift.username=swift
+objectstore.swift.password=fingertips
+
+# Add mailtrap credentials in here if you have them. DON'T ENABLE features.emailStudents unless you have mailtrap creds set
+# mail.smtp.host=smtp.mailtrap.io
+# mail.smtp.port=2525
+# mail.smtp.user=
+# mail.smtp.password=
+# mail.smtp.auth=true
+#
+# features.emailStudents=true
+
+# Set this to true if you have mywarwick.* credentials and you're testing that
+features.notificationListeners.mywarwick=false
+mywarwick.instances.0.baseUrl=https://my.invalid
+mywarwick.instances.0.providerId=
+mywarwick.instances.0.userName=
+mywarwick.instances.0.password=
+
+# Replace with a real registered application ID for Photos.Warwick
+photos.applicationId=
+photos.preSharedKey=
+
+celcat.fetcher.ib.username=
+celcat.fetcher.ib.password=
+
+EOF
+
+cat <<EOF > $tomcat_data_path/lib/memcached.properties
+memcached.servers=tabula-memcached:11211
+memcached.maxReconnectDelay=5
+memcached.opTimeout=250
+memcached.hashAlgorithm=KETAMA
+
+EOF
+
+echo "### Writing Tabula SSO config file"
+
+openssl genrsa -out /tmp/private_key.pem 2048 &>/dev/null
+openssl rsa -pubout -in /tmp/private_key.pem -out /tmp/public_key.pem &>/dev/null
+
+trustedapps_public_key=$(cat /tmp/public_key.pem | tail -n +2 | head -n -1 | tr -d '\n')
+trustedapps_private_key=$(cat /tmp/private_key.pem | tail -n +2 | head -n -1 | tr -d '\n')
+
+rm /tmp/public_key.pem /tmp/private_key.pem
+
+cat <<EOF > $tomcat_data_path/lib/tabula-sso-config.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+  <httpbasic><allow>true</allow></httpbasic>
+  <mode>new</mode>
+
+  <cluster>
+   <enabled>true</enabled>
+   <datasource>java:comp/env/jdbc/TabulaSSODS</datasource>
+  </cluster>
+
+  <origin>
+    <login>
+      <location>https://websignon.warwick.ac.uk/origin/hs</location>
+    </login>
+    <logout>
+      <location>https://websignon.warwick.ac.uk/origin/logout</location>
+    </logout>
+    <attributeauthority>
+      <location>https://websignon.warwick.ac.uk/origin/aa</location>
+    </attributeauthority>
+  </origin>
+
+  <shire>
+    <filteruserkey>SSO_USER</filteruserkey>
+    <uri-header>x-requested-uri</uri-header>
+    <location>https://$domain/sso/acs</location>
+    <sscookie>
+      <name>SSO-SSC-Tabula</name>
+      <path>/</path>
+      <domain>$domain</domain>
+      <secure>true</secure>
+    </sscookie>
+    <providerid>urn:$domain:tabula:service</providerid>
+  </shire>
+
+  <logout>
+    <location>https://$domain/sso/logout</location>
+  </logout>
+
+  <oauth>
+    <enabled>true</enabled>
+    <!-- Location of the OAuth service -->
+    <service>
+      <location>https://websignon.warwick.ac.uk/origin/oauth/service</location>
+    </service>
+  </oauth>
+
+  <credentials>
+    <certificate>file:/etc/letsencrypt/live/$domain/fullchain.pem</certificate>
+    <key>file:/etc/letsencrypt/live/$domain/privkey.pem</key>
+  </credentials>
+
+  <trustedapps>
+      <!-- Credentials for this application -->
+      <publickey>$trustedapps_public_key</publickey>
+      <privatekey>$trustedapps_private_key</privatekey>
+  </trustedapps>
+</config>
+
+EOF

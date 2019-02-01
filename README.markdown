@@ -100,17 +100,17 @@ This is just copied from the `conf` directory in the Tomcat 8 install. I couldn'
 
 ### `lib/warwick-logging-1.1.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.1-all.jar
+You can get this from https://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.1-all.jar
 
 Note that this dependency replaces previous dependencies on logback, logstash-logback-encoder, jackson and slf4j-api
 
 ### `lib/jtds-1.3.1.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
+You can get this from https://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
 
 ### `lib/ojdbc8.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
+You can get this from https://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
 
 ### `lib/postgresql-42.2.5.jar`
 

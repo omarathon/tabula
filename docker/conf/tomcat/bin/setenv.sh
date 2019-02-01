@@ -32,6 +32,9 @@ JAVA_OPTS="-XX:+UseG1GC -XX:G1HeapRegionSize=32m -Dwarwick.memcached.config=/mem
 
 DEBUG_OPTS="-Xdebug -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"
 
+# https://manuals.zeroturnaround.com/jrebel/remoteserver/docker.html
+JREBEL_SYSTEM_PROPERTIES="-agentpath:/usr/local/tomcat/bin/libjrebel64.so -Drebel.remoting_plugin=true"
+
 # Userlookup system properties
 USERLOOKUP_SYSTEM_PROPERTIES="-Duserlookup.ssosUrl=https://websignon.warwick.ac.uk/sentry -Duserlookup.groupservice.type=WarwickGroups -Duserlookup.groupservice.location=http://webgroups.warwick.ac.uk -Duserlookup.disk.store.dir=/tmp/ehcache -Dehcache.disk.store.dir=/tmp/ehcache"
 
