@@ -14,12 +14,10 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 
 		val externalAgent = "Professor A Frank"
 
-		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relType.description = "Personal tutor"
+		val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
 		session.save(student)
 		session.save(memberAgent)
-		session.save(relType)
 		session.flush()
 	}
 

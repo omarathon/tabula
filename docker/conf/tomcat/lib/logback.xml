@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="max.retention.days" value="30" />
+	<property name="catalina.base" value="/usr/local/tomcat" />
+
+	<!-- file appenders -->
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/server.log</file>
+		<append>true</append>
+		<encoder>
+			<charset>utf-8</charset>
+			<pattern>%d %-5p [%c] %m%n</pattern>
+		</encoder>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${catalina.base}/logs/server.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>${max.retention.days}</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/debug.log</file>
+		<append>true</append>
+		<encoder>
+			<charset>utf-8</charset>
+			<pattern>%d %-5p [%c] %m%n</pattern>
+		</encoder>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${catalina.base}/logs/debug.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>${max.retention.days}</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="AUDIT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/audit.log</file>
+		<append>true</append>
+		<encoder>
+			<charset>utf-8</charset>
+			<pattern>%d %m%n</pattern>
+		</encoder>
+
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${catalina.base}/logs/audit.log.%d{yyyy-MM-dd}</fileNamePattern>
+			<maxHistory>${max.retention.days}</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<!-- console -->
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{"HH:mm:ss,SSS"} %-5p [%c{1}] %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- categories -->
+	<logger name="uk.ac.warwick" level="INFO" />
+
+	<logger name="uk.ac.warwick.AUDIT" additivity="false">
+		<appender-ref ref="AUDIT" />
+	</logger>
+
+	<logger name="uk.ac.warwick.sso" level="WARN" />
+
+	<logger name="org.springframework" level="INFO" />
+	<logger name="org.apache" level="INFO" />
+	<logger name="org.hibernate" level="INFO" />
+
+	<!-- TAB-2343 Stop logging ObjectNotFoundException info notices -->
+	<logger name="org.hibernate.event.internal.DefaultLoadEventListener" level="WARN" />
+
+	<logger name="org.apache.catalina" level="WARN" />
+	<logger name="jacorb" level="WARN" />
+	<logger name="org.jgroups" level="WARN" />
+	<logger name="org.quartz" level="INFO" />
+	<logger name="com.sun" level="INFO" />
+	<logger name="sun" level="INFO" />
+	<logger name="javax.xml.bind" level="INFO" />
+	<logger name="facelets.compiler" level="WARN" />
+	<logger name="org.ajax4jsf.cache" level="WARN" />
+	<logger name="org.rhq" level="WARN" />
+	<logger name="org.hibernate.orm.deprecation" level="OFF" />
+
+	<root level="INFO">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>
+
