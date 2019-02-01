@@ -49,7 +49,7 @@
 			</@f.select>
 		</@bs3form.labelled_form_group>
 
-		<p>Select sets of groups that you'd wish to copy:</p>
+		<p>Select the group sets to copy:</p>
 
 		<table class="table table-striped small-group-sets-list" id="copy-groups-table">
 			<thead>

@@ -36,10 +36,13 @@ test {
     doFirst {
         mkdir 'build/integrationTest-screenshots'
         systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+
+        println "Executing tests against " + System.getProperty("toplevel.url", "https://tabula-test.warwick.ac.uk")
     }
 
     systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
+    systemProperty 'toplevel.url', System.getProperty("toplevel.url")
 }
 
 // run npm install
