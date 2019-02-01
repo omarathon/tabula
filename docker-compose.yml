@@ -1,0 +1,56 @@
+version: '3'
+services:
+  tabula:
+    build: ./docker
+  tomcat:
+    image: "tomcat:8.5-jre8"
+    ports:
+      - "8787:8787"
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    volumes:
+      - ./docker/data/nginx:/etc/nginx/conf.d
+      - ./docker/data/certbot/conf:/etc/letsencrypt
+      - ./docker/data/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+  certbot:
+    image: certbot/certbot
+    restart: unless-stopped
+    volumes:
+      - ./docker/data/certbot/conf:/etc/letsencrypt
+      - ./docker/data/certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+  db:
+    image: "postgres:10"
+    restart: always
+    volumes:
+      - ./docker/data/postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: tabula
+      POSTGRES_PASSWORD: a really strong password, not a horrible weak one
+      POSTGRES_DB: tabula
+      PGDATA: /var/lib/postgresql/data/pgdata
+  elasticsearch:
+    image: "elasticsearch:6.5.4"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./docker/data/elasticsearch:/usr/share/elasticsearch/data
+    environment:
+      cluster.name: tabula
+      bootstrap.memory_lock: true
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  activemq:
+    image: "rmohr/activemq:5.15.6"
+    restart: always
+    volumes:
+      - ./docker/conf/activemq:/opt/activemq/conf
+      - ./docker/data/activemq:/opt/activemq/data
+  objectstore:
+    image: "bouncestorage/swift-aio"

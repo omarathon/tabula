@@ -1,12 +1,14 @@
 Tabula
 ==========
 
-This is Tabula, the 'MyDepartment' system including a number of modules. It has a [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
+This is Tabula, the University of Warwick's student administration system including a number of modules. It has an internal [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
 
 Currently, the modules that are in Tabula are:
 
-- web - Static content and homepage
+- common - Data model and "Commands", which perform actions in Tabula
+- web - Static content and web controllers for several major sections:
   - coursework - Coursework Submission, the Assignment Management project that used to be [Horses for Courses](https://bugs.elab.warwick.ac.uk/browse/HFC)
+  - exams - Exam Management, exam marks (deprecated) and exam grids
   - profiles - Student Profiles
   - groups - Small Group Teaching management
   - attendance - Monitoring point management and recording
@@ -14,12 +16,34 @@ Currently, the modules that are in Tabula are:
   - reports - Report generation for other modules
 - api - API-specific details
 
-Note: This is likely to change to being 3 modules: web, reports and api (possibly with common? commands? who knows).
+Table of Contents
+----------
+
+- [Quick start](#quick-start)
+- [Setting up for development](#setting-up-for-development)
+	- [ActiveMQ](#activemq)
+  - [Elasticsearch](#elasticsearch)
+  - [Java 8 JDK](#java-8-jdk)
+  - [Starting Tomcat](#starting-tomcat)
+  - [Apache](#apache)
+  - [Local properties](#local-properties)
+  - [Troubleshooting updates](#troubleshooting-updates)
+  - [Deployment](#deployment)
+  - [Building assets](#building-assets)
+- [Directory structure](#directory-structure)
+- [WAR overlays](#war-overlays)
+- [Database schema changes](#database-schema-changes)
+- [Code style](#code-style)
+- [Validation](#validation)
+- [Running code on bind (pre-validation)](#running-code-on-bind-pre-validation)
+
+Quick start
+-----------
 
 Setting up for development
 ----------
 
-Install Tomcat 8 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
+Install the latest Tomcat 8.5 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
 
 Create a new base directory for Tabula's config and deployment, e.g. `/var/tomcat/instances/tabula`. The structure and contents of this directory should be as follows:
 
