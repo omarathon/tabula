@@ -41,13 +41,13 @@ Table of Contents
 Quick start
 -----------
 
-We provide a Docker set up that can be used with `docker-compose` to build an deploy Tabula locally.
+We provide a Docker set up that can be used with `docker-compose` to build and deploy Tabula locally.
 
 ### Pre-requisites
 
 1. You're running on Linux or macOS
 2. You've installed [Docker Engine](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
-3. You've got a stable hostname ending in `warwick.ac.uk`. If you're on-campus but don't a hostname registered to your workstation, contact IT Services.
+3. You've got a stable hostname. If you're on-campus but don't a hostname registered to your workstation, contact IT Services.
 4. You've got an SSO provider ID registered with the IT Services Web Team.
 5. You've got a stable IP address and it's whitelisted for the SSO sentry (contact IT Services Web Team if necessary).
 
@@ -56,8 +56,8 @@ We provide a Docker set up that can be used with `docker-compose` to build an de
 Currently, the University's Maven repository is behind authentication - you'll need to set a `nexusUser` and `nexusPassword` property
 in `~/.gradle/gradle.properties`. While we work to open this up, you can use read-only credentials:
 
-	nexusUser=elab
-	nexusPassword=elab
+	nexusUser=readonly
+	nexusPassword=readonly
 	
 This should allow you to access source and binaries from mvn.elab.warwick.ac.uk. If you're using an IDE (we recommend IntelliJ IDEA)
 this should mean you'll get code completion and the original source of dependencies that haven't been fully open-sourced.
