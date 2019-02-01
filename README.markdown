@@ -91,6 +91,9 @@ the database or Elasticsearch. You'll need to go to https://localdev.warwick.ac.
 logged-in user is a member of the WebGroup `in-tabula-local-dev-sysadmins`, you can edit the generated `docker/data/tomcat/lib/tabula.properties` to use
 a different group).
 
+WebGroups can be created in the [WebGroups system](https://webgroups.warwick.ac.uk/) by staff, or you can use an existing group
+such as `all-staff` to allow any staff member at the University (for example).
+
 Click in the 3 boxes for "Rebuild audit event index from", "Rebuild profiles index from" and "Rebuild notification stream index from" so
 that they're populated with a date, and click "Index". This should complete immediately as no data will be indexed, but it will create the index
 structure in Elasticsearch.
