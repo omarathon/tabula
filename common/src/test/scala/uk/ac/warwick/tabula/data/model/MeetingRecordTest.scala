@@ -24,12 +24,9 @@ class MeetingRecordTest extends PersistenceTestBase {
 			val student: StudentMember = Fixtures.student(universityId = "1000001")
 			val externalAgent = "Professor A Frank"
 
-			val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			relType.description = "Personal tutor"
-
 			session.save(student)
-			session.save(relType)
 
+			val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 			val relationship = ExternalStudentRelationship(externalAgent, relType, student, DateTime.now)
 
 			session.save(creator)

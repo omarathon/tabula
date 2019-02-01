@@ -27,15 +27,17 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	val agent: User = agentMember.asSsoUser
 
 	val staff = Fixtures.staff("1234567")
-	val student = Fixtures.student("9876543")
-	val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
-	relType.description = "Personal tutor"
 
-	val meeting = new MeetingRecord
-	meeting.creator = staff
+	private trait Fixture {
+		val student = Fixtures.student("9876543")
+		val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
-	val relationship = StudentRelationship(staff, relType, student, DateTime.now)
-	meeting.relationships = Seq(relationship)
+		val meeting = new MeetingRecord
+		meeting.creator = staff
+
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+		meeting.relationships = Seq(relationship)
+	}
 
 	@Before
 	def setup() {
@@ -54,11 +56,10 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		Notification.init(new HeronWarningNotification, agent, meeting)
 	}
 
-	@Test def saveAndFetch() {
+	@Test def saveAndFetch(): Unit = new Fixture {
 		val notification = newHeronNotification(agent, meeting)
 		session.save(staff)
 		session.save(student)
-		session.save(relType)
 		session.save(relationship)
 		session.save(meeting)
 
@@ -150,8 +151,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	def scheduledMeetings() {
 		val staff = Fixtures.staff("1234567")
 		val student = Fixtures.student("9876543")
-		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
-		relType.description = "Personal tutor"
+		val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
 		val meeting = new ScheduledMeetingRecord
 		meeting.creator = staff
@@ -161,7 +161,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.save(staff)
 		session.save(student)
-		session.save(relType)
 		session.save(relationship)
 		session.save(meeting)
 
@@ -175,7 +174,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		retrieved.meeting should be (meeting)
 	}
 
-	@Test def recent() {
+	@Test def recent(): Unit = new Fixture {
 		val agent = Fixtures.user()
 		val group = Fixtures.smallGroup("Blissfully unaware group")
 		session.save(group)
@@ -184,7 +183,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.save(staff)
 		session.save(student)
-		session.save(relType)
 		session.save(relationship)
 		session.save(meeting)
 
@@ -243,7 +241,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Test def unemailedRecipientIds() {
+	@Test def unemailedRecipientIds(): Unit = new Fixture {
 		val agent = Fixtures.user()
 		val group = Fixtures.smallGroup("Blissfully unaware group")
 		session.save(group)
@@ -252,7 +250,6 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		session.save(staff)
 		session.save(student)
-		session.save(relType)
 		session.save(relationship)
 		session.save(meeting)
 

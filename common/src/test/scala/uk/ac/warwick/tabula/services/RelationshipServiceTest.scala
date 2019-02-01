@@ -32,9 +32,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.save(staff1)
 		session.save(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
-		relationshipService.saveOrUpdate(relationshipType)
+		val relationshipType: StudentRelationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 	}
 
 	@Before def setup(): Unit = transactional { tx =>
@@ -77,9 +75,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
-		relationshipService.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 
 		val rel1 = relationshipService.saveStudentRelationship(relationshipType, m1.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
 		val rel2 = relationshipService.saveStudentRelationship(relationshipType, m2.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
@@ -121,9 +117,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(staff1)
 		profileService.save(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
-		relationshipService.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 
 		// create and save one personal tutor relationship
 		val relStu1Staff3 = relationshipService.saveStudentRelationship(relationshipType, stu1.mostSignificantCourseDetails.get, Left(staff1), DateTime.now)
@@ -196,9 +190,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
-		relationshipService.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 
 		val rel1 = relationshipService.saveStudentRelationship(relationshipType, m1.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
 		val rel2 = relationshipService.saveStudentRelationship(relationshipType, m2.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
@@ -259,8 +251,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.saveOrUpdate(m5)
 		session.saveOrUpdate(m6)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
+		val relationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 		relationshipType.expectedUG = true
 		relationshipService.saveOrUpdate(relationshipType)
 
@@ -295,9 +286,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipType.description = "Personal tutor"
-		relationshipService.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipService.getStudentRelationshipTypeById("personalTutor").get
 
 		val rel1 = relationshipService.saveStudentRelationship(relationshipType, m1.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
 		val rel2 = relationshipService.saveStudentRelationship(relationshipType, m2.mostSignificantCourseDetails.get, Left(m3), DateTime.now)
