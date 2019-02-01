@@ -48,7 +48,3 @@ if [ -z "$CATALINA_PID" ] ; then
     fi
 fi
 export CATALINA_PID
-
-#LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/apr/lib"
-#export LD_LIBRARY_PATH
-
