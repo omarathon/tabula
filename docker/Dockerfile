@@ -4,7 +4,10 @@ RUN rm -rf /usr/local/tomcat/webapps/ROOT* /usr/local/tomcat/webapps/docs* /usr/
 
 COPY ./conf/tomcat/manager-context.xml /usr/local/tomcat/webapps/manager/META-INF/context.xml
 
+COPY ./conf/tomcat/bin/jrebel.jar /usr/local/tomcat/bin/
+COPY ./conf/tomcat/bin/libjrebel64.so /usr/local/tomcat/bin/
 COPY ./conf/tomcat/bin/setenv.sh /usr/local/tomcat/bin/
+
 COPY ./conf/tomcat/conf/context.xml /usr/local/tomcat/conf/
 COPY ./conf/tomcat/conf/tomcat-users.xml /usr/local/tomcat/conf/
 

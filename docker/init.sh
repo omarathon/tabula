@@ -11,6 +11,11 @@ fi
 
 read -p "Enter your email address (for Let's Encrypt to issue a certificate): " email
 
+read -p "Enter your SSO provder ID (leave blank for urn:$domain:tabula:service): " sso_provider_id
+if [ "x${sso_provider_id}" = "x" ]; then
+    export sso_provider_id=urn:$domain:tabula:service
+fi
+
 rsa_key_size=4096
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 data_path="${script_dir}/data/certbot"
@@ -20,7 +25,7 @@ tomcat_data_path="${script_dir}/data/tomcat"
 staging=1 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
-  read -p "Existing data found for $domain. Continue and replace existing certificate? (y/N) " decision
+  read -p "Existing data found for $domain. THIS WILL OVERWRITE ALL YOUR CURRENT CONFIGURATION (but persistent data such as database and object storage will remain). Do you want to continue? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
     exit
   fi
@@ -144,12 +149,15 @@ mkdir -p $tomcat_data_path/lib
 echo "### Writing Tabula properties file"
 cat <<EOF > $tomcat_data_path/lib/tabula.properties
 spring.profiles.active=sandbox
-scheduling.enabled=false
+scheduling.enabled=true
 environment.production=false
 environment.nonproduction=true
 environment.standby=false
 
 toplevel.url=https://$domain
+
+permissions.admin.group=in-tabula-local-dev-sysadmins
+permissions.masquerade.group=in-tabula-local-dev-masqueraders
 
 # Set these after running init.sh if you have sandbox credentials
 turnitin.aid=
@@ -251,7 +259,7 @@ cat <<EOF > $tomcat_data_path/lib/tabula-sso-config.xml
       <domain>$domain</domain>
       <secure>true</secure>
     </sscookie>
-    <providerid>urn:$domain:tabula:service</providerid>
+    <providerid>$sso_provider_id</providerid>
   </shire>
 
   <logout>

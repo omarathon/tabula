@@ -20,6 +20,7 @@ Table of Contents
 ----------
 
 - [Quick start](#quick-start)
+  - [Pre-requisites](#pre-requisites)
 - [Setting up for development](#setting-up-for-development)
 	- [ActiveMQ](#activemq)
   - [Elasticsearch](#elasticsearch)
@@ -39,6 +40,72 @@ Table of Contents
 
 Quick start
 -----------
+
+We provide a Docker set up that can be used with `docker-compose` to build an deploy Tabula locally.
+
+### Pre-requisites
+
+1. You're running on Linux or macOS
+2. You've installed [Docker Engine](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
+3. You've got a stable hostname ending in `warwick.ac.uk`. If you're on-campus but don't a hostname registered to your workstation, contact IT Services.
+4. You've got an SSO provider ID registered with the IT Services Web Team.
+5. You've got a stable IP address and it's whitelisted for the SSO sentry (contact IT Services Web Team if necessary).
+
+### Building Tabula
+
+Currently, the University's Maven repository is behind authentication - you'll need to set a `nexusUser` and `nexusPassword` property
+in `~/.gradle/gradle.properties`. While we work to open this up, you can use read-only credentials:
+
+	nexusUser=elab
+	nexusPassword=elab
+	
+This should allow you to access source and binaries from mvn.elab.warwick.ac.uk. If you're using an IDE (we recommend IntelliJ IDEA)
+this should mean you'll get code completion and the original source of dependencies that haven't been fully open-sourced.
+
+The gradle wrapper should be able to now build wars, if you run `./gradlew war` from the root directory it should build `api/build/libs/api.war`
+and `web/build/libs/ROOT.war`.
+
+### Running the Tomcat container with dependencies
+
+First, run `docker/init.sh` (i.e. run it from the root of the project, rather than `cd`'ing into the docker directory). This will ask you
+three questions:
+
+1. What's the hostname of your machine (i.e. localdev.warwick.ac.uk)
+2. What's your email address (for obtaining an SSL certificate from Let's Encrypt)
+3. What's your SSO provider ID (or leave blank for `urn:localdev.warwick.ac.uk:tabula:service` - you'll get this when you register for an SSO provider ID with the ITS Web Team).
+
+This generates the necessary properties files to run Tabula in `docker/data`. You shouldn't need to run `docker/init.sh` again except when there's been
+a change in the properties required; if you're just changing properties files you can just change these files directly without regenerating them.
+
+You can now start the Docker containers with `sudo docker-compose up --build` (again, you'll only need `--build` when configuration changes have been made).
+This will get everything running and you should get a 404 for https://localdev.warwick.ac.uk/ (and a 401 basic auth prompt for http://localdev.warwick.ac.uk:8080/manager).
+
+Now, you can deploy the application with `./gradlew cargoDeployRemote` which will connect to the Manager application on Tomcat and deploy the application there.
+If you make changes and want to re-deploy without starting from scratch you can run `./gradlew cargoRedeployRemote`; if you use JRebel and you've set it up with
+the remote server correctly you should be able to make changes live without a redeploy.
+
+### Populating data
+
+Once you've got the application running, it'll spew some errors that are expected when there isn't any data in either
+the database or Elasticsearch. You'll need to go to https://localdev.warwick.ac.uk/sysadmin (note, this requires that your
+logged-in user is a member of the WebGroup `in-tabula-local-dev-sysadmins`, you can edit the generated `docker/data/tomcat/lib/tabula.properties` to use
+a different group).
+
+Click in the 3 boxes for "Rebuild audit event index from", "Rebuild profiles index from" and "Rebuild notification stream index from" so
+that they're populated with a date, and click "Index". This should complete immediately as no data will be indexed, but it will create the index
+structure in Elasticsearch.
+
+Next, start the Imports in the top right:
+
+* Departments, modules, routes etc.
+* SITS assignments, ALL YEARS
+* SITS module lists
+* Profiles (leave deptCode empty)
+
+As `tabula.properties` specifies this is a sandbox instance, this will complete quickly and with completely fake data.
+
+You can then go to "List departments in the system", click a department and "View department admins" to grant permissions, enabling
+God mode will allow your user to bypass permissions checks and add ordinary permissions.
 
 Setting up for development
 ----------
