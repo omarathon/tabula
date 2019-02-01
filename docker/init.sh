@@ -22,7 +22,7 @@ data_path="${script_dir}/data/certbot"
 nginx_data_path="${script_dir}/data/nginx"
 nginx_certbot_data_path="${script_dir}/data/nginx-certbot"
 tomcat_data_path="${script_dir}/data/tomcat"
-staging=1 # Set to 1 if you're testing your setup to avoid hitting request limits
+staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domain. THIS WILL OVERWRITE ALL YOUR CURRENT CONFIGURATION (but persistent data such as database and object storage will remain). Do you want to continue? (y/N) " decision
