@@ -47,7 +47,7 @@ We provide a Docker set up that can be used with `docker-compose` to build and d
 
 1. You're running on Linux or macOS
 2. You've installed [Docker Engine](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
-3. You've got a stable hostname. If you're on-campus but don't a hostname registered to your workstation, contact IT Services.
+3. You've got a stable hostname. If you're on-campus but don't have a hostname registered to your workstation, contact IT Services.
 4. You've got an SSO provider ID registered with the IT Services Web Team.
 5. You've got a stable IP address and it's whitelisted for the SSO sentry (contact IT Services Web Team if necessary).
 
