@@ -8,14 +8,17 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 	private def openEditOptionsScreen(): Unit = {
 
 		When("I expand module XXX02")
-		val moduleBlock = id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1)
+		val moduleBlock = eventually { id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1) }
 		val arrow = moduleBlock.findElement(By.cssSelector(".fa-chevron-right"))
 		click on arrow
 
 		Then("The  module should expand")
 		eventually {
 			And("I should find a button to edit the CM2 assignment")
+			println(id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).size())
 			val editAssignmentBtn = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).get(1)
+			editAssignmentBtn.isDisplayed should be (true)
+			editAssignmentBtn.isEnabled should be (true)
 			click on editAssignmentBtn
 		}
 

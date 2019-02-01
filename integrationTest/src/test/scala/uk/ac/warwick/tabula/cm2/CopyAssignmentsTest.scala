@@ -64,9 +64,11 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 			currentUrl should not include "copy-assignments"
 		})
 
-		When("I expand Test Module 2")
-		val testModule = id("main").webElement.findElement(By.className("fa-chevron-right"))
-		click on testModule
+		eventually {
+			When("I expand Test Module 2")
+			val testModule = id("main").webElement.findElement(By.className("fa-chevron-right"))
+			click on testModule
+		}
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
 			And("Assignments should be displayed")
@@ -112,9 +114,11 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
 			currentUrl should not include "copy-assignments"
 		})
 
-		When("I expand Test Module 2")
-		val testModule = id("main").webElement.findElement(By.className("fa-chevron-right"))
-		click on testModule
+		eventually {
+			When("I expand Test Module 2")
+			val testModule = id("main").webElement.findElement(By.className("fa-chevron-right"))
+			click on testModule
+		}
 
 		eventually(timeout(45.seconds), interval(300.millis)) ({
 			Then("Assignments should be displayed")
