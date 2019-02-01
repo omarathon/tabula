@@ -67,6 +67,9 @@ and `web/build/libs/ROOT.war`.
 
 ### Running the Tomcat container with dependencies
 
+*macOS note*: The standard `head` on macOS may be incompatible with `docker/init.sh`, you may want to get `ghead` from Homebrew and
+replace instances in the script before running.
+
 First, run `docker/init.sh` (i.e. run it from the root of the project, rather than `cd`'ing into the docker directory). This will ask you
 three questions:
 
