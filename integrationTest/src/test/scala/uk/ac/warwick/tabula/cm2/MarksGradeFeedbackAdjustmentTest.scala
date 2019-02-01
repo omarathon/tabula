@@ -14,9 +14,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
 
 			// check that we can see some modules on the page.
 			Then("Module XXX01 should be displayed")
-			getModule("XXX01").get.isDisplayed should be {
-				true
-			}
+			eventually { getModule("XXX01").get.isDisplayed should be (true) }
 
 			When("I click on the XXX01 module it should open")
 			val module = getModule("XXX01").get

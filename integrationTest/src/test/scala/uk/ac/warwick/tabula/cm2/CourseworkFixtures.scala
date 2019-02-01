@@ -100,7 +100,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 			find(cssSelector("div.deptheader")) should be('defined)
 		}
 		if ((assistants ++ managers).nonEmpty) {
-			val module = getModule(moduleCode).get
+			val module = eventually { getModule(moduleCode).get }
 			click on module.findElement(By.partialLinkText("Manage this module"))
 			val editPerms = module.findElement(By.partialLinkText("Module permissions"))
 			eventually(editPerms.isDisplayed should be {

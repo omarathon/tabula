@@ -61,8 +61,11 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 			click on downloadDropdown
 
 			Then("The link to download as zip should be disabled")
-			val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
-			disabledlinks.getAttribute("class").contains("disabled") should be (true)
+			val disabledlinks = eventually {
+				val links = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
+				links.getAttribute("class").contains("disabled") should be(true)
+				links
+			}
 
 			When("I select a student")
 			val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)

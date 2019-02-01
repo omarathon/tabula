@@ -46,7 +46,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
 		Given("There is an assignment with feedback released")
 		signIn as P.Admin1 to Path("/coursework/admin/department/xxx")
-		val module = getModule("XXX02").get
+		val module = eventually { getModule("XXX02").get }
 		click on module.findElement(By.className("mod-code"))
 
 		eventually(pageSource.contains("Feedback needs publishing (2 of 2)") should be (true))
