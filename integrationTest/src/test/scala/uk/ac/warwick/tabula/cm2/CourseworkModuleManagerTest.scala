@@ -150,6 +150,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 				val element = eventually {
 					val el = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
 					el.size should be (1)
+					el
 				}
 
 				Then("I should be able to click on the Manage button")
