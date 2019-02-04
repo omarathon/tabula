@@ -4,7 +4,6 @@ import org.openqa.selenium.{By, WebElement}
 import org.scalatest.GivenWhenThen
 import org.scalatest.exceptions.TestFailedException
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 
 class AdministerExamsTest extends ExamFixtures
 	with GivenWhenThen {
@@ -24,20 +23,19 @@ class AdministerExamsTest extends ExamFixtures
 		click on linkText("Show")
 
 		Then("The user should be able to select the 'Create new exam' option from the 'Manage' dropdown")
-		var info = getModuleInfo("XXX01")
+		var info = eventually { getModuleInfo("XXX01") }
 		val manageButton = info.findElement(By.className("module-manage-button")).findElement(By.linkText("Manage"))
 		eventually {
 			manageButton.isDisplayed should be (true)
 		}
 		click on manageButton
 
-		// Doesn't work on Chrome. No idea why
-//		val createNewExam = info.findElement(By.partialLinkText("Create new exam"))
-//		eventually {
-//			createNewExam.isDisplayed should be {true}
-//		}
-//		click on createNewExam
-		go to Path(s"/exams/exams/admin/module/xxx01/$year/exams/new")
+		And("I click on the 'Create new exam' link")
+		eventually {
+			val createNewExam = info.findElement(By.partialLinkText("Create new exam"))
+			createNewExam.isDisplayed should be (true)
+			click on createNewExam
+		}
 
 		Then("This should show the create exam page")
 		currentUrl should include(s"/admin/module/xxx01/$year/exams/new")
