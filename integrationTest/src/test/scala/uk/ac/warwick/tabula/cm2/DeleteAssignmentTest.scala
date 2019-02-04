@@ -16,7 +16,7 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		click on cssSelector(".navbar-tertiary").webElement.findElement(By.partialLinkText(s"${AcademicYear.now().toString}"))
 
 		When("I expand module XXX02")
-		val moduleBlock = id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1)
+		val moduleBlock = eventually { id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1) }
 		val arrow = moduleBlock.findElement(By.cssSelector(".fa-chevron-right"))
 		click on arrow
 		
