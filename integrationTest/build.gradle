@@ -48,17 +48,11 @@ test {
 // run npm install
 task installHeadlessChromeDependency(type: NpmTask) {
     outputs.dir 'node_modules/puppeteer/.local-chromium'
-    args = ['install', 'puppeteer', '--no-save']
-}
-
-// run npm install
-task installChromeDriverDependency(type: NpmTask) {
-    outputs.dir 'chromedriver/lib/chromedriver/chromedriver'
-    args = ['install', 'chromedriver', '--no-save']
+    outputs.dir 'node_modules/chromedriver/lib/chromedriver'
+    args = ['install', 'puppeteer', 'chromedriver', '--no-save']
 }
 
 test.dependsOn 'installHeadlessChromeDependency'
-test.dependsOn 'installChromeDriverDependency'
 
 def bundlerEnvironment = [
     GEM_HOME: 'vendor/gem_home',

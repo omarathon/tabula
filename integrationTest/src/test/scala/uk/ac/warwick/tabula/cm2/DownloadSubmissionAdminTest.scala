@@ -14,7 +14,7 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 
 		loadCurrentAcademicYearTab()
 
-		val testModule =id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
+		val testModule = eventually { id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0) }
 		click on testModule
 
 		eventually {
