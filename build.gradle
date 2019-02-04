@@ -32,7 +32,7 @@ ext {
     poiVersion = "4.0.1"
     tilesVersion = "3.0.8"
     jcloudsVersion = "2.1.1"
-    warwickUtilsVersion = "20190114"
+    warwickUtilsVersion = "20190125"
     surefireVersion = "2.19.1"
 }
 
@@ -102,18 +102,12 @@ subprojects {
     // In this section you declare where to find the dependencies of your project
     repositories {
         mavenCentral()
-        maven {
-            credentials {
-                username nexusUser
-                password nexusPassword
-            }
-            url "https://mvn.elab.warwick.ac.uk/nexus/content/groups/public"
-        }
-        maven { url "http://oauth.googlecode.com/svn/code/maven" }
+        maven { url 'https://mvn.elab.warwick.ac.uk/nexus/repository/public-anonymous/' }
+        maven { url 'http://oauth.googlecode.com/svn/code/maven' }
         maven { url 'http://repo.spring.io/snapshot' }
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-        maven { url "https://repository.apache.org/content/repositories/snapshots" }
-        maven { url "http://dl.bintray.com/scalaz/releases" }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots' }
+        maven { url 'http://dl.bintray.com/scalaz/releases' }
         mavenLocal()
     }
 

@@ -53,13 +53,7 @@ We provide a Docker set up that can be used with `docker-compose` to build and d
 
 ### Building Tabula
 
-Currently, the University's Maven repository is behind authentication - you'll need to set a `nexusUser` and `nexusPassword` property
-in `~/.gradle/gradle.properties`. While we work to open this up, you can use read-only credentials:
-
-	nexusUser=readonly
-	nexusPassword=readonly
-	
-This should allow you to access source and binaries from mvn.elab.warwick.ac.uk. If you're using an IDE (we recommend IntelliJ IDEA)
+You should be able to access source and binaries from mvn.elab.warwick.ac.uk when you resolve dependencies. If you're using an IDE (we recommend IntelliJ IDEA)
 this should mean you'll get code completion and the original source of dependencies that haven't been fully open-sourced.
 
 The gradle wrapper should be able to now build wars, if you run `./gradlew war` from the root directory it should build `api/build/libs/api.war`
