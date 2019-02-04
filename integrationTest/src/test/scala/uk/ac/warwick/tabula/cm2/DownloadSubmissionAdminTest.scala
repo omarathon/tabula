@@ -112,12 +112,10 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 		val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(1)
 		disabledlinks.getAttribute("class").contains("disabled") should be (false)
 
-
 		And("The link should point to the zip file")
-		menuOption.isDisplayed should be(true)
+		eventually { menuOption.isDisplayed should be(true) }
 		menuOption.getAttribute("href") should include("/delete")
 		click on menuOption
-
 	}
 
 	private def uncheckStudents(): Unit = {
