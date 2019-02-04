@@ -33,8 +33,8 @@ class DeleteAssignmentTest extends BrowserTest with CourseworkFixtures {
 		eventually {
 			val assignmentRow = id("main").webElement.findElements(By.xpath(path))
 			click on assignmentRow.get(0)
+			currentUrl should endWith("/summary")
 		}
-		eventually(currentUrl should endWith("/summary"))
 		When("I click on the edit button")
 		click on partialLinkText("Edit assignment")
 
