@@ -393,7 +393,6 @@ Directory structure
       - `webapp` - other non-code files that make up the WAR.
       - `artwork` - source graphics not included in the app, but used to generate static images. Usually SVG/Inkscape.
     - `test`
-    - `integration-test`
     - `console`
 
 WAR overlays
