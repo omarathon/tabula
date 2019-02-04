@@ -334,35 +334,35 @@
 		<div class="col-md-1">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="30catsNoUnusual"
-											<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("30catsNoUnusual")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("30catsNoUnusual")>checked</#if>
 					/> <=30</label>
 			</div>
 		</div>
 		<div class="col-md-1">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="40catsNoUnusual"
-											<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("40catsNoUnusual")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("40catsNoUnusual")>checked</#if>
 					/> >=40</label>
 			</div>
 		</div>
 		<div class="col-md-1">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="50catsNoUnusual"
-											<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("50catsNoUnusual")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("50catsNoUnusual")>checked</#if>
 					/> >=50</label>
 			</div>
 		</div>
 		<div class="col-md-1">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="60catsNoUnusual"
-											<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("60catsNoUnusual")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("60catsNoUnusual")>checked</#if>
 					/> >=60</label>
 			</div>
 		</div>
 		<div class="col-md-1">
 			<div class="checkbox">
 				<label><input type="checkbox" name="predefinedColumnIdentifiers" value="70catsNoUnusual"
-											<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("70catsNoUnusual")>checked</#if>
+					<#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("70catsNoUnusual")>checked</#if>
 					/> >=70</label>
 			</div>
 		</div>

@@ -241,12 +241,8 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 					.setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
-					//.setFetchMode("studentCourseDetails.currentRoute.upstreamModuleLists", FetchMode.JOIN)
-					//.setFetchMode("studentCourseDetails.currentRoute.upstreamModuleLists.entries", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)
-					//.setFetchMode("studentCourseDetails.studentCourseYearDetails.route.upstreamModuleLists", FetchMode.JOIN)
-					//.setFetchMode("studentCourseDetails.studentCourseYearDetails.route.upstreamModuleLists.entries", FetchMode.JOIN)
   				.distinct
   				.seq
   				.map { student =>
