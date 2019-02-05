@@ -62,10 +62,10 @@ dependencies {
 
     compile "joda-time:joda-time:2.10.1"
     compile "joda-time:joda-time-jsptags:1.1.1"
-    compile "org.jadira.usertype:usertype.core:7.0.0.CR1"
+    compile ("org.jadira.usertype:usertype.core:7.0.0.CR1") { exclude group: 'com.h2database' }
     compile "org.joda:joda-convert:2.1.2"
 
-    compile "com.google.guava:guava:23.6.1-jre"
+    compile "com.google.guava:guava:24.1.1-jre"
     compile "com.google.code.findbugs:jsr305:3.0.2"
 
     compile "com.fasterxml.jackson.module:jackson-module-scala_${scalaMajorVersion}:${jacksonScalaModuleVersion}"
