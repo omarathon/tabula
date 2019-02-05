@@ -22,6 +22,7 @@ dependencies {
     compile "uk.ac.warwick.util:warwickutils-mail:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-web:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-queue:${warwickUtilsVersion}"
+    testCompile 'org.apache.activemq:activemq-broker:5.15.8'
     compile "uk.ac.warwick.util:warwickutils-files:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-hibernate4:${warwickUtilsVersion}"
     compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"

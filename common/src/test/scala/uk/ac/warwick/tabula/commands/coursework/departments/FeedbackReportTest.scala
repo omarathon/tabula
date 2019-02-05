@@ -136,7 +136,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		}
 
 		/** Check each cell in the row against the corresponding item in expected. */
-		def check(description:String, row: Row, expected: Seq[Any]) {
+		def check(description: String, row: Row, expected: Seq[Any]) {
 			for ((cell, (expectedValue, i)) <- row.cellIterator().asScala.toSeq zip expected.zipWithIndex) {
 				withClue(s"$description column index $i:") {
 					compare(cell, expectedValue)
