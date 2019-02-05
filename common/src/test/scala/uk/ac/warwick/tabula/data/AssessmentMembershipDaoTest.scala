@@ -78,7 +78,10 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup2.assessmentGroup = "A"
 		upstreamGroup2.sequence = "A02"
 		upstreamGroup2.academicYear = AcademicYear(2010)
-		upstreamGroup2.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"))
+		upstreamGroup2.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"),
+			new UpstreamAssessmentGroupMember(upstreamGroup2, "1000005")
+		)
 
 		assignment2.assessmentGroups.add(assessmentGroup2)
 		assignment2.academicYear = AcademicYear(2010)
@@ -129,6 +132,13 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
+
+		val studentCourseDetails = new StudentCourseDetails(Fixtures.student("0672089", "cuscav"), "0672089/1")
+		studentCourseDetails.statusOnCourse = new SitsStatus(code = "C")
+		val studentCourseYearDetails = new StudentCourseYearDetails(studentCourseDetails, 1, AcademicYear(2010))
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYearDetails)
+		session.save(studentCourseYearDetails)
+		session.save(studentCourseDetails)
 
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
@@ -207,7 +217,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 					m.userId = id
 					m
 				}
-				val members = Seq(testMember("cuscav"), testMember("cuslaj"), testMember("cuslat"))
+				val members: Seq[StudentMember] = Seq(testMember("cuscav"), testMember("cuslaj"), testMember("cuslat"))
 				members.foreach(session.save)
 				session.flush()
 
@@ -237,7 +247,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 	@Test def UpstreamAssessmentGroupMembers(): Unit = {
 		transactional { _ =>
 			new Fixture {
-				val academicYear =  AcademicYear.now()
+				val academicYear: AcademicYear =  AcademicYear.now()
 
 				val dept1 = Fixtures.department("its")
 				val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
@@ -246,8 +256,8 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.saveOrUpdate(sprFullyEnrolledStatus)
 				session.flush()
 
-				val stu1 = Fixtures.student(user.getWarwickId, user.getUserId, department=dept1, sprStatus=sprFullyEnrolledStatus)
-				val stu2 = Fixtures.student("1000006", "u1000006", department=dept1)
+				val stu1 = Fixtures.student("1000005", "1000005", department=dept1, sprStatus=sprFullyEnrolledStatus)
+				val stu2: StudentMember = Fixtures.student("1000006", "u1000006", department=dept)
 				stu1.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
 				stu2.mostSignificantCourse.statusOnCourse = sprPWDStatus
 				session.save(stu1)
@@ -255,9 +265,9 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				upstreamGroup2.academicYear = academicYear
 				session.update(upstreamGroup2)
 				session.flush()
-				val uagInfo = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				val uagInfo: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
 				uagInfo.size should be (1)
-				val currentMembers = uagInfo.head.currentMembers
+				val currentMembers: Seq[UpstreamAssessmentGroupMember] = uagInfo.head.currentMembers
 				currentMembers.size should be (1)
 
 				//now add one more PWD member. We should still have just 1 member
@@ -265,13 +275,13 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.update(upstreamGroup2)
 				session.flush()
 
-				val uagInfo1 = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				val uagInfo1: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
 				uagInfo1.size should be (1)
-				val currentMembers1 = uagInfo1.head.currentMembers
+				val currentMembers1: Seq[UpstreamAssessmentGroupMember] = uagInfo1.head.currentMembers
 				currentMembers1.size should be (1)
 
 				//add one more fully enrolled member.
-				val stu3 = Fixtures.student("0000007", "u1000007", department=dept1)
+				val stu3: StudentMember = Fixtures.student("0000007", "u1000007", department=dept)
 				stu3.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
 				session.save(stu3)
 				session.flush()
@@ -280,12 +290,12 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				session.update(upstreamGroup2)
 				session.flush()
 
-				val uagInfo2 = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
-				val currentMembers2 = uagInfo2.filter(_.upstreamAssessmentGroup == upstreamGroup2).head.currentMembers
+				val uagInfo2: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				val currentMembers2: Seq[UpstreamAssessmentGroupMember] = uagInfo2.filter(_.upstreamAssessmentGroup == upstreamGroup2).head.currentMembers
 				currentMembers2.size should be (2)
 
 				currentMembers2.foreach{ uagm =>
-					uagm.universityId should not be ("1000006")
+					uagm.universityId should not be "1000006"
 				}
 			}
 		}
