@@ -179,22 +179,10 @@ subprojects {
         maxHeapSize = '2048m'
         maxParallelForks = forks
         systemProperties = [TestProcessId: "F1"] // FIXME
-
-        if (System.env['bamboo_working_directory'] != null) {
-            ignoreFailures = true // So we can quarantine in Bamboo
-            testLogging {
-                // set options for log level LIFECYCLE
-                events "failed"
-                exceptionFormat "short"
-                // set options for log level DEBUG
-                debug {
-                    events "started", "skipped", "failed"
-                    exceptionFormat "full"
-                }
-            }
-            afterTest { desc, result ->
-                println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
-            }
+        ignoreFailures = System.env['bamboo_working_directory'] != null // So we can quarantine in Bamboo
+        testLogging {
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
         }
     }
 
