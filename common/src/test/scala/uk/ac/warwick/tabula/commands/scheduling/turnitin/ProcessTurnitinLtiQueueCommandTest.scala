@@ -95,7 +95,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			report.attachment.submissionValue.submission.assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
 			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
-			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(success = true, json = Option(""))
+			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId) returns new TurnitinLtiResponse(success = true, json = Option(""))
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
 			cmd.applyInternal()
@@ -151,7 +151,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns None
 			mockTurnitinLtiQueueService.findReportToProcessForSubmission returns None
 			mockTurnitinLtiQueueService.findReportToProcessForReport(false) returns Option(report)
-			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(success = true, json = Option(""))
+			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId) returns new TurnitinLtiResponse(success = true, json = Option(""))
 			mockTurnitinLtiQueueService.listCompletedAssignments returns Seq()
 			mockTurnitinLtiQueueService.listFailedAssignments returns Seq()
 			cmd.applyInternal()
@@ -349,7 +349,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
 			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
-			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(
+			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId) returns new TurnitinLtiResponse(
 				success = false,
 				statusMessage = Option("How bout no!"),
 				json = Some("{}")
@@ -372,7 +372,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
 			assignment.userLookup = mockUserLookup
 			mockTurnitinLtiQueueService.findAssignmentToProcess returns None
 			mockTurnitinLtiQueueService.findReportToProcessForReport(true) returns Option(report)
-			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user1, user1)) returns new TurnitinLtiResponse(
+			mockTurnitinLtiService.getSubmissionDetails(report.turnitinId) returns new TurnitinLtiResponse(
 				success = true,
 				json = Option(
 					"""

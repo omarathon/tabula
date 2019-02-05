@@ -178,7 +178,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		val extensionRequested = extension.isDefined && !extension.get.isManual
 		val submission = assignment.submissions.asScala.find(_.isForUser(user.apparentUser))
 		val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user.apparentUser))
-		val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission).orElse(assignment.feedbackDeadline)
+		val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission)
 
 		StudentAssignmentInformation(
 			assignment = assignment,
