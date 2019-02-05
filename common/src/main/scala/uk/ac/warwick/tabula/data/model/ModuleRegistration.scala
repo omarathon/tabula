@@ -88,12 +88,12 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 	var passFail: Boolean = _
 
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"${studentCourseDetails.scjCode}-$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
 			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
 		}
 
 	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"${studentCourseDetails.scjCode}-$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
 			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true)
 				.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
 		}
