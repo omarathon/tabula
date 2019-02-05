@@ -10,16 +10,15 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="api_main" target="1.8" />
-      <module name="api_test" target="1.8" />
       <module name="bamboo-specs" target="1.8" />
-      <module name="common_main" target="1.8" />
-      <module name="common_test" target="1.8" />
-      <module name="integrationTest_main" target="1.8" />
-      <module name="integrationTest_test" target="1.8" />
-      <module name="web_integrationTest" target="1.8" />
-      <module name="web_main" target="1.8" />
-      <module name="web_test" target="1.8" />
+      <module name="tabula.api.main" target="1.8" />
+      <module name="tabula.api.test" target="1.8" />
+      <module name="tabula.common.main" target="1.8" />
+      <module name="tabula.common.test" target="1.8" />
+      <module name="tabula.integrationTest.main" target="1.8" />
+      <module name="tabula.integrationTest.test" target="1.8" />
+      <module name="tabula.web.main" target="1.8" />
+      <module name="tabula.web.test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

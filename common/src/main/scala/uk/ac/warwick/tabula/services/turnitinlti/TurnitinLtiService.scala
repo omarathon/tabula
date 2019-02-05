@@ -208,7 +208,7 @@ class TurnitinLtiService extends Logging with DisposableBean
 		})
 	}
 
-	def getSubmissionDetails(turnitinSubmissionId: String, user: CurrentUser): TurnitinLtiResponse =
+	def getSubmissionDetails(turnitinSubmissionId: String): TurnitinLtiResponse =
 		doRequest(s"$apiSubmissionDetails/$turnitinSubmissionId", Map())(ApacheHttpClientUtils.handler {
 			case response =>
 				val json = EntityUtils.toString(response.getEntity)
