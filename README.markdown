@@ -3,6 +3,8 @@ Tabula
 
 This is Tabula, the University of Warwick's student administration system including a number of modules. It has an internal [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
 
+![Screenshot](screenshot.png)
+
 Currently, the modules that are in Tabula are:
 
 - common - Data model and "Commands", which perform actions in Tabula
