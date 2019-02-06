@@ -671,15 +671,8 @@ table.tablesorter {
 
 	.placeholder {
 		display: none;
-	}
 
-	&.disabled {
-
-		.fix-header {
-			position:relative;
-		}
-
-		.placeholder {
+		&.loading {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -690,13 +683,7 @@ table.tablesorter {
 			top: 0;
 			left: 0;
 		}
-
-		form.form-inline {
-			opacity: 0.1;
-		}
-
 	}
-
 }
 
 .fix-header .placeholder {
