@@ -157,6 +157,7 @@ object Permissions {
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object ManageNotificationSettings extends Permission("Manage notification settings")
+		case object ManageMarkingDescriptors extends Permission("Manage marking descriptors")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
 		case object Manage extends Permission("Manage sub-departments")

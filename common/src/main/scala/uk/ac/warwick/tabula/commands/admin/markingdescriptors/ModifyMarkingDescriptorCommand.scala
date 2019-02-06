@@ -52,7 +52,7 @@ trait ModifyMarkingDescriptorPermissions extends RequiresPermissionsChecking wit
 	self: ModifyMarkingDescriptorState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Department.Manage, mandatory(department))
+		p.PermissionCheck(Permissions.Department.ManageMarkingDescriptors, mandatory(department))
 	}
 }
 
