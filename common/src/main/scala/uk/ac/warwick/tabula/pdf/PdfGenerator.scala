@@ -4,6 +4,7 @@ import java.io.{ByteArrayOutputStream, OutputStream}
 import java.net.URL
 
 import com.google.common.io.ByteSource
+import com.itextpdf.text.exceptions.InvalidPdfException
 import com.itextpdf.text.pdf.{PdfCopy, PdfReader}
 import com.itextpdf.text.{Document, Image}
 import org.w3c.dom.Element
@@ -17,6 +18,7 @@ import uk.ac.warwick.tabula.commands.profiles.{MemberPhotoUrlGenerator, MemberPh
 import uk.ac.warwick.tabula.data.FileDaoComponent
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.views.TextRendererComponent
 
@@ -84,7 +86,7 @@ trait FreemarkerXHTMLPDFGeneratorWithFileStorageComponent extends FreemarkerXHTM
 
 }
 
-trait CombinesPdfs {
+trait CombinesPdfs extends Logging{
 
 	self: FileDaoComponent =>
 
@@ -95,13 +97,18 @@ trait CombinesPdfs {
 		val copy = new PdfCopy(document, output)
 		document.open()
 		pdfs.foreach(attachment => {
-			val reader = new PdfReader(attachment.asByteSource.openStream())
+			try {
+				val reader = new PdfReader(attachment.asByteSource.openStream())
 
-			(1 to reader.getNumberOfPages).foreach(page => {
-				copy.addPage(copy.getImportedPage(reader, page))
-			})
-			copy.freeReader(reader)
-			reader.close()
+				(1 to reader.getNumberOfPages).foreach(page => {
+					copy.addPage(copy.getImportedPage(reader, page))
+				})
+				copy.freeReader(reader)
+				reader.close()
+			} catch {
+				case e: InvalidPdfException => logger.info(s"Unable to add ${attachment.name} to the combined PDF", e)
+			}
+
 		})
 		document.close()
 		val pdf = new FileAttachment
