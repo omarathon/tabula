@@ -147,8 +147,11 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 				When("I go the admin page, and expand the module list")
 				click on linkText("Test Services")
-				var element = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
-				element.size should be (1)
+				val element = eventually {
+					val el = className("filter-results").webElement.findElements(By.cssSelector("div.striped-section.admin-assignment-list "))
+					el.size should be (1)
+					el
+				}
 
 				Then("I should be able to click on the Manage button")
 				val row = element.asScala.find({_.findElement(By.cssSelector("span.mod-code")).getText == "XXX01" })

@@ -23,7 +23,7 @@
 			<@f.input path="endDate" cssClass="form-control date-picker" />
 		</@bs3form.labelled_form_group>
 
-		<p>Select sets of groups that you'd wish to print:</p>
+		<p>Select the group sets to print:</p>
 
 		<@bs3form.errors path="smallGroupSets" />
 

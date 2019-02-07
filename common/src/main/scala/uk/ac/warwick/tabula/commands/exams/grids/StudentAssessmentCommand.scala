@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, NormalCATSLoadServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -54,7 +54,10 @@ trait StudentAssessmentPermissions extends RequiresPermissionsChecking with Perm
 	self: StudentAssessmentCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment)
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.enrolmentDepartment),
+				CheckablePermission(Permissions.Department.ExamGrids, studentCourseYearDetails.studentCourseDetails.currentRoute))
+		)
 	}
 
 }
@@ -64,6 +67,7 @@ trait StudentAssessmentCommandState {
 	self: StudentCourseYearDetailsDaoComponent with NormalCATSLoadServiceComponent =>
 
 	def academicYear: AcademicYear
+
 	def studentCourseYearDetails: StudentCourseYearDetails
 
 	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, studentCourseYearDetails.yearOfStudy, normalCATSLoadService)

@@ -14,7 +14,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 			When("I go to the department admin page")
 			go to Path("/coursework/admin/department/xxx")
 
-			val module = getModule("XXX02").get
+			val module = eventually { getModule("XXX02").get }
 			eventually(click on module.findElement(By.className("mod-code")))
 			Then("I should see the premarked assignment")
 			eventually(pageSource contains "Premarked assignment" should be {true})

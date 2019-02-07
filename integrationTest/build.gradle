@@ -36,26 +36,23 @@ test {
     doFirst {
         mkdir 'build/integrationTest-screenshots'
         systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+
+        println "Executing tests against " + System.getProperty("toplevel.url", "https://tabula-test.warwick.ac.uk")
     }
 
     systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
+    systemProperty 'toplevel.url', System.getProperty("toplevel.url")
 }
 
 // run npm install
 task installHeadlessChromeDependency(type: NpmTask) {
     outputs.dir 'node_modules/puppeteer/.local-chromium'
-    args = ['install', 'puppeteer', '--no-save']
-}
-
-// run npm install
-task installChromeDriverDependency(type: NpmTask) {
-    outputs.dir 'chromedriver/lib/chromedriver/chromedriver'
-    args = ['install', 'chromedriver', '--no-save']
+    outputs.dir 'node_modules/chromedriver/lib/chromedriver'
+    args = ['install', 'puppeteer', 'chromedriver', '--no-save']
 }
 
 test.dependsOn 'installHeadlessChromeDependency'
-test.dependsOn 'installChromeDriverDependency'
 
 def bundlerEnvironment = [
     GEM_HOME: 'vendor/gem_home',
