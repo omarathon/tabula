@@ -48,8 +48,12 @@ object ListMarkerFeedbackCommand {
 			enhancedFeedbackByStage.map{ case(stage, values) =>
 				FeedbackByActionability(
 					readyToMark = values.filter(_.markerFeedback.feedback.outstandingStages.contains(stage)),
-					notReadyToMark = values.filter(emf => !emf.markerFeedback.hasContent && emf.markerFeedback.feedback.currentStageIndex < stage.order),
-					marked = values.filter(emf => emf.markerFeedback.hasContent && !emf.markerFeedback.feedback.outstandingStages.contains(stage))
+					notReadyToMark = values.filter(emf => emf.markerFeedback.feedback.currentStageIndex < stage.order),
+					marked = values.filter(emf =>
+						emf.markerFeedback.hasContent && // the marker has added content
+						!emf.markerFeedback.feedback.outstandingStages.contains(stage) && // the current stage isn't outstanding
+						!(emf.markerFeedback.feedback.currentStageIndex < stage.order) // marking hasn't been sent back to a previous stage
+					)
 				)
 			}.foldLeft(FeedbackByActionability(Nil, Nil, Nil))((a, b) => a.merge(b))
 		}
