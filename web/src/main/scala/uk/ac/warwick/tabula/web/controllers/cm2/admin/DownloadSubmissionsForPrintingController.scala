@@ -18,21 +18,23 @@ import scala.util.Try
 
 trait DownloadSubmissionsForPrintingController extends CourseworkController with AutowiringUserLookupComponent {
 
-	private def isValidPdf(file: FileAttachment): Boolean = file.name.endsWith(DownloadAdminSubmissionsForPrintingCommand.pdfExtension) && Try(new PdfReader(file.asByteSource.openStream())).isSuccess
+	private def isValidPdf(file: FileAttachment): Boolean = file.name.endsWith(DownloadAdminSubmissionsForPrintingCommand.pdfExtension) &&
+		Try(new PdfReader(file.asByteSource.openStream()).close()).isSuccess
 
 	@RequestMapping
 	def pdfCheck(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command, @PathVariable assignment: Assignment): Mav = {
 		Mav(new JSONView(Map(
-			"submissionsWithNonPDFs" -> cmd.submissions.filter(
-				_.allAttachments.exists(file => !isValidPdf(file))
-			).map(submission =>
-				Map(
-					"submission" -> submission.id,
-					"universityId" -> submission.studentIdentifier,
-					"name" -> (if (assignment.module.adminDepartment.showStudentName) userLookup.getUserByUserId(submission.usercode).getFullName else ""),
-					"nonPDFFiles" -> submission.allAttachments.filter(file => !isValidPdf(file)).map(_.name)
-				)
-			)
+			"submissionsWithNonPDFs" -> cmd.submissions
+					.map(s => (s, s.allAttachments.filter(file => !isValidPdf(file))))
+					.filter{ case (_, a) => a.nonEmpty}
+					.map{ case (s, a) =>
+						Map(
+							"submission" -> s.id,
+							"universityId" -> s.studentIdentifier,
+							"name" -> (if (assignment.module.adminDepartment.showStudentName) userLookup.getUserByUserId(s.usercode).getFullName else ""),
+							"nonPDFFiles" -> a.map(_.name)
+						)
+					}
 		))).noLayout()
 	}
 
