@@ -1385,3 +1385,20 @@
 			 <span class="very-subtle">Reason for adjustment:</span> ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
 		</#if>
 </#macro>
+
+<#macro downloadPdfModal url id="download-pdf-modal">
+	<div id="${id}" class="modal fade">
+		<@modal.wrapper>
+			<@modal.header>
+				<h3 class="modal-title">Download submissions as PDF</h3>
+			</@modal.header>
+			<@modal.body>
+				<p>There are <span class="count"></span> submissions that have files that are not valid PDFs (shown below). The download will not include these files.</p>
+				<p><a class="form-post btn btn-primary"
+							data-href="${url}?download" href="">Download submissions as PDF</a>
+				</p>
+				<ul class="submissions"></ul>
+			</@modal.body>
+		</@modal.wrapper>
+	</div>
+</#macro>

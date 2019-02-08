@@ -99,10 +99,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 		val query =
 			session.newQuery[Assignment](s"""select a
 			from
-				Assignment a, UpstreamAssessmentGroup uag
+				Assignment a, UpstreamAssessmentGroup uag, StudentCourseDetails scd
 					join a.assessmentGroups ag
 					join uag.members uagms with uagms.universityId = :universityId
+		 			join scd.studentCourseYearDetails scyd with scyd.academicYear = a.academicYear
 			where
+	 				scd.student.universityId = :universityId and
+					scd.statusOnCourse.code not like 'P%' and
 	 				ag.assessmentComponent.moduleCode = uag.moduleCode and
 					ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
 					uag.academicYear = a.academicYear and

@@ -814,6 +814,18 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
 		new AssignmentMembershipFixture() {
 			val ams: AssessmentMembershipServiceImpl = assignmentMembershipService
 
+			val dept1 = Fixtures.department("CH")
+			val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+			session.saveOrUpdate(dept1)
+			session.saveOrUpdate(sprFullyEnrolledStatus)
+
+			for(id <- 1 to 5) {
+				val stu = Fixtures.student(s"000000$id", s"student$id", department=dept1, sprStatus=sprFullyEnrolledStatus)
+				stu.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+				session.save(stu)
+			}
+			session.flush()
+
 			withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment1).toSet) }
 			withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment1, assignment2).toSet) }
 			withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser, None).toSet should be (Seq(assignment2).toSet) }
