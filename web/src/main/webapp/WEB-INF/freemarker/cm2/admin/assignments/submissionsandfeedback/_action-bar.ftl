@@ -74,7 +74,7 @@
 								action_descr='delete submissions'
 								classes="form-post"
 								href=deletesubmissionurl
-								tooltip='Delete submissions'>
+								tooltip='Delete the submissions for the selected students'>
 									Delete submissions
 							</@fmt.permission_button>
 						</li>
