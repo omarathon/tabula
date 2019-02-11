@@ -133,12 +133,19 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
 
-		val studentCourseDetails = new StudentCourseDetails(Fixtures.student("0672089", "cuscav"), "0672089/1")
+		val student: StudentMember = new StudentMember("0672089")
+		student.userId = "cuscav"
+
+		val studentCourseDetails = new StudentCourseDetails(student, "0672089/1")
+		studentCourseDetails.sprCode = "0672089/1"
 		studentCourseDetails.statusOnCourse = new SitsStatus(code = "C")
+
 		val studentCourseYearDetails = new StudentCourseYearDetails(studentCourseDetails, 1, AcademicYear(2010))
 		studentCourseDetails.addStudentCourseYearDetails(studentCourseYearDetails)
-		session.save(studentCourseYearDetails)
-		session.save(studentCourseDetails)
+
+		session.saveOrUpdate(student)
+		session.saveOrUpdate(studentCourseDetails)
+		session.saveOrUpdate(studentCourseYearDetails)
 
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
