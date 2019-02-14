@@ -32,7 +32,7 @@ trait DeleteMarkingDescriptorPermissions extends RequiresPermissionsChecking wit
 	self: DeleteMarkingDescriptorState =>
 
 	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Department.Manage, mandatory(markingDescriptor.department))
+		p.PermissionCheck(Permissions.Department.ManageMarkingDescriptors, mandatory(markingDescriptor.department))
 	}
 }
 
