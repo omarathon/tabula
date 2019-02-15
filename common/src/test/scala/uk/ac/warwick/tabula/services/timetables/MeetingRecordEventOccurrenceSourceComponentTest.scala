@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.services.timetables
 
-import org.joda.time.{DateTime, LocalDateTime}
+import org.joda.time.{DateTime, LocalDate, LocalDateTime}
 import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
-class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestBase with Mockito {
+class MeetingRecordEventOccurrenceSourceComponentTest extends TestBase with Mockito {
 	val student = new StudentMember
 	student.universityId = "university ID"
 
@@ -23,7 +23,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 	})
 	meetings.head.relationships = relationships
 
-	val source = new MeetingRecordServiceScheduledMeetingEventSourceComponent
+	val source = new MeetingRecordEventOccurrenceSourceComponent
 		with RelationshipServiceComponent
 		with MeetingRecordServiceComponent
 		with SecurityServiceComponent {
@@ -34,6 +34,9 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	}
 
+	val start = LocalDate.now().minusDays(1)
+	val end = LocalDate.now().plusDays(1)
+
 	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
 	source.relationshipService.listCurrentStudentRelationshipsWithMember(student) returns Nil
 	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns true
@@ -41,7 +44,7 @@ class MeetingRecordServiceScheduledMeetingEventSourceComponentTest extends TestB
 
 	@Test
 	def callsBothServicesAndGeneratesOccurrence(){
-		source.scheduledMeetingEventSource.occurrencesFor(student, user, TimetableEvent.Context.Staff).futureValue.events should be (Seq(occurrence))
+		source.eventOccurrenceSource.occurrencesFor(student, user, TimetableEvent.Context.Staff, start, end).futureValue.events should be (Seq(occurrence))
 	}
 
 

@@ -25,6 +25,27 @@ class FuturesTest extends TestBase with Mockito {
 	}
 
 	@Test
+	def combineSuccess(): Unit = {
+		val good = Future.successful(7)
+		Futures.combine(Seq(good, good), (rs: Seq[Int]) => rs.sum).futureValue shouldBe 14
+	}
+
+	@Test
+	def combineFailure(): Unit = {
+		val zing = new RuntimeException("zing")
+		val bad = Future.failed(zing)
+		Futures.combine(Seq(bad, bad), (rs: Seq[Int]) => rs.sum).failed.futureValue shouldBe zing
+	}
+
+	@Test
+	def combinePartFailure(): Unit = {
+		val zing = new RuntimeException("zing")
+		val good = Future.successful(7)
+		val bad = Future.failed(zing)
+		Futures.combine(Seq(good, bad), (rs: Seq[Int]) => rs.sum).failed.futureValue shouldBe zing
+	}
+
+	@Test
 	def flattenWithFailure(): Unit = {
 		val e = new IllegalStateException
 
