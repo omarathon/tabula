@@ -52,6 +52,7 @@ trait SkillsforgeServiceComponent {
 
 				//logger.info(s"Skillsforge data for user ${member.userId}: $data")
 				// TODO map `data` to EventOccurrenceList (NEWSTART-1626 has example data for student4)
+				// TODO is this cached?
 
 				// A pretend event to show that this source is coming through
 				EventOccurrenceList(Seq(
