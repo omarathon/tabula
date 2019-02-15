@@ -5,32 +5,52 @@ import java.util.concurrent.{ScheduledExecutorService, TimeoutException}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
+import scala.util.{Failure, Success}
+import scala.collection.immutable
 
 trait Futures {
 
-	// TODO express this using combine()
-	def flatten[A, M[X] <: TraversableOnce[X]](in: Future[M[A]]*)(implicit executor: ExecutionContext): Future[Seq[A]] = {
-		val p = scala.concurrent.Promise[Seq[A]]
+	def flatten[A, M[X] <: TraversableOnce[X]](in: Future[M[A]]*)(implicit executor: ExecutionContext): Future[Seq[A]] =
+		Future.sequence(in).map(_.flatten)
 
-		// If any of the Futures fail, fire the first failure up to the Promise
-		in.foreach { _.onFailure { case t => p.tryFailure(t) } }
+	/**
+		* Combine a set of futures if they all succeeded.
+		*/
+	def combine[A](in: Seq[Future[A]], fn: Seq[A] => A)(implicit executor: ExecutionContext): Future[A] =
+		Future.sequence(in).map(fn)
 
-		// Get the sequential result of the futures and flatten them
-		Future.sequence(in).foreach { results => p.trySuccess(results.flatten) }
+	/**
+		* Combine a set of futures if at least 1 of them succeeded.
+		*
+		* @param in A non-empty sequence of futures.
+		*/
+	def combineAnySuccess[A](in: Seq[Future[A]], fn: Seq[A] => A)(implicit executor: ExecutionContext): Future[A] = {
+		require(in.nonEmpty, "in cannot be empty")
 
-		p.future
+		// Convert each Future[A] to Future[Try[A]] that will always "succeed"
+		val tryFutures = in.map(_.transformWith(Future.successful))
+
+		Future.sequence(tryFutures).map { trys =>
+			if (trys.forall(_.isFailure)) {
+				// Everything failed - return the first one as the failure
+				trys.head.get
+			} else {
+				//
+				fn( trys.flatMap(_.toOption) )
+			}
+		}
 	}
 
-	def combine[A](in: Seq[Future[A]], fn: (Seq[A] => A))(implicit executor: ExecutionContext): Future[A] = {
-		val p = scala.concurrent.Promise[A]
-
-		// If any of the Futures fail, fire the first failure up to the Promise
-		in.foreach { _.onFailure { case t => p.tryFailure(t) } }
-
-		// Get the sequential result of the futures and flatten them
-		Future.sequence(in).foreach { results => p.trySuccess(fn(results)) }
-
-		p.future
+	/**
+		* Converts a sequence of futures into a future of a sequence of all the successful values.
+		* Note that this completely swallows any failures so you probably only want to use this in conjunction
+		* with some other failure handling.
+		*/
+	def successSequence[A](in: immutable.Seq[Future[A]])(implicit executor: ExecutionContext): Future[Seq[A]] = {
+		// Transform results into Try and then into Option, so any failures are just none
+		val options: Seq[Future[Option[A]]] = in.map(_.transformWith(t => Future.successful(t.toOption)))
+		// Flatmap the Nones out of existence, so we just have success values
+		Future.sequence(options).map(_.flatten)
 	}
 
 	/**

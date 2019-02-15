@@ -1,0 +1,57 @@
+package uk.ac.warwick.tabula.services.timetables
+
+import org.joda.time.LocalDate
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
+import uk.ac.warwick.tabula.timetables.TimetableEvent
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
+import uk.ac.warwick.tabula.helpers.{Futures, Logging}
+
+import scala.concurrent.Future
+
+// A searchable source of EventOccurences.
+trait EventOccurrenceSource {
+	def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context, start: LocalDate, end: LocalDate): Future[EventOccurrenceList]
+}
+
+trait EventOccurrenceSourceComponent {
+	def eventOccurrenceSource: EventOccurrenceSource
+}
+
+class CombinedEventOccurrenceSource(sources: Seq[(String, EventOccurrenceSource)]) extends EventOccurrenceSource with Logging {
+	def occurrencesFor(member: Member, currentUser: CurrentUser, context: TimetableEvent.Context, start: LocalDate, end: LocalDate) = {
+
+		val results = sources.map { case (id, source) =>
+			val result = source.occurrencesFor(member, currentUser, context, start, end)
+			result.failed.foreach { e =>
+				logger.warn(s"Event source $id failed to fetch for user ${member.universityId}/${member.userId}", e)
+			}
+			result
+		}
+
+		Futures.combineAnySuccess(results, EventOccurrenceList.combine)
+	}
+}
+
+trait AutowiringEventOccurrenceSourceComponent extends EventOccurrenceSourceComponent {
+	val eventOccurrenceSource: EventOccurrenceSource = {
+
+		val meetingRecordSource = (new MeetingRecordEventOccurrenceSourceComponent
+			with AutowiringRelationshipServiceComponent
+			with AutowiringMeetingRecordServiceComponent
+			with AutowiringSecurityServiceComponent
+		).eventOccurrenceSource
+
+		val skillsforgeSource = (new SkillsforgeServiceComponent
+			with AutowiringSkillsforgeConfigurationComponent
+			with AutowiringApacheHttpClientComponent
+		).skillsforge
+
+		new CombinedEventOccurrenceSource(Seq(
+			"meeting records" -> meetingRecordSource,
+			"Skillsforge" -> skillsforgeSource,
+		))
+	}
+}
