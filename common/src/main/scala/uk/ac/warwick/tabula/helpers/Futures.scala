@@ -5,8 +5,6 @@ import java.util.concurrent.{ScheduledExecutorService, TimeoutException}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
-import scala.util.{Failure, Success}
-import scala.collection.immutable
 
 trait Futures {
 
@@ -42,18 +40,6 @@ trait Futures {
 	}
 
 	/**
-		* Converts a sequence of futures into a future of a sequence of all the successful values.
-		* Note that this completely swallows any failures so you probably only want to use this in conjunction
-		* with some other failure handling.
-		*/
-	def successSequence[A](in: immutable.Seq[Future[A]])(implicit executor: ExecutionContext): Future[Seq[A]] = {
-		// Transform results into Try and then into Option, so any failures are just none
-		val options: Seq[Future[Option[A]]] = in.map(_.transformWith(t => Future.successful(t.toOption)))
-		// Flatmap the Nones out of existence, so we just have success values
-		Future.sequence(options).map(_.flatten)
-	}
-
-	/**
 		* Constructs a Future that will return the result (or failure) of the passed Future if it completes within
 		* the specified Duration, else will return a failure with a TimeoutException.
 		*/
@@ -84,7 +70,7 @@ object Futures extends Futures {
 }
 
 object ExecutionContexts {
-	implicit lazy val global: ExecutionContext = new SessionAwareExecutionContext(100)
+	implicit lazy val global: ExecutionContext = new SessionAwareExecutionContext(parallelism = 100)
 
 	implicit lazy val email: ExecutionContext = new SessionAwareExecutionContext(50)
 

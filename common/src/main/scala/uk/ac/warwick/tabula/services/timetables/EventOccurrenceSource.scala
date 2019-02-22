@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOc
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.{Futures, Logging}
+import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 
 import scala.concurrent.Future
 
@@ -35,7 +36,11 @@ class CombinedEventOccurrenceSource(sources: Seq[(String, EventOccurrenceSource)
 	}
 }
 
-trait AutowiringEventOccurrenceSourceComponent extends EventOccurrenceSourceComponent {
+trait AutowiringEventOccurrenceSourceComponent
+	extends EventOccurrenceSourceComponent
+	with CachedEventOccurrenceSourceComponent
+	with AutowiringCacheStrategyComponent {
+
 	val eventOccurrenceSource: EventOccurrenceSource = {
 
 		val meetingRecordSource = (new MeetingRecordEventOccurrenceSourceComponent
@@ -45,13 +50,16 @@ trait AutowiringEventOccurrenceSourceComponent extends EventOccurrenceSourceComp
 		).eventOccurrenceSource
 
 		val skillsforgeSource = (new SkillsforgeServiceComponent
+			with AutowiringCacheStrategyComponent
 			with AutowiringSkillsforgeConfigurationComponent
 			with AutowiringApacheHttpClientComponent
-		).skillsforge
+		).eventOccurrenceSource
+
+		val skillsforgeCached = new CachedEventOccurrenceSource(skillsforgeSource)
 
 		new CombinedEventOccurrenceSource(Seq(
 			"meeting records" -> meetingRecordSource,
-			"Skillsforge" -> skillsforgeSource,
+			"Skillsforge" -> skillsforgeCached,
 		))
 	}
 }
