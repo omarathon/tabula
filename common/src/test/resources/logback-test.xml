@@ -20,8 +20,7 @@
 	<logger name="org.hibernate" level="WARN"/>
 	<logger name="uk.ac.warwick.tabula" level="WARN"/>
 	<logger name="org.elasticsearch.bootstrap" level="ERROR"/>
-	<logger name="org.hibernate.SQL" level="DEBUG" />
-	<root level="DEBUG">
+	<root level="WARN">
 		<appender-ref ref="S"/>
 	</root>
 </configuration>
