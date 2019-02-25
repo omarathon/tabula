@@ -1,7 +1,23 @@
 apply plugin: 'war'
+apply plugin: 'com.bmuschko.cargo'
 
 ext.contextPath = 'api'
 war.archiveName = 'api.war'
+
+cargo {
+    containerId = 'tomcat8x'
+    port = 8080
+
+    deployable {
+        context = '/api'
+    }
+
+    remote {
+        hostname = '127.0.0.1'
+        username = 'deploy'
+        password = 'deploy'
+    }
+}
 
 dependencies {
     compile project(':common')

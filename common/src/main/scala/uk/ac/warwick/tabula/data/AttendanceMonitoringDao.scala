@@ -701,8 +701,8 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
 					.add(max("route.name"))
 					.add(max("studentCourseYearDetails.yearOfStudy"))
 					.add(max("studentCourseDetails.sprCode"))
-  				.add(max("studentCourseYearDetails.casUsed"))
-					.add(max("studentCourseYearDetails.tier4Visa"))
+  				.add(any("studentCourseYearDetails.casUsed"))
+					.add(any("studentCourseYearDetails.tier4Visa"))
 			if (withEndDate) {
 				projections.add(max("studentCourseDetails.endDate"))
 			}

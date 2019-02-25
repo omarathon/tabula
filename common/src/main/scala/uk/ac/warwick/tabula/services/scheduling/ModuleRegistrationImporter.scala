@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -67,7 +68,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
 	var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	lazy val queries = Seq(
+	lazy val queries: Seq[MappingSqlQuery[ModuleRegistrationRow]] = Seq(
 		new UnconfirmedModuleRegistrationsQuery(sits),
 		new ConfirmedModuleRegistrationsQuery(sits)
 	)
@@ -81,6 +82,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 					query.executeByNamedParam(params.asJava).asScala
 				}.distinct
 			}.seq
+
 			applyForRows(rows).toSeq
 		}
 	}
@@ -108,12 +110,11 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
 			moduleCode <- route.moduleCodes
 		} yield {
-
 			val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
 			val markScheme = if (isPassFail) "PF" else "WAR"
 
 			val mark = if (isPassFail) {
-				if(math.random < 0.25) 0 else 100
+				if (math.random < 0.25) 0 else 100
 			} else {
 				(universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
 					Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
@@ -121,7 +122,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 			}
 
 			val grade =
-				if(isPassFail) if (mark == 100) "P" else "F"
+				if (isPassFail) if (mark == 100) "P" else "F"
 				else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
 
 			new ModuleRegistrationRow(
@@ -244,21 +245,21 @@ object ModuleRegistrationImporter {
 	}
 }
 
-// Full class rather than case class so it can be BeanWrapped
-class ModuleRegistrationRow {
-
-	var scjCode: String = _
-	var sitsModuleCode: String = _
-	var cats: JBigDecimal = _
-	var assessmentGroup: String = _
-	var selectionStatusCode: String = _
-	var occurrence: String = _
-	var academicYear: String = _
-	var actualMark: Option[JBigDecimal] = _
-	var actualGrade: String = _
-	var agreedMark: Option[JBigDecimal] = _
-	var agreedGrade: String = _
-	var passFail: Boolean = _
+// Full class rather than case class so it can be BeanWrapped (these need to be vars)
+class ModuleRegistrationRow(
+	var scjCode: String,
+	var sitsModuleCode: String,
+	var cats: JBigDecimal,
+	var assessmentGroup: String,
+	var selectionStatusCode: String,
+	var occurrence: String,
+	var academicYear: String,
+	var actualMark: Option[JBigDecimal],
+	var actualGrade: String,
+	var agreedMark: Option[JBigDecimal],
+	var agreedGrade: String,
+	var passFail: Boolean,
+) {
 
 	def this(
 		scjCode: String,
@@ -274,19 +275,57 @@ class ModuleRegistrationRow {
 		agreedGrade: String,
 		markScheme: String
 	) {
-		this()
-		this.scjCode = scjCode
-		this.sitsModuleCode = sitsModuleCode
-		this.cats = cats
-		this.assessmentGroup = assessmentGroup
-		this.selectionStatusCode = selectionStatusCode
-		this.occurrence = occurrence
-		this.academicYear = academicYear
-		this.actualMark = actualMark
-		this.actualGrade = actualGrade
-		this.agreedMark = agreedMark
-		this.agreedGrade = agreedGrade
-		this.passFail = ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme)
+		this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme))
 	}
 
+	override def toString: String =
+		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			.append(scjCode)
+			.append(sitsModuleCode)
+			.append(cats)
+			.append(assessmentGroup)
+			.append(selectionStatusCode)
+			.append(occurrence)
+			.append(academicYear)
+			.append(actualMark)
+			.append(actualGrade)
+			.append(agreedMark)
+			.append(agreedGrade)
+			.append(passFail)
+			.build()
+
+	override def hashCode(): Int =
+		new HashCodeBuilder()
+			.append(scjCode)
+			.append(sitsModuleCode)
+			.append(cats)
+			.append(assessmentGroup)
+			.append(selectionStatusCode)
+			.append(occurrence)
+			.append(academicYear)
+			.append(actualMark)
+			.append(actualGrade)
+			.append(agreedMark)
+			.append(agreedGrade)
+			.append(passFail)
+			.build()
+
+	override def equals(other: Any): Boolean = other match {
+		case that: ModuleRegistrationRow =>
+			new EqualsBuilder()
+				.append(scjCode, that.scjCode)
+				.append(sitsModuleCode, that.sitsModuleCode)
+				.append(cats, that.cats)
+				.append(assessmentGroup, that.assessmentGroup)
+				.append(selectionStatusCode, that.selectionStatusCode)
+				.append(occurrence, that.occurrence)
+				.append(academicYear, that.academicYear)
+				.append(actualMark, that.actualMark)
+				.append(actualGrade, that.actualGrade)
+				.append(agreedMark, that.agreedMark)
+				.append(agreedGrade, that.agreedGrade)
+				.append(passFail, that.passFail)
+				.build()
+		case _ => false
+	}
 }

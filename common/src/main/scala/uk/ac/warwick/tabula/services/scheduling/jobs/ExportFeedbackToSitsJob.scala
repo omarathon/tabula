@@ -4,6 +4,7 @@ import org.quartz.{DisallowConcurrentExecution, JobExecutionContext}
 import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.commands.scheduling.ExportFeedbackToSitsCommand
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 
@@ -16,7 +17,9 @@ class ExportFeedbackToSitsJob extends AutowiredJobBean {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingExportFeedbackToSits)
 			exceptionResolver.reportExceptions {
-				ExportFeedbackToSitsCommand().apply()
+				EarlyRequestInfo.wrap() {
+					ExportFeedbackToSitsCommand().apply()
+				}
 			}
 	}
 

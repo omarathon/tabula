@@ -72,14 +72,15 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		turnitinLtiQueueDao.findAssignmentToProcess.isEmpty should be {true}
 	}}
 
-	private def fullCompleteReport(assignment: Assignment): OriginalityReport = {
+	private def fullCompleteReport(assignment: Assignment, universityId: String): OriginalityReport = {
 		val report = new OriginalityReport
 		report.reportReceived = true
 		report.submitToTurnitinRetries = 0
 		report.reportRequestRetries = 0
 		val attachment = new FileAttachment
 		val submissionValue = new SavedFormValue
-		val submission = Fixtures.submission()
+		submissionValue.name = "originalityReport"
+		val submission = Fixtures.submission(universityId)
 		report.attachment = attachment
 		attachment.submissionValue = submissionValue
 		submissionValue.submission = submission
@@ -91,8 +92,8 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		report
 	}
 
-	private def validReportForSubmission(assignment: Assignment): OriginalityReport = {
-		val report = fullCompleteReport(assignment)
+	private def validReportForSubmission(assignment: Assignment, universityId: String): OriginalityReport = {
+		val report = fullCompleteReport(assignment, universityId)
 		report.reportReceived = false
 		report.turnitinId = null
 		report.lastSubmittedToTurnitin = DateTime.now.minusMinutes(20)
@@ -107,10 +108,10 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		assignment.submitToTurnitin = true
 		session.save(assignment)
 
-		val reportToProcess = validReportForSubmission(assignment)
+		val reportToProcess = validReportForSubmission(assignment, "0000001")
 		session.save(reportToProcess)
 
-		val reportToProcessLater = validReportForSubmission(assignment)
+		val reportToProcessLater = validReportForSubmission(assignment, "0000002")
 		reportToProcessLater.lastSubmittedToTurnitin = DateTime.now.minusMinutes(10)
 		session.save(reportToProcessLater)
 
@@ -124,23 +125,23 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		assignment.submitToTurnitin = true
 		session.save(assignment)
 
-		val reportAlreadyDone = validReportForSubmission(assignment)
+		val reportAlreadyDone = validReportForSubmission(assignment, "0000001")
 		reportAlreadyDone.turnitinId = "1234"
 		session.save(reportAlreadyDone)
 
-		val reportTooSoon = validReportForSubmission(assignment)
+		val reportTooSoon = validReportForSubmission(assignment, "0000002")
 		reportTooSoon.lastSubmittedToTurnitin = DateTime.now
 		session.save(reportTooSoon)
 
-		val reportTooManyRetries = validReportForSubmission(assignment)
+		val reportTooManyRetries = validReportForSubmission(assignment, "0000003")
 		reportTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
 		session.save(reportTooManyRetries)
 
 		turnitinLtiQueueDao.findReportToProcessForSubmission.isEmpty should be {true}
 	}}
 
-	private def validReportForReport(assignment: Assignment): OriginalityReport = {
-		val report = fullCompleteReport(assignment)
+	private def validReportForReport(assignment: Assignment, universityId: String): OriginalityReport = {
+		val report = fullCompleteReport(assignment, universityId)
 		report.turnitinId = "1234"
 		report.fileRequested = DateTime.now
 		report.reportReceived = false
@@ -156,10 +157,10 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		assignment.submitToTurnitin = true
 		session.save(assignment)
 
-		val reportToProcess = validReportForReport(assignment)
+		val reportToProcess = validReportForReport(assignment, "0000001")
 		session.save(reportToProcess)
 
-		val reportToProcessLater = validReportForReport(assignment)
+		val reportToProcessLater = validReportForReport(assignment, "0000002")
 		reportToProcessLater.lastReportRequest = DateTime.now.minusMinutes(10)
 		session.save(reportToProcessLater)
 
@@ -173,22 +174,22 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		assignment.submitToTurnitin = true
 		session.save(assignment)
 
-		val reportAlreadyDone = validReportForReport(assignment)
+		val reportAlreadyDone = validReportForReport(assignment, "0000001")
 		reportAlreadyDone.reportReceived = true
 		session.save(reportAlreadyDone.attachment)
 		session.save(reportAlreadyDone)
 
-		val reportTooSoon = validReportForReport(assignment)
+		val reportTooSoon = validReportForReport(assignment, "0000002")
 		reportTooSoon.lastReportRequest = DateTime.now
 		session.save(reportTooSoon.attachment)
 		session.save(reportTooSoon)
 
-		val reportTooManyRetries = validReportForReport(assignment)
+		val reportTooManyRetries = validReportForReport(assignment, "0000003")
 		reportTooManyRetries.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
 		session.save(reportTooManyRetries.attachment)
 		session.save(reportTooManyRetries)
 
-		val reportNotSubmitted = validReportForReport(assignment)
+		val reportNotSubmitted = validReportForReport(assignment, "0000004")
 		reportNotSubmitted.turnitinId = null
 		session.save(reportNotSubmitted.attachment)
 		session.save(reportNotSubmitted)
@@ -203,13 +204,13 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		completeAssignment.submitToTurnitin = true
 		session.save(completeAssignment)
 
-		val completeReportReceieved = fullCompleteReport(completeAssignment)
+		val completeReportReceieved = fullCompleteReport(completeAssignment, "0000001")
 		completeReportReceieved.reportReceived = true
 		session.save(completeReportReceieved)
-		val completeReportMaxSubmitRetry = fullCompleteReport(completeAssignment)
+		val completeReportMaxSubmitRetry = fullCompleteReport(completeAssignment, "0000002")
 		completeReportMaxSubmitRetry.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
 		session.save(completeReportMaxSubmitRetry)
-		val completeReportMaxReportRetry = fullCompleteReport(completeAssignment)
+		val completeReportMaxReportRetry = fullCompleteReport(completeAssignment, "0000003")
 		completeReportMaxReportRetry.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
 		session.save(completeReportMaxReportRetry)
 
@@ -218,7 +219,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 		incompleteAssignment.submitToTurnitin = true
 		session.save(incompleteAssignment)
 
-		val incompleteReport = fullCompleteReport(incompleteAssignment)
+		val incompleteReport = fullCompleteReport(incompleteAssignment, "0000004")
 		incompleteReport.reportReceived = false
 		incompleteReport.submitToTurnitinRetries = 0
 		incompleteReport.reportRequestRetries = 0

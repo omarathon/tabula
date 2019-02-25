@@ -12,19 +12,22 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	val dao = new ScheduledNotificationDaoImpl
 
-	val staff = Fixtures.staff("1234567")
-	val student = Fixtures.student("9876543")
-	val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+	private trait Fixture {
+		val staff = Fixtures.staff("1234567")
+		val student = Fixtures.student("9876543")
 
-	val meeting1 = new MeetingRecord
-	meeting1.creator = staff
+		val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
-	val relationship = StudentRelationship(staff, relType, student, DateTime.now)
-	meeting1.relationships = Seq(relationship)
+		val meeting1 = new MeetingRecord
+		meeting1.creator = staff
 
-	val meeting2 = new MeetingRecord
-	meeting2.creator = staff
-	meeting2.relationships = Seq(relationship)
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+		meeting1.relationships = Seq(relationship)
+
+		val meeting2 = new MeetingRecord
+		meeting2.creator = staff
+		meeting2.relationships = Seq(relationship)
+	}
 
 	def testNotification(target: MeetingRecord, date: DateTime): ScheduledNotification[MeetingRecord] = {
 		val sn = new ScheduledNotification[MeetingRecord]("meeting1Warning", target, date)
@@ -35,16 +38,15 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 	def setup() {
 		dao.sessionFactory = sessionFactory
 		SSOUserType.userLookup = smartMock[UserLookupService]
-		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
-		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
 	}
 
-	@Test def saveAndFetch() {
+	@Test def saveAndFetch(): Unit = new Fixture {
 
 		val tomorrow = DateTime.now.plusDays(1)
 		val notification = testNotification(meeting1, tomorrow)
 
-		session.save(relType)
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 
@@ -73,8 +75,9 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.flush()
 	}
 
-	@Test def scheduledNotifications() {
-		session.save(relType)
+	@Test def scheduledNotifications(): Unit = new Fixture {
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 		session.save(meeting2)
@@ -98,8 +101,9 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 		session.flush()
 	}
 
-	@Test def getNotificationsToComplete() {
-		session.save(relType)
+	@Test def getNotificationsToComplete(): Unit = new Fixture {
+		session.save(student)
+		session.save(staff)
 		session.save(relationship)
 		session.save(meeting1)
 

@@ -47,11 +47,11 @@ class SubmissionServiceTest extends PersistenceTestBase {
 		submissionAfter.usercode = universityId
 		submissionAfter.submittedDate = endDate.plusDays(1)
 
-		val assignment1 = new Assignment
-		val assignment2 = new Assignment
-		val assignment3 = new Assignment
-		val assignment4 = new Assignment
-		val assignment5 = new Assignment
+		val assignment1 = Fixtures.assignment("1")
+		val assignment2 = Fixtures.assignment("2")
+		val assignment3 = Fixtures.assignment("3")
+		val assignment4 = Fixtures.assignment("4")
+		val assignment5 = Fixtures.assignment("5")
 		assignment1.addSubmission(submissionBefore)
 		assignment2.addSubmission(submissionOnStartDate)
 		assignment3.addSubmission(submissionInside)

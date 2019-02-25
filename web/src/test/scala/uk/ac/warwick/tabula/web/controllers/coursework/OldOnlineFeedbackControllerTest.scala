@@ -48,9 +48,8 @@ class OldOnlineFeedbackFormControllerTest extends AppContextTestBase with Mockit
 		val module = new Module
 		module.adminDepartment = department
 		module.code = "hrn101"
-		val assignment = new Assignment
+		val assignment: Assignment = Fixtures.assignment("Herons are evil")
 		assignment.module = module
-		assignment.name = "Herons are evil"
 		val student = new StudentMember("student")
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)

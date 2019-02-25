@@ -13,11 +13,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssignmentImporterComponent {
 	def assignmentImporter: AssignmentImporter
@@ -214,7 +214,7 @@ object AssignmentImporter {
 	var sqlStringCastFunction: String = "to_char"
 	var dialectRegexpLike = "regexp_like"
 
-	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
+	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle (for SITS), but not in HSQL (with the embedded database)
 	def castToString(orig: String): String =
 		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
 		else orig

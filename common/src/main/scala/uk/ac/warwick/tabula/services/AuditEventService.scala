@@ -114,10 +114,7 @@ class AuditEventServiceImpl extends AuditEventService {
 			a.userId = array(RealIdIndex).asInstanceOf[String]
 			a.ipAddress = array(IpAddressIndex).asInstanceOf[String]
 			a.userAgent = array(UserAgentIndex).asInstanceOf[String]
-			a.readOnly = array(ReadOnlyIndex) match {
-				case null => false
-				case n: Number => n.intValue == 1
-			}
+			a.readOnly = array(ReadOnlyIndex).asInstanceOf[Boolean]
 			a.data = unclob(array(DataIndex))
 			a.eventId = array(EventIdIndex).asInstanceOf[String]
 			a.id = toIdType(array(IdIndex))
@@ -199,7 +196,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 			val query = session.createSQLQuery("insert into auditevent " +
 				"(id, eventid, eventdate, eventtype, eventstage, real_user_id, masquerade_user_id, ip_address, user_agent, read_only, data) " +
-				"values(" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
+				"values (" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
 			query.setString("eventid", event.id)
 			query.setTimestamp("date", timestampColumnMapper.toNonNullValue(event.date))
 			query.setString("name", event.name)
@@ -208,7 +205,7 @@ class AuditEventServiceImpl extends AuditEventService {
 			query.setString("masquerade_user_id", event.userId)
 			query.setString("ip_address", event.ipAddress)
 			query.setString("user_agent", event.userAgent)
-			query.setInteger("read_only", if (event.readOnly) 1 else 0)
+			query.setBoolean("read_only", event.readOnly)
 			if (event.extra != null) {
 				val data = new StringWriter()
 				json.writeValue(data, event.extra)

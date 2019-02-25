@@ -1,1 +1,0 @@
-alter table membernote add deleted NUMBER(1,0) DEFAULT 0;

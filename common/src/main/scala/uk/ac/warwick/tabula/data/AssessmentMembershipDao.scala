@@ -290,7 +290,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 	}
 
 	def countPublishedFeedback(assignment: Assignment): Int = {
-		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = 1""")
+		session.createSQLQuery("""select count(*) from feedback where assignment_id = :assignmentId and released = true""")
 			.setString("assignmentId", assignment.id)
 			.uniqueResult
 			.asInstanceOf[Number].intValue

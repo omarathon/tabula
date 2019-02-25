@@ -133,12 +133,19 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
 
-		val studentCourseDetails = new StudentCourseDetails(Fixtures.student("0672089", "cuscav"), "0672089/1")
+		val student: StudentMember = new StudentMember("0672089")
+		student.userId = "cuscav"
+
+		val studentCourseDetails = new StudentCourseDetails(student, "0672089/1")
+		studentCourseDetails.sprCode = "0672089/1"
 		studentCourseDetails.statusOnCourse = new SitsStatus(code = "C")
+
 		val studentCourseYearDetails = new StudentCourseYearDetails(studentCourseDetails, 1, AcademicYear(2010))
 		studentCourseDetails.addStudentCourseYearDetails(studentCourseYearDetails)
-		session.save(studentCourseYearDetails)
-		session.save(studentCourseDetails)
+
+		session.saveOrUpdate(student)
+		session.saveOrUpdate(studentCourseDetails)
+		session.saveOrUpdate(studentCourseYearDetails)
 
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
@@ -232,7 +239,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				val thisYear: AcademicYear = AcademicYear.now()
 				val membershipInfo: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
 
-				membershipInfo.assignments should be {Seq(assignment1, assignment5)}
+				membershipInfo.assignments.toSet should be (Set(assignment1, assignment5))
 
 				assignment1.members.knownType.removeUserId("cuscav")
 				session.save(assignment1)

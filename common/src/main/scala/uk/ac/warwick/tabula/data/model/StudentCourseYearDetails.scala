@@ -162,7 +162,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		}
 	}
 
-	def isFinalYear: Boolean = yearOfStudy.toString == studentCourseDetails.courseYearLength
+	def isFinalYear: Boolean = yearOfStudy == studentCourseDetails.courseYearLength
 
 	@Lob
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")

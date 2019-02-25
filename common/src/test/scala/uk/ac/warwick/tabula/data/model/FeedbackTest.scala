@@ -69,7 +69,7 @@ class FeedbackPersistenceTest extends PersistenceTestBase {
 		val (feedback, feedbackAttachment) = flushing(session) {
 			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
 
-			val assignment = new Assignment
+			val assignment = Fixtures.assignment("Hard work")
 			session.save(assignment)
 
 			feedback.assignment = assignment

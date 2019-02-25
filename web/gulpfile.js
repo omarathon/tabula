@@ -61,6 +61,23 @@ gulp.task('copy-id7', ['copy-assets'], () => {
     .pipe(gulp.dest('build/rootContent/static/id7'));
 });
 
+// Shim fontawesome-pro using fontawesome-free if fontawesome-pro isn't available
+gulp.task('shim-fa-pro', ['copy-assets'], () => {
+  const base = 'build/rootContent/static/css/id7/fontawesome-pro-shim';
+  const target = 'node_modules/@fortawesome/fontawesome-pro/less';
+
+  let shim;
+  try {
+    fs.accessSync('node_modules/@fortawesome/fontawesome-pro/package.json');
+    shim = false;
+  } catch (err) {
+    shim = true;
+  }
+
+  return gulp.src(`${base}/**/*`, { base })
+    .pipe(shim ? gulp.dest(target) : gutil.noop());
+});
+
 // Concat to create various script files
 function concatScripts(name, target, srcs, minify, dependencies) {
   gulp.task(name, ['copy-assets'].concat(dependencies || []), () => {
@@ -271,7 +288,7 @@ gulp.task('concat-scripts-id7', [
 gulp.task('concat-scripts', ['concat-scripts-id6', 'concat-scripts-id7']);
 
 // Compile any less files
-gulp.task('compile-less', ['copy-assets', 'copy-id7'], () => {
+gulp.task('compile-less', ['copy-assets', 'copy-id7', 'shim-fa-pro'], () => {
   const base = 'build/rootContent/static';
 
   const srcs = [

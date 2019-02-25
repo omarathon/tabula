@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.{Index, IndexAndType}
 import com.sksamuel.elastic4s.http.ElasticDsl._
 import com.sksamuel.elastic4s.http.Response
 import com.sksamuel.elastic4s.http.get.GetResponse
 import com.sksamuel.elastic4s.http.search.SearchResponse
 import com.sksamuel.elastic4s.searches.sort.SortOrder
 import com.sksamuel.elastic4s.testkit.IndexMatchers
+import com.sksamuel.elastic4s.{Index, IndexAndType}
 import org.hibernate.Session
-import org.hibernate.dialect.HSQLDialect
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -16,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.AuditEventServiceImpl
+import uk.ac.warwick.tabula.system.PostgreSQL10Dialect
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StopWatch
@@ -35,7 +35,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
 		val service: AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
 			val session: Session = sessionFactory.getCurrentSession
 		}
-		service.dialect = new HSQLDialect()
+		service.dialect = new PostgreSQL10Dialect
 
 		val indexer = new AuditEventIndexService
 		indexer.indexName = AuditEventIndexServiceTest.this.index.name
