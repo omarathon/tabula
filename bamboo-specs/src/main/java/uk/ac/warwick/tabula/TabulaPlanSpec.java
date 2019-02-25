@@ -102,7 +102,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                 .stage(buildStage())
                 .slackNotifications(SLACK_CHANNEL, false)
                 .build(),
-            build(PROJECT, "FUNC", "Tabula Functional Tests")
+            build(PROJECT, "FUNC", "Tabula Functional Tests - tabula-test")
                 .linkedRepository(LINKED_REPOSITORY).noBranches()
                 .description("Run functional tests with a headless browser against tabula-test.warwick.ac.uk")
                 .triggers(
@@ -133,7 +133,7 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .location("integrationTest/build/integrationTest-screenshots")
                 )
                 .build(),
-            build(PROJECT, "FUNCPG", "Tabula Functional Tests - PostgreSQL")
+            build(PROJECT, "FUNCPG", "Tabula Functional Tests - tabula-dev")
                 .linkedRepository(LINKED_REPOSITORY).noBranches()
                 .description("Run functional tests with a headless browser against tabula-dev.warwick.ac.uk")
                 .triggers(

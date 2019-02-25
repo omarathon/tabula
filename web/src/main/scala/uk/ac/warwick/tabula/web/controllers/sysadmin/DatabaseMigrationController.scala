@@ -78,7 +78,7 @@ object DatabaseMigrationController {
 			StringColumn("id"),
 			StringColumn("scjcode"),
 			StringColumn("awardcode"),
-			StringColumn("sequencenumber"),
+			IntColumn("sequencenumber"),
 			IntColumn("academicyear"),
 			BigDecimalColumn("cats"),
 			StringColumn("levelcode"),
