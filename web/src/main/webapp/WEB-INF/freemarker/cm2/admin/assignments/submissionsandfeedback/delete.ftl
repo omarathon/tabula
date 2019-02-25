@@ -39,7 +39,7 @@
 		</@bs3form.labelled_form_group>
 
 		<p>
-			You only need to do this if if an erroneous submission has been made or the wrong feedback has been uploaded.
+			You only need to do this if an erroneous submission has been made or the wrong feedback has been uploaded.
 			If you are trying to re-use this assignment, you should go back and create a separate assignment instead.
 		</p>
 
