@@ -1351,13 +1351,6 @@ class DatabaseMigrationController extends BaseSysadminController {
 			logAndWrite(s"Migrating ${mapping.tableName}")
 			logAndWrite("------------")
 
-			val insert = newConnection.prepareStatement(
-				s"""
-					|insert into ${mapping.tableName}
-					|(${mapping.migrations.map(_.columnName).mkString(",")}) values
-					|(${mapping.migrations.map(_ => "?").mkString(",")})
-				""".stripMargin)
-
 			// Get the total count
 			val st = oldConnection.createStatement()
 			val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}")
@@ -1367,6 +1360,8 @@ class DatabaseMigrationController extends BaseSysadminController {
 			st.close()
 
 			val statement = oldConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
+			statement.setFetchSize(10000)
+
 			val results = statement.executeQuery(
 				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}"
 			)
@@ -1377,6 +1372,13 @@ class DatabaseMigrationController extends BaseSysadminController {
 				if (count > 0) i * 100 / count
 				else 100
 
+			val insert = newConnection.prepareStatement(
+				s"""
+					|insert into ${mapping.tableName}
+					|(${mapping.migrations.map(_.columnName).mkString(",")}) values
+					|(${mapping.migrations.map(_ => "?").mkString(",")})
+				""".stripMargin)
+
 			var i = 0
 			while (results.next()) {
 				mapping.migrations.zipWithIndex.foreach { case (migration, index) =>
@@ -1385,7 +1387,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 				insert.addBatch()
 
 				i = i + 1
-				if (i % 1000 == 0) {
+				if (i % 10000 == 0) {
 					insert.executeBatch()
 					logAndWrite(s"[${perc(i)}%] Inserted $i rows")
 					insert.clearBatch()
