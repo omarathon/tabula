@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEventType}
 
 class SkillsforgeTest extends TestBase {
 
-	val testEvent = Json.parse(
+	private val testEvent = Json.parse(
 		"""
         {
             "bookingId": "00892418-5dbe-4c4a-962a-8349c1c1c147",

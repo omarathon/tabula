@@ -11,8 +11,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ApacheHttpClientComponent
-import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
@@ -39,13 +39,14 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 				currentUser: CurrentUser,
 				context: TimetableEvent.Context,
 				start: LocalDate,
-				endExclusive: LocalDate): Future[EventOccurrenceList] = Future {
+				endInclusive: LocalDate): Future[EventOccurrenceList] = Future {
 
+			// For testing
 			config.hardcodedUserId.foreach { id =>
 				logger.info(s"Fetching skillsforge data for hardcoded ID $id")
 			}
 			val userId = config.hardcodedUserId.getOrElse(member.userId)
-			val end = endExclusive.plusDays(1) // Skillsforge is exclusive, we're inclusive
+			val end = endInclusive.plusDays(1) // Skillsforge is exclusive, we're inclusive
 
 			val req = RequestBuilder.post(s"${config.baseUri}/$userId")
 				.addHeader("X-Auth-Token", config.authToken)
@@ -62,7 +63,23 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 					(data \ "data").as[Seq[JsObject]].map(Skillsforge.toEventOccurrence)
 				} else {
 					val errorMessage = (data \ "errorMessage").asOpt[String].getOrElse(s"Unknown error from Skillsforge: $data")
-					throw new RuntimeException(errorMessage)
+					/*
+						The API will return this error if a user doesn't exist:
+
+					    {"success":false,"data":null,"errorMessage":"Could not retrieve users bookings - EMBD.GBRFU:1.3: Could not complete operation: Insufficient privileges."}
+
+					 	However, it will also return this exact same error if you don't have permission (such as when the auth token is incorrect).
+					 	I did query this but the developers said this is just how it works.
+
+					 	I've made a flag which will be set true on one of the instances, so hopefully if there are problems with the auth token we will
+					 	see them there without bogging down the logs elsewhere.
+					*/
+					if (errorMessage.contains("Insufficient privileges") && !config.reportAuthErrors) {
+						if (logger.isDebugEnabled) logger.debug(s"Ignoring error because it is probably just a nonexistent user: ${errorMessage}")
+						Nil
+					} else {
+						throw new RuntimeException(s"Skillsforge error: $errorMessage")
+					}
 				}
 
 				EventOccurrenceList(occurrences, Some(new DateTime()))
@@ -78,7 +95,8 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 case class SkillsforgeConfiguration (
 	baseUri: String,
 	authToken: String,
-	hardcodedUserId: Option[String]
+	hardcodedUserId: Option[String],
+	reportAuthErrors: Boolean,
 )
 
 trait SkillsForgeConfigurationComponent {
@@ -89,7 +107,8 @@ trait AutowiringSkillsforgeConfigurationComponent extends SkillsForgeConfigurati
 	lazy val config = SkillsforgeConfiguration(
 		baseUri = Wire.property("${skillsforge.base.url}"),
 		authToken = Wire.property("${skillsforge.authToken}"),
-		hardcodedUserId = Wire.optionProperty("${skillsforge.hardcodedUserId}")
+		hardcodedUserId = Wire.optionProperty("${skillsforge.hardcodedUserId}").filter(_.hasText),
+		reportAuthErrors = Wire.property("${skillsforge.reportAuthErrors}").toBoolean,
 	)
 }
 
