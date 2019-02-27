@@ -41,7 +41,7 @@ services:
     networks:
       - tabula-internal-net
   db:
-    image: "postgres:10-alpine"
+    image: "postgres:11-alpine"
     container_name: tabula-db
     restart: unless-stopped
     ports:
