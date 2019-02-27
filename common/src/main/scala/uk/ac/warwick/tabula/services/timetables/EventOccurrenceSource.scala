@@ -55,7 +55,7 @@ trait AutowiringEventOccurrenceSourceComponent
 			with AutowiringApacheHttpClientComponent
 		).eventOccurrenceSource
 
-		val skillsforgeCached = new CachedEventOccurrenceSource(skillsforgeSource)
+		val skillsforgeCached = new CachedEventOccurrenceSource(cacheName = "skillsforge", delegate = skillsforgeSource)
 
 		new CombinedEventOccurrenceSource(Seq(
 			"meeting records" -> meetingRecordSource,

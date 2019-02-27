@@ -23,7 +23,7 @@ trait CachedEventOccurrenceSourceComponent { self: CacheStrategyComponent =>
 		def cacheKey = s"${member.userId}:$start-$end"
 	}
 
-	class CachedEventOccurrenceSource(delegate: EventOccurrenceSource) extends EventOccurrenceSource {
+	class CachedEventOccurrenceSource(cacheName: String, delegate: EventOccurrenceSource) extends EventOccurrenceSource {
 
 		private val ttl = 2.hours.toSeconds
 
@@ -38,7 +38,7 @@ trait CachedEventOccurrenceSourceComponent { self: CacheStrategyComponent =>
 			override def shouldBeCached(list: EventOccurrenceList): Boolean = true
 		}
 
-		private val cache = Caches.newDataInitialisatingCache("skillsforge", factory, ttl, cacheStrategy)
+		private val cache = Caches.newDataInitialisatingCache(cacheName, factory, ttl, cacheStrategy)
 
 		override def occurrencesFor(
 			member: Member,
