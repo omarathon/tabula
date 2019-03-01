@@ -47,7 +47,7 @@
 				Show student name with submission
 			</@bs3form.checkbox>
 			<div class="help-block">
-				When this option is selected, markers, moderators and module auditors see students' names and University IDs with submissions by default. You can override this setting at the assignment level.
+				When this option is selected, markers and moderators see students' names and University IDs with submissions by default. You can override this setting at the assignment level.
 			</div>
 		</@bs3form.labelled_form_group>
 
