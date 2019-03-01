@@ -1134,32 +1134,24 @@ object DatabaseMigrationController {
 		Migration("usergroupinclude", Seq(
 			StringColumn("group_id"),
 			StringColumn("usercode"),
-		)),
+		), restriction = Some("where usercode is not null")),
 
 		Migration("usergroupstatic", Seq(
 			StringColumn("group_id"),
 			StringColumn("usercode"),
-		)),
+		), restriction = Some("where usercode is not null")),
 
 		Migration("usersettings", Seq(
 			StringColumn("id"),
 			StringColumn("userid"),
 			StringColumn("settings"),
-		)),
+		), restriction = Some("where usercode is not null")),
 
 		Migration("entityreference", Seq(
 			StringColumn("id"),
 			StringColumn("entity_type"),
 			StringColumn("entity_id"),
 			StringColumn("notification_id"),
-		), restriction = Some(
-			"""
-				|where
-				|  notification_id in (select id from notification where created >= trunc(sysdate - 30)) or
-				|  id in (select target_id from notification where created >= trunc(sysdate - 30)) or
-				|  id in (select target_id from scheduled_notification where scheduled_date >= trunc(sysdate - 30)) or
-				|  id in (select target_id from scheduledtrigger where scheduled_date >= trunc(sysdate - 30))
-			""".stripMargin
 		)),
 
 		Migration("notification", Seq(
@@ -1173,75 +1165,8 @@ object DatabaseMigrationController {
 			StringColumn("recipientuniversityid"),
 			StringColumn("priority"),
 			BooleanColumn("listeners_processed"),
-		), restriction = Some("where created >= trunc(sysdate - 30)")),
-
-		Migration("recipientnotificationinfo", Seq(
-			StringColumn("id"),
-			StringColumn("notification_id"),
-			StringColumn("recipient"),
-			BooleanColumn("dismissed"),
-			BooleanColumn("email_sent"),
-			TimestampColumn("attemptedat"),
-		), restriction = Some("where notification_id in (select id from notification where created >= trunc(sysdate - 30))")),
-
-		Migration("scheduled_notification", Seq(
-			StringColumn("id"),
-			StringColumn("notification_type"),
-			TimestampColumn("scheduled_date"),
-			StringColumn("target_id"),
-			BooleanColumn("completed"),
-		), restriction = Some("where scheduled_date >= trunc(sysdate - 30)")),
-
-		Migration("scheduledtrigger", Seq(
-			StringColumn("id"),
-			StringColumn("trigger_type"),
-			TimestampColumn("scheduled_date"),
-			StringColumn("target_id"),
-			TimestampColumn("completed_date"),
-		), restriction = Some("where scheduled_date >= trunc(sysdate - 30)")),
-
-		Migration("auditevent", Seq(
-			IntColumn("id"),
-			TimestampColumn("eventdate"),
-			StringColumn("eventtype"),
-			StringColumn("eventstage"),
-			StringColumn("real_user_id"),
-			StringColumn("masquerade_user_id"),
-			StringColumn("data"),
-			StringColumn("eventid"),
-			StringColumn("ip_address"),
-			StringColumn("user_agent"),
-			BooleanColumn("read_only"),
-		), restriction = Some("where eventdate >= trunc(sysdate - 30)")),
-
-		Migration("entityreference", Seq(
-			StringColumn("id"),
-			StringColumn("entity_type"),
-			StringColumn("entity_id"),
-			StringColumn("notification_id"),
-		), restriction = Some(
-			"""
-				|where
-				|  notification_id not in (select id from notification where created >= trunc(sysdate - 30)) and
-				|  id not in (select target_id from notification where created >= trunc(sysdate - 30)) and
-				|  id not in (select target_id from scheduled_notification where scheduled_date >= trunc(sysdate - 30)) and
-				|  id not in (select target_id from scheduledtrigger where scheduled_date >= trunc(sysdate - 30))
-			""".stripMargin
 		)),
 
-		Migration("notification", Seq(
-			StringColumn("id"),
-			StringColumn("notification_type"),
-			StringColumn("agent"),
-			TimestampColumn("created"),
-			StringColumn("target_id"),
-			StringColumn("settings"),
-			StringColumn("recipientuserid"),
-			StringColumn("recipientuniversityid"),
-			StringColumn("priority"),
-			BooleanColumn("listeners_processed"),
-		), restriction = Some("where created < trunc(sysdate - 30)")),
-
 		Migration("recipientnotificationinfo", Seq(
 			StringColumn("id"),
 			StringColumn("notification_id"),
@@ -1249,7 +1174,7 @@ object DatabaseMigrationController {
 			BooleanColumn("dismissed"),
 			BooleanColumn("email_sent"),
 			TimestampColumn("attemptedat"),
-		), restriction = Some("where notification_id not in (select id from notification where created >= trunc(sysdate - 30))")),
+		)),
 
 		Migration("scheduled_notification", Seq(
 			StringColumn("id"),
@@ -1257,7 +1182,7 @@ object DatabaseMigrationController {
 			TimestampColumn("scheduled_date"),
 			StringColumn("target_id"),
 			BooleanColumn("completed"),
-		), restriction = Some("where scheduled_date < trunc(sysdate - 30)")),
+		)),
 
 		Migration("scheduledtrigger", Seq(
 			StringColumn("id"),
@@ -1265,7 +1190,7 @@ object DatabaseMigrationController {
 			TimestampColumn("scheduled_date"),
 			StringColumn("target_id"),
 			TimestampColumn("completed_date"),
-		), restriction = Some("where scheduled_date < trunc(sysdate - 30)")),
+		)),
 
 		Migration("auditevent", Seq(
 			IntColumn("id"),
@@ -1279,7 +1204,7 @@ object DatabaseMigrationController {
 			StringColumn("ip_address"),
 			StringColumn("user_agent"),
 			BooleanColumn("read_only"),
-		), restriction = Some("where eventdate < trunc(sysdate - 30)")),
+		)),
 	)
 }
 
@@ -1311,103 +1236,117 @@ class DatabaseMigrationController extends BaseSysadminController {
 		oldDataSource.setUsername(username)
 		oldDataSource.setPassword(password)
 
-		val oldConnection = oldDataSource.getConnection
-		oldConnection.setReadOnly(true)
+		def recycleConnections[A](fn: (Connection, Connection) => A): A = {
+			val oldConnection = oldDataSource.getConnection
+			oldConnection.setAutoCommit(false)
+			oldConnection.setReadOnly(true)
 
-		val newConnection = newDataSource.getConnection
-		newConnection.setAutoCommit(false)
+			val newConnection = newDataSource.getConnection
+			newConnection.setAutoCommit(false)
+
+			try {
+				fn(oldConnection, newConnection)
+			} finally {
+				newConnection.close()
+				oldConnection.close()
+			}
+		}
 
 		implicit val writer: PrintWriter = response.getWriter
 
-		// Do the AuditEvent sequence first
-		logAndWrite(s"Migrating auditevent_seq")
-		logAndWrite("------------")
-
-		val st = oldConnection.createStatement()
-		val rs = st.executeQuery("select auditevent_seq.nextval from dual")
-		rs.next()
-		val nextVal = rs.getLong(1)
-
-		val update = newConnection.createStatement()
-		update.executeQuery(s"SELECT setval('auditevent_seq', $nextVal, false)")
-		update.close()
-
-		logAndWrite(s"Set auditevent_seq next value to $nextVal")
-
-		rs.close()
-		st.close()
-
-		writer.println()
-
-		// Do all the truncating first
-		DatabaseMigrationController.mappings.map(_.tableName).distinct.foreach { tableName =>
-			val truncate = newConnection.createStatement()
-			truncate.executeUpdate(s"truncate $tableName cascade")
-			newConnection.commit()
-			truncate.close()
-		}
-
-		DatabaseMigrationController.mappings.foreach { mapping =>
-			logAndWrite(s"Migrating ${mapping.tableName}")
+		recycleConnections { case (oldConnection, newConnection) =>
+			// Do the AuditEvent sequence first
+			logAndWrite(s"Migrating auditevent_seq")
 			logAndWrite("------------")
 
-			// Get the total count
 			val st = oldConnection.createStatement()
-			val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}")
+			val rs = st.executeQuery("select auditevent_seq.nextval from dual")
 			rs.next()
-			val count = rs.getLong(1)
+			val nextVal = rs.getLong(1)
+
+			val update = newConnection.createStatement()
+			update.executeQuery(s"SELECT setval('auditevent_seq', $nextVal, false)").close()
+			update.close()
+
+			logAndWrite(s"Set auditevent_seq next value to $nextVal")
+
 			rs.close()
 			st.close()
-
-			val statement = oldConnection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY)
-			statement.setFetchSize(10000)
-
-			val results = statement.executeQuery(
-				s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}"
-			)
-
-			logAndWrite(s"$count rows to insert")
-
-			def perc(i: Int): Long =
-				if (count > 0) i * 100 / count
-				else 100
-
-			val insert = newConnection.prepareStatement(
-				s"""
-					|insert into ${mapping.tableName}
-					|(${mapping.migrations.map(_.columnName).mkString(",")}) values
-					|(${mapping.migrations.map(_ => "?").mkString(",")})
-				""".stripMargin)
-
-			var i = 0
-			while (results.next()) {
-				mapping.migrations.zipWithIndex.foreach { case (migration, index) =>
-					migration.process(index + 1, results, insert)
-				}
-				insert.addBatch()
-
-				i = i + 1
-				if (i % 10000 == 0) {
-					insert.executeBatch()
-					logAndWrite(s"[${perc(i)}%] Inserted $i rows")
-					insert.clearBatch()
-				}
-			}
-
-			insert.executeBatch()
-			logAndWrite(s"[${perc(i)}%] Inserted $i rows")
-			insert.clearBatch()
-
-			results.close()
-			statement.close()
-			insert.close()
-			newConnection.commit()
 
 			writer.println()
 		}
 
-		oldConnection.close()
-		newConnection.close()
+		// Do all the truncating first
+		recycleConnections { case (_, newConnection) =>
+			DatabaseMigrationController.mappings.map(_.tableName).distinct.foreach { tableName =>
+				val truncate = newConnection.createStatement()
+				truncate.executeUpdate(s"truncate $tableName cascade")
+				newConnection.commit()
+				truncate.close()
+			}
+		}
+
+		DatabaseMigrationController.mappings.foreach { mapping =>
+			recycleConnections { case (oldConnection, newConnection) =>
+				logAndWrite(s"Migrating ${mapping.tableName}")
+				logAndWrite("------------")
+
+				// Get the total count
+				val st = oldConnection.createStatement()
+				val rs = st.executeQuery(s"SELECT count(*) FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}")
+				rs.next()
+				val count = rs.getLong(1)
+				rs.close()
+				st.close()
+
+				val statement = oldConnection.createStatement()
+				statement.setFetchSize(10000)
+
+				val results = statement.executeQuery(
+					s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}"
+				)
+
+				logAndWrite(s"$count rows to insert")
+
+				def perc(i: Int): Long =
+					if (count > 0) i * 100 / count
+					else 100
+
+				val insert = newConnection.prepareStatement(
+					s"""
+						 |insert into ${mapping.tableName}
+						 |(${mapping.migrations.map(_.columnName).mkString(",")}) values
+						 |(${mapping.migrations.map(_ => "?").mkString(",")})
+				""".stripMargin)
+
+				var i = 0
+				while (results.next()) {
+					mapping.migrations.zipWithIndex.foreach { case (migration, index) =>
+						migration.process(index + 1, results, insert)
+					}
+					insert.addBatch()
+
+					i = i + 1
+					if (i % 10000 == 0) {
+						insert.executeBatch()
+						newConnection.commit()
+						logAndWrite(s"[${perc(i)}%] Inserted $i rows")
+						insert.clearBatch()
+					}
+				}
+
+				insert.executeBatch()
+				newConnection.commit()
+				logAndWrite(s"[${perc(i)}%] Inserted $i rows")
+				insert.clearBatch()
+
+				results.close()
+				statement.close()
+				insert.close()
+
+				writer.println()
+			}
+		}
 	}
 
 }
