@@ -1129,7 +1129,7 @@ object DatabaseMigrationController {
 		Migration("usergroupexclude", Seq(
 			StringColumn("group_id"),
 			StringColumn("usercode"),
-		)),
+		), restriction = Some("where usercode is not null")),
 
 		Migration("usergroupinclude", Seq(
 			StringColumn("group_id"),
@@ -1145,7 +1145,7 @@ object DatabaseMigrationController {
 			StringColumn("id"),
 			StringColumn("userid"),
 			StringColumn("settings"),
-		), restriction = Some("where usercode is not null")),
+		)),
 
 		Migration("entityreference", Seq(
 			StringColumn("id"),
