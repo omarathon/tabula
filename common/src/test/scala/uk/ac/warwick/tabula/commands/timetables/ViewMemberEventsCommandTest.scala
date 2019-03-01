@@ -17,10 +17,10 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport
 		extends StudentTimetableEventSourceComponent
-			with ScheduledMeetingEventSourceComponent
+			with EventOccurrenceSourceComponent
 			with EventOccurrenceServiceComponent {
 		val studentTimetableEventSource: StudentTimetableEventSource = mock[StudentTimetableEventSource]
-		val scheduledMeetingEventSource: ScheduledMeetingEventSource = mock[ScheduledMeetingEventSource]
+		val eventOccurrenceSource: EventOccurrenceSource = mock[EventOccurrenceSource]
 		val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
 	}
 
@@ -42,10 +42,12 @@ class ViewMemberEventsCommandTest extends TestBase with Mockito {
 
 		val command = new ViewStudentEventsCommandInternal(testStudent, user) with CommandTestSupport
 
-		command.from = DateTime.now.getMillis
-		command.to = DateTime.now.plusDays(2).getMillis
+		val start = LocalDate.now()
+		val end = start.plusDays(2)
+		command.from = start.toDateTimeAtStartOfDay.getMillis
+		command.to = end.toDateTimeAtStartOfDay.getMillis
 		command.studentTimetableEventSource.eventsFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventList.fresh(timetableEvents))
-		command.scheduledMeetingEventSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student) returns Future.successful(EventOccurrenceList.fresh(meetingOccurrences))
+		command.eventOccurrenceSource.occurrencesFor(testStudent, user, TimetableEvent.Context.Student, start, end) returns Future.successful(EventOccurrenceList.fresh(meetingOccurrences))
 		command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 	}
 

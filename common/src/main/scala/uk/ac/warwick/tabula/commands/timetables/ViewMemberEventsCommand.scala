@@ -33,7 +33,7 @@ object ViewMemberEventsCommand extends Logging {
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
 				with AutowiringStudentTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
+				with AutowiringEventOccurrenceSourceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case staff: StaffMember =>
@@ -43,7 +43,7 @@ object ViewMemberEventsCommand extends Logging {
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
 				with AutowiringStaffTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
+				with AutowiringEventOccurrenceSourceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case _ =>
@@ -58,7 +58,7 @@ object ViewMemberEventsCommand extends Logging {
 			with ViewMemberEventsPermissions
 			with ViewMemberEventsValidation
 			with Unaudited with ReadOnly
-			with AutowiringScheduledMeetingEventSourceComponent
+			with AutowiringEventOccurrenceSourceComponent
 			with AutowiringTermBasedEventOccurrenceServiceComponent
 			with StaffTimetableEventSourceComponent {
 			val staffTimetableEventSource: StaffTimetableEventSource = source
@@ -72,7 +72,7 @@ object ViewMemberEventsCommand extends Logging {
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
 				with AutowiringStudentTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
+				with AutowiringEventOccurrenceSourceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case staff: StaffMember =>
@@ -82,7 +82,7 @@ object ViewMemberEventsCommand extends Logging {
 				with ViewMemberEventsValidation
 				with Unaudited with ReadOnly
 				with AutowiringStaffTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
+				with AutowiringEventOccurrenceSourceComponent
 				with AutowiringTermBasedEventOccurrenceServiceComponent
 
 		case _ =>
@@ -127,7 +127,7 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StudentTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
+	self: StudentTimetableEventSourceComponent with EventOccurrenceSourceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
 		val timetableOccurrences =
@@ -135,15 +135,13 @@ abstract class ViewStudentEventsCommandInternal(val member: StudentMember, curre
 				.map(eventsToOccurrences)
 
 		val meetingOccurrences =
-			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
-				.map(_.filterNot { event =>
-					event.end.toLocalDate.isBefore(start) || event.start.toLocalDate.isAfter(end)
-				})
+			eventOccurrenceSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student, start, end)
 
 		Try(Await.result(
 			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
 		)).map(sorted)
 	}
+
 
 }
 
@@ -151,7 +149,7 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 	extends CommandInternal[ReturnType]
 		with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StaffTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
+	self: StaffTimetableEventSourceComponent with EventOccurrenceSourceComponent with EventOccurrenceServiceComponent =>
 
 	def applyInternal(): ReturnType = {
 		val timetableOccurrences =
@@ -159,7 +157,7 @@ abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUs
 				.map(eventsToOccurrences)
 
 		val meetingOccurrences =
-			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
+			eventOccurrenceSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff, start, end)
 
 		Try(Await.result(
 			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout

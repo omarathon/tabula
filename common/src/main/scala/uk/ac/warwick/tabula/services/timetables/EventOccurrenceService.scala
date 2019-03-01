@@ -25,6 +25,9 @@ trait AutowiringTermBasedEventOccurrenceServiceComponent extends TermBasedEventO
 	val eventOccurrenceService: TermBasedEventOccurrenceService = Wire[TermBasedEventOccurrenceService]
 }
 
+/**
+	* Resolves TimetableEvents into multiple EventOccurrences
+	*/
 trait EventOccurrenceService {
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
 	def toVEvent(eventOccurrence: EventOccurrence): VEvent

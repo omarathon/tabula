@@ -80,6 +80,10 @@ dependencies {
     compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${jacksonVersion}"
     annotationProcessor "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
 
+    // Standalone JSON library
+    compile "com.typesafe.play:play-json_${scalaMajorVersion}:2.7.0"
+    compile "com.typesafe.play:play-json-joda_${scalaMajorVersion}:2.7.0"
+
     compile 'org.apache.commons:commons-compress:1.18'
     compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
     compile 'commons-codec:commons-codec:1.11'
