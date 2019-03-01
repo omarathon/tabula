@@ -55,11 +55,11 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                         .description("Checkout source from default repository")
                         .checkoutItems(new CheckoutItem().defaultRepository()),
                     new ScriptTask()
-                        .description("gradlew clean check war")
+                        .description("gradlew check war")
                         .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
                         .location(ScriptTaskProperties.Location.FILE)
                         .fileFromPath("gradlew")
-                        .argument("clean check war --no-daemon")
+                        .argument("check war")
                         .environmentVariables("JAVA_OPTS=\"-Xmx256m -Xms128m\""),
                     new ScriptTask()
                         .description("Touch test files so Bamboo doesn't ignore them")
