@@ -1308,7 +1308,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 
 				logAndWrite(s"$count rows to insert")
 
-				def perc(i: Int): Long =
+				def perc(i: Long): Long =
 					if (count > 0) i * 100 / count
 					else 100
 
@@ -1319,7 +1319,7 @@ class DatabaseMigrationController extends BaseSysadminController {
 						 |(${mapping.migrations.map(_ => "?").mkString(",")})
 				""".stripMargin)
 
-				var i = 0
+				var i: Long = 0
 				while (results.next()) {
 					mapping.migrations.zipWithIndex.foreach { case (migration, index) =>
 						migration.process(index + 1, results, insert)
