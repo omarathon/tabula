@@ -1299,19 +1299,14 @@ class DatabaseMigrationController extends BaseSysadminController {
 				rs.close()
 				st.close()
 
-				logAndWrite(s"$count rows to insert")
-
-				// Disable referential integrity
-				val disableTriggers = newConnection.createStatement()
-				disableTriggers.execute(s"ALTER TABLE ${mapping.tableName} DISABLE TRIGGER ALL")
-				disableTriggers.close()
-
 				val statement = oldConnection.createStatement()
 				statement.setFetchSize(10000)
 
 				val results = statement.executeQuery(
 					s"SELECT ${mapping.migrations.map(_.columnName).mkString(",")} FROM ${mapping.tableName} ${mapping.restriction.getOrElse("")}"
 				)
+
+				logAndWrite(s"$count rows to insert")
 
 				def perc(i: Int): Long =
 					if (count > 0) i * 100 / count
@@ -1348,11 +1343,6 @@ class DatabaseMigrationController extends BaseSysadminController {
 				results.close()
 				statement.close()
 				insert.close()
-
-				// Re-enable referential integrity
-				val enableTriggers = newConnection.createStatement()
-				enableTriggers.execute(s"ALTER TABLE ${mapping.tableName} ENABLE TRIGGER ALL")
-				enableTriggers.close()
 
 				writer.println()
 			}
