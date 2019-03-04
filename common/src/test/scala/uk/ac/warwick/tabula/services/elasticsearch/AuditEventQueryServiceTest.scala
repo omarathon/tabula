@@ -254,4 +254,72 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		paged2.totalHits should be (70)
 	}}
 
+	@Test def latestOnlineViews(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
+		// Specifically this verifies the fix to TAB-6888 and its predecessor TAB-4168 where the query doesn't fetch all terms
+
+		val dept = new Department
+		dept.code = "zx"
+
+		val assignment = new Assignment
+		assignment.id = "4a0ce216-adda-b0b0-c0c0-000000000000"
+
+		// Merry Christmas
+		assignment.closeDate = new DateTime(2009,12,25,0,0,0)
+
+		val module = new Module
+		module.id = "367a9abd-adda-c0c0-b0b0-000000000000"
+		module.assignments = List(assignment).asJava
+		module.adminDepartment = dept
+
+		val eventData: String = json.writeValueAsString(Map(
+			"assignment" -> assignment.id,
+			"module" -> module.id,
+			"department" -> dept.code
+		))
+
+		val studentUsercodes = (1 to 20).map { i => f"u00000$i%02d" }
+
+		val events: IndexedSeq[AuditEvent] = (1 to 70).map { i =>
+			AuditEvent(
+				eventId="viewed"+i, eventType="ViewOnlineFeedback", eventStage="before", userId=studentUsercodes(i % 20), masqueradeUserId=studentUsercodes(i % 20),
+				eventDate=new DateTime(2009,12,30,0,0,0).plusSeconds(i),
+				data=eventData
+			)
+		}
+
+		events.zipWithIndex.foreach { case (auditEvent, i) =>
+			auditEvent.id = i
+			auditEvent.related = events.filter { _.eventId == auditEvent.eventId }
+			auditEvent.parsedData = Option(auditEvent.data).map { json.readValue(_, classOf[Map[String, Any]]) }
+		}
+
+		queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
+			ids.asInstanceOf[Seq[Long]].flatMap { id => events.find { _.id == id } }
+		}
+
+		// Index the audit event
+		events.foreach { auditEvent =>
+			client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
+		}
+
+		blockUntilExactCount(70, index.name)
+
+		val feedback: Seq[AssignmentFeedback] = studentUsercodes.map { usercode =>
+			val f = new AssignmentFeedback
+			f.usercode = usercode
+			f.released = true
+			f.releasedDate = assignment.closeDate
+			f
+		}
+
+		queryService.userLookup.asInstanceOf[MockUserLookup].registerUsers(studentUsercodes: _*)
+
+		val views = queryService.latestOnlineFeedbackViews(assignment, feedback).futureValue
+		views.size should be (20) // If this is 10, need to increase the size of the aggregation!
+
+		// Check that we're returning the latest date
+		views(queryService.userLookup.getUserByUserId("u0000001")) should be (new DateTime(2009,12,30,0,0,0).plusSeconds(60))
+		views(queryService.userLookup.getUserByUserId("u0000015")) should be (new DateTime(2009,12,30,0,0,0).plusSeconds(54))
+	}}
+
 }
