@@ -163,8 +163,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 
 	def isFinalYear: Boolean = yearOfStudy == studentCourseDetails.courseYearLength
-
-	@Lob
+	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	protected var overcatting: Map[String, Any] = Map()
 
