@@ -106,7 +106,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 			enhancedSubmissions.exists(_.submission.hasOriginalityReport)
 		}
 		val usercodesWithSubmissionOrFeedback = benchmarkTask("Get usercodes with submissions or feedback") {
-			assignment.getUsercodesWithSubmissionOrFeedback.filter(_.hasText).toSeq.sorted
+			(enhancedSubmissions.map(_.submission.usercode) ++ assignment.fullFeedback.map(_.usercode)).filter(_.hasText).sorted
 		}
 		val moduleMembers = benchmarkTask("Get module membership") {
 			assessmentMembershipService.determineMembershipUsers(assignment)
