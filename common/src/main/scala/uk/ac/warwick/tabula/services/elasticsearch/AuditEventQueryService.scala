@@ -219,6 +219,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 				.aggregations(
 					termsAggregation("userIds")
 						.field("userId.keyword")
+						.size(1000)
 						.addSubAggregation(
 							topHitsAggregation("latestEvent")
 								.size(1)
@@ -287,12 +288,14 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 								assignmentTerm
 							)
 					)
-  				.limit(0)
-  				.aggregations(
+					.limit(0)
+					.aggregations(
 						termsAggregation("studentUsercodes")
-							.field("studentUsercodes.keyword"),
+							.field("studentUsercodes.keyword")
+							.size(1000),
 						termsAggregation("studentUniversityIds")
 							.field("students.keyword")
+							.size(1000)
 					)
 			}.map { response =>
 				val studentUsercodes = response.result.aggregations.terms("studentUsercodes").buckets.map(_.key)
@@ -322,6 +325,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 					.aggregations(
 						termsAggregation("submissionId")
 							.field("submission.keyword")
+							.size(1000)
 					)
 			}.map { response =>
 				response.result.aggregations.terms("submissionId").buckets.map(_.key)
@@ -340,8 +344,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 	def feedbackDownloads(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Seq[(User, DateTime)]] =
 		latestEventsOfType("DownloadFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
-  		.map(_.filterNot(_.hadError))
-  		.map { events =>
+			.map(_.filterNot(_.hadError))
+			.map { events =>
 				val userIds = events.map(_.masqueradeUserId).distinct
 				val userIdToUser = batchedUsersByUserId(userIds)
 
@@ -366,8 +370,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 	def latestOnlineFeedbackViews(assignment: Assignment, feedback: Seq[AssignmentFeedback]): Future[Map[User, DateTime]] = // User ID to DateTime
 		latestEventsOfType("ViewOnlineFeedback", afterFeedbackPublishedRestriction(assignment, feedback))
-  		.map(_.filterNot(_.hadError))
-  		.map { events =>
+			.map(_.filterNot(_.hadError))
+			.map { events =>
 				val userIds = events.map(_.masqueradeUserId).distinct
 				val userIdToUser = batchedUsersByUserId(userIds)
 
@@ -378,8 +382,8 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
 	def latestOnlineFeedbackAdded(assignment: Assignment): Future[Map[User, DateTime]] =
 		parsedLatestEventsOfType("OnlineFeedback", assignmentRangeRestriction(assignment, Option(assignment.createdDate)))
-  		.map(_.filterNot(_.hadError))
-  		.map { events =>
+			.map(_.filterNot(_.hadError))
+			.map { events =>
 				val studentUniversityIds = events.flatMap(_.students).distinct
 				val studentUsercodes = events.flatMap(_.studentUsercodes).distinct
 
@@ -428,7 +432,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 				.query(
 					boolQuery()
 						.must(queries)
-  					.should(modules.map { module => termQuery("module", module.id) })
+						.should(modules.map { module => termQuery("module", module.id) })
 				)
 				.limit(max)
 				.sortBy(fieldSort("eventDate").order(SortOrder.Desc))
