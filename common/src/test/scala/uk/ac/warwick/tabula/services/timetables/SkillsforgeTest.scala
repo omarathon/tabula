@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.timetables
 
 
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsNull, JsObject, JsString, Json}
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.NamedLocation
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
@@ -88,6 +88,21 @@ class SkillsforgeTest extends TestBase {
 			relatedUrl = None,
 			attendance = None
 		))
+	}
+
+
+	@Test
+	def toEventOccurrenceNullLocation(): Unit = {
+		val input = testEvent - "venue" ++ Json.obj("venue" -> JsNull)
+		val output = Skillsforge.toEventOccurrence(input)
+		output.location shouldBe None
+	}
+
+	@Test
+	def toEventOccurrenceNoLocation(): Unit = {
+		val input = testEvent - "venue"
+		val output = Skillsforge.toEventOccurrence(input)
+		output.location shouldBe None
 	}
 
 }

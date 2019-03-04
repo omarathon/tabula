@@ -131,7 +131,7 @@ object Skillsforge {
 			eventType = TimetableEventType.Other("Skillsforge"),
 			start = startDate,
 			end = endDate,
-			location = Some((obj \ "venue").as[JsObject]).map(toLocation),
+			location = (obj \ "venue").asOpt[JsObject].map(toLocation),
 			parent = Parent(),
 			comments = None,
 			staff = Nil,
