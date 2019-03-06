@@ -111,7 +111,7 @@ task installNpmDependencies(type: NpmTask) {
     inputs.file('package.json').withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir 'node_modules'
 
-    args = ['install', '-d']
+    args = ['ci']
 }
 
 task webpack(type: NpmTask) {
