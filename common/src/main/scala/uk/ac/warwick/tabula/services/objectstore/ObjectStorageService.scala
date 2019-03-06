@@ -63,7 +63,7 @@ class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, bl
 }
 
 class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blobName: String, fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
-	private lazy val byteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
+	private lazy val byteSource: ByteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
 
 	override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
 	override lazy val isEmpty: Boolean = metadata.isEmpty
@@ -71,7 +71,7 @@ class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blob
 
 	override def openStream(): InputStream = try byteSource.openStream() catch {
 		// BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
-		case e: NullPointerException => null
+		case _: NullPointerException => null
 	}
 	override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
 }

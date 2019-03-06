@@ -396,7 +396,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] = {
     // Get the UpstreamAssessmentGroups first as some of them will be empty
     val upstreamGroups: Seq[UpstreamAssessmentGroup] =
-      session.newQuery[UpstreamAssessmentGroup]("""
+      if (groups.isEmpty) Nil
+      else session.newQuery[UpstreamAssessmentGroup]("""
         select uag
         from UpstreamAssessmentGroup uag
           join AssessmentComponent ac
@@ -415,8 +416,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
           .seq
 
     // Get only current members
-    val currentMembers =
-      session.newQuery[UpstreamAssessmentGroupMember]("""
+    val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
+      if (upstreamGroups.isEmpty) Map.empty
+      else session.newQuery[UpstreamAssessmentGroupMember]("""
         select distinct uagm
         from UpstreamAssessmentGroupMember uagm
           join uagm.upstreamAssessmentGroup uag

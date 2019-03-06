@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 
 	private trait Fixture{
-		val userLookup: UserLookupService = mock[UserLookupService]
+		val userLookup: UserLookupService = smartMock[UserLookupService]
 		val groupSet = new SmallGroupSet
 		groupSet.module = Fixtures.module("in101")
 		groupSet.module.adminDepartment = Fixtures.department("in")
@@ -29,8 +29,10 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		wireUserLookup(groupSet.members)
 		groupSet.id= "test"
 
-		val membershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
+		val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		groupSet.membershipService = membershipService
+
+		membershipService.getUpstreamAssessmentGroupInfo(Nil, groupSet.academicYear) returns Nil
 
 		val memberUser = new User("member")
 		memberUser.setWarwickId("test")
@@ -45,8 +47,8 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		val nonMember = new CurrentUser(nonMemberUser, nonMemberUser)
 		userLookup.getUserByWarwickUniId("test2") returns nonMemberUser
 
-		membershipService.isStudentCurrentMember(memberUser, Nil, Some(groupSet.members)) returns (true)
-		membershipService.isStudentCurrentMember(nonMemberUser, Nil, Some(groupSet.members)) returns (false)
+		membershipService.isStudentCurrentMember(memberUser, Nil, Some(groupSet.members)) returns true
+		membershipService.isStudentCurrentMember(nonMemberUser, Nil, Some(groupSet.members)) returns false
 
 		val roleProvider = new SmallGroupSetMemberRoleProvider
 	}
