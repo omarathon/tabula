@@ -1,17 +1,19 @@
-@import "id7/less/id7-no-fa";
-@import "id7/less/font-awesome-pro";
+@import "@universityofwarwick/id7/less/id7-no-fa";
+@import "@universityofwarwick/id7/less/font-awesome-pro";
 @import "@fortawesome/fontawesome-pro/less/v4-shims";
 
 @id7-ignore-id6-legacy: true;
-@id7-image-root-dir: '../../id7/images';
-@icon-font-path: '../../id7/fonts';
-@fa-font-path: '../../id7/fonts';
+@id7-image-root-dir: '../../lib/id7/images';
+@icon-font-path: '../../lib/fontawesome-pro/webfonts';
+@fa-font-path: '../../lib/fontawesome-pro/webfonts';
 
 @import "id7-fixes.css";
 @import "id7-theme.less";
 @import "main.less";
-@import "../../libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css";
-@import "../../libs/popup/popup.css";
-@import "../../libs/jquery-fixedheadertable/jquery.fixedheadertable.css";
-@import "../../libs/jquery-ui-interactions/jquery-ui.min.css";
-@import "../../libs/bootstrap3-editable/css/bootstrap-editable.css";
+@import (inline) "bootstrap-datetime-picker/css/bootstrap-datetimepicker.css";
+@import (inline) "../../libs/popup/popup.css";
+@import (inline) "fixed-header-table/css/defaultTheme.css";
+@import (inline) "jquery-ui/themes/base/core.css";
+@import (inline) "../../libs/bootstrap3-editable/css/bootstrap-editable.css";
+@import (inline) "../fullcalendar.css";
+@import (inline) "../fullcalendar-custom.css";

@@ -12,10 +12,7 @@ import com.atlassian.bamboo.specs.api.builders.plan.configuration.ConcurrentBuil
 import com.atlassian.bamboo.specs.api.builders.project.Project;
 import com.atlassian.bamboo.specs.api.builders.requirement.Requirement;
 import com.atlassian.bamboo.specs.builders.notification.DeploymentFailedNotification;
-import com.atlassian.bamboo.specs.builders.task.CheckoutItem;
-import com.atlassian.bamboo.specs.builders.task.ScriptTask;
-import com.atlassian.bamboo.specs.builders.task.TestParserTask;
-import com.atlassian.bamboo.specs.builders.task.VcsCheckoutTask;
+import com.atlassian.bamboo.specs.builders.task.*;
 import com.atlassian.bamboo.specs.builders.trigger.AfterSuccessfulBuildPlanTrigger;
 import com.atlassian.bamboo.specs.builders.trigger.ScheduledTrigger;
 import com.atlassian.bamboo.specs.model.task.ScriptTaskProperties;
@@ -54,13 +51,23 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
                     new VcsCheckoutTask()
                         .description("Checkout source from default repository")
                         .checkoutItems(new CheckoutItem().defaultRepository()),
+                    new NpmTask()
+                        .description("JS dependencies")
+                        .workingSubdirectory("web")
+                        .nodeExecutable("Node 8")
+                        .command("ci"),
                     new ScriptTask()
                         .description("gradlew check war")
                         .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
                         .location(ScriptTaskProperties.Location.FILE)
                         .fileFromPath("gradlew")
                         .argument("check war")
-                        .environmentVariables("JAVA_OPTS=\"-Xmx256m -Xms128m\""),
+                        .environmentVariables("PATH=/usr/nodejs/8/bin JAVA_OPTS=\"-Xmx256m -Xms128m\""),
+                    new NpmTask()
+                        .description("JS tests")
+                        .workingSubdirectory("web")
+                        .nodeExecutable("Node 8")
+                        .command("run bamboo"),
                     new ScriptTask()
                         .description("Touch test files so Bamboo doesn't ignore them")
                         .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
@@ -74,7 +81,9 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
         job.finalTasks(
             new TestParserTask(TestParserTaskProperties.TestType.JUNIT)
                 .description("Parse test results")
-                .resultDirectories("**/test-results/**/*.xml")
+                .resultDirectories("**/test-results/**/*.xml"),
+            TestParserTask.createMochaParserTask()
+                .resultDirectories("web/mocha.json")
         );
 
         job.artifacts(

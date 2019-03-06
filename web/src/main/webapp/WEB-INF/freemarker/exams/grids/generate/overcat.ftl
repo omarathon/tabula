@@ -58,7 +58,7 @@
 								<#if column.category?has_content>
 									<#if currentCategory != column.category>
 										<#assign currentCategory = column.category />
-										<th class="rotated" colspan="${overcatView.optionsColumnCategories[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
+										<th class="rotated" colspan="${overcatView.optionsColumnCategories[column.category]?size}"><span class="rotate">${column.category}</span></th>
 									</#if>
 								<#else>
 									<td>&nbsp;</td>
@@ -71,7 +71,7 @@
 									<#if column.category?has_content>
 										<#if currentCategory != column.category>
 											<#assign currentCategory = column.category />
-											<th class="rotated" colspan="${mapGet(overcatView.perYearColumnCategories, year)[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
+											<th class="rotated" colspan="${mapGet(overcatView.perYearColumnCategories, year)[column.category]?size}"><span class="rotate">${column.category}</span></th>
 										</#if>
 									<#else>
 										<td>&nbsp;</td>
@@ -83,12 +83,12 @@
 						<#-- Header row -->
 						<tr class="header">
 							<#list overcatView.optionsColumns as column>
-								<th class="rotated" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
+								<th class="rotated" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><span class="rotate">${column.title}</span></th>
 							</#list>
 							<td class="spacer">&nbsp;</td>
 							<#list overcatView.perYearColumns?keys?sort?reverse as year>
 								<#list mapGet(overcatView.perYearColumns, year) as column>
-									<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
+									<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><span class="rotate">${column.title}</span></th>
 								</#list>
 								<td class="spacer">&nbsp;</td>
 							</#list>
@@ -171,18 +171,6 @@
 			$(this).prev().addClass('last-in-category');
 		});
 
-		$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
-			var width = $(this).find('.rotate').width();
-			var height = $(this).find('.rotate').height();
-			$(this).css('height', width + 15).css('min-width', height + 5);
-			$(this).find('.rotate').css({
-				'margin-left': height / 2
-			}).not('.nomargin').css({
-				'margin-top': -(height)
-			}).end().filter('.middle').not('.nomargin').css({
-				'margin-top': width / 4
-			});
-		});
 		$modalBody.wideTables();
 
 		var updateButtons = function(){
@@ -257,18 +245,6 @@
 		});
 
 		$modalBody.closest('.modal').on('shown.bs.modal', function(){
-			$('.modal-body th.rotated, .modal-body td.rotated').each(function() {
-				var width = $(this).find('.rotate').width();
-				var height = $(this).find('.rotate').height();
-				$(this).css('height', width + 15).css('min-width', height + 5);
-				$(this).find('.rotate').css({
-					'margin-left': height / 2
-				}).not('.nomargin').css({
-					'margin-top': -(height)
-				}).end().filter('.middle').not('.nomargin').css({
-					'margin-top': width / 4
-				});
-			});
 			$modalBody.wideTables();
 		});
 

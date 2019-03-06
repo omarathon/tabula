@@ -53,7 +53,7 @@
 			<#if column.category?has_content>
 				<#if currentCategory != column.category>
 					<#assign currentCategory = column.category />
-					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><div class="rotate-outer"><div class="rotate">${column.category}</div></div></th>
+					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><span class="rotate">${column.category}</span></th>
 				</#if>
 			<#else>
 				<td>&nbsp;</td>
@@ -73,14 +73,14 @@
 			<th colspan="${yearSize}">Year ${year}</th>
 
 			<#list mapGet(perYearModuleReportColumns, year) as column>
-				<th class="rotated <#if column.category?has_content>has-category</#if>"><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
+				<th class="rotated <#if column.category?has_content>has-category</#if>"><span class="rotate">${column.title}</span></th>
 			</#list>
 
 			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 		</#list>
 
 		<#list summaryColumns as column>
-			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>"><div class="rotate-outer"><div class="rotate">${column.title}</div></div></th>
+			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>"><span class="rotate">${column.title}</span></th>
 		</#list>
 	</tr>
 
@@ -106,9 +106,7 @@
 							<#assign hasValue = !column.isEmpty(entity, year) />
 							<#if hasValue>
 								<td class="rotated">
-									<div class="rotate-outer">
-										<div class="rotate">${column.title} - ${column.secondaryValue} <i>${column.categoryShortForm!""}</i></div>
-									</div>
+									<span class="rotate">${column.title} - ${column.secondaryValue} <i>${column.categoryShortForm!""}</i></span>
 								</td>
 								<#assign colsUsed = colsUsed + 1>
 							</#if>

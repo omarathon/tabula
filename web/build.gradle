@@ -1,6 +1,5 @@
 plugins {
-    id 'com.moowork.node' version '1.1.1'
-    id 'com.moowork.gulp' version '1.1.1'
+    id 'com.moowork.node' version '1.2.0'
 }
 
 apply plugin: 'war'
@@ -108,33 +107,27 @@ task buildInformation(dependsOn: 'webInf') {
 task bamboo(dependsOn: ['clean', 'test', 'war']) {}
 task deployApplicationLocally(dependsOn: ['war', 'deployToTomcat']) {}
 
-gulp {
-    colors = true
-}
-
-task installGulpDependencies(type: NpmTask) {
-    inputs.file 'package.json'
+task installNpmDependencies(type: NpmTask) {
+    inputs.file('package.json').withPathSensitivity(PathSensitivity.RELATIVE)
     outputs.dir 'node_modules'
 
-    args = ['install', '-d']
+    args = ['ci']
 }
 
-gulp_assets.inputs.files 'gulpfile.js', 'src/main/assets/static'
-gulp_assets.outputs.dir 'build/rootContent/static'
+task webpack(type: NpmTask) {
+    inputs.files('webpack.config.babel.js', 'package.json').withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir('build-tooling').withPathSensitivity(PathSensitivity.RELATIVE)
+    inputs.dir('src/main/assets/static').withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir 'build/rootContent/static'
+    outputs.cacheIf { true }
 
-// run npm install
-gulp_assets.dependsOn 'installGulpDependencies'
+    args = ['run', 'build']
+}
 
-// run gulp install
-gulp_assets.dependsOn 'installGulp'
-
-def srcDir = new File(projectDir, "src/main/static")
-def targetDir = new File(project.buildDir, "static")
-gulp_dist.inputs.dir srcDir
-gulp_dist.outputs.dir targetDir
+webpack.dependsOn 'installNpmDependencies'
 
 war {
-    dependsOn gulp_assets, buildInformation
+    dependsOn webpack, buildInformation
     rootSpec.exclude '**/WEB-INF'
     webInf { from 'build/rootContent/WEB-INF' }
     from 'build/rootContent'

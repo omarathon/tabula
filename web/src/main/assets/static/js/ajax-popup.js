@@ -1,3 +1,6 @@
+import $ from 'jquery';
+require('../libs/popup/popup');
+
 /**
  * Enhances links with "ajax-popup" class by turning them magically
  * into AJAX-driven popup dialogs, without needing much special magic
@@ -6,7 +9,6 @@
  * "data-popup-target" attribute can be a CSS selector for a parent
  * element for the popup to point at.
  */
-(function ($) { "use strict";
 
 var exports = {};
 
@@ -150,5 +152,4 @@ $(function() {
 // we use extend() to add to any existing variable rather than clobber it
 window.AjaxPopup = jQuery.extend(window.AjaxPopup, exports);
 
-})(jQuery);
 // end AJAX modal

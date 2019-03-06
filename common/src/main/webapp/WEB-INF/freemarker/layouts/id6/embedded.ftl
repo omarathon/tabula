@@ -11,8 +11,8 @@
 
 		  <@stylesheet "/static/css/concat6.css" />
 		  <#include "_styles.ftl" />
-		  <link rel="stylesheet" title="No Accessibility" href="/static/css/noaccessibility.css" type="text/css">
-		  <link rel="alternate stylesheet" title="Show Accessibility" href="/static/css/showaccessibility.css" type="text/css">
+			<link rel="stylesheet" title="No Accessibility" href="<@url resource="/static/css/noaccessibility.css"/>" type="text/css">
+			<link rel="alternate stylesheet" title="Show Accessibility" href="<@url resource="/static/css/showaccessibility.css"/>" type="text/css">
 
 		  <!--[if lt IE 8]>
 			  <@stylesheet "/static/css/ielt8.css" />

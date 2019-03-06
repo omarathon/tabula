@@ -56,7 +56,9 @@
 			placement: 'left',
 			expandClickTarget: true,
 			template: '<div class="popover extra-wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
-			content: _.template(['<iframe width="800" height="600" frameborder="0" src="<%- mapUrl %>"></iframe>'])
+			content: function(o) {
+			  return '<iframe width="800" height="600" frameborder="0" src="' + o.mapUrl + '"></iframe>';
+      }
 		});
 
 		$('table.sortable').sortableTable();

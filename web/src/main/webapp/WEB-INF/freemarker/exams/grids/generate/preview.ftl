@@ -390,19 +390,6 @@
 			$confirmModal.modal('show');
 		});
 
-		$('th.rotated, td.rotated').each(function() {
-			var width = $(this).find('.rotate').width();
-			var height = $(this).find('.rotate').height();
-			$(this).css('height', width + 15).css('min-width', height + 5);
-			$(this).find('.rotate').css({
-				'margin-left': height / 2
-			}).not('.nomargin').css({
-				'margin-top': -(height)
-			}).end().filter('.middle').not('.nomargin').css({
-				'margin-top': width / 4
-			});
-		});
-
 		$('button.edit-overcatting').each(function(){
 			$(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student') + '?basedOnLevel=' + $(this).data('basedonlevel'))
 				.data('target', '#edit-overcatting-modal');
@@ -439,9 +426,9 @@
 		$(window).on('id7:reflow', reflowScroll);
 		reflowScroll();
 
-		_.defer(function () {
+		setTimeout(function () {
 			$('.key table').css('max-width', '');
-		});
+		}, 1);
 
 		// Chrome has "Safari" in its ua
 		if (!(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1)) {

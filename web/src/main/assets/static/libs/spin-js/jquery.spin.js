@@ -1,3 +1,5 @@
+const { Spinner } = window;
+
 /*
 
 You can now create a spinner using any of the variants below:

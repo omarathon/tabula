@@ -10,11 +10,4 @@
 <meta http-equiv="cleartype" content="on">
 
 <#include "_styles.ftl" />
-<@stylesheet "/static/css/${component.name?default('common')}.css" />
-
 <#include "_scripts.ftl" />
-<#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
-	<#include "components/${component.name?default('common')}.ftl" />
-<#else>
-	<@script "/static/js/${component.name?default('common')}.js" />
-</#if>

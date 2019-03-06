@@ -1,3 +1,5 @@
+import _ from 'lodash-es';
+
 (function ($) { "use strict";
 
 	var Config = {
@@ -35,7 +37,7 @@
 					container: options.container,
 					template: options.template,
 					html: options.html,
-					content: options.content({mapUrl:mapUrl}),
+					content: options.content({ mapUrl: mapUrl }),
 					placement: options.placement
 				});
 

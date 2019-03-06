@@ -1,7 +1,9 @@
+/* eslint-env browser */
+import $ from 'jquery';
+
 /**
  * Scripts used only by the attendance monitoring section.
  */
-(function ($) { "use strict";
 
 var exports = {};
 
@@ -420,5 +422,3 @@ $(function(){
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
-
-}(jQuery));
