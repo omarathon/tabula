@@ -44,14 +44,5 @@
 <@stylesheet "/static/css/id7/${component.name?default('common')}.css" />
 
 <@script "/static/js/id7/render.js" />
-<#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
-	<#include "components/${component.name?default('common')}.ftl" />
-<#else>
-	<@script "/static/js/id7/${component.name?default('common')}.js" />
-</#if>
+<@script "/static/js/id7/${component.name?default('common')}.js" />
 
-<!-- HTML5 shim for IE8 support of HTML5 elements -->
-
-<!--[if lt IE 9]>
-<@script "/static/js/id7/vendor/html5shiv-3.7.2.min.js" />
-<![endif]-->

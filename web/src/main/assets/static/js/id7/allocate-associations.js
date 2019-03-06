@@ -1,4 +1,7 @@
-jQuery(function($){
+/* eslint-env browser */
+import $ from 'jquery';
+
+$(function() {
 	if ($('.allocate-associations').length === 0)
 		return;
 
@@ -96,7 +99,7 @@ jQuery(function($){
 			$(this).closest('form').submit();
 		}
 	}).attr('autocomplete', 'off');
-	var $typeahead = $studentQuery.bootstrap3Typeahead({
+	var $typeahead = $studentQuery.typeahead({
 		source: function(query, process){
 			// Abort any existing search
 			if (self.currentSearch) {

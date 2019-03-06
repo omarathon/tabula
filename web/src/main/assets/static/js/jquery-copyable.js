@@ -1,4 +1,4 @@
-(function ($) { "use strict";
+import $ from 'jquery';
 
 /**
  * Replace links with a textbox that selects itself on focus, and
@@ -42,6 +42,4 @@ jQuery.fn.copyable = function(options) {
   });
 
   return this;
-}
-
-}(jQuery));
+};

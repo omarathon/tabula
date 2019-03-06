@@ -1,3 +1,5 @@
+const { jQuery, WPopupBox } = window;
+
 /**
  * Cross-app scripting.
  * Only for code that is common across Tabula UI.

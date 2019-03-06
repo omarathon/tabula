@@ -1,7 +1,9 @@
+/* eslint-env browser */
+import $ from 'jquery';
+
 /**
 * Scripts used when recording attendance in Attendance Monitoring or Small Group Teaching.
 */
-(function ($) { "use strict";
 
 var exports = {};
 
@@ -321,7 +323,7 @@ $(function(){
 					var $spinner = $('<div />').addClass('spinner-container').addClass('pull-right').attr('style', 'position: relative; top: 15px; left: 15px;');
 					$search.before($spinner);
 
-					$(this).bootstrap3Typeahead({
+					$(this).typeahead({
 						source: function(query, process) {
 							if (xhr != null) {
 								xhr.abort();
@@ -369,5 +371,3 @@ $(function(){
 });
 
 window.AttendanceRecording = jQuery.extend(window.AttendanceRecording, exports);
-
-}(jQuery));

@@ -306,9 +306,9 @@
 		$(window).on('id7:reflow', reflowScroll);
 		reflowScroll();
 
-		_.defer(function () {
+		setTimeout(function () {
 			$('.key table').css('max-width', '');
-		});
+		}, 1);
 
 		// Chrome has "Safari" in its ua
 		if (!(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1)) {

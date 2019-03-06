@@ -197,9 +197,6 @@
 </div>
 
 <style type="text/css">
-	@import url("<@url resource="/static/css/fullcalendar.css" />");
-	@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
-
 	.fc-event.allday {
 		font-weight: bold;
 		color: white !important;

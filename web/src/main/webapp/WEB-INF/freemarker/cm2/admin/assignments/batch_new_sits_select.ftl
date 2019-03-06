@@ -287,6 +287,6 @@ first page of the form to setup a bunch of assignments from SITS.
 		</script>
 	</#if>
 	<!-- </script> specifically added for functional test -->
-	<script type="text/javascript" src="/static/js/assignment-batch-select.js"></script>
+	<@script "/static/js/assignment-batch-select.js" />
 
 </#escape>
