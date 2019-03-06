@@ -58,7 +58,8 @@
     "lodash-es": "4.17.11",
     "moment-timezone": "github:UniversityofWarwick/moment-timezone#0.5.23-london",
     "spin.js": "4.0.0",
-    "tablesorter": "2.31.1"
+    "tablesorter": "2.31.1",
+    "x-editable": "1.5.1"
   },
   "optionalDependencies": {
     "@fortawesome/fontawesome-pro": "5.7.2"

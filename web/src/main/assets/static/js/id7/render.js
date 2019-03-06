@@ -18,6 +18,7 @@ require('jquery-caret-plugin/dist/jquery.caret');
 require('fixed-header-table/jquery.fixedheadertable');
 require('tablesorter/dist/js/jquery.tablesorter');
 require('bootstrap-datetime-picker/js/bootstrap-datetimepicker');
+require('x-editable/dist/bootstrap3-editable/js/bootstrap-editable');
 
 window.Spinner = require('spin.js/spin').Spinner;
 
