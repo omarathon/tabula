@@ -9,11 +9,11 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.cache.HashMapCacheStore
+import uk.ac.warwick.util.cache.Caches
 
 import scala.concurrent.Future
 
-class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
+class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
 
   private trait Fixture {
     val module: Module = Fixtures.module("cs118")
@@ -27,7 +27,9 @@ class CachedTimetableFetchingServiceTest  extends TestBase with Mockito{
   }
 
   @Before def clearCaches() {
-    HashMapCacheStore.clearAll()
+    Caches.builder("cacheName", Caches.CacheStrategy.CaffeineRequired)
+      .buildStore()
+      .clear()
   }
 
   @Test

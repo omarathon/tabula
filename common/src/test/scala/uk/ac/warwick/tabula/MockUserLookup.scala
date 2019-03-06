@@ -120,7 +120,7 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	with CacheStrategyComponent
 	with MockUser {
 
-	val cacheStrategy = CacheStrategy.InMemoryOnly
+	val cacheStrategy = CacheStrategy.CaffeineRequired
 
 	override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean): User = {
 		flavour match {
