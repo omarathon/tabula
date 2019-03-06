@@ -133,7 +133,7 @@ object Daoisms {
 
 	// The maximum number of clauses supported in an IN(..) before it will
 	// unceremoniously fail. Use `grouped` with this to split up work
-	val MaxInClauseCount = 1000
+	val MaxInClauseCount: Int = Short.MaxValue.toInt // Oh Postgres you fantastic bastard
 }
 
 /**

@@ -4,22 +4,22 @@ import scala.reflect._
 import scala.collection.JavaConverters._
 import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.{HelperRestrictions, SessionComponent, Daoisms}
+import uk.ac.warwick.tabula.data.{Daoisms, HelperRestrictions, SessionComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.cache.{Cache, Caches, SingularCacheEntryFactory}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.{StringId, KnownTypeUserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, StringId, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.conversion.ItemType
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.hibernate.criterion.Projections
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache, RequestLevelCaching}
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import org.joda.time.Days
 import org.springframework.util.Assert
-import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringStyle, ToStringBuilder}
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
 import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -61,7 +61,7 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 	lazy val cacheName: String = simpleEntityName + "-" + path.replace(".","-")
 	lazy val cache: Option[Cache[String, Array[String]]] = Wire.optionNamed[Cache[String, Array[String]]](cacheName)
 
-	def findBy(user: User): Seq[A] = {
+	def findBy(user: User): Seq[A] = RequestLevelCache.cachedBy(s"UserGroupMembershipHelper[${runtimeClass.getName}].$path", user.getUserId) {
 		val ids = cache match {
 			case Some(c) => benchmarkTask("findByUsingCache") {
 				c.get(user.getUserId).toSeq

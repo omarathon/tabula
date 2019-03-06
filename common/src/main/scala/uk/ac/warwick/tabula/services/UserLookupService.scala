@@ -165,7 +165,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	def create(warwickId: UniversityId): User = {
 		try {
-			getUserByWarwickUniIdUncached(warwickId, false)
+			getUserByWarwickUniIdUncached(warwickId, skipMemberLookup = false)
 		} catch {
 			case e: Exception => throw new CacheEntryUpdateException(e)
 		}
@@ -175,7 +175,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	def create(warwickIds: JList[UniversityId]): JMap[UniversityId, User] = {
 		try {
-			getUsersByWarwickUniIdsUncached(warwickIds.asScala, false).asJava
+			getUsersByWarwickUniIdsUncached(warwickIds.asScala, skipMemberLookup = false).asJava
 		} catch {
 			case e: Exception => throw new CacheEntryUpdateException(e)
 		}

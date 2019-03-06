@@ -304,11 +304,11 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				currentMembers2.foreach{ uagm =>
 					uagm.universityId should not be "1000006"
 				}
+
+				val uag: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(Seq(assessmentGroup2, assessmentGroup3, assessmentGroup4), academicYear)
+				uag should be (uagInfo2)
 			}
 		}
 	}
-
-
-
 
 }

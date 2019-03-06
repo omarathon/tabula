@@ -121,7 +121,11 @@ task webpack(type: NpmTask) {
     outputs.dir 'build/rootContent/static'
     outputs.cacheIf { true }
 
-    args = ['run', 'build']
+    if (isDevBuild) {
+        args = ['run', 'dev']
+    } else {
+        args = ['run', 'build']
+    }
 }
 
 webpack.dependsOn 'installNpmDependencies'

@@ -24,6 +24,7 @@ trait AssessmentMembershipService {
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo]
+	def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo]
 	def getUpstreamAssessmentGroups(module: Module, academicYear:AcademicYear): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroups(student: StudentMember, academicYear:AcademicYear, resitOnly: Boolean): Seq[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
@@ -163,6 +164,10 @@ class AssessmentMembershipServiceImpl
 	def getUpstreamAssessmentGroupInfo(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroupInfo] = {
 		find(template).map( grp => UpstreamAssessmentGroupInfo(grp, getCurrentUpstreamAssessmentGroupMembers(grp.id)))
 	}
+
+	def getUpstreamAssessmentGroupInfo(groups: Seq[AssessmentGroup], academicYear: AcademicYear): Seq[UpstreamAssessmentGroupInfo] =
+		dao.getUpstreamAssessmentGroupInfo(groups, academicYear)
+
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup] = dao.getUpstreamAssessmentGroup(id)
 	def getCurrentUpstreamAssessmentGroupMembers(uagid:String): Seq[UpstreamAssessmentGroupMember] = dao.getCurrentUpstreamAssessmentGroupMembers(uagid)
 
@@ -261,10 +266,12 @@ trait AssessmentMembershipMethods extends Logging {
 
 	private def generateAssessmentMembershipInfo(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], includePWD: Boolean = false):AssessmentMembershipInfo = {
 		val sitsUsers =
-			userLookup.getUsersByWarwickUniIds(upstream.flatMap { uagInfo =>
-				val members = if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
-				members.map(_.universityId).filter(_.hasText)
-			}.distinct).toSeq
+			userLookup.getUsersByWarwickUniIds(
+				upstream.flatMap { uagInfo =>
+					val members = if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
+					members.map(_.universityId).filter(_.hasText)
+				}.distinct
+			).toSeq
 
 		val includes = others.map(_.users.map(u => u.getUserId -> u)).getOrElse(Nil)
 		val excludes = others.map(_.excludes.map(u => u.getUserId -> u)).getOrElse(Nil)
@@ -305,8 +312,8 @@ trait AssessmentMembershipMethods extends Logging {
 	}
 
 	def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User] = assessment match {
-		case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), true).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
-		case e: Exam => generateMembershipUsersWithOrder(e, true).map(_._1)
+		case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
+		case e: Exam => generateMembershipUsersWithOrder(e, includePWD = true).map(_._1)
 	}
 
 
@@ -361,9 +368,7 @@ trait AssessmentMembershipMethods extends Logging {
 	def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
 		if (others.exists(_.excludesUser(user))) false
 		else if (others.exists(_.includesUser(user))) true
-		else upstream.exists {
-			_.currentMembers.map(_.universityId).contains(user.getWarwickId)
-		}
+		else determineMembership(upstream, others).items.filter(notExclude).exists(_.universityId.contains(user.getWarwickId))
 	}
 
 	private def sameUserIdAs(user: User) = (other: (String, User)) => { user.getUserId == other._2.getUserId }

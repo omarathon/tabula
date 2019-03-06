@@ -26,9 +26,9 @@ class GenerateGradesFromMarkCommandInternal(val assessment: Assessment)
 
 	self: GenerateGradesFromMarkCommandRequest with AssessmentMembershipServiceComponent =>
 
-	lazy val assignmentUpstreamAssessmentGroupInfoMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map(group =>
+	lazy val assignmentUpstreamAssessmentGroupInfoMap: Map[AssessmentGroup, Option[UpstreamAssessmentGroupInfo]] = assessment.assessmentGroups.asScala.map { group =>
 		group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
-	).toMap
+	}.toMap
 
 	private def isNotNullAndInt(intString: String): Boolean = {
 		if (intString == null) {

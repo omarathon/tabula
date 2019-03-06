@@ -184,7 +184,7 @@ trait UpdatesStudentMembership {
 	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
 	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroupInfo] =
 		if (assessmentGroups == null) Seq()
-		else assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroupInfo(academicYear) }
+		else assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
 
 	/**
 	 * Returns a sequence of MembershipItems

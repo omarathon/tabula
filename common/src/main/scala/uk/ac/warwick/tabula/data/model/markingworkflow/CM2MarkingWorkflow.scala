@@ -136,7 +136,7 @@ class StageMarkers extends GeneratedId with Serializable {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
 	var stage: MarkingWorkflowStage = _
 
-	@ManyToOne(optional = false, cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
+	@ManyToOne(optional = false, cascade = Array(CascadeType.ALL), fetch = FetchType.EAGER)
 	@JoinColumn(name = "workflow_id")
 	var workflow: CM2MarkingWorkflow = _
 

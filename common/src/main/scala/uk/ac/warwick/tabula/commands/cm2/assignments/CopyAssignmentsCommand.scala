@@ -117,16 +117,15 @@ abstract class AbstractCopyAssignmentsCommandInternal
 
 		// TAB-1175 Guess SITS links
 		assignment.assessmentGroups.asScala
-			.filter {
-				_.toUpstreamAssessmentGroupInfo(newAssignment.academicYear).isDefined
-			} // Only where defined in the new year
+			// Only where defined in the new year
+			.filter(_.toUpstreamAssessmentGroupInfo(newAssignment.academicYear).nonEmpty)
 			.foreach { group =>
-			val newGroup = new AssessmentGroup
-			newGroup.assessmentComponent = group.assessmentComponent
-			newGroup.occurrence = group.occurrence
-			newGroup.assignment = newAssignment
-			newAssignment.assessmentGroups.add(newGroup)
-		}
+				val newGroup = new AssessmentGroup
+				newGroup.assessmentComponent = group.assessmentComponent
+				newGroup.occurrence = group.occurrence
+				newGroup.assignment = newAssignment
+				newAssignment.assessmentGroups.add(newGroup)
+			}
 
 		newAssignment
 	}

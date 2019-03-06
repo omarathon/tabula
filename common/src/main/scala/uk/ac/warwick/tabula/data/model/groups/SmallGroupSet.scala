@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -207,35 +208,48 @@ class SmallGroupSet
 	def showAttendanceReports: Boolean = !archived && !deleted && collectAttendance
 
 	// converts the assessmentGroups to UpstreamAssessmentGroupInfo
-	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroupInfo(academicYear) }
+	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("SmallGroupSet.upstreamAssessmentGroupInfos", id) {
+		membershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
+	}
 
 	// Gets a breakdown of the membership for this small group set.
-	def membershipInfo: AssessmentMembershipInfo = membershipService.determineMembership(upstreamAssessmentGroupInfos, Some(members))
+	def membershipInfo: AssessmentMembershipInfo = RequestLevelCache.cachedBy("SmallGroupSet.membershipInfo", id) {
+		membershipService.determineMembership(upstreamAssessmentGroupInfos, Some(members))
+	}
 
-	def isStudentMember(user: User): Boolean = {
-		groups.asScala.exists(_.students.includesUser(user)) ||
-		Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
+	def isStudentMember(user: User): Boolean = RequestLevelCache.cachedBy("SmallGroupSet.isStudentMember", s"$id-${user.getUserId}") {
+		val memberOfAnyGroup: Boolean =
+			smallGroupService match {
+				case Some(service) =>
+					service.studentGroupHelper.findBy(user).exists(_.groupSet.id == id)
+
+				case _ => groups.asScala.exists(_.students.includesUser(user))
+			}
+
+		memberOfAnyGroup || Option(linkedDepartmentSmallGroupSet).map { _.isStudentMember(user) }.getOrElse {
 			membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
 		}
 	}
 
-	def allStudents: Seq[User] =
+	def allStudents: Seq[User] = RequestLevelCache.cachedBy("SmallGroupSet.allStudents", id) {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudents }.getOrElse {
 			membershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Some(members))
 		}
+	}
 
-	def allStudentIds: Seq[String] =
+	def allStudentIds: Seq[String] = RequestLevelCache.cachedBy("SmallGroupSet.allStudentIds", id) {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentIds }.getOrElse {
 			membershipService.determineMembershipIds(upstreamAssessmentGroupInfos, Some(members))
 		}
+	}
 
-	def allStudentsCount: Int = benchmarkTask(s"${this.id} allStudentsCount") {
+	def allStudentsCount: Int = benchmarkTask(s"$id allStudentsCount") { RequestLevelCache.cachedBy("SmallGroupSet.allStudentsCount", id) {
 		Option(linkedDepartmentSmallGroupSet).map { _.allStudentsCount }.getOrElse {
 			membershipService.countCurrentMembershipWithUniversityIdGroup(upstreamAssessmentGroupInfos, Some(members))
 		}
-	}
+	}}
 
-	def unallocatedStudents: Seq[User] = {
+	def unallocatedStudents: Seq[User] = RequestLevelCache.cachedBy("SmallGroupSet.unallocatedStudents", id) {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudents }.getOrElse {
 			val allocatedStudents = groups.asScala.flatMap { _.students.users }
 
@@ -243,7 +257,7 @@ class SmallGroupSet
 		}
 	}
 
-	def unallocatedStudentsCount: Int = benchmarkTask(s"${this.id} unallocatedStudentsCount") {
+	def unallocatedStudentsCount: Int = benchmarkTask(s"$id unallocatedStudentsCount") { RequestLevelCache.cachedBy("SmallGroupSet.unallocatedStudentsCount", id) {
 		Option(linkedDepartmentSmallGroupSet).map { _.unallocatedStudentsCount }.getOrElse {
 			if (groups.asScala.forall { _.students.universityIds } && members.universityIds) {
 				// Efficiency
@@ -255,7 +269,7 @@ class SmallGroupSet
 				unallocatedStudents.size
 			}
 		}
-	}
+	}}
 
 	def studentsNotInMembership: mutable.Buffer[User] = {
 		Option(linkedDepartmentSmallGroupSet).map { _.studentsNotInMembership }.getOrElse {
