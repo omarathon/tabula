@@ -1,3 +1,4 @@
 **/*.js
 # One day
 #!/src/main/assets/static/js/**/*.js
+!/src/main/assets/static/js/id7/render.js

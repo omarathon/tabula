@@ -10,7 +10,7 @@ require('../libs/popup/popup');
 require('../libs/bootstrap/js/bootstrap');
 require('../libs/bootstrap-editable/js/bootstrap-editable');
 require('../libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker');
-window.Spinner = require('../libs/spin-js/spin');
+window.Spinner = require('../libs/spin-js/spin').Spinner;
 require('../libs/spin-js/jquery.spin');
 require('./browser-info');
 require('./activity-streams');

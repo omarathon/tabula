@@ -1,7 +1,7 @@
 /* eslint-env browser */
 require('@universityofwarwick/id7/dist/js/id7-bundle');
 
-import moment from 'moment-timezone';
+import moment from 'moment-timezone'; // eslint-disable-line import/first,import/newline-after-import
 window.moment = moment;
 
 // TODO do we need all of these?
@@ -18,33 +18,51 @@ require('jquery-caret-plugin/dist/jquery.caret');
 require('fixed-header-table/jquery.fixedheadertable');
 require('tablesorter/dist/js/jquery.tablesorter');
 require('bootstrap-datetime-picker/js/bootstrap-datetimepicker');
-require('spin.js/spin');
 
-window.jQuery.fn.spin = function spin(o, color) {
-	return this.each((i, el) => {
-		const $this = $(el);
-		const data = $this.data();
+window.Spinner = require('spin.js/spin').Spinner;
 
-		if (data.spinner) {
-			data.spinner.stop();
-			delete data.spinner;
-		}
+const $ = window.jQuery;
 
-		if (o !== false) {
-			const opts = $.extend(
-				{ color: color || $this.css('color') },
-				$.fn.spin.presets[o] || o
-			);
+$.fn.spin = function spin(o, color) {
+  return this.each((i, el) => {
+    const $this = $(el);
+    const data = $this.data();
 
-			data.spinner = new Spinner(opts).spin(el);
-		}
-	});
+    if (data.spinner) {
+      data.spinner.stop();
+      delete data.spinner;
+    }
+
+    if (o !== false) {
+      const opts = $.extend(
+        { color: color || $this.css('color') },
+        $.fn.spin.presets[o] || o,
+      );
+
+      data.spinner = new window.Spinner(opts).spin(el);
+    }
+  });
 };
 
-window.jQuery.fn.spin.presets = {
-	tiny: { lines: 8, length: 2, width: 2, radius: 3 },
-	small: { lines: 8, length: 4, width: 3, radius: 5 },
-	large: { lines: 10, length: 8, width: 4, radius: 8 },
+$.fn.spin.presets = {
+  tiny: {
+    lines: 8,
+    length: 2,
+    width: 2,
+    radius: 3,
+  },
+  small: {
+    lines: 8,
+    length: 4,
+    width: 3,
+    radius: 5,
+  },
+  large: {
+    lines: 10,
+    length: 8,
+    width: 4,
+    radius: 8,
+  },
 };
 
 require('../jquery-copyable');
