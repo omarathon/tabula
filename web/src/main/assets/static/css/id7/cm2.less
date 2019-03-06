@@ -1,4 +1,4 @@
-@import (reference) "../../libs/font-awesome/less/variables.less";
+@import (reference) "@fortawesome/fontawesome-pro/less/_variables.less";
 @import (reference) "../bootstrap/variables.less";
 @import (reference) "colours.less";
 @import "embeddable";
@@ -35,27 +35,31 @@ a.profile-link {
 	&.collapsed .toggle-icon:before {
 		font-family: 'Font Awesome 5 Pro';
 		font-weight: 900;
-		content: @caret-right;
+		content: @fa-var-caret-right;
 	}
 
 	.toggle-icon:before {
 		font-family: 'Font Awesome 5 Pro';
 		font-weight: 900;
-		content: @caret-down;
+		content: @fa-var-caret-down;
 		margin-right: 6px;
 	}
 
 	&.collapsed .toggle-icon-large:before {
 		font-family: 'Font Awesome 5 Pro';
 		font-weight: 900;
-		content: @chevron-right;
+		content: @fa-var-chevron-right;
 	}
 
 	.toggle-icon-large:before {
 		font-family: 'Font Awesome 5 Pro';
 		font-weight: 900;
-		content: @chevron-down;
+		content: @fa-var-chevron-down;
 		margin-right: 6px;
+	}
+
+	.toggle-icon, .toggle-icon-large {
+		white-space: nowrap;
 	}
 }
 

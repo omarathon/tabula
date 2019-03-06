@@ -1,4 +1,5 @@
 import path from 'path';
+import fs from 'fs';
 import EventEmitter from 'events';
 import WebpackNotifierPlugin from 'webpack-notifier';
 import RemovePlugin from 'remove-files-webpack-plugin';
@@ -62,7 +63,7 @@ const paths = {
 
 let shimFontAwesomePro;
 try {
-  fs.accessSync('node_modules/@fortawesome/fontawesome-pro/package.json');
+  fs.accessSync(path.join(__dirname, 'node_modules/@fortawesome/fontawesome-pro/package.json'));
   shimFontAwesomePro = false;
 } catch (err) {
   shimFontAwesomePro = true;

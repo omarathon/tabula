@@ -16,7 +16,7 @@ require('jquery-ui/ui/widgets/sortable');
 
 require('jquery-caret-plugin/dist/jquery.caret');
 require('fixed-header-table/jquery.fixedheadertable');
-require('tablesorter/dist/js/jquery.tablesorter');
+require('../../libs/jquery-tablesorter/jquery.tablesorter'); // TODO rewrite code to be compatible with npm-published version
 require('bootstrap-datetime-picker/js/bootstrap-datetimepicker');
 require('x-editable/dist/bootstrap3-editable/js/bootstrap-editable');
 
