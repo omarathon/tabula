@@ -331,7 +331,7 @@ even for Scala).
 Gradle unit test results go to a HTML file which is pretty good, so you probably don't want to spend too long trying to make the
 console output more verbose.
 
-If you run `node_modules/.bin/gulp` from inside the `web` folder in a tab, that will constantly build assets and JRebel will
+If you run `npm run watch` from inside the `web` folder in a tab, that will constantly build assets and JRebel will
 then sync these across to the war, along with WEB-INF content such as Freemarker views.
 
 Some other useful Gradle commands:
@@ -352,20 +352,16 @@ Some other useful Gradle commands:
 
 ### Building assets
 
-The `web` module contains a call to `node_modules/.bin/gulp assets` to build assets as part of the deployment.
+The `web` module contains a call to `npm run build` to build assets with Webpack as part of the deployment.
 You can run this manually to build new static content into `build/rootContent` (which is monitored by JRebel for changes).
 
-If you don't want to mess with gulp at all, you can call `./gradlew gulp_assets` to rebuild the assets (or replace `assets` with another task name as below).
+If you don't want to mess with webpack at all, you can call `./gradlew webpack` to rebuild the assets.
 
-Other useful `gulp` commands:
+Other useful `npm` commands:
 
-- `gulp assets` - build all assets and exit
-- `gulp` - build all assets then watch for any changes and rebuild
-- `gulp watch-assets` - just watch for changes before rebuilding
-- `gulp clean` - clean out anything from `build/rootContent` (sometimes necessary if you delete files)
-- `gulp concat-scripts-id6` - generate the concatenated JS files for ID6 modules
-- `gulp concat-scripts-id7` - generate the concatenated JS files for ID7 modules
-- `gulp compile-less` - compile any LESS files to CSS
+- `npm run build` - build all production assets and exit
+- `npm run dev` - build assets for development and exit
+- `npm run watch` - watch for changes to files and re-build development assets
 
 At the moment, we still have a lot of JS libraries in `src/main/assets/static/libs/` - these should be gradually replaced
 with proper dependency management in `package.json` (we already do this for ID7). If you need to update ID7, change the version
@@ -385,7 +381,7 @@ Directory structure
       - `scala` - Scala source files
       - `java` - Java source files
       - `resources` - non-code files that will be available in the app classpath
-      - `assets` - JS/CSS files etc. to be asset-processed by gulp before being added to the WAR
+      - `assets` - JS/CSS files etc. to be asset-processed by webpack before being added to the WAR
       - `webapp` - other non-code files that make up the WAR.
       - `artwork` - source graphics not included in the app, but used to generate static images. Usually SVG/Inkscape.
     - `test`
