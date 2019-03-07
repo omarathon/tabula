@@ -39,7 +39,7 @@
 			<form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
 				<input type="hidden" name="basedOnLevel" value="${overcatView.basedOnLevel?c}" />
 				<table class="table table-condensed grid overcat">
-					<tbody>
+					<thead>
 						<#-- Year row -->
 						<tr class="year">
 							<th colspan="3">Options</th>
@@ -103,7 +103,9 @@
 								<td class="spacer">&nbsp;</td>
 							</#list>
 						</tr>
+					</thead>
 
+					<tbody>
 						<#-- Entities -->
 						<#list overcatView.overcattedEntities as entity>
 							<tr class="student clickable">

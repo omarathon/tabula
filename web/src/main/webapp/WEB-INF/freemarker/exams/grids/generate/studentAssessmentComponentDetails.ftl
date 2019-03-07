@@ -153,7 +153,7 @@
 															</#if>
 														</#compress></span>
 													<#else>
-														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Assessment component">X</span>
+														<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="No marks set for Assessment component">X</span>
 													</#if>
 												</td>
 											</tr>
@@ -170,7 +170,7 @@
 													<#if studentInfo.groupMember.firstDefinedGrade??>
 														<span class="<#if !studentInfo.groupMember.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${studentInfo.groupMember.firstDefinedGrade}</span>
 													<#else>
-														<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Assessment component">X</span>
+														<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="No grade set for Assessment component">X</span>
 													</#if>
 												</td>
 											</tr>
@@ -193,7 +193,7 @@
 										<span class=exam-grid-actual-mark">${mr.actualMark}</span>
 									</#if>
 								<#else>
-									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No marks set for Module registration">X</span>
+									<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="No marks set for Module registration">X</span>
 								</#if>
 							</td>
 							<td class="assessment_details_col assessment_details_col1">
@@ -202,7 +202,7 @@
 								<#elseif mr.actualGrade??>
 									${mr.actualGrade}
 								<#else>
-									<span class="exam-grid-actual-mark use-tooltip" title="" data-container="body" data-original-title="No grade set for Module registration">X</span>
+									<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="No grade set for Module registration">X</span>
 								</#if>
 							</td>
 						</tr>
