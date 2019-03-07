@@ -4,7 +4,7 @@
 <#macro showMarks entity markType>
 	<#list perYearColumns?keys?sort as year>
 		<#if gridOptionsCommand.showComponentMarks>
-		<th><span class="use-tooltip" title="${markType.description}">${markType.label}</span></th>
+		<th><span class="exam-grid-tooltip" data-title="${markType.description}">${markType.label}</span></th>
 		</#if>
 		<#list mapGet(perYearColumns, year) as column>
 			<td>
@@ -21,78 +21,80 @@
 </#macro>
 
 <table class="table table-condensed grid <#if !gridOptionsCommand.showComponentMarks>with-hover</#if>">
-	<#-- Year row -->
-	<tr class="year">
-		<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
-		<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-		<#list perYearColumns?keys?sort as year>
-			<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-			<th colspan="${mapGet(perYearColumns, year)?size}">Year ${year}</th>
-			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
-		</#list>
-		<#list summaryColumns as column><td class="borderless">&nbsp;</td></#list>
-	</tr>
-	<#-- Category row -->
-	<tr class="category">
-		<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
-		<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-		<#list perYearColumns?keys?sort as year>
-			<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+	<thead>
+		<#-- Year row -->
+		<tr class="year">
+			<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
+			<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+			<#list perYearColumns?keys?sort as year>
+				<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+				<th colspan="${mapGet(perYearColumns, year)?size}">Year ${year}</th>
+				<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
+			</#list>
+			<#list summaryColumns as column><td class="borderless">&nbsp;</td></#list>
+		</tr>
+		<#-- Category row -->
+		<tr class="category">
+			<#list studentInformationColumns as column><td class="borderless">&nbsp;</td></#list>
+			<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+			<#list perYearColumns?keys?sort as year>
+				<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+				<#assign currentCategory = '' />
+				<#list mapGet(perYearColumns, year) as column>
+					<#if column.category?has_content>
+						<#if currentCategory != column.category>
+							<#assign currentCategory = column.category />
+							<th class="rotated" colspan="${mapGet(perYearColumnCategories, year)[column.category]?size}"><span class="rotate">${column.category}</span></th>
+						</#if>
+					<#else>
+						<td>&nbsp;</td>
+					</#if>
+				</#list>
+				<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
+				<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
+			</#list>
 			<#assign currentCategory = '' />
-			<#list mapGet(perYearColumns, year) as column>
+			<#list summaryColumns as column>
 				<#if column.category?has_content>
 					<#if currentCategory != column.category>
 						<#assign currentCategory = column.category />
-						<th class="rotated" colspan="${mapGet(perYearColumnCategories, year)[column.category]?size}"><span class="rotate">${column.category}</span></th>
+						<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><span class="rotate">${column.category}</span></th>
 					</#if>
 				<#else>
 					<td>&nbsp;</td>
 				</#if>
 			</#list>
-			<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
-			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
-		</#list>
-		<#assign currentCategory = '' />
-		<#list summaryColumns as column>
-			<#if column.category?has_content>
-				<#if currentCategory != column.category>
-					<#assign currentCategory = column.category />
-					<th class="rotated" colspan="${chosenYearColumnCategories[column.category]?size}"><span class="rotate">${column.category}</span></th>
-				</#if>
-			<#else>
-				<td>&nbsp;</td>
-			</#if>
-		</#list>
-	</tr>
-	<#-- Header row -->
-	<tr class="header">
-		<#list studentInformationColumns as column>
-			<th <#if !column.secondaryValue?has_content>rowspan="2"</#if>>${column.title}</th>
-		</#list>
-		<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-		<#list perYearColumns?keys?sort as year>
-			<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-			<#list mapGet(perYearColumns, year) as column>
+		</tr>
+		<#-- Header row -->
+		<tr class="header">
+			<#list studentInformationColumns as column>
+				<th <#if !column.secondaryValue?has_content>rowspan="2"</#if>>${column.title}</th>
+			</#list>
+			<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+			<#list perYearColumns?keys?sort as year>
+				<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+				<#list mapGet(perYearColumns, year) as column>
+					<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><span class="rotate">${column.title}</span></th>
+				</#list>
+				<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
+				<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
+			</#list>
+			<#list summaryColumns as column>
 				<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><span class="rotate">${column.title}</span></th>
 			</#list>
-			<#if !mapGet(perYearColumns, year)?has_content><td class="spacer">&nbsp;</td></#if>
-			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
-		</#list>
-		<#list summaryColumns as column>
-			<th class="rotated <#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>" <#if !column.secondaryValue?has_content>rowspan="2"</#if>><span class="rotate">${column.title}</span></th>
-		</#list>
-	</tr>
-	<#-- Secondary value row -->
-	<tr class="secondary">
-		<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-		<#list perYearColumns?keys?sort as year>
-			<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
-			<#list mapGet(perYearColumns, year) as column>
-				<#if column.secondaryValue?has_content><th class="<#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>">${column.secondaryValue}</th></#if>
+		</tr>
+		<#-- Secondary value row -->
+		<tr class="secondary">
+			<#if !gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+			<#list perYearColumns?keys?sort as year>
+				<#if gridOptionsCommand.showComponentMarks><td class="spacer">&nbsp;</td></#if>
+				<#list mapGet(perYearColumns, year) as column>
+					<#if column.secondaryValue?has_content><th class="<#if column.boldTitle>bold</#if> <#if column.category?has_content>has-category</#if>">${column.secondaryValue}</th></#if>
+				</#list>
+				<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
 			</#list>
-			<#if !year_has_next><td class="spacer">&nbsp;</td></#if>
-		</#list>
-	</tr>
+		</tr>
+	</thead>
 
 	<#-- Entities -->
 	<#list entities as entity>
