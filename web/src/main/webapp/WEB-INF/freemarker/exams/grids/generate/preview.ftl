@@ -26,7 +26,7 @@
         </div>
       </div>
 
-      <div id="examGridContainer" class="no-wide-tables" style="display: none;">
+      <div id="examGridContainer" style="display: none;">
         <div class="row">
           <div class="alert alert-info <#if user?? && user.sysadmin>col-sm-8<#else>col-sm-12</#if>">
             <h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
@@ -408,8 +408,7 @@
 
       $('#examGridContainer').show();
       $('#examGridSpinner').hide();
-
-      $('#examGridContainer').removeClass('no-wide-tables').wideTables();
+      $('#examGridContainer table.grid').parent().doubleScroll();
 
       // fix the grid scrollbar to the footer
       var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
