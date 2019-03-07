@@ -17,8 +17,8 @@ require('jquery-ui/ui/widgets/sortable');
 require('jquery-caret-plugin/dist/jquery.caret');
 require('fixed-header-table/jquery.fixedheadertable');
 require('../../libs/jquery-tablesorter/jquery.tablesorter'); // TODO rewrite code to be compatible with npm-published version
-require('bootstrap-datetime-picker/js/bootstrap-datetimepicker');
-require('x-editable/dist/bootstrap3-editable/js/bootstrap-editable');
+require('../../libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker'); // TODO this is a patched version I can't find in npm
+require('../../libs/bootstrap3-editable/js/bootstrap-editable'); // TODO bizarrely npm only has 1.5.1 and we use 1.5.3, we also patch for fa icons
 
 window.Spinner = require('spin.js/spin').Spinner;
 
