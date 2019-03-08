@@ -70,5 +70,5 @@ trait StudentAssessmentCommandState {
 
 	def studentCourseYearDetails: StudentCourseYearDetails
 
-	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
+	lazy val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
 }

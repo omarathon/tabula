@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYear
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalCATSLoadServiceComponent, UpstreamRouteRuleService, UpstreamRouteRuleServiceComponent}
 
-
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
 	val thisDepartment: Department = Fixtures.department("its")

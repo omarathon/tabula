@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.jobs
 
 import org.junit.Ignore
-import uk.ac.warwick.tabula._
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.jobs._
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.services.jobs._
 
 class JobContextTest extends AppContextTestBase {
 
@@ -35,14 +35,12 @@ class JobContextTest extends AppContextTestBase {
 	@Test
 	def load() {
 		val id = jobService.add(None, TestingJob("anything really")).id
-		jobService.getInstance(id) map { instance =>
-			jobService.run()
-
-		} orElse fail()
+		jobService.getInstance(id).map { _ =>
+			jobService.run()(new EarlyRequestInfoImpl)
+		}.orElse(fail())
 
 		// Check that the flags have actually been updated.
-		jobService.getInstance(id) map { instance =>
-
+		jobService.getInstance(id).map { instance =>
 			withClue("Started") { instance.started should be {true} }
 			withClue("Finished") { instance.finished should be {true} }
 			withClue("Succeeded") { instance.succeeded should be {true} }

@@ -47,7 +47,8 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
 		val entities = examModuleGridResult.gridStudentDetailRecords
 		val aGroupAndSequenceAndOccurrences = examModuleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName.map { case (aGroupAndSeqAndOcc, _) => aGroupAndSeqAndOcc }
 		val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
-		sheet.trackAllColumnsForAutoSizing()
+		sheet.trackColumnForAutoSizing(0)
+		sheet.trackColumnForAutoSizing(1)
 
 		ModuleExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, module, entities.map(_.universityId).distinct.size)
 

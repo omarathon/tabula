@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.jobs
 
-import uk.ac.warwick.tabula.TestBase
 import org.junit.Before
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.CurrentUser
-
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.Transactions
+import uk.ac.warwick.tabula.{CurrentUser, EarlyRequestInfoImpl, Mockito, TestBase}
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class JobTest extends TestBase with Mockito with JobTestHelp {
@@ -28,7 +25,7 @@ class JobTest extends TestBase with Mockito with JobTestHelp {
 			dao.findOutstandingInstances(10).size should be (1)
 			val myInstance = service.getInstance(id).get
 			myInstance.started should be (right = false)
-			service.run()
+			service.run()(new EarlyRequestInfoImpl)
 			myInstance.finished should be (right = true)
 			myInstance.succeeded should be (right = true)
 			dao.findOutstandingInstances(10).size should be (0)

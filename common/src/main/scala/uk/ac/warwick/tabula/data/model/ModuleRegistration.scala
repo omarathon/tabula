@@ -98,7 +98,7 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 		}.filter(_.universityId == studentCourseDetails.student.universityId)
 
 	def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId && !studentCourseDetails.statusOnCourse.code.startsWith("P"))
+		upstreamAssessmentGroupMembers.filter(_ => !studentCourseDetails.statusOnCourse.code.startsWith("P"))
 
 	override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
 

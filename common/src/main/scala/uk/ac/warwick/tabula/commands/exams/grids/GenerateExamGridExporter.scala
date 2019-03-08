@@ -50,7 +50,6 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 		val cellStyleMap = getCellStyleMap(workbook)
 
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
-		sheet.trackAllColumnsForAutoSizing()
 
 		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
 
@@ -151,7 +150,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 							currentCategory = hasCategory.category
 							val categoryCell = categoryRow.createCell(currentColumnIndex)
 							categoryCell.setCellValue(hasCategory.category)
-							sheet.autoSizeColumn(currentColumnIndex)
+							sheet.setColumnWidth(currentColumnIndex, hasCategory.excelColumnWidth)
 							categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 							categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
 
@@ -229,7 +228,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 
 						val categoryCell = categoryRow.createCell(currentColumnIndex)
 						categoryCell.setCellValue(hasCategory.category)
-						sheet.autoSizeColumn(currentColumnIndex)
+						sheet.setColumnWidth(currentColumnIndex, hasCategory.excelColumnWidth)
 						categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 						categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
 

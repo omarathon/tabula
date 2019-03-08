@@ -131,15 +131,13 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
     dbUsers ++ others
   }
 
-  private def filterApplicantUsers(user: User) = user.isApplicant match {
-    case true => {
+  private def filterApplicantUsers(user: User): User =
+    if (user.isApplicant) {
       val result = new AnonymousUser()
       result.setUserId(user.getUserId)
       result.setWarwickId(user.getWarwickId)
       result
-    }
-    case _ => user
-  }
+    } else user
 
 }
 

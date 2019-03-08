@@ -46,7 +46,6 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 		val cellStyleMap = getCellStyleMap(workbook)
 
 		val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
-		sheet.trackAllColumnsForAutoSizing()
 
 		ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
 
@@ -79,7 +78,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 				// Header row
 				val headerCell = headerRow.createCell(currentColumnIndex)
 				headerCell.setCellValue(leftColumn.title)
-				sheet.autoSizeColumn(currentColumnIndex)
+				sheet.setColumnWidth(currentColumnIndex, leftColumn.excelColumnWidth)
 				headerCell.setCellStyle(cellStyleMap(Header))
 
 				// Nothing in secondary value row
@@ -214,7 +213,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
 						val categoryCell = categoryRow.createCell(currentColumnIndex)
 						categoryCell.setCellValue(hasCategory.category)
-						sheet.autoSizeColumn(currentColumnIndex)
+						sheet.setColumnWidth(currentColumnIndex, hasCategory.excelColumnWidth)
 						categoryRowMaxCellWidth = Math.max(categoryRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 						categoryCell.setCellStyle(cellStyleMap(HeaderRotated))
 
@@ -230,7 +229,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 				// Header row
 				val headerCell = headerRow.createCell(currentColumnIndex)
 				headerCell.setCellValue(rightColumn.title)
-				sheet.autoSizeColumn(currentColumnIndex)
+				sheet.setColumnWidth(currentColumnIndex, rightColumn.excelColumnWidth)
 				headerRowMaxCellWidth = Math.max(headerRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
 
 				if (rightColumn.boldTitle)

@@ -58,7 +58,7 @@ class UpstreamRouteRule extends GeneratedId {
 
 }
 
-class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
+case class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
 	private val cache = mutable.Map[(Route, Level), Seq[UpstreamRouteRule]]()
 
 	def apply(route: Route, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
