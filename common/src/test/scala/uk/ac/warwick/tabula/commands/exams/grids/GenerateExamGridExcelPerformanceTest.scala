@@ -28,7 +28,7 @@ import scala.util.Random
   *
   * If you run into performance problems the first thing to do is to run this test through the IDEA Profiler.
   *
-  * Oh and do look too hard at the ridiculous fixture setup because it's a mess.
+  * Oh and don't look too hard at the ridiculous fixture setup because it's a mess.
   *
   * @see https://warwick.slack.com/archives/C025ZSENB/p1552059325058100
   */
