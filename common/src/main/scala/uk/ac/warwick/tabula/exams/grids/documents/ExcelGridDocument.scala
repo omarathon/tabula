@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.StatusAdapter
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{ModuleExamGridColumn, ModuleReportsColumn}
-import uk.ac.warwick.tabula.exams.grids.columns.studentidentification.NameColumnOption
 import uk.ac.warwick.tabula.exams.grids.data.{GeneratesExamGridData, GridData}
 import uk.ac.warwick.tabula.exams.grids.documents.ExamGridDocument._
 import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent}
