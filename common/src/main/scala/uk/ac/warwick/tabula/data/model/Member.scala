@@ -190,6 +190,8 @@ abstract class Member
 
 	def isStaff: Boolean = userType == MemberUserType.Staff
 	def isStudent: Boolean = userType == MemberUserType.Student
+	def isPgr: Boolean = groupName.startsWith("Postgraduate (research)")
+	def isPgt: Boolean = groupName.startsWith("Postgraduate (taught)")
 	def isRelationshipAgent(relationshipType: StudentRelationshipType): Boolean = {
 		relationshipService.listCurrentStudentRelationshipsWithMember(relationshipType, this).nonEmpty
 	}
