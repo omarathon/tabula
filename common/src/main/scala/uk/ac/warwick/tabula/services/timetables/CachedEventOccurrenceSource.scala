@@ -40,7 +40,7 @@ trait CachedEventOccurrenceSourceComponent { self: CacheStrategyComponent =>
 		}
 
 		private val cache = Caches.builderWithDataInitialisation(cacheName, factory, cacheStrategy)
-  		.expireAfterWrite(ttl.toJava)
+			.expireAfterWrite(ttl.toJava)
 			.build
 
 		override def occurrencesFor(
