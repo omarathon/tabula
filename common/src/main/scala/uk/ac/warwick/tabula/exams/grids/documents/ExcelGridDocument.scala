@@ -110,27 +110,6 @@ class ExcelGridDocument extends ExamGridDocument
 
 		val workbook = benchmarkTask("Build workbook") {
 			if (gridOptionsCommand.showFullLayout) benchmarkTask("Generate full layout workbook") {
-				logger.info("Entities")
-				entities.foreach { e => logger.info(e.toString) }
-
-				logger.info("State")
-				val c = new NameColumnOption
-				val state = studentInformationColumns.head.asInstanceOf[c.FirstNameColumn].state
-
-				logger.info("Overcat subsets")
-				state.overcatSubsets.foreach { case (entityYear, subsets) =>
-					logger.info(s"${entityYear.studentCourseYearDetails.get.studentCourseDetails.student.universityId} -> $subsets")
-				}
-
-				logger.info("Chosen year columns")
-				chosenYearColumnValues.foreach { case (col, m) =>
-					logger.info(col.getClass.getName)
-					logger.info(m.map { case (ent, value) => ent.universityId -> value }.toString)
-				}
-
-				logger.info("Per year columns")
-				logger.info(perYearColumnValues.toString)
-
 				GenerateExamGridExporter(
 					department = department,
 					academicYear = academicYear,
