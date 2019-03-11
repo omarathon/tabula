@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.io.{ByteArrayOutputStream, FileOutputStream}
+import java.io.ByteArrayOutputStream
 
 import org.apache.poi.ss.usermodel.Workbook
 import org.joda.time.DateTime
@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalLoadLookup, UpstreamRouteRuleService}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleRegistrationService}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.util.core.StopWatch
 
 import scala.util.Random
 
@@ -290,8 +289,7 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
   @Test
-  def fullGridPerformanceMergedCells(): Unit = Command.timed { sw =>
-    sw.start("Generate workbook")
+  def fullGridPerformanceMergedCells(): Unit = {
     val workbook: Workbook = GenerateExamGridExporter(
       department = department,
       academicYear = academicYear,
@@ -309,27 +307,27 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       mergedCells = true,
       status = status
     )
-    sw.stop()
     workbook should not be null
 
-    sw.start("Write workbook to ByteArrayOutputStream")
+    Command.timed { sw =>
+      sw.start("Write workbook to ByteArrayOutputStream")
 
-    val out = new ByteArrayOutputStream
-    workbook.write(out)
-    out.close()
+      val out = new ByteArrayOutputStream
+      workbook.write(out)
+      out.close()
 
-    sw.stop()
+      sw.stop()
 
-    if (sw.getTotalTimeMillis > 20000)
-      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+      if (sw.getTotalTimeMillis > 20000)
+        fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+    }
   }
 
   /**
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
   @Test
-  def fullGridPerformanceUnmerged(): Unit = Command.timed { sw =>
-    sw.start("Generate workbook")
+  def fullGridPerformanceUnmerged(): Unit = {
     val workbook: Workbook = GenerateExamGridExporter(
       department = department,
       academicYear = academicYear,
@@ -347,23 +345,23 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       mergedCells = false,
       status = status
     )
-    sw.stop()
     workbook should not be null
 
-    sw.start("Write workbook to ByteArrayOutputStream")
+    Command.timed { sw =>
+      sw.start("Write workbook to ByteArrayOutputStream")
 
-    val out = new ByteArrayOutputStream
-    workbook.write(out)
-    out.close()
+      val out = new ByteArrayOutputStream
+      workbook.write(out)
+      out.close()
 
-    sw.stop()
+      sw.stop()
 
-    if (sw.getTotalTimeMillis > 20000)
-      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+      if (sw.getTotalTimeMillis > 20000)
+        fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+    }
   }
 
-  private[this] abstract class ShortGridFixture(sw: StopWatch) {
-    sw.start("Generate short grid extra information")
+  private[this] trait ShortGridFixture {
     val perYearModuleMarkColumns: Map[YearOfStudy, Seq[ModuleExamGridColumn]] =
       perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleExamGridColumn => marks } }
 
@@ -385,15 +383,13 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
           year -> (hasValue ++ padding)
         }
       }).toMap
-    sw.stop()
   }
 
   /**
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
   @Test
-  def shortGridPerformanceMergedCells(): Unit = Command.timed { sw => new ShortGridFixture(sw) {
-    sw.start("Generate workbook")
+  def shortGridPerformanceMergedCells(): Unit = new ShortGridFixture {
     val workbook: Workbook = GenerateExamGridShortFormExporter(
       department = department,
       academicYear = academicYear,
@@ -415,27 +411,27 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       mergedCells = true,
       status = status
     )
-    sw.stop()
     workbook should not be null
 
-    sw.start("Write workbook to ByteArrayOutputStream")
+    Command.timed { sw =>
+      sw.start("Write workbook to ByteArrayOutputStream")
 
-    val out = new ByteArrayOutputStream
-    workbook.write(out)
-    out.close()
+      val out = new ByteArrayOutputStream
+      workbook.write(out)
+      out.close()
 
-    sw.stop()
+      sw.stop()
 
-    if (sw.getTotalTimeMillis > 20000)
-      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
-  }}
+      if (sw.getTotalTimeMillis > 20000)
+        fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+    }
+  }
 
   /**
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
   @Test
-  def shortGridPerformanceUnmerged(): Unit = Command.timed { sw => new ShortGridFixture(sw) {
-    sw.start("Generate workbook")
+  def shortGridPerformanceUnmerged(): Unit = new ShortGridFixture {
     val workbook: Workbook = GenerateExamGridShortFormExporter(
       department = department,
       academicYear = academicYear,
@@ -457,19 +453,20 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       mergedCells = false,
       status = status
     )
-    sw.stop()
     workbook should not be null
 
-    sw.start("Write workbook to ByteArrayOutputStream")
+    Command.timed { sw =>
+      sw.start("Write workbook to ByteArrayOutputStream")
 
-    val out = new ByteArrayOutputStream
-    workbook.write(out)
-    out.close()
+      val out = new ByteArrayOutputStream
+      workbook.write(out)
+      out.close()
 
-    sw.stop()
+      sw.stop()
 
-    if (sw.getTotalTimeMillis > 20000)
-      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
-  }}
+      if (sw.getTotalTimeMillis > 20000)
+        fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+    }
+  }
 
 }
