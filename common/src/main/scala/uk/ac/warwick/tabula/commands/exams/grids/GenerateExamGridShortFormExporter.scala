@@ -150,10 +150,6 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
                   val headerCell = header.createCell(currentColumnIndex)
                   val title = s"${column.title} - ${column.secondaryValue} ${column.categoryShortForm}"
                   headerCell.setCellValue(title)
-                  sheet.autoSizeColumn(currentColumnIndex)
-
-                  entityHeaderRowMaxCellWidth = Math.max(entityHeaderRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
-                  headerCell.setCellStyle(cellStyleMap(Rotated))
 
                   if (showComponentMarks) {
                     val overallCell = valueRows(ExamGridColumnValueType.Overall).createCell(currentColumnIndex)
@@ -179,6 +175,13 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
               }
             })
           })
+
+          sheet.autoSizeColumn(currentColumnIndex)
+          entityHeaderRowMaxCellWidth = Math.max(entityHeaderRowMaxCellWidth, sheet.getColumnWidth(currentColumnIndex))
+
+          entityRows.values.map { case (r, _) => r }.foreach { row =>
+            Option(row.getCell(currentColumnIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL)).foreach(_.setCellStyle(cellStyleMap(Rotated)))
+          }
 
           // and finally ..
           perYearModuleMarkColumns(year).headOption.foreach(c => sheet.setColumnWidth(currentColumnIndex, c.excelColumnWidth))
