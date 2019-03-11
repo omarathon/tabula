@@ -56,7 +56,7 @@ abstract class Best90MA2CATSColumnOption(isResultRequired: Boolean = false, colu
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def result: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			//add logic to display best 90 cats for each ExamGridEntity
 			if (state.department.rootDepartment.code == "ma") {
 				state.entities.map { entity =>

@@ -43,8 +43,8 @@ class MarksRecordDocument extends ExamGridDocument
 		val document = ExamGridMarksRecordExporter(
 			entities,
 			progressionService,
-			new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-			new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+			NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
+			UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 			isConfidential = isConfidential,
 			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
 			selectCourseCommand.isLevelGrid

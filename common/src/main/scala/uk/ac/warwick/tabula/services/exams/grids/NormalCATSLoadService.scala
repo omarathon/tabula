@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringNormalCATSLoadDaoComponent, NormalCA
 
 import scala.collection.mutable
 
-class NormalLoadLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, normalCATSLoadService: NormalCATSLoadService) {
+case class NormalLoadLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy, normalCATSLoadService: NormalCATSLoadService) {
 	private val cache = mutable.Map[Route, Option[BigDecimal]]()
 	def withoutDefault(route: Route): Option[BigDecimal] = cache.get(route) match {
 		case Some(option) =>

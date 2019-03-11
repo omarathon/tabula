@@ -29,6 +29,7 @@ object ExamGridColumnValueType {
 
 sealed trait ExamGridColumnValue {
 	protected def getValueStringForRender: String
+	override def toString: String = s"${getClass.getSimpleName}($getValueStringForRender)"
 	protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit
 	val isActual: Boolean
 	def toHTML: String

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services.jobs
 import uk.ac.warwick.tabula.jobs.TestingJob
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{EarlyRequestInfoImpl, Mockito, TestBase}
 
 // scalastyle:off magic.number
 class JobServiceTest extends TestBase with Mockito {
@@ -32,7 +32,7 @@ class JobServiceTest extends TestBase with Mockito {
 
 		jobDao.findOutstandingInstances(10) returns Seq(inst)
 
-		service.run()
+		service.run()(new EarlyRequestInfoImpl)
 		jobDao.listRunningJobs returns Seq(inst)
 
 		verify(jobDao, atLeast(1)).update(inst)
@@ -93,7 +93,7 @@ class JobServiceTest extends TestBase with Mockito {
 		jobDao.listRunningJobs returns Nil
 		jobDao.findOutstandingInstances(10) returns runningJobInstances
 
-		service.run()
+		service.run()(new EarlyRequestInfoImpl)
 
 		// Above jobs now running (they'll actually finish in the test, but the mocked DAO will return them as running)
 		runningJobInstances.foreach(job => job.started should be {true})
@@ -110,7 +110,7 @@ class JobServiceTest extends TestBase with Mockito {
 		jobDao.listRunningJobs returns runningJobInstances
 		jobDao.findOutstandingInstances(5) returns outstandingJobInstances
 
-		service.run()
+		service.run()(new EarlyRequestInfoImpl)
 
 		verify(jobDao, times(1)).findOutstandingInstances(10) // Looks for 10 the first time
 		verify(jobDao, times(1)).findOutstandingInstances(5) // Looks for 5 the second time (10 less 5 running)
@@ -133,7 +133,7 @@ class JobServiceTest extends TestBase with Mockito {
 		jobDao.listRunningJobs returns Nil
 		jobDao.findOutstandingInstances(10) returns runningJobInstances
 
-		service.run()
+		service.run()(new EarlyRequestInfoImpl)
 
 		// Above jobs now running (they'll actually finish in the test, but the mocked DAO will return them as running)
 		runningJobInstances.foreach(job => job.started should be {true})
@@ -146,7 +146,7 @@ class JobServiceTest extends TestBase with Mockito {
 		jobDao.listRunningJobs returns runningJobInstances
 		jobDao.findOutstandingInstances(9) returns outstandingJobInstances
 
-		service.run()
+		service.run()(new EarlyRequestInfoImpl)
 
 		verify(jobDao, times(1)).findOutstandingInstances(10) // Looks for 10 the first time
 		verify(jobDao, times(1)).findOutstandingInstances(9) // Looks for 9 the second time (10 less 1 running)
