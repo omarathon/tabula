@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.commands.exams.grids
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, FileOutputStream}
 
 import org.apache.poi.ss.usermodel.Workbook
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.grids.columns.cats._
@@ -16,6 +17,7 @@ import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalLoadLookup, UpstreamRouteRuleService}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleRegistrationService}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.util.core.StopWatch
 
 import scala.util.Random
 
@@ -282,14 +284,14 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
     perYearColumns(1).map { column => column -> column.values }.toMap
 
   val showComponentMarks: Boolean = true
-  val mergedCells: Boolean = true
   val status: StatusAdapter = NullStatusAdapter
 
   /**
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
-  @Test(timeout = 10000)
-  def fullGridPerformance(): Unit = {
+  @Test
+  def fullGridPerformanceMergedCells(): Unit = Command.timed { sw =>
+    sw.start("Generate workbook")
     val workbook: Workbook = GenerateExamGridExporter(
       department = department,
       academicYear = academicYear,
@@ -304,43 +306,78 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       chosenYearColumnValues = chosenYearColumnValues,
       perYearColumnValues = perYearColumnValues,
       showComponentMarks = showComponentMarks,
-      mergedCells = mergedCells,
+      mergedCells = true,
       status = status
     )
+    sw.stop()
     workbook should not be null
 
-    Command.timed { sw =>
-      sw.start("Write workbook to ByteArrayOutputStream")
+    sw.start("Write workbook to ByteArrayOutputStream")
 
-      val out = new ByteArrayOutputStream
-      workbook.write(out)
-      out.close()
+    val out = new ByteArrayOutputStream
+    workbook.write(out)
+    out.close()
 
-      sw.stop()
+    sw.stop()
 
-      println(sw.prettyPrint())
-    }
+    if (sw.getTotalTimeMillis > 20000)
+      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
   }
 
   /**
     * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
     */
-  @Test(timeout = 10000)
-  def shortGridPerformance(): Unit = {
-    val perYearModuleMarkColumns =
+  @Test
+  def fullGridPerformanceUnmerged(): Unit = Command.timed { sw =>
+    sw.start("Generate workbook")
+    val workbook: Workbook = GenerateExamGridExporter(
+      department = department,
+      academicYear = academicYear,
+      courses = courses,
+      routes = routes,
+      yearOfStudy = yearOfStudy,
+      normalLoadLookup = normalLoadLookup,
+      entities = entities,
+      leftColumns = leftColumns,
+      perYearColumns = perYearColumns,
+      rightColumns = rightColumns,
+      chosenYearColumnValues = chosenYearColumnValues,
+      perYearColumnValues = perYearColumnValues,
+      showComponentMarks = showComponentMarks,
+      mergedCells = false,
+      status = status
+    )
+    sw.stop()
+    workbook should not be null
+
+    sw.start("Write workbook to ByteArrayOutputStream")
+
+    val out = new ByteArrayOutputStream
+    workbook.write(out)
+    out.close()
+
+    sw.stop()
+
+    if (sw.getTotalTimeMillis > 20000)
+      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+  }
+
+  private[this] abstract class ShortGridFixture(sw: StopWatch) {
+    sw.start("Generate short grid extra information")
+    val perYearModuleMarkColumns: Map[YearOfStudy, Seq[ModuleExamGridColumn]] =
       perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleExamGridColumn => marks } }
 
-    val perYearModuleReportColumns =
+    val perYearModuleReportColumns: Map[YearOfStudy, Seq[ModuleReportsColumn]] =
       perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleReportsColumn => marks } }
 
-    val maxYearColumnSize =
+    val maxYearColumnSize: Map[YearOfStudy, YearOfStudy] =
       perYearModuleMarkColumns.map { case (year, columns) =>
         val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
         year -> maxModuleColumns
       }
 
     // for each entity have a list of all modules with marks and padding at the end for empty cells
-    val moduleColumnsPerEntity =
+    val moduleColumnsPerEntity: Map[ExamGridEntity, Map[YearOfStudy, Seq[Option[ModuleExamGridColumn]]]] =
       entities.map(entity => {
         entity -> perYearModuleMarkColumns.map { case (year, mods) =>
           val hasValue: Seq[Option[ModuleExamGridColumn]] = mods.filter(m => !m.isEmpty(entity, year)).map(Some.apply)
@@ -348,7 +385,15 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
           year -> (hasValue ++ padding)
         }
       }).toMap
+    sw.stop()
+  }
 
+  /**
+    * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
+    */
+  @Test
+  def shortGridPerformanceMergedCells(): Unit = Command.timed { sw => new ShortGridFixture(sw) {
+    sw.start("Generate workbook")
     val workbook: Workbook = GenerateExamGridShortFormExporter(
       department = department,
       academicYear = academicYear,
@@ -367,22 +412,64 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
       perYearModuleReportColumns = perYearModuleReportColumns,
       maxYearColumnSize,
       showComponentMarks = showComponentMarks,
-      mergedCells = mergedCells,
+      mergedCells = true,
       status = status
     )
+    sw.stop()
     workbook should not be null
 
-    Command.timed { sw =>
-      sw.start("Write workbook to ByteArrayOutputStream")
+    sw.start("Write workbook to ByteArrayOutputStream")
 
-      val out = new ByteArrayOutputStream
-      workbook.write(out)
-      out.close()
+    val out = new ByteArrayOutputStream
+    workbook.write(out)
+    out.close()
 
-      sw.stop()
+    sw.stop()
 
-      println(sw.prettyPrint())
-    }
-  }
+    if (sw.getTotalTimeMillis > 20000)
+      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+  }}
+
+  /**
+    * HALT! Are you thinking of reducing the timeout or perhaps @Ignore-ing this test? Read the Javadoc on the class.
+    */
+  @Test
+  def shortGridPerformanceUnmerged(): Unit = Command.timed { sw => new ShortGridFixture(sw) {
+    sw.start("Generate workbook")
+    val workbook: Workbook = GenerateExamGridShortFormExporter(
+      department = department,
+      academicYear = academicYear,
+      courses = courses,
+      routes = routes,
+      yearOfStudy = yearOfStudy,
+      normalLoadLookup = normalLoadLookup,
+      entities = entities,
+      leftColumns = leftColumns,
+      perYearColumns = perYearColumns,
+      rightColumns = rightColumns,
+      chosenYearColumnValues = chosenYearColumnValues,
+      perYearColumnValues = perYearColumnValues,
+      moduleColumnsPerEntity = moduleColumnsPerEntity,
+      perYearModuleMarkColumns = perYearModuleMarkColumns,
+      perYearModuleReportColumns = perYearModuleReportColumns,
+      maxYearColumnSize,
+      showComponentMarks = showComponentMarks,
+      mergedCells = false,
+      status = status
+    )
+    sw.stop()
+    workbook should not be null
+
+    sw.start("Write workbook to ByteArrayOutputStream")
+
+    val out = new ByteArrayOutputStream
+    workbook.write(out)
+    out.close()
+
+    sw.stop()
+
+    if (sw.getTotalTimeMillis > 20000)
+      fail(s"Grid generation took too long! ${sw.prettyPrint()}")
+  }}
 
 }
