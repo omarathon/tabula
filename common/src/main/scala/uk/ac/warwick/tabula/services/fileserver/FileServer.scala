@@ -3,7 +3,10 @@ package uk.ac.warwick.tabula.services.fileserver
 import java.util.{BitSet => JBitSet}
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-import org.apache.tika.mime.MediaType
+import org.apache.tika.detect.DefaultDetector
+import org.apache.tika.io.{IOUtils, TikaInputStream}
+import org.apache.tika.metadata.{HttpHeaders, Metadata, TikaMetadataKeys}
+import org.apache.tika.mime.{MediaType, MimeTypes}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import org.springframework.util.FileCopyUtils
@@ -65,14 +68,39 @@ private[fileserver] object FileServer {
 trait StreamsFiles {
   self: FeaturesComponent =>
 
-  def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-    val inStream = file.inputStream
+  /**
+    * Uses the magic bytes at the start of the file first, then the filename, then the supplied content type.
+    */
+  private val mimeTypeDetector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
 
-    out.setHeader("Content-Type", file.contentType)
+  def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+    val mimeType: MediaType = file.contentType match {
+      case "application/octet-stream" =>
+        // We store files in the object store as application/octet-stream but we can just infer from the filename
+        Option(file.inputStream).map { inputStream =>
+          val is = TikaInputStream.get(inputStream)
+          try {
+            val metadata = new Metadata
+            metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, file.filename)
+            metadata.set(HttpHeaders.CONTENT_TYPE, file.contentType)
+
+            mimeTypeDetector.detect(is, metadata)
+          } finally {
+            IOUtils.closeQuietly(is)
+
+            // If we've detected a mime type, add XCTO so it's used
+            out.setHeader("X-Content-Type-Options", "nosniff")
+          }
+        }.getOrElse(MediaType.parse(file.contentType))
+
+      case _ => MediaType.parse(file.contentType)
+    }
+
+    out.setHeader("Content-Type", mimeType.toString)
 
     file.suggestedFilename.foreach { filename =>
       val builder = new StringBuilder
-      builder.append(if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
+      builder.append(if (FileServer.isServeInline(mimeType)) "inline" else "attachment")
       builder.append("; ")
       HttpHeaderParameterEncoding.encodeToBuilder("filename", filename, builder)
       out.setHeader("Content-Disposition", builder.toString)
@@ -85,7 +113,7 @@ trait StreamsFiles {
 
     if (request.getMethod.toUpperCase != "HEAD") {
       file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
-      Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
+      Option(file.inputStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
     } else {
       file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
     }
