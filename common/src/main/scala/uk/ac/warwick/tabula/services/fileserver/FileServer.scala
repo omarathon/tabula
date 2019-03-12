@@ -23,8 +23,14 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
      * is to put it as the last part of the URL path.
      */
     val dispositionHeader = fileName match {
-      case Some(name) => "attachment;filename=\"" + name + "\""
-      case _ => "attachment"
+      case Some(name) =>
+        val builder = new StringBuilder
+        builder.append(if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
+        builder.append("; ")
+        HttpHeaderParameterEncoding.encodeToBuilder("filename", name, builder)
+        builder.toString
+
+      case _ => if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment"
     }
 
     out.addHeader("Content-Disposition", dispositionHeader)
@@ -33,40 +39,7 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
   }
 }
 
-/**
-  * Sets up the appropriate response headers and streams a renderable file
-  *
-  * We don't support using the content disposition header here as it's an unreliable way of setting the filename
-  */
-trait StreamsFiles {
-  self: FeaturesComponent =>
-
-  def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-    val inStream = file.inputStream
-
-    out.setHeader("Content-Type", file.contentType)
-
-    file.suggestedFilename.foreach { filename =>
-      val builder = new StringBuilder
-      builder.append(if (isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
-      builder.append("; ")
-      encodeToBuilder("filename", filename, builder)
-      out.setHeader("Content-Disposition", builder.toString)
-    }
-
-    // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work
-    out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'")
-
-    handleCaching(file, request, out)
-
-    if (request.getMethod.toUpperCase != "HEAD") {
-      file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
-      Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
-    } else {
-      file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
-    }
-  }
-
+private[fileserver] object FileServer {
   private lazy val serveInlineMimeTypes: Set[MediaType] = Set(
     "text/plain",
     "application/pdf",
@@ -87,10 +60,45 @@ trait StreamsFiles {
     "message/rfc822"
   ).map(MediaType.parse)
 
-  private def isServeInline(mediaType: MediaType): Boolean =
+  def isServeInline(mediaType: MediaType): Boolean =
     serveInlineMimeTypes.exists { serveInline =>
       serveInline == mediaType || (serveInline.getSubtype == "*" && serveInline.getType == mediaType.getType)
     }
+}
+
+/**
+  * Sets up the appropriate response headers and streams a renderable file
+  *
+  * We don't support using the content disposition header here as it's an unreliable way of setting the filename
+  */
+trait StreamsFiles {
+  self: FeaturesComponent =>
+
+  def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+    val inStream = file.inputStream
+
+    out.setHeader("Content-Type", file.contentType)
+
+    file.suggestedFilename.foreach { filename =>
+      val builder = new StringBuilder
+      builder.append(if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
+      builder.append("; ")
+      HttpHeaderParameterEncoding.encodeToBuilder("filename", filename, builder)
+      out.setHeader("Content-Disposition", builder.toString)
+    }
+
+    // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work
+    out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'")
+
+    handleCaching(file, request, out)
+
+    if (request.getMethod.toUpperCase != "HEAD") {
+      file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
+      Option(inStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
+    } else {
+      file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
+    }
+  }
 
   // Very simplistic cache headers - needs turbocharging with TAB-929
   private def handleCaching(file: RenderableFile, request: HttpServletRequest, out: HttpServletResponse) {
@@ -99,7 +107,14 @@ trait StreamsFiles {
       out.setDateHeader("Expires", (DateTime.now plus expires).getMillis)
     }
   }
+}
 
+/**
+  * Grokked from play.core.utils.HttpHeaderParameterEncoding
+  *
+  * Support for rending HTTP header parameters according to RFC5987.
+  */
+private[fileserver] object HttpHeaderParameterEncoding {
   private def charSeqToBitSet(chars: Seq[Char]): JBitSet = {
     val ints: Seq[Int] = chars.map(_.toInt)
     val max = ints.fold(0)(Math.max)
@@ -152,8 +167,6 @@ trait StreamsFiles {
   private val PlaceholderChar: Char = '?'
 
   /**
-    * Grokked from play.core.utils.HttpHeaderParameterEncoding
-    *
     * Render a parameter name and value, handling character set issues as
     * recommended in RFC5987.
     *
@@ -163,7 +176,7 @@ trait StreamsFiles {
     * render("filename", "naïve.txt") ==> "filename=na_ve.txt; filename*=utf8''na%C3%AFve.txt"
     * ]]
     */
-  private def encodeToBuilder(name: String, value: String, builder: StringBuilder): Unit = {
+  def encodeToBuilder(name: String, value: String, builder: StringBuilder): Unit = {
     // This flag gets set if we encounter extended characters when rendering the
     // regular parameter value.
     var hasExtendedChars = false
