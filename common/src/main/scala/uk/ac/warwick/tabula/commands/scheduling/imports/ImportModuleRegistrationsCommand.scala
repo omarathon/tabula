@@ -4,10 +4,9 @@ import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, PropertyAccessorFactory}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.ModuleRegistrationDao
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -60,6 +59,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 			val hasChanged = copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
 				copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+				copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
 				copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
 				copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
 
@@ -99,10 +99,9 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		}
 	}
 
-	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {
-		val property = "selectionStatus"
+	private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
 		val oldValue = destinationBean.getPropertyValue(property)
-		val newValue = ModuleSelectionStatus.fromCode(selectionStatusCode)
+		val newValue = fn(code)
 
 		logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
 
@@ -115,6 +114,12 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		}
 		else false
 	}
+
+	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean =
+		copyCustomProperty("selectionStatus", destinationBean, selectionStatusCode, ModuleSelectionStatus.fromCode)
+
+	def copyModuleResult(destinationBean: BeanWrapper, moduleResultCode: String): Boolean =
+		copyCustomProperty("moduleResult", destinationBean, moduleResultCode, ModuleResult.fromCode)
 
 	private val properties = Set(
 		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"

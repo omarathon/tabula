@@ -48,31 +48,42 @@
 					<@fmt.module_name moduleRegistration.module />
 					<span class="mod-reg-summary">
 						<#if showModuleResults>
-							<span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!}</span>
-							<span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span>
 							<span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
+							<span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
+							<#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
+							<#if moduleRegistration.passedCats??>
+								<span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+							</#if>
 						</#if>
 					</span>
 				</h3>
-				<div class="striped-section-contents">
-					<div class="row item-info">
+				<div class="striped-section-contents ">
+					<div class="item-info row">
 						<div class="col-md-4">
 							<h4><@fmt.module_name moduleRegistration.module false /></h4>
 						</div>
-						<div class="col-md-8">
-							<strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
+						<div class="col-md-4">
 							<strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
 							<strong>Occurrence:</strong> ${(moduleRegistration.occurrence)!} <br />
-							<#if showModuleResults>
-								<strong>Mark:</strong> ${(moduleRegistration.agreedMark)!} <br />
-								<strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!} <br />
-							</#if>
 							<strong>Status:</strong>
 							<#if moduleRegistration.selectionStatus??>
 								${(moduleRegistration.selectionStatus.description)!}
 							<#else>
 								-
 							</#if> <br />
+							<strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
+						</div>
+						<div class="col-md-4">
+							<#if showModuleResults>
+								<strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
+								<strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
+								<strong>Passed CATS:</strong>
+								<#if moduleRegistration.passedCats??>
+									<#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if>
+								<#else>
+									-
+								</#if><br />
+							</#if>
 						</div>
 					</div>
 				</div>

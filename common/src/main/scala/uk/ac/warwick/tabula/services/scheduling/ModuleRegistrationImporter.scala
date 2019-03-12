@@ -140,7 +140,8 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
 				actualGrade = grade,
 				agreedMark = Some(new JBigDecimal(mark)),
 				agreedGrade = grade,
-				markScheme = markScheme
+				markScheme = markScheme,
+				moduleResult = if (mark < 40) "F" else "P"
 			)
 		}).toSeq
 
@@ -166,7 +167,8 @@ object ModuleRegistrationImporter {
 			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
 			smr_agrg, -- agreed overall module grade
-	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
+			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+			smr_rslt  -- result of module
 				from $sitsSchema.ins_stu stu -- student
 					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
@@ -193,7 +195,8 @@ object ModuleRegistrationImporter {
 			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
 			smr_agrg, -- agreed overall module grade
-	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
+			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+			smr_rslt  -- result of module
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
@@ -226,7 +229,8 @@ object ModuleRegistrationImporter {
 			resultSet.getString("smr_actg"),
 			Option(resultSet.getBigDecimal("smr_agrm")),
 			resultSet.getString("smr_agrg"),
-			resultSet.getString("smr_mksc")
+			resultSet.getString("smr_mksc"),
+			resultSet.getString("smr_rslt"),
 		)
 	}
 
@@ -259,6 +263,7 @@ class ModuleRegistrationRow(
 	var agreedMark: Option[JBigDecimal],
 	var agreedGrade: String,
 	var passFail: Boolean,
+	var moduleResult: String,
 ) {
 
 	def this(
@@ -273,9 +278,10 @@ class ModuleRegistrationRow(
 		actualGrade: String,
 		agreedMark: Option[JBigDecimal],
 		agreedGrade: String,
-		markScheme: String
+		markScheme: String,
+		moduleResult: String
 	) {
-		this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme))
+		this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult)
 	}
 
 	override def toString: String =
