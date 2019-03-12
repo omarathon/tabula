@@ -124,7 +124,7 @@ class FileServerTest extends TestBase with Mockito {
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
 		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getHeader("Content-Disposition") should be ("inline") // zips are inline
 		res.getContentAsByteArray().length should be (0)
 	}
 
@@ -138,6 +138,7 @@ class FileServerTest extends TestBase with Mockito {
 		val file = mock[RenderableFile]
 		file.cachePolicy returns (CachePolicy(expires = Some(period)))
 		file.contentLength returns None
+		file.contentType returns "application/octet-stream"
 		file.suggestedFilename returns None
 
 		withFakeTime(time) {

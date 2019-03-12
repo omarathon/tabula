@@ -25,7 +25,7 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
     if (fileName.isEmpty) {
       out.setHeader("Content-Disposition", if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
     }
-    
+
     stream(file)
   }
 }
