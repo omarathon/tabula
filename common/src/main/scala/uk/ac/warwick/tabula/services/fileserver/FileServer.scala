@@ -14,23 +14,11 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 @Service
 class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
-
   /**
     * Serves a RenderableFile out to an HTTP response.
     */
-  def serve(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-    /*
-     * There's no consistent standard for encoding in the optional
-     * "filename" attribute of Content-Disposition, so you should stick
-     * to the only reliable method of specifying the filename which
-     * is to put it as the last part of the URL path.
-     */
-    if (fileName.isEmpty) {
-      out.setHeader("Content-Disposition", if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
-    }
-
-    stream(file)
-  }
+  def serve(file: RenderableFile, fileName: String)(implicit request: HttpServletRequest, out: HttpServletResponse): Unit =
+    stream(file, Some(fileName))
 }
 
 private[fileserver] object FileServer {
@@ -73,7 +61,7 @@ trait StreamsFiles {
     */
   private val mimeTypeDetector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
 
-  def stream(file: RenderableFile)(implicit request: HttpServletRequest, out: HttpServletResponse) {
+  def stream(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse) {
     val mimeType: MediaType = file.contentType match {
       case "application/octet-stream" =>
         // We store files in the object store as application/octet-stream but we can just infer from the filename
@@ -98,13 +86,15 @@ trait StreamsFiles {
 
     out.setHeader("Content-Type", mimeType.toString)
 
-    file.suggestedFilename.foreach { filename =>
-      val builder = new StringBuilder
-      builder.append(if (FileServer.isServeInline(mimeType)) "inline" else "attachment")
+    val builder = new StringBuilder
+    builder.append(if (FileServer.isServeInline(mimeType)) "inline" else "attachment")
+
+    file.suggestedFilename.orElse(fileName).foreach { filename =>
       builder.append("; ")
       HttpHeaderParameterEncoding.encodeToBuilder("filename", filename, builder)
-      out.setHeader("Content-Disposition", builder.toString)
     }
+
+    out.setHeader("Content-Disposition", builder.toString)
 
     // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work
     out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'")
