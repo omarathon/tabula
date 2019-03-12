@@ -22,19 +22,10 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
      * to the only reliable method of specifying the filename which
      * is to put it as the last part of the URL path.
      */
-    val dispositionHeader = fileName match {
-      case Some(name) =>
-        val builder = new StringBuilder
-        builder.append(if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
-        builder.append("; ")
-        HttpHeaderParameterEncoding.encodeToBuilder("filename", name, builder)
-        builder.toString
-
-      case _ => if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment"
+    if (fileName.isEmpty) {
+      out.setHeader("Content-Disposition", if (FileServer.isServeInline(MediaType.parse(file.contentType))) "inline" else "attachment")
     }
-
-    out.addHeader("Content-Disposition", dispositionHeader)
-
+    
     stream(file)
   }
 }
