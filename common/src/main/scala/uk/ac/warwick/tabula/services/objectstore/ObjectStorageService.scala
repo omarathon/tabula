@@ -104,7 +104,7 @@ trait ObjectStorageService extends InitializingBean {
 
 				override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 
-				override def inputStream: InputStream = source.openStream()
+				override val byteSource: ByteSource = source
 			}
 		}
 
