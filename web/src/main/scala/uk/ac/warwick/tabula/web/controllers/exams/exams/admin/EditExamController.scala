@@ -17,51 +17,51 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/edit"))
 class EditExamController extends ExamsController {
 
-	type EditExamCommand = Appliable[Exam] with EditExamCommandState with ModifiesExamMembership with PopulateEditExamCommand
+  type EditExamCommand = Appliable[Exam] with EditExamCommandState with ModifiesExamMembership with PopulateEditExamCommand
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable exam : Exam) = EditExamCommand(mandatory(exam))
+  @ModelAttribute("command")
+  def command(
+    @PathVariable exam: Exam) = EditExamCommand(mandatory(exam))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@ModelAttribute("command") cmd: EditExamCommand): Mav = {
-		cmd.populateGroups(cmd.exam)
-		cmd.afterBind()
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm(@ModelAttribute("command") cmd: EditExamCommand): Mav = {
+    cmd.populateGroups(cmd.exam)
+    cmd.afterBind()
 
-		render(cmd)
-	}
+    render(cmd)
+  }
 
-	private def render(cmd: EditExamCommand) = {
-		Mav("exams/exams/admin/edit",
-			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
-			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> cmd.assessmentGroups,
-			"department" -> cmd.module.adminDepartment
-		).crumbs(
-			Breadcrumbs.Exams.Home(cmd.academicYear),
-			Breadcrumbs.Exams.Department(cmd.module.adminDepartment, cmd.academicYear),
-			Breadcrumbs.Exams.Module(cmd.module, cmd.academicYear)
-		)
-	}
+  private def render(cmd: EditExamCommand) = {
+    Mav("exams/exams/admin/edit",
+      "availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+      "linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+      "assessmentGroups" -> cmd.assessmentGroups,
+      "department" -> cmd.module.adminDepartment
+    ).crumbs(
+      Breadcrumbs.Exams.Home(cmd.academicYear),
+      Breadcrumbs.Exams.Department(cmd.module.adminDepartment, cmd.academicYear),
+      Breadcrumbs.Exams.Module(cmd.module, cmd.academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: EditExamCommand,
-		errors: Errors
-	): Mav = {
-			cmd.afterBind()
-			if (errors.hasErrors) {
-				render(cmd)
-			} else {
-				cmd.apply()
-				Redirect(Routes.Exams.admin.module(cmd.exam.module, cmd.exam.academicYear))
-			}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: EditExamCommand,
+    errors: Errors
+  ): Mav = {
+    cmd.afterBind()
+    if (errors.hasErrors) {
+      render(cmd)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Exams.admin.module(cmd.exam.module, cmd.exam.academicYear))
+    }
+  }
 
-	@InitBinder
-	def upstreamGroupBinder(binder: WebDataBinder) {
-		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
-	}
+  @InitBinder
+  def upstreamGroupBinder(binder: WebDataBinder) {
+    binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+  }
 }

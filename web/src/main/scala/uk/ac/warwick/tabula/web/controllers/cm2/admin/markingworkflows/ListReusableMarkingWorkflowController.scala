@@ -13,55 +13,57 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController}
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows"))
 class ListReusableMarkingWorkflowController extends CM2MarkingWorkflowController {
 
-	type ListReusableWorkflowsCommand = Appliable[Seq[CM2MarkingWorkflow]] with ListReusableWorkflowsState
+  type ListReusableWorkflowsCommand = Appliable[Seq[CM2MarkingWorkflow]] with ListReusableWorkflowsState
 
-	@ModelAttribute("listReusableWorkflowsCommand")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		ListReusableWorkflowsCommand(department, academicYear)
+  @ModelAttribute("listReusableWorkflowsCommand")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    ListReusableWorkflowsCommand(department, academicYear)
 
-	@RequestMapping
-	def showForm(
-		@ModelAttribute("listReusableWorkflowsCommand") cmd: ListReusableWorkflowsCommand,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam(value="actionErrors", required=false) actionErrors: String,
-		@RequestParam(value="copiedWorkflow", required=false) copiedWorkflow: CM2MarkingWorkflow,
-		@RequestParam(value="deletedWorkflow", required=false) deletedWorkflow: String
-	): Mav = {
-		// use the SITS rollover date so we can start adding workflows for 'next' year
-		val currentAcademicYear = AcademicYear.now()
+  @RequestMapping
+  def showForm(
+    @ModelAttribute("listReusableWorkflowsCommand") cmd: ListReusableWorkflowsCommand,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam(value = "actionErrors", required = false) actionErrors: String,
+    @RequestParam(value = "copiedWorkflow", required = false) copiedWorkflow: CM2MarkingWorkflow,
+    @RequestParam(value = "deletedWorkflow", required = false) deletedWorkflow: String
+  ): Mav = {
+    // use the SITS rollover date so we can start adding workflows for 'next' year
+    val currentAcademicYear = AcademicYear.now()
 
-		commonCrumbs(
-			Mav("cm2/admin/workflows/list_reusable", Map(
-				"department" -> department,
-				"academicYear" -> academicYear,
-				"workflows" -> cmd.apply(),
-				"currentYear" -> currentAcademicYear,
-				"isCurrentYear" -> (currentAcademicYear == academicYear),
-				"isCurrentYearOrLater" -> (academicYear >= currentAcademicYear),
-				"actionErrors" -> actionErrors,
-				"copiedWorkflow" -> copiedWorkflow,
-				"deletedWorkflow" -> deletedWorkflow
-			)),
-			department,
-			academicYear
-		)
+    commonCrumbs(
+      Mav("cm2/admin/workflows/list_reusable", Map(
+        "department" -> department,
+        "academicYear" -> academicYear,
+        "workflows" -> cmd.apply(),
+        "currentYear" -> currentAcademicYear,
+        "isCurrentYear" -> (currentAcademicYear == academicYear),
+        "isCurrentYearOrLater" -> (academicYear >= currentAcademicYear),
+        "actionErrors" -> actionErrors,
+        "copiedWorkflow" -> copiedWorkflow,
+        "deletedWorkflow" -> deletedWorkflow
+      )),
+      department,
+      academicYear
+    )
 
-	}
+  }
 
 }
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/markingworkflows", "/${cm2.prefix}/admin/department/{department}/markingworkflows/**"))
 class ListReusableMarkingWorkflowRedirectController extends BaseController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@RequestMapping
-	def redirect(@PathVariable department: Department) =
-		Redirect(Routes.admin.workflows(department, retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
+  @RequestMapping
+  def redirect(@PathVariable department: Department) =
+    Redirect(Routes.admin.workflows(department, retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
 
 }

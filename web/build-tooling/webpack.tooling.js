@@ -27,7 +27,7 @@ const lintJS = () => ({
   },
 });
 
-const transpileJS = ({ entry, include } = {}) => ({
+const transpileJS = ({entry, include} = {}) => ({
   entry,
   output: {
     chunkFilename: '[chunkhash]-[name].js',
@@ -44,7 +44,7 @@ const transpileJS = ({ entry, include } = {}) => ({
   },
 });
 
-const copyNpmDistAssets = ({ modules, dest } = {}) => {
+const copyNpmDistAssets = ({modules, dest} = {}) => {
   const pairs = modules.map(m => ({
     from: `node_modules/${m}/dist`,
     to: `${dest}/${m.split('/').slice(-1)[0]}/[1]`,
@@ -58,7 +58,7 @@ const copyNpmDistAssets = ({ modules, dest } = {}) => {
   };
 };
 
-const copyAssets = ({ src, dest, test, force = false } = {}) => ({
+const copyAssets = ({src, dest, test, force = false} = {}) => ({
   plugins: [
     new CopyWebpackPlugin([{
       from: src,
@@ -69,7 +69,7 @@ const copyAssets = ({ src, dest, test, force = false } = {}) => ({
   ],
 });
 
-const extractCSS = ({ entry, resolverPaths } = {}) => ({
+const extractCSS = ({entry, resolverPaths} = {}) => ({
   entry,
   module: {
     rules: [

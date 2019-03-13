@@ -1,35 +1,35 @@
 <#escape x as x?html>
 
-<#if features.exams>
+  <#if features.exams>
 
-	<#import "*/sits_groups.ftl" as sits_groups />
+    <#import "*/sits_groups.ftl" as sits_groups />
 
-	<h1>Create exam for <@fmt.module_name module /></h1>
+    <h1>Create exam for <@fmt.module_name module /></h1>
 
-	<#assign createExamUrl><@routes.exams.createExam module academicYear /></#assign>
+    <#assign createExamUrl><@routes.exams.createExam module academicYear /></#assign>
 
-	<@f.form id="newExamForm" method="post" action="${createExamUrl}" modelAttribute="command">
+    <@f.form id="newExamForm" method="post" action="${createExamUrl}" modelAttribute="command">
 
-		<#include "_common_fields.ftl" />
+      <#include "_common_fields.ftl" />
 
-		<div class="">
-			<input type="submit" value="Create" class="btn btn-primary">
-			<a class="btn btn-default" href="<@routes.exams.moduleHomeWithYear module=module academicYear=academicYear />">Cancel</a>
-		</div>
-	</@f.form>
+      <div class="">
+        <input type="submit" value="Create" class="btn btn-primary">
+        <a class="btn btn-default" href="<@routes.exams.moduleHomeWithYear module=module academicYear=academicYear />">Cancel</a>
+      </div>
+    </@f.form>
 
-</#if>
+  </#if>
 </#escape>
 
 <script>
-	jQuery(function ($) {
+  jQuery(function ($) {
 
-		$('#newExamForm').on('submit',function (){
-			$('.upstreamGroupsHidden').remove();
-			$('.upstreamGroups:checked').each(function(i,input) {
-				$('<input>', { 'class': 'upstreamGroupsHidden', type: 'hidden', name: 'upstreamGroups['+i+']', value:input.value }).appendTo('#sits-table');
-			});
-		});
+    $('#newExamForm').on('submit', function () {
+      $('.upstreamGroupsHidden').remove();
+      $('.upstreamGroups:checked').each(function (i, input) {
+        $('<input>', {'class': 'upstreamGroupsHidden', type: 'hidden', name: 'upstreamGroups[' + i + ']', value: input.value}).appendTo('#sits-table');
+      });
+    });
 
-	});
+  });
 </script>

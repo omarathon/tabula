@@ -4,50 +4,51 @@ import java.security.InvalidKeyException
 
 
 /**
- * Test our hand-rolled observer classes in Reactor.
- */
+  * Test our hand-rolled observer classes in Reactor.
+  */
 class ObserverTest extends TestBase {
 
-	import Reactor._
+  import Reactor._
 
-	class Service {
-		var changedState: EventSource[Boolean] = EventSource[Boolean]
-		def updateState(state:Boolean) {
-			changedState.emit(state)
-		}
-	}
+  class Service {
+    var changedState: EventSource[Boolean] = EventSource[Boolean]
 
-	class ServiceObserver(service:Service) {
-		var enabled = false
+    def updateState(state: Boolean) {
+      changedState.emit(state)
+    }
+  }
 
-		service.changedState.observe { value =>
-			enabled = value
-		}
+  class ServiceObserver(service: Service) {
+    var enabled = false
 
-	}
+    service.changedState.observe { value =>
+      enabled = value
+    }
 
-	@Test def listening {
-		val service = new Service
-		val observer = new ServiceObserver(service)
+  }
 
-		observer.enabled should be (false)
-		service updateState true
+  @Test def listening {
+    val service = new Service
+    val observer = new ServiceObserver(service)
 
-		observer.enabled should be (true)
-		service updateState false
+    observer.enabled should be(false)
+    service updateState true
 
-		observer.enabled should be (false)
+    observer.enabled should be(true)
+    service updateState false
 
-	}
+    observer.enabled should be(false)
 
-	// Exceptions thrown in observers bubble up to emit().
-	@Test(expected=classOf[InvalidKeyException])
-	def exceptions() {
-		val state = EventSource[Boolean]
-		state.observe { b =>
-			throw new InvalidKeyException()
-		}
-		state.emit(true)
-	}
+  }
+
+  // Exceptions thrown in observers bubble up to emit().
+  @Test(expected = classOf[InvalidKeyException])
+  def exceptions() {
+    val state = EventSource[Boolean]
+    state.observe { b =>
+      throw new InvalidKeyException()
+    }
+    state.emit(true)
+  }
 
 }

@@ -16,61 +16,61 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.userlookup.User
 
 /**
- * Allocates students that are in the allocation list for groups to individual groups.
- */
+  * Allocates students that are in the allocation list for groups to individual groups.
+  */
 abstract class AllocateStudentsToDepartmentalSmallGroupsController extends GroupsController {
 
-	validatesSelf[SelfValidating]
-	type AllocateStudentsToDepartmentalSmallGroupsCommand = Appliable[DepartmentSmallGroupSet] with GroupsObjects[User, DepartmentSmallGroup]
+  validatesSelf[SelfValidating]
+  type AllocateStudentsToDepartmentalSmallGroupsCommand = Appliable[DepartmentSmallGroupSet] with GroupsObjects[User, DepartmentSmallGroup]
 
-	@ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
+  @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable smallGroupSet: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsCommand =
-		AllocateStudentsToDepartmentalSmallGroupsCommand(department, smallGroupSet, user)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable smallGroupSet: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsCommand =
+    AllocateStudentsToDepartmentalSmallGroupsCommand(department, smallGroupSet, user)
 
-	@RequestMapping
-	def showForm(
-		@ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		cmd.populate()
-		cmd.sort()
-		form(cmd, department, academicYear)
-	}
+  @RequestMapping
+  def showForm(
+    @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    cmd.populate()
+    cmd.sort()
+    form(cmd, department, academicYear)
+  }
 
-	protected val renderPath: String
+  protected val renderPath: String
 
-	protected def form(cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, department: Department, academicYear: AcademicYear): Mav =
-		Mav(renderPath).crumbs(Breadcrumbs.Department(department, academicYear), Breadcrumbs.Reusable(department, academicYear))
+  protected def form(cmd: AllocateStudentsToDepartmentalSmallGroupsCommand, department: Department, academicYear: AcademicYear): Mav =
+    Mav(renderPath).crumbs(Breadcrumbs.Department(department, academicYear), Breadcrumbs.Reusable(department, academicYear))
 
-	@RequestMapping(method=Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		cmd.sort()
-		if (errors.hasErrors) {
-			form(cmd, department, academicYear)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.reusable(department, academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsCommand,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    cmd.sort()
+    if (errors.hasErrors) {
+      form(cmd, department, academicYear)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.reusable(department, academicYear))
+    }
+  }
 
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/new/{smallGroupSet}/allocate"))
+@RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/new/{smallGroupSet}/allocate"))
 class CreateDepartmentSmallGroupSetAllocateController extends AllocateStudentsToDepartmentalSmallGroupsController {
-	override protected val renderPath = "groups/admin/groups/reusable/allocateoncreate"
+  override protected val renderPath = "groups/admin/groups/reusable/allocateoncreate"
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/edit/{smallGroupSet}/allocate"))
+@RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/edit/{smallGroupSet}/allocate"))
 class EditDepartmentSmallGroupSetAllocateController extends AllocateStudentsToDepartmentalSmallGroupsController {
-	override protected val renderPath = "groups/admin/groups/reusable/allocateonedit"
+  override protected val renderPath = "groups/admin/groups/reusable/allocateonedit"
 }

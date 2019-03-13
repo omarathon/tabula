@@ -13,16 +13,16 @@ import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 @Controller
 @RequestMapping(path = Array("/exams/grids/{department}/{academicYear}/generate/documents/{jobId}/download"))
 class DownloadExamGridDocumentController extends ExamsController
-	with AutowiringJobServiceComponent with AutowiringFileDaoComponent {
-	@GetMapping
-	def download(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable jobId: String): RenderableFile =
-		jobService.getInstance(jobId)
-			.filter(_.user.apparentUser == user.apparentUser)
-			.filter(_.jobType == GenerateExamGridDocumentJob.identifier)
-			.filter(_.getString("department") == department.code)
-			.filter(_.succeeded)
-			.map(_.getString("fileId"))
-			.flatMap(fileDao.getFileById)
-			.map(file => new RenderableAttachment(file, name = Some(file.name)))
-			.getOrElse(throw new ItemNotFoundException())
+  with AutowiringJobServiceComponent with AutowiringFileDaoComponent {
+  @GetMapping
+  def download(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable jobId: String): RenderableFile =
+    jobService.getInstance(jobId)
+      .filter(_.user.apparentUser == user.apparentUser)
+      .filter(_.jobType == GenerateExamGridDocumentJob.identifier)
+      .filter(_.getString("department") == department.code)
+      .filter(_.succeeded)
+      .map(_.getString("fileId"))
+      .flatMap(fileDao.getFileById)
+      .map(file => new RenderableAttachment(file, name = Some(file.name)))
+      .getOrElse(throw new ItemNotFoundException())
 }

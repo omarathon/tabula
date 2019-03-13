@@ -7,21 +7,21 @@ import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
 class ExamFixtures extends BrowserTest with FeaturesDriver with GivenWhenThen {
 
-	before {
-		go to Path("/fixtures/setup")
-		pageSource should include("Fixture setup successful")
+  before {
+    go to Path("/fixtures/setup")
+    pageSource should include("Fixture setup successful")
 
-		Given("The exams feature is enabled")
-		enableFeature("exams")
+    Given("The exams feature is enabled")
+    enableFeature("exams")
 
-		And("the exam grids feature is enabled")
-		enableFeature("examGrids")
-	}
+    And("the exam grids feature is enabled")
+    enableFeature("examGrids")
+  }
 
-	def as[T](user: LoginDetails)(fn: => T): T = {
-		currentUser = user
-		signIn as user to Path("/exams/exams")
+  def as[T](user: LoginDetails)(fn: => T): T = {
+    currentUser = user
+    signIn as user to Path("/exams/exams")
 
-		fn
-	}
+    fn
+  }
 }

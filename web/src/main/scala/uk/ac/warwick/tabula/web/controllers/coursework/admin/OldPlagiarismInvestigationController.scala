@@ -16,44 +16,45 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{PlagiarismInvestiga
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
 class OldPlagiarismInvestigationController extends OldCourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment) = PlagiarismInvestigationCommand(assignment, user.apparentUser)
 
-	validatesSelf[PlagiarismInvestigationCommandValidation]
+  validatesSelf[PlagiarismInvestigationCommandValidation]
 
-	def formView(assignment: Assignment): Mav =
-		Mav("coursework/admin/assignments/submissionsandfeedback/mark-plagiarised",
-				"assignment" -> assignment
-		).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
+  def formView(assignment: Assignment): Mav =
+    Mav("coursework/admin/assignments/submissionsandfeedback/mark-plagiarised",
+      "assignment" -> assignment
+    ).crumbs(Breadcrumbs.Department(assignment.module.adminDepartment), Breadcrumbs.Module(assignment.module))
 
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+  def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
-	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
-	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+  // shouldn't ever be called as a GET - if it is, just redirect back to the submission list
+  @RequestMapping(method = Array(GET))
+  def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
-		formView(assignment)
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
+    formView(assignment)
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-			@PathVariable module: Module,
-			@PathVariable assignment: Assignment,
-			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			formView(assignment)
-		} else {
-			form.apply()
-			RedirectBack(assignment)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      formView(assignment)
+    } else {
+      form.apply()
+      RedirectBack(assignment)
+    }
+  }
 }

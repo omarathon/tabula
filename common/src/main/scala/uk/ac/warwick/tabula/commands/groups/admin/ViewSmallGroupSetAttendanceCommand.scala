@@ -19,36 +19,36 @@ import ViewSmallGroupAttendanceCommand._
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 object ViewSmallGroupSetAttendanceCommand {
-	def apply(set: SmallGroupSet) =
-		new ViewSmallGroupSetAttendanceCommand(set)
-			with ComposableCommand[SortedMap[SmallGroup, SmallGroupAttendanceInformation]]
-			with ViewSmallGroupSetAttendancePermissions
-			with ReadOnly with Unaudited {
-		override lazy val eventName = "ViewSmallGroupSetAttendance"
-	}
+  def apply(set: SmallGroupSet) =
+    new ViewSmallGroupSetAttendanceCommand(set)
+      with ComposableCommand[SortedMap[SmallGroup, SmallGroupAttendanceInformation]]
+      with ViewSmallGroupSetAttendancePermissions
+      with ReadOnly with Unaudited {
+      override lazy val eventName = "ViewSmallGroupSetAttendance"
+    }
 }
 
 class ViewSmallGroupSetAttendanceCommand(val set: SmallGroupSet)
-	extends CommandInternal[SortedMap[SmallGroup, SmallGroupAttendanceInformation]] with ViewSmallGroupSetAttendanceState {
+  extends CommandInternal[SortedMap[SmallGroup, SmallGroupAttendanceInformation]] with ViewSmallGroupSetAttendanceState {
 
-	if (!set.collectAttendance) throw new ItemNotFoundException
+  if (!set.collectAttendance) throw new ItemNotFoundException
 
-	override def applyInternal(): SortedMap[SmallGroup, SmallGroupAttendanceInformation] = {
-		SortedMap(set.groups.asScala.map { group =>
-			(group -> ViewSmallGroupAttendanceCommand(group).apply())
-		}.toSeq:_*)
-	}
+  override def applyInternal(): SortedMap[SmallGroup, SmallGroupAttendanceInformation] = {
+    SortedMap(set.groups.asScala.map { group =>
+      (group -> ViewSmallGroupAttendanceCommand(group).apply())
+    }.toSeq: _*)
+  }
 
 }
 
 trait ViewSmallGroupSetAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewSmallGroupSetAttendanceState =>
+  self: ViewSmallGroupSetAttendanceState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, set)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, set)
+  }
 }
 
 trait ViewSmallGroupSetAttendanceState {
-	def set: SmallGroupSet
+  def set: SmallGroupSet
 }

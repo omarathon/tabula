@@ -12,25 +12,25 @@ import uk.ac.warwick.tabula.web.Mav
 @Controller
 @RequestMapping(Array("/sysadmin/fix-monitoring-checkpoints"))
 class FixMonitoringCheckpointsForAttendedMeetingsController extends BaseSysadminController
-	with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-	with AutowiringMeetingRecordServiceComponent {
+  with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+  with AutowiringMeetingRecordServiceComponent {
 
-	def meetingRecords: Seq[MeetingRecord] = meetingRecordService.listAllOnOrAfter(LocalDate.parse("2018-08-01"))
+  def meetingRecords: Seq[MeetingRecord] = meetingRecordService.listAllOnOrAfter(LocalDate.parse("2018-08-01"))
 
-	@GetMapping
-	def form: Mav = {
-		val checkpoints: Seq[AttendanceMonitoringCheckpoint] = meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints)
+  @GetMapping
+  def form: Mav = {
+    val checkpoints: Seq[AttendanceMonitoringCheckpoint] = meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints)
 
-		Mav("sysadmin/fix-monitoring-checkpoints/form", Map(
-			"checkpoints" -> checkpoints
-		))
-	}
+    Mav("sysadmin/fix-monitoring-checkpoints/form", Map(
+      "checkpoints" -> checkpoints
+    ))
+  }
 
-	@PostMapping
-	def process: Mav = {
-		meetingRecords.foreach(attendanceMonitoringMeetingRecordService.updateCheckpoints)
+  @PostMapping
+  def process: Mav = {
+    meetingRecords.foreach(attendanceMonitoringMeetingRecordService.updateCheckpoints)
 
-		Mav("sysadmin/fix-monitoring-checkpoints/done")
-	}
+    Mav("sysadmin/fix-monitoring-checkpoints/done")
+  }
 
 }

@@ -9,51 +9,51 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.userlookup.User
 
 object SmallGroupsByModuleReportCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new SmallGroupsByModuleReportCommandInternal(department, academicYear)
-			with ComposableCommand[SmallGroupsByModuleReportCommandResult]
-			with AutowiringAttendanceMonitoringServiceComponent
-			with ReportPermissions
-			with SmallGroupsByModuleReportCommandState
-			with SetsFilteredAttendance
-			with ReadOnly with Unaudited
+  def apply(department: Department, academicYear: AcademicYear) =
+    new SmallGroupsByModuleReportCommandInternal(department, academicYear)
+      with ComposableCommand[SmallGroupsByModuleReportCommandResult]
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ReportPermissions
+      with SmallGroupsByModuleReportCommandState
+      with SetsFilteredAttendance
+      with ReadOnly with Unaudited
 }
 
 case class SmallGroupsByModuleReportCommandResult(
-	counts: Map[User, Map[Module, Int]],
-	studentDatas: Seq[AttendanceMonitoringStudentData],
-	modules: Seq[Module]
+  counts: Map[User, Map[Module, Int]],
+  studentDatas: Seq[AttendanceMonitoringStudentData],
+  modules: Seq[Module]
 )
 
 class SmallGroupsByModuleReportCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[SmallGroupsByModuleReportCommandResult] {
+  extends CommandInternal[SmallGroupsByModuleReportCommandResult] {
 
-	self: SmallGroupsByModuleReportCommandState with AttendanceMonitoringServiceComponent =>
+  self: SmallGroupsByModuleReportCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): SmallGroupsByModuleReportCommandResult = {
-		val byModule: Map[User, Map[Module, Int]] = filteredAttendance.attendance.map{case(student, eventMap) =>
-			student -> eventMap.groupBy(_._1.event.group.groupSet.module).map { case (module, groupedEventMap) =>
-				module -> groupedEventMap.keys.size
-			}
-		}
+  override def applyInternal(): SmallGroupsByModuleReportCommandResult = {
+    val byModule: Map[User, Map[Module, Int]] = filteredAttendance.attendance.map { case (student, eventMap) =>
+      student -> eventMap.groupBy(_._1.event.group.groupSet.module).map { case (module, groupedEventMap) =>
+        module -> groupedEventMap.keys.size
+      }
+    }
 
-		SmallGroupsByModuleReportCommandResult(
-			byModule,
-			attendanceMonitoringService.getAttendanceMonitoringDataForStudents(byModule.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
-			byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted
-		)
-	}
+    SmallGroupsByModuleReportCommandResult(
+      byModule,
+      attendanceMonitoringService.getAttendanceMonitoringDataForStudents(byModule.keySet.toSeq.sortBy(s => (s.getLastName, s.getFirstName)).map(_.getWarwickId), academicYear),
+      byModule.flatMap(_._2.map(_._1)).toSeq.distinct.sorted
+    )
+  }
 }
 
 trait SetsFilteredAttendance {
 
-	self: SmallGroupsByModuleReportCommandState =>
+  self: SmallGroupsByModuleReportCommandState =>
 
-	def setFilteredAttendance(theFilteredAttendance: AllSmallGroupsReportCommandResult): Unit = {
-		filteredAttendance = theFilteredAttendance
-	}
+  def setFilteredAttendance(theFilteredAttendance: AllSmallGroupsReportCommandResult): Unit = {
+    filteredAttendance = theFilteredAttendance
+  }
 }
 
 trait SmallGroupsByModuleReportCommandState extends ReportCommandState {
-	var filteredAttendance: AllSmallGroupsReportCommandResult = _
+  var filteredAttendance: AllSmallGroupsReportCommandResult = _
 }

@@ -17,28 +17,28 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import scala.collection.immutable.SortedMap
 
 abstract class AbstractViewModuleAttendanceController extends GroupsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	type ViewModuleAttendanceCommand = Appliable[SortedMap[SmallGroupSet, SortedMap[SmallGroup, ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation]]]
-		with ViewModuleAttendanceState
+  type ViewModuleAttendanceCommand = Appliable[SortedMap[SmallGroupSet, SortedMap[SmallGroup, ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation]]]
+    with ViewModuleAttendanceState
 
-	@RequestMapping
-	def show(
-		@ModelAttribute("command") command: ViewModuleAttendanceCommand,
-		@PathVariable module: Module
-	): Mav = {
-		val sets = command.apply()
+  @RequestMapping
+  def show(
+    @ModelAttribute("command") command: ViewModuleAttendanceCommand,
+    @PathVariable module: Module
+  ): Mav = {
+    val sets = command.apply()
 
-		if (ajax)
-			Mav("groups/attendance/view_module_partial",
-				"sets" -> sets
-			).noLayout()
-		else
-			Mav("groups/attendance/view_module",
-				"sets" -> sets
-			).crumbs(Breadcrumbs.Department(module.adminDepartment, command.academicYear), Breadcrumbs.Module(module))
-				.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(year => Routes.admin.moduleAttendance(command.module, year)):_*)
-	}
+    if (ajax)
+      Mav("groups/attendance/view_module_partial",
+        "sets" -> sets
+      ).noLayout()
+    else
+      Mav("groups/attendance/view_module",
+        "sets" -> sets
+      ).crumbs(Breadcrumbs.Department(module.adminDepartment, command.academicYear), Breadcrumbs.Module(module))
+        .secondCrumbs(academicYearBreadcrumbs(command.academicYear)(year => Routes.admin.moduleAttendance(command.module, year)): _*)
+  }
 
 }
 
@@ -46,12 +46,12 @@ abstract class AbstractViewModuleAttendanceController extends GroupsController
 @Controller
 class ViewModuleAttendanceController extends AbstractViewModuleAttendanceController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		ViewModuleAttendanceCommand(mandatory(module), academicYear.getOrElse(AcademicYear.now()))
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
+    ViewModuleAttendanceCommand(mandatory(module), academicYear.getOrElse(AcademicYear.now()))
 
 }
 
@@ -59,11 +59,11 @@ class ViewModuleAttendanceController extends AbstractViewModuleAttendanceControl
 @Controller
 class ViewModuleAttendanceInYearController extends AbstractViewModuleAttendanceController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
-		ViewModuleAttendanceCommand(mandatory(module), mandatory(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
+    ViewModuleAttendanceCommand(mandatory(module), mandatory(academicYear))
 
 }

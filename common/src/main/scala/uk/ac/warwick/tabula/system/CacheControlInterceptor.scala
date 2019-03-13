@@ -5,10 +5,10 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 
 class CacheControlInterceptor extends HandlerInterceptorAdapter {
 
-	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean = {
-		response.setHeader("Cache-control", "no-cache, no-store")
-		response.setHeader("Pragma", "no-cache")
-		response.setHeader("Expires", "0")
-		true //allow request to continue
-	}
+  override def preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean = {
+    response.setHeader("Cache-control", "no-cache, no-store")
+    response.setHeader("Pragma", "no-cache")
+    response.setHeader("Expires", "0")
+    true //allow request to continue
+  }
 }

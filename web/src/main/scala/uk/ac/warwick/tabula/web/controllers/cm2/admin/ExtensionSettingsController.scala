@@ -20,32 +20,32 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/extensions"))
 class ExtensionSettingsController extends CourseworkController
-	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = ExtensionSettingsCommand.AdminPermission
+  override val departmentPermission: Permission = ExtensionSettingsCommand.AdminPermission
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("extensionSettingsCommand")
-	def extensionSettingsCommand(@PathVariable department: Department): ExtensionSettingsCommand.Command =
-		ExtensionSettingsCommand(mandatory(department))
+  @ModelAttribute("extensionSettingsCommand")
+  def extensionSettingsCommand(@PathVariable department: Department): ExtensionSettingsCommand.Command =
+    ExtensionSettingsCommand(mandatory(department))
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@RequestMapping
-	def viewSettings(@PathVariable department: Department): Mav =
-		Mav("cm2/admin/extension-settings")
-			.crumbsList(Breadcrumbs.department(department, None))
+  @RequestMapping
+  def viewSettings(@PathVariable department: Department): Mav =
+    Mav("cm2/admin/extension-settings")
+      .crumbsList(Breadcrumbs.department(department, None))
 
-	@RequestMapping(method = Array(RequestMethod.POST))
-	def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
-		if (errors.hasErrors) {
-			viewSettings(department)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.department(cmd.department))
-		}
+  @RequestMapping(method = Array(RequestMethod.POST))
+  def saveSettings(@Valid @ModelAttribute("extensionSettingsCommand") cmd: ExtensionSettingsCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
+    if (errors.hasErrors) {
+      viewSettings(department)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.department(cmd.department))
+    }
 
 }

@@ -9,22 +9,23 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/attempt"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/module/{module}/{assignment}/attempt"))
 class OldSubmissionAttemptController extends OldCourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		SubmissionAttemptCommand(assignment, user)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment) = {
+    mustBeLinked(mandatory(assignment), mandatory(module))
+    SubmissionAttemptCommand(assignment, user)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {
-		cmd.apply()
-		Mav(new JSONView(Map(
-			"success" -> true
-		)))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {
+    cmd.apply()
+    Mav(new JSONView(Map(
+      "success" -> true
+    )))
+  }
 
 }

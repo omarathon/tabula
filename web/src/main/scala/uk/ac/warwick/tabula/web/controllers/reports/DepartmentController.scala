@@ -10,11 +10,11 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/reports/{department}"))
 class DepartmentController extends ReportsController with CurrentAcademicYear {
 
-	@RequestMapping
-	def home(@PathVariable department: Department): Mav = {
-		Mav("reports/department",
-			"academicYears" -> Seq(academicYear.previous, academicYear)
-		)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department): Mav = {
+    Mav("reports/department",
+      "academicYears" -> Seq(academicYear.previous, academicYear)
+    )
+  }
 
 }

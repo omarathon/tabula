@@ -16,37 +16,43 @@ import scala.util.{Failure, Success, Try}
 @Service
 class EmailNotificationService extends Logging with Daoisms {
 
-	val RunBatchSize = 50
+  val RunBatchSize = 50
 
-	var dao: NotificationDao = Wire[NotificationDao]
-	var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
+  var dao: NotificationDao = Wire[NotificationDao]
+  var listener: RecipientNotificationListener = Wire[EmailNotificationListener]
 
-	def processNotifications(): Unit = transactional(readOnly = true) {
-		val futures: Seq[Future[(String, Try[Unit])]] = unemailedRecipientIds.map { id => Future {
-			id -> Try(transactional() {
-				// This is a (new) read-only session as it happens inside the Future
-				val recipient = session.load(classOf[RecipientNotificationInfo], id).asInstanceOf[RecipientNotificationInfo]
-				session.setReadOnly(recipient, false)
+  def processNotifications(): Unit = transactional(readOnly = true) {
+    val futures: Seq[Future[(String, Try[Unit])]] = unemailedRecipientIds.map { id =>
+      Future {
+        id -> Try(transactional() {
+          // This is a (new) read-only session as it happens inside the Future
+          val recipient = session.load(classOf[RecipientNotificationInfo], id).asInstanceOf[RecipientNotificationInfo]
+          session.setReadOnly(recipient, false)
 
-				logger.info("Emailing recipient - " + recipient)
-				listener.listen(recipient)
-			})
-		}}
+          logger.info("Emailing recipient - " + recipient)
+          listener.listen(recipient)
+        })
+      }
+    }
 
-		Await.result(Future.sequence(futures), Duration.Inf).foreach { case (recipientId, result) =>
-			result match {
-				case Success(_) =>
-				case Failure(throwable) =>
-					// TAB-2238 Catch and log, so that the overall transaction can still commit
-					logger.error(s"Exception handling email for RecipientNotificationInfo[$recipientId]:", throwable)
-			}
-		}
-	}
+    Await.result(Future.sequence(futures), Duration.Inf).foreach { case (recipientId, result) =>
+      result match {
+        case Success(_) =>
+        case Failure(throwable) =>
+          // TAB-2238 Catch and log, so that the overall transaction can still commit
+          logger.error(s"Exception handling email for RecipientNotificationInfo[$recipientId]:", throwable)
+      }
+    }
+  }
 
-	def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] = dao.recentRecipients(start, count)
-	def unemailedRecipientCount: Number = dao.unemailedRecipientCount
-	def unemailedRecipientIds: Seq[String] = dao.unemailedRecipientIds(RunBatchSize)
-	def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = dao.oldestUnemailedRecipient
-	def recentEmailedRecipient: Option[RecipientNotificationInfo] = dao.recentEmailedRecipient
+  def recentRecipients(start: Int, count: Int): Seq[RecipientNotificationInfo] = dao.recentRecipients(start, count)
+
+  def unemailedRecipientCount: Number = dao.unemailedRecipientCount
+
+  def unemailedRecipientIds: Seq[String] = dao.unemailedRecipientIds(RunBatchSize)
+
+  def oldestUnemailedRecipient: Option[RecipientNotificationInfo] = dao.oldestUnemailedRecipient
+
+  def recentEmailedRecipient: Option[RecipientNotificationInfo] = dao.recentEmailedRecipient
 
 }

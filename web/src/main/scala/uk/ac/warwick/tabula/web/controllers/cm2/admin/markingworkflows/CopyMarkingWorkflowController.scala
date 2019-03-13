@@ -18,35 +18,36 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 import scala.collection.JavaConverters._
 
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/{workflow}/copy"))
 class CopyMarkingWorkflowController extends CM2MarkingWorkflowController {
 
-	var messageSource: MessageSource = Wire.auto[MessageSource]
+  var messageSource: MessageSource = Wire.auto[MessageSource]
 
-	type CopyMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with CopyMarkingWorkflowState
+  type CopyMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with CopyMarkingWorkflowState
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable workflow: CM2MarkingWorkflow) =
-		CopyMarkingWorkflowCommand(mandatory(department), mandatory(workflow))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable workflow: CM2MarkingWorkflow) =
+    CopyMarkingWorkflowCommand(mandatory(department), mandatory(workflow))
 
-	@RequestMapping
-	def submitForm(
-		@PathVariable department: Department,
-		@Valid @ModelAttribute("command") cmd: CopyMarkingWorkflowCommand,
-		errors: Errors
-	): Mav = {
-		val model = if(errors.hasErrors) {
-			"actionErrors" -> errors.getAllErrors.asScala.map(
-				e => messageSource.getMessage(e.getCode, e.getArguments, null)
-			).mkString(", ")
-		} else {
-			"copiedWorkflow" -> cmd.apply().id
-		}
-		val currentAcademicYear = AcademicYear.now()
-		Redirect(Routes.cm2.admin.workflows(department, currentAcademicYear), model)
-	}
+  @RequestMapping
+  def submitForm(
+    @PathVariable department: Department,
+    @Valid @ModelAttribute("command") cmd: CopyMarkingWorkflowCommand,
+    errors: Errors
+  ): Mav = {
+    val model = if (errors.hasErrors) {
+      "actionErrors" -> errors.getAllErrors.asScala.map(
+        e => messageSource.getMessage(e.getCode, e.getArguments, null)
+      ).mkString(", ")
+    } else {
+      "copiedWorkflow" -> cmd.apply().id
+    }
+    val currentAcademicYear = AcademicYear.now()
+    Redirect(Routes.cm2.admin.workflows(department, currentAcademicYear), model)
+  }
 
 }

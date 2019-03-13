@@ -13,15 +13,15 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 @Controller
 @RequestMapping(Array("/attendance/view/{department:[^\\d].*}"))
 class AttendanceViewDepartmentRedirectController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		Redirect(Routes.View.departmentForYear(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now())))
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    Redirect(Routes.View.departmentForYear(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now())))
+  }
 
 }

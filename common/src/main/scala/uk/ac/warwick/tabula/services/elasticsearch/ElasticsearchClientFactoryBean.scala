@@ -11,27 +11,27 @@ import uk.ac.warwick.tabula.ScalaFactoryBean
 @Service
 class ElasticsearchClientFactoryBean extends ScalaFactoryBean[ElasticClient] {
 
-	@Value("${elasticsearch.cluster.name}") var clusterName: String = _
-	@Value("${elasticsearch.cluster.nodes}") var nodes: Array[String] = _
+  @Value("${elasticsearch.cluster.name}") var clusterName: String = _
+  @Value("${elasticsearch.cluster.nodes}") var nodes: Array[String] = _
 
-	@Value("${elasticsearch.cluster.local_jvm:false}") var localJvmCluster: Boolean = _
-	@Value("${filesystem.index.dir}") var localIndexDirectory: File = _
+  @Value("${elasticsearch.cluster.local_jvm:false}") var localJvmCluster: Boolean = _
+  @Value("${filesystem.index.dir}") var localIndexDirectory: File = _
 
-	override def createInstance(): ElasticClient = {
-		if (localJvmCluster) {
-			throw new IllegalStateException("Sorry, local JVM cluster ElasticSearch is no longer supported.")
-		} else {
-			ElasticClient(ElasticProperties(s"http://${nodes.mkString(",")}"))
-		}
-	}
+  override def createInstance(): ElasticClient = {
+    if (localJvmCluster) {
+      throw new IllegalStateException("Sorry, local JVM cluster ElasticSearch is no longer supported.")
+    } else {
+      ElasticClient(ElasticProperties(s"http://${nodes.mkString(",")}"))
+    }
+  }
 
-	override def destroyInstance(instance: ElasticClient): Unit = instance.close()
+  override def destroyInstance(instance: ElasticClient): Unit = instance.close()
 }
 
 trait ElasticsearchClientComponent {
-	def client: ElasticClient
+  def client: ElasticClient
 }
 
 trait AutowiringElasticsearchClientComponent extends ElasticsearchClientComponent {
-	var client: ElasticClient = Wire[ElasticClient]
+  var client: ElasticClient = Wire[ElasticClient]
 }

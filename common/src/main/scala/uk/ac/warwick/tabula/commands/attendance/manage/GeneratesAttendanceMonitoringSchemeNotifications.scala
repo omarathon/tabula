@@ -11,38 +11,38 @@ import scala.collection.JavaConverters._
 
 trait GeneratesAttendanceMonitoringSchemeNotifications extends Logging {
 
-	self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
+  self: AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
-	var thisScheduledNotificationService: ScheduledNotificationService = Wire.auto[ScheduledNotificationService]
+  var thisScheduledNotificationService: ScheduledNotificationService = Wire.auto[ScheduledNotificationService]
 
-	def generateNotifications(schemes: Seq[AttendanceMonitoringScheme]): Unit = {
-		// Custom scheduled notifications
-		schemes.groupBy(_.department).foreach{case(department, _) =>
+  def generateNotifications(schemes: Seq[AttendanceMonitoringScheme]): Unit = {
+    // Custom scheduled notifications
+    schemes.groupBy(_.department).foreach { case (department, _) =>
 
-			thisScheduledNotificationService.removeInvalidNotifications(department)
+      thisScheduledNotificationService.removeInvalidNotifications(department)
 
-			val schemes = attendanceMonitoringService.listAllSchemes(department)
+      val schemes = attendanceMonitoringService.listAllSchemes(department)
 
-			val notifications = schemes.flatMap(_.points.asScala.map(_.endDate)).flatMap(date =>
-				Seq(
-					date.plusDays(3).toDateTimeAtStartOfDay,
-					date.plusDays(6).toDateTimeAtStartOfDay
-				)
-			).distinct.flatMap(notificationDate => {
-				Seq(
-					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedPoints", department, notificationDate),
-					new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedStudents", department, notificationDate)
-				)
-			})
+      val notifications = schemes.flatMap(_.points.asScala.map(_.endDate)).flatMap(date =>
+        Seq(
+          date.plusDays(3).toDateTimeAtStartOfDay,
+          date.plusDays(6).toDateTimeAtStartOfDay
+        )
+      ).distinct.flatMap(notificationDate => {
+        Seq(
+          new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedPoints", department, notificationDate),
+          new ScheduledNotification[Department]("AttendanceMonitoringUnrecordedStudents", department, notificationDate)
+        )
+      })
 
-			for (scheduledNotification <- notifications) {
-				if (scheduledNotification.scheduledDate.isBeforeNow) {
-					logger.warn("ScheduledNotification generated in the past, ignoring: " + scheduledNotification)
-				} else {
-					thisScheduledNotificationService.push(scheduledNotification)
-				}
-			}
-		}
-	}
+      for (scheduledNotification <- notifications) {
+        if (scheduledNotification.scheduledDate.isBeforeNow) {
+          logger.warn("ScheduledNotification generated in the past, ignoring: " + scheduledNotification)
+        } else {
+          thisScheduledNotificationService.push(scheduledNotification)
+        }
+      }
+    }
+  }
 
 }

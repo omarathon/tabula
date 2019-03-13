@@ -12,76 +12,78 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object DeleteSmallGroupCommand {
-	type Command = Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState
+  type Command = Appliable[SmallGroup] with SelfValidating with DeleteSmallGroupCommandState
 
-	def apply(set: SmallGroupSet, group: SmallGroup, isSpreadsheetUpload: Boolean = false): Command =
-		new DeleteSmallGroupCommandInternal(set, group, isSpreadsheetUpload)
-			with ComposableCommand[SmallGroup]
-			with DeleteSmallGroupPermissions
-			with DeleteSmallGroupDescription
-			with DeleteSmallGroupValidation
-			with AutowiringSmallGroupServiceComponent
+  def apply(set: SmallGroupSet, group: SmallGroup, isSpreadsheetUpload: Boolean = false): Command =
+    new DeleteSmallGroupCommandInternal(set, group, isSpreadsheetUpload)
+      with ComposableCommand[SmallGroup]
+      with DeleteSmallGroupPermissions
+      with DeleteSmallGroupDescription
+      with DeleteSmallGroupValidation
+      with AutowiringSmallGroupServiceComponent
 }
 
 trait DeleteSmallGroupCommandState {
-	def set: SmallGroupSet
-	def group: SmallGroup
-	def isSpreadsheetUpload: Boolean
+  def set: SmallGroupSet
+
+  def group: SmallGroup
+
+  def isSpreadsheetUpload: Boolean
 }
 
 class DeleteSmallGroupCommandInternal(val set: SmallGroupSet, val group: SmallGroup, val isSpreadsheetUpload: Boolean)
-	extends CommandInternal[SmallGroup] with DeleteSmallGroupCommandState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[SmallGroup] with DeleteSmallGroupCommandState {
+  self: SmallGroupServiceComponent =>
 
 
-	override def applyInternal(): SmallGroup = transactional() {
-		group.preDelete()
+  override def applyInternal(): SmallGroup = transactional() {
+    group.preDelete()
 
-		set.groups.remove(group)
-		group
-	}
+    set.groups.remove(group)
+    group
+  }
 
 }
 
 trait DeleteSmallGroupPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DeleteSmallGroupCommandState =>
+  self: DeleteSmallGroupCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(group, set)
-		p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(group))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(group, set)
+    p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(group))
+  }
 }
 
 trait DeleteSmallGroupDescription extends Describable[SmallGroup] {
-	self: DeleteSmallGroupCommandState =>
+  self: DeleteSmallGroupCommandState =>
 
-	override def describe(d: Description) {
-		d.smallGroup(group)
-	}
+  override def describe(d: Description) {
+    d.smallGroup(group)
+  }
 }
 
 trait DeleteSmallGroupValidation extends SelfValidating {
-	self: DeleteSmallGroupCommandState with SmallGroupServiceComponent =>
+  self: DeleteSmallGroupCommandState with SmallGroupServiceComponent =>
 
-	def validate(errors: Errors) {
-		// when modifying ther groups via a spreadsheet allow groups with students to be deleted
-		if (!group.students.isEmpty && !isSpreadsheetUpload) {
-			errors.reject("smallGroup.delete.notEmpty")
-		} else {
-			// Can't delete events that have attendance recorded against them
-			val hasAttendance =
-				group.events.exists { event =>
-					smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
-						.exists {
-							_.attendance.asScala.exists { attendance =>
-								attendance.state != AttendanceState.NotRecorded
-							}
-						}
-				}
+  def validate(errors: Errors) {
+    // when modifying ther groups via a spreadsheet allow groups with students to be deleted
+    if (!group.students.isEmpty && !isSpreadsheetUpload) {
+      errors.reject("smallGroup.delete.notEmpty")
+    } else {
+      // Can't delete events that have attendance recorded against them
+      val hasAttendance =
+        group.events.exists { event =>
+          smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+            .exists {
+              _.attendance.asScala.exists { attendance =>
+                attendance.state != AttendanceState.NotRecorded
+              }
+            }
+        }
 
-			if (hasAttendance) {
-				errors.reject("smallGroupEvent.delete.hasAttendance")
-			}
-		}
-	}
+      if (hasAttendance) {
+        errors.reject("smallGroupEvent.delete.hasAttendance")
+      }
+    }
+  }
 }

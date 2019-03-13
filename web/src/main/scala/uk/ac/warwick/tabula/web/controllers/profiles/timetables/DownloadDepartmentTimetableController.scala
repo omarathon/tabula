@@ -12,32 +12,32 @@ import uk.ac.warwick.tabula.web.views.PDFView
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables/download/{academicYear}"))
 class DownloadDepartmentTimetableController extends ProfilesController
-	with AutowiringModuleTimetableEventSourceComponent with DownloadsTimetable {
+  with AutowiringModuleTimetableEventSourceComponent with DownloadsTimetable {
 
-	@ModelAttribute("timetableCommand")
-	def timetableCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): DepartmentTimetableCommand.CommandType = {
-		DepartmentTimetableCommand(
-			mandatory(department),
-			academicYear,
-			user,
-			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
-			new ViewStudentMemberTimetableCommandFactoryImpl(user),
-			new ViewStaffMemberTimetableCommandFactoryImpl(user)
-		)
-	}
+  @ModelAttribute("timetableCommand")
+  def timetableCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): DepartmentTimetableCommand.CommandType = {
+    DepartmentTimetableCommand(
+      mandatory(department),
+      academicYear,
+      user,
+      new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
+      new ViewStudentMemberTimetableCommandFactoryImpl(user),
+      new ViewStaffMemberTimetableCommandFactoryImpl(user)
+    )
+  }
 
-	@RequestMapping
-	def render(
-		@ModelAttribute("timetableCommand") cmd: DepartmentTimetableCommand.CommandType,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): PDFView = {
-		getTimetable(
-			events = cmd.apply()._1.events,
-			academicYear = academicYear,
-			fileNameSuffix = department.code,
-			title = s"${department.name} for ${academicYear.toString}"
-		)
-	}
+  @RequestMapping
+  def render(
+    @ModelAttribute("timetableCommand") cmd: DepartmentTimetableCommand.CommandType,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): PDFView = {
+    getTimetable(
+      events = cmd.apply()._1.events,
+      academicYear = academicYear,
+      fileNameSuffix = department.code,
+      title = s"${department.name} for ${academicYear.toString}"
+    )
+  }
 
 }

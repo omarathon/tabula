@@ -19,81 +19,81 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 class UserSettingsController extends BaseController {
 
-	type UserSettingsCommand = Appliable[UserSettings]
+  type UserSettingsCommand = Appliable[UserSettings]
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	hideDeletedItems
+  hideDeletedItems
 
-	var userSettingsService: UserSettingsService = Wire.auto[UserSettingsService]
-	var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var userSettingsService: UserSettingsService = Wire.auto[UserSettingsService]
+  var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	private def getUserSettings(user: CurrentUser) =
-		userSettingsService.getByUserId(user.apparentId)
+  private def getUserSettings(user: CurrentUser) =
+    userSettingsService.getByUserId(user.apparentId)
 
 
-	@ModelAttribute("userSettingsCommand")
-	def command(user: CurrentUser): UserSettingsCommand = {
-		val usersettings = getUserSettings(user)
-		usersettings match {
-			case Some(setting) => UserSettingsCommand(user, setting)
-			case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
-		}
-	}
+  @ModelAttribute("userSettingsCommand")
+  def command(user: CurrentUser): UserSettingsCommand = {
+    val usersettings = getUserSettings(user)
+    usersettings match {
+      case Some(setting) => UserSettingsCommand(user, setting)
+      case None => UserSettingsCommand(user, new UserSettings(user.apparentId))
+    }
+  }
 
-	@RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors:Errors, success: Boolean = false): Mav = {
-		Mav("usersettings/form",
-			"isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
-			"isDepartmentalAdmin" -> moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
-			"success" -> success
-		)
-	}
+  @RequestMapping(value = Array("/settings"), method = Array(GET, HEAD))
+  def viewSettings(user: CurrentUser, @ModelAttribute("userSettingsCommand") command: UserSettingsCommand, errors: Errors, success: Boolean = false): Mav = {
+    Mav("usersettings/form",
+      "isCourseworkModuleManager" -> moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+      "isDepartmentalAdmin" -> moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments).nonEmpty,
+      "success" -> success
+    )
+  }
 
-	@RequestMapping(value = Array("/settings"), method=Array(POST))
-	def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors:Errors): Mav = {
-		if (errors.hasErrors){
-			viewSettings(user, command, errors)
-		}
-		else{
-			command.apply()
-			viewSettings(user, command, errors, success = true)
-		}
-	}
+  @RequestMapping(value = Array("/settings"), method = Array(POST))
+  def saveSettings(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      viewSettings(user, command, errors)
+    }
+    else {
+      command.apply()
+      viewSettings(user, command, errors, success = true)
+    }
+  }
 
-	@RequestMapping(value = Array("/settings.json"), method = Array(GET, HEAD))
-	def viewSettingsJson(user: CurrentUser): Mav = {
-		val usersettings =
-			getUserSettings(user) match {
-				case Some(setting) => JSONUserSettings(setting)
-				case None => JSONUserSettings(new UserSettings(user.apparentId))
-			}
+  @RequestMapping(value = Array("/settings.json"), method = Array(GET, HEAD))
+  def viewSettingsJson(user: CurrentUser): Mav = {
+    val usersettings =
+      getUserSettings(user) match {
+        case Some(setting) => JSONUserSettings(setting)
+        case None => JSONUserSettings(new UserSettings(user.apparentId))
+      }
 
-		Mav(new JSONView(usersettings))
-	}
+    Mav(new JSONView(usersettings))
+  }
 
-	@RequestMapping(value = Array("/settings.json"), method=Array(POST))
-	def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav = {
-		if (!errors.hasErrors) command.apply()
+  @RequestMapping(value = Array("/settings.json"), method = Array(POST))
+  def saveSettingsJson(@ModelAttribute("userSettingsCommand") @Valid command: UserSettingsCommand, errors: Errors): Mav = {
+    if (!errors.hasErrors) command.apply()
 
-		viewSettingsJson(user)
-	}
+    viewSettingsJson(user)
+  }
 }
 
 case class JSONUserSettings(
-	alertsSubmission: String,
-	weekNumberingSystem: String,
-	bulkEmailSeparator: String,
-	profilesDefaultView: String
+  alertsSubmission: String,
+  weekNumberingSystem: String,
+  bulkEmailSeparator: String,
+  profilesDefaultView: String
 )
 
 object JSONUserSettings {
-	def apply(u: UserSettings): JSONUserSettings = {
-		JSONUserSettings(
-			alertsSubmission = u.alertsSubmission,
-			weekNumberingSystem = u.weekNumberingSystem,
-			bulkEmailSeparator = u.bulkEmailSeparator,
-			profilesDefaultView = u.profilesDefaultView
-		)
-	}
+  def apply(u: UserSettings): JSONUserSettings = {
+    JSONUserSettings(
+      alertsSubmission = u.alertsSubmission,
+      weekNumberingSystem = u.weekNumberingSystem,
+      bulkEmailSeparator = u.bulkEmailSeparator,
+      profilesDefaultView = u.profilesDefaultView
+    )
+  }
 }

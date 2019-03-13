@@ -15,23 +15,23 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/sysadmin/permissions-helper"))
 class PermissionsHelperController extends BaseSysadminController {
 
-	validatesSelf[PermissionsHelperCommand]
+  validatesSelf[PermissionsHelperCommand]
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(form: PermissionsHelperCommand, errors: Errors): Mav =
-		Mav("sysadmin/permissions-helper/form").noLayoutIf(ajax)
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(form: PermissionsHelperCommand, errors: Errors): Mav =
+    Mav("sysadmin/permissions-helper/form").noLayoutIf(ajax)
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: PermissionsHelperCommand, errors: Errors): Mav = {
-		if (errors.hasErrors)
-			showForm(form, errors)
-		else {
-			Mav("sysadmin/permissions-helper/results", "results" -> form.apply())
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid form: PermissionsHelperCommand, errors: Errors): Mav = {
+    if (errors.hasErrors)
+      showForm(form, errors)
+    else {
+      Mav("sysadmin/permissions-helper/results", "results" -> form.apply())
+    }
+  }
 
-	@ModelAttribute("allPermissions") def allPermissions: Map[String, Seq[(String, String)]] = ReflectionHelper.groupedPermissions
+  @ModelAttribute("allPermissions") def allPermissions: Map[String, Seq[(String, String)]] = ReflectionHelper.groupedPermissions
 
-	@ModelAttribute("allPermissionTargets") def allPermissionTargets: Seq[Class[PermissionsTarget]] = ReflectionHelper.allPermissionTargets
+  @ModelAttribute("allPermissionTargets") def allPermissionTargets: Seq[Class[PermissionsTarget]] = ReflectionHelper.allPermissionTargets
 
 }

@@ -18,126 +18,132 @@ import scala.collection.immutable.IndexedSeq
 
 class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
-	override implicit val patienceConfig =
-		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
+  override implicit val patienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
-	val index = Index("notification")
-	val indexType: String = new NotificationIndexType {}.indexType
+  val index = Index("notification")
+  val indexType: String = new NotificationIndexType {}.indexType
 
-	private trait Fixture {
-		val dao: NotificationDao = smartMock[NotificationDao]
+  private trait Fixture {
+    val dao: NotificationDao = smartMock[NotificationDao]
 
-		// default behaviour, we add individual expectations later
-		dao.getById(any[String]) returns None
+    // default behaviour, we add individual expectations later
+    dao.getById(any[String]) returns None
 
-		val indexer = new NotificationIndexService
-		indexer.indexName = NotificationIndexServiceTest.this.index.name
-		indexer.client = NotificationIndexServiceTest.this.client
-		indexer.notificationDao = dao
+    val indexer = new NotificationIndexService
+    indexer.indexName = NotificationIndexServiceTest.this.index.name
+    indexer.client = NotificationIndexServiceTest.this.client
+    indexer.notificationDao = dao
 
-		// Creates the index
-		indexer.ensureIndexExists().await should be (true)
+    // Creates the index
+    indexer.ensureIndexExists().await should be(true)
 
-		implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
-	}
+    implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
+  }
 
-	private trait DataFixture extends Fixture {
-		val agent: User = Fixtures.user(userId="abc")
-		val recipient: User = Fixtures.user(userId="xyz")
-		val otherRecipient: User = Fixtures.user(userId="xyo")
+  private trait DataFixture extends Fixture {
+    val agent: User = Fixtures.user(userId = "abc")
+    val recipient: User = Fixtures.user(userId = "xyz")
+    val otherRecipient: User = Fixtures.user(userId = "xyo")
 
-		val staff = Fixtures.staff("1234567")
-		val student = Fixtures.student("9876543")
-		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+    val staff = Fixtures.staff("1234567")
+    val student = Fixtures.student("9876543")
+    val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
 
-		val meeting = new MeetingRecord
-		meeting.creator = staff
+    val meeting = new MeetingRecord
+    meeting.creator = staff
 
-		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
-		meeting.relationships = Seq(relationship)
+    val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+    meeting.relationships = Seq(relationship)
 
-		val now: DateTime = DateTime.now
+    val now: DateTime = DateTime.now
 
-		// Selection of notifications intended for a couple of different recipients
-		lazy val items: IndexedSeq[IndexedNotification] = for (i <- 1 to 100) yield {
-			val notification =
-				if (i % 2 == 0) {
-					new HeronWarningNotification
-				} else {
-					new HeronDefeatedNotification
-				}
-			notification.id = "nid"+i
-			notification.created = now.plusMinutes(i)
-			dao.getById(notification.id) returns Some(notification)
+    // Selection of notifications intended for a couple of different recipients
+    lazy val items: IndexedSeq[IndexedNotification] = for (i <- 1 to 100) yield {
+      val notification =
+        if (i % 2 == 0) {
+          new HeronWarningNotification
+        } else {
+          new HeronDefeatedNotification
+        }
+      notification.id = "nid" + i
+      notification.created = now.plusMinutes(i)
+      dao.getById(notification.id) returns Some(notification)
 
-			notification.priority = if (i <= 40) {
-				NotificationPriority.Info
-			} else if (i <= 80) {
-				NotificationPriority.Warning
-			} else {
-				NotificationPriority.Critical
-			}
+      notification.priority = if (i <= 40) {
+        NotificationPriority.Info
+      } else if (i <= 80) {
+        NotificationPriority.Warning
+      } else {
+        NotificationPriority.Critical
+      }
 
-			val theRecipient = if (i % 2 == 0) {
-				recipient
-			} else {
-				otherRecipient
-			}
-			IndexedNotification(notification, theRecipient)
-		}
+      val theRecipient = if (i % 2 == 0) {
+        recipient
+      } else {
+        otherRecipient
+      }
+      IndexedNotification(notification, theRecipient)
+    }
 
-		// The IDs of notifications we expect our recipient to get.
-		lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter { _.recipient == recipient }
-	}
+    // The IDs of notifications we expect our recipient to get.
+    lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter(_.recipient == recipient)
+  }
 
-	@After def tearDown(): Unit = {
-		deleteIndex(index.name)
-	}
+  @After def tearDown(): Unit = {
+    deleteIndex(index.name)
+  }
 
-	@Test def fields(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
-		val notification = new HeronDefeatedNotification
-		notification.id = "defeat"
-		notification.created = DateTime.now()
-		notification.priority = NotificationPriority.Info
+  @Test def fields(): Unit = withFakeTime(dateTime(2000, 6)) {
+    new Fixture {
+      val notification = new HeronDefeatedNotification
+      notification.id = "defeat"
+      notification.created = DateTime.now()
+      notification.priority = NotificationPriority.Info
 
-		val recipient: User = Fixtures.user(userId = "xyz")
+      val recipient: User = Fixtures.user(userId = "xyz")
 
-		val item = IndexedNotification(notification, recipient)
+      val item = IndexedNotification(notification, recipient)
 
-		indexer.indexItems(Seq(item)).await
-		blockUntilExactCount(1, index.name)
+      indexer.indexItems(Seq(item)).await
+      blockUntilExactCount(1, index.name)
 
-		// University ID is the ID field so it isn't in the doc source
-		val doc: GetResponse = client.execute { get(item.id).from(IndexAndType(index.name, indexType)) }.futureValue.result
+      // University ID is the ID field so it isn't in the doc source
+      val doc: GetResponse = client.execute {
+        get(item.id).from(IndexAndType(index.name, indexType))
+      }.futureValue.result
 
-		doc.source should be (Map(
-			"notification" -> "defeat",
-			"recipient" -> "xyz",
-			"notificationType" -> "HeronDefeat",
-			"priority" -> 0.25,
-			"dismissed" -> false,
-			"created" -> "2000-06-01T00:00:00+01:00"
-		))
-	}}
+      doc.source should be(Map(
+        "notification" -> "defeat",
+        "recipient" -> "xyz",
+        "notificationType" -> "HeronDefeat",
+        "priority" -> 0.25,
+        "dismissed" -> false,
+        "created" -> "2000-06-01T00:00:00+01:00"
+      ))
+    }
+  }
 
-	@Test def indexItems(): Unit = new DataFixture {
-		indexer.indexItems(items)
-		blockUntilExactCount(100, index.name)
+  @Test def indexItems(): Unit = new DataFixture {
+    indexer.indexItems(items)
+    blockUntilExactCount(100, index.name)
 
-		val dates: Seq[DateTime] = client.execute {
-			search(index).query(termQuery("recipient", "xyz")).sortBy(fieldSort("created").order(SortOrder.Desc)).limit(100)
-		}.map { _.result.hits.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq }
-		  .futureValue
+    val dates: Seq[DateTime] = client.execute {
+      search(index).query(termQuery("recipient", "xyz")).sortBy(fieldSort("created").order(SortOrder.Desc)).limit(100)
+    }.map {
+      _.result.hits.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq
+    }
+      .futureValue
 
-		dates.size should be (50)
-		dates.head should be (recipientNotifications.map { _.notification.created.withMillisOfSecond(0) }.max)
-	}
+    dates.size should be(50)
+    dates.head should be(recipientNotifications.map(_.notification.created.withMillisOfSecond(0)).max)
+  }
 
-	@Test def missingRecipient(): Unit = new DataFixture {
-		val anonUser = new AnonymousUser()
-		val notification: HeronWarningNotification = Notification.init(new HeronWarningNotification, agent, meeting)
-		indexer.indexItems(Seq(IndexedNotification(notification, anonUser))).await
-		// No exception, good times.
-	}
+  @Test def missingRecipient(): Unit = new DataFixture {
+    val anonUser = new AnonymousUser()
+    val notification: HeronWarningNotification = Notification.init(new HeronWarningNotification, agent, meeting)
+    indexer.indexItems(Seq(IndexedNotification(notification, anonUser))).await
+    // No exception, good times.
+  }
 
 }

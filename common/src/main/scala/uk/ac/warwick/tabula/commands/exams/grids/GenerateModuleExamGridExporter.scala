@@ -134,7 +134,7 @@ object GenerateModuleExamGridExporter extends TaskBenchmarking {
               } else {
                 (s"[${cInfo.resitInfo.resitGrade.toString}]", if (cInfo.resitInfo.isActualResitGrade) Option(cellStyleMap(ActualMark)) else None)
               }
-            } else  if (Option(cInfo.grade).isDefined) {
+            } else if (Option(cInfo.grade).isDefined) {
               (cInfo.grade.toString, if (cInfo.isActualGrade) Option(cellStyleMap(ActualMark)) else None)
             } else {
               ("X", None)

@@ -13,65 +13,65 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @RequestMapping(value = Array("/profiles/department/{department}/{relationshipType}"))
 class ViewStudentRelationshipsController extends ProfilesController {
 
-	@ModelAttribute("viewStudentRelationshipsCommand")
-	def viewStudentRelationshipsCommand(
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType
-	) = ViewStudentRelationshipsCommand(department, relationshipType)
+  @ModelAttribute("viewStudentRelationshipsCommand")
+  def viewStudentRelationshipsCommand(
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType
+  ) = ViewStudentRelationshipsCommand(department, relationshipType)
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def view(
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@ModelAttribute("viewStudentRelationshipsCommand") command: Appliable[ViewStudentRelationshipsCommand.Result]
-	): Mav = {
-		val agentGraph = command.apply()
-		Mav("profiles/relationships/agent_view",
-			"agentRelationships" -> agentGraph.studentMap,
-			"missingCount" -> agentGraph.missingCount,
-			"scheduledCount" -> agentGraph.scheduledCount,
-			"courseMap" -> agentGraph.courseMap,
-			"yearOfStudyMap" -> agentGraph.yearOfStudyMap,
-			"department" -> department,
-			"canReallocateStudents" -> !relationshipType.readOnly(department)
-		)
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def view(
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @ModelAttribute("viewStudentRelationshipsCommand") command: Appliable[ViewStudentRelationshipsCommand.Result]
+  ): Mav = {
+    val agentGraph = command.apply()
+    Mav("profiles/relationships/agent_view",
+      "agentRelationships" -> agentGraph.studentMap,
+      "missingCount" -> agentGraph.missingCount,
+      "scheduledCount" -> agentGraph.scheduledCount,
+      "courseMap" -> agentGraph.courseMap,
+      "yearOfStudyMap" -> agentGraph.yearOfStudyMap,
+      "department" -> department,
+      "canReallocateStudents" -> !relationshipType.readOnly(department)
+    )
+  }
 }
 
 
 abstract class ViewStudentRelationshipController extends ProfilesController {
 
-	type ViewRelatedStudentsCommand = ViewRelatedStudentsCommand.CommandType
+  type ViewRelatedStudentsCommand = ViewRelatedStudentsCommand.CommandType
 
 
-	@RequestMapping
-	def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: ViewRelatedStudentsCommand): Mav = {
-		val result = viewRelatedStudentsCommand.apply()
-		val studentCourseDetails = result.entities
-		val students = studentCourseDetails.map(_.student).distinct.sortBy { student =>  (student.lastName, student.firstName) }
-		val meetingInfoMap = result.lastMeetingWithTotalPendingApprovalsMap
+  @RequestMapping
+  def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: ViewRelatedStudentsCommand): Mav = {
+    val result = viewRelatedStudentsCommand.apply()
+    val studentCourseDetails = result.entities
+    val students = studentCourseDetails.map(_.student).distinct.sortBy { student => (student.lastName, student.firstName) }
+    val meetingInfoMap = result.lastMeetingWithTotalPendingApprovalsMap
 
-		if(ajax)
-			Mav("profiles/relationships/student_view_results",
-				"studentCourseDetails" -> studentCourseDetails,
-				"students" -> students,
-				"meetingsMap" -> meetingInfoMap
-			).noLayout()
-		else
-			Mav("profiles/relationships/student_view",
-				"studentCourseDetails" -> studentCourseDetails,
-				"students" -> students,
-				"meetingsMap" -> meetingInfoMap
-			)
-	}
+    if (ajax)
+      Mav("profiles/relationships/student_view_results",
+        "studentCourseDetails" -> studentCourseDetails,
+        "students" -> students,
+        "meetingsMap" -> meetingInfoMap
+      ).noLayout()
+    else
+      Mav("profiles/relationships/student_view",
+        "studentCourseDetails" -> studentCourseDetails,
+        "students" -> students,
+        "meetingsMap" -> meetingInfoMap
+      )
+  }
 }
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/students"))
 class ViewMyStudentRelationshipsController extends ViewStudentRelationshipController {
 
-	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
-		ViewRelatedStudentsCommand(currentMember, relationshipType)
+  @ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable relationshipType: StudentRelationshipType) =
+    ViewRelatedStudentsCommand(currentMember, relationshipType)
 }
 
 
@@ -79,9 +79,9 @@ class ViewMyStudentRelationshipsController extends ViewStudentRelationshipContro
 @RequestMapping(value = Array("/profiles/{relationshipType}/{member}/students"))
 class ViewMembersStudentRelationshipsController extends ViewStudentRelationshipController {
 
-	@ModelAttribute("viewRelatedStudentsCommand") def command(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable member: Member
-	) =
-		ViewRelatedStudentsCommand(member, relationshipType)
+  @ModelAttribute("viewRelatedStudentsCommand") def command(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable member: Member
+  ) =
+    ViewRelatedStudentsCommand(member, relationshipType)
 }

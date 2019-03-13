@@ -11,14 +11,14 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
 
   override def fetch(key: String): RichByteSource = services.find(_.keyExists(key)).map(_.fetch(key)).getOrElse(RichByteSource.empty)
 
-	override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit  = services.head.push(key, in, metadata)
+  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = services.head.push(key, in, metadata)
 
-	override def delete(key: String): Unit  = services.foreach(_.delete(key))
+  override def delete(key: String): Unit = services.foreach(_.delete(key))
 
   /**
     * Not guaranteed to be distinct (unless you call distinct on it) but shouldn't be used anyway.
     */
-  override def listKeys(): Stream[String] = services.toStream.flatMap { _.listKeys() }
+  override def listKeys(): Stream[String] = services.toStream.flatMap(_.listKeys())
 
-	override def afterPropertiesSet(): Unit = services.foreach(_.afterPropertiesSet())
+  override def afterPropertiesSet(): Unit = services.foreach(_.afterPropertiesSet())
 }

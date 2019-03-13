@@ -9,6 +9,7 @@
 p {
   margin: 0 0 @baseLineHeight / 2;
 }
+
 .lead {
   margin-bottom: @baseLineHeight;
   font-size: @baseFontSize * 1.5;
@@ -21,36 +22,79 @@ p {
 // -------------------------
 
 // Ex: 14px base font * 85% = about 12px
-small   { font-size: 85%; }
+small {
+  font-size: 85%;
+}
 
-strong  { font-weight: bold; }
-em      { font-style: italic; }
-cite    { font-style: normal; }
+strong {
+  font-weight: bold;
+}
+
+em {
+  font-style: italic;
+}
+
+cite {
+  font-style: normal;
+}
 
 // Utility classes
-.muted               { color: @grayLight; }
+.muted {
+  color: @grayLight;
+}
+
 a.muted:hover,
-a.muted:focus        { color: darken(@grayLight, 10%); }
+a.muted:focus {
+  color: darken(@grayLight, 10%);
+}
 
-.text-warning        { color: @warningText; }
+.text-warning {
+  color: @warningText;
+}
+
 a.text-warning:hover,
-a.text-warning:focus { color: darken(@warningText, 10%); }
+a.text-warning:focus {
+  color: darken(@warningText, 10%);
+}
 
-.text-error          { color: @errorText; }
+.text-error {
+  color: @errorText;
+}
+
 a.text-error:hover,
-a.text-error:focus   { color: darken(@errorText, 10%); }
+a.text-error:focus {
+  color: darken(@errorText, 10%);
+}
 
-.text-info           { color: @infoText; }
+.text-info {
+  color: @infoText;
+}
+
 a.text-info:hover,
-a.text-info:focus    { color: darken(@infoText, 10%); }
+a.text-info:focus {
+  color: darken(@infoText, 10%);
+}
 
-.text-success        { color: @successText; }
+.text-success {
+  color: @successText;
+}
+
 a.text-success:hover,
-a.text-success:focus { color: darken(@successText, 10%); }
+a.text-success:focus {
+  color: darken(@successText, 10%);
+}
 
-.text-left           { text-align: left; }
-.text-right          { text-align: right; }
-.text-center         { text-align: center; }
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
 
 // NOT FOR TABULA ---------------------------------------------------------------------------
 
@@ -94,7 +138,6 @@ a.text-success:focus { color: darken(@successText, 10%); }
 //   margin: @baseLineHeight 0 (@baseLineHeight * 1.5);
 //   border-bottom: 1px solid @grayLighter;
 // }
-
 
 
 // // Lists
@@ -178,11 +221,12 @@ a.text-success:focus { color: darken(@successText, 10%); }
 
 // Abbreviations and acronyms
 abbr[title],
-// Added data-* attribute to help out our tooltip plugin, per https://github.com/twitter/bootstrap/issues/5257
+  // Added data-* attribute to help out our tooltip plugin, per https://github.com/twitter/bootstrap/issues/5257
 abbr[data-original-title] {
   cursor: help;
   border-bottom: 1px dotted @grayLight;
 }
+
 abbr.initialism {
   font-size: 90%;
   text-transform: uppercase;
@@ -193,16 +237,19 @@ blockquote {
   padding: 0 0 0 15px;
   margin: 0 0 @baseLineHeight;
   border-left: 5px solid @grayLighter;
+
   p {
     margin-bottom: 0;
     font-size: @baseFontSize * 1.25;
     font-weight: 300;
     line-height: 1.25;
   }
+
   small {
     display: block;
     line-height: @baseLineHeight;
     color: @grayLight;
+
     &:before {
       content: '\2014 \00A0';
     }
@@ -215,14 +262,17 @@ blockquote {
     padding-left: 0;
     border-right: 5px solid @grayLighter;
     border-left: 0;
+
     p,
     small {
       text-align: right;
     }
+
     small {
       &:before {
         content: '';
       }
+
       &:after {
         content: '\00A0 \2014';
       }

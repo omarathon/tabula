@@ -7,76 +7,76 @@ import scala.collection.JavaConverters._
 
 class UsercodeListValidatorTest extends TestBase {
 
-	class ValidateMe {
-		var usercodes: List[String] = _
-	}
+  class ValidateMe {
+    var usercodes: List[String] = _
+  }
 
-	@Test def passes {
-		val errors = new BindException(new ValidateMe(), "command")
+  @Test def passes {
+    val errors = new BindException(new ValidateMe(), "command")
 
-		val userLookup = new MockUserLookup
-		userLookup.registerUsers("cuscav", "cusebr")
+    val userLookup = new MockUserLookup
+    userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
-		validator.userLookup = userLookup
+    val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
+    validator.userLookup = userLookup
 
-		validator.validate(errors)
+    validator.validate(errors)
 
-		errors.hasErrors should be (false)
-	}
+    errors.hasErrors should be(false)
+  }
 
-	@Test def notEmpty {
-		val errors = new BindException(new ValidateMe(), "command")
+  @Test def notEmpty {
+    val errors = new BindException(new ValidateMe(), "command")
 
-		val userLookup = new MockUserLookup
-		userLookup.registerUsers("cuscav", "cusebr")
+    val userLookup = new MockUserLookup
+    userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List("").asJava, "usercodes")
-		validator.userLookup = userLookup
+    val validator = new UsercodeListValidator(List("").asJava, "usercodes")
+    validator.userLookup = userLookup
 
-		validator.validate(errors)
+    validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("usercodes")
-		errors.getFieldError.getCode should be ("NotEmpty")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("usercodes")
+    errors.getFieldError.getCode should be("NotEmpty")
+  }
 
-	@Test def alreadyHasCode {
-		val errors = new BindException(new ValidateMe(), "command")
+  @Test def alreadyHasCode {
+    val errors = new BindException(new ValidateMe(), "command")
 
-		val userLookup = new MockUserLookup
-		userLookup.registerUsers("cuscav", "cusebr")
+    val userLookup = new MockUserLookup
+    userLookup.registerUsers("cuscav", "cusebr")
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes") {
-			override def alreadyHasCode = true
-		}
+    val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes") {
+      override def alreadyHasCode = true
+    }
 
-		validator.userLookup = userLookup
+    validator.userLookup = userLookup
 
-		validator.validate(errors)
+    validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("usercodes")
-		errors.getFieldError.getCode should be ("userId.duplicate")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("usercodes")
+    errors.getFieldError.getCode should be("userId.duplicate")
+  }
 
-	@Test def invalidUser {
-		val errors = new BindException(new ValidateMe(), "command")
+  @Test def invalidUser {
+    val errors = new BindException(new ValidateMe(), "command")
 
-		val userLookup = new MockUserLookup
-		userLookup.registerUsers("cuscav") // cusebr is not found
+    val userLookup = new MockUserLookup
+    userLookup.registerUsers("cuscav") // cusebr is not found
 
-		val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
-		validator.userLookup = userLookup
+    val validator = new UsercodeListValidator(List("cuscav", "cusebr").asJava, "usercodes")
+    validator.userLookup = userLookup
 
-		validator.validate(errors)
+    validator.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("usercodes")
-		errors.getFieldError.getCode should be ("userId.notfound.specified")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("usercodes")
+    errors.getFieldError.getCode should be("userId.notfound.specified")
+  }
 
 }

@@ -14,55 +14,55 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 trait GroupsDepartmentsAndModulesWithPermission {
 
-	self: ModuleAndDepartmentServiceComponent =>
+  self: ModuleAndDepartmentServiceComponent =>
 
-	case class Result(departments: Set[Department], modules: Set[Module])
+  case class Result(departments: Set[Department], modules: Set[Module])
 
-	def departmentsAndModulesForPermission(user: CurrentUser, permission: Permission): Result = {
-		val departments = moduleAndDepartmentService.departmentsWithPermission(user, permission)
-		val modules = moduleAndDepartmentService.modulesWithPermission(user, permission)
-		Result(departments, modules)
-	}
+  def departmentsAndModulesForPermission(user: CurrentUser, permission: Permission): Result = {
+    val departments = moduleAndDepartmentService.departmentsWithPermission(user, permission)
+    val modules = moduleAndDepartmentService.modulesWithPermission(user, permission)
+    Result(departments, modules)
+  }
 
-	def allDepartmentsForPermission(user: CurrentUser, permission: Permission): Set[Department] = {
-		val result = departmentsAndModulesForPermission(user, permission)
-		result.departments ++ result.modules.map(_.adminDepartment)
-	}
+  def allDepartmentsForPermission(user: CurrentUser, permission: Permission): Set[Department] = {
+    val result = departmentsAndModulesForPermission(user, permission)
+    result.departments ++ result.modules.map(_.adminDepartment)
+  }
 }
 
 abstract class AbstractGroupsHomeController extends GroupsController with GroupsDepartmentsAndModulesWithPermission
-	with AutowiringModuleAndDepartmentServiceComponent with AutowiringSmallGroupServiceComponent
-	with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
+  with AutowiringModuleAndDepartmentServiceComponent with AutowiringSmallGroupServiceComponent
+  with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
 
-	import GroupsDisplayHelper._
+  import GroupsDisplayHelper._
 
-	@RequestMapping
-	def home(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+  @RequestMapping
+  def home(@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		if (user.loggedIn) {
-			val departmentsAndRoutes = departmentsAndModulesForPermission(user, Permissions.Module.ManageSmallGroups)
-			val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+    if (user.loggedIn) {
+      val departmentsAndRoutes = departmentsAndModulesForPermission(user, Permissions.Module.ManageSmallGroups)
+      val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
 
-			val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser).filter(_.academicYear == academicYear)
-			val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
-			val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_,user.apparentUser))
+      val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser).filter(_.academicYear == academicYear)
+      val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
+      val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user.apparentUser))
 
-			val todaysOccurrences = smallGroupService.findTodaysEventOccurrences(Seq(user.apparentUser), departmentsAndRoutes.modules.toSeq, departmentsAndRoutes.departments.toSeq)
+      val todaysOccurrences = smallGroupService.findTodaysEventOccurrences(Seq(user.apparentUser), departmentsAndRoutes.modules.toSeq, departmentsAndRoutes.departments.toSeq)
 
-			Mav("groups/home/view",
-				"academicYear" -> academicYear,
-				"ownedDepartments" -> departmentsAndRoutes.departments,
-				"ownedModuleDepartments" -> departmentsAndRoutes.modules.map { _.adminDepartment },
-				"taughtGroups" -> taughtGroups,
-				"memberGroupsetModules" -> ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false),
-				"todaysModules" -> ViewModules.fromOccurrences(todaysOccurrences, GroupsViewModel.Tutor),
-				"showOccurrenceAttendance" -> true
-			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.homeForYear(year)):_*)
-		} else {
-			Mav("groups/home/view")
-		}
-	}
+      Mav("groups/home/view",
+        "academicYear" -> academicYear,
+        "ownedDepartments" -> departmentsAndRoutes.departments,
+        "ownedModuleDepartments" -> departmentsAndRoutes.modules.map(_.adminDepartment),
+        "taughtGroups" -> taughtGroups,
+        "memberGroupsetModules" -> ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false),
+        "todaysModules" -> ViewModules.fromOccurrences(todaysOccurrences, GroupsViewModel.Tutor),
+        "showOccurrenceAttendance" -> true
+      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.homeForYear(year)): _*)
+    } else {
+      Mav("groups/home/view")
+    }
+  }
 
 }
 
@@ -70,8 +70,8 @@ abstract class AbstractGroupsHomeController extends GroupsController with Groups
 @RequestMapping(Array("/groups"))
 class GroupsHomeController extends AbstractGroupsHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 }
 
@@ -79,7 +79,7 @@ class GroupsHomeController extends AbstractGroupsHomeController {
 @RequestMapping(Array("/groups/{academicYear}"))
 class GroupsHomeForYearController extends AbstractGroupsHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 }

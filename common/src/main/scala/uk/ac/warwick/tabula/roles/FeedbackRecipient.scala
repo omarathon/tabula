@@ -10,11 +10,11 @@ case class FeedbackRecipient(feedback: model.Feedback) extends BuiltInRole(Feedb
 
 case object FeedbackRecipientRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Feedback Recipient"
+  override def description = "Feedback Recipient"
 
-	GrantsScopedPermission(
-		AssignmentFeedback.Read,
-		AssignmentFeedback.Rate
-	)
+  GrantsScopedPermission(
+    AssignmentFeedback.Read,
+    AssignmentFeedback.Rate
+  )
 
 }

@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/edit/{meetingRecord}"))
 class EditMeetingRecordController extends AbstractManageMeetingRecordController {
 
-	@ModelAttribute("command")
-	def getCommand(@PathVariable meetingRecord: MeetingRecord) =
-		EditMeetingRecordCommand(mandatory(meetingRecord))
+  @ModelAttribute("command")
+  def getCommand(@PathVariable meetingRecord: MeetingRecord) =
+    EditMeetingRecordCommand(mandatory(meetingRecord))
 }

@@ -13,28 +13,28 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value=Array("/exams/exams/admin/department/{department}/markingworkflows/edit/{markingWorkflow}"))
+@RequestMapping(value = Array("/exams/exams/admin/department/{department}/markingworkflows/edit/{markingWorkflow}"))
 class ExamEditMarkingWorkflowController extends ExamsController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def cmd(@PathVariable department: Department, @PathVariable markingWorkflow: MarkingWorkflow) =
-		OldEditMarkingWorkflowCommand(department, markingWorkflow)
+  @ModelAttribute("command")
+  def cmd(@PathVariable department: Department, @PathVariable markingWorkflow: MarkingWorkflow) =
+    OldEditMarkingWorkflowCommand(department, markingWorkflow)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav("exams/exams/admin/markingworkflows/edit", "isExams" -> true)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
+    Mav("exams/exams/admin/markingworkflows/edit", "isExams" -> true)
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			cmd.apply()
-			Redirect(Routes.Exams.admin.markingWorkflow.list(cmd.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Exams.admin.markingWorkflow.list(cmd.department))
+    }
+  }
 
 }

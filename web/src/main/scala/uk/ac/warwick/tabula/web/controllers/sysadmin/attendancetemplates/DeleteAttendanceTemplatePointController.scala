@@ -13,28 +13,28 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/sysadmin/attendancetemplates/{template}/points/{point}/delete"))
 class DeleteAttendanceTemplatePointController extends BaseSysadminController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable point: AttendanceMonitoringTemplatePoint) = DeleteAttendanceTemplatePointCommand(mandatory(point))
+  @ModelAttribute("command")
+  def command(@PathVariable point: AttendanceMonitoringTemplatePoint) = DeleteAttendanceTemplatePointCommand(mandatory(point))
 
-	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[Unit], @PathVariable template: AttendanceMonitoringTemplate): Mav = {
-		render(template)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@ModelAttribute("command") cmd: Appliable[Unit], @PathVariable template: AttendanceMonitoringTemplate): Mav = {
+    render(template)
+  }
 
-	private def render(template: AttendanceMonitoringTemplate) = {
-		Mav("sysadmin/attendancetemplates/deletepoint").crumbs(
-			SysadminBreadcrumbs.AttendanceTemplates.Home,
-			SysadminBreadcrumbs.AttendanceTemplates.Edit(template)
-		)
-	}
+  private def render(template: AttendanceMonitoringTemplate) = {
+    Mav("sysadmin/attendancetemplates/deletepoint").crumbs(
+      SysadminBreadcrumbs.AttendanceTemplates.Home,
+      SysadminBreadcrumbs.AttendanceTemplates.Edit(template)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@ModelAttribute("command") cmd: Appliable[Unit],
-		@PathVariable template: AttendanceMonitoringTemplate
-	): Mav = {
-		cmd.apply()
-		Redirect(Routes.AttendanceTemplates.edit(template))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @ModelAttribute("command") cmd: Appliable[Unit],
+    @PathVariable template: AttendanceMonitoringTemplate
+  ): Mav = {
+    cmd.apply()
+    Redirect(Routes.AttendanceTemplates.edit(template))
+  }
 
 }

@@ -10,49 +10,49 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
 
-class DownloadMarkerFeedbackFilesCommand (val module: Module, val assignment: Assignment, val markerFeedbackId: String)
-	extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadMarkerFeedbackFilesCommand(val module: Module, val assignment: Assignment, val markerFeedbackId: String)
+  extends Command[Option[RenderableFile]] with ReadOnly {
 
-		var feedbackService: FeedbackService = Wire[FeedbackService]
+  var feedbackService: FeedbackService = Wire[FeedbackService]
 
-		val markerFeedback: MarkerFeedback = feedbackService.getMarkerFeedbackById(markerFeedbackId).get
+  val markerFeedback: MarkerFeedback = feedbackService.getMarkerFeedbackById(markerFeedbackId).get
 
-		notDeleted(assignment)
-		mustBeLinked(assignment, module)
-		PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
+  notDeleted(assignment)
+  mustBeLinked(assignment, module)
+  PermissionCheck(Permissions.AssignmentFeedback.Read, markerFeedback.feedback)
 
-		var filename: String = _
+  var filename: String = _
 
-		var zipService: ZipService = Wire.auto[ZipService]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-		private var fileFound: Boolean = _
+  private var fileFound: Boolean = _
 
-		/**
-		 * If filename is unset, it returns a renderable Zip of all files.
-		 * If filename is set, it will return a renderable attachment if found.
-		 * In either case if it's not found, None is returned.
-		 */
-		def applyInternal(): Option[RenderableFile] = {
-			val result: Option[RenderableFile] =
-				filename match {
-					case name: String if name.hasText =>
-						markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_){
-							override val filename = s"${markerFeedback.feedback.studentIdentifier}-${Option(name).getOrElse(module.code)}"
-						})
-					case _ => Some(zipped(markerFeedback))
-				}
+  /**
+    * If filename is unset, it returns a renderable Zip of all files.
+    * If filename is set, it will return a renderable attachment if found.
+    * In either case if it's not found, None is returned.
+    */
+  def applyInternal(): Option[RenderableFile] = {
+    val result: Option[RenderableFile] =
+      filename match {
+        case name: String if name.hasText =>
+          markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_) {
+            override val filename = s"${markerFeedback.feedback.studentIdentifier}-${Option(name).getOrElse(module.code)}"
+          })
+        case _ => Some(zipped(markerFeedback))
+      }
 
-			fileFound = result.isDefined
-			result
-		}
+    fileFound = result.isDefined
+    result
+  }
 
-		private def zipped(markerFeedback: MarkerFeedback) = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
+  private def zipped(markerFeedback: MarkerFeedback) = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
 
-		override def describe(d: Description): Unit = {
-			d.property("filename", filename)
-		}
+  override def describe(d: Description): Unit = {
+    d.property("filename", filename)
+  }
 
-		override def describeResult(d: Description) {
-			d.property("fileFound", fileFound)
-		}
-	}
+  override def describeResult(d: Description) {
+    d.property("fileFound", fileFound)
+  }
+}

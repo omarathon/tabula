@@ -7,55 +7,73 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
 trait ModuleDao {
-	def allModules: Seq[Module]
-	def saveOrUpdate(module: Module)
-	def saveOrUpdate(teachingInfo: ModuleTeachingInformation)
-	def delete(teachingInfo: ModuleTeachingInformation)
-	def getByCode(code: String): Option[Module]
-	def getAllByCodes(codes: Seq[String]): Seq[Module]
-	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation]
-	def getById(id: String): Option[Module]
-	def stampMissingFromImport(newStaleModuleCodes: Seq[String])
-	def hasAssignments(module: Module): Boolean
-	def findModulesNamedLike(query: String): Seq[Module]
-	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module]
-	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
-	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module]
+  def allModules: Seq[Module]
+
+  def saveOrUpdate(module: Module)
+
+  def saveOrUpdate(teachingInfo: ModuleTeachingInformation)
+
+  def delete(teachingInfo: ModuleTeachingInformation)
+
+  def getByCode(code: String): Option[Module]
+
+  def getAllByCodes(codes: Seq[String]): Seq[Module]
+
+  def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation]
+
+  def getById(id: String): Option[Module]
+
+  def stampMissingFromImport(newStaleModuleCodes: Seq[String])
+
+  def hasAssignments(module: Module): Boolean
+
+  def findModulesNamedLike(query: String): Seq[Module]
+
+  def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module]
+
+  def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module]
+
+  def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module]
 }
 
 @Repository
 class ModuleDaoImpl extends ModuleDao with Daoisms {
 
-	def allModules: Seq[Module] =
-		session.newCriteria[Module]
-			.addOrder(Order.asc("code"))
-			.seq
-			.distinct
+  def allModules: Seq[Module] =
+    session.newCriteria[Module]
+      .addOrder(Order.asc("code"))
+      .seq
+      .distinct
 
-	def saveOrUpdate(module: Module): Unit = session.saveOrUpdate(module)
-	def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit = session.saveOrUpdate(teachingInfo)
-	def delete(teachingInfo: ModuleTeachingInformation): Unit = session.delete(teachingInfo)
+  def saveOrUpdate(module: Module): Unit = session.saveOrUpdate(module)
 
-	def getByCode(code: String): Option[Module] =
-		session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
+  def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit = session.saveOrUpdate(teachingInfo)
 
-	def getAllByCodes(codes: Seq[String]): Seq[Module] = {
-		safeInSeq(() => { session.newCriteria[Module] }, "code", codes)
-	}
+  def delete(teachingInfo: ModuleTeachingInformation): Unit = session.delete(teachingInfo)
 
-	def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation] =
-		session.newCriteria[ModuleTeachingInformation]
-			.createAlias("module", "module")
-			.createAlias("department", "department")
-			.add(is("module.code", moduleCode.toLowerCase))
-			.add(is("department.code", departmentCode.toLowerCase))
-			.uniqueResult
+  def getByCode(code: String): Option[Module] =
+    session.newQuery[Module]("from Module m where code = :code").setString("code", code).uniqueResult
 
-	def getById(id: String): Option[Module] = getById[Module](id)
+  def getAllByCodes(codes: Seq[String]): Seq[Module] = {
+    safeInSeq(() => {
+      session.newCriteria[Module]
+    }, "code", codes)
+  }
 
-	def stampMissingFromImport(staleModuleCodes: Seq[String]): Unit = {
-		staleModuleCodes.grouped(Daoisms.MaxInClauseCount).foreach { staleCodes =>
-			val sqlString = """
+  def getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation] =
+    session.newCriteria[ModuleTeachingInformation]
+      .createAlias("module", "module")
+      .createAlias("department", "department")
+      .add(is("module.code", moduleCode.toLowerCase))
+      .add(is("department.code", departmentCode.toLowerCase))
+      .uniqueResult
+
+  def getById(id: String): Option[Module] = getById[Module](id)
+
+  def stampMissingFromImport(staleModuleCodes: Seq[String]): Unit = {
+    staleModuleCodes.grouped(Daoisms.MaxInClauseCount).foreach { staleCodes =>
+      val sqlString =
+        """
 				update
 					Module
 				set
@@ -66,43 +84,43 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		 			missingFromImportSince is null
 			"""
 
-			session.newUpdateQuery(sqlString)
-				.setParameter("now", now)
-				.setParameterList("staleModuleCodes", staleCodes)
-				.executeUpdate()
-		}
-	}
+      session.newUpdateQuery(sqlString)
+        .setParameter("now", now)
+        .setParameterList("staleModuleCodes", staleCodes)
+        .executeUpdate()
+    }
+  }
 
-	def hasAssignments(module: Module): Boolean = {
-		session.newCriteria[Assignment]
-			.add(is("module", module))
-			.count.intValue > 0
-	}
+  def hasAssignments(module: Module): Boolean = {
+    session.newCriteria[Assignment]
+      .add(is("module", module))
+      .count.intValue > 0
+  }
 
-	def findModulesNamedLike(query: String): Seq[Module] = {
-		val maxResults = 20
-		val modulesByCode = session.newCriteria[Module]
-			.add(likeIgnoreCase("code", s"%${query.toLowerCase}%"))
-			.addOrder(Order.asc("code"))
-			.setMaxResults(maxResults).seq
+  def findModulesNamedLike(query: String): Seq[Module] = {
+    val maxResults = 20
+    val modulesByCode = session.newCriteria[Module]
+      .add(likeIgnoreCase("code", s"%${query.toLowerCase}%"))
+      .addOrder(Order.asc("code"))
+      .setMaxResults(maxResults).seq
 
-		if (modulesByCode.size < maxResults) {
-			val modulesByName = session.newCriteria[Module]
-				.add(likeIgnoreCase("name", s"%${query.toLowerCase}%"))
-				.addOrder(Order.asc("code"))
-				.setMaxResults(maxResults - modulesByCode.size).seq
-			(modulesByCode ++ modulesByName).distinct
-		} else {
-			modulesByCode
-		}
-	}
+    if (modulesByCode.size < maxResults) {
+      val modulesByName = session.newCriteria[Module]
+        .add(likeIgnoreCase("name", s"%${query.toLowerCase}%"))
+        .addOrder(Order.asc("code"))
+        .setMaxResults(maxResults - modulesByCode.size).seq
+      (modulesByCode ++ modulesByName).distinct
+    } else {
+      modulesByCode
+    }
+  }
 
-	def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] = {
-		if (routes.isEmpty) {
-			Seq()
-		} else {
-			session.newQuery[Module](
-				"""
+  def findByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] = {
+    if (routes.isEmpty) {
+      Seq()
+    } else {
+      session.newQuery[Module](
+        """
 					select module from
 						Module as module,
 						ModuleRegistration as registration,
@@ -117,18 +135,18 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						and route in (:routes)
 						and registration.academicYear = :academicYear
 				""")
-				.setParameterList("routes", routes)
-				.setParameter("academicYear", academicYear)
-				.seq
-		}
-	}
+        .setParameterList("routes", routes)
+        .setParameter("academicYear", academicYear)
+        .seq
+    }
+  }
 
-	def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] = {
-		if (yearsOfStudy.isEmpty) {
-			Seq()
-		} else {
-			session.newQuery[Module](
-				"""
+  def findByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] = {
+    if (yearsOfStudy.isEmpty) {
+      Seq()
+    } else {
+      session.newQuery[Module](
+        """
 					select module from
 						Module as module,
 						ModuleRegistration as registration,
@@ -152,16 +170,16 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			 				or route.adminDepartment = :department
 						)
 				""")
-				.setParameter("department", department)
-				.setParameterList("yearsOfStudy", yearsOfStudy)
-				.setParameter("academicYear", academicYear)
-				.seq
-		}
-	}
+        .setParameter("department", department)
+        .setParameterList("yearsOfStudy", yearsOfStudy)
+        .setParameter("academicYear", academicYear)
+        .seq
+    }
+  }
 
-	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] = {
-		session.newQuery[Module](
-			"""
+  def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] = {
+    session.newQuery[Module](
+      """
 					select distinct module from
 						Module as module,
 						ModuleRegistration as registration,
@@ -180,10 +198,10 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 						and scyd.academicYear = :academicYear
 						and scyd.yearOfStudy = :yearOfStudy
 			""")
-			.setParameter("route", route)
-			.setParameter("yearOfStudy", yearOfStudy)
-			.setParameter("academicYear", academicYear)
-			.seq
-	}
+      .setParameter("route", route)
+      .setParameter("yearOfStudy", yearOfStudy)
+      .setParameter("academicYear", academicYear)
+      .seq
+  }
 
 }

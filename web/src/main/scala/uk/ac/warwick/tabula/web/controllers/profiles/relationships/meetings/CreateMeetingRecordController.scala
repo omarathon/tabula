@@ -14,20 +14,20 @@ import scala.collection.JavaConverters._
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/create"))
 class CreateMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
-	@ModelAttribute("command")
-	def getCommand(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
-	): Appliable[MeetingRecord] with CreateMeetingRecordCommandState = {
-		manageableRelationships match {
-			case Nil => throw new ItemNotFoundException
-			case relationships =>
-				val cmd = CreateMeetingRecordCommand(currentMember, manageableRelationships)
-				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
-				cmd
-		}
-	}
+  @ModelAttribute("command")
+  def getCommand(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
+  ): Appliable[MeetingRecord] with CreateMeetingRecordCommandState = {
+    manageableRelationships match {
+      case Nil => throw new ItemNotFoundException
+      case relationships =>
+        val cmd = CreateMeetingRecordCommand(currentMember, manageableRelationships)
+        cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
+        cmd
+    }
+  }
 
 }
 
@@ -35,18 +35,18 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/createmissed"))
 class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
-	@ModelAttribute("command")
-	def getCommand(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
-	): Appliable[MeetingRecord] = {
-		manageableRelationships match {
-			case Nil => throw new ItemNotFoundException
-			case relationships =>
-				val cmd = CreateMissedMeetingRecordCommand(currentMember, relationships)
-				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
-				cmd
-		}
-	}
+  @ModelAttribute("command")
+  def getCommand(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
+  ): Appliable[MeetingRecord] = {
+    manageableRelationships match {
+      case Nil => throw new ItemNotFoundException
+      case relationships =>
+        val cmd = CreateMissedMeetingRecordCommand(currentMember, relationships)
+        cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
+        cmd
+    }
+  }
 }

@@ -11,43 +11,44 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 import scala.concurrent.Future
 
 trait StaffTimetableEventSource extends MemberTimetableEventSource[StaffMember] {
-	override def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
+  override def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
 }
 
 trait StaffTimetableEventSourceComponent {
-	def staffTimetableEventSource: StaffTimetableEventSource
+  def staffTimetableEventSource: StaffTimetableEventSource
 }
 
 trait CombinedStaffTimetableEventSourceComponent extends StaffTimetableEventSourceComponent {
-	this: StaffTimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
+  this: StaffTimetableFetchingServiceComponent with SmallGroupEventTimetableEventSourceComponent =>
 
-	def staffTimetableEventSource: StaffTimetableEventSource = new CombinedStaffTimetableEventSource
+  def staffTimetableEventSource: StaffTimetableEventSource = new CombinedStaffTimetableEventSource
 
-	class CombinedStaffTimetableEventSource() extends StaffTimetableEventSource {
+  class CombinedStaffTimetableEventSource() extends StaffTimetableEventSource {
 
-		def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] = {
-			val timetableEvents: Future[EventList] = timetableFetchingService.getTimetableForStaff(staff.universityId)
-			val smallGroupEvents: Future[EventList] = staffGroupEventSource.eventsFor(staff, currentUser, context)
+    def eventsFor(staff: StaffMember, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList] = {
+      val timetableEvents: Future[EventList] = timetableFetchingService.getTimetableForStaff(staff.universityId)
+      val smallGroupEvents: Future[EventList] = staffGroupEventSource.eventsFor(staff, currentUser, context)
 
-			Futures.combine(
-				Seq(timetableEvents, smallGroupEvents),
-				(eventLists: Seq[EventList]) => CombinedTimetableFetchingService.mergeDuplicates(EventList.combine(eventLists))
-			)
-		}
+      Futures.combine(
+        Seq(timetableEvents, smallGroupEvents),
+        (eventLists: Seq[EventList]) => CombinedTimetableFetchingService.mergeDuplicates(EventList.combine(eventLists))
+      )
+    }
 
-	}
+  }
+
 }
 
 trait AutowiringStaffTimetableEventSourceComponent extends StaffTimetableEventSourceComponent {
-	val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
-		with SmallGroupEventTimetableEventSourceComponentImpl
-		with CombinedHttpTimetableFetchingServiceComponent
-		with AutowiringSmallGroupServiceComponent
-		with AutowiringUserLookupComponent
-		with AutowiringScientiaHttpTimetableFetchingServiceComponent
-		with AutowiringCelcatConfigurationComponent
-		with AutowiringExamTimetableConfigurationComponent
-		with AutowiringSecurityServiceComponent
-		with SystemClockComponent
-	).staffTimetableEventSource
+  val staffTimetableEventSource: StaffTimetableEventSource = (new CombinedStaffTimetableEventSourceComponent
+    with SmallGroupEventTimetableEventSourceComponentImpl
+    with CombinedHttpTimetableFetchingServiceComponent
+    with AutowiringSmallGroupServiceComponent
+    with AutowiringUserLookupComponent
+    with AutowiringScientiaHttpTimetableFetchingServiceComponent
+    with AutowiringCelcatConfigurationComponent
+    with AutowiringExamTimetableConfigurationComponent
+    with AutowiringSecurityServiceComponent
+    with SystemClockComponent
+    ).staffTimetableEventSource
 }

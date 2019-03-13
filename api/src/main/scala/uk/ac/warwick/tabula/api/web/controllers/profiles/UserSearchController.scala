@@ -13,41 +13,41 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 @RequestMapping(Array("/v1/usersearch"))
 class UserSearchController extends ApiController
-	with GetUsersApi with AutowiringProfileServiceComponent {
+  with GetUsersApi with AutowiringProfileServiceComponent {
 
-	final override def onPreRequest {
-		session.enableFilter(Member.ActiveOnlyFilter)
-	}
+  final override def onPreRequest {
+    session.enableFilter(Member.ActiveOnlyFilter)
+  }
 
-	@RequestMapping(path = Array("/undergraduates"), method = Array(GET), produces = Array("application/json"))
-	def undergraduates(
-		@ModelAttribute("getCommand") command: ViewViewableCommand[PermissionsTarget],
-		@RequestParam(required = false) level: String
-	): Mav = {
-		getMav(
-			Option(level) match {
-				case Some("f") | Some("F") => profileService.findFinalistUndergraduateUsercodes()
-				case Some(l) => profileService.findUndergraduatesUsercodesByLevel(l)
-				case None => profileService.findUndergraduateUsercodes()
-			}
-		)
-	}
+  @RequestMapping(path = Array("/undergraduates"), method = Array(GET), produces = Array("application/json"))
+  def undergraduates(
+    @ModelAttribute("getCommand") command: ViewViewableCommand[PermissionsTarget],
+    @RequestParam(required = false) level: String
+  ): Mav = {
+    getMav(
+      Option(level) match {
+        case Some("f") | Some("F") => profileService.findFinalistUndergraduateUsercodes()
+        case Some(l) => profileService.findUndergraduatesUsercodesByLevel(l)
+        case None => profileService.findUndergraduateUsercodes()
+      }
+    )
+  }
 }
 
 
 trait GetUsersApi {
 
-	self: ApiController with ProfileServiceComponent =>
+  self: ApiController with ProfileServiceComponent =>
 
-	@ModelAttribute("getCommand")
-	def getCommand(): ViewViewableCommand[PermissionsTarget] =
-		new ViewViewableCommand(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
+  @ModelAttribute("getCommand")
+  def getCommand(): ViewViewableCommand[PermissionsTarget] =
+    new ViewViewableCommand(Permissions.Profiles.ViewSearchResults, PermissionsTarget.Global)
 
-	def getMav(usercodes: Seq[String]): Mav = {
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"usercodes" -> usercodes
-		)))
-	}
+  def getMav(usercodes: Seq[String]): Mav = {
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "usercodes" -> usercodes
+    )))
+  }
 }

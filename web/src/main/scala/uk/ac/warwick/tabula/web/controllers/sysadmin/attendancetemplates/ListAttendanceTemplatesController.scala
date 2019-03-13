@@ -12,12 +12,12 @@ import uk.ac.warwick.tabula.web.controllers.sysadmin.BaseSysadminController
 @RequestMapping(value = Array("/sysadmin/attendancetemplates"))
 class ListAttendanceTemplatesController extends BaseSysadminController {
 
-	@ModelAttribute("command")
-	def command = ListAttendanceTemplatesCommand()
+  @ModelAttribute("command")
+  def command = ListAttendanceTemplatesCommand()
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringTemplate]]): Mav = {
-		Mav("sysadmin/attendancetemplates/home", "templates" -> cmd.apply())
-	}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringTemplate]]): Mav = {
+    Mav("sysadmin/attendancetemplates/home", "templates" -> cmd.apply())
+  }
 
 }

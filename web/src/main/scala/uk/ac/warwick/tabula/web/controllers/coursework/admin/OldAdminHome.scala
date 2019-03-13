@@ -19,113 +19,116 @@ import scala.collection.mutable
 import scala.xml.Elem
 
 /**
- * Screens for department and module admins.
- */
+  * Screens for department and module admins.
+  */
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin", "/${cm1.prefix}/admin/department", "/${cm1.prefix}/admin/module"))
 class OldCourseworkAdminHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
-	@RequestMapping(method=Array(GET, HEAD))
-	def homeScreen(user: CurrentUser) = {
-		if(features.redirectCM1) {
-			Redirect(CM2Routes.home)
-		} else {
-			Redirect(Routes.home)
-		}
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def homeScreen(user: CurrentUser) = {
+    if (features.redirectCM1) {
+      Redirect(CM2Routes.home)
+    } else {
+      Redirect(Routes.home)
+    }
+  }
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{dept}"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{dept}"))
 class OldCourseworkAdminDepartmentHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable dept: Department, user: CurrentUser) =
-		new AdminDepartmentHomeCommand(dept, user)
+  @ModelAttribute def command(@PathVariable dept: Department, user: CurrentUser) =
+    new AdminDepartmentHomeCommand(dept, user)
 
-	@RequestMapping
-	def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
-		if(features.redirectCM1) {
-			Redirect(CM2Routes.admin.department(cmd.department))
-		} else {
-			val info = cmd.apply()
+  @RequestMapping
+  def adminDepartment(cmd: AdminDepartmentHomeCommand): Mav = {
+    if (features.redirectCM1) {
+      Redirect(CM2Routes.admin.department(cmd.department))
+    } else {
+      val info = cmd.apply()
 
-			Mav("coursework/admin/department",
-				"department" -> cmd.department,
-				"modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
-			)
-		}
-	}
+      Mav("coursework/admin/department",
+        "department" -> cmd.department,
+        "modules" -> info.sortWith(_.code.toLowerCase < _.code.toLowerCase)
+      )
+    }
+  }
 
-	@RequestMapping(Array("/assignments.xml"))
-	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable dept: Department): Elem = {
-		val info = cmd.apply()
+  @RequestMapping(Array("/assignments.xml"))
+  def xml(cmd: AdminDepartmentHomeCommand, @PathVariable dept: Department): Elem = {
+    val info = cmd.apply()
 
-		new AdminHomeExports.XMLBuilder(dept, DepartmentHomeInformation(info, cmd.gatherNotices(info))).toXML
-	}
+    new AdminHomeExports.XMLBuilder(dept, DepartmentHomeInformation(info, cmd.gatherNotices(info))).toXML
+  }
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}"))
 class OldCourseworkAdminModuleHomeController extends OldCourseworkController with AutowiringFeaturesComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("command") def command(@PathVariable module: Module, user: CurrentUser) =
-		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
+  @ModelAttribute("command") def command(@PathVariable module: Module, user: CurrentUser) =
+    new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
-	@RequestMapping
-	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
-		val module = cmd.apply()
-		if(features.redirectCM1) {
-			Redirect(WebRoutes.admin.module(module))
-		}  else {
-			if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()
-			else Mav("coursework/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
-		}
-	}
+  @RequestMapping
+  def adminModule(@ModelAttribute("command") cmd: Appliable[Module]): Mav = {
+    val module = cmd.apply()
+    if (features.redirectCM1) {
+      Redirect(WebRoutes.admin.module(module))
+    } else {
+      if (ajax) Mav("coursework/admin/modules/admin_partial").noLayout()
+      else Mav("coursework/admin/modules/admin").crumbs(Breadcrumbs.Department(module.adminDepartment))
+    }
+  }
 }
 
 class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]]
-		with ReadOnly with Unaudited {
+  with ReadOnly with Unaudited {
 
-	var securityService: SecurityService = Wire.auto[SecurityService]
-	var moduleService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+  var securityService: SecurityService = Wire.auto[SecurityService]
+  var moduleService: ModuleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
-	val modules: JList[Module] =
-		if (securityService.can(user, Permissions.Module.ManageAssignments, mandatory(department))) {
-			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
-			PermissionCheck(Permissions.Module.ManageAssignments, department)
+  val modules: JList[Module] =
+    if (securityService.can(user, Permissions.Module.ManageAssignments, mandatory(department))) {
+      // This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
+      PermissionCheck(Permissions.Module.ManageAssignments, department)
 
-			department.modules
-		} else {
-			val managedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments, department).toList
+      department.modules
+    } else {
+      val managedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments, department).toList
 
-			// This is implied by the above, but it's nice to check anyway
-			PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)
+      // This is implied by the above, but it's nice to check anyway
+      PermissionCheckAll(Permissions.Module.ManageAssignments, managedModules)
 
-			if (managedModules.isEmpty)
-				throw PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
+      if (managedModules.isEmpty)
+        throw PermissionDeniedException(user, Permissions.Module.ManageAssignments, department)
 
-			managedModules.asJava
-		}
+      managedModules.asJava
+    }
 
-	def applyInternal(): mutable.Buffer[Module] = {
-		modules.asScala.sortBy { module => (module.assignments.isEmpty, module.code) }
-	}
+  def applyInternal(): mutable.Buffer[Module] = {
+    modules.asScala.sortBy { module => (module.assignments.isEmpty, module.code) }
+  }
 
-	def gatherNotices(modules: Seq[Module]): Map[String, Seq[Assignment]] = benchmarkTask("Gather notices") {
-		val unpublished = for (
-				module <- modules;
-				assignment <- module.assignments.asScala
-				if assignment.isAlive && assignment.hasUnreleasedFeedback
-			) yield assignment
+  def gatherNotices(modules: Seq[Module]): Map[String, Seq[Assignment]] = benchmarkTask("Gather notices") {
+    val unpublished = for (
+      module <- modules;
+      assignment <- module.assignments.asScala
+      if assignment.isAlive && assignment.hasUnreleasedFeedback
+    ) yield assignment
 
-		Map(
-			"unpublishedAssignments" -> unpublished
-		)
-	}
+    Map(
+      "unpublishedAssignments" -> unpublished
+    )
+  }
 
 }
 

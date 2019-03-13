@@ -19,19 +19,19 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/online"))
 class OnlineFeedbackListController extends CourseworkController {
 
-	type Command = Appliable[Seq[EnhancedFeedback]] with OnlineFeedbackListState
+  type Command = Appliable[Seq[EnhancedFeedback]] with OnlineFeedbackListState
 
-	@ModelAttribute
-	def command(@PathVariable assignment: Assignment): Command = OnlineFeedbackListCommand(mandatory(assignment))
+  @ModelAttribute
+  def command(@PathVariable assignment: Assignment): Command = OnlineFeedbackListCommand(mandatory(assignment))
 
-	@RequestMapping
-	def showTable(@PathVariable assignment: Assignment, @ModelAttribute command: Command, @RequestParam(value="usercode", required=false) usercode: String): Mav = {
-		Mav("cm2/admin/assignments/feedback/online_feedback_list",
-			"department" -> assignment.module.adminDepartment,
-			"studentToOpen" -> usercode,
-			"enhancedFeedbacks" -> command.apply()
-		).crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  @RequestMapping
+  def showTable(@PathVariable assignment: Assignment, @ModelAttribute command: Command, @RequestParam(value = "usercode", required = false) usercode: String): Mav = {
+    Mav("cm2/admin/assignments/feedback/online_feedback_list",
+      "department" -> assignment.module.adminDepartment,
+      "studentToOpen" -> usercode,
+      "enhancedFeedbacks" -> command.apply()
+    ).crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
 }
 
@@ -40,34 +40,34 @@ class OnlineFeedbackListController extends CourseworkController {
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/online/{student}"))
 class OnlineFeedbackController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type Command = Appliable[Feedback] with OnlineFeedbackState
+  type Command = Appliable[Feedback] with OnlineFeedbackState
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) = OnlineFeedbackCommand(
-		mandatory(assignment),
-		mandatory(student),
-		submitter,
-		GenerateGradesFromMarkCommand(mandatory(assignment))
-	)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable student: User, submitter: CurrentUser) = OnlineFeedbackCommand(
+    mandatory(assignment),
+    mandatory(student),
+    submitter,
+    GenerateGradesFromMarkCommand(mandatory(assignment))
+  )
 
-	@RequestMapping
-	def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
-		Mav("cm2/admin/assignments/feedback/online_feedback",
-			"isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
-			"command" -> command
-		).noLayout()
-	}
+  @RequestMapping
+  def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
+    Mav("cm2/admin/assignments/feedback/online_feedback",
+      "isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
+      "command" -> command
+    ).noLayout()
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			showForm(command, errors)
-		} else {
-			command.apply()
-			Mav("ajax_success").noLayout()
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      showForm(command, errors)
+    } else {
+      command.apply()
+      Mav("ajax_success").noLayout()
+    }
+  }
 
 }

@@ -10,38 +10,40 @@ import scala.language.reflectiveCalls
 
 class RoleProviderTest extends TestBase with Mockito {
 
-	val personalTutorRelationshipType = StudentRelationshipType("personalTutor", "personalTutor", "personalTutor", "personalTutor")
+  val personalTutorRelationshipType = StudentRelationshipType("personalTutor", "personalTutor", "personalTutor", "personalTutor")
 
-	@Test def noElevatedSelector() = withUser("cuscav", "0672089") {
-		val service = new RoleProvider {
-			override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = Stream()
-			override def rolesProvided: Set[Class[_ <: Role]] = Set()
-			def testCustomRolesFor[A <: PermissionsTarget](department: Department, definition: RoleDefinition, scope: A): Option[Role] =
-				customRoleFor(department)(definition, scope)
-		}
+  @Test def noElevatedSelector() = withUser("cuscav", "0672089") {
+    val service = new RoleProvider {
+      override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = Stream()
 
-		val customWildcardSelectorRoleDefinition = new CustomRoleDefinition
-		customWildcardSelectorRoleDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any[StudentRelationshipType])
-		customWildcardSelectorRoleDefinition.replacesBaseDefinition = true
-		val department = Fixtures.department("its")
-		department.customRoleDefinitions = JArrayList(customWildcardSelectorRoleDefinition)
+      override def rolesProvided: Set[Class[_ <: Role]] = Set()
 
-		val originalRoleDefinition = StudentRelationshipAgentRoleDefinition(personalTutorRelationshipType)
+      def testCustomRolesFor[A <: PermissionsTarget](department: Department, definition: RoleDefinition, scope: A): Option[Role] =
+        customRoleFor(department)(definition, scope)
+    }
 
-		val customRole = service.testCustomRolesFor(department, originalRoleDefinition, null)
+    val customWildcardSelectorRoleDefinition = new CustomRoleDefinition
+    customWildcardSelectorRoleDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any[StudentRelationshipType])
+    customWildcardSelectorRoleDefinition.replacesBaseDefinition = true
+    val department = Fixtures.department("its")
+    department.customRoleDefinitions = JArrayList(customWildcardSelectorRoleDefinition)
 
-		customRole.get.definition match {
-			case customRoleDefinition: CustomRoleDefinition =>
-				// Check original hasn't been changed (otherwise the restricted selector is persisted)
-				department.customRoleDefinitions.size should be (1)
-				department.customRoleDefinitions.get(0).builtInBaseRoleDefinition.asInstanceOf[SelectorBuiltInRoleDefinition[StudentRelationshipType]].selector should be (PermissionsSelector.Any[StudentRelationshipType])
-				customRoleDefinition.baseRoleDefinition match {
-					case selectorDefinition: SelectorBuiltInRoleDefinition[_] =>
-						selectorDefinition.selector should be(personalTutorRelationshipType)
-					case _ =>
-						fail("customRole.head.definition should be a SelectorBuiltInRoleDefinition")
-				}
-		}
-	}
+    val originalRoleDefinition = StudentRelationshipAgentRoleDefinition(personalTutorRelationshipType)
+
+    val customRole = service.testCustomRolesFor(department, originalRoleDefinition, null)
+
+    customRole.get.definition match {
+      case customRoleDefinition: CustomRoleDefinition =>
+        // Check original hasn't been changed (otherwise the restricted selector is persisted)
+        department.customRoleDefinitions.size should be(1)
+        department.customRoleDefinitions.get(0).builtInBaseRoleDefinition.asInstanceOf[SelectorBuiltInRoleDefinition[StudentRelationshipType]].selector should be(PermissionsSelector.Any[StudentRelationshipType])
+        customRoleDefinition.baseRoleDefinition match {
+          case selectorDefinition: SelectorBuiltInRoleDefinition[_] =>
+            selectorDefinition.selector should be(personalTutorRelationshipType)
+          case _ =>
+            fail("customRole.head.definition should be a SelectorBuiltInRoleDefinition")
+        }
+    }
+  }
 
 }

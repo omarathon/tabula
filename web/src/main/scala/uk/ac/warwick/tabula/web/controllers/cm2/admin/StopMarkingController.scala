@@ -20,28 +20,28 @@ import uk.ac.warwick.tabula.web.controllers.cm2.{AdminSelectionAction, Coursewor
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/stop-marking"))
 class StopMarkingController extends CourseworkController with AdminSelectionAction {
 
-	validatesSelf[SelfValidating]
-	type Command = Appliable[Seq[AssignmentFeedback]] with StopMarkingRequest
+  validatesSelf[SelfValidating]
+  type Command = Appliable[Seq[AssignmentFeedback]] with StopMarkingRequest
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
-		mandatory(Option(assignment.cm2MarkingWorkflow))
-		StopMarkingMarkingCommand(mandatory(assignment), user)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
+    mandatory(Option(assignment.cm2MarkingWorkflow))
+    StopMarkingMarkingCommand(mandatory(assignment), user)
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		Mav("cm2/admin/assignments/submissionsandfeedback/stop-marking")
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    Mav("cm2/admin/assignments/submissionsandfeedback/stop-marking")
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		if (errors.hasErrors)
-			showForm(assignment, cmd, errors)
-		else {
-			cmd.apply()
-			RedirectBack(assignment)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    if (errors.hasErrors)
+      showForm(assignment, cmd, errors)
+    else {
+      cmd.apply()
+      RedirectBack(assignment)
+    }
+  }
 
 }

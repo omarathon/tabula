@@ -14,13 +14,13 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class CleanupTemporaryFilesJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingCleanupTemporaryFiles)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					new CleanupTemporaryFilesCommand().apply()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingCleanupTemporaryFiles)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          new CleanupTemporaryFilesCommand().apply()
+        }
+      }
+  }
 
 }

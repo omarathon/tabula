@@ -10,39 +10,42 @@ import uk.ac.warwick.tabula.services.scheduling.ModuleInfo
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
+class ModuleFixtureCommand extends CommandInternal[Module] with Logging {
 
-	this: ModuleAndDepartmentServiceComponent with SessionComponent=>
-	import ImportAcademicInformationCommand._
+  this: ModuleAndDepartmentServiceComponent with SessionComponent =>
 
-  var name:String = _
-	var code:String = _
-	var shortName:String = _
-	var departmentCode:String = _
+  import ImportAcademicInformationCommand._
 
-	def moduleInfo = ModuleInfo(name, shortName, code, "", DegreeType.Undergraduate)
-	def applyInternal(): Module =
-		transactional() {
-			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
-			moduleAndDepartmentService.getModuleByCode(code).foreach { module =>
-				department.modules.remove(module)
-				session.delete(module)
-				logger.info(s"Deleted module ${code}")
-			}
-			val m = newModuleFrom(moduleInfo, department)
-			session.save(m)
-			logger.info(s"Created module ${code}")
-			m
-		}
+  var name: String = _
+  var code: String = _
+  var shortName: String = _
+  var departmentCode: String = _
+
+  def moduleInfo = ModuleInfo(name, shortName, code, "", DegreeType.Undergraduate)
+
+  def applyInternal(): Module =
+    transactional() {
+      val department = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
+      moduleAndDepartmentService.getModuleByCode(code).foreach { module =>
+        department.modules.remove(module)
+        session.delete(module)
+        logger.info(s"Deleted module ${code}")
+      }
+      val m = newModuleFrom(moduleInfo, department)
+      session.save(m)
+      logger.info(s"Created module ${code}")
+      m
+    }
 }
-object ModuleFixtureCommand{
-	def apply(): ModuleFixtureCommand with ComposableCommand[Module] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with Unaudited with PubliclyVisiblePermissions ={
-		new ModuleFixtureCommand()
-			with ComposableCommand[Module]
-			with AutowiringModuleAndDepartmentServiceComponent
-			with Daoisms
-			with Unaudited
-			with PubliclyVisiblePermissions
 
-	}
+object ModuleFixtureCommand {
+  def apply(): ModuleFixtureCommand with ComposableCommand[Module] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with Unaudited with PubliclyVisiblePermissions = {
+    new ModuleFixtureCommand()
+      with ComposableCommand[Module]
+      with AutowiringModuleAndDepartmentServiceComponent
+      with Daoisms
+      with Unaudited
+      with PubliclyVisiblePermissions
+
+  }
 }

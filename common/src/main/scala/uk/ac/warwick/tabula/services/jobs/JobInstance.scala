@@ -7,50 +7,55 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 
 /**
- * Interface for a Job to update its status in the database.
- *
- * The main implementation of this is JobInstanceImpl which is
- * stores in the database.
- */
+  * Interface for a Job to update its status in the database.
+  *
+  * The main implementation of this is JobInstanceImpl which is
+  * stores in the database.
+  */
 trait JobInstance {
-	type JsonMap = Map[String, Any]
+  type JsonMap = Map[String, Any]
 
-	var propsMap: Map[String, Any]
+  var propsMap: Map[String, Any]
 
-	def jobType: String
+  def jobType: String
 
-	var id: String
+  var id: String
 
-	def optInt(name: String): Option[Int] = propsMap.get(name).map { _.toString.toInt }
-	def getString(name: String): String = propsMap(name).toString
-	def setString(name: String, value: String): Unit = propsMap = propsMap + (name -> value)
+  def optInt(name: String): Option[Int] = propsMap.get(name).map(_.toString.toInt)
 
-	def getStrings(name: String): Seq[String] = propsMap(name) match {
-		case seq: Seq[String] @unchecked => seq
-		case jList => jList.asInstanceOf[JList[String]].asScala
-	}
-	def setStrings(name: String, value: Seq[String]): Unit = propsMap = propsMap + (name -> value.asJava)
+  def getString(name: String): String = propsMap(name).toString
 
-	def getStringMap(name: String): Map[String, String] = propsMap(name) match {
-		case map: Map[String, String] @unchecked => map
-		case jMap => jMap.asInstanceOf[JMap[String, String]].asScala.toMap
-	}
-	def setStringMap(name: String, value: Map[String, String]): Unit = propsMap = propsMap + (name -> value.asJava)
+  def setString(name: String, value: String): Unit = propsMap = propsMap + (name -> value)
 
-	var createdDate: DateTime
-	var updatedDate: DateTime
+  def getStrings(name: String): Seq[String] = propsMap(name) match {
+    case seq: Seq[String]@unchecked => seq
+    case jList => jList.asInstanceOf[JList[String]].asScala
+  }
 
-	var status: String
-	var progress: Int
+  def setStrings(name: String, value: Seq[String]): Unit = propsMap = propsMap + (name -> value.asJava)
 
-	var started: Boolean
-	var finished: Boolean
-	var succeeded: Boolean
+  def getStringMap(name: String): Map[String, String] = propsMap(name) match {
+    case map: Map[String, String]@unchecked => map
+    case jMap => jMap.asInstanceOf[JMap[String, String]].asScala.toMap
+  }
 
-	var schedulerInstance: String
+  def setStringMap(name: String, value: Map[String, String]): Unit = propsMap = propsMap + (name -> value.asJava)
 
-	def json: JsonMap
+  var createdDate: DateTime
+  var updatedDate: DateTime
 
-	def user: CurrentUser
-	def userId: String
+  var status: String
+  var progress: Int
+
+  var started: Boolean
+  var finished: Boolean
+  var succeeded: Boolean
+
+  var schedulerInstance: String
+
+  def json: JsonMap
+
+  def user: CurrentUser
+
+  def userId: String
 }

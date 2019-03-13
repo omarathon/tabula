@@ -20,87 +20,88 @@ import scala.util.{Failure, Try}
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/timetables/drafts/{academicYear}/{endpoint}"))
 class DepartmentDraftTimetablesController extends ProfilesController
-	with AutowiringUserLookupComponent {
+  with AutowiringUserLookupComponent {
 
-	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department): Department = department
+  @ModelAttribute("activeDepartment")
+  def activeDepartment(@PathVariable department: Department): Department = department
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentEventsCommand.CommandType = {
-		val scientiaConfiguration = new ScientiaConfiguration {
-			override val perYearUris: Seq[(String, AcademicYear)] = Seq(
-				// FIXME hardcoded host
-				s"https://timetablingmanagement.warwick.ac.uk/$endpoint" -> academicYear
-			)
-			override val cacheSuffix: String = s"$endpoint${academicYear.startYear}"
-			override val cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
-		}
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable endpoint: String): DepartmentEventsCommand.CommandType = {
+    val scientiaConfiguration = new ScientiaConfiguration {
+      override val perYearUris: Seq[(String, AcademicYear)] = Seq(
+        // FIXME hardcoded host
+        s"https://timetablingmanagement.warwick.ac.uk/$endpoint" -> academicYear
+      )
+      override val cacheSuffix: String = s"$endpoint${academicYear.startYear}"
+      override val cacheExpiryTime: Int = CachedPartialTimetableFetchingService.defaultCacheExpiryTime
+    }
 
-		val draftTimetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
+    val draftTimetableFetchingService = ScientiaHttpTimetableFetchingService(scientiaConfiguration)
 
-		val moduleTimetableEventSource: ModuleTimetableEventSource =
-			new CombinedModuleTimetableEventSourceComponent
-				with SmallGroupEventTimetableEventSourceComponentImpl
-				with AutowiringSmallGroupServiceComponent
-				with AutowiringUserLookupComponent
-				with AutowiringCelcatConfigurationComponent
-				with AutowiringExamTimetableConfigurationComponent
-				with AutowiringSecurityServiceComponent
-				with SystemClockComponent
-				with ModuleTimetableFetchingServiceComponent {
-				override val timetableFetchingService: ModuleTimetableFetchingService = draftTimetableFetchingService
-			}.moduleTimetableEventSource
+    val moduleTimetableEventSource: ModuleTimetableEventSource =
+      new CombinedModuleTimetableEventSourceComponent
+        with SmallGroupEventTimetableEventSourceComponentImpl
+        with AutowiringSmallGroupServiceComponent
+        with AutowiringUserLookupComponent
+        with AutowiringCelcatConfigurationComponent
+        with AutowiringExamTimetableConfigurationComponent
+        with AutowiringSecurityServiceComponent
+        with SystemClockComponent
+        with ModuleTimetableFetchingServiceComponent {
+        override val timetableFetchingService: ModuleTimetableFetchingService = draftTimetableFetchingService
+      }.moduleTimetableEventSource
 
-		val staffTimetableEventSource: StaffTimetableEventSource =
-			new CombinedStaffTimetableEventSourceComponent
-				with SmallGroupEventTimetableEventSourceComponentImpl
-				with AutowiringSmallGroupServiceComponent
-				with AutowiringUserLookupComponent
-				with AutowiringScientiaConfigurationComponent
-				with AutowiringCelcatConfigurationComponent
-				with AutowiringExamTimetableConfigurationComponent
-				with AutowiringSecurityServiceComponent
-				with SystemClockComponent
-				with StaffTimetableFetchingServiceComponent {
-				override val timetableFetchingService: StaffTimetableFetchingService = draftTimetableFetchingService
-			}.staffTimetableEventSource
+    val staffTimetableEventSource: StaffTimetableEventSource =
+      new CombinedStaffTimetableEventSourceComponent
+        with SmallGroupEventTimetableEventSourceComponentImpl
+        with AutowiringSmallGroupServiceComponent
+        with AutowiringUserLookupComponent
+        with AutowiringScientiaConfigurationComponent
+        with AutowiringCelcatConfigurationComponent
+        with AutowiringExamTimetableConfigurationComponent
+        with AutowiringSecurityServiceComponent
+        with SystemClockComponent
+        with StaffTimetableFetchingServiceComponent {
+        override val timetableFetchingService: StaffTimetableFetchingService = draftTimetableFetchingService
+      }.staffTimetableEventSource
 
-		DepartmentEventsCommand.draft(
-			mandatory(department),
-			academicYear,
-			user,
-			new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
-			// Don't support students
-			new ViewStudentMemberEventsCommandFactory() {
-				override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =
-					new Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest {
-						override val member: StudentMember = student
-						override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
-					}
-			},
-			new ViewStaffMemberEventsCommandFactoryImpl(user, staffTimetableEventSource)
-		)
-	}
+    DepartmentEventsCommand.draft(
+      mandatory(department),
+      academicYear,
+      user,
+      new ViewModuleTimetableCommandFactoryImpl(moduleTimetableEventSource),
+      // Don't support students
+      new ViewStudentMemberEventsCommandFactory() {
+        override def apply(student: StudentMember): Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest =
+          new Appliable[Try[EventOccurrenceList]] with ViewMemberEventsRequest {
+            override val member: StudentMember = student
 
-	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("profiles/timetables/department_draft",
-			"startDate" -> academicYear.termOrVacation(PeriodType.autumnTerm).firstDay,
-			"canFilterStudents" -> false,
-			"canFilterStaff" -> securityService.can(user, DepartmentEventsCommand.FilterStaffPermission, mandatory(department)),
-			"canFilterRoute" -> false,
-			"canFilterYearOfStudy" -> false
-		)
-	}
+            override def apply(): Try[EventOccurrenceList] = Failure(new IllegalArgumentException("Filtering students is not supported for draft timetables"))
+          }
+      },
+      new ViewStaffMemberEventsCommandFactoryImpl(user, staffTimetableEventSource)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def post(
-		@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType,
-		@PathVariable department: Department
-	): Mav = {
-		val result = cmd.apply()
-		val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
-		Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("profiles/timetables/department_draft",
+      "startDate" -> academicYear.termOrVacation(PeriodType.autumnTerm).firstDay,
+      "canFilterStudents" -> false,
+      "canFilterStaff" -> securityService.can(user, DepartmentEventsCommand.FilterStaffPermission, mandatory(department)),
+      "canFilterRoute" -> false,
+      "canFilterYearOfStudy" -> false
+    )
+  }
+
+  @RequestMapping(method = Array(POST))
+  def post(
+    @ModelAttribute("command") cmd: DepartmentEventsCommand.CommandType,
+    @PathVariable department: Department
+  ): Mav = {
+    val result = cmd.apply()
+    val calendarEvents = FullCalendarEvent.colourEvents(result._1.events.map(FullCalendarEvent(_, userLookup)))
+    Mav(new JSONView(Map("events" -> calendarEvents, "lastUpdated" -> result._1.lastUpdated, "errors" -> result._2)))
+  }
 
 }

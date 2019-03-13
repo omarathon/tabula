@@ -7,7 +7,7 @@ import java.lang.annotation.*;
  * that its access inside a view is restricted by the permissions passed.
  * The scope is the containing object (although it's not checked for
  * scope-less permissions, obviously).
- *
+ * <p>
  * Don't use this annotation directly because the default behaviour
  * is to only add it to the private field. Instead use
  * uk.ac.warwick.tabula.system.permissions.Restricted which is an alias to this
@@ -17,10 +17,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestrictedInternal {
 
-	/**
-	 * The name of the permissions to check. We can't pass Permissions directly
-	 * here as annotations don't support that. Boo
-	 */
-	String[] value();
+  /**
+   * The name of the permissions to check. We can't pass Permissions directly
+   * here as annotations don't support that. Boo
+   */
+  String[] value();
 
 }

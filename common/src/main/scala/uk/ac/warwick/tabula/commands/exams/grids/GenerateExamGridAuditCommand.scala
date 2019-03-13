@@ -10,54 +10,53 @@ import scala.collection.JavaConverters._
 
 object GenerateExamGridAuditCommand {
 
-	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
+  type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 
-	def apply(cmd: SelectCourseCommand) =
-		new GenerateExamGridAuditCommandInternal(cmd.department, cmd.academicYear)
-			with ComposableCommand[Unit]
-			with GenerateExamGridAuditState
-			with GenerateExamGridAuditDescription
-			with GenerateExamGridAuditPermissions
-			with ReadOnly
-		{
-			courses = cmd.courses
-			routes = cmd.routes
-			yearOfStudy = cmd.yearOfStudy
-		}
+  def apply(cmd: SelectCourseCommand) =
+    new GenerateExamGridAuditCommandInternal(cmd.department, cmd.academicYear)
+      with ComposableCommand[Unit]
+      with GenerateExamGridAuditState
+      with GenerateExamGridAuditDescription
+      with GenerateExamGridAuditPermissions
+      with ReadOnly {
+      courses = cmd.courses
+      routes = cmd.routes
+      yearOfStudy = cmd.yearOfStudy
+    }
 
 }
 
 class GenerateExamGridAuditCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Unit] {
+  extends CommandInternal[Unit] {
 
-	override def applyInternal(): Unit = {}
+  override def applyInternal(): Unit = {}
 }
 
 trait GenerateExamGridAuditPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: GenerateExamGridAuditState =>
+  self: GenerateExamGridAuditState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ExamGrids, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Department.ExamGrids, department)
+  }
 
 }
 
 trait GenerateExamGridAuditDescription extends Describable[Unit] {
-	self: GenerateExamGridAuditState =>
+  self: GenerateExamGridAuditState =>
 
-	override lazy val eventName = "GenerateExamGrid"
+  override lazy val eventName = "GenerateExamGrid"
 
-	override def describe(d: Description) {
-		d.department(department)
-		 .property("academicYear", academicYear)
-		 .property("courses", courses.asScala.map(_.code).mkString(", "))
-		 .property("routes", routes.asScala.map(_.code).mkString(", "))
-		 .property("yearOfStudy", yearOfStudy)
-	}
+  override def describe(d: Description) {
+    d.department(department)
+      .property("academicYear", academicYear)
+      .property("courses", courses.asScala.map(_.code).mkString(", "))
+      .property("routes", routes.asScala.map(_.code).mkString(", "))
+      .property("yearOfStudy", yearOfStudy)
+  }
 }
 
 trait GenerateExamGridAuditState extends GenerateExamGridSelectCourseCommandRequest {
-	val department: Department
-	val academicYear: AcademicYear
+  val department: Department
+  val academicYear: AcademicYear
 }

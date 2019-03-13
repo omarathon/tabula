@@ -12,37 +12,37 @@ import uk.ac.warwick.userlookup.User
 
 
 object RemoveAgedApplicantsCommand {
-	def apply() =
-		new RemoveAgedApplicantsCommandInternal
-			with ComposableCommand[Seq[String]]
-			with AutowiringPermissionsServiceComponent
-			with AutowiringMemberDaoComponent
-			with RemoveAgedApplicantsPermissions
-			with RemoveAgedApplicantsDescription
+  def apply() =
+    new RemoveAgedApplicantsCommandInternal
+      with ComposableCommand[Seq[String]]
+      with AutowiringPermissionsServiceComponent
+      with AutowiringMemberDaoComponent
+      with RemoveAgedApplicantsPermissions
+      with RemoveAgedApplicantsDescription
 }
 
 class RemoveAgedApplicantsCommandInternal extends CommandInternal[Seq[String]] {
-	self: PermissionsServiceComponent with MemberDaoComponent =>
+  self: PermissionsServiceComponent with MemberDaoComponent =>
 
-	override protected def applyInternal(): Seq[String] = transactional() {
-		val uniIdsToBeRemoved: Seq[String] = memberDao.getMissingBefore[ApplicantMember](
-			from = DateTime.now().minusMonths(2)
-		)
-		memberDao.deleteByUniversityIds(uniIdsToBeRemoved)
-		uniIdsToBeRemoved
-	}
+  override protected def applyInternal(): Seq[String] = transactional() {
+    val uniIdsToBeRemoved: Seq[String] = memberDao.getMissingBefore[ApplicantMember](
+      from = DateTime.now().minusMonths(2)
+    )
+    memberDao.deleteByUniversityIds(uniIdsToBeRemoved)
+    uniIdsToBeRemoved
+  }
 }
 
 trait RemoveAgedApplicantsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ImportSystemData)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.ImportSystemData)
+  }
 }
 
 trait RemoveAgedApplicantsDescription extends Describable[Seq[String]] {
-	override def describe(d: Description) {}
+  override def describe(d: Description) {}
 
-	override def describeResult(d: Description, result: Seq[String]): Unit = {
-		d.studentIds(result)
-	}
+  override def describeResult(d: Description, result: Seq[String]): Unit = {
+    d.studentIds(result)
+  }
 }

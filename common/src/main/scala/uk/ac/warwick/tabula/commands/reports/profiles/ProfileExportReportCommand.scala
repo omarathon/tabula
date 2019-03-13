@@ -14,65 +14,67 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 
 object ProfileExportReportCommand {
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
-		new ProfileExportReportCommandInternal(department, academicYear, user)
-			with AutowiringJobServiceComponent
-			with AutowiringProfileServiceComponent
-			with ComposableCommand[JobInstance]
-			with ProfileExportReportValidation
-			with Unaudited
-			with ProfileExportReportPermissions
-			with ProfileExportReportCommandState
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+    new ProfileExportReportCommandInternal(department, academicYear, user)
+      with AutowiringJobServiceComponent
+      with AutowiringProfileServiceComponent
+      with ComposableCommand[JobInstance]
+      with ProfileExportReportValidation
+      with Unaudited
+      with ProfileExportReportPermissions
+      with ProfileExportReportCommandState
 }
 
 
 class ProfileExportReportCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[JobInstance] {
+  extends CommandInternal[JobInstance] {
 
-	self: JobServiceComponent with ProfileExportReportCommandState =>
+  self: JobServiceComponent with ProfileExportReportCommandState =>
 
-	override def applyInternal(): JobInstance = {
-		jobService.add(Option(user), ProfileExportJob(students.asScala, academicYear))
-	}
+  override def applyInternal(): JobInstance = {
+    jobService.add(Option(user), ProfileExportJob(students.asScala, academicYear))
+  }
 
 }
 
 trait ProfileExportReportValidation extends SelfValidating {
 
-	self: ProfileExportReportCommandState with ProfileServiceComponent =>
+  self: ProfileExportReportCommandState with ProfileServiceComponent =>
 
-	override def validate(errors: Errors) {
-		if (students.isEmpty) {
-			errors.rejectValue("students", "reports.profiles.export.noStudents")
-		} else {
-			val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala).groupBy(_.universityId).mapValues(_.head)
-			val notMembers = students.asScala.filter(uniId => memberMap.get(uniId).isEmpty)
-			if (notMembers.nonEmpty) {
-				errors.rejectValue("students", "reports.profiles.export.notMembers", Array(notMembers.mkString(", ")), "")
-			}
-			val outsideDepartment = memberMap.values.toSeq.filterNot(member => member.affiliatedDepartments.flatMap(_.subDepartmentsContaining(member)).contains(department))
-			if (outsideDepartment.nonEmpty) {
-				errors.rejectValue("students", "reports.profiles.export.outsideDepartment", Array(outsideDepartment.map(m => s"${m.fullName.getOrElse("")} (${m.universityId})").mkString(", ")), "")
-			}
-		}
-	}
+  override def validate(errors: Errors) {
+    if (students.isEmpty) {
+      errors.rejectValue("students", "reports.profiles.export.noStudents")
+    } else {
+      val memberMap = profileService.getAllMembersWithUniversityIds(students.asScala).groupBy(_.universityId).mapValues(_.head)
+      val notMembers = students.asScala.filter(uniId => memberMap.get(uniId).isEmpty)
+      if (notMembers.nonEmpty) {
+        errors.rejectValue("students", "reports.profiles.export.notMembers", Array(notMembers.mkString(", ")), "")
+      }
+      val outsideDepartment = memberMap.values.toSeq.filterNot(member => member.affiliatedDepartments.flatMap(_.subDepartmentsContaining(member)).contains(department))
+      if (outsideDepartment.nonEmpty) {
+        errors.rejectValue("students", "reports.profiles.export.outsideDepartment", Array(outsideDepartment.map(m => s"${m.fullName.getOrElse("")} (${m.universityId})").mkString(", ")), "")
+      }
+    }
+  }
 
 }
 
 trait ProfileExportReportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ProfileExportReportCommandState =>
+  self: ProfileExportReportCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Reports, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Department.Reports, department)
+  }
 
 }
 
 trait ProfileExportReportCommandState {
-	def department: Department
-	def academicYear: AcademicYear
-	def user: CurrentUser
+  def department: Department
 
-	var students: JList[String] = JArrayList()
+  def academicYear: AcademicYear
+
+  def user: CurrentUser
+
+  var students: JList[String] = JArrayList()
 }

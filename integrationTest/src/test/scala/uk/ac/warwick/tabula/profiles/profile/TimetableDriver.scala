@@ -14,42 +14,42 @@ import scala.xml.Elem
 
 trait TimetableDriver extends FixturesDriver {
 
-	def setTimetableFor(userId:String, year:AcademicYear, content:Elem) {
-		val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
+  def setTimetableFor(userId: String, year: AcademicYear, content: Elem) {
+    val uri = FunctionalTestProperties.SiteRoot + "/stubTimetable/student"
 
-		val req =
-			RequestBuilder.post(uri)
-				.addParameter("studentId", userId)
-				.addParameter("year", year.toString.replace("/", ""))
-				.addParameter("content", content.toString)
+    val req =
+      RequestBuilder.post(uri)
+        .addParameter("studentId", userId)
+        .addParameter("year", year.toString.replace("/", ""))
+        .addParameter("content", content.toString)
 
-		httpClient.execute(
-			req.build(),
-			ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
-		)
-	}
+    httpClient.execute(
+      req.build(),
+      ApacheHttpClientUtils.statusCodeFilteringHandler(HttpStatus.SC_OK)(EntityUtils.consumeQuietly)
+    )
+  }
 
-	def requestWholeYearsTimetableFeedFor(user:LoginDetails, asUser:Option[LoginDetails]=None ):Seq[Map[String,Any]]={
-		val requestor = asUser.getOrElse(user)
-		// request all the events for the current year
-		val startOfYear = AcademicYear.now().firstDay.toDateTimeAtStartOfDay
-		val start = startOfYear.getMillis
-		val end = startOfYear.plusYears(1).getMillis
-		val req =
-			RequestBuilder.get(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar")
-				.addParameter("from", start.toString)
-				.addParameter("to", end.toString)
-				.addParameter("whoFor", user.warwickId)
-				.addParameter("forceBasic", "true")
-  			.setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(requestor.usercode, requestor.password)))
+  def requestWholeYearsTimetableFeedFor(user: LoginDetails, asUser: Option[LoginDetails] = None): Seq[Map[String, Any]] = {
+    val requestor = asUser.getOrElse(user)
+    // request all the events for the current year
+    val startOfYear = AcademicYear.now().firstDay.toDateTimeAtStartOfDay
+    val start = startOfYear.getMillis
+    val end = startOfYear.plusYears(1).getMillis
+    val req =
+      RequestBuilder.get(s"${FunctionalTestProperties.SiteRoot}/api/v1/member/${user.warwickId}/timetable/calendar")
+        .addParameter("from", start.toString)
+        .addParameter("to", end.toString)
+        .addParameter("whoFor", user.warwickId)
+        .addParameter("forceBasic", "true")
+        .setHeader(ApacheHttpClientUtils.basicAuthHeader(new UsernamePasswordCredentials(requestor.usercode, requestor.password)))
 
-		val rawJSON = httpClient.execute(req.build(), new BasicResponseHandler)
-		JSON.parseFull(rawJSON) match {
-			case Some(json: Map[String, Any] @unchecked) => json.get("events") match {
-				case Some(events: Seq[Map[String, Any]] @unchecked) => events
-				case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
-			}
-			case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
-		}
-	}
+    val rawJSON = httpClient.execute(req.build(), new BasicResponseHandler)
+    JSON.parseFull(rawJSON) match {
+      case Some(json: Map[String, Any]@unchecked) => json.get("events") match {
+        case Some(events: Seq[Map[String, Any]]@unchecked) => events
+        case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
+      }
+      case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
+    }
+  }
 }

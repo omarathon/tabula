@@ -17,93 +17,95 @@ import scala.concurrent.Await
 import scala.util.Try
 
 object ViewModuleTimetableCommand {
-	private[timetables] type ReturnType = Try[EventList]
-	type CommandType = Appliable[ReturnType] with ViewModuleTimetableRequest
+  private[timetables] type ReturnType = Try[EventList]
+  type CommandType = Appliable[ReturnType] with ViewModuleTimetableRequest
 
-	def apply(module: Module, user: CurrentUser): CommandType =
-		new ViewModuleTimetableCommandInternal(module, user)
-			with ComposableCommand[ReturnType]
-			with ViewModuleTimetablePermissions
-			with ViewModuleTimetableValidation
-			with ViewModuleTimetableDescription with ReadOnly
-			with AutowiringScientiaConfigurationComponent
-			with SystemClockComponent
-			with AutowiringModuleTimetableEventSourceComponent
+  def apply(module: Module, user: CurrentUser): CommandType =
+    new ViewModuleTimetableCommandInternal(module, user)
+      with ComposableCommand[ReturnType]
+      with ViewModuleTimetablePermissions
+      with ViewModuleTimetableValidation
+      with ViewModuleTimetableDescription with ReadOnly
+      with AutowiringScientiaConfigurationComponent
+      with SystemClockComponent
+      with AutowiringModuleTimetableEventSourceComponent
 
-	// Re-usable service
-	def apply(module: Module, user: CurrentUser, source: ModuleTimetableEventSource): CommandType =
-		new ViewModuleTimetableCommandInternal(module, user)
-			with ComposableCommand[ReturnType]
-			with ViewModuleTimetablePermissions
-			with ViewModuleTimetableValidation
-			with Unaudited with ReadOnly
-			with ModuleTimetableEventSourceComponent {
-			val moduleTimetableEventSource: ModuleTimetableEventSource = source
-		}
+  // Re-usable service
+  def apply(module: Module, user: CurrentUser, source: ModuleTimetableEventSource): CommandType =
+    new ViewModuleTimetableCommandInternal(module, user)
+      with ComposableCommand[ReturnType]
+      with ViewModuleTimetablePermissions
+      with ViewModuleTimetableValidation
+      with Unaudited with ReadOnly
+      with ModuleTimetableEventSourceComponent {
+      val moduleTimetableEventSource: ModuleTimetableEventSource = source
+    }
 }
 
 trait ViewModuleTimetableCommandFactory {
-	def apply(module: Module, user: CurrentUser): CommandType
+  def apply(module: Module, user: CurrentUser): CommandType
 }
+
 class ViewModuleTimetableCommandFactoryImpl(source: ModuleTimetableEventSource) extends ViewModuleTimetableCommandFactory {
-	def apply(module: Module, user: CurrentUser) = ViewModuleTimetableCommand(module, user, source)
+  def apply(module: Module, user: CurrentUser) = ViewModuleTimetableCommand(module, user, source)
 }
 
 abstract class ViewModuleTimetableCommandInternal(val module: Module, user: CurrentUser)
-	extends CommandInternal[ReturnType]
-		with ViewModuleTimetableRequest {
+  extends CommandInternal[ReturnType]
+    with ViewModuleTimetableRequest {
 
-	self: ModuleTimetableEventSourceComponent =>
+  self: ModuleTimetableEventSourceComponent =>
 
-	def applyInternal(): ReturnType = {
-		Try(Await.result(moduleTimetableEventSource.eventsFor(module, academicYear, user, sourcesToShow), ViewModuleEventsCommand.Timeout))
-			.recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }
-			.map { events => events.filter { event => event.year == academicYear }}
-	}
+  def applyInternal(): ReturnType = {
+    Try(Await.result(moduleTimetableEventSource.eventsFor(module, academicYear, user, sourcesToShow), ViewModuleEventsCommand.Timeout))
+      .recover { case _: TimeoutException | _: TimetableEmptyException => EventList.empty }
+      .map { events => events.filter { event => event.year == academicYear } }
+  }
 }
 
 // State - unmodifiable pre-requisites
 trait ViewModuleTimetableState {
-	val module: Module
+  val module: Module
 }
 
 // Request parameters
 trait ViewModuleTimetableRequest extends ViewModuleTimetableState
-	with CurrentAcademicYear {
-	var showTimetableEvents: Boolean = true
-	var showSmallGroupEvents: Boolean = false
-	def sourcesToShow: Seq[TimetableEventSource] = if (showTimetableEvents == showSmallGroupEvents) {
-		Seq(TimetableEventSource.Sciencia, TimetableEventSource.SmallGroups)
-	} else if (showTimetableEvents) {
-		Seq(TimetableEventSource.Sciencia)
-	} else {
-		Seq(TimetableEventSource.SmallGroups)
-	}
+  with CurrentAcademicYear {
+  var showTimetableEvents: Boolean = true
+  var showSmallGroupEvents: Boolean = false
+
+  def sourcesToShow: Seq[TimetableEventSource] = if (showTimetableEvents == showSmallGroupEvents) {
+    Seq(TimetableEventSource.Sciencia, TimetableEventSource.SmallGroups)
+  } else if (showTimetableEvents) {
+    Seq(TimetableEventSource.Sciencia)
+  } else {
+    Seq(TimetableEventSource.SmallGroups)
+  }
 }
 
 trait ViewModuleTimetablePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewModuleTimetableState =>
+  self: ViewModuleTimetableState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Module.ViewTimetable, mandatory(module))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Module.ViewTimetable, mandatory(module))
+  }
 }
 
 trait ViewModuleTimetableValidation extends SelfValidating {
-	self: ViewModuleTimetableRequest =>
+  self: ViewModuleTimetableRequest =>
 
-	override def validate(errors: Errors) {
-		if (academicYear == null) {
-			errors.rejectValue("academicYear", "NotEmpty")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (academicYear == null) {
+      errors.rejectValue("academicYear", "NotEmpty")
+    }
+  }
 }
 
 /**
-	* This won't be audited, but it is included in things like stopwatch task names
-	*/
+  * This won't be audited, but it is included in things like stopwatch task names
+  */
 trait ViewModuleTimetableDescription extends Describable[ReturnType] with Unaudited {
-	self: ViewModuleTimetableRequest =>
+  self: ViewModuleTimetableRequest =>
 
-	override def describe(d: Description): Unit = d.module(module).properties("academicYear" -> academicYear.toString)
+  override def describe(d: Description): Unit = d.module(module).properties("academicYear" -> academicYear.toString)
 }

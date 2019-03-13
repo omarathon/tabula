@@ -7,41 +7,41 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object DownloadFeedbackAsPdfCommand {
 
-	final val feedbackDownloadTemple = "/WEB-INF/freemarker/coursework/admin/assignments/markerfeedback/feedback-download.ftl"
+  final val feedbackDownloadTemple = "/WEB-INF/freemarker/coursework/admin/assignments/markerfeedback/feedback-download.ftl"
 
-	def apply(module: Module, assignment: Assignment, feedback: Feedback) =
-		new DownloadFeedbackAsPdfCommandInternal(module, assignment, feedback)
-			with ComposableCommand[Feedback]
-			with DownloadFeedbackAsPdfPermissions
-			with DownloadFeedbackAsPdfAudit
+  def apply(module: Module, assignment: Assignment, feedback: Feedback) =
+    new DownloadFeedbackAsPdfCommandInternal(module, assignment, feedback)
+      with ComposableCommand[Feedback]
+      with DownloadFeedbackAsPdfPermissions
+      with DownloadFeedbackAsPdfAudit
 }
 
 class DownloadFeedbackAsPdfCommandInternal(val module: Module, val assignment: Assignment, val feedback: Feedback)
-	extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
-	override def applyInternal(): Feedback = feedback
+  extends CommandInternal[Feedback] with DownloadFeedbackAsPdfState {
+  override def applyInternal(): Feedback = feedback
 }
 
 trait DownloadFeedbackAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadFeedbackAsPdfState =>
+  self: DownloadFeedbackAsPdfState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		notDeleted(assignment)
-		mustBeLinked(assignment, module)
+  def permissionsCheck(p: PermissionsChecking) {
+    notDeleted(assignment)
+    mustBeLinked(assignment, module)
 
-		p.PermissionCheckAny(Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback)))
-	}
+    p.PermissionCheckAny(Seq(CheckablePermission(Permissions.AssignmentFeedback.Read, feedback)))
+  }
 }
 
 trait DownloadFeedbackAsPdfAudit extends Describable[Feedback] {
-	self: DownloadFeedbackAsPdfState =>
+  self: DownloadFeedbackAsPdfState =>
 
-	def describe(d: Description) {
-		d.feedback(feedback)
-	}
+  def describe(d: Description) {
+    d.feedback(feedback)
+  }
 }
 
 trait DownloadFeedbackAsPdfState {
-	val module: Module
-	val assignment: Assignment
-	val feedback: Feedback
+  val module: Module
+  val assignment: Assignment
+  val feedback: Feedback
 }

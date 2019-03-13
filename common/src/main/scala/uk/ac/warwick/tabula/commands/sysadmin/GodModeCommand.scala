@@ -15,22 +15,22 @@ import uk.ac.warwick.tabula.permissions._
 
 class GodModeCommand extends Command[Option[Cookie]] with ReadOnly {
 
-	PermissionCheck(Permissions.GodMode)
+  PermissionCheck(Permissions.GodMode)
 
-	var action: String = _
+  var action: String = _
 
-	def applyInternal(): Some[Cookie] = {
-		if (action == "remove") Some(newCookie(false))
-		else Some(newCookie(true))
-	}
+  def applyInternal(): Some[Cookie] = {
+    if (action == "remove") Some(newCookie(false))
+    else Some(newCookie(true))
+  }
 
-	private def newCookie(isGod: Boolean) = new Cookie(
-		name = CurrentUser.godModeCookie,
-		value = isGod.toString,
-		path = "/")
+  private def newCookie(isGod: Boolean) = new Cookie(
+    name = CurrentUser.godModeCookie,
+    value = isGod.toString,
+    path = "/")
 
-	def describe(d: Description): Unit = d.properties(
-		"action" -> action
-	)
+  def describe(d: Description): Unit = d.properties(
+    "action" -> action
+  )
 
 }

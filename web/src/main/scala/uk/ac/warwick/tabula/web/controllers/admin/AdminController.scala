@@ -4,10 +4,10 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 
 abstract class AdminController extends BaseController with AdminBreadcrumbs {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	final override def onPreRequest {
+  final override def onPreRequest {
 
-	}
+  }
 
 }

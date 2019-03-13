@@ -14,34 +14,35 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/resend-receipt"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/module/{module}/{assignment}/resend-receipt"))
 class OldResendSubmissionEmail extends OldCourseworkController {
 
-	var submissionService: SubmissionService = Wire.auto[SubmissionService]
+  var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
-		new SendSubmissionReceiptCommand(
-			module, assignment,
-			mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
-			user)
+  @ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+    new SendSubmissionReceiptCommand(
+      module, assignment,
+      mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
+      user)
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def nope(form: SendSubmissionReceiptCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
+  @RequestMapping(method = Array(GET, HEAD))
+  def nope(form: SendSubmissionReceiptCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
 
-	@RequestMapping(method = Array(POST))
-	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
-		val sent = form.apply()
+  @RequestMapping(method = Array(POST))
+  def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
+    val sent = form.apply()
 
-		Mav("coursework/submit/receipt",
-			"submission" -> form.submission,
-			"module" -> form.module,
-			"assignment" -> form.assignment,
-			"sent" -> sent,
-			"hasEmail" -> user.email.hasText)
+    Mav("coursework/submit/receipt",
+      "submission" -> form.submission,
+      "module" -> form.module,
+      "assignment" -> form.assignment,
+      "sent" -> sent,
+      "hasEmail" -> user.email.hasText)
 
-	}
+  }
 
 }

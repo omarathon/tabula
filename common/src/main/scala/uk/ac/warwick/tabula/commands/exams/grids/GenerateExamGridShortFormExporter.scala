@@ -46,7 +46,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
     // Styles
     val cellStyleMap = getCellStyleMap(workbook)
 
-    val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
+    val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
 
     ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
@@ -91,7 +91,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             val entityCell = header.createCell(currentColumnIndex)
             chosenYearColumnValues(leftColumn)(entity).populateCell(entityCell, cellStyleMap)
             if (mergedCells) {
-              val lastRow = if(showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
+              val lastRow = if (showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
               mergedRegions += new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex)
             } else {
               valueRows.values.foreach(row => {
@@ -140,10 +140,10 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
           }
 
           // Entity rows
-          entities.foreach(entity => benchmarkTask(s"entityRow${entity.universityId}"){
+          entities.foreach(entity => benchmarkTask(s"entityRow${entity.universityId}") {
             val (header, valueRows) = entityRows(entity)
             moduleColumnsPerEntity(entity)(year).lift(moduleColumnIndex - 1).foreach(col => {
-              val marks = col.map(c => perYearColumnValues.getOrElse(c, Map()).getOrElse(entity,Map()).getOrElse(year,Map())).getOrElse(Map())
+              val marks = col.map(c => perYearColumnValues.getOrElse(c, Map()).getOrElse(entity, Map()).getOrElse(year, Map())).getOrElse(Map())
               col match {
                 // has marks for this module
                 case Some(column) if marks.nonEmpty =>
@@ -256,7 +256,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
             val entityCell = header.createCell(currentColumnIndex)
             chosenYearColumnValues(rightColumn)(entity).populateCell(entityCell, cellStyleMap)
             if (mergedCells) {
-              val lastRow = if(showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
+              val lastRow = if (showComponentMarks) entityCell.getRowIndex + 3 else entityCell.getRowIndex + 1
               mergedRegions += new CellRangeAddress(entityCell.getRowIndex, lastRow, entityCell.getColumnIndex, entityCell.getColumnIndex)
             } else {
               valueRows.values.foreach(row => {
@@ -277,7 +277,7 @@ object GenerateExamGridShortFormExporter extends TaskBenchmarking {
 
     categoryRow.setHeight(Math.min(4000, categoryRowMaxCellWidth * 0.5).toShort)
     headerRow.setHeight(Math.min(4000, headerRowMaxCellWidth * 0.5).toShort)
-    entityRows.values.map{ case (header, _) => header }.foreach(entityHeader =>
+    entityRows.values.map { case (header, _) => header }.foreach(entityHeader =>
       entityHeader.setHeight(Math.min(4000, entityHeaderRowMaxCellWidth * 0.5).toShort)
     )
 

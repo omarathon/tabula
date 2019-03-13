@@ -11,124 +11,124 @@ import uk.ac.warwick.tabula.services.scheduling.{ExportFeedbackToSitsService, Ex
 import uk.ac.warwick.userlookup.User
 
 trait ComponentMixins
-extends FeedbackForSitsDaoComponent
-with ExportFeedbackToSitsServiceComponent with Mockito {
-	var exportFeedbackToSitsService: ExportFeedbackToSitsService = smartMock[ExportFeedbackToSitsService]
-	var feedbackForSitsDao: FeedbackForSitsDao = smartMock[FeedbackForSitsDao]
+  extends FeedbackForSitsDaoComponent
+    with ExportFeedbackToSitsServiceComponent with Mockito {
+  var exportFeedbackToSitsService: ExportFeedbackToSitsService = smartMock[ExportFeedbackToSitsService]
+  var feedbackForSitsDao: FeedbackForSitsDao = smartMock[FeedbackForSitsDao]
 }
 
-class ExportFeedbackToSitsCommandTest extends TestBase  with ComponentMixins with Mockito {
+class ExportFeedbackToSitsCommandTest extends TestBase with ComponentMixins with Mockito {
 
-	trait Environment {
-		val module: Module = Fixtures.module("HY903", "Further Explorations")
-		module.degreeType = DegreeType.Undergraduate
+  trait Environment {
+    val module: Module = Fixtures.module("HY903", "Further Explorations")
+    module.degreeType = DegreeType.Undergraduate
 
-		// test department
-		val department: Department = Fixtures.department("XX", "Xander Department")
-		department.id = "1"
-		department.code = "XX"
-		department.setUploadMarksToSitsForYear(AcademicYear(2014), DegreeType.Undergraduate, canUpload = true)
+    // test department
+    val department: Department = Fixtures.department("XX", "Xander Department")
+    department.id = "1"
+    department.code = "XX"
+    department.setUploadMarksToSitsForYear(AcademicYear(2014), DegreeType.Undergraduate, canUpload = true)
 
-		module.adminDepartment = department
+    module.adminDepartment = department
 
-		val cmd = new ExportFeedbackToSitsCommand
-			with ComposableCommand[Seq[FeedbackForSits]]
-			with ExportFeedbackToSitsCommandPermissions
-			with ExportFeedbackToSitsCommandDescription
-			with ComponentMixins
+    val cmd = new ExportFeedbackToSitsCommand
+      with ComposableCommand[Seq[FeedbackForSits]]
+      with ExportFeedbackToSitsCommandPermissions
+      with ExportFeedbackToSitsCommandDescription
+      with ComponentMixins
 
-		val assignment: Assignment = Fixtures.assignment("test assignment")
-		assignment.module = module
-		assignment.academicYear = AcademicYear(2014)
+    val assignment: Assignment = Fixtures.assignment("test assignment")
+    assignment.module = module
+    assignment.academicYear = AcademicYear(2014)
 
-		// set up feedback
-		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")
-		feedback.assignment = assignment
-		feedback.actualGrade = Some("B")
-		feedback.actualMark = Some(73)
-		feedback.id = "397"
+    // set up feedback
+    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0070790")
+    feedback.assignment = assignment
+    feedback.actualGrade = Some("B")
+    feedback.actualMark = Some(73)
+    feedback.id = "397"
 
-		assignment.feedbacks.add(feedback)
+    assignment.feedbacks.add(feedback)
 
-	}
+  }
 
-	trait EnvironmentMarkAndGradeAdjusted extends Environment {
-		feedback.addMark(null, MarkType.Adjustment, 78, Some("A-"), null)
-	}
+  trait EnvironmentMarkAndGradeAdjusted extends Environment {
+    feedback.addMark(null, MarkType.Adjustment, 78, Some("A-"), null)
+  }
 
-	@Test def testUploadFeedbackToSitsMarkAndGradeAdjusted() = withUser("0070790", "cusdx") {
-		new EnvironmentMarkAndGradeAdjusted {
+  @Test def testUploadFeedbackToSitsMarkAndGradeAdjusted() = withUser("0070790", "cusdx") {
+    new EnvironmentMarkAndGradeAdjusted {
 
-			cmd.feedbackForSitsDao = feedbackForSitsDao
+      cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+      val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-			exportFeedbackToSitsService.exportToSits(feedback) returns 1
-			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
+      exportFeedbackToSitsService.exportToSits(feedback) returns 1
+      cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
-			// upload the feedback to SITS
-			cmd.uploadFeedbackToSits(feedbackForSits)
+      // upload the feedback to SITS
+      cmd.uploadFeedbackToSits(feedbackForSits)
 
-			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
-			val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
-			dateOfUpload should not be null
-			dateOfUpload.isAfter(DateTime.now) should be{false}
-			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be{true}
+      // check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
+      val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
+      dateOfUpload should not be null
+      dateOfUpload.isAfter(DateTime.now) should be (false)
+      dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be (true)
 
-			feedbackForSits.actualGradeLastUploaded should be("A-")
-			feedbackForSits.actualMarkLastUploaded should be(78)
-		}
-	}
+      feedbackForSits.actualGradeLastUploaded should be("A-")
+      feedbackForSits.actualMarkLastUploaded should be(78)
+    }
+  }
 
-	@Test def testUploadFeedbackToSitsNotAdjusted() = withUser("0070790", "cusdx") {
-		new Environment {
-			cmd.feedbackForSitsDao = feedbackForSitsDao
+  @Test def testUploadFeedbackToSitsNotAdjusted() = withUser("0070790", "cusdx") {
+    new Environment {
+      cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+      val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
 
-			exportFeedbackToSitsService.exportToSits(feedback) returns 1
-			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
+      exportFeedbackToSitsService.exportToSits(feedback) returns 1
+      cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
-			// upload the feedback to SITS
-			cmd.uploadFeedbackToSits(feedbackForSits)
+      // upload the feedback to SITS
+      cmd.uploadFeedbackToSits(feedbackForSits)
 
-			// check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
-			val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
-			dateOfUpload should not be null
-			dateOfUpload.isAfter(DateTime.now) should be{false}
-			dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be{true}
+      // check that the feedbackForSits record has been updated to reflect the fact that data has been written to SITS
+      val dateOfUpload: DateTime = feedbackForSits.dateOfUpload
+      dateOfUpload should not be null
+      dateOfUpload.isAfter(DateTime.now) should be (false)
+      dateOfUpload.plusMinutes(1).isAfter(DateTime.now) should be (true)
 
-			feedbackForSits.actualGradeLastUploaded should be("B")
-			feedbackForSits.actualMarkLastUploaded should be(73)
-		}
-	}
+      feedbackForSits.actualGradeLastUploaded should be("B")
+      feedbackForSits.actualMarkLastUploaded should be(73)
+    }
+  }
 
-	@Test def testApply() = withUser("0070790", "cusdx") {
-		new EnvironmentMarkAndGradeAdjusted {
-			val user: User = currentUser.apparentUser
-			val feedbackService: FeedbackService = smartMock[FeedbackService]
-			feedbackService.getUsersForFeedback(assignment) returns Seq[(String, User)]((user.getUserId, user))
+  @Test def testApply() = withUser("0070790", "cusdx") {
+    new EnvironmentMarkAndGradeAdjusted {
+      val user: User = currentUser.apparentUser
+      val feedbackService: FeedbackService = smartMock[FeedbackService]
+      feedbackService.getUsersForFeedback(assignment) returns Seq[(String, User)]((user.getUserId, user))
 
-			val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
-			feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)
-			cmd.feedbackForSitsDao = feedbackForSitsDao
+      val feedbackForSits: FeedbackForSits = Fixtures.feedbackForSits(feedback, currentUser.apparentUser)
+      feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)
+      cmd.feedbackForSitsDao = feedbackForSitsDao
 
-			exportFeedbackToSitsService.countMatchingSasRecords(feedback) returns 1
-			exportFeedbackToSitsService.exportToSits(feedback) returns 1
+      exportFeedbackToSitsService.countMatchingSasRecords(feedback) returns 1
+      exportFeedbackToSitsService.exportToSits(feedback) returns 1
 
-			cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
+      cmd.exportFeedbackToSitsService = exportFeedbackToSitsService
 
-			// call apply to queue the feedback
-			val uploadedFeedbacks: Seq[FeedbackForSits] = cmd.applyInternal()
+      // call apply to queue the feedback
+      val uploadedFeedbacks: Seq[FeedbackForSits] = cmd.applyInternal()
 
-			// check to see if the return is as expected
-			uploadedFeedbacks.size should be(1)
-			uploadedFeedbacks.head.status should be(Successful)
-			uploadedFeedbacks.head.feedback.actualMark should be(Some(73))
-			uploadedFeedbacks.head.feedback.actualGrade should be(Some("B"))
-			uploadedFeedbacks.head.feedback.latestMark should be(Some(78))
-			uploadedFeedbacks.head.feedback.latestGrade should be(Some("A-"))
-		}
-	}
+      // check to see if the return is as expected
+      uploadedFeedbacks.size should be(1)
+      uploadedFeedbacks.head.status should be(Successful)
+      uploadedFeedbacks.head.feedback.actualMark should be(Some(73))
+      uploadedFeedbacks.head.feedback.actualGrade should be(Some("B"))
+      uploadedFeedbacks.head.feedback.latestMark should be(Some(78))
+      uploadedFeedbacks.head.feedback.latestGrade should be(Some("A-"))
+    }
+  }
 
 }

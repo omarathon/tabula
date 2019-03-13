@@ -9,39 +9,39 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object ViewSmallGroupSetsWithMissingMapLocationsCommand {
-	val RequiredPermission = Permissions.SmallGroups.Update
+  val RequiredPermission = Permissions.SmallGroups.Update
 
-	def apply(academicYear: AcademicYear, department: Department) =
-		new ViewSmallGroupSetsWithMissingMapLocationsCommand(academicYear, department)
-			with ComposableCommand[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]
-			with ViewSmallGroupSetsWithMissingMapLocationPermissions
-			with AutowiringSmallGroupServiceComponent
-			with ReadOnly with Unaudited {
-			override lazy val eventName = "ViewSmallGroupSetsWithMissingMapLocations"
-		}
+  def apply(academicYear: AcademicYear, department: Department) =
+    new ViewSmallGroupSetsWithMissingMapLocationsCommand(academicYear, department)
+      with ComposableCommand[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]
+      with ViewSmallGroupSetsWithMissingMapLocationPermissions
+      with AutowiringSmallGroupServiceComponent
+      with ReadOnly with Unaudited {
+      override lazy val eventName = "ViewSmallGroupSetsWithMissingMapLocations"
+    }
 }
 
 class ViewSmallGroupSetsWithMissingMapLocationsCommand(val academicYear: AcademicYear, val department: Department)
-	extends CommandInternal[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]
-		with ViewSmallGroupSetsWithMissingMapLocationState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]
+    with ViewSmallGroupSetsWithMissingMapLocationState {
+  self: SmallGroupServiceComponent =>
 
-	override def applyInternal(): Seq[(SmallGroupSet, Seq[SmallGroupEvent])] = {
-		smallGroupService.listSmallGroupSetsWithEventsWithoutMapLocation(academicYear, Some(department))
-			.toSeq.sortBy { case (set, _) => (set.module, set) }
-	}
+  override def applyInternal(): Seq[(SmallGroupSet, Seq[SmallGroupEvent])] = {
+    smallGroupService.listSmallGroupSetsWithEventsWithoutMapLocation(academicYear, Some(department))
+      .toSeq.sortBy { case (set, _) => (set.module, set) }
+  }
 }
 
 trait ViewSmallGroupSetsWithMissingMapLocationPermissions extends RequiresPermissionsChecking {
-	self: ViewSmallGroupSetsWithMissingMapLocationState =>
+  self: ViewSmallGroupSetsWithMissingMapLocationState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(ViewSmallGroupSetsWithMissingMapLocationsCommand.RequiredPermission, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(ViewSmallGroupSetsWithMissingMapLocationsCommand.RequiredPermission, department)
+  }
 }
 
 trait ViewSmallGroupSetsWithMissingMapLocationState {
-	def academicYear: AcademicYear
+  def academicYear: AcademicYear
 
-	def department: Department
+  def department: Department
 }

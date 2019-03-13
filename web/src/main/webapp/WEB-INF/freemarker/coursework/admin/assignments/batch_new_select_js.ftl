@@ -9,168 +9,167 @@ It would probably be better as an external js file. Probably!
 jQuery(function($){
 
 
-	// editable name field
-	$('.editable-name').each(function() {
-		var $this = $(this);
+// editable name field
+$('.editable-name').each(function() {
+var $this = $(this);
 
-		var $target = $('<a class="name-edit-link"><i class="icon-pencil"></i></a>');
+var $target = $('<a class="name-edit-link"><i class="icon-pencil"></i></a>');
 
-		$this.editable({
-			toggle: 'manual',
-			mode: 'inline',
-			validate: function(value) {
-			  if ($.trim(value) == '') {
-			    return "A name is required.";
-			  }
-			}
-		}).on('save', function(e, params){
-			// set the hidden field to the new value.
-			var newVal = params.newValue;
-			$(this).closest('.itemContainer').find('input.name-field').val( newVal );
-		}).on('shown', function() {
-			$target.hide();
-		}).on('hidden', function() {
-			$target.show();
-		});
+$this.editable({
+toggle: 'manual',
+mode: 'inline',
+validate: function(value) {
+if ($.trim(value) == '') {
+return "A name is required.";
+}
+}
+}).on('save', function(e, params){
+// set the hidden field to the new value.
+var newVal = params.newValue;
+$(this).closest('.itemContainer').find('input.name-field').val( newVal );
+}).on('shown', function() {
+$target.hide();
+}).on('hidden', function() {
+$target.show();
+});
 
-		$this.after($target.on('click', function(e) {
-			e.stopPropagation();
-			$this.editable('toggle');
-		})).after('&nbsp;');
-	});
+$this.after($target.on('click', function(e) {
+e.stopPropagation();
+$this.editable('toggle');
+})).after('&nbsp;');
+});
 
 
+var optionGroupCount = $('#options-buttons .options-button').length;
 
-	var optionGroupCount = $('#options-buttons .options-button').length;
+var $form = $('#batch-add-form');
 
-	var $form = $('#batch-add-form');
+// reload page when academic field dropdown changes, as it changes the contents of the list.
+$('#academicYearSelect, #includeSubDepartmentsSelect').change(function(){
+$form.find('input[name=action]').val('change-year');
+$form.submit();
+});
 
-	// reload page when academic field dropdown changes, as it changes the contents of the list.
-	$('#academicYearSelect, #includeSubDepartmentsSelect').change(function(){
-		$form.find('input[name=action]').val('change-year');
-		$form.submit();
-	});
+// When clicking Next, set the action parameter to the relevant value before submitting
+$form.find('button[data-action]').click(function(event){
+var action = $(this).data('action');
+if (action) {
+$form.find('input[name=action]').val(action);
+}
+});
 
-	// When clicking Next, set the action parameter to the relevant value before submitting
-	$form.find('button[data-action]').click(function(event){
-		var action = $(this).data('action');
-		if (action) {
-			$form.find('input[name=action]').val(action);
-		}
-	});
+// Disable submit buttons after form is submitted.
+$form.submit(function() {
+var $buttons = $('button[data-action], #batch-add-submit-button');
+$buttons.attr('disabled',true).addClass('disabled');
+$(window).on('pageshow', function() {
+$buttons.attr('disabled', false).removeClass('disabled');
+})
+});
 
-	// Disable submit buttons after form is submitted.
-	$form.submit(function() {
-		var $buttons = $('button[data-action], #batch-add-submit-button');
-		$buttons.attr('disabled',true).addClass('disabled');
-		$(window).on('pageshow', function() {
-			$buttons.attr('disabled', false).removeClass('disabled');
-		})
-	});
+// Set up checkboxes for the big table
 
-	// Set up checkboxes for the big table
+$('#batch-add-table').bigList({
+setup : function() {
+var $container = this;
 
-	$('#batch-add-table').bigList({
-		setup : function() {
-			var $container = this;
+$('#selected-deselect').click(function(){
+$container.find('.collection-checkbox, .collection-check-all').attr('checked',false);
+$container.find("tr.selected").removeClass('selected');
+$('#selected-count').text("0 selected");
+return false;
+});
+},
 
-			$('#selected-deselect').click(function(){
-				$container.find('.collection-checkbox, .collection-check-all').attr('checked',false);
-				$container.find("tr.selected").removeClass('selected');
-				$('#selected-count').text("0 selected");
-				return false;
-			});
-		},
+onChange : function() {
+this.closest("tr").toggleClass("selected", this.is(":checked"));
+var x = $('#batch-add-table .collection-checkbox:checked').length;
+$('#selected-count').text(x+" selected");
+},
 
-		onChange : function() {
-			this.closest("tr").toggleClass("selected", this.is(":checked"));
-			var x = $('#batch-add-table .collection-checkbox:checked').length;
-			$('#selected-count').text(x+" selected");
-		},
+onSomeChecked : function() {
+$('#set-options-button, #set-dates-button').removeClass('disabled');
+},
 
-		onSomeChecked : function() {
-			$('#set-options-button, #set-dates-button').removeClass('disabled');
-		},
+onNoneChecked : function() {
+$('#set-options-button, #set-dates-button').addClass('disabled');
+$('#selected-count').text("0 selected");
+}
+});
 
-		onNoneChecked : function() {
-			$('#set-options-button, #set-dates-button').addClass('disabled');
-			$('#selected-count').text("0 selected");
-		}
-	});
+// cool selection mechanism...
+var batchTableMouseDown = false;
+$('#batch-add-table')
+.on('mousedown', 'td.selectable', function(){
+batchTableMouseDown = true;
+var $row = $(this).closest('tr');
+$row.toggleClass('selected');
+var checked = $row.hasClass('selected');
+$row.find('.collection-checkbox').attr('checked', checked);
+return false;
+})
+.on('mouseenter', 'td.selectable', function(){
+if (batchTableMouseDown) {
+var $row = $(this).closest('tr');
+$row.toggleClass('selected');
+var checked = $row.hasClass('selected');
+$row.find('.collection-checkbox').attr('checked', checked);
+}
+})
+.on('mousedown', 'a.name-edit-link', function(e){
+// prevent td.selected toggling when clicking the edit link.
+e.stopPropagation();
+});
 
-	// cool selection mechanism...
-	var batchTableMouseDown = false;
-	$('#batch-add-table')
-		.on('mousedown', 'td.selectable', function(){
-			batchTableMouseDown = true;
-			var $row = $(this).closest('tr');
-			$row.toggleClass('selected');
-			var checked = $row.hasClass('selected');
-			$row.find('.collection-checkbox').attr('checked', checked);
-			return false;
-		})
-		.on('mouseenter', 'td.selectable', function(){
-			if (batchTableMouseDown) {
-				var $row = $(this).closest('tr');
-				$row.toggleClass('selected');
-				var checked = $row.hasClass('selected');
-				$row.find('.collection-checkbox').attr('checked', checked);
-			}
-		})
-		.on('mousedown', 'a.name-edit-link', function(e){
-			// prevent td.selected toggling when clicking the edit link.
-			e.stopPropagation();
-		});
+$(document).mouseup(function(){
+batchTableMouseDown = false;
+$('#batch-add-table').bigList('changed');
+});
 
-	$(document).mouseup(function(){
-		batchTableMouseDown = false;
-		$('#batch-add-table').bigList('changed');
-	});
+// make "Set options" buttons magically stay where they are
+var $opts = $('#options-buttons');
+$opts.width( $opts.width() ); //absolutify width
+$opts.affix();
 
-	// make "Set options" buttons magically stay where they are
-	var $opts = $('#options-buttons');
-	$opts.width( $opts.width() ); //absolutify width
-	$opts.affix();
+var $optsButton = $('#set-options-button');
+var $optsModal = $('#set-options-modal');
+var $optsModalBody = $optsModal.find('.modal-body');
+var optsUrl = $optsButton.attr('href');
 
-	var $optsButton = $('#set-options-button');
-	var $optsModal = $('#set-options-modal');
-	var $optsModalBody = $optsModal.find('.modal-body');
-	var optsUrl = $optsButton.attr('href');
+var decorateOptionsModal = function() {
+$optsModalBody.find('details').details();
 
-	var decorateOptionsModal = function() {
-		$optsModalBody.find('details').details();
+// TAB-118 Disable submit until modal is scrolled to the bottom
+var scrollCheck = function() {
+if (($optsModalBody.scrollTop() + $optsModalBody.height()) * 1.1 > $optsModalBody.get(0).scrollHeight) {
+$optsModal.find('.modal-footer button.btn-primary').attr({
+'disabled' : false,
+'title' : ''
+});
+} else {
+window.setTimeout(scrollCheck, 500);
+}
+};
+window.setTimeout(scrollCheck, 500);
+$optsModal.find('.modal-footer button.btn-primary').attr({
+'disabled' : true,
+'title' : 'Scroll to the bottom to see all options'
+});
 
-		// TAB-118 Disable submit until modal is scrolled to the bottom
-		var scrollCheck = function() {
-			if (($optsModalBody.scrollTop() + $optsModalBody.height()) * 1.1 > $optsModalBody.get(0).scrollHeight) {
-				$optsModal.find('.modal-footer button.btn-primary').attr({
-					'disabled' : false,
-					'title' : ''
-				});
-			} else {
-				window.setTimeout(scrollCheck, 500);
-			}
-		};
-		window.setTimeout(scrollCheck, 500);
-		$optsModal.find('.modal-footer button.btn-primary').attr({
-			'disabled' : true,
-			'title' : 'Scroll to the bottom to see all options'
-		});
+// do all sorts of clever stuff when we submit this form.
+$optsModalBody.find('form').on('submit', function(e){
+e.preventDefault();
+$.post(optsUrl, $optsModalBody.find('form').serialize(), function(data){
+$optsModalBody.html(data);
+decorateOptionsModal();
+if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
+// grab all the submittable fields and clone them to the main page form
+var fields = $optsModalBody.find('[name]').clone();
 
-		// do all sorts of clever stuff when we submit this form.
-		$optsModalBody.find('form').on('submit', function(e){
-			e.preventDefault();
-			$.post(optsUrl, $optsModalBody.find('form').serialize(), function(data){
-				$optsModalBody.html(data);
-				decorateOptionsModal();
-				if ($optsModalBody.find('.ajax-response').data('status') == 'success') { // passed validation
-					// grab all the submittable fields and clone them to the main page form
-					var fields = $optsModalBody.find('[name]').clone();
-
-					// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
-					// Z. Nobody knows what happens after Z...
-					var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
-					var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
+// Generate group names alphabetically from A, continuing later with B, and then C, and so on until
+// Z. Nobody knows what happens after Z...
+var groupName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.charAt(optionGroupCount);
+var $groupNameLabel = $('<span>').addClass('label').addClass('label-'+groupName).html(groupName);
 					optionGroupCount = optionGroupCount + 1;
 
 					var $group = $('<div>').addClass('options-button');

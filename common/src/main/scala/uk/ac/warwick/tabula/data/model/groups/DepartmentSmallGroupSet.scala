@@ -19,130 +19,138 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object DepartmentSmallGroupSet {
-	final val NotDeletedFilter = "notDeleted"
+  final val NotDeletedFilter = "notDeleted"
 
-	// For sorting a collection by set name. Either pass to the sort function,
-	// or expose as an implicit val.
-	val NameOrdering: Ordering[DepartmentSmallGroupSet] = Ordering.by { set: DepartmentSmallGroupSet => (set.name, set.id) }
+  // For sorting a collection by set name. Either pass to the sort function,
+  // or expose as an implicit val.
+  val NameOrdering: Ordering[DepartmentSmallGroupSet] = Ordering.by { set: DepartmentSmallGroupSet => (set.name, set.id) }
 
-	// Companion object is one of the places searched for an implicit Ordering, so
-	// this will be the default when ordering a list of small group sets.
-	implicit val defaultOrdering = NameOrdering
+  // Companion object is one of the places searched for an implicit Ordering, so
+  // this will be the default when ordering a list of small group sets.
+  implicit val defaultOrdering = NameOrdering
 }
 
 /**
- * Represents a set of small groups with a Department. These are then linked to by an actual
- * SmallGroupSet rather than doing allocations manually.
- */
+  * Represents a set of small groups with a Department. These are then linked to by an actual
+  * SmallGroupSet rather than doing allocations manually.
+  */
 @FilterDef(name = DepartmentSmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = DepartmentSmallGroupSet.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)
 class DepartmentSmallGroupSet
-	extends GeneratedId
-	with CanBeDeleted
-	with ToString
-	with PermissionsTarget
-	with Serializable
-	with ToEntityReference {
-	type Entity = DepartmentSmallGroupSet
+  extends GeneratedId
+    with CanBeDeleted
+    with ToString
+    with PermissionsTarget
+    with Serializable
+    with ToEntityReference {
+  type Entity = DepartmentSmallGroupSet
 
-	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+  // FIXME this isn't really optional, but testing is a pain unless it's made so
+  @transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
-	def this(_department: Department) {
-		this()
-		this.department = _department
-	}
+  def this(_department: Department) {
+    this()
+    this.department = _department
+  }
 
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Column(nullable = false)
-	var academicYear: AcademicYear = AcademicYear.now()
+  @Basic
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+  @Column(nullable = false)
+  var academicYear: AcademicYear = AcademicYear.now()
 
-	@NotNull
-	var name: String = _
+  @NotNull
+  var name: String = _
 
-	var archived: JBoolean = false
+  var archived: JBoolean = false
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "department_id")
-	var department: Department = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id")
+  var department: Department = _
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
-	@JoinColumn(name = "set_id")
-	@BatchSize(size=200)
-	var groups: JList[DepartmentSmallGroup] = JArrayList()
+  @OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @JoinColumn(name = "set_id")
+  @BatchSize(size = 200)
+  var groups: JList[DepartmentSmallGroup] = JArrayList()
 
-	@OneToMany(mappedBy = "linkedDepartmentSmallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BatchSize(size=200)
-	var linkedSets: JSet[SmallGroupSet] = JHashSet()
+  @OneToMany(mappedBy = "linkedDepartmentSmallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+  @BatchSize(size = 200)
+  var linkedSets: JSet[SmallGroupSet] = JHashSet()
 
-	// only students manually added or excluded. use allStudents to get all students in the group set
-	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "membersgroup_id")
-	private var _membersGroup = UserGroup.ofUniversityIds
-	def members: UnspecifiedTypeUserGroup = {
-		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_membersGroup, smallGroupService.departmentGroupSetManualMembersHelper)
-			}
-			case _ => _membersGroup
-		}
-	}
-	def members_=(group: UserGroup) { _membersGroup = group }
+  // only students manually added or excluded. use allStudents to get all students in the group set
+  @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @JoinColumn(name = "membersgroup_id")
+  private var _membersGroup = UserGroup.ofUniversityIds
 
-	@Column(name = "member_query")
-	var memberQuery: String = _
+  def members: UnspecifiedTypeUserGroup = {
+    smallGroupService match {
+      case Some(smallGroupService) => {
+        new UserGroupCacheManager(_membersGroup, smallGroupService.departmentGroupSetManualMembersHelper)
+      }
+      case _ => _membersGroup
+    }
+  }
 
-	def isStudentMember(user: User): Boolean = members.includesUser(user)
+  def members_=(group: UserGroup) {
+    _membersGroup = group
+  }
 
-	def allStudents: Seq[User] = members.users
-	def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map { _.getWarwickId }
-	def allStudentsCount: Int = members.size
+  @Column(name = "member_query")
+  var memberQuery: String = _
 
-	def unallocatedStudents: Seq[User] = {
-		val allocatedStudents = groups.asScala.flatMap { _.students.users }
+  def isStudentMember(user: User): Boolean = members.includesUser(user)
 
-		allStudents diff allocatedStudents
-	}
+  def allStudents: Seq[User] = members.users
 
-	def unallocatedStudentsCount: Int = {
-		// TAB-2296 we can't rely just on counts here
-		unallocatedStudents.size
-	}
+  def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map(_.getWarwickId)
 
-	def studentsNotInMembership: mutable.Buffer[User] = {
-		val allocatedStudents = groups.asScala.flatMap { _.students.users }
+  def allStudentsCount: Int = members.size
 
-		allocatedStudents diff allStudents
-	}
+  def unallocatedStudents: Seq[User] = {
+    val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
-	def studentsNotInMembershipCount: Int = {
-		// TAB-2296 we can't rely just on counts here
-		studentsNotInMembership.size
-	}
+    allStudents diff allocatedStudents
+  }
 
-	def hasAllocated: Boolean = groups.asScala.exists { !_.students.isEmpty }
+  def unallocatedStudentsCount: Int = {
+    // TAB-2296 we can't rely just on counts here
+    unallocatedStudents.size
+  }
 
-	def permissionsParents: Stream[GeneratedId with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour with ToEntityReference with Logging] = Option(department).toStream ++ linkedSets.asScala.toStream
+  def studentsNotInMembership: mutable.Buffer[User] = {
+    val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
-	def toStringProps = Seq(
-		"id" -> id,
-		"name" -> name,
-		"department" -> department)
+    allocatedStudents diff allStudents
+  }
 
-	def duplicateTo(transient: Boolean, department: Department = department, academicYear: AcademicYear = academicYear, copyMembership: Boolean = true): DepartmentSmallGroupSet = {
-		val newSet = new DepartmentSmallGroupSet()
-		if (!transient) newSet.id = id
-		newSet.academicYear = academicYear
-		newSet.archived = archived
-		newSet.memberQuery = memberQuery
-		newSet.groups = groups.asScala.map(_.duplicateTo(newSet, transient = transient, copyMembership = copyMembership)).asJava
-		if (copyMembership) newSet._membersGroup = _membersGroup.duplicate()
-		newSet.department = department
-		newSet.name = name
-		newSet
-	}
+  def studentsNotInMembershipCount: Int = {
+    // TAB-2296 we can't rely just on counts here
+    studentsNotInMembership.size
+  }
+
+  def hasAllocated: Boolean = groups.asScala.exists {
+    !_.students.isEmpty
+  }
+
+  def permissionsParents: Stream[GeneratedId with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour with ToEntityReference with Logging] = Option(department).toStream ++ linkedSets.asScala.toStream
+
+  def toStringProps = Seq(
+    "id" -> id,
+    "name" -> name,
+    "department" -> department)
+
+  def duplicateTo(transient: Boolean, department: Department = department, academicYear: AcademicYear = academicYear, copyMembership: Boolean = true): DepartmentSmallGroupSet = {
+    val newSet = new DepartmentSmallGroupSet()
+    if (!transient) newSet.id = id
+    newSet.academicYear = academicYear
+    newSet.archived = archived
+    newSet.memberQuery = memberQuery
+    newSet.groups = groups.asScala.map(_.duplicateTo(newSet, transient = transient, copyMembership = copyMembership)).asJava
+    if (copyMembership) newSet._membersGroup = _membersGroup.duplicate()
+    newSet.department = department
+    newSet.name = name
+    newSet
+  }
 
 }

@@ -5,21 +5,21 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringServiceComponent, AutowiringAttendanceMonitoringServiceComponent}
 
 object ListAttendanceTemplatesCommand {
-	def apply() =
-		new ListAttendanceTemplatesCommandInternal
-			with ComposableCommand[Seq[AttendanceMonitoringTemplate]]
-			with AutowiringAttendanceMonitoringServiceComponent
-			with AttendanceTemplatePermissions
-			with ReadOnly with Unaudited
+  def apply() =
+    new ListAttendanceTemplatesCommandInternal
+      with ComposableCommand[Seq[AttendanceMonitoringTemplate]]
+      with AutowiringAttendanceMonitoringServiceComponent
+      with AttendanceTemplatePermissions
+      with ReadOnly with Unaudited
 }
 
 
 class ListAttendanceTemplatesCommandInternal extends CommandInternal[Seq[AttendanceMonitoringTemplate]] {
 
-	self: AttendanceMonitoringServiceComponent =>
+  self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Seq[AttendanceMonitoringTemplate] = {
-		attendanceMonitoringService.listAllTemplateSchemes
-	}
+  override def applyInternal(): Seq[AttendanceMonitoringTemplate] = {
+    attendanceMonitoringService.listAllTemplateSchemes
+  }
 
 }

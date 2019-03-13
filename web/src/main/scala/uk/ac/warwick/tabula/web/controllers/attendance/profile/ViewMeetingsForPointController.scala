@@ -13,16 +13,16 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/{point}/meetings"))
 class ViewMeetingsForPointController extends AttendanceController {
 
-	@ModelAttribute("command")
-	def createCommand(@PathVariable student: StudentMember,	@PathVariable point: AttendanceMonitoringPoint) =
-		ViewMeetingsForPointCommand(mandatory(student), mandatory(point))
+  @ModelAttribute("command")
+  def createCommand(@PathVariable student: StudentMember, @PathVariable point: AttendanceMonitoringPoint) =
+    ViewMeetingsForPointCommand(mandatory(student), mandatory(point))
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[(MeetingRecord, Seq[String])]]): Mav = {
-		val meetingsStatuses = cmd.apply()
-		Mav("attendance/view/meetings",
-			"meetingsStatuses" -> meetingsStatuses,
-			"allMeetingFormats" -> MeetingFormat.members
-		).noLayoutIf(ajax)
-	}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[Seq[(MeetingRecord, Seq[String])]]): Mav = {
+    val meetingsStatuses = cmd.apply()
+    Mav("attendance/view/meetings",
+      "meetingsStatuses" -> meetingsStatuses,
+      "allMeetingFormats" -> MeetingFormat.members
+    ).noLayoutIf(ajax)
+  }
 }

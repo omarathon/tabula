@@ -11,53 +11,53 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
 
 object ArchiveAssignmentsCommand {
-	def apply(department: Department, modules: Seq[Module]) =
-		new ArchiveAssignmentsCommand(department, modules)
-			with ComposableCommand[Seq[Assignment]]
-			with ArchiveAssignmentsPermissions
-			with ArchiveAssignmentsDescription
-			with AutowiringAssessmentServiceComponent {
-			override lazy val eventName = "ArchiveAssignments"
-		}
+  def apply(department: Department, modules: Seq[Module]) =
+    new ArchiveAssignmentsCommand(department, modules)
+      with ComposableCommand[Seq[Assignment]]
+      with ArchiveAssignmentsPermissions
+      with ArchiveAssignmentsDescription
+      with AutowiringAssessmentServiceComponent {
+      override lazy val eventName = "ArchiveAssignments"
+    }
 }
 
 abstract class ArchiveAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
-	with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
+  with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
 
-	self: AssessmentServiceComponent =>
+  self: AssessmentServiceComponent =>
 
-	def applyInternal(): Seq[Assignment] = transactional() {
-		assignments.asScala.foreach { assignment =>
-			assignment.archive()
+  def applyInternal(): Seq[Assignment] = transactional() {
+    assignments.asScala.foreach { assignment =>
+      assignment.archive()
 
-			assessmentService.save(assignment)
-		}
+      assessmentService.save(assignment)
+    }
 
-		assignments.asScala
-	}
+    assignments.asScala
+  }
 
 }
 
 trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ArchiveAssignmentsState =>
-	def permissionsCheck(p: PermissionsChecking) {
-		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
-		else for (module <- modules) {
-			p.mustBeLinked(p.mandatory(module), mandatory(department))
-			p.PermissionCheck(Permissions.Assignment.Archive, module)
-		}
-	}
+  self: ArchiveAssignmentsState =>
+  def permissionsCheck(p: PermissionsChecking) {
+    if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, mandatory(department))
+    else for (module <- modules) {
+      p.mustBeLinked(p.mandatory(module), mandatory(department))
+      p.PermissionCheck(Permissions.Assignment.Archive, module)
+    }
+  }
 }
 
 trait ArchiveAssignmentsState {
-	val department: Department
-	val modules: Seq[Module]
-	var assignments: JList[Assignment] = JArrayList()
+  val department: Department
+  val modules: Seq[Module]
+  var assignments: JList[Assignment] = JArrayList()
 }
 
 trait ArchiveAssignmentsDescription extends Describable[Seq[Assignment]] {
-	self: ArchiveAssignmentsState =>
-	def describe(d: Description): Unit = d
-		.properties("modules" -> modules.map(_.id))
-		.properties("assignments" -> assignments.asScala.map(_.id))
+  self: ArchiveAssignmentsState =>
+  def describe(d: Description): Unit = d
+    .properties("modules" -> modules.map(_.id))
+    .properties("assignments" -> assignments.asScala.map(_.id))
 }

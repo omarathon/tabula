@@ -13,26 +13,26 @@ import collection.JavaConverters._
 
 abstract class AbstractManageSchemePointsController extends AttendanceController {
 
-	@ModelAttribute("findCommand")
-	def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FindPointsCommand(mandatory(department), mandatory(academicYear), None)
+  @ModelAttribute("findCommand")
+  def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    FindPointsCommand(mandatory(department), mandatory(academicYear), None)
 
-	protected def render(
-		findCommandResult: FindPointsResult,
-		scheme: AttendanceMonitoringScheme,
-		points: JInteger,
-		actionCompleted: String
-	): Mav
+  protected def render(
+    findCommandResult: FindPointsResult,
+    scheme: AttendanceMonitoringScheme,
+    points: JInteger,
+    actionCompleted: String
+  ): Mav
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult] with FindPointsCommandState,
-		@PathVariable scheme: AttendanceMonitoringScheme,
-		@RequestParam(required = false) points: JInteger,
-		@RequestParam(required = false) actionCompleted: String
-	): Mav = {
-		findCommand.findSchemes = Seq(scheme).asJava
-		render(findCommand.apply(), scheme, points, actionCompleted)
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult] with FindPointsCommandState,
+    @PathVariable scheme: AttendanceMonitoringScheme,
+    @RequestParam(required = false) points: JInteger,
+    @RequestParam(required = false) actionCompleted: String
+  ): Mav = {
+    findCommand.findSchemes = Seq(scheme).asJava
+    render(findCommand.apply(), scheme, points, actionCompleted)
+  }
 
 }

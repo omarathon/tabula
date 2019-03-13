@@ -10,75 +10,78 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object ConvertScheduledMeetingRecordCommand {
-	def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
-		new ConvertScheduledMeetingRecordCommand(creator, meetingRecord)
-			with ComposableCommand[MeetingRecord]
-			with ConvertScheduledMeetingRecordPermissions
-			with ConvertScheduledMeetingRecordState
-			with MeetingRecordCommandRequest
-			with ConvertScheduledMeetingRecordDescription
-			with AutowiringMeetingRecordServiceComponent
-			with ConvertScheduledMeetingRecordCommandValidation
-			with AutowiringFileAttachmentServiceComponent
-			with PopulateMeetingRecordCommand
+  def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
+    new ConvertScheduledMeetingRecordCommand(creator, meetingRecord)
+      with ComposableCommand[MeetingRecord]
+      with ConvertScheduledMeetingRecordPermissions
+      with ConvertScheduledMeetingRecordState
+      with MeetingRecordCommandRequest
+      with ConvertScheduledMeetingRecordDescription
+      with AutowiringMeetingRecordServiceComponent
+      with ConvertScheduledMeetingRecordCommandValidation
+      with AutowiringFileAttachmentServiceComponent
+      with PopulateMeetingRecordCommand
 }
 
-class ConvertScheduledMeetingRecordCommand (override val creator: Member, val meetingRecord: ScheduledMeetingRecord)
-	extends CommandInternal[MeetingRecord] with ConvertScheduledMeetingRecordState {
+class ConvertScheduledMeetingRecordCommand(override val creator: Member, val meetingRecord: ScheduledMeetingRecord)
+  extends CommandInternal[MeetingRecord] with ConvertScheduledMeetingRecordState {
 
-	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
+  self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
-	def applyInternal(): MeetingRecord = {
-		val newMeeting = createCommand.apply()
-		newMeeting.attachments.asScala.foreach(_.meetingRecord = newMeeting)
+  def applyInternal(): MeetingRecord = {
+    val newMeeting = createCommand.apply()
+    newMeeting.attachments.asScala.foreach(_.meetingRecord = newMeeting)
 
-		meetingRecord.removeAllAttachments()
-		meetingRecordService.purge(meetingRecord)
-		newMeeting
-	}
+    meetingRecord.removeAllAttachments()
+    meetingRecordService.purge(meetingRecord)
+    newMeeting
+  }
 
 }
 
 trait ConvertScheduledMeetingRecordCommandValidation extends SelfValidating {
-	self: ConvertScheduledMeetingRecordState  =>
-	override def validate(errors: Errors) {
-		if (meetingRecord.missed)
-			errors.reject("meetingRecord.confirm.missed")
-	}
+  self: ConvertScheduledMeetingRecordState =>
+  override def validate(errors: Errors) {
+    if (meetingRecord.missed)
+      errors.reject("meetingRecord.confirm.missed")
+  }
 }
 
 trait ConvertScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ConvertScheduledMeetingRecordState =>
+  self: ConvertScheduledMeetingRecordState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(
-			Permissions.Profiles.ScheduledMeetingRecord.Confirm,
-			mandatory(meetingRecord)
-		)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(
+      Permissions.Profiles.ScheduledMeetingRecord.Confirm,
+      mandatory(meetingRecord)
+    )
+  }
 }
 
 trait ConvertScheduledMeetingRecordDescription extends Describable[MeetingRecord] {
-	self: ConvertScheduledMeetingRecordState =>
+  self: ConvertScheduledMeetingRecordState =>
 
-	override lazy val eventName = "ConvertScheduledMeetingRecord"
+  override lazy val eventName = "ConvertScheduledMeetingRecord"
 
-	override def describe(d: Description) {
-		d.member(meetingRecord.student)
-		d.properties(
-			"creator" -> creator.universityId,
-			"relationship" -> meetingRecord.relationshipTypes.mkString(", ")
-		)
-	}
+  override def describe(d: Description) {
+    d.member(meetingRecord.student)
+    d.properties(
+      "creator" -> creator.universityId,
+      "relationship" -> meetingRecord.relationshipTypes.mkString(", ")
+    )
+  }
 
-	override def describeResult(d: Description, result: MeetingRecord) {
-		d.meeting(result)
-	}
+  override def describeResult(d: Description, result: MeetingRecord) {
+    d.meeting(result)
+  }
 }
 
 trait ConvertScheduledMeetingRecordState extends EditMeetingRecordCommandState {
-	def creator: Member
-	def meetingRecord: ScheduledMeetingRecord
-	override def allRelationships: Seq[StudentRelationship] = meetingRecord.relationships
-	var createCommand: Appliable[MeetingRecord] = _
+  def creator: Member
+
+  def meetingRecord: ScheduledMeetingRecord
+
+  override def allRelationships: Seq[StudentRelationship] = meetingRecord.relationships
+
+  var createCommand: Appliable[MeetingRecord] = _
 }

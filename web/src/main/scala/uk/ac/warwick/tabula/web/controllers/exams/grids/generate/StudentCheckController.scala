@@ -16,25 +16,25 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/generate/preview/checkstudent"))
 class StudentCheckController extends ExamsController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
+  type SelectCourseCommand = Appliable[Seq[ExamGridEntity]] with GenerateExamGridSelectCourseCommandRequest with GenerateExamGridSelectCourseCommandState
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		ExamGridStudentCheckCommand(mandatory(department), mandatory(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    ExamGridStudentCheckCommand(mandatory(department), mandatory(academicYear))
 
-	@PostMapping
-	def checkStudent(
-		@Valid @ModelAttribute("command") command: SelectCourseCommand,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = if(errors.hasErrors) {
-		Mav("exams/grids/generate/checkStudent", "errors" -> true).noLayout()
-	} else {
-		Mav("exams/grids/generate/checkStudent", "check" -> command.apply()).noLayout()
-	}
+  @PostMapping
+  def checkStudent(
+    @Valid @ModelAttribute("command") command: SelectCourseCommand,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = if (errors.hasErrors) {
+    Mav("exams/grids/generate/checkStudent", "errors" -> true).noLayout()
+  } else {
+    Mav("exams/grids/generate/checkStudent", "check" -> command.apply()).noLayout()
+  }
 
 
 }

@@ -7,25 +7,29 @@ import uk.ac.warwick.tabula.services.jobs.JobService
 
 class TestingJobTest extends TestBase with Mockito {
 
-	@Test def run {
-		val instance = JobInstanceImpl.fromPrototype(TestingJob("test job"))
+  @Test def run {
+    val instance = JobInstanceImpl.fromPrototype(TestingJob("test job"))
 
-		withClue("Succeeded") { instance.succeeded should be (false) }
+    withClue("Succeeded") {
+      instance.succeeded should be(false)
+    }
 
-		instance.progress should be (0)
-		instance.status should be (null)
+    instance.progress should be(0)
+    instance.status should be(null)
 
-		val job = new TestingJob()
-		job.jobService = mock[JobService]
-		doAnswer(_ => Some(instance)).when(job.jobService).getInstance(anyString)
+    val job = new TestingJob()
+    job.jobService = mock[JobService]
+    doAnswer(_ => Some(instance)).when(job.jobService).getInstance(anyString)
 
-		job.run(instance)
+    job.run(instance)
 
-		// Check that the flags have been updated.
-		withClue("Succeeded") { instance.succeeded should be (true) }
+    // Check that the flags have been updated.
+    withClue("Succeeded") {
+      instance.succeeded should be(true)
+    }
 
-		instance.progress should be (100)
-		instance.status should be ("Finished the job!")
-	}
+    instance.progress should be(100)
+    instance.status should be("Finished the job!")
+  }
 
 }

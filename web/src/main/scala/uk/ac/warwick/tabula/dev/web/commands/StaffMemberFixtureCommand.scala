@@ -10,49 +10,49 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class StaffMemberFixtureCommand extends CommandInternal[StaffMember] with Logging {
-	this: UserLookupComponent =>
+  this: UserLookupComponent =>
 
-	var userId: String = _
-	var genderCode: String = _
-	var deptCode:String=""
+  var userId: String = _
+  var genderCode: String = _
+  var deptCode: String = ""
 
-	var memberDao: MemberDao = Wire[MemberDao]
-	var deptDao: DepartmentDao = Wire[DepartmentDao]
+  var memberDao: MemberDao = Wire[MemberDao]
+  var deptDao: DepartmentDao = Wire[DepartmentDao]
 
-	def applyInternal(): StaffMember = {
-		val userLookupUser = userLookup.getUserByUserId(userId)
-		assert(userLookupUser != null)
+  def applyInternal(): StaffMember = {
+    val userLookupUser = userLookup.getUserByUserId(userId)
+    assert(userLookupUser != null)
 
-		val existing = memberDao.getByUniversityId(userLookupUser.getWarwickId)
-		val dept = if (deptCode!= "") deptDao.getByCode(deptCode) else None
+    val existing = memberDao.getByUniversityId(userLookupUser.getWarwickId)
+    val dept = if (deptCode != "") deptDao.getByCode(deptCode) else None
 
-		val newMember = new StaffMember
-		newMember.universityId = userLookupUser.getWarwickId
-		newMember.userId = userId
-		newMember.gender = Gender.fromCode(genderCode)
-		newMember.firstName = userLookupUser.getFirstName
-		newMember.lastName = userLookupUser.getLastName
-		newMember.inUseFlag = "Active"
-		if (dept.isDefined)  newMember.homeDepartment = dept.get
+    val newMember = new StaffMember
+    newMember.universityId = userLookupUser.getWarwickId
+    newMember.userId = userId
+    newMember.gender = Gender.fromCode(genderCode)
+    newMember.firstName = userLookupUser.getFirstName
+    newMember.lastName = userLookupUser.getLastName
+    newMember.inUseFlag = "Active"
+    if (dept.isDefined) newMember.homeDepartment = dept.get
 
-		transactional() {
+    transactional() {
 
-			existing foreach {
-				memberDao.delete
-			}
+      existing foreach {
+        memberDao.delete
+      }
 
-			memberDao.saveOrUpdate(newMember)
-		}
+      memberDao.saveOrUpdate(newMember)
+    }
 
-		newMember
-	}
+    newMember
+  }
 }
 
 object StaffMemberFixtureCommand {
-	def apply(): StaffMemberFixtureCommand with ComposableCommand[StaffMember] with AutowiringUserLookupComponent with Unaudited with PubliclyVisiblePermissions = {
-		new StaffMemberFixtureCommand with ComposableCommand[StaffMember]
-			with AutowiringUserLookupComponent
-			with Unaudited
-			with PubliclyVisiblePermissions
-	}
+  def apply(): StaffMemberFixtureCommand with ComposableCommand[StaffMember] with AutowiringUserLookupComponent with Unaudited with PubliclyVisiblePermissions = {
+    new StaffMemberFixtureCommand with ComposableCommand[StaffMember]
+      with AutowiringUserLookupComponent
+      with Unaudited
+      with PubliclyVisiblePermissions
+  }
 }

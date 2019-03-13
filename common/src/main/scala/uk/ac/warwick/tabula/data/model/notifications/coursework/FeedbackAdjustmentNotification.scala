@@ -9,45 +9,48 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 object FeedbackAdjustmentNotification {
-	val templateLocation = "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
+  val templateLocation = "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
 }
 
 @Entity
 @DiscriminatorValue("FeedbackAdjustment")
 class FeedbackAdjustmentNotification
-	extends NotificationWithTarget[AssignmentFeedback, Assignment]
-	with SingleItemNotification[AssignmentFeedback]
-	with AutowiringUserLookupComponent
-	with MyWarwickActivity {
+  extends NotificationWithTarget[AssignmentFeedback, Assignment]
+    with SingleItemNotification[AssignmentFeedback]
+    with AutowiringUserLookupComponent
+    with MyWarwickActivity {
 
-	def verb = "adjusted"
-	def assignment: Assignment = target.entity
-	def feedback: Feedback = item.entity
+  def verb = "adjusted"
 
-	def recipients: Seq[User] = {
-		if (assignment.hasWorkflow) {
+  def assignment: Assignment = target.entity
 
-			val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.usercode).getOrElse({
-				throw new IllegalStateException(s"No primary marker found for ${feedback.usercode}")
-			})
-			Seq(userLookup.getUserByUserId(userId))
-		} else {
-			Seq()
-		}
+  def feedback: Feedback = item.entity
 
-	}
+  def recipients: Seq[User] = {
+    if (assignment.hasWorkflow) {
 
-	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.studentIdentifier}"
+      val userId = assignment.markingWorkflow.getStudentsPrimaryMarker(assignment, feedback.usercode).getOrElse({
+        throw new IllegalStateException(s"No primary marker found for ${feedback.usercode}")
+      })
+      Seq(userLookup.getUserByUserId(userId))
+    } else {
+      Seq()
+    }
 
-	def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
-		Map(
-			"assignment" -> assignment,
-			"feedback" -> feedback
-	))
+  }
 
-	def url: String = recipients.headOption.map(recipient => Routes.admin.assignment.markerFeedback(assignment, recipient)).getOrElse("")
-	def urlTitle = "mark these submissions"
+  def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to feedback for ${feedback.studentIdentifier}"
 
-	priority = Info
+  def content = FreemarkerModel(FeedbackAdjustmentNotification.templateLocation,
+    Map(
+      "assignment" -> assignment,
+      "feedback" -> feedback
+    ))
+
+  def url: String = recipients.headOption.map(recipient => Routes.admin.assignment.markerFeedback(assignment, recipient)).getOrElse("")
+
+  def urlTitle = "mark these submissions"
+
+  priority = Info
 
 }

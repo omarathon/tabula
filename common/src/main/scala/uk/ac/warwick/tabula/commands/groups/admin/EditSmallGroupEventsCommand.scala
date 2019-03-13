@@ -14,108 +14,113 @@ import scala.collection.JavaConverters._
 import EditSmallGroupEventsCommand._
 
 object EditSmallGroupEventsCommand {
-	def apply(module: Module, set: SmallGroupSet) =
-		new EditSmallGroupEventsCommandInternal(module, set)
-			with ComposableCommand[SmallGroupSet]
-			with DeletesSmallGroupEventsWithCommand
-			with EditSmallGroupEventsPermissions
-			with EditSmallGroupEventsValidation
-			with Unaudited
-			with AutowiringSmallGroupServiceComponent
-			with PopulateEditSmallGroupEventsSubCommands {
-			populate()
-		}
+  def apply(module: Module, set: SmallGroupSet) =
+    new EditSmallGroupEventsCommandInternal(module, set)
+      with ComposableCommand[SmallGroupSet]
+      with DeletesSmallGroupEventsWithCommand
+      with EditSmallGroupEventsPermissions
+      with EditSmallGroupEventsValidation
+      with Unaudited
+      with AutowiringSmallGroupServiceComponent
+      with PopulateEditSmallGroupEventsSubCommands {
+      populate()
+    }
 
-	class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
-		var delete: Boolean = false
-		def hasRecordedAttendance: Boolean = {
-			smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
-				.exists { _.attendance.asScala.exists { attendance =>
-				attendance.state != AttendanceState.NotRecorded
-			}}
-		}
-	}
+  class EventProperties(val event: SmallGroupEvent, smallGroupService: SmallGroupService) {
+    var delete: Boolean = false
 
-	class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup, smallGroupService: SmallGroupService) {
-		var events: JList[EventProperties] = JArrayList()
+    def hasRecordedAttendance: Boolean = {
+      smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+        .exists {
+          _.attendance.asScala.exists { attendance =>
+            attendance.state != AttendanceState.NotRecorded
+          }
+        }
+    }
+  }
 
-		group.events.sorted.foreach { event =>
-			events.add(new EventProperties(event, smallGroupService))
-		}
-	}
+  class GroupProperties(val module: Module, val set: SmallGroupSet, val group: SmallGroup, smallGroupService: SmallGroupService) {
+    var events: JList[EventProperties] = JArrayList()
+
+    group.events.sorted.foreach { event =>
+      events.add(new EventProperties(event, smallGroupService))
+    }
+  }
+
 }
 
 trait EditSmallGroupEventsCommandState {
-	def module: Module
-	def set: SmallGroupSet
+  def module: Module
 
-	var groups: JMap[SmallGroup, GroupProperties] = JHashMap()
+  def set: SmallGroupSet
+
+  var groups: JMap[SmallGroup, GroupProperties] = JHashMap()
 }
 
 trait PopulateEditSmallGroupEventsSubCommands {
-	self: EditSmallGroupEventsCommandState with SmallGroupServiceComponent =>
+  self: EditSmallGroupEventsCommandState with SmallGroupServiceComponent =>
 
-	def populate() {
-		groups.clear()
-		set.groups.asScala.sorted.foreach { group =>
-			groups.put(group, new GroupProperties(module, set, group, smallGroupService))
-		}
-	}
+  def populate() {
+    groups.clear()
+    set.groups.asScala.sorted.foreach { group =>
+      groups.put(group, new GroupProperties(module, set, group, smallGroupService))
+    }
+  }
 
 }
 
 class EditSmallGroupEventsCommandInternal(val module: Module, val set: SmallGroupSet) extends CommandInternal[SmallGroupSet] with EditSmallGroupEventsCommandState {
-	self: SmallGroupServiceComponent with DeletesSmallGroupEvents =>
+  self: SmallGroupServiceComponent with DeletesSmallGroupEvents =>
 
-	override def applyInternal(): SmallGroupSet = transactional() {
-		groups.asScala.foreach { case (group, props) =>
-			props.events.asScala.filter(_.delete).map(_.event).foreach { event =>
-				deleteEvent(group, event)
-			}
-		}
+  override def applyInternal(): SmallGroupSet = transactional() {
+    groups.asScala.foreach { case (group, props) =>
+      props.events.asScala.filter(_.delete).map(_.event).foreach { event =>
+        deleteEvent(group, event)
+      }
+    }
 
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 }
 
 trait DeletesSmallGroupEvents {
-	def deleteEvent(group: SmallGroup, event: SmallGroupEvent)
+  def deleteEvent(group: SmallGroup, event: SmallGroupEvent)
 }
 
 trait DeletesSmallGroupEventsWithCommand extends DeletesSmallGroupEvents {
-	def deleteEvent(group: SmallGroup, event: SmallGroupEvent) {
-		DeleteSmallGroupEventCommand(group, event).apply()
-	}
+  def deleteEvent(group: SmallGroup, event: SmallGroupEvent) {
+    DeleteSmallGroupEventCommand(group, event).apply()
+  }
 }
 
 trait EditSmallGroupEventsValidation extends SelfValidating {
-	self: EditSmallGroupEventsCommandState =>
+  self: EditSmallGroupEventsCommandState =>
 
-	override def validate(errors: Errors) {
-		groups.asScala.foreach { case (group, props) =>
-			errors.pushNestedPath(s"groups[${group.id}]")
+  override def validate(errors: Errors) {
+    groups.asScala.foreach { case (group, props) =>
+      errors.pushNestedPath(s"groups[${group.id}]")
 
-			props.events.asScala.zipWithIndex.filter { case (props, _) => props.delete }.foreach { case (props, index) =>
-				errors.pushNestedPath(s"events[$index]")
+      props.events.asScala.zipWithIndex.filter { case (props, _) => props.delete }.foreach { case (props, index) =>
+        errors.pushNestedPath(s"events[$index]")
 
-				if (props.hasRecordedAttendance) {
-					errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
-				}
+        if (props.hasRecordedAttendance) {
+          errors.rejectValue("delete", "smallGroupEvent.delete.hasAttendance")
+        }
 
-				errors.popNestedPath()
-			}
+        errors.popNestedPath()
+      }
 
-			errors.popNestedPath()
-		}
-	}
+      errors.popNestedPath()
+    }
+  }
 }
 
 trait EditSmallGroupEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditSmallGroupEventsCommandState =>
+  self: EditSmallGroupEventsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(set, module)
-		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, module)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+  }
 }

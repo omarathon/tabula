@@ -13,23 +13,24 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Assignment
 
 /**
- * For calling by AJAX. Returns a report of the email addresses that would be
- * the recipients for any published feedback, noting ones that appear empty or
- * invalid.
- */
-@Profile(Array("cm1Enabled")) @Controller
+  * For calling by AJAX. Returns a report of the email addresses that would be
+  * the recipients for any published feedback, noting ones that appear empty or
+  * invalid.
+  */
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/check-recipients"))
 class OldFeedbackRecipientCheckController extends OldCourseworkController {
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		new FeedbackRecipientCheckCommand(module, assignment)
+  @ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+    new FeedbackRecipientCheckCommand(module, assignment)
 
-	@RequestMapping()
-	def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
-		val report = command.apply()
-		Mav("coursework/admin/assignments/publish/checkrecipients",
-			"assignment" -> command.assignment,
-			"report" -> report).noLayout()
-	}
+  @RequestMapping()
+  def confirmation(command: FeedbackRecipientCheckCommand, errors: Errors): Mav = {
+    val report = command.apply()
+    Mav("coursework/admin/assignments/publish/checkrecipients",
+      "assignment" -> command.assignment,
+      "report" -> report).noLayout()
+  }
 
 }

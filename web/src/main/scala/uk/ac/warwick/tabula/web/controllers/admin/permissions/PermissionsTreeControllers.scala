@@ -14,23 +14,27 @@ import scala.reflect.ClassTag
 
 abstract class PermissionsTreeControllerMethods[A <: PermissionsTarget : ClassTag] extends AdminController {
 
-	type PermissionsTreeCommand = Appliable[PermissionsTree[A]]
-	@ModelAttribute("command") def command(@PathVariable target: A): PermissionsTreeCommand = BuildPermissionsTreeCommand(target)
+  type PermissionsTreeCommand = Appliable[PermissionsTree[A]]
 
-	@RequestMapping
-	def tree(@ModelAttribute("command") command: PermissionsTreeCommand, @PathVariable target: A): Mav = {
-		Mav("admin/permissions/tree",
-			"tree" -> command.apply()
-		).crumbs(Breadcrumbs.Permissions(target))
-	}
+  @ModelAttribute("command") def command(@PathVariable target: A): PermissionsTreeCommand = BuildPermissionsTreeCommand(target)
+
+  @RequestMapping
+  def tree(@ModelAttribute("command") command: PermissionsTreeCommand, @PathVariable target: A): Mav = {
+    Mav("admin/permissions/tree",
+      "tree" -> command.apply()
+    ).crumbs(Breadcrumbs.Permissions(target))
+  }
 
 }
 
-@Controller @RequestMapping(value = Array("/admin/permissions/department/{target}/tree"))
+@Controller
+@RequestMapping(value = Array("/admin/permissions/department/{target}/tree"))
 class DepartmentPermissionsTreeController extends PermissionsTreeControllerMethods[Department]
 
-@Controller @RequestMapping(value = Array("/admin/permissions/module/{target}/tree"))
+@Controller
+@RequestMapping(value = Array("/admin/permissions/module/{target}/tree"))
 class ModulePermissionsTreeController extends PermissionsTreeControllerMethods[Module]
 
-@Controller @RequestMapping(value = Array("/admin/permissions/route/{target}/tree"))
+@Controller
+@RequestMapping(value = Array("/admin/permissions/route/{target}/tree"))
 class RoutePermissionsTreeController extends PermissionsTreeControllerMethods[Route]

@@ -9,37 +9,40 @@ import scala.collection.JavaConverters._
 import scala.xml._
 
 object AdminHomeExports {
-	class XMLBuilder(val department: Department, val info: DepartmentHomeInformation) extends AdminHomeExport {
-		var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-		def toXML: Elem = {
-			val assignments = info.modules.flatMap { _.assignments.asScala }.filter { _.isAlive }
+  class XMLBuilder(val department: Department, val info: DepartmentHomeInformation) extends AdminHomeExport {
+    var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-			<assignments>
-				{ assignments map assignmentElement }
-			</assignments>
-		}
+    def toXML: Elem = {
+      val assignments = info.modules.flatMap(_.assignments.asScala).filter(_.isAlive)
 
-		def assignmentElement(assignment: Assignment): Elem = {
-			<assignment>
+      <assignments>
+        {assignments map assignmentElement}
+      </assignments>
+    }
 
-			</assignment> % assignmentData(assignment)
-		}
-	}
+    def assignmentElement(assignment: Assignment): Elem = {
+      <assignment>
 
-	trait AdminHomeExport {
-		val department: Department
-		val info: DepartmentHomeInformation
-		def topLevelUrl: String
+      </assignment> % assignmentData(assignment)
+    }
+  }
 
-		protected def assignmentData(assignment: Assignment): Map[String, Any] = Map(
-			"module-code" -> assignment.module.code,
-			"id" -> assignment.id,
-			"open-date" -> assignment.openDate,
-			"open-ended" -> assignment.openEnded,
-			"close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
-			"last-submission-date" -> assignment.submissions.asScala.map { _.submittedDate }.sortBy { _.getMillis }.reverse.headOption,
-			"submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))
-		)
-	}
+  trait AdminHomeExport {
+    val department: Department
+    val info: DepartmentHomeInformation
+
+    def topLevelUrl: String
+
+    protected def assignmentData(assignment: Assignment): Map[String, Any] = Map(
+      "module-code" -> assignment.module.code,
+      "id" -> assignment.id,
+      "open-date" -> assignment.openDate,
+      "open-ended" -> assignment.openEnded,
+      "close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
+      "last-submission-date" -> assignment.submissions.asScala.map(_.submittedDate).sortBy(_.getMillis).reverse.headOption,
+      "submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))
+    )
+  }
+
 }

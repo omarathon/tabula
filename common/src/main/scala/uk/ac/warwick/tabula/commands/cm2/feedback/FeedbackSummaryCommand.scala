@@ -9,46 +9,47 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 object FeedbackSummaryCommand {
-	type Result = Option[AssignmentFeedback]
-	type Command = Appliable[Result]
+  type Result = Option[AssignmentFeedback]
+  type Command = Appliable[Result]
 
-	def apply(assignment: Assignment, student: User): Command =
-		new FeedbackSummaryCommandInternal(assignment, student)
-			with ComposableCommand[Result]
-			with FeedbackSummaryPermissions
-			with FeedbackSummaryDescription
-			with AutowiringFeedbackServiceComponent
-			with ReadOnly
+  def apply(assignment: Assignment, student: User): Command =
+    new FeedbackSummaryCommandInternal(assignment, student)
+      with ComposableCommand[Result]
+      with FeedbackSummaryPermissions
+      with FeedbackSummaryDescription
+      with AutowiringFeedbackServiceComponent
+      with ReadOnly
 }
 
 trait FeedbackSummaryState {
-	def assignment: Assignment
-	def student: User
+  def assignment: Assignment
+
+  def student: User
 }
 
 class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: User)
-	extends CommandInternal[Result]
-		with FeedbackSummaryState {
-	self: FeedbackServiceComponent =>
+  extends CommandInternal[Result]
+    with FeedbackSummaryState {
+  self: FeedbackServiceComponent =>
 
-	override def applyInternal(): Option[AssignmentFeedback] =
-		feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
+  override def applyInternal(): Option[AssignmentFeedback] =
+    feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 }
 
 trait FeedbackSummaryPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FeedbackSummaryState =>
+  self: FeedbackSummaryState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
 }
 
 trait FeedbackSummaryDescription extends Describable[Result] {
-	self: FeedbackSummaryState =>
+  self: FeedbackSummaryState =>
 
-	override lazy val eventName: String = "FeedbackSummary"
+  override lazy val eventName: String = "FeedbackSummary"
 
-	override def describe(d: Description): Unit =
-		d.assignment(assignment)
-		 .studentIds(Option(student.getWarwickId).toSeq)
-		 .studentUsercodes(student.getUserId)
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+      .studentIds(Option(student.getWarwickId).toSeq)
+      .studentUsercodes(student.getUserId)
 }

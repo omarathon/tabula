@@ -6,10 +6,10 @@ case class MarksManager() extends BuiltInRole(MarksManagerRoleDefinition, None)
 
 case object MarksManagerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Tabula Marks Manager"
+  override def description = "Tabula Marks Manager"
 
-	GrantsScopelessPermission(
-		Marks.MarksManagement
-	)
+  GrantsScopelessPermission(
+    Marks.MarksManagement
+  )
 
 }

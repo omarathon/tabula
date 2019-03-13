@@ -14,14 +14,14 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ObjectStorageMigrationJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		// We don't really need a maintenance guard here, but it stops it running on the standby
-		if (features.schedulingObjectStorageMigration)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					ObjectStorageMigrationCommand().apply()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    // We don't really need a maintenance guard here, but it stops it running on the standby
+    if (features.schedulingObjectStorageMigration)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          ObjectStorageMigrationCommand().apply()
+        }
+      }
+  }
 
 }

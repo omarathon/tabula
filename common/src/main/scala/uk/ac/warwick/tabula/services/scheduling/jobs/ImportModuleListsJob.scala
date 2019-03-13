@@ -14,15 +14,15 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportModuleListsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingModuleListsImport) {
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					ImportModuleListsCommand().apply()
-					ImportRouteRulesCommand().apply()
-				}
-			}
-		}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingModuleListsImport) {
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          ImportModuleListsCommand().apply()
+          ImportRouteRulesCommand().apply()
+        }
+      }
+    }
+  }
 
 }

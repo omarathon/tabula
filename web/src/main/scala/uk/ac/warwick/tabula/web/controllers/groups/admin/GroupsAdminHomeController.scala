@@ -24,13 +24,13 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 
 
 /**
- * Redirects to handle these otherwise nonexistent parent paths.
- */
+  * Redirects to handle these otherwise nonexistent parent paths.
+  */
 @Controller
 @RequestMapping(Array("/groups/admin", "/groups/admin/department", "/groups/admin/module"))
 class GroupsAdminHomeController extends GroupsController {
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
+  @RequestMapping(method = Array(GET, HEAD))
+  def homeScreen(user: CurrentUser) = Redirect(Routes.home)
 
 }

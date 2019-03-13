@@ -11,185 +11,198 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.userlookup.User
 
 trait AssessmentServiceComponent {
-	def assessmentService: AssessmentService
+  def assessmentService: AssessmentService
 }
 
 trait AutowiringAssessmentServiceComponent extends AssessmentServiceComponent {
-	var assessmentService: AssessmentService = Wire[AssessmentService]
+  var assessmentService: AssessmentService = Wire[AssessmentService]
 }
 
 /**
- * Service providing access to Assignments and related objects.
- */
+  * Service providing access to Assignments and related objects.
+  */
 trait AssessmentService {
-	def getAssignmentById(id: String): Option[Assignment]
-	def getExamById(id: String): Option[Exam]
+  def getAssignmentById(id: String): Option[Assignment]
 
-	def save(assignment: Assignment): Unit
-	def save(exam: Exam): Unit
+  def getExamById(id: String): Option[Exam]
 
-	def deleteFormField(field: FormField) : Unit
+  def save(assignment: Assignment): Unit
 
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
-	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
+  def save(exam: Exam): Unit
 
-	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment]
-	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
-	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+  def deleteFormField(field: FormField): Unit
 
-	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment]
-	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
-	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+  def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
 
-	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
+  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam]
 
-	def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+  def getAssignmentsWithFeedback(usercode: String): Seq[Assignment]
 
-	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-	def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
-	def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+  def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
 
-	/**
-	 * Find a recent assignment within this module or possible department.
-	 */
-	def recentAssignment(department: Department): Option[Assignment]
+  def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
+  def getAssignmentsWithSubmission(usercode: String): Seq[Assignment]
 
-	def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
+  def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
 
-	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+  def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+  def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
-	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
+  def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
 
-	def getExamsWhereMarker(user: User): Seq[Exam]
+  def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
+  def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
+  def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
+  def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
+  def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment]
+
+  /**
+    * Find a recent assignment within this module or possible department.
+    */
+  def recentAssignment(department: Department): Option[Assignment]
+
+  def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
+
+  def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
+
+  def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
+
+  def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+
+  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
+
+  def getExamsWhereMarker(user: User): Seq[Exam]
 
 }
 
 abstract class AbstractAssessmentService extends AssessmentService {
-	self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent =>
+  self: AssessmentDaoComponent with AssessmentServiceUserGroupHelpers with MarkingWorkflowServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
-	def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
-	def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
+  def getAssignmentById(id: String): Option[Assignment] = assessmentDao.getAssignmentById(id)
 
-	def save(assignment: Assignment): Unit = assessmentDao.save(assignment)
-	def save(exam: Exam): Unit = assessmentDao.save(exam)
+  def getExamById(id: String): Option[Exam] = assessmentDao.getExamById(id)
 
-	def deleteFormField(field: FormField) : Unit = assessmentDao.deleteFormField(field)
+  def save(assignment: Assignment): Unit = assessmentDao.save(assignment)
 
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
-		assessmentDao.getAssignmentByNameYearModule(name, year, module)
+  def save(exam: Exam): Unit = assessmentDao.save(exam)
 
-	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
-		assessmentDao.getExamByNameYearModule(name, year, module)
+  def deleteFormField(field: FormField): Unit = assessmentDao.deleteFormField(field)
 
-	def getAssignmentsWithFeedback(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(usercode).filter { _.isVisibleToStudentsHistoric }
+  def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
+    assessmentDao.getAssignmentByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
-		val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.userId)
-		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
-	}
+  def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
+    assessmentDao.getExamByNameYearModule(name, year, module)
 
-	def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		assessmentDao.getAssignmentsWithFeedback(usercode, academicYearOption)
+  def getAssignmentsWithFeedback(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithFeedback(usercode).filter(_.isVisibleToStudentsHistoric)
 
-	def getAssignmentsWithSubmission(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(usercode).filter { _.isVisibleToStudentsHistoric }
+  def getAssignmentsWithFeedback(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+    val allAssignments = getAssignmentsWithFeedback(studentCourseYearDetails.studentCourseDetails.student.userId)
+    filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
+  }
 
-	def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
-		val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.userId)
-		filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
-	}
+  def getAssignmentsWithFeedback(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    assessmentDao.getAssignmentsWithFeedback(usercode, academicYearOption)
 
-	def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		assessmentDao.getAssignmentsWithSubmission(usercode, academicYearOption)
+  def getAssignmentsWithSubmission(usercode: String): Seq[Assignment] = assessmentDao.getAssignmentsWithSubmission(usercode).filter(_.isVisibleToStudentsHistoric)
 
-	def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
-		assessmentDao.getSubmissionsForAssignmentsBetweenDates(usercode, startInclusive, endExclusive)
+  def getAssignmentsWithSubmission(studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+    val allAssignments = getAssignmentsWithSubmission(studentCourseYearDetails.studentCourseDetails.student.userId)
+    filterAssignmentsByCourseAndYear(allAssignments, studentCourseYearDetails)
+  }
 
-	def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
-		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
-			.distinct
-			.flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
-			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
-	}
+  def getAssignmentsWithSubmission(usercode: String, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    assessmentDao.getAssignmentsWithSubmission(usercode, academicYearOption)
 
-	def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module.adminDepartment == department }
+  def getSubmissionsForAssignmentsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+    assessmentDao.getSubmissionsForAssignmentsBetweenDates(usercode, startInclusive, endExclusive)
 
-	def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
+  def getAssignmentWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+    (firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
+      .distinct
+      .flatMap(markingWorkflowService.getAssignmentsUsingMarkingWorkflow)
+      .filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
+  }
 
-	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
-		val workflows = cm2MarkerHelper.findBy(user).map(_.workflow).distinct
+  def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module.adminDepartment == department)
 
-		cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflows(workflows)
-			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
-	}
+  def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module == module)
 
-	def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter { _.module.adminDepartment == department }
+  def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
+    val workflows = cm2MarkerHelper.findBy(user).map(_.workflow).distinct
 
-	def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-		getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
+    cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflows(workflows)
+      .filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
+  }
 
-	/**
-	 * Find a recent assignment within this module or possible department.
-	 */
-	def recentAssignment(department: Department): Option[Assignment] = assessmentDao.recentAssignment(department)
+  def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter(_.module.adminDepartment == department)
 
-	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assessmentDao.getAssignmentsByName(partialName, department)
+  def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
+    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter(_.module == module)
 
-	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assessmentDao.findAssignmentsByNameOrModule(query)
+  /**
+    * Find a recent assignment within this module or possible department.
+    */
+  def recentAssignment(department: Department): Option[Assignment] = assessmentDao.recentAssignment(department)
 
-	def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
-		assignments
-			.filter(_.academicYear == studentCourseYearDetails.academicYear)
-			.filter(assignment => {
-				val allStudentsModulesForYear = studentCourseYearDetails.studentCourseDetails.student.registeredModulesByYear(Some(assignment.academicYear))
+  def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assessmentDao.getAssignmentsByName(partialName, department)
 
-				// include the assignment only for the course with the relevant module registration -
-				// unless the student isn't registered on the module at all, in which case include this assignment under all the student's course tabs
-				studentCourseYearDetails.registeredModules.contains(assignment.module) || !allStudentsModulesForYear.contains(assignment.module)
-			}
-		)
-	}
+  def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assessmentDao.findAssignmentsByNameOrModule(query)
 
-	def getAssignmentsClosingBetween(start: DateTime, end: DateTime): Seq[Assignment] = assessmentDao.getAssignmentsClosingBetween(start, end)
+  def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment] = {
+    assignments
+      .filter(_.academicYear == studentCourseYearDetails.academicYear)
+      .filter(assignment => {
+        val allStudentsModulesForYear = studentCourseYearDetails.studentCourseDetails.student.registeredModulesByYear(Some(assignment.academicYear))
 
-	def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
-		assessmentDao.getExamsByModules(modules, academicYear)
+        // include the assignment only for the course with the relevant module registration -
+        // unless the student isn't registered on the module at all, in which case include this assignment under all the student's course tabs
+        studentCourseYearDetails.registeredModules.contains(assignment.module) || !allStudentsModulesForYear.contains(assignment.module)
+      }
+      )
+  }
 
-	def getExamsWhereMarker(user: User): Seq[Exam] = {
-		(firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
-			.distinct
-			.flatMap(markingWorkflowService.getExamsUsingMarkingWorkflow)
-			.filterNot { e => e.deleted}
-	}
+  def getAssignmentsClosingBetween(start: DateTime, end: DateTime): Seq[Assignment] = assessmentDao.getAssignmentsClosingBetween(start, end)
+
+  def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
+    assessmentDao.getExamsByModules(modules, academicYear)
+
+  def getExamsWhereMarker(user: User): Seq[Exam] = {
+    (firstMarkerHelper.findBy(user) ++ secondMarkerHelper.findBy(user))
+      .distinct
+      .flatMap(markingWorkflowService.getExamsUsingMarkingWorkflow)
+      .filterNot { e => e.deleted }
+  }
 }
 
 trait AssessmentServiceUserGroupHelpers {
-	val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
-	val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
+  val firstMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
+  val secondMarkerHelper: UserGroupMembershipHelper[MarkingWorkflow]
 
-	val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers]
+  val cm2MarkerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait AssessmentServiceUserGroupHelpersImpl extends AssessmentServiceUserGroupHelpers {
-	val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
-	val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
+  val firstMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_firstMarkers")
+  val secondMarkerHelper = new UserGroupMembershipHelper[MarkingWorkflow]("_secondMarkers")
 
-	val cm2MarkerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
+  val cm2MarkerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
 @Service(value = "assignmentService")
 class AssessmentServiceImpl
-	extends AbstractAssessmentService
-		with AutowiringAssessmentDaoComponent
-		with AutowiringMarkingWorkflowServiceComponent
-		with AutowiringCM2MarkingWorkflowServiceComponent
-		with AssessmentServiceUserGroupHelpersImpl
+  extends AbstractAssessmentService
+    with AutowiringAssessmentDaoComponent
+    with AutowiringMarkingWorkflowServiceComponent
+    with AutowiringCM2MarkingWorkflowServiceComponent
+    with AssessmentServiceUserGroupHelpersImpl
 

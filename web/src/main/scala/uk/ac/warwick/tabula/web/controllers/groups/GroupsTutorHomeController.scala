@@ -14,32 +14,32 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 
 /**
- * Displays the group sets that the current user is a tutor of.
- */
+  * Displays the group sets that the current user is a tutor of.
+  */
 abstract class AbstractGroupsTutorHomeController extends GroupsController
-	with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
+  with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
 
-	@ModelAttribute("command") def command(@ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
-		TutorHomeCommand(user, academicYear.getOrElse(AcademicYear.now()))
+  @ModelAttribute("command") def command(@ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]) =
+    TutorHomeCommand(user, academicYear.getOrElse(AcademicYear.now()))
 
-	@RequestMapping
-	def listModules(
-		@ModelAttribute("command") command: Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]],
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
-		@RequestParam(value="updatedOccurrence", required=false) occurrence: SmallGroupEventOccurrence
-	): Mav = {
-		val mapping = command.apply()
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+  @RequestMapping
+  def listModules(
+    @ModelAttribute("command") command: Appliable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]],
+    @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
+    @RequestParam(value = "updatedOccurrence", required = false) occurrence: SmallGroupEventOccurrence
+  ): Mav = {
+    val mapping = command.apply()
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		val data = GroupsViewModel.ViewModules.generate(mapping, GroupsViewModel.Tutor)
+    val data = GroupsViewModel.ViewModules.generate(mapping, GroupsViewModel.Tutor)
 
-		Mav("groups/tutor_home",
-			"academicYear" -> academicYear,
-			"data" -> data,
-			"updatedOccurrence" -> occurrence,
-			"isSelf" -> true
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.tutor.mygroupsForYear(year)):_*)
-	}
+    Mav("groups/tutor_home",
+      "academicYear" -> academicYear,
+      "data" -> data,
+      "updatedOccurrence" -> occurrence,
+      "isSelf" -> true
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.tutor.mygroupsForYear(year)): _*)
+  }
 
 }
 
@@ -47,8 +47,8 @@ abstract class AbstractGroupsTutorHomeController extends GroupsController
 @RequestMapping(Array("/groups/tutor"))
 class GroupsTutorHomeController extends AbstractGroupsTutorHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 }
 
@@ -56,7 +56,7 @@ class GroupsTutorHomeController extends AbstractGroupsTutorHomeController {
 @RequestMapping(Array("/groups/tutor/{academicYear}"))
 class GroupsTutorHomeForYearController extends AbstractGroupsTutorHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 }

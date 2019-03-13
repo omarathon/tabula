@@ -5,140 +5,145 @@ import uk.ac.warwick.tabula.BrowserTest
 
 class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 
-	private def openSummaryScreen(): Unit = {
+  private def openSummaryScreen(): Unit = {
 
-		When("I go the admin page")
-		if (!currentUrl.contains("/department/xxx/20")) {
-			click on linkText("Test Services")
-		}
+    When("I go the admin page")
+    if (!currentUrl.contains("/department/xxx/20")) {
+      click on linkText("Test Services")
+    }
 
-		loadCurrentAcademicYearTab()
+    loadCurrentAcademicYearTab()
 
-		val testModule = eventually { id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0) }
-		click on testModule
+    val testModule = eventually {
+      id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
+    }
+    click on testModule
 
-		eventually {
-			val cm2Assignment =id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
-			click on cm2Assignment
-		}
+    eventually {
+      val cm2Assignment = id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
+      click on cm2Assignment
+    }
 
-		eventually {
-			currentUrl.contains("/summary") should be(true)
-		}
+    eventually {
+      currentUrl.contains("/summary") should be(true)
+    }
 
-	}
+  }
 
-	private def downloadAsPdf(): Unit = {
+  private def downloadAsPdf(): Unit = {
 
-		When("I click on the Download dropdown without selecting any students")
-		val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
-		click on downloadDropdown
+    When("I click on the Download dropdown without selecting any students")
+    val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
+    click on downloadDropdown
 
-		Then("The link to download as pdf should be disabled")
-		val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
-		disabledlinks.getAttribute("class").contains("disabled") should be (true)
+    Then("The link to download as pdf should be disabled")
+    val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
+    disabledlinks.getAttribute("class").contains("disabled") should be(true)
 
-		When("I select a student")
-		val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
-		click on student1Checkbox
+    When("I select a student")
+    val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
+    click on student1Checkbox
 
-		click on downloadDropdown
+    click on downloadDropdown
 
-		Then("The link to download as pdf should be enabled")
-		val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.download-pdf")).get(0)
-		disabledlinks.getAttribute("class").contains("disabled") should be (false)
+    Then("The link to download as pdf should be enabled")
+    val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.download-pdf")).get(0)
+    disabledlinks.getAttribute("class").contains("disabled") should be(false)
 
-		And("The link should point to the pdf file")
-		menuOption.getAttribute("href") should include("/submissions.pdf")
-		click on menuOption
+    And("The link should point to the pdf file")
+    menuOption.getAttribute("href") should include("/submissions.pdf")
+    click on menuOption
 
-	}
+  }
 
-	private def downloadAll(): Unit = {
+  private def downloadAll(): Unit = {
 
-			When("I click on the Download dropdown without selecting any students")
-			val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
-			click on downloadDropdown
+    When("I click on the Download dropdown without selecting any students")
+    val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
+    click on downloadDropdown
 
-			Then("The link to download as zip should be disabled")
-			val disabledlinks = eventually {
-				val links = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
-				links.getAttribute("class").contains("disabled") should be(true)
-				links
-			}
+    Then("The link to download as zip should be disabled")
+    val disabledlinks = eventually {
+      val links = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
+      links.getAttribute("class").contains("disabled") should be(true)
+      links
+    }
 
-			When("I select a student")
-			val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
-			click on student1Checkbox
+    When("I select a student")
+    val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
+    click on student1Checkbox
 
-			And("I select a second student")
-			val student2Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(1)
-			click on student2Checkbox
+    And("I select a second student")
+    val student2Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(1)
+    click on student2Checkbox
 
-			Then("The all checkbox should be checked too")
-			val allCheckbox = id("main").webElement.findElements(By.cssSelector(".collection-check-all")).get(0)
-			allCheckbox.isSelected should be (true)
+    Then("The all checkbox should be checked too")
+    val allCheckbox = id("main").webElement.findElements(By.cssSelector(".collection-check-all")).get(0)
+    allCheckbox.isSelected should be(true)
 
-			click on downloadDropdown
+    click on downloadDropdown
 
-			And("The link to download as zip should be enabled")
-			val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(0)
-			disabledlinks.getAttribute("class").contains("disabled") should be (false)
+    And("The link to download as zip should be enabled")
+    val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(0)
+    disabledlinks.getAttribute("class").contains("disabled") should be(false)
 
 
-			And("The link should point to the zip file")
-			menuOption.isDisplayed should be(true)
-			menuOption.getAttribute("href") should include("/submissions.zip")
-			click on menuOption
+    And("The link should point to the zip file")
+    menuOption.isDisplayed should be(true)
+    menuOption.getAttribute("href") should include("/submissions.zip")
+    click on menuOption
 
-	}
-	private def deleteSubmission(): Unit = {
+  }
 
-		When("I click on the Download dropdown without selecting any students")
-		val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
-		click on downloadDropdown
+  private def deleteSubmission(): Unit = {
 
-		Then("The link to download as zip should be disabled")
-		val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
-		disabledlinks.getAttribute("class").contains("disabled") should be (true)
+    When("I click on the Download dropdown without selecting any students")
+    val downloadDropdown = id("main").webElement.findElements(By.cssSelector("button.dropdown-toggle")).get(0)
+    click on downloadDropdown
 
-		When("I select a student")
-		val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
-		click on student1Checkbox
+    Then("The link to download as zip should be disabled")
+    val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
+    disabledlinks.getAttribute("class").contains("disabled") should be(true)
 
-		click on downloadDropdown
+    When("I select a student")
+    val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
+    click on student1Checkbox
 
-		And("The link to delete submissions should be enabled")
-		val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(1)
-		disabledlinks.getAttribute("class").contains("disabled") should be (false)
+    click on downloadDropdown
 
-		And("The link should point to the zip file")
-		eventually { menuOption.isDisplayed should be(true) }
-		menuOption.getAttribute("href") should include("/delete")
-		click on menuOption
-	}
+    And("The link to delete submissions should be enabled")
+    val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(1)
+    disabledlinks.getAttribute("class").contains("disabled") should be(false)
 
-	private def uncheckStudents(): Unit = {
+    And("The link should point to the zip file")
+    eventually {
+      menuOption.isDisplayed should be(true)
+    }
+    menuOption.getAttribute("href") should include("/delete")
+    click on menuOption
+  }
 
-		val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
-		if(student1Checkbox.isSelected){
-			click on student1Checkbox
-		}
+  private def uncheckStudents(): Unit = {
 
-		val student2Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(1)
-		if(student2Checkbox.isSelected){
-			click on student2Checkbox
-		}
+    val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
+    if (student1Checkbox.isSelected) {
+      click on student1Checkbox
+    }
 
-	}
+    val student2Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(1)
+    if (student2Checkbox.isSelected) {
+      click on student2Checkbox
+    }
 
-	"Admin" should "be able to download submissions" in as(P.Admin1) {
+  }
 
-		openSummaryScreen()
-		downloadAll()
-		uncheckStudents()
-		downloadAsPdf()
-		uncheckStudents()
-		deleteSubmission()
-	}
+  "Admin" should "be able to download submissions" in as(P.Admin1) {
+
+    openSummaryScreen()
+    downloadAll()
+    uncheckStudents()
+    downloadAsPdf()
+    uncheckStudents()
+    deleteSubmission()
+  }
 }

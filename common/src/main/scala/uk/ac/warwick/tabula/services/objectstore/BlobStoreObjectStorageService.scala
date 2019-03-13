@@ -15,86 +15,84 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 
 /**
-	* Implementation uses the Apache jclouds library to push and pull data to the cloud store
-	*/
+  * Implementation uses the Apache jclouds library to push and pull data to the cloud store
+  */
 class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectContainerName: String)
-	extends ObjectStorageService with Logging with InitializingBean with TaskBenchmarking {
+  extends ObjectStorageService with Logging with InitializingBean with TaskBenchmarking {
 
-	protected lazy val blobStore: BlobStore = blobStoreContext.getBlobStore
+  protected lazy val blobStore: BlobStore = blobStoreContext.getBlobStore
 
-	private final val slicer = new BasePayloadSlicer
+  private final val slicer = new BasePayloadSlicer
 
-	override def afterPropertiesSet(): Unit = {
-		// Create the container if it doesn't exist
-		if (!blobStore.containerExists(objectContainerName)) blobStore.createContainerInLocation(null, objectContainerName)
-	}
+  override def afterPropertiesSet(): Unit = {
+    // Create the container if it doesn't exist
+    if (!blobStore.containerExists(objectContainerName)) blobStore.createContainerInLocation(null, objectContainerName)
+  }
 
-	override def keyExists(key: String): Boolean = blobStore.blobExists(objectContainerName, key)
+  override def keyExists(key: String): Boolean = blobStore.blobExists(objectContainerName, key)
 
-	private def metadata(key: String) = key.maybeText.flatMap { k => Option(blobStore.blobMetadata(objectContainerName, k)) }
+  private def metadata(key: String) = key.maybeText.flatMap { k => Option(blobStore.blobMetadata(objectContainerName, k)) }
 
-	override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = benchmark(s"Push file for key $key", level = Logging.Level.Debug) {
-		Assert.notNull(key, "Key must be defined")
+  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = benchmark(s"Push file for key $key", level = Logging.Level.Debug) {
+    Assert.notNull(key, "Key must be defined")
 
-		val blob = blobStore.blobBuilder(key)
-			.payload(in)
-			.contentDisposition(key)
-			.contentType(metadata.contentType)
-			.contentLength(metadata.contentLength)
-			.userMetadata(metadata.fileHash.map { h => "shahex" -> h }.toMap.asJava)
-			.build()
+    val blob = blobStore.blobBuilder(key)
+      .payload(in)
+      .contentDisposition(key)
+      .contentType(metadata.contentType)
+      .contentLength(metadata.contentLength)
+      .userMetadata(metadata.fileHash.map { h => "shahex" -> h }.toMap.asJava)
+      .build()
 
-		// TAB-4144 Use large object support for anything over 50mb
-		// TAB-4235 If you want this done in parallel, you have to do it yourself
-		if (metadata.contentLength > 50 * 1024 * 1024) {
-			val partSize =
-				new MultipartUploadSlicingAlgorithm(blobStore.getMinimumMultipartPartSize, blobStore.getMaximumMultipartPartSize, blobStore.getMaximumNumberOfParts)
-					.calculateChunkSize(metadata.contentLength)
+    // TAB-4144 Use large object support for anything over 50mb
+    // TAB-4235 If you want this done in parallel, you have to do it yourself
+    if (metadata.contentLength > 50 * 1024 * 1024) {
+      val partSize =
+        new MultipartUploadSlicingAlgorithm(blobStore.getMinimumMultipartPartSize, blobStore.getMaximumMultipartPartSize, blobStore.getMaximumNumberOfParts)
+          .calculateChunkSize(metadata.contentLength)
 
-			val multipartUpload = blobStore.initiateMultipartUpload(objectContainerName, blob.getMetadata, PutOptions.NONE)
+      val multipartUpload = blobStore.initiateMultipartUpload(objectContainerName, blob.getMetadata, PutOptions.NONE)
 
-			val parts = slicer.slice(blob.getPayload, partSize).asScala.toList.zipWithIndex.par.map { case (payload, index) =>
-				blobStore.uploadMultipartPart(multipartUpload, index + 1, payload)
-			}.seq
+      val parts = slicer.slice(blob.getPayload, partSize).asScala.toList.zipWithIndex.par.map { case (payload, index) =>
+        blobStore.uploadMultipartPart(multipartUpload, index + 1, payload)
+      }.seq
 
-			benchmarkTask(s"blobstore upload multipart $key size=${metadata.contentLength}") {
-				blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
-			}
-		} else {
-			benchmarkTask(s"blobstore upload single $key size=${metadata.contentLength}") {
-				blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
-			}
-		}
-	}
+      benchmarkTask(s"blobstore upload multipart $key size=${metadata.contentLength}") {
+        blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
+      }
+    } else {
+      benchmarkTask(s"blobstore upload single $key size=${metadata.contentLength}") {
+        blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
+      }
+    }
+  }
 
-	/**
-		* Overridden in SwiftObjectStorageService to support multipart
-		*/
-	protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata): String = blobStore.putBlob(objectContainerName, blob)
+  /**
+    * Overridden in SwiftObjectStorageService to support multipart
+    */
+  protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata): String = blobStore.putBlob(objectContainerName, blob)
 
-	override def fetch(key: String): RichByteSource = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
-		new BlobBackedRichByteSource(blobStore, objectContainerName, key, metadata(key))
-	}
+  override def fetch(key: String): RichByteSource = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
+    new BlobBackedRichByteSource(blobStore, objectContainerName, key, metadata(key))
+  }
 
-	def delete(key: String): Unit = benchmark(s"Deleting key $key", level = Logging.Level.Debug) {
-		blobStore.removeBlob(objectContainerName, key)
-	}
+  def delete(key: String): Unit = benchmark(s"Deleting key $key", level = Logging.Level.Debug) {
+    blobStore.removeBlob(objectContainerName, key)
+  }
 
-	override def listKeys(): Stream[String] = benchmark("List keys", level = Logging.Level.Debug) {
-		def list(nextMarker: Option[String], accumulator: Stream[_ <: StorageMetadata]): Stream[_ <: StorageMetadata] = nextMarker match {
-			case None => // No more results
-				accumulator
+  override def listKeys(): Stream[String] = benchmark("List keys", level = Logging.Level.Debug) {
+    def list(nextMarker: Option[String], accumulator: Stream[_ <: StorageMetadata]): Stream[_ <: StorageMetadata] = nextMarker match {
+      case None => // No more results
+        accumulator
 
-			case Some(marker) =>
-				accumulator.append({
-					val nextResults = blobStore.list(objectContainerName, ListContainerOptions.Builder.afterMarker(marker))
-					list(Option(nextResults.getNextMarker), nextResults.asScala.toStream)
-				})
-		}
+      case Some(marker) =>
+        accumulator.append({
+          val nextResults = blobStore.list(objectContainerName, ListContainerOptions.Builder.afterMarker(marker))
+          list(Option(nextResults.getNextMarker), nextResults.asScala.toStream)
+        })
+    }
 
-		val firstResults = blobStore.list(objectContainerName)
-		list(Option(firstResults.getNextMarker), firstResults.asScala.toStream).map {
-			_.getName
-		}
-	}
+    val firstResults = blobStore.list(objectContainerName)
+    list(Option(firstResults.getNextMarker), firstResults.asScala.toStream).map(_.getName)
+  }
 }

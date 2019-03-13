@@ -14,34 +14,34 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 
 trait ExamModuleGridDocumentsController extends ExamsController {
 
-	self: GenerateModuleExamGridController =>
+  self: GenerateModuleExamGridController =>
 
-	var messageSource: MessageSource = Wire.auto[MessageSource]
+  var messageSource: MessageSource = Wire.auto[MessageSource]
 
-	@RequestMapping(method = Array(POST), params = Array(GenerateModuleExamGridMappingParameters.excel))
-	def excel(
-		@Valid @ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
-		selectModuleExamCommandErrors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): View = {
-		if (selectModuleExamCommandErrors.hasErrors) {
-			throw new IllegalArgumentException
-		}
+  @RequestMapping(method = Array(POST), params = Array(GenerateModuleExamGridMappingParameters.excel))
+  def excel(
+    @Valid @ModelAttribute("selectModuleExamCommand") selectModuleExamCommand: SelectModuleExamCommand,
+    selectModuleExamCommandErrors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): View = {
+    if (selectModuleExamCommandErrors.hasErrors) {
+      throw new IllegalArgumentException
+    }
 
-		val workbook =
-			GenerateModuleExamGridExporter(
-				department = department,
-				academicYear = academicYear,
-				module = selectModuleExamCommand.module,
-				examModuleGridResult = selectModuleExamCommand.apply()
-			)
+    val workbook =
+      GenerateModuleExamGridExporter(
+        department = department,
+        academicYear = academicYear,
+        module = selectModuleExamCommand.module,
+        examModuleGridResult = selectModuleExamCommand.apply()
+      )
 
 
-		new ExcelView(
-			s"Exam grid for ${department.name} ${selectModuleExamCommand.module.code} ${academicYear.toString.replace("/", "-")}.xlsx",
-			workbook
-		)
-	}
+    new ExcelView(
+      s"Exam grid for ${department.name} ${selectModuleExamCommand.module.code} ${academicYear.toString.replace("/", "-")}.xlsx",
+      workbook
+    )
+  }
 
 }

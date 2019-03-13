@@ -13,243 +13,247 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class CopySmallGroupSetsCommandTest extends TestBase with Mockito {
 
-	private trait CommandTestSupport extends SmallGroupServiceComponent with PopulateCopySmallGroupSetsRequestDefaults {
-		self: CopySmallGroupSetsRequestState with CopySmallGroupSetsCommandState =>
+  private trait CommandTestSupport extends SmallGroupServiceComponent with PopulateCopySmallGroupSetsRequestDefaults {
+    self: CopySmallGroupSetsRequestState with CopySmallGroupSetsCommandState =>
 
-		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-	}
+    val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
+  }
 
-	private trait Fixture {
-		val department: Department = Fixtures.department("in", "IT Services")
-		department.id = "departmentId"
+  private trait Fixture {
+    val department: Department = Fixtures.department("in", "IT Services")
+    department.id = "departmentId"
 
-		val module: Module = Fixtures.module("in101", "Introduction to Scala")
-		module.id = "moduleId"
-		module.adminDepartment = department
-	}
+    val module: Module = Fixtures.module("in101", "Introduction to Scala")
+    module.id = "moduleId"
+    module.adminDepartment = department
+  }
 
-	private trait CommandFixture extends Fixture {
-		val command = new CopySmallGroupSetsCommandInternal(department, Seq(module)) with CommandTestSupport
-	}
+  private trait CommandFixture extends Fixture {
+    val command = new CopySmallGroupSetsCommandInternal(department, Seq(module)) with CommandTestSupport
+  }
 
-	@Test def populate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.OCTOBER, 13, 9, 13, 29, 0)) { new CommandFixture {
-		val source = new SmallGroupSet()
+  @Test def populate(): Unit = withFakeTime(new DateTime(2014, DateTimeConstants.OCTOBER, 13, 9, 13, 29, 0)) {
+    new CommandFixture {
+      val source = new SmallGroupSet()
 
-		command.smallGroupService.getSmallGroupSets(module, AcademicYear(2013)) returns (Seq(source))
+      command.smallGroupService.getSmallGroupSets(module, AcademicYear(2013)) returns (Seq(source))
 
-		command.populate()
+      command.populate()
 
-		command.sourceAcademicYear should be (AcademicYear(2013))
-		command.targetAcademicYear should be (AcademicYear(2014))
-		command.smallGroupSets.size() should be (1)
-		command.smallGroupSets.get(0).smallGroupSet should be (source)
-	}}
+      command.sourceAcademicYear should be(AcademicYear(2013))
+      command.targetAcademicYear should be(AcademicYear(2014))
+      command.smallGroupSets.size() should be(1)
+      command.smallGroupSets.get(0).smallGroupSet should be(source)
+    }
+  }
 
-	@Test def apply(): Unit = new CommandFixture {
-		val copy = new SmallGroupSet()
-		val source = new SmallGroupSet() {
-			override def duplicateTo(transient: Boolean, module: Module, assessmentGroups: JavaImports.JList[AssessmentGroup], academicYear: AcademicYear, copyGroups: Boolean, copyEvents: Boolean, copyMembership: Boolean): SmallGroupSet =
-				copy
-		}
+  @Test def apply(): Unit = new CommandFixture {
+    val copy = new SmallGroupSet()
+    val source = new SmallGroupSet() {
+      override def duplicateTo(transient: Boolean, module: Module, assessmentGroups: JavaImports.JList[AssessmentGroup], academicYear: AcademicYear, copyGroups: Boolean, copyEvents: Boolean, copyMembership: Boolean): SmallGroupSet =
+        copy
+    }
 
-		command.smallGroupService.getSmallGroupSets(module, command.sourceAcademicYear) returns (Seq(source))
+    command.smallGroupService.getSmallGroupSets(module, command.sourceAcademicYear) returns (Seq(source))
 
-		command.populate()
+    command.populate()
 
-		command.smallGroupSets.get(0).copy = true
+    command.smallGroupSets.get(0).copy = true
 
-		// The actual duplicateTo code is tested elsewhere
-		command.applyInternal() should be (Seq(copy))
+    // The actual duplicateTo code is tested elsewhere
+    command.applyInternal() should be(Seq(copy))
 
-		verify(command.smallGroupService, times(1)).saveOrUpdate(copy)
-	}
+    verify(command.smallGroupService, times(1)).saveOrUpdate(copy)
+  }
 
-	@Test def permissions(): Unit = new Fixture {
-		val (d, m) = (department, Seq(module))
+  @Test def permissions(): Unit = new Fixture {
+    val (d, m) = (department, Seq(module))
 
-		val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
-			val department: Department = d
-			val modules: Seq[Module] = m
-		}
+    val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
+      val department: Department = d
+      val modules: Seq[Module] = m
+    }
 
-		val checking: PermissionsChecking = mock[PermissionsChecking]
-		command.permissionsCheck(checking)
+    val checking: PermissionsChecking = mock[PermissionsChecking]
+    command.permissionsCheck(checking)
 
-		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Read, module)
-		verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Create, module)
-	}
+    verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Read, module)
+    verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Create, module)
+  }
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
-		val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
-			val modules = Nil
-			val department = null
-		}
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment(): Unit = {
+    val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
+      val modules = Nil
+      val department = null
+    }
 
-		val checking = mock[PermissionsChecking]
-		command.permissionsCheck(checking)
-	}
+    val checking = mock[PermissionsChecking]
+    command.permissionsCheck(checking)
+  }
 
-	@Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedModule(): Unit = {
-		val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
-			val department: Department = Fixtures.department("in")
-			department.id = "d id"
+  @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedModule(): Unit = {
+    val command = new CopySmallGroupSetsPermissions with CopySmallGroupSetsCommandState {
+      val department: Department = Fixtures.department("in")
+      department.id = "d id"
 
-			val modules = Seq(new Module(code = "in101", adminDepartment = Fixtures.department("other")))
-		}
+      val modules = Seq(new Module(code = "in101", adminDepartment = Fixtures.department("other")))
+    }
 
-		val checking = mock[PermissionsChecking]
-		command.permissionsCheck(checking)
-	}
+    val checking = mock[PermissionsChecking]
+    command.permissionsCheck(checking)
+  }
 
-	private trait ValidationFixture extends Fixture {
-		val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
-			val department: Department = ValidationFixture.this.department
-			val modules = Seq(ValidationFixture.this.module)
+  private trait ValidationFixture extends Fixture {
+    val command = new CopySmallGroupSetsValidation with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
+      val department: Department = ValidationFixture.this.department
+      val modules = Seq(ValidationFixture.this.module)
 
-			// Populate some default values
-			targetAcademicYear = AcademicYear(2014)
-			sourceAcademicYear = AcademicYear(2013)
-			smallGroupSets = JArrayList()
-		}
-	}
+      // Populate some default values
+      targetAcademicYear = AcademicYear(2014)
+      sourceAcademicYear = AcademicYear(2013)
+      smallGroupSets = JArrayList()
+    }
+  }
 
-	@Test def validationPasses(): Unit = new ValidationFixture {
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+  @Test def validationPasses(): Unit = new ValidationFixture {
+    val errors = new BindException(command, "command")
+    command.validate(errors)
 
-		errors.hasErrors should be (false)
-	}
+    errors.hasErrors should be(false)
+  }
 
-	@Test def validationNoSourceYear(): Unit = new ValidationFixture {
-		command.sourceAcademicYear = null
+  @Test def validationNoSourceYear(): Unit = new ValidationFixture {
+    command.sourceAcademicYear = null
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+    val errors = new BindException(command, "command")
+    command.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("sourceAcademicYear")
-		errors.getFieldError.getCodes should contain ("NotEmpty")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("sourceAcademicYear")
+    errors.getFieldError.getCodes should contain("NotEmpty")
+  }
 
-	@Test def validationNoTargetYear(): Unit = new ValidationFixture {
-		command.targetAcademicYear = null
+  @Test def validationNoTargetYear(): Unit = new ValidationFixture {
+    command.targetAcademicYear = null
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+    val errors = new BindException(command, "command")
+    command.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("targetAcademicYear")
-		errors.getFieldError.getCodes should contain ("NotEmpty")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("targetAcademicYear")
+    errors.getFieldError.getCodes should contain("NotEmpty")
+  }
 
-	@Test def validationTargetEqualsSourceYear(): Unit = new ValidationFixture {
-		command.targetAcademicYear = command.sourceAcademicYear
+  @Test def validationTargetEqualsSourceYear(): Unit = new ValidationFixture {
+    command.targetAcademicYear = command.sourceAcademicYear
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+    val errors = new BindException(command, "command")
+    command.validate(errors)
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("targetAcademicYear")
-		errors.getFieldError.getCodes should contain ("smallGroupSet.copy.sameYear")
-	}
+    errors.hasErrors should be(true)
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("targetAcademicYear")
+    errors.getFieldError.getCodes should contain("smallGroupSet.copy.sameYear")
+  }
 
-	// TAB-3974
-	@Test def validationWeekNotInTargetYear(): Unit = new ValidationFixture {
-		command.sourceAcademicYear = AcademicYear(2014) // 14/15 - week -8 to week 53
-		command.targetAcademicYear = AcademicYear(2015) // 15/16 - week -8 to week 52
+  // TAB-3974
+  @Test def validationWeekNotInTargetYear(): Unit = new ValidationFixture {
+    command.sourceAcademicYear = AcademicYear(2014) // 14/15 - week -8 to week 53
+    command.targetAcademicYear = AcademicYear(2015) // 15/16 - week -8 to week 52
 
-		val set: SmallGroupSet = Fixtures.smallGroupSet("set")
-		val group: SmallGroup = Fixtures.smallGroup("group")
-		val event: SmallGroupEvent = Fixtures.smallGroupEvent("event")
+    val set: SmallGroupSet = Fixtures.smallGroupSet("set")
+    val group: SmallGroup = Fixtures.smallGroup("group")
+    val event: SmallGroupEvent = Fixtures.smallGroupEvent("event")
 
-		set.groups.add(group)
-		group.addEvent(event)
+    set.groups.add(group)
+    group.addEvent(event)
 
-		val state = new CopySmallGroupSetState(set)
-		command.smallGroupSets.add(state)
+    val state = new CopySmallGroupSetState(set)
+    command.smallGroupSets.add(state)
 
-		// This is fine because there is a week 52 in both years
-		{
-			event.weekRanges = Seq(WeekRange(-8, 52))
-			state.copy = true
-			state.copyGroups = true
-			state.copyEvents = true
+    // This is fine because there is a week 52 in both years
+    {
+      event.weekRanges = Seq(WeekRange(-8, 52))
+      state.copy = true
+      state.copyGroups = true
+      state.copyEvents = true
 
-			val errors = new BindException(command, "command")
-			command.validate(errors)
+      val errors = new BindException(command, "command")
+      command.validate(errors)
 
-			errors.hasErrors should be (false)
-		}
+      errors.hasErrors should be(false)
+    }
 
-		// This is fine because we're set to not copy events
-		{
-			event.weekRanges = Seq(WeekRange(-8, 53))
-			state.copy = true
-			state.copyGroups = true
-			state.copyEvents = false
+    // This is fine because we're set to not copy events
+    {
+      event.weekRanges = Seq(WeekRange(-8, 53))
+      state.copy = true
+      state.copyGroups = true
+      state.copyEvents = false
 
-			val errors = new BindException(command, "command")
-			command.validate(errors)
+      val errors = new BindException(command, "command")
+      command.validate(errors)
 
-			errors.hasErrors should be (false)
-		}
+      errors.hasErrors should be(false)
+    }
 
-		{
-			event.weekRanges = Seq(WeekRange(-8, 53))
-			state.copy = true
-			state.copyGroups = true
-			state.copyEvents = true
+    {
+      event.weekRanges = Seq(WeekRange(-8, 53))
+      state.copy = true
+      state.copyGroups = true
+      state.copyEvents = true
 
-			val errors = new BindException(command, "command")
-			command.validate(errors)
+      val errors = new BindException(command, "command")
+      command.validate(errors)
 
-			errors.hasErrors should be (true)
-			errors.getErrorCount should be (1)
-			errors.getFieldError.getField should be ("smallGroupSets[0].copyEvents")
-			errors.getFieldError.getCodes should contain ("smallGroupSet.copy.weekNotInTargetYear")
-		}
-	}
+      errors.hasErrors should be(true)
+      errors.getErrorCount should be(1)
+      errors.getFieldError.getField should be("smallGroupSets[0].copyEvents")
+      errors.getFieldError.getCodes should contain("smallGroupSet.copy.weekNotInTargetYear")
+    }
+  }
 
-	@Test def describe(): Unit = new Fixture {
-		val (d, m) = (department, Seq(module))
-		val set = new SmallGroupSet {
-			id = "smallGroupSetId"
-		}
+  @Test def describe(): Unit = new Fixture {
+    val (d, m) = (department, Seq(module))
+    val set = new SmallGroupSet {
+      id = "smallGroupSetId"
+    }
 
-		val command = new CopySmallGroupSetsDescription with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
-			override val eventName = "test"
-			val department: Department = d
-			val modules: Seq[Module] = m
+    val command = new CopySmallGroupSetsDescription with CopySmallGroupSetsCommandState with CopySmallGroupSetsRequestState {
+      override val eventName = "test"
+      val department: Department = d
+      val modules: Seq[Module] = m
 
-			// Populate some default values
-			targetAcademicYear = AcademicYear(2014)
-			sourceAcademicYear = AcademicYear(2013)
-			smallGroupSets = JArrayList(new CopySmallGroupSetState(set) { copy = true })
-		}
+      // Populate some default values
+      targetAcademicYear = AcademicYear(2014)
+      sourceAcademicYear = AcademicYear(2013)
+      smallGroupSets = JArrayList(new CopySmallGroupSetState(set) {
+        copy = true
+      })
+    }
 
-		val description = new DescriptionImpl
-		command.describe(description)
+    val description = new DescriptionImpl
+    command.describe(description)
 
-		description.allProperties should be (Map(
-			"department" -> "in",
-			"modules" -> Seq("moduleId"),
-			"smallGroupSets" -> Seq("smallGroupSetId")
-		))
-	}
+    description.allProperties should be(Map(
+      "department" -> "in",
+      "modules" -> Seq("moduleId"),
+      "smallGroupSets" -> Seq("smallGroupSetId")
+    ))
+  }
 
-	@Test def wires(): Unit = new Fixture {
-		val command = CopySmallGroupSetsCommand(department, Seq(module))
+  @Test def wires(): Unit = new Fixture {
+    val command = CopySmallGroupSetsCommand(department, Seq(module))
 
-		command should be (anInstanceOf[Appliable[Seq[SmallGroupSet]]])
-		command should be (anInstanceOf[Describable[Seq[SmallGroupSet]]])
-		command should be (anInstanceOf[CopySmallGroupSetsPermissions])
-		command should be (anInstanceOf[CopySmallGroupSetsCommandState])
-		command should be (anInstanceOf[CopySmallGroupSetsRequestState])
-		command should be (anInstanceOf[SelfValidating])
-		command should be (anInstanceOf[PopulateOnForm])
-	}
+    command should be(anInstanceOf[Appliable[Seq[SmallGroupSet]]])
+    command should be(anInstanceOf[Describable[Seq[SmallGroupSet]]])
+    command should be(anInstanceOf[CopySmallGroupSetsPermissions])
+    command should be(anInstanceOf[CopySmallGroupSetsCommandState])
+    command should be(anInstanceOf[CopySmallGroupSetsRequestState])
+    command should be(anInstanceOf[SelfValidating])
+    command should be(anInstanceOf[PopulateOnForm])
+  }
 
 }

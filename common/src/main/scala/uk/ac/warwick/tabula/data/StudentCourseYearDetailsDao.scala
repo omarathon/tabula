@@ -13,328 +13,342 @@ import uk.ac.warwick.tabula.data.model._
 import scala.reflect.classTag
 
 trait StudentCourseYearDetailsDao {
-	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
-	def delete(studentCourseYearDetails: StudentCourseYearDetails)
-	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
-	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
-	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
-	def getFreshIds: Seq[String]
-	def getIdsStaleSince(from:DateTime): Seq[String]
-	def getFreshKeys: Seq[StudentCourseYearKey]
-	def getIdFromKey(key: StudentCourseYearKey): Option[String]
-	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
-	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
-	def unstampPresentInImport(notStaleScjCodes: Seq[String])
+  def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
 
-	def findByCourseRoutesYear(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		yearOfStudy: Int,
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = true
-	): Seq[StudentCourseYearDetails]
+  def delete(studentCourseYearDetails: StudentCourseYearDetails)
 
-	def findByCourseRoutesLevel(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		levelCode: String,
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = true
-	): Seq[StudentCourseYearDetails]
+  def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 
-	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
-	def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
-	def listForYearMarkExport: Seq[StudentCourseYearDetails]
+  def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
+
+  def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
+
+  def getFreshIds: Seq[String]
+
+  def getIdsStaleSince(from: DateTime): Seq[String]
+
+  def getFreshKeys: Seq[StudentCourseYearKey]
+
+  def getIdFromKey(key: StudentCourseYearKey): Option[String]
+
+  def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String]
+
+  def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
+
+  def unstampPresentInImport(notStaleScjCodes: Seq[String])
+
+  def findByCourseRoutesYear(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    yearOfStudy: Int,
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    eagerLoad: Boolean = false,
+    disableFreshFilter: Boolean = false,
+    includePermWithdrawn: Boolean = true
+  ): Seq[StudentCourseYearDetails]
+
+  def findByCourseRoutesLevel(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    levelCode: String,
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    eagerLoad: Boolean = false,
+    disableFreshFilter: Boolean = false,
+    includePermWithdrawn: Boolean = true
+  ): Seq[StudentCourseYearDetails]
+
+  def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
+
+  def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails]
+
+  def listForYearMarkExport: Seq[StudentCourseYearDetails]
 }
 
 @Repository
 class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
-	import Restrictions._
 
-	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails): Unit = {
-		session.saveOrUpdate(studentCourseYearDetails)
-	}
+  import Restrictions._
 
-	def delete(studentCourseYearDetails: StudentCourseYearDetails): Unit =  {
-		session.delete(studentCourseYearDetails)
-		session.flush()
-	}
+  def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails): Unit = {
+    session.saveOrUpdate(studentCourseYearDetails)
+  }
 
-	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails] = getById[StudentCourseYearDetails](id)
+  def delete(studentCourseYearDetails: StudentCourseYearDetails): Unit = {
+    session.delete(studentCourseYearDetails)
+    session.flush()
+  }
 
-	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
-		session.newCriteria[StudentCourseYearDetails]
-			.add(is("studentCourseDetails", studentCourseDetails))
-			.add(is("missingFromImportSince", null))
-			.add(is("sceSequenceNumber", seq))
-			.uniqueResult
+  def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails] = getById[StudentCourseYearDetails](id)
 
-	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] = {
-		sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
-			.add(is("studentCourseDetails", studentCourseDetails))
-			.add(is("sceSequenceNumber", seq))
-			.uniqueResult
-	}
+  def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
+    session.newCriteria[StudentCourseYearDetails]
+      .add(is("studentCourseDetails", studentCourseDetails))
+      .add(is("missingFromImportSince", null))
+      .add(is("sceSequenceNumber", seq))
+      .uniqueResult
 
-	def getFreshKeys: Seq[StudentCourseYearKey] = {
-		session.newCriteria[StudentCourseYearDetails]
-			.add(is("missingFromImportSince", null))
-				.project[Array[Any]](
-					projectionList()
-						.add(property("studentCourseDetails.scjCode"), "scjCode")
-						.add(property("sceSequenceNumber"), "sceSequenceNumber")
-				)
-		.setResultTransformer(Transformers.aliasToBean(classOf[StudentCourseYearKey]))
-		.seq
-	}
+  def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] = {
+    sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
+      .add(is("studentCourseDetails", studentCourseDetails))
+      .add(is("sceSequenceNumber", seq))
+      .uniqueResult
+  }
 
-	def getFreshIds: Seq[String] = {
-		session.newCriteria[StudentCourseYearDetails]
-			.add(isNull("missingFromImportSince"))
-			.project[String](Projections.property("id"))
-		.seq
-	}
+  def getFreshKeys: Seq[StudentCourseYearKey] = {
+    session.newCriteria[StudentCourseYearDetails]
+      .add(is("missingFromImportSince", null))
+      .project[Array[Any]](
+      projectionList()
+        .add(property("studentCourseDetails.scjCode"), "scjCode")
+        .add(property("sceSequenceNumber"), "sceSequenceNumber")
+    )
+      .setResultTransformer(Transformers.aliasToBean(classOf[StudentCourseYearKey]))
+      .seq
+  }
 
-	def getIdsStaleSince(from:DateTime): Seq[String] = {
-		session.newCriteria[StudentCourseYearDetails]
-			.add(ge("missingFromImportSince", from))
-			.project[String](Projections.property("id"))
-			.seq
-	}
+  def getFreshIds: Seq[String] = {
+    session.newCriteria[StudentCourseYearDetails]
+      .add(isNull("missingFromImportSince"))
+      .project[String](Projections.property("id"))
+      .seq
+  }
 
-	// TODO - put these two methods in a service
-	def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String] =
-			keys.flatMap {
-				key => getIdFromKey(key)
-			}
+  def getIdsStaleSince(from: DateTime): Seq[String] = {
+    session.newCriteria[StudentCourseYearDetails]
+      .add(ge("missingFromImportSince", from))
+      .project[String](Projections.property("id"))
+      .seq
+  }
 
-	def getIdFromKey(key: StudentCourseYearKey): Option[String] = {
-		sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
-		.add(is("studentCourseDetails.scjCode", key.scjCode))
-		.add(is("sceSequenceNumber", key.sceSequenceNumber))
-		.project[String](Projections.property("id"))
-		.uniqueResult
-	}
+  // TODO - put these two methods in a service
+  def convertKeysToIds(keys: Seq[StudentCourseYearKey]): Seq[String] =
+    keys.flatMap {
+      key => getIdFromKey(key)
+    }
 
-	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime): Unit = {
-		newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
-			val sqlString =
-				""" update StudentCourseYearDetails set missingFromImportSince = :importStart
-					|where id in (:newStaleScydIds) """.stripMargin
+  def getIdFromKey(key: StudentCourseYearKey): Option[String] = {
+    sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
+      .add(is("studentCourseDetails.scjCode", key.scjCode))
+      .add(is("sceSequenceNumber", key.sceSequenceNumber))
+      .project[String](Projections.property("id"))
+      .uniqueResult
+  }
 
-				session.newUpdateQuery(sqlString)
-					.setParameter("importStart", importStart)
-					.setParameterList("newStaleScydIds", newStaleIds)
-					.executeUpdate()
-		}
-	}
+  def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime): Unit = {
+    newStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { newStaleIds =>
+      val sqlString =
+        """ update StudentCourseYearDetails set missingFromImportSince = :importStart
+          					|where id in (:newStaleScydIds) """.stripMargin
 
-	def unstampPresentInImport(notStaleScydIds: Seq[String]): Unit = {
-		notStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { ids =>
-			val hqlString =
-				"""update StudentCourseYearDetails set missingFromImportSince = null
-					|where id in (:ids)""".stripMargin
+      session.newUpdateQuery(sqlString)
+        .setParameter("importStart", importStart)
+        .setParameterList("newStaleScydIds", newStaleIds)
+        .executeUpdate()
+    }
+  }
 
-			sessionWithoutFreshFilters.newUpdateQuery(hqlString)
-				.setParameterList("ids", ids)
-				.executeUpdate()
-		}
-	}
+  def unstampPresentInImport(notStaleScydIds: Seq[String]): Unit = {
+    notStaleScydIds.grouped(Daoisms.MaxInClauseCount).foreach { ids =>
+      val hqlString =
+        """update StudentCourseYearDetails set missingFromImportSince = null
+          					|where id in (:ids)""".stripMargin
 
-	private def sessionDisablingFilters(disableFreshFilter: Boolean) =
-		if (disableFreshFilter) {
-			sessionWithoutFreshFilters
-		} else {
-			session
-		}
+      sessionWithoutFreshFilters.newUpdateQuery(hqlString)
+        .setParameterList("ids", ids)
+        .executeUpdate()
+    }
+  }
 
-	private def findByCourseRoutesCriteria(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		disableFreshFilter: Boolean,
-		enrolledOrCompleted: Boolean = true,
-		extraCriteria: Seq[Criterion] = Nil
-	): ScalaCriteria[StudentCourseYearDetails] = {
-		val c = sessionDisablingFilters(disableFreshFilter).newCriteria[StudentCourseYearDetails]
-			.createAlias("studentCourseDetails", "scd")
-			.add(isNull("missingFromImportSince"))
-			.add(is("academicYear", academicYear))
-			.add(is("enrolledOrCompleted", enrolledOrCompleted))
-			.add(safeIn("scd.course", courses))
+  private def sessionDisablingFilters(disableFreshFilter: Boolean) =
+    if (disableFreshFilter) {
+      sessionWithoutFreshFilters
+    } else {
+      session
+    }
 
-		if (!includeTempWithdrawn) {
-			c.add(not(like("scd.statusOnRoute.code", "T%")))
-		}
+  private def findByCourseRoutesCriteria(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    disableFreshFilter: Boolean,
+    enrolledOrCompleted: Boolean = true,
+    extraCriteria: Seq[Criterion] = Nil
+  ): ScalaCriteria[StudentCourseYearDetails] = {
+    val c = sessionDisablingFilters(disableFreshFilter).newCriteria[StudentCourseYearDetails]
+      .createAlias("studentCourseDetails", "scd")
+      .add(isNull("missingFromImportSince"))
+      .add(is("academicYear", academicYear))
+      .add(is("enrolledOrCompleted", enrolledOrCompleted))
+      .add(safeIn("scd.course", courses))
 
-		if (routes.nonEmpty) {
-			c.add(disjunction(
-				safeIn("route", routes),
-				conjunction(
-					isNull("route"),
-					safeIn("scd.currentRoute", routes)
-				)
-			))
-		}
+    if (!includeTempWithdrawn) {
+      c.add(not(like("scd.statusOnRoute.code", "T%")))
+    }
 
-		if (resitOnly) {
-			val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
-				.createAlias("upstreamAssessmentGroup", "uag")
-				.add(is("uag.academicYear", academicYear))
-				.add(or(
-					or(isNotNull("resitActualMark"), isNotNull("resitActualGrade")),
-					or(isNotNull("resitAgreedMark"), isNotNull("resitAgreedGrade"))
-				))
-				.add(eqProperty("uagm.universityId", "scd.student.universityId"))
-			c.add(Subqueries.exists(resitQuery.setProjection(property("uagm.universityId"))))
-		}
+    if (routes.nonEmpty) {
+      c.add(disjunction(
+        safeIn("route", routes),
+        conjunction(
+          isNull("route"),
+          safeIn("scd.currentRoute", routes)
+        )
+      ))
+    }
 
-		extraCriteria.foreach(c.add)
+    if (resitOnly) {
+      val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
+        .createAlias("upstreamAssessmentGroup", "uag")
+        .add(is("uag.academicYear", academicYear))
+        .add(or(
+          or(isNotNull("resitActualMark"), isNotNull("resitActualGrade")),
+          or(isNotNull("resitAgreedMark"), isNotNull("resitAgreedGrade"))
+        ))
+        .add(eqProperty("uagm.universityId", "scd.student.universityId"))
+      c.add(Subqueries.exists(resitQuery.setProjection(property("uagm.universityId"))))
+    }
 
-		c
-	}
+    extraCriteria.foreach(c.add)
 
-	private def findByCourseRoutesWithPermWithdrawnOption(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = true,
-		extraCriteria: Seq[Criterion] = Nil
-	): Seq[StudentCourseYearDetails] = {
-		val criteria = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, disableFreshFilter, enrolledOrCompleted = true, extraCriteria)
+    c
+  }
 
-		val result: Seq[StudentCourseYearDetails] =
-			if (eagerLoad) {
-				// Where we're going, we don't need roads
-				type UniversityId = String
-				type StudentCourseYearDetailsId = String
+  private def findByCourseRoutesWithPermWithdrawnOption(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    eagerLoad: Boolean = false,
+    disableFreshFilter: Boolean = false,
+    includePermWithdrawn: Boolean = true,
+    extraCriteria: Seq[Criterion] = Nil
+  ): Seq[StudentCourseYearDetails] = {
+    val criteria = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, disableFreshFilter, enrolledOrCompleted = true, extraCriteria)
 
-				val studentsMap: Map[UniversityId, StudentCourseYearDetailsId] =
-					criteria
-						.project[Array[Any]](
-							projectionList()
-								.add(property("scd.student.universityId"), "universityId")
-								.add(property("id"), "id")
-						)
-						.seq
-						.map { case Array(universityId: UniversityId, scydId: StudentCourseYearDetailsId) => (universityId, scydId) }
-  					.toMap
+    val result: Seq[StudentCourseYearDetails] =
+      if (eagerLoad) {
+        // Where we're going, we don't need roads
+        type UniversityId = String
+        type StudentCourseYearDetailsId = String
 
-				// Eagerly load the students and relationships for use later
-				sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
-  				.add(safeIn("universityId", studentsMap.keys.toSeq))
-  				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
-					.setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)
-  				.distinct
-  				.seq
-  				.map { student =>
-						student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
-  						.find(_.id == studentsMap(student.universityId))
-  						.get
-					}
-			} else {
-				criteria.seq
-			}
+        val studentsMap: Map[UniversityId, StudentCourseYearDetailsId] =
+          criteria
+            .project[Array[Any]](
+            projectionList()
+              .add(property("scd.student.universityId"), "universityId")
+              .add(property("id"), "id")
+          )
+            .seq
+            .map { case Array(universityId: UniversityId, scydId: StudentCourseYearDetailsId) => (universityId, scydId) }
+            .toMap
 
-		if (!includePermWithdrawn) {
-			result.filterNot(_.studentCourseDetails.permanentlyWithdrawn)
-		} else {
-			result
-		}
-	}
+        // Eagerly load the students and relationships for use later
+        sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
+          .add(safeIn("universityId", studentsMap.keys.toSeq))
+          .setFetchMode("studentCourseDetails", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+          .setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)
+          .distinct
+          .seq
+          .map { student =>
+            student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
+              .find(_.id == studentsMap(student.universityId))
+              .get
+          }
+      } else {
+        criteria.seq
+      }
 
-	def findByCourseRoutesYear(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		yearOfStudy: Int,
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = true
-	): Seq[StudentCourseYearDetails] = {
-		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
-	}
+    if (!includePermWithdrawn) {
+      result.filterNot(_.studentCourseDetails.permanentlyWithdrawn)
+    } else {
+      result
+    }
+  }
 
-	def findByCourseRoutesLevel(
-		academicYear: AcademicYear,
-		courses: Seq[Course],
-		routes: Seq[Route],
-		levelCode: String,
-		includeTempWithdrawn: Boolean,
-		resitOnly: Boolean,
-		eagerLoad: Boolean = false,
-		disableFreshFilter: Boolean = false,
-		includePermWithdrawn: Boolean = true
-	): Seq[StudentCourseYearDetails] = {
-		findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
-	}
+  def findByCourseRoutesYear(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    yearOfStudy: Int,
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    eagerLoad: Boolean = false,
+    disableFreshFilter: Boolean = false,
+    includePermWithdrawn: Boolean = true
+  ): Seq[StudentCourseYearDetails] = {
+    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("yearOfStudy", yearOfStudy)))
+  }
 
-	def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
-		// Get all the SCYDs for the given SCJ codes
-		val scyds = safeInSeq(() => {
-			session.newCriteria[StudentCourseYearDetails]
-				.createAlias("studentCourseDetails", "scd")
-				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-		}, "scd.scjCode", items.map(_._1))
-		// Group by SCJ code-academic year pairs
-		scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
-			// Only use the pairs that were passed in
-			.filterKeys(items.contains)
-			// Sort take the last SCYD; SCYDs are sorted so the most relevant is last
-			.mapValues(_.sorted.lastOption)
-			.filter(_._2.isDefined).mapValues(_.get)
-	}
+  def findByCourseRoutesLevel(
+    academicYear: AcademicYear,
+    courses: Seq[Course],
+    routes: Seq[Route],
+    levelCode: String,
+    includeTempWithdrawn: Boolean,
+    resitOnly: Boolean,
+    eagerLoad: Boolean = false,
+    disableFreshFilter: Boolean = false,
+    includePermWithdrawn: Boolean = true
+  ): Seq[StudentCourseYearDetails] = {
+    findByCourseRoutesWithPermWithdrawnOption(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, includePermWithdrawn, extraCriteria = Seq(is("studyLevel", levelCode)))
+  }
 
-	def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
-		// Get all the SCYDs for the given Uni IDs
-		val scyds = safeInSeq(() => {
-			session.newCriteria[StudentCourseYearDetails]
-				.createAlias("studentCourseDetails", "scd")
-				.createAlias("scd.student", "student")
-				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
-		}, "student.universityId", items.map(_._1))
-		// Group by Uni ID-academic year pairs
-		scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
-			// Only use the pairs that were passed in
-			.filterKeys(items.contains)
-			// Sort take the last SCYD; SCYDs are sorted so the most relevant is last
-			.mapValues(_.sorted.lastOption)
-			.filter(_._2.isDefined).mapValues(_.get)
-	}
+  def findByScjCodeAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
+    // Get all the SCYDs for the given SCJ codes
+    val scyds = safeInSeq(() => {
+      session.newCriteria[StudentCourseYearDetails]
+        .createAlias("studentCourseDetails", "scd")
+        .setFetchMode("studentCourseDetails", FetchMode.JOIN)
+    }, "scd.scjCode", items.map(_._1))
+    // Group by SCJ code-academic year pairs
+    scyds.groupBy(scyd => (scyd.studentCourseDetails.scjCode, scyd.academicYear))
+      // Only use the pairs that were passed in
+      .filterKeys(items.contains)
+      // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
+      .mapValues(_.sorted.lastOption)
+      .filter(_._2.isDefined).mapValues(_.get)
+  }
 
-	def listForYearMarkExport: Seq[StudentCourseYearDetails] = {
-		session.newCriteria[StudentCourseYearDetails]
-			.add(isNull("agreedMarkUploadedDate"))
-			.add(isNotNull("agreedMark"))
-			.seq
-	}
+  def findByUniversityIdAndAcademicYear(items: Seq[(String, AcademicYear)]): Map[(String, AcademicYear), StudentCourseYearDetails] = {
+    // Get all the SCYDs for the given Uni IDs
+    val scyds = safeInSeq(() => {
+      session.newCriteria[StudentCourseYearDetails]
+        .createAlias("studentCourseDetails", "scd")
+        .createAlias("scd.student", "student")
+        .setFetchMode("studentCourseDetails", FetchMode.JOIN)
+        .setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+    }, "student.universityId", items.map(_._1))
+    // Group by Uni ID-academic year pairs
+    scyds.groupBy(scyd => (scyd.studentCourseDetails.student.universityId, scyd.academicYear))
+      // Only use the pairs that were passed in
+      .filterKeys(items.contains)
+      // Sort take the last SCYD; SCYDs are sorted so the most relevant is last
+      .mapValues(_.sorted.lastOption)
+      .filter(_._2.isDefined).mapValues(_.get)
+  }
+
+  def listForYearMarkExport: Seq[StudentCourseYearDetails] = {
+    session.newCriteria[StudentCourseYearDetails]
+      .add(isNull("agreedMarkUploadedDate"))
+      .add(isNotNull("agreedMark"))
+      .seq
+  }
 }
 
 trait StudentCourseYearDetailsDaoComponent {
-	def studentCourseYearDetailsDao: StudentCourseYearDetailsDao
+  def studentCourseYearDetailsDao: StudentCourseYearDetailsDao
 }
 
-trait AutowiringStudentCourseYearDetailsDaoComponent extends StudentCourseYearDetailsDaoComponent{
-	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
+trait AutowiringStudentCourseYearDetailsDaoComponent extends StudentCourseYearDetailsDaoComponent {
+  var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 }

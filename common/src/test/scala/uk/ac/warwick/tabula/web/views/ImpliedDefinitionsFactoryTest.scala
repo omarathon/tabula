@@ -11,40 +11,40 @@ import org.apache.tiles.locale.LocaleResolver
 
 class ImpliedDefinitionsFactoryTest extends TestBase with Mockito {
 
-	val factory = new ImpliedDefinitionsFactory
+  val factory = new ImpliedDefinitionsFactory
 
-	val defDao: DefinitionDAO[Locale] = mock[DefinitionDAO[Locale]]
-	val localeResolver: LocaleResolver = mock[LocaleResolver]
+  val defDao: DefinitionDAO[Locale] = mock[DefinitionDAO[Locale]]
+  val localeResolver: LocaleResolver = mock[LocaleResolver]
 
-	factory.setDefinitionDAO(defDao)
-	factory.setLocaleResolver(localeResolver)
+  factory.setDefinitionDAO(defDao)
+  factory.setLocaleResolver(localeResolver)
 
-	localeResolver.resolveLocale(isA[Request]) returns (Locale.ENGLISH)
+  localeResolver.resolveLocale(isA[Request]) returns (Locale.ENGLISH)
 
-	@Test def matchesDefinition {
-		val definition = mock[Definition]
-		val ctx = mock[Request]
+  @Test def matchesDefinition {
+    val definition = mock[Definition]
+    val ctx = mock[Request]
 
-		defDao.getDefinition("def", Locale.ENGLISH) returns (definition)
+    defDao.getDefinition("def", Locale.ENGLISH) returns (definition)
 
-		factory.getDefinition("def", ctx) should be (definition)
-	}
+    factory.getDefinition("def", ctx) should be(definition)
+  }
 
-	@Test def slashPrefix {
-		val ctx = mock[Request]
+  @Test def slashPrefix {
+    val ctx = mock[Request]
 
-		factory.getDefinition("/def", ctx) should be (null)
-	}
+    factory.getDefinition("/def", ctx) should be(null)
+  }
 
-	@Test def resolve {
-		val ctx = mock[Request]
+  @Test def resolve {
+    val ctx = mock[Request]
 
-		val baseDefinition = mock[Definition]
-		defDao.getDefinition("base", Locale.ENGLISH) returns (baseDefinition)
+    val baseDefinition = mock[Definition]
+    defDao.getDefinition("base", Locale.ENGLISH) returns (baseDefinition)
 
-		val defin = factory.getDefinition("my/template", ctx)
-		defin should not be (null)
-		defin.getAttribute("body").getValue() should be ("/WEB-INF/freemarker/my/template.ftl")
-	}
+    val defin = factory.getDefinition("my/template", ctx)
+    defin should not be (null)
+    defin.getAttribute("body").getValue() should be("/WEB-INF/freemarker/my/template.ftl")
+  }
 
 }

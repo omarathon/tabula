@@ -12,27 +12,27 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 
 class YearMarkItemXslxSheetHandler(styles: StylesTable, sst: ReadOnlySharedStringsTable, markItems: JList[YearMarkItem])
-	extends AbstractXslxSheetHandler(styles, sst, markItems) with SheetContentsHandler with Logging {
+  extends AbstractXslxSheetHandler(styles, sst, markItems) with SheetContentsHandler with Logging {
 
-	override def newCurrentItem = new YearMarkItem()
+  override def newCurrentItem = new YearMarkItem()
 
-	override def cell(cellReference: String, formattedValue: String, comment: XSSFComment){
-		val col = new CellReference(cellReference).getCol
-		if (isFirstRow){
-			columnMap(col) = formattedValue
-		} else if (columnMap.asJava.containsKey(col)) {
-			columnMap(col) match {
-				case "Student ID" =>
-					currentItem.studentId = formattedValue
-				case "Mark" =>
-					if(formattedValue.hasText)
-						currentItem.mark = formattedValue
-				case "Academic year" =>
-					if(formattedValue.hasText)
-						currentItem.academicYear = formattedValue
-				case _ => // ignore anything else
-			}
-		}
-	}
-	
+  override def cell(cellReference: String, formattedValue: String, comment: XSSFComment) {
+    val col = new CellReference(cellReference).getCol
+    if (isFirstRow) {
+      columnMap(col) = formattedValue
+    } else if (columnMap.asJava.containsKey(col)) {
+      columnMap(col) match {
+        case "Student ID" =>
+          currentItem.studentId = formattedValue
+        case "Mark" =>
+          if (formattedValue.hasText)
+            currentItem.mark = formattedValue
+        case "Academic year" =>
+          if (formattedValue.hasText)
+            currentItem.academicYear = formattedValue
+        case _ => // ignore anything else
+      }
+    }
+  }
+
 }

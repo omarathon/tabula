@@ -15,54 +15,54 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 
 trait SmallGroupEventsController extends GroupsController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("allDays") def allDays: Seq[DayOfWeek with Product] = DayOfWeek.members
+  @ModelAttribute("allDays") def allDays: Seq[DayOfWeek with Product] = DayOfWeek.members
 
-	case class NamedTerm(name: String, term: AcademicPeriod, weekRange: WeekRange)
+  case class NamedTerm(name: String, term: AcademicPeriod, weekRange: WeekRange)
 
-	@ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[NamedTerm] = {
-		val year = Option(set.academicYear).getOrElse(AcademicYear.now())
-		year.weeks
-			.map { case (weekNumber, week) =>
-				(weekNumber, week.period)
-			}
-			.groupBy { _._2 }
-			.map { case (term, weekNumbersAndTerms) =>
-				(term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
-			}
-			.toSeq
-			.sortBy { case (_, weekRange) => weekRange.minWeek }
-			.map { case (term, weekRange) => NamedTerm(term.periodType.toString, term, weekRange) }
-	}
+  @ModelAttribute("allTerms") def allTerms(@PathVariable("smallGroupSet") set: SmallGroupSet): Seq[NamedTerm] = {
+    val year = Option(set.academicYear).getOrElse(AcademicYear.now())
+    year.weeks
+      .map { case (weekNumber, week) =>
+        (weekNumber, week.period)
+      }
+      .groupBy(_._2)
+      .map { case (term, weekNumbersAndTerms) =>
+        (term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
+      }
+      .toSeq
+      .sortBy { case (_, weekRange) => weekRange.minWeek }
+      .map { case (term, weekRange) => NamedTerm(term.periodType.toString, term, weekRange) }
+  }
 }
 
 abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsController {
 
-	type CreateSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
+  type CreateSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
-	@ModelAttribute("createSmallGroupEventCommand") def cmd(
-		@PathVariable module: Module,
-		@PathVariable("smallGroupSet") set: SmallGroupSet,
-		@PathVariable("smallGroup") group: SmallGroup
-	): CreateSmallGroupEventCommand =
-		ModifySmallGroupEventCommand.create(module, set, group)
+  @ModelAttribute("createSmallGroupEventCommand") def cmd(
+    @PathVariable module: Module,
+    @PathVariable("smallGroupSet") set: SmallGroupSet,
+    @PathVariable("smallGroup") group: SmallGroup
+  ): CreateSmallGroupEventCommand =
+    ModifySmallGroupEventCommand.create(module, set, group)
 
-	protected def cancelUrl(set: SmallGroupSet): String
+  protected def cancelUrl(set: SmallGroupSet): String
 
-	@RequestMapping
-	def form(@ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand): Mav = {
-		Mav("groups/admin/groups/events/new", "cancelUrl" -> cancelUrl(cmd.set))
-			.crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
-	}
+  @RequestMapping
+  def form(@ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand): Mav = {
+    Mav("groups/admin/groups/events/new", "cancelUrl" -> cancelUrl(cmd.set))
+      .crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+  }
 
-	protected def submit(cmd: CreateSmallGroupEventCommand, errors: Errors, route: String): Mav = {
-		if (errors.hasErrors) form(cmd)
-		else {
-			cmd.apply()
-			RedirectForce(route)
-		}
-	}
+  protected def submit(cmd: CreateSmallGroupEventCommand, errors: Errors, route: String): Mav = {
+    if (errors.hasErrors) form(cmd)
+    else {
+      cmd.apply()
+      RedirectForce(route)
+    }
+  }
 
 }
 
@@ -70,11 +70,11 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
 @Controller
 class CreateSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEventController {
 
-	override def cancelUrl(set: SmallGroupSet): String = Routes.admin.createAddEvents(set)
+  override def cancelUrl(set: SmallGroupSet): String = Routes.admin.createAddEvents(set)
 
-	@RequestMapping(method = Array(POST))
-	def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
-		submit(cmd, errors, Routes.admin.createAddEvents(set))
+  @RequestMapping(method = Array(POST))
+  def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+    submit(cmd, errors, Routes.admin.createAddEvents(set))
 
 }
 
@@ -82,43 +82,43 @@ class CreateSmallGroupSetCreateEventController extends AbstractCreateSmallGroupE
 @Controller
 class EditSmallGroupSetCreateEventController extends AbstractCreateSmallGroupEventController {
 
-	override def cancelUrl(set: SmallGroupSet): String = Routes.admin.editAddEvents(set)
+  override def cancelUrl(set: SmallGroupSet): String = Routes.admin.editAddEvents(set)
 
-	@RequestMapping(method = Array(POST))
-	def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
-		submit(cmd, errors, Routes.admin.editAddEvents(set))
+  @RequestMapping(method = Array(POST))
+  def saveAndExit(@Valid @ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+    submit(cmd, errors, Routes.admin.editAddEvents(set))
 
 }
 
 abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsController
-	with AutowiringScientiaTimetableFetchingServiceComponent
-	with SyllabusPlusEventCountForModule {
+  with AutowiringScientiaTimetableFetchingServiceComponent
+  with SyllabusPlusEventCountForModule {
 
-	type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
+  type EditSmallGroupEventCommand = Appliable[SmallGroupEvent] with ModifySmallGroupEventCommandState
 
-	@ModelAttribute("editSmallGroupEventCommand") def cmd(
-		@PathVariable module: Module,
-		@PathVariable("smallGroupSet") set: SmallGroupSet,
-		@PathVariable("smallGroup") group: SmallGroup,
-		@PathVariable("smallGroupEvent") event: SmallGroupEvent
-	): EditSmallGroupEventCommand =
-		ModifySmallGroupEventCommand.edit(module, set, group, event)
+  @ModelAttribute("editSmallGroupEventCommand") def cmd(
+    @PathVariable module: Module,
+    @PathVariable("smallGroupSet") set: SmallGroupSet,
+    @PathVariable("smallGroup") group: SmallGroup,
+    @PathVariable("smallGroupEvent") event: SmallGroupEvent
+  ): EditSmallGroupEventCommand =
+    ModifySmallGroupEventCommand.edit(module, set, group, event)
 
-	protected def cancelUrl(set: SmallGroupSet): String
+  protected def cancelUrl(set: SmallGroupSet): String
 
-	@RequestMapping
-	def form(@ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand): Mav = {
-		Mav("groups/admin/groups/events/edit", "cancelUrl" -> cancelUrl(cmd.set))
-			.crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
-	}
+  @RequestMapping
+  def form(@ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand): Mav = {
+    Mav("groups/admin/groups/events/edit", "cancelUrl" -> cancelUrl(cmd.set))
+      .crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+  }
 
-	protected def submit(cmd: EditSmallGroupEventCommand, errors: Errors, route: String): Mav = {
-		if (errors.hasErrors) form(cmd)
-		else {
-			cmd.apply()
-			Redirect(route)
-		}
-	}
+  protected def submit(cmd: EditSmallGroupEventCommand, errors: Errors, route: String): Mav = {
+    if (errors.hasErrors) form(cmd)
+    else {
+      cmd.apply()
+      Redirect(route)
+    }
+  }
 
 }
 
@@ -126,13 +126,13 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
 @Controller
 class CreateSmallGroupSetEditEventController extends AbstractEditSmallGroupEventController {
 
-	override def cancelUrl(set: SmallGroupSet): String = Routes.admin.createAddEvents(set)
+  override def cancelUrl(set: SmallGroupSet): String = Routes.admin.createAddEvents(set)
 
-	@RequestMapping(method = Array(POST))
-	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
-		submit(cmd, errors, Routes.admin.createAddEvents(set))
+  @RequestMapping(method = Array(POST))
+  def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+    submit(cmd, errors, Routes.admin.createAddEvents(set))
 
-	@ModelAttribute("is_edit_set") def isEditingSmallGroupSet = false
+  @ModelAttribute("is_edit_set") def isEditingSmallGroupSet = false
 
 }
 
@@ -140,71 +140,71 @@ class CreateSmallGroupSetEditEventController extends AbstractEditSmallGroupEvent
 @Controller
 class EditSmallGroupSetEditEventController extends AbstractEditSmallGroupEventController {
 
-	override def cancelUrl(set: SmallGroupSet): String = Routes.admin.editAddEvents(set)
+  override def cancelUrl(set: SmallGroupSet): String = Routes.admin.editAddEvents(set)
 
-	@RequestMapping(method = Array(POST))
-	def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
-		submit(cmd, errors, Routes.admin.editAddEvents(set))
+  @RequestMapping(method = Array(POST))
+  def saveAndExit(@Valid @ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand, errors: Errors, @PathVariable("smallGroupSet") set: SmallGroupSet): Mav =
+    submit(cmd, errors, Routes.admin.editAddEvents(set))
 
-	@ModelAttribute("is_edit_set") def isEditingSmallGroupSet = true
+  @ModelAttribute("is_edit_set") def isEditingSmallGroupSet = true
 
 }
 
 abstract class AbstractUpdateSmallGroupEventFromExternalSystemController extends GroupsController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type UpdateSmallGroupEventFromExternalSystemCommand = Appliable[SmallGroupEvent] with SelfValidating
+  type UpdateSmallGroupEventFromExternalSystemCommand = Appliable[SmallGroupEvent] with SelfValidating
 
-	@ModelAttribute("command") def cmd(
-		@PathVariable module: Module,
-		@PathVariable("smallGroupSet") set: SmallGroupSet,
-		@PathVariable("smallGroup") group: SmallGroup,
-		@PathVariable("smallGroupEvent") event: SmallGroupEvent
-	): UpdateSmallGroupEventFromExternalSystemCommand =
-		UpdateSmallGroupEventFromExternalSystemCommand(module, set, group, event)
+  @ModelAttribute("command") def cmd(
+    @PathVariable module: Module,
+    @PathVariable("smallGroupSet") set: SmallGroupSet,
+    @PathVariable("smallGroup") group: SmallGroup,
+    @PathVariable("smallGroupEvent") event: SmallGroupEvent
+  ): UpdateSmallGroupEventFromExternalSystemCommand =
+    UpdateSmallGroupEventFromExternalSystemCommand(module, set, group, event)
 
-	protected def render(event: SmallGroupEvent): Mav = {
-		val set = event.group.groupSet
+  protected def render(event: SmallGroupEvent): Mav = {
+    val set = event.group.groupSet
 
-		Mav("groups/admin/groups/events/update", "cancelUrl" -> postSaveRoute(event))
-			.crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
-	}
+    Mav("groups/admin/groups/events/update", "cancelUrl" -> postSaveRoute(event))
+      .crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+  }
 
-	protected def postSaveRoute(event: SmallGroupEvent): String
+  protected def postSaveRoute(event: SmallGroupEvent): String
 
-	@RequestMapping
-	def form(
-		@PathVariable("smallGroupEvent") event: SmallGroupEvent,
-		@ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand
-	): Mav = render(event)
+  @RequestMapping
+  def form(
+    @PathVariable("smallGroupEvent") event: SmallGroupEvent,
+    @ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand
+  ): Mav = render(event)
 
-	protected def submit(cmd: UpdateSmallGroupEventFromExternalSystemCommand, errors: Errors, event: SmallGroupEvent, route: String): Mav = {
-		if (errors.hasErrors) {
-			render(event)
-		} else {
-			cmd.apply()
-			RedirectForce(route)
-		}
-	}
+  protected def submit(cmd: UpdateSmallGroupEventFromExternalSystemCommand, errors: Errors, event: SmallGroupEvent, route: String): Mav = {
+    if (errors.hasErrors) {
+      render(event)
+    } else {
+      cmd.apply()
+      RedirectForce(route)
+    }
+  }
 
-	@RequestMapping(method = Array(POST))
-	def save(
-		@Valid @ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand,
-		errors: Errors,
-		@PathVariable("smallGroupEvent") event: SmallGroupEvent
-	): Mav = submit(cmd, errors, event, postSaveRoute(event))
+  @RequestMapping(method = Array(POST))
+  def save(
+    @Valid @ModelAttribute("command") cmd: UpdateSmallGroupEventFromExternalSystemCommand,
+    errors: Errors,
+    @PathVariable("smallGroupEvent") event: SmallGroupEvent
+  ): Mav = submit(cmd, errors, event, postSaveRoute(event))
 
 }
 
 @RequestMapping(Array("/groups/admin/module/{module}/groups/new/{smallGroupSet}/events/{smallGroup}/edit/{smallGroupEvent}/import"))
 @Controller
 class CreateSmallGroupSetUpdateEventFromExternalSystemController extends AbstractUpdateSmallGroupEventFromExternalSystemController {
-	override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.createEditEvent(event)
+  override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.createEditEvent(event)
 }
 
 @RequestMapping(Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/events/{smallGroup}/edit/{smallGroupEvent}/import"))
 @Controller
 class EditSmallGroupSetUpdateEventFromExternalSystemController extends AbstractUpdateSmallGroupEventFromExternalSystemController {
-	override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.editEditEvent(event)
+  override def postSaveRoute(event: SmallGroupEvent): String = Routes.admin.editEditEvent(event)
 }

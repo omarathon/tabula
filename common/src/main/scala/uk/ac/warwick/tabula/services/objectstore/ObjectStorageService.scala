@@ -27,156 +27,167 @@ import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesyste
 import scala.collection.JavaConverters._
 
 object ObjectStorageService {
-	case class Metadata(
-		contentLength: Long,
-		contentType: String,
-		fileHash: Option[String]
-	)
 
-	object Metadata {
-		def apply(blobMetadata: BlobMetadata): Metadata = Metadata(
-			contentLength = blobMetadata.getSize.longValue,
-			contentType = blobMetadata.getContentMetadata.getContentType,
-			fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText
-		)
-	}
+  case class Metadata(
+    contentLength: Long,
+    contentType: String,
+    fileHash: Option[String]
+  )
+
+  object Metadata {
+    def apply(blobMetadata: BlobMetadata): Metadata = Metadata(
+      contentLength = blobMetadata.getSize.longValue,
+      contentType = blobMetadata.getContentMetadata.getContentType,
+      fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText
+    )
+  }
+
 }
 
 trait RichByteSource extends ByteSource {
-	def metadata: Option[ObjectStorageService.Metadata]
+  def metadata: Option[ObjectStorageService.Metadata]
 }
 
 object RichByteSource {
-	def apply(fetchBlob: => Option[Blob], fetchMetadata: => Option[BlobMetadata]): RichByteSource = new BlobBackedByteSource(fetchBlob, fetchMetadata)
-	def wrap(source: ByteSource, md: Option[ObjectStorageService.Metadata]): RichByteSource = new RichByteSource {
-		override lazy val metadata: Option[ObjectStorageService.Metadata] = md
-		override def openStream(): InputStream = source.openStream()
-		override lazy val size: Long = source.size()
-		override lazy val isEmpty: Boolean = source.isEmpty
-		override def read(): Array[Byte] = source.read()
-	}
-	def empty: RichByteSource = new BlobBackedByteSource(None, None)
+  def apply(fetchBlob: => Option[Blob], fetchMetadata: => Option[BlobMetadata]): RichByteSource = new BlobBackedByteSource(fetchBlob, fetchMetadata)
+
+  def wrap(source: ByteSource, md: Option[ObjectStorageService.Metadata]): RichByteSource = new RichByteSource {
+    override lazy val metadata: Option[ObjectStorageService.Metadata] = md
+
+    override def openStream(): InputStream = source.openStream()
+
+    override lazy val size: Long = source.size()
+    override lazy val isEmpty: Boolean = source.isEmpty
+
+    override def read(): Array[Byte] = source.read()
+  }
+
+  def empty: RichByteSource = new BlobBackedByteSource(None, None)
 }
 
 class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(new LocalFilesystemFileStore(Map.empty[String, FileHashResolver].asJava, new StaticFileReferenceCreationStrategy(Target.local)), blobStore, containerName, blobName) {
-	override def overwrite(in: ByteSource) = throw new UnsupportedOperationException
+  override def overwrite(in: ByteSource) = throw new UnsupportedOperationException
 }
 
 class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blobName: String, fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
-	private lazy val byteSource: ByteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
+  private lazy val byteSource: ByteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
 
-	override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
-	override lazy val isEmpty: Boolean = metadata.isEmpty
-	override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
+  override lazy val isEmpty: Boolean = metadata.isEmpty
+  override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
 
-	override def openStream(): InputStream = try byteSource.openStream() catch {
-		// BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
-		case _: NullPointerException => null
-	}
-	override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
+  override def openStream(): InputStream = try byteSource.openStream() catch {
+    // BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
+    case _: NullPointerException => null
+  }
+
+  override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
 }
 
 private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob], fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
-	override lazy val metadata: Option[ObjectStorageService.Metadata] =
-		fetchMetadata.map(ObjectStorageService.Metadata.apply)
+  override lazy val metadata: Option[ObjectStorageService.Metadata] =
+    fetchMetadata.map(ObjectStorageService.Metadata.apply)
 
-	override def openStream(): InputStream = fetchBlob.map(_.getPayload.openStream()).orNull
+  override def openStream(): InputStream = fetchBlob.map(_.getPayload.openStream()).orNull
 
-	override lazy val isEmpty: Boolean = metadata.isEmpty
-	override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override lazy val isEmpty: Boolean = metadata.isEmpty
+  override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
 }
 
 trait ObjectStorageService extends InitializingBean {
-	def keyExists(key: String): Boolean
-	def fetch(key: String): RichByteSource
+  def keyExists(key: String): Boolean
 
-	/**
-		* Combines calls to fetch() and metadata()
-		*/
-	def renderable(key: String, fileName: Option[String]): Option[RenderableFile] =
-		Option(fetch(key)).filterNot(_.isEmpty).map { source =>
-			new RenderableFile {
-				override val filename: String = fileName.getOrElse(key)
+  def fetch(key: String): RichByteSource
 
-				private lazy val fileMetadata = source.metadata
+  /**
+    * Combines calls to fetch() and metadata()
+    */
+  def renderable(key: String, fileName: Option[String]): Option[RenderableFile] =
+    Option(fetch(key)).filterNot(_.isEmpty).map { source =>
+      new RenderableFile {
+        override val filename: String = fileName.getOrElse(key)
 
-				override lazy val contentLength: Option[Long] = fileMetadata.map(_.contentLength)
+        private lazy val fileMetadata = source.metadata
 
-				override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
+        override lazy val contentLength: Option[Long] = fileMetadata.map(_.contentLength)
 
-				override val byteSource: ByteSource = source
-			}
-		}
+        override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 
-	def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit
-	def delete(key: String): Unit
-	def listKeys(): Stream[String]
+        override val byteSource: ByteSource = source
+      }
+    }
+
+  def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit
+
+  def delete(key: String): Unit
+
+  def listKeys(): Stream[String]
 }
 
 @Service
 class ObjectStorageServiceFactoryBean extends ScalaFactoryBean[ObjectStorageService] {
 
-	// As this a singleton, this reference will be retained by the bean factory,
-	// so don't need to worry about it going away
-	@transient private var blobStoreContext: BlobStoreContext = _
+  // As this a singleton, this reference will be retained by the bean factory,
+  // so don't need to worry about it going away
+  @transient private var blobStoreContext: BlobStoreContext = _
 
-	@Value("${objectstore.container}") var containerName: String = _
-	@Value("${objectstore.provider}") var providerType: String = _
+  @Value("${objectstore.container}") var containerName: String = _
+  @Value("${objectstore.provider}") var providerType: String = _
 
-	// This defaults to an empty string
-	@Value("${filesystem.attachment.dir:}") var legacyAttachmentsDirectory: String = _
+  // This defaults to an empty string
+  @Value("${filesystem.attachment.dir:}") var legacyAttachmentsDirectory: String = _
 
-	private def createFilesystemBlobContext(): ContextBuilder = {
-		val properties = {
-			val p = new Properties
-			p.setProperty(FilesystemConstants.PROPERTY_BASEDIR, Wire.property("${objectstore.filesystem.baseDir}"))
-			p
-		}
+  private def createFilesystemBlobContext(): ContextBuilder = {
+    val properties = {
+      val p = new Properties
+      p.setProperty(FilesystemConstants.PROPERTY_BASEDIR, Wire.property("${objectstore.filesystem.baseDir}"))
+      p
+    }
 
-		ContextBuilder.newBuilder(new FilesystemApiMetadata)
-			.overrides(properties)
-	}
+    ContextBuilder.newBuilder(new FilesystemApiMetadata)
+      .overrides(properties)
+  }
 
-	private def createSwiftBlobContext(): ContextBuilder = {
-		val endpoint = Wire.property("${objectstore.swift.endpoint}")
-		val username = Wire.property("${objectstore.swift.username}")
-		val password = Wire.property("${objectstore.swift.password}")
+  private def createSwiftBlobContext(): ContextBuilder = {
+    val endpoint = Wire.property("${objectstore.swift.endpoint}")
+    val username = Wire.property("${objectstore.swift.username}")
+    val password = Wire.property("${objectstore.swift.password}")
 
-		ContextBuilder.newBuilder(new SwiftApiMetadata)
-			.endpoint(endpoint)
-			.credentials(s"LDAP_$username:$username", password)
-	}
+    ContextBuilder.newBuilder(new SwiftApiMetadata)
+      .endpoint(endpoint)
+      .credentials(s"LDAP_$username:$username", password)
+  }
 
-	override def createInstance(): ObjectStorageService = {
-		val contextBuilder = (providerType match {
-			case "filesystem" => createFilesystemBlobContext()
-			case "swift" => createSwiftBlobContext()
-			case "transient" => ContextBuilder.newBuilder(new TransientApiMetadata)
-			case _ => throw new IllegalArgumentException(s"Invalid provider type $providerType")
-		}).modules(Seq(new SLF4JLoggingModule).asJava)
+  override def createInstance(): ObjectStorageService = {
+    val contextBuilder = (providerType match {
+      case "filesystem" => createFilesystemBlobContext()
+      case "swift" => createSwiftBlobContext()
+      case "transient" => ContextBuilder.newBuilder(new TransientApiMetadata)
+      case _ => throw new IllegalArgumentException(s"Invalid provider type $providerType")
+    }).modules(Seq(new SLF4JLoggingModule).asJava)
 
-		blobStoreContext = contextBuilder.buildView(classOf[BlobStoreContext])
+    blobStoreContext = contextBuilder.buildView(classOf[BlobStoreContext])
 
-		val blobStoreService = new BlobStoreObjectStorageService(blobStoreContext, containerName)
+    val blobStoreService = new BlobStoreObjectStorageService(blobStoreContext, containerName)
 
-		legacyAttachmentsDirectory.maybeText.map(new File(_)) match {
-			case Some(dir) => new LegacyAwareObjectStorageService(
-				defaultService = blobStoreService,
-				legacyService = new LegacyFilesystemObjectStorageService(dir)
-			)
+    legacyAttachmentsDirectory.maybeText.map(new File(_)) match {
+      case Some(dir) => new LegacyAwareObjectStorageService(
+        defaultService = blobStoreService,
+        legacyService = new LegacyFilesystemObjectStorageService(dir)
+      )
 
-			case _ => blobStoreService
-		}
-	}
+      case _ => blobStoreService
+    }
+  }
 
-	override def destroy(): Unit = blobStoreContext.close()
+  override def destroy(): Unit = blobStoreContext.close()
 
 }
 
 trait ObjectStorageServiceComponent {
-	def objectStorageService: ObjectStorageService
+  def objectStorageService: ObjectStorageService
 }
 
 trait AutowiringObjectStorageServiceComponent extends ObjectStorageServiceComponent {
-	var objectStorageService: ObjectStorageService = Wire[ObjectStorageService]
+  var objectStorageService: ObjectStorageService = Wire[ObjectStorageService]
 }

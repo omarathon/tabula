@@ -13,27 +13,27 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/release-for-marking"))
 class ReleaseExamForMarkingController extends ExamsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		ReleaseExamForMarkingCommand (
-			mandatory(module),
-			mandatory(exam),
-			user
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable exam: Exam) =
+    ReleaseExamForMarkingCommand(
+      mandatory(module),
+      mandatory(exam),
+      user
+    )
 
-	@RequestMapping(method = Array(GET))
-	def form(@PathVariable module: Module, @PathVariable exam: Exam): Mav = {
-		Mav("exams/exams/admin/release").crumbs(
-			Breadcrumbs.Exams.Home(exam.academicYear),
-			Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
-			Breadcrumbs.Exams.Module(module, exam.academicYear)
-		)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@PathVariable module: Module, @PathVariable exam: Exam): Mav = {
+    Mav("exams/exams/admin/release").crumbs(
+      Breadcrumbs.Exams.Home(exam.academicYear),
+      Breadcrumbs.Exams.Department(module.adminDepartment, exam.academicYear),
+      Breadcrumbs.Exams.Module(module, exam.academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam): Mav = {
-		cmd.apply()
-		Redirect(Routes.Exams.admin.module(exam.module, exam.academicYear))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable exam: Exam): Mav = {
+    cmd.apply()
+    Redirect(Routes.Exams.admin.module(exam.module, exam.academicYear))
+  }
 
 }

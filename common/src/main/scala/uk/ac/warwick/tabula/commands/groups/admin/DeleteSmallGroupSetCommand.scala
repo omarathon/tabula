@@ -12,43 +12,43 @@ import uk.ac.warwick.tabula.data.model.{Module, ScheduledNotification}
 import collection.JavaConverters._
 
 class DeleteSmallGroupSetCommand(val module: Module, val set: SmallGroupSet)
-	extends Command[SmallGroupSet] with SelfValidating with SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] {
+  extends Command[SmallGroupSet] with SelfValidating with SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] {
 
-	mustBeLinked(set, module)
-	PermissionCheck(Permissions.SmallGroups.Delete, set)
+  mustBeLinked(set, module)
+  PermissionCheck(Permissions.SmallGroups.Delete, set)
 
-	var service: SmallGroupService = Wire[SmallGroupService]
+  var service: SmallGroupService = Wire[SmallGroupService]
 
-	var confirm = false
+  var confirm = false
 
-	override def applyInternal(): SmallGroupSet = transactional() {
-		set.markDeleted()
-		service.saveOrUpdate(set)
-		set
-	}
+  override def applyInternal(): SmallGroupSet = transactional() {
+    set.markDeleted()
+    service.saveOrUpdate(set)
+    set
+  }
 
-	def validate(errors: Errors) {
-		if (!confirm) {
-			errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
-		} else validateCanDelete(errors)
-	}
+  def validate(errors: Errors) {
+    if (!confirm) {
+      errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
+    } else validateCanDelete(errors)
+  }
 
-	def validateCanDelete(errors: Errors) {
-		if (set.deleted) {
-			errors.reject("smallGroupSet.delete.deleted")
-		} else if (set.allocationMethod ==  SmallGroupAllocationMethod.StudentSignUp  && !set.canBeDeleted) {
-			errors.reject("smallGroupSet.delete.studentSignUpReleased")
-		} else if (set.allocationMethod !=  SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted) {
-			errors.reject("smallGroupSet.delete.released")
-		}
-	}
+  def validateCanDelete(errors: Errors) {
+    if (set.deleted) {
+      errors.reject("smallGroupSet.delete.deleted")
+    } else if (set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted) {
+      errors.reject("smallGroupSet.delete.studentSignUpReleased")
+    } else if (set.allocationMethod != SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted) {
+      errors.reject("smallGroupSet.delete.released")
+    }
+  }
 
-	override def describe(d: Description): Unit = d.smallGroupSet(set)
+  override def describe(d: Description): Unit = d.smallGroupSet(set)
 
-	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
-		set.groups.asScala.flatMap(
-			_.events.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
-		)
+  override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
+    set.groups.asScala.flatMap(
+      _.events.flatMap(service.getAllSmallGroupEventOccurrencesForEvent)
+    )
 
-	override def scheduledNotifications(notificationTarget: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = Seq()
+  override def scheduledNotifications(notificationTarget: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = Seq()
 }

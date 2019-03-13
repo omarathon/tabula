@@ -8,17 +8,17 @@ import uk.ac.warwick.tabula.permissions.PermissionsSelector
 case class ScheduledMeetingRecordCreator(meeting: model.ScheduledMeetingRecord, relationshipType: StudentRelationshipType) extends BuiltInRole(ScheduledMeetingRecordCreatorRoleDefinition(relationshipType), meeting)
 
 case class ScheduledMeetingRecordCreatorRoleDefinition(relationshipType: PermissionsSelector[StudentRelationshipType]) extends SelectorBuiltInRoleDefinition(relationshipType) with UnassignableBuiltInRoleDefinition {
-	override def description = "Scheduled Meeting Record Creator"
+  override def description = "Scheduled Meeting Record Creator"
 
-	GrantsScopedPermission(
-		Profiles.ScheduledMeetingRecord.Manage(relationshipType),
-		Profiles.ScheduledMeetingRecord.Confirm
-	)
+  GrantsScopedPermission(
+    Profiles.ScheduledMeetingRecord.Manage(relationshipType),
+    Profiles.ScheduledMeetingRecord.Confirm
+  )
 
-	def duplicate(selectorOption: Option[PermissionsSelector[StudentRelationshipType]]): SelectorBuiltInRoleDefinition[StudentRelationshipType] =
-		selectorOption.map{ selector =>
-			ScheduledMeetingRecordCreatorRoleDefinition(selector)
-		}.getOrElse(
-			ScheduledMeetingRecordCreatorRoleDefinition(relationshipType)
-		)
+  def duplicate(selectorOption: Option[PermissionsSelector[StudentRelationshipType]]): SelectorBuiltInRoleDefinition[StudentRelationshipType] =
+    selectorOption.map { selector =>
+      ScheduledMeetingRecordCreatorRoleDefinition(selector)
+    }.getOrElse(
+      ScheduledMeetingRecordCreatorRoleDefinition(relationshipType)
+    )
 }

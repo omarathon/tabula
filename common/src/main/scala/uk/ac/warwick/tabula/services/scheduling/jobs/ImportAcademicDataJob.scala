@@ -15,20 +15,20 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportAcademicDataJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingAcademicInformationImport)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					// If we get department codes, just do module import for that department
-					context.getMergedJobDataMap.getString("departmentCodes").maybeText match {
-						case Some(deptCodes) =>
-							val cmd = ImportDepartmentsModulesCommand()
-							cmd.deptCode = deptCodes
-							cmd.apply()
-						case _ => ImportAcademicInformationCommand().apply()
-					}
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingAcademicInformationImport)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          // If we get department codes, just do module import for that department
+          context.getMergedJobDataMap.getString("departmentCodes").maybeText match {
+            case Some(deptCodes) =>
+              val cmd = ImportDepartmentsModulesCommand()
+              cmd.deptCode = deptCodes
+              cmd.apply()
+            case _ => ImportAcademicInformationCommand().apply()
+          }
+        }
+      }
+  }
 
 }

@@ -5,24 +5,28 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 
 abstract class SubmissionNotification
-	extends NotificationWithTarget[Submission, Assignment]
-	with SingleItemNotification[Submission]
-	with AutowiringUserLookupComponent
-	with MyWarwickActivity {
+  extends NotificationWithTarget[Submission, Assignment]
+    with SingleItemNotification[Submission]
+    with AutowiringUserLookupComponent
+    with MyWarwickActivity {
 
-	def submission: Submission = item.entity
-	def assignment: Assignment = target.entity
-	def module: Module = assignment.module
-	def moduleCode: String = module.code.toUpperCase
+  def submission: Submission = item.entity
 
-	def verb = "submit"
-	def templateLocation : String
+  def assignment: Assignment = target.entity
 
-	def content = FreemarkerModel(templateLocation, Map(
-		"submission" -> submission,
-		"submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
-		"assignment" -> assignment,
-		"module" -> module,
-		"user" -> userLookup.getUserByUserId(submission.usercode))
-	)
+  def module: Module = assignment.module
+
+  def moduleCode: String = module.code.toUpperCase
+
+  def verb = "submit"
+
+  def templateLocation: String
+
+  def content = FreemarkerModel(templateLocation, Map(
+    "submission" -> submission,
+    "submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
+    "assignment" -> assignment,
+    "module" -> module,
+    "user" -> userLookup.getUserByUserId(submission.usercode))
+  )
 }

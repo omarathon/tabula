@@ -14,42 +14,43 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/batch"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/batch"))
 class OldAddBatchFeedbackController extends OldCourseworkController {
-	@ModelAttribute("addFeedbackCommand")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
-		new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
+  @ModelAttribute("addFeedbackCommand")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+    new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
 
-	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+  // Add the common breadcrumbs to the model.
+  def crumbed(mav: Mav, module: Module): Mav = mav.crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def uploadZipForm(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand): Mav = {
-		crumbed(Mav("coursework/admin/assignments/feedback/zipform"), cmd.module)
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def uploadZipForm(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand): Mav = {
+    crumbed(Mav("coursework/admin/assignments/feedback/zipform"), cmd.module)
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmBatchUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
-		cmd.preExtractValidation(errors)
-		if (errors.hasErrors) {
-			uploadZipForm(cmd)
-		} else {
-			cmd.postExtractValidation(errors)
-			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirm"))
+  def confirmBatchUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
+    cmd.preExtractValidation(errors)
+    if (errors.hasErrors) {
+      uploadZipForm(cmd)
+    } else {
+      cmd.postExtractValidation(errors)
+      crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
-		cmd.preExtractValidation(errors)
-		cmd.postExtractValidation(errors)
-		if (errors.hasErrors) {
-			crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
-		} else {
-			// do apply, redirect back
-			cmd.apply()
-			Redirect(Routes.admin.module(cmd.module))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirm=true"))
+  def doUpload(@ModelAttribute("addFeedbackCommand") cmd: OldAddFeedbackCommand, errors: Errors): Mav = {
+    cmd.preExtractValidation(errors)
+    cmd.postExtractValidation(errors)
+    if (errors.hasErrors) {
+      crumbed(Mav("coursework/admin/assignments/feedback/zipreview"), cmd.module)
+    } else {
+      // do apply, redirect back
+      cmd.apply()
+      Redirect(Routes.admin.module(cmd.module))
+    }
+  }
 }

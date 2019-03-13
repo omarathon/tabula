@@ -8,18 +8,18 @@ import uk.ac.warwick.userlookup.User
 
 class RemoveUserFromDepartmentSmallGroupCommand(val user: User, val group: DepartmentSmallGroup) extends Command[UnspecifiedTypeUserGroup] {
 
-	PermissionCheck(Permissions.SmallGroups.Update, group)
+  PermissionCheck(Permissions.SmallGroups.Update, group)
 
-	def applyInternal(): UnspecifiedTypeUserGroup = {
-		val ug = group.students
-		ug.remove(user)
-		ug
-	}
+  def applyInternal(): UnspecifiedTypeUserGroup = {
+    val ug = group.students
+    ug.remove(user)
+    ug
+  }
 
-	override def describe(d: Description): Unit =
-		d.departmentSmallGroup(group).properties(
-			"usercode" -> user.getUserId,
-			"universityId" -> user.getWarwickId
-		)
+  override def describe(d: Description): Unit =
+    d.departmentSmallGroup(group).properties(
+      "usercode" -> user.getUserId,
+      "universityId" -> user.getWarwickId
+    )
 
 }

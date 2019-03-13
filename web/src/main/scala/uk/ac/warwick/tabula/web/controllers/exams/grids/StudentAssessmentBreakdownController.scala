@@ -18,83 +18,83 @@ import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes, Breadcrumbs => BaseBre
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}/{studentCourseDetails}/assessmentdetails"))
 class StudentAssessmentBreakdownController extends ExamsController
-	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
-	with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringNormalCATSLoadServiceComponent
-	with TaskBenchmarking {
+  with DepartmentScopedController with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
+  with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringNormalCATSLoadServiceComponent
+  with TaskBenchmarking {
 
 
-	type CommandType = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
+  type CommandType = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
 
-	override val departmentPermission: Permission = Permissions.Department.ExamGrids
+  override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 
-	@ModelAttribute("command")
-	def command(@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear): CommandType = {
-		StudentAssessmentCommand(studentCourseDetails, mandatory(academicYear))
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear): CommandType = {
+    StudentAssessmentCommand(studentCourseDetails, mandatory(academicYear))
+  }
 
-	@ModelAttribute("weightings")
-	def weightings(@PathVariable studentCourseDetails: StudentCourseDetails): IndexedSeq[CourseYearWeighting] = {
-		(1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
-			courseAndRouteService.getCourseYearWeighting(mandatory(studentCourseDetails).course.code,
-				mandatory(studentCourseDetails.sprStartAcademicYear), year)
-		).sorted
-	}
+  @ModelAttribute("weightings")
+  def weightings(@PathVariable studentCourseDetails: StudentCourseDetails): IndexedSeq[CourseYearWeighting] = {
+    (1 to FilterStudentsOrRelationships.MaxYearsOfStudy).flatMap(year =>
+      courseAndRouteService.getCourseYearWeighting(mandatory(studentCourseDetails).course.code,
+        mandatory(studentCourseDetails.sprStartAcademicYear), year)
+    ).sorted
+  }
 
-	@RequestMapping()
-	def viewStudentAssessmentDetails(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear,
-		@ModelAttribute("command") cmd: CommandType
-	): Mav = {
+  @RequestMapping()
+  def viewStudentAssessmentDetails(
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear,
+    @ModelAttribute("command") cmd: CommandType
+  ): Mav = {
 
-		val breakdown = cmd.apply()
-		val assessmentComponents = breakdown.modules
-		val passMarkMap = assessmentComponents.map(ac => {
-			val module = ac.moduleRegistration.module
-			module -> ProgressionService.modulePassMark(module.degreeType)
-		}).toMap
-		val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, cmd.studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
+    val breakdown = cmd.apply()
+    val assessmentComponents = breakdown.modules
+    val passMarkMap = assessmentComponents.map(ac => {
+      val module = ac.moduleRegistration.module
+      module -> ProgressionService.modulePassMark(module.degreeType)
+    }).toMap
+    val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, cmd.studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
 
-		Mav("exams/grids/generate/studentAssessmentComponentDetails",
-			"passMarkMap" -> passMarkMap,
-			"assessmentComponents" -> assessmentComponents,
-			"normalLoadLookup" -> normalLoadLookup,
-			"member" -> studentCourseDetails.student
-		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
-			.secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
+    Mav("exams/grids/generate/studentAssessmentComponentDetails",
+      "passMarkMap" -> passMarkMap,
+      "assessmentComponents" -> assessmentComponents,
+      "normalLoadLookup" -> normalLoadLookup,
+      "member" -> studentCourseDetails.student
+    ).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
+      .secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
 
-	}
+  }
 
-	def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: StudentCourseYearDetails => String): Seq[BreadCrumb] = {
-		val chooseScyd = scd.freshStudentCourseYearDetailsForYear(activeAcademicYear) // fresh scyd for this year
-			.orElse(scd.freshOrStaleStudentCourseYearDetailsForYear(activeAcademicYear))
-			.getOrElse(throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year"))
+  def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: StudentCourseYearDetails => String): Seq[BreadCrumb] = {
+    val chooseScyd = scd.freshStudentCourseYearDetailsForYear(activeAcademicYear) // fresh scyd for this year
+      .orElse(scd.freshOrStaleStudentCourseYearDetailsForYear(activeAcademicYear))
+      .getOrElse(throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year"))
 
-		val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
-			case Nil =>
-				scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
-			case fresh =>
-				fresh
-		}
-		scyds.map(scyd =>
-			BaseBreadcumbs.Standard(
-				title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
-				url = Some(urlGenerator(scyd)),
-				tooltip = "%s %s".format(
-					scyd.studentCourseDetails.course.name,
-					scyd.academicYear.getLabel
-				)
-			).setActive(scyd == chooseScyd)
-		).toSeq
-	}
+    val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
+      case Nil =>
+        scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
+      case fresh =>
+        fresh
+    }
+    scyds.map(scyd =>
+      BaseBreadcumbs.Standard(
+        title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
+        url = Some(urlGenerator(scyd)),
+        tooltip = "%s %s".format(
+          scyd.studentCourseDetails.course.name,
+          scyd.academicYear.getLabel
+        )
+      ).setActive(scyd == chooseScyd)
+    ).toSeq
+  }
 }

@@ -17,15 +17,15 @@ import scala.util.Try
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportSmallGroupEventLocationsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		exceptionResolver.reportExceptions {
-			EarlyRequestInfo.wrap() {
-				context.getMergedJobDataMap.getString("academicYear").maybeText.flatMap(s => Try(s.toInt).toOption).foreach(year => {
-					val cmd = ImportSmallGroupEventLocationsCommand(AcademicYear(year))
-					cmd.apply()
-				})
-			}
-		}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    exceptionResolver.reportExceptions {
+      EarlyRequestInfo.wrap() {
+        context.getMergedJobDataMap.getString("academicYear").maybeText.flatMap(s => Try(s.toInt).toOption).foreach(year => {
+          val cmd = ImportSmallGroupEventLocationsCommand(AcademicYear(year))
+          cmd.apply()
+        })
+      }
+    }
+  }
 
 }

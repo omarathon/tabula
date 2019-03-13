@@ -1,5 +1,5 @@
 Given /^there is a file|page at (.+?)$/ do |url|
-  (@expected_responses||={})[url] = 200
+  (@expected_responses ||= {})[url] = 200
 end
 
 When /^I request (\S+?) then (\S+?)$/ do |prefire_url, url|
@@ -29,11 +29,11 @@ When /^I make a HEAD request to (.+?)$/ do |url|
 end
 
 When /^I set the header (.+?) to "([^\"]*)"$/ do |header, value|
-  (@headers||={})[header] = value
+  (@headers ||= {})[header] = value
 end
 
 When /^I set the header (.+?) as (.+?)$/ do |header, stored|
-  (@headers||={})[header] = @stored_headers[stored.downcase]
+  (@headers ||= {})[header] = @stored_headers[stored.downcase]
 end
 
 When /^I follow redirects$/ do
@@ -65,7 +65,7 @@ Then /^the (.+?) response header should be the same as the stored (.+?)$/ do |he
 end
 
 Then /^the (.+?) response header should be stored$/ do |header|
-  (@stored_headers||={})[header.downcase] = response[header.downcase]
+  (@stored_headers ||= {})[header.downcase] = response[header.downcase]
 end
 
 Then /^the status code should be ([0-9]*)$/ do |status|
@@ -91,8 +91,6 @@ end
 Then /^the final url should be "([^\"]*)"$/ do |value|
   @url.should == value
 end
-
-
 
 
 Then /^I should tidy up$/ do

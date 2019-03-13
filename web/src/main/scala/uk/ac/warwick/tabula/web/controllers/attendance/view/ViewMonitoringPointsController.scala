@@ -16,41 +16,41 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/points"))
 class ViewMonitoringPointsController extends AttendanceController with HasMonthNames
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent
-	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent
+  with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.MonitoringPoints.View
+  override val departmentPermission: Permission = Permissions.MonitoringPoints.View
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("filterCommand")
-	def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
+  @ModelAttribute("filterCommand")
+  def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		val filterResult = filterCommand.apply().pointMap
-		if (ajax) {
-			Mav("attendance/view/_points_results",
-				"filterResult" -> filterResult
-			).noLayout()
-		} else {
-			Mav("attendance/view/points",
-				"filterResult" -> filterResult
-			).crumbs(
-				Breadcrumbs.View.HomeForYear(academicYear),
-				Breadcrumbs.View.DepartmentForYear(department, academicYear)
-			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.points(department, year)): _*)
-		}
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    val filterResult = filterCommand.apply().pointMap
+    if (ajax) {
+      Mav("attendance/view/_points_results",
+        "filterResult" -> filterResult
+      ).noLayout()
+    } else {
+      Mav("attendance/view/points",
+        "filterResult" -> filterResult
+      ).crumbs(
+        Breadcrumbs.View.HomeForYear(academicYear),
+        Breadcrumbs.View.DepartmentForYear(department, academicYear)
+      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.points(department, year)): _*)
+    }
+  }
 
 }

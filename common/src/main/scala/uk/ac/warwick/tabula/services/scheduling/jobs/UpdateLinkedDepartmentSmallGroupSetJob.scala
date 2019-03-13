@@ -15,22 +15,22 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class UpdateLinkedDepartmentSmallGroupSetJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingGroupsUpdateDepartmentSets) {
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					UpdateLinkedDepartmentSmallGroupSetsCommand().apply()
-				}
-			}
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					val thisAcademicYear = AcademicYear.now()
-					if (thisAcademicYear.isSITSInFlux(LocalDate.now)) {
-						UnlinkDepartmentSmallGroupSetCommand().apply()
-					}
-				}
-			}
-		}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingGroupsUpdateDepartmentSets) {
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          UpdateLinkedDepartmentSmallGroupSetsCommand().apply()
+        }
+      }
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          val thisAcademicYear = AcademicYear.now()
+          if (thisAcademicYear.isSITSInFlux(LocalDate.now)) {
+            UnlinkDepartmentSmallGroupSetCommand().apply()
+          }
+        }
+      }
+    }
+  }
 
 }

@@ -10,63 +10,70 @@ import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRe
 import scala.collection.mutable
 
 object ViewMeetingsForPointCommand {
-	def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
-		new ViewMeetingsForPointCommand(student, point)
-			with ComposableCommand[Seq[(MeetingRecord, Seq[String])]]
-			with ViewMeetingsForPointPermission
-			with ViewMeetingsForPointCommandState
-			with AutowiringRelationshipServiceComponent
-			with AutowiringMeetingRecordDaoComponent
-			with ReadOnly with Unaudited
+  def apply(student: StudentMember, point: AttendanceMonitoringPoint) =
+    new ViewMeetingsForPointCommand(student, point)
+      with ComposableCommand[Seq[(MeetingRecord, Seq[String])]]
+      with ViewMeetingsForPointPermission
+      with ViewMeetingsForPointCommandState
+      with AutowiringRelationshipServiceComponent
+      with AutowiringMeetingRecordDaoComponent
+      with ReadOnly with Unaudited
 }
 
 class ViewMeetingsForPointCommand(val student: StudentMember, val point: AttendanceMonitoringPoint)
-	extends CommandInternal[Seq[(MeetingRecord, Seq[String])]] with ViewMeetingsForPointCommandState {
+  extends CommandInternal[Seq[(MeetingRecord, Seq[String])]] with ViewMeetingsForPointCommandState {
 
-	self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
+  self: RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
-	override def applyInternal(): Seq[(MeetingRecord, mutable.Buffer[String])] = {
-		// Get all the enabled relationship types for a department
-		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
+  override def applyInternal(): Seq[(MeetingRecord, mutable.Buffer[String])] = {
+    // Get all the enabled relationship types for a department
+    val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
-		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list)
-		}
+    val allMeetings = allRelationshipTypes.flatMap { relationshipType =>
+      relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list)
+    }
 
-		allMeetings.map{meeting => meeting -> {
-			val reasons: mutable.Buffer[String] = mutable.Buffer()
-			if (!meeting.relationshipTypes.exists(point.meetingRelationships.contains))
-				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"
+    allMeetings.map { meeting =>
+      meeting -> {
+        val reasons: mutable.Buffer[String] = mutable.Buffer()
+        if (!meeting.relationshipTypes.exists(point.meetingRelationships.contains))
+          reasons += s"Meeting was not with ${
+            point.meetingRelationships.map(_.agentRole).mkString(" or ")
+          }"
 
-			if (!point.meetingFormats.contains(meeting.format))
-				reasons += s"Meeting was not a ${point.meetingFormats.map{_.description}.mkString(" or ")}"
+        if (!point.meetingFormats.contains(meeting.format))
+          reasons += s"Meeting was not a ${
+            point.meetingFormats.map(_.description).mkString(" or ")
+          }"
 
-			if (meeting.isRejected)
-				reasons += s"Rejected"
-			else if (!meeting.isAttendanceApproved)
-				reasons += s"Awaiting approval"
+        if (meeting.isRejected)
+          reasons += s"Rejected"
+        else if (!meeting.isAttendanceApproved)
+          reasons += s"Awaiting approval"
 
-			if (meeting.meetingDate.toLocalDate.isBefore(point.startDate))
-				reasons += "Took place before"
+        if (meeting.meetingDate.toLocalDate.isBefore(point.startDate))
+          reasons += "Took place before"
 
-			if (meeting.meetingDate.toLocalDate.isAfter(point.endDate))
-				reasons += "Took place after"
+        if (meeting.meetingDate.toLocalDate.isAfter(point.endDate))
+          reasons += "Took place after"
 
-			reasons
-		}}
-	}
+        reasons
+      }
+    }
+  }
 
 }
 
 trait ViewMeetingsForPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewMeetingsForPointCommandState =>
+  self: ViewMeetingsForPointCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.View, student)
+  }
 }
 
 trait ViewMeetingsForPointCommandState {
-	def student: StudentMember
-	def point: AttendanceMonitoringPoint
+  def student: StudentMember
+
+  def point: AttendanceMonitoringPoint
 }

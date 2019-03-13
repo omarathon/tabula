@@ -17,122 +17,122 @@ import uk.ac.warwick.tabula.JavaImports._
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/markingdescriptors"))
 class MarkingDescriptorsController extends AdminController with AutowiringMarkingDescriptorServiceComponent {
-	@ModelAttribute("markPoints")
-	def markPoints: Seq[MarkPoint] = MarkPoint.all
+  @ModelAttribute("markPoints")
+  def markPoints: Seq[MarkPoint] = MarkPoint.all
 
 
-	@ModelAttribute("universityDescriptors")
-	def universityDescriptors: JMap[MarkPoint, UniversityMarkingDescriptor] = {
-		val descriptors = markingDescriptorService.getUniversityMarkingDescriptors
+  @ModelAttribute("universityDescriptors")
+  def universityDescriptors: JMap[MarkPoint, UniversityMarkingDescriptor] = {
+    val descriptors = markingDescriptorService.getUniversityMarkingDescriptors
 
-		(for {
-			markPoint <- MarkPoint.all
-			descriptor <- descriptors.find(_.isForMarkPoint(markPoint))
-		} yield markPoint -> descriptor).toMap.asJava
-	}
+    (for {
+      markPoint <- MarkPoint.all
+      descriptor <- descriptors.find(_.isForMarkPoint(markPoint))
+    } yield markPoint -> descriptor).toMap.asJava
+  }
 
-	@ModelAttribute("departmentDescriptors")
-	def departmentDescriptors(@PathVariable department: Department): JMap[MarkPoint, DepartmentMarkingDescriptor] = {
-		val descriptors = markingDescriptorService.getDepartmentMarkingDescriptors(department)
+  @ModelAttribute("departmentDescriptors")
+  def departmentDescriptors(@PathVariable department: Department): JMap[MarkPoint, DepartmentMarkingDescriptor] = {
+    val descriptors = markingDescriptorService.getDepartmentMarkingDescriptors(department)
 
-		(for {
-			markPoint <- MarkPoint.all
-			descriptor <- descriptors.find(_.isForMarkPoint(markPoint))
-		} yield markPoint -> descriptor).toMap.asJava
-	}
+    (for {
+      markPoint <- MarkPoint.all
+      descriptor <- descriptors.find(_.isForMarkPoint(markPoint))
+    } yield markPoint -> descriptor).toMap.asJava
+  }
 
-	@GetMapping
-	def index(@PathVariable department: Department): Mav = Mav("admin/markingdescriptors/index")
+  @GetMapping
+  def index(@PathVariable department: Department): Mav = Mav("admin/markingdescriptors/index")
 }
 
 @Controller
 @RequestMapping(value = Array("/admin/department/{department}/markingdescriptors/new"))
 class AddMarkingDescriptorController extends AdminController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type CommandType = Appliable[MarkingDescriptor] with ModifyMarkingDescriptorState
+  type CommandType = Appliable[MarkingDescriptor] with ModifyMarkingDescriptorState
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department): CommandType =
-		AddMarkingDescriptorCommand.apply(mandatory(department))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department): CommandType =
+    AddMarkingDescriptorCommand.apply(mandatory(department))
 
-	@ModelAttribute("markPoints")
-	def markPoints: Seq[MarkPoint] = MarkPoint.all
+  @ModelAttribute("markPoints")
+  def markPoints: Seq[MarkPoint] = MarkPoint.all
 
-	def render: Mav = Mav("admin/markingdescriptors/new")
+  def render: Mav = Mav("admin/markingdescriptors/new")
 
-	@GetMapping
-	def form(@PathVariable department: Department, @ModelAttribute("command") command: CommandType): Mav = {
-		render
-	}
+  @GetMapping
+  def form(@PathVariable department: Department, @ModelAttribute("command") command: CommandType): Mav = {
+    render
+  }
 
-	@PostMapping
-	def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
-		if (bindingResult.hasErrors) {
-			render
-		} else {
-			command.apply()
+  @PostMapping
+  def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
+    if (bindingResult.hasErrors) {
+      render
+    } else {
+      command.apply()
 
-			Redirect(s"/admin/department/${department.code}/markingdescriptors")
-		}
-	}
+      Redirect(s"/admin/department/${department.code}/markingdescriptors")
+    }
+  }
 }
 
 @Controller
 @RequestMapping(path = Array("/admin/department/{department}/markingdescriptors/{markingDescriptor}/edit"))
 class EditMarkingDescriptorController extends AdminController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type CommandType = Appliable[MarkingDescriptor] with ModifyMarkingDescriptorState
+  type CommandType = Appliable[MarkingDescriptor] with ModifyMarkingDescriptorState
 
-	@ModelAttribute("command")
-	def command(@PathVariable("markingDescriptor") markingDescriptor: DepartmentMarkingDescriptor): CommandType =
-		EditMarkingDescriptorCommand.apply(mandatory(markingDescriptor))
+  @ModelAttribute("command")
+  def command(@PathVariable("markingDescriptor") markingDescriptor: DepartmentMarkingDescriptor): CommandType =
+    EditMarkingDescriptorCommand.apply(mandatory(markingDescriptor))
 
-	@ModelAttribute("markPoints")
-	def markPoints: Seq[MarkPoint] = MarkPoint.all
+  @ModelAttribute("markPoints")
+  def markPoints: Seq[MarkPoint] = MarkPoint.all
 
-	def render: Mav = Mav("admin/markingdescriptors/edit")
+  def render: Mav = Mav("admin/markingdescriptors/edit")
 
-	@GetMapping
-	def form(@PathVariable department: Department): Mav = render
+  @GetMapping
+  def form(@PathVariable department: Department): Mav = render
 
-	@PostMapping
-	def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
-		if (bindingResult.hasErrors) {
-			render
-		} else {
-			command.apply()
+  @PostMapping
+  def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
+    if (bindingResult.hasErrors) {
+      render
+    } else {
+      command.apply()
 
-			Redirect(s"/admin/department/${department.code}/markingdescriptors")
-		}
-	}
+      Redirect(s"/admin/department/${department.code}/markingdescriptors")
+    }
+  }
 }
 
 @Controller
 @RequestMapping(path = Array("/admin/department/{department}/markingdescriptors/{markingDescriptor}/delete"))
 class DeleteMarkingDescriptorController extends AdminController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type CommandType = Appliable[Unit]
+  type CommandType = Appliable[Unit]
 
-	@ModelAttribute("command")
-	def command(@PathVariable("markingDescriptor") markingDescriptor: DepartmentMarkingDescriptor): CommandType =
-		DeleteMarkingDescriptorCommand.apply(mandatory(markingDescriptor))
+  @ModelAttribute("command")
+  def command(@PathVariable("markingDescriptor") markingDescriptor: DepartmentMarkingDescriptor): CommandType =
+    DeleteMarkingDescriptorCommand.apply(mandatory(markingDescriptor))
 
-	def render: Mav = Mav("admin/markingdescriptors/delete")
+  def render: Mav = Mav("admin/markingdescriptors/delete")
 
-	@GetMapping
-	def form(@PathVariable department: Department): Mav = render
+  @GetMapping
+  def form(@PathVariable department: Department): Mav = render
 
-	@PostMapping
-	def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
-		if (bindingResult.hasErrors) {
-			render
-		} else {
-			command.apply()
+  @PostMapping
+  def process(@PathVariable department: Department, @Valid @ModelAttribute("command") command: CommandType, bindingResult: BindingResult): Mav = {
+    if (bindingResult.hasErrors) {
+      render
+    } else {
+      command.apply()
 
-			Redirect(s"/admin/department/${department.code}/markingdescriptors")
-		}
-	}
+      Redirect(s"/admin/department/${department.code}/markingdescriptors")
+    }
+  }
 }

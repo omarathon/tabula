@@ -14,11 +14,11 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ManualMembershipWarningJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit =
-		exceptionResolver.reportExceptions {
-			EarlyRequestInfo.wrap() {
-				ManualMembershipWarningCommandWithNotification().apply()
-			}
-		}
+  override def executeInternal(context: JobExecutionContext): Unit =
+    exceptionResolver.reportExceptions {
+      EarlyRequestInfo.wrap() {
+        ManualMembershipWarningCommandWithNotification().apply()
+      }
+    }
 
 }

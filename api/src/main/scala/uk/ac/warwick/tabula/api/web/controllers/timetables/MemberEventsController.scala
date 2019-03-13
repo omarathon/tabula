@@ -20,47 +20,47 @@ import uk.ac.warwick.tabula.{CurrentUser, DateFormats, RequestFailedException}
 import scala.util.{Failure, Success}
 
 object MemberEventsController {
-	type ViewMemberEventsCommand = ViewMemberEventsCommand.TimetableCommand
+  type ViewMemberEventsCommand = ViewMemberEventsCommand.TimetableCommand
 }
 
 @Controller
 @RequestMapping(Array("/v1/member/{member}/timetable/events"))
 class MemberEventsController extends ApiController
-	with GetMemberEventsApi
-	with EventOccurrenceToJsonConverter
-	with AutowiringProfileServiceComponent
+  with GetMemberEventsApi
+  with EventOccurrenceToJsonConverter
+  with AutowiringProfileServiceComponent
 
 trait GetMemberEventsApi {
-	self: ApiController with EventOccurrenceToJsonConverter =>
+  self: ApiController with EventOccurrenceToJsonConverter =>
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("getTimetableCommand")
-	def command(@PathVariable member: Member, currentUser: CurrentUser): ViewMemberEventsCommand =
-		ViewMemberEventsCommand(mandatory(member), currentUser)
+  @ModelAttribute("getTimetableCommand")
+  def command(@PathVariable member: Member, currentUser: CurrentUser): ViewMemberEventsCommand =
+    ViewMemberEventsCommand(mandatory(member), currentUser)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showMemberTimetable(
-		@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberEventsCommand,
-		errors: Errors,
-		@RequestParam(required = false) start: LocalDate,
-		@RequestParam(required = false) end: LocalDate
-	): Mav = {
-		for (from <- Option(start); to <- Option(end)) {
-			command.from = from.toDateTimeAtStartOfDay.getMillis
-			command.to = to.toDateTimeAtStartOfDay.getMillis
-		}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def showMemberTimetable(
+    @Valid @ModelAttribute("getTimetableCommand") command: ViewMemberEventsCommand,
+    errors: Errors,
+    @RequestParam(required = false) start: LocalDate,
+    @RequestParam(required = false) end: LocalDate
+  ): Mav = {
+    for (from <- Option(start); to <- Option(end)) {
+      command.from = from.toDateTimeAtStartOfDay.getMillis
+      command.to = to.toDateTimeAtStartOfDay.getMillis
+    }
 
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else command.apply() match {
-			case Success(result) => Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"events" -> result.events.map(jsonEventOccurrenceObject),
-				"lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
-			)))
-			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
-		}
-	}
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else command.apply() match {
+      case Success(result) => Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "events" -> result.events.map(jsonEventOccurrenceObject),
+        "lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
+      )))
+      case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
+    }
+  }
 }

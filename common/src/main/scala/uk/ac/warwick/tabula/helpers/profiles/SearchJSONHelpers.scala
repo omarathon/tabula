@@ -11,38 +11,40 @@ import scala.collection.JavaConverters._
 
 trait SearchJSONHelpers {
 
-	val formMav: Mav
+  val formMav: Mav
 
-	def toJson(profiles: Seq[Member]): Seq[Map[String, String]] = {
-		def memberToJson(member: Member) = Map[String, String](
-			"name" -> {member.fullName match {
-				case None => "[Unknown user]"
-				case Some(name) => name
-			}},
-			"id" -> member.universityId,
-			"userId" -> member.userId,
-			"description" -> member.description)
+  def toJson(profiles: Seq[Member]): Seq[Map[String, String]] = {
+    def memberToJson(member: Member) = Map[String, String](
+      "name" -> {
+        member.fullName match {
+          case None => "[Unknown user]"
+          case Some(name) => name
+        }
+      },
+      "id" -> member.universityId,
+      "userId" -> member.userId,
+      "description" -> member.description)
 
-		profiles.map(memberToJson(_))
-	}
+    profiles.map(memberToJson(_))
+  }
 
-	def submitJson(cmd: Appliable[Seq[Member]], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			formMav
-		} else {
-			val profilesJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
-			Mav(new JSONView(profilesJson))
-		}
-	}
+  def submitJson(cmd: Appliable[Seq[Member]], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      formMav
+    } else {
+      val profilesJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
+      Mav(new JSONView(profilesJson))
+    }
+  }
 
-	def submit(cmd: Appliable[Seq[Member]], errors: Errors, path: String): Mav = {
-		if (errors.hasErrors) {
-			formMav
-		} else {
-			Mav(path,
-				"results" -> cmd.apply())
-		}
-	}
+  def submit(cmd: Appliable[Seq[Member]], errors: Errors, path: String): Mav = {
+    if (errors.hasErrors) {
+      formMav
+    } else {
+      Mav(path,
+        "results" -> cmd.apply())
+    }
+  }
 
 
 }

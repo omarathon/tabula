@@ -15,44 +15,44 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(value = Array("/ajax/assignmentpicker/query"))
 class AssignmentSearchPickerController extends BaseController {
 
-	@ModelAttribute("command")
-	def command = AssignmentSearchPickerCommand()
+  @ModelAttribute("command")
+  def command = AssignmentSearchPickerCommand()
 
-	@RequestMapping
-	def query(@ModelAttribute("command")cmd: Appliable[Seq[Assignment]]): Mav = {
-		val assignments = cmd.apply()
-		Mav(
-			new JSONView(
-				assignments.map(assignment => Map(
-					"id" -> assignment.id,
-					"name" -> assignment.name,
-					"module" -> assignment.module.code,
-					"department" -> assignment.module.adminDepartment.name,
-					"academicYear" -> assignment.academicYear
-				))
-			)
-		)
-	}
+  @RequestMapping
+  def query(@ModelAttribute("command") cmd: Appliable[Seq[Assignment]]): Mav = {
+    val assignments = cmd.apply()
+    Mav(
+      new JSONView(
+        assignments.map(assignment => Map(
+          "id" -> assignment.id,
+          "name" -> assignment.name,
+          "module" -> assignment.module.code,
+          "department" -> assignment.module.adminDepartment.name,
+          "academicYear" -> assignment.academicYear
+        ))
+      )
+    )
+  }
 
 }
 
 class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 
-	self: AssessmentServiceComponent =>
+  self: AssessmentServiceComponent =>
 
-	var query: String = _
+  var query: String = _
 
-	def applyInternal(): Seq[Assignment] = {
-		if (query.isEmptyOrWhitespace) {
-			Seq()
-		} else {
-			assessmentService.findAssignmentsByNameOrModule(query)
-		}
-	}
+  def applyInternal(): Seq[Assignment] = {
+    if (query.isEmptyOrWhitespace) {
+      Seq()
+    } else {
+      assessmentService.findAssignmentsByNameOrModule(query)
+    }
+  }
 
 }
 
 object AssignmentSearchPickerCommand {
-	def apply() = new AssignmentSearchPickerCommand with Command[Seq[Assignment]] with AutowiringAssessmentServiceComponent
-	with ReadOnly with Unaudited with Public
+  def apply() = new AssignmentSearchPickerCommand with Command[Seq[Assignment]] with AutowiringAssessmentServiceComponent
+    with ReadOnly with Unaudited with Public
 }

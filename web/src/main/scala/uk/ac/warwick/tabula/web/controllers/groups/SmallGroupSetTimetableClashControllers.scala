@@ -14,33 +14,33 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/groups/{smallGroupSet}/timetableclash"))
 class SmallGroupSetTimetableClashController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable smallGroupSet: SmallGroupSet) =
-		SmallGroupSetTimetableClashCommand(mandatory(smallGroupSet))
+  @ModelAttribute("command")
+  def command(@PathVariable smallGroupSet: SmallGroupSet) =
+    SmallGroupSetTimetableClashCommand(mandatory(smallGroupSet))
 
-	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: Appliable[Seq[(SmallGroup, Seq[User])]]): Mav = {
-		val clashInfo = command.apply().map { case(group, users) => (group.id, users.map(user => user.getUserId)) }
-		Mav(new JSONView(Map("students" -> clashInfo)))
-	}
+  @RequestMapping
+  def ajaxList(@ModelAttribute("command") command: Appliable[Seq[(SmallGroup, Seq[User])]]): Mav = {
+    val clashInfo = command.apply().map { case (group, users) => (group.id, users.map(user => user.getUserId)) }
+    Mav(new JSONView(Map("students" -> clashInfo)))
+  }
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/{smallGroupSet}/timetableclashstudentspopup"))
+@RequestMapping(value = Array("/groups/{smallGroupSet}/timetableclashstudentspopup"))
 class ListSmallGroupSetTimetableClashStudentsController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable smallGroupSet: SmallGroupSet): ListSmallGroupSetTimetableClashStudentsCommand.Command =
-		ListSmallGroupSetTimetableClashStudentsCommand(mandatory(smallGroupSet))
+  @ModelAttribute("command")
+  def command(@PathVariable smallGroupSet: SmallGroupSet): ListSmallGroupSetTimetableClashStudentsCommand.Command =
+    ListSmallGroupSetTimetableClashStudentsCommand(mandatory(smallGroupSet))
 
-	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: ListSmallGroupSetTimetableClashStudentsCommand.Command): Mav = {
-		val groups = command.apply()
-		Mav("groups/timetableconflicts_students",
-			"groups" -> groups,
-			"allStudents" -> groups.values.flatten.toSeq
-		).noLayout()
-	}
+  @RequestMapping
+  def ajaxList(@ModelAttribute("command") command: ListSmallGroupSetTimetableClashStudentsCommand.Command): Mav = {
+    val groups = command.apply()
+    Mav("groups/timetableconflicts_students",
+      "groups" -> groups,
+      "allStudents" -> groups.values.flatten.toSeq
+    ).noLayout()
+  }
 }
 
 

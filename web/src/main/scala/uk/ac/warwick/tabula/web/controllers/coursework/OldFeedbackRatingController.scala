@@ -20,32 +20,33 @@ import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.spring.Wire
 
 @RequestMapping(Array("/${cm1.prefix}/module/{module}/{assignment}/rate"))
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 class OldFeedbackRatingController extends OldCourseworkController {
 
-	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
+  var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute def cmd(
-		@PathVariable assignment: Assignment,
-		@PathVariable module: Module,
-		user: CurrentUser) =
-		new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUsercode(assignment, user.userId).filter(_.released)))
+  @ModelAttribute def cmd(
+    @PathVariable assignment: Assignment,
+    @PathVariable module: Module,
+    user: CurrentUser) =
+    new RateFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUsercode(assignment, user.userId).filter(_.released)))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(command: RateFeedbackCommand): Mav =
-		Mav("coursework/submit/rating").noLayoutIf(ajax)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(command: RateFeedbackCommand): Mav =
+    Mav("coursework/submit/rating").noLayoutIf(ajax)
 
-	@RequestMapping(method = Array(POST))
-	def submit(command: RateFeedbackCommand, errors: Errors): Mav = {
-		command.validate(errors)
-		if (errors.hasErrors) {
-			form(command)
-		} else {
-			command.apply()
-			Mav("coursework/submit/rating", "rated" -> true).noLayoutIf(ajax)
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(command: RateFeedbackCommand, errors: Errors): Mav = {
+    command.validate(errors)
+    if (errors.hasErrors) {
+      form(command)
+    } else {
+      command.apply()
+      Mav("coursework/submit/rating", "rated" -> true).noLayoutIf(ajax)
+    }
+  }
 
 }

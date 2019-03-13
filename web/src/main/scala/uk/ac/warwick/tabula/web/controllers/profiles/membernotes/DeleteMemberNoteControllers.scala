@@ -14,15 +14,15 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 abstract class AbstractDeleteMemberNoteController extends ProfilesController {
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[AbstractMemberNote], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			cmd.apply()
-			Mav(new JSONView(Map("status" -> "successful")))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[AbstractMemberNote], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      cmd.apply()
+      Mav(new JSONView(Map("status" -> "successful")))
+    }
+  }
 
 }
 
@@ -30,9 +30,9 @@ abstract class AbstractDeleteMemberNoteController extends ProfilesController {
 @RequestMapping(value = Array("/profiles/{member}/note/{note}/delete"))
 class DeleteMemberNoteController extends AbstractDeleteMemberNoteController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
-		DeleteMemberNoteCommand(note, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
+    DeleteMemberNoteCommand(note, member)
 
 }
 
@@ -40,9 +40,9 @@ class DeleteMemberNoteController extends AbstractDeleteMemberNoteController {
 @RequestMapping(value = Array("/profiles/{member}/circumstances/{circumstances}/delete"))
 class DeleteExtenuatingCircumstancesController extends AbstractDeleteMemberNoteController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
-		DeleteExtenuatingCircumstancesCommand(circumstances, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
+    DeleteExtenuatingCircumstancesCommand(circumstances, member)
 
 }
 
@@ -50,11 +50,11 @@ class DeleteExtenuatingCircumstancesController extends AbstractDeleteMemberNoteC
 @RequestMapping(value = Array("/profiles/{member}/note/{note}/restore"))
 class RestoreMemberNoteController extends AbstractDeleteMemberNoteController {
 
-	showDeletedItems
+  showDeletedItems
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
-		RestoreMemberNoteCommand(note, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
+    RestoreMemberNoteCommand(note, member)
 
 }
 
@@ -62,11 +62,11 @@ class RestoreMemberNoteController extends AbstractDeleteMemberNoteController {
 @RequestMapping(value = Array("/profiles/{member}/circumstances/{circumstances}/restore"))
 class RestoreExtenuatingCircumstancesController extends AbstractDeleteMemberNoteController {
 
-	showDeletedItems
+  showDeletedItems
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
-		RestoreExtenuatingCircumstancesCommand(circumstances, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
+    RestoreExtenuatingCircumstancesCommand(circumstances, member)
 
 }
 
@@ -74,11 +74,11 @@ class RestoreExtenuatingCircumstancesController extends AbstractDeleteMemberNote
 @RequestMapping(value = Array("/profiles/{member}/note/{note}/purge"))
 class PurgeMemberNoteController extends AbstractDeleteMemberNoteController {
 
-	showDeletedItems
+  showDeletedItems
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
-		PurgeMemberNoteCommand(note, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable note: MemberNote) =
+    PurgeMemberNoteCommand(note, member)
 
 }
 
@@ -86,10 +86,10 @@ class PurgeMemberNoteController extends AbstractDeleteMemberNoteController {
 @RequestMapping(value = Array("/profiles/{member}/circumstances/{circumstances}/purge"))
 class PurgeExtenuatingCircumstancesController extends AbstractDeleteMemberNoteController {
 
-	showDeletedItems
+  showDeletedItems
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
-		PurgeExtenuatingCircumstancesCommand(circumstances, member)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
+    PurgeExtenuatingCircumstancesCommand(circumstances, member)
 
 }

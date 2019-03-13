@@ -12,22 +12,22 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @RequestMapping(value = Array("/profiles/department/{department}/{relationshipType}/missing"))
 class MissingStudentRelationshipController extends ProfilesController {
 
-	@ModelAttribute("missingStudentRelationshipCommand")
-	def missingStudentRelationshipCommand(
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType
-	) =	MissingStudentRelationshipsCommand(department, relationshipType)
+  @ModelAttribute("missingStudentRelationshipCommand")
+  def missingStudentRelationshipCommand(
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType
+  ) = MissingStudentRelationshipsCommand(department, relationshipType)
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def view(
-		@PathVariable department: Department,
-		@ModelAttribute("missingStudentRelationshipCommand") missing: Appliable[(Int, Seq[Member])]
-	): Mav = {
-		val (studentCount, missingStudents) = missing.apply()
-		Mav("profiles/relationships/missing_agent_view",
-			"studentCount" -> studentCount,
-			"missingStudents" -> missingStudents,
-			"department" -> department
-		)
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def view(
+    @PathVariable department: Department,
+    @ModelAttribute("missingStudentRelationshipCommand") missing: Appliable[(Int, Seq[Member])]
+  ): Mav = {
+    val (studentCount, missingStudents) = missing.apply()
+    Mav("profiles/relationships/missing_agent_view",
+      "studentCount" -> studentCount,
+      "missingStudents" -> missingStudents,
+      "department" -> department
+    )
+  }
 }

@@ -7,24 +7,25 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
 import uk.ac.warwick.userlookup.User
 
 abstract class ExtensionRequestRespondedNotification(val verbed: String) extends ExtensionNotification
-	with MyWarwickActivity {
+  with MyWarwickActivity {
 
-	def verb = "respond"
+  def verb = "respond"
 
-	def title: String = titlePrefix + "Extension request by %s for \"%s\" was %s".format(student.getFullName, assignment.name, verbed)
+  def title: String = titlePrefix + "Extension request by %s for \"%s\" was %s".format(student.getFullName, assignment.name, verbed)
 
-	def url: String = Routes.admin.assignment.extension(assignment, student)
-	def urlTitle = "review this extension request"
+  def url: String = Routes.admin.assignment.extension(assignment, student)
 
-	def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(
-		"studentName" -> student.getFullName,
-		"agentName" -> agent.getFullName,
-		"verbed" -> verbed,
-		"assignment" -> assignment,
-		"path" ->  url
-	))
+  def urlTitle = "review this extension request"
 
-	def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
+  def content = FreemarkerModel("/WEB-INF/freemarker/emails/responded_extension_request.ftl", Map(
+    "studentName" -> student.getFullName,
+    "agentName" -> agent.getFullName,
+    "verbed" -> verbed,
+    "assignment" -> assignment,
+    "path" -> url
+  ))
+
+  def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
 
 }
 

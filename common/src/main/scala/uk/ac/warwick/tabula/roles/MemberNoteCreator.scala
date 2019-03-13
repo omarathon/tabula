@@ -10,11 +10,11 @@ case class MemberNoteCreator(note: model.AbstractMemberNote) extends BuiltInRole
 
 case object MemberNoteCreatorRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Member Note Creator"
+  override def description = "Member Note Creator"
 
-	GrantsScopedPermission(
-		Permissions.MemberNotes.Update,
-		Permissions.MemberNotes.Delete
-	)
+  GrantsScopedPermission(
+    Permissions.MemberNotes.Update,
+    Permissions.MemberNotes.Delete
+  )
 
 }

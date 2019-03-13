@@ -11,25 +11,28 @@ import uk.ac.warwick.tabula.data.model.{EntityReference, GeneratedId, ToEntityRe
 @DiscriminatorColumn(name = "TRIGGER_TYPE", discriminatorType = DiscriminatorType.STRING)
 abstract class Trigger[A >: Null <: ToEntityReference, B] extends GeneratedId with Serializable with Appliable[B] {
 
-	@Column(name="scheduled_date")
-	@NotNull
-	var scheduledDate: DateTime = null
+  @Column(name = "scheduled_date")
+  @NotNull
+  var scheduledDate: DateTime = null
 
-	@transient private[this] var _target: EntityReference[A] = _
+  @transient private[this] var _target: EntityReference[A] = _
 
-	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
-	def getTarget: EntityReference[A] = _target
-	def target: EntityReference[A] = getTarget
-	def setTarget(target: EntityReference[A]): Unit = _target = target
-	def target_=(target: EntityReference[A]): Unit = setTarget(target)
+  @Access(value = AccessType.PROPERTY)
+  @OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
+  def getTarget: EntityReference[A] = _target
 
-	@Column(name="completed_date")
-	var completedDate: DateTime = null
+  def target: EntityReference[A] = getTarget
 
-	def updateTarget(targetEntity: ToEntityReference): Unit = {
-		target = Option(targetEntity).map { e =>
-			e.toEntityReference.asInstanceOf[EntityReference[A]]
-		}.orNull
-	}
+  def setTarget(target: EntityReference[A]): Unit = _target = target
+
+  def target_=(target: EntityReference[A]): Unit = setTarget(target)
+
+  @Column(name = "completed_date")
+  var completedDate: DateTime = null
+
+  def updateTarget(targetEntity: ToEntityReference): Unit = {
+    target = Option(targetEntity).map { e =>
+      e.toEntityReference.asInstanceOf[EntityReference[A]]
+    }.orNull
+  }
 }

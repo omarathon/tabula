@@ -10,97 +10,103 @@ import org.springframework.validation.BindException
 
 class DisplaySettingsControllerTest extends TestBase with Mockito {
 
-	val controller = new DisplaySettingsController
-	controller.relationshipService = mock[RelationshipService]
+  val controller = new DisplaySettingsController
+  controller.relationshipService = mock[RelationshipService]
 
-	@Test def createsCommand {
-		val department = Fixtures.department("in")
+  @Test def createsCommand {
+    val department = Fixtures.department("in")
 
-		val command = controller.displaySettingsCommand(department)
+    val command = controller.displaySettingsCommand(department)
 
-		command should be (anInstanceOf[Appliable[Department]])
-		command should be (anInstanceOf[PopulateOnForm])
-	}
+    command should be(anInstanceOf[Appliable[Department]])
+    command should be(anInstanceOf[PopulateOnForm])
+  }
 
-	@Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
-		controller.displaySettingsCommand(null)
-	}
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+    controller.displaySettingsCommand(null)
+  }
 
-	@Test def form {
-		val department = Fixtures.department("in")
+  @Test def form {
+    val department = Fixtures.department("in")
 
-		var populateCalledCount = 0
-		val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-			val permissionsService = null
-			def populate() {
-				populateCalledCount += 1
-			}
-			def apply(): Null = {
-				fail("Should not be called")
-				null
-			}
-		}
+    var populateCalledCount = 0
+    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
+      val permissionsService = null
 
-		val mav = controller.initialView(department, command)
-		mav.viewName should be ("admin/display-settings")
-		mav.toModel("department") should be (department)
-		mav.toModel("returnTo") should be ("")
+      def populate() {
+        populateCalledCount += 1
+      }
 
-		populateCalledCount should be (1)
-	}
+      def apply(): Null = {
+        fail("Should not be called")
+        null
+      }
+    }
 
-	@Test def submit {
-		val department = Fixtures.department("in")
+    val mav = controller.initialView(department, command)
+    mav.viewName should be("admin/display-settings")
+    mav.toModel("department") should be(department)
+    mav.toModel("returnTo") should be("")
 
-		var populateCalledCount = 0
-		var applyCalledCount = 0
-		val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-			val permissionsService = null
-			def populate() {
-				populateCalledCount += 1
-			}
-			def apply(): Department = {
-				applyCalledCount += 1
-				department
-			}
-		}
+    populateCalledCount should be(1)
+  }
 
-		val errors = new BindException(command, "command")
+  @Test def submit {
+    val department = Fixtures.department("in")
 
-		val mav = controller.saveSettings(command, errors, department)
-		mav.viewName should be (s"redirect:${Routes.admin.department(department)}")
-		mav.toModel should be ('empty)
+    var populateCalledCount = 0
+    var applyCalledCount = 0
+    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
+      val permissionsService = null
 
-		populateCalledCount should be (0)
-		applyCalledCount should be (1)
-	}
+      def populate() {
+        populateCalledCount += 1
+      }
 
-	@Test def submitValidationErrors {
-		val department = Fixtures.department("in")
+      def apply(): Department = {
+        applyCalledCount += 1
+        department
+      }
+    }
 
-		var populateCalledCount = 0
-		var applyCalledCount = 0
-		val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
-			val permissionsService = null
-			def populate() {
-				populateCalledCount += 1
-			}
-			def apply(): Department = {
-				applyCalledCount += 1
-				department
-			}
-		}
+    val errors = new BindException(command, "command")
 
-		val errors = new BindException(command, "command")
-		errors.reject("fail")
+    val mav = controller.saveSettings(command, errors, department)
+    mav.viewName should be(s"redirect:${Routes.admin.department(department)}")
+    mav.toModel should be('empty)
 
-		val mav = controller.saveSettings(command, errors, department)
-		mav.viewName should be ("admin/display-settings")
-		mav.toModel("department") should be (department)
-		mav.toModel("returnTo") should be ("")
+    populateCalledCount should be(0)
+    applyCalledCount should be(1)
+  }
 
-		populateCalledCount should be (0)
-		applyCalledCount should be (0)
-	}
+  @Test def submitValidationErrors {
+    val department = Fixtures.department("in")
+
+    var populateCalledCount = 0
+    var applyCalledCount = 0
+    val command = new Appliable[Department] with PopulateOnForm with PermissionsServiceComponent {
+      val permissionsService = null
+
+      def populate() {
+        populateCalledCount += 1
+      }
+
+      def apply(): Department = {
+        applyCalledCount += 1
+        department
+      }
+    }
+
+    val errors = new BindException(command, "command")
+    errors.reject("fail")
+
+    val mav = controller.saveSettings(command, errors, department)
+    mav.viewName should be("admin/display-settings")
+    mav.toModel("department") should be(department)
+    mav.toModel("returnTo") should be("")
+
+    populateCalledCount should be(0)
+    applyCalledCount should be(0)
+  }
 
 }

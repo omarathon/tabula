@@ -3,7 +3,7 @@ import fs from 'fs';
 import EventEmitter from 'events';
 import WebpackNotifierPlugin from 'webpack-notifier';
 import RemovePlugin from 'remove-files-webpack-plugin';
-import { ProvidePlugin } from 'webpack';
+import {ProvidePlugin} from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
 
@@ -99,7 +99,7 @@ const commonConfig = merge([
           ],
         },
       }),
-      new MomentLocalesPlugin({ localesToKeep: ['en-gb'] }),
+      new MomentLocalesPlugin({localesToKeep: ['en-gb']}),
     ],
     resolve: {
       alias: {
@@ -189,13 +189,13 @@ const developmentConfig = merge([
     mode: 'development',
     plugins: [
       new WebpackNotifierPlugin(),
-      new WatchEventsPlugin({ emitter: new EventEmitter() }),
+      new WatchEventsPlugin({emitter: new EventEmitter()}),
     ],
   },
   tooling.generateSourceMaps('cheap-module-source-map'),
 ]);
 
-module.exports = ({ production } = {}) => {
+module.exports = ({production} = {}) => {
   if (production) {
     return merge(commonConfig, productionConfig);
   } else {

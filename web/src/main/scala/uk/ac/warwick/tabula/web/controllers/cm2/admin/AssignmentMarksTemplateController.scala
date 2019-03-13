@@ -16,42 +16,42 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marks-template"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marks-template"))
 class AssignmentMarksTemplateController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) = GenerateMarksTemplateCommand(mandatory(assignment))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment) = GenerateMarksTemplateCommand(mandatory(assignment))
 
-	@RequestMapping
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
-		new ExcelView(MarksTemplateCommand.safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+    new ExcelView(MarksTemplateCommand.safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
+  }
 }
 
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks-template"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks-template"))
 class AssignmentMarkerMarksTemplateController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User) =
-		GenerateOwnMarksTemplateCommand(mandatory(assignment), mandatory(marker))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable marker: User) =
+    GenerateOwnMarksTemplateCommand(mandatory(assignment), mandatory(marker))
 
-	@RequestMapping
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
-		new ExcelView(MarksTemplateCommand.safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+    new ExcelView(MarksTemplateCommand.safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
+  }
 }
 
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks-template"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks-template"))
 class AssignmentCurrentMarkerMarksTemplateController extends CourseworkController {
 
-	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
-		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
-	}
+  @RequestMapping
+  def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
+  }
 }

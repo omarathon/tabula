@@ -13,29 +13,29 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 abstract class AbstractManageMemberNoteController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	protected def viewPrefix: String
+  protected def viewPrefix: String
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[AbstractMemberNote] with PopulateOnForm): Mav = {
-		cmd.populate()
-		render(cmd)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: Appliable[AbstractMemberNote] with PopulateOnForm): Mav = {
+    cmd.populate()
+    render(cmd)
+  }
 
-	private def render(cmd: Appliable[AbstractMemberNote]) = {
-		Mav(s"profiles/membernote/${viewPrefix}_form").noNavigation()
-	}
+  private def render(cmd: Appliable[AbstractMemberNote]) = {
+    Mav(s"profiles/membernote/${viewPrefix}_form").noNavigation()
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[AbstractMemberNote], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			render(cmd)
-		} else {
-			cmd.apply()
-			Mav(s"profiles/membernote/${viewPrefix}_form", "memberNoteSuccess" -> true).noNavigation()
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[AbstractMemberNote], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      render(cmd)
+    } else {
+      cmd.apply()
+      Mav(s"profiles/membernote/${viewPrefix}_form", "memberNoteSuccess" -> true).noNavigation()
+    }
+  }
 
 }
 
@@ -43,11 +43,11 @@ abstract class AbstractManageMemberNoteController extends ProfilesController {
 @RequestMapping(Array("/profiles/{member}/note/add"))
 class CreateMemberNoteController extends AbstractManageMemberNoteController {
 
-	@ModelAttribute("command")
-	def createCommand(@PathVariable member: Member) =
-		CreateMemberNoteCommand(member, user)
+  @ModelAttribute("command")
+  def createCommand(@PathVariable member: Member) =
+    CreateMemberNoteCommand(member, user)
 
-	override protected val viewPrefix: String = "membernote"
+  override protected val viewPrefix: String = "membernote"
 
 }
 
@@ -55,11 +55,11 @@ class CreateMemberNoteController extends AbstractManageMemberNoteController {
 @RequestMapping(Array("/profiles/{member}/circumstances/add"))
 class CreateExtenuatingCircumstancesController extends AbstractManageMemberNoteController {
 
-	@ModelAttribute("command")
-	def createCommand(@PathVariable member: Member) =
-		CreateExtenuatingCircumstancesCommand(member, user)
+  @ModelAttribute("command")
+  def createCommand(@PathVariable member: Member) =
+    CreateExtenuatingCircumstancesCommand(member, user)
 
-	override protected val viewPrefix: String = "circumstances"
+  override protected val viewPrefix: String = "circumstances"
 
 }
 
@@ -67,11 +67,11 @@ class CreateExtenuatingCircumstancesController extends AbstractManageMemberNoteC
 @RequestMapping(value = Array("/profiles/{member}/note/{memberNote}/edit"))
 class EditMemberNoteController extends AbstractManageMemberNoteController {
 
-	@ModelAttribute("command")
-	def editCommand(@PathVariable member: Member, @PathVariable memberNote: MemberNote) =
-		EditMemberNoteCommand(memberNote)
+  @ModelAttribute("command")
+  def editCommand(@PathVariable member: Member, @PathVariable memberNote: MemberNote) =
+    EditMemberNoteCommand(memberNote)
 
-	override protected val viewPrefix: String = "membernote"
+  override protected val viewPrefix: String = "membernote"
 
 }
 
@@ -79,11 +79,11 @@ class EditMemberNoteController extends AbstractManageMemberNoteController {
 @RequestMapping(value = Array("/profiles/{member}/circumstances/{circumstances}/edit"))
 class EditExtenuatingCircumstancesController extends AbstractManageMemberNoteController {
 
-	@ModelAttribute("command")
-	def editCommand(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
-		EditExtenuatingCircumstancesCommand(circumstances)
+  @ModelAttribute("command")
+  def editCommand(@PathVariable member: Member, @PathVariable circumstances: ExtenuatingCircumstances) =
+    EditExtenuatingCircumstancesCommand(circumstances)
 
-	override protected val viewPrefix: String = "circumstances"
+  override protected val viewPrefix: String = "circumstances"
 
 }
 

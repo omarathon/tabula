@@ -7,167 +7,179 @@ import scala.collection.JavaConverters._
 
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
-	//check to see how many template files are currently showing on screen
-	def currentCount() = {
-		if (id("feedback-template-list").findElement.isEmpty) 0
-		else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
-	}
+  //check to see how many template files are currently showing on screen
+  def currentCount() = {
+    if (id("feedback-template-list").findElement.isEmpty) 0
+    else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
+  }
 
-		"Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
-			click on linkText("Test Services")
+  "Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
+    click on linkText("Test Services")
 
-			def openFeedbackTemplates() = {
-				click on (partialLinkText("Feedback"))
+    def openFeedbackTemplates() = {
+      click on (partialLinkText("Feedback"))
 
-				val feedbackTemplatesLink = id("main").webElement.findElement(By.linkText("Feedback templates"))
-				eventually {
-					feedbackTemplatesLink.isDisplayed should be (true)
-				}
-				click on (feedbackTemplatesLink)
-			}
+      val feedbackTemplatesLink = id("main").webElement.findElement(By.linkText("Feedback templates"))
+      eventually {
+        feedbackTemplatesLink.isDisplayed should be(true)
+      }
+      click on (feedbackTemplatesLink)
+    }
 
-			Then("I should be able to open feedback templates page")
-			openFeedbackTemplates()
+    Then("I should be able to open feedback templates page")
+    openFeedbackTemplates()
 
-			var currCnt = currentCount()
+    var currCnt = currentCount()
 
-			def uploadNewTemplate(file: String) {
-				val currentCount =
-					if (id("feedback-template-list").findElement.isEmpty) 0
-					else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
+    def uploadNewTemplate(file: String) {
+      val currentCount =
+        if (id("feedback-template-list").findElement.isEmpty) 0
+        else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
 
-				click on id("file.upload")
-				pressKeys(getClass.getResource(file).getFile)
+      click on id("file.upload")
+      pressKeys(getClass.getResource(file).getFile)
 
-				click on cssSelector(".btn-primary")
+      click on cssSelector(".btn-primary")
 
-				eventually {
+      eventually {
 
-					// We make sure that we haven't left the page
-					currentUrl should endWith ("/settings/feedback-templates/")
+        // We make sure that we haven't left the page
+        currentUrl should endWith("/settings/feedback-templates/")
 
-					// Check that we have one more row in the feedback template list
-					id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (currentCount + 1)
+        // Check that we have one more row in the feedback template list
+        id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(currentCount + 1)
 
-				}
-			}
+      }
+    }
 
-			Then("I should be able to upload a new template")
-			uploadNewTemplate("/file1.txt")
-			currCnt = currentCount()
+    Then("I should be able to upload a new template")
+    uploadNewTemplate("/file1.txt")
+    currCnt = currentCount()
 
-			And("a row should be displayed for the new template")
-			currCnt should be (1)
+    And("a row should be displayed for the new template")
+    currCnt should be(1)
 
-			Then("I should be able to upload a second template")
-			// Just so we have two to work with, let's upload a second file as well
-			uploadNewTemplate("/file2.txt")
-			currCnt = currentCount()
+    Then("I should be able to upload a second template")
+    // Just so we have two to work with, let's upload a second file as well
+    uploadNewTemplate("/file2.txt")
+    currCnt = currentCount()
 
-			And("a row should be displayed for the new template")
-			currCnt should be (2)
+    And("a row should be displayed for the new template")
+    currCnt should be(2)
 
-			def downloadTemplate(file: String): Unit = {
+    def downloadTemplate(file: String): Unit = {
 
-				val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-				val row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == file })
-				row should be (defined)
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == file
+      })
+      row should be(defined)
 
-				val providedFileUrl: String = row.get.findElement(By.cssSelector(".btn-primary")).getAttribute("href")
-				providedFileUrl should endWith(file)
+      val providedFileUrl: String = row.get.findElement(By.cssSelector(".btn-primary")).getAttribute("href")
+      providedFileUrl should endWith(file)
 
-				eventually {
+      eventually {
 
-					// make sure that we haven't left the page
-					currentUrl should endWith("/settings/feedback-templates/")
+        // make sure that we haven't left the page
+        currentUrl should endWith("/settings/feedback-templates/")
 
-				}
-			}
+      }
+    }
 
-			Then("I should be able to download the first template")
-			downloadTemplate("file1.txt")
-			currCnt = currentCount()
+    Then("I should be able to download the first template")
+    downloadTemplate("file1.txt")
+    currCnt = currentCount()
 
-			And("count should still be the same")
-			currCnt should be (2)
+    And("count should still be the same")
+    currCnt should be(2)
 
-			// Edit template 1. The rows actually appear in db insert order, so we need to find the right row first
-			def editTemplate(file: String): Unit = {
-				val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-				val row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == file })
+    // Edit template 1. The rows actually appear in db insert order, so we need to find the right row first
+    def editTemplate(file: String): Unit = {
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == file
+      })
 
-				click on (row.get.findElement(By.partialLinkText("Edit")))
+      click on (row.get.findElement(By.partialLinkText("Edit")))
 
-				eventually {
-					find("feedback-template-model") map { _.isDisplayed } should be (Some(true))
+      eventually {
+        find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
-					val ifr = find(cssSelector(".modal-body iframe"))
-					ifr map { _.isDisplayed } should be (Some(true))
-				}
+        val ifr = find(cssSelector(".modal-body iframe"))
+        ifr.map(_.isDisplayed) should be(Some(true))
+      }
 
-				switch to frame(find(cssSelector(".modal-body iframe")).get)
+      switch to frame(find(cssSelector(".modal-body iframe")).get)
 
-				// Set a name and description TODO check update
-				textField("name").value = "extension template"
-				textArea("description").value = "my extension template"
-				submit
+      // Set a name and description TODO check update
+      textField("name").value = "extension template"
+      textArea("description").value = "my extension template"
+      submit
 
-				switch to defaultContent
-			}
-			Then("I should be able to edit the first template")
-			editTemplate("file1.txt")
+      switch to defaultContent
+    }
 
-			And("Values should have been updated")
-			var tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-			var row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == "extension template" })
-			val file1names = row.map(_.findElements(By.tagName("td")).asScala).getOrElse(Seq()).map(_.getText).toSet
-			file1names should be (Set("extension template", "my extension template", "None", "Download Edit Delete"))
+    Then("I should be able to edit the first template")
+    editTemplate("file1.txt")
 
-			var beforeDelete = currentCount()
+    And("Values should have been updated")
+    var tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+    var row = tbody.findElements(By.tagName("tr")).asScala.find({
+      _.findElement(By.tagName("td")).getText == "extension template"
+    })
+    val file1names = row.map(_.findElements(By.tagName("td")).asScala).getOrElse(Seq()).map(_.getText).toSet
+    file1names should be(Set("extension template", "my extension template", "None", "Download Edit Delete"))
 
-			// This works, but it doesn't reload the page automatically properly. Do it manually
-			reloadPage
+    var beforeDelete = currentCount()
 
-			And("The second template should not have changed")
-			tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-			row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == "file2.txt" })
-			val file2names = row.map(_.findElements(By.tagName("td")).asScala).getOrElse(Seq()).map(_.getText).toSet
-			file2names should be (Set("file2.txt", "", "None", "Download Edit Delete"))
-			currCnt = currentCount()
+    // This works, but it doesn't reload the page automatically properly. Do it manually
+    reloadPage
 
-			And("count should still be the same")
-			currCnt should be (2)
+    And("The second template should not have changed")
+    tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+    row = tbody.findElements(By.tagName("tr")).asScala.find({
+      _.findElement(By.tagName("td")).getText == "file2.txt"
+    })
+    val file2names = row.map(_.findElements(By.tagName("td")).asScala).getOrElse(Seq()).map(_.getText).toSet
+    file2names should be(Set("file2.txt", "", "None", "Download Edit Delete"))
+    currCnt = currentCount()
 
-			// Delete the file2.txt template
-			def deleteFile(file: String): Unit = {
-				val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-				val row = tbody.findElements(By.tagName("tr")).asScala.find({ _.findElement(By.tagName("td")).getText == file })
-				row should be ('defined)
+    And("count should still be the same")
+    currCnt should be(2)
 
-				click on (row.get.findElement(By.partialLinkText("Delete")))
-			}
-			Then("I should be able to delete the second file")
-			deleteFile("file2.txt")
+    // Delete the file2.txt template
+    def deleteFile(file: String): Unit = {
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == file
+      })
+      row should be('defined)
 
-			eventually {
-				find("feedback-template-model") map { _.isDisplayed } should be (Some(true))
+      click on (row.get.findElement(By.partialLinkText("Delete")))
+    }
 
-				val ifr = find(cssSelector(".modal-body iframe"))
-				ifr map { _.isDisplayed } should be (Some(true))
-			}
+    Then("I should be able to delete the second file")
+    deleteFile("file2.txt")
 
-			val iframe = frame(find(cssSelector(".modal-body iframe")).get)
-			switch to iframe
-			eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be {true})
+    eventually {
+      find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
-			executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
+      val ifr = find(cssSelector(".modal-body iframe"))
+      ifr.map(_.isDisplayed) should be(Some(true))
+    }
 
-			switch to defaultContent
+    val iframe = frame(find(cssSelector(".modal-body iframe")).get)
+    switch to iframe
+    eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be (true))
 
-			// This works, but it doesn't reload the page automatically properly. Do it manually
-			reloadPage
+    executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
 
-			And("File should have been deleted so count should be 1 less")
-			eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (currCnt-1))
-	}
+    switch to defaultContent
+
+    // This works, but it doesn't reload the page automatically properly. Do it manually
+    reloadPage
+
+    And("File should have been deleted so count should be 1 less")
+    eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(currCnt - 1))
+  }
 }

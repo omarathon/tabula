@@ -26,548 +26,621 @@ import scala.xml.NodeSeq
 
 case class DepartmentWithManualUsers(department: String, assignments: Int, smallGroupSets: Int)
 
-@Entity @Access(AccessType.FIELD)
+@Entity
+@Access(AccessType.FIELD)
 class Department extends GeneratedId
-	with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference with Logging{
+  with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference with Logging {
 
-	import Department._
+  import Department._
 
-	type Entity = Department
+  type Entity = Department
 
-	@Column(unique = true)
-	var code: String = _
+  @Column(unique = true)
+  var code: String = _
 
-	@Column(name = "name")
-	var fullName: String = _
+  @Column(name = "name")
+  var fullName: String = _
 
-	def name: String = shortName.maybeText.getOrElse(fullName)
+  def name: String = shortName.maybeText.getOrElse(fullName)
 
-	var shortName: String = _
+  var shortName: String = _
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
-	@BatchSize(size=200)
-	var children:JSet[Department] = JHashSet()
+  @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)
+  @BatchSize(size = 200)
+  var children: JSet[Department] = JHashSet()
 
-	// returns a list containing this department and all departments that are descendants of this department
-	def descendants: List[Department] = {
-		def getDescendantsDepts(department: Department): List[Department] = {
-			if (department.children.asScala.isEmpty) List(department)
-			else department :: department.children.asScala.toList.flatMap(d => getDescendantsDepts(d))
-		}
-		getDescendantsDepts(this)
-	}
+  // returns a list containing this department and all departments that are descendants of this department
+  def descendants: List[Department] = {
+    def getDescendantsDepts(department: Department): List[Department] = {
+      if (department.children.asScala.isEmpty) List(department)
+      else department :: department.children.asScala.toList.flatMap(d => getDescendantsDepts(d))
+    }
 
-	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent: Department = _
+    getDescendantsDepts(this)
+  }
 
-	// No orphanRemoval as it makes it difficult to move modules between Departments.
-	@OneToMany(mappedBy="adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
-	@BatchSize(size=200)
-	var modules: JList[Module] = JArrayList()
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  var parent: Department = _
 
-	@OneToMany(mappedBy="adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
-	@BatchSize(size=200)
-	var routes:JList[Route] = JArrayList()
+  // No orphanRemoval as it makes it difficult to move modules between Departments.
+  @OneToMany(mappedBy = "adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+  @BatchSize(size = 200)
+  var modules: JList[Module] = JArrayList()
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var moduleTeachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
+  @OneToMany(mappedBy = "adminDepartment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+  @BatchSize(size = 200)
+  var routes: JList[Route] = JArrayList()
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var routeTeachingInfo: JSet[RouteTeachingInformation] = JHashSet()
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var moduleTeachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var feedbackTemplates: JList[FeedbackTemplate] = JArrayList()
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var routeTeachingInfo: JSet[RouteTeachingInformation] = JHashSet()
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	private val _markingWorkflows: JSet[MarkingWorkflow] = JHashSet()
-	def markingWorkflows: Seq[MarkingWorkflow] = _markingWorkflows.asScala.toSeq.sorted
-	def addMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.add(markingWorkflow)
-	def removeMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.remove(markingWorkflow)
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var feedbackTemplates: JList[FeedbackTemplate] = JArrayList()
+
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  private val _markingWorkflows: JSet[MarkingWorkflow] = JHashSet()
+
+  def markingWorkflows: Seq[MarkingWorkflow] = _markingWorkflows.asScala.toSeq.sorted
+
+  def addMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.add(markingWorkflow)
+
+  def removeMarkingWorkflow(markingWorkflow: MarkingWorkflow): Boolean = _markingWorkflows.remove(markingWorkflow)
 
 
-	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	private val _cm2MarkingWorkflows: JSet[CM2MarkingWorkflow] = JHashSet()
-	def cm2MarkingWorkflows: Seq[CM2MarkingWorkflow] = _cm2MarkingWorkflows.asScala.toSeq.sorted
-	def addCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.add(markingWorkflow)
-	def removeCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.remove(markingWorkflow)
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  private val _cm2MarkingWorkflows: JSet[CM2MarkingWorkflow] = JHashSet()
 
-	// TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
-	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
-	@BatchSize(size=200)
-	var customRoleDefinitions: JList[CustomRoleDefinition] = JArrayList()
+  def cm2MarkingWorkflows: Seq[CM2MarkingWorkflow] = _cm2MarkingWorkflows.asScala.toSeq.sorted
 
-	def collectFeedbackRatings: Boolean = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse false
-	def collectFeedbackRatings_= (collect: Boolean): Unit = settings += (Settings.CollectFeedbackRatings -> collect)
+  def addCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.add(markingWorkflow)
 
-	// settings for extension requests
-	def allowExtensionRequests: Boolean = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse false
-	def allowExtensionRequests_= (allow: Boolean): Unit = settings += (Settings.AllowExtensionRequests -> allow)
+  def removeCM2MarkingWorkflow(markingWorkflow: CM2MarkingWorkflow): Boolean = _cm2MarkingWorkflows.remove(markingWorkflow)
 
-	def extensionGuidelineSummary: String = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
-	def extensionGuidelineSummary_= (summary: String): Unit = settings += (Settings.ExtensionGuidelineSummary -> summary)
+  // TAB-2388 Disable orphanRemoval as Module Managers were unintentionally being removed in certain circumstances
+  @OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+  @BatchSize(size = 200)
+  var customRoleDefinitions: JList[CustomRoleDefinition] = JArrayList()
 
-	def extensionGuidelineLink: String = getStringSetting(Settings.ExtensionGuidelineLink).orNull
-	def extensionGuidelineLink_= (link: String): Unit = settings += (Settings.ExtensionGuidelineLink -> link)
+  def collectFeedbackRatings: Boolean = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse false
 
-	def showStudentName: Boolean = getBooleanSetting(Settings.ShowStudentName) getOrElse false
-	def showStudentName_= (showName: Boolean): Unit = settings += (Settings.ShowStudentName -> showName)
+  def collectFeedbackRatings_=(collect: Boolean): Unit = settings += (Settings.CollectFeedbackRatings -> collect)
 
-	def plagiarismDetectionEnabled: Boolean = getBooleanSetting(Settings.PlagiarismDetection, default = true)
-	def plagiarismDetectionEnabled_= (enabled: Boolean): Unit = settings += (Settings.PlagiarismDetection -> enabled)
+  // settings for extension requests
+  def allowExtensionRequests: Boolean = getBooleanSetting(Settings.AllowExtensionRequests) getOrElse false
 
-	def turnitinExcludeBibliography: Boolean = getBooleanSetting(Settings.TurnitinExcludeBibliography, default = true)
-	def turnitinExcludeBibliography_= (exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeBibliography -> exclude)
+  def allowExtensionRequests_=(allow: Boolean): Unit = settings += (Settings.AllowExtensionRequests -> allow)
 
-	def turnitinExcludeQuotations: Boolean = getBooleanSetting(Settings.TurnitinExcludeQuotations, default = true)
-	def turnitinExcludeQuotations_= (exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeQuotations -> exclude)
+  def extensionGuidelineSummary: String = getStringSetting(Settings.ExtensionGuidelineSummary).orNull
 
-	def turnitinSmallMatchWordLimit: Int = getIntSetting(Settings.TurnitinSmallMatchWordLimit, 0)
-	def turnitinSmallMatchWordLimit_= (limit: Int): Unit = settings += (Settings.TurnitinSmallMatchWordLimit -> limit)
+  def extensionGuidelineSummary_=(summary: String): Unit = settings += (Settings.ExtensionGuidelineSummary -> summary)
 
-	def turnitinSmallMatchPercentageLimit: Int = getIntSetting(Settings.TurnitinSmallMatchPercentageLimit, 0)
-	def turnitinSmallMatchPercentageLimit_= (limit: Int): Unit = settings += (Settings.TurnitinSmallMatchPercentageLimit -> limit)
+  def extensionGuidelineLink: String = getStringSetting(Settings.ExtensionGuidelineLink).orNull
 
-	def assignmentInfoView: String = getStringSetting(Settings.AssignmentInfoView) getOrElse Assignment.Settings.InfoViewType.Default
-	def assignmentInfoView_= (setting: String): Unit = settings += (Settings.AssignmentInfoView -> setting)
+  def extensionGuidelineLink_=(link: String): Unit = settings += (Settings.ExtensionGuidelineLink -> link)
 
-	def autoGroupDeregistration: Boolean = getBooleanSetting(Settings.AutoGroupDeregistration, default = true)
-	def autoGroupDeregistration_=(dereg: Boolean) { settings += (Settings.AutoGroupDeregistration -> dereg) }
+  def showStudentName: Boolean = getBooleanSetting(Settings.ShowStudentName) getOrElse false
 
-	def studentsCanScheduleMeetings: Boolean = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
-	def studentsCanScheduleMeetings_=(canDo: Boolean) { settings += (Settings.StudentsCanScheduleMeetings -> canDo) }
+  def showStudentName_=(showName: Boolean): Unit = settings += (Settings.ShowStudentName -> showName)
 
-	def uploadCourseworkMarksToSits: Boolean = getBooleanSetting(Settings.UploadCourseworkMarksToSits, default = false)
-	def uploadCourseworkMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadCourseworkMarksToSits -> enabled) }
+  def plagiarismDetectionEnabled: Boolean = getBooleanSetting(Settings.PlagiarismDetection, default = true)
 
-	def uploadExamMarksToSits: Boolean = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
-	def uploadExamMarksToSits_=(enabled: Boolean) { settings += (Settings.UploadExamMarksToSits -> enabled) }
+  def plagiarismDetectionEnabled_=(enabled: Boolean): Unit = settings += (Settings.PlagiarismDetection -> enabled)
 
-	def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
-	def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
+  def turnitinExcludeBibliography: Boolean = getBooleanSetting(Settings.TurnitinExcludeBibliography, default = true)
 
-	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean =
-		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
-			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
-			false
-		} else canUploadMarksToSitsForYear(year, module.degreeType)
+  def turnitinExcludeBibliography_=(exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeBibliography -> exclude)
 
-	def canUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType): Boolean = {
-		// marks are uploadable until a department is explicitly closed for the year by the Exams Office
-		def canUploadForYear(markUploadMap: Option[Map[String, String]]): Boolean = markUploadMap match {
-			case None => true // there isn't even a settings map at all for this so hasn't been closed yet for the year
-			case Some(markMap: Map[String, String]) =>
-				markMap.get(year.toString) match {
-					case None => true // no setting for this year/ugpg combo for the department - so hasn't been closed yet for the year
-					case Some(booleanStringValue: String) => booleanStringValue.toBoolean
-				}
-		}
+  def turnitinExcludeQuotations: Boolean = getBooleanSetting(Settings.TurnitinExcludeQuotations, default = true)
 
-		degreeType match {
-			case DegreeType.Undergraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg))
-			case DegreeType.Postgraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg))
-			case _ =>
-				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
-				false
-		}
-	}
+  def turnitinExcludeQuotations_=(exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeQuotations -> exclude)
 
-	def setUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType, canUpload: Boolean): Unit = {
-		val (markUploadMap, mapKey) = degreeType match {
-			case DegreeType.Undergraduate => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg), Settings.CanUploadMarksToSitsForYearUg)
-			case DegreeType.Postgraduate => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg), Settings.CanUploadMarksToSitsForYearPg)
-			case _ => throw new IllegalStateException("setUploadMarksToSitsForYear called with invalid degreeType")
-		}
+  def turnitinSmallMatchWordLimit: Int = getIntSetting(Settings.TurnitinSmallMatchWordLimit, 0)
 
-		val markMap = markUploadMap.getOrElse(new collection.mutable.HashMap[String, String]())
+  def turnitinSmallMatchWordLimit_=(limit: Int): Unit = settings += (Settings.TurnitinSmallMatchWordLimit -> limit)
 
-		settings += (mapKey -> (markMap + (year.toString -> canUpload.toString)))
-	}
+  def turnitinSmallMatchPercentageLimit: Int = getIntSetting(Settings.TurnitinSmallMatchPercentageLimit, 0)
 
-	def getStudentRelationshipSource(relationshipType: StudentRelationshipType): StudentRelationshipSource =
-		getStringMapSetting(Settings.StudentRelationshipSource)
-			.flatMap {
-			_.get(relationshipType.id)
-		}.fold(relationshipType.defaultSource)(StudentRelationshipSource.fromCode)
+  def turnitinSmallMatchPercentageLimit_=(limit: Int): Unit = settings += (Settings.TurnitinSmallMatchPercentageLimit -> limit)
 
-	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource): Unit = {
-		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
-		val newMap = map + (relationshipType.id -> source.dbValue)
+  def assignmentInfoView: String = getStringSetting(Settings.AssignmentInfoView) getOrElse Assignment.Settings.InfoViewType.Default
 
-		settings += (Settings.StudentRelationshipSource -> newMap)
-	}
+  def assignmentInfoView_=(setting: String): Unit = settings += (Settings.AssignmentInfoView -> setting)
 
-	def studentRelationshipSource: Map[String, String] = getStringMapSetting(Settings.StudentRelationshipSource) getOrElse Map()
-	def studentRelationshipSource_= (setting: Map[String, String]): Unit = settings += (Settings.StudentRelationshipSource -> setting)
+  def autoGroupDeregistration: Boolean = getBooleanSetting(Settings.AutoGroupDeregistration, default = true)
 
-	def studentRelationshipDisplayed: Map[String, String] = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse Map()
-	def studentRelationshipDisplayed_= (setting: Map[String, String]): Unit = settings += (Settings.StudentRelationshipDisplayed -> setting)
+  def autoGroupDeregistration_=(dereg: Boolean) {
+    settings += (Settings.AutoGroupDeregistration -> dereg)
+  }
 
-	def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
-		studentRelationshipDisplayed
-			.get(relationshipType.id).fold(relationshipType.defaultDisplay)(_.toBoolean)
+  def studentsCanScheduleMeetings: Boolean = getBooleanSetting(Settings.StudentsCanScheduleMeetings, default = true)
 
-	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean): Unit = {
-		studentRelationshipDisplayed = studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString)
-	}
+  def studentsCanScheduleMeetings_=(canDo: Boolean) {
+    settings += (Settings.StudentsCanScheduleMeetings -> canDo)
+  }
 
-	def getStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType): Option[Boolean] =
-		getStringMapSetting(Settings.StudentRelationshipExpected).flatMap(_.get(s"${relationshipType.id}-${courseType.code}").map(_.toBoolean))
-	def setStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType, isExpected: Boolean): Unit =
-		settings += (Settings.StudentRelationshipExpected ->
-			(getStringMapSetting(Settings.StudentRelationshipExpected).getOrElse(Map()) + (s"${relationshipType.id}-${courseType.code}" -> isExpected.toString))
-		)
+  def uploadCourseworkMarksToSits: Boolean = getBooleanSetting(Settings.UploadCourseworkMarksToSits, default = false)
 
-	@transient
-	var relationshipService: RelationshipService = Wire[RelationshipService]
+  def uploadCourseworkMarksToSits_=(enabled: Boolean) {
+    settings += (Settings.UploadCourseworkMarksToSits -> enabled)
+  }
 
-	def displayedStudentRelationshipTypes: Seq[StudentRelationshipType] =
-		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed }
+  def uploadExamMarksToSits: Boolean = getBooleanSetting(Settings.UploadExamMarksToSits, default = false)
 
-	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType): Boolean = displayedStudentRelationshipTypes.contains(relationshipType)
+  def uploadExamMarksToSits_=(enabled: Boolean) {
+    settings += (Settings.UploadExamMarksToSits -> enabled)
+  }
 
-	def weekNumberingSystem: String = getStringSetting(Settings.WeekNumberingSystem) getOrElse WeekRange.NumberingSystem.Default
-	def weekNumberingSystem_= (wnSystem: String): Unit = settings += (Settings.WeekNumberingSystem -> wnSystem)
+  def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
+
+  def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
+
+  def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean =
+    if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
+      logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
+      false
+    } else canUploadMarksToSitsForYear(year, module.degreeType)
+
+  def canUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType): Boolean = {
+    // marks are uploadable until a department is explicitly closed for the year by the Exams Office
+    def canUploadForYear(markUploadMap: Option[Map[String, String]]): Boolean = markUploadMap match {
+      case None => true // there isn't even a settings map at all for this so hasn't been closed yet for the year
+      case Some(markMap: Map[String, String]) =>
+        markMap.get(year.toString) match {
+          case None => true // no setting for this year/ugpg combo for the department - so hasn't been closed yet for the year
+          case Some(booleanStringValue: String) => booleanStringValue.toBoolean
+        }
+    }
+
+    degreeType match {
+      case DegreeType.Undergraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg))
+      case DegreeType.Postgraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg))
+      case _ =>
+        logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
+        false
+    }
+  }
+
+  def setUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType, canUpload: Boolean): Unit = {
+    val (markUploadMap, mapKey) = degreeType match {
+      case DegreeType.Undergraduate => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg), Settings.CanUploadMarksToSitsForYearUg)
+      case DegreeType.Postgraduate => (getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg), Settings.CanUploadMarksToSitsForYearPg)
+      case _ => throw new IllegalStateException("setUploadMarksToSitsForYear called with invalid degreeType")
+    }
+
+    val markMap = markUploadMap.getOrElse(new collection.mutable.HashMap[String, String]())
+
+    settings += (mapKey -> (markMap + (year.toString -> canUpload.toString)))
+  }
+
+  def getStudentRelationshipSource(relationshipType: StudentRelationshipType): StudentRelationshipSource =
+    getStringMapSetting(Settings.StudentRelationshipSource)
+      .flatMap(_.get(relationshipType.id)).fold(relationshipType.defaultSource)(StudentRelationshipSource.fromCode)
+
+  def setStudentRelationshipSource(relationshipType: StudentRelationshipType, source: StudentRelationshipSource): Unit = {
+    val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
+    val newMap = map + (relationshipType.id -> source.dbValue)
+
+    settings += (Settings.StudentRelationshipSource -> newMap)
+  }
+
+  def studentRelationshipSource: Map[String, String] = getStringMapSetting(Settings.StudentRelationshipSource) getOrElse Map()
+
+  def studentRelationshipSource_=(setting: Map[String, String]): Unit = settings += (Settings.StudentRelationshipSource -> setting)
+
+  def studentRelationshipDisplayed: Map[String, String] = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse Map()
+
+  def studentRelationshipDisplayed_=(setting: Map[String, String]): Unit = settings += (Settings.StudentRelationshipDisplayed -> setting)
+
+  def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
+    studentRelationshipDisplayed
+      .get(relationshipType.id).fold(relationshipType.defaultDisplay)(_.toBoolean)
+
+  def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean): Unit = {
+    studentRelationshipDisplayed = studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString)
+  }
+
+  def getStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType): Option[Boolean] =
+    getStringMapSetting(Settings.StudentRelationshipExpected).flatMap(_.get(s"${relationshipType.id}-${courseType.code}").map(_.toBoolean))
+
+  def setStudentRelationshipExpected(relationshipType: StudentRelationshipType, courseType: CourseType, isExpected: Boolean): Unit =
+    settings += (Settings.StudentRelationshipExpected ->
+      (getStringMapSetting(Settings.StudentRelationshipExpected).getOrElse(Map()) + (s"${relationshipType.id}-${courseType.code}" -> isExpected.toString))
+      )
+
+  @transient
+  var relationshipService: RelationshipService = Wire[RelationshipService]
+
+  def displayedStudentRelationshipTypes: Seq[StudentRelationshipType] =
+    relationshipService.allStudentRelationshipTypes.filter {
+      getStudentRelationshipDisplayed
+    }
+
+  def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType): Boolean = displayedStudentRelationshipTypes.contains(relationshipType)
+
+  def weekNumberingSystem: String = getStringSetting(Settings.WeekNumberingSystem) getOrElse WeekRange.NumberingSystem.Default
+
+  def weekNumberingSystem_=(wnSystem: String): Unit = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
   def defaultGroupAllocationMethod: SmallGroupAllocationMethod =
-		getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
-  def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod): Unit =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
+    getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
 
-	def assignmentGradeValidation: Boolean = getBooleanSetting(Settings.AssignmentGradeValidation) getOrElse false
-	def assignmentGradeValidation_= (validation: Boolean): Unit = settings += (Settings.AssignmentGradeValidation -> validation)
+  def defaultGroupAllocationMethod_=(method: SmallGroupAllocationMethod): Unit = settings += (Settings.DefaultGroupAllocationMethod -> method.dbValue)
 
-	def autoMarkMissedMonitoringPoints: Boolean = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
-	def autoMarkMissedMonitoringPoints_=(enabled: Boolean) { settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled) }
+  def assignmentGradeValidation: Boolean = getBooleanSetting(Settings.AssignmentGradeValidation) getOrElse false
 
-	def missedMonitoringPointsNotificationLevels: Department.Settings.MissedMonitoringPointsNotificationLevels =
-		Department.Settings.MissedMonitoringPointsNotificationLevels(
-			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelLow, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Low),
-			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelMedium, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Medium),
-			getIntSetting(Settings.MissedMonitoringPointsNotificationLevelHigh, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.High)
-		)
+  def assignmentGradeValidation_=(validation: Boolean): Unit = settings += (Settings.AssignmentGradeValidation -> validation)
 
-	def missedMonitoringPointsNotificationLevels_=(levels: Department.Settings.MissedMonitoringPointsNotificationLevels) {
-		settings += (Settings.MissedMonitoringPointsNotificationLevelLow -> levels.low)
-		settings += (Settings.MissedMonitoringPointsNotificationLevelMedium -> levels.medium)
-		settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
-	}
+  def autoMarkMissedMonitoringPoints: Boolean = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
 
-	def nameToShow: ExamGridStudentIdentificationColumnValue =
-		getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
+  def autoMarkMissedMonitoringPoints_=(enabled: Boolean) {
+    settings += (Settings.AutoMarkMissedMonitoringPoints -> enabled)
+  }
 
-	def nameToShow_= (identification:ExamGridStudentIdentificationColumnValue): Unit =  settings += (Settings.ExamGridOptions.NameToShow->identification.value)
+  def missedMonitoringPointsNotificationLevels: Department.Settings.MissedMonitoringPointsNotificationLevels =
+    Department.Settings.MissedMonitoringPointsNotificationLevels(
+      getIntSetting(Settings.MissedMonitoringPointsNotificationLevelLow, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Low),
+      getIntSetting(Settings.MissedMonitoringPointsNotificationLevelMedium, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.Medium),
+      getIntSetting(Settings.MissedMonitoringPointsNotificationLevelHigh, default = Department.Settings.MissedMonitoringPointsNotificationLevels.Defaults.High)
+    )
 
-	def moduleNameToShow: ExamGridDisplayModuleNameColumnValue =
-		getStringSetting(Settings.ExamGridOptions.ModuleNameToShow).map(ExamGridDisplayModuleNameColumnValue(_)).getOrElse(ExamGridDisplayModuleNameColumnValue.Default)
+  def missedMonitoringPointsNotificationLevels_=(levels: Department.Settings.MissedMonitoringPointsNotificationLevels) {
+    settings += (Settings.MissedMonitoringPointsNotificationLevelLow -> levels.low)
+    settings += (Settings.MissedMonitoringPointsNotificationLevelMedium -> levels.medium)
+    settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
+  }
 
-	def moduleNameToShow_= (identification:ExamGridDisplayModuleNameColumnValue): Unit =  settings += (Settings.ExamGridOptions.ModuleNameToShow->identification.value)
+  def nameToShow: ExamGridStudentIdentificationColumnValue =
+    getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
 
-	def examGridOptions: ExamGridOptions = ExamGridOptions(
-		getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
-		getStringSeqSetting(Settings.ExamGridOptions.CustomColumnTitles, Seq()),
-		nameToShow,
-		getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
-		getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
-		getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
-		moduleNameToShow,
-		getStringSetting(Settings.ExamGridOptions.Layout, "full"),
-		getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
-		getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true),
-		Option(getIntSetting(Settings.ExamGridOptions.EntitiesPerPage, default = 0)).filter(_ > 0)
-	)
-	def examGridOptions_=(options: ExamGridOptions): Unit = {
-		settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
-		settings += (Settings.ExamGridOptions.CustomColumnTitles -> options.customColumnTitles)
-		settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
-		settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
-		settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
-		settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
-		settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow.value)
-		settings += (Settings.ExamGridOptions.Layout -> options.layout)
-		settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
-		settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
-		settings += (Settings.ExamGridOptions.EntitiesPerPage -> options.entitiesPerPage.getOrElse(0))
-	}
+  def nameToShow_=(identification: ExamGridStudentIdentificationColumnValue): Unit = settings += (Settings.ExamGridOptions.NameToShow -> identification.value)
 
-	def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = false)
-	def enableLevelGrids_=(enabled: Boolean) { settings += (Settings.EnableLevelGrids -> enabled) }
+  def moduleNameToShow: ExamGridDisplayModuleNameColumnValue =
+    getStringSetting(Settings.ExamGridOptions.ModuleNameToShow).map(ExamGridDisplayModuleNameColumnValue(_)).getOrElse(ExamGridDisplayModuleNameColumnValue.Default)
 
-	// FIXME belongs in Freemarker
-	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary).fold("")({ raw =>
-		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
-		val nodes = Splitter.split(raw).map { p => <p>{p}</p>	}
-		(NodeSeq fromSeq nodes).toString()
-	})
+  def moduleNameToShow_=(identification: ExamGridDisplayModuleNameColumnValue): Unit = settings += (Settings.ExamGridOptions.ModuleNameToShow -> identification.value)
 
-	@transient
-	var permissionsService: PermissionsService = Wire[PermissionsService]
-	@transient
-	lazy val owners: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
-	@transient
-	lazy val extensionManagers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
+  def examGridOptions: ExamGridOptions = ExamGridOptions(
+    getStringSeqSetting(Settings.ExamGridOptions.PredefinedColumnIdentifiers, Wire.all[ExamGridColumnOption].map(_.identifier)).toSet,
+    getStringSeqSetting(Settings.ExamGridOptions.CustomColumnTitles, Seq()),
+    nameToShow,
+    getStringSetting(Settings.ExamGridOptions.MarksToShow, "overall"),
+    getStringSetting(Settings.ExamGridOptions.ComponentsToShow, "all"),
+    getStringSetting(Settings.ExamGridOptions.ComponentSequenceToShow, "markOnly"),
+    moduleNameToShow,
+    getStringSetting(Settings.ExamGridOptions.Layout, "full"),
+    getStringSetting(Settings.ExamGridOptions.YearMarksToUse, "sits"),
+    getBooleanSetting(Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns, default = true),
+    Option(getIntSetting(Settings.ExamGridOptions.EntitiesPerPage, default = 0)).filter(_ > 0)
+  )
 
-	def isOwnedBy(userId:String): Boolean = owners.knownType.includesUserId(userId)
+  def examGridOptions_=(options: ExamGridOptions): Unit = {
+    settings += (Settings.ExamGridOptions.PredefinedColumnIdentifiers -> options.predefinedColumnIdentifiers)
+    settings += (Settings.ExamGridOptions.CustomColumnTitles -> options.customColumnTitles)
+    settings += (Settings.ExamGridOptions.NameToShow -> options.nameToShow.value)
+    settings += (Settings.ExamGridOptions.MarksToShow -> options.marksToShow)
+    settings += (Settings.ExamGridOptions.ComponentsToShow -> options.componentsToShow)
+    settings += (Settings.ExamGridOptions.ComponentSequenceToShow -> options.componentSequenceToShow)
+    settings += (Settings.ExamGridOptions.ModuleNameToShow -> options.moduleNameToShow.value)
+    settings += (Settings.ExamGridOptions.Layout -> options.layout)
+    settings += (Settings.ExamGridOptions.YearMarksToUse -> options.yearMarksToUse)
+    settings += (Settings.ExamGridOptions.MandatoryModulesAndYearMarkColumns -> options.mandatoryModulesAndYearMarkColumns)
+    settings += (Settings.ExamGridOptions.EntitiesPerPage -> options.entitiesPerPage.getOrElse(0))
+  }
 
-	def canRequestExtension: Boolean = allowExtensionRequests
-	def isExtensionManager(user:String): Boolean = extensionManagers!=null && extensionManagers.knownType.includesUserId(user)
+  def enableLevelGrids: Boolean = getBooleanSetting(Settings.EnableLevelGrids, default = false)
 
-	def addFeedbackForm(form:FeedbackTemplate): Boolean = feedbackTemplates.add(form)
+  def enableLevelGrids_=(enabled: Boolean) {
+    settings += (Settings.EnableLevelGrids -> enabled)
+  }
 
-	def copySettingsFrom(other: Department): Unit = {
-		ensureSettings
-		settings ++= other.settings
-	}
+  // FIXME belongs in Freemarker
+  def formattedGuidelineSummary: String = Option(extensionGuidelineSummary).fold("")({ raw =>
+    val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
+  val nodes = Splitter.split(raw).map { p => <p>
+    {p}
+  </p>
+  }
+    (NodeSeq fromSeq nodes).toString()
+  })
 
-	def copyExtensionManagersFrom(other: Department): Unit = {
-		extensionManagers.copyFrom(other.extensionManagers)
-	}
+  @transient
+  var permissionsService: PermissionsService = Wire[PermissionsService]
+  @transient
+  lazy val owners: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
+  @transient
+  lazy val extensionManagers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
-	override def postLoad() {
-		ensureSettings
-	}
+  def isOwnedBy(userId: String): Boolean = owners.knownType.includesUserId(userId)
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
-	@Column(name="FilterRuleName")
-	var filterRule: FilterRule = AllMembersFilterRule
+  def canRequestExtension: Boolean = allowExtensionRequests
 
-	def includesMember(m: Member, d: Option[Department]): Boolean = Option(parent) match {
-		case None => filterRule.matches(m, d)
-		case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
-	}
+  def isExtensionManager(user: String): Boolean = extensionManagers != null && extensionManagers.knownType.includesUserId(user)
 
-	def subDepartmentsContaining(member: Member): Stream[Department] = {
-		if (!includesMember(member, Option(this))) {
-			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
-		} else {
-			this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
-		}
-	}
+  def addFeedbackForm(form: FeedbackTemplate): Boolean = feedbackTemplates.add(form)
 
-	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition): Option[CustomRoleDefinition] = {
-		def matches(customRoleDefinition: CustomRoleDefinition) = {
-			roleDefinition match {
-				case roleDefinition: SelectorBuiltInRoleDefinition[_] =>
-					customRoleDefinition.baseRoleDefinition match {
-						case customRoleDefinition: SelectorBuiltInRoleDefinition[_]
-							if (customRoleDefinition.getClass == roleDefinition.getClass) &&
-								(roleDefinition <= customRoleDefinition) => true
-						case _ => false
-					}
-				case _ => roleDefinition == customRoleDefinition.baseRoleDefinition
-			}
-		}
+  def copySettingsFrom(other: Department): Unit = {
+    ensureSettings
+    settings ++= other.settings
+  }
 
-		customRoleDefinitions.asScala.filter { _.replacesBaseDefinition }.find(matches) match {
-			case Some(role) => Option(role)
-			case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
-			case _ => None
-		}
-	}
+  def copyExtensionManagersFrom(other: Department): Unit = {
+    extensionManagers.copyFrom(other.extensionManagers)
+  }
 
-	def permissionsParents: Stream[Department] = Option(parent).toStream
-	override def humanReadableId: String = name
-	override def urlSlug: String = code
+  override def postLoad() {
+    ensureSettings
+  }
 
-	/** The 'top' ancestor of this department, or itself if
-	  * it has no parent.
-	  */
-	@tailrec
-	final def rootDepartment: Department =
-		if (parent == null) this
-		else parent.rootDepartment
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
+  @Column(name = "FilterRuleName")
+  var filterRule: FilterRule = AllMembersFilterRule
 
-	def hasParent: Boolean = parent != null
+  def includesMember(m: Member, d: Option[Department]): Boolean = Option(parent) match {
+    case None => filterRule.matches(m, d)
+    case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
+  }
 
-	def hasChildren: Boolean = !children.isEmpty
+  def subDepartmentsContaining(member: Member): Stream[Department] = {
+    if (!includesMember(member, Option(this))) {
+      Stream.empty // no point looking further down the tree if this level doesn't contain the required member
+    } else {
+      this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
+    }
+  }
 
-	def isUpstream: Boolean = !hasParent
+  def replacedRoleDefinitionFor(roleDefinition: RoleDefinition): Option[CustomRoleDefinition] = {
+    def matches(customRoleDefinition: CustomRoleDefinition) = {
+      roleDefinition match {
+        case roleDefinition: SelectorBuiltInRoleDefinition[_] =>
+          customRoleDefinition.baseRoleDefinition match {
+            case customRoleDefinition: SelectorBuiltInRoleDefinition[_]
+              if (customRoleDefinition.getClass == roleDefinition.getClass) &&
+                (roleDefinition <= customRoleDefinition) => true
+            case _ => false
+          }
+        case _ => roleDefinition == customRoleDefinition.baseRoleDefinition
+      }
+    }
 
-	override def toString: String = "Department(" + code + ")"
+    customRoleDefinitions.asScala.filter(_.replacesBaseDefinition).find(matches) match {
+      case Some(role) => Option(role)
+      case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
+      case _ => None
+    }
+  }
+
+  def permissionsParents: Stream[Department] = Option(parent).toStream
+
+  override def humanReadableId: String = name
+
+  override def urlSlug: String = code
+
+  /** The 'top' ancestor of this department, or itself if
+    * it has no parent.
+    */
+  @tailrec
+  final def rootDepartment: Department =
+    if (parent == null) this
+    else parent.rootDepartment
+
+  def hasParent: Boolean = parent != null
+
+  def hasChildren: Boolean = !children.isEmpty
+
+  def isUpstream: Boolean = !hasParent
+
+  override def toString: String = "Department(" + code + ")"
 
 }
 
 object Department {
 
-	object FilterRule {
-		// Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
-		implicit val factory: String => FilterRule = { name: String => withName(name) }
+  object FilterRule {
+    // Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
+    implicit val factory: String => FilterRule = { name: String => withName(name) }
 
-		val allFilterRules: Seq[FilterRule] = {
-			val inYearRules = (1 until 9).map(InYearFilterRule)
-			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
-		}
+    val allFilterRules: Seq[FilterRule] = {
+      val inYearRules = (1 until 9).map(InYearFilterRule)
+      Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule, DepartmentRoutesFilterRule) ++ inYearRules
+    }
 
-		def withName(name: String): FilterRule = {
-			allFilterRules.find(_.name == name).get
-		}
-	}
+    def withName(name: String): FilterRule = {
+      allFilterRules.find(_.name == name).get
+    }
+  }
 
-	sealed trait FilterRule extends Convertible[String] {
-		val name: String
-		val courseTypes: Seq[CourseType]
-		def matches(member: Member, department: Option[Department]): Boolean
-		def getName: String = name // for Spring
-		def value: String = name
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction]
-	}
+  sealed trait FilterRule extends Convertible[String] {
+    val name: String
+    val courseTypes: Seq[CourseType]
 
-	case object UndergraduateFilterRule extends FilterRule {
-		val name = "UG"
-		val courseTypes: Seq[CourseType] = CourseType.ugCourseTypes
-		def matches(member: Member, department: Option[Department]): Boolean = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
-				case Some(DegreeType.Undergraduate) => true
-				case _ => false
-			}
-			case _ => false
-		}
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			ScalaRestriction.is("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"):_*)
-		}
-	}
+    def matches(member: Member, department: Option[Department]): Boolean
 
-	case object PostgraduateFilterRule extends FilterRule {
-		val name = "PG"
-		val courseTypes: Seq[CourseType] = CourseType.pgCourseTypes
-		def matches(member: Member, department: Option[Department]): Boolean = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
-				case Some(DegreeType.Undergraduate) => false
-				case _ => true
-			}
-			case _ => false
-		}
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			ScalaRestriction.isNot("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"):_*)
-		}
-	}
+    def getName: String = name // for Spring
+    def value: String = name
 
-	case object AllMembersFilterRule extends FilterRule {
-		val name = "All"
-		val courseTypes: Seq[CourseType] = CourseType.all
-		def matches(member: Member, department: Option[Department]) = true
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			None
-		}
-	}
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction]
+  }
 
+  case object UndergraduateFilterRule extends FilterRule {
+    val name = "UG"
+    val courseTypes: Seq[CourseType] = CourseType.ugCourseTypes
 
-	case class InYearFilterRule(year:Int) extends FilterRule {
-		val name=s"Y$year"
-		val courseTypes: Seq[CourseType] = CourseType.all
-		def matches(member: Member, department: Option[Department]): Boolean = member match{
-			case s:StudentMember => s.mostSignificantCourseDetails.exists(_.latestStudentCourseYearDetails.yearOfStudy == year)
-			case _=>false
-		}
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			ScalaRestriction.is("latestStudentCourseYearDetails.yearOfStudy", year, aliasPaths("latestStudentCourseYearDetails"):_*)
-		}
-	}
+    def matches(member: Member, department: Option[Department]): Boolean = member match {
+      case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
+        case Some(DegreeType.Undergraduate) => true
+        case _ => false
+      }
+      case _ => false
+    }
 
-	case object DepartmentRoutesFilterRule extends FilterRule {
-		val name = "DepartmentRoutes"
-		val courseTypes: Seq[CourseType] = CourseType.all
-		def matches(member: Member, department: Option[Department]): Boolean = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.exists{r => department.contains(r.adminDepartment)}
-			case _ => false
-		}
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			department.flatMap(d => ScalaRestriction.is("route.adminDepartment", d, aliasPaths("route"):_*))
-		}
-	}
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      ScalaRestriction.is("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"): _*)
+    }
+  }
 
-	case class CompositeFilterRule(rules:Seq[FilterRule]) extends FilterRule{
-		val name: String = rules.map(_.name).mkString(",")
-		val courseTypes: Seq[CourseType] = CourseType.all
-		def matches(member:Member, department: Option[Department]): Boolean = rules.forall(_.matches(member, department))
-		def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
-			val restrictions = rules.flatMap(_.restriction(aliasPaths, department))
-			ScalaRestriction.custom(conjunction(restrictions.map(_.underlying):_*), restrictions.flatMap(_.aliases.toSeq):_*)
-		}
-	}
+  case object PostgraduateFilterRule extends FilterRule {
+    val name = "PG"
+    val courseTypes: Seq[CourseType] = CourseType.pgCourseTypes
+
+    def matches(member: Member, department: Option[Department]): Boolean = member match {
+      case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.flatMap { route => Option(route.degreeType) } match {
+        case Some(DegreeType.Undergraduate) => false
+        case _ => true
+      }
+      case _ => false
+    }
+
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      ScalaRestriction.isNot("route.degreeType", DegreeType.Undergraduate, aliasPaths("route"): _*)
+    }
+  }
+
+  case object AllMembersFilterRule extends FilterRule {
+    val name = "All"
+    val courseTypes: Seq[CourseType] = CourseType.all
+
+    def matches(member: Member, department: Option[Department]) = true
+
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      None
+    }
+  }
 
 
-	object Settings {
-		val CollectFeedbackRatings = "collectFeedbackRatings"
+  case class InYearFilterRule(year: Int) extends FilterRule {
+    val name = s"Y$year"
+    val courseTypes: Seq[CourseType] = CourseType.all
 
-		val AllowExtensionRequests = "allowExtensionRequests"
-		val ExtensionGuidelineSummary = "extensionGuidelineSummary"
-		val ExtensionGuidelineLink = "extensionGuidelineLink"
+    def matches(member: Member, department: Option[Department]): Boolean = member match {
+      case s: StudentMember => s.mostSignificantCourseDetails.exists(_.latestStudentCourseYearDetails.yearOfStudy == year)
+      case _ => false
+    }
 
-		val ShowStudentName = "showStudentName"
-		val AssignmentInfoView = "assignmentInfoView"
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      ScalaRestriction.is("latestStudentCourseYearDetails.yearOfStudy", year, aliasPaths("latestStudentCourseYearDetails"): _*)
+    }
+  }
 
-		val PlagiarismDetection = "plagiarismDetection"
-		val TurnitinExcludeBibliography = "turnitinExcludeBibliography"
-		val TurnitinExcludeQuotations = "turnitinExcludeQuotations"
-		val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
-		val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
+  case object DepartmentRoutesFilterRule extends FilterRule {
+    val name = "DepartmentRoutes"
+    val courseTypes: Seq[CourseType] = CourseType.all
 
-		val StudentRelationshipSource = "studentRelationshipSource"
-		val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
-		val StudentRelationshipExpected = "studentRelationshipExpected"
+    def matches(member: Member, department: Option[Department]): Boolean = member match {
+      case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.currentRoute) }.exists { r => department.contains(r.adminDepartment) }
+      case _ => false
+    }
 
-		val WeekNumberingSystem = "weekNumberSystem"
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      department.flatMap(d => ScalaRestriction.is("route.adminDepartment", d, aliasPaths("route"): _*))
+    }
+  }
 
-		val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
+  case class CompositeFilterRule(rules: Seq[FilterRule]) extends FilterRule {
+    val name: String = rules.map(_.name).mkString(",")
+    val courseTypes: Seq[CourseType] = CourseType.all
 
-		val AutoGroupDeregistration = "autoGroupDeregistration"
+    def matches(member: Member, department: Option[Department]): Boolean = rules.forall(_.matches(member, department))
 
-		val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
+    def restriction(aliasPaths: Map[String, Seq[(String, AliasAndJoinType)]], department: Option[Department] = None): Option[ScalaRestriction] = {
+      val restrictions = rules.flatMap(_.restriction(aliasPaths, department))
+      ScalaRestriction.custom(conjunction(restrictions.map(_.underlying): _*), restrictions.flatMap(_.aliases.toSeq): _*)
+    }
+  }
 
-		val UploadCourseworkMarksToSits = "uploadMarksToSits"
-		val UploadExamMarksToSits = "uploadExamMarksToSits"
-		val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
-		val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
 
-		val EnableLevelGrids = "enableLevelGrids"
+  object Settings {
+    val CollectFeedbackRatings = "collectFeedbackRatings"
 
-		val AssignmentGradeValidation = "assignmentGradeValidation"
-		val MeetingRecordApprovalType = "meetingRecordApprovalType"
+    val AllowExtensionRequests = "allowExtensionRequests"
+    val ExtensionGuidelineSummary = "extensionGuidelineSummary"
+    val ExtensionGuidelineLink = "extensionGuidelineLink"
 
-		val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
-		val MissedMonitoringPointsNotificationLevelLow = "missedMonitoringPointsNotificationLevelLow"
-		val MissedMonitoringPointsNotificationLevelMedium = "missedMonitoringPointsNotificationLevelMedium"
-		val MissedMonitoringPointsNotificationLevelHigh = "missedMonitoringPointsNotificationLevelHigh"
-		object MissedMonitoringPointsNotificationLevels {
-			object Defaults {
-				val Low = 3
-				val Medium = 6
-				val High = 8
-			}
-		}
-		case class MissedMonitoringPointsNotificationLevels(low: Int, medium: Int, high: Int)
+    val ShowStudentName = "showStudentName"
+    val AssignmentInfoView = "assignmentInfoView"
 
-		object ExamGridOptions {
-			val PredefinedColumnIdentifiers = "examGridOptionsPredefined"
-			val CustomColumnTitles = "examGridOptionsCustom"
-			val NameToShow = "examGridOptionsName"
-			val MarksToShow = "examGridOptionsMarks"
-			val ComponentsToShow = "examGridOptionsComponents"
-			val ComponentSequenceToShow = "componentSequenceToShow"
-			val ModuleNameToShow = "examGridOptionsModuleName"
-			val Layout ="examGridOptionsLayout"
-			val YearMarksToUse = "examGridOptionsYearMark"
-			val MandatoryModulesAndYearMarkColumns = "examGridOptionsMandatoryModulesAndYearMarkColumns"
-			val EntitiesPerPage = "entitiesPerPage"
-		}
-		case class ExamGridOptions(
-			predefinedColumnIdentifiers: Set[String],
-			customColumnTitles: Seq[String],
-			nameToShow: ExamGridStudentIdentificationColumnValue,
-			marksToShow: String,
-			componentsToShow: String,
-			componentSequenceToShow: String,
-			moduleNameToShow: ExamGridDisplayModuleNameColumnValue,
-			layout: String,
-			yearMarksToUse: String,
-			mandatoryModulesAndYearMarkColumns: Boolean,
-			entitiesPerPage: Option[Int]
-		)
-	}
+    val PlagiarismDetection = "plagiarismDetection"
+    val TurnitinExcludeBibliography = "turnitinExcludeBibliography"
+    val TurnitinExcludeQuotations = "turnitinExcludeQuotations"
+    val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
+    val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
+
+    val StudentRelationshipSource = "studentRelationshipSource"
+    val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
+    val StudentRelationshipExpected = "studentRelationshipExpected"
+
+    val WeekNumberingSystem = "weekNumberSystem"
+
+    val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
+
+    val AutoGroupDeregistration = "autoGroupDeregistration"
+
+    val StudentsCanScheduleMeetings = "studentsCanScheduleMeetings"
+
+    val UploadCourseworkMarksToSits = "uploadMarksToSits"
+    val UploadExamMarksToSits = "uploadExamMarksToSits"
+    val CanUploadMarksToSitsForYearUg = "canUploadMarksToSitsForYearUG"
+    val CanUploadMarksToSitsForYearPg = "canUploadMarksToSitsForYearPG"
+
+    val EnableLevelGrids = "enableLevelGrids"
+
+    val AssignmentGradeValidation = "assignmentGradeValidation"
+    val MeetingRecordApprovalType = "meetingRecordApprovalType"
+
+    val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
+    val MissedMonitoringPointsNotificationLevelLow = "missedMonitoringPointsNotificationLevelLow"
+    val MissedMonitoringPointsNotificationLevelMedium = "missedMonitoringPointsNotificationLevelMedium"
+    val MissedMonitoringPointsNotificationLevelHigh = "missedMonitoringPointsNotificationLevelHigh"
+
+    object MissedMonitoringPointsNotificationLevels {
+
+      object Defaults {
+        val Low = 3
+        val Medium = 6
+        val High = 8
+      }
+
+    }
+
+    case class MissedMonitoringPointsNotificationLevels(low: Int, medium: Int, high: Int)
+
+    object ExamGridOptions {
+      val PredefinedColumnIdentifiers = "examGridOptionsPredefined"
+      val CustomColumnTitles = "examGridOptionsCustom"
+      val NameToShow = "examGridOptionsName"
+      val MarksToShow = "examGridOptionsMarks"
+      val ComponentsToShow = "examGridOptionsComponents"
+      val ComponentSequenceToShow = "componentSequenceToShow"
+      val ModuleNameToShow = "examGridOptionsModuleName"
+      val Layout = "examGridOptionsLayout"
+      val YearMarksToUse = "examGridOptionsYearMark"
+      val MandatoryModulesAndYearMarkColumns = "examGridOptionsMandatoryModulesAndYearMarkColumns"
+      val EntitiesPerPage = "entitiesPerPage"
+    }
+
+    case class ExamGridOptions(
+      predefinedColumnIdentifiers: Set[String],
+      customColumnTitles: Seq[String],
+      nameToShow: ExamGridStudentIdentificationColumnValue,
+      marksToShow: String,
+      componentsToShow: String,
+      componentSequenceToShow: String,
+      moduleNameToShow: ExamGridDisplayModuleNameColumnValue,
+      layout: String,
+      yearMarksToUse: String,
+      mandatoryModulesAndYearMarkColumns: Boolean,
+      entitiesPerPage: Option[Int]
+    )
+
+  }
+
 }
 
 // converter for spring

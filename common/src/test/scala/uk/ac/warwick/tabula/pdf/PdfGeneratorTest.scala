@@ -8,39 +8,39 @@ import uk.ac.warwick.tabula.{TestBase, TopLevelUrlComponent}
 
 class PdfGeneratorTest extends TestBase {
 
-	trait MockMemberPhotoUrlGeneratorComponent extends MemberPhotoUrlGeneratorComponent {
-		val photoUrlGenerator: MemberPhotoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
-			def photosWarwickConfiguration = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
-		}
-	}
+  trait MockMemberPhotoUrlGeneratorComponent extends MemberPhotoUrlGeneratorComponent {
+    val photoUrlGenerator: MemberPhotoUrlGenerator = new PhotosWarwickMemberPhotoUrlGenerator with PhotosWarwickConfigComponent {
+      def photosWarwickConfiguration = PhotosWarwickConfig("photos.warwick.ac.uk", "tabula", "somekey")
+    }
+  }
 
-	trait MockTopLevelUrlComponent extends TopLevelUrlComponent {
-		val toplevelUrl: String = "http://tabula.warwick.ac.uk"
-	}
+  trait MockTopLevelUrlComponent extends TopLevelUrlComponent {
+    val toplevelUrl: String = "http://tabula.warwick.ac.uk"
+  }
 
-	val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent with MockTopLevelUrlComponent {
-		def textRenderer: TextRenderer = (templateId: String, _: Any) => {
-			templateId match {
-				case "minimal" => minimalXhtml
-			}
-		}
-	}.pdfGenerator
+  val pdfGenerator: PdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with MockMemberPhotoUrlGeneratorComponent with TextRendererComponent with MockTopLevelUrlComponent {
+    def textRenderer: TextRenderer = (templateId: String, _: Any) => {
+      templateId match {
+        case "minimal" => minimalXhtml
+      }
+    }
+  }.pdfGenerator
 
-	@Test
-	def renderXHTML() {
-		val baos = new ByteArrayOutputStream()
-		pdfGenerator.renderTemplate("minimal", Map(), baos)
-		val of = new FileOutputStream(new File("/tmp/test.pdf"))
-		val pdfBytes = baos.toByteArray
-		of.write(pdfBytes)
-		of.close()
-		val pdf = new String(pdfBytes)
-		pdf should not be null
-		pdf should include("%PDF-1.4")
-	}
+  @Test
+  def renderXHTML() {
+    val baos = new ByteArrayOutputStream()
+    pdfGenerator.renderTemplate("minimal", Map(), baos)
+    val of = new FileOutputStream(new File("/tmp/test.pdf"))
+    val pdfBytes = baos.toByteArray
+    of.write(pdfBytes)
+    of.close()
+    val pdf = new String(pdfBytes)
+    pdf should not be null
+    pdf should include("%PDF-1.4")
+  }
 
-	val minimalXhtml: String =
-		"""<?xml version="1.0" encoding="UTF-8"?>
+  val minimalXhtml: String =
+    """<?xml version="1.0" encoding="UTF-8"?>
 			<!DOCTYPE html
 			PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 			"DTD/xhtml1-transitional.dtd">

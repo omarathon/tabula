@@ -11,15 +11,15 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/module/{module}", "/groups/admin/module/{module}/groups"))
+@RequestMapping(value = Array("/groups/admin/module/{module}", "/groups/admin/module/{module}/groups"))
 class GroupsAdminModuleHomeController extends GroupsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@RequestMapping
-	def adminModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]): Mav = {
-		Redirect(Routes.admin.module(module, academicYear.getOrElse(AcademicYear.now())))
-	}
+  @RequestMapping
+  def adminModule(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") academicYear: Option[AcademicYear]): Mav = {
+    Redirect(Routes.admin.module(module, academicYear.getOrElse(AcademicYear.now())))
+  }
 }

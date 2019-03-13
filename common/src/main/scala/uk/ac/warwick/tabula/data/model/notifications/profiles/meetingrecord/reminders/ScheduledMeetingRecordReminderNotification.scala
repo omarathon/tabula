@@ -10,58 +10,59 @@ import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.userlookup.User
 
 abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeetingRecordNotification
-	with MyWarwickNotification {
+  with MyWarwickNotification {
 
-	verbSetting.value = "remind"
-	priority = Warning
+  verbSetting.value = "remind"
+  priority = Warning
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
+  def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
 
-	def referenceDate: DateTime = meeting.meetingDate
-	def isToday: Boolean = {
-		val today = DateTime.now.withTimeAtStartOfDay()
-		val meetingDate = meeting.meetingDate.withTimeAtStartOfDay()
-		today == meetingDate
-	}
+  def referenceDate: DateTime = meeting.meetingDate
 
-	def dateForTitle: String = {
-		val timeFormat = ConfigurableIntervalFormatter.Hour12OptionalMins
+  def isToday: Boolean = {
+    val today = DateTime.now.withTimeAtStartOfDay()
+    val meetingDate = meeting.meetingDate.withTimeAtStartOfDay()
+    today == meetingDate
+  }
 
-		if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
-		else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
-	}
+  def dateForTitle: String = {
+    val timeFormat = ConfigurableIntervalFormatter.Hour12OptionalMins
 
-	def title: String = s"Meeting with ${meeting.allParticipantNames} $dateForTitle"
+    if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
+    else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
+  }
 
-	override def titleFor(user: User): String = s"Meeting with ${meeting.participantNamesExcept(user)} $dateForTitle"
+  def title: String = s"Meeting with ${meeting.allParticipantNames} $dateForTitle"
 
-	def isAgent: Boolean
+  override def titleFor(user: User): String = s"Meeting with ${meeting.participantNamesExcept(user)} $dateForTitle"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"isAgent" -> isAgent,
-		"agentRoles" -> agentRoles,
-		"otherParticipants" -> meeting.participants.filterNot(_ == meeting.creator),
-		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting
-	))
+  def isAgent: Boolean
+
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "isAgent" -> isAgent,
+    "agentRoles" -> agentRoles,
+    "otherParticipants" -> meeting.participants.filterNot(_ == meeting.creator),
+    "dateTimeFormatter" -> dateTimeFormatter,
+    "meetingRecord" -> meeting
+  ))
 }
 
 @Entity
-@DiscriminatorValue(value="ScheduledMeetingRecordReminderStudent")
+@DiscriminatorValue(value = "ScheduledMeetingRecordReminderStudent")
 class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeetingRecordReminderNotification {
 
-	override def isAgent = false
+  override def isAgent = false
 
-	override def recipients: Seq[User] = Seq(meeting.student.asSsoUser)
+  override def recipients: Seq[User] = Seq(meeting.student.asSsoUser)
 
 }
 
 @Entity
-@DiscriminatorValue(value="ScheduledMeetingRecordReminderAgent")
+@DiscriminatorValue(value = "ScheduledMeetingRecordReminderAgent")
 class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRecordReminderNotification {
 
-	override def isAgent = true
+  override def isAgent = true
 
-	override def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
+  override def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
 
 }

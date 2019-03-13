@@ -13,15 +13,15 @@ import uk.ac.warwick.tabula.web.Mav
 @Controller
 class DownloadSingleRegisterAsPdfController extends GroupsController {
 
-	type DownloadRegisterAsPdfCommand = Appliable[RenderableFile]
+  type DownloadRegisterAsPdfCommand = Appliable[RenderableFile]
 
-	@ModelAttribute
-	def command(@PathVariable event: SmallGroupEvent, @RequestParam week: Int): DownloadRegisterAsPdfCommand
-		= DownloadSingleRegisterAsPdfCommand(mandatory(event), mandatory(week), s"register-week$week.pdf", user)
+  @ModelAttribute
+  def command(@PathVariable event: SmallGroupEvent, @RequestParam week: Int): DownloadRegisterAsPdfCommand
+  = DownloadSingleRegisterAsPdfCommand(mandatory(event), mandatory(week), s"register-week$week.pdf", user)
 
-	@RequestMapping
-	def downloadAsPdf(@ModelAttribute command: DownloadRegisterAsPdfCommand): Mav = {
-		Mav(new RenderableFileView(command.apply()))
-	}
+  @RequestMapping
+  def downloadAsPdf(@ModelAttribute command: DownloadRegisterAsPdfCommand): Mav = {
+    Mav(new RenderableFileView(command.apply()))
+  }
 
 }

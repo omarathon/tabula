@@ -9,14 +9,15 @@ import uk.ac.warwick.tabula.commands.coursework.departments.ReportWorld
 
 // scalastyle:off magic.number
 class FeedbackReportJobTest extends TestBase with Mockito with JobTestHelp with ReportWorld {
-	val job = new FeedbackReportJob
-	override def createJobs: Array[Job] = Array[Job](job)
+  val job = new FeedbackReportJob
 
-	@Test def run {
-		val job = new FeedbackReportJob
-		job.assignmentService = mock[AssessmentService]
-		job.departmentService = mock[ModuleAndDepartmentService]
+  override def createJobs: Array[Job] = Array[Job](job)
 
-		service.add(None, FeedbackReportJob(department, dateTime(2013, 1, 1), dateTime(2013, 8, 1)))
-	}
+  @Test def run {
+    val job = new FeedbackReportJob
+    job.assignmentService = mock[AssessmentService]
+    job.departmentService = mock[ModuleAndDepartmentService]
+
+    service.add(None, FeedbackReportJob(department, dateTime(2013, 1, 1), dateTime(2013, 8, 1)))
+  }
 }

@@ -6,39 +6,39 @@ import uk.ac.warwick.tabula.data.model.SyllabusPlusLocation
 import uk.ac.warwick.tabula.data.{AutowiringSyllabusPlusLocationDaoComponent, SyllabusPlusLocationDaoComponent}
 
 trait SyllabusPlusLocationServiceComponent {
-	def syllabusPlusLocationService: SyllabusPlusLocationService
+  def syllabusPlusLocationService: SyllabusPlusLocationService
 }
 
 trait AutowiringSyllabusPlusLocationServiceComponent extends SyllabusPlusLocationServiceComponent {
-	var syllabusPlusLocationService: SyllabusPlusLocationService = Wire[SyllabusPlusLocationService]
+  var syllabusPlusLocationService: SyllabusPlusLocationService = Wire[SyllabusPlusLocationService]
 }
 
 trait SyllabusPlusLocationService {
-	def delete(location: SyllabusPlusLocation): Unit
+  def delete(location: SyllabusPlusLocation): Unit
 
-	def save(location: SyllabusPlusLocation): Unit
+  def save(location: SyllabusPlusLocation): Unit
 
-	def all(): Seq[SyllabusPlusLocation]
+  def all(): Seq[SyllabusPlusLocation]
 
-	def getByUpstreamName(upstreamName: String): Option[SyllabusPlusLocation]
+  def getByUpstreamName(upstreamName: String): Option[SyllabusPlusLocation]
 
-	def getById(id: String): Option[SyllabusPlusLocation]
+  def getById(id: String): Option[SyllabusPlusLocation]
 }
 
 abstract class AbstractSyllabusPlusLocationService extends SyllabusPlusLocationService {
-	self: SyllabusPlusLocationDaoComponent =>
+  self: SyllabusPlusLocationDaoComponent =>
 
-	override def delete(location: SyllabusPlusLocation): Unit = syllabusPlusLocationDao.delete(location)
+  override def delete(location: SyllabusPlusLocation): Unit = syllabusPlusLocationDao.delete(location)
 
-	override def save(location: SyllabusPlusLocation): Unit = syllabusPlusLocationDao.saveOrUpdate(location)
+  override def save(location: SyllabusPlusLocation): Unit = syllabusPlusLocationDao.saveOrUpdate(location)
 
-	override def all(): Seq[SyllabusPlusLocation] = syllabusPlusLocationDao.getAll()
+  override def all(): Seq[SyllabusPlusLocation] = syllabusPlusLocationDao.getAll()
 
-	override def getByUpstreamName(upstreamName: String): Option[SyllabusPlusLocation] = syllabusPlusLocationDao.getByUpstreamName(upstreamName)
+  override def getByUpstreamName(upstreamName: String): Option[SyllabusPlusLocation] = syllabusPlusLocationDao.getByUpstreamName(upstreamName)
 
-	override def getById(id: String): Option[SyllabusPlusLocation] = syllabusPlusLocationDao.getById(id)
+  override def getById(id: String): Option[SyllabusPlusLocation] = syllabusPlusLocationDao.getById(id)
 }
 
 @Service("syllabusPlusLocationService")
 class SyllabusPlusLocationServiceImpl extends AbstractSyllabusPlusLocationService
-	with AutowiringSyllabusPlusLocationDaoComponent
+  with AutowiringSyllabusPlusLocationDaoComponent

@@ -16,6 +16,7 @@ require('./browser-info');
 require('./activity-streams');
 
 import moment from 'moment-timezone';
+
 window.moment = moment;
 
 require('./scripts');

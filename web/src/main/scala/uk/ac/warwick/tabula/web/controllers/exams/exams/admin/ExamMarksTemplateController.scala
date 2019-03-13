@@ -17,38 +17,38 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marks-template"))
 class ExamMarksTemplateController extends ExamsController {
 
-	var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		GenerateExamMarksTemplateCommand(
-			mandatory(module),
-			mandatory(exam),
-			examMembershipService.determineMembershipUsersWithOrder(exam)
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable exam: Exam) =
+    GenerateExamMarksTemplateCommand(
+      mandatory(module),
+      mandatory(exam),
+      examMembershipService.determineMembershipUsersWithOrder(exam)
+    )
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
-		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
+    new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
+  }
 }
 
 @Controller
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/marker/{marker}/marks-template"))
 class ExamMarkerMarksTemplateController extends ExamsController {
 
-	var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  var examMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam, @PathVariable marker: User) =
-		GenerateOwnExamMarksTemplateCommand(
-			mandatory(module),
-			mandatory(exam),
-			examMembershipService.determineMembershipUsersWithOrderForMarker(exam, marker)
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable exam: Exam, @PathVariable marker: User) =
+    GenerateOwnExamMarksTemplateCommand(
+      mandatory(module),
+      mandatory(exam),
+      examMembershipService.determineMembershipUsersWithOrderForMarker(exam, marker)
+    )
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
-		new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable exam: Exam): ExcelView = {
+    new ExcelView(safeAssessmentName(exam) + " marks.xlsx", cmd.apply())
+  }
 }

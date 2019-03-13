@@ -15,14 +15,16 @@
 
       <p class="progress-arrows">
         <span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${uriParser(gridOptionsQueryString)}">Select courses</a></span>
-        <span class="arrow-right arrow-left"><a class="btn btn-link" href="<@routes.exams.generateGridOptions department academicYear />?${uriParser(gridOptionsQueryString)}">Set grid options</a></span>
+        <span class="arrow-right arrow-left"><a class="btn btn-link"
+                                                href="<@routes.exams.generateGridOptions department academicYear />?${uriParser(gridOptionsQueryString)}">Set grid options</a></span>
         <span class="arrow-right arrow-left active">Preview and download</span>
       </p>
 
       <div id="examGridSpinner">
         <i class="fa fa-spinner fa-spin"></i> Loading&hellip;
         <div class="progress">
-          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="${entities?size}" style="width: 0%"></div>
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0"
+               aria-valuemax="${entities?size}" style="width: 0%"></div>
         </div>
       </div>
 
@@ -52,7 +54,8 @@
               </form>
             <#else>
               <p>
-                <button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
+                <button class="btn btn-primary use-tooltip" disabled
+                        title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
                   Refresh SITS data and regenerate grid
                 </button>
               </p>
@@ -91,8 +94,11 @@
           <div class="alert alert-info">
             <h3>Over catted marks</h3>
             <p>There were no Pathway Module Rules defined in SITS for this route, year of study, and academic year.</p>
-            <p>Therefore for students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your course regulations.</p>
-            <p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#" class="show-more">Show More</a></p>
+            <p>Therefore for students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your
+              course regulations.</p>
+            <p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#"
+                                                                                                                                         class="show-more">Show
+                More</a></p>
             <div class="more hidden">
               <p>Each course normally consists of modules each with a CATs score and to pass that course you must achieve the minimum number of CATs.</p>
               <p>
@@ -100,7 +106,8 @@
                 Any student who studies more than the normal load of CATs has been deemed to have over-catted.
               </p>
               <p>
-                So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the student has taken.
+                So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the
+                student has taken.
                 If this is higher than the mean module mark, it will be the mark they are awarded, as long as the combination satisfies the course regulations.
               </p>
               <p>
@@ -109,7 +116,8 @@
                 Some courses may not allow certain combinations of modules to be taken in a year or over several years.
               </p>
               <p>
-                Unless Pathway Module Rules are defined it is not possible for Tabula to be sure that the final over-catted mark it derives complies with the regulations,
+                Unless Pathway Module Rules are defined it is not possible for Tabula to be sure that the final over-catted mark it derives complies with the
+                regulations,
                 and we ask the exam board to choose the final over-catted mark to ensure that it meets with all the regulations. <a href="#" class="show-less">Less</a>
               </p>
             </div>
@@ -325,33 +333,50 @@
           <div class="btn-group dropup">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
             <ul class="dropdown-menu download-options">
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button></li>
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells</button></li>
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button></li>
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record</button></li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excel}">Excel grid</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.excelNoMergedCells}">Excel grid without merged cells
+                </button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecord}">Marks record</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record
+                </button>
+              </li>
               <#-- Removed for - TAB-6217 -->
               <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>-->
               <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passListConfidential}">Confidential pass list</button></li>-->
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcript}">Transcript</button></li>
-              <li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcriptConfidential}">Confidential transcript</button></li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcript}">Transcript</button>
+              </li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcriptConfidential}">Confidential transcript</button>
+              </li>
             </ul>
           </div>
         </div>
       </form>
     </div>
     <div class='modal fade' id='confirmModal'>
-      <div class='modal-dialog' role='document'><div class='modal-content'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
           <div class='modal-body'>
             <p>
               Exam grids contain restricted information. Under the University's
-              <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>information classification scheme</a>,
+              <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>information classification
+                scheme</a>,
               student names and University IDs are 'protected', exam marks are 'restricted' and provisional degree classifications are 'reserved'.
             </p>
             <p>
               When you download the data provided you are responsible for managing the security of the
               information within it. You agree to abide by the University's <a target='_blank' href='http://warwick.ac.uk/dataprotection'>
                 Data Protection Policy
-              </a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
+              </a> and the mandatory working practices for <a target='_blank'
+                                                              href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
                 electronic information asset protection.</a>
             </p>
           </div>
@@ -367,41 +392,41 @@
   <div class="modal fade" id="edit-overcatting-modal"></div>
 
   <script>
-    jQuery(function($){
+    jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
 
       var $form = $('#examGridDocuments'), $confirmModal = $('#confirmModal');
-      $('a.confirm', $confirmModal).on('click', function() {
+      $('a.confirm', $confirmModal).on('click', function () {
         $form.submit();
         $confirmModal.modal('hide');
         $form.find('input.download-option').remove();
       });
-      $('.download-options').on('click', 'button', function(e) {
+      $('.download-options').on('click', 'button', function (e) {
         e.preventDefault();
         e.stopPropagation();
         var $this = $(this);
         $form.find('input.download-option').remove();
         $form.append($('<input/>').attr({
-          'type' : 'hidden',
-          'class' : 'download-option',
-          'name' : $this.attr('name'),
-          'value' : true
+          'type': 'hidden',
+          'class': 'download-option',
+          'name': $this.attr('name'),
+          'value': true
         }));
         $confirmModal.modal('show');
       });
 
-      $('button.edit-overcatting').each(function(){
+      $('button.edit-overcatting').each(function () {
         $(this).attr('href', '<@routes.exams.generateGrid department academicYear />/overcatting/' + $(this).data('student') + '?basedOnLevel=' + $(this).data('basedonlevel'))
           .data('target', '#edit-overcatting-modal');
 
       }).ajaxModalLink();
 
-      $('a.show-more').on('click', function(e){
+      $('a.show-more').on('click', function (e) {
         e.preventDefault();
         $(this).parent().next('.more').removeClass('hidden').end().end()
           .hide();
       });
-      $('a.show-less').on('click', function(e){
+      $('a.show-less').on('click', function (e) {
         e.preventDefault();
         $(this).closest('.more').addClass('hidden').parent().find('a.show-more').show();
       });
@@ -427,6 +452,7 @@
             .scrollLeft(0);
         }, 0);
       }
+
       $(window).on('id7:reflow', reflowScroll);
       reflowScroll();
 
@@ -447,14 +473,14 @@
         });
       });
 
-      $('.student-checker').on('submit', function(e){
+      $('.student-checker').on('submit', function (e) {
         e.preventDefault();
         var $form = $(this);
         $.ajax({
           type: "POST",
           url: $form.attr('action'),
           data: $form.serialize(),
-          success: function(response) {
+          success: function (response) {
             $('.student-checker-modal').find('.modal-content').html(response);
             $('.student-checker-modal').modal('show')
           }

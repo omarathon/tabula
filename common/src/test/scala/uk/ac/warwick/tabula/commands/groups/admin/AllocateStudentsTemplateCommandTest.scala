@@ -23,14 +23,14 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     }
 
 
-    def studentMemberWithCourse(universityId: String, userId: String, firstName: String, lastName: String): StudentMember ={
+    def studentMemberWithCourse(universityId: String, userId: String, firstName: String, lastName: String): StudentMember = {
       val studentWithUsercode1 = new StudentMember
       studentWithUsercode1.universityId = universityId
       studentWithUsercode1.userId = userId
       studentWithUsercode1.firstName = firstName
       studentWithUsercode1.lastName = lastName
-      studentWithUsercode1.inUseFlag= "Active"
-      Fixtures.studentCourseDetails(studentWithUsercode1,null,null)
+      studentWithUsercode1.inUseFlag = "Active"
+      Fixtures.studentCourseDetails(studentWithUsercode1, null, null)
       studentWithUsercode1
     }
 
@@ -43,7 +43,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     user1.setLastName("Mannion")
     user1.setWarwickId("0672089")
 
-    val studentWithUsercode1: StudentMember = studentMemberWithCourse("0672089","cuscav", "Mathew", "Mannion")
+    val studentWithUsercode1: StudentMember = studentMemberWithCourse("0672089", "cuscav", "Mathew", "Mannion")
 
 
     val user2 = new User("cusebr")
@@ -51,7 +51,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     user2.setFirstName("Nick")
     user2.setLastName("Howes")
     user2.setWarwickId("0672088")
-    val studentWithUsercode2: StudentMember = studentMemberWithCourse("0672088","cusebr", "Nick", "Howes")
+    val studentWithUsercode2: StudentMember = studentMemberWithCourse("0672088", "cusebr", "Nick", "Howes")
 
 
     val user3 = new User("cusfal")
@@ -59,21 +59,21 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     user3.setFirstName("Matthew")
     user3.setLastName("Jones")
     user3.setWarwickId("9293883")
-    val studentWithUsercode3: StudentMember = studentMemberWithCourse("9293883","cusfal", "Matthew", "Jones")
+    val studentWithUsercode3: StudentMember = studentMemberWithCourse("9293883", "cusfal", "Matthew", "Jones")
 
     val user4 = new User("curef")
     user4.setFoundUser(true)
     user4.setFirstName("John")
     user4.setLastName("Dale")
     user4.setWarwickId("0200202")
-    val studentWithUsercode4: StudentMember = studentMemberWithCourse("0200202","curef", "John", "Dale")
+    val studentWithUsercode4: StudentMember = studentMemberWithCourse("0200202", "curef", "John", "Dale")
 
     val user5 = new User("cusmab")
     user5.setFoundUser(true)
     user5.setFirstName("Steven")
     user5.setLastName("Carpenter")
     user5.setWarwickId("8888888")
-    val studentWithUsercode5: StudentMember = studentMemberWithCourse("8888888","cusmab", "Steven", "Carpenter")
+    val studentWithUsercode5: StudentMember = studentMemberWithCourse("8888888", "cusmab", "Steven", "Carpenter")
 
     userLookup.users += (
       user1.getUserId -> user1,
@@ -136,72 +136,81 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.profileService.getMemberByUser(user5) returns (Some(studentWithUsercode5))
   }
 
-  @Test def allocateUsersSheet { new CommandFixture {
-    implicit class SearchableSheet(self: Sheet) {
-      def containsDataRow(id:String, name:String, maxRows:Int = self.getLastRowNum):Boolean = {
-        val rows = for (i<- 1 to maxRows) yield self.getRow(i)
-        val matchingRow = rows.find(r=>r.getCell(0).toString == id && r.getCell(1).toString == name)
-        matchingRow.isDefined
+  @Test def allocateUsersSheet {
+    new CommandFixture {
+
+      implicit class SearchableSheet(self: Sheet) {
+        def containsDataRow(id: String, name: String, maxRows: Int = self.getLastRowNum): Boolean = {
+          val rows = for (i <- 1 to maxRows) yield self.getRow(i)
+          val matchingRow = rows.find(r => r.getCell(0).toString == id && r.getCell(1).toString == name)
+          matchingRow.isDefined
+        }
       }
+
+      val workbook: SXSSFWorkbook = command.generateWorkbook()
+
+      val allocateSheet: Sheet = workbook.getSheet(command.allocateSheetName)
+
+      val headerRow: Row = allocateSheet.getRow(0)
+      headerRow.getCell(0).toString should be("student_id")
+      headerRow.getCell(1).toString should be("Student name")
+      headerRow.getCell(2).toString should be("Group name")
+      headerRow.getCell(3).toString should be("group_id")
+
+      allocateSheet.containsDataRow("0672089", "Mathew Mannion", maxRows = 6) should be(true)
+      allocateSheet.containsDataRow("0672088", "Nick Howes", maxRows = 6) should be(true)
+      allocateSheet.containsDataRow("8888888", "Steven Carpenter", maxRows = 6) should be(true)
+      allocateSheet.containsDataRow("9293883", "Matthew Jones", maxRows = 6) should be(true)
+      allocateSheet.containsDataRow("0200202", "John Dale", maxRows = 6) should be(true)
     }
+  }
 
-    val workbook: SXSSFWorkbook = command.generateWorkbook()
+  @Test def groupLookupSheet {
+    new CommandFixture {
+      val workbook: SXSSFWorkbook = command.generateWorkbook()
 
-    val allocateSheet: Sheet = workbook.getSheet(command.allocateSheetName)
+      val groupLookupSheet: Sheet = workbook.getSheet(command.groupLookupSheetName)
 
-    val headerRow: Row = allocateSheet.getRow(0)
-    headerRow.getCell(0).toString should be ("student_id")
-    headerRow.getCell(1).toString should be ("Student name")
-    headerRow.getCell(2).toString should be ("Group name")
-    headerRow.getCell(3).toString should be ("group_id")
+      var groupRow: Row = groupLookupSheet.getRow(1)
+      groupRow.getCell(0).toString should be("Group 1")
+      groupRow.getCell(1).toString should be("abcdefgh1")
 
-    allocateSheet.containsDataRow("0672089","Mathew Mannion", maxRows = 6) should be(true)
-    allocateSheet.containsDataRow("0672088","Nick Howes", maxRows = 6) should be(true)
-    allocateSheet.containsDataRow("8888888","Steven Carpenter", maxRows = 6) should be(true)
-    allocateSheet.containsDataRow("9293883","Matthew Jones", maxRows = 6) should be(true)
-    allocateSheet.containsDataRow("0200202","John Dale", maxRows = 6) should be(true)
-  }}
+      groupRow = groupLookupSheet.getRow(2)
+      groupRow.getCell(0).toString should be("Group 2")
+      groupRow.getCell(1).toString should be("abcdefgh2")
 
-  @Test def groupLookupSheet { new CommandFixture {
-    val workbook: SXSSFWorkbook = command.generateWorkbook()
+      groupRow = groupLookupSheet.getRow(3)
+      groupRow.getCell(0).toString should be("Group 3")
+      groupRow.getCell(1).toString should be("abcdefgh3")
 
-    val groupLookupSheet: Sheet = workbook.getSheet(command.groupLookupSheetName)
-
-    var groupRow: Row = groupLookupSheet.getRow(1)
-    groupRow.getCell(0).toString should be ("Group 1")
-    groupRow.getCell(1).toString should be ("abcdefgh1")
-
-    groupRow = groupLookupSheet.getRow(2)
-    groupRow.getCell(0).toString should be ("Group 2")
-    groupRow.getCell(1).toString should be ("abcdefgh2")
-
-    groupRow = groupLookupSheet.getRow(3)
-    groupRow.getCell(0).toString should be ("Group 3")
-    groupRow.getCell(1).toString should be ("abcdefgh3")
-
-    groupRow = groupLookupSheet.getRow(4)
-    groupRow.getCell(0).toString should be ("Group 4")
-    groupRow.getCell(1).toString should be ("abcdefgh4")
-  }}
-
-  @Test def checkExcelView { new CommandFixture {
-    val excelDownload: ExcelView = command.applyInternal()
-
-    excelDownload.getContentType() should be ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
-  }}
-
-  @Test def permissions { new Fixture {
-    val (theModule, theSet) = (module, set)
-    val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
-      val module: Module = theModule
-      val set: SmallGroupSet = theSet
+      groupRow = groupLookupSheet.getRow(4)
+      groupRow.getCell(0).toString should be("Group 4")
+      groupRow.getCell(1).toString should be("abcdefgh4")
     }
+  }
 
-    val checking: PermissionsChecking = mock[PermissionsChecking]
-    command.permissionsCheck(checking)
+  @Test def checkExcelView {
+    new CommandFixture {
+      val excelDownload: ExcelView = command.applyInternal()
 
-    verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
-  }}
+      excelDownload.getContentType() should be("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    }
+  }
+
+  @Test def permissions {
+    new Fixture {
+      val (theModule, theSet) = (module, set)
+      val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
+        val module: Module = theModule
+        val set: SmallGroupSet = theSet
+      }
+
+      val checking: PermissionsChecking = mock[PermissionsChecking]
+      command.permissionsCheck(checking)
+
+      verify(checking, times(1)).PermissionCheck(Permissions.SmallGroups.Allocate, set)
+    }
+  }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
     val command = new AllocateStudentsToGroupsTemplatePermissions with AllocateStudentsToGroupsTemplateCommandState {
@@ -235,14 +244,16 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     command.permissionsCheck(checking)
   }
 
-  @Test def wires { new Fixture {
-    val command = AllocateStudentsToGroupsTemplateCommand(module, set)
+  @Test def wires {
+    new Fixture {
+      val command = AllocateStudentsToGroupsTemplateCommand(module, set)
 
-    command should be (anInstanceOf[Appliable[ExcelView]])
-    command should be (anInstanceOf[AllocateStudentsToGroupsTemplatePermissions])
-    command should be (anInstanceOf[AllocateStudentsToGroupsTemplateCommandState])
-    command should be (anInstanceOf[ReadOnly])
-    command should be (anInstanceOf[Unaudited])
-  }}
+      command should be(anInstanceOf[Appliable[ExcelView]])
+      command should be(anInstanceOf[AllocateStudentsToGroupsTemplatePermissions])
+      command should be(anInstanceOf[AllocateStudentsToGroupsTemplateCommandState])
+      command should be(anInstanceOf[ReadOnly])
+      command should be(anInstanceOf[Unaudited])
+    }
+  }
 
 }

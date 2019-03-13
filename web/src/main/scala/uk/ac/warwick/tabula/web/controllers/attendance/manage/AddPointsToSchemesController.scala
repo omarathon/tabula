@@ -17,34 +17,34 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints"))
 class AddPointsToSchemesController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		AddPointsToSchemesCommand(mandatory(department), mandatory(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    AddPointsToSchemesCommand(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[AddPointsToSchemesCommandResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam(required = false) points: JInteger
-	): Mav = {
-		val result = cmd.apply()
-		Mav("attendance/manage/addpoints",
-			"schemeMaps" -> result,
-			"changedSchemes" -> (result.weekSchemes.count(_._2) + result.dateSchemes.count(_._2)),
-			"schemesParam" -> (result.weekSchemes.filter(_._2).keys ++ result.dateSchemes.filter(_._2).keys)
-				.map(s => s"findSchemes=${s.id}").mkString("&"),
-			"newPoints" -> Option(points).getOrElse(0)
-		).crumbs(
-			Breadcrumbs.Manage.HomeForYear(academicYear),
-			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.addPointsToExistingSchemes(department, year)): _*)
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[AddPointsToSchemesCommandResult],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam(required = false) points: JInteger
+  ): Mav = {
+    val result = cmd.apply()
+    Mav("attendance/manage/addpoints",
+      "schemeMaps" -> result,
+      "changedSchemes" -> (result.weekSchemes.count(_._2) + result.dateSchemes.count(_._2)),
+      "schemesParam" -> (result.weekSchemes.filter(_._2).keys ++ result.dateSchemes.filter(_._2).keys)
+        .map(s => s"findSchemes=${s.id}").mkString("&"),
+      "newPoints" -> Option(points).getOrElse(0)
+    ).crumbs(
+      Breadcrumbs.Manage.HomeForYear(academicYear),
+      Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.addPointsToExistingSchemes(department, year)): _*)
+  }
 
 }

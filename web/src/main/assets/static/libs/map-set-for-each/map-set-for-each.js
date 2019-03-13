@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-(function() {
+(function () {
   'use strict';
 
   if (typeof Map === 'undefined' ||
-      typeof Set === 'undefined' ||
-      typeof WeakMap === 'undefined') {
+    typeof Set === 'undefined' ||
+    typeof WeakMap === 'undefined') {
     throw Error('This requires Map, Set and WeakMap');
   }
 
@@ -56,18 +56,18 @@
   }
 
   MapData.prototype = {
-    getNode: function(key) {
+    getNode: function (key) {
       return MapGet.call(this.map, key);
     },
-    has: function(key) {
+    has: function (key) {
       var node = this.getNode(key);
       return !!node;
     },
-    get: function(key) {
+    get: function (key) {
       var node = this.getNode(key);
       return node && node.value;
     },
-    set: function(key, value) {
+    set: function (key, value) {
       var node = this.getNode(key);
       if (node) {
         node.value = value;
@@ -79,7 +79,7 @@
         this.size++;
       }
     },
-    delete: function(key) {
+    delete: function (key) {
       var node = this.getNode(key);
       if (!node)
         return false;
@@ -89,7 +89,7 @@
       this.maybeCleanup();
       return true;
     },
-    clear: function() {
+    clear: function () {
       if (this.iteratorCount === 0) {
         this.array = [];
       } else {
@@ -100,11 +100,11 @@
       MapClear.call(this.map);
       this.size = 0;
     },
-    maybeCleanup: function() {
-      if (this.iteratorCount === 0 &&  this.array.length > 1.5 * this.size)
+    maybeCleanup: function () {
+      if (this.iteratorCount === 0 && this.array.length > 1.5 * this.size)
         this.cleanup();
     },
-    cleanup: function() {
+    cleanup: function () {
       var newArray = [], j = 0;
       for (var i = 0; i < this.array.length; i++) {
         var node = this.array[i];
@@ -115,7 +115,7 @@
       }
       this.array = newArray;
     },
-    forEach: function(f, self, context) {
+    forEach: function (f, self, context) {
       this.iteratorCount++;
       try {
         for (var i = 0; i < this.array.length; i++) {
@@ -139,29 +139,29 @@
     return mapData;
   }
 
-  Map.prototype.has = function(key) {
+  Map.prototype.has = function (key) {
     return getMapData(this).has(key);
   };
 
-  Map.prototype.get = function(key) {
+  Map.prototype.get = function (key) {
     return getMapData(this).get(key);
   };
 
-  Map.prototype.set = function(key, value) {
+  Map.prototype.set = function (key, value) {
     getMapData(this).set(key, value);
     return this;
   };
 
-  Map.prototype.delete = function(key) {
+  Map.prototype.delete = function (key) {
     return getMapData(this).delete(key);
   };
 
-  Map.prototype.clear = function(f) {
+  Map.prototype.clear = function (f) {
     getMapData(this).clear();
   };
 
   Object.defineProperty(Set.prototype, 'size', {
-    get: function() {
+    get: function () {
       return getMapData(this).size;
     }
   });
@@ -173,30 +173,30 @@
    * @param {Object} opt_this The object to use as this in the callback.
    *     Defaults to the map itself.
    */
-  Map.prototype.forEach = function(f, opt_this) {
+  Map.prototype.forEach = function (f, opt_this) {
     getMapData(this).forEach(f, this, opt_this);
   };
 
 
-  Set.prototype.has = function(key) {
+  Set.prototype.has = function (key) {
     return getMapData(this).has(key);
   };
 
-  Set.prototype.add = function(key) {
+  Set.prototype.add = function (key) {
     getMapData(this).set(key, key);
     return this;
   };
 
-  Set.prototype.delete = function(key) {
+  Set.prototype.delete = function (key) {
     return getMapData(this).delete(key);
   };
 
-  Set.prototype.clear = function() {
+  Set.prototype.clear = function () {
     getMapData(this).clear();
   };
 
   Object.defineProperty(Set.prototype, 'size', {
-    get: function() {
+    get: function () {
       return getMapData(this).size;
     }
   });
@@ -208,7 +208,7 @@
    * @param {Object} opt_this The object to use as this in the callback.
    *     Defaults to the set itself.
    */
-  Set.prototype.forEach = function(f, opt_this) {
+  Set.prototype.forEach = function (f, opt_this) {
     getMapData(this).forEach(f, this, opt_this);
   };
 

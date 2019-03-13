@@ -21,42 +21,42 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stage}/feedback/online/{student}"))
 class OnlineMarkerFeedbackController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type Command = Appliable[MarkerFeedback] with OnlineMarkerFeedbackState
+  type Command = Appliable[MarkerFeedback] with OnlineMarkerFeedbackState
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable assignment: Assignment,
-		@PathVariable stage: MarkingWorkflowStage,
-		@PathVariable student: User,
-		@PathVariable marker: User,
-		submitter: CurrentUser
-	) = OnlineMarkerFeedbackCommand(
-		mandatory(assignment),
-		mandatory(stage),
-		mandatory(student),
-		mandatory(marker),
-		submitter,
-		GenerateGradesFromMarkCommand(mandatory(assignment))
-	)
+  @ModelAttribute("command")
+  def command(
+    @PathVariable assignment: Assignment,
+    @PathVariable stage: MarkingWorkflowStage,
+    @PathVariable student: User,
+    @PathVariable marker: User,
+    submitter: CurrentUser
+  ) = OnlineMarkerFeedbackCommand(
+    mandatory(assignment),
+    mandatory(stage),
+    mandatory(student),
+    mandatory(marker),
+    submitter,
+    GenerateGradesFromMarkCommand(mandatory(assignment))
+  )
 
-	@RequestMapping
-	def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
-		Mav("cm2/admin/assignments/markers/marker_online_feedback",
-			"isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
-			"command" -> command
-		).noLayout()
-	}
+  @RequestMapping
+  def showForm(@ModelAttribute("command") command: Command, errors: Errors): Mav = {
+    Mav("cm2/admin/assignments/markers/marker_online_feedback",
+      "isGradeValidation" -> command.assignment.module.adminDepartment.assignmentGradeValidation,
+      "command" -> command
+    ).noLayout()
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			showForm(command, errors)
-		} else {
-			command.apply()
-			Mav("ajax_success").noLayout()
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@PathVariable stage: MarkingWorkflowStage, @Valid @ModelAttribute("command") command: Command, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      showForm(command, errors)
+    } else {
+      command.apply()
+      Mav("ajax_success").noLayout()
+    }
+  }
 
 }

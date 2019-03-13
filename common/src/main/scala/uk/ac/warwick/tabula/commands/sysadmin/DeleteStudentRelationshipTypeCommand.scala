@@ -15,52 +15,52 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
 
 object DeleteStudentRelationshipTypeCommand {
-	def apply(tpe: StudentRelationshipType) =
-		new DeleteStudentRelationshipTypeCommandInternal(tpe)
-			with ComposableCommand[StudentRelationshipType]
-			with AutowiringRelationshipServiceComponent
-			with DeleteStudentRelationshipTypeCommandPermissions
-			with DeleteStudentRelationshipTypeCommandDescription
+  def apply(tpe: StudentRelationshipType) =
+    new DeleteStudentRelationshipTypeCommandInternal(tpe)
+      with ComposableCommand[StudentRelationshipType]
+      with AutowiringRelationshipServiceComponent
+      with DeleteStudentRelationshipTypeCommandPermissions
+      with DeleteStudentRelationshipTypeCommandDescription
 }
 
 class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType)
-	extends CommandInternal[StudentRelationshipType] with HasExistingStudentRelationshipType with SelfValidating {
-	this: RelationshipServiceComponent =>
+  extends CommandInternal[StudentRelationshipType] with HasExistingStudentRelationshipType with SelfValidating {
+  this: RelationshipServiceComponent =>
 
-	var confirm: Boolean = _
+  var confirm: Boolean = _
 
-	override def applyInternal(): StudentRelationshipType = transactional() {
-		relationshipService.delete(relationshipType)
-		relationshipType
-	}
+  override def applyInternal(): StudentRelationshipType = transactional() {
+    relationshipService.delete(relationshipType)
+    relationshipType
+  }
 
-	def validate(errors: Errors) {
-		// Don't allow removal if non-empty
-		if (!relationshipType.empty) {
-			errors.reject("relationshipType.delete.nonEmpty")
-		}
+  def validate(errors: Errors) {
+    // Don't allow removal if non-empty
+    if (!relationshipType.empty) {
+      errors.reject("relationshipType.delete.nonEmpty")
+    }
 
-		if (!confirm) errors.rejectValue("confirm", "relationshipType.delete.confirm")
-	}
+    if (!confirm) errors.rejectValue("confirm", "relationshipType.delete.confirm")
+  }
 }
 
 trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	this: HasExistingStudentRelationshipType =>
+  this: HasExistingStudentRelationshipType =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		mandatory(relationshipType)
-		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    mandatory(relationshipType)
+    p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
+  }
 }
 
 trait DeleteStudentRelationshipTypeCommandDescription extends Describable[StudentRelationshipType] {
-	this: HasExistingStudentRelationshipType =>
+  this: HasExistingStudentRelationshipType =>
 
-	// describe the thing that's happening.
-	override def describe(d: Description): Unit =
-		d.properties(
-			"id" -> relationshipType.id,
-			"urlPart" -> relationshipType.urlPart,
-			"description" -> relationshipType.description
-		)
+  // describe the thing that's happening.
+  override def describe(d: Description): Unit =
+    d.properties(
+      "id" -> relationshipType.id,
+      "urlPart" -> relationshipType.urlPart,
+      "description" -> relationshipType.description
+    )
 }

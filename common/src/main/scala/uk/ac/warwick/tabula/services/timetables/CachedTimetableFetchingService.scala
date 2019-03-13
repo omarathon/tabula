@@ -35,29 +35,29 @@ class CachedPartialTimetableFetchingService(
 
   val cacheEntryFactory = new CacheEntryFactory[TimetableCacheKey, EventList] {
 
-    def create(key:TimetableCacheKey): EventList = {
+    def create(key: TimetableCacheKey): EventList = {
       val result = key match {
         case StudentKey(id) => delegate match {
           case delegate: StudentTimetableFetchingService => delegate.getTimetableForStudent(id)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching student timetables")
         }
-        case StaffKey(id)   => delegate match {
+        case StaffKey(id) => delegate match {
           case delegate: StaffTimetableFetchingService => delegate.getTimetableForStaff(id)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching staff timetables")
         }
-        case CourseKey(id)  => delegate match {
+        case CourseKey(id) => delegate match {
           case delegate: CourseTimetableFetchingService => delegate.getTimetableForCourse(id)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching course timetables")
         }
-        case RoomKey(id)    => delegate match {
+        case RoomKey(id) => delegate match {
           case delegate: RoomTimetableFetchingService => delegate.getTimetableForRoom(id)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching room timetables")
         }
-        case ModuleKey(id)  => delegate match {
+        case ModuleKey(id) => delegate match {
           case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id, includeStudents = false)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables")
         }
-        case ModuleWithStudentsKey(id)  => delegate match {
+        case ModuleWithStudentsKey(id) => delegate match {
           case delegate: ModuleTimetableFetchingService => delegate.getTimetableForModule(id, includeStudents = true)
           case _ => throw new UnsupportedOperationException("Delegate does not support fetching module timetables with students")
         }
@@ -72,7 +72,9 @@ class CachedPartialTimetableFetchingService(
     def create(keys: JList[TimetableCacheKey]): JMap[TimetableCacheKey, EventList] = {
       JMap(keys.asScala.map(id => (id, create(id))): _*)
     }
+
     def isSupportsMultiLookups: Boolean = true
+
     def shouldBeCached(response: EventList): Boolean = true
   }
 
@@ -82,6 +84,7 @@ class CachedPartialTimetableFetchingService(
       .expireAfterWrite(java.time.Duration.ofSeconds(cacheExpiryTime * 10))
       .expiryStategy(new TTLCacheExpiryStrategy[TimetableCacheKey, EventList] {
         override def getTTL(entry: CacheEntry[TimetableCacheKey, EventList]): Pair[Number, TimeUnit] = Pair.of(cacheExpiryTime * 10, TimeUnit.SECONDS)
+
         override def isStale(entry: CacheEntry[TimetableCacheKey, EventList]): Boolean = (entry.getTimestamp + cacheExpiryTime * 1000) <= DateTime.now.getMillis
       })
       .asynchronous()
@@ -92,12 +95,16 @@ class CachedPartialTimetableFetchingService(
     Future(eventList).recoverWith { case e: CacheEntryUpdateException => Future.failed(e.getCause) }
 
   def getTimetableForStudent(universityId: String): Future[EventList] = toFuture(timetableCache.get(StudentKey(universityId)))
+
   def getTimetableForModule(moduleCode: String, includeStudents: Boolean): Future[EventList] = {
     if (includeStudents) toFuture(timetableCache.get(ModuleWithStudentsKey(moduleCode)))
     else toFuture(timetableCache.get(ModuleKey(moduleCode)))
   }
+
   def getTimetableForCourse(courseCode: String): Future[EventList] = toFuture(timetableCache.get(CourseKey(courseCode)))
+
   def getTimetableForRoom(roomName: String): Future[EventList] = toFuture(timetableCache.get(RoomKey(roomName)))
+
   def getTimetableForStaff(universityId: String): Future[EventList] = toFuture(timetableCache.get(StaffKey(universityId)))
 
 }
@@ -128,10 +135,17 @@ class CachedCompleteTimetableFetchingService(delegate: CompleteTimetableFetching
 }
 
 object TimetableCacheKey {
+
   case class StudentKey(id: String) extends TimetableCacheKey
+
   case class StaffKey(id: String) extends TimetableCacheKey
+
   case class CourseKey(id: String) extends TimetableCacheKey
+
   case class RoomKey(id: String) extends TimetableCacheKey
+
   case class ModuleKey(id: String) extends TimetableCacheKey
+
   case class ModuleWithStudentsKey(id: String) extends TimetableCacheKey
+
 }

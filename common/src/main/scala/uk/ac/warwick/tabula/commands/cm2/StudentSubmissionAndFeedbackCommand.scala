@@ -16,150 +16,154 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object StudentSubmissionAndFeedbackCommand {
-	case class StudentSubmissionInformation(
-		submission: Option[Submission],
-		feedback: Option[Feedback],
-		extension: Option[Extension],
-		isExtended: Boolean,
-		extensionRequested: Boolean,
-		canSubmit: Boolean,
-		canReSubmit: Boolean,
-		disability: Option[Disability]
+
+  case class StudentSubmissionInformation(
+    submission: Option[Submission],
+    feedback: Option[Feedback],
+    extension: Option[Extension],
+    isExtended: Boolean,
+    extensionRequested: Boolean,
+    canSubmit: Boolean,
+    canReSubmit: Boolean,
+    disability: Option[Disability]
   )
 
-	def apply(assignment: Assignment, member: Member, viewingUser: CurrentUser) =
-		new StudentMemberSubmissionAndFeedbackCommandInternal(assignment, member, viewingUser)
-			with StudentMemberSubmissionAndFeedbackCommandPermissions
-			with AutowiringFeedbackServiceComponent
-			with AutowiringSubmissionServiceComponent
-			with AutowiringProfileServiceComponent
-			with ComposableCommand[StudentSubmissionInformation]
-			with Unaudited with ReadOnly
+  def apply(assignment: Assignment, member: Member, viewingUser: CurrentUser) =
+    new StudentMemberSubmissionAndFeedbackCommandInternal(assignment, member, viewingUser)
+      with StudentMemberSubmissionAndFeedbackCommandPermissions
+      with AutowiringFeedbackServiceComponent
+      with AutowiringSubmissionServiceComponent
+      with AutowiringProfileServiceComponent
+      with ComposableCommand[StudentSubmissionInformation]
+      with Unaudited with ReadOnly
 
-	def apply(assignment: Assignment, user: CurrentUser) =
-		new CurrentUserSubmissionAndFeedbackCommandInternal(assignment, user)
-			with CurrentUserSubmissionAndFeedbackCommandPermissions
-			with CurrentUserSubmissionAndFeedbackNotificationCompletion
-			with AutowiringFeedbackServiceComponent
-			with AutowiringSubmissionServiceComponent
-			with AutowiringProfileServiceComponent
-			with ComposableCommand[StudentSubmissionInformation]
-			with Unaudited with ReadOnly
+  def apply(assignment: Assignment, user: CurrentUser) =
+    new CurrentUserSubmissionAndFeedbackCommandInternal(assignment, user)
+      with CurrentUserSubmissionAndFeedbackCommandPermissions
+      with CurrentUserSubmissionAndFeedbackNotificationCompletion
+      with AutowiringFeedbackServiceComponent
+      with AutowiringSubmissionServiceComponent
+      with AutowiringProfileServiceComponent
+      with ComposableCommand[StudentSubmissionInformation]
+      with Unaudited with ReadOnly
 }
 
 trait StudentSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+  self: FeedbackServiceComponent with SubmissionServiceComponent =>
 
-	def assignment: Assignment
-	def studentUser: User
-	def viewer: User
+  def assignment: Assignment
 
-	lazy val feedback: Option[AssignmentFeedback] =
-		feedbackService.getAssignmentFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
-	lazy val submission: Option[Submission] =
-		submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter(_.submitted)
+  def studentUser: User
+
+  def viewer: User
+
+  lazy val feedback: Option[AssignmentFeedback] =
+    feedbackService.getAssignmentFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
+  lazy val submission: Option[Submission] =
+    submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter(_.submitted)
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+  self: FeedbackServiceComponent with SubmissionServiceComponent =>
 
-	def studentMember: Member
-	def currentUser: CurrentUser
+  def studentMember: Member
 
-	final lazy val studentUser: User = studentMember.asSsoUser
-	final lazy val viewer: User = currentUser.apparentUser
+  def currentUser: CurrentUser
+
+  final lazy val studentUser: User = studentMember.asSsoUser
+  final lazy val viewer: User = currentUser.apparentUser
 }
 
 trait CurrentUserSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent =>
+  self: FeedbackServiceComponent with SubmissionServiceComponent =>
 
-	def currentUser: CurrentUser
+  def currentUser: CurrentUser
 
-	final lazy val studentUser: User = currentUser.apparentUser
-	final lazy val viewer: User = currentUser.apparentUser
+  final lazy val studentUser: User = currentUser.apparentUser
+  final lazy val viewer: User = currentUser.apparentUser
 }
 
 abstract class StudentMemberSubmissionAndFeedbackCommandInternal(assignment: Assignment, val studentMember: Member, val currentUser: CurrentUser)
-	extends StudentSubmissionAndFeedbackCommandInternal(assignment) with StudentMemberSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
+  extends StudentSubmissionAndFeedbackCommandInternal(assignment) with StudentMemberSubmissionAndFeedbackCommandState {
+  self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
 abstract class CurrentUserSubmissionAndFeedbackCommandInternal(assignment: Assignment, val currentUser: CurrentUser)
-	extends StudentSubmissionAndFeedbackCommandInternal(assignment) with CurrentUserSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
+  extends StudentSubmissionAndFeedbackCommandInternal(assignment) with CurrentUserSubmissionAndFeedbackCommandState {
+  self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 }
 
 abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assignment)
-	extends CommandInternal[StudentSubmissionInformation] with StudentSubmissionAndFeedbackCommandState {
-	self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
+  extends CommandInternal[StudentSubmissionInformation] with StudentSubmissionAndFeedbackCommandState {
+  self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
-	def applyInternal(): StudentSubmissionInformation = {
-		val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
+  def applyInternal(): StudentSubmissionInformation = {
+    val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
 
-		// Log a ViewOnlineFeedback event if the student itself is viewing
-		feedback.filter { _.usercode == viewer.getUserId }.foreach { feedback =>
-			ViewOnlineFeedbackCommand(feedback).apply()
-		}
+    // Log a ViewOnlineFeedback event if the student itself is viewing
+    feedback.filter(_.usercode == viewer.getUserId).foreach { feedback =>
+      ViewOnlineFeedbackCommand(feedback).apply()
+    }
 
-		StudentSubmissionInformation(
-			submission = submission,
-			feedback = HibernateHelpers.initialiseAndUnproxy(feedback),
-			extension = extension,
+    StudentSubmissionInformation(
+      submission = submission,
+      feedback = HibernateHelpers.initialiseAndUnproxy(feedback),
+      extension = extension,
 
-			isExtended = assignment.isWithinExtension(studentUser),
-			extensionRequested = extension.isDefined && !extension.get.isManual,
+      isExtended = assignment.isWithinExtension(studentUser),
+      extensionRequested = extension.isDefined && !extension.get.isManual,
 
-			canSubmit = assignment.submittable(studentUser),
-			canReSubmit = assignment.resubmittable(studentUser),
+      canSubmit = assignment.submittable(studentUser),
+      canReSubmit = assignment.resubmittable(studentUser),
 
-			disability = profileService.getMemberByUser(studentUser).flatMap {
-				case student: StudentMember => student.disability.filter(_.reportable)
-				case _ => None
-			}
-		)
-	}
+      disability = profileService.getMemberByUser(studentUser).flatMap {
+        case student: StudentMember => student.disability.filter(_.reportable)
+        case _ => None
+      }
+    )
+  }
 
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: StudentMemberSubmissionAndFeedbackCommandState =>
+  self: StudentMemberSubmissionAndFeedbackCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(studentMember))
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Submission.Read, mandatory(studentMember))
+    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(studentMember))
+  }
 }
 
 trait CurrentUserSubmissionAndFeedbackCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CurrentUserSubmissionAndFeedbackCommandState =>
+  self: CurrentUserSubmissionAndFeedbackCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		var perms = collection.mutable.MutableList[CheckablePermission]()
+  def permissionsCheck(p: PermissionsChecking) {
+    var perms = collection.mutable.MutableList[CheckablePermission]()
 
-		submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
-		feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }
+    submission.foreach { submission => perms += CheckablePermission(Permissions.Submission.Read, Some(submission)) }
+    feedback.foreach { feedback => perms += CheckablePermission(Permissions.AssignmentFeedback.Read, Some(feedback)) }
 
-		perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
+    perms += CheckablePermission(Permissions.Submission.Create, Some(assignment))
 
-		p.PermissionCheckAny(perms)
-	}
+    p.PermissionCheckAny(perms)
+  }
 }
 
 trait CurrentUserSubmissionAndFeedbackNotificationCompletion extends CompletesNotifications[StudentSubmissionInformation] {
 
-	self: NotificationHandling with StudentSubmissionAndFeedbackCommandState =>
+  self: NotificationHandling with StudentSubmissionAndFeedbackCommandState =>
 
-	def notificationsToComplete(commandResult: StudentSubmissionInformation): CompletesNotificationsResult = {
-		commandResult.feedback match {
-			case Some(feedbackResult: AssignmentFeedback) =>
-				CompletesNotificationsResult(
-					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackPublishedNotification](feedbackResult) ++
-						notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackChangeNotification](feedbackResult),
-					viewer
-				)
-			case _ =>
-				EmptyCompletesNotificationsResult
-		}
-	}
+  def notificationsToComplete(commandResult: StudentSubmissionInformation): CompletesNotificationsResult = {
+    commandResult.feedback match {
+      case Some(feedbackResult: AssignmentFeedback) =>
+        CompletesNotificationsResult(
+          notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackPublishedNotification](feedbackResult) ++
+            notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackChangeNotification](feedbackResult),
+          viewer
+        )
+      case _ =>
+        EmptyCompletesNotificationsResult
+    }
+  }
 
 }
