@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.commands.profiles.profile
 
+import uk.ac.warwick.tabula.commands.exams.grids.{StudentAssessmentCommandState, StudentAssessmentProfileCommand, StudentAssessmentProfilePermissions}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 
-class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
+class StudentAssessmentProfileCommandTest extends TestBase with Mockito {
 
 	val testStudent = new StudentMember
 	val scd = new StudentCourseDetails(testStudent, "student")
@@ -13,7 +14,7 @@ class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def requiresModuleRegistrationCoreReadPermissions() {
-		val perms = new ViewModuleRegistrationsCommandPermissions with ViewModuleRegistrationsCommandState {
+		val perms: StudentAssessmentProfilePermissions with StudentAssessmentCommandState = new StudentAssessmentProfilePermissions with StudentAssessmentCommandState {
 			val studentCourseDetails: StudentCourseDetails = scd
 			val academicYear: AcademicYear = year
 		}
@@ -25,8 +26,8 @@ class ViewModuleRegistrationsCommandTest extends TestBase with Mockito {
 
 	@Test
 	def mixesCorrectPermissionsIntoCommand() {
-		val composedCommand = ViewModuleRegistrationsCommand(scd, year)
-		composedCommand should be(anInstanceOf[ViewModuleRegistrationsCommandPermissions])
+		val composedCommand = StudentAssessmentProfileCommand(scd, year)
+		composedCommand should be(anInstanceOf[StudentAssessmentProfilePermissions])
 	}
 
 }

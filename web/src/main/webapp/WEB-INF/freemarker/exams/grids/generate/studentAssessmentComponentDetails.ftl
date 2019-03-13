@@ -48,7 +48,6 @@
 					<tr>
 						<th>Normal CAT load:</th>
 						<td>
-							<#assign normalLoadLookup = command.normalLoadLookup />
 							<#if normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)?has_content>
 								${normalLoadLookup.withoutDefault(studentCourseDetails.currentRoute)}
 							<#else>
@@ -110,15 +109,14 @@
 				<tbody>
 					<#list assessmentComponents as info>
 						<#assign mr = info.moduleRegistration />
-						<#assign test = info.studentAssessmentComponentInfo />
 						<tr>
 							<td class="assessment_details_col assessment_details_col2" ><div>${mr.module.code?upper_case}</div>  <div>${mr.module.name}</div></td>
 							<td class="assessment_details_col">${mr.cats}</td>
 							<td>
 								<table class="component_info">
 									<tbody>
-										<#list info.studentAssessmentComponentInfo as studentInfo>
-										<tr><td>${studentInfo.grpWithComponentInfo.group.sequence}</td></tr>
+										<#list info.components as component>
+											<tr><td>${component.upstreamGroup.group.sequence}</td></tr>
 										</#list>
 									</tbody>
 								</table>
@@ -126,8 +124,8 @@
 							<td>
 								<table class="component_info">
 									<tbody>
-										<#list info.studentAssessmentComponentInfo as studentInfo>
-										<tr><td>${studentInfo.grpWithComponentInfo.name}</td></tr>
+										<#list info.components as component>
+										<tr><td>${component.upstreamGroup.name}</td></tr>
 										</#list>
 									</tbody>
 								</table>
@@ -136,20 +134,20 @@
 							<td>
 								<table class="component_info">
 									<tbody>
-										<#list info.studentAssessmentComponentInfo as studentInfo>
+										<#list info.components as component>
 											<tr>
 												<td>
-													<#if studentInfo.groupMember.firstDefinedMark??>
-														<#assign passMark =mapGet(passMarkMap, studentInfo.grpWithComponentInfo.assessmentComponent.module) />
+													<#if component.member.firstDefinedMark??>
+														<#assign passMark =mapGet(passMarkMap, component.upstreamGroup.assessmentComponent.module) />
 														<#assign class><#compress>
-															<#if studentInfo.groupMember.firstDefinedMark?number < passMark>exam-grid-fail </#if>
-															<#if !studentInfo.groupMember.isAgreedMark()>exam-grid-actual-mark </#if>
-															<#if studentInfo.groupMember.isResitMark()>exam-grid-resit </#if>
+															<#if component.member.firstDefinedMark?number < passMark>exam-grid-fail </#if>
+															<#if !component.member.isAgreedMark()>exam-grid-actual-mark </#if>
+															<#if component.member.isResitMark()>exam-grid-resit </#if>
 														</#compress></#assign>
 														<span class="${class}"><#compress>
-															${studentInfo.groupMember.firstDefinedMark}
-															<#if studentInfo.groupMember.isResitMark() && studentInfo.groupMember.firstOriginalMark??>
-																(${studentInfo.groupMember.firstOriginalMark})
+															${component.member.firstDefinedMark}
+															<#if component.member.isResitMark() && component.member.firstOriginalMark??>
+																(${component.member.firstOriginalMark})
 															</#if>
 														</#compress></span>
 													<#else>
@@ -164,11 +162,11 @@
 							<td>
 								<table class="component_info">
 									<tbody>
-										<#list info.studentAssessmentComponentInfo as studentInfo>
+										<#list info.components as component>
 											<tr>
 												<td>
-													<#if studentInfo.groupMember.firstDefinedGrade??>
-														<span class="<#if !studentInfo.groupMember.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${studentInfo.groupMember.firstDefinedGrade}</span>
+													<#if component.member.firstDefinedGrade??>
+														<span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${component.member.firstDefinedGrade}</span>
 													<#else>
 														<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="No grade set for Assessment component">X</span>
 													</#if>

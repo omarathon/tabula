@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -263,7 +262,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 					weighting <- weightings
 				} yield s"${weighting.weightingAsPercentage.toPlainString}"
 
-				val weightingCol = if (weightings.size > 0) {
+				val weightingCol = if (weightings.nonEmpty) {
 					s"${yearWeightingsAsString.mkString("/")} - ${weightings.head.course.code}"
 				} else "Year weightings not set"
 				entity -> ExamGridColumnValueString(weightingCol)

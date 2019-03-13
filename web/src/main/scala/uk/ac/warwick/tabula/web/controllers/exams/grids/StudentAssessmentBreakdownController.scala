@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.{StudentAssessmentCommand, _}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, NormalLoadLookup}
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
@@ -20,11 +21,11 @@ class StudentAssessmentBreakdownController extends ExamsController
 	with DepartmentScopedController with AcademicYearScopedController
 	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
 	with AutowiringMaintenanceModeServiceComponent with AutowiringJobServiceComponent
-	with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent
+	with AutowiringCourseAndRouteServiceComponent with AutowiringModuleRegistrationServiceComponent with AutowiringNormalCATSLoadServiceComponent
 	with TaskBenchmarking {
 
 
-	type CommandType = Appliable[Seq[GridAssessmentComponentDetails]] with StudentAssessmentCommandState
+	type CommandType = Appliable[StudentMarksBreakdown] with StudentAssessmentCommandState
 
 	override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
@@ -35,24 +36,10 @@ class StudentAssessmentBreakdownController extends ExamsController
 	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 
-	protected def fetchScyd(scd: StudentCourseDetails, gridAcademicYear: AcademicYear): StudentCourseYearDetails = {
-		val scyds = scd.freshStudentCourseYearDetails match {
-			case Nil =>
-				scd.freshOrStaleStudentCourseYearDetails
-			case fresh =>
-				fresh
-		}
-		scyds.find(_.academicYear == gridAcademicYear) match {
-			case Some(scyd) => scyd
-			case _ => throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year ")
-		}
-	}
-
-
 	@ModelAttribute("command")
 	def command(@PathVariable studentCourseDetails: StudentCourseDetails,
 		@PathVariable academicYear: AcademicYear): CommandType = {
-		StudentAssessmentCommand(fetchScyd(studentCourseDetails, academicYear), mandatory(academicYear))
+		StudentAssessmentCommand(studentCourseDetails, mandatory(academicYear))
 	}
 
 	@ModelAttribute("weightings")
@@ -70,23 +57,29 @@ class StudentAssessmentBreakdownController extends ExamsController
 		@ModelAttribute("command") cmd: CommandType
 	): Mav = {
 
-		val assessmentComponents = cmd.apply()
+		val breakdown = cmd.apply()
+		val assessmentComponents = breakdown.modules
 		val passMarkMap = assessmentComponents.map(ac => {
 			val module = ac.moduleRegistration.module
 			module -> ProgressionService.modulePassMark(module.degreeType)
 		}).toMap
+		val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, cmd.studentCourseYearDetails.yearOfStudy, normalCATSLoadService)
 
 		Mav("exams/grids/generate/studentAssessmentComponentDetails",
 			"passMarkMap" -> passMarkMap,
 			"assessmentComponents" -> assessmentComponents,
+			"normalLoadLookup" -> normalLoadLookup,
 			"member" -> studentCourseDetails.student
 		).crumbs(Breadcrumbs.Grids.Home, Breadcrumbs.Grids.Department(mandatory(cmd.studentCourseYearDetails.enrolmentDepartment), mandatory(academicYear)))
 			.secondCrumbs(secondBreadcrumbs(academicYear, studentCourseDetails)(scyd => Routes.exams.Grids.assessmentdetails(scyd)): _*)
 
 	}
 
-	def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {
-		val chooseScyd = fetchScyd(scd, activeAcademicYear)
+	def secondBreadcrumbs(activeAcademicYear: AcademicYear, scd: StudentCourseDetails)(urlGenerator: StudentCourseYearDetails => String): Seq[BreadCrumb] = {
+		val chooseScyd = scd.freshStudentCourseYearDetailsForYear(activeAcademicYear) // fresh scyd for this year
+			.orElse(scd.freshOrStaleStudentCourseYearDetailsForYear(activeAcademicYear))
+			.getOrElse(throw new UnsupportedOperationException("Not valid StudentCourseYearDetails for given academic year"))
+
 		val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
 			case Nil =>
 				scd.student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)

@@ -90,6 +90,8 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 	def firstDefinedMark: Option[BigDecimal] = resitAgreedMark.orElse(resitActualMark).orElse(firstOriginalMark)
 	// doesn't include resit marks
 	def firstOriginalMark: Option[BigDecimal] = agreedMark.orElse(actualMark)
+	// only includes board agreed marks
+	def firstAgreedMark: Option[BigDecimal] = resitAgreedMark.orElse(agreedMark)
 
 	def isAgreedGrade: Boolean  = resitAgreedGrade.orElse(agreedGrade).isDefined
 	def isResitGrade: Boolean  = resitAgreedGrade.orElse(resitActualGrade).isDefined
@@ -97,6 +99,8 @@ class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAss
 	def firstDefinedGrade: Option[String] = resitAgreedGrade.orElse(resitActualGrade).orElse(firstOriginalGrade)
 	// doesn't include resit grades
 	def firstOriginalGrade: Option[String] = agreedGrade.orElse(actualGrade)
+	// only includes board agreed marks
+	def firstAgreedGrade: Option[String] = resitAgreedGrade.orElse(agreedGrade)
 }
 
 trait UpstreamAssessmentGroupMemberProperties {
