@@ -35,11 +35,7 @@ trait TimetableEventToJsonConverter {
     "context" -> event.parent.shortName,
     "parent" -> event.parent,
     "comments" -> event.comments.orNull,
-    "staffUniversityIds" -> event.staff.map {
-      _.getWarwickId
-    }.filter {
-      _.hasText
-    },
+    "staffUniversityIds" -> event.staff.map(_.getWarwickId).filter(_.hasText),
     "staff" -> event.staff.map { user =>
       Map(
         "universityId" -> user.getWarwickId,

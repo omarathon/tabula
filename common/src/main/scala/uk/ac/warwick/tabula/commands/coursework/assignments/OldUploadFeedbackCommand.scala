@@ -173,9 +173,7 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
 
     for ((filename, file) <- bits) {
       // match uni numbers found in file path
-      val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map {
-        _.subgroups(0)
-      }.toList
+      val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map(_.subgroups(0)).toList
 
       // ignore any numbers longer than 7 characters.
       val numbers = allNumbers.filter {
@@ -194,9 +192,7 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
       }
 
       // match potential module codes found in file path
-      val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map {
-        _.subgroups(0)
-      }.toList
+      val allModuleCodes = moduleCodePattern.findAllIn(filename).matchData.map(_.subgroups(0)).toList
 
       if (allModuleCodes.nonEmpty) {
         // the potential module code doesn't match this assignment's module code

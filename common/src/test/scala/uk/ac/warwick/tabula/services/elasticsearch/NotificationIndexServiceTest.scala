@@ -138,9 +138,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
       .futureValue
 
     dates.size should be(50)
-    dates.head should be(recipientNotifications.map {
-      _.notification.created.withMillisOfSecond(0)
-    }.max)
+    dates.head should be(recipientNotifications.map(_.notification.created.withMillisOfSecond(0)).max)
   }
 
   @Test def missingRecipient(): Unit = new DataFixture {

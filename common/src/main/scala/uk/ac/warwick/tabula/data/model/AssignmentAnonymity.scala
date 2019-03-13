@@ -61,7 +61,5 @@ class AssignmentAnonymityUserType extends AbstractBasicUserType[AssignmentAnonym
 class AssignmentAnonymityConverter extends TwoWayConverter[String, AssignmentAnonymity] {
   override def convertRight(code: String): AssignmentAnonymity = AssignmentAnonymity.fromCode(code)
 
-  override def convertLeft(aa: AssignmentAnonymity): String = (Option(aa) map {
-    _.code
-  }).orNull
+  override def convertLeft(aa: AssignmentAnonymity): String = (Option(aa).map(_.code)).orNull
 }

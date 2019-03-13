@@ -31,9 +31,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
         case _ => notification.items.asScala
       }
 
-      val permissionsTargets = allEntities.filter(_ != null).map {
-        _.entity
-      }.collect { case pt: PermissionsTarget => pt }
+      val permissionsTargets = allEntities.filter(_ != null).map(_.entity).collect { case pt: PermissionsTarget => pt }
 
       def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 

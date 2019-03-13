@@ -69,9 +69,7 @@ class SmallGroup
   @Column(name = "name")
   private var _name: String = _
 
-  def name: String = Option(linkedDepartmentSmallGroup).map {
-    _.name
-  }.getOrElse(_name)
+  def name: String = Option(linkedDepartmentSmallGroup).map(_.name).getOrElse(_name)
 
   def name_=(name: String) {
     _name = name

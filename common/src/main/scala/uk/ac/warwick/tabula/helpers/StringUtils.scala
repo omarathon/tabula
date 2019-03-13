@@ -17,9 +17,7 @@ trait StringUtils {
 
     def hasLength: Boolean = Utils hasLength string
 
-    def safeTrim: String = Option(string).map {
-      _.trim
-    }.getOrElse("")
+    def safeTrim: String = Option(string).map(_.trim).getOrElse("")
 
     def safeSubstring(proposedStart: Int): String = Utils safeSubstring(string, proposedStart)
 
@@ -31,9 +29,7 @@ trait StringUtils {
 
     def textOrEmpty: String = maybeText.getOrElse("")
 
-    def safeLowercase: String = Option(string).map {
-      _.toLowerCase
-    }.getOrElse("")
+    def safeLowercase: String = Option(string).map(_.toLowerCase).getOrElse("")
 
     def safeLength: Int = Option(string).fold(0) {
       _.length

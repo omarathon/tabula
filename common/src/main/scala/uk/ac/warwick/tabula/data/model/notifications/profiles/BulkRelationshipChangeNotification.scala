@@ -73,13 +73,9 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
   }
 
 
-  def student: Option[StudentMember] = entities.headOption.map {
-    _.studentCourseDetails.student
-  }
+  def student: Option[StudentMember] = entities.headOption.map(_.studentCourseDetails.student)
 
-  def recipients: Seq[User] = student.map {
-    _.asSsoUser
-  }.toSeq
+  def recipients: Seq[User] = student.map(_.asSsoUser).toSeq
 
   def url: String = student.map(stu => Routes.Profile.relationshipType(stu, relationshipType)).getOrElse("")
 
@@ -100,15 +96,11 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotification {
   @transient val templateLocation = BulkRelationshipChangeNotification.NewAgentTemplate
 
-  def newAgent: Option[Member] = entities.headOption.flatMap {
-    _.agentMember
-  }
+  def newAgent: Option[Member] = entities.headOption.flatMap(_.agentMember)
 
   def title: String = s"Allocation of new ${relationshipType.studentRole}s"
 
-  def recipients: Seq[User] = newAgent.map {
-    _.asSsoUser
-  }.toSeq
+  def recipients: Seq[User] = newAgent.map(_.asSsoUser).toSeq
 
   def url: String = Routes.students(relationshipType)
 
@@ -134,9 +126,7 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
   def title: String = s"Change to ${relationshipType.studentRole}s"
 
   // this should be a sequence of 1 since one notification is created for each old agent
-  def recipients: Seq[User] = oldAgents.map {
-    _.asSsoUser
-  }
+  def recipients: Seq[User] = oldAgents.map(_.asSsoUser)
 
   def url: String = Routes.students(relationshipType)
 

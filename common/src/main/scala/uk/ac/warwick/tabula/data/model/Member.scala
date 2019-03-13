@@ -360,9 +360,7 @@ class StudentMember extends Member with StudentProperties {
     val modules: Stream[PermissionsTarget] = mostSignificantCourse.toStream.flatMap { scd =>
       latestStudentCourseYearDetails.toStream.flatMap { scyd =>
         // Only include module registrations for the latest year of the most significant course
-        scd.moduleRegistrationsByYear(Some(scyd.academicYear)).map {
-          _.module
-        }
+        scd.moduleRegistrationsByYear(Some(scyd.academicYear)).map(_.module)
       }
     }
 

@@ -71,12 +71,8 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
       command.populate()
 
-      command.existingGroups.values().asScala.map {
-        _.name
-      }.toSet should be(Set("Group A", "Group B"))
-      command.existingGroups.values().asScala.map {
-        _.maxGroupSize
-      }.toSet should be(Set(null, null))
+      command.existingGroups.values().asScala.map(_.name).toSet should be(Set("Group A", "Group B"))
+      command.existingGroups.values().asScala.map(_.maxGroupSize).toSet should be(Set(null, null))
     }
   }
 
@@ -124,9 +120,7 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
   @Test def edit {
     new CommandWithExistingFixture {
-      command.existingGroups.asScala.values.map {
-        _.name
-      }.toSet should be(Set("Group A", "Group B", "Group C", "Group D"))
+      command.existingGroups.asScala.values.map(_.name).toSet should be(Set("Group A", "Group B", "Group C", "Group D"))
       command.existingGroups.get(groupB.id).name = "Edited group"
       command.existingGroups.get(groupD.id).delete = true
 

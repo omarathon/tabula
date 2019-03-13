@@ -18,9 +18,7 @@ class LegacyAwareObjectStorageService(val defaultService: ObjectStorageService, 
   /**
     * Not guaranteed to be distinct (unless you call distinct on it) but shouldn't be used anyway.
     */
-  override def listKeys(): Stream[String] = services.toStream.flatMap {
-    _.listKeys()
-  }
+  override def listKeys(): Stream[String] = services.toStream.flatMap(_.listKeys())
 
   override def afterPropertiesSet(): Unit = services.foreach(_.afterPropertiesSet())
 }

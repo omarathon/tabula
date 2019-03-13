@@ -174,9 +174,7 @@ class SchedulingConfiguration {
       }
 
     val jobs = Seq(scheduledJobs, SchedulingConfiguration.unscheduledJobs).flatten
-    val jobNames = jobs.map {
-      _.name
-    }
+    val jobNames = jobs.map(_.name)
 
     // Clear the scheduler if there is a trigger that we no longer want to run
     val clearScheduler = !triggerNames.forall(jobNames.contains)
@@ -215,12 +213,8 @@ class SchedulingConfiguration {
     factory.setApplicationContextSchedulerContextKey("applicationContext")
     factory.setJobFactory(jobFactory)
 
-    factory.setJobDetails(jobs.map {
-      _.jobDetail
-    }: _*)
-    factory.setTriggers(scheduledJobs.map {
-      _.trigger
-    }: _*)
+    factory.setJobDetails(jobs.map(_.jobDetail): _*)
+    factory.setTriggers(scheduledJobs.map(_.trigger): _*)
 
     factory
   }

@@ -99,9 +99,7 @@ class ViewPlagiarismReportCommandInternal(val module: Module, val assignment: As
               val matchingObject = list.find {
                 _.title == attachment.id
               }
-              val objectId = matchingObject.map {
-                _.objectId
-              }
+              val objectId = matchingObject.map(_.objectId)
               objectId match {
                 case Some(id) =>
                   debug("Found objectID %s for FileAttachment %s", id, attachment.id)

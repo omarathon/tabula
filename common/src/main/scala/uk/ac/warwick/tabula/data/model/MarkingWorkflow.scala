@@ -207,12 +207,8 @@ trait AssessmentMarkerMap {
 
     def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
       val studentIds =
-        assignment.firstMarkerMap.get(marker.getUserId).map {
-          _.knownType.allIncludedIds
-        }.getOrElse(Seq()) ++
-          assignment.secondMarkerMap.get(marker.getUserId).map {
-            _.knownType.allIncludedIds
-          }.getOrElse(Seq())
+        assignment.firstMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Seq()) ++
+          assignment.secondMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Seq())
 
       assignment.submissions.asScala.filter(s => studentIds.contains(s.usercode))
     }
@@ -238,12 +234,8 @@ trait AssessmentMarkerMap {
   }
 
   def getMarkersStudents(assessment: Assessment, marker: User): Seq[User] = {
-    assessment.firstMarkerMap.get(marker.getUserId).map {
-      _.knownType.users
-    }.getOrElse(Seq()) ++
-      assessment.secondMarkerMap.get(marker.getUserId).map {
-        _.knownType.users
-      }.getOrElse(Seq())
+    assessment.firstMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Seq()) ++
+      assessment.secondMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Seq())
   }
 
 }
@@ -323,7 +315,5 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod] {
 class StringToMarkingMethod extends TwoWayConverter[String, MarkingMethod] {
   override def convertRight(source: String): MarkingMethod = source.maybeText.map(MarkingMethod.fromCode).orNull
 
-  override def convertLeft(source: MarkingMethod): String = Option(source).map {
-    _.name
-  }.orNull
+  override def convertLeft(source: MarkingMethod): String = Option(source).map(_.name).orNull
 }

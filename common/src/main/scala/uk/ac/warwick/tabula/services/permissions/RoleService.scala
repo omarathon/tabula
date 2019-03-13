@@ -128,17 +128,11 @@ class RoleServiceImpl extends RoleService with Logging {
         _._2.nonEmpty
       }
 
-      val stream = hasResults flatMap {
-        _._2
-      }
+      val stream = hasResults.flatMap(_._2)
 
       // For each of the parents, call the stack again, excluding any exhaustive providers that have returned results
       val next = scope.permissionsParents flatMap {
-        streamScoped((noResults #::: (hasResults filter {
-          _._1.isExhaustive
-        })) map {
-          _._1
-        }, _)
+        streamScoped((noResults #::: (hasResults.filter(_._1.isExhaustive))).map(_._1), _)
       }
 
       stream #::: next
@@ -181,15 +175,9 @@ class RoleServiceImpl extends RoleService with Logging {
           _._2.nonEmpty
         }
 
-        val stream = hasResults flatMap {
-          _._2
-        }
+        val stream = hasResults.flatMap(_._2)
         val next = scope.permissionsParents flatMap {
-          streamScoped((noResults #::: (hasResults filter {
-            _._1.isExhaustive
-          })) map {
-            _._1
-          }, _)
+          streamScoped((noResults #::: (hasResults.filter(_._1.isExhaustive))).map(_._1), _)
         }
 
         stream #::: next

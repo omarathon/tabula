@@ -14,11 +14,7 @@ object AdminHomeExports {
     var topLevelUrl: String = Wire.property("${toplevel.url}")
 
     def toXML: Elem = {
-      val assignments = info.modules.flatMap {
-        _.assignments.asScala
-      }.filter {
-        _.isAlive
-      }
+      val assignments = info.modules.flatMap(_.assignments.asScala).filter(_.isAlive)
 
       <assignments>
         {assignments map assignmentElement}
@@ -44,9 +40,7 @@ object AdminHomeExports {
       "open-date" -> assignment.openDate,
       "open-ended" -> assignment.openEnded,
       "close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
-      "last-submission-date" -> assignment.submissions.asScala.map {
-        _.submittedDate
-      }.sortBy {
+      "last-submission-date" -> assignment.submissions.asScala.map(_.submittedDate).sortBy {
         _.getMillis
       }.reverse.headOption,
       "submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))

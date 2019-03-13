@@ -62,9 +62,7 @@ trait StudentSubmissionAndFeedbackCommandState {
   lazy val feedback: Option[AssignmentFeedback] =
     feedbackService.getAssignmentFeedbackByUsercode(assignment, studentUser.getUserId).filter(_.released)
   lazy val submission: Option[Submission] =
-    submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter {
-      _.submitted
-    }
+    submissionService.getSubmissionByUsercode(assignment, studentUser.getUserId).filter(_.submitted)
 }
 
 trait StudentMemberSubmissionAndFeedbackCommandState extends StudentSubmissionAndFeedbackCommandState {

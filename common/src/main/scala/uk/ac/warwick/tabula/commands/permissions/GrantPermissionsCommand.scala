@@ -64,9 +64,7 @@ trait GrantPermissionsCommandValidation extends SelfValidating {
     }) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      grantedPermission.map {
-        _.users
-      }.foreach { users =>
+      grantedPermission.map(_.users).foreach { users =>
         val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
           override def alreadyHasCode: Boolean = usercodes.asScala.exists {
             users.knownType.includesUserId

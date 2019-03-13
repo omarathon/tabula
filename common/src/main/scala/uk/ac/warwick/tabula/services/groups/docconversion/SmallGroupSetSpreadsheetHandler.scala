@@ -513,9 +513,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
 
       set.module.code.equalsIgnoreCase(moduleCode) && set.name.equalsIgnoreCase(setName) && group.name.equalsIgnoreCase(groupName)
     }.flatMap { row =>
-      val title = row.values.get(ExtractedSmallGroupEvent.TitleColumn).flatMap {
-        _.formattedValue.maybeText
-      }
+      val title = row.values.get(ExtractedSmallGroupEvent.TitleColumn).flatMap(_.formattedValue.maybeText)
       val tutors =
         if (row.values.contains(ExtractedSmallGroupEvent.TutorsColumn))
           extractUsers(sheetName, row.values(ExtractedSmallGroupEvent.TutorsColumn), result)

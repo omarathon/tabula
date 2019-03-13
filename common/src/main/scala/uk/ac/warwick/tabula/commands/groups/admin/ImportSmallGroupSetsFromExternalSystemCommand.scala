@@ -145,9 +145,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandInternal(val department: Depa
 
           set.groups.add(group)
 
-          val tutorUsercodes = e.staff.map {
-            _.getUserId
-          }
+          val tutorUsercodes = e.staff.map(_.getUserId)
 
           createEvent(module, set, group, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
         }

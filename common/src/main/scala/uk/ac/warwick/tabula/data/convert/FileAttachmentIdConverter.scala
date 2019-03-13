@@ -11,7 +11,5 @@ class FileAttachmentIdConverter extends TwoWayConverter[String, FileAttachment] 
 
   override def convertRight(id: String): FileAttachment = fileDao.getFileById(id).orNull
 
-  override def convertLeft(attachment: FileAttachment): String = (Option(attachment) map {
-    _.id
-  }).orNull
+  override def convertLeft(attachment: FileAttachment): String = (Option(attachment).map(_.id)).orNull
 }

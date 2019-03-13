@@ -125,9 +125,7 @@ class StudentCourseDetails
         latestYearDetails.toStream.flatMap { scyd =>
           // Only include module registrations for the latest year
           // FIXME TAB-2971 See StudentMember.permissionsParents
-          moduleRegistrationsByYear(Some(scyd.academicYear)).map {
-            _.module
-          }
+          moduleRegistrationsByYear(Some(scyd.academicYear)).map(_.module)
         }
       )
   }
@@ -214,9 +212,7 @@ class StudentCourseDetails
     if (department == null) false
     else {
       // first see if any of the sub-departments that the student is in are set to display this relationship type
-      val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap {
-        _.studentRelationshipDisplayed.get(relationshipType.id)
-      }.exists(_.toBoolean)
+      val relationshipDisplayedForSubDepts = department.subDepartmentsContaining(student).flatMap(_.studentRelationshipDisplayed.get(relationshipType.id)).exists(_.toBoolean)
 
       // if either a sub-dept is set to display this relationship type or the parent department is, then display it:
       relationshipDisplayedForSubDepts || department.getStudentRelationshipDisplayed(relationshipType)

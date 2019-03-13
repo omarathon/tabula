@@ -42,12 +42,8 @@ object TimetableFetchingService {
 
     def combine(eventLists: Seq[EventList]): EventList =
       EventList.forDate(
-        eventLists.flatMap {
-          _.events
-        },
-        eventLists.flatMap {
-          _.lastUpdated
-        }.sortBy(_.getMillis).headOption // Earliest
+        eventLists.flatMap(_.events),
+        eventLists.flatMap(_.lastUpdated).sortBy(_.getMillis).headOption // Earliest
       )
   }
 
@@ -74,12 +70,8 @@ object TimetableFetchingService {
 
     def combine(eventLists: Seq[EventOccurrenceList]): EventOccurrenceList =
       EventOccurrenceList(
-        eventLists.flatMap {
-          _.events
-        },
-        eventLists.flatMap {
-          _.lastUpdated
-        }.sortBy(_.getMillis).headOption // Earliest
+        eventLists.flatMap(_.events),
+        eventLists.flatMap(_.lastUpdated).sortBy(_.getMillis).headOption // Earliest
       )
   }
 
@@ -174,33 +166,19 @@ object CombinedTimetableFetchingService {
           val event = groupedEvents.head
           TimetableEvent(
             event.uid,
-            groupedEvents.flatMap {
-              _.name.maybeText
-            }.headOption.getOrElse(""),
-            groupedEvents.flatMap {
-              _.title.maybeText
-            }.headOption.getOrElse(""),
-            groupedEvents.flatMap {
-              _.description.maybeText
-            }.headOption.getOrElse(""),
+            groupedEvents.flatMap(_.name.maybeText).headOption.getOrElse(""),
+            groupedEvents.flatMap(_.title.maybeText).headOption.getOrElse(""),
+            groupedEvents.flatMap(_.description.maybeText).headOption.getOrElse(""),
             event.eventType,
             event.weekRanges,
             event.day,
             event.startTime,
             event.endTime,
-            groupedEvents.flatMap {
-              _.location
-            }.headOption,
+            groupedEvents.flatMap(_.location).headOption,
             event.parent,
-            groupedEvents.flatMap {
-              _.comments
-            }.headOption,
-            groupedEvents.flatMap {
-              _.staff
-            }.distinct,
-            groupedEvents.flatMap {
-              _.students
-            }.distinct,
+            groupedEvents.flatMap(_.comments).headOption,
+            groupedEvents.flatMap(_.staff).distinct,
+            groupedEvents.flatMap(_.students).distinct,
             event.year,
             event.relatedUrl,
             event.attendance

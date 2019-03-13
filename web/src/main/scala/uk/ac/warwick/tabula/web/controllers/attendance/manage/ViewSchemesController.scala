@@ -43,9 +43,7 @@ class ViewSchemesController extends AttendanceController
 
     Mav("attendance/manage/list",
       "schemes" -> schemes,
-      "havePoints" -> (schemes.map {
-        _.points.size
-      }.sum > 0)
+      "havePoints" -> (schemes.map(_.points.size).sum > 0)
     ).crumbs(
       Breadcrumbs.Manage.HomeForYear(academicYear),
       Breadcrumbs.Manage.DepartmentForYear(department, academicYear)

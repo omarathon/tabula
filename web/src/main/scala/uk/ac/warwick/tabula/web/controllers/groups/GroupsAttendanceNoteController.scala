@@ -34,9 +34,7 @@ class GroupsAttendanceNoteController extends GroupsController {
     Mav("groups/attendance/view_note",
       "attendanceNote" -> attendanceNote,
       "attendance" -> attendance,
-      "updatedBy" -> profileService.getAllMembersWithUserId(attendanceNote.updatedBy).headOption.map {
-        _.fullName
-      }.getOrElse(""),
+      "updatedBy" -> profileService.getAllMembersWithUserId(attendanceNote.updatedBy).headOption.map(_.fullName).getOrElse(""),
       "updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
       "isModal" -> ajax
     ).noLayoutIf(ajax)

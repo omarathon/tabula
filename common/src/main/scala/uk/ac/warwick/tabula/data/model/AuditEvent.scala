@@ -52,9 +52,7 @@ case class AuditEvent(
   @transient var related: Seq[AuditEvent] = Nil) extends Identifiable {
 
   /** Collects up all the parsed data maps for all related events. */
-  def relatedParsedData: Seq[DataType] = related.flatMap {
-    _.parsedData
-  }
+  def relatedParsedData: Seq[DataType] = related.flatMap(_.parsedData)
 
   /**
     * Joins the JSON data for all the related audit events into one map. It is a simple
@@ -106,21 +104,13 @@ case class AuditEvent(
     */
   private def stringProperty(name: String): Option[String] =
     relatedParsedData
-      .flatMap {
-        _.get(name)
-      }
-      .map {
-        _.toString
-      }.headOption
+      .flatMap(_.get(name))
+      .map(_.toString).headOption
 
   private def stringListProperty(name: String): Seq[String] =
     relatedParsedData
-      .flatMap {
-        _.get(name)
-      }
-      .flatMap {
-        _.asInstanceOf[Seq[String]]
-      }
+      .flatMap(_.get(name))
+      .flatMap(_.asInstanceOf[Seq[String]])
 
   /**
     * Convert to an Event object (losing the stage information). There's usually

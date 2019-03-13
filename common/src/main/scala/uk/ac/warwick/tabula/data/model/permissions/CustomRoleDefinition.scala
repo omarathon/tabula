@@ -25,9 +25,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
   // Role uses getName. Could change it to name.
   def getName: String = name
 
-  def description: String = "%s (derived from %s)" format(name, Option(baseRoleDefinition).map {
-    _.description
-  } getOrElse ("another role"))
+  def description: String = "%s (derived from %s)" format(name, Option(baseRoleDefinition).map(_.description) getOrElse ("another role"))
 
   def isAssignable = true
 
@@ -84,9 +82,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
     val additions = additionOverrides.map {
       _.permission -> scope
     }
-    val removals = removalOverrides.map {
-      _.permission
-    }
+    val removals = removalOverrides.map(_.permission)
 
     (basePermissions ++ additions) -- removals
   }

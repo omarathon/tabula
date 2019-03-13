@@ -14,8 +14,6 @@ class AssignmentIdConverter extends TwoWayConverter[String, Assignment] {
     service.getAssignmentById
   }).orNull
 
-  override def convertLeft(assignment: Assignment): String = (Option(assignment) map {
-    _.id
-  }).orNull
+  override def convertLeft(assignment: Assignment): String = (Option(assignment).map(_.id)).orNull
 
 }

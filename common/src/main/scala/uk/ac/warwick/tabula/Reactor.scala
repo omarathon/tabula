@@ -40,9 +40,7 @@ object Reactor {
     }
 
     def emit(a: A) {
-      observers.foreach {
-        _ (a)
-      }
+      observers.foreach(_(a))
     }
   }
 

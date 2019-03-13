@@ -38,12 +38,8 @@ trait CustomRoleControllerMethods extends AdminController {
     val allDepartments = parentDepartments(department)
 
     val relationshipTypes =
-      if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter {
-        _.defaultDisplay
-      }
-      else allDepartments.flatMap {
-        _.displayedStudentRelationshipTypes
-      }.distinct
+      if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter(_.defaultDisplay)
+      else allDepartments.flatMap(_.displayedStudentRelationshipTypes).distinct
 
     val selectorBuiltInRoleDefinitions =
       ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
@@ -55,9 +51,7 @@ trait CustomRoleControllerMethods extends AdminController {
 
     val customRoleDefinitions = allDepartments.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
 
-    (builtInRoleDefinitions ++ customRoleDefinitions ++ selectorBuiltInRoleDefinitions).filter {
-      _.isAssignable
-    }
+    (builtInRoleDefinitions ++ customRoleDefinitions ++ selectorBuiltInRoleDefinitions).filter(_.isAssignable)
   }
 }
 

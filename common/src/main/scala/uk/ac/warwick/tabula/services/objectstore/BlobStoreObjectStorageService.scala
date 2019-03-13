@@ -93,8 +93,6 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
     }
 
     val firstResults = blobStore.list(objectContainerName)
-    list(Option(firstResults.getNextMarker), firstResults.asScala.toStream).map {
-      _.getName
-    }
+    list(Option(firstResults.getNextMarker), firstResults.asScala.toStream).map(_.getName)
   }
 }

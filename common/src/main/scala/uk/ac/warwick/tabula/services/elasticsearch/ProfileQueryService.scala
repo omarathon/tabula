@@ -137,9 +137,7 @@ trait ProfileQueryMethodsImpl extends ProfileQueryMethods {
       val universityIds = client.execute {
         searchRequest.query(boolQuery().must(queries))
       }
-        .map { response => response.result.hits.hits.map {
-          _.id
-        }.toSeq
+        .map { response => response.result.hits.hits.map(_.id).toSeq
         }
         .recover { case _ => Nil } // ignore any error
         .await(15.seconds) // Avoid Hibernate horror by waiting for the Future here, then initialising in the main thread

@@ -50,9 +50,7 @@ trait CourseImporter extends Logging {
   }
 
   def importCourses(): ImportAcademicInformationCommand.ImportResult = {
-    val results = buildImportCommands().map {
-      _.apply()._2
-    }
+    val results = buildImportCommands().map(_.apply()._2)
 
     updateCourseMap()
 

@@ -36,9 +36,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
     val f4: AssignmentFeedback = Fixtures.assignmentFeedback(universityId = "0000004", userId = "student4")
 
     assignment.submissions.addAll(Seq(sub1, sub2, sub3, sub4).toList.asJava)
-    assignment.submissions.asScala.toList foreach {
-      _.assignment = assignment
-    }
+    assignment.submissions.asScala.toList.foreach(_.assignment = assignment)
     assignment.feedbacks.addAll(Seq(f1, f2, f3, f4).toList.asJava)
 
     // f1 isn't released yet

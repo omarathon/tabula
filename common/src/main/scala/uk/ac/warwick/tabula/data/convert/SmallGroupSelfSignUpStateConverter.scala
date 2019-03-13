@@ -10,8 +10,6 @@ class SmallGroupSelfSignUpStateConverter extends TwoWayConverter[String, SmallGr
     if (value.hasText) SmallGroupSetSelfSignUpState(value)
     else null
 
-  override def convertLeft(state: SmallGroupSetSelfSignUpState): String = Option(state).map {
-    _.name
-  }.orNull
+  override def convertLeft(state: SmallGroupSetSelfSignUpState): String = Option(state).map(_.name).orNull
 
 }

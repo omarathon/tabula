@@ -7,8 +7,6 @@ class SubmissionAndFeedbackInfoFilterConverter extends TwoWayConverter[String, S
 
   override def convertRight(source: String): SubmissionAndFeedbackInfoFilter = SubmissionAndFeedbackInfoFilters.of(source)
 
-  override def convertLeft(source: SubmissionAndFeedbackInfoFilter): String = Option(source).map {
-    _.getName
-  }.orNull
+  override def convertLeft(source: SubmissionAndFeedbackInfoFilter): String = Option(source).map(_.getName).orNull
 
 }

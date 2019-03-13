@@ -499,17 +499,13 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
       // Fetch student details for every student linked to one of the related points
       val allStudents: Map[UniversityId, AttendanceMonitoringStudentData] =
         attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(
-          points.flatMap {
-            _.scheme.members.members
-          }.distinct,
+          points.flatMap(_.scheme.members.members).distinct,
           academicYear
         ).map { data => data.universityId -> data }.toMap
 
       // Map schemes to student lists
       val studentsForScheme: Map[AttendanceMonitoringScheme, Seq[AttendanceMonitoringStudentData]] =
-        points.map {
-          _.scheme
-        }.distinct.map { scheme =>
+        points.map(_.scheme).distinct.map { scheme =>
           scheme -> scheme.members.members.filter(allStudents.contains).map(allStudents.apply)
         }.toMap
 
@@ -548,9 +544,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
       val applicableStudents = getApplicableStudentsForPoints(relevantPoints, academicYear)
       val checkpointsByPoint = attendanceMonitoringDao.getAllCheckpoints(relevantPoints)
 
-      relevantPoints.filterNot {
-        _.scheme.members.isEmpty
-      }.flatMap(point => {
+      relevantPoints.filterNot(_.scheme.members.isEmpty).flatMap(point => {
         // every student that should have a checkpoint for this point
         val students = applicableStudents(point)
 

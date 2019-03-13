@@ -212,16 +212,12 @@ abstract class AbstractPermissionsService extends PermissionsService {
     else Stream.empty
 
   def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(transactional(readOnly = true) {
-    permissionsDao.getGrantedRolesFor(scope) filter {
-      _.users.includesUser(user.apparentUser)
-    }
+    permissionsDao.getGrantedRolesFor(scope).filter(_.users.includesUser(user.apparentUser))
   })
 
   def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] =
     ensureFoundUserSeq(user)(transactional(readOnly = true) {
-      permissionsDao.getGrantedPermissionsFor(scope).toStream filter {
-        _.users.includesUser(user.apparentUser)
-      }
+      permissionsDao.getGrantedPermissionsFor(scope).toStream.filter(_.users.includesUser(user.apparentUser))
     }
     )
 
@@ -247,9 +243,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
           ++ GrantedRolesForGroupCache.get((groupNames, classTag[A])).asScala
       ).toStream
         // For sanity's sake, filter by the users including the user
-        .filter {
-        _.users.includesUser(user.apparentUser)
-      }
+        .filter(_.users.includesUser(user.apparentUser))
     }
     )
 
@@ -265,28 +259,20 @@ abstract class AbstractPermissionsService extends PermissionsService {
           ++ GrantedPermissionsForGroupCache.get((groupNames, classTag[A])).asScala
       ).toStream
         // For sanity's sake, filter by the users including the user
-        .filter {
-        _.users.includesUser(user.apparentUser)
-      }
+        .filter(_.users.includesUser(user.apparentUser))
     }
     )
 
   def getAllPermissionDefinitionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ensureFoundUserSet(user) {
     val scopesWithGrantedRole =
       getGrantedRolesFor[A](user)
-        .filter {
-          _.mayGrant(targetPermission)
-        }
-        .map {
-          _.scope
-        }
+        .filter(_.mayGrant(targetPermission))
+        .map(_.scope)
 
     val scopesWithGrantedPermission =
       getGrantedPermissionsFor[A](user)
         .filter { perm => perm.overrideType == GrantedPermission.Allow && perm.permission == targetPermission }
-        .map {
-          _.scope
-        }
+        .map(_.scope)
 
     Set() ++ scopesWithGrantedRole ++ scopesWithGrantedPermission
   }

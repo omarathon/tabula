@@ -254,7 +254,5 @@ class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, Strin
 class ExtensionStateConverter extends TwoWayConverter[String, ExtensionState] {
   override def convertRight(code: String): ExtensionState = ExtensionState.fromCode(code)
 
-  override def convertLeft(state: ExtensionState): String = (Option(state) map {
-    _.dbValue
-  }).orNull
+  override def convertLeft(state: ExtensionState): String = (Option(state).map(_.dbValue)).orNull
 }

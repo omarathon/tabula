@@ -105,7 +105,5 @@ class MarkingWorkflowTypeUserType extends AbstractStringUserType[MarkingWorkflow
 class StringToMarkingWorkflowType extends TwoWayConverter[String, MarkingWorkflowType] {
   override def convertRight(source: String): MarkingWorkflowType = source.maybeText.map(MarkingWorkflowType.fromCode).getOrElse(throw new IllegalArgumentException)
 
-  override def convertLeft(source: MarkingWorkflowType): String = Option(source).map {
-    _.name
-  }.orNull
+  override def convertLeft(source: MarkingWorkflowType): String = Option(source).map(_.name).orNull
 }

@@ -82,9 +82,7 @@ class ZipService
   }
 
   private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
-    markerFeedback.attachments.asScala.toSeq.filter {
-      _.hasData
-    }.map { attachment =>
+    markerFeedback.attachments.asScala.toSeq.filter(_.hasData).map { attachment =>
       ZipFileItem(markerFeedback.feedback.studentIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
 

@@ -8,8 +8,6 @@ class FeedbackTemplateIdConverter extends TwoWayConverter[String, FeedbackTempla
 
   override def convertRight(id: String): FeedbackTemplate = getById[FeedbackTemplate](id).orNull
 
-  override def convertLeft(template: FeedbackTemplate): String = (Option(template) map {
-    _.id
-  }).orNull
+  override def convertLeft(template: FeedbackTemplate): String = (Option(template).map(_.id)).orNull
 
 }

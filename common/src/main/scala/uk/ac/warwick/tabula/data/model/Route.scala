@@ -56,9 +56,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
   def teachingDepartments: mutable.Set[Department] =
     if (teachingDepartmentsActive)
-      teachingInfo.asScala.map {
-        _.department
-      } + adminDepartment
+      teachingInfo.asScala.map(_.department) + adminDepartment
     else
       mutable.Set(adminDepartment)
 

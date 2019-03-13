@@ -14,8 +14,6 @@ class StudentRelationshipTypeConverter extends TwoWayConverter[String, StudentRe
     service.getStudentRelationshipTypeByUrlPart
   }).orNull
 
-  override def convertLeft(relationshipType: StudentRelationshipType): String = (Option(relationshipType) map {
-    _.urlPart
-  }).orNull
+  override def convertLeft(relationshipType: StudentRelationshipType): String = (Option(relationshipType).map(_.urlPart)).orNull
 
 }

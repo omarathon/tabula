@@ -245,9 +245,7 @@ trait SubmitAssignmentDescription extends Describable[Submission] {
     assignment.submissions.asScala.find(_.usercode == user.usercode).map { existingSubmission =>
       d.properties(
         "existingSubmission" -> existingSubmission.id,
-        "existingAttachments" -> existingSubmission.allAttachments.map {
-          _.id
-        }
+        "existingAttachments" -> existingSubmission.allAttachments.map(_.id)
       )
     }
   }

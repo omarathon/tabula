@@ -267,9 +267,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
     }
 
     val membersWithPublishedFeedback = submitted.filter { student =>
-      student.coursework.enhancedFeedback exists {
-        _.feedback.checkedReleased
-      }
+      student.coursework.enhancedFeedback.exists(_.feedback.checkedReleased)
     }
 
     // True if any feedback exists that's been published. To decide whether to show whoDownloaded count.

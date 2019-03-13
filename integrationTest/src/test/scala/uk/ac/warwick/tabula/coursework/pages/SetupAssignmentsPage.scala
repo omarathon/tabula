@@ -25,9 +25,7 @@ class SetupAssignmentsPage(val departmentCode: String)(implicit driver: WebDrive
   }
 
   def getOptionIdForRow(row: Element): Option[String] = {
-    row.underlying.findElements(By.cssSelector(".options-id-label .label")).asScala.headOption.map {
-      _.getText()
-    }
+    row.underlying.findElements(By.cssSelector(".options-id-label .label")).asScala.headOption.map(_.getText())
   }
 
   def setTitleForRow(row: Element, title: String) {

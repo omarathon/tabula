@@ -38,9 +38,7 @@ class UserLookupTag extends TemplateDirectiveModel {
 
     val user = unwrap[String](params.get("id"))
     val users = unwrap[JList[String]](params.get("ids"))
-    val lookupByUniversityId = unwrap[JBoolean](params.get("lookupByUniversityId")).exists {
-      _.booleanValue()
-    }
+    val lookupByUniversityId = unwrap[JBoolean](params.get("lookupByUniversityId")).exists(_.booleanValue())
 
     if (body == null) {
       throw new TemplateException("UserLookupTag: must have a body", env);

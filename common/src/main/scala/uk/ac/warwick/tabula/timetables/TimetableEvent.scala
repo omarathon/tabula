@@ -117,13 +117,7 @@ object TimetableEvent {
     _.minBy {
       _.minWeek
     }.minWeek
-  }, Option(event.day).map {
-    _.jodaDayOfWeek
-  }, Option(event.startTime).map {
-    _.getMillisOfDay
-  }, Option(event.endTime).map {
-    _.getMillisOfDay
-  }, event.name, event.title, event.uid)
+  }, Option(event.day).map(_.jodaDayOfWeek), Option(event.startTime).map(_.getMillisOfDay), Option(event.endTime).map(_.getMillisOfDay), event.name, event.title, event.uid)
   }
 
 }

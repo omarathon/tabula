@@ -16,8 +16,6 @@ class StudentCourseDetailsConverter extends TwoWayConverter[String, StudentCours
   }
 
   // print
-  override def convertLeft(studentCourseDetails: StudentCourseDetails): String = (Option(studentCourseDetails) map {
-    _.scjCode
-  }).orNull
+  override def convertLeft(studentCourseDetails: StudentCourseDetails): String = (Option(studentCourseDetails).map(_.scjCode)).orNull
 
 }

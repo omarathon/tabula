@@ -58,13 +58,7 @@ trait ControllerViews extends Logging {
   }
 
   def getReturnToUnescaped(defaultUrl: String): String =
-    requestInfo.flatMap {
-      _.requestParameters.get("returnTo")
-    }.flatMap {
-      _.headOption
-    }.filter {
-      _.hasText
-    }.fold({
+    requestInfo.flatMap(_.requestParameters.get("returnTo")).flatMap(_.headOption).filter(_.hasText).fold({
       if (defaultUrl.isEmpty)
         logger.warn("Empty defaultUrl when using returnTo")
       defaultUrl

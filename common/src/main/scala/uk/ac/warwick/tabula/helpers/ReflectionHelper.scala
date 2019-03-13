@@ -18,11 +18,7 @@ object ReflectionHelper extends Logging {
     val scanner = new ClassPathScanningCandidateComponentProvider(false)
     scanner.addIncludeFilter(new AssignableTypeFilter(classTag[A].runtimeClass))
     val components = scanner.findCandidateComponents(pkg)
-    components.asScala.map {
-      _.getBeanClassName
-    }.toSeq.sorted.map(Class.forName).map {
-      _.asInstanceOf[Class[A]]
-    }
+    components.asScala.map(_.getBeanClassName).toSeq.sorted.map(Class.forName).map(_.asInstanceOf[Class[A]])
   }
 
   lazy val allNotifications: Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = {
@@ -53,9 +49,7 @@ object ReflectionHelper extends Logging {
     }
 
     subtypesOf[Permission]("uk.ac.warwick.tabula.permissions")
-      .filter {
-        _.getName.substring(Permissions.getClass.getName.length).contains('$')
-      }
+      .filter(_.getName.substring(Permissions.getClass.getName.length).contains('$'))
       .sortWith(sortFn)
       .map { clz =>
         val constructor = clz.getConstructors()(0)

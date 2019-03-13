@@ -13,8 +13,6 @@ class ExamIdConverter extends TwoWayConverter[String, Exam] {
     service.getExamById
   }).orNull
 
-  override def convertLeft(exam: Exam): String = (Option(exam) map {
-    _.id
-  }).orNull
+  override def convertLeft(exam: Exam): String = (Option(exam).map(_.id)).orNull
 
 }

@@ -50,19 +50,13 @@ class CurrentUser(
   def masquerading: Boolean = !apparentId.equals(realId)
 
   /** Full name of the apparent user. */
-  def fullName: String = profile flatMap {
-    _.fullName
-  } getOrElse apparentUser.getFullName
+  def fullName: String = profile.flatMap(_.fullName) getOrElse apparentUser.getFullName
 
   /** First name of the apparent user. */
-  def firstName: String = profile map {
-    _.firstName
-  } getOrElse apparentUser.getFirstName
+  def firstName: String = profile.map(_.firstName) getOrElse apparentUser.getFirstName
 
   /** Surname of the apparent user. */
-  def lastName: String = profile map {
-    _.lastName
-  } getOrElse apparentUser.getLastName
+  def lastName: String = profile.map(_.lastName) getOrElse apparentUser.getLastName
 
   /** Warwick Uni ID of the apparent user. */
   def universityId: String = apparentUser.getWarwickId

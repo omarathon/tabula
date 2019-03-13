@@ -98,9 +98,7 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment: Assignment, marker
     val feedback = usercode.flatMap(u => assignment.feedbacks.asScala.find(_.usercode == u))
 
     // warn if feedback for this student is already uploaded
-    feedback flatMap {
-      _.getCurrentWorkflowFeedback
-    } match {
+    feedback.flatMap(_.getCurrentWorkflowFeedback) match {
       case Some(markerFeedback) if markerFeedback.hasFeedback =>
         // set warning flag for existing feedback and check if any existing files will be overwritten
         item.submissionExists = true
@@ -118,23 +116,15 @@ class OldAddMarkerFeedbackCommand(module: Module, assignment: Assignment, marker
 
   def describe(d: Description) {
     d.assignment(assignment)
-      .studentIds(items.asScala.map {
-        _.uniNumber
-      })
+      .studentIds(items.asScala.map(_.uniNumber))
       .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
   }
 
   override def describeResult(d: Description, feedbacks: List[MarkerFeedback]): Unit = {
     d.assignment(assignment)
-      .studentIds(items.asScala.map {
-        _.uniNumber
-      })
+      .studentIds(items.asScala.map(_.uniNumber))
       .studentUsercodes(items.asScala.flatMap(_.student.map(_.getUserId)))
-      .fileAttachments(feedbacks.flatMap {
-        _.attachments.asScala
-      })
-      .properties("feedback" -> feedbacks.map {
-        _.id
-      })
+      .fileAttachments(feedbacks.flatMap(_.attachments.asScala))
+      .properties("feedback" -> feedbacks.map(_.id))
   }
 }

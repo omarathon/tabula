@@ -14,9 +14,7 @@ class RouteCodeConverter extends TwoWayConverter[String, Route] {
       service.getRouteById(code).orNull
     }
 
-  override def convertLeft(route: Route): String = (Option(route) map {
-    _.code
-  }).orNull
+  override def convertLeft(route: Route): String = (Option(route).map(_.code)).orNull
 
   def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

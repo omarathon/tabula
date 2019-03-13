@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands
 
 import java.net.{URI, URLDecoder}
+import java.nio.charset.StandardCharsets
 
 import org.apache.http.client.utils.URLEncodedUtils
 import org.hibernate.NullPrecedence
@@ -126,73 +127,61 @@ trait DeserializesExtensionsFilterImpl extends DeserializesExtensionsFilter with
 
   def deserializeFilter(filterString: String): Unit = {
     val params: Map[String, Seq[String]] =
-      URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), "UTF-8")
+      URLEncodedUtils.parse(new URI(null, null, null, URLDecoder.decode(filterString, "UTF-8"), null), StandardCharsets.UTF_8)
         .asScala
         .groupBy(_.getName)
         .map { case (name, nameValuePairs) => name -> nameValuePairs.map(_.getValue) }
 
     modules.clear()
-    params.get("modules").foreach {
-      _.foreach { item =>
-        val moduleCodeConverter = new ModuleCodeConverter
-        moduleCodeConverter.service = moduleAndDepartmentService
-        moduleCodeConverter.convertRight(item) match {
-          case module: Module => modules.add(module)
-          case _ => logger.warn(s"Could not deserialize filter with module $item")
-        }
+    params.get("modules").foreach(_.foreach { item =>
+      val moduleCodeConverter = new ModuleCodeConverter
+      moduleCodeConverter.service = moduleAndDepartmentService
+      moduleCodeConverter.convertRight(item) match {
+        case module: Module => modules.add(module)
+        case _ => logger.warn(s"Could not deserialize filter with module $item")
       }
-    }
+    })
 
     departments.clear()
-    params.get("departments").foreach {
-      _.foreach { item =>
-        val departmentConverter = new DepartmentCodeConverter
-        departmentConverter.service = moduleAndDepartmentService
-        departmentConverter.convertRight(item) match {
-          case department: Department => departments.add(department)
-          case _ => logger.warn(s"Could not deserialize filter with department $item")
-        }
+    params.get("departments").foreach(_.foreach { item =>
+      val departmentConverter = new DepartmentCodeConverter
+      departmentConverter.service = moduleAndDepartmentService
+      departmentConverter.convertRight(item) match {
+        case department: Department => departments.add(department)
+        case _ => logger.warn(s"Could not deserialize filter with department $item")
       }
-    }
+    })
 
     departments.clear()
-    params.get("assignments").foreach {
-      _.foreach { item =>
-        val assignmentConverter = new AssignmentIdConverter
-        assignmentConverter.service = assessmentService
-        assignmentConverter.convertRight(item) match {
-          case assignment: Assignment => assignments.add(assignment)
-          case _ => logger.warn(s"Could not deserialize filter with assignment $item")
-        }
+    params.get("assignments").foreach(_.foreach { item =>
+      val assignmentConverter = new AssignmentIdConverter
+      assignmentConverter.service = assessmentService
+      assignmentConverter.convertRight(item) match {
+        case assignment: Assignment => assignments.add(assignment)
+        case _ => logger.warn(s"Could not deserialize filter with assignment $item")
       }
-    }
+    })
 
     states.clear()
-    params.get("states").foreach {
-      _.foreach { item =>
-        try {
-          states.add(ExtensionState.fromCode(item))
-        } catch {
-          case e: IllegalArgumentException => logger.warn(s"Could not deserialize filter with state $item")
-        }
+    params.get("states").foreach(_.foreach { item =>
+      try {
+        states.add(ExtensionState.fromCode(item))
+      } catch {
+        case e: IllegalArgumentException => logger.warn(s"Could not deserialize filter with state $item")
       }
-    }
+    })
 
     times.clear()
-    params.get("times").foreach {
-      _.foreach { item =>
-        try {
-          times.add(TimeFilter.fromCode(item))
-        } catch {
-          case e: IllegalArgumentException => logger.warn(s"Could not deserialize filter with time $item")
-        }
+    params.get("times").foreach(_.foreach { item =>
+      try {
+        times.add(TimeFilter.fromCode(item))
+      } catch {
+        case e: IllegalArgumentException => logger.warn(s"Could not deserialize filter with time $item")
       }
-    }
+    })
 
     otherCriteria.clear()
-    params.get("otherCriteria").foreach {
-      _.foreach { item => otherCriteria.add(item) }
-    }
+    params.get("otherCriteria").foreach(_.foreach { item => otherCriteria.add(item) })
   }
 }
 
@@ -226,7 +215,5 @@ object TimeFilter {
 class TimeFilterConverter extends TwoWayConverter[String, TimeFilter] {
   override def convertRight(code: String): TimeFilter = TimeFilter.fromCode(code)
 
-  override def convertLeft(time: TimeFilter): String = (Option(time) map {
-    _.code
-  }).orNull
+  override def convertLeft(time: TimeFilter): String = (Option(time).map(_.code)).orNull
 }

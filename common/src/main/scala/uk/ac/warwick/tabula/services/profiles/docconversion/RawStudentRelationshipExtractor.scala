@@ -85,9 +85,7 @@ class RawStudentRelationshipExtractor {
   def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType, department: Department): Seq[ParsedRow] = {
     val validRows = SpreadsheetHelpers.parseXSSFExcelFile(file)
       .map { rowData => new RawStudentRelationshipRow(relationshipType, rowData) }
-      .filter {
-        _.isValid
-      } // Ignore blank rows
+      .filter(_.isValid) // Ignore blank rows
 
     val memberMap = profileService.getAllMembersWithUniversityIds(
       validRows.flatMap(r => Seq(r.rowData("student_id"), r.rowData("agent_id")))

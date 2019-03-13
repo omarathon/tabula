@@ -63,21 +63,11 @@ trait AssignmentToJsonConverter {
           "allowExtensionsAfterCloseDate" -> assignment.allowExtensionsAfterCloseDate,
           "fileAttachmentLimit" -> assignment.attachmentLimit,
           "fileAttachmentTypes" -> assignment.fileExtensions,
-          "individualFileSizeLimit" -> assignment.attachmentField.map {
-            _.individualFileSizeLimit
-          }.orNull,
-          "submissionFormText" -> assignment.commentField.map {
-            _.value
-          }.getOrElse(""),
-          "wordCountMin" -> assignment.wordCountField.map {
-            _.min
-          }.orNull,
-          "wordCountMax" -> assignment.wordCountField.map {
-            _.max
-          }.orNull,
-          "wordCountConventions" -> assignment.wordCountField.map {
-            _.conventions
-          }.getOrElse(""),
+          "individualFileSizeLimit" -> assignment.attachmentField.map(_.individualFileSizeLimit).orNull,
+          "submissionFormText" -> assignment.commentField.map(_.value).getOrElse(""),
+          "wordCountMin" -> assignment.wordCountField.map(_.min).orNull,
+          "wordCountMax" -> assignment.wordCountField.map(_.max).orNull,
+          "wordCountConventions" -> assignment.wordCountField.map(_.conventions).getOrElse(""),
           "submissions" -> assignment.submissions.size(),
           "unapprovedExtensions" -> assignment.countUnapprovedExtensions
         )

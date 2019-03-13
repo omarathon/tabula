@@ -64,9 +64,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 
   def agentLastName: String
 
-  def studentMember: Option[StudentMember] = Option(studentCourseDetails).map {
-    _.student
-  }
+  def studentMember: Option[StudentMember] = Option(studentCourseDetails).map(_.student)
 
   def studentMember_=(student: StudentMember) {
     student.mostSignificantCourseDetails.foreach { scd =>
@@ -109,9 +107,7 @@ class MemberStudentRelationship extends StudentRelationship {
 
   def agentLastName: String = agentMember.map(_.lastName).getOrElse(agent) // can't reliably extract a last name from agent string
 
-  def agent: String = agentMember.map {
-    _.universityId
-  }.orNull
+  def agent: String = agentMember.map(_.universityId).orNull
 }
 
 @Entity

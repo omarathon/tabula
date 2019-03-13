@@ -234,46 +234,34 @@ class SmallGroupSet
         case _ => groups.asScala.exists(_.students.includesUser(user))
       }
 
-    memberOfAnyGroup || Option(linkedDepartmentSmallGroupSet).map {
-      _.isStudentMember(user)
-    }.getOrElse {
+    memberOfAnyGroup || Option(linkedDepartmentSmallGroupSet).map(_.isStudentMember(user)).getOrElse {
       membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
     }
   }
 
   def allStudents: Seq[User] = RequestLevelCache.cachedBy("SmallGroupSet.allStudents", id) {
-    Option(linkedDepartmentSmallGroupSet).map {
-      _.allStudents
-    }.getOrElse {
+    Option(linkedDepartmentSmallGroupSet).map(_.allStudents).getOrElse {
       membershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Some(members))
     }
   }
 
   def allStudentIds: Seq[String] = RequestLevelCache.cachedBy("SmallGroupSet.allStudentIds", id) {
-    Option(linkedDepartmentSmallGroupSet).map {
-      _.allStudentIds
-    }.getOrElse {
+    Option(linkedDepartmentSmallGroupSet).map(_.allStudentIds).getOrElse {
       membershipService.determineMembershipIds(upstreamAssessmentGroupInfos, Some(members))
     }
   }
 
   def allStudentsCount: Int = benchmarkTask(s"$id allStudentsCount") {
     RequestLevelCache.cachedBy("SmallGroupSet.allStudentsCount", id) {
-      Option(linkedDepartmentSmallGroupSet).map {
-        _.allStudentsCount
-      }.getOrElse {
+      Option(linkedDepartmentSmallGroupSet).map(_.allStudentsCount).getOrElse {
         membershipService.countCurrentMembershipWithUniversityIdGroup(upstreamAssessmentGroupInfos, Some(members))
       }
     }
   }
 
   def unallocatedStudents: Seq[User] = RequestLevelCache.cachedBy("SmallGroupSet.unallocatedStudents", id) {
-    Option(linkedDepartmentSmallGroupSet).map {
-      _.unallocatedStudents
-    }.getOrElse {
-      val allocatedStudents = groups.asScala.flatMap {
-        _.students.users
-      }
+    Option(linkedDepartmentSmallGroupSet).map(_.unallocatedStudents).getOrElse {
+      val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
       allStudents diff allocatedStudents
     }
@@ -281,16 +269,12 @@ class SmallGroupSet
 
   def unallocatedStudentsCount: Int = benchmarkTask(s"$id unallocatedStudentsCount") {
     RequestLevelCache.cachedBy("SmallGroupSet.unallocatedStudentsCount", id) {
-      Option(linkedDepartmentSmallGroupSet).map {
-        _.unallocatedStudentsCount
-      }.getOrElse {
+      Option(linkedDepartmentSmallGroupSet).map(_.unallocatedStudentsCount).getOrElse {
         if (groups.asScala.forall {
           _.students.universityIds
         } && members.universityIds) {
           // Efficiency
-          val allocatedStudentIds = groups.asScala.flatMap {
-            _.students.knownType.members
-          }
+          val allocatedStudentIds = groups.asScala.flatMap(_.students.knownType.members)
 
           (allStudentIds diff allocatedStudentIds).size
         } else {
@@ -302,28 +286,20 @@ class SmallGroupSet
   }
 
   def studentsNotInMembership: mutable.Buffer[User] = {
-    Option(linkedDepartmentSmallGroupSet).map {
-      _.studentsNotInMembership
-    }.getOrElse {
-      val allocatedStudents = groups.asScala.flatMap {
-        _.students.users
-      }
+    Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembership).getOrElse {
+      val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
       allocatedStudents diff allStudents
     }
   }
 
   def studentsNotInMembershipCount: Int = {
-    Option(linkedDepartmentSmallGroupSet).map {
-      _.studentsNotInMembershipCount
-    }.getOrElse {
+    Option(linkedDepartmentSmallGroupSet).map(_.studentsNotInMembershipCount).getOrElse {
       if (groups.asScala.forall {
         _.students.universityIds
       } && members.universityIds) {
         // Efficiency
-        val allocatedStudentIds = groups.asScala.flatMap {
-          _.students.knownType.members
-        }
+        val allocatedStudentIds = groups.asScala.flatMap(_.students.knownType.members)
 
         (allocatedStudentIds diff allStudentIds).size
       } else {

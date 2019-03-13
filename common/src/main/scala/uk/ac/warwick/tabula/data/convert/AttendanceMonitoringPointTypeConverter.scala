@@ -10,8 +10,6 @@ class AttendanceMonitoringPointTypeConverter extends TwoWayConverter[String, Att
     if (value.hasText) AttendanceMonitoringPointType.fromCode(value)
     else null
 
-  override def convertLeft(pointType: AttendanceMonitoringPointType): String = Option(pointType).map {
-    _.dbValue
-  }.orNull
+  override def convertLeft(pointType: AttendanceMonitoringPointType): String = Option(pointType).map(_.dbValue).orNull
 
 }

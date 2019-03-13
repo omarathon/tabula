@@ -207,9 +207,7 @@ trait EditAttendancePointCommandState extends AttendancePointCommandState with F
     case AttendanceMonitoringPointStyle.Date => findPointsResult.monthGroupedPoints
   }).flatMap(_._2)
     .find(p => p.templatePoint.id == templatePoint.id)
-    .map {
-      _.points
-    }
+    .map(_.points)
     .getOrElse(Nil)
 
   def schemesToEdit: Seq[AttendanceMonitoringScheme] = pointsToEdit.map(_.scheme)

@@ -46,9 +46,7 @@ trait LevelImporter extends Logging {
   }
 
   def importLevels(): ImportAcademicInformationCommand.ImportResult = {
-    val results = getImportCommands().map {
-      _.apply()._2
-    }
+    val results = getImportCommands().map(_.apply()._2)
 
     updateLevelMap()
 

@@ -15,9 +15,7 @@ class ModuleCodeConverter extends TwoWayConverter[String, Module] {
       service.getModuleById(code).orNull
     }
 
-  override def convertLeft(module: Module): String = (Option(module) map {
-    _.code
-  }).orNull
+  override def convertLeft(module: Module): String = (Option(module).map(_.code)).orNull
 
   def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

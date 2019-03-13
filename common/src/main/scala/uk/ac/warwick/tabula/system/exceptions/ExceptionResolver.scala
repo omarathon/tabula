@@ -64,9 +64,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
   override def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
 
-  private def ajax = requestInfo.exists {
-    _.ajax
-  }
+  private def ajax = requestInfo.exists(_.ajax)
 
   /**
     * Resolve an exception outside of a request. Doesn't return a model/view.
@@ -80,9 +78,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
     * happens beyond Spring's grasp.
     */
   def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
-    def loggedIn = requestInfo.exists {
-      _.user.loggedIn
-    }
+    def loggedIn = requestInfo.exists(_.user.loggedIn)
 
     def isAjaxRequest = request.isDefined && ("XMLHttpRequest" == request.get.getHeader("X-Requested-With"))
 
@@ -100,9 +96,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
       case missingBody: HttpMessageNotReadableException => handle(new RequestBodyMissingException(missingBody), request, response)
 
       // TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
-      case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists {
-        _.isJsonRequest
-      } => RedirectToSignin()
+      case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists(_.isJsonRequest) => RedirectToSignin()
 
       case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
       case e: ExceptionConverter if e.getException.isInstanceOf[IOException] && ExceptionHandler.isClientAbortException(e.getException.asInstanceOf[IOException]) => Mav(null.asInstanceOf[String])
@@ -165,9 +159,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
       case _ => httpStatus.getReasonPhrase
     }
 
-    response.foreach {
-      _.setStatus(httpStatus.value())
-    }
+    response.foreach(_.setStatus(httpStatus.value()))
 
     request.foreach { request =>
       if (request.isJsonRequest) {

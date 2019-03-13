@@ -15,8 +15,6 @@ class SitsStatusCodeConverter extends TwoWayConverter[String, SitsStatus] {
     dao.getByCode
   }).orNull
 
-  override def convertLeft(moa: SitsStatus): String = (Option(moa) map {
-    _.code
-  }).orNull
+  override def convertLeft(moa: SitsStatus): String = (Option(moa).map(_.code)).orNull
 
 }

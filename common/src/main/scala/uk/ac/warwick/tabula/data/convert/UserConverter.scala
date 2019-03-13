@@ -21,9 +21,7 @@ class UserConverter extends TwoWayConverter[String, User] with FetchByUniIdOrUse
 
   override def convertRight(userId: String): User = fetchUser(userId)
 
-  override def convertLeft(user: User): String = (Option(user) map {
-    _.getUserId
-  }).orNull
+  override def convertLeft(user: User): String = (Option(user).map(_.getUserId)).orNull
 
 }
 
@@ -34,9 +32,7 @@ trait FetchByUniIdOrUsercode {
   def fetchUser(identifier: String): User = {
     if (UniversityId.isValid(identifier)) {
       Option(userLookup.getUserByWarwickUniId(identifier))
-        .filter {
-          _.isFoundUser
-        } // We don't consider not-found users
+        .filter(_.isFoundUser) // We don't consider not-found users
         .getOrElse(userLookup.getUserByUserId(identifier))
     } else {
       userLookup.getUserByUserId(identifier)

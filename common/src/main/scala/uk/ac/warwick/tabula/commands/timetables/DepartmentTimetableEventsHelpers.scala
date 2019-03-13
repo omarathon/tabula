@@ -95,9 +95,7 @@ trait DepartmentTimetableEventsRequest extends PermissionsCheckingMethods with T
   lazy val suggestedStudents: Seq[StudentMember] = (
     studentMembers ++
       user.profile.collect { case m: StudentMember => m }.toSeq ++
-      relationshipService.listCurrentRelationshipsWithAgent(personalTutorRelationshipType, user.universityId).flatMap {
-        _.studentMember
-      }
+      relationshipService.listCurrentRelationshipsWithAgent(personalTutorRelationshipType, user.universityId).flatMap(_.studentMember)
     ).distinct.sortBy { m => (m.lastName, m.firstName) }
 
   lazy val allEventTypes: Seq[TimetableEventType] = {

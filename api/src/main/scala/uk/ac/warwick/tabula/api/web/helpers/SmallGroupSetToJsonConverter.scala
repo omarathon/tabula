@@ -39,9 +39,7 @@ trait SmallGroupSetToJsonConverter {
       )
 
       case SmallGroupAllocationMethod.Linked => Map(
-        "linkedDepartmentGroupSet" -> Option(set.linkedDepartmentSmallGroupSet).map {
-          _.id
-        }.orNull
+        "linkedDepartmentGroupSet" -> Option(set.linkedDepartmentSmallGroupSet).map(_.id).orNull
       )
 
       case _ => Map()

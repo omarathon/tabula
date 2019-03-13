@@ -45,9 +45,7 @@ abstract class AbstractExamsHomeController extends ExamsController with TaskBenc
       "currentAcademicYear" -> academicYear,
       "examsForMarking" -> examsForMarking,
       "ownedDepartments" -> ownedDepartments,
-      "ownedModuleDepartments" -> ownedModules.map {
-        _.adminDepartment
-      },
+      "ownedModuleDepartments" -> ownedModules.map(_.adminDepartment),
       "marked" -> marked
     ).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.exams.Exams.home): _*)
   }

@@ -55,12 +55,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
    * of being plagiarised */
   def getUsersForFeedback(assignment: Assignment): Seq[(String, User)] = {
     val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
-    val plagiarisedIds = plagiarisedSubmissions.map {
-      _.usercode
-    }
-    val unreleasedIds = assignment.unreleasedFeedback.map {
-      _.usercode
-    }
+    val plagiarisedIds = plagiarisedSubmissions.map(_.usercode)
+    val unreleasedIds = assignment.unreleasedFeedback.map(_.usercode)
     val unplagiarisedUnreleasedIds = unreleasedIds.filter { usercode => !plagiarisedIds.contains(usercode) }
     userLookup.getUsersByUserIds(unplagiarisedUnreleasedIds).toSeq
   }

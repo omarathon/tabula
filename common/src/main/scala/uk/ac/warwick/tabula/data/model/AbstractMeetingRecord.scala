@@ -190,9 +190,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
       end = meetingEndDate.toLocalDateTime,
       location = Option(meetingLocation).orElse {
         if (format == MeetingFormat.FaceToFace) None
-        else Option(format).map {
-          _.description
-        }.map(NamedLocation)
+        else Option(format).map(_.description).map(NamedLocation)
       },
       parent = TimetableEvent.Parent(relationships.map(_.relationshipType).distinct),
       comments = None,

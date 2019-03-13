@@ -91,9 +91,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
     case module: Module => Some(module.adminDepartment)
     case route: Route => Some(route.adminDepartment)
     case student: StudentMember =>
-      student.mostSignificantCourseDetails.flatMap {
-        _.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption
-      }.orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
+      student.mostSignificantCourseDetails.flatMap(_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption).orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
     case member: Member => Option(member.homeDepartment)
     case assignment: Assignment => Some(assignment.module.adminDepartment)
     case smallGroup: SmallGroup => Some(smallGroup.groupSet.module.adminDepartment)
@@ -102,9 +100,7 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
     case _ => None
   }
 
-  def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap {
-    _.replacedRoleDefinitionFor(roleDefinition)
-  }.getOrElse(roleDefinition)
+  def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap(_.replacedRoleDefinitionFor(roleDefinition)).getOrElse(roleDefinition)
 
   // If hibernate sets users to null, make a new empty usergroup
   override def postLoad() {

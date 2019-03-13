@@ -40,9 +40,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
       {<submission>
       {item.coursework.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse Nil}
     </submission> % submissionData(item) % submissionStatusData(item)}{<marking/> % markerData(item, assignment) % plagiarismData(item)}{<feedback>
-      {item.coursework.enhancedFeedback.flatMap {
-        _.feedback.comments
-      }.orNull}
+      {item.coursework.enhancedFeedback.flatMap(_.feedback.comments).orNull}
     </feedback> % feedbackData(item)}{<adjustment/> % adjustmentData(item)}
     </student> % identityData(item)
   }

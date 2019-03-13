@@ -38,16 +38,12 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Attenda
         val reasons: mutable.Buffer[String] = mutable.Buffer()
         if (!meeting.relationshipTypes.exists(point.meetingRelationships.contains))
           reasons += s"Meeting was not with ${
-            point.meetingRelationships.map {
-              _.agentRole
-            }.mkString(" or ")
+            point.meetingRelationships.map(_.agentRole).mkString(" or ")
           }"
 
         if (!point.meetingFormats.contains(meeting.format))
           reasons += s"Meeting was not a ${
-            point.meetingFormats.map {
-              _.description
-            }.mkString(" or ")
+            point.meetingFormats.map(_.description).mkString(" or ")
           }"
 
         if (meeting.isRejected)

@@ -24,13 +24,7 @@ object SmallGroupEvent {
         _.minBy {
           _.minWeek
         }.minWeek
-      }, Option(event.day).map {
-        _.jodaDayOfWeek
-      }, Option(event.startTime).map {
-        _.getMillisOfDay
-      }, Option(event.endTime).map {
-        _.getMillisOfDay
-      })
+      }, Option(event.day).map(_.jodaDayOfWeek), Option(event.startTime).map(_.getMillisOfDay), Option(event.endTime).map(_.getMillisOfDay))
     }
 
     def compare(a: SmallGroupEvent, b: SmallGroupEvent): Int = {

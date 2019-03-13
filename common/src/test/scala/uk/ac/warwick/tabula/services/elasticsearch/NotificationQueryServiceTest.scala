@@ -96,19 +96,13 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
     lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter {
       _.recipient == recipient
     }
-    lazy val expectedIds: IndexedSeq[String] = recipientNotifications.map {
-      _.notification.id
-    }
+    lazy val expectedIds: IndexedSeq[String] = recipientNotifications.map(_.notification.id)
     lazy val criticalIds: IndexedSeq[String] = recipientNotifications.filter {
       _.notification.priority == Critical
-    }.map {
-      _.notification.id
-    }
+    }.map(_.notification.id)
     lazy val warningIds: IndexedSeq[String] =
       recipientNotifications.filter { i => i.notification.priority == Warning || i.notification.priority == Critical }
-        .map {
-          _.notification.id
-        }
+        .map(_.notification.id)
   }
 
   @Before def setUp(): Unit = {
@@ -139,16 +133,12 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
     val page1: PagedNotifications = queryService.userStream(request)
     page1.items.size should be(20)
 
-    page1.items.map {
-      _.id
-    } should be(expectedIds.reverse.slice(0, 20))
+    page1.items.map(_.id) should be(expectedIds.reverse.slice(0, 20))
 
     val page2: PagedNotifications = queryService.userStream(request.copy(lastUpdatedDate = page1.lastUpdatedDate))
     page2.items.size should be(20)
 
-    page2.items.map {
-      _.id
-    } should be(expectedIds.reverse.slice(20, 40))
+    page2.items.map(_.id) should be(expectedIds.reverse.slice(20, 40))
   }
 
   @Test
@@ -169,23 +159,17 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
     val criticalRequest = ActivityStreamRequest(user = recipient, priority = 0.75, max = 20, lastUpdatedDate = None)
     val page: PagedNotifications = queryService.userStream(criticalRequest)
     page.items.size should be(10)
-    page.items.map {
-      _.id
-    } should be(criticalIds.reverse)
+    page.items.map(_.id) should be(criticalIds.reverse)
 
     // show >= warning items only - should be 30 items
     val warningRequest = ActivityStreamRequest(user = recipient, priority = 0.5, max = 20, lastUpdatedDate = None)
     val page1: PagedNotifications = queryService.userStream(warningRequest)
     page1.items.size should be(20)
-    page1.items.map {
-      _.id
-    } should be(warningIds.reverse.slice(0, 20))
+    page1.items.map(_.id) should be(warningIds.reverse.slice(0, 20))
 
     val page2: PagedNotifications = queryService.userStream(warningRequest.copy(lastUpdatedDate = page1.lastUpdatedDate))
     page2.items.size should be(10)
-    page2.items.map {
-      _.id
-    } should be(warningIds.reverse.slice(20, 30))
+    page2.items.map(_.id) should be(warningIds.reverse.slice(20, 30))
   }
 
 }

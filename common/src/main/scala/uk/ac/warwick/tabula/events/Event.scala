@@ -50,12 +50,8 @@ object Event {
       case None => (null, null)
     }
 
-    val ipAddress = RequestInfo.fromThread.flatMap {
-      _.ipAddress.maybeText
-    }.orNull
-    val userAgent = RequestInfo.fromThread.flatMap {
-      _.userAgent.maybeText
-    }.orNull
+    val ipAddress = RequestInfo.fromThread.flatMap(_.ipAddress.maybeText).orNull
+    val userAgent = RequestInfo.fromThread.flatMap(_.userAgent.maybeText).orNull
 
     val eventId = id match {
       case id: String => id
@@ -76,7 +72,5 @@ object Event {
     )
   }
 
-  private def getUser = RequestInfo.fromThread.map {
-    _.user
-  }
+  private def getUser = RequestInfo.fromThread.map(_.user)
 }

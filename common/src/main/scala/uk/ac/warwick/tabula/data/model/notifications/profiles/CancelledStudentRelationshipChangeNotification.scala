@@ -68,9 +68,7 @@ class CancelledStudentRelationshipChangeToStudentNotification extends CancelledS
 
   def templateLocation = CancelledStudentRelationshipChangeNotification.StudentTemplate
 
-  def recipients: Seq[User] = student.map {
-    _.asSsoUser
-  }.toSeq
+  def recipients: Seq[User] = student.map(_.asSsoUser).toSeq
 
   def urlTitle = "view your student profile"
 }
@@ -83,9 +81,7 @@ class CancelledStudentRelationshipChangeToOldAgentNotification extends Cancelled
 
   def templateLocation = CancelledStudentRelationshipChangeNotification.OldAgentTemplate
 
-  def recipients: Seq[User] = cancelledRemovals.map {
-    _.asSsoUser
-  }
+  def recipients: Seq[User] = cancelledRemovals.map(_.asSsoUser)
 
   private def profileName = student match {
     case Some(sm) if sm.fullName.nonEmpty => " for " + sm.fullName.get
@@ -103,9 +99,7 @@ class CancelledStudentRelationshipChangeToNewAgentNotification extends Cancelled
 
   def templateLocation = CancelledStudentRelationshipChangeNotification.NewAgentTemplate
 
-  def recipients: Seq[User] = cancelledAdditions.map {
-    _.asSsoUser
-  }
+  def recipients: Seq[User] = cancelledAdditions.map(_.asSsoUser)
 
   override def url: String = Routes.students(relationshipType.get)
 

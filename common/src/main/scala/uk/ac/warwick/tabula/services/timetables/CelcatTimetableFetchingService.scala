@@ -114,9 +114,7 @@ object CelcatHttpTimetableFetchingService {
     val categories =
       Option(event.getProperty(Property.CATEGORIES))
         .map(_.asInstanceOf[Categories])
-        .map { c => c.getCategories.iterator().asScala.collect { case s: String => s }.filter {
-          _.hasText
-        }.toList
+        .map { c => c.getCategories.iterator().asScala.collect { case s: String => s }.filter(_.hasText).toList
         }
         .getOrElse(Nil)
 
@@ -181,9 +179,7 @@ object CelcatHttpTimetableFetchingService {
             namesOrInitials.flatMap { nameOrInitial =>
               allStaff.values.find { info =>
                 info.fullName == nameOrInitial || info.initials == nameOrInitial
-              }.map {
-                _.universityId
-              }
+              }.map(_.universityId)
             }
           }.getOrElse(Nil)
       else Nil
@@ -194,19 +190,13 @@ object CelcatHttpTimetableFetchingService {
         uid = event.getUid.getValue,
         name = summary,
         "",
-        description = Option(event.getDescription).map {
-          _.getValue
-        }.filter {
-          _.hasText
-        }.getOrElse(summary),
+        description = Option(event.getDescription).map(_.getValue).filter(_.hasText).getOrElse(summary),
         eventType = eventType,
         weekRanges = Seq(weekRange),
         day = day,
         startTime = start.toLocalTime,
         endTime = end.toLocalTime,
-        location = Option(event.getLocation).flatMap {
-          _.getValue.maybeText
-        }.map(locationFetchingService.locationFor),
+        location = Option(event.getLocation).flatMap(_.getValue.maybeText).map(locationFetchingService.locationFor),
         comments = None,
         parent = TimetableEvent.Parent(parseModuleCode(event).flatMap(code => moduleMap.get(code.toLowerCase))),
         staff = staff,
@@ -307,9 +297,7 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
             event.title,
             event.description,
             event.eventType,
-            eventSeq.flatMap {
-              _.weekRanges
-            },
+            eventSeq.flatMap(_.weekRanges),
             event.day,
             event.startTime,
             event.endTime,

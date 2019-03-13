@@ -86,9 +86,7 @@ class CM2WorkflowProgressService extends RequestLevelCaching[Assignment, Seq[CM2
 
   def progress(assignment: Assignment)(coursework: WorkflowItems): WorkflowProgress = {
     val allStages = getStagesFor(assignment)
-    val progresses = allStages.map {
-      _.progress(assignment)(coursework)
-    }
+    val progresses = allStages.map(_.progress(assignment)(coursework))
 
     val workflowMap = WorkflowStages.toMap(progresses)
 

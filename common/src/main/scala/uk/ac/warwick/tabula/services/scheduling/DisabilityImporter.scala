@@ -42,9 +42,7 @@ trait DisabilityImporter extends Logging {
   }
 
   def importDisabilities(): ImportAcademicInformationCommand.ImportResult = {
-    val results = getImportCommands().map {
-      _.apply()._2
-    }
+    val results = getImportCommands().map(_.apply()._2)
 
     updateDisabilityMap()
 

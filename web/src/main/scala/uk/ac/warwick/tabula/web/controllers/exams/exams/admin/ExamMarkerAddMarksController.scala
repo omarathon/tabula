@@ -75,12 +75,8 @@ class ExamMarkerAddMarksController extends ExamsController {
 
     feedback match {
       case Some(f) =>
-        markItem.actualMark = f.actualMark.map {
-          _.toString
-        }.getOrElse("")
-        markItem.actualGrade = f.actualGrade.map {
-          _.toString
-        }.getOrElse("")
+        markItem.actualMark = f.actualMark.map(_.toString).getOrElse("")
+        markItem.actualGrade = f.actualGrade.map(_.toString).getOrElse("")
       case None =>
         markItem.actualMark = ""
         markItem.actualGrade = ""

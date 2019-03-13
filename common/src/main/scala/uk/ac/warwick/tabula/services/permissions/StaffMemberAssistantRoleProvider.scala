@@ -49,10 +49,6 @@ class StaffMemberAssistantRoleProvider extends RoleProvider with TaskBenchmarkin
   }
 
   def rolesProvided: Set[Class[_ <: Role]] =
-    roleProviders.get.toSet[RoleProvider].filterNot {
-      _.isInstanceOf[StaffMemberAssistantRoleProvider]
-    }.flatMap {
-      _.rolesProvided
-    }
+    roleProviders.get.toSet[RoleProvider].filterNot(_.isInstanceOf[StaffMemberAssistantRoleProvider]).flatMap(_.rolesProvided)
 
 }

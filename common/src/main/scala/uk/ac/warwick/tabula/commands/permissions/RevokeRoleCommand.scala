@@ -67,9 +67,7 @@ trait RevokeRoleCommandValidation extends SelfValidating {
     }) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      grantedRole.map {
-        _.users
-      }.foreach { users =>
+      grantedRole.map(_.users).foreach { users =>
         for (code <- usercodes.asScala) {
           if (!users.knownType.includesUserId(code)) {
             errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
@@ -88,9 +86,7 @@ trait RevokeRoleCommandValidation extends SelfValidating {
       val permissionsToRevoke = roleDefinition.allPermissions(Some(scope)).keys
       val deniedPermissions = permissionsToRevoke.filterNot(securityService.canDelegate(user, _, scope))
       if (deniedPermissions.nonEmpty && !user.god) {
-        errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.map {
-          _.description
-        }.mkString("\n"), scope), "")
+        errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.map(_.description).mkString("\n"), scope), "")
       }
     }
   }

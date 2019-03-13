@@ -142,9 +142,7 @@ class AssessmentMembershipServiceImpl
   def getEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
     val autoEnrolled =
       dao.getSITSEnrolledAssignments(user, academicYear)
-        .filterNot {
-          _.members.excludesUser(user)
-        }
+        .filterNot(_.members.excludesUser(user))
 
     // TAB-1749 If we've been passed a non-primary usercode (e.g. WBS logins)
     // then also get registrations for the primary usercode
@@ -159,9 +157,7 @@ class AssessmentMembershipServiceImpl
     }
 
     (autoEnrolled ++ manuallyEnrolled.filter { a => academicYear.isEmpty || academicYear.contains(a.academicYear) })
-      .filter {
-        _.isVisibleToStudents
-      }.distinct
+      .filter(_.isVisibleToStudents).distinct
   }
 
   def emptyMembers(groupsToEmpty: Seq[String]): Int =
@@ -395,9 +391,7 @@ trait AssessmentMembershipMethods extends Logging {
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String] = {
     others.foreach { g => assert(g.universityIds) }
 
-    val sitsUsers = upstream.flatMap {
-      _.currentMembers.map(_.universityId)
-    }.distinct
+    val sitsUsers = upstream.flatMap(_.currentMembers.map(_.universityId)).distinct
 
     val includes = others.map(_.knownType.members).getOrElse(Nil)
     val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
@@ -411,16 +405,10 @@ trait AssessmentMembershipMethods extends Logging {
         logger.warn("Attempted to use countCurrentWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
         determineMembershipUsers(upstream, others).size
       case _ =>
-        val sitsUsers = upstream.flatMap {
-          _.currentMembers.map(_.universityId)
-        }
+        val sitsUsers = upstream.flatMap(_.currentMembers.map(_.universityId))
 
-        val includes = others map {
-          _.knownType.allIncludedIds
-        } getOrElse Nil
-        val excludes = others map {
-          _.knownType.allExcludedIds
-        } getOrElse Nil
+        val includes = others.map(_.knownType.allIncludedIds) getOrElse Nil
+        val excludes = others.map(_.knownType.allExcludedIds) getOrElse Nil
 
         deceasedUniIdsFilter((sitsUsers ++ includes).distinct.diff(excludes)).size
     }
@@ -475,13 +463,9 @@ trait AssessmentMembershipMethods extends Logging {
           extraneous = false)
     }
 
-  private def universityId(user: User, fallback: Option[String]) = option(user) map {
-    _.getWarwickId
-  } orElse fallback
+  private def universityId(user: User, fallback: Option[String]) = option(user).map(_.getWarwickId) orElse fallback
 
-  private def userId(user: User, fallback: Option[String]) = option(user) map {
-    _.getUserId
-  } orElse fallback
+  private def userId(user: User, fallback: Option[String]) = option(user).map(_.getUserId) orElse fallback
 
   private def option(user: User): Option[User] = user match {
     case FoundUser(_) => Some(user)

@@ -60,9 +60,7 @@ class ScientiaConfigurationImpl extends ScientiaConfiguration {
   }
 
   def yearProperty: Option[Seq[AcademicYear]] =
-    Wire.optionProperty("${scientia.years}").map {
-      _.split(",").map(AcademicYear.parse)
-    }
+    Wire.optionProperty("${scientia.years}").map(_.split(",").map(AcademicYear.parse))
 
   lazy val academicYears: Seq[AcademicYear] = yearProperty.getOrElse {
     Seq(prevAcademicYear, currentAcademicYear).flatten
@@ -266,16 +264,10 @@ private class ScientiaHttpTimetableFetchingService(scientiaConfiguration: Scient
         startTime = startTime,
         endTime = endTime,
         location = location,
-        comments = Option((activity \\ "comments").text).flatMap {
-          _.maybeText
-        },
+        comments = Option((activity \\ "comments").text).flatMap(_.maybeText),
         parent = parent,
-        staff = userLookup.getUsersByWarwickUniIds((activity \\ "staffmember") map {
-          _.text
-        }).values.collect { case FoundUser(u) => u }.toSeq,
-        students = userLookup.getUsersByWarwickUniIds((activity \\ "student") map {
-          _.text
-        }).values.collect { case FoundUser(u) => u }.toSeq,
+        staff = userLookup.getUsersByWarwickUniIds((activity \\ "staffmember").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
+        students = userLookup.getUsersByWarwickUniIds((activity \\ "student").map(_.text)).values.collect { case FoundUser(u) => u }.toSeq,
         year = year,
         relatedUrl = None,
         attendance = Map()

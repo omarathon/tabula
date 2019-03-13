@@ -32,9 +32,7 @@ class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourse
     relationshipService
       .getStudentRelationshipTypesWithRdxType // only look for relationship types that are in RDX
       .filter { relType => // where the department settings specify that SITS should be the source
-      val source = Option(studentCourseDetails.department).map {
-        _.getStudentRelationshipSource(relType)
-      }.getOrElse(relType.defaultSource)
+      val source = Option(studentCourseDetails.department).map(_.getStudentRelationshipSource(relType)).getOrElse(relType.defaultSource)
       source == StudentRelationshipSource.SITS
     }
       .foreach { relationshipType =>

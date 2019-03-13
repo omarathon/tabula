@@ -803,12 +803,8 @@ class Assignment
     "module" -> module)
 
   def getUsercodesWithSubmissionOrFeedback: Set[String] = {
-    val submissionIds = submissions.asScala.map {
-      _.usercode
-    }.toSet
-    val feedbackIds = fullFeedback.map {
-      _.usercode
-    }.toSet
+    val submissionIds = submissions.asScala.map(_.usercode).toSet
+    val feedbackIds = fullFeedback.map(_.usercode).toSet
 
     submissionIds ++ feedbackIds
   }

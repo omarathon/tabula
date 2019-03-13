@@ -16,23 +16,15 @@ trait ReplacingAssignmentStudentMessageResolver extends AssignmentStudentMessage
     val firstMarker =
       student.coursework.enhancedSubmission
         .flatMap { s => Option(s.submission) }
-        .flatMap {
-          _.firstMarker
-        }
-        .map {
-          _.getWarwickId
-        }
+        .flatMap(_.firstMarker)
+        .map(_.getWarwickId)
         .getOrElse("first marker")
 
     val secondMarker =
       student.coursework.enhancedSubmission
         .flatMap { s => Option(s.submission) }
-        .flatMap {
-          _.secondMarker
-        }
-        .map {
-          _.getWarwickId
-        }
+        .flatMap(_.secondMarker)
+        .map(_.getWarwickId)
         .getOrElse("second marker")
 
     getMessage(key, args)

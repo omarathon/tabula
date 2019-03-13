@@ -66,9 +66,7 @@ case class ServiceHealthcheck(
       "name" -> name,
       "status" -> status.asString,
       "testedAt" -> DateFormats.IsoDateTime.print(testedAt),
-      "perfData" -> performanceData.toArray.map {
-        _.asString
-      }
+      "perfData" -> performanceData.toArray.map(_.asString)
     ) ++ message.maybeText.map {
       "message" -> _
     }

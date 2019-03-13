@@ -36,9 +36,7 @@ abstract class CopySmallGroupSetsCommandInternal(val department: Department, val
   self: SmallGroupServiceComponent =>
 
   override def applyInternal(): Seq[SmallGroupSet] = {
-    smallGroupSets.asScala.filter {
-      _.copy
-    }.map { state =>
+    smallGroupSets.asScala.filter(_.copy).map { state =>
       val set = state.smallGroupSet
 
       val copy = set.duplicateTo(
@@ -163,12 +161,8 @@ trait CopySmallGroupSetsValidation extends SelfValidating {
         .filterNot { case (state, _) =>
         val allWeeks: Seq[WeekRange.Week] =
           state.smallGroupSet.groups.asScala
-            .flatMap {
-              _.events
-            }
-            .flatMap {
-              _.allWeeks
-            }
+            .flatMap(_.events)
+            .flatMap(_.allWeeks)
             .distinct
 
         allWeeks.forall(targetAcademicYearWeeks.contains)

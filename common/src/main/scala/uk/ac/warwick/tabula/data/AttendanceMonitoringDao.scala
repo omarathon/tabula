@@ -278,9 +278,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 
       val reportedTerms = mergedTermCounts.toSeq
         .filter { case (term, count) => count.intValue() == students.size }
-        .map {
-          _._1
-        }
+        .map(_._1)
       AcademicPeriod.allPeriodTypes.map(_.toString) diff reportedTerms
     }
 

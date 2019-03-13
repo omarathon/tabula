@@ -29,12 +29,8 @@ object ProfileIndexService {
 
       fields += (
         "userId" -> item.userId,
-        "department" -> item.affiliatedDepartments.map {
-          _.code
-        },
-        "touchedDepartments" -> item.touchedDepartments.map {
-          _.code
-        },
+        "department" -> item.affiliatedDepartments.map(_.code),
+        "touchedDepartments" -> item.touchedDepartments.map(_.code),
         "lastUpdatedDate" -> DateFormats.IsoDateTime.print(item.lastUpdatedDate)
       )
 

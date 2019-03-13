@@ -58,9 +58,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
     assignmentMembershipService.dao = amDao
     assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
     assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
-    assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach {
-      _.clear()
-    }
+    assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach(_.clear())
     assignmentMembershipService.userLookup = userLookup
     assignmentMembershipService.profileService = profileService
     val extDao = new ExtensionDaoImpl
@@ -939,9 +937,7 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
         session.flush()
 
 
-        assignmentMembershipService.determineMembershipUsers(assignment1).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(assignment1).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000004", "0000005", "0000006", "0000007"
         ))
 
@@ -951,47 +947,33 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
         // Ass Groups: ag2 (0000002, 0000003)
         // Actual membership: manual2/0000007, manual3/0000008, manual4/0000009, 0000002
 
-        assignmentMembershipService.determineMembershipUsers(assignment2).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(assignment2).map(_.getWarwickId).toSet should be(Set(
           "0000007", "0000008", "0000009", "0000002"
         ))
 
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1), None).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1), None).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo2), None).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo2), None).map(_.getWarwickId).toSet should be(Set(
           "0000002", "0000003"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo3), None).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo3), None).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), None).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), None).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005"
         ))
 
         // UniversityID Group: 0000001, 0000010, 0000015
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
         ))
 
         // UserID Group: student1/0000001, manual5/0000010, manual10/0000015
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)).map {
-          _.getWarwickId
-        }.toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
         ))
       }

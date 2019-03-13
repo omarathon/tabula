@@ -69,17 +69,13 @@ class EditSmallGroupsCommandInternal(val module: Module, val set: SmallGroupSet)
 
   override def applyInternal(): mutable.Buffer[SmallGroup] = {
     // Manage existing groups
-    existingGroups.asScala.values.filterNot {
-      _.delete
-    }.foreach { props =>
+    existingGroups.asScala.values.filterNot(_.delete).foreach { props =>
       val group = props.group
       group.name = props.name
       group.maxGroupSize = props.maxGroupSize
     }
 
-    existingGroups.asScala.values.filter {
-      _.delete
-    }.foreach { props =>
+    existingGroups.asScala.values.filter(_.delete).foreach { props =>
       val group = props.group
 
       group.preDelete()

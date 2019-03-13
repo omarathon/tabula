@@ -12,8 +12,6 @@ class ExtenuatingCircumstancesIdConverter extends TwoWayConverter[String, Extenu
 
   override def convertRight(id: String): ExtenuatingCircumstances = service.getExtenuatingCircumstancesById(id).orNull
 
-  override def convertLeft(circumstances: ExtenuatingCircumstances): String = (Option(circumstances) map {
-    _.id
-  }).orNull
+  override def convertLeft(circumstances: ExtenuatingCircumstances): String = (Option(circumstances).map(_.id)).orNull
 
 }

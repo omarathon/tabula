@@ -13,8 +13,6 @@ class DepartmentSmallGroupIdConverter extends TwoWayConverter[String, Department
     service.getDepartmentSmallGroupById(_)
   }).orNull
 
-  override def convertLeft(group: DepartmentSmallGroup): String = (Option(group) map {
-    _.id
-  }).orNull
+  override def convertLeft(group: DepartmentSmallGroup): String = (Option(group).map(_.id)).orNull
 
 }

@@ -68,7 +68,7 @@ trait PopulateNotificationSettingsCommandState {
   //	smallGroupEventAttendanceReminderNotifyNamedUsers = smallGroupEventAttendanceReminderSettings.notifyNamedUsers.value
   //	smallGroupEventAttendanceReminderNotifyNamedUsersFirst = smallGroupEventAttendanceReminderSettings.notifyNamedUsersFirst.value
   //	smallGroupEventAttendanceReminderNamedUsers.addAll(
-  //		smallGroupEventAttendanceReminderSettings.namedUsers.value.map { _.getUserId }.filter { _.hasText }.asJavaCollection
+  //		smallGroupEventAttendanceReminderSettings.namedUsers.value.map(_.getUserId).filter(_.hasText).asJavaCollection
   //	)
 
   smallGroupEventAttendanceReminderNotifyFirstNonEmptyGroupOnly = smallGroupEventAttendanceReminderSettings.notifyFirstNonEmptyGroupOnly.value
@@ -82,7 +82,7 @@ trait PopulateNotificationSettingsCommandState {
   //	finaliseFeedbackNotificationNotifyNamedUsers = finaliseFeedbackNotificationSettings.notifyNamedUsers.value
   //	finaliseFeedbackNotificationNotifyNamedUsersFirst = finaliseFeedbackNotificationSettings.notifyNamedUsersFirst.value
   //	finaliseFeedbackNotificationNamedUsers.addAll(
-  //		finaliseFeedbackNotificationSettings.namedUsers.value.map { _.getUserId }.filter { _.hasText }.asJavaCollection
+  //		finaliseFeedbackNotificationSettings.namedUsers.value.map(_.getUserId).filter(_.hasText).asJavaCollection
   //	)
 
   finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly = finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value

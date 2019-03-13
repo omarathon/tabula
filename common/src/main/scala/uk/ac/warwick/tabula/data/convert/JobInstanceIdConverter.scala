@@ -12,8 +12,6 @@ class JobInstanceIdConverter extends TwoWayConverter[String, JobInstance] {
 
   override def convertRight(id: String): JobInstance = Option(id).flatMap(service.getInstance).orNull
 
-  override def convertLeft(job: JobInstance): String = Option(job).map {
-    _.id
-  }.orNull
+  override def convertLeft(job: JobInstance): String = Option(job).map(_.id).orNull
 
 }

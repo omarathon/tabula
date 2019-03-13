@@ -33,9 +33,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
             "assignmentsForMarking" -> info.assignmentsForMarking,
             "ownedDepartments" -> info.ownedDepartments,
             "ownedModule" -> info.ownedModules,
-            "ownedModuleDepartments" -> info.ownedModules.map {
-              _.adminDepartment
-            },
+            "ownedModuleDepartments" -> info.ownedModules.map(_.adminDepartment),
             "ajax" -> ajax,
             "userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
           )

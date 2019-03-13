@@ -189,9 +189,7 @@ trait UpdatesStudentMembership {
       Nil
     else
     // Can't use the method on assessmentMembershipService as these may be transient
-      assessmentGroups.asScala.flatMap {
-        _.toUpstreamAssessmentGroupInfo(academicYear)
-      }
+      assessmentGroups.asScala.flatMap(_.toUpstreamAssessmentGroupInfo(academicYear))
 
   /**
     * Returns a sequence of MembershipItems

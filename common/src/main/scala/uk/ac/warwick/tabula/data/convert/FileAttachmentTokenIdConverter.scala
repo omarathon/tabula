@@ -9,7 +9,5 @@ class FileAttachmentTokenIdConverter extends TwoWayConverter[String, FileAttachm
 
   override def convertRight(id: String): FileAttachmentToken = getById[FileAttachmentToken](id).orNull
 
-  override def convertLeft(token: FileAttachmentToken): String = (Option(token) map {
-    _.id
-  }).orNull
+  override def convertLeft(token: FileAttachmentToken): String = (Option(token).map(_.id)).orNull
 }

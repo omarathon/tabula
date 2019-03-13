@@ -44,9 +44,7 @@ trait EditSmallGroupSetDefaultPropertiesCommandState {
   var useNamedLocation: Boolean = _
   var defaultLocationAlias: String = _
 
-  def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map {
-    _.intValue
-  })
+  def defaultWeekRanges: Seq[WeekRange] = Option(defaultWeeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map(_.intValue))
   } getOrElse Seq()
 
   def defaultWeekRanges_=(ranges: Seq[WeekRange]) {
@@ -67,9 +65,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
     copyTo(set)
 
     if (resetExistingEvents) {
-      set.groups.asScala.flatMap {
-        _.events
-      }.foreach { event =>
+      set.groups.asScala.flatMap(_.events).foreach { event =>
         event.weekRanges = set.defaultWeekRanges
         event.day = set.defaultDay
         event.startTime = set.defaultStartTime

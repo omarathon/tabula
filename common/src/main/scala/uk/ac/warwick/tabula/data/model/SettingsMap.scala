@@ -50,11 +50,7 @@ object HasSettings {
     def value: Seq[User] = allSettings.getStringSeqSetting(key).map(_.map(userLookup.getUserByUserId).filter(_.isFoundUser)).getOrElse(default)
 
     override def value_=(v: Seq[User]) {
-      allSettings.settings += key -> v.map {
-        _.getUserId
-      }.filter {
-        _.hasText
-      }.toList
+      allSettings.settings += key -> v.map(_.getUserId).filter(_.hasText).toList
     }
   }
 
@@ -67,9 +63,7 @@ trait HasSettings {
 
   def settingsIterator: Iterator[(String, Any)] = settings.iterator
 
-  protected def getSetting(key: String): Option[Any] = Option(settings).flatMap {
-    _.get(key)
-  }
+  protected def getSetting(key: String): Option[Any] = Option(settings).flatMap(_.get(key))
 
   protected def getStringSetting(key: String): Option[String] = getSetting(key) match {
     case Some(value: String) => Some(value)
@@ -128,9 +122,7 @@ trait HasSettings {
 
   protected def getStringMapSetting(key: String, default: => Map[String, String]): Map[String, String] = getStringMapSetting(key).getOrElse(default)
 
-  protected def settingsSeq: Seq[(String, Any)] = Option(settings).map {
-    _.toSeq
-  }.getOrElse(Nil)
+  protected def settingsSeq: Seq[(String, Any)] = Option(settings).map(_.toSeq).getOrElse(Nil)
 
   protected def ensureSettings {
     if (settings == null) settings = Map()

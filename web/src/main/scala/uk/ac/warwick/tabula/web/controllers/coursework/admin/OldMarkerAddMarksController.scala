@@ -82,9 +82,7 @@ class OldMarkerAddMarksController extends OldCourseworkController {
     markItem.user = member
     markerFeedback match {
       case Some(f) =>
-        markItem.actualMark = f.mark.map {
-          _.toString
-        }.getOrElse("")
+        markItem.actualMark = f.mark.map(_.toString).getOrElse("")
         markItem.actualGrade = f.grade.getOrElse("")
       case None =>
         markItem.actualMark = ""

@@ -84,8 +84,6 @@ class WeekRangeListUserType extends AbstractBasicUserType[Seq[WeekRange], String
 
   override def convertToObject(string: String): mutable.ArraySeq[WeekRange] = string.split(separator) map { rep => WeekRange.fromString(rep) }
 
-  override def convertToValue(list: Seq[WeekRange]): String = if (list.isEmpty) null else list.map {
-    _.toString
-  }.mkString(separator)
+  override def convertToValue(list: Seq[WeekRange]): String = if (list.isEmpty) null else list.map(_.toString).mkString(separator)
 
 }

@@ -113,9 +113,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
   }
 
   def hasDuplicates(strings: Seq[String]): Boolean = {
-    strings.filter {
-      _.hasText
-    }.distinct.size != strings.count {
+    strings.filter(_.hasText).distinct.size != strings.count {
       _.hasText
     }
   }

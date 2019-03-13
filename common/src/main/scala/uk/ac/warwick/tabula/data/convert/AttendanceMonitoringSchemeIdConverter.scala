@@ -13,8 +13,6 @@ class AttendanceMonitoringSchemeIdConverter extends TwoWayConverter[String, Atte
     service.getSchemeById
   }).orNull
 
-  override def convertLeft(scheme: AttendanceMonitoringScheme): String = (Option(scheme) map {
-    _.id
-  }).orNull
+  override def convertLeft(scheme: AttendanceMonitoringScheme): String = (Option(scheme).map(_.id)).orNull
 
 }

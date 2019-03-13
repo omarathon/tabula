@@ -33,9 +33,7 @@ class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSet
 
   }
 
-  override def convertLeft(source: SmallGroupSetFilter): String = Option(source).map {
-    _.getName
-  }.orNull
+  override def convertLeft(source: SmallGroupSetFilter): String = Option(source).map(_.getName).orNull
 
   def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

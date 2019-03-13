@@ -41,12 +41,8 @@ abstract class AbstractRoleTableController extends AdminController {
     val allDepartments = department.toSeq.flatMap(parentDepartments)
 
     val relationshipTypes =
-      if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter {
-        _.defaultDisplay
-      }
-      else allDepartments.flatMap {
-        _.displayedStudentRelationshipTypes
-      }.distinct
+      if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter(_.defaultDisplay)
+      else allDepartments.flatMap(_.displayedStudentRelationshipTypes).distinct
 
     val selectorBuiltInRoleDefinitions =
       ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
@@ -59,15 +55,11 @@ abstract class AbstractRoleTableController extends AdminController {
     val customRoleDefinitions =
       allDepartments
         .flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
-        .filterNot {
-          _.replacesBaseDefinition
-        }
+        .filterNot(_.replacesBaseDefinition)
 
     val allDefinitionsWithoutReplacements =
       (builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
-        .filter {
-          _.isAssignable
-        }
+        .filter(_.isAssignable)
         .sortBy {
           _.allPermissions(Some(null)).size
         }
@@ -79,17 +71,13 @@ abstract class AbstractRoleTableController extends AdminController {
           case _ => 1
         }
 
-        (selectorSort, defs.map {
-          _.allPermissions(Some(null)).size
-        }.max, substr)
+        (selectorSort, defs.map(_.allPermissions(Some(null)).size).max, substr)
       }
         .flatMap { case (_, defs) => defs }
 
     val allDefinitions =
       allDefinitionsWithoutReplacements.map { definition =>
-        (definition, allDepartments.flatMap {
-          _.replacedRoleDefinitionFor(definition)
-        }.headOption.getOrElse(definition))
+        (definition, allDepartments.flatMap(_.replacedRoleDefinitionFor(definition)).headOption.getOrElse(definition))
       }
 
     def groupFn(p: Permission) = {

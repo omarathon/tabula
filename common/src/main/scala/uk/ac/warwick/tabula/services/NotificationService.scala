@@ -125,9 +125,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer with Daois
     dao.unprocessedNotifications.take(NotificationService.ProcessListenersBatchSize).foreach { notification =>
       try {
         logger.info("Processing notification listeners - " + notification)
-        listeners.foreach {
-          _.listen(notification)
-        }
+        listeners.foreach(_.listen(notification))
         notification.markListenersProcessed()
         dao.update(notification)
         session.flush()

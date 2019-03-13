@@ -81,9 +81,7 @@ trait NotificationQueryMethodsImpl extends NotificationQueryMethods {
 
     PagedNotifications(
       items = items,
-      lastUpdatedDate = items.lastOption.map {
-        _.created
-      },
+      lastUpdatedDate = items.lastOption.map(_.created),
       totalHits = response.result.totalHits
     )
   }

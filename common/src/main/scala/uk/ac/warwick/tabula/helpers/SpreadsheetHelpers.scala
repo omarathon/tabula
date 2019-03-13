@@ -85,18 +85,14 @@ object SpreadsheetHelpers extends SpreadsheetHelpers {
   }
 
   def addDateCell(value: DateTime, row: Row, style: CellStyle) {
-    addDateCell(Option(value).map {
-      _.toLocalDate
-    }.orNull, row, style)
+    addDateCell(Option(value).map(_.toLocalDate).orNull, row, style)
   }
 
   def addDateCell(value: LocalDate, row: Row, style: CellStyle) {
     if (value != null) {
       val cell = addCell(row, CellType.NUMERIC)
       cell.setCellStyle(style)
-      cell.setCellValue(Option(value).map {
-        _.toDate
-      }.orNull)
+      cell.setCellValue(Option(value).map(_.toDate).orNull)
     } else addCell(row, CellType.BLANK)
   }
 

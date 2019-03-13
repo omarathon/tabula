@@ -99,11 +99,7 @@ class EmailingExceptionHandler extends ExceptionHandler with Logging with Initia
       "standby" -> standby)))
   }
 
-  private def userId(info: Option[RequestInfo]) = info.map {
-    _.user
-  }.map {
-    _.realId
-  }.getOrElse("ANON")
+  private def userId(info: Option[RequestInfo]) = info.map(_.user).map(_.realId).getOrElse("ANON")
 
   override def afterPropertiesSet(): Unit = {
     template = freemarker.getTemplate("/WEB-INF/freemarker/emails/exception.ftl")

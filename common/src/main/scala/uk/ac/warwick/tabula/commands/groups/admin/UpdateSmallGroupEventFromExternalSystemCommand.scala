@@ -71,9 +71,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandInternal(val module: Module,
   override def applyInternal(): SmallGroupEvent = transactional() {
     val e = timetableEvents(index)
 
-    val tutorUsercodes = e.staff.map {
-      _.getUserId
-    }
+    val tutorUsercodes = e.staff.map(_.getUserId)
 
     updateEvent(module, set, group, event, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
 

@@ -42,9 +42,7 @@ class CreateMonitoringPointReportCommandInternal(val department: Department, val
       val scd = student.mostSignificantCourseDetails.orNull
       val report = new MonitoringPointReport
       val reporterId = Option(currentUser.apparentUser.getWarwickId).getOrElse(currentUser.apparentUser.getUserId)
-      val reporterDepartment = Option(currentUser.departmentCode).map {
-        _.toUpperCase
-      }.getOrElse("")
+      val reporterDepartment = Option(currentUser.departmentCode).map(_.toUpperCase).getOrElse("")
       report.academicYear = academicYear
       report.createdDate = DateTime.now
       report.missed = missedCount

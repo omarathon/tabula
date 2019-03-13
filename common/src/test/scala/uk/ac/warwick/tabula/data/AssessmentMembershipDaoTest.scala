@@ -157,9 +157,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
   @Before def setup() {
     dao.sessionFactory = sessionFactory
     assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
-    assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach {
-      _.clear()
-    }
+    assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach(_.clear())
   }
 
   @Test def enrolledAssignments(): Unit = {

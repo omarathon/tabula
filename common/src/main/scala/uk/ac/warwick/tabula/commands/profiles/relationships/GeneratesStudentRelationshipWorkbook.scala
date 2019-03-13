@@ -29,9 +29,7 @@ trait GeneratesStudentRelationshipWorkbook {
         row.createCell(1).setCellValue(student.fullName.getOrElse(""))
 
         val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
-        agents.headOption.flatMap {
-          _.fullName
-        }.foreach(agentNameCell.setCellValue)
+        agents.headOption.flatMap(_.fullName).foreach(agentNameCell.setCellValue)
 
         row.createCell(3).setCellFormula(
           "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"

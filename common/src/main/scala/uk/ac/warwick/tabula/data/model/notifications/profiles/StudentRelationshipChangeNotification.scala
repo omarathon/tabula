@@ -74,9 +74,7 @@ class StudentRelationshipChangeToStudentNotification extends StudentRelationship
 
   def templateLocation = StudentRelationshipChangeNotification.StudentTemplate
 
-  def recipients: Seq[User] = relationship.studentMember.map {
-    _.asSsoUser
-  }.toSeq
+  def recipients: Seq[User] = relationship.studentMember.map(_.asSsoUser).toSeq
 
   def urlTitle = "view your student profile"
 }
@@ -90,9 +88,7 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 
   def templateLocation = StudentRelationshipChangeNotification.OldAgentTemplate
 
-  def recipients: Seq[User] = oldAgents.map {
-    _.asSsoUser
-  }
+  def recipients: Seq[User] = oldAgents.map(_.asSsoUser)
 }
 
 @Entity
@@ -104,9 +100,7 @@ class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshi
 
   def templateLocation = StudentRelationshipChangeNotification.NewAgentTemplate
 
-  def recipients: Seq[User] = relationship.agentMember.map {
-    _.asSsoUser
-  }.toSeq
+  def recipients: Seq[User] = relationship.agentMember.map(_.asSsoUser).toSeq
 }
 
 object StudentRelationshipChangeNotification {

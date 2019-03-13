@@ -97,11 +97,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 
   override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])): Unit = {
     val (submissions, feedbacks) = result
-    val attachments = submissions.flatMap {
-      _.allAttachments
-    } ++ feedbacks.flatMap {
-      _.attachments.asScala
-    }
+    val attachments = submissions.flatMap(_.allAttachments) ++ feedbacks.flatMap(_.attachments.asScala)
 
     d.assignment(assignment)
       .property("submissionsDeleted" -> submissions.length)

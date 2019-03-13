@@ -63,9 +63,7 @@ trait RevokePermissionsCommandValidation extends SelfValidating {
     }) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
-      grantedPermission.map {
-        _.users
-      }.foreach { users =>
+      grantedPermission.map(_.users).foreach { users =>
         for (code <- usercodes.asScala) {
           if (!users.knownType.includesUserId(code)) {
             errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")

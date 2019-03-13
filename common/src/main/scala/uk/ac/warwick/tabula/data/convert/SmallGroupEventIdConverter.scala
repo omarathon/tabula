@@ -13,8 +13,6 @@ class SmallGroupEventIdConverter extends TwoWayConverter[String, SmallGroupEvent
     service.getSmallGroupEventById(_)
   }).orNull
 
-  override def convertLeft(group: SmallGroupEvent): String = (Option(group) map {
-    _.id
-  }).orNull
+  override def convertLeft(group: SmallGroupEvent): String = (Option(group).map(_.id)).orNull
 
 }

@@ -54,9 +54,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
         .toSeq
         .sortBy { case (defn, _) => defn.allPermissions(Some(null)).size }
         .reverse
-        .map { case (defn, grantedRoles) => RoleAndUsers(defn, grantedRoles.flatMap {
-          _.users.users
-        }.distinct)
+        .map { case (defn, grantedRoles) => RoleAndUsers(defn, grantedRoles.flatMap(_.users.users).distinct)
         }
         .filter { case r =>
           // Only include empty roles if it's the UAM role
@@ -72,9 +70,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
           _.permission
         }
         .toSeq
-        .map { case (p, grantedPermissions) => PermissionAndUsers(p, grantedPermissions.flatMap {
-          _.users.users
-        }.distinct)
+        .map { case (p, grantedPermissions) => PermissionAndUsers(p, grantedPermissions.flatMap(_.users.users).distinct)
         }
 
     PermissionsTree(

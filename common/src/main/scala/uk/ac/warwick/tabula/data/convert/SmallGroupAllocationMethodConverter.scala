@@ -7,8 +7,6 @@ class SmallGroupAllocationMethodConverter extends TwoWayConverter[String, SmallG
 
   override def convertRight(code: String): SmallGroupAllocationMethod = SmallGroupAllocationMethod.fromDatabase(code)
 
-  override def convertLeft(allocationMethod: SmallGroupAllocationMethod): String = Option(allocationMethod).map {
-    _.dbValue
-  }.orNull
+  override def convertLeft(allocationMethod: SmallGroupAllocationMethod): String = Option(allocationMethod).map(_.dbValue).orNull
 
 }

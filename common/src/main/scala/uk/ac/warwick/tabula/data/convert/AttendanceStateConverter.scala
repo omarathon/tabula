@@ -10,8 +10,6 @@ class AttendanceStateConverter extends TwoWayConverter[String, AttendanceState] 
     if (value.hasText) AttendanceState.fromCode(value)
     else null
 
-  override def convertLeft(state: AttendanceState): String = Option(state).map {
-    _.dbValue
-  }.orNull
+  override def convertLeft(state: AttendanceState): String = Option(state).map(_.dbValue).orNull
 
 }

@@ -102,9 +102,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 
     Then("I should get a confirmation modal")
     eventually {
-      find("marking-workflow-modal") map {
-        _.isDisplayed
-      } should be(Some(true))
+      find("marking-workflow-modal").map(_.isDisplayed) should be(Some(true))
     }
 
     And("It should have a dangerous button")

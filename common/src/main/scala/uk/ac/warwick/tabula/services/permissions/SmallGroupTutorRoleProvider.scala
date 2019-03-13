@@ -46,20 +46,14 @@ class SmallGroupTutorRoleProvider extends RoleProvider
   private def getRoles(user: CurrentUser, events: Iterable[SmallGroupEvent]) = {
     val validEvents =
       events.toStream
-        .filter {
-          _.group.groupSet.releasedToTutors
-        }
-        .filter {
-          _.tutors.includesUser(user.apparentUser)
-        }
+        .filter(_.group.groupSet.releasedToTutors)
+        .filter(_.tutors.includesUser(user.apparentUser))
 
     val eventRoles = validEvents.map { event =>
       customRoleFor(event.group.groupSet.module.adminDepartment)(SmallGroupEventTutorRoleDefinition, event).getOrElse(SmallGroupEventTutor(event))
     }
 
-    val groupRoles = validEvents.map {
-      _.group
-    }.distinct.map { group =>
+    val groupRoles = validEvents.map(_.group).distinct.map { group =>
       customRoleFor(group.groupSet.module.adminDepartment)(SmallGroupTutorRoleDefinition, group).getOrElse(SmallGroupTutor(group))
     }
 

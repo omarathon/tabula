@@ -94,9 +94,7 @@ trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
   self: FinaliseFeedbackCommandState with UserAware =>
 
   override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
-    Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot {
-      _.checkedReleased
-    }, assignment))
+    Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot(_.checkedReleased), assignment))
   }
 }
 

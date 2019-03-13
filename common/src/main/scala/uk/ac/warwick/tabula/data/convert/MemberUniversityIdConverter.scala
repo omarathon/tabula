@@ -20,8 +20,6 @@ class MemberUniversityIdConverter extends TwoWayConverter[String, Member] {
     }
   }
 
-  override def convertLeft(member: Member): String = (Option(member) map {
-    _.universityId
-  }).orNull
+  override def convertLeft(member: Member): String = (Option(member).map(_.universityId)).orNull
 
 }

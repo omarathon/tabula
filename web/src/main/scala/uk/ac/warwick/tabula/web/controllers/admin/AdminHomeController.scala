@@ -76,12 +76,8 @@ class AdminHomeController extends AdminController with DepartmentScopedControlle
 
       Mav("admin/home/view",
         "ownedDepartments" -> result.departments,
-        "ownedModuleDepartments" -> result.modules.map {
-          _.adminDepartment
-        },
-        "ownedRouteDepartments" -> result.routes.map {
-          _.adminDepartment
-        },
+        "ownedModuleDepartments" -> result.modules.map(_.adminDepartment),
+        "ownedRouteDepartments" -> result.routes.map(_.adminDepartment),
         "departmentsWithManualUsers" -> departmentsWithManualUsers)
     }
   }

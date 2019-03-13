@@ -14,8 +14,6 @@ class AbstractMeetingRecordIdConverter extends TwoWayConverter[String, AbstractM
     dao.get
   }).orNull
 
-  override def convertLeft(meetingRecord: AbstractMeetingRecord): String = (Option(meetingRecord) map {
-    _.id
-  }).orNull
+  override def convertLeft(meetingRecord: AbstractMeetingRecord): String = (Option(meetingRecord).map(_.id)).orNull
 
 }

@@ -47,9 +47,7 @@ trait FiltersRelationships extends FilterStudentsOrRelationships {
   import uk.ac.warwick.tabula.commands.FiltersRelationships._
 
   def routeRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-    "currentRoute.code", routes.asScala.map {
-      _.code
-    },
+    "currentRoute.code", routes.asScala.map(_.code),
     getAliasPaths("currentRoute"): _*
   )
 

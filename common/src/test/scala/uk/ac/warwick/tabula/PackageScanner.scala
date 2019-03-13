@@ -16,11 +16,7 @@ object PackageScanner {
     val scanner = new ClassPathScanningCandidateComponentProvider(true)
     scanner.addIncludeFilter(new AssignableTypeFilter(classTag[A].runtimeClass))
     val components = scanner.findCandidateComponents(packageName)
-    components.asScala.map {
-      _.getBeanClassName
-    }.toSeq.sorted.map(Class.forName).map {
-      _.asInstanceOf[Class[A]]
-    }
+    components.asScala.map(_.getBeanClassName).toSeq.sorted.map(Class.forName).map(_.asInstanceOf[Class[A]])
   }
 
 }

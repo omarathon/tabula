@@ -77,9 +77,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module
       .map { e => (e.timetableEvent, Option(e.group)) }
       .filter { case (_, group) => group.nonEmpty }
       .map { case (e, group) =>
-        val tutorUsercodes = e.staff.map {
-          _.getUserId
-        }
+        val tutorUsercodes = e.staff.map(_.getUserId)
 
         createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
       }

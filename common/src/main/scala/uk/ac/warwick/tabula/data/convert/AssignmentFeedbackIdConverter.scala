@@ -12,8 +12,6 @@ class AssignmentFeedbackIdConverter extends TwoWayConverter[String, AssignmentFe
 
   override def convertRight(id: String): AssignmentFeedback = service.getAssignmentFeedback(id).orNull
 
-  override def convertLeft(feedback: AssignmentFeedback): String = (Option(feedback) map {
-    _.id
-  }).orNull
+  override def convertLeft(feedback: AssignmentFeedback): String = (Option(feedback).map(_.id)).orNull
 
 }

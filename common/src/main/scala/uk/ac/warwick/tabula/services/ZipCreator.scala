@@ -34,9 +34,7 @@ case class ZipFolderItem(name: String, startItems: Seq[ZipItem] = Nil) extends Z
   var items: ListBuffer[ZipItem] = ListBuffer()
   items.appendAll(startItems)
 
-  def length: Long = items.map {
-    _.length
-  }.sum
+  def length: Long = items.map(_.length).sum
 }
 
 /**
@@ -86,9 +84,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
   }
 
   private def isOverSizeLimit(items: Seq[ZipItem]) =
-    items.map {
-      _.length
-    }.sum > MaxZipItemsSizeInBytes
+    items.map(_.length).sum > MaxZipItemsSizeInBytes
 
   private val CompressionLevel = Deflater.BEST_COMPRESSION
 

@@ -37,9 +37,7 @@ class SmallGroupsByModuleReportExporter(val processorResult: SmallGroupsByModule
         studentData.sprCode
       case _ =>
         val thisModule = modules(moduleIndex - 6)
-        counts.get(studentData).flatMap(_.get(thisModule).map {
-          _.toString
-        }).getOrElse("n/a")
+        counts.get(studentData).flatMap(_.get(thisModule).map(_.toString)).getOrElse("n/a")
     }
   }
 

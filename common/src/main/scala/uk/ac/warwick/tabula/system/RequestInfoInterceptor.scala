@@ -65,9 +65,7 @@ object RequestInfoInterceptor {
 
   def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false, emergencyMessageService: EmergencyMessageService): RequestInfo = {
     // Transfer cache from an EarlyAccessInfo if one exists.
-    val cache = EarlyRequestInfo.fromThread map {
-      _.requestLevelCache
-    } getOrElse {
+    val cache = EarlyRequestInfo.fromThread.map(_.requestLevelCache) getOrElse {
       new RequestLevelCache()
     }
 

@@ -162,9 +162,7 @@ trait PublishFeedbackCommandRequest extends SelectedStudentsRequest with Publish
     val releaseFeedbacks = feedbacks.filterNot { f => f.isPlaceholder || f.released }
     if (releaseFeedbacks.nonEmpty) {
       val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
-      val plagiarisedIds = plagiarisedSubmissions.map {
-        _.usercode
-      }
+      val plagiarisedIds = plagiarisedSubmissions.map(_.usercode)
       releaseFeedbacks.filter { f => !plagiarisedIds.contains(f.usercode) }
     } else {
       Seq()
@@ -254,15 +252,11 @@ trait PublishFeedbackSubmissionsReportGenerator extends SubmissionsReportGenerat
 
     val hasProblems: Boolean = {
       val shouldBeEmpty = Set(feedbackOnly, submissionOnly)
-      val problems = assignment.collectSubmissions && shouldBeEmpty.exists {
-        _.nonEmpty
-      }
+      val problems = assignment.collectSubmissions && shouldBeEmpty.exists(_.nonEmpty)
 
       if (assignment.collectMarks) {
         val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-        problems || shouldBeEmptyWhenCollectingMarks.exists {
-          _.nonEmpty
-        }
+        problems || shouldBeEmptyWhenCollectingMarks.exists(_.nonEmpty)
       } else {
         problems
       }

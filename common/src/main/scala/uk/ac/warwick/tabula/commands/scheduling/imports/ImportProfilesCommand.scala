@@ -192,9 +192,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
       importModRegCommands.flatMap(_.apply())
     }
 
-    val usercodesProcessed: Seq[String] = membershipInfo map {
-      _.member.usercode
-    }
+    val usercodesProcessed: Seq[String] = membershipInfo.map(_.member.usercode)
 
     logger.info("Removing old module registrations")
 
@@ -212,9 +210,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
     val importAccreditedPriorLearningCommands = accreditedPriorLearningImporter.getAccreditedPriorLearning(membershipInfo, users)
 
-    importAccreditedPriorLearningCommands flatMap {
-      _.apply()
-    }
+    importAccreditedPriorLearningCommands.flatMap(_.apply())
   }
 
   def updateStudentCourseDetailsNotes(): Seq[StudentCourseDetailsNote] = {
@@ -300,9 +296,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           // retrieve details for this student from SITS and store the information in Tabula
           val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(universityId -> user), importCommandFactory)
           if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
-          val members = importMemberCommands map {
-            _.apply()
-          }
+          val members = importMemberCommands.map(_.apply())
 
           session.flush()
 

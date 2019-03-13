@@ -139,15 +139,9 @@ object SmallGroupSetFilters {
 
     def apply(set: SmallGroupSet): Boolean =
       set.groups.asScala
-        .flatMap {
-          _.events
-        }
-        .flatMap {
-          _.weekRanges
-        }
-        .flatMap {
-          _.toWeeks
-        }
+        .flatMap(_.events)
+        .flatMap(_.weekRanges)
+        .flatMap(_.toWeeks)
         .exists(weekRange.toWeeks.contains)
   }
 

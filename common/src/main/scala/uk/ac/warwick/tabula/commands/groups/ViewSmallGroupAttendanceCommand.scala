@@ -81,9 +81,7 @@ object ViewSmallGroupAttendanceCommand {
     group.events.filter {
       !_.isUnscheduled
     }.flatMap { event =>
-      val allWeeks = event.weekRanges.flatMap {
-        _.toWeeks
-      }
+      val allWeeks = event.weekRanges.flatMap(_.toWeeks)
       allWeeks.map { week =>
         val occurrence = occurrences.find { o =>
           o.event == event && o.week == week
@@ -146,11 +144,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     // Build the list of all users who are in the group, or have attended one or more occurrences of the group
     val allStudents = benchmarkTask("Get a list of all registered or attended users") {
       (group.students.users ++
-        userLookup.getUsersByWarwickUniIds(occurrences.flatMap {
-          _.attendance.asScala
-        }.map {
-          _.universityId
-        }).values.toSeq)
+        userLookup.getUsersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
         .distinct
     }
 

@@ -205,9 +205,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
   def addItems(seq: Seq[A]): Notification[A, B] = {
     val x = seq.map(_.toEntityReference).asInstanceOf[Seq[EntityReference[A]]]
-    x.foreach {
-      _.notification = this
-    }
+    x.foreach(_.notification = this)
     items.addAll(x.asJava)
     this
   }
@@ -373,9 +371,7 @@ trait ConfigurableNotification {
 
   protected def departmentSettings: NotificationSettings = configuringDepartment.notificationSettings(notificationType)
 
-  protected def userSettings(u: User): Option[NotificationSettings] = userSettingsService.getByUserId(u.getUserId).map {
-    _.notificationSettings(notificationType)
-  }
+  protected def userSettings(u: User): Option[NotificationSettings] = userSettingsService.getByUserId(u.getUserId).map(_.notificationSettings(notificationType))
 
   private def enabledForDepartment: Boolean = departmentSettings.enabled.value
 

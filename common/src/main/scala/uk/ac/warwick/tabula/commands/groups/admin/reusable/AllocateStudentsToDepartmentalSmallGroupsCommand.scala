@@ -85,11 +85,7 @@ trait AllocateStudentsToDepartmentalSmallGroupsFileUploadSupport extends GroupsO
     val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
     // work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map {
-      _.universityId
-    }.filter {
-      _.hasText
-    }).values.toSet
+    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map(_.universityId).filter(_.hasText)).values.toSet
     val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
     for (user <- usersToAddToSet) set.members.add(user)
 

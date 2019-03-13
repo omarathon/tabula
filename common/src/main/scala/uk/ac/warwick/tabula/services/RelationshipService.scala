@@ -257,9 +257,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     agents: Seq[(Member, JBigDecimal)]
   ): Seq[StudentRelationship] = transactional() {
     val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails)
-    val existingRelationships = currentRelationships.filter { rel => rel.agentMember.exists { agent => agents.map {
-      _._1
-    }.contains(agent)
+    val existingRelationships = currentRelationships.filter { rel => rel.agentMember.exists { agent => agents.map(_._1).contains(agent)
     }
     }
     val agentsToCreate = agents.filterNot { case (agent, _) => currentRelationships.exists(_.agentMember.contains(agent)) }
@@ -323,9 +321,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
   ): Seq[StudentRelationship] = transactional() {
     val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails)
     val (existingRelationships, relationshipsToEnd) = currentRelationships.partition {
-      rel => rel.agentMember.exists { agent => agents.map {
-        _._1
-      }.contains(agent)
+      rel => rel.agentMember.exists { agent => agents.map(_._1).contains(agent)
       }
     }
 
@@ -343,9 +339,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     // Don't need to do anything with existingRelationships, but need to handle the others
 
     // End all relationships for agents not passed in
-    relationshipsToEnd.foreach {
-      _.endDate = DateTime.now
-    }
+    relationshipsToEnd.foreach(_.endDate = DateTime.now)
 
     // Save new relationships for agents that don't already exist
     saveStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, agentsToAdd)

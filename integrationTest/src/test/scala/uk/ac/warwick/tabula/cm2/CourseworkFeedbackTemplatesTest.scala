@@ -103,14 +103,10 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
       click on (row.get.findElement(By.partialLinkText("Edit")))
 
       eventually {
-        find("feedback-template-model") map {
-          _.isDisplayed
-        } should be(Some(true))
+        find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
         val ifr = find(cssSelector(".modal-body iframe"))
-        ifr map {
-          _.isDisplayed
-        } should be(Some(true))
+        ifr.map(_.isDisplayed) should be(Some(true))
       }
 
       switch to frame(find(cssSelector(".modal-body iframe")).get)
@@ -166,14 +162,10 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
     deleteFile("file2.txt")
 
     eventually {
-      find("feedback-template-model") map {
-        _.isDisplayed
-      } should be(Some(true))
+      find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
       val ifr = find(cssSelector(".modal-body iframe"))
-      ifr map {
-        _.isDisplayed
-      } should be(Some(true))
+      ifr.map(_.isDisplayed) should be(Some(true))
     }
 
     val iframe = frame(find(cssSelector(".modal-body iframe")).get)

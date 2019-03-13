@@ -119,9 +119,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
     if (hits.isEmpty) Seq()
     else {
       val databaseResults: Map[Long, AuditEvent] =
-        auditEventService.getByIds(hits.map {
-          _.id.toLong
-        }.toSeq)
+        auditEventService.getByIds(hits.map(_.id.toLong).toSeq)
           .map { event => event.id -> event }
           .toMap
 
@@ -455,9 +453,7 @@ trait AuditEventQueryMethodsImpl extends AuditEventQueryMethods {
 
       PagedAuditEvents(
         items = items,
-        lastUpdatedDate = items.lastOption.map {
-          _.eventDate
-        },
+        lastUpdatedDate = items.lastOption.map(_.eventDate),
         totalHits = response.result.totalHits
       )
     }

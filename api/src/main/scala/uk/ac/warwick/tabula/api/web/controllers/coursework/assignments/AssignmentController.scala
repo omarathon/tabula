@@ -220,9 +220,7 @@ trait CreateSubmissionApi {
   def create(@RequestPart("submission") request: CreateSubmissionRequest, @RequestPart("attachments") files: JList[MultipartFile], @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
     request.copyTo(command, errors)
 
-    command.assignment.attachmentField.map {
-      _.id
-    }.foreach { fieldId =>
+    command.assignment.attachmentField.map(_.id).foreach { fieldId =>
       command.fields.get(fieldId).asInstanceOf[FileFormValue].file.upload.addAll(files)
     }
 
@@ -269,17 +267,13 @@ class CreateSubmissionRequest extends JsonApiRequest[SubmitAssignmentRequest] {
 
   override def copyTo(state: SubmitAssignmentRequest, errors: Errors): Unit = {
     attachments.asScala.foreach { attachment =>
-      state.assignment.attachmentField.map {
-        _.id
-      }.foreach { fieldId =>
+      state.assignment.attachmentField.map(_.id).foreach { fieldId =>
         state.fields.get(fieldId).asInstanceOf[FileFormValue].file.attached.add(attachment)
       }
     }
 
     Option(wordCount).foreach { value =>
-      state.assignment.wordCountField.map {
-        _.id
-      }.foreach { fieldId =>
+      state.assignment.wordCountField.map(_.id).foreach { fieldId =>
         state.fields.get(fieldId).asInstanceOf[IntegerFormValue].value = value
       }
     }

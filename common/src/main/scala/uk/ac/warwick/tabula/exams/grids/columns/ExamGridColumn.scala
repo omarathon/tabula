@@ -94,9 +94,7 @@ object ExamGridStudentIdentificationColumnValue {
 class StringToExamGridStudentIdentificationColumnValue extends TwoWayConverter[String, ExamGridStudentIdentificationColumnValue] {
   override def convertRight(source: String): ExamGridStudentIdentificationColumnValue = source.maybeText.map(ExamGridStudentIdentificationColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
 
-  override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map {
-    _.value
-  }.orNull
+  override def convertLeft(source: ExamGridStudentIdentificationColumnValue): String = Option(source).map(_.value).orNull
 }
 
 sealed abstract class ExamGridDisplayModuleNameColumnValue(val value: String, val description: String) {
@@ -129,9 +127,7 @@ object ExamGridDisplayModuleNameColumnValue {
 class StringToExamGridDisplayModuleNameColumnValue extends TwoWayConverter[String, ExamGridDisplayModuleNameColumnValue] {
   override def convertRight(source: String): ExamGridDisplayModuleNameColumnValue = source.maybeText.map(ExamGridDisplayModuleNameColumnValue.fromCode).getOrElse(throw new IllegalArgumentException)
 
-  override def convertLeft(source: ExamGridDisplayModuleNameColumnValue): String = Option(source).map {
-    _.value
-  }.orNull
+  override def convertLeft(source: ExamGridDisplayModuleNameColumnValue): String = Option(source).map(_.value).orNull
 }
 
 case class ExamGridColumnState(

@@ -465,9 +465,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   }
 
   def getInputByLabel(label: String): Option[WebElement] =
-    findAll(tagName("label")).find(_.underlying.getText.trim == label) map {
-      _.underlying.getAttribute("for")
-    } map {
+    findAll(tagName("label")).find(_.underlying.getText.trim == label).map(_.underlying.getAttribute("for")) map {
       id(_).webElement
     }
 

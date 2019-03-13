@@ -215,9 +215,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
     } else if (set.linkedDepartmentSmallGroupSet != null) {
       // TAB-4032 Unset linked state
       set.linkedDepartmentSmallGroupSet = null
-      set.groups.asScala.foreach {
-        _.linkedDepartmentSmallGroup = null
-      }
+      set.groups.asScala.foreach(_.linkedDepartmentSmallGroup = null)
     }
   }
 }

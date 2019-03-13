@@ -8,8 +8,6 @@ class WorkflowCategoryConverter extends TwoWayConverter[String, WorkflowCategory
 
   override def convertRight(code: String): WorkflowCategory = WorkflowCategory.fromCode(code)
 
-  override def convertLeft(ctg: WorkflowCategory): String = (Option(ctg) map {
-    _.code
-  }).orNull
+  override def convertLeft(ctg: WorkflowCategory): String = (Option(ctg).map(_.code)).orNull
 
 }

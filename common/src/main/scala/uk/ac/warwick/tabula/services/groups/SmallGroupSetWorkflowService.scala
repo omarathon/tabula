@@ -39,9 +39,7 @@ class SmallGroupSetWorkflowService {
 
   def progress(set: SmallGroupSet): WorkflowProgress = {
     val allStages = getStagesFor(set)
-    val progresses = allStages.map {
-      _.progress(set)
-    }
+    val progresses = allStages.map(_.progress(set))
 
     val workflowMap = WorkflowStages.toMap(progresses)
 

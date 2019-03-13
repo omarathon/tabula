@@ -103,16 +103,12 @@ class DepartmentSmallGroupSet
 
   def allStudents: Seq[User] = members.users
 
-  def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map {
-    _.getWarwickId
-  }
+  def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map(_.getWarwickId)
 
   def allStudentsCount: Int = members.size
 
   def unallocatedStudents: Seq[User] = {
-    val allocatedStudents = groups.asScala.flatMap {
-      _.students.users
-    }
+    val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
     allStudents diff allocatedStudents
   }
@@ -123,9 +119,7 @@ class DepartmentSmallGroupSet
   }
 
   def studentsNotInMembership: mutable.Buffer[User] = {
-    val allocatedStudents = groups.asScala.flatMap {
-      _.students.users
-    }
+    val allocatedStudents = groups.asScala.flatMap(_.students.users)
 
     allocatedStudents diff allStudents
   }

@@ -15,7 +15,5 @@ class DayOfWeekConverter extends TwoWayConverter[String, DayOfWeek] {
     }
     else null
 
-  override def convertLeft(day: DayOfWeek): String = Option(day).map {
-    _.getAsInt.toString
-  }.orNull
+  override def convertLeft(day: DayOfWeek): String = Option(day).map(_.getAsInt.toString).orNull
 }

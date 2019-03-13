@@ -53,9 +53,7 @@ abstract class AbstractGroupsHomeController extends GroupsController with Groups
       Mav("groups/home/view",
         "academicYear" -> academicYear,
         "ownedDepartments" -> departmentsAndRoutes.departments,
-        "ownedModuleDepartments" -> departmentsAndRoutes.modules.map {
-          _.adminDepartment
-        },
+        "ownedModuleDepartments" -> departmentsAndRoutes.modules.map(_.adminDepartment),
         "taughtGroups" -> taughtGroups,
         "memberGroupsetModules" -> ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false),
         "todaysModules" -> ViewModules.fromOccurrences(todaysOccurrences, GroupsViewModel.Tutor),

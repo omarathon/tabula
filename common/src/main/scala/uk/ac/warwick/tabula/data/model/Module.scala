@@ -61,9 +61,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
   @BatchSize(size = 200)
   var teachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
 
-  def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map {
-    _.department
-  } + adminDepartment
+  def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map(_.department) + adminDepartment
 
   def permissionsParents: Stream[Department] = Option(adminDepartment).toStream
 

@@ -316,9 +316,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     // TODO Can't test link to SITS for our fixture department
     // Don't bother messing around with assigning students, let's just assume students will magically find the submit page
     click on id("student-summary-legend")
-    className("show-adder").findElement map {
-      _.underlying.isDisplayed
-    } should be(Some(true))
+    className("show-adder").findElement.map(_.underlying.isDisplayed) should be(Some(true))
 
     // Make sure JS is working
     id("js-hint").findElement should be('empty)
@@ -350,9 +348,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     checkbox("collectSubmissions").select()
 
     eventually {
-      find("submission-options") map {
-        _.isDisplayed
-      } should be(Some(true))
+      find("submission-options").map(_.isDisplayed) should be(Some(true))
     }
 
     // Turn everything on
@@ -414,9 +410,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   }
 
   def getInputByLabel(label: String): Option[WebElement] =
-    findAll(tagName("label")).find(_.underlying.getText.trim == label) map {
-      _.underlying.getAttribute("for")
-    } map {
+    findAll(tagName("label")).find(_.underlying.getText.trim == label).map(_.underlying.getAttribute("for")) map {
       id(_).webElement
     }
 

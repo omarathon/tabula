@@ -31,12 +31,8 @@ abstract class FeedbackTemplateCommand(val department: Department)
 
   override def describeResult(d: Description, templates: Seq[FeedbackTemplate]) {
     d.department(department)
-      .property("feedbackTemplate" -> templates.map {
-        _.id
-      })
-      .fileAttachments(templates.map {
-        _.attachment
-      })
+      .property("feedbackTemplate" -> templates.map(_.id))
+      .fileAttachments(templates.map(_.attachment))
   }
 }
 

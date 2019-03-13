@@ -84,9 +84,7 @@ trait GrantRoleCommandValidation extends SelfValidating {
       val permissionsToAdd = roleDefinition.allPermissions(Some(scope)).keys
       val deniedPermissions = permissionsToAdd.filterNot(securityService.canDelegate(user, _, scope))
       if (deniedPermissions.nonEmpty && (!user.god)) {
-        errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.map {
-          _.description
-        }.mkString("\n"), scope), "")
+        errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.map(_.description).mkString("\n"), scope), "")
       }
     }
   }

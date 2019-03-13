@@ -220,9 +220,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
   def findSmallGroupSetsByMember(user: User): Seq[SmallGroupSet] = {
     val autoEnrolled =
       membershipDao.getSITSEnrolledSmallGroupSets(user)
-        .filterNot {
-          _.members.excludesUser(user)
-        }
+        .filterNot(_.members.excludesUser(user))
 
     val manuallyEnrolled =
       groupSetManualMembersHelper.findBy(user)
@@ -231,9 +229,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
     val linked =
       departmentGroupSetManualMembersHelper.findBy(user)
         .filterNot { dsgs => dsgs.deleted || dsgs.archived }
-        .flatMap {
-          _.linkedSets.asScala
-        }
+        .flatMap(_.linkedSets.asScala)
         .filterNot { sgs => sgs.deleted || sgs.archived }
 
     (autoEnrolled ++ manuallyEnrolled ++ linked).distinct
@@ -248,9 +244,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
       val linkedGroups = benchmarkTask("findBydepartmentStudentGroupHelper") {
         departmentStudentGroupHelper.findBy(user)
           .filterNot { group => group.groupSet.deleted || group.groupSet.archived }
-          .flatMap {
-            _.linkedGroups.asScala
-          }
+          .flatMap(_.linkedGroups.asScala)
           .filterNot { group => group.groupSet.deleted || group.groupSet.archived }
       }
       (groups ++ linkedGroups).distinct

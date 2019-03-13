@@ -37,9 +37,7 @@ abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsControl
 
     val hasModules = info.modulesWithPermission.nonEmpty
     val hasGroups = setsToDisplay.nonEmpty
-    val hasGroupAttendance = setsToDisplay.exists {
-      _.set.showAttendanceReports
-    }
+    val hasGroupAttendance = setsToDisplay.exists(_.set.showAttendanceReports)
 
     val model = Map(
       "viewedAcademicYear" -> cmd.academicYear,

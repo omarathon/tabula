@@ -29,9 +29,7 @@ class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: Cur
 
   def applyInternal(): ViewModules = {
     val user = member.asSsoUser
-    val memberGroupSets = (smallGroupService.findSmallGroupSetsByMember(user) ++ smallGroupService.findSmallGroupsByStudent(user).map {
-      _.groupSet
-    }).distinct
+    val memberGroupSets = (smallGroupService.findSmallGroupSetsByMember(user) ++ smallGroupService.findSmallGroupsByStudent(user).map(_.groupSet)).distinct
     val filteredmemberGroupSets = academicYearOption.map(academicYear => memberGroupSets.filter(_.academicYear == academicYear)).getOrElse(memberGroupSets)
     val releasedMemberGroupSets = getGroupSetsReleasedToStudents(filteredmemberGroupSets)
     val isTutor = !(currentUser.apparentUser == user)

@@ -115,9 +115,7 @@ trait SubmissionAndFeedbackValidation extends SelfValidating {
   self: SubmissionAndFeedbackRequest =>
 
   override def validate(errors: Errors): Unit = {
-    Option(filter) foreach {
-      _.validate(filterParameters.asScala.toMap)(errors)
-    }
+    Option(filter).foreach(_.validate(filterParameters.asScala.toMap)(errors))
   }
 }
 
@@ -275,9 +273,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val module: Module, val assi
     }
 
     val membersWithPublishedFeedback = submitted.filter { student =>
-      student.coursework.enhancedFeedback exists {
-        _.feedback.checkedReleased
-      }
+      student.coursework.enhancedFeedback.exists(_.feedback.checkedReleased)
     }
 
     // True if any feedback exists that's been published. To decide whether to show whoDownloaded count.

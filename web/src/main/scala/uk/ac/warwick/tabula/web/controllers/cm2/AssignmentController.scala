@@ -85,9 +85,7 @@ class AssignmentController extends CourseworkController
       "errors" -> errors,
       "feedback" -> info.feedback,
       "submission" -> info.submission,
-      "justSubmitted" -> form.exists {
-        _.justSubmitted
-      },
+      "justSubmitted" -> form.exists(_.justSubmitted),
       "canSubmit" -> info.canSubmit,
       "canReSubmit" -> info.canReSubmit,
       "hasExtension" -> info.extension.isDefined,

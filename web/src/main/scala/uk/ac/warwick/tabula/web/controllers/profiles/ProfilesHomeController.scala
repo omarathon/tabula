@@ -38,9 +38,7 @@ import uk.ac.warwick.tabula.web.Mav
         "smallGroups" -> info.currentSmallGroups,
         "previousSmallGroups" -> info.previousSmallGroups,
         "adminDepartments" -> info.adminDepartments,
-        "searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map {
-          _.homeDepartment
-        }.toSet)
+        "searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map(_.homeDepartment).toSet)
       )
     }
   }

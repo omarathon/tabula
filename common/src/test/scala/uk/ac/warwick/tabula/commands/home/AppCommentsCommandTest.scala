@@ -133,12 +133,8 @@ class AppCommentsCommandTest extends TestBase with Mockito {
         cmd.applyInternal()
         verify(mockMailSender, times(1)).send(mimeMessage)
 
-        mimeMessage.getRecipients(RecipientType.TO).map {
-          _.toString
-        } should be(Array(owner.getEmail))
-        mimeMessage.getFrom.map {
-          _.toString
-        } should be(Array(adminEmail))
+        mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(owner.getEmail))
+        mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
         mimeMessage.getSubject should be("Tabula help")
 
         // Check properties have been set
@@ -165,9 +161,7 @@ class AppCommentsCommandTest extends TestBase with Mockito {
       cmd.applyInternal()
       verify(mockMailSender, times(1)).send(mimeMessage)
 
-      mimeMessage.getRecipients(RecipientType.TO).map {
-        _.toString
-      } should be(Array(adminEmail))
+      mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(adminEmail))
       mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
       mimeMessage.getSubject should be("Tabula support")
 
@@ -201,12 +195,8 @@ class AppCommentsCommandTest extends TestBase with Mockito {
         cmd.applyInternal()
         verify(mockMailSender, times(1)).send(mimeMessage)
 
-        mimeMessage.getRecipients(RecipientType.TO).map {
-          _.toString
-        } should be(Array(adminEmail))
-        mimeMessage.getFrom.map {
-          _.toString
-        } should be(Array(adminEmail))
+        mimeMessage.getRecipients(RecipientType.TO).map(_.toString) should be(Array(adminEmail))
+        mimeMessage.getFrom.map(_.toString) should be(Array(adminEmail))
         mimeMessage.getSubject should be("Tabula support")
 
         // Check properties have been set

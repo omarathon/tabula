@@ -28,9 +28,7 @@ class ListAllExtensionsCommand(val department: Department, val academicYear: Aca
 
     // get all extensions for assignments in modules in the department for the current year
     assignmentDao.getAssignments(department, academicYear)
-      .flatMap {
-        _.extensions.asScala
-      }
+      .flatMap(_.extensions.asScala)
       .map { extension => ExtensionGraph(extension, userLookup.getUserByUserId(extension.usercode)) }
   }
 

@@ -12,9 +12,7 @@ class CourseCodeConverter extends TwoWayConverter[String, Course] {
   override def convertRight(code: String): Course =
     service.getCourseByCode(sanitise(code)).orNull
 
-  override def convertLeft(course: Course): String = (Option(course) map {
-    _.code
-  }).orNull
+  override def convertLeft(course: Course): String = (Option(course).map(_.code)).orNull
 
   def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

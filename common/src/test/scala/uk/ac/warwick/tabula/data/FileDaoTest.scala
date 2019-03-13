@@ -69,12 +69,8 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
     dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 1) should be(Seq(attachments(4)))
     dao.getFilesCreatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 10) should be(attachments.slice(4, 10))
 
-    dao.getAllFileIds() should be((attachments map {
-      _.id
-    }).toSet)
-    dao.getAllFileIds(Some(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0))) should be((attachments.slice(0, 4) map {
-      _.id
-    }).toSet)
+    dao.getAllFileIds() should be((attachments.map(_.id)).toSet)
+    dao.getAllFileIds(Some(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0))) should be((attachments.slice(0, 4).map(_.id)).toSet)
   }
 
   @Test

@@ -21,9 +21,7 @@ trait JobInstance {
 
   var id: String
 
-  def optInt(name: String): Option[Int] = propsMap.get(name).map {
-    _.toString.toInt
-  }
+  def optInt(name: String): Option[Int] = propsMap.get(name).map(_.toString.toInt)
 
   def getString(name: String): String = propsMap(name).toString
 

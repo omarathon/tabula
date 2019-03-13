@@ -30,9 +30,7 @@ class OldModuleController extends OldCourseworkController {
     Mav("coursework/submit/module",
       "module" -> module,
       "assignments" -> module.assignments.asScala
-        .filterNot {
-          _.deleted
-        }
+        .filterNot(_.deleted)
         .sortBy {
           _.closeDate
         }

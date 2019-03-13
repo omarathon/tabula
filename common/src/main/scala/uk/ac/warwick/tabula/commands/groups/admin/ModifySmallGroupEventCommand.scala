@@ -70,9 +70,7 @@ trait ModifySmallGroupEventCommandState {
   var locationAlias: String = _
   var possibleMapLocations: Seq[WAI2GoLocation] = Nil
 
-  def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map {
-    _.intValue
-  })
+  def weekRanges: Seq[WeekRange] = Option(weeks) map { weeks => WeekRange.combine(weeks.asScala.toSeq.map(_.intValue))
   } getOrElse Seq()
 
   def weekRanges_=(ranges: Seq[WeekRange]) {

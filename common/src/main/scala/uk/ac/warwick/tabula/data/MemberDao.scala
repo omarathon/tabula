@@ -227,17 +227,13 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
     if (universityIds.isEmpty) Seq.empty
     else safeInSeq(() => {
       session.newCriteria[Member]
-    }, "universityId", universityIds map {
-      _.safeTrim
-    })
+    }, "universityId", universityIds.map(_.safeTrim))
 
   def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member] = {
     if (universityIds.isEmpty) Seq.empty
     else safeInSeq(() => {
       sessionWithoutFreshFilters.newCriteria[Member]
-    }, "universityId", universityIds map {
-      _.safeTrim
-    })
+    }, "universityId", universityIds.map(_.safeTrim))
   }
 
   def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false, activeOnly: Boolean = true): Seq[Member] =
@@ -398,9 +394,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
   def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String] = {
     val idCriteria = session.newCriteria[StudentMember]
-    restrictions.foreach {
-      _.apply(idCriteria)
-    }
+    restrictions.foreach(_.apply(idCriteria))
 
     if (orders.nonEmpty) {
       orders.foreach {
@@ -414,9 +408,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
   def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
     val idCriteria = session.newCriteria[StudentMember]
-    restrictions.foreach {
-      _.apply(idCriteria)
-    }
+    restrictions.foreach(_.apply(idCriteria))
 
     val universityIds = idCriteria.project[String](property("universityId")).seq
 
@@ -463,18 +455,14 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
         ))
 
       val c = session.newCriteria[StudentCourseDetails]
-      restrictions.foreach {
-        _.apply(c)
-      }
+      restrictions.foreach(_.apply(c))
       c.add(Property.forName("scjCode").in(d)).seq
     }
   }
 
   def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int = {
     val c = session.newCriteria[StudentMember]
-    restrictions.foreach {
-      _.apply(c)
-    }
+    restrictions.foreach(_.apply(c))
 
     c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()
   }
@@ -577,9 +565,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
           session.newCriteria[Member]
         }
       }
-      restrictions.foreach {
-        _.apply(criteria)
-      }
+      restrictions.foreach(_.apply(criteria))
       criteria.project[String](Projections.property("userId")).seq
     } finally {
       if (filterEnabled) {

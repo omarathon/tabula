@@ -235,9 +235,7 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
           Await.result(
             auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode, feedback.universityId),
             5.seconds
-          ).headOption.map {
-            _.eventDate
-          }
+          ).headOption.map(_.eventDate)
         } catch {
           case timeout: TimeoutException => None
         }

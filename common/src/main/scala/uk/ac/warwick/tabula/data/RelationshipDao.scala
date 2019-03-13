@@ -456,9 +456,7 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 
   def getStudentAssociationData(restrictions: Iterable[ScalaRestriction]): Seq[StudentAssociationData] = {
     val criteria = session.newCriteria[StudentMember]
-    restrictions.foreach {
-      _.apply(criteria)
-    }
+    restrictions.foreach(_.apply(criteria))
     criteria.createAlias("mostSignificantCourse", "mostSignificantCourse")
       .createAlias("mostSignificantCourse.course", "course")
       .createAlias("mostSignificantCourse.currentRoute", "route", JoinType.LEFT_OUTER_JOIN)

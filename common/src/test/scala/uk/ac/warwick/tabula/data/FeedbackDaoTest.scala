@@ -64,15 +64,9 @@ class FeedbackDaoTest extends PersistenceTestBase {
     dao.getAssignmentFeedback(f3.id) should be(Some(f3))
     dao.getAssignmentFeedback("blah") should be(None)
 
-    dao.getMarkerFeedback(mf1.id) map {
-      _.feedback
-    } should be(Some(f1))
-    dao.getMarkerFeedback(mf2.id) map {
-      _.feedback
-    } should be(Some(f2))
-    dao.getMarkerFeedback(mf3.id) map {
-      _.feedback
-    } should be(Some(f3))
+    dao.getMarkerFeedback(mf1.id).map(_.feedback) should be(Some(f1))
+    dao.getMarkerFeedback(mf2.id).map(_.feedback) should be(Some(f2))
+    dao.getMarkerFeedback(mf3.id).map(_.feedback) should be(Some(f3))
     dao.getMarkerFeedback("blah") should be(None)
 
     dao.getAssignmentFeedbackByUsercode(ass1, "0205225") should be(Some(f1))

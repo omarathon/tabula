@@ -87,11 +87,7 @@ trait AllocateStudentsToGroupsFileUploadSupport extends GroupsObjectsWithFileUpl
     val allocations = groupsExtractor.readXSSFExcelFile(file.asByteSource.openStream())
 
     // work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map {
-      _.universityId
-    }.filter {
-      _.hasText
-    }).values.toSet
+    val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map(_.universityId).filter(_.hasText)).values.toSet
     val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
     for (user <- usersToAddToSet) set.members.add(user)
 
@@ -202,9 +198,7 @@ trait AllocateStudentsToGroupsViewHelpers[A >: Null <: GeneratedId] extends Task
     def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 
     val allUsers = unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten
-    val allUniversityIds = allUsers.filter(validUser).map {
-      _.getWarwickId
-    }
+    val allUniversityIds = allUsers.filter(validUser).map(_.getWarwickId)
     val members = benchmarkTask("members") {
       profileService.getAllMembersWithUniversityIds(allUniversityIds)
         .map(member => (member.universityId, member)).toMap

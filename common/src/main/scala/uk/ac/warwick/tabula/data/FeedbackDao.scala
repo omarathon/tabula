@@ -56,15 +56,9 @@ abstract class AbstractFeedbackDao extends FeedbackDao with Daoisms {
 
   override def delete(feedback: Feedback): Unit = {
     // We need to delete any markerfeedback first
-    Option(feedback.firstMarkerFeedback) foreach {
-      _.markDeleted()
-    }
-    Option(feedback.secondMarkerFeedback) foreach {
-      _.markDeleted()
-    }
-    Option(feedback.thirdMarkerFeedback) foreach {
-      _.markDeleted()
-    }
+    Option(feedback.firstMarkerFeedback).foreach(_.markDeleted())
+    Option(feedback.secondMarkerFeedback).foreach(_.markDeleted())
+    Option(feedback.thirdMarkerFeedback).foreach(_.markDeleted())
 
     feedback.clearAttachments()
 

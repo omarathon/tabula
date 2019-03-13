@@ -11,8 +11,6 @@ class ExamFeedbackIdConverter extends TwoWayConverter[String, ExamFeedback] {
 
   override def convertRight(id: String): ExamFeedback = service.getExamFeedback(id).orNull
 
-  override def convertLeft(feedback: ExamFeedback): String = (Option(feedback) map {
-    _.id
-  }).orNull
+  override def convertLeft(feedback: ExamFeedback): String = (Option(feedback).map(_.id)).orNull
 
 }

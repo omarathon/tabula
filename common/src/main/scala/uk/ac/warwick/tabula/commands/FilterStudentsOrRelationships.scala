@@ -37,18 +37,14 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
   )
 
   def courseTypeRestriction: Option[ScalaRestriction] = startsWithIfNotEmpty(
-    "course.code", courseTypes.asScala.flatMap {
-      _.courseCodeChars.map(_.toString)
-    },
+    "course.code", courseTypes.asScala.flatMap(_.courseCodeChars.map(_.toString)),
     getAliasPaths("course"): _*
   )
 
   def routeRestriction: Option[ScalaRestriction]
 
   def courseRestriction: Option[ScalaRestriction] = inIfNotEmpty(
-    "course.code", courses.asScala.map {
-      _.code
-    },
+    "course.code", courses.asScala.map(_.code),
     getAliasPaths("course"): _*
   )
 

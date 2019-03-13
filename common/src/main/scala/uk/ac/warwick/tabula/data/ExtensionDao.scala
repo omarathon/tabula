@@ -72,20 +72,14 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 
   def filterExtensions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder], maxResults: Int, startResult: Int): Seq[Extension] = {
     val c = session.newCriteria[Extension]
-    restrictions.foreach {
-      _.apply(c)
-    }
-    orders.foreach {
-      c.addOrder
-    }
+    restrictions.foreach(_.apply(c))
+    orders.foreach(c.addOrder)
     c.setMaxResults(maxResults).setFirstResult(startResult).seq
   }
 
   def countFilteredExtensions(restrictions: Seq[ScalaRestriction]): Int = {
     val c = session.newCriteria[Extension]
-    restrictions.foreach {
-      _.apply(c)
-    }
+    restrictions.foreach(_.apply(c))
     c.count.intValue()
   }
 }

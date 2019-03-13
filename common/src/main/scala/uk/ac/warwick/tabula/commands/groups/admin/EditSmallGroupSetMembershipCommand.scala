@@ -91,12 +91,8 @@ trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with Spec
 
   // start complicated membership stuff
 
-  lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map {
-    _.upstreamAssessmentGroupInfos
-  }
-  lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map {
-    _.members
-  }
+  lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map(_.upstreamAssessmentGroupInfos)
+  lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map(_.members)
 
   def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
     // TAB-4848 get all the groups that are linked even if they're marked not in use

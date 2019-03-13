@@ -84,9 +84,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 trait UnarchivedAssignmentsMap {
 
   def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-    for (module <- modules) yield module.code -> module.assignments.asScala.filter {
-      _.isAlive
-    }
+    for (module <- modules) yield module.code -> module.assignments.asScala.filter(_.isAlive)
     ).toMap.filterNot(_._2.isEmpty)
 
 }

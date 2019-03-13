@@ -14,8 +14,6 @@ class ExtensionIdConverter extends TwoWayConverter[String, Extension] {
     service.getExtensionById(_)
   }).orNull
 
-  override def convertLeft(extension: Extension): String = (Option(extension) map {
-    _.id
-  }).orNull
+  override def convertLeft(extension: Extension): String = (Option(extension).map(_.id)).orNull
 
 }

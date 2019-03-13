@@ -31,15 +31,11 @@ case class SubmissionsReport(assignment: Assignment) {
 
   def hasProblems: Boolean = {
     val shouldBeEmpty = Set(feedbackOnly, submissionOnly, plagiarised)
-    val problems = assignment.collectSubmissions && shouldBeEmpty.exists {
-      _.nonEmpty
-    }
+    val problems = assignment.collectSubmissions && shouldBeEmpty.exists(_.nonEmpty)
 
     if (assignment.collectMarks) {
       val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-      problems || shouldBeEmptyWhenCollectingMarks.exists {
-        _.nonEmpty
-      }
+      problems || shouldBeEmptyWhenCollectingMarks.exists(_.nonEmpty)
     } else {
       problems
     }

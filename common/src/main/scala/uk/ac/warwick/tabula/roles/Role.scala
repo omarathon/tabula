@@ -80,17 +80,13 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
     scopedPermissions.contains(permission) ||
       scopelessPermissions.contains(permission) ||
       globalPermissions.contains(permission) ||
-      (subRoleDefinitions exists {
-        _.mayGrant(permission)
-      })
+      (subRoleDefinitions.exists(_.mayGrant(permission)))
 
   /**
     * Return all permissions, resolving sub-roles
     */
   def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
-    permissions(scope) ++ (subRoleDefinitions flatMap {
-      _.allPermissions(scope)
-    })
+    permissions(scope) ++ (subRoleDefinitions.flatMap(_.allPermissions(scope)))
 
   def isAssignable = true
 }

@@ -137,7 +137,5 @@ object ModerationSampler {
 class ModerationSamplerConverter extends TwoWayConverter[String, ModerationSampler] {
   override def convertRight(source: String): ModerationSampler = source.maybeText.map(ModerationSampler.fromCode).orNull
 
-  override def convertLeft(source: ModerationSampler): String = Option(source).map {
-    _.code
-  }.orNull
+  override def convertLeft(source: ModerationSampler): String = Option(source).map(_.code).orNull
 }

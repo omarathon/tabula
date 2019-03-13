@@ -86,9 +86,7 @@ class RecordAttendanceController extends GroupsController with AutowiringSmallGr
         group.events.filter {
           !_.isUnscheduled
         }.flatMap { event =>
-          val allWeeks = event.weekRanges.flatMap {
-            _.toWeeks
-          }
+          val allWeeks = event.weekRanges.flatMap(_.toWeeks)
           allWeeks.map { week =>
             val occurrence = occurrences.find { o =>
               o.event == event && o.week == week

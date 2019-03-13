@@ -222,9 +222,7 @@ class Department extends GeneratedId
 
   def getStudentRelationshipSource(relationshipType: StudentRelationshipType): StudentRelationshipSource =
     getStringMapSetting(Settings.StudentRelationshipSource)
-      .flatMap {
-        _.get(relationshipType.id)
-      }.fold(relationshipType.defaultSource)(StudentRelationshipSource.fromCode)
+      .flatMap(_.get(relationshipType.id)).fold(relationshipType.defaultSource)(StudentRelationshipSource.fromCode)
 
   def setStudentRelationshipSource(relationshipType: StudentRelationshipType, source: StudentRelationshipSource): Unit = {
     val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
@@ -412,9 +410,7 @@ class Department extends GeneratedId
       }
     }
 
-    customRoleDefinitions.asScala.filter {
-      _.replacesBaseDefinition
-    }.find(matches) match {
+    customRoleDefinitions.asScala.filter(_.replacesBaseDefinition).find(matches) match {
       case Some(role) => Option(role)
       case _ if hasParent => parent.replacedRoleDefinitionFor(roleDefinition)
       case _ => None

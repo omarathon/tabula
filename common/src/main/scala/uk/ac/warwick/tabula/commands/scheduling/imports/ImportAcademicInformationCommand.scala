@@ -317,9 +317,7 @@ trait ImportModuleTeachingDepartments {
   }
 
   def importModuleTeachingDepartments(moduleTeachingDepartments: Seq[ModuleTeachingDepartmentInfo], module: Module): ImportResult = {
-    val seenDepartments = moduleTeachingDepartments.map {
-      _.departmentCode
-    }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+    val seenDepartments = moduleTeachingDepartments.map(_.departmentCode).flatMap(moduleAndDepartmentService.getDepartmentByCode)
 
     val deletions =
       module.teachingInfo.asScala
@@ -422,7 +420,7 @@ trait ImportRouteTeachingDepartments {
 
   def importRouteTeachingDepartments(routeTeachingDepartments: Seq[RouteTeachingDepartmentInfo], route: Route): ImportResult = {
     // TAB-2943
-    //		val seenDepartments = routeTeachingDepartments.map { _.departmentCode }.flatMap(moduleAndDepartmentService.getDepartmentByCode)
+    //		val seenDepartments = routeTeachingDepartments.map(_.departmentCode).flatMap(moduleAndDepartmentService.getDepartmentByCode)
     //
     //		val deletions =
     //			route.teachingInfo.asScala
@@ -476,9 +474,7 @@ trait ImportSitsStatuses {
     logger.info("Importing SITS statuses")
 
     transactional() {
-      val results = sitsStatusImporter.getSitsStatuses().map {
-        _.apply()._2
-      }
+      val results = sitsStatusImporter.getSitsStatuses().map(_.apply()._2)
 
       combineResults(results)
     }
@@ -492,9 +488,7 @@ trait ImportModesOfAttendance {
     logger.info("Importing modes of attendance")
 
     transactional() {
-      val results = modeOfAttendanceImporter.getImportCommands().map {
-        _.apply()._2
-      }
+      val results = modeOfAttendanceImporter.getImportCommands().map(_.apply()._2)
 
       combineResults(results)
     }

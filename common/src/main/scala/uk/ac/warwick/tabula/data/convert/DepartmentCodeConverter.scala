@@ -19,9 +19,7 @@ class DepartmentCodeConverter extends TwoWayConverter[String, Department] {
     }
   }
 
-  override def convertLeft(department: Department): String = (Option(department) map {
-    _.code
-  }).orNull
+  override def convertLeft(department: Department): String = (Option(department).map(_.code)).orNull
 
   def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

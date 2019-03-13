@@ -7,7 +7,5 @@ class TimetableEventTypeConverter extends TwoWayConverter[String, TimetableEvent
 
   override def convertRight(code: String) = TimetableEventType(code)
 
-  override def convertLeft(format: TimetableEventType): String = (Option(format) map {
-    _.code
-  }).orNull
+  override def convertLeft(format: TimetableEventType): String = (Option(format).map(_.code)).orNull
 }

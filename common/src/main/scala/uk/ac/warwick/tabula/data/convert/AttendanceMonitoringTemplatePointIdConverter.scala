@@ -14,8 +14,6 @@ class AttendanceMonitoringTemplatePointIdConverter extends TwoWayConverter[Strin
     service.getTemplatePointById
   }).orNull
 
-  override def convertLeft(scheme: AttendanceMonitoringTemplatePoint): String = (Option(scheme) map {
-    _.id
-  }).orNull
+  override def convertLeft(scheme: AttendanceMonitoringTemplatePoint): String = (Option(scheme).map(_.id)).orNull
 
 }

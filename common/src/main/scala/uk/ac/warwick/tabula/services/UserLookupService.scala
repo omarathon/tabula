@@ -116,9 +116,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
   def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User = {
     if (skipMemberLookup) getUserByWarwickUniIdFromUserLookup(id)
     else profileService.getMemberByUniversityIdStaleOrFresh(id)
-      .map {
-        _.asSsoUser
-      }
+      .map(_.asSsoUser)
       .getOrElse {
         getUserByWarwickUniIdFromUserLookup(id)
       }

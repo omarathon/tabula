@@ -59,9 +59,7 @@ abstract class ImportMemberFromMembershipCommand
     this.jobTitle = member.position
     this.phoneNumber = member.phoneNumber
 
-    this.inUseFlag = getInUseFlag(rs.map {
-      _.getString("in_use_flag")
-    }, member)
+    this.inUseFlag = getInUseFlag(rs.map(_.getString("in_use_flag")), member)
     this.groupName = member.targetGroup
     this.inactivationDate = member.endDate
 

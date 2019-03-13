@@ -41,9 +41,7 @@ class ListAssignmentsForDepartmentController extends DepartmentAssignmentsContro
       Mav(new JSONView(Map(
         "success" -> true,
         "status" -> "ok",
-        "academicYear" -> Option(academicYear).map {
-          _.toString
-        }.orNull,
+        "academicYear" -> Option(academicYear).map(_.toString).orNull,
         "assignments" -> assignments.map(jsonAssignmentObject)
       )))
     }
@@ -65,9 +63,7 @@ class ListAssignmentsForDepartmentController extends DepartmentAssignmentsContro
         </assignments> % Map(
           "success" -> true,
           "status" -> "ok",
-          "academicYear" -> Option(academicYear).map {
-            _.toString
-          }.orNull
+          "academicYear" -> Option(academicYear).map(_.toString).orNull
         )
       ))
     }

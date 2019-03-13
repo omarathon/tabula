@@ -49,11 +49,7 @@ trait AddAdditionalStudent {
   var replacedWeek: JInteger = _
   var replacedEvent: SmallGroupEvent = _
 
-  lazy val manuallyAddedUniversityIds: mutable.Set[String] = occurrence.attendance.asScala.filter {
-    _.addedManually
-  }.map {
-    _.universityId
-  }
+  lazy val manuallyAddedUniversityIds: mutable.Set[String] = occurrence.attendance.asScala.filter(_.addedManually).map(_.universityId)
 
   var linkedAttendance: SmallGroupEventAttendance = _
 

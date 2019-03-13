@@ -25,9 +25,7 @@ class AssignmentInfoFilterConverter extends TwoWayConverter[String, AssignmentIn
 
   }
 
-  override def convertLeft(source: AssignmentInfoFilter): String = Option(source).map {
-    _.getName
-  }.orNull
+  override def convertLeft(source: AssignmentInfoFilter): String = Option(source).map(_.getName).orNull
 
   private def sanitise(code: String): String = {
     if (code == null) throw new IllegalArgumentException

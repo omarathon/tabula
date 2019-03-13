@@ -18,8 +18,6 @@ class MeetingRecordIdConverter extends TwoWayConverter[String, MeetingRecord] {
       }
   }).orNull
 
-  override def convertLeft(meetingRecord: MeetingRecord): String = (Option(meetingRecord) map {
-    _.id
-  }).orNull
+  override def convertLeft(meetingRecord: MeetingRecord): String = (Option(meetingRecord).map(_.id)).orNull
 
 }

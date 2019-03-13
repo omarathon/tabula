@@ -56,9 +56,7 @@ class SitsAssignmentItem(
   var assessmentGroup: Option[UpstreamAssessmentGroup] = _
 
   // Name for new assignment. Defaults to the name of the upstream assignment, if provided.
-  var name: String = Option(upstreamAssignment).map {
-    _.name
-  }.orNull
+  var name: String = Option(upstreamAssignment).map(_.name).orNull
   if (upstreamAssignment != null) upstreamAssignment.name else null
 
   // Will reference a key of AddSitsAssignmentsCommand.optionsMap. In this way, many SitsAssignmentItems
@@ -306,9 +304,7 @@ trait AddSitsAssignmentsCommandState {
   // All the possible assignments, prepopulated from SITS.
   var sitsAssignmentItems: JList[SitsAssignmentItem] = LazyLists.create[SitsAssignmentItem]()
 
-  def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter {
-    _.include
-  }
+  def includedItems: mutable.Buffer[SitsAssignmentItem] = sitsAssignmentItems.asScala.filter(_.include)
 
   /**
     * options which are referenced by key by SitsAssignmentItem.optionsId

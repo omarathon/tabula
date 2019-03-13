@@ -33,9 +33,7 @@ abstract class FormValue extends BindListener {
 
   def persist(value: SavedFormValue)
 
-  protected def safeToString(value: Any): String = Option(value).map {
-    _.toString
-  }.getOrElse("")
+  protected def safeToString(value: Any): String = Option(value).map(_.toString).getOrElse("")
 }
 
 class StringFormValue(val field: FormField) extends FormValue {

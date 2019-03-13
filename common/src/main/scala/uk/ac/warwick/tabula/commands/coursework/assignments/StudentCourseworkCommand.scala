@@ -71,9 +71,7 @@ trait StudentCourseworkCommandHelper
     enrolledAssignments
       .diff(assignmentsWithFeedback)
       .diff(assignmentsWithSubmission)
-      .filter {
-        _.collectSubmissions
-      } // TAB-475
+      .filter(_.collectSubmissions) // TAB-475
       .filterNot(lateFormativeAssignments.contains(_))
       .sortWith { (ass1, ass2) =>
         // TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
@@ -141,9 +139,7 @@ trait StudentCourseworkCommandHelper
           val assignment = info("assignment").asInstanceOf[Assignment]
           val submission = info("submission").asInstanceOf[Option[Submission]]
 
-          submission map {
-            _.submittedDate
-          } getOrElse {
+          submission.map(_.submittedDate) getOrElse {
             if (assignment.openEnded) assignment.openDate else assignment.closeDate
           }
         }
