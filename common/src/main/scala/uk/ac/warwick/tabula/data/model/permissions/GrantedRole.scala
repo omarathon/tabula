@@ -1,27 +1,19 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import org.hibernate.annotations.Type
 import javax.persistence._
-import javax.persistence.CascadeType._
-
+import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Type}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
+import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, Role, RoleBuilder, RoleDefinition}
 
 import scala.reflect._
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 
 @Entity
 @Access(AccessType.FIELD)
-@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(
-		name="scope_type",
-		discriminatorType=DiscriminatorType.STRING
-)
-abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
+class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.EAGER)
 	@JoinColumn(name="usergroup_id")
@@ -52,16 +44,35 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	 * The scope of the GrantedRole is what the permissions contained within are granted against,
 	 * which is a PermissionsTarget.
 	 */
-	var scope: A
+	@Any(metaColumn = new Column(name = "scope_type"), fetch = FetchType.LAZY)
+	@AnyMetaDef(idType = "string", metaType = "string",
+		metaValues = Array(
+			new MetaValue(targetEntity = classOf[Department], value = "Department"),
+			new MetaValue(targetEntity = classOf[Module], value = "Module"),
+			new MetaValue(targetEntity = classOf[Route], value = "Route"),
+			new MetaValue(targetEntity = classOf[Member], value = "Member"),
+			new MetaValue(targetEntity = classOf[Assignment], value = "Assignment"),
+			new MetaValue(targetEntity = classOf[SmallGroup], value = "SmallGroup"),
+			new MetaValue(targetEntity = classOf[SmallGroupSet], value = "SmallGroupSet"),
+			new MetaValue(targetEntity = classOf[SmallGroupEvent], value = "SmallGroupEvent"),
+		)
+	)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: A = _
 
-	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
-	// assume it's a permissions target
-	def scopeAsPermissionsTarget:PermissionsTarget = scope
+	@Column(name = "scope_type", insertable = false, updatable = false)
+	var scopeType: String = _
 
 	/**
 	 * Build a Role from this definition
 	 */
-	def build(): GeneratedRole = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
+	def build(): GeneratedRole =
+		if (scopeType == "___GLOBAL___")
+			RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
+		else
+			RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
+
 	def mayGrant(target: Permission): Boolean = Option(replaceableRoleDefinition).fold(false) { _.mayGrant(target) }
 
 	/**
@@ -70,7 +81,22 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	 * In almost all cases, Department will be one of the permissionsParents of the scope (maybe multiple
 	 * levels up), but providing a direct link here means we don't have to iterate up the tree.
 	 */
-	def scopeDepartment: Option[Department]
+	def scopeDepartment: Option[Department] = scope match {
+		case null => None
+		case department: Department => Some(department)
+		case module: Module => Some(module.adminDepartment)
+		case route: Route => Some(route.adminDepartment)
+		case student: StudentMember =>
+			student.mostSignificantCourseDetails.flatMap {
+				_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption
+			}.orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
+		case member: Member => Option(member.homeDepartment)
+		case assignment: Assignment => Some(assignment.module.adminDepartment)
+		case smallGroup: SmallGroup => Some(smallGroup.groupSet.module.adminDepartment)
+		case smallGroupSet: SmallGroupSet => Some(smallGroupSet.module.adminDepartment)
+		case smallGroupEvent: SmallGroupEvent => Some(smallGroupEvent.group.groupSet.module.adminDepartment)
+		case _ => None
+	}
 
 	def replaceableRoleDefinition: RoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
@@ -86,64 +112,31 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 }
 
-// TODO DRY this out
 object GrantedRole {
-	def apply[A <: PermissionsTarget](scope: A, definition: RoleDefinition): GrantedRole[A] =
-		(scope match {
-			case dept: Department => new DepartmentGrantedRole(dept, definition)
-			case module: Module => new ModuleGrantedRole(module, definition)
-			case route: Route => new RouteGrantedRole(route, definition)
-			case member: Member => new MemberGrantedRole(member, definition)
-			case assignment: Assignment => new AssignmentGrantedRole(assignment, definition)
-			case group: SmallGroup => new SmallGroupGrantedRole(group, definition)
-			case smallGroupSet: SmallGroupSet => new SmallGroupSetGrantedRole(smallGroupSet, definition)
-			case event: SmallGroupEvent => new SmallGroupEventGrantedRole(event, definition)
-			case _ => throw new IllegalArgumentException("Cannot define new roles for " + scope)
-		}).asInstanceOf[GrantedRole[A]]
+	def apply[A <: PermissionsTarget : ClassTag](scope: A, definition: RoleDefinition): GrantedRole[A] =
+		if (canDefineFor[A]) {
+			val r = new GrantedRole[A]
+			r.scope = scope
+			r.roleDefinition = definition
+			r
+		} else {
+			throw new IllegalArgumentException(s"Cannot define new roles for $scope")
+		}
 
-	def canDefineFor[A <: PermissionsTarget](scope: A): Boolean = scope match {
-		case _: Department => true
-		case _: Module => true
-		case _: Route => true
-		case _: Member => true
-		case _: Assignment => true
-		case _: SmallGroup => true
-		case _: SmallGroupSet => true
-		case _: SmallGroupEvent => true
-		case _ => false
+	def canDefineFor[A <: PermissionsTarget : ClassTag]: Boolean = classTag[A] == classTag[PermissionsTarget] || scopeType[A].nonEmpty
+	def scopeType[A <: PermissionsTarget : ClassTag]: Option[String] = classTag[A] match {
+		case t if isSubtype(t, classTag[Department]) => Some("Department")
+		case t if isSubtype(t, classTag[Module]) => Some("Module")
+		case t if isSubtype(t, classTag[Route]) => Some("Route")
+		case t if isSubtype(t, classTag[Member]) => Some("Member")
+		case t if isSubtype(t, classTag[Assignment]) => Some("Assignment")
+		case t if isSubtype(t, classTag[SmallGroup]) => Some("SmallGroup")
+		case t if isSubtype(t, classTag[SmallGroupSet]) => Some("SmallGroupSet")
+		case t if isSubtype(t, classTag[SmallGroupEvent]) => Some("SmallGroupEvent")
+		case _ => None
 	}
 
-	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
-		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedRole]
-		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedRole]
-		case t if isSubtype(t, classTag[Route]) => classOf[RouteGrantedRole]
-		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedRole]
-		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedRole]
-		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedRole]
-		case t if isSubtype(t, classTag[SmallGroupSet]) => classOf[SmallGroupSetGrantedRole]
-		case t if isSubtype(t, classTag[SmallGroupEvent]) => classOf[SmallGroupEventGrantedRole]
-		case _ => classOf[GrantedRole[_]]
-	}
-
-  private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
-
-  def className[A <: PermissionsTarget : ClassTag]: String = classObject[A].getSimpleName
-	def discriminator[A <: PermissionsTarget : ClassTag]: Option[String] =
-		Option(classObject[A].getAnnotation(classOf[DiscriminatorValue])) map { _.value }
-}
-
-/* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
-@Entity @DiscriminatorValue("___GLOBAL___") class GloballyGrantedRole extends GrantedRole[PermissionsTarget] {
-	def this(definition: RoleDefinition) = {
-		this()
-		this.roleDefinition = definition
-	}
-
-	@transient var scope: PermissionsTarget = null
-
-	def scopeDepartment = None
-
-	override def build(): GeneratedRole = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
+	private def isSubtype[A,B](self: ClassTag[A], other: ClassTag[B]) = other.runtimeClass.isAssignableFrom(self.runtimeClass)
 }
 
 /**
@@ -163,123 +156,4 @@ case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition
 	def getName: String = delegate.getName
 	def description: String = delegate.description
 	def isAssignable: Boolean = delegate.isAssignable
-}
-
-@Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
-	def this(department: Department, definition: RoleDefinition) = {
-		this()
-		this.scope = department
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: Department = _
-
-	def scopeDepartment = Some(scope)
-}
-@Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
-	def this(module: Module, definition: RoleDefinition) = {
-		this()
-		this.scope = module
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: Module = _
-
-	def scopeDepartment = Some(scope.adminDepartment)
-}
-@Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
-	def this(route: Route, definition: RoleDefinition) = {
-		this()
-		this.scope = route
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: Route = _
-
-	def scopeDepartment = Some(scope.adminDepartment)
-}
-@Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
-	def this(member: Member, definition: RoleDefinition) = {
-		this()
-		this.scope = member
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: Member = _
-
-	def scopeDepartment: Option[Department] = scope match {
-		case student: StudentMember =>
-			student.mostSignificantCourseDetails.flatMap {
-				_.latestStudentCourseYearDetails.enrolmentDepartment.subDepartmentsContaining(student).lastOption
-			}.orElse(Option(student.homeDepartment).flatMap(_.subDepartmentsContaining(student).lastOption))
-		case _ => Option(scope.homeDepartment)
-	}
-}
-@Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
-	def this(assignment: Assignment, definition: RoleDefinition) = {
-		this()
-		this.scope = assignment
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: Assignment = _
-
-	def scopeDepartment = Some(scope.module.adminDepartment)
-}
-@Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
-	def this(group: SmallGroup, definition: RoleDefinition) = {
-		this()
-		this.scope = group
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: SmallGroup = _
-
-	def scopeDepartment = Some(scope.groupSet.module.adminDepartment)
-}
-@Entity @DiscriminatorValue("SmallGroupSet") class SmallGroupSetGrantedRole extends GrantedRole[SmallGroupSet] {
-	def this(groupset: SmallGroupSet, definition: RoleDefinition) = {
-		this()
-		this.scope = groupset
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: SmallGroupSet = _
-
-	def scopeDepartment = Some(scope.module.adminDepartment)
-}
-@Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
-	def this(event: SmallGroupEvent, definition: RoleDefinition) = {
-		this()
-		this.scope = event
-		this.roleDefinition = definition
-	}
-
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="scope_id")
-	@ForeignKey(name="none")
-	var scope: SmallGroupEvent = _
-
-	def scopeDepartment = Some(scope.group.groupSet.module.adminDepartment)
 }

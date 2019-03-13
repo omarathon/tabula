@@ -6,7 +6,7 @@
 		method="post"
 		class="form-horizontal"
 		action=submitUrl
-		commandName="deleteFeedbackTemplateCommand">
+		modelAttribute="deleteFeedbackTemplateCommand">
 		<@f.hidden path="id"/>
 		<p>Are you sure that you want to delete this feedback template?</p>
 	</@f.form>

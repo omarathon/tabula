@@ -245,7 +245,7 @@ abstract class AbstractProgressionService extends ProgressionService {
 		*/
 	def suggestedFinalYearGrade(entityYear: ExamGridEntityYear, normalLoad: BigDecimal, routeRulesPerYear: Map[Int, Seq[UpstreamRouteRule]], calculateYearMarks: Boolean, groupByLevel: Boolean, weightings: Seq[CourseYearWeighting]): FinalYearGrade = {
 		entityYear.studentCourseYearDetails.map(scyd => {
-			val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength.toInt
+			val finalYearOfStudy = scyd.studentCourseDetails.courseYearLength
 			if (entityYear.yearOfStudy >= finalYearOfStudy) {
 				val entityPerYear: Map[Int, ExamGridEntityYear] = {
 					val scds = scyd.studentCourseDetails.student.freshStudentCourseDetails.sorted.takeWhile(_.scjCode != scyd.studentCourseDetails.scjCode) ++ Seq(scyd.studentCourseDetails)

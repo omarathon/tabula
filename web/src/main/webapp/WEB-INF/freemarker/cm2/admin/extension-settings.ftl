@@ -8,7 +8,7 @@
 	<@cm2.departmentHeader "Extension settings" department route_function />
 
 	<#assign actionUrl><@routes.cm2.extensionSettings department /></#assign>
-	<@f.form method="post" class="form-inline" action=actionUrl commandName="extensionSettingsCommand" cssClass="dirty-check">
+	<@f.form method="post" class="form-inline" action=actionUrl modelAttribute="extensionSettingsCommand" cssClass="dirty-check">
 		<#if features.extensions>
 			<@bs3form.labelled_form_group>
 				<@bs3form.checkbox path="allowExtensionRequests">

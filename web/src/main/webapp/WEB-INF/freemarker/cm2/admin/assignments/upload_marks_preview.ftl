@@ -24,7 +24,7 @@
 <#escape x as x?html>
 <@cm2.assignmentHeader "Submit marks and feedback" assignment />
 <div class="fix-area">
-	<@f.form method="post" action=formUrl commandName=commandName>
+	<@f.form method="post" action=formUrl modelAttribute=commandName>
 
 		<@spring.bind path="marks">
 			<#assign itemsList=status.actualValue />

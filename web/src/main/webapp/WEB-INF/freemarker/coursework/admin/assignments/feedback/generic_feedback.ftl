@@ -9,7 +9,7 @@
 		<h4><span class="muted">for</span> ${assignment.name}</h4>
 	</#if>
 
-	<@f.form cssClass="form-horizontal" method="post" commandName="command" action="${submit_url}">
+	<@f.form cssClass="form-horizontal" method="post" modelAttribute="command" action="${submit_url}">
 		<div>
 			<@f.textarea path="genericFeedback" cssClass="span9" rows="6"/>
 		</div>

@@ -3,7 +3,7 @@
 	<h1>Delete exam for <@fmt.module_name exam.module /></h1>
 
 	<#assign submitAction><@routes.exams.deleteExam exam /></#assign>
-	<@f.form method="post" action="${submitAction}" commandName="command">
+	<@f.form method="post" action="${submitAction}" modelAttribute="command">
 		<h2>${exam.name} (${exam.academicYear.label})</h2>
 
 		<!-- global errors -->

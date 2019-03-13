@@ -75,11 +75,8 @@ class OriginalityReport extends GeneratedId with ToEntityReference {
 
 	var sourceCount: JInteger = _
 
-	@Lob
 	var urkundResponse: String = _
 
 	var urkundResponseCode: String = _
 
-
-	override def toEntityReference: OriginalityReportEntityReference = new OriginalityReportEntityReference().put(this)
 }

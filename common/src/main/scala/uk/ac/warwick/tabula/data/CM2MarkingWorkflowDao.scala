@@ -27,6 +27,7 @@ trait CM2MarkingWorkflowDao {
 
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment]
 }
 
 @Repository
@@ -72,4 +73,12 @@ class CM2MarkingWorkflowDaoImpl extends CM2MarkingWorkflowDao with Daoisms {
 			.add(is("cm2MarkingWorkflow", workflow))
 			.add(is("deleted", false))
 			.seq
+
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment] =
+		if (workflows.isEmpty) Nil
+		else
+			session.newCriteria[Assignment]
+				.add(safeIn("cm2MarkingWorkflow", workflows))
+				.add(is("deleted", false))
+				.seq
 }

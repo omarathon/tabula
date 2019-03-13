@@ -52,6 +52,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
 			scd.statusOnRoute = currentStudentStatus
+			scd.statusOnCourse = currentStudentStatus
 
 			if (route.isDefined) scd.currentRoute = route.get
 			if (course.isDefined) scd.course = course.get

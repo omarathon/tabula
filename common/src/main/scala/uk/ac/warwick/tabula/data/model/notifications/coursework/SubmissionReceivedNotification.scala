@@ -61,7 +61,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 	override def urlFor(user: User): String = {
 		val feedback = assignment.findFeedback(submission.usercode)
 
-		if (assignment.hasCM2Workflow && feedback.toSeq.flatMap(_.markingInProgress).map(_.marker).contains(user)) {
+		if (assignment.hasCM2Workflow && feedback.toSeq.flatMap(_.allMarkerFeedback).map(_.marker).contains(user)) {
 			Routes.admin.assignment.markerFeedback(assignment, user)
 		} else {
 			Routes.admin.assignment.submissionsandfeedback.list(assignment)

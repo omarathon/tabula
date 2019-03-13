@@ -1,5 +1,5 @@
 plugins {
-    id 'com.moowork.node' version '1.1.1'
+    id 'com.moowork.node' version '1.2.0'
 }
 
 // Define cucumber configuration
@@ -12,20 +12,18 @@ configurations {
     }
 }
 
-configurations.all {
-    resolutionStrategy {
-        force 'org.seleniumhq.selenium:selenium-support:3.3.1'
-    }
+ext {
+    seleniumVersion = '3.141.59'
 }
 
 dependencies {
     compile project(':common')
     testCompile project(path: ':common', configuration: 'testArtifacts')
 
-    cucumber 'org.jruby:jruby-complete:9.1.6.0'
-    cucumber 'ch.qos.logback:logback-classic:1.1.7'
+    cucumber 'org.jruby:jruby-complete:9.2.5.0'
+    cucumber 'ch.qos.logback:logback-classic:1.2.3'
 
-    testCompile 'org.seleniumhq.selenium:selenium-server:3.3.1'
+    testCompile "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
 }
 
 test {
@@ -37,19 +35,24 @@ test {
 
     doFirst {
         mkdir 'build/integrationTest-screenshots'
+        systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+
+        println "Executing tests against " + System.getProperty("toplevel.url", "https://tabula-test.warwick.ac.uk")
     }
 
-    systemProperty 'phantomjs.binary.path', new File(projectDir, "node_modules/.bin/phantomjs").absolutePath
+    systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
     systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
+    systemProperty 'toplevel.url', System.getProperty("toplevel.url")
 }
 
 // run npm install
-task installPhantomJSDependency(type: NpmTask) {
-    outputs.dir 'node_modules/phantomjs'
-    args = ['install', 'phantomjs-prebuilt', '--no-save']
+task installHeadlessChromeDependency(type: NpmTask) {
+    outputs.dir 'node_modules/puppeteer/.local-chromium'
+    outputs.dir 'node_modules/chromedriver/lib/chromedriver'
+    args = ['install', 'puppeteer', 'chromedriver', '--no-save']
 }
 
-test.dependsOn 'installPhantomJSDependency'
+test.dependsOn 'installHeadlessChromeDependency'
 
 def bundlerEnvironment = [
     GEM_HOME: 'vendor/gem_home',

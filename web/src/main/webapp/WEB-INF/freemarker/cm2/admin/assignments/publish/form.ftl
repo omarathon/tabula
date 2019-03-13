@@ -48,7 +48,7 @@
 	</script>
 
 	<#assign submitUrl><@routes.cm2.publishFeedback assignment /></#assign>
-	<@f.form method="post" action=submitUrl commandName="command">
+	<@f.form method="post" action=submitUrl modelAttribute="command">
 		<@bs3form.errors path="" />
 
 		<#if submissionsReport.plagiarised?has_content>

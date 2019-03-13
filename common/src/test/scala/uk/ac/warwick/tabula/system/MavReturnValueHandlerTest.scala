@@ -19,10 +19,10 @@ class MavReturnValueHandlerTest extends TestBase {
 
 	def returnsSuperMav = new SuperMav("supermav")
 
-	val mavMethod  = new MethodParameter(getClass.getMethod("returnsMav"), 1)
-	val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), 1)
-	val anyMethod  = new MethodParameter(getClass.getMethod("returnsAny"), 1)
-	val superMavMethod  = new MethodParameter(getClass.getMethod("returnsMav"), 1)
+	val mavMethod  = new MethodParameter(getClass.getMethod("returnsMav"), -1)
+	val unitMethod = new MethodParameter(getClass.getMethod("returnsUnit"), -1)
+	val anyMethod  = new MethodParameter(getClass.getMethod("returnsAny"), -1)
+	val superMavMethod  = new MethodParameter(getClass.getMethod("returnsMav"), -1)
 
 	@Test def supports {
 		handler.supportsReturnType(mavMethod) should be (true)

@@ -9,7 +9,7 @@
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.groups.printRegisters department academicYear /></#assign>
-	<@f.form method="post" action="${submitUrl}.pdf" commandName="command">
+	<@f.form method="post" action="${submitUrl}.pdf" modelAttribute="command">
 
 		<@bs3form.errors path="" />
 
@@ -23,7 +23,7 @@
 			<@f.input path="endDate" cssClass="form-control date-picker" />
 		</@bs3form.labelled_form_group>
 
-		<p>Select sets of groups that you'd wish to print:</p>
+		<p>Select the group sets to print:</p>
 
 		<@bs3form.errors path="smallGroupSets" />
 

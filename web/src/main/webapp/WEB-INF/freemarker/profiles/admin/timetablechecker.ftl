@@ -1,6 +1,6 @@
 <h3>Timetable Checker</h3>
 
-<@f.form method="post" enctype="multipart/form-data" commandName="command">
+<@f.form method="post" enctype="multipart/form-data" modelAttribute="command">
 
 <@bs3form.labelled_form_group path="warwickUniId" labelText="Enter student university id to check timetable feeds">
 	<@f.input type="text" path="warwickUniId" cssClass="form-control" maxlength="255" placeholder="University id" />

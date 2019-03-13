@@ -11,8 +11,9 @@ import freemarker.ext.beans.BeanModel
 import freemarker.template.{DefaultObjectWrapper, _}
 import org.hibernate.proxy.HibernateProxyHelper
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.{CurrentUser, NoCurrentUser, RequestInfo, ScalaConcurrentMapHelpers}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget, ScopelessPermission}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityService, SecurityServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{Restricted, RestrictionProvider}
@@ -25,8 +26,8 @@ import scala.util.{Failure, Success, Try}
 	* A implementation of BeansWrapper that support native Scala basic and collection types
 	* in Freemarker template engine.
 	*/
-class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_21) with Logging
-	with AutowiringSecurityServiceComponent {
+class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_28) with Logging
+	with AutowiringSecurityServiceComponent with TaskBenchmarking {
 
 	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
 	// won't know to clear this singleton variable.
@@ -37,7 +38,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = {
+	override def wrap(obj: Object): TemplateModel = RequestLevelCache.cachedByIdentity("ScalaBeansWrapper.wrap", obj) {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
@@ -51,7 +52,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
 			case directive: TemplateDirectiveModel => superWrap(directive)
-			case method: TemplateMethodModel => superWrap(method)
+			case method: TemplateMethodModelEx => superWrap(method)
 			case model: TemplateModel => superWrap(model)
 			case sobj if isScalaCompiled(sobj) =>
 				new ScalaHashModel(obj, this, useWrapperCache) with SecurityServiceComponent {
@@ -63,11 +64,11 @@ class ScalaBeansWrapper extends DefaultObjectWrapper(Configuration.VERSION_2_3_2
 
 	// scalastyle:on
 
-	// whether or not to cache results of get() methods for the life of this wrapper.
+	// whether or not to cache results of get() methods for the life of a ScalaHashModel
 	var useWrapperCache = true
 
 	private def isScalaCompiled(obj: Any) = Option(obj) match {
-		case Some(o) if !o.getClass.isArray => o.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
+		case Some(o) if !o.getClass.isArray => o.getClass.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
 	}
 
@@ -88,13 +89,13 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 
 	import ScalaHashModel._
 
-	private val objectClass = HibernateProxyHelper.getClassWithoutInitializingProxy(sobj)
+	private lazy val objectClass = HibernateProxyHelper.getClassWithoutInitializingProxy(sobj)
+
+	private lazy val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 	private def lowercaseFirst(camel: String) = camel.head.toLower + camel.tail
 
 	private def isGetter(m: Getter) = !m.getName.endsWith("_$eq") && m.getParameterTypes.isEmpty
-
-	private val getters = gettersCache.getOrElseUpdate(objectClass, generateGetterInformation(objectClass))
 
 	private def generateGetterInformation(cls: Class[_]) = {
 		val javaGetterRegex = new Regex("^(is|get)([A-Z]\\w*)")
@@ -105,16 +106,16 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 			val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
 			val perms: PermissionsFetcher =
 				if (restrictedAnnotation != null) {
-					(_) => Seq(restrictedAnnotation.value map { name => Permissions.of(name) })
+					_ => Seq(restrictedAnnotation.value map { name => Permissions.of(name) })
 				}
 				else if (restrictionProviderAnnotation != null) {
 					Try(cls.getMethod(restrictionProviderAnnotation.value())) match {
-						case Success(method) => (x) => method.invoke(x).asInstanceOf[Seq[Seq[Permission]]]
+						case Success(method) => x => method.invoke(x).asInstanceOf[Seq[Seq[Permission]]]
 						case Failure(e) => throw new IllegalStateException(
 							"Couldn't find restriction provider method %s(): Seq[Seq[Permission]]".format(restrictionProviderAnnotation.value()), e)
 					}
 				}
-				else (_) => Nil
+				else _ => Nil
 
 			name -> (m, perms)
 		}
@@ -185,11 +186,11 @@ class ScalaHashModel(sobj: Any, wrapper: ScalaBeansWrapper, useWrapperCache: Boo
 		})
 	}
 
-	private def checkInnerClasses(key: String): Option[TemplateModel] = {
+	private def checkInnerClasses(key: String): Option[TemplateModel] = RequestLevelCache.cachedBy("ScalaBeansWrapper.checkInnerClasses", objectClass.getName + key + "$") {
 		try {
 			Some(wrapper.wrap(Class.forName(objectClass.getName + key + "$").getField("MODULE$").get(null)))
 		} catch {
-			case e @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
+			case _ @ (_: ClassNotFoundException | _: NoSuchFieldException) =>
 				None
 		}
 	}

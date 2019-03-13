@@ -34,7 +34,7 @@ object DepartmentSmallGroupSet {
  * Represents a set of small groups with a Department. These are then linked to by an actual
  * SmallGroupSet rather than doing allocations manually.
  */
-@FilterDef(name = DepartmentSmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = 0")
+@FilterDef(name = DepartmentSmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = DepartmentSmallGroupSet.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)
@@ -144,7 +144,5 @@ class DepartmentSmallGroupSet
 		newSet.name = name
 		newSet
 	}
-
-	override def toEntityReference: DepartmentSmallGroupSetEntityReference = new DepartmentSmallGroupSetEntityReference().put(this)
 
 }

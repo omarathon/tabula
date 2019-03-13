@@ -166,9 +166,6 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 		workingDaysHelper.datePlusWorkingDays(ed.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays).asJoda.toDateTime(ed)
 	)
 
-
-	def toEntityReference: ExtensionEntityReference = new ExtensionEntityReference().put(this)
-
 	def duration: Int = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
 	def requestedExtraDuration: Int = requestedExpiryDate

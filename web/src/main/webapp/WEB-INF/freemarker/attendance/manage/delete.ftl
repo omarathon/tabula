@@ -3,7 +3,7 @@
 
 <h1>Delete scheme</h1>
 
-<@f.form id="deleteScheme" method="POST" commandName="command" class="form-horizontal">
+<@f.form id="deleteScheme" method="POST" modelAttribute="command" class="form-horizontal">
 
 	<p>Are you sure you want to delete scheme: ${command.scheme.displayName}?</p>
 

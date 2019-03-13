@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.BrowserTest
 
 class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixtures {
 
-	def options() = {
+	def options(): Unit = {
 		singleSel("minimumFileAttachmentLimit").value = "2"
 		singleSel("fileAttachmentLimit").value = "3"
 	}
@@ -19,16 +19,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 				currentUrl should endWith(assignmentId)
 
 				click on find(cssSelector("input[type=file]")).get
-				ifPhantomJSDriver(
-					operation = { d =>
-						// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-						d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file1.txt").getFile + "');")
-					},
-					otherwise = { _ =>
-						click on find(cssSelector("input[type=file]")).get
-						pressKeys(getClass.getResource("/file1.txt").getFile)
-					}
-				)
+				pressKeys(getClass.getResource("/file1.txt").getFile)
 				// Don't upload the second file yet
 				submit()
 
@@ -39,16 +30,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 					}
 
 					click on find(cssSelector("input[type=file]")).get
-					ifPhantomJSDriver(
-						operation = { d =>
-							// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-							d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file2.txt").getFile + "');")
-						},
-						otherwise = { _ =>
-							click on find(cssSelector("input[type=file]")).get
-							pressKeys(getClass.getResource("/file2.txt").getFile)
-						}
-					)
+					pressKeys(getClass.getResource("/file2.txt").getFile)
 
 					submit()
 

@@ -429,7 +429,7 @@ preposition: Text to relate the title to the department name in the second line,
 	<#local id_attr></#local>
 	<#if id?has_content><#local id_attr>id='${id}'</#local></#if>
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+	<#noescape><${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#nested></${type}></#noescape>
 </#macro>
 
 <#macro bulk_email emails title subject limit=500>

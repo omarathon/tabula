@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.JavaImports._
  * deal with the various Scala collection classes, so we don't
  * have to convert them to Java collections manually every time.
  */
-class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2_3_0) with ServletContextAware {
+class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2_3_28) with ServletContextAware {
 	// Default constructor init
 	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
 	this.setAutoIncludes(List("/WEB-INF/freemarker/prelude.ftl").asJava)
@@ -29,15 +29,16 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
 
 	this.setObjectWrapper(createWrapper(true))
 
-	private def createWrapper(useCache: Boolean) = {
+	private def createWrapper(useCache: Boolean): ScalaBeansWrapper = {
 		val wrapper = new ScalaBeansWrapper
 		wrapper.setMethodsShadowItems(false) // do not lookup method first.
 		wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
 
 		// TAB-351 TAB-469 Don't enable caching
 		wrapper.setUseCache(false)
-		wrapper.useWrapperCache = false
+		wrapper.useWrapperCache = useCache
 		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE)
+		wrapper.writeProtect()
 
 		wrapper
 	}

@@ -8,7 +8,7 @@
 		<@f.form
 			method="GET"
 			action="${formAction}"
-			commandName="command"
+			modelAttribute="command"
 			class="form-inline"
 		>
 			<#-- Department filter-->

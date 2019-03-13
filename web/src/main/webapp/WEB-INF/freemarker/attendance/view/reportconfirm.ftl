@@ -2,7 +2,7 @@
 
 <h1>Upload missed monitoring points</h1>
 
-<@f.form commandName="command" action="" method="POST">
+<@f.form modelAttribute="command" action="" method="POST">
 
 	<input type="hidden" name="period" value="${command.period}" />
 	<input type="hidden" name="filterString" value="${command.filterString}" />

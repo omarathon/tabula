@@ -8,10 +8,10 @@ import uk.ac.warwick.util.cache.{CacheStore, Caches}
 class CacheClearingEventListener extends EventListener with AutowiringCacheStrategyComponent {
 
 	lazy val markerWorkflowCacheStore: CacheStore[MarkerWorkflowCache.AssignmentId, MarkerWorkflowCache.Json] =
-		Caches.newCacheStore(MarkerWorkflowCache.CacheName, MarkerWorkflowCache.CacheExpiryTime, cacheStrategy)
+		Caches.builder(MarkerWorkflowCache.CacheName, cacheStrategy).buildStore()
 
 	lazy val assignmentProgressCacheStore: CacheStore[AssignmentProgressCache.AssignmentId, AssignmentProgressCache.Json] =
-		Caches.newCacheStore(AssignmentProgressCache.CacheName, AssignmentProgressCache.CacheExpiryTime, cacheStrategy)
+		Caches.builder(AssignmentProgressCache.CacheName, cacheStrategy).buildStore()
 
 	override def beforeCommand(event: Event): Unit = {}
 	override def onException(event: Event, exception: Throwable): Unit = {}

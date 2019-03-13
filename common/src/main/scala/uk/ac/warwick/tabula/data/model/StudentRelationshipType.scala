@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
+
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.`type`.{AbstractSingleColumnStandardBasicType, StandardBasicTypes}
 import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -83,18 +83,21 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 * whether it is hidden when empty, or displayed with a prompt to add.
 	 */
 	def displayIfEmpty(studentCourseDetails: StudentCourseDetails): Boolean = {
+		// if a sub-department matches this student check the settings from that department rather than the parent
+		val departmentToCheck = Option(studentCourseDetails.department).map(d => d.subDepartmentsContaining(studentCourseDetails.student).lastOption.getOrElse(d))
+
 		studentCourseDetails.courseType match {
 			case Some(courseType: CourseType) => courseType match {
 				case CourseType.UG =>
-					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedUG.booleanValue)
+					departmentToCheck.flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedUG.booleanValue)
 				case CourseType.PGT =>
-					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGT.booleanValue)
+					departmentToCheck.flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGT.booleanValue)
 				case CourseType.PGR =>
-					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGR.booleanValue)
+					departmentToCheck.flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPGR.booleanValue)
 				case CourseType.Foundation =>
-					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedFoundation.booleanValue)
+					departmentToCheck.flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedFoundation.booleanValue)
 				case CourseType.PreSessional =>
-					Option(studentCourseDetails.department).flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPreSessional.booleanValue)
+					departmentToCheck.flatMap { _.getStudentRelationshipExpected(this, courseType) }.getOrElse(expectedPreSessional.booleanValue)
 				case _ => false
 			}
 			case _ => false
@@ -174,11 +177,11 @@ object StudentRelationshipSource {
 
 class StudentRelationshipSourceUserType extends AbstractBasicUserType[StudentRelationshipSource, String] {
 
-	val basicType = StandardBasicTypes.STRING
+	val basicType: AbstractSingleColumnStandardBasicType[String] = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)
 
-	val nullValue = null
-	val nullObject = null
+	val nullValue: String = null
+	val nullObject: StudentRelationshipSource  = null
 
 	override def convertToObject(string: String): StudentRelationshipSource = StudentRelationshipSource.fromCode(string)
 

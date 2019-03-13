@@ -1,15 +1,18 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{RichGetResponse, RichSearchResponse}
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.{Index, IndexAndType}
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.Response
+import com.sksamuel.elastic4s.http.get.GetResponse
+import com.sksamuel.elastic4s.http.search.SearchResponse
+import com.sksamuel.elastic4s.searches.sort.SortOrder
 import org.hibernate.Session
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, SessionComponent}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.util.core.StopWatch
@@ -20,10 +23,10 @@ import scala.concurrent.Future
 
 class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
-	val indexName = "profile"
+	val index = Index("profile")
 	val indexType: String = new ProfileIndexType {}.indexType
 
 	private trait Fixture {
@@ -32,18 +35,18 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		}
 
 		val indexer = new ProfileIndexService
-		indexer.indexName = ProfileIndexServiceTest.this.indexName
+		indexer.indexName = ProfileIndexServiceTest.this.index.name
 		indexer.client = ProfileIndexServiceTest.this.client
 		indexer.memberDao = dao
 
 		// Creates the index
 		indexer.ensureIndexExists().await should be (true)
 
-		implicit val indexable = ProfileIndexService.MemberIndexable
+		implicit val indexable: ElasticsearchIndexable[Member] = ProfileIndexService.MemberIndexable
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }.await
+		deleteIndex(index.name)
 	}
 
 	@Transactional
@@ -59,18 +62,18 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		m.inUseFlag = "Active"
 
 		indexer.indexItems(Seq(m)).await
-		blockUntilCount(1, indexName, indexType)
+		blockUntilCount(1, index.name)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc: RichGetResponse = client.execute { get id m.universityId from indexName / indexType }.futureValue
+		val doc: GetResponse = client.execute { get(m.universityId).from(IndexAndType(index.name, indexType)) }.futureValue.result
 
-		doc.source.asScala.toMap should be (Map(
+		doc.source should be (Map(
 			"userId" -> "cuscav",
 			"firstName" -> "Mathew",
 			"lastName" -> "Mannion",
 			"fullName" -> "Mathew Mannion",
-			"department" -> Array("CS").toList.asJava,
-			"touchedDepartments" -> Array("CS").toList.asJava,
+			"department" -> List("CS"),
+			"touchedDepartments" -> List("CS"),
 			"courseEndDate" -> "2100-06-01", // 100 years after the "current" date
 			"userType" -> "S",
 			"inUseFlag" -> "Active",
@@ -79,7 +82,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 	}}
 
 	@Transactional
-	@Test def index(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
+	@Test def indexing(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
 		val stopwatch = new StopWatch
 		stopwatch.start("creating items")
 
@@ -107,15 +110,15 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 
 		indexer.indexFrom(new DateTime(2000,1,1,0,0,0)).await
 
-		blockUntilCount(100, indexName, indexType)
-		client.execute { search in indexName / indexType }.await.totalHits should be (100)
+		blockUntilCount(100, index.name)
+		client.execute { search(index) }.await.result.totalHits should be (100)
 
 		stopwatch.stop()
 
-		def listRecent(max: Int): Future[RichSearchResponse] =
-			client.execute { search in indexName / indexType sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit max }
+		def listRecent(max: Int): Future[Response[SearchResponse]] =
+			client.execute { search(index).sortBy(fieldSort("lastUpdatedDate").order(SortOrder.Desc)).limit(max) }
 
-		listRecent(100).futureValue.hits.length should be (100)
+		listRecent(100).futureValue.result.hits.hits.length should be (100)
 
 		val moreItems: Seq[StudentMember] = {
 			val m = new StudentMember
@@ -132,18 +135,18 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Test
 		}
 		indexer.indexItems(moreItems)
 
-		blockUntilCount(101, indexName, indexType)
+		blockUntilCount(101, index.name)
 
-		listRecent(13).futureValue.hits.length should be (13)
+		listRecent(13).futureValue.result.hits.hits.length should be (13)
 
 		// First query is slowest, but subsequent queries quickly drop
 		// to a much smaller time
 		for (i <- 1 to 20) {
 			stopwatch.start("searching for newest item forever attempt " + i)
 			val newest =
-				client.execute { search in indexName / indexType sort ( field sort "lastUpdatedDate" order SortOrder.DESC ) limit 1 }
+				client.execute { search(index).sortBy(fieldSort("lastUpdatedDate").order(SortOrder.Desc)).limit(1) }
 
-			newest.futureValue.hits.head.sourceAsMap("userId") should be ("100")
+			newest.futureValue.result.hits.hits.head.sourceAsMap("userId") should be ("100")
 			stopwatch.stop()
 		}
 

@@ -2,7 +2,7 @@
 <#escape x as x?html>
 	<h1>Edit reusable small groups: ${smallGroupSet.name}</h1>
 
-	<@f.form id="editGroups" method="POST" commandName="editDepartmentSmallGroupSetCommand">
+	<@f.form id="editGroups" method="POST" modelAttribute="editDepartmentSmallGroupSetCommand">
 		<@components.reusable_set_wizard false 'properties' smallGroupSet />
 
 		<#assign label>

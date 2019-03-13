@@ -176,6 +176,8 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 		for (s <- Seq(student1, student2, student3)) {
 			val report = new MonitoringPointReport()
 			report.student = s
+			report.studentCourseDetails = s.mostSignificantCourse
+			report.studentCourseYearDetails = report.studentCourseDetails.freshStudentCourseYearDetails.head
 			report.academicYear = academicYear
 			report.monitoringPeriod = "Spring"
 			report.reporter = ""

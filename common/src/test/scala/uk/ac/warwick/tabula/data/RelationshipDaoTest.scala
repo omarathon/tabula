@@ -65,8 +65,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
 		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
@@ -121,8 +120,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
 		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
@@ -154,8 +152,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
 		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
@@ -187,7 +184,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(null, dept1) should be (Seq())
 	}
 
-	@Test def studentRelationshipsByStaffDepartments(): Unit = transactional{tx=>
+	@Test def studentRelationshipsByStaffDepartments(): Unit = transactional { tx =>
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 		val dept1 = Fixtures.department("hm", "History of Music")
@@ -205,8 +202,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(stu1)
 		memberDao.saveOrUpdate(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val relBetweenStaff1AndStu2 = StudentRelationship(staff2, relationshipType, stu1, DateTime.now)
 
@@ -255,8 +251,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1, DateTime.now)
 		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2, DateTime.now)
@@ -306,8 +301,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 		memberDao.saveOrUpdate(anotherStudent)
 		memberDao.saveOrUpdate(staff)
 
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		relationshipDao.saveOrUpdate(relationshipType)
+		val relationshipType = relationshipDao.getStudentRelationshipTypeById("personalTutor").get
 
 		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff, relationshipType, studentWithMultipleScdsSameSpr, DateTime.now)
 		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff, relationshipType, anotherStudent, DateTime.now)

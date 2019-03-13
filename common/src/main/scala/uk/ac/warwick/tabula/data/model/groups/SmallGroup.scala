@@ -174,6 +174,4 @@ class SmallGroup
 	}
 
 	def hasScheduledEvents: Boolean = events.exists(!_.isUnscheduled)
-
-	override def toEntityReference: SmallGroupEntityReference = new SmallGroupEntityReference().put(this)
 }

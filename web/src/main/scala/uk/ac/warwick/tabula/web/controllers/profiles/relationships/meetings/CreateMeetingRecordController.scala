@@ -7,11 +7,12 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.profiles.relationships.meetings._
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, _}
 import uk.ac.warwick.tabula.JavaImports._
+
 import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/create"))
-class CreateMeetingRecordController extends AbstractManageMeetingRecordController {
+class CreateMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
 	@ModelAttribute("command")
 	def getCommand(
@@ -22,16 +23,8 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 		manageableRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
-				// Go through the relationships for this SPR code and find one where the current user is the agent.
-				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
-				val chosenRelationship = relationships match {
-					case Seq(r) => r
-					case _ => relationships.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
-						.getOrElse(relationships.head)
-				}
-
 				val cmd = CreateMeetingRecordCommand(currentMember, manageableRelationships)
-				cmd.relationships = JArrayList(chosenRelationship)
+				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
 				cmd
 		}
 	}
@@ -40,7 +33,7 @@ class CreateMeetingRecordController extends AbstractManageMeetingRecordControlle
 
 @Controller
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/{academicYear}/createmissed"))
-class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController {
+class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordController with MeetingRecordControllerHelper {
 
 	@ModelAttribute("command")
 	def getCommand(
@@ -51,18 +44,9 @@ class CreateMissedMeetingRecordController extends AbstractManageMeetingRecordCon
 		manageableRelationships match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
-				// Go through the relationships for this SPR code and find one where the current user is the agent.
-				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
-				val chosenRelationship = relationships match {
-					case Seq(r) => r
-					case _ => relationships.find(rel => rel.agentMember.map(_.universityId).contains(user.universityId))
-						.getOrElse(relationships.head)
-				}
-
 				val cmd = CreateMissedMeetingRecordCommand(currentMember, relationships)
-				cmd.relationships = JArrayList(chosenRelationship)
+				cmd.relationships = JArrayList(chosenRelationships(relationshipType, relationships, user))
 				cmd
 		}
 	}
-
 }

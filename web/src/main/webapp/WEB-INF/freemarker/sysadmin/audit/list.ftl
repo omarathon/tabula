@@ -36,7 +36,7 @@
 			data-content="${helpText}"><i class="fa fa-question-circle fa-fw" style="font-size:11pt" aria-label="Help"></i></a>
 	</#assign>
 
-	<@f.form commandName="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form">
+	<@f.form modelAttribute="auditLogQuery" action="${url('/sysadmin/audit/search')}" method="POST" cssClass="form">
 		<div class="form-group">
 			<div class="input-group">
 				<span class="input-group-addon">

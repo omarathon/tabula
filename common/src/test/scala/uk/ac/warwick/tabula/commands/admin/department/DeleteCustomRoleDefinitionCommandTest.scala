@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedRole}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 
 class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 
@@ -86,7 +86,7 @@ class DeleteCustomRoleDefinitionCommandTest extends TestBase with Mockito {
 	}}
 
 	@Test def validateHasGrantedRole { new ValidationFixture {
-		command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns (Seq(new DepartmentGrantedRole(department, customRole)))
+		command.permissionsService.getAllGrantedRolesForDefinition(customRole) returns (Seq(GrantedRole(department, customRole)))
 		command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole) returns (Nil)
 
 		val errors = new BindException(command, "command")

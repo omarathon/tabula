@@ -6,11 +6,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.ModuleRegistrationDao
-import uk.ac.warwick.tabula.data.model.{Module, ModuleRegistration, ModuleSelectionStatus, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.scheduling.PropertyCopying
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.ModuleRegistrationRow
+
+import scala.math.BigDecimal.RoundingMode
 
 class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows: Seq[ModuleRegistrationRow], modules: Set[Module])
 	extends Command[Seq[ModuleRegistration]] with Logging with Unaudited with PropertyCopying {
@@ -19,6 +21,8 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 	var moduleRegistrationDao: ModuleRegistrationDao = Wire[ModuleRegistrationDao]
 
+	private def scaled(bg: JBigDecimal): JBigDecimal =
+		JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
 
 	override def applyInternal(): Seq[ModuleRegistration] = {
 		logger.debug("Importing module registration for student " + course.scjCode)
@@ -28,7 +32,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 			val existingRegistration = course.moduleRegistrations.find(mr =>
 				mr.module.code == module.code
 					&& mr.academicYear == AcademicYear.parse(modRegRow.academicYear)
-					&& mr.cats == modRegRow.cats
+					&& scaled(mr.cats) == scaled(modRegRow.cats)
 					&& mr.occurrence == modRegRow.occurrence
 			)
 
@@ -55,6 +59,7 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 
 			val hasChanged = copyBasicProperties(properties, rowBean, moduleRegistrationBean) |
 				copySelectionStatus(moduleRegistrationBean, modRegRow.selectionStatusCode) |
+				copyModuleResult(moduleRegistrationBean, modRegRow.moduleResult) |
 				copyBigDecimal(moduleRegistrationBean, "actualMark", modRegRow.actualMark) |
 				copyBigDecimal(moduleRegistrationBean, "agreedMark", modRegRow.agreedMark)
 
@@ -79,25 +84,24 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 				(modules.find(_.code == Module.stripCats(sitsMR.sitsModuleCode).get.toLowerCase)
 					.exists { module => module.code == mr.module.code }
 					&& AcademicYear.parse(sitsMR.academicYear) == mr.academicYear
-					&& sitsMR.cats == mr.cats
+					&& scaled(sitsMR.cats) == scaled(mr.cats)
 					&& sitsMR.occurrence == mr.occurrence)
 			}
 
 			/** Ensure at least there is some record in SITS.If for some reason we couldn't
 				* get any SITS data, don't mark all deleted- better to leave as it is **/
 			if (courseRows.nonEmpty && !mrExists) {
-				mr.markDeleted
-				logger.info("Marking delete  for " + mr)
+				mr.markDeleted()
+				logger.info("Marking delete for " + mr)
 				mr.lastUpdatedDate = DateTime.now
 				moduleRegistrationDao.saveOrUpdate(mr)
 			}
 		}
 	}
 
-	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean = {
-		val property = "selectionStatus"
+	private def copyCustomProperty[A](property: String, destinationBean: BeanWrapper, code: String, fn: String => A): Boolean = {
 		val oldValue = destinationBean.getPropertyValue(property)
-		val newValue = ModuleSelectionStatus.fromCode(selectionStatusCode)
+		val newValue = fn(code)
 
 		logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
 
@@ -111,10 +115,17 @@ class ImportModuleRegistrationsCommand(course: StudentCourseDetails, courseRows:
 		else false
 	}
 
+	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String): Boolean =
+		copyCustomProperty("selectionStatus", destinationBean, selectionStatusCode, ModuleSelectionStatus.fromCode)
+
+	def copyModuleResult(destinationBean: BeanWrapper, moduleResultCode: String): Boolean =
+		copyCustomProperty("moduleResult", destinationBean, moduleResultCode, ModuleResult.fromCode)
+
 	private val properties = Set(
 		"assessmentGroup", "occurrence", "actualGrade", "agreedGrade", "passFail"
 	)
 
 	override def describe(d: Description): Unit = d.properties("scjCode" -> course.scjCode)
 
+	override def toString: String = s"ImportModuleRegistrationsCommand($course, $courseRows)"
 }

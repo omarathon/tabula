@@ -11,10 +11,10 @@ import org.scalatest.Matchers
 import org.scalatest.time.{Millis, Seconds, Span}
 
 
-class SmallGroupTeachingPage(val departmentCode:String, val academicYear: String)(implicit val webDriver:WebDriver)
+class SmallGroupTeachingPage(val departmentCode: String, val academicYear: String)(implicit val webDriver: WebDriver)
 	extends Page with WebBrowser with BreadcrumbsMatcher with Eventually with Matchers with GroupSetList {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
 	val url: String = "%s/groups/admin/department/%s/%s".format(FunctionalTestProperties.SiteRoot, departmentCode, academicYear)

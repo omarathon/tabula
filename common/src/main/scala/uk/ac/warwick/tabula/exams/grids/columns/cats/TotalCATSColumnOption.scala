@@ -22,7 +22,7 @@ class TotalCATSColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear =>
 					ExamGridColumnValueDecimal(entityYear.moduleRegistrations.map(mr => BigDecimal(mr.cats)).sum.underlying)

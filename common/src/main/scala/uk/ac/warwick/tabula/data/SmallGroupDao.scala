@@ -250,15 +250,14 @@ class SmallGroupDaoImpl extends SmallGroupDao
 			.uniqueResult
 	}
 
-	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] = {
-		if(studentIds.isEmpty || occurrences.isEmpty)
-			return Seq()
-
-		session.newCriteria[SmallGroupEventAttendanceNote]
-			.add(safeIn("student.id", studentIds))
-			.add(safeIn("occurrence", occurrences))
-			.seq
-	}
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] =
+		if (studentIds.isEmpty || occurrences.isEmpty)
+			Nil
+		else
+			session.newCriteria[SmallGroupEventAttendanceNote]
+				.add(safeIn("student.id", studentIds))
+				.add(safeIn("occurrence", occurrences))
+				.seq
 
 	def findSmallGroupsWithAttendanceRecorded(studentId: String): Seq[SmallGroup] =
 		session.newCriteria[SmallGroupEventAttendance]
@@ -559,10 +558,10 @@ class SmallGroupDaoImpl extends SmallGroupDao
 					join e.group as g
 					join g.groupSet as s
 					where s.academicYear = :academicYear and location not like '%|%'
-		 			and s.deleted = 0
+		 			and s.deleted = false
 		 			$departmentCondition
 			""")
-			.setString("academicYear", academicYear.getStoreValue.toString)
+			.setParameter("academicYear", academicYear)
 
 		department.foreach(d => query.setEntity("department", d))
 
@@ -574,9 +573,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
 
 		val termConditions = indexedTerms.zipWithIndex.map{ case (_, i) => s"""(
 			(
-			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :ot$i or
-			 lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :fw$i or
-       lower(g.uk$$ac$$warwick$$tabula$$data$$model$$groups$$SmallGroup$$$$_name) like :lw$i
+			 lower(g._name) like :ot$i or
+			 lower(g._name) like :fw$i or
+       lower(g._name) like :lw$i
 			 )
 			or
 			(

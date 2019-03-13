@@ -124,10 +124,9 @@ abstract class AbstractAssessmentService extends AssessmentService {
 		getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter { _.module == module }
 
 	def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
-		cm2MarkerHelper.findBy(user)
-			.map(_.workflow)
-			.distinct
-			.flatMap(cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflow)
+		val workflows = cm2MarkerHelper.findBy(user).map(_.workflow).distinct
+
+		cm2MarkingWorkflowService.getAssignmentsUsingMarkingWorkflows(workflows)
 			.filter { a => a.isAlive && (academicYearOption.isEmpty || academicYearOption.contains(a.academicYear)) }
 	}
 

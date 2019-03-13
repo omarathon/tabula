@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.timetables
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property.{Categories, DateProperty, RRule}
-import net.fortuna.ical4j.model.{Parameter, Property}
+import net.fortuna.ical4j.model.{Parameter, Property, Recur}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.auth.{Credentials, UsernamePasswordCredentials}
 import org.apache.http.client.methods.RequestBuilder
@@ -25,6 +25,7 @@ import uk.ac.warwick.tabula.services.timetables.CelcatHttpTimetableFetchingServi
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventList
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, DateFormats, FeaturesComponent}
+import uk.ac.warwick.tabula.JavaImports._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -107,7 +108,7 @@ object CelcatHttpTimetableFetchingService {
 		val summary = Option(event.getSummary).fold("") { _.getValue }
 		val categories =
 			Option(event.getProperty(Property.CATEGORIES))
-				.collect { case c: Categories => c }
+  			.map(_.asInstanceOf[Categories])
 				.map { c => c.getCategories.iterator().asScala.collect { case s: String => s }.filter { _.hasText }.toList }
 				.getOrElse(Nil)
 
@@ -140,11 +141,13 @@ object CelcatHttpTimetableFetchingService {
 			val startWeek = year.weekForDate(start.toLocalDate).weekNumber
 
 			// We support exactly one RRule of frequence weekly
-			val endWeek = event.getProperties(Property.RRULE).asScala.headOption.collect {
-				case rule: RRule if rule.getRecur.getFrequency == "WEEKLY" => rule
-			}.map { rule =>
-				startWeek + rule.getRecur.getCount - 1
-			}.getOrElse(startWeek)
+			val endWeek =
+				event.getProperties(Property.RRULE).asInstanceOf[JList[_ <: Property]].asScala
+					.headOption
+  				.map(_.asInstanceOf[RRule])
+					.filter(_.getRecur.getFrequency == Recur.Frequency.WEEKLY)
+					.map { rule => startWeek + rule.getRecur.getCount - 1 }
+					.getOrElse(startWeek)
 
 			val weekRange = WeekRange(startWeek, endWeek)
 

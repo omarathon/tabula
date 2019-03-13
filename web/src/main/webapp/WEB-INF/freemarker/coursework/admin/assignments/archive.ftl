@@ -1,6 +1,6 @@
 <#assign assignment=command.assignment />
 <#assign submitUrl><@routes.coursework.archiveAssignment assignment /></#assign>
-<@f.form method="post" action=submitUrl commandName="command" cssClass="form-vertical">
+<@f.form method="post" action=submitUrl modelAttribute="command" cssClass="form-vertical">
 
 <#if !assignment.alive>
 

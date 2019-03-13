@@ -122,14 +122,14 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
 			.seq
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
-		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
+		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=false")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)
 			.seq
 
 	def getExamByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Exam] =
-		session.newQuery[Exam]("from Exam where name=:name and academicYear=:year and module=:module and deleted=0")
+		session.newQuery[Exam]("from Exam where name=:name and academicYear=:year and module=:module and deleted=false")
 			.setString("name", name)
 			.setParameter("year", year)
 			.setEntity("module", module)

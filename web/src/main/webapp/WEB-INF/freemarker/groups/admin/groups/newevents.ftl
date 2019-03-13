@@ -6,7 +6,7 @@
 	</div>
 
 	<div class="fix-area">
-		<@f.form id="newEvents" method="POST" commandName="command">
+		<@f.form id="newEvents" method="POST" modelAttribute="command">
 			<@components.set_wizard true 'events' smallGroupSet />
 
 			<#assign is_edit = false />

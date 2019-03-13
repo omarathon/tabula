@@ -2,7 +2,7 @@
 
 <#escape x as x?html>
 	<div class="filters admin-assignment-submission-filters btn-group-group well well-sm" data-lazy="true">
-		<@f.form commandName="submissionAndFeedbackCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
+		<@f.form modelAttribute="submissionAndFeedbackCommand" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
 			<@f.errors cssClass="error form-errors" />
 
 			<#assign placeholder = "All submission statuses" />

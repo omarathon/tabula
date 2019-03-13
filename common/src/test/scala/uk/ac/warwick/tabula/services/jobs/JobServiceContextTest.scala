@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.jobs.JobPrototype
+import uk.ac.warwick.tabula.{AppContextTestBase, EarlyRequestInfoImpl}
 
 class JobServiceContextTest extends AppContextTestBase {
 
@@ -18,7 +18,7 @@ class JobServiceContextTest extends AppContextTestBase {
 
 		val instance = JobInstanceImpl.fromPrototype(JobPrototype("unknown", Map()))
 
-		jobService.processInstance(instance)
+		jobService.processInstance(instance)(new EarlyRequestInfoImpl)
 
 		// Check that the flags have not actually been updated.
 		withClue("Started") { instance.started should be {false} }

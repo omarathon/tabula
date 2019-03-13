@@ -2,7 +2,7 @@
 	<#assign command = sharedAssignmentPropertiesForm />
 	<#assign actionUrl><@routes.cm2.assignmentSharedOptions department/></#assign>
 
-	<@f.form method="post" action=actionUrl commandName="sharedAssignmentPropertiesForm" >
+	<@f.form method="post" action=actionUrl modelAttribute="sharedAssignmentPropertiesForm" >
 		<#if submitted?? && submitted && !hasErrors>
 			<span class="ajax-response" data-status="success"></span>
 		</#if>

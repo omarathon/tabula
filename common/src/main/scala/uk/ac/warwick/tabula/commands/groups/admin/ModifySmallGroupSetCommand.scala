@@ -323,7 +323,7 @@ trait ModifySmallGroupSetsScheduledNotifications
 			set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
 		else Nil // The set commands spawned will handle notification creation for events
 
-	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
 		if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
 		else Nil // The set commands spawned will handle notification creation for events
 	}

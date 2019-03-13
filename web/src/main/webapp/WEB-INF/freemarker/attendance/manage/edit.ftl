@@ -3,7 +3,7 @@
 
 <h1>Edit scheme: ${scheme.displayName}</h1>
 
-<@f.form id="editScheme" method="POST" commandName="command">
+<@f.form id="editScheme" method="POST" modelAttribute="command">
 
 	<p class="progress-arrows">
 		<span class="arrow-right active">Properties</span>

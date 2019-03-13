@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.services.{MaintenanceModeServiceComponent, UserSettingsServiceComponent}
@@ -10,14 +11,14 @@ import uk.ac.warwick.tabula.{AcademicYear, Features}
 
 import scala.collection.mutable.ArrayBuffer
 
-trait AcademicYearScopedController {
+trait AcademicYearScopedController extends TaskBenchmarking {
 
 	self: BaseController with UserSettingsServiceComponent with MaintenanceModeServiceComponent =>
 
 	@Autowired var features: Features  = _
 
 	@ModelAttribute("availableAcademicYears")
-	def availableAcademicYears: Seq[AcademicYear] = {
+	def availableAcademicYears: Seq[AcademicYear] = benchmarkTask("availableAcademicYears") {
 		val years = ArrayBuffer[AcademicYear]()
 		if (features.academicYear2012) years += AcademicYear(2012)
 		if (features.academicYear2013) years += AcademicYear(2013)
@@ -57,7 +58,7 @@ trait AcademicYearScopedController {
 	def activeAcademicYear(academicYear: AcademicYear): Option[AcademicYear] = { None }
 	def activeAcademicYear: Option[AcademicYear] = { None }
 
-	def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: (AcademicYear) => String): Seq[BreadCrumb] =
+	def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: AcademicYear => String): Seq[BreadCrumb] =
 		availableAcademicYears.map(year =>
 			Breadcrumbs.Standard(year.getLabel, Some(urlGenerator(year)), "").setActive(year.startYear == activeAcademicYear.startYear)
 		)

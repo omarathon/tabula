@@ -10,7 +10,7 @@
 	<div class="fix-area form-post-container">
 		<div class="fix-header pad-when-fixed">
 			<div class="filters marker-feedback-filters btn-group-group well well-sm" data-lazy="true">
-				<@f.form commandName="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
+				<@f.form modelAttribute="command" action="${info.requestedUri.path}" method="GET" cssClass="form-inline filter-form">
 					<@f.errors cssClass="error form-errors" />
 
 					<#assign placeholder = "All marking statuses" />

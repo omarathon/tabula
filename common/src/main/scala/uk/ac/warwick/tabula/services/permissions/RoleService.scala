@@ -144,7 +144,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		val (scopeless, allScoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
 
 		// if we are getting roles for an assistant then don't use the StaffMemberAssistantRoleProvider again (avoids assistant relationships chaining)
-		val scoped = if(isAssistant) allScoped.filterNot(_.isInstanceOf[StaffMemberAssistantRoleProvider]) else allScoped
+		val scoped = if (isAssistant) allScoped.filterNot(_.isInstanceOf[StaffMemberAssistantRoleProvider]) else allScoped
 
 		// We only need to do scopeless once
 		// (we call the (User, Target) method signature otherwise it bypasses the request level caching)
@@ -174,13 +174,13 @@ class RoleServiceImpl extends RoleService with Logging {
 		val targetClass = role.getClass
 
 		// Go through the list of RoleProviders and get any that provide this role
-		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap {
+		val allRoles = roleProviders.filter(_.rolesProvided.contains(targetClass)).flatMap {
 			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user, null)
-			case provider if role.scope.isDefined => provider.getRolesFor(user, role.scope.get)
+			case provider if role.scope.nonEmpty => provider.getRolesFor(user, role.scope.get)
 			case _ => Seq()
 		}
 
-		allRoles contains role
+		allRoles.contains(role)
 	}
 
 }

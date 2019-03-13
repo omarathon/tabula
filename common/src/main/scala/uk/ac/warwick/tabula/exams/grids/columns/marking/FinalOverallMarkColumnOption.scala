@@ -23,7 +23,7 @@ class FinalOverallMarkColumnOption extends ChosenYearExamGridColumnOption with A
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
 				entity -> entity.validYears.get(state.yearOfStudy).map(entityYear =>
 					progressionService.suggestedFinalYearGrade(

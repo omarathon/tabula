@@ -4,7 +4,7 @@
 		<@modal.header>
 				<h3 class="modal-title">Bulk moderation</h3>
 		</@modal.header>
-		<@f.form method="POST" commandName="command" >
+		<@f.form method="POST" modelAttribute="command" >
 			<@modal.body>
 
 				<@bs3form.labelled_form_group path="previousMarker" labelText="Moderate all submissions marked by">

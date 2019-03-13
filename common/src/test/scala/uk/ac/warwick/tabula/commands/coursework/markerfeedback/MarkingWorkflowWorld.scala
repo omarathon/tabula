@@ -3,14 +3,14 @@ package uk.ac.warwick.tabula.commands.coursework.markerfeedback
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.ZipService
-import uk.ac.warwick.tabula.{Features, MockUserLookup, TestHelpers}
+import uk.ac.warwick.tabula.services.{FeedbackService, ZipService}
+import uk.ac.warwick.tabula.{Features, MockUserLookup, Mockito, TestHelpers}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 // reusable environment for marking workflow tests
-trait MarkingWorkflowWorld extends TestHelpers {
+trait MarkingWorkflowWorld extends TestHelpers with Mockito {
 
 	val mockUserLookup = new MockUserLookup
 
@@ -33,6 +33,9 @@ trait MarkingWorkflowWorld extends TestHelpers {
 	generateSubmission(assignment, "0672088", "cusebr")
 	generateSubmission(assignment, "0672089", "cuscav")
 	addFeedback(assignment)
+
+	assignment.feedbackService = smartMock[FeedbackService]
+	assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 	var markingWorkflow = new SeenSecondMarkingWorkflow()
 	markingWorkflow.department = assignment.module.adminDepartment

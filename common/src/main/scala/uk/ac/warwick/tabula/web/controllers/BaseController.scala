@@ -1,29 +1,27 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import org.apache.commons.lang3.StringEscapeUtils
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Required
+import java.net.URI
+
+import javax.annotation.Resource
+import org.springframework.beans.factory.annotation.{Autowired, Required}
 import org.springframework.context.MessageSource
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Validator
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute}
-import javax.annotation.Resource
-import javax.servlet.http.HttpServletResponse
-
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.StringUtils
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.validators.CompositeValidator
-import uk.ac.warwick.tabula.web.Mav
+import org.springframework.web.bind.annotation.InitBinder
 import uk.ac.warwick.sso.client.SSOConfiguration
 import uk.ac.warwick.sso.client.tags.SSOLoginLinkGenerator
-import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.helpers.{Logging, StringUtils}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods}
+import uk.ac.warwick.tabula.validators.CompositeValidator
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, PermissionDeniedException, RequestInfo}
+
+import scala.util.Try
 
 trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 	def user: CurrentUser
@@ -45,7 +43,18 @@ trait ControllerMethods extends PermissionsCheckingMethods with Logging {
 trait ControllerViews extends Logging {
 	val Mav = uk.ac.warwick.tabula.web.Mav
 
-	def getReturnTo(defaultUrl: String): String = StringEscapeUtils.escapeHtml4(getReturnToUnescaped(defaultUrl))
+	def getReturnTo(defaultUrl: String): String = {
+		Try {
+			val uri = new URI(getReturnToUnescaped(defaultUrl))
+
+			implicit def nonEmpty(s: String): Option[String] = Option(s).filterNot(_ == "").filterNot(_ == null)
+
+			val qs: Option[String] = uri.getQuery
+			val path: Option[String] = uri.getRawPath
+
+			path.map(_ + qs.map("?" + _).getOrElse(""))
+		}.toOption.flatten.getOrElse("")
+	}
 
 	def getReturnToUnescaped(defaultUrl: String): String =
 		requestInfo.flatMap {

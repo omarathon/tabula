@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import javax.sql.DataSource
+import org.hibernate.`type`.Type
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Criterion, DetachedCriteria, Projection, PropertySubqueryExpression}
+import org.hibernate.criterion._
 import org.hibernate.proxy.HibernateProxy
-import org.hibernate.{Hibernate, Session, SessionFactory}
+import org.hibernate.{Criteria, Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 import uk.ac.warwick.tabula.data.model._
@@ -53,7 +54,7 @@ trait HelperRestrictions extends Logging {
 	def safeIn[A](propertyName: String, elements: Seq[A]): Criterion = {
 		val iterable = elements.map(HibernateHelpers.initialiseAndUnproxy)
 		if (iterable.isEmpty) {
-			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
+			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary", new Exception)
 			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
 		} else if (iterable.length <= maxInClause) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
@@ -88,6 +89,13 @@ trait HelperRestrictions extends Logging {
 		(property, value) => org.hibernate.criterion.Restrictions.like(property, HibernateHelpers.initialiseAndUnproxy(value)).ignoreCase
 }
 
+case class SimpleAggregateProjection(fn: String, property: String) extends AggregateProjection(fn, property)
+
+trait HelperProjections {
+	def any(propertyName: String): Projection = SimpleAggregateProjection("bool_or", propertyName) // Any of the values are true
+	def every(propertyName: String): Projection = SimpleAggregateProjection("bool_and", propertyName) // All of the values are true
+}
+
 trait HibernateHelpers {
 	def initialiseAndUnproxy[A >: Null](entity: A): A =
 		Option(entity).map { proxy =>
@@ -99,7 +107,7 @@ trait HibernateHelpers {
 		}.orNull
 }
 
-object HibernateHelpers extends HibernateHelpers with HelperRestrictions
+object HibernateHelpers extends HibernateHelpers with HelperRestrictions with HelperProjections
 
 object Daoisms {
 	/**
@@ -109,21 +117,23 @@ object Daoisms {
 	implicit class NiceQueryCreator(session: Session) {
 		def newCriteria[A: ClassTag] =
 			new ScalaCriteria[A](
-				session.createCriteria(
-					classTag[A]
-						.runtimeClass
-				)
+				session.createCriteria(classTag[A].runtimeClass)
 			)
 		def newCriteria[A: ClassTag](clazz: Class[_]) =
 			new ScalaCriteria[A](
 				session.createCriteria(clazz)
 			)
-		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
+		def newQuery[A: ClassTag](hql: String) =
+			new ScalaQuery[A](
+				session.createQuery(hql, classTag[A].runtimeClass.asInstanceOf[Class[A]])
+			)
+		def newUpdateQuery(hql: String) =
+			new ScalaUpdateQuery(session.createQuery(hql))
 	}
 
 	// The maximum number of clauses supported in an IN(..) before it will
 	// unceremoniously fail. Use `grouped` with this to split up work
-	val MaxInClauseCount = 1000
+	val MaxInClauseCount: Int = Short.MaxValue.toInt // Oh Postgres you fantastic bastard
 }
 
 /**
@@ -134,7 +144,7 @@ object Daoisms {
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
+trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HelperProjections with HibernateHelpers {
 	@transient private var _dataSource = Wire.option[DataSource]("dataSource")
 	def dataSource: DataSource = _dataSource.orNull
 	def dataSource_=(dataSource: DataSource) { _dataSource = Option(dataSource) }
@@ -149,7 +159,6 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 				session.enableFilter(Member.FreshOnlyFilter)
 				session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 				session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
-				session.enableFilter(Route.ActiveRoutesOnlyFilter)
 				session
 			}
 
@@ -177,7 +186,14 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	 */
 	protected def inSession(fn: Session => Unit) {
 		val sess = sessionFactory.openSession()
-		try fn(sess) finally sess.close()
+		val tx = sess.beginTransaction()
+
+		try {
+			fn(sess)
+		} finally {
+			tx.commit()
+			sess.close()
+		}
 	}
 
 	implicit def implicitNiceSession(session: Session): NiceQueryCreator = new NiceQueryCreator(session)

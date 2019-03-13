@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.profiles.profile
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.profiles.profile.ViewModuleRegistrationsCommand
+import uk.ac.warwick.tabula.commands.exams.grids.StudentAssessmentProfileCommand
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.Mav
@@ -41,11 +41,14 @@ class ViewProfileModulesController extends AbstractViewProfileController {
 		activeAcademicYear: Option[AcademicYear]
 	): Mav = {
 		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
-		val command = restricted(ViewModuleRegistrationsCommand(mandatory(studentCourseDetails), thisAcademicYear))
+		val command = restricted(StudentAssessmentProfileCommand(mandatory(studentCourseDetails), thisAcademicYear))
+		val studentBreakdown = command.map(_.apply())
 		Mav("profiles/profile/modules_student",
 			"hasPermission" -> command.nonEmpty,
 			"command" -> command,
-			"moduleRegistrations" -> command.map(_.apply()).getOrElse(Seq()),
+			"yearMark" -> studentBreakdown.map(_.yearMark),
+			"yearWeighting" -> studentBreakdown.flatMap(_.yearWeighting),
+			"moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq()),
 			"isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
 			"member" -> studentCourseDetails.student
 		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.ModulesIdentifier): _*)

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.jobs
 
 import org.joda.time.DateTime
+import org.junit.Ignore
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.jobs.TestingJob
@@ -10,7 +11,7 @@ class JobDaoTest extends AppContextTestBase with HasJobDao {
 
 	@Autowired var service: JobService = _
 
-	@Test def crud(): Unit = transactional { _ =>
+	@Ignore @Test def crud(): Unit = transactional { _ =>
 
 		val anHourAgo = DateTime.now.minusHours(1)
 		val twoHoursAgo = DateTime.now.minusHours(2)

@@ -107,7 +107,7 @@ class AssignmentController extends CourseworkController
 	): Mav = {
 		// We know form isn't null here because of permissions checks on the info command
 		if (errors.hasErrors) {
-			logger.error(s"Validation failed for assignment ${assignment.id} by ${user.apparentId}. ${errors.getAllErrors.asScala.map(_.toString)}")
+			logger.warn(s"Validation failed for assignment ${assignment.id} by ${user.apparentId}. ${errors.getAllErrors.asScala.map(_.toString)}")
 			view(infoCommand, form, errors)
 		} else {
 			try {

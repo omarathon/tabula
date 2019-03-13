@@ -22,16 +22,16 @@ class PreviousYearMarksColumnOption extends ChosenYearExamGridColumnOption with 
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity =>
-				entity -> (result(entity) match {
+				entity -> (markOrError(entity) match {
 					case Right(mark) => ExamGridColumnValueDecimal(mark)
-					case Left(message) => ExamGridColumnValueMissing(message)
+					case Left(error) => ExamGridColumnValueMissing(error)
 				})
 			).toMap
 		}
 
-		private def result(entity: ExamGridEntity): Either[String, BigDecimal] = {
+		private def markOrError(entity: ExamGridEntity): Either[String, BigDecimal] = {
 			relevantEntityYear(entity) match {
 				case Some(year) => if(state.calculateYearMarks) {
 					progressionService.getYearMark(year, state.normalLoadLookup(year.route), state.routeRulesLookup(year.route, year.level), entity.yearWeightings)

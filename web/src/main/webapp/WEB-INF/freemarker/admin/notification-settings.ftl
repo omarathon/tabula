@@ -15,7 +15,7 @@
 </#if>
 
 <#assign submitUrl><@routes.admin.notificationsettings department /></#assign>
-<@f.form method="post" class="notification-settings-form" action=submitUrl commandName="command">
+<@f.form method="post" class="notification-settings-form" action=submitUrl modelAttribute="command">
 	<input type="hidden" name="returnTo" value="${returnTo}">
 
 	<div class="modal fade" id="small-group-attendance-modal">

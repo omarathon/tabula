@@ -25,7 +25,7 @@ jQuery(function($){ "use strict";
 </script>
 
 <#assign submitUrl><@routes.coursework.publishFeedback assignment /></#assign>
-<@f.form method="post" action=submitUrl commandName="publishFeedbackCommand">
+<@f.form method="post" action=submitUrl modelAttribute="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
 

@@ -1,24 +1,22 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports.{JList, _}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
-
 
 object OnlineMarkerFeedbackCommand {
 	def apply(assignment: Assignment, stage: MarkingWorkflowStage, student: User, marker: User, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
@@ -67,7 +65,6 @@ class OnlineMarkerFeedbackCommandInternal(
 	}
 
 	def copyFrom(markerFeedback: MarkerFeedback) {
-
 		copyFormFields(markerFeedback)
 
 		// mark and grade
@@ -77,7 +74,7 @@ class OnlineMarkerFeedbackCommandInternal(
 		}
 
 		// get attachments
-		attachedFiles = markerFeedback.attachments
+		attachedFiles = JArrayList[FileAttachment](markerFeedback.attachments.asScala)
 	}
 
 	def copyTo(markerFeedback: MarkerFeedback) {
@@ -93,11 +90,11 @@ class OnlineMarkerFeedbackCommandInternal(
 		// save attachments
 		if (markerFeedback.attachments != null) {
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
-			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
+			val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
 			val filesToRemove = existingFiles -- filesToKeep
 			val filesToReplicate = filesToKeep -- existingFiles
 			fileAttachmentService.deleteAttachments(filesToRemove)
-			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
+			markerFeedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
 			val replicatedFiles = filesToReplicate.map ( _.duplicate() )
 			replicatedFiles.foreach(markerFeedback.addAttachment)
 		}

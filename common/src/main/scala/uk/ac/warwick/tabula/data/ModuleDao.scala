@@ -66,7 +66,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		 			missingFromImportSince is null
 			"""
 
-			session.newQuery(sqlString)
+			session.newUpdateQuery(sqlString)
 				.setParameter("now", now)
 				.setParameterList("staleModuleCodes", staleCodes)
 				.executeUpdate()

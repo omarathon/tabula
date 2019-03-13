@@ -19,6 +19,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 		relationshipType.defaultSource = StudentRelationshipSource.SITS
 		relationshipType.defaultRdxType = "SUP"
+		relationshipType.description = "Research supervisor"
 		session.saveOrUpdate(relationshipType)
 
 		val department = new Department
@@ -57,12 +58,12 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		}
 
 		class CourseFixture (scjCode: String, sprCode: String) {
-
 			val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 			studentCourseDetails.sprCode = sprCode
 			studentCourseDetails.department = department
 
 			supervisee.attachStudentCourseDetails(studentCourseDetails)
+			supervisee.mostSignificantCourse = studentCourseDetails
 
 			val route = new Route
 			route.active = true
@@ -79,6 +80,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			val course2 = new CourseFixture("1111111/2", "1111111/2")
 			session.save(course2.studentCourseDetails)
+			session.saveOrUpdate(supervisee)
 
 			val supervisor2: StaffMember = newSupervisor("1273455","cusmbg")
 		}

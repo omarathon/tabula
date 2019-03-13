@@ -50,7 +50,7 @@ trait DownloadMarkerFeedbackDescription extends Describable[Option[RenderableFil
 	override def describe(d: Description): Unit = {
 		d.assignment(assignment)
 		d.property("filename", filename)
-		d.fileAttachments(markerFeedback.attachments.asScala)
+		d.fileAttachments(markerFeedback.attachments.asScala.toSeq)
 	}
 
 	override def describeResult(d: Description, result: Option[RenderableFile]) {

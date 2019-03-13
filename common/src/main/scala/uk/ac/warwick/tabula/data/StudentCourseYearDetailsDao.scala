@@ -130,7 +130,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				""" update StudentCourseYearDetails set missingFromImportSince = :importStart
 					|where id in (:newStaleScydIds) """.stripMargin
 
-				session.newQuery(sqlString)
+				session.newUpdateQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleScydIds", newStaleIds)
 					.executeUpdate()
@@ -143,11 +143,18 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 				"""update StudentCourseYearDetails set missingFromImportSince = null
 					|where id in (:ids)""".stripMargin
 
-			sessionWithoutFreshFilters.newQuery(hqlString)
+			sessionWithoutFreshFilters.newUpdateQuery(hqlString)
 				.setParameterList("ids", ids)
 				.executeUpdate()
 		}
 	}
+
+	private def sessionDisablingFilters(disableFreshFilter: Boolean) =
+		if (disableFreshFilter) {
+			sessionWithoutFreshFilters
+		} else {
+			session
+		}
 
 	private def findByCourseRoutesCriteria(
 		academicYear: AcademicYear,
@@ -155,19 +162,11 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		routes: Seq[Route],
 		includeTempWithdrawn: Boolean,
 		resitOnly: Boolean,
-		eagerLoad: Boolean,
 		disableFreshFilter: Boolean,
 		enrolledOrCompleted: Boolean = true,
 		extraCriteria: Seq[Criterion] = Nil
 	): ScalaCriteria[StudentCourseYearDetails] = {
-
-		val thisSession = if (disableFreshFilter) {
-			sessionWithoutFreshFilters
-		} else {
-			session
-		}
-
-		val c = thisSession.newCriteria[StudentCourseYearDetails]
+		val c = sessionDisablingFilters(disableFreshFilter).newCriteria[StudentCourseYearDetails]
 			.createAlias("studentCourseDetails", "scd")
 			.add(isNull("missingFromImportSince"))
 			.add(is("academicYear", academicYear))
@@ -177,13 +176,6 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		if (!includeTempWithdrawn) {
 			c.add(not(like("scd.statusOnRoute.code", "T%")))
 		}
-
-		if (eagerLoad) {
-			c.setFetchMode("studentCourseDetails", FetchMode.JOIN)
-				.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
-				.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
-		}
-
 
 		if (routes.nonEmpty) {
 			c.add(disjunction(
@@ -195,8 +187,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			))
 		}
 
-
-		if(resitOnly) {
+		if (resitOnly) {
 			val resitQuery = DetachedCriteria.forClass(classTag[UpstreamAssessmentGroupMember].runtimeClass, "uagm")
 				.createAlias("upstreamAssessmentGroup", "uag")
 				.add(is("uag.academicYear", academicYear))
@@ -224,7 +215,44 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		includePermWithdrawn: Boolean = true,
 		extraCriteria: Seq[Criterion] = Nil
 	): Seq[StudentCourseYearDetails] = {
-		val result = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, eagerLoad, disableFreshFilter, enrolledOrCompleted = true, extraCriteria).seq
+		val criteria = findByCourseRoutesCriteria(academicYear, courses, routes, includeTempWithdrawn, resitOnly, disableFreshFilter, enrolledOrCompleted = true, extraCriteria)
+
+		val result: Seq[StudentCourseYearDetails] =
+			if (eagerLoad) {
+				// Where we're going, we don't need roads
+				type UniversityId = String
+				type StudentCourseYearDetailsId = String
+
+				val studentsMap: Map[UniversityId, StudentCourseYearDetailsId] =
+					criteria
+						.project[Array[Any]](
+							projectionList()
+								.add(property("scd.student.universityId"), "universityId")
+								.add(property("id"), "id")
+						)
+						.seq
+						.map { case Array(universityId: UniversityId, scydId: StudentCourseYearDetailsId) => (universityId, scydId) }
+  					.toMap
+
+				// Eagerly load the students and relationships for use later
+				sessionDisablingFilters(disableFreshFilter).newCriteria[StudentMember]
+  				.add(safeIn("universityId", studentsMap.keys.toSeq))
+  				.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails._moduleRegistrations", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails._moduleRegistrations.module", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.currentRoute", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.route", FetchMode.JOIN)
+  				.distinct
+  				.seq
+  				.map { student =>
+						student.freshOrStaleStudentCourseDetails.flatMap(_.freshOrStaleStudentCourseYearDetails)
+  						.find(_.id == studentsMap(student.universityId))
+  						.get
+					}
+			} else {
+				criteria.seq
+			}
 
 		if (!includePermWithdrawn) {
 			result.filterNot(_.studentCourseDetails.permanentlyWithdrawn)

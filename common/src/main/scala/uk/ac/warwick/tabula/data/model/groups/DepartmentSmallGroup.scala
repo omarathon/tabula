@@ -90,6 +90,4 @@ class DepartmentSmallGroup
 		newGroup
 	}
 
-	override def toEntityReference: DepartmentSmallGroupEntityReference = new DepartmentSmallGroupEntityReference().put(this)
-
 }

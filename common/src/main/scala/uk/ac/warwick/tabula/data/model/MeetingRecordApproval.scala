@@ -36,8 +36,6 @@ class MeetingRecordApproval extends GeneratedId with ToEntityReference with Perm
 	@JoinColumn(name="approved_by")
 	var approvedBy: Member = _
 
-	override def toEntityReference: EntityReference[MeetingRecordApproval] = new MeetingRecordApprovalEntityReference().put(this)
-
 	override def permissionsParents: Stream[PermissionsTarget] = Stream(meetingRecord)
 
 	def approved: Boolean = state == Approved

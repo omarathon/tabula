@@ -8,34 +8,50 @@
 
 <#import "*/modal_macros.ftl" as modal />
 
-<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false>
+<#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
 	<span id="${id}-container">
+		<#local has_late_formative = false />
+		<#if hide_late_formative><#list assignments as info><#if info.lateFormative><#local has_late_formative = true /><#break></#if></#list></#if>
 		<#local has_assignments = (assignments!?size gt 0) />
 		<div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
 			<div class="clearfix">
 				<h4 class="section-title">${title}</h4>
 
-				<#if has_assignments>
-					<div class="striped-section-contents">
+				<#if hide_late_formative && has_late_formative>
+					<div class="checkbox">
+						<label>
+							<input type="checkbox" name="lateFormative" /> Show late formative assignments
+							<@fmt.help_popover id="route" content="Formative assignments do not count towards the final module mark." />
+						</label>
+					</div>
+					<script type="text/javascript">
+						jQuery(function($){
+							$('input[name=lateFormative]:checkbox').on('change', function(){
+								$('span.late_formative').toggleClass('hidden', !this.checked);
+							});
+						});
+					</script>
+				</#if>
+
+				<div class="striped-section-contents">
+					<#if has_assignments || has_late_formative>
 						<div class="row">
 							<div class="col-md-3">Details</div>
 							<div class="col-md-4 col-lg-5">Progress</div>
 							<div class="col-md-5 col-lg-4">Actions</div>
 						</div>
-
-						<#list assignments as info>
-							<span id="assignment-container-${info.assignment.id}">
-								<@student_assignment_info info show_submission_progress />
-							</span>
-						</#list>
-					</div>
-				<#else>
-					<div class="striped-section-contents">
-						<div class="item-info">
+					</#if>
+					<#if !has_assignments>
+						<div class="item-info empty-message">
 							${empty_message}
 						</div>
-					</div>
-				</#if>
+					</#if>
+					<#list assignments as info>
+						<span id="assignment-container-${info.assignment.id}" class="<#if hide_late_formative && info.lateFormative>late_formative hidden</#if>">
+							<@student_assignment_info info show_submission_progress />
+						</span>
+					</#list>
+				</div>
 			</div>
 		</div>
 	</span>
@@ -254,7 +270,7 @@
 					<#local feedbackStatus>
 						Feedback for this assignment is provided outside Tabula
 					</#local>
-				<#elseif info.studentDeadline??>
+				<#elseif !(info.submission??) && info.studentDeadline??>
 					<#local feedbackStatus>
 						<strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
 					</#local>
@@ -334,7 +350,7 @@
 <#macro lateness assignment user submission="">
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 		<#if submission.late>
-			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate)} after deadline
+			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate, true)} after deadline
 		<#else>
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
@@ -927,7 +943,7 @@
 	- <a href="<@routes.cm2.listmarkersubmissions assignment marker />#${stage.name}-${student.userId}">Proxy</a>
 </#macro>
 
-<#macro student_workflow_details student>
+<#macro student_workflow_details assignment student canProxy>
 	<#if student.coursework.enhancedSubmission??>
 		<#local enhancedSubmission=student.coursework.enhancedSubmission>
 		<#local submission=enhancedSubmission.submission>
@@ -963,7 +979,7 @@
 
 					<#if firstMarker!?length gt 0>
 						(${firstMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink fm "marker" />
 						</#if>
 					</#if>
@@ -975,7 +991,7 @@
 
 					<#if secondMarker!?length gt 0>
 						(${secondMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink sm "marker" />
 						</#if>
 					</#if>
@@ -987,7 +1003,7 @@
 
 					<#if secondMarker!?length gt 0>
 						(${secondMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink sm "moderator" />
 						</#if>
 					</#if>
@@ -999,7 +1015,7 @@
 
 					<#if firstMarker!?length gt 0>
 						(${firstMarker})
-						<#if can.do("Assignment.MarkOnBehalf", assignment)>
+						<#if canProxy>
 							<@uniIdSafeMarkerLink fm "marker" />
 						</#if>
 					</#if>
@@ -1012,7 +1028,7 @@
 
 						<#if (marker.userId)??>
 							${marker.fullName}
-							<#if can.do("Assignment.MarkOnBehalf", assignment)>
+							<#if canProxy>
 								<@uniIdSafeCM2MarkerLink markingStage marker student.user />
 							</#if>
 						<#elseif stage_name != "CM2MarkingWorkflowStage(admin-moderation-admin)">
@@ -1209,7 +1225,7 @@
 <#macro lateness submission="" assignment="" user=""><#compress>
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 		<#if submission.late>
-			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate)} after deadline
+			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate, true)} after deadline
 		<#else>
 			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
@@ -1221,7 +1237,7 @@
 
 <#macro extensionLateness extension submission><#compress>
 	<#if extension?has_content && extension.expiryDate?? && submission.late>
-		<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true stripHtml=true />)
+		<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(extension.expiryDate, submission.submittedDate, true)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true stripHtml=true />)
 	</#if>
 </#compress></#macro>
 
@@ -1368,4 +1384,21 @@
 		<#if adjustmentReasonAdded>
 			 <span class="very-subtle">Reason for adjustment:</span> ${feedback.latestPrivateOrNonPrivateAdjustment.reason!''}
 		</#if>
+</#macro>
+
+<#macro downloadPdfModal url id="download-pdf-modal">
+	<div id="${id}" class="modal fade">
+		<@modal.wrapper>
+			<@modal.header>
+				<h3 class="modal-title">Download submissions as PDF</h3>
+			</@modal.header>
+			<@modal.body>
+				<p>There are <span class="count"></span> submissions that have files that are not valid PDFs (shown below). The download will not include these files.</p>
+				<p><a class="form-post btn btn-primary"
+							data-href="${url}?download" href="">Download submissions as PDF</a>
+				</p>
+				<ul class="submissions"></ul>
+			</@modal.body>
+		</@modal.wrapper>
+	</div>
 </#macro>

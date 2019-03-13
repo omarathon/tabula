@@ -47,7 +47,7 @@ class OvercattingOptionsController extends ExamsController
 			mandatory(department),
 			mandatory(academicYear),
 			mandatory(scyd),
-			new NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService),
+			NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService),
 			routeRules(scyd, academicYear),
 			user,
 			basedOnLevel = basedOnLevel
@@ -60,7 +60,7 @@ class OvercattingOptionsController extends ExamsController
 		@PathVariable scyd: StudentCourseYearDetails,
 		@RequestParam(value = "basedOnLevel", required = false) basedOnLevel: Boolean
 	) =
-		OvercattingOptionsView(department, academicYear, scyd, new NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService), routeRules(scyd, academicYear), basedOnLevel = basedOnLevel)
+		OvercattingOptionsView(department, academicYear, scyd, NormalLoadLookup(academicYear, scyd.yearOfStudy, normalCATSLoadService), routeRules(scyd, academicYear), basedOnLevel = basedOnLevel)
 
 	@ModelAttribute("ExamGridColumnValueType")
 	def examGridColumnValueType = ExamGridColumnValueType
@@ -240,7 +240,7 @@ class ChooseOvercatColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Spacer
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> {
 				val entityId = GenerateExamGridOvercatCommand.overcatIdentifier(entity.validYears(state.yearOfStudy).moduleRegistrations)
 				ExamGridColumnValueStringHtmlOnly(
@@ -278,7 +278,7 @@ class FixedValueColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.Decimal
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> (value match {
 				case Some(mark) => ExamGridColumnValueDecimal(mark)
 				case _ => ExamGridColumnValueString("")

@@ -139,6 +139,7 @@ class SmallGroupDaoTest extends PersistenceTestBase {
 		session.save(event1)
 
 		val departmentSmallGroupSet = Fixtures.departmentSmallGroupSet("Department group set")
+		departmentSmallGroupSet.department = department
 		val departmentSmallGroup = Fixtures.departmentSmallGroup("Department group")
 		departmentSmallGroup.groupSet = departmentSmallGroupSet
 		departmentSmallGroup.students = UserGroup.ofUsercodes

@@ -70,8 +70,6 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 		anExtension.approve()
 		anExtension.expiryDate = DateTime.now.plusWeeks(1)
 
-		println(s"the extension is $anExtension and its assignment is ${anExtension.assignment}")
-
 		withClue("Should only be sent to the one user who has an extension") {
 			notification.recipients should be(Seq(users(1)))
 		}

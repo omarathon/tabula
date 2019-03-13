@@ -72,6 +72,6 @@ trait ArchiveAssignmentNotifications extends SchedulesNotifications[Assignment, 
 	override def transformResult(assignment: Assignment): Seq[Assignment] = Seq(assignment)
 
 	// Clear all notifications
-	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[_]] = Seq()
+	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = Seq()
 
 }

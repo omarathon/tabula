@@ -68,18 +68,6 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
 	@Column(nullable=false)
 	var assessmentType: AssessmentType = _
 
-	/**
-	 * Read-only mapping of upstream groups. Used by AssignmentMembershipDao to inform Hibernate of how to join properly.
-	 *
-	 * Note that this ISN'T really OneToMany
-	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumns(Array(
-    new JoinColumn(name = "moduleCode", referencedColumnName = "moduleCode", insertable = false, updatable = false, unique = false),
-    new JoinColumn(name = "assessmentGroup", referencedColumnName = "assessmentGroup", insertable = false, updatable = false, unique = false)
-  ))
-	var upstreamAssessmentGroups: JSet[UpstreamAssessmentGroup] = _
-
 	var marksCode: String = _
 
 	var weighting: JInteger = _

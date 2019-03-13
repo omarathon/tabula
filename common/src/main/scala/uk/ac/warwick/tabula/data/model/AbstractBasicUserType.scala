@@ -9,7 +9,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.{io => jio}
 
-import org.hibernate.engine.spi.SessionImplementor
+import org.hibernate.engine.spi.{SessionImplementor, SharedSessionContractImplementor}
 
 /** Trait for a class that can be converted to a value for storing,
 	* usually a string or jinteger.
@@ -36,8 +36,7 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 
-
-	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SessionImplementor, owner: Object): A = {
+	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SharedSessionContractImplementor, owner: Object): A = {
 		basicType.nullSafeGet(resultSet, names(0), impl) match {
 			case s: Any if s == nullValue => nullObject
 			case b: B => convertToObject(b)
@@ -45,7 +44,7 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 		}
 	}
 
-	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SessionImplementor) {
+	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SharedSessionContractImplementor) {
 		basicType.nullSafeSet(stmt, toValue(value), index, impl)
   }
 

@@ -4,7 +4,8 @@ import java.util.UUID
 
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.JsonMappingException
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{Index, IndexAndType}
+import com.sksamuel.elastic4s.http.ElasticDsl._
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -18,10 +19,10 @@ import scala.collection.immutable.IndexedSeq
 
 class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
-	override implicit val patienceConfig =
+	override implicit val patienceConfig: PatienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
-	val indexName = "audit"
+	val index = Index("audit")
 	val indexType: String = new AuditEventIndexType {}.indexType
 
 	private trait Fixture {
@@ -29,7 +30,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		queryService.userLookup = new MockUserLookup()
 		queryService.auditEventService = smartMock[AuditEventService]
 		queryService.client = AuditEventQueryServiceTest.this.client
-		queryService.indexName = AuditEventQueryServiceTest.this.indexName
+		queryService.indexName = AuditEventQueryServiceTest.this.index.name
 
 		queryService.auditEventService.parseData(any[String]) answers { data =>
 			try {
@@ -45,15 +46,15 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	@Before def setUp(): Unit = {
 		new AuditEventElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
-			}.await.isAcknowledged should be(true)
+				createIndex(index.name).mappings(mapping(indexType).fields(fields)).analysis(analysers)
+			}.await.result.acknowledged should be(true)
 		}
-		blockUntilIndexExists(indexName)
+		blockUntilIndexExists(index.name)
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }
-		blockUntilIndexNotExists(indexName)
+		deleteIndex(index.name)
+		blockUntilIndexNotExists(index.name)
 	}
 
 	/**
@@ -71,7 +72,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 			a
 		}
 
-		val data = Map(
+		val data: Map[String, Any] = Map(
 			"assignment" -> assignment.id,
 			"submissions" -> Seq("submissionId1"),
 			"students" -> Seq("1234567"),
@@ -91,13 +92,13 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be ('empty)
 
 		// Index the audit event
-		client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
+		blockUntilCount(1, index.name)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be (assignment.submissions.asScala)
 	}}
 
 	@Test def individuallyDownloadedSubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
@@ -113,7 +114,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 			a
 		}
 
-		val data = Map(
+		val data: Map[String, Any] = Map(
 			"assignment" -> assignment.id,
 			"submission" -> "321",
 			"student" -> "1234567",
@@ -133,13 +134,13 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		queryService.auditEventService.getByIds(Seq(1)) returns Seq(auditEvent)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be ('empty)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be ('empty)
 
 		// Index the audit event
-		client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
-		blockUntilCount(1, indexName, indexType)
+		client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
+		blockUntilCount(1, index.name)
 
-		queryService.adminDownloadedSubmissions(assignment).futureValue should be (assignment.submissions.asScala)
+		queryService.adminDownloadedSubmissions(assignment, assignment.submissions.asScala).futureValue should be (assignment.submissions.asScala)
 	}}
 
 	@Test def noteworthySubmissions(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
@@ -231,10 +232,10 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		// Index the audit event
 		beforeEvents.foreach { auditEvent =>
-			client.execute { index into indexName / indexType source auditEvent id auditEvent.id }
+			client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
 		}
 
-		blockUntilExactCount(140, indexName, indexType)
+		blockUntilExactCount(140, index.name)
 
 		stopwatch.stop()
 
@@ -251,6 +252,74 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		val paged2: PagedAuditEvents = queryService.noteworthySubmissionsForModules(Seq(module), None, 100).futureValue
 		paged2.items.length should be (70)
 		paged2.totalHits should be (70)
+	}}
+
+	@Test def latestOnlineViews(): Unit = withFakeTime(dateTime(2001, 6)) { new Fixture {
+		// Specifically this verifies the fix to TAB-6888 and its predecessor TAB-4168 where the query doesn't fetch all terms
+
+		val dept = new Department
+		dept.code = "zx"
+
+		val assignment = new Assignment
+		assignment.id = "4a0ce216-adda-b0b0-c0c0-000000000000"
+
+		// Merry Christmas
+		assignment.closeDate = new DateTime(2009,12,25,0,0,0)
+
+		val module = new Module
+		module.id = "367a9abd-adda-c0c0-b0b0-000000000000"
+		module.assignments = List(assignment).asJava
+		module.adminDepartment = dept
+
+		val eventData: String = json.writeValueAsString(Map(
+			"assignment" -> assignment.id,
+			"module" -> module.id,
+			"department" -> dept.code
+		))
+
+		val studentUsercodes = (1 to 20).map { i => f"u00000$i%02d" }
+
+		val events: IndexedSeq[AuditEvent] = (1 to 70).map { i =>
+			AuditEvent(
+				eventId="viewed"+i, eventType="ViewOnlineFeedback", eventStage="before", userId=studentUsercodes(i % 20), masqueradeUserId=studentUsercodes(i % 20),
+				eventDate=new DateTime(2009,12,30,0,0,0).plusSeconds(i),
+				data=eventData
+			)
+		}
+
+		events.zipWithIndex.foreach { case (auditEvent, i) =>
+			auditEvent.id = i
+			auditEvent.related = events.filter { _.eventId == auditEvent.eventId }
+			auditEvent.parsedData = Option(auditEvent.data).map { json.readValue(_, classOf[Map[String, Any]]) }
+		}
+
+		queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
+			ids.asInstanceOf[Seq[Long]].flatMap { id => events.find { _.id == id } }
+		}
+
+		// Index the audit event
+		events.foreach { auditEvent =>
+			client.execute { indexInto(IndexAndType(index.name, indexType)).source(auditEvent).id(auditEvent.id.toString) }
+		}
+
+		blockUntilExactCount(70, index.name)
+
+		val feedback: Seq[AssignmentFeedback] = studentUsercodes.map { usercode =>
+			val f = new AssignmentFeedback
+			f.usercode = usercode
+			f.released = true
+			f.releasedDate = assignment.closeDate
+			f
+		}
+
+		queryService.userLookup.asInstanceOf[MockUserLookup].registerUsers(studentUsercodes: _*)
+
+		val views = queryService.latestOnlineFeedbackViews(assignment, feedback).futureValue
+		views.size should be (20) // If this is 10, need to increase the size of the aggregation!
+
+		// Check that we're returning the latest date
+		views(queryService.userLookup.getUserByUserId("u0000001")) should be (new DateTime(2009,12,30,0,0,0).plusSeconds(60))
+		views(queryService.userLookup.getUserByUserId("u0000015")) should be (new DateTime(2009,12,30,0,0,0).plusSeconds(54))
 	}}
 
 }

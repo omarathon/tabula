@@ -3,7 +3,7 @@
 <#escape x as x?html>
 <#assign formAction><@routes.coursework.releaseForMarking assignment /></#assign>
 
-<@f.form method="post" action="${formAction}" commandName="releaseForMarkingCommand">
+<@f.form method="post" action="${formAction}" modelAttribute="releaseForMarkingCommand">
 
 	<h1>Release submissions to markers for ${assignment.name}</h1>
 

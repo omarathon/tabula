@@ -4,7 +4,7 @@
 <#if success!false>
 	<div class="alert alert-info">Your preferred settings have been updated.</div>
 </#if>
-<@f.form method="post" action="${url('/settings')}" commandName="userSettingsCommand">
+<@f.form method="post" action="${url('/settings')}" modelAttribute="userSettingsCommand">
 
 	<#if isCourseworkModuleManager || isDepartmentalAdmin>
 		<@bs3form.labelled_form_group path="alertsSubmission" labelText="Submission email alerts">

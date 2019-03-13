@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.turnitin.ProcessTurnitinLtiQueueCommand.ProcessTurnitinLtiQueueCommandResult
-import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.{TurnitinJobErrorNotification, TurnitinJobSuccessNotification}
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, OriginalityReport}
@@ -13,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.turnitinlti._
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, _}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, TopLevelUrlComponent}
 import uk.ac.warwick.userlookup.User
 
@@ -67,7 +67,16 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 	private def userToSubmit(assignment: Assignment): User = {
 		assignment.turnitinLtiNotifyUsers.headOption.getOrElse(
 			assignment.module.managers.users.headOption.getOrElse(
-				assignment.module.adminDepartment.owners.users.head
+				assignment.module.adminDepartment.owners.users.headOption.getOrElse {
+					Option(assignment.module.adminDepartment).filter(_.hasParent).flatMap(_.rootDepartment.owners.users.headOption).getOrElse {
+						val u = new User("tabula")
+						u.setFoundUser(true)
+						u.setEmail("tabula@warwick.ac.uk")
+						u.setFirstName("Tabula")
+						u.setLastName("System")
+						u
+					}
+				}
 			)
 		)
 	}
@@ -136,11 +145,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
 		logger.info(s"Processing report for report ${report.id}...")
 		report.lastReportRequest = DateTime.now
 
-		val attachment = report.attachment
-		val assignment = attachment.submissionValue.submission.assignment
-		val user = userToSubmit(assignment)
-
-		turnitinLtiService.getSubmissionDetails(report.turnitinId, new CurrentUser(user, user)) match {
+		turnitinLtiService.getSubmissionDetails(report.turnitinId) match {
 			case response if response.success && response.submissionInfo().similarity.isDefined =>
 				val result = response.submissionInfo()
 				report.similarity = result.similarity

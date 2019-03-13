@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
@@ -31,6 +32,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 	/** All assignments using this marking workflow. */
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment]
 
 	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
 	def progress(markerStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
@@ -69,14 +71,14 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with Logging {
+	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with Logging {
 
 	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
 	override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
 
 	override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
-		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
+		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.toSet.asJava
 		feedbackService.saveOrUpdate(f)
 		f
 	})
@@ -90,6 +92,9 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
 		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
+	def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment] =
+		markingWorkflowDao.getAssignmentsUsingMarkingWorkflows(workflows)
+
 	override def progress(currentStage: MarkingWorkflowStage , feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
 		// don't progress if nextStages is empty
 		if(currentStage.nextStages.isEmpty)
@@ -100,9 +105,9 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
 
 		feedbacks.flatMap(f => {
-			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
+			val remainingStages = f.outstandingStages.asScala diff Set(currentStage)
 			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
-				f.outstandingStages = currentStage.nextStages.asJava
+				f.outstandingStages = currentStage.nextStages.toSet.asJava
 				f.allMarkerFeedback.filter(mf => currentStage.nextStages.contains(mf.stage))
 			} else {
 				f.outstandingStages = remainingStages.asJava
@@ -141,7 +146,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
 		// move the stage pointer on feedback to the end of the workflow and finalise the feedback
 		mfToFinalise.map(mf => {
-			mf.feedback.outstandingStages = JArrayList(finalStage)
+			mf.feedback.outstandingStages = JHashSet(finalStage)
 			finaliseFeedback(mf)
 		})
 
@@ -184,7 +189,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 			throw new IllegalArgumentException(s"The following stages aren't all in the same workflow step - ${stages.map(_.name).mkString(", ")}")
 
 		feedbacks.flatMap(f => {
-			f.outstandingStages = stages.asJava
+			f.outstandingStages = stages.toSet.asJava
 			feedbackService.saveOrUpdate(f)
 			f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
 		})
@@ -259,14 +264,22 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 		markingWorkflowDao.markerFeedbackForAssignmentAndStage(assignment, stage)
 
 	override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations = {
-		feedbackByMarker(assignment,stage).map{ case (marker, markerFeedbacks) =>
-			marker -> markerFeedbacks.map(_.student).toSet
+		val feedback = feedbackByMarker(assignment, stage)
+		val usercodes = feedback.values.flatten.map(_.feedback.usercode).toSet
+
+		val students = {
+			if (usercodes.isEmpty) Map.empty[String, User]
+			else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+		}.withDefault(new AnonymousUser(_))
+
+		feedback.map { case (marker, markerFeedbacks) =>
+			marker -> markerFeedbacks.map { mf => students(mf.feedback.usercode) }.toSet
 		}
 	}
 
 	// marker can be an Anon marker if marking
 	override def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]] = {
-		allMarkerFeedbackForStage(assignment,stage).groupBy(_.marker)
+		allMarkerFeedbackForStage(assignment, stage).groupBy(_.marker)
 	}
 
 	override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {

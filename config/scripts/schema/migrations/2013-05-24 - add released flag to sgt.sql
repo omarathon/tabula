@@ -1,1 +1,0 @@
-alter table SmallGroupSet add released number(1, 0) default 0;

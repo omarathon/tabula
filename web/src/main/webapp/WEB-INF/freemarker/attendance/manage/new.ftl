@@ -2,7 +2,7 @@
 
 <h1>Create a scheme</h1>
 
-<@f.form id="newScheme" method="POST" commandName="command">
+<@f.form id="newScheme" method="POST" modelAttribute="command">
 
 	<p class="progress-arrows">
 		<span class="arrow-right active">Properties</span>

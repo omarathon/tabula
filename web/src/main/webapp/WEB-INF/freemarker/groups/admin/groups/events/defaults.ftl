@@ -8,7 +8,7 @@
 
 	<p>Defaults set here will apply to any new events. You can adjust these properties for individual events.</p>
 
-	<@f.form method="post" action="" commandName="command">
+	<@f.form method="post" action="" modelAttribute="command">
 		<@f.errors cssClass="error form-errors" />
 
 		<@bs3form.labelled_form_group path="defaultTutors" labelText="Tutors">

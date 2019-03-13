@@ -49,8 +49,8 @@ class PassListDocument extends ExamGridDocument
 			selectCourseCommand.yearOfStudy,
 			selectCourseCommand.academicYear,
 			progressionService,
-			new NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-			new UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+			NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
+			UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
 			isConfidential,
 			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
 			selectCourseCommand.isLevelGrid

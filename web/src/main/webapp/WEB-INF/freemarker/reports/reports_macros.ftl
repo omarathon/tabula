@@ -5,7 +5,7 @@
 		window.ReportBuilder.rowKey = 'students';
 	</script>
 	<#if hasDatePicker>
-		<@f.form method="get" action="" commandName="${commandName}" cssClass="form-inline double-submit-protection">
+		<@f.form method="get" action="" modelAttribute="${commandName}" cssClass="form-inline double-submit-protection">
 			<@bs3form.labelled_form_group path="startDate" labelText="Start date">
 				<@f.input id="startDate" path="startDate" cssClass="date-picker input-small form-control" />
 			</@bs3form.labelled_form_group>

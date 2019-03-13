@@ -32,7 +32,7 @@
 	<#return result />
 </#function>
 
-<@f.form action="" method="POST" commandName="command">
+<@f.form action="" method="POST" modelAttribute="command">
 
 	<#assign hasOverlap = false />
 

@@ -10,7 +10,7 @@
 </@spring.bind>
 
 <#assign submitUrl><@routes.coursework.addFeedback assignment /></#assign>
-<@f.form method="post" action=submitUrl commandName=commandName cssClass="submission-form double-submit-protection">
+<@f.form method="post" action=submitUrl modelAttribute=commandName cssClass="submission-form double-submit-protection">
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>

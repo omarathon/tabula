@@ -56,7 +56,7 @@
 
 	<#assign post_url><@routes.groups.import_groups department /></#assign>
 	<div class="fix-area">
-		<@f.form method="post" id="import-form" action="${post_url}" commandName="command">
+		<@f.form method="post" id="import-form" action="${post_url}" modelAttribute="command">
 			<input type="hidden" name="action" value="" />
 
 			<p>Below are all the scheduled small groups and lectures defined for modules in this department in Syllabus+, the central timetabling system.</p>

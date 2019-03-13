@@ -20,13 +20,21 @@ class MeetingRecordTest extends PersistenceTestBase {
 		val (creator, relationship) = flushing(session){
 			val creator = new StaffMember(id = idFormat(1))
 			creator.userId = idFormat(11)
-			val relationship = new ExternalStudentRelationship
+
+			val student: StudentMember = Fixtures.student(universityId = "1000001")
+			val externalAgent = "Professor A Frank"
+
+			session.save(student)
+
+			val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
+			val relationship = ExternalStudentRelationship(externalAgent, relType, student, DateTime.now)
+
 			session.save(creator)
 			session.save(relationship)
 			(creator, relationship)
 		}
 
-		val (meetingRecord, meetingRecordkAttachment) = flushing(session) {
+		val (meetingRecord, meetingRecordAttachment) = flushing(session) {
 			val meetingRecord = new MeetingRecord(creator, Seq(relationship))
 			meetingRecord.id = idFormat(2)
 
@@ -40,13 +48,13 @@ class MeetingRecordTest extends PersistenceTestBase {
 		// Ensure everything's been persisted
 		orphanAttachment.id should not be null
 		meetingRecord.id should not be null
-		meetingRecordkAttachment.id should not be null
+		meetingRecordAttachment.id should not be null
 
 		// Can fetch everything from db
 		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[MeetingRecord], meetingRecord.id) should be (meetingRecord)
-			session.get(classOf[FileAttachment], meetingRecordkAttachment.id) should be (meetingRecordkAttachment)
+			session.get(classOf[FileAttachment], meetingRecordAttachment.id) should be (meetingRecordAttachment)
 		}
 
 		flushing(session) { session.delete(meetingRecord) }
@@ -55,7 +63,7 @@ class MeetingRecordTest extends PersistenceTestBase {
 		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[MeetingRecord], meetingRecord.id) should be (null)
-			session.get(classOf[FileAttachment], meetingRecordkAttachment.id) should be (null)
+			session.get(classOf[FileAttachment], meetingRecordAttachment.id) should be (null)
 		}
 	}
 

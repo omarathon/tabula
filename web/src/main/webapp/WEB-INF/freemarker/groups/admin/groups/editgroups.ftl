@@ -14,7 +14,7 @@
 	</#if>
 
 	<div class="fix-area">
-		<@f.form id="editGroups" method="POST" commandName="command" class="dirty-check">
+		<@f.form id="editGroups" method="POST" modelAttribute="command" class="dirty-check">
 			<input type="hidden" name="action" value="submit" id="action-submit" >
 
 			<@components.set_wizard false 'groups' smallGroupSet />

@@ -3,8 +3,10 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentMembershipInfo}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipInfo, AssessmentMembershipService}
+
 import collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 
@@ -44,14 +46,15 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	// returns feedback for a specified student
 	def findFullFeedback(usercode: String): Option[Feedback] = fullFeedback.find(_.usercode == usercode)
 
-	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		assessmentGroups.asScala.flatMap {
-			_.toUpstreamAssessmentGroup(academicYear)
-		}
+	// converts the assessmentGroups to UpstreamAssessmentGroupInfo
+	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("Assessment.upstreamAssessmentGroupInfos", id) {
+		assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
+	}
 
 	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat number
-	def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(this)
+	def membershipInfo: AssessmentMembershipInfo = RequestLevelCache.cachedBy("Assessment.membershipInfo", id) {
+		assessmentMembershipService.determineMembership(this)
+	}
 
 	def collectMarks: JBoolean
 

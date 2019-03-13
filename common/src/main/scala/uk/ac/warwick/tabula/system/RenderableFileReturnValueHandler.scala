@@ -29,7 +29,7 @@ class RenderableFileReturnValueHandler extends HandlerMethodReturnValueHandler w
 }
 
 class RenderableFileView(file: RenderableFile) extends View with StreamsFiles with AutowiringFeaturesComponent {
-	def getContentType: String = file.contentType
+	override def getContentType: String = file.contentType
 	def render(model: JMap[String, _], in: HttpServletRequest, out: HttpServletResponse) {
 		stream(file)(in, out)
 	}

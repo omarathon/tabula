@@ -33,7 +33,7 @@ class RedirectingMailSenderTest extends TestBase with Mockito {
 	  sender.testEmailTo = "test@warwick.ac.uk"
 
 	  val message = new SimpleMailMessage
-	  message.setTo(Array("ron@example.com", "jim@example.net"))
+	  message.setTo("ron@example.com", "jim@example.net")
 	  message.setFrom("no-reply@example.com")
 	  message.setText(text)
 	  sender.send(message)

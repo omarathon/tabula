@@ -101,7 +101,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
 		val mockAssignmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 		assignment.assessmentMembershipService = mockAssignmentMembershipService
-		mockAssignmentMembershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroup]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq()
+		mockAssignmentMembershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroupInfo]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq()
 
 		val mockExtensionService: ExtensionService = smartMock[ExtensionService]
 		assignment.extensionService = mockExtensionService

@@ -4,7 +4,7 @@
 
 	<p>Are you sure you want to delete this override?</p>
 
-		<@f.form method="post" action="${form_url}" commandName="command">
+		<@f.form method="post" action="${form_url}" modelAttribute="command">
 			<@f.errors cssClass="error form-errors" />
 
 			<input type="submit" class="btn btn-danger" value="Delete" />

@@ -2,7 +2,7 @@
 	<h1>Delete reusable small groups</h1>
 
 	<#assign submitAction><@routes.groups.deletecrossmodulegroups smallGroupSet /></#assign>
-	<@f.form method="post" action="${submitAction}" commandName="command">
+	<@f.form method="post" action="${submitAction}" modelAttribute="command">
 		<h2>${smallGroupSet.name} (${smallGroupSet.academicYear.label})</h2>
 
 		<!-- global errors -->

@@ -135,7 +135,7 @@ class DownloadMarkerTemplatesController extends CourseworkController {
 	@ModelAttribute("downloadFeedbackSheetsCommand")
 	def feedbackSheetsCommand(@PathVariable assignment: Assignment, @PathVariable marker: User): DownloadFeedbackSheetsCommand.Command = {
 		mandatory(marker)
-		val students = assignment.cm2MarkerAllocations.filter(_.marker == marker).flatMap(_.students).distinct
+		val students = assignment.cm2MarkerAllocations(marker).flatMap(_.students).distinct
 		DownloadFeedbackSheetsCommand.marker(assignment, students)
 	}
 

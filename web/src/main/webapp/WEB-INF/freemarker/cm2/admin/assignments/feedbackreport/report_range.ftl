@@ -9,7 +9,7 @@
 	<@cm2.departmentHeader "Feedback report" department route_function academicYear />
 
 	<#assign actionUrl><@routes.cm2.feedbackreport department /></#assign>
-	<@f.form method="post" action=actionUrl commandName="feedbackReportCommand" cssClass="dirty-check">
+	<@f.form method="post" action=actionUrl modelAttribute="feedbackReportCommand" cssClass="dirty-check">
 		<p>Generate a feedback report for assignments with closing dates:</p>
 
 		<@bs3form.labelled_form_group labelText="From" path="startDate">

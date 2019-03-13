@@ -78,7 +78,7 @@ trait ScheduledMeetingRecordMissedNotification
 	def transformResult(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecord] = Seq(meeting)
 
 	// Notifications are cleared before being re-created, so just don't create any more
-	def scheduledNotifications(meeting: ScheduledMeetingRecord): Seq[ScheduledNotification[_]] = Seq()
+	def scheduledNotifications(meeting: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = Seq()
 }
 
 trait ScheduledMeetingRecordMissedState {

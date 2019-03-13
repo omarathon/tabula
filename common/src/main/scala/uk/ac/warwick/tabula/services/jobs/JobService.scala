@@ -7,11 +7,11 @@ import javax.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.JobNotificationHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.jobs._
+import uk.ac.warwick.tabula.{CurrentUser, EarlyRequestInfo}
 import uk.ac.warwick.userlookup.User
 
 trait JobServiceComponent {
@@ -45,7 +45,7 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 	/** Spring should wire in all beans that extend Job */
 	@Autowired var jobs: Array[Job] = Array()
 
-	def run() {
+	def run()(implicit earlyRequestInfo: EarlyRequestInfo) {
 		val runningJobs = jobDao.listRunningJobs
 		if (runningJobs.size < RunBatchSize) {
 			val jobsToRun = jobDao.findOutstandingInstances(RunBatchSize - runningJobs.size)
@@ -62,12 +62,13 @@ class JobService extends HasJobDao with Logging with JobNotificationHandling {
 
 	def getInstance(id: String): Option[JobInstance] = jobDao.getById(id)
 
-	def processInstance(instance: JobInstance) {
-		findJob(instance.jobType) match {
-			case Some(job) => processInstance(instance, job)
-			case _ => logger.warn("Couldn't find a job matching for this instance: " + instance)
+	def processInstance(instance: JobInstance)(implicit earlyRequestInfo: EarlyRequestInfo): Unit =
+		EarlyRequestInfo.wrap(earlyRequestInfo) {
+			findJob(instance.jobType) match {
+				case Some(job) => processInstance(instance, job)
+				case _ => logger.warn("Couldn't find a job matching for this instance: " + instance)
+			}
 		}
-	}
 
 	def processInstance(instance: JobInstance, job: Job) {
 		logger.info(s"Running job ${instance.id}")

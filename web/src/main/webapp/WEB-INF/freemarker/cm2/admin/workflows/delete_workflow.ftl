@@ -10,7 +10,7 @@
 		method="POST"
 		class="double-submit-protection"
 		action="${formAction}"
-		commandName="deleteMarkingWorkflowCommand">
+		modelAttribute="deleteMarkingWorkflowCommand">
 
 		<@bs3form.labelled_form_group>
 			<input type="submit" value="Delete" class="btn btn-primary">

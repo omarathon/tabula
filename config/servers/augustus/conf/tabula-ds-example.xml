@@ -1,5 +1,0 @@
-<Resource name="jdbc/TabulaDS" auth="Container"
-          type="javax.sql.DataSource" driverClassName="oracle.jdbc.OracleDriver"
-          url="jdbc:oracle:thin://@dev-db-host:1666/dev-db.warwick.ac.uk"
-          username="USERNAME" password="PASSWORD" maxTotal="20" maxIdle="10"
-          maxWaitMillis="-1"/>

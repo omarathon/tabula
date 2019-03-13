@@ -1,7 +1,7 @@
-@import (reference) "id7/less/variables.less";
-@import (reference) "id7/less/bootstrap/mixins/text-emphasis.less";
-@import (reference) "id7/less/bootstrap/mixins/vendor-prefixes.less";
-@import (reference) "id7/less/bootstrap/mixins/buttons.less";
+@import (reference) "@universityofwarwick/id7/less/variables.less";
+@import (reference) "bootstrap/less/mixins/text-emphasis.less";
+@import (reference) "bootstrap/less/mixins/vendor-prefixes.less";
+@import (reference) "bootstrap/less/mixins/buttons.less";
 @import (reference) "colours.less";
 @import (reference) "../css3.less";
 
@@ -184,9 +184,6 @@ ul.links {
 	padding-left:0;
 	margin: 7px 0;
 }
-
-// Make WPopupBox appear above bootstrap modals
-.WPopupGlass, .WPopupBox, .WPopupBoxContent { z-index: 1060 !important; }
 
 .box-style() {
 	border: 1px solid @tabulaGrayLight;
@@ -671,15 +668,8 @@ table.tablesorter {
 
 	.placeholder {
 		display: none;
-	}
 
-	&.disabled {
-
-		.fix-header {
-			position:relative;
-		}
-
-		.placeholder {
+		&.loading {
 			display: flex;
 			align-items: center;
 			justify-content: center;
@@ -690,13 +680,7 @@ table.tablesorter {
 			top: 0;
 			left: 0;
 		}
-
-		form.form-inline {
-			opacity: 0.1;
-		}
-
 	}
-
 }
 
 .fix-header .placeholder {

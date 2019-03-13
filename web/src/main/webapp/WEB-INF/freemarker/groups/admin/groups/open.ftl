@@ -11,7 +11,7 @@
     </#if>
 
 	<@modal.wrapper>
-		<@f.form method="post" action="${submitAction}" commandName="openGroupSetCommand" cssClass="double-submit-protection">
+		<@f.form method="post" action="${submitAction}" modelAttribute="openGroupSetCommand" cssClass="double-submit-protection">
 
 			<@modal.header>
 				<h3 class="modal-title">${setState}</h3>

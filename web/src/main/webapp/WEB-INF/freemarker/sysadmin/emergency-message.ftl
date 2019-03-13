@@ -1,6 +1,6 @@
 <h1>Emergency message</h1>
 
-<@f.form action="?" commandName="emergencyMessageCommand">
+<@f.form action="?" modelAttribute="emergencyMessageCommand">
 
 	<@bs3form.checkbox path="enable">
 		<@f.checkbox path="enable" /> Enabled

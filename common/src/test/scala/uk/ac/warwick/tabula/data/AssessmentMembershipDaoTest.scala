@@ -76,8 +76,12 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup2.moduleCode = "in101-10"
 		upstreamGroup2.occurrence = "A"
 		upstreamGroup2.assessmentGroup = "A"
+		upstreamGroup2.sequence = "A02"
 		upstreamGroup2.academicYear = AcademicYear(2010)
-		upstreamGroup2.members = JArrayList(new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"))
+		upstreamGroup2.members = JArrayList(
+			new UpstreamAssessmentGroupMember(upstreamGroup2, "0672089"),
+			new UpstreamAssessmentGroupMember(upstreamGroup2, "1000005")
+		)
 
 		assignment2.assessmentGroups.add(assessmentGroup2)
 		assignment2.academicYear = AcademicYear(2010)
@@ -128,6 +132,20 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 		val user = new User("cuscav")
 		user.setWarwickId("0672089")
+
+		val student: StudentMember = new StudentMember("0672089")
+		student.userId = "cuscav"
+
+		val studentCourseDetails = new StudentCourseDetails(student, "0672089/1")
+		studentCourseDetails.sprCode = "0672089/1"
+		studentCourseDetails.statusOnCourse = new SitsStatus(code = "C")
+
+		val studentCourseYearDetails = new StudentCourseYearDetails(studentCourseDetails, 1, AcademicYear(2010))
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYearDetails)
+
+		session.saveOrUpdate(student)
+		session.saveOrUpdate(studentCourseDetails)
+		session.saveOrUpdate(studentCourseYearDetails)
 
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
@@ -206,7 +224,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 					m.userId = id
 					m
 				}
-				val members = Seq(testMember("cuscav"), testMember("cuslaj"), testMember("cuslat"))
+				val members: Seq[StudentMember] = Seq(testMember("cuscav"), testMember("cuslaj"), testMember("cuslat"))
 				members.foreach(session.save)
 				session.flush()
 
@@ -221,7 +239,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 				val thisYear: AcademicYear = AcademicYear.now()
 				val membershipInfo: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
 
-				membershipInfo.assignments should be {Seq(assignment1, assignment5)}
+				membershipInfo.assignments.toSet should be (Set(assignment1, assignment5))
 
 				assignment1.members.knownType.removeUserId("cuscav")
 				session.save(assignment1)
@@ -229,6 +247,66 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
 
 				val membershipInfo2: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
 				membershipInfo2.assignments should be {Seq(assignment5)}
+			}
+		}
+	}
+
+	@Test def UpstreamAssessmentGroupMembers(): Unit = {
+		transactional { _ =>
+			new Fixture {
+				val academicYear: AcademicYear =  AcademicYear.now()
+
+				val dept1 = Fixtures.department("its")
+				val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+				val sprPWDStatus: SitsStatus = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
+				session.saveOrUpdate(dept1)
+				session.saveOrUpdate(sprFullyEnrolledStatus)
+				session.flush()
+
+				val stu1 = Fixtures.student("1000005", "1000005", department=dept1, sprStatus=sprFullyEnrolledStatus)
+				val stu2: StudentMember = Fixtures.student("1000006", "u1000006", department=dept)
+				stu1.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+				stu2.mostSignificantCourse.statusOnCourse = sprPWDStatus
+				session.save(stu1)
+				session.save(stu2)
+				upstreamGroup2.academicYear = academicYear
+				session.update(upstreamGroup2)
+				session.flush()
+				val uagInfo: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				uagInfo.size should be (1)
+				val currentMembers: Seq[UpstreamAssessmentGroupMember] = uagInfo.head.currentMembers
+				currentMembers.size should be (1)
+
+				//now add one more PWD member. We should still have just 1 member
+				upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "1000006"))
+				session.update(upstreamGroup2)
+				session.flush()
+
+				val uagInfo1: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				uagInfo1.size should be (1)
+				val currentMembers1: Seq[UpstreamAssessmentGroupMember] = uagInfo1.head.currentMembers
+				currentMembers1.size should be (1)
+
+				//add one more fully enrolled member.
+				val stu3: StudentMember = Fixtures.student("0000007", "u1000007", department=dept)
+				stu3.mostSignificantCourse.statusOnCourse = sprFullyEnrolledStatus
+				session.save(stu3)
+				session.flush()
+
+				upstreamGroup2.members.add(new UpstreamAssessmentGroupMember(upstreamGroup2, "0000007"))
+				session.update(upstreamGroup2)
+				session.flush()
+
+				val uagInfo2: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(assignment2AC, academicYear)
+				val currentMembers2: Seq[UpstreamAssessmentGroupMember] = uagInfo2.filter(_.upstreamAssessmentGroup == upstreamGroup2).head.currentMembers
+				currentMembers2.size should be (2)
+
+				currentMembers2.foreach{ uagm =>
+					uagm.universityId should not be "1000006"
+				}
+
+				val uag: Seq[UpstreamAssessmentGroupInfo] = assignmentMembershipService.getUpstreamAssessmentGroupInfo(Seq(assessmentGroup2, assessmentGroup3, assessmentGroup4), academicYear)
+				uag should be (uagInfo2)
 			}
 		}
 	}

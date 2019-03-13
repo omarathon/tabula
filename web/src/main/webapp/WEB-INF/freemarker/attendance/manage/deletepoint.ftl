@@ -21,7 +21,7 @@
 	(<@fmt.interval command.templatePoint.startDate command.templatePoint.endDate />)
 </p>
 
-<@f.form action="" method="POST" commandName="command">
+<@f.form action="" method="POST" modelAttribute="command">
 
 	<@f.errors cssClass="error form-errors" />
 

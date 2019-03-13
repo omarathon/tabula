@@ -8,7 +8,7 @@
 	Note that you can upload just marks, or both marks and grades.
 </p>
 	<#assign formUrl><@routes.cm2.feedbackBulkAdjustment assignment /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 		<input name="isfile" value="true" type="hidden"/>
 		<h3>Select file</h3>
 		<@bs3form.labelled_form_group path="file.upload" labelText="File">

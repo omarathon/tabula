@@ -19,7 +19,7 @@ object Exam {
 	final val defaultFeedbackTextFieldName = "feedbackText"
 }
 
-@FilterDef(name = Exam.NotDeletedFilter, defaultCondition = "deleted = 0")
+@FilterDef(name = Exam.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Exam.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)
@@ -131,7 +131,5 @@ class Exam
 	override val collectMarks: JBoolean = true
 
 	override def permissionsParents: Stream[Module] = Option(module).toStream
-
-	override def toEntityReference: ExamEntityReference = new ExamEntityReference().put(this)
 
 }

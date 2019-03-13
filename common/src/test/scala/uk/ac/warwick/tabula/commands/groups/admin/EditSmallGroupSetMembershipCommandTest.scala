@@ -10,9 +10,9 @@ import uk.ac.warwick.userlookup.User
 class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
 	private trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with AssessmentMembershipServiceComponent with RemovesUsersFromGroups {
-		val smallGroupService: SmallGroupService = mock[SmallGroupService]
+		val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
 		val userLookup = new MockUserLookup
-		var assessmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
+		var assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 
 		def removeFromGroup(user: User, group: SmallGroup): Unit = group.students.remove(user)
 	}
@@ -43,7 +43,8 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		}
 
 		set.members = UserGroup.ofUsercodes
-		set.membershipService = mock[AssessmentMembershipService] // Intentionally different to the command's one
+		set.membershipService = smartMock[AssessmentMembershipService] // Intentionally different to the command's one
+		set.membershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
 
 		set.members.add(user1)
 		set.members.add(user2)
@@ -77,8 +78,9 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		command.members.copyFrom(set.members)
 		command.academicYear = set.academicYear
 
-		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
-		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns (command.members.users)
+		command.assessmentMembershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
+		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users
+		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns command.members.users
 		command.applyInternal()
 
 		set.members.users.toSet should be (Set(user1, user2, user3, user4))
@@ -92,9 +94,10 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 		command.members.remove(user4)
 		command.members.add(user5)
 
-		command.assessmentMembershipService = mock[AssessmentMembershipService] // Intentionally different to the SmallGroupSet's one
-		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
-		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns (command.members.users)
+		command.assessmentMembershipService = smartMock[AssessmentMembershipService] // Intentionally different to the SmallGroupSet's one
+		command.assessmentMembershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
+		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users
+		command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns command.members.users
 		command.applyInternal()
 
 		set.members.users.toSet should be (Set(user1, user5))

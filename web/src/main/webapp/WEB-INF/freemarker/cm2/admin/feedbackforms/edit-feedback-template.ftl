@@ -3,7 +3,7 @@
 <@f.form enctype="multipart/form-data"
 	method="post"
 	action="${actionUrl}"
-	commandName="editFeedbackTemplateCommand">
+	modelAttribute="editFeedbackTemplateCommand">
 	<@f.hidden path="id"/>
 
 	<@bs3form.filewidget

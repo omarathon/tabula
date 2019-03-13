@@ -3,7 +3,7 @@
 <#escape x as x?html>
 <div id="batch-feedback-form">
 	<#assign submitUrl><@routes.coursework.addFeedback assignment /></#assign>
-<@f.form method="post" enctype="multipart/form-data" action=submitUrl commandName="addFeedbackCommand">
+<@f.form method="post" enctype="multipart/form-data" action=submitUrl modelAttribute="addFeedbackCommand">
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>

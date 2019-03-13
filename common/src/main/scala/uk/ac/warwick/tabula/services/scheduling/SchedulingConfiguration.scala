@@ -33,7 +33,7 @@ object SchedulingConfiguration {
 		lazy val jobDetail: JobDetail = {
 			val jobDetail = new JobDetailFactoryBean
 			jobDetail.setName(name)
-			jobDetail.setJobClass(classTag[J].runtimeClass)
+			jobDetail.setJobClass(classTag[J].runtimeClass.asInstanceOf[Class[J]])
 			jobDetail.setDurability(true)
 			jobDetail.setRequestsRecovery(true)
 			jobDetail.afterPropertiesSet()

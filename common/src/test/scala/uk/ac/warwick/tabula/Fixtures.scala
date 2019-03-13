@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import uk.ac.warwick.tabula.Fixtures.assessmentGroup
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
@@ -179,6 +180,15 @@ object Fixtures extends Mockito {
 		group
 	}
 
+	def upstreamAssessmentGroupInfo(academicYear: AcademicYear, code: String, module: String, occurrence: String): UpstreamAssessmentGroupInfo = {
+		val uag = assessmentGroup(academicYear, code, module, occurrence)
+		val activeMembers =  uag.members
+		//add one PWD
+		val uagm = new UpstreamAssessmentGroupMember(uag, "1000006")
+		uag.members.add(uagm)
+		UpstreamAssessmentGroupInfo(uag, activeMembers.asScala)
+	}
+
 	def assessmentGroup(assignment:AssessmentComponent): UpstreamAssessmentGroup =
 		assessmentGroup(
 			academicYear = AcademicYear(2012),
@@ -338,10 +348,11 @@ object Fixtures extends Mockito {
 		memberNote
 	}
 
-	def memberNote(note: String, student: Member ): MemberNote = {
+	def memberNote(note: String, student: Member, creatorId: String): MemberNote = {
 		val memberNote = new MemberNote
 		memberNote.note = note
 		memberNote.member = student
+		memberNote.creatorId = creatorId
 		memberNote
 	}
 
@@ -367,8 +378,16 @@ object Fixtures extends Mockito {
 	}
 
 	def notification(agent:User, recipient: User): HeronWarningNotification = {
-		val heron = new Heron(recipient)
-		Notification.init(new HeronWarningNotification, agent, heron)
+		val staff = Fixtures.staff("1234567")
+		val student = Fixtures.student("9876543")
+		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+		val meeting = new MeetingRecord
+		meeting.creator = staff
+
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+		meeting.relationships = Seq(relationship)
+		Notification.init(new HeronWarningNotification, agent, meeting)
 	}
 
 	def attendanceMonitoringPoint(

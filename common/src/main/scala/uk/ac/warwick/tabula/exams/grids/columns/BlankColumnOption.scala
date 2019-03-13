@@ -17,7 +17,7 @@ object BlankColumnOption extends ChosenYearExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> ExamGridColumnValueString("")).toMap
 		}
 

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.exams.grids.columns.studentidentification
 
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.model.{CourseYearWeighting, StudentCourseYearDetails}
 import uk.ac.warwick.tabula.exams.grids.columns._
 import uk.ac.warwick.tabula.exams.web.Routes
@@ -20,13 +19,13 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	override val mandatory = true
 
-	private case class FirstNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
+	case class FirstNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "First Name"
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(entity.firstName)
 			).toMap
@@ -34,13 +33,13 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	}
 
-	private case class LastNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
+	case class LastNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "Last Name"
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(entity.lastName)
 			).toMap
@@ -48,13 +47,13 @@ class NameColumnOption extends StudentExamGridColumnOption {
 
 	}
 
-	private case class FullNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
+	case class FullNameColumn(state: ExamGridColumnState) extends ChosenYearExamGridColumn(state) {
 
 		override val title: String = "Name"
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.LongString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(Seq(entity.firstName, entity.lastName).mkString(" "))
 			).toMap
@@ -86,7 +85,7 @@ class UniversityIDColumnOption extends StudentExamGridColumnOption {
 		override val title: String = "ID"
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map { entity =>
 				val scyd = for {
 					egeyOpt <- entity.years.get(state.yearOfStudy)
@@ -127,7 +126,7 @@ class SPRCodeColumnOption extends StudentExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					(for {
@@ -159,7 +158,7 @@ class CourseColumnOption extends StudentExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					entity.validYears
@@ -192,7 +191,7 @@ class RouteColumnOption extends StudentExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
@@ -223,7 +222,7 @@ class StartYearColumnOption extends StudentExamGridColumnOption {
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity ->
 				ExamGridColumnValueString(
 					entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails).flatMap(
@@ -255,7 +254,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.ShortString
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map { entity =>
 				val studentCourseYearDetails = entity.validYears.get(state.yearOfStudy).flatMap(_.studentCourseYearDetails)
 				val weightings = abroadYearWeightings(studentCourseYearDetails)
@@ -263,7 +262,7 @@ class YearWeightingsColumnOption extends StudentExamGridColumnOption with Autowi
 					weighting <- weightings
 				} yield s"${weighting.weightingAsPercentage.toPlainString}"
 
-				val weightingCol = if (weightings.size > 0) {
+				val weightingCol = if (weightings.nonEmpty) {
 					s"${yearWeightingsAsString.mkString("/")} - ${weightings.head.course.code}"
 				} else "Year weightings not set"
 				entity -> ExamGridColumnValueString(weightingCol)

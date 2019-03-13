@@ -81,7 +81,8 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 
 		Then("I should see the correct fields")
 		textField("name").value should be ("Marking workflow 1")
-		textField("firstMarkers").value should be (P.Marker1.usercode)
+		val markers = findAll(name("firstMarkers")).map { el => new TextField(el.underlying).value }.filterNot(_.isEmpty).toSet
+		markers should be (Set(P.Marker1.usercode, P.Marker2.usercode))
 
 		When("I cancel that edit")
 		click on linkText("Cancel")

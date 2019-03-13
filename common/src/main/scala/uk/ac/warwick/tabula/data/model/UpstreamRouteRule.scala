@@ -38,7 +38,7 @@ class UpstreamRouteRule extends GeneratedId {
 	}
 	def academicYear: Option[AcademicYear] = Option(_academicYear)
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	var route: Route = _
 
@@ -58,7 +58,7 @@ class UpstreamRouteRule extends GeneratedId {
 
 }
 
-class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
+case class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleService: UpstreamRouteRuleService) {
 	private val cache = mutable.Map[(Route, Level), Seq[UpstreamRouteRule]]()
 
 	def apply(route: Route, level: Option[Level]): Seq[UpstreamRouteRule] = level.map(l =>
@@ -68,7 +68,5 @@ class UpstreamRouteRuleLookup(academicYear: AcademicYear,  upstreamRouteRuleServ
 				cache.put((route, l), upstreamRouteRuleService.list(route, academicYear, l))
 				cache((route, l))
 		}).getOrElse(Seq())
-
-
 
 }

@@ -1,20 +1,9 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
-import uk.ac.warwick.tabula.roles.DepartmentModuleManager
-import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 
 class DatabaseBackedPermissionsProviderTest extends TestBase with Mockito {
 
@@ -26,8 +15,8 @@ class DatabaseBackedPermissionsProviderTest extends TestBase with Mockito {
 	val dept: Department = Fixtures.department("in")
 
 	@Test def getPermissions = withUser("cuscav") {
-		val gp1 = new DepartmentGrantedPermission(dept, Permissions.Department.ManageDisplaySettings, GrantedPermission.Allow)
-		val gp2 = new DepartmentGrantedPermission(dept, Permissions.Module.Create, GrantedPermission.Deny)
+		val gp1 = GrantedPermission(dept, Permissions.Department.ManageDisplaySettings, GrantedPermission.Allow)
+		val gp2 = GrantedPermission(dept, Permissions.Module.Create, GrantedPermission.Deny)
 
 		service.getGrantedPermissionsFor[PermissionsTarget](currentUser) returns (Stream(gp1, gp2).asInstanceOf[Stream[GrantedPermission[PermissionsTarget]]])
 

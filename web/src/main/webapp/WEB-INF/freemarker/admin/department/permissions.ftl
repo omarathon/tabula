@@ -17,8 +17,8 @@
 
 	<#if department.hasChildren>
 	<div class="alert alert-info">
-		<i class="fa fa-info-circle"></i> Department permissions don't cascade to sub-departments.
-		To change permissions for a sub-department, select it from the drop-down above.
+		<i class="fa fa-info-circle"></i> Permissions in a parent department cascade to sub-departments. 
+		Any permission explicitly granted or revoked in a sub-department takes precedence over the parent department.
 	</div>
 	</#if>
 

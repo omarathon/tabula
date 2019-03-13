@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsComma
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -16,6 +17,8 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 	assignment.id = "123"
 	assignment.openDate = dateTime(2012, 4)
 	assignment.closeDate = dateTime(2012, 6)
+	assignment.feedbackService = smartMock[FeedbackService]
+	assignment.feedbackService.loadFeedbackForAssignment(assignment) returns Nil
 
 	val plagiarisedReport = new OriginalityReport
 	plagiarisedReport.overlap = Some(97)

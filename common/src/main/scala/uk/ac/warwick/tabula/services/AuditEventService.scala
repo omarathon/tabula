@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.services
 
 import java.io.StringWriter
 import java.sql.Clob
-import javax.annotation.Resource
+import java.util.TimeZone
 
+import javax.annotation.Resource
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
 import org.hibernate.dialect.Dialect
@@ -69,9 +70,10 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val IdIndex = 10
 
 	private val idSql = baseSelect + " where id = :id"
-	private def idsSql = baseSelect + " where id in (:ids)"
+	private val idsSql = baseSelect + " where id in (:ids)"
 
 	private val eventIdSql = baseSelect + " where eventid = :id"
+	private val eventIdsSql = baseSelect + " where eventid in (:ids)"
 
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
@@ -85,7 +87,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	private val timestampColumnMapper = {
 		val mapper = new TimestampColumnDateTimeMapper
-		mapper.setDatabaseZone(DateTimeZone.forID("Europe/London"))
+		mapper.setDatabaseZone(TimeZone.getTimeZone("Europe/London"))
 		mapper.setJavaZone(DateTimeZone.forID("Europe/London"))
 		mapper
 	}
@@ -112,10 +114,7 @@ class AuditEventServiceImpl extends AuditEventService {
 			a.userId = array(RealIdIndex).asInstanceOf[String]
 			a.ipAddress = array(IpAddressIndex).asInstanceOf[String]
 			a.userAgent = array(UserAgentIndex).asInstanceOf[String]
-			a.readOnly = array(ReadOnlyIndex) match {
-				case null => false
-				case n: Number => n.intValue == 1
-			}
+			a.readOnly = array(ReadOnlyIndex).asInstanceOf[Boolean]
 			a.data = unclob(array(DataIndex))
 			a.eventId = array(EventIdIndex).asInstanceOf[String]
 			a.id = toIdType(array(IdIndex))
@@ -136,8 +135,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	def getById(id: Long): Option[AuditEvent] = {
 		val query = session.createSQLQuery(idSql)
 		query.setLong("id", id)
-		//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
-		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map { addRelated }
+		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map(addRelated)
 	}
 
 	def latest: DateTime = {
@@ -150,9 +148,16 @@ class AuditEventServiceImpl extends AuditEventService {
 			val query = session.createSQLQuery(idsSql)
 			query.setParameterList("ids", group.asJava)
 			val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
-			results.map(mapListToObject).map(addRelated)
+			addRelated(results.map(mapListToObject))
 		}.toSeq
 
+	def getByEventIds(ids: Seq[String]): Map[String, Seq[AuditEvent]] =
+		ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
+			val query = session.createSQLQuery(eventIdsSql)
+			query.setParameterList("ids", group.asJava)
+			val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
+			results.map(mapListToObject).groupBy(_.eventId)
+		}.toMap
 
 	def addParsedData(event: AuditEvent): Unit = {
 		event.parsedData = parseData(event.data)
@@ -161,6 +166,13 @@ class AuditEventServiceImpl extends AuditEventService {
 	def addRelated(event: AuditEvent): AuditEvent = {
 		event.related = getByEventId(event.eventId)
 		event
+	}
+
+	def addRelated(events: Seq[AuditEvent]): Seq[AuditEvent] = {
+		getByEventIds(events.map(_.eventId)).foreach { case (eventId, related) =>
+			events.filter(_.eventId == eventId).foreach(_.related = related)
+		}
+		events
 	}
 
 	def save(event: Event, stage: String) {
@@ -184,7 +196,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 			val query = session.createSQLQuery("insert into auditevent " +
 				"(id, eventid, eventdate, eventtype, eventstage, real_user_id, masquerade_user_id, ip_address, user_agent, read_only, data) " +
-				"values(" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
+				"values (" + nextSeq + ", :eventid, :date, :name, :stage, :user_id, :masquerade_user_id, :ip_address, :user_agent, :read_only, :data)")
 			query.setString("eventid", event.id)
 			query.setTimestamp("date", timestampColumnMapper.toNonNullValue(event.date))
 			query.setString("name", event.name)
@@ -193,7 +205,7 @@ class AuditEventServiceImpl extends AuditEventService {
 			query.setString("masquerade_user_id", event.userId)
 			query.setString("ip_address", event.ipAddress)
 			query.setString("user_agent", event.userAgent)
-			query.setInteger("read_only", if (event.readOnly) 1 else 0)
+			query.setBoolean("read_only", event.readOnly)
 			if (event.extra != null) {
 				val data = new StringWriter()
 				json.writeValue(data, event.extra)

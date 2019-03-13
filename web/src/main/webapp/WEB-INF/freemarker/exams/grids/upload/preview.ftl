@@ -82,7 +82,7 @@
 			<#return infos />
 		</#function>
 		<#assign formUrl><@routes.exams.uploadYearMarks department academicYear /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command">
 			<table class="table table-striped table-condensed">
 				<thead>
 					<tr>

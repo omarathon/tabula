@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.web.controllers
 
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
@@ -10,14 +11,14 @@ import uk.ac.warwick.tabula.services.{MaintenanceModeServiceComponent, ModuleAnd
 
 import scala.collection.JavaConverters._
 
-trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permission), Seq[Department]] {
+trait DepartmentScopedController extends RequestLevelCaching[(CurrentUser, Permission), Seq[Department]] with TaskBenchmarking {
 
 	self: BaseController with UserSettingsServiceComponent with ModuleAndDepartmentServiceComponent with MaintenanceModeServiceComponent =>
 
 	def departmentPermission: Permission
 
 	@ModelAttribute("departmentsWithPermission")
-	def departmentsWithPermission: Seq[Department] = {
+	def departmentsWithPermission: Seq[Department] = benchmarkTask("departmentsWithPermission") {
 		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)
 
 		cachedBy((user, departmentPermission)) {

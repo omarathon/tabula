@@ -25,7 +25,6 @@ console.properties
 tabula-private.properties
 !/*/src/test/resources/tabula-private.properties
 atlassian-ide-plugin.xml
-gulpopts.json
 gradle-local.properties
 
 # Error dumps, logs
@@ -51,16 +50,19 @@ ${*
 .externalToolBuilders
 
 # IntelliJ IDE
+/.idea/*
+*.iml
+*.iws
 !/.idea/modules.iml
 !/.idea/modules/*.iml
+!/.idea/modules/**/*.iml
+!/.idea/codeStyles
 !/.idea/codeStyleSettings.xml
 !/.idea/fileTemplates/*
 !/.idea/gradle.xml
 !/.idea/compiler.xml
 !/.idea/encodings.xml
-/.idea/*
-*.iml
-*.iws
+!/.idea/misc.xml
 
 # Sublime Text IDE
 *.sublime-project
@@ -72,4 +74,6 @@ CVS
 pom.xml.versionsBackup
 .DS_Store
 phantomjsdriver.log
+chromedriver.log
 .gradletasknamecache
+/config/servers

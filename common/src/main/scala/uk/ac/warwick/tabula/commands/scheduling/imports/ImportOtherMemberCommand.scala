@@ -25,34 +25,34 @@ class ImportOtherMemberCommand(member: MembershipInformation, ssoUser: User)
 		val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 		if (memberExisting.collect { case m @ (_: StudentMember | _: StaffMember) => m }.nonEmpty) {
 			// Don't override existing students or staff
-			return memberExisting.get
+			memberExisting.get
+		} else {
+			logger.debug("Importing other member " + universityId + " into " + memberExisting)
+
+			val (isTransient, member) = memberExisting match {
+				case Some(m) => (false, m)
+				case _ if this.userType == MemberUserType.Applicant => (true, new ApplicantMember(universityId))
+				case _ => (true, new OtherMember(universityId))
+			}
+
+			val commandBean = new BeanWrapperImpl(this)
+			val memberBean = new BeanWrapperImpl(member)
+
+			// We intentionally use single pipes rather than double here - we want all statements to be evaluated
+			val hasChanged = member match {
+				case _ : ApplicantMember => copyMemberProperties(commandBean, memberBean) | copyApplicantProperties(commandBean, memberBean)
+				case _ => copyMemberProperties(commandBean, memberBean)
+			}
+
+			if (isTransient || hasChanged) {
+				logger.debug("Saving changes for " + member)
+
+				member.lastUpdatedDate = DateTime.now
+				memberDao.saveOrUpdate(member)
+			}
+
+			member
 		}
-
-		logger.debug("Importing other member " + universityId + " into " + memberExisting)
-
-		val (isTransient, member) = memberExisting match {
-			case Some(m) => (false, m)
-			case _ if this.userType == MemberUserType.Applicant => (true, new ApplicantMember(universityId))
-			case _ => (true, new OtherMember(universityId))
-		}
-
-		val commandBean = new BeanWrapperImpl(this)
-		val memberBean = new BeanWrapperImpl(member)
-
-		// We intentionally use single pipes rather than double here - we want all statements to be evaluated
-		val hasChanged = member match {
-			case _ : ApplicantMember => copyMemberProperties(commandBean, memberBean) | copyApplicantProperties(commandBean, memberBean)
-			case _ => copyMemberProperties(commandBean, memberBean)
-		}
-
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + member)
-
-			member.lastUpdatedDate = DateTime.now
-			memberDao.saveOrUpdate(member)
-		}
-
-		member
 	}
 
 	private val basicApplicantProperties = Set(

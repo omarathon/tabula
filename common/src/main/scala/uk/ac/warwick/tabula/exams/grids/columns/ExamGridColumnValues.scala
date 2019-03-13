@@ -29,6 +29,7 @@ object ExamGridColumnValueType {
 
 sealed trait ExamGridColumnValue {
 	protected def getValueStringForRender: String
+	override def toString: String = s"${getClass.getSimpleName}($getValueStringForRender)"
 	protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit
 	val isActual: Boolean
 	def toHTML: String
@@ -108,11 +109,10 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 	override def isEmpty: Boolean = !value.hasText
 }
 
-case class ExamGridColumnValueWithTooltip(value:String, actual:Boolean, message: String = "") extends ExamGridColumnValueString(value, actual){
-	override def toHTML: String = "<span class=\"use-tooltip\" %s>%s</span>".format(
-		if (message.hasText) "title=\"%s\" data-container=\"body\"".format(message) else "",
-		value
-	)
+case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, message: String = "") extends ExamGridColumnValueString(value, actual){
+	override def toHTML: String =
+		if (message.hasText) s"""<span class="exam-grid-tooltip" data-title="$message">$value</span>"""
+		else s"""<span>$value</span>"""
 }
 
 trait ExamGridColumnValueFailed {
@@ -179,10 +179,10 @@ case class ExamGridColumnValueOverrideString(value: String, override val isActua
 
 
 case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColumnValueString("X", isActual = true) {
-	override def toHTML: String = "<span class=\"exam-grid-actual-mark %s\" %s>X</span>".format(
-		if (message.hasText) "use-tooltip" else "",
-		if (message.hasText) "title=\"%s\" data-container=\"body\"".format(message) else ""
-	)
+	override def toHTML: String =
+		if (message.hasText) s"""<span class="exam-grid-actual-mark exam-grid-tooltip" data-title="$message">X</span>"""
+		else """<span class="exam-grid-actual-mark">X</span>"""
+
 	override protected def applyCellStyle(cell: Cell, cellStyleMap: Map[ExamGridExportStyles.Style, CellStyle]): Unit = {
 		cell.setCellStyle(cellStyleMap(ExamGridExportStyles.ActualMark))
 	}

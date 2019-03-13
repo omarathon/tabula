@@ -2,7 +2,7 @@
 <#import "*/group_components.ftl" as components />
 	<h1>Edit reusable small groups: ${smallGroupSet.name}</h1>
 
-	<@f.form id="editGroups" method="POST" commandName="command">
+	<@f.form id="editGroups" method="POST" modelAttribute="command">
 		<@components.reusable_set_wizard false 'groups' smallGroupSet />
 
 		<#include "_editGroups.ftl" />

@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.RichGetResponse
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.{Index, IndexAndType}
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.get.GetResponse
+import com.sksamuel.elastic4s.searches.sort.SortOrder
 import org.joda.time.DateTime
 import org.junit.After
 import org.scalatest.time.{Millis, Seconds, Span}
@@ -13,7 +14,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 
 class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
@@ -21,7 +21,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 	override implicit val patienceConfig =
 		PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
-	val indexName = "notification"
+	val index = Index("notification")
 	val indexType: String = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
@@ -31,7 +31,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		dao.getById(any[String]) returns None
 
 		val indexer = new NotificationIndexService
-		indexer.indexName = NotificationIndexServiceTest.this.indexName
+		indexer.indexName = NotificationIndexServiceTest.this.index.name
 		indexer.client = NotificationIndexServiceTest.this.client
 		indexer.notificationDao = dao
 
@@ -45,8 +45,16 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		val agent: User = Fixtures.user(userId="abc")
 		val recipient: User = Fixtures.user(userId="xyz")
 		val otherRecipient: User = Fixtures.user(userId="xyo")
-		val victim: User = Fixtures.user("heronVictim")
-		val heron = new Heron(victim)
+
+		val staff = Fixtures.staff("1234567")
+		val student = Fixtures.student("9876543")
+		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+		val meeting = new MeetingRecord
+		meeting.creator = staff
+
+		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+		meeting.relationships = Seq(relationship)
 
 		val now: DateTime = DateTime.now
 
@@ -83,7 +91,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }.await
+		deleteIndex(index.name)
 	}
 
 	@Test def fields(): Unit = withFakeTime(dateTime(2000, 6)) { new Fixture {
@@ -97,12 +105,12 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 		val item = IndexedNotification(notification, recipient)
 
 		indexer.indexItems(Seq(item)).await
-		blockUntilExactCount(1, indexName, indexType)
+		blockUntilExactCount(1, index.name)
 
 		// University ID is the ID field so it isn't in the doc source
-		val doc: RichGetResponse = client.execute { get id item.id from indexName / indexType }.futureValue
+		val doc: GetResponse = client.execute { get(item.id).from(IndexAndType(index.name, indexType)) }.futureValue.result
 
-		doc.source.asScala.toMap should be (Map(
+		doc.source should be (Map(
 			"notification" -> "defeat",
 			"recipient" -> "xyz",
 			"notificationType" -> "HeronDefeat",
@@ -114,11 +122,11 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
 	@Test def indexItems(): Unit = new DataFixture {
 		indexer.indexItems(items)
-		blockUntilExactCount(100, indexName, indexType)
+		blockUntilExactCount(100, index.name)
 
 		val dates: Seq[DateTime] = client.execute {
-			search in indexName / indexType query termQuery("recipient", "xyz") sort(field sort "created" order SortOrder.DESC ) limit 100
-		}.map { _.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq }
+			search(index).query(termQuery("recipient", "xyz")).sortBy(fieldSort("created").order(SortOrder.Desc)).limit(100)
+		}.map { _.result.hits.hits.map { hit => DateFormats.IsoDateTime.parseDateTime(hit.sourceAsMap("created").toString) }.toSeq }
 		  .futureValue
 
 		dates.size should be (50)
@@ -127,7 +135,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
 	@Test def missingRecipient(): Unit = new DataFixture {
 		val anonUser = new AnonymousUser()
-		val notification: HeronWarningNotification = Notification.init(new HeronWarningNotification, agent, heron)
+		val notification: HeronWarningNotification = Notification.init(new HeronWarningNotification, agent, meeting)
 		indexer.indexItems(Seq(IndexedNotification(notification, anonUser))).await
 		// No exception, good times.
 	}

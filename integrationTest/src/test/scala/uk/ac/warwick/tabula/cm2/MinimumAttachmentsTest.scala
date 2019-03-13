@@ -8,14 +8,17 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 	private def openEditOptionsScreen(): Unit = {
 
 		When("I expand module XXX02")
-		val moduleBlock = id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1)
+		val moduleBlock = eventually { id("main").webElement.findElements(By.cssSelector("h4.with-button")).get(1) }
 		val arrow = moduleBlock.findElement(By.cssSelector(".fa-chevron-right"))
 		click on arrow
 
 		Then("The  module should expand")
 		eventually {
 			And("I should find a button to edit the CM2 assignment")
+			println(id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).size())
 			val editAssignmentBtn = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).get(1)
+			editAssignmentBtn.isDisplayed should be (true)
+			editAssignmentBtn.isEnabled should be (true)
 			click on editAssignmentBtn
 		}
 
@@ -57,16 +60,8 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		When("I upload a file for submission")
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file1.txt").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/file1.txt").getFile)
-			}
-		)
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource("/file1.txt").getFile)
 
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)
@@ -78,16 +73,8 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 		}
 
 		When("I upload another file")
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/file2.txt").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/file2.txt").getFile)
-			}
-		)
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource("/file2.txt").getFile)
 
 		And("press submit")
 		click on id("main").webElement.findElements(By.cssSelector(".btn-primary")).get(0)

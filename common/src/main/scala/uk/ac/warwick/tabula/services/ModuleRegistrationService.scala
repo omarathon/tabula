@@ -39,6 +39,11 @@ trait ModuleRegistrationService {
 		*/
 	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
 
+	/**
+		* Like weightedMeanYearMark but only returns year marks calculated from agreed (post board) marks
+		*/
+	def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
+
 	def overcattedModuleSubsets(
 		entity: ExamGridEntityYear,
 		markOverrides: Map[Module, BigDecimal],
@@ -77,9 +82,9 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 	def getByModuleAndYear(module: Module, academicYear: AcademicYear): Seq[ModuleRegistration] =
 		moduleRegistrationDao.getByModuleAndYear(module, academicYear)
 
-	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] = {
+	private def calculateYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean)(marksFn: ModuleRegistration => Option[JBigDecimal]): Either[String, BigDecimal] = {
 		val nonNullReplacedMarksAndCats: Seq[(BigDecimal, BigDecimal)] = moduleRegistrations.map(mr => {
-			val mark: BigDecimal = markOverrides.getOrElse(mr.module, mr.firstDefinedMark.map(mark => BigDecimal(mark)).orNull)
+			val mark: BigDecimal = markOverrides.getOrElse(mr.module, marksFn(mr).map(mark => BigDecimal(mark)).orNull)
 			val cats: BigDecimal = Option(mr.cats).map(c => BigDecimal(c)).orNull
 			(mark, cats)
 		}).filter{case(mark, cats) => mark != null & cats != null}
@@ -98,6 +103,12 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
 				Left(s"The year mark cannot be calculated because the following module registrations have no mark: ${moduleRegistrations.filter(mr => !mr.passFail && mr.firstDefinedMark.isEmpty).map(_.module.code.toUpperCase).mkString(", ")}")
 		}
 	}
+
+	def weightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
+		calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => mr.firstDefinedMark }
+
+	def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal] =
+		calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
 	def overcattedModuleSubsets(
 		entity: ExamGridEntityYear,

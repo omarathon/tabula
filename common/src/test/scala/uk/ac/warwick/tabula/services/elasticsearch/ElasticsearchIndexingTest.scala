@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
-import com.sksamuel.elastic4s.{ElasticClient, RichSearchResponse}
+import com.sksamuel.elastic4s.Index
 import com.sksamuel.elastic4s.analyzers.SimpleAnalyzer
-import org.elasticsearch.search.sort.SortOrder
+import com.sksamuel.elastic4s.http.ElasticClient
+import com.sksamuel.elastic4s.http.ElasticDsl._
+import com.sksamuel.elastic4s.http.search.SearchResponse
+import com.sksamuel.elastic4s.searches.sort.SortOrder
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import uk.ac.warwick.tabula.data.model.Identifiable
@@ -26,7 +28,7 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 		override def lastUpdatedDate(item: Item): DateTime = item.date
 	}
 
-	val indexName = "mock"
+	val index = Index("mock")
 	val indexType = "wibble"
 
 	private trait ElasticsearchIndexingSupport extends ElasticsearchClientComponent {
@@ -37,7 +39,7 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 		val fakeItems: IndexedSeq[Item] = for (i <- 1 to 100) yield Item(i, s"item$i", new DateTime().plusMinutes(i))
 
 		val service = new ElasticsearchIndexing[Item] with ElasticsearchIndexName with ElasticsearchIndexType with ElasticsearchIndexingSupport with ElasticsearchIndexEnsure {
-			override val indexName: String = ElasticsearchIndexingTest.this.indexName
+			override val index: Index = ElasticsearchIndexingTest.this.index
 			override val indexType: String = ElasticsearchIndexingTest.this.indexType
 			override val UpdatedDateField = "date"
 			override val IncrementalBatchSize: Int = 1000
@@ -49,16 +51,16 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 	}
 
 	@Before def setup(): Unit = {
-		client.execute { create index indexName mappings (
-			mapping(indexType) fields (
-				stringField("name") analyzer SimpleAnalyzer,
-				dateField("date") format "strict_date_time_no_millis"
+		client.execute { createIndex(index.name).mappings(
+			mapping(indexType).fields(
+				textField("name").analyzer(SimpleAnalyzer),
+				dateField("date").format("strict_date_time_no_millis")
 			)
-		) }.await.isAcknowledged should be (true)
+		) }.await.result.acknowledged should be (true)
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }.await
+		deleteIndex(index.name)
 	}
 
 	@Test def indexItems(): Unit = new Fixture {
@@ -69,17 +71,17 @@ class ElasticsearchIndexingTest extends ElasticsearchTestBase {
 		result.failed should be (0)
 
 		// We block because ElasticSearch accepts items but they may not be returned until a refresh happens internally
-		blockUntilCount(100, indexName, indexType)
+		blockUntilCount(100, index.name)
 
 		// Get the most recent item from a sort
-		val searchResponse: RichSearchResponse =
-			client.execute { search in indexName / indexType sort ( field sort "date" order SortOrder.DESC ) limit 1 }.await
+		val searchResponse: SearchResponse =
+			client.execute { search(index).sortBy(fieldSort("date").order(SortOrder.Desc)).limit(1) }.await.result
 
-		searchResponse.hits.length should be (1)
+		searchResponse.hits.hits.length should be (1)
 		searchResponse.totalHits should be (100)
-		searchResponse.hits(0).id should be ("100")
-		searchResponse.hits(0).sourceAsMap("name") should be ("item100")
-		Option(searchResponse.hits(0).sourceAsMap("date")) should be ('defined)
+		searchResponse.hits.hits(0).id should be ("100")
+		searchResponse.hits.hits(0).sourceAsMap("name") should be ("item100")
+		Option(searchResponse.hits.hits(0).sourceAsMap("date")) should be ('defined)
 
 		service.newestItemInIndexDate.futureValue should be (Some(fakeItems.last.date.withMillisOfSecond(0))) // millis are lost in indexing
 	}

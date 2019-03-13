@@ -2,7 +2,7 @@
 
 <h1>LTI Conformance tester (basic-lti-launch-request)</h1>
 
-	<@f.form method="post" action="${url('/sysadmin/turnitinlti/conformancetester-generate')}" commandName="ltiConformanceTesterPopulateFormCommand">
+	<@f.form method="post" action="${url('/sysadmin/turnitinlti/conformancetester-generate')}" modelAttribute="ltiConformanceTesterPopulateFormCommand">
 
 		<@f.errors cssClass="error form-errors" />
 

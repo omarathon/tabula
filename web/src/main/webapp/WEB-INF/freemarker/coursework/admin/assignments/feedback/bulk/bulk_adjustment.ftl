@@ -8,7 +8,7 @@
 	Note that you can upload just marks, or both marks and grades.
 </p>
 	<#assign formUrl><@routes.coursework.feedbackBulkAdjustment assignment /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command"class="form-horizontal">
+	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command"class="form-horizontal">
 		<input name="isfile" value="true" type="hidden"/>
 		<table role="presentation" class="narrowed-form">
 			<tr>

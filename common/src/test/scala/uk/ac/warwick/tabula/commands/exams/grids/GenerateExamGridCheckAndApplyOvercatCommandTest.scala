@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYear
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids.{NormalCATSLoadService, NormalCATSLoadServiceComponent, UpstreamRouteRuleService, UpstreamRouteRuleServiceComponent}
 
-
 class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mockito {
 
 	val thisDepartment: Department = Fixtures.department("its")
@@ -22,6 +21,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
 	val mads: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 	mads.getModuleByCode(module1.code) returns Some(module1)
 	mads.getModuleByCode(module2.code) returns Some(module2)
+	mads.getModulesByCodes(Seq(module1.code, module2.code)) returns Seq(module1, module2)
 	val scd: StudentCourseDetails = Fixtures.student("1234").mostSignificantCourse
 	scd.levelCode = "3"
 

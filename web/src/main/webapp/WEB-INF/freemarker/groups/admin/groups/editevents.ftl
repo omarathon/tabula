@@ -13,7 +13,7 @@
 	</#if>
 
 	<div class="fix-area">
-		<@f.form id="editEvents" method="POST" commandName="command">
+		<@f.form id="editEvents" method="POST" modelAttribute="command">
 			<@components.set_wizard false 'events' smallGroupSet />
 
 			<#assign is_edit = true />

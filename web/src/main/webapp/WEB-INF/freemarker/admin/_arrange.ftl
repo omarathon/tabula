@@ -36,7 +36,7 @@
 </@spring.hasBindErrors>
 
 <div class="fix-area">
-	<@f.form commandName="${commandName}" action="${submitUrl}">
+	<@f.form modelAttribute="${commandName}" action="${submitUrl}">
 		<div class="tabula-dnd">
 			<#macro renderObjects department objects>
 				<div class="drag-target clearfix form-group">

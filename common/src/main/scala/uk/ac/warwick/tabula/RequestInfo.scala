@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula
 
 import org.springframework.web.context.request.{RequestAttributes, RequestContextHolder, ServletRequestAttributes}
 import org.springframework.web.servlet.HandlerMapping
-import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.util.web.Uri
 
@@ -34,8 +33,8 @@ class RequestInfo(
 ) extends EarlyRequestInfo
 
 object RequestInfo {
-	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {
-		override def initialValue = None
+	private val threadLocal: ThreadLocal[Option[RequestInfo]] = new ThreadLocal[Option[RequestInfo]] {
+		override def initialValue: Option[RequestInfo] = None
 	}
 
 	def fromThread: Option[RequestInfo] = threadLocal.get
@@ -72,11 +71,18 @@ trait EarlyRequestInfo {
 }
 
 object EarlyRequestInfo {
-	private val threadLocal = new ThreadLocal[Option[EarlyRequestInfo]] {
-		override def initialValue = None
+	private val threadLocal: ThreadLocal[Option[EarlyRequestInfo]] = new ThreadLocal[Option[EarlyRequestInfo]] {
+		override def initialValue: Option[RequestInfo] = None
 	}
 
 	def open(info: EarlyRequestInfo): Unit = threadLocal.set(Some(info))
+	def wrap[A](info: EarlyRequestInfo = new EarlyRequestInfoImpl)(fn: => A): A =
+		try {
+			open(info)
+			fn
+		} finally {
+			close()
+		}
 
 	/** Only useful for an edge case. Use #fromThread usually.
 		* If a full RequestInfo is available, this is used instead of

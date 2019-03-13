@@ -44,7 +44,7 @@
 
 	<@f.form cssClass="dirty-check double-submit-protection ajax-form"
 			 method="post"
-			 commandName="command"
+			 modelAttribute="command"
 			 action="${submit_url}">
 
 		<@bs3form.errors path="" />

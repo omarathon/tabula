@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, MarkerSelectField, SavedFormValue, WordCountField}
-import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.services.{FeedbackService, SubmissionService}
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -26,6 +26,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 	val assignment: Assignment = Fixtures.assignment("Programming Test")
 	assignment.module = module
 	module.adminDepartment = department
+
+	assignment.feedbackService = smartMock[FeedbackService]
+	assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 	val mockUserLookup = new MockUserLookup
 	mockUserLookup.registerUserObjects(

@@ -2,7 +2,7 @@
 
 <h1>Delete student relationship type: ${relationshipType.description}</h1>
 
-<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/delete')}" commandName="deleteStudentRelationshipTypeCommand">
+<@f.form method="post" action="${url('/sysadmin/relationships/${relationshipType.urlPart}/delete')}" modelAttribute="deleteStudentRelationshipTypeCommand">
 	<!-- global errors -->
 	<@f.errors cssClass="error" />
 

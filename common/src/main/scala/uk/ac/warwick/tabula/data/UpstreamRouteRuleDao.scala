@@ -29,11 +29,14 @@ class UpstreamRouteRuleDaoImpl extends UpstreamRouteRuleDao with Daoisms {
 
 	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule] = {
 		session.newCriteria[UpstreamRouteRule]
+			.setFetchMode("route", FetchMode.JOIN)
+			.setFetchMode("entries", FetchMode.JOIN)
 			.add(is("route", route))
 			.add(Restrictions.disjunction()
 				.add(is("_academicYear", academicYear))
 				.add(is("_academicYear", null))
 			).add(is("levelCode", level.code))
+  		.distinct
 			.seq
 	}
 

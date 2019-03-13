@@ -115,7 +115,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				"""update StudentCourseDetails set missingFromImportSince = :importStart
 					|where scjCode in (:newStaleScjCodes)""".stripMargin
 
-				session.newQuery(sqlString)
+				session.newUpdateQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleScjCodes", newStaleCodes)
 					.executeUpdate()
@@ -128,7 +128,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				"""update StudentCourseDetails set missingFromImportSince = null
 					|where scjCode in (:notStaleCodes)""".stripMargin
 
-			sessionWithoutFreshFilters.newQuery(hqlString)
+			sessionWithoutFreshFilters.newUpdateQuery(hqlString)
 				.setParameterList("notStaleCodes", codes)
 				.executeUpdate()
 

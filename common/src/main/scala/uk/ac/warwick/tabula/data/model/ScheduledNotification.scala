@@ -6,17 +6,15 @@ import scala.annotation.meta.field
 
 @Entity(name = "Scheduled_Notification")
 class ScheduledNotification[A >: Null <: ToEntityReference](
+	// holds the discriminator value for the notification that will be spawned when this is completed
+	@(Column @field)(name="notification_type")
+	var notificationType: String,
 
-		// holds the discriminator value for the notification that will be spawned when this is completed
-		@(Column @field)(name="notification_type")
-		var notificationType: String,
+	targetEntity: ToEntityReference,
 
-		targetEntity: ToEntityReference,
-
-		@(Column @field)(name="scheduled_date")
-		var scheduledDate: DateTime
-
-	) extends GeneratedId with Serializable {
+	@(Column @field)(name="scheduled_date")
+	var scheduledDate: DateTime
+) extends GeneratedId with Serializable {
 
 	def this() {
 		this(null, null, null)
@@ -27,7 +25,7 @@ class ScheduledNotification[A >: Null <: ToEntityReference](
 	}.orNull
 
 	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[A]], fetch = FetchType.LAZY)
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[_]], fetch = FetchType.LAZY)
 	def getTarget: EntityReference[A] = _target
 	def target: EntityReference[A] = getTarget
 	def setTarget(target: EntityReference[A]): Unit = _target = target

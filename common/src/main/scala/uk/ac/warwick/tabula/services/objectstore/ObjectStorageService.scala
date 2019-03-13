@@ -19,7 +19,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
-import uk.ac.warwick.util.files.impl.AbstractBlobBackedFileData
+import uk.ac.warwick.util.files.FileReferenceCreationStrategy.Target
+import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
+import uk.ac.warwick.util.files.hash.FileHashResolver
+import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
 
 import scala.collection.JavaConverters._
 
@@ -55,12 +58,12 @@ object RichByteSource {
 	def empty: RichByteSource = new BlobBackedByteSource(None, None)
 }
 
-class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(blobStore, containerName, blobName) {
+class ReadOnlyBlobBackedFileData(blobStore: BlobStore, containerName: String, blobName: String) extends AbstractBlobBackedFileData(new LocalFilesystemFileStore(Map.empty[String, FileHashResolver].asJava, new StaticFileReferenceCreationStrategy(Target.local)), blobStore, containerName, blobName) {
 	override def overwrite(in: ByteSource) = throw new UnsupportedOperationException
 }
 
 class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blobName: String, fetchMetadata: => Option[BlobMetadata]) extends RichByteSource {
-	private lazy val byteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
+	private lazy val byteSource: ByteSource = new ReadOnlyBlobBackedFileData(blobStore, containerName, blobName).asByteSource()
 
 	override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
 	override lazy val isEmpty: Boolean = metadata.isEmpty
@@ -68,7 +71,7 @@ class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blob
 
 	override def openStream(): InputStream = try byteSource.openStream() catch {
 		// BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
-		case e: NullPointerException => null
+		case _: NullPointerException => null
 	}
 	override def slice(offset: Long, length: Long): ByteSource = byteSource.slice(offset, length)
 }
@@ -101,7 +104,7 @@ trait ObjectStorageService extends InitializingBean {
 
 				override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 
-				override def inputStream: InputStream = source.openStream()
+				override val byteSource: ByteSource = source
 			}
 		}
 

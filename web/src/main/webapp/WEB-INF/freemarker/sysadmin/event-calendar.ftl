@@ -4,9 +4,6 @@
 	<div class="fullCalendar" data-viewname="month"></div>
 
 	<style type="text/css">
-		@import url("<@url resource="/static/css/fullcalendar.css" />");
-		@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
-
 		.fc-event.allday {
 			font-weight: bold;
 			color: white !important;
@@ -15,7 +12,6 @@
 		}
 	</style>
 
-	<@script "/static/js/fullcalendar.js" />
 	<script type="text/javascript">
 		// TIMETABLE STUFF
 		jQuery(function($) {

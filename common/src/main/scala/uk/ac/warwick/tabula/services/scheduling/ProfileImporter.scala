@@ -64,7 +64,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 	var fim: DataSource = Wire[DataSource]("fimDataSource")
 
-	private val FixMaxParameterCount: Int = 2000
+	private val SQLServerMaxParameterCount: Int = 2000
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
 	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
@@ -80,7 +80,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
 
 	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = {
-		universityIds.toSeq.grouped(FixMaxParameterCount).flatMap(ids =>
+		universityIds.toSeq.grouped(SQLServerMaxParameterCount).flatMap(ids =>
 			membershipUniversityIdPresenceQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.toSet
 		).toSet
 	}
@@ -126,7 +126,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
 			val universityIdsInMembership =
-				universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+				universityIds.grouped(SQLServerMaxParameterCount).flatMap { ids =>
 					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
 				}
 
@@ -140,7 +140,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}
 
 	def head(result: Any): Option[MembershipInformation] = result match {
-		case result: List[MembershipMember] => result.headOption.map(m => MembershipInformation(m))
+		case result: List[MembershipMember @unchecked] => result.headOption.map(m => MembershipInformation(m))
 		case _ => None
 	}
 

@@ -5,11 +5,13 @@ buildscript {
         maven { url "https://maven.eveoh.nl/content/repositories/releases" }
         maven { url "http://www.terracotta.org/download/reflector/releases" }
         maven { url "https://plugins.gradle.org/m2/" }
+        jcenter()
         mavenLocal()
     }
 
     dependencies {
         classpath "gradle.plugin.org.zeroturnaround:gradle-jrebel-plugin:1.1.8"
+        classpath "com.bmuschko:gradle-cargo-plugin:2.5"
     }
 }
 
@@ -19,18 +21,18 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-    scalaVersion = "2.12.7"
+    scalaVersion = "2.12.8"
     scalaMajorVersion = "2.12"
-    springVersion = "4.3.14.RELEASE"
-    hibernateVersion = "4.3.11.Final"
-    jacksonVersion = "2.6.7"
-    jacksonScalaModuleVersion = "2.6.7.1"
-    elasticsearchVersion = "2.1.2"
-    elastic4sVersion = "2.1.3-warwick"
-    poiVersion = "3.17"
+    springVersion = "5.1.4.RELEASE"
+    hibernateVersion = "5.4.1.Final"
+    jacksonVersion = "2.9.8"
+    jacksonScalaModuleVersion = "2.9.8"
+    elasticsearchVersion = "6.5.2"
+    elastic4sVersion = "6.5.0"
+    poiVersion = "4.0.1"
     tilesVersion = "3.0.8"
-    jcloudsVersion = "2.0.2"
-    warwickUtilsVersion = "20180430"
+    jcloudsVersion = "2.1.1"
+    warwickUtilsVersion = "20190227"
     surefireVersion = "2.19.1"
 }
 
@@ -100,18 +102,12 @@ subprojects {
     // In this section you declare where to find the dependencies of your project
     repositories {
         mavenCentral()
-        maven {
-            credentials {
-                username nexusUser
-                password nexusPassword
-            }
-            url "https://mvn.elab.warwick.ac.uk/nexus/content/groups/public"
-        }
-        maven { url "http://oauth.googlecode.com/svn/code/maven" }
+        maven { url 'https://mvn.elab.warwick.ac.uk/nexus/repository/public-anonymous/' }
+        maven { url 'http://oauth.googlecode.com/svn/code/maven' }
         maven { url 'http://repo.spring.io/snapshot' }
-        maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
-        maven { url "https://repository.apache.org/content/repositories/snapshots" }
-        maven { url "http://dl.bintray.com/scalaz/releases" }
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        maven { url 'https://repository.apache.org/content/repositories/snapshots' }
+        maven { url 'http://dl.bintray.com/scalaz/releases' }
         mavenLocal()
     }
 
@@ -120,7 +116,6 @@ subprojects {
             exclude group: 'xerces', module: 'xerces'
             exclude group: 'javax.servlet', module: 'servletapi'
             exclude group: 'servletapi', module: 'servletapi'
-            exclude group: 'log4j', module: 'log4j'
             exclude group: 'jboss', module: 'javassist'
 
             resolutionStrategy {
@@ -136,15 +131,15 @@ subprojects {
 
         // 'providedCompile' deps are not included in WAR and also makes it compile within IDEA internally.
         providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
-        compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.1'
-        compile 'javax.servlet:jstl:1.2'
+        compile 'javax.servlet.jsp:javax.servlet.jsp-api:2.3.3'
+        compile 'org.apache.taglibs:taglibs-standard-jstlel:1.2.5'
 
         /* LOGGING */
-        providedCompile 'uk.ac.warwick:warwick-logging:1.0:all'
+        providedCompile 'uk.ac.warwick:warwick-logging:1.1:all'
 
         // Provided by the above
         providedCompile 'ch.qos.logback:logback-classic:1.2.3'
-        providedCompile('net.logstash.logback:logstash-logback-encoder:4.11') {
+        providedCompile('net.logstash.logback:logstash-logback-encoder:5.2') {
             exclude group: 'com.fasterxml.jackson.core'
         }
         providedCompile 'org.slf4j:slf4j-api:1.7.25'
@@ -152,6 +147,7 @@ subprojects {
         compile 'org.slf4j:log4j-over-slf4j:1.7.25'
         compile 'org.slf4j:jcl-over-slf4j:1.7.25'
         compile 'org.slf4j:jul-to-slf4j:1.7.25'
+
         // Not actually provided -  it's a ruse to exclude commons-logging from the WAR.
         // The API at runtime is provided by jcl-over-slf4j.
         providedCompile 'commons-logging:commons-logging:1.2'
@@ -180,32 +176,20 @@ subprojects {
         doFirst {
             println "Executing tests with ${forks} forks"
         }
-        ignoreFailures = true // So we can quarantine in Bamboo
         maxHeapSize = '2048m'
         maxParallelForks = forks
-        systemProperties = [TestProcessId: "F1"] // FIXME
+        systemProperty 'TestProcessId', 'F1' // FIXME
+        ignoreFailures = System.env['bamboo_working_directory'] != null // So we can quarantine in Bamboo
         testLogging {
-            // set options for log level LIFECYCLE
-            events "failed"
-            exceptionFormat "short"
-            // set options for log level DEBUG
-            debug {
-                events "started", "skipped", "failed"
-                exceptionFormat "full"
-            }
-        }
-        afterTest { desc, result ->
-            println "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
+            events "passed", "skipped", "failed"
+            exceptionFormat "full"
         }
     }
 
     war.dependsOn(generateRebel)
 }
 
-// upgrade to a different version of Gradle by changing this
-// value then running `./gradlew wrapper`. Next time gradlew
-// is run it will fetch and use that version.
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
+wrapper {
+    gradleVersion = '5.2'
     distributionType = 'ALL'
 }

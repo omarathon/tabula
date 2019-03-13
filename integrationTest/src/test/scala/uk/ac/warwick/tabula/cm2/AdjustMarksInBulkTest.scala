@@ -78,16 +78,8 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 	private def adjustMarks(): Unit = {
 
 		When("I upload an adjustments file")
-		ifPhantomJSDriver(
-			operation = { d =>
-				// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-				d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource("/adjustments.xlsx").getFile + "');")
-			},
-			otherwise = { _ =>
-				click on find(cssSelector("input[type=file]")).get
-				pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-			}
-		)
+		click on find(cssSelector("input[type=file]")).get
+		pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
 		And("Click on the upload button")
 		click on cssSelector("button.btn-primary").webElement

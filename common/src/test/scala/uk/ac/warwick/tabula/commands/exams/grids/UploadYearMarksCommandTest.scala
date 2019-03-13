@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, StudentCourseYear
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.coursework.docconversion.{YearMarkItem, YearMarksExtractor, YearMarksExtractorComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
+import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class UploadYearMarksCommandTest extends TestBase with Mockito {
@@ -29,11 +30,12 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 		invalidStudent.mostSignificantCourse.latestStudentCourseYearDetails.enrolmentDepartment = otherDepartment
 
 		val command = new UploadYearMarksCommandBindListener with UploadYearMarksCommandRequest
-			with UploadYearMarksCommandState with YearMarksExtractorComponent	with StudentCourseYearDetailsDaoComponent {
+			with UploadYearMarksCommandState with YearMarksExtractorComponent	with StudentCourseYearDetailsDaoComponent with PermissionsServiceComponent {
 			val studentCourseYearDetailsDao: StudentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 			val department: Department = thisDepartment
 			val academicYear: AcademicYear = AcademicYear(2015)
 			val yearMarksExtractor: YearMarksExtractor = smartMock[YearMarksExtractor]
+			val permissionsService: PermissionsService = smartMock[PermissionsService]
 		}
 	}
 
@@ -109,6 +111,8 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 				(validStudent.mostSignificantCourse.scjCode, AcademicYear(2015)) -> validStudent.mostSignificantCourse.latestStudentCourseYearDetails,
 				(invalidStudent.mostSignificantCourse.scjCode, AcademicYear(2013)) -> invalidStudent.mostSignificantCourse.latestStudentCourseYearDetails
 			)
+
+			command.permissionsService.getAllGrantedRolesFor[Department](otherDepartment) returns Nil
 
 			val errors = new BindException(command, "command")
 			command.onBind(errors)

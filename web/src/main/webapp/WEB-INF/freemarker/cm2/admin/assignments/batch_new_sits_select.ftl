@@ -15,7 +15,7 @@ first page of the form to setup a bunch of assignments from SITS.
 	<#assign step=action!'select'/>
 
 	<#assign actionUrl><@routes.cm2.create_sitsassignments department academicYear /></#assign>
-	<@f.form method="post" id="batch-add-form" action=actionUrl commandName=commandName>
+	<@f.form method="post" id="batch-add-form" action=actionUrl modelAttribute=commandName>
 		<#if step =='select'>
 			<div class="alert alert-info slow-page-warning">
 				<p>This page may take a few seconds to fully load, please wait&hellip;</p>
@@ -232,7 +232,7 @@ first page of the form to setup a bunch of assignments from SITS.
 					<h3 class="modal-title">Set dates</h3>
 				</@modal.header>
 				<@modal.body>
-					<@f.form  class="dateTimePair dirty-check-ignore" commandName=commandName>
+					<@f.form  class="dateTimePair dirty-check-ignore" modelAttribute=commandName>
 						<@bs3form.labelled_form_group path="defaultOpenDate" labelText="Open date">
 							<div class="input-group">
 								<input type="text" id="modal-open-date" name="openDate" class="form-control date-time-minute-picker" value="${status.value}">
@@ -287,6 +287,6 @@ first page of the form to setup a bunch of assignments from SITS.
 		</script>
 	</#if>
 	<!-- </script> specifically added for functional test -->
-	<script type="text/javascript" src="/static/js/assignment-batch-select.js"></script>
+	<@script "/static/js/assignment-batch-select.js" />
 
 </#escape>

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.Permissions.Module
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
@@ -27,7 +28,8 @@ object CourseworkHomepageCommand {
 		resubmittable: Boolean,
 		feedback: Option[AssignmentFeedback],
 		feedbackDeadline: Option[LocalDate],
-		feedbackLate: Boolean
+		feedbackLate: Boolean,
+		lateFormative: Boolean
 	)
 
 	case class CourseworkHomepageStudentInformation(
@@ -38,6 +40,7 @@ object CourseworkHomepageCommand {
 	) {
 		def isEmpty: Boolean = upcomingAssignments.isEmpty && actionRequiredAssignments.isEmpty && noActionRequiredAssignments.isEmpty && completedAssignments.isEmpty
 		def nonempty: Boolean = !isEmpty
+		def numLateFormative(infos: Seq[StudentAssignmentInformation]): Int = infos.count(_.lateFormative)
 	}
 
 	case class CourseworkHomepageAdminInformation(
@@ -58,7 +61,7 @@ object CourseworkHomepageCommand {
 	type Result = CourseworkHomepageInformation
 	type Command = Appliable[Result] with CourseworkHomepageCommandState
 
-	val AdminPermission = Permissions.Module.ManageAssignments
+	val AdminPermission: Module.ManageAssignments.type = Permissions.Module.ManageAssignments
 
 	def apply(user: CurrentUser): Command =
 		new CourseworkHomepageCommandInternal(user)
@@ -175,7 +178,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 		val extensionRequested = extension.isDefined && !extension.get.isManual
 		val submission = assignment.submissions.asScala.find(_.isForUser(user.apparentUser))
 		val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user.apparentUser))
-		val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission).orElse(assignment.feedbackDeadline)
+		val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission)
 
 		StudentAssignmentInformation(
 			assignment = assignment,
@@ -189,7 +192,8 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 			resubmittable = assignment.resubmittable(user.apparentUser),
 			feedback = feedback,
 			feedbackDeadline = feedbackDeadline,
-			feedbackLate = feedbackDeadline.exists(_.isBefore(LocalDate.now))
+			feedbackLate = feedbackDeadline.exists(_.isBefore(LocalDate.now)),
+			lateFormative = lateFormative(assignment)
 		)
 	}
 
@@ -217,13 +221,12 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 			.diff(assignmentsWithFeedback)
 			.diff(assignmentsWithSubmission)
 			.filter(_.collectSubmissions) // TAB-475
-			.filterNot(lateFormative)
 			.sortWith(hasEarlierPersonalDeadline)
 			.map(enhance)
 	}
 
 	private lazy val studentUpcomingAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get upcoming assignments") {
-		allUnsubmittedAssignments.filterNot(_.assignment.isOpened)
+		allUnsubmittedAssignments.filterNot(i => i.assignment.isOpened || i.lateFormative )
 	}
 
 	private lazy val studentActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get action required assignments") {
@@ -251,9 +254,10 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 				.map(enhance)
 
 		val unsubmittedAndUnsubmittable =
-			allUnsubmittedAssignments
+			allUnsubmittedAssignments.filterNot(_.lateFormative)
 				.diff(studentUpcomingAssignments)
 				.diff(studentActionRequiredAssignments)
+  			.filterNot(_.lateFormative)
 
 		(submittedAwaitingFeedback ++ unsubmittedAndUnsubmittable)
 			.sortWith(hasEarlierEffectiveDate)

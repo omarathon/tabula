@@ -125,7 +125,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 				group.groupSet.membershipService = membershipService
 				smallGroupDao.findSmallGroupOccurrencesByGroup(group) returns eventOccurrencesGroup1
 				smallGroupDao.findSmallGroupOccurrencesByGroup(group2) returns eventOccurrencesGroup2
-				membershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroup]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq(user) ++ Seq(user1) ++ Seq(user2) ++ Seq(user3)
+				membershipService.determineMembershipUsers(any[Seq[UpstreamAssessmentGroupInfo]], any[Option[UnspecifiedTypeUserGroup]]) returns Seq(user) ++ Seq(user1) ++ Seq(user2) ++ Seq(user3)
 				studentGroupHelper.findBy(user) returns Seq(group) ++ Seq(group2)
 				studentGroupHelper.findBy(user1) returns Seq(group)
 				studentGroupHelper.findBy(user2) returns Seq(group)

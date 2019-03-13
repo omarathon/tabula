@@ -7,7 +7,7 @@
 	</#if>
 </#assign>
 
-<@f.form method="post" action="${formAction}" commandName="markingCompletedCommand">
+<@f.form method="post" action="${formAction}" modelAttribute="markingCompletedCommand">
 
 <#assign title><#if nextStageRole?has_content>Send to ${nextStageRole}<#else>Marking completed</#if></#assign>
 

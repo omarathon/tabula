@@ -4,7 +4,7 @@
 
 <#if !command.allocationType?has_content>
 
-	<@f.form commandName="command" action="${previewFormAction}" method="POST" class="double-submit-protection">
+	<@f.form modelAttribute="command" action="${previewFormAction}" method="POST" class="double-submit-protection">
 		<#list command.additions?keys as entity>
 			<#list command.additions[entity] as student>
 			<input type="hidden" name="additions[${entity}]" value="${student}" />
@@ -107,7 +107,7 @@
 		</div>
 	</#if>
 
-	<@f.form commandName="command" action="${previewFormAction}" method="POST" class="double-submit-protection">
+	<@f.form modelAttribute="command" action="${previewFormAction}" method="POST" class="double-submit-protection">
 		<#include "_allocate_notifications_modal.ftl" />
 
 		<#list command.additions?keys as entity>

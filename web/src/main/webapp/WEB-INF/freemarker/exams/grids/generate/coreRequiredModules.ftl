@@ -16,7 +16,7 @@
 	<h2>Set grid options</h2>
 
 	<p class="progress-arrows">
-		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${gridOptionsQueryString}">Select courses</a></span>
+		<span class="arrow-right"><a class="btn btn-link" href="<@routes.exams.generateGrid department academicYear />?${uriParser(gridOptionsQueryString)}">Select courses</a></span>
 		<span class="arrow-right arrow-left active">Set grid options</span>
 		<span class="arrow-right arrow-left">Preview and download</span>
 	</p>

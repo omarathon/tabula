@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.services
 
+import org.hibernate.ObjectNotFoundException
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
@@ -131,19 +132,25 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	}
 
 
-	def can(user: CurrentUser, permission: ScopelessPermission ): Boolean = _can(user, permission, None, canDelegate = false)
+	def can(user: CurrentUser, permission: ScopelessPermission): Boolean = _can(user, permission, None, canDelegate = false)
 	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Boolean = _can(user, permission, Option(scope), canDelegate = false)
 	def canForAny(user: CurrentUser, permission: Permission, scopes: Seq[PermissionsTarget]): Boolean  = {
 		scopes.exists(scope => _can(user, permission, Option(scope), canDelegate = false))
 	}
-	def canDelegate(user: CurrentUser, permission: ScopelessPermission ): Boolean = _can(user, permission, None, canDelegate = true)
+	def canDelegate(user: CurrentUser, permission: ScopelessPermission): Boolean = _can(user, permission, None, canDelegate = true)
 	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Boolean = _can(user, permission, Option(scope), canDelegate = true)
 
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget],canDelegate:Boolean): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
 		val checksToRun = if (canDelegate) delegationChecks else checks
 		val result: Response = cachedBy((user, permission, scope.orNull)) {
-			benchmarkTask(s"Checking permission ${if (permission != null) permission.getName} on $scope") {checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption}
+			try {
+				benchmarkTask(s"Checking permission ${if (permission != null) permission.getName} on $scope") {
+					checksToRun.view.flatMap(_(user, permission, scope.orNull)).headOption
+				}
+			} catch {
+				case _: ObjectNotFoundException => Deny
+			}
 		}
 
 		/*

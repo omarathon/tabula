@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, MaintenanceModeService}
+import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks, MaintenanceModeService}
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+
+import scala.collection.JavaConverters._
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
@@ -22,6 +24,9 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
 		val mockSpreadsheetHelper: SpreadsheetHelpers = smartMock[SpreadsheetHelpers]
 		val thisAssessment = new Assignment
+		thisAssessment.feedbackService = smartMock[FeedbackService]
+		thisAssessment.feedbackService.loadFeedbackForAssignment(thisAssessment) answers { _ => thisAssessment.feedbacks.asScala }
+
 		val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234")
 		thisAssessment.feedbacks.add(feedback)
 		val bindListener = new BulkAdjustmentCommandBindListener with BulkAdjustmentCommandState {

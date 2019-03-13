@@ -1,2 +1,0 @@
-ALTER TABLE DEPARTMENT
-ADD ( settings NCLOB );

@@ -27,7 +27,7 @@
 	<#include "_allocate_manual_tab.ftl" />
 
 	<div class="tab-pane" id="allocatestudents-tab2">
-		<@f.form commandName="uploadCommand" action="${uploadFormAction}" method="POST" cssClass="form-inline" enctype="multipart/form-data">
+		<@f.form modelAttribute="uploadCommand" action="${uploadFormAction}" method="POST" cssClass="form-inline" enctype="multipart/form-data">
 			<#list command.additions?keys as entity>
 				<#list command.additions[entity] as student>
 					<input type="hidden" name="additions[${entity}]" value="${student}" />

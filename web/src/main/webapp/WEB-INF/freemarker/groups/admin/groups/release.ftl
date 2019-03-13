@@ -7,7 +7,7 @@
     </#if>
 
 	<@modal.wrapper>
-		<@f.form method="post" action="${submitAction}" commandName="releaseGroupSetCommand" cssClass="double-submit-protection">
+		<@f.form method="post" action="${submitAction}" modelAttribute="releaseGroupSetCommand" cssClass="double-submit-protection">
 
 			<@modal.header>
 				<h3 class="modal-title">Publish</h3>

@@ -3,14 +3,15 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence._
-
 import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.lang3.builder.CompareToBuilder
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+
 import scala.collection.JavaConverters._
 
 /*
@@ -86,10 +87,28 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var passFail: Boolean = _
 
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = membershipService.getUpstreamAssessmentGroups(this)
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
+	@Column(name="moduleresult")
+	var moduleResult: ModuleResult = _
+
+	def passedCats: Option[Boolean] = moduleResult match {
+		case _: ModuleResult.Pass.type => Some(true)
+		case _: ModuleResult.Fail.type => Some(false)
+		case _ => None
+	}
+
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
+		}
 
 	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
+		}.filter(_.universityId == studentCourseDetails.student.universityId)
+
+	def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
+		upstreamAssessmentGroupMembers.filter(_ => !studentCourseDetails.statusOnCourse.code.startsWith("P"))
 
 	override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
 

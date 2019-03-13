@@ -780,4 +780,6 @@ WPopupBox.showSelectBoxes = function() {
 		);
 };
 
+window.WPopupBox = WPopupBox;
+
 };

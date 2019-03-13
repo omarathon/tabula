@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import java.io.IOException
+
+import com.itextpdf.text.ExceptionConverter
 import javax.servlet.ServletException
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-
 import org.springframework.beans.TypeMismatchException
 import org.springframework.beans.factory.annotation.{Autowired, Required}
 import org.springframework.http.HttpStatus
@@ -20,7 +21,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.profiles.DefaultPhoto
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, Ordered}
-import uk.ac.warwick.tabula.system.{RenderableFileView, CurrentUserInterceptor, RequestInfoInterceptor}
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RenderableFileView, RequestInfoInterceptor}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -95,6 +96,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists { _.isJsonRequest } => RedirectToSignin()
 
 			case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
+			case e: ExceptionConverter if e.getException.isInstanceOf[IOException] && ExceptionHandler.isClientAbortException(e.getException.asInstanceOf[IOException]) => Mav(null.asInstanceOf[String])
 
 			// TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
 			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)

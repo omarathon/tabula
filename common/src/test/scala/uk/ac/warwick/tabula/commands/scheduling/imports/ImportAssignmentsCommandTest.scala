@@ -7,10 +7,11 @@ import org.scalatest.junit._
 import org.scalatest.{FlatSpec, Matchers}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
@@ -234,6 +235,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 		val assignment = new Assignment
 		assignment.cm2Assignment = true
 		assignment.addFeedback(feedback)
+
+		assignment.feedbackService = smartMock[FeedbackService]
+		assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
 		command.modifiedAssignments = Set(assignment)
 

@@ -1,21 +1,22 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, InputStream, OutputStream}
+
 import javax.activation.{DataHandler, DataSource}
 import javax.mail.Part
 import javax.mail.internet.{MimeBodyPart, MimeMultipart}
-
 import net.fortuna.ical4j.data.CalendarOutputter
 import net.fortuna.ical4j.model.Calendar
 import net.fortuna.ical4j.model.property._
+import org.hibernate.ObjectNotFoundException
 import org.springframework.mail.javamail.MimeMessageHelper
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.HasSettings._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBasedEventOccurrenceService}
 import uk.ac.warwick.tabula.timetables.TimetableEvent
-
 
 abstract class ScheduledMeetingRecordNotification
 	extends Notification[ScheduledMeetingRecord, Unit]
@@ -23,9 +24,13 @@ abstract class ScheduledMeetingRecordNotification
 
 	self: MyWarwickDiscriminator =>
 
-	def meeting: ScheduledMeetingRecord = item.entity
+	def meeting: ScheduledMeetingRecord = try {
+		item.entity
+	} catch {
+		case _: ClassCastException => throw new ObjectNotFoundException("", "")
+	}
 
-	def verbSetting = StringSetting("verb", "")
+	def verbSetting: StringSetting = StringSetting("verb", "")
 	def verb: String = verbSetting.value
 
 	def academicYear: AcademicYear = AcademicYear.forDate(meeting.meetingDate)
@@ -79,7 +84,7 @@ trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAt
 				cal.getProperties.add(Method.CANCEL)
 				vEvent.getProperties.add(Status.VEVENT_CANCELLED)
 				vEvent.getProperties.add(new Sequence(1))
-			case ("rescheduled"|"updated") =>
+			case "rescheduled" | "updated" =>
 				cal.getProperties.add(Method.PUBLISH)
 				vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
 				vEvent.getProperties.add(new Sequence(1))

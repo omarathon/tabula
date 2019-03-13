@@ -27,7 +27,7 @@
 	</#if>
 
 	<#assign formUrl><@routes.coursework.feedbackBulkAdjustment assignment /></#assign>
-	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" commandName="command" class="form-horizontal">
+	<@f.form method="post" enctype="multipart/form-data" action="${formUrl}" modelAttribute="command" class="form-horizontal">
 		<#list command.students as usercode>
 			<input type="hidden" name="students" value="${usercode}" />
 		</#list>

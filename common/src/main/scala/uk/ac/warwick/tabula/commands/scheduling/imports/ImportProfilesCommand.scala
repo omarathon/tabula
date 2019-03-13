@@ -189,7 +189,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 		logger.info("Saving or updating module registrations")
 
 		val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
-			importModRegCommands flatMap { _.apply() }
+			importModRegCommands.flatMap(_.apply())
 		}
 
 		val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }

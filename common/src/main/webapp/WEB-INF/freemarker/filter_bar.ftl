@@ -1,8 +1,7 @@
 <#escape x as x?html>
 	<div class="fix-area filter-container disabled">
 		<div class="fix-header pad-when-fixed">
-			<div class="placeholder"><i class="fa fa-spinner fa-spin"></i>&nbsp;Loading…</div>
-			<@f.form commandName=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
+			<@f.form modelAttribute=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
 				<@f.errors cssClass="error form-errors" />
 				<#--Don't send academic year if it's a path variable (therefore global in the model)-->
 				<#if filterCommand.academicYear?? && !academicYear??>
@@ -193,6 +192,7 @@
 			</@f.form>
 		</div>
 
+		<div class="placeholder"><i class="fa fa-spinner fa-spin"></i>&nbsp;Loading…</div>
 		<div id="filter-results">
 			<#include filterResultsPath />
 		</div>
@@ -269,11 +269,13 @@
 				}
 
 				$('#filter-results').addClass('loading');
+				$('.filter-container .placeholder').addClass('loading');
 				$form.data('request', $.post($form.attr('action'), $form.serialize(), function(data) {
 					$('#filter-results').html(data);
 
 					$form.data('request', null);
 					$('#filter-results').removeClass('loading');
+					$('.filter-container .placeholder').removeClass('loading');
 
 					$('.use-wide-popover').tabulaPopover({
 						trigger: 'click',

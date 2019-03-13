@@ -198,7 +198,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def recipients: Seq[User]
 
 	def addItems(seq: Seq[A]): Notification[A, B] = {
-		val x = seq.map { _.toEntityReference }.asInstanceOf[Seq[EntityReference[A]]]
+		val x = seq.map(_.toEntityReference).asInstanceOf[Seq[EntityReference[A]]]
 		x.foreach { _.notification = this }
 		items.addAll(x.asJava)
 		this
@@ -237,7 +237,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
  * So for those types the target parameter is not defined.
  */
 @Entity
-abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: AnyRef] extends Notification[A,B] {
+abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference] extends Notification[A,B] {
 
 	self: MyWarwickDiscriminator =>
 
@@ -263,9 +263,9 @@ trait SingleItemNotification[A >: Null <: ToEntityReference] {
 
 	def item: EntityReference[A] =
 		try {
-			items.get(0)
+			items.asScala.filter(_.entity != null).head
 		} catch {
-			case _: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+			case _ @ (_: IndexOutOfBoundsException | _: NoSuchElementException) => throw new ObjectNotFoundException("", "")
 		}
 }
 

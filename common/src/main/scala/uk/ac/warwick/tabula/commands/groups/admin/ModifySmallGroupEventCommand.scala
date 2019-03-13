@@ -312,14 +312,14 @@ trait ModifySmallGroupEventScheduledNotifications
 		// get all the occurrences (even the ones in invalid weeks) so they can be cleared
 		smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
 
-	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
 		generateNotifications(occurrence)
 	}
 }
 
 trait GeneratesNotificationsForSmallGroupEventOccurrence {
 
-	def generateNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[_]] = {
+	def generateNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
 		// Only generate notifications for sets that collect attendance and occurrences that are in valid weeks...
 		if (occurrence.event.group.groupSet.collectAttendance && occurrence.event.allWeeks.contains(occurrence.week)) {
 			occurrence.startDateTime.map(_.toDateTime).map(dt => {

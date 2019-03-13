@@ -18,7 +18,7 @@
 </#if>
 
 <div class="fix-area">
-	<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/${smallGroupSet.id}/edit')}" commandName="editSmallGroupSetCommand" cssClass="dirty-check">
+	<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/${smallGroupSet.id}/edit')}" modelAttribute="editSmallGroupSetCommand" cssClass="dirty-check">
 		<@components.set_wizard false 'properties' smallGroupSet />
 
 		<@f.errors cssClass="error form-errors" />

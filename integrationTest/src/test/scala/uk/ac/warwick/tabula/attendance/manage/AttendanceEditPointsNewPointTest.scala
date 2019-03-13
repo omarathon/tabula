@@ -39,9 +39,6 @@ class AttendanceEditPointsNewPointTest extends AttendanceFixture with GivenWhenT
 		And("set the type")
 		radioButtonGroup("pointType").value = "standard"
 
-		// Stop HTMLUnit screwing up buttons
-		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
-
 		And("save the point")
 		click on cssSelector("button[name=submit]")
 

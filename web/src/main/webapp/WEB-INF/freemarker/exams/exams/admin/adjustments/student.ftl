@@ -34,7 +34,7 @@
 	<@f.form id="adjust-form-${marking_macros.extractId(command.student)}"
 		cssClass="double-submit-protection"
 		method="post"
-		commandName="command"
+		modelAttribute="command"
 		action="${submit_url}"
 	>
 

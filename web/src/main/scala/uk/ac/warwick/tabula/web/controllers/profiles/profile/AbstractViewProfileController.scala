@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.core.convert.ConversionService
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
 import uk.ac.warwick.tabula.AcademicYear
@@ -22,6 +22,8 @@ abstract class AbstractViewProfileController extends ProfilesController
 	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent
 	with AutowiringAssessmentServiceComponent
 	with RequestLevelCaching[String, Any] {
+
+	@Value("${tabula.yearZero}") var yearZero: Int = 2000
 
 	@ModelAttribute("siblingBreadcrumbs")
 	def siblingBreadcrumbs = true
@@ -71,20 +73,29 @@ abstract class AbstractViewProfileController extends ProfilesController
 				Seq(
 					ProfileBreadcrumbs.Profile.IdentityForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.TimetableForScyd(scyd).setActive(activeIdentifier)
-				) ++ relationshipTypesToDisplay(scd).map(relationshipType =>
+				) ++
+				relationshipTypesToDisplay(scd).map(relationshipType =>
 					ProfileBreadcrumbs.Profile.RelationshipTypeForScyd(scyd, relationshipType).setActive(activeIdentifier)
-				) ++ Seq(
+				) ++
+				Seq(
 					ProfileBreadcrumbs.Profile.AssignmentsForScyd(scyd).setActive(activeIdentifier),
 					ProfileBreadcrumbs.Profile.ModulesForScyd(scyd).setActive(activeIdentifier),
-					ProfileBreadcrumbs.Profile.EventsForScyd(scyd).setActive(activeIdentifier),
-					ProfileBreadcrumbs.Profile.AttendanceForScyd(scyd).setActive(activeIdentifier)
-				) ++ (assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser, Some(scyd.academicYear)) match {
+					ProfileBreadcrumbs.Profile.EventsForScyd(scyd).setActive(activeIdentifier)
+				) ++
+				(if (scyd.academicYear.startYear >= yearZero)
+					Seq(ProfileBreadcrumbs.Profile.AttendanceForScyd(scyd).setActive(activeIdentifier))
+				else
+					Nil
+				) ++
+				(assessmentService.getAssignmentWhereMarker(MemberOrUser(scd.student).asUser, Some(scyd.academicYear)) match {
 					case Nil => Nil
 					case _ => Seq(ProfileBreadcrumbs.Profile.MarkingForScyd(scyd).setActive(activeIdentifier))
-				}) ++ (scd.student == currentMember match {
-					case false => Nil
-					case true => Seq(ProfileBreadcrumbs.Profile.DownloadForScyd(scyd).setActive(activeIdentifier))
-				})
+				}) ++
+				(if (scd.student == currentMember)
+					Seq(ProfileBreadcrumbs.Profile.DownloadForScyd(scyd).setActive(activeIdentifier))
+				else
+					Nil
+				)
 		}
 
 	}

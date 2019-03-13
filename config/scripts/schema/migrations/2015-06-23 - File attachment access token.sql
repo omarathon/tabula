@@ -1,6 +1,0 @@
-create table fileattachmenttoken (
-  ID NVARCHAR2(255) NOT NULL,
-  EXPIRES TIMESTAMP,
-  DATE_USED TIMESTAMP,
-  FILEATTACHMENT_ID nvarchar2(255)
-);

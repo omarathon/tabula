@@ -98,4 +98,54 @@ class BaseControllerTest extends TestBase with Mockito {
 		verify(mockSession, times(1)).enableFilter("notDeleted")
 	}
 
+	@Test def sanitiseReturnTo(): Unit = {
+		val controller = new BaseController {}
+
+		val badPath1 = "javascript:alert(1)" // not safe at all, should be killed
+		controller.getReturnTo(badPath1) should be ("")
+
+		val badPath2 = "/javascript:alert(1)" // looks bad, but actually valid
+		controller.getReturnTo(badPath2) should be ("/javascript:alert(1)")
+
+		val badPath3 = "%20javascript:alert(1)" // crashes URI
+		controller.getReturnTo(badPath3) should be ("")
+
+		val badPath4 = "javascript%253Aalert(1)" // looks bad, but actually valid
+		controller.getReturnTo(badPath4) should be ("javascript%253Aalert(1)")
+
+		val badPath5 = s"""\"\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath5) should be ("")
+
+		val badPath6 = s"""\"strange\""://ss.co/this/is/what"""
+		controller.getReturnTo(badPath6) should be ("")
+
+		val badPath7 = s"://ss.co/this/is/what"
+		controller.getReturnTo(badPath7) should be ("")
+
+		val goodPath1 = "/i/eat/chocolate" // good one
+		controller.getReturnTo(goodPath1) should be ("/i/eat/chocolate")
+
+		val goodPath2 = "this/is/what"
+		controller.getReturnTo(goodPath2) should be ("this/is/what")
+
+		val goodPath3 = "/assignment?teacher=duck&room=[1,2,3]"
+		controller.getReturnTo(goodPath3) should be ("/assignment?teacher=duck&room=[1,2,3]")
+
+		val goodPath4 = "/assignment?teacher=duck"
+		controller.getReturnTo(goodPath4) should be ("/assignment?teacher=duck")
+
+		val absoluteUrlTabula = "https://tabula-test.warwick.ac.uk/assignment?teacher=duck"
+		controller.getReturnTo(absoluteUrlTabula) should be ("/assignment?teacher=duck")
+
+		val absoluteUrlNotTabula = "https://ss.co/this/is/what"
+		controller.getReturnTo(absoluteUrlNotTabula) should be ("/this/is/what")
+
+		val absoluteUrlNotTabula2 = "https://blah/wara"
+		controller.getReturnTo(absoluteUrlNotTabula2) should be ("/wara")
+
+		val emptyString = ""
+		controller.getReturnTo(emptyString) should be ("")
+
+	}
+
 }

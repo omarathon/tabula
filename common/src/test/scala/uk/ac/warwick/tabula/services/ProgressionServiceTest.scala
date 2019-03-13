@@ -20,7 +20,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		student.mostSignificantCourse.sprStartAcademicYear = academicYear - 2
 		val scyd3: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
 		scyd3.academicYear = academicYear
-		student.mostSignificantCourse.courseYearLength = "3"
+		student.mostSignificantCourse.courseYearLength = 3
 		scyd3.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 		val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {
 			override val moduleRegistrationService: ModuleRegistrationService = smartMock[ModuleRegistrationService]
@@ -327,6 +327,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 			scyd3.moduleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 			scyd3.moduleAndDepartmentService.getModuleByCode(module1.code) returns Option(module1)
 			scyd3.moduleAndDepartmentService.getModuleByCode(module2.code) returns Option(module2)
+			scyd3.moduleAndDepartmentService.getModulesByCodes(Seq(module1.code, module2.code)) returns Seq(module1, module2)
 		}
 
 		// Not overcat
@@ -608,7 +609,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 		student.mostSignificantCourse.sprStartAcademicYear = academicYear
 		val scyd: StudentCourseYearDetails = student.mostSignificantCourse.latestStudentCourseYearDetails
 		scyd.academicYear = academicYear
-		student.mostSignificantCourse.courseYearLength = "1"
+		student.mostSignificantCourse.courseYearLength = 1
 		scyd.modeOfAttendance = Fixtures.modeOfAttendance("F", "FT", "Full time")
 
 		val service = new AbstractProgressionService with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent {

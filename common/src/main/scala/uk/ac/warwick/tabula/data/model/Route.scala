@@ -3,19 +3,15 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.{CascadeType, Entity, _}
 import org.hibernate.annotations.{NamedQueries => _, NamedQuery => _, _}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 
-@FilterDefs(Array(
-	new FilterDef(name = Route.ActiveRoutesOnlyFilter, defaultCondition = "active = 1"),
-))
-@Filters(Array(
-	new Filter(name = Route.ActiveRoutesOnlyFilter),
-))
 @Entity
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
@@ -46,6 +42,15 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	@OneToMany(mappedBy = "route", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var teachingInfo: JSet[RouteTeachingInformation] = JHashSet()
+
+	@OneToMany(mappedBy = "route", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var upstreamModuleLists: JSet[UpstreamModuleList] = JHashSet()
+
+	def filterUnusualOptions(yearOfStudy: YearOfStudy, academicYear: AcademicYear, moduleRegistrations: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
+		val moduleLists = upstreamModuleLists.asScala.filter(uml => !uml.unusualOptions && uml.academicYear == academicYear && uml.yearOfStudy == yearOfStudy)
+		moduleRegistrations.filter(mr => moduleLists.exists(_.matches(mr.toSITSCode)))
+	}
 
 	def teachingDepartments: mutable.Set[Department] =
 		if (teachingDepartmentsActive)
@@ -85,5 +90,4 @@ object Route {
 	// this will be the default when ordering a list of routes.
 	implicit val defaultOrdering: Ordering[Route] = CodeOrdering
 
-	final val ActiveRoutesOnlyFilter = "activeRoutesOnly"
 }

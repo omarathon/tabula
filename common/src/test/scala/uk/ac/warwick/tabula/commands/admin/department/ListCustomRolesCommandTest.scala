@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
-import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
-import ListCustomRolesCommand._
+import uk.ac.warwick.tabula.commands.admin.department.ListCustomRolesCommand._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedRole}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.{Fixtures, ItemNotFoundException, Mockito, TestBase}
 
 class ListCustomRolesCommandTest extends TestBase with Mockito {
 
@@ -29,7 +29,7 @@ class ListCustomRolesCommandTest extends TestBase with Mockito {
 		command.permissionsService.getAllGrantedRolesForDefinition(customRole1) returns (Nil)
 		command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole1) returns (Seq(customRole2))
 
-		command.permissionsService.getAllGrantedRolesForDefinition(customRole2) returns (Seq(new DepartmentGrantedRole(department, customRole2)))
+		command.permissionsService.getAllGrantedRolesForDefinition(customRole2) returns (Seq(GrantedRole(department, customRole2)))
 		command.permissionsService.getCustomRoleDefinitionsBasedOn(customRole2) returns (Nil)
 
 		command.applyInternal() should be (

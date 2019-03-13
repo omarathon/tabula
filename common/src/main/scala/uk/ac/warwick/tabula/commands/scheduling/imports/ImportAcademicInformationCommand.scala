@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportAcademicInformationCommand._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -11,6 +12,7 @@ import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.system.permissions._
 
 import scala.collection.JavaConverters._
+import scala.math.BigDecimal.RoundingMode
 
 object ImportAcademicInformationCommand {
 	def apply() =
@@ -115,11 +117,16 @@ object ImportAcademicInformationCommand {
 
 		// Don't try and handle badly specified codes, just let the .get fail
 		info.route = courseAndRouteService.getRouteByCode(i.code).get
-		info.department = moduleAndDepartmentService.getDepartmentByCode(i.departmentCode).get
+		info.department = moduleAndDepartmentService.getDepartmentByCode(i.departmentCode).getOrElse {
+			throw new IllegalArgumentException(s"Couldn't import ${i.code} because department ${i.departmentCode} doesn't exist")
+		}
 		info.percentage = i.percentage
 
 		info
 	}
+
+	def scaled(bg: JBigDecimal): JBigDecimal =
+		JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
 }
 
 class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAcademicInformationResults] with TaskBenchmarking {
@@ -287,7 +294,7 @@ trait ImportModuleTeachingDepartments {
 						ImportResult(added = 1)
 					case Some(teachingInfo) =>
 						// Update percentage if it changes
-						if (teachingInfo.percentage != info.percentage) {
+						if (scaled(teachingInfo.percentage) != scaled(info.percentage)) {
 							logger.info(s"Updating percentage of $teachingInfo to ${info.percentage}")
 							teachingInfo.percentage = info.percentage
 							moduleAndDepartmentService.saveOrUpdate(teachingInfo)
@@ -317,7 +324,7 @@ trait ImportRoutes {
 
 	def importRoutes(routes: Seq[RouteInfo], dept: Department): ImportResult = {
 		val results = for (rot <- routes) yield {
-			courseAndRouteService.getRouteByCodeActiveOrInactive(rot.code) match {
+			courseAndRouteService.getRouteByCode(rot.code) match {
 				case None =>
 					debug("Route code %s not found in database, so inserting", rot.code)
 					courseAndRouteService.save(newRouteFrom(rot, dept))
@@ -390,7 +397,7 @@ trait ImportRouteTeachingDepartments {
 						ImportResult(added = 1)
 					case Some(teachingInfo) =>
 						// Update percentage if it changes
-						if (teachingInfo.percentage != info.percentage) {
+						if (scaled(teachingInfo.percentage) != scaled(info.percentage)) {
 							logger.info(s"Updating percentage of $teachingInfo to ${info.percentage}")
 							teachingInfo.percentage = info.percentage
 							courseAndRouteService.saveOrUpdate(teachingInfo)

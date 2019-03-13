@@ -33,7 +33,7 @@ class MemberNoteDaoTest extends PersistenceTestBase {
 
 			val student = Fixtures.student("456", "def")
 			session.saveOrUpdate(student)
-			val note = Fixtures.memberNote("another note", student )
+			val note = Fixtures.memberNote("another note", student, "1234567")
 
 			memberNoteDao.listNotes(student).size should be (0)
 
@@ -54,7 +54,7 @@ class MemberNoteDaoTest extends PersistenceTestBase {
 
 			val student = Fixtures.student("456", "def")
 			session.saveOrUpdate(student)
-			val note = Fixtures.memberNote("another note", student )
+			val note = Fixtures.memberNote("another note", student, "1234567")
 
 			memberNoteDao.listNotes(student).size should be (0)
 

@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.services.fileserver
-import java.io.InputStream
-import java.io.File
+
+import com.google.common.io.ByteSource
 
 trait RenderableFile {
-	def inputStream: InputStream
+	def byteSource: ByteSource
 	def filename: String
 	def contentType: String
 	def contentLength: Option[Long]

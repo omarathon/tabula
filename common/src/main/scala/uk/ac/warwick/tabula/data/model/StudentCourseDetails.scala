@@ -67,8 +67,10 @@ class StudentCourseDetails
 	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
 	def freshStudentCourseYearDetails: Seq[StudentCourseYearDetails] = studentCourseYearDetails.asScala.filter(scyd => !scyd.stale).toSeq.sorted
+	def freshStudentCourseYearDetailsForYear(academicYear: AcademicYear): Option[StudentCourseYearDetails] =  {
+		freshStudentCourseYearDetails.filter(_.academicYear == academicYear).lastOption
+	}
 	def freshOrStaleStudentCourseYearDetails: mutable.Set[StudentCourseYearDetails] = studentCourseYearDetails.asScala
-
 	def freshOrStaleStudentCourseYearDetailsForYear(academicYear: AcademicYear): Option[StudentCourseYearDetails] =  {
 		studentCourseYearDetails.asScala.filter(_.academicYear == academicYear).lastOption
 	}
@@ -243,7 +245,7 @@ trait BasicStudentCourseProperties {
 	var expectedEndDate: LocalDate = _
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var courseYearLength: String = _
+	var courseYearLength: JInteger = _
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _

@@ -8,13 +8,13 @@
 <div class="fix-area">
 	<#if department.hasChildren>
 	<div class="alert alert-info">
-		<i class="fa fa-info-circle"></i> Department settings don't cascade to sub-departments.
-		To change settings for a sub-department, select it from the drop-down above.
+		<i class="fa fa-info-circle"></i> Department settings do not cascade to sub-departments.
+		To change settings for a sub-department, select it from the drop-down list above.
 	</div>
 	</#if>
 
 	<#assign submitUrl><@routes.admin.displaysettings department /></#assign>
-	<@f.form method="post" class="department-settings-form" action=submitUrl commandName="displaySettingsCommand">
+	<@f.form method="post" class="department-settings-form" action=submitUrl modelAttribute="displaySettingsCommand">
 		<input type="hidden" name="returnTo" value="${returnTo}">
 
 		<@bs3form.labelled_form_group labelText="Week numbering system">
@@ -32,7 +32,7 @@
 			</@bs3form.radio>
 			<@bs3form.radio>
 				<@f.radiobutton path="weekNumberingSystem" value="none" />
-				Use no week numbers, displaying dates instead
+				Use dates instead of week numbers
 			</@bs3form.radio>
 			<@bs3form.errors path="weekNumberingSystem" />
 		</@bs3form.labelled_form_group>
@@ -47,7 +47,7 @@
 				Show student name with submission
 			</@bs3form.checkbox>
 			<div class="help-block">
-				When this setting is enabled, markers, moderators and module auditors see students' names and University IDs with submissions by default. You can override this setting at the assignment level.
+				When this option is selected, markers and moderators see students' names and University IDs with submissions by default. You can override this setting at the assignment level.
 			</div>
 		</@bs3form.labelled_form_group>
 
@@ -71,12 +71,12 @@
 			<@bs3form.radio>
 				<@f.radiobutton path="assignmentGradeValidation" value="true" />
 				Validate grade
-				<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be removed and replaced by a drop-down of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades will be calculated automatically when uploaded to SITS"/>
+				<@fmt.help_popover id="assignmentGradeValidationTrue" content="The 'Grade' text box will be replaced by a drop-down list of valid grades based on the marks scheme defined in SITS for the assessment component. Empty grades are calculated automatically when they are uploaded to SITS."/>
 			</@bs3form.radio>
 			<@bs3form.radio>
 				<@f.radiobutton path="assignmentGradeValidation" value="false" />
 				Free-form grades
-				<@fmt.help_popover id="assignmentGradeValidationFalse" content="Any text can be entered for the grade. Note that an invalid grade will prevent the feedback being uploaded to SITS (if and when this is requested)."/>
+				<@fmt.help_popover id="assignmentGradeValidationFalse" content="Any text can be entered for the grade. Note that an invalid grade prevents the feedback being uploaded to SITS (if and when this is requested)."/>
 			</@bs3form.radio>
 		</@bs3form.labelled_form_group>
 
@@ -84,7 +84,7 @@
 			<@f.checkbox path="plagiarismDetection" id="plagiarismDetection" />
 			Enable Turnitin plagiarism detection of assignment submissions
 			<div class="help-block">
-				If you turn this option off, it won't be possible to submit any assignment submissions in this department to Turnitin.
+				If you turn this option off, it will not be possible to submit any assignment submissions in this department to Turnitin.
 			</div>
 		</@bs3form.checkbox>
 
@@ -138,11 +138,11 @@
 				<@bs3form.labelled_form_group path="defaultGroupAllocationMethod" labelText="Default allocation method for small groups">
 					<@bs3form.radio>
 						<@f.radiobutton path="defaultGroupAllocationMethod" value="Manual" />
-						Manual Allocation
+						Manual allocation
 					</@bs3form.radio>
 					<@bs3form.radio>
 						<@f.radiobutton path="defaultGroupAllocationMethod" value="StudentSignUp" />
-						Self Sign-up
+						Self sign-up
 					</@bs3form.radio>
 				</@bs3form.labelled_form_group>
 			</#if>
@@ -164,7 +164,7 @@
 					<@f.checkbox path="autoMarkMissedMonitoringPoints" id="autoMarkMissedMonitoringPoints" />
 					Automatically mark small group teaching monitoring points as missed
 					<div class="help-block">
-						If checked, small group teaching monitoring points will be marked as missed if all applicable events are marked as missed for that student.
+						If this option is selected, small group teaching monitoring points will be marked as missed when all applicable events are marked as missed for that student.
 					</div>
 				</@bs3form.checkbox>
 			</fieldset>
@@ -227,7 +227,7 @@
 					<@f.checkbox path="studentsCanScheduleMeetings" id="studentsCanScheduleMeetings" />
 					Students can schedule meetings
 					<div class="help-block">
-						If unchecked, students won't be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
+						If this option is not selected, students will not be able to schedule meetings with a tutor, supervisor or other relationship agent in this department.
 					</div>
 				</@bs3form.checkbox>
 

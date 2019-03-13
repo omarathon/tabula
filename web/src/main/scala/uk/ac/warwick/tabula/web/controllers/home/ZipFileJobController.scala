@@ -61,7 +61,7 @@ class ZipFileJobController extends BaseController with AutowiringJobServiceCompo
 		val objectStoreKey = ZipCreator.objectKey(jobInstance.getString(ZipFileJob.ZipFilePathKey))
 
 		objectStorageService.renderable(objectStoreKey, Some(job.zipFileName)) match {
-			case Some(f) => fileServer.serve(f, Some(job.zipFileName))
+			case Some(f) => fileServer.serve(f, job.zipFileName)
 			case _ => throw new ItemNotFoundException()
 		}
 	}

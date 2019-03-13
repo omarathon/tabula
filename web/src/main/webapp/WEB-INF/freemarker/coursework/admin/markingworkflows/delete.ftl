@@ -6,7 +6,7 @@
 
 <p>Are you sure you want to delete <strong>"${markingWorkflow.name}"</strong>?</p>
 
-<@f.form method="post" action="${form_url}" commandName="command" cssClass="form-horizontal">
+<@f.form method="post" action="${form_url}" modelAttribute="command" cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
 <input type="submit" class="btn btn-danger" value="Delete" />

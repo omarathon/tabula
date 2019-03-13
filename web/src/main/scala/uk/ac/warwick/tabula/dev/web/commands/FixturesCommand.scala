@@ -98,15 +98,15 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	private def setupDepartmentAndModules() {
 		// Blitz members
 		transactional() {
-			sessionWithoutFreshFilters.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from FileAttachment where member_note_id in (select id from MemberNote where memberId like '3000%')").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from MemberNote where memberId like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from MeetingRecord where creator.universityId like '3100%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
-			sessionWithoutFreshFilters.newQuery("delete from StaffMember where universityId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from FileAttachment where member_note_id in (select id from MemberNote where memberId like '3000%')").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from MemberNote where memberId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from MeetingRecord where creator.universityId like '3100%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+			sessionWithoutFreshFilters.newUpdateQuery("delete from StaffMember where universityId like '3000%'").executeUpdate()
 		}
 
 		// Blitz the test department
@@ -253,7 +253,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
 		transactional() {
-			session.newQuery("delete from AssessmentComponent where moduleCode like :codePrefix")
+			session.newUpdateQuery("delete from AssessmentComponent where moduleCode like :codePrefix")
 				.setString("codePrefix", "XXX%")
 				.executeUpdate()
 

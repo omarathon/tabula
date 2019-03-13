@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{ModuleAssistantRoleDefinition, ModuleManagerRoleDefinition}
@@ -86,11 +84,6 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	var groupSets: JList[SmallGroupSet] = JArrayList()
 
 	var active: Boolean = _
-
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
 
 	var missingFromImportSince: DateTime = _
 

@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
-
 import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
@@ -11,17 +10,16 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
-import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.helpers.JodaConverters._
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
-import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.reflect._
@@ -67,7 +65,7 @@ object Assignment {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = 0")
+@FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)
@@ -189,7 +187,8 @@ class Assignment
 	var submissions: JList[Submission] = JArrayList()
 
 	def submissionsFromUnenrolledStudents: JList[Submission] = {
-		submissions.asScala.filterNot(sub => membershipInfo.usercodes.contains(sub.usercode)).asJava
+		val enrolledUsercodes = membershipInfo.usercodes
+		submissions.asScala.filterNot(sub => enrolledUsercodes.contains(sub.usercode)).asJava
 	}
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
@@ -199,7 +198,9 @@ class Assignment
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var feedbacks: JList[AssignmentFeedback] = JArrayList()
-	override def allFeedback: mutable.Buffer[AssignmentFeedback] = feedbacks.asScala
+	override def allFeedback: Seq[AssignmentFeedback] = RequestLevelCache.cachedBy("Assignment.allFeedback", id) {
+		feedbackService.loadFeedbackForAssignment(this)
+	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
@@ -242,7 +243,7 @@ class Assignment
 
 
 	private def doesAllMembersHaveApprovedExtensions: Boolean =
-		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroups, Option(members))
+		assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Option(members))
 			.forall(user => extensions.asScala.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
 
 
@@ -631,7 +632,7 @@ class Assignment
 			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.usercode == user.getUserId) ||
 				fullFeedback.exists(_.usercode == user.getUserId) ||
-				assessmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
+				assessmentMembershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
 		} else {
 			true
 		})
@@ -776,11 +777,6 @@ class Assignment
 		secondMarkerMap.map { case (usercode, userGrp) => userLookup.getUserByUserId(usercode) -> userGrp.size }
 	}
 
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
-
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -836,6 +832,8 @@ class Assignment
 	def cm2MarkerAllocations: Seq[MarkerAllocation] =
 		Option(cm2MarkingWorkflow)
 			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
 				workflow.markers.toSeq
 					.sortBy { case (stage, _) => stage.order }
 					.flatMap { case (stage, markers) =>
@@ -844,11 +842,50 @@ class Assignment
 								stage.roleName,
 								stage.description,
 								marker,
-								allFeedback.flatMap(_.allMarkerFeedback).filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+								markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
 							)
 						}
 					}
 			}.getOrElse(Nil)
+
+	def cm2MarkerAllocations(marker: User): Seq[MarkerAllocation] =
+		Option(cm2MarkingWorkflow)
+			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
+				workflow.markers.toSeq
+					.filter { case (_, markers) => markers.contains(marker) }
+					.sortBy { case (stage, _) => stage.order }
+					.map { case (stage, _) =>
+						MarkerAllocation(
+							stage.roleName,
+							stage.description,
+							marker,
+							markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.student).toSet
+						)
+					}
+			}.getOrElse(Nil)
+
+	def cm2MarkerStudentUsercodes(marker: User): Set[String] =
+		Option(cm2MarkingWorkflow)
+			.map { workflow =>
+				lazy val markerFeedback = allFeedback.flatMap(_.allMarkerFeedback)
+
+				workflow.markers.toSeq
+					.filter { case (_, markers) => markers.contains(marker) }
+					.sortBy { case (stage, _) => stage.order }
+					.flatMap { case (stage, _) =>
+						markerFeedback.filter { mf => mf.stage == stage && mf.marker == marker }.map(_.feedback.usercode)
+					}
+					.toSet
+			}.getOrElse(Set.empty)
+
+	def cm2MarkerSubmissions(marker: User): Seq[Submission] = {
+		val usercodes = cm2MarkerStudentUsercodes(marker)
+
+		if (usercodes.isEmpty) Nil
+		else submissions.asScala.filter { s => usercodes.contains(s.usercode) }
+	}
 
 	def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
 	def automaticallyReleaseToMarkers_= (include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
@@ -886,8 +923,6 @@ class Assignment
 			extensionRequested = extension.isDefined && !extension.get.isManual
 		)
 	}
-
-	def toEntityReference: AssignmentEntityReference = new AssignmentEntityReference().put(this)
 
 	def showStudentNames: Boolean = (anonymity == null && module.adminDepartment.showStudentName) || anonymity == NameAndID
 

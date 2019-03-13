@@ -1,6 +1,6 @@
 <h1>Maintenance mode</h1>
 
-<@f.form action="?" commandName="maintenanceModeCommand">
+<@f.form action="?" modelAttribute="maintenanceModeCommand">
 
 	<@bs3form.checkbox path="enable">
 		<@f.checkbox path="enable" id="enable"/> Enabled?

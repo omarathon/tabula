@@ -72,7 +72,6 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 		state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
 		val result: Map[String, Seq[AttendanceMonitoringPoint]] = state.termPoints
-		println(result)
 		result(PeriodType.autumnTerm.toString) should be (Seq(point1))
 		result(PeriodType.christmasVacation.toString) should be (Seq(point2))
 	}}

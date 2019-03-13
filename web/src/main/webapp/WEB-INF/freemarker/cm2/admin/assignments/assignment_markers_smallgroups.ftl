@@ -14,7 +14,7 @@
 		</p>
 		<#if sets?has_content>
 			<#assign actionUrl><@routes.cm2.assignmentmarkerssmallgroups assignment mode /></#assign>
-			<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection" commandName="smallGroupCommand">
+			<@f.form method="post" action=actionUrl cssClass="dirty-check double-submit-protection" modelAttribute="smallGroupCommand">
 				<div class="has-error"><@f.errors cssClass="error help-block" /></div>
 
 				<#if allocationWarnings?size != 0>

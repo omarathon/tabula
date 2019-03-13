@@ -14,7 +14,7 @@
 
 	<div class="fix-area">
 		<#assign submitUrl><@routes.groups.deregisteredStudents smallGroupSet /></#assign>
-		<@f.form method="post" action="${submitUrl}" commandName="command">
+		<@f.form method="post" action="${submitUrl}" modelAttribute="command">
 			<table class="table table-striped table-condensed table-hover table-checkable">
 				<thead>
 					<tr>

@@ -1,5 +1,5 @@
 <#escape x as x?html>
-<@f.form commandName="command" action=submitUrl method="POST" cssClass="form-inline">
+<@f.form modelAttribute="command" action=submitUrl method="POST" cssClass="form-inline">
 	<@f.hidden path="from" />
 	<@f.hidden path="to" />
 
@@ -197,9 +197,6 @@
 </div>
 
 <style type="text/css">
-	@import url("<@url resource="/static/css/fullcalendar.css" />");
-	@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
-
 	.fc-event.allday {
 		font-weight: bold;
 		color: white !important;
@@ -233,7 +230,7 @@
 <script type="text/javascript">
 	// TIMETABLE STUFF
 	jQuery(function($) {
-		var weeks = ${weekRangesDumper()};
+		var weeks = <#noescape>${weekRangesDumper()}</#noescape>;
 
 		var $form = $('#command');
 

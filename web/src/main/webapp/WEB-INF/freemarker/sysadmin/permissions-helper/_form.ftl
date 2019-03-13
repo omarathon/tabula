@@ -1,4 +1,4 @@
-<@f.form action="${url('/sysadmin/permissions-helper')}" commandName="permissionsHelperCommand">
+<@f.form action="${url('/sysadmin/permissions-helper')}" modelAttribute="permissionsHelperCommand">
 
 	<@bs3form.labelled_form_group path="user" labelText="User ID">
 		<@bs3form.flexipicker path="user" placeholder="Type name or usercode" />

@@ -14,7 +14,7 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 
 		loadCurrentAcademicYearTab()
 
-		val testModule =id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
+		val testModule = eventually { id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0) }
 		click on testModule
 
 		eventually {
@@ -61,8 +61,11 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 			click on downloadDropdown
 
 			Then("The link to download as zip should be disabled")
-			val disabledlinks = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
-			disabledlinks.getAttribute("class").contains("disabled") should be (true)
+			val disabledlinks = eventually {
+				val links = id("main").webElement.findElements(By.cssSelector("ul.dropdown-menu li")).get(0)
+				links.getAttribute("class").contains("disabled") should be(true)
+				links
+			}
 
 			When("I select a student")
 			val student1Checkbox = id("main").webElement.findElements(By.cssSelector(".collection-checkbox")).get(0)
@@ -109,12 +112,10 @@ class DownloadSubmissionAdminTest extends BrowserTest with CourseworkFixtures {
 		val menuOption = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li a.form-post")).get(1)
 		disabledlinks.getAttribute("class").contains("disabled") should be (false)
 
-
 		And("The link should point to the zip file")
-		menuOption.isDisplayed should be(true)
+		eventually { menuOption.isDisplayed should be(true) }
 		menuOption.getAttribute("href") should include("/delete")
 		click on menuOption
-
 	}
 
 	private def uncheckStudents(): Unit = {

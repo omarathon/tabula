@@ -4,7 +4,7 @@
 	<h4><span class="muted">for</span> <@fmt.module_name module /></h4>
 
 	<div class="fix-area">
-		<@f.form id="newStudents" method="POST" commandName="command" class="dirty-check">
+		<@f.form id="newStudents" method="POST" modelAttribute="command" class="dirty-check">
 			<@components.set_wizard true 'students' smallGroupSet />
 
 			<#include "_editStudents.ftl" />

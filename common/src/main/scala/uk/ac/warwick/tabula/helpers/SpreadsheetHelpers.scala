@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.helpers
 
 import java.io.InputStream
 
-import org.apache.poi.hssf.util.CellReference
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.ss.usermodel._
-import org.apache.poi.ss.util.WorkbookUtil
+import org.apache.poi.ss.util.{CellReference, WorkbookUtil}
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFReader, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable

@@ -7,7 +7,7 @@
 </div>
 
 <div class="fix-area">
-<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" commandName="createSmallGroupSetCommand" cssClass="dirty-check">
+<@f.form method="post" action="${url('/groups/admin/module/${module.code}/groups/new')}" modelAttribute="createSmallGroupSetCommand" cssClass="dirty-check">
 
 	<#if smallGroupSet??>
 		<@components.set_wizard true 'properties' smallGroupSet />

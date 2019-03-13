@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.elasticsearch
 
-import com.sksamuel.elastic4s.ElasticDsl._
+import com.sksamuel.elastic4s.{Index, IndexAndType}
+import com.sksamuel.elastic4s.http.ElasticDsl._
 import org.joda.time.DateTime
 import org.junit.{After, Before}
 import uk.ac.warwick.tabula.data.NotificationDao
@@ -14,14 +15,14 @@ import scala.collection.immutable.IndexedSeq
 
 class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
-	val indexName = "notifications"
+	val index = Index("notifications")
 	val indexType: String = new NotificationIndexType {}.indexType
 
 	private trait Fixture {
 		val queryService = new NotificationQueryServiceImpl
 		queryService.notificationDao = smartMock[NotificationDao]
 		queryService.client = NotificationQueryServiceTest.this.client
-		queryService.indexName = NotificationQueryServiceTest.this.indexName
+		queryService.indexName = NotificationQueryServiceTest.this.index.name
 
 		implicit val indexable = NotificationIndexService.IndexedNotificationIndexable
 	}
@@ -61,8 +62,17 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 		}
 
 		lazy val dismissedItem: IndexedNotification = {
-			val heron2 = new Heron(recipient)
-			val notification = Notification.init(new HeronWarningNotification, agent, heron2)
+			val staff = Fixtures.staff("1234567", userId = recipient.getUserId)
+			val student = Fixtures.student("9876543")
+			val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+
+			val meeting = new MeetingRecord
+			meeting.creator = staff
+
+			val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+			meeting.relationships = Seq(relationship)
+
+			val notification = Notification.init(new HeronWarningNotification, agent, meeting)
 			notification.id = "nid101"
 			notification.created = now.plusMinutes(101)
 			notification.dismiss(recipient)
@@ -71,14 +81,14 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
 		(items :+ dismissedItem).foreach { item =>
 			queryService.notificationDao.getById(item.notification.id) returns Some(item.notification)
-			client.execute { index into indexName / indexType source item id item.id }
+			client.execute { indexInto(IndexAndType(index.name, indexType)).source(item).id(item.id) }
 		}
-		blockUntilExactCount(101, indexName, indexType)
+		blockUntilExactCount(101, index.name)
 
 		// Sanity test
-		search in indexName / indexType limit 200 should containResult("nid1-xyo")
-		search in indexName / indexType limit 200 should containResult("nid101-xyz")
-		search in indexName / indexType term("notificationType", "HeronDefeat") should haveTotalHits(50)
+		search(index).limit(200) should containId("nid1-xyo")
+		search(index).limit(200) should containId("nid101-xyz")
+		search(index).termQuery("notificationType", "HeronDefeat") should haveTotalHits(50)
 
 		// The IDs of notifications we expect our recipient to get.
 		lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter { _.recipient == recipient }
@@ -92,15 +102,15 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
 	@Before def setUp(): Unit = {
 		new NotificationElasticsearchConfig {
 			client.execute {
-				create index indexName mappings (mapping(indexType) fields fields) analysis analysers
-			}.await.isAcknowledged should be(true)
+				createIndex(index.name).mappings(mapping(indexType).fields(fields)).analysis(analysers)
+			}.await.result.acknowledged should be(true)
 		}
-		blockUntilIndexExists(indexName)
+		blockUntilIndexExists(index.name)
 	}
 
 	@After def tearDown(): Unit = {
-		client.execute { delete index indexName }
-		blockUntilIndexNotExists(indexName)
+		deleteIndex(index.name)
+		blockUntilIndexNotExists(index.name)
 	}
 
 	@Test def ignoreDismissed(): Unit = new IndexedDataFixture {

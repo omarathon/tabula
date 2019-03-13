@@ -7,7 +7,7 @@
 	</div>
 </#if>
 
-<@f.form method="post" action="" commandName="moduleList">
+<@f.form method="post" action="" modelAttribute="moduleList">
 	<p>Publish these groups so they are shown in Tabula to:</p>
 	<@bs3form.checkbox path="notifyStudents">
 		<@f.checkbox path="notifyStudents"/> Students
@@ -58,7 +58,6 @@
 </@f.form>
 </#escape>
 
-<@script "/static/js/sortable-table.js" />
 <script type="text/javascript">
 	jQuery("#modules-table").bigList({});
 </script>

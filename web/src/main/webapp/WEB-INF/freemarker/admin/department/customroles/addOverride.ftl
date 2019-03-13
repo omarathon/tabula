@@ -3,7 +3,7 @@
 
 	<h1>Add custom role override</h1>
 
-	<@f.form method="post" action="${form_url}" commandName="command">
+	<@f.form method="post" action="${form_url}" modelAttribute="command">
 		<@f.errors cssClass="error form-errors" />
 
 		<@bs3form.labelled_form_group path="permission" labelText="Permission">

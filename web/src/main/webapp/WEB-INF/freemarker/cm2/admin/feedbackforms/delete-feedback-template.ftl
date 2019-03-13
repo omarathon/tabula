@@ -4,7 +4,7 @@
 	method="post"
 	class="form-inline"
 	action="${actionUrl}"
-	commandName="deleteFeedbackTemplateCommand">
+	modelAttribute="deleteFeedbackTemplateCommand">
 	<@f.hidden path="id"/>
 	<p>Are you sure that you want to delete this feedback template?</p>
 </@f.form>

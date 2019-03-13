@@ -3,7 +3,7 @@
 <h1>Upload missed monitoring points to SITS e:Vision</h1>
 
 <#assign confirmPath><@routes.attendance.viewReportConfirm department academicYear /></#assign>
-<@f.form commandName="command" action="${confirmPath}" method="POST">
+<@f.form modelAttribute="command" action="${confirmPath}" method="POST">
 
 	<input type="hidden" name="period" value="${command.period}" />
 	<input type="hidden" name="filterString" value="${command.serializeFilter}" />

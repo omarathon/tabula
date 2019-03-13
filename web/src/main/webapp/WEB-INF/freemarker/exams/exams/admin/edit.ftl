@@ -7,7 +7,7 @@
 
 	<#assign updateExamUrl><@routes.exams.editExam exam /></#assign>
 
-	<@f.form id="exams.editExamForm" method="post" action="${updateExamUrl}" commandName="command">
+	<@f.form id="exams.editExamForm" method="post" action="${updateExamUrl}" modelAttribute="command">
 
 		<#include "_common_fields.ftl" />
 

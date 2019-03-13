@@ -8,7 +8,7 @@
 	</div>
 
 	<#assign submitUrl><@routes.coursework.feedbackreport department /></#assign>
-	<@f.form method="post" action=submitUrl commandName="feedbackReportCommand">
+	<@f.form method="post" action=submitUrl modelAttribute="feedbackReportCommand">
 	<div class="modal-body">
 		<p>Generate report for assignments with closing dates </p>
 

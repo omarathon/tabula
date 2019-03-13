@@ -22,7 +22,7 @@ class PotentialMarkingOptionsColumnOption extends StudentExamGridColumnOption wi
 
 		override val excelColumnWidth: Int = ExamGridColumnOption.ExcelColumnSizes.WholeMark
 
-		override def values: Map[ExamGridEntity, ExamGridColumnValue] = {
+		override lazy val result: Map[ExamGridEntity, ExamGridColumnValue] = {
 			state.entities.map(entity => entity -> (
 				if (maintenanceModeService.enabled)
 					ExamGridColumnValueStringHtmlOnly(

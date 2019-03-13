@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.ByteArrayInputStream
-
 import com.google.common.io.ByteSource
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
@@ -26,22 +24,22 @@ class ZipCreatorTest extends TestBase {
 		)
 
 		val zip = creator.createUnnamedZip(items)
-		zip.inputStream should not be null
+		zip.byteSource.openStream() should not be null
 		zip.contentType should be ("application/zip")
 
 		creator.invalidate(zip.filename)
-		zip.inputStream should be (null)
+		transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).openStream() should be (null)
 
 		val name = "myzip/under/a/folder"
 		val namedZip = creator.getZip(name, items)
-		namedZip.inputStream should not be null
+		namedZip.byteSource.openStream() should not be null
 		namedZip.contentType should be ("application/zip")
 
 		// getting zip without any items should effectively be a no-op
 		creator.getZip(name, Seq()).contentLength should be (namedZip.contentLength)
 
 		creator.invalidate(name)
-		zip.inputStream should be (null)
+		transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).openStream() should be (null)
 	}
 
 	@Test def trunc {

@@ -15,7 +15,7 @@
 
 <div class="fix-area">
 	<#assign submitUrl><@routes.coursework.addMarks assignment /></#assign>
-	<@f.form method="post" action=submitUrl commandName=commandName cssClass="double-submit-protection">
+	<@f.form method="post" action=submitUrl modelAttribute=commandName cssClass="double-submit-protection">
 
 	<#assign isfile=RequestParameters.isfile/>
 

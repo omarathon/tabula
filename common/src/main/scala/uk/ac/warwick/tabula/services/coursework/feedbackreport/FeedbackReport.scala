@@ -71,7 +71,11 @@ class FeedbackReport(department: Department, academicYear: Option[AcademicYear],
 			addStringCell(assignmentInfo.assignment.name, row)
 			addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
 			addStringCell(assignmentInfo.moduleName, row)
-			addStringCell(if (assignmentInfo.feedbackCount.late == 0) "Y" else "N", row)
+			addStringCell(assignmentInfo.feedbackCount match {
+				case FeedbackCount(onTime, 0, _, _) if onTime > 0 => "Y"
+				case FeedbackCount(_, late, _, _) if late > 0 => "N"
+				case _ => "N/A"
+			}, row)
 			addStringCell(if (assignmentInfo.dissertation) "Y" else "N", row)
 			addStringCell("", row)
 

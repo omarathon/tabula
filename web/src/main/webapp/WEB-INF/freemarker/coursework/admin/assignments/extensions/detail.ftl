@@ -15,7 +15,7 @@
 <#escape x as x?html>
 	<div class="content extension-detail">
 		<#assign actionUrl><@routes.coursework.extensiondetail assignment usercode /></#assign>
-		<@f.form method="post" enctype="multipart/form-data" action=actionUrl commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
+		<@f.form method="post" enctype="multipart/form-data" action=actionUrl modelAttribute="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
 
 			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
 

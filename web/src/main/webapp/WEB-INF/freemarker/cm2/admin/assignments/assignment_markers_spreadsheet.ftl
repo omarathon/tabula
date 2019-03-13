@@ -7,7 +7,7 @@
 
 	<div class="fix-area">
 		<#assign actionUrl><@routes.cm2.assignmentmarkerstemplate assignment mode /></#assign>
-		<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check" commandName="assignMarkersBySpreadsheetCommand">
+		<@f.form method="post" action=actionUrl enctype="multipart/form-data" cssClass="dirty-check" modelAttribute="assignMarkersBySpreadsheetCommand">
 			<@components.assignment_wizard 'markers' assignment.module false assignment />
 			<p class="btn-toolbar">
 				<a class="return-items btn btn-default" href="<@routes.cm2.assignmentmarkers assignment mode />" >

@@ -126,7 +126,7 @@ class MarkerFeedback extends GeneratedId
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
 	@Fetch(FetchMode.JOIN)
-	var attachments: JList[FileAttachment] = JArrayList()
+	var attachments: JSet[FileAttachment] = JHashSet()
 
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
@@ -184,8 +184,6 @@ class MarkerFeedback extends GeneratedId
 	def outstanding: Boolean = feedback.outstandingStages.contains(stage)
 
 	def finalised: Boolean = hasContent && !outstanding
-
-	override def toEntityReference: MarkerFeedbackEntityReference = new MarkerFeedbackEntityReference().put(this)
 }
 
 trait CM1MarkerFeedbackSupport {
@@ -199,7 +197,6 @@ trait CM1MarkerFeedbackSupport {
 
 	@Deprecated
 	def getMarkerUsercode: Option[String] = {
-		// Very fuck you, Hibernate
 		HibernateHelpers.initialiseAndUnproxy(feedback) match {
 			case assignmentFeedback: AssignmentFeedback =>
 				val student = feedback.usercode

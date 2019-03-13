@@ -10,7 +10,7 @@
 
 <h1>Check SITS for student relationship data</h1>
 
-<@f.form method="get" action="${url('/sysadmin/relationships/check')}" commandName="checkStudentRelationshipImportCommand">
+<@f.form method="get" action="${url('/sysadmin/relationships/check')}" modelAttribute="checkStudentRelationshipImportCommand">
 
 	<@f.errors cssClass="error form-errors" />
 

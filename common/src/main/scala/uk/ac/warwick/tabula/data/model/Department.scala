@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.CascadeType.ALL
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
 import org.hibernate.criterion.Restrictions._
@@ -11,7 +10,7 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole}
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.{AliasAndJoinType, PostLoadBehaviour, ScalaRestriction}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnOption, ExamGridDisplayModuleNameColumnValue, ExamGridStudentIdentificationColumnValue}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -151,30 +150,29 @@ class Department extends GeneratedId
 	def meetingRecordApprovalType: MeetingRecordApprovalType = getStringSetting(Settings.MeetingRecordApprovalType).flatMap(MeetingRecordApprovalType.fromCode).getOrElse(MeetingRecordApprovalType.default)
 	def meetingRecordApprovalType_=(meetingRecordApprovalType: MeetingRecordApprovalType): Unit = settings += (Settings.MeetingRecordApprovalType -> meetingRecordApprovalType.code)
 
-	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean = {
+	def canUploadMarksToSitsForYear(year: AcademicYear, module: Module): Boolean =
 		if (module.degreeType != DegreeType.Undergraduate && module.degreeType != DegreeType.Postgraduate) {
 			logger.warn(s"Can't upload marks for module $module since degreeType ${module.degreeType} can't be identified as UG or PG")
-			return false
-		}
-		canUploadMarksToSitsForYear(year, module.degreeType)
-	}
+			false
+		} else canUploadMarksToSitsForYear(year, module.degreeType)
 
 	def canUploadMarksToSitsForYear(year: AcademicYear, degreeType: DegreeType): Boolean = {
-		val markUploadMap: Option[Map[String, String]] = degreeType match {
-			case DegreeType.Undergraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg)
-			case DegreeType.Postgraduate => getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg)
-			case _ =>
-				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
-				return false
-		}
 		// marks are uploadable until a department is explicitly closed for the year by the Exams Office
-		markUploadMap match {
+		def canUploadForYear(markUploadMap: Option[Map[String, String]]): Boolean = markUploadMap match {
 			case None => true // there isn't even a settings map at all for this so hasn't been closed yet for the year
 			case Some(markMap: Map[String, String]) =>
 				markMap.get(year.toString) match {
 					case None => true // no setting for this year/ugpg combo for the department - so hasn't been closed yet for the year
 					case Some(booleanStringValue: String) => booleanStringValue.toBoolean
 				}
+		}
+
+		degreeType match {
+			case DegreeType.Undergraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearUg))
+			case DegreeType.Postgraduate => canUploadForYear(getStringMapSetting(Settings.CanUploadMarksToSitsForYearPg))
+			case _ =>
+				logger.warn(s"Can't upload marks for degree type $degreeType since it can't be identified as UG or PG")
+				false
 		}
 	}
 
@@ -332,11 +330,6 @@ class Department extends GeneratedId
 		ensureSettings
 	}
 
-	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@ForeignKey(name="none")
-	@BatchSize(size=200)
-	var grantedRoles: JList[DepartmentGrantedRole] = JArrayList()
-
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
 	@Column(name="FilterRuleName")
 	var filterRule: FilterRule = AllMembersFilterRule
@@ -345,7 +338,6 @@ class Department extends GeneratedId
 		case None => filterRule.matches(m, d)
 		case Some(p) => filterRule.matches(m, d) && p.includesMember(m, d)
 	}
-
 
 	def subDepartmentsContaining(member: Member): Stream[Department] = {
 		if (!includesMember(member, Option(this))) {
@@ -396,15 +388,13 @@ class Department extends GeneratedId
 
 	override def toString: String = "Department(" + code + ")"
 
-	def toEntityReference: DepartmentEntityReference = new DepartmentEntityReference().put(this)
-
 }
 
 object Department {
 
 	object FilterRule {
 		// Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
-		implicit val factory: (String) => FilterRule = { name: String => withName(name) }
+		implicit val factory: String => FilterRule = { name: String => withName(name) }
 
 		val allFilterRules: Seq[FilterRule] = {
 			val inYearRules = (1 until 9).map(InYearFilterRule)

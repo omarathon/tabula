@@ -121,13 +121,13 @@ trait FixturesDriver extends SimpleHttpFetching {
 	}
 
 	def createStudentMember(
-		userId:String,
-		genderCode:String = "M",
-		routeCode:String="",
-		yearOfStudy:Int=1,
-		courseCode:String="",
-		deptCode:String="",
-		academicYear:String = "2014"
+		userId: String,
+		genderCode: String = "M",
+		routeCode: String="",
+		yearOfStudy: Int=1,
+		courseCode: String="",
+		deptCode: String="",
+		academicYear: String = "2014"
 	){
 		val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/studentMember"
 

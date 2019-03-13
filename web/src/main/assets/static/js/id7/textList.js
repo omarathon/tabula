@@ -1,4 +1,6 @@
-TextListController = function (target, formField){
+/* eslint-env browser */
+
+var TextListController = function (target, formField){
 	this.newItemHead = '<li class="item"><span>';
 	this.newItemTail = '</span><a class="close" href="#"></a></li>';
 
@@ -174,3 +176,5 @@ TextListController.prototype = {
 		}
 	}
 };
+
+window.TextListController = TextListController;

@@ -36,6 +36,9 @@ class UpstreamModuleList {
 
 	var yearOfStudy: JInteger = _
 
+	// Where the last letter of the FMC_CODE is U
+	def unusualOptions: Boolean = code.takeRight(1) == "U"
+
 	@OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	val entries: JSet[UpstreamModuleListEntry] = JHashSet()

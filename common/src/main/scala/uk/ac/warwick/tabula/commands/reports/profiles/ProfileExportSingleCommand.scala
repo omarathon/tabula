@@ -211,7 +211,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
 									mark = feedback.latestMark,
 									grade = feedback.latestGrade,
 									comments = feedback.comments,
-									attachments = feedback.attachments.asScala,
+									attachments = feedback.attachments.asScala.toSeq,
 									adjustments = viewableAdjustments(feedback).map(mark =>
 										AdjustmentData(
 											mark = mark.mark,

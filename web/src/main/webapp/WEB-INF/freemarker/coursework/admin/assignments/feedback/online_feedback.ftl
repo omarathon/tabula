@@ -30,7 +30,7 @@
 		</#if>
 	</#assign>
 	<@f.form cssClass="form-horizontal double-submit-protection"
-			method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
+			method="post" enctype="multipart/form-data" modelAttribute="command" action="${submit_url}">
 
 		<@f.errors cssClass="error form-errors" />
 
