@@ -87,6 +87,16 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var passFail: Boolean = _
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
+	@Column(name="moduleresult")
+	var moduleResult: ModuleResult = _
+
+	def passedCats: Option[Boolean] = moduleResult match {
+		case _: ModuleResult.Pass.type => Some(true)
+		case _: ModuleResult.Fail.type => Some(false)
+		case _ => None
+	}
+
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
 		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
 			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
