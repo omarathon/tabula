@@ -24,7 +24,7 @@ class ZipCreatorTest extends TestBase {
 		)
 
 		val zip = creator.createUnnamedZip(items)
-		zip.inputStream should not be null
+		zip.byteSource.openStream() should not be null
 		zip.contentType should be ("application/zip")
 
 		creator.invalidate(zip.filename)
@@ -32,7 +32,7 @@ class ZipCreatorTest extends TestBase {
 
 		val name = "myzip/under/a/folder"
 		val namedZip = creator.getZip(name, items)
-		namedZip.inputStream should not be null
+		namedZip.byteSource.openStream() should not be null
 		namedZip.contentType should be ("application/zip")
 
 		// getting zip without any items should effectively be a no-op

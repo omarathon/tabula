@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.profiles
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 
+import com.google.common.io.ByteSource
 import org.joda.time.Days
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
@@ -53,7 +54,7 @@ object DefaultPhoto extends RenderableFile {
 	// TODO is keeping this in memory the right thing to do? It's only 3kb
 	private val NoPhoto = read()
 
-	override def inputStream = new ByteArrayInputStream(NoPhoto)
+	override def byteSource: ByteSource = ByteSource.wrap(NoPhoto)
 	override def filename = "no-photo.jpg"
 	override def contentType = "image/jpg"
 	override def contentLength = Some(NoPhoto.length)

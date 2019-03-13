@@ -73,7 +73,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 		command.applyInternal().get.filename should be (attachment.name)
 
 		command.filename = null
-		command.applyInternal().get.inputStream should not be null
+		command.applyInternal().get.byteSource.openStream() should not be null
 	}}}
 
 }

@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.services.fileserver
 
-import java.util.{BitSet => JBitSet}
-
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.io.{IOUtils, TikaInputStream}
 import org.apache.tika.metadata.{HttpHeaders, Metadata, TikaMetadataKeys}
 import org.apache.tika.mime.{MediaType, MimeTypes}
 import org.joda.time.DateTime
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 @Service
@@ -65,8 +64,8 @@ trait StreamsFiles {
     val mimeType: MediaType = file.contentType match {
       case "application/octet-stream" =>
         // We store files in the object store as application/octet-stream but we can just infer from the filename
-        Option(file.inputStream).map { inputStream =>
-          val is = TikaInputStream.get(inputStream)
+        Option(file.byteSource).map { byteSource =>
+          val is = TikaInputStream.get(byteSource.openStream())
           try {
             val metadata = new Metadata
             metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, file.filename)
@@ -96,15 +95,52 @@ trait StreamsFiles {
 
     out.setHeader("Content-Disposition", builder.toString)
 
-    // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work plus audio/video
-    out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'; media-src 'self'")
+    // Restrictive CSP, just enough for viewing inline
+    out.setHeader("Content-Security-Policy",
+      "default-src 'none'; " +
+        "img-src 'self' data:; " + // View images inline; allow data: for Safari media player
+        "object-src 'self'; " + // Allow plugins to load for the current context
+        "plugin-types application/pdf; " + // Only allow the PDF plugin
+        "style-src 'unsafe-inline'; " + // PDF viewer Chrome?
+        "media-src 'self'" // Needed to load the audio/video
+    )
 
     handleCaching(file, request, out)
 
     if (request.getMethod.toUpperCase != "HEAD") {
-      file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
-      Option(file.inputStream).foreach { FileCopyUtils.copy(_, out.getOutputStream) }
+      (file.contentLength, Option(file.byteSource)) match {
+        case (Some(totalLength), Some(byteSource)) =>
+          // Inform the client that we accept byte-range requests
+          out.setHeader("Accept-Ranges", "bytes")
+
+          RangeSet(Some(totalLength), Option(request.getHeader("Range")).filter(_.hasText)) match {
+            case rangeSet: SatisfiableRangeSet =>
+              val firstRange = rangeSet.first
+              val byteRange = firstRange.byteRange
+
+              out.setStatus(HttpStatus.PARTIAL_CONTENT.value())
+              out.setHeader("Content-Range", rangeSet.toString)
+              out.setHeader("Content-Length", firstRange.length.toString)
+
+              byteSource.slice(byteRange.start, byteRange.length + 1).copyTo(out.getOutputStream)
+
+            case rangeSet: UnsatisfiableRangeSet =>
+              out.setStatus(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE.value())
+              out.setHeader("Content-Range", rangeSet.toString)
+
+            case _: NoHeaderRangeSet =>
+              // Serve the whole file
+              out.setHeader("Content-Length", totalLength.toString)
+              byteSource.copyTo(out.getOutputStream)
+          }
+
+        case _ =>
+          // Do nothing, it's gone
+      }
     } else {
+      // Inform the client that we accept byte-range requests
+      out.setHeader("Accept-Ranges", "bytes")
+
       file.contentLength.foreach { length => out.setHeader("Content-Length", length.toString) }
     }
   }
@@ -114,150 +150,6 @@ trait StreamsFiles {
     out.setHeader("Cache-Control", "private")
     for (expires <- file.cachePolicy.expires) {
       out.setDateHeader("Expires", (DateTime.now plus expires).getMillis)
-    }
-  }
-}
-
-/**
-  * Grokked from play.core.utils.HttpHeaderParameterEncoding
-  *
-  * Support for rending HTTP header parameters according to RFC5987.
-  */
-private[fileserver] object HttpHeaderParameterEncoding {
-  private def charSeqToBitSet(chars: Seq[Char]): JBitSet = {
-    val ints: Seq[Int] = chars.map(_.toInt)
-    val max = ints.fold(0)(Math.max)
-    assert(max <= 256) // We should only be dealing with 7 or 8 bit chars
-    val bitSet = new JBitSet(max)
-    ints.foreach(bitSet.set)
-    bitSet
-  }
-
-  // From https://tools.ietf.org/html/rfc2616#section-2.2
-  //
-  //   separators     = "(" | ")" | "<" | ">" | "@"
-  //                  | "," | ";" | ":" | "\" | <">
-  //                  | "/" | "[" | "]" | "?" | "="
-  //                  | "{" | "}" | SP | HT
-  //
-  // Rich: We exclude <">, "\" since they can be used for quoting/escaping and HT since it is
-  // rarely used and seems like it should be escaped.
-  private val Separators: Seq[Char] = Seq('(', ')', '<', '>', '@', ',', ';', ':', '/', '[', ']', '?', '=', '{', '}', ' ')
-
-  private val AlphaNum: Seq[Char] = ('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')
-
-  // From https://tools.ietf.org/html/rfc5987#section-3.2.1:
-  //
-  // attr-char     = ALPHA / DIGIT
-  // / "!" / "#" / "$" / "&" / "+" / "-" / "."
-  // / "^" / "_" / "`" / "|" / "~"
-  // ; token except ( "*" / "'" / "%" )
-  private val AttrCharPunctuation: Seq[Char] = Seq('!', '#', '$', '&', '+', '-', '.', '^', '_', '`', '|', '~')
-
-  /**
-    * A subset of the 'qdtext' defined in https://tools.ietf.org/html/rfc2616#section-2.2. These are the
-    * characters which can be inside a 'quoted-string' parameter value. These should form a
-    * superset of the [[AttrChar]] set defined below. We exclude some characters which are technically
-    * valid, but might be problematic, e.g. "\" and "%" could be treated as escape characters by some
-    * clients. We can be conservative because we can express these characters clearly as an extended
-    * parameter.
-    */
-  private val PartialQuotedText: JBitSet = charSeqToBitSet(
-    AlphaNum ++ AttrCharPunctuation ++
-      // we include 'separators' plus some chars excluded from 'attr-char'
-      Separators ++ Seq('*', '\''))
-
-  /**
-    * The 'attr-char' values defined in https://tools.ietf.org/html/rfc5987#section-3.2.1. Should be a
-    * subset of [[PartialQuotedText]] defined above.
-    */
-  private val AttrChar: JBitSet = charSeqToBitSet(AlphaNum ++ AttrCharPunctuation)
-
-  private val PlaceholderChar: Char = '?'
-
-  /**
-    * Render a parameter name and value, handling character set issues as
-    * recommended in RFC5987.
-    *
-    * Examples:
-    * [[
-    * render("filename", "foo.txt") ==> "filename=foo.txt"
-    * render("filename", "naïve.txt") ==> "filename=na_ve.txt; filename*=utf8''na%C3%AFve.txt"
-    * ]]
-    */
-  def encodeToBuilder(name: String, value: String, builder: StringBuilder): Unit = {
-    // This flag gets set if we encounter extended characters when rendering the
-    // regular parameter value.
-    var hasExtendedChars = false
-
-    // Render ASCII parameter
-    // E.g. naïve.txt --> "filename=na_ve.txt"
-
-    builder.append(name)
-    builder.append("=\"")
-
-    // Iterate over code points here, because we only want one
-    // ASCII character or placeholder per logical character. If
-    // we use the value's encoded bytes or chars then we might
-    // end up with multiple placeholders per logical character.
-    value.codePoints().forEach { codePoint =>
-      // We could support a wider range of characters here by using
-      // the 'token' or 'quoted printable' encoding, however it's
-      // simpler to use the subset of characters that is also valid
-      // for extended attributes.
-      if (codePoint >= 0 && codePoint <= 255 && PartialQuotedText.get(codePoint)) {
-        builder.append(codePoint.toChar)
-      } else {
-        // Set flag because we need to render an extended parameter.
-        hasExtendedChars = true
-        // Render a placeholder instead of the unsupported character.
-        builder.append(PlaceholderChar)
-      }
-    }
-
-    builder.append('"')
-
-    // Optionally render extended, UTF-8 encoded parameter
-    // E.g. naïve.txt --> "; filename*=utf8''na%C3%AFve.txt"
-    //
-    // Renders both regular and extended parameters, as suggested by:
-    // - https://tools.ietf.org/html/rfc5987#section-4.2
-    // - https://tools.ietf.org/html/rfc6266#section-4.3 (for Content-Disposition filename parameter)
-
-    if (hasExtendedChars) {
-      def hexDigit(x: Int): Char = (if (x < 10) x + '0' else x - 10 + 'a').toChar
-
-      // From https://tools.ietf.org/html/rfc5987#section-3.2.1:
-      //
-      // Producers MUST use either the "UTF-8" ([RFC3629]) or the "ISO-8859-1"
-      // ([ISO-8859-1]) character set.  Extension character sets (mime-
-
-      val CharacterSetName = "utf-8"
-
-      builder.append("; ")
-      builder.append(name)
-
-      builder.append("*=")
-      builder.append(CharacterSetName)
-      builder.append("''")
-
-      // From https://tools.ietf.org/html/rfc5987#section-3.2.1:
-      //
-      // Inside the value part, characters not contained in attr-char are
-      // encoded into an octet sequence using the specified character set.
-      // That octet sequence is then percent-encoded as specified in Section
-      // 2.1 of [RFC3986].
-
-      val bytes = value.getBytes(CharacterSetName)
-      for (b <- bytes) {
-        if (AttrChar.get(b & 0xFF)) {
-          builder.append(b.toChar)
-        } else {
-          builder.append('%')
-          builder.append(hexDigit((b >> 4) & 0xF))
-          builder.append(hexDigit(b & 0xF))
-        }
-      }
     }
   }
 }
