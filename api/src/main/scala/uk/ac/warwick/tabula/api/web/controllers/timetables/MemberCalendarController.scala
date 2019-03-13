@@ -83,12 +83,8 @@ trait PathVariableTimetableHashMemberCalendarApi extends MemberCalendarApi {
     // Use a mocked up CurrentUser, as the actual current user is probably not logged in
     def currentUser(m: Member) =
       new CurrentUser(
-        realUser = m.asSsoUser.tap {
-          _.setIsLoggedIn(true)
-        },
-        apparentUser = m.asSsoUser.tap {
-          _.setIsLoggedIn(true)
-        },
+        realUser = m.asSsoUser.tap(_.setIsLoggedIn(true)),
+        apparentUser = m.asSsoUser.tap(_.setIsLoggedIn(true)),
         profile = Some(m),
         sysadmin = false,
         masquerader = false,

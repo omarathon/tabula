@@ -32,18 +32,10 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
   }
 
   private trait ExistingGroupsFixture extends Fixture {
-    val groupA: SmallGroup = Fixtures.smallGroup("Group A").tap {
-      _.id = "groupAid"
-    }
-    val groupB: SmallGroup = Fixtures.smallGroup("Group B").tap {
-      _.id = "groupBid"
-    }
-    val groupC: SmallGroup = Fixtures.smallGroup("Group C").tap {
-      _.id = "groupCid"
-    }
-    val groupD: SmallGroup = Fixtures.smallGroup("Group D").tap {
-      _.id = "groupDid"
-    }
+    val groupA: SmallGroup = Fixtures.smallGroup("Group A").tap(_.id = "groupAid")
+    val groupB: SmallGroup = Fixtures.smallGroup("Group B").tap(_.id = "groupBid")
+    val groupC: SmallGroup = Fixtures.smallGroup("Group C").tap(_.id = "groupCid")
+    val groupD: SmallGroup = Fixtures.smallGroup("Group D").tap(_.id = "groupDid")
 
     set.groups.add(groupA)
     set.groups.add(groupB)
@@ -62,12 +54,8 @@ class EditSmallGroupsCommandTest extends TestBase with Mockito {
 
   @Test def populate {
     new CommandFixture {
-      set.groups.add(Fixtures.smallGroup("Group A").tap {
-        _.id = "groupAId"
-      })
-      set.groups.add(Fixtures.smallGroup("Group B").tap {
-        _.id = "groupBId"
-      })
+      set.groups.add(Fixtures.smallGroup("Group A").tap(_.id = "groupAId"))
+      set.groups.add(Fixtures.smallGroup("Group B").tap(_.id = "groupBId"))
 
       command.populate()
 

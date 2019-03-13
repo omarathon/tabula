@@ -15,18 +15,14 @@ class FinaliseFeedbackNotificationTest extends TestBase with Mockito with Freema
   }
 
   private trait SingleItemFixture extends Fixture {
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0000001").tap {
-      _.assignment = assignment
-    }
+    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0000001").tap(_.assignment = assignment)
 
     val notification: FinaliseFeedbackNotification = Notification.init(new FinaliseFeedbackNotification, currentUser.apparentUser, feedback.asInstanceOf[Feedback], assignment)
   }
 
   private trait MultipleItemsFixture extends Fixture {
     val feedbacks: Seq[Feedback] =
-      Seq("0000001", "0000002", "0000003").map { uniId => Fixtures.assignmentFeedback(uniId).tap {
-        _.assignment = assignment
-      }
+      Seq("0000001", "0000002", "0000003").map { uniId => Fixtures.assignmentFeedback(uniId).tap(_.assignment = assignment)
       }
 
     val notification: FinaliseFeedbackNotification = Notification.init(new FinaliseFeedbackNotification, currentUser.apparentUser, feedbacks, assignment)

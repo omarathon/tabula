@@ -58,9 +58,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish: Seq[SmallGroupSet], privat
         tutor <- group.events.flatMap(_.tutors.users).distinct
       } yield {
         val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
-          .tap {
-            _.isStudent = false
-          }
+          .tap(_.isStudent = false)
         n.recipientUserId = tutor.getUserId
         n.priority = if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial
         n
@@ -75,9 +73,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish: Seq[SmallGroupSet], privat
         student <- group.students.users
       } yield {
         val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
-          .tap {
-            _.isStudent = true
-          }
+          .tap(_.isStudent = true)
         n.recipientUserId = student.getUserId
         n.priority = if (sendEmail) NotificationPriority.Info else NotificationPriority.Trivial
         n

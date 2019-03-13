@@ -63,9 +63,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
   @Test def studentMember() {
     val service = new AssessmentMembershipServiceImpl
 
-    val user = new User("cuscav").tap {
-      _.setWarwickId("0672089")
-    }
+    val user = new User("cuscav").tap(_.setWarwickId("0672089"))
 
     service.userLookup = new MockUserLookup().tap(_.registerUserObjects(user))
     service.profileService = smartMock[ProfileService]
