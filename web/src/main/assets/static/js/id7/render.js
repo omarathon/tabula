@@ -36,7 +36,7 @@ $.fn.spin = function spin(o, color) {
 
     if (o !== false) {
       const opts = $.extend(
-        {color: color || $this.css('color')},
+        { color: color || $this.css('color') },
         $.fn.spin.presets[o] || o,
       );
 
