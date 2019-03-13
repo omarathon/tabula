@@ -81,9 +81,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
 
   def permissionsChildren[A <: PermissionsTarget](target: A): Seq[PermissionsTree[_]] = target match {
     case d: Department =>
-      d.children.asScala.toSeq.sortBy {
-        _.name
-      }.map(buildTree) ++
+      d.children.asScala.toSeq.sortBy(_.name).map(buildTree) ++
         d.modules.asScala.toSeq.sorted.map(buildTree) ++
         d.routes.asScala.toSeq.sorted.map(buildTree)
     case _ => Nil

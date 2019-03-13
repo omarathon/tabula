@@ -36,9 +36,7 @@ final class FeaturesController extends BaseSysadminController with InitializingB
       .filter {
         _.getWriteMethod != null
       }
-      .sortBy {
-        _.getDisplayName
-      }
+      .sortBy(_.getDisplayName)
   }
 
   def currentValues: List[FeatureItem] = properties.map { (property) =>

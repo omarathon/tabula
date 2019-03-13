@@ -60,9 +60,7 @@ abstract class AbstractRoleTableController extends AdminController {
     val allDefinitionsWithoutReplacements =
       (builtInRoleDefinitions ++ selectorBuiltInRoleDefinitions ++ customRoleDefinitions)
         .filter(_.isAssignable)
-        .sortBy {
-          _.allPermissions(Some(null)).size
-        }
+        .sortBy(_.allPermissions(Some(null)).size)
         .groupBy(baseName)
         .toSeq.sortBy { case (substr, defs) =>
         // Show selector ones first

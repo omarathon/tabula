@@ -31,9 +31,7 @@ class OldModuleController extends OldCourseworkController {
       "module" -> module,
       "assignments" -> module.assignments.asScala
         .filterNot(_.deleted)
-        .sortBy {
-          _.closeDate
-        }
+        .sortBy(_.closeDate)
         .reverse)
   }
 

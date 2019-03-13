@@ -53,9 +53,7 @@ class OldCopyDepartmentAssignmentsController extends OldCourseworkController wit
 
   @ModelAttribute
   def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
-    val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy {
-      _.code
-    }
+    val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy(_.code)
     CopyAssignmentsCommand(department, modules)
   }
 

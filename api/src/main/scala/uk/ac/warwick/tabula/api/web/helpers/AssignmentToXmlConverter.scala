@@ -18,9 +18,7 @@ trait AssignmentToXmlConverter {
       "open-date" -> assignment.openDate,
       "open-ended" -> assignment.openEnded,
       "close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
-      "last-submission-date" -> assignment.submissions.asScala.map(_.submittedDate).sortBy {
-        _.getMillis
-      }.reverse.headOption,
+      "last-submission-date" -> assignment.submissions.asScala.map(_.submittedDate).sortBy(_.getMillis).reverse.headOption,
       "submissions-zip-url" -> (toplevelUrl + Routes.admin.assignment.submissionsZip(assignment))
     )
   }

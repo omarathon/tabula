@@ -86,9 +86,7 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 
   def webgroupsToMap(groups: Seq[Group]): Seq[(String, Group)] = groups
     .map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
-    .sortBy {
-      _._1
-    }
+    .sortBy(_._1)
 
 }
 

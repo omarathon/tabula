@@ -48,9 +48,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
   def xml(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType, @PathVariable assignment: Assignment): Elem = {
     command.checkIndex = checkIndex
 
-    val items = command.apply().sortBy {
-      _.submission.submittedDate
-    }.reverse
+    val items = command.apply().sortBy(_.submission.submittedDate).reverse
 
     <submissions>
       {assignmentElement(assignment)}{items map submissionElement}
@@ -87,9 +85,7 @@ class OldSubmissionsInfoController extends OldCourseworkController {
   def csv(@ModelAttribute("command") command: ListSubmissionsCommand.CommandType): CSVView = {
     command.checkIndex = checkIndex
 
-    val items = command.apply().sortBy {
-      _.submission.submittedDate
-    }.reverse
+    val items = command.apply().sortBy(_.submission.submittedDate).reverse
     val writer = new StringWriter
     val csvBuilder = new SubmissionsCSVBuilder(items)
     val doc = new GoodCsvDocument(csvBuilder, null)

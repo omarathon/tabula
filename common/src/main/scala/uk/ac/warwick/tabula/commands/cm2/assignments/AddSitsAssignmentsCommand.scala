@@ -146,9 +146,7 @@ trait PopulatesAddSitsAssignmentsCommand extends PopulateOnForm {
   private def fetchSitsAssignmentItems(): JList[SitsAssignmentItem] = {
     for {
       upstreamAssignment <- assessmentMembershipService.getAssessmentComponents(department, includeSubDepartments)
-      assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy {
-        _.occurrence
-      }
+      assessmentGroup <- assessmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy(_.occurrence)
     } yield {
       val item = new SitsAssignmentItem(
         include = shouldIncludeByDefault(upstreamAssignment),
