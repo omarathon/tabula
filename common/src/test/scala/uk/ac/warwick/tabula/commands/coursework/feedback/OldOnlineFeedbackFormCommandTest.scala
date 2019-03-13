@@ -125,53 +125,33 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     new Fixture {
       var errors = new BindException(command, "command")
       command.mark = "heron"
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
 
       errors = new BindException(command, "command")
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       command.mark = "101"
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
 
       errors = new BindException(command, "command")
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       command.mark = "-5"
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
 
       errors = new BindException(command, "command")
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       command.mark = "77"
       command.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
 
       errors = new BindException(command, "command")
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       command.mark = "77.2"
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
 
     }
   }
@@ -187,16 +167,12 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     new GradeFixture {
       command.grade = "F"
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
     new GradeFixture {
       command.grade = "A"
       command.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 }

@@ -34,9 +34,7 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
       var errors = new BindException(command, "command")
       command.resource_link_id = s"${TurnitinLtiService.AssignmentPrefix}1234"
       command.validate(errors)
-      errors.hasFieldErrors should be {
-        false
-      }
+      errors.hasFieldErrors should be (false)
     }
   }
 
@@ -46,9 +44,7 @@ class TurnitinLtiSubmitAssignmentResponseTest extends TestBase with Mockito {
       var errors = new BindException(command, "command")
       command.resource_link_id = s"${TurnitinLtiService.AssignmentPrefix}4321"
       command.validate(errors)
-      errors.hasFieldErrors should be {
-        true
-      }
+      errors.hasFieldErrors should be (true)
     }
   }
 

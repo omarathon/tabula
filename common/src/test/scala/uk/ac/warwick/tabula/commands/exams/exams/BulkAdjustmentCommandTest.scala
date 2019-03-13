@@ -59,9 +59,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       bindListener.file = badFile
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        true
-      }
+      errors.hasFieldErrors("file") should be (true)
     }
   }
 
@@ -73,9 +71,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        false
-      }
+      errors.hasFieldErrors("file") should be (false)
       bindListener.ignoredRows.size should be(1)
     }
   }
@@ -88,9 +84,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        false
-      }
+      errors.hasFieldErrors("file") should be (false)
       bindListener.ignoredRows.size should be(1)
     }
   }
@@ -103,9 +97,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        false
-      }
+      errors.hasFieldErrors("file") should be (false)
       bindListener.ignoredRows.size should be(1)
     }
   }
@@ -125,12 +117,8 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       )
       val errors = new BindException(bindListener, "command")
       bindListener.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        false
-      }
-      bindListener.ignoredRows.isEmpty should be {
-        true
-      }
+      errors.hasFieldErrors("file") should be (false)
+      bindListener.ignoredRows.isEmpty should be (true)
       bindListener.students.size should be(1)
       bindListener.marks.get(studentId) should be("100")
       bindListener.grades.get(studentId) should be("A")
@@ -166,9 +154,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
   def validateNoMark() {
     new ValidateFixture {
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("marks[1234]") should be (true)
     }
   }
 
@@ -177,9 +163,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     new ValidateFixture {
       validator.marks.put("1234", "")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("marks[1234]") should be (true)
     }
   }
 
@@ -188,9 +172,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     new ValidateFixture {
       validator.marks.put("1234", "101")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("marks[1234]") should be (true)
     }
   }
 
@@ -199,9 +181,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     new ValidateFixture {
       validator.marks.put("1234", "one")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("marks[1234]") should be (true)
     }
   }
 
@@ -212,12 +192,8 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       validator.marks.put("1234", "100")
       validator.grades.put("1234", "F")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        false
-      }
-      errors.hasFieldErrors("grades[1234]") should be {
-        false
-      }
+      errors.hasFieldErrors("marks[1234]") should be (false)
+      errors.hasFieldErrors("grades[1234]") should be (false)
     }
   }
 
@@ -228,12 +204,8 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       validator.marks.put("1234", "100")
       validator.grades.put("1234", "")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        false
-      }
-      errors.hasFieldErrors("grades[1234]") should be {
-        false
-      }
+      errors.hasFieldErrors("marks[1234]") should be (false)
+      errors.hasFieldErrors("grades[1234]") should be (false)
     }
   }
 
@@ -244,12 +216,8 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       validator.marks.put("1234", "100")
       validator.grades.put("1234", "F")
       validator.validate(errors)
-      errors.hasFieldErrors("marks[1234]") should be {
-        false
-      }
-      errors.hasFieldErrors("grades[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("marks[1234]") should be (false)
+      errors.hasFieldErrors("grades[1234]") should be (true)
     }
   }
 
@@ -267,9 +235,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
 				Spare ribs fugiat chuck pancetta meatball capicola, meatloaf tail brisket.
 			""")
       validator.validate(errors)
-      errors.hasFieldErrors("reasons[1234]") should be {
-        true
-      }
+      errors.hasFieldErrors("reasons[1234]") should be (true)
     }
   }
 
@@ -280,12 +246,8 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
       validator.reasons.put("1234", "")
       validator.comments.put("1234", "")
       validator.validate(errors)
-      errors.hasFieldErrors("defaultReason") should be {
-        true
-      }
-      errors.hasFieldErrors("defaultComment") should be {
-        true
-      }
+      errors.hasFieldErrors("defaultReason") should be (true)
+      errors.hasFieldErrors("defaultComment") should be (true)
     }
   }
 

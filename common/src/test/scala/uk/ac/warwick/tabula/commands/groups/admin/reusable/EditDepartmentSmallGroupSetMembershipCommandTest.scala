@@ -112,19 +112,11 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
       val result: AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult = command.addUsers()
       result.missingUsers.size should be(2)
-      result.missingUsers.contains(invalidNoone) should be {
-        true
-      }
-      result.missingUsers.contains(invalidStaff.universityId) should be {
-        true
-      }
+      result.missingUsers.contains(invalidNoone) should be (true)
+      result.missingUsers.contains(invalidStaff.universityId) should be (true)
       command.includedStudentIds.size should be(2)
-      command.includedStudentIds.contains(validStudent.universityId) should be {
-        true
-      }
-      command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be {
-        true
-      }
+      command.includedStudentIds.contains(validStudent.universityId) should be (true)
+      command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be (true)
     }
   }
 

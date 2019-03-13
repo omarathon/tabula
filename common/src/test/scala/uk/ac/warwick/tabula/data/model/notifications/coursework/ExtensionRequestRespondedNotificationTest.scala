@@ -29,9 +29,7 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
   def titleShouldContainMessage(): Unit = new ExtensionFixture {
     extension.reject()
     val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
-    n.title.contains("XXX: Extension request by [Unknown user] for \"Essay\" was rejected") should be {
-      true
-    }
+    n.title.contains("XXX: Extension request by [Unknown user] for \"Essay\" was rejected") should be (true)
   }
 
   @Test

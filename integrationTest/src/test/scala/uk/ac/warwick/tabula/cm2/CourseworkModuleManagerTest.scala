@@ -41,9 +41,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
       Then("I should see the module permissions option")
       val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
       eventually {
-        managersLink.isDisplayed should be {
-          true
-        }
+        managersLink.isDisplayed should be (true)
       }
 
       When("I click the permissions link")
@@ -169,9 +167,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
         Then("I should see the module permissions option")
         val managersLink = manageModule.findElement(By.partialLinkText("Module permissions"))
         eventually {
-          managersLink.isDisplayed should be {
-            true
-          }
+          managersLink.isDisplayed should be (true)
         }
       }
     }

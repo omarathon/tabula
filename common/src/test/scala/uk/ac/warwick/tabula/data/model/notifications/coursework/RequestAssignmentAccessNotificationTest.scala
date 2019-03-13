@@ -34,10 +34,10 @@ class Cm2RequestAssignmentAccessNotificationTest extends TestBase with Freemarke
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
     notificationContent should be(
       """Student Full Name (1234567), who is a student in Warwick Business School, has requested access to the assignment "5,000 word essay" for CS118.
-        				|
-        				|If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
-        				|
-        				|You can contact the student via email at student@wbs.ac.uk.""".stripMargin
+        |
+        |If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
+        |
+        |You can contact the student via email at student@wbs.ac.uk.""".stripMargin
     )
   }
 
@@ -56,10 +56,10 @@ class Cm2RequestAssignmentAccessNotificationTest extends TestBase with Freemarke
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
     notificationContent should be(
       """Staff Full Name (1234567), who is a member of staff in Warwick Business School, has requested access to the assignment "5,000 word essay" for CS118.
-        				|
-        				|If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
-        				|
-        				|You can contact the member of staff via email at staff@wbs.ac.uk.""".stripMargin
+        |
+        |If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
+        |
+        |You can contact the member of staff via email at staff@wbs.ac.uk.""".stripMargin
     )
   }
 
@@ -75,10 +75,10 @@ class Cm2RequestAssignmentAccessNotificationTest extends TestBase with Freemarke
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
     notificationContent should be(
       """External Full Name, who is an external user, has requested access to the assignment "5,000 word essay" for CS118.
-        				|
-        				|If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
-        				|
-        				|You can contact the external user via email at external@wbs.ac.uk.""".stripMargin
+        |
+        |If you agree that they should be able to submit to this assignment, you should enrol them on the assignment via the assignment properties.
+        |
+        |You can contact the external user via email at external@wbs.ac.uk.""".stripMargin
     )
   }
 

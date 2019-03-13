@@ -27,9 +27,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
   def testDeleted() {
     new Fixture {
       var deleted: Boolean = meeting.deleted
-      deleted should be {
-        false
-      }
+      deleted should be (false)
 
       val cmd = new DeleteMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
         val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
@@ -37,9 +35,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
       cmd.applyInternal()
 
       deleted = meeting.deleted
-      deleted should be {
-        true
-      }
+      deleted should be (true)
     }
   }
 
@@ -54,9 +50,7 @@ class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
       cmd.applyInternal()
 
       val deleted: Boolean = meeting.deleted
-      deleted should be {
-        false
-      }
+      deleted should be (false)
     }
   }
 

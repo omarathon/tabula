@@ -56,9 +56,7 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
   def validateNoOldCourses(): Unit = new ValidationFixture {
     thisStudent.freshStudentCourseDetails.head.endDate = null
     validator.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
   }
 
   @Test
@@ -66,43 +64,33 @@ class ExpireRelationshipsOnOldCoursesCommandTest extends TestBase with Mockito {
     thisStudent.freshStudentCourseDetails.head.endDate = DateTime.now.minusDays(1).toLocalDate
     testObject.relationshipService.getRelationships(tutorRelationshipType, thisStudent) returns Seq()
     validator.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
   }
 
   @Test
   def validateAlreadyExpired(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
     relationshipOnEndedCourse.endDate = DateTime.now.minusDays(1)
     validator.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
   }
 
   @Test
   def validateHasExpired(): Unit = new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
     validator.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
   }
 
   @Test
   def noCurrentRelationshipAndNotPastGracePeriod(): Unit = new ValidationFixture with StudentWithOnlyEndedCourse {
     validator.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
   }
 
   @Test
   def noCurrentRelationshipButPastGracePeriod(): Unit = new ValidationFixture with StudentWithOnlyEndedCourse {
     currentCourse.endDate = DateTime.now.minusMonths(3).toLocalDate
     validator.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
   }
 
   trait ApplyFixture extends Fixture {

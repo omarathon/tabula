@@ -56,25 +56,15 @@ class EditSchemeMembershipCommandTest extends TestBase with Mockito {
 
       val result = command.addUsers()
       result.missingMembers.size should be(2)
-      result.missingMembers.contains(invalidNoone) should be {
-        true
-      }
-      result.missingMembers.contains(invalidStaff.universityId) should be {
-        true
-      }
+      result.missingMembers.contains(invalidNoone) should be (true)
+      result.missingMembers.contains(invalidStaff.universityId) should be (true)
       result.noPermissionMembers.size should be(1)
       result.noPermissionMembers.head should be(invalidNoPermission)
       command.includedStudentIds.size should be(3)
       // TAB-2531 The same student shouldn't be added multiple times
-      command.includedStudentIds.asScala.count(_ == validStudentAlreadyIncluded.universityId) should be {
-        1
-      }
-      command.includedStudentIds.contains(validStudentAlreadyIncluded.universityId) should be {
-        true
-      }
-      command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be {
-        true
-      }
+      command.includedStudentIds.asScala.count(_ == validStudentAlreadyIncluded.universityId) should be (1)
+      command.includedStudentIds.contains(validStudentAlreadyIncluded.universityId) should be (true)
+      command.includedStudentIds.contains(validStudentWithUsercode.universityId) should be (true)
     }
   }
 

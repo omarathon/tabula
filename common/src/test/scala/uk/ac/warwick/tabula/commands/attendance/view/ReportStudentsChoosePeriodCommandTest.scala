@@ -138,18 +138,10 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
         state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
         val result = state.availablePeriods
         result.size should be(2)
-        result.contains((PeriodType.autumnTerm.toString, true)) should be {
-          true
-        }
-        result.contains((PeriodType.autumnTerm.toString, false)) should be {
-          false
-        }
-        result.contains((PeriodType.christmasVacation.toString, false)) should be {
-          true
-        }
-        result.contains((PeriodType.christmasVacation.toString, true)) should be {
-          false
-        }
+        result.contains((PeriodType.autumnTerm.toString, true)) should be (true)
+        result.contains((PeriodType.autumnTerm.toString, false)) should be (false)
+        result.contains((PeriodType.christmasVacation.toString, false)) should be (true)
+        result.contains((PeriodType.christmasVacation.toString, true)) should be (false)
       }
     }
   }

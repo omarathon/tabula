@@ -5,21 +5,21 @@ A submission for the assignment '${assignment.name}' for ${module.code?upper_cas
 
 <#if submission.allAttachments??>
 
-  Uploaded attachments:
+Uploaded attachments:
 
-  <#list submission.allAttachments as attachment>
-    - ${attachment.name}
-  </#list>
+<#list submission.allAttachments as attachment>
+- ${attachment.name}
+</#list>
 </#if>
 
 <#-- Only show these links if it's an email. -->
 <#if isEmail!false>
-  You can download all the attachments for this submission here:
+You can download all the attachments for this submission here:
 
-  <@url context='/coursework' page='/admin/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.studentIdentifier}.zip'/>
+<@url context='/coursework' page='/admin/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.studentIdentifier}.zip'/>
 
 
-  To unsubscribe from these messages, go here and select "No alerts".
+To unsubscribe from these messages, go here and select "No alerts".
 
-  <@url context='/' page='/settings'/>
+<@url context='/' page='/settings'/>
 </#if>

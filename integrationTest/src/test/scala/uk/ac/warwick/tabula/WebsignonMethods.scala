@@ -67,15 +67,11 @@ trait WebsignonMethods extends Matchers with Eventually {
               // Signed in as someone else
               click on ssoLink.get
               eventually {
-                (cssSelector("div.sign-out a").findElement.isDefined && cssSelector("div.sign-out a").findElement.get.isDisplayed) should be {
-                  true
-                }
+                (cssSelector("div.sign-out a").findElement.isDefined && cssSelector("div.sign-out a").findElement.get.isDisplayed) should be (true)
               }
               click on cssSelector("div.sign-out a")
               eventually {
-                (className("sso-link").findElement.isDefined && className("sso-link").findElement.get.attribute("class").exists(_.contains("sign-in"))) should be {
-                  true
-                }
+                (className("sso-link").findElement.isDefined && className("sso-link").findElement.get.attribute("class").exists(_.contains("sign-in"))) should be (true)
               }
               click on className("sso-link")
               login(url)

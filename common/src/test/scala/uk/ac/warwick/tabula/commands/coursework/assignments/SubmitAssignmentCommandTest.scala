@@ -30,9 +30,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
     var errors = new BindException(cmd, "command")
     cmd.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
   }
 
   @Test def multipleSubmissions() = withUser(code = "cusebr", universityId = "0678022") {
@@ -47,9 +45,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
     var errors = new BindException(cmd, "command")
     cmd.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
 
     val submission = new Submission()
     submission.assignment = assignment
@@ -60,17 +56,13 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
     // Can't submit twice, silly
     errors = new BindException(cmd, "command")
     cmd.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
 
     // But guys, guys... what if...
     assignment.allowResubmission = true
     errors = new BindException(cmd, "command")
     cmd.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
   }
 
   @Test def fileTypeValidation() = withUser(code = "cusebr", universityId = "0678022") {
@@ -99,36 +91,28 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
       val document: Array[Byte] = resourceAsBytes("attachment1.docx")
       submissionValue.file.upload add new MockMultipartFile("attachment1.docx", "attachment1.docx", null, document)
       cmd.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
 
     new Setup {
       val document2: Array[Byte] = resourceAsBytes("attachment2.doc")
       submissionValue.file.upload add new MockMultipartFile("attachment2.doc", "attachment2.doc", null, document2)
       cmd.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
 
     new Setup {
       val pdf: Array[Byte] = resourceAsBytes("attachment3.pdf")
       submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.PDF", null, pdf)
       cmd.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
 
     new Setup {
       val csv: Array[Byte] = resourceAsBytes("attachment4.csv")
       submissionValue.file.upload add new MockMultipartFile("attachment4.csv", "attachment4.csv", null, csv)
       cmd.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldError("fields[upload].file").getCode should be("file.wrongtype.one")
     }
 
@@ -137,9 +121,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
       submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.pdf", null, pdf)
       submissionValue.file.upload add new MockMultipartFile("attachment3.pdf", "attachment3.pdf", null, pdf)
       cmd.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldError("fields[upload].file").getCode should be("file.duplicate")
     }
   }
@@ -159,9 +141,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
       // no disability use selected
       var errors = new BindException(cmd, "command")
       cmd.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldErrors.asScala.head.getField should be("useDisability")
       errors.getFieldErrors.asScala.head.getCodes should contain("assignment.submit.chooseDisability")
@@ -171,9 +151,7 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
       errors = new BindException(cmd, "command")
       cmd.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 

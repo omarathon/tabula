@@ -9,18 +9,14 @@ class FormValueTest extends PersistenceTestBase {
     val field = new FileField()
     val value = new FileFormValue(field)
     val attachment = new FileAttachment()
-    attachment.temporary.booleanValue should be {
-      true
-    }
+    attachment.temporary.booleanValue should be (true)
 
     value.file.attached.add(attachment)
 
     val saved = new SavedFormValue()
     value.persist(saved)
     saved.attachments.size should be(1)
-    saved.attachments.iterator.next.temporary.booleanValue should be {
-      false
-    }
+    saved.attachments.iterator.next.temporary.booleanValue should be (false)
   }
 
   @Test def tab3614(): Unit = transactional { tx =>

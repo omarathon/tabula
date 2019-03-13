@@ -27,9 +27,7 @@ class JobContextTest extends AppContextTestBase {
 
     val jsiLoaded = session.get(classOf[JobInstanceImpl], id)
     jsiLoaded.data should be("""{"How":"Json"}""")
-    jsiLoaded.succeeded should be {
-      true
-    }
+    jsiLoaded.succeeded should be (true)
   }
 
   @Transactional
@@ -44,19 +42,13 @@ class JobContextTest extends AppContextTestBase {
     // Check that the flags have actually been updated.
     jobService.getInstance(id).map { instance =>
       withClue("Started") {
-        instance.started should be {
-          true
-        }
+        instance.started should be (true)
       }
       withClue("Finished") {
-        instance.finished should be {
-          true
-        }
+        instance.finished should be (true)
       }
       withClue("Succeeded") {
-        instance.succeeded should be {
-          true
-        }
+        instance.succeeded should be (true)
       }
     }
   }

@@ -15,9 +15,7 @@ trait ValidatorHelpers {
   def testValidator(validator: SelfValidating, field: String, hasError: Boolean): Unit = {
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors(field) should be {
-      hasError
-    }
+    errors.hasFieldErrors(field) should be (hasError)
   }
 
 }

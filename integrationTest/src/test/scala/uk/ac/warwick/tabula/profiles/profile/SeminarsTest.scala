@@ -27,9 +27,7 @@ class SeminarsTest extends BrowserTest with GivenWhenThen with FeaturesDriver wi
     currentUrl should endWith("/events")
 
     Then("They see the group to sign up")
-    cssSelector(s"div.groupset-$setId").findElement.isDefined should be {
-      true
-    }
+    cssSelector(s"div.groupset-$setId").findElement.isDefined should be (true)
 
     When("They choose the group to join")
     click on radioButton("group")

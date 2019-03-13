@@ -54,9 +54,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
       command.memberDao = memberDao
 
       val member: Member = command.applyInternal()
-      member.isInstanceOf[StaffProperties] should be {
-        true
-      }
+      member.isInstanceOf[StaffProperties] should be (true)
 
       member.title should be("Mr")
       member.universityId should be("0672089")
@@ -86,9 +84,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
       command.memberDao = memberDao
 
       val member: Member = command.applyInternal()
-      member.isInstanceOf[StaffProperties] should be {
-        true
-      }
+      member.isInstanceOf[StaffProperties] should be (true)
 
       member.title should be("Mr")
       member.universityId should be("0672089")
@@ -116,12 +112,8 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
       command.memberDao = memberDao
 
       val member: Member = command.applyInternal()
-      member.isInstanceOf[StaffProperties] should be {
-        true
-      }
-      member.isInstanceOf[EmeritusMember] should be {
-        true
-      }
+      member.isInstanceOf[StaffProperties] should be (true)
+      member.isInstanceOf[EmeritusMember] should be (true)
 
       verify(memberDao, times(1)).delete(existing)
       verify(memberDao, times(1)).saveOrUpdate(existing)

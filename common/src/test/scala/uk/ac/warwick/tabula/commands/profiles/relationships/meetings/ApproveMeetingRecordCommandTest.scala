@@ -46,9 +46,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
     new Fixture {
       cmd.approved = true
       cmd.applyInternal()
-      meetingRecord.isApproved should be {
-        true
-      }
+      meetingRecord.isApproved should be (true)
       verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
       verify(cmd.attendanceMonitoringMeetingRecordService, times(1)).updateCheckpoints(meetingRecord)
     }
@@ -59,9 +57,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
     new Fixture {
       cmd.approved = false
       cmd.applyInternal()
-      meetingRecord.isApproved should be {
-        false
-      }
+      meetingRecord.isApproved should be (false)
       verify(cmd.meetingRecordDao, times(1)).saveOrUpdate(proposedApproval)
       verify(cmd.attendanceMonitoringMeetingRecordService, times(1)).updateCheckpoints(meetingRecord)
     }
@@ -89,9 +85,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 
     cmd.validate(errors)
-    errors.hasErrors should be {
-      false
-    }
+    errors.hasErrors should be (false)
   }
 
   @Test
@@ -139,9 +133,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
     val errors = new BindException(cmd, "command")
     cmd.validate(errors)
-    errors.hasErrors should be {
-      true
-    }
+    errors.hasErrors should be (true)
     errors.getErrorCount should be(1)
     errors.getGlobalError.getCode should be("meetingRecordApproval.meetingRecord.deleted")
 

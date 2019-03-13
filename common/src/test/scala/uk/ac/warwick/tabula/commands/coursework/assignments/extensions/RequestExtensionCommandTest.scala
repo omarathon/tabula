@@ -29,44 +29,30 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
         command.disabilityAdjustment = true
         val errors = new BindException(command, "command")
         command.validate(errors)
-        errors.hasErrors should be {
-          false
-        }
+        errors.hasErrors should be (false)
 
         var returnedExtension = command.applyInternal()
 
         returnedExtension.requestedExpiryDate should be(Some(DateTime.now.plusMonths(2)))
         returnedExtension.reason should be("Fun fun fun")
-        returnedExtension.disabilityAdjustment should be {
-          true
-        }
+        returnedExtension.disabilityAdjustment should be (true)
         returnedExtension.requestedOn should be(DateTime.now)
-        returnedExtension.approved should be {
-          false
-        }
-        returnedExtension.rejected should be {
-          false
-        }
+        returnedExtension.approved should be (false)
+        returnedExtension.rejected should be (false)
         returnedExtension.reviewedOn should be(null)
         returnedExtension.usercode should be(currentUser.userId)
         returnedExtension.universityId should be(Some(currentUser.universityId))
         returnedExtension.assignment should be(assignment)
-        returnedExtension.attachments.isEmpty should be {
-          true
-        }
+        returnedExtension.attachments.isEmpty should be (true)
 
         // check boolean is correctly propagated
         command.disabilityAdjustment = false
         returnedExtension = command.applyInternal()
-        returnedExtension.disabilityAdjustment should be {
-          false
-        }
+        returnedExtension.disabilityAdjustment should be (false)
 
         command.disabilityAdjustment = null
         returnedExtension = command.applyInternal()
-        returnedExtension.disabilityAdjustment should be {
-          false
-        }
+        returnedExtension.disabilityAdjustment should be (false)
       }
     }
   }
@@ -90,18 +76,14 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
         var command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
         var returnedExtension = command.applyInternal()
 
-        returnedExtension.approved should be {
-          true
-        }
+        returnedExtension.approved should be (true)
         returnedExtension.reviewedOn should be(DateTime.now)
 
         assignment = newDeepAssignment()
         command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
         returnedExtension = command.applyInternal()
 
-        returnedExtension.approved should be {
-          false
-        }
+        returnedExtension.approved should be (false)
         returnedExtension.reviewedOn should be(null)
 
       }
@@ -120,58 +102,38 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
         val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
         var errors = new BindException(command, "command")
-        errors.hasErrors should be {
-          false
-        }
+        errors.hasErrors should be (false)
         command.validate(errors)
-        errors.hasErrors should be {
-          true
-        }
+        errors.hasErrors should be (true)
 
-        errors.getFieldErrors("readGuidelines").isEmpty should be {
-          false
-        }
+        errors.getFieldErrors("readGuidelines").isEmpty should be (false)
         command.readGuidelines = true
         errors = new BindException(command, "command")
         command.validate(errors)
-        errors.getFieldErrors("readGuidelines").isEmpty should be {
-          true
-        }
+        errors.getFieldErrors("readGuidelines").isEmpty should be (true)
 
-        errors.getFieldErrors("reason").isEmpty should be {
-          false
-        }
+        errors.getFieldErrors("reason").isEmpty should be (false)
         command.reason = "Hello sailor"
         errors = new BindException(command, "command")
         command.validate(errors)
-        errors.getFieldErrors("reason").isEmpty should be {
-          true
-        }
+        errors.getFieldErrors("reason").isEmpty should be (true)
 
-        errors.getFieldErrors("requestedExpiryDate").isEmpty should be {
-          false
-        }
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (false)
         command.requestedExpiryDate = DateTime.now
         errors = new BindException(command, "command")
         command.validate(errors)
-        errors.getFieldErrors("requestedExpiryDate").isEmpty should be {
-          false
-        }
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (false)
         errors.getFieldError("requestedExpiryDate").getCode should be("extension.requestedExpiryDate.beforeAssignmentExpiry")
 
         command.requestedExpiryDate = DateTime.now.plusMonths(2)
         errors = new BindException(command, "command")
         command.validate(errors)
-        errors.getFieldErrors("requestedExpiryDate").isEmpty should be {
-          true
-        }
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (true)
 
         assignment.extensionAttachmentMandatory = true
         errors = new BindException(command, "command")
         command.validate(errors)
-        errors.getFieldErrors("file").asScala.nonEmpty should be {
-          true
-        }
+        errors.getFieldErrors("file").asScala.nonEmpty should be (true)
       }
     }
   }
@@ -203,9 +165,7 @@ class RequestExtensionCommandTest extends TestBase with Mockito {
 
         command.attachedFiles.remove(attachment)
         returnedExtension = command.applyInternal()
-        returnedExtension.attachments.isEmpty should be {
-          true
-        }
+        returnedExtension.attachments.isEmpty should be (true)
       }
     }
   }

@@ -32,9 +32,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
   def validToken() {
     new Fixture {
       command.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -43,9 +41,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
     new Fixture {
       token.dateUsed = new DateTime()
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 
@@ -54,9 +50,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
     new Fixture {
       token.expires = new DateTime().minusMinutes(1)
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 
@@ -65,9 +59,7 @@ class DownloadFileByTokenCommandTest extends TestBase with Mockito {
     new Fixture {
       token.fileAttachmentId = "wrong id"
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 

@@ -75,9 +75,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
         var errors = new BindException(validator, "command")
         validator.validate(errors)
-        errors.hasErrors should be {
-          true
-        }
+        errors.hasErrors should be (true)
         errors.getErrorCount should be(1)
         errors.getFieldErrors.asScala.map(_.getField).contains("meetingDateStr") should be(true)
         errors.getFieldError.getCode should be("meetingRecord.date.prehistoric")
@@ -104,9 +102,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
 
         var errors = new BindException(validator, "command")
         validator.validate(errors)
-        errors.hasErrors should be {
-          true
-        }
+        errors.hasErrors should be (true)
         errors.getErrorCount should be(1)
         errors.getFieldErrors.asScala.map(_.getField).contains("meetingTimeStr") should be(true)
         errors.getFieldError.getCode should be("meetingRecord.date.endbeforestart")

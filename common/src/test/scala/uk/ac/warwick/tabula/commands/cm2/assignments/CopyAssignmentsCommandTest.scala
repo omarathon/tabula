@@ -74,39 +74,17 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
         newAssignment.name should be("Test")
         newAssignment.openDate should be(new DateTime(2017, 8, 22, 0, 0))
         newAssignment.closeDate should be(new DateTime(2017, 8, 22, 0, 0).plusDays(30))
-        newAssignment.openEnded.booleanValue should be {
-          false
-        }
-        newAssignment.collectMarks.booleanValue should be {
-          true
-        }
-        newAssignment.collectSubmissions.booleanValue should be {
-          true
-        }
-        newAssignment.restrictSubmissions.booleanValue should be {
-          true
-        }
-        newAssignment.allowLateSubmissions.booleanValue should be {
-          true
-        }
-        newAssignment.allowResubmission.booleanValue should be {
-          false
-        }
-        newAssignment.displayPlagiarismNotice.booleanValue should be {
-          true
-        }
-        newAssignment.allowExtensions.booleanValue should be {
-          true
-        }
-        newAssignment.extensionAttachmentMandatory.booleanValue should be {
-          true
-        }
-        newAssignment.allowExtensionsAfterCloseDate.booleanValue should be {
-          true
-        }
-        newAssignment.summative.booleanValue should be {
-          false
-        }
+        newAssignment.openEnded.booleanValue should be (false)
+        newAssignment.collectMarks.booleanValue should be (true)
+        newAssignment.collectSubmissions.booleanValue should be (true)
+        newAssignment.restrictSubmissions.booleanValue should be (true)
+        newAssignment.allowLateSubmissions.booleanValue should be (true)
+        newAssignment.allowResubmission.booleanValue should be (false)
+        newAssignment.displayPlagiarismNotice.booleanValue should be (true)
+        newAssignment.allowExtensions.booleanValue should be (true)
+        newAssignment.extensionAttachmentMandatory.booleanValue should be (true)
+        newAssignment.allowExtensionsAfterCloseDate.booleanValue should be (true)
+        newAssignment.summative.booleanValue should be (false)
       }
     }
   }
@@ -182,9 +160,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
       findCommentField(newAssignment).get.value should be("")
       findFileField(newAssignment).get.attachmentLimit should be(1)
       findFileField(newAssignment).get.attachmentTypes should be(Nil)
-      findWordCountField(newAssignment).isEmpty should be {
-        true
-      }
+      findWordCountField(newAssignment).isEmpty should be (true)
     }
   }
 

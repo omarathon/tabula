@@ -44,9 +44,7 @@ class DownloadSubmissionsCommandTest extends TestBase with Mockito {
 
     cmd.submissions = submissions
 
-    cmd.applyInternal().isLeft should be {
-      true
-    }
+    cmd.applyInternal().isLeft should be (true)
     val zip = cmd.applyInternal().left.toOption.get
     val stream = new ZipInputStream(zip.byteSource.openStream())
     val items = Zips.map(stream) { item =>

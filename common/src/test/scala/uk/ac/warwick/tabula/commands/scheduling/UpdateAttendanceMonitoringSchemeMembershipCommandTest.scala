@@ -35,12 +35,8 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
     new Fixture {
       cmd.attendanceMonitoringService.listSchemesForMembershipUpdate returns Seq()
       val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
-      deserializeFilterCalled should be {
-        false
-      }
-      schemes.isEmpty should be {
-        true
-      }
+      deserializeFilterCalled should be (false)
+      schemes.isEmpty should be (true)
     }
   }
 
@@ -64,17 +60,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
       cmd.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 
       val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
-      deserializeFilterCalled should be {
-        true
-      }
+      deserializeFilterCalled should be (true)
       verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
       verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
-      schemes.contains(scheme1) should be {
-        true
-      }
-      schemes.contains(scheme2) should be {
-        true
-      }
+      schemes.contains(scheme1) should be (true)
+      schemes.contains(scheme2) should be (true)
       verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept, AcademicYear(2014))
     }
   }
@@ -102,17 +92,11 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandTest extends TestBase wit
       cmd.profileService.getAllMembersWithUniversityIds(Seq(student.universityId)) returns Seq(student)
 
       val schemes: Seq[AttendanceMonitoringScheme] = cmd.applyInternal()
-      deserializeFilterCalled should be {
-        true
-      }
+      deserializeFilterCalled should be (true)
       verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme1)
       verify(cmd.attendanceMonitoringService, times(1)).saveOrUpdate(scheme2)
-      schemes.contains(scheme1) should be {
-        true
-      }
-      schemes.contains(scheme2) should be {
-        true
-      }
+      schemes.contains(scheme1) should be (true)
+      schemes.contains(scheme2) should be (true)
       verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept1, AcademicYear(2014))
       verify(cmd.attendanceMonitoringService, times(1)).setCheckpointTotalsForUpdate(Seq(student), dept2, AcademicYear(2014))
     }

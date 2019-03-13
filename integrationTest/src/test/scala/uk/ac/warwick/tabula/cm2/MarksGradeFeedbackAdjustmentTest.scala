@@ -39,9 +39,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
     Then("I should see the Add marks menu option")
     val addMarksLink = partialLinkText("Add marks").webElement
     eventually {
-      addMarksLink.isDisplayed should be {
-        true
-      }
+      addMarksLink.isDisplayed should be (true)
     }
     When("I click the Add marks link")
     click on addMarksLink
@@ -87,9 +85,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
     Then("I should see the Add marks menu option")
     val addMarksLink = partialLinkText("Add marks").webElement
     eventually {
-      addMarksLink.isDisplayed should be {
-        true
-      }
+      addMarksLink.isDisplayed should be (true)
     }
     When("I click the Add marks link")
     click on addMarksLink

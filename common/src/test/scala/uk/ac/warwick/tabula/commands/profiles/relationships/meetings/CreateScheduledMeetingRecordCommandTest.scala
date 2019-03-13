@@ -32,9 +32,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
       command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
       command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
       command.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -47,9 +45,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
       command.meetingTimeStr = new DateTime().plusDays(1).toString(TimePickerFormatter)
       command.meetingEndTimeStr = new DateTime().plusDays(1).plusHours(1).toString(TimePickerFormatter)
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldErrorCount should be(1)
       errors.getFieldErrors("title").size should be(1)
     }
@@ -65,9 +61,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
       command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
       command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldErrorCount should be(1)
       errors.getFieldErrors("format").size should be(1)
     }
@@ -85,9 +79,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
       command.meetingTimeStr = meetingTime.toString(TimePickerFormatter)
       command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldErrorCount should be(1)
       errors.getFieldErrors("meetingDateStr").size should be(1)
     }
@@ -112,9 +104,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
       command.meetingEndTimeStr = meetingTime.plusHours(1).toString(TimePickerFormatter)
 
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getFieldErrorCount should be(1)
       errors.getFieldErrors("meetingDateStr").size should be(1)
     }
@@ -125,9 +115,7 @@ class CreateScheduledMeetingRecordCommandTest extends TestBase with Mockito {
     new Fixture {
       val errors = new BindException(command, "command")
       command.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 }

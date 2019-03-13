@@ -76,9 +76,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
     new Fixture {
       validator.absenceType = null
       validator.validate(errors)
-      errors.hasFieldErrors("absenceType") should be {
-        true
-      }
+      errors.hasFieldErrors("absenceType") should be (true)
     }
   }
 
@@ -87,9 +85,7 @@ class EditAttendanceNoteCommandTest extends TestBase with Mockito {
     new Fixture {
       validator.absenceType = AbsenceType.Academic
       validator.validate(errors)
-      errors.hasFieldErrors("absenceType") should be {
-        false
-      }
+      errors.hasFieldErrors("absenceType") should be (false)
     }
   }
 

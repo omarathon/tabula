@@ -25,9 +25,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     validator.period = "Summer"
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors should be {
-      true
-    }
+    errors.hasFieldErrors should be (true)
     errors.getFieldErrors("availablePeriods").size() should be(1)
   }
 
@@ -40,9 +38,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     validator.period = "Spring"
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors should be {
-      true
-    }
+    errors.hasFieldErrors should be (true)
     errors.getFieldErrors("availablePeriods").size() should be(1)
   }
 
@@ -55,9 +51,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     validator.period = "Autumn"
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors should be {
-      true
-    }
+    errors.hasFieldErrors should be (true)
     errors.getFieldErrors("studentMissedReportCounts").size() should be(1)
   }
 
@@ -70,9 +64,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     validator.period = "Autumn"
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors should be {
-      true
-    }
+    errors.hasFieldErrors should be (true)
     errors.getFieldErrors("confirm").size() should be(1)
   }
 
@@ -86,9 +78,7 @@ class ReportStudentsConfirmCommandTest extends TestBase with Mockito {
     validator.confirm = true
     val errors = new BindException(validator, "command")
     validator.validate(errors)
-    errors.hasFieldErrors should be {
-      false
-    }
+    errors.hasFieldErrors should be (false)
   }
 
 }

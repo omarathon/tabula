@@ -58,28 +58,20 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       command.query = "JO"
       val result: StudentAssociationResult = command.applyInternal()
       result.unallocated.size should be(2)
-      result.unallocated.contains(student8) should be {
-        true
-      }
-      result.unallocated.contains(student9) should be {
-        true
-      }
+      result.unallocated.contains(student8) should be (true)
+      result.unallocated.contains(student9) should be (true)
     }
     new Fixture {
       command.query = "pa sm"
       val result: StudentAssociationResult = command.applyInternal()
       result.unallocated.size should be(1)
-      result.unallocated.contains(student9) should be {
-        true
-      }
+      result.unallocated.contains(student9) should be (true)
     }
     new Fixture {
       command.query = "Sam Jones"
       val result: StudentAssociationResult = command.applyInternal()
       result.unallocated.size should be(1)
-      result.unallocated.contains(student9) should be {
-        true
-      }
+      result.unallocated.contains(student9) should be (true)
     }
   }
 
@@ -96,9 +88,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       sizes.count(_ == 3) should be(3)
       sizes.count(_ == 2) should be(1)
       mockDbUnallocated.map(_.universityId).foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
 
@@ -113,9 +103,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       sizes.count(_ == 3) should be(3)
       sizes.count(_ == 2) should be(1)
       mockDbUnallocated.map(_.universityId).foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
 
@@ -131,9 +119,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.find(_.entityId == "3").get.students.size should be(5)
       result.allocated.find(_.entityId == "4").get.students.size should be(4)
       mockDbUnallocated.map(_.universityId).foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
   }
@@ -153,9 +139,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       sizes.count(_ == 3) should be(3)
       sizes.count(_ == 2) should be(1)
       allocated.foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
 
@@ -172,9 +156,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       sizes.count(_ == 3) should be(2)
       sizes.count(_ == 2) should be(2)
       allocated.foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
 
@@ -192,9 +174,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.find(_.entityId == "3").get.students.size should be(4)
       result.allocated.find(_.entityId == "4").get.students.size should be(4)
       allocated.foreach(id => {
-        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be {
-          true
-        }
+        command.additions.get(result.allocated.find(_.students.exists(_.universityId == id)).get.entityId).contains(id) should be (true)
       })
     }
   }
@@ -210,9 +190,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.size should be(4)
       result.allocated.flatMap(_.students).distinct.size should be(6)
       result.allocated.find(_.entityId == "2").get.students.size should be(1)
-      command.removals.get("2").contains("1") should be {
-        true
-      }
+      command.removals.get("2").contains("1") should be (true)
     }
   }
 
@@ -227,21 +205,11 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.flatMap(_.students).distinct.size should be(2)
       result.allocated.find(_.entityId == "3").get.students.size should be(0)
       result.allocated.find(_.entityId == "4").get.students.size should be(0)
-      command.removals.get("3").contains("3") should be {
-        true
-      }
-      command.removals.get("3").contains("4") should be {
-        true
-      }
-      command.removals.get("4").contains("5") should be {
-        true
-      }
-      command.removals.get("4").contains("6") should be {
-        true
-      }
-      command.removals.get("4").contains("7") should be {
-        true
-      }
+      command.removals.get("3").contains("3") should be (true)
+      command.removals.get("3").contains("4") should be (true)
+      command.removals.get("4").contains("5") should be (true)
+      command.removals.get("4").contains("6") should be (true)
+      command.removals.get("4").contains("7") should be (true)
     }
   }
 
@@ -257,9 +225,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.size should be(4)
       result.allocated.flatMap(_.students).distinct.size should be(6)
       result.allocated.find(_.entityId == "2").get.students.size should be(1)
-      command.removals.get("2").contains("1") should be {
-        true
-      }
+      command.removals.get("2").contains("1") should be (true)
       // Re-add
       command.allocate = Seq("1").asJava
       command.entities = Seq("2").asJava
@@ -269,12 +235,8 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result2.allocated.size should be(4)
       result2.allocated.flatMap(_.students).distinct.size should be(7)
       result2.allocated.find(_.entityId == "2").get.students.size should be(2)
-      command.removals.get("2").contains("1") should be {
-        false
-      }
-      command.additions.get("2").contains("1") should be {
-        false
-      } // This is important, don't add already in the DB
+      command.removals.get("2").contains("1") should be (false)
+      command.additions.get("2").contains("1") should be (false) // This is important, don't add already in the DB
     }
   }
 
@@ -290,9 +252,7 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result.allocated.size should be(4)
       result.allocated.flatMap(_.students).distinct.size should be(8)
       result.allocated.find(_.entityId == "2").get.students.size should be(3)
-      command.additions.get("2").contains("8") should be {
-        true
-      }
+      command.additions.get("2").contains("8") should be (true)
       // Re-remove
       command.studentToRemove = "8"
       command.entityToRemoveFrom = "2"
@@ -302,12 +262,8 @@ class FetchDepartmentRelationshipInformationCommandTest extends TestBase with Mo
       result2.allocated.size should be(4)
       result2.allocated.flatMap(_.students).distinct.size should be(7)
       result2.allocated.find(_.entityId == "2").get.students.size should be(2)
-      command.removals.get("2").contains("8") should be {
-        false
-      }
-      command.additions.get("2").contains("8") should be {
-        false
-      } // This is important, don't remove not in the DB
+      command.removals.get("2").contains("8") should be (false)
+      command.additions.get("2").contains("8") should be (false) // This is important, don't remove not in the DB
     }
   }
 

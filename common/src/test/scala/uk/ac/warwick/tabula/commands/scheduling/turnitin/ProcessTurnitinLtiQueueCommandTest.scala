@@ -399,9 +399,7 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
       report.publicationOverlap should be(Option(20))
       report.webOverlap should be(Option(30))
       report.studentOverlap should be(Option(40))
-      report.reportReceived should be {
-        true
-      }
+      report.reportReceived should be (true)
       verify(mockOriginalityReportService, times(1)).saveOrUpdate(report)
     }
   }
@@ -420,12 +418,8 @@ class ProcessTurnitinLtiQueueCommandTest extends TestBase with Mockito {
       mockTurnitinLtiQueueService.listCompletedAssignments returns Seq(completeAssignment)
       mockTurnitinLtiQueueService.listFailedAssignments returns Seq(failedAssignment)
       cmd.applyInternal()
-      completeAssignment.submitToTurnitin.booleanValue() should be {
-        false
-      }
-      failedAssignment.submitToTurnitin.booleanValue() should be {
-        false
-      }
+      completeAssignment.submitToTurnitin.booleanValue() should be (false)
+      failedAssignment.submitToTurnitin.booleanValue() should be (false)
       verify(mockAssessmentService, times(1)).save(completeAssignment)
       verify(mockAssessmentService, times(1)).save(failedAssignment)
     }

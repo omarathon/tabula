@@ -38,21 +38,11 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
       group.includedUserIds should (contain("superhat") and contain("menace"))
 
       group.excludeUserId("eggdog") // poor eggdog.
-      group.includesUserId("whoareyou") should be {
-        false
-      }
-      group.includesUserId("exoman") should be {
-        true
-      }
-      group.includesUserId("eggdog") should be {
-        false
-      }
-      group.includesUserId("superhat") should be {
-        true
-      }
-      group.includesUserId("menace") should be {
-        true
-      }
+      group.includesUserId("whoareyou") should be (false)
+      group.includesUserId("exoman") should be (true)
+      group.includesUserId("eggdog") should be (false)
+      group.includesUserId("superhat") should be (true)
+      group.includesUserId("menace") should be (true)
 
       /* check that members works and is consistent.
        * At time of writing, staticIncludeUsers would get
@@ -98,9 +88,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group2.sessionFactory = mockSessionFactory
     group2.copyFrom(group)
 
-    group.eq(group2) should be {
-      false
-    }
+    group.eq(group2) should be (false)
 
     group2.includedUserIds should be(group.includedUserIds)
     group2.excludedUserIds should be(group.excludedUserIds)

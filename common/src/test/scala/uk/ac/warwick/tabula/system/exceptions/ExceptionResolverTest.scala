@@ -73,9 +73,7 @@ class ExceptionResolverTest extends TestBase {
     val modelAndView = resolver.doResolve(exception, None)
     modelAndView.viewName should be("upload-failed")
     modelAndView.toModel("exception") match {
-      case ex: FileUploadException if ex.getCause == exception => ex.isInstanceOf[HandledException] should be {
-        true
-      }
+      case ex: FileUploadException if ex.getCause == exception => ex.isInstanceOf[HandledException] should be (true)
       case _ => fail("expected file upload exception")
     }
   }

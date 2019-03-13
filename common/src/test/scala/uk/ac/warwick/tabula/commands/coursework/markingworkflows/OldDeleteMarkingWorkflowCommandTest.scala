@@ -32,9 +32,7 @@ class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
       mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
 
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
     }
   }
@@ -46,9 +44,7 @@ class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
       mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam, new Exam)
 
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
     }
   }
@@ -60,9 +56,7 @@ class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
       mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam)
 
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(2)
     }
   }
@@ -74,12 +68,8 @@ class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
       mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
 
       validator.validate(errors)
-      errors.hasFieldErrors should be {
-        false
-      }
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasFieldErrors should be (false)
+      errors.hasErrors should be (false)
     }
   }
 

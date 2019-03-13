@@ -36,20 +36,12 @@ class UnlinkAttendanceMonitoringSchemeCommandTest extends TestBase with Mockito 
     )
 
     val result = command.applyInternal()
-    result.get(dept1).isDefined should be {
-      true
-    }
+    result.get(dept1).isDefined should be (true)
     result(dept1).size should be(1)
     result(dept1).head.members.members.size should be(2)
-    result(dept1).head.members.includesUserId(student1.userId) should be {
-      true
-    }
-    result(dept1).head.members.includesUserId(student2.userId) should be {
-      false
-    }
-    result(dept1).head.members.includesUserId(student3.userId) should be {
-      true
-    }
+    result(dept1).head.members.includesUserId(student1.userId) should be (true)
+    result(dept1).head.members.includesUserId(student2.userId) should be (false)
+    result(dept1).head.members.includesUserId(student3.userId) should be (true)
     verify(command.attendanceMonitoringService, times(1)).saveOrUpdate(dept1scheme1)
   }
 

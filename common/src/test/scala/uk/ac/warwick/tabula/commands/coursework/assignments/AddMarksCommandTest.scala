@@ -186,9 +186,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 
         validator.postExtractValidation(errors)
 
-        errors.hasErrors should be {
-          true
-        }
+        errors.hasErrors should be (true)
       }
     }
 
@@ -203,9 +201,7 @@ class AddMarksCommandTest extends TestBase with Mockito {
 
         validator.postExtractValidation(errors)
 
-        errors.hasErrors should be {
-          false
-        }
+        errors.hasErrors should be (false)
       }
     }
   }

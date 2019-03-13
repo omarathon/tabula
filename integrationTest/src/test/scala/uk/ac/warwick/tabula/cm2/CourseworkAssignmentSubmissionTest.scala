@@ -25,9 +25,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
 
         eventually {
           pageSource contains "Thanks, we've received your submission." should be(false)
-          pageSource contains "You need to at least submit 2 files" should be {
-            true
-          }
+          pageSource contains "You need to at least submit 2 files" should be (true)
 
           click on find(cssSelector("input[type=file]")).get
           pressKeys(getClass.getResource("/file2.txt").getFile)
@@ -47,9 +45,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
   "Student" should "be able to submit assignment" in {
     withAssignment("xxx01", "Fully featured assignment") { assignmentId =>
       submitAssignment(P.Student1, "Fully featured assignment", assignmentId, "/file1.txt")
-      verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be {
-        true
-      })
+      verifyPageLoaded(pageSource contains "Thanks, we've received your submission." should be (true))
     }
   }
 
@@ -59,9 +55,7 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
       submitAssignment(P.Student1, "Min 2 attachments", assignmentId, "/file1.txt")
 
       eventually {
-        pageSource contains "You need to at least submit 2 files" should be {
-          true
-        }
+        pageSource contains "You need to at least submit 2 files" should be (true)
       }
     }
   }

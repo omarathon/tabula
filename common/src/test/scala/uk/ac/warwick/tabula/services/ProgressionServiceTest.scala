@@ -49,9 +49,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       ))
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
-      result.asInstanceOf[ProgressionResult.Unknown].details.contains(module1.code.toUpperCase) should be {
-        true
-      }
+      result.asInstanceOf[ProgressionResult.Unknown].details.contains(module1.code.toUpperCase) should be (true)
     }
   }
 
@@ -60,9 +58,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
     new Fixture {
       val result: ProgressionResult = service.suggestedResult(entityYear3, 120, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
       result.description should be(ProgressionResult.Unknown("").description)
-      result.asInstanceOf[ProgressionResult.Unknown].details.contains("No module registrations found") should be {
-        true
-      }
+      result.asInstanceOf[ProgressionResult.Unknown].details.contains("No module registrations found") should be (true)
     }
   }
 
@@ -342,9 +338,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       )
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be {
-        true
-      }
+      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
     }
 
     // Overcat, single subset
@@ -357,9 +351,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       // Should re-use the initally calculated mark as only 1 subset
       verify(service.moduleRegistrationService, times(1)).weightedMeanYearMark(any[Seq[ModuleRegistration]], any[Map[Module, BigDecimal]], any[Boolean])
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be {
-        true
-      }
+      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
     }
 
     // Overcat, 2 subsets, none chosen
@@ -400,9 +392,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
 
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be {
-        true
-      }
+      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
     }
   }
 
@@ -422,9 +412,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       service.courseAndRouteService.getCourseYearWeighting(course.code, student.mostSignificantCourse.sprStartAcademicYear, 3) returns None
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, Seq())
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be {
-        true
-      }
+      result.asInstanceOf[FinalYearGrade.Unknown].details.contains("Could not find year weightings") should be (true)
     }
 
     // No weighting for 2nd year
@@ -483,9 +471,7 @@ class ProgressionServiceTest extends TestBase with Mockito {
       student.mostSignificantCourse.addModuleRegistration(mr2)
       val result: FinalYearGrade = service.suggestedFinalYearGrade(entityYear3, 180, Map(), calculateYearMarks = false, groupByLevel = false, yearWeightings)
       result.description should be(FinalYearGrade.Unknown("").description)
-      result.asInstanceOf[FinalYearGrade.Unknown].details.contains(module1.code.toUpperCase) should be {
-        true
-      }
+      result.asInstanceOf[FinalYearGrade.Unknown].details.contains(module1.code.toUpperCase) should be (true)
     }
 
     // Not enough credits passed in 2nd year

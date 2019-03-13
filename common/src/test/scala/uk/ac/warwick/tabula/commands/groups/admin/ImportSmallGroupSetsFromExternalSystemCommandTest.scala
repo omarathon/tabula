@@ -188,9 +188,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 
   @Test def init() {
     new CommandFixture with FixtureWithSingleSeminarForYear {
-      command.canManageDepartment should be {
-        true
-      }
+      command.canManageDepartment should be (true)
       command.modules should be(Seq(module1, module2))
       command.timetabledEvents should be(Seq(
         TimetabledSmallGroupEvent(module1, TimetableEventType.Seminar, Seq(tEventModule1Seminar2, tEventModule1Seminar1))

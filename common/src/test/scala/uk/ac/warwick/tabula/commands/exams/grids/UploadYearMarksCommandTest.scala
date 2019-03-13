@@ -49,9 +49,7 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
       command.file = badFile
       val errors = new BindException(command, "command")
       command.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        true
-      }
+      errors.hasFieldErrors("file") should be (true)
     }
   }
 
@@ -81,9 +79,7 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
 
       val errors = new BindException(command, "command")
       command.onBind(errors)
-      errors.hasFieldErrors("file") should be {
-        false
-      }
+      errors.hasFieldErrors("file") should be (false)
       command.marks.size() should be(1)
     }
   }
@@ -125,19 +121,11 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
       command.processedYearMarks.size should be(8)
       command.processedYearMarks.count(_.errors.nonEmpty) should be(6)
       val validWithMissingAcademicYear: Option[ProcessedYearMark] = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == command.academicYear)
-      validWithMissingAcademicYear.isDefined should be {
-        true
-      }
-      validWithMissingAcademicYear.get.errors.isEmpty should be {
-        true
-      }
+      validWithMissingAcademicYear.isDefined should be (true)
+      validWithMissingAcademicYear.get.errors.isEmpty should be (true)
       val valid: Option[ProcessedYearMark] = command.processedYearMarks.find(i => i.scjCode == validStudent.mostSignificantCourse.scjCode && i.academicYear == AcademicYear(2013))
-      valid.isDefined should be {
-        true
-      }
-      valid.get.errors.isEmpty should be {
-        true
-      }
+      valid.isDefined should be (true)
+      valid.get.errors.isEmpty should be (true)
       valid.get.mark.doubleValue should be(60.7) // Check rounding
     }
   }

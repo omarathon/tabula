@@ -66,48 +66,24 @@ class OldOnlineFeedbackCommandTest extends TestBase with Mockito {
 
       val graph1: StudentFeedbackGraph = feedbackGraphs.head
       graph1.student should be(user1)
-      graph1.hasSubmission should be {
-        true
-      }
-      graph1.hasUncompletedFeedback should be {
-        true
-      }
-      graph1.hasPublishedFeedback should be {
-        false
-      }
-      graph1.hasCompletedFeedback should be {
-        false
-      }
+      graph1.hasSubmission should be (true)
+      graph1.hasUncompletedFeedback should be (true)
+      graph1.hasPublishedFeedback should be (false)
+      graph1.hasCompletedFeedback should be (false)
 
       val graph2: StudentFeedbackGraph = feedbackGraphs(1)
       graph2.student should be(user2)
-      graph2.hasSubmission should be {
-        false
-      }
-      graph2.hasUncompletedFeedback should be {
-        true
-      }
-      graph2.hasPublishedFeedback should be {
-        true
-      }
-      graph2.hasCompletedFeedback should be {
-        false
-      }
+      graph2.hasSubmission should be (false)
+      graph2.hasUncompletedFeedback should be (true)
+      graph2.hasPublishedFeedback should be (true)
+      graph2.hasCompletedFeedback should be (false)
 
       val graph3: StudentFeedbackGraph = feedbackGraphs(2)
       graph3.student should be(user3)
-      graph3.hasSubmission should be {
-        false
-      }
-      graph3.hasUncompletedFeedback should be {
-        false
-      }
-      graph3.hasPublishedFeedback should be {
-        false
-      }
-      graph3.hasCompletedFeedback should be {
-        false
-      }
+      graph3.hasSubmission should be (false)
+      graph3.hasUncompletedFeedback should be (false)
+      graph3.hasPublishedFeedback should be (false)
+      graph3.hasCompletedFeedback should be (false)
 
       feedbackGraphs.size should be(3)
     }

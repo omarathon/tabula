@@ -30,9 +30,7 @@ class SmallGroupTeachingPage(val departmentCode: String, val academicYear: Strin
     val manageDropdownContainer = find(cssSelector("div.dept-toolbar")).get.underlying
     val openButton = manageDropdownContainer.findElement(By.partialLinkText("Open"))
     eventually {
-      openButton.isDisplayed should be {
-        true
-      }
+      openButton.isDisplayed should be (true)
     }
     openButton
   }
@@ -48,9 +46,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
     underlying.findElement(By.partialLinkText("Edit")).click()
     val editGroupset = underlying.findElement(By.partialLinkText("Properties"))
     eventually {
-      editGroupset.isDisplayed should be {
-        true
-      }
+      editGroupset.isDisplayed should be (true)
     }
     editGroupset.click()
     val propsPage = new EditSmallGroupSetPropertiesPage()

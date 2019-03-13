@@ -67,9 +67,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
       newModRegs.head.selectionStatus.description should be("Core")
       newModRegs.head.studentCourseDetails should be(scd)
       newModRegs.head.lastUpdatedDate.getDayOfMonth should be(LocalDate.now.getDayOfMonth)
-      newModRegs.head.passFail should be {
-        true
-      }
+      newModRegs.head.passFail should be (true)
 
       // now reset the last updated date to 10 days ago:
       val tenDaysAgo: DateTime = DateTime.now.minusDays(10)

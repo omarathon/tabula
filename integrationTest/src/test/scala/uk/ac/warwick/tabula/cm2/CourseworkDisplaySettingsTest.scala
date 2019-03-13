@@ -24,9 +24,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
     // Check that when we go back to the page, all of the settings have been populated
     openDisplaySettings()
     And("showStudentName is selected")
-    checkbox("showStudentName").isSelected should be {
-      true
-    }
+    checkbox("showStudentName").isSelected should be (true)
   }
 
   "Department admin" should "be able to set default group signup method for a department" in {
@@ -74,9 +72,7 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
     And("I should see the department settings menu option")
     val departmentLink = toolbar.findElement(By.partialLinkText("Department settings"))
     eventually {
-      departmentLink.isDisplayed should be {
-        true
-      }
+      departmentLink.isDisplayed should be (true)
     }
 
     When("I click the department setting link")

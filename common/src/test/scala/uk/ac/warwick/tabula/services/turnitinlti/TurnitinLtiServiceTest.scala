@@ -18,18 +18,14 @@ class TurnitinLtiServiceTest extends TestBase {
   @Test def testValidFileType() {
     new Fixture {
       file.name = "test.doc"
-      TurnitinLtiService.validFileType(file) should be {
-        true
-      }
+      TurnitinLtiService.validFileType(file) should be (true)
     }
   }
 
   @Test def testInvalidFileType() {
     new Fixture {
       file.name = "test.gif"
-      TurnitinLtiService.validFileType(file) should be {
-        false
-      }
+      TurnitinLtiService.validFileType(file) should be (false)
     }
   }
 

@@ -19,43 +19,27 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       }
       eventually(click on module.findElement(By.className("mod-code")))
       Then("I should see the premarked assignment")
-      eventually(pageSource contains "Premarked assignment" should be {
-        true
-      })
+      eventually(pageSource contains "Premarked assignment" should be (true))
       eventually(click on linkText("Premarked assignment"))
 
       When("I go to the adjustments page")
 
-      eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be {
-        true
-      })
+      eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be (true))
       click on className("collection-check-all")
-      eventually(pageSource contains "Feedback" should be {
-        true
-      })
+      eventually(pageSource contains "Feedback" should be (true))
       click on linkText("Feedback")
-      eventually(pageSource contains "Adjustments" should be {
-        true
-      })
+      eventually(pageSource contains "Adjustments" should be (true))
       click on linkText("Adjustments")
 
       Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student1" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student3" should be {
-        true
-      }
+      pageSource contains "Feedback adjustment" should be (true)
+      pageSource contains "tabula-functest-student1" should be (true)
+      pageSource contains "tabula-functest-student3" should be (true)
 
       When("I click on a student's ID")
       click on cssSelector("h6.toggle-icon")
       Then("I see the form and the student's current marks")
-      eventually(pageSource contains "Original mark - 41" should be {
-        true
-      })
+      eventually(pageSource contains "Original mark - 41" should be (true))
 
       When("I populate and submit the form")
       // as there is a hidden and disabled reason element on the same page we can't use the scala test singleSel
@@ -73,9 +57,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       When("I click on the student's ID again")
       click on cssSelector("h6.toggle-icon")
       Then("I see the form and the adusted mark")
-      eventually(pageSource contains "Adjusted mark - 31" should be {
-        true
-      })
+      eventually(pageSource contains "Adjusted mark - 31" should be (true))
 
       click on partialLinkText("XXX02 Test Module 2")
 
@@ -91,14 +73,10 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       click on checkbox("confirm")
       cssSelector("div.submit-buttons button[type=submit]").findElement.get.underlying.click()
       Then("all is well in the world for all the Herons are in a deep slumber")
-      eventually(pageSource contains "The feedback has been published." should be {
-        true
-      })
+      eventually(pageSource contains "The feedback has been published." should be (true))
     }
 
-    eventually(pageSource contains "Premarked assignment" should be {
-      true
-    })
+    eventually(pageSource contains "Premarked assignment" should be (true))
     eventually(click on partialLinkText("Premarked assignment"))
     val assignmentId = currentUrl.split("/")(6)
 
@@ -107,27 +85,17 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       When("I visit the feedback page")
       go to Path(s"/coursework/submission/$assignmentId")
       Then("I can see the adjusted mark only")
-      eventually(pageSource contains "Adjusted mark: 31" should be {
-        true
-      })
-      pageSource contains "Mark: 41" should be {
-        true
-      }
+      eventually(pageSource contains "Adjusted mark: 31" should be (true))
+      pageSource contains "Mark: 41" should be (true)
     }
 
     When("Admin goes back in to make non-private adjustments")
     as(P.Admin1) {
       go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
       Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student1" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student3" should be {
-        true
-      }
+      pageSource contains "Feedback adjustment" should be (true)
+      pageSource contains "tabula-functest-student1" should be (true)
+      pageSource contains "tabula-functest-student3" should be (true)
 
       When("I click on the bulk adjustments button")
       click on linkText("Adjust in bulk")
@@ -144,9 +112,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
       Then("I should see the preview bulk adjustment page")
       eventually {
-        pageSource contains "Preview bulk adjustment" should be {
-          true
-        }
+        pageSource contains "Preview bulk adjustment" should be (true)
       }
 
       Then("The hide from student checkbox should be selected by default")
@@ -169,39 +135,21 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       When("I visit the feedback page")
       go to Path(s"/coursework/submission/$assignmentId")
       Then("I should see the adjustments")
-      pageSource contains "Adjusted" should be {
-        true
-      }
-      pageSource contains "Adjusted mark: 43" should be {
-        true
-      }
-      pageSource contains "Adjusted grade: B" should be {
-        true
-      }
-      pageSource contains adjustmentDescriptionText should be {
-        true
-      }
-      pageSource contains "Mark: 41" should be {
-        true
-      }
-      pageSource contains "Mark: 31" should be {
-        true
-      }
+      pageSource contains "Adjusted" should be (true)
+      pageSource contains "Adjusted mark: 43" should be (true)
+      pageSource contains "Adjusted grade: B" should be (true)
+      pageSource contains adjustmentDescriptionText should be (true)
+      pageSource contains "Mark: 41" should be (true)
+      pageSource contains "Mark: 31" should be (true)
     }
 
     Then("Admin goes back in to make private adjustments")
     as(P.Admin1) {
       go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
       Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student1" should be {
-        true
-      }
-      pageSource contains "tabula-functest-student3" should be {
-        true
-      }
+      pageSource contains "Feedback adjustment" should be (true)
+      pageSource contains "tabula-functest-student1" should be (true)
+      pageSource contains "tabula-functest-student3" should be (true)
 
       When("I click on the bulk adjustments button")
       click on linkText("Adjust in bulk")
@@ -218,9 +166,7 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
       Then("I should see the preview bulk adjustment page")
       eventually {
-        pageSource contains "Preview bulk adjustment" should be {
-          true
-        }
+        pageSource contains "Preview bulk adjustment" should be (true)
       }
 
       Then("The hide from student checkbox should be selected by default")
@@ -240,24 +186,12 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       When("I visit the feedback page")
       go to Path(s"/coursework/submission/$assignmentId")
       Then("I cannot see any adjustments as the last one was private")
-      pageSource contains "Adjusted" should be {
-        false
-      }
-      pageSource contains "Mark: 43" should be {
-        true
-      }
-      pageSource contains "Grade: B" should be {
-        true
-      }
-      pageSource contains adjustmentDescriptionText should be {
-        false
-      }
-      pageSource contains "Mark: 41" should be {
-        false
-      }
-      pageSource contains "Mark: 31" should be {
-        false
-      }
+      pageSource contains "Adjusted" should be (false)
+      pageSource contains "Mark: 43" should be (true)
+      pageSource contains "Grade: B" should be (true)
+      pageSource contains adjustmentDescriptionText should be (false)
+      pageSource contains "Mark: 41" should be (false)
+      pageSource contains "Mark: 31" should be (false)
     }
 
   }

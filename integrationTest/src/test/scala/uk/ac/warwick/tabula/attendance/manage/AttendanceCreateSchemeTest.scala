@@ -31,17 +31,13 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
     eventually {
       findAll(cssSelector(".find-students div.student-filter")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
     click on cssSelector("span[data-placeholder='All routes']")
     eventually {
       findAll(cssSelector("input[name=routes]")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
     click on cssSelector("input[name=routes]")
 
@@ -60,9 +56,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
     eventually {
       findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
 
     click on cssSelector("input[name=manuallyAddForm]")

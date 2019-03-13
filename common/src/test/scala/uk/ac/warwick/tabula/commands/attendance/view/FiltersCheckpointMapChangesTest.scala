@@ -41,9 +41,7 @@ class FiltersCheckpointMapChangesTest extends TestBase with Mockito {
     val changedMap = checker.filterCheckpointMapForChanges(newCheckpoints, existingCheckpoints)
     val newStudentMap = changedMap(newStudent)
     newStudentMap.values.size should be(2)
-    newStudentMap.values.forall(_ == AttendanceState.Attended) should be {
-      true
-    }
+    newStudentMap.values.forall(_ == AttendanceState.Attended) should be (true)
     val existingStudentMap = changedMap(existingStudent)
     existingStudentMap(newPoint) should be(AttendanceState.Attended)
     existingStudentMap.get(existingPoint1) should be(None) // Unchanged

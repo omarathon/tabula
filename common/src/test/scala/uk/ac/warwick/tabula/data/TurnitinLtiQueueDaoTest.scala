@@ -70,9 +70,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
     assignmentTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAssignmentMaxRetries
     session.save(assignmentTooManyRetries)
 
-    turnitinLtiQueueDao.findAssignmentToProcess.isEmpty should be {
-      true
-    }
+    turnitinLtiQueueDao.findAssignmentToProcess.isEmpty should be (true)
   }
   }
 
@@ -142,9 +140,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
     reportTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
     session.save(reportTooManyRetries)
 
-    turnitinLtiQueueDao.findReportToProcessForSubmission.isEmpty should be {
-      true
-    }
+    turnitinLtiQueueDao.findReportToProcessForSubmission.isEmpty should be (true)
   }
   }
 
@@ -203,9 +199,7 @@ class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
     session.save(reportNotSubmitted.attachment)
     session.save(reportNotSubmitted)
 
-    turnitinLtiQueueDao.findReportToProcessForReport(false).isEmpty should be {
-      true
-    }
+    turnitinLtiQueueDao.findReportToProcessForReport(false).isEmpty should be (true)
   }
   }
 

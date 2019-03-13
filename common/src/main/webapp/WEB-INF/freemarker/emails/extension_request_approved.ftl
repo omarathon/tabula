@@ -3,8 +3,8 @@ Your extension request has been<#if extension.expiryDateAdjusted> adjusted and</
 Your deadline for this assignment is now **${newExpiryDate}**. Any submissions made after this deadline are subject to the usual late penalties.
 
 <#if extension.reviewerComments?has_content>
-  The administrator commented:
+The administrator commented:
 
-  ${extension.reviewerComments}
+${extension.reviewerComments}
 
 </#if>

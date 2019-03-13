@@ -186,9 +186,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -206,9 +204,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getGlobalError.getCodes should contain("smallGroup.allocation.groups.invalid")
     }
@@ -280,9 +276,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
       val errors = new BindException(command, "command")
       command.validateUploadedFile(errors)
 
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -299,9 +293,7 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
       val errors = new BindException(command, "command")
       command.validateUploadedFile(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("file")
       errors.getFieldError.getCodes should contain("file.wrongtype.one")

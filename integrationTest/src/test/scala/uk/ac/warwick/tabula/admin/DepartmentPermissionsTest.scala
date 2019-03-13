@@ -33,9 +33,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
     And("I should see the permissions menu option")
     val managersLink = toolbar.findElement(By.partialLinkText("Edit departmental permissions"))
     eventually {
-      managersLink.isDisplayed should be {
-        true
-      }
+      managersLink.isDisplayed should be (true)
     }
 
     When("I click the permissions link")
@@ -163,9 +161,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 
       // no direct access
       go to Path("/admin/department/xxx/permissions")
-      pageSource.contains(s"Sorry ${P.ModuleManager1.usercode}, you don't have permission to see that.") should be {
-        true
-      }
+      pageSource.contains(s"Sorry ${P.ModuleManager1.usercode}, you don't have permission to see that.") should be (true)
     }
 
   }

@@ -297,15 +297,11 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       rowCommand.applyInternal() match {
         case stuMem: StudentMember =>
           val courseCommand = importCommandFactory.createImportStudentCourseCommand(Seq(row), stuMem)
-          courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be {
-            false
-          }
+          courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
           studentCourseDetails.missingFromImportSince should be(null)
           studentCourseDetails.missingFromImportSince = DateTime.now
           studentCourseDetails.missingFromImportSince should not be null
-          courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be {
-            true
-          }
+          courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (true)
           studentCourseDetails.missingFromImportSince should be(null)
         case _ => 1 should be(0)
       }
@@ -355,9 +351,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
           scyd.modeOfAttendance.code should be("P")
           scyd.academicYear.toString should be("10/11")
           scyd.moduleRegistrationStatus.dbValue should be("CON")
-        case _ => false should be {
-          true
-        }
+        case _ => false should be (true)
       }
 
       verify(memberDao, times(1)).saveOrUpdate(any[Member])
@@ -461,9 +455,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
         case stu: StudentMember =>
           stu.freshStudentCourseDetails.size should be(1)
           stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be(1)
-        case _ => false should be {
-          true
-        }
+        case _ => false should be (true)
       }
 
       verify(memberDao, times(1)).saveOrUpdate(any[Member])

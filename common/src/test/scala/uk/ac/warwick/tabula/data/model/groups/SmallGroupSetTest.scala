@@ -54,9 +54,7 @@ class SmallGroupSetTest extends TestBase with Mockito {
     clone.id should be(null) // Don't duplicate IDs
     clone.academicYear should be(source.academicYear)
     clone.allocationMethod should be(source.allocationMethod)
-    clone.allowSelfGroupSwitching.booleanValue should be {
-      false
-    }
+    clone.allowSelfGroupSwitching.booleanValue should be (false)
     clone.allowSelfGroupSwitching.booleanValue should be(source.allowSelfGroupSwitching.booleanValue)
     clone.archived should be(source.archived)
     clone.assessmentGroups should be(assessmentGroups)
@@ -64,13 +62,9 @@ class SmallGroupSetTest extends TestBase with Mockito {
     clone.groups.size should be(1)
     clone.groups.asScala.head should be(cloneGroup)
     clone.members should not be source.members
-    clone.members.hasSameMembersAs(source.members) should be {
-      true
-    }
+    clone.members.hasSameMembersAs(source.members) should be (true)
     clone.defaultTutors should not be source.defaultTutors
-    clone.defaultTutors.hasSameMembersAs(source.defaultTutors) should be {
-      true
-    }
+    clone.defaultTutors.hasSameMembersAs(source.defaultTutors) should be (true)
     clone.module should be(cloneModule)
     clone.name should be(source.name)
     clone.permissionsService should be(source.permissionsService)
@@ -94,45 +88,31 @@ class SmallGroupSetTest extends TestBase with Mockito {
     source.members.asInstanceOf[UserGroup].sessionFactory = sessionFactory
     source.defaultTutors.asInstanceOf[UserGroup].sessionFactory = sessionFactory
     val clone = source.duplicateTo(transient = true)
-    clone.studentsCanSeeOtherMembers should be {
-      true
-    }
+    clone.studentsCanSeeOtherMembers should be (true)
     source.studentsCanSeeOtherMembers = false
-    clone.studentsCanSeeOtherMembers should be {
-      true
-    }
+    clone.studentsCanSeeOtherMembers should be (true)
   }
 
   @Test
   def canGetAndSetTutorVisibility() {
     val set = new SmallGroupSet()
-    set.studentsCanSeeTutorName should be {
-      false
-    }
+    set.studentsCanSeeTutorName should be (false)
     set.studentsCanSeeTutorName = true
-    set.studentsCanSeeTutorName should be {
-      true
-    }
+    set.studentsCanSeeTutorName should be (true)
   }
 
   @Test
   def canGetAndSetOtherStudentVisibility() {
     val set = new SmallGroupSet()
-    set.studentsCanSeeOtherMembers should be {
-      false
-    }
+    set.studentsCanSeeOtherMembers should be (false)
     set.studentsCanSeeOtherMembers = true
-    set.studentsCanSeeOtherMembers should be {
-      true
-    }
+    set.studentsCanSeeOtherMembers should be (true)
   }
 
   @Test
   def allowSelfGroupSwitchingDefaultsToTrue() {
     val set = new SmallGroupSet()
-    set.allowSelfGroupSwitching should be {
-      true
-    }
+    set.allowSelfGroupSwitching should be (true)
   }
 
   @Test

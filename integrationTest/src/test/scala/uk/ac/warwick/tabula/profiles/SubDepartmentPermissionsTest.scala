@@ -25,9 +25,7 @@ class SubDepartmentPermissionsTest extends SubDepartmentFixture {
 
     Then("Admin1 can view Student1's timetable")
     signIn as P.Admin1 to Path(s"/profiles/view/${P.Student1.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      true
-    }
+    pageSource.contains("Mobile phone:") should be (true)
   }
 
   "A departmental administrator" should "have admin rights on students on modules in their sub-departments" in {
@@ -37,9 +35,7 @@ class SubDepartmentPermissionsTest extends SubDepartmentFixture {
 
     Then("Admin1 can view Student2's profile")
     signIn as P.Admin1 to Path(s"/profiles/view/${P.Student2.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      true
-    }
+    pageSource.contains("Mobile phone:") should be (true)
   }
 
   "A sub-departmental administrator" should "have admin rights on students who match their sub-departments" in {
@@ -50,9 +46,7 @@ class SubDepartmentPermissionsTest extends SubDepartmentFixture {
 
     Then("Admin3 can view Student1's profile")
     signIn as P.Admin3 to Path(s"/profiles/view/${P.Student1.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      true
-    }
+    pageSource.contains("Mobile phone:") should be (true)
   }
 
   "A sub-departmental administrator" should "have admin rights on students on modules in their sub-department" in {
@@ -63,9 +57,7 @@ class SubDepartmentPermissionsTest extends SubDepartmentFixture {
 
     Then("Admin3 can view Student2's profile")
     signIn as P.Admin3 to Path(s"/profiles/view/${P.Student2.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      true
-    }
+    pageSource.contains("Mobile phone:") should be (true)
   }
 
   "A sub-sub-departmental administrator" should "have admin rights on students who match their sub-sub-department" in {
@@ -80,16 +72,12 @@ class SubDepartmentPermissionsTest extends SubDepartmentFixture {
 
     Then("Admin4 can view Student1's profile")
     signIn as P.Admin4 to Path(s"/profiles/view/${P.Student1.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      true
-    }
+    pageSource.contains("Mobile phone:") should be (true)
 
     And("Admin4 cannot view student2's profile")
 
     go to Path(s"/profiles/view/${P.Student2.warwickId}")
-    pageSource.contains("Mobile phone:") should be {
-      false
-    }
+    pageSource.contains("Mobile phone:") should be (false)
   }
 
 }

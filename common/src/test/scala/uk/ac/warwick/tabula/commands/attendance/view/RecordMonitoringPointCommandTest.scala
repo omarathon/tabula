@@ -99,12 +99,8 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
       state.filteredPoints = thisFilteredPoints
       state.studentDatas = thisStudentDatas
       val result: Seq[AttendanceMonitoringPoint] = state.pointsToRecord
-      result.contains(point1) should be {
-        true
-      }
-      result.contains(point2) should be {
-        true
-      }
+      result.contains(point1) should be (true)
+      result.contains(point2) should be (true)
     }
   }
 
@@ -114,24 +110,12 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
       state.filteredPoints = thisFilteredPoints
       state.studentDatas = thisStudentDatas
       val result: Map[AttendanceMonitoringPoint, Seq[StudentMember]] = state.studentMap
-      result(point1).contains(student1) should be {
-        true
-      }
-      result(point1).contains(student2) should be {
-        true
-      }
-      result(point1).contains(student3) should be {
-        false
-      }
-      result(point2).contains(student1) should be {
-        false
-      }
-      result(point2).contains(student2) should be {
-        true
-      }
-      result(point2).contains(student3) should be {
-        true
-      }
+      result(point1).contains(student1) should be (true)
+      result(point1).contains(student2) should be (true)
+      result(point1).contains(student3) should be (false)
+      result(point2).contains(student1) should be (false)
+      result(point2).contains(student2) should be (true)
+      result(point2).contains(student3) should be (true)
     }
   }
 
@@ -204,9 +188,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
         student3 -> JHashMap(point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
       )
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student3.universityId}][${point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student3.universityId}][${point1.id}]") should be (true)
     }
   }
 
@@ -218,9 +200,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
         student1 -> JHashMap(point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
       )
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be (true)
     }
   }
 
@@ -233,9 +213,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
       )
       point1.startDate = DateTime.now.plusDays(2).toLocalDate
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be (true)
     }
   }
 
@@ -248,9 +226,7 @@ class RecordMonitoringPointCommandTest extends TestBase with Mockito {
       )
       point1.startDate = DateTime.now.minusDays(2).toLocalDate
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be {
-        false
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${point1.id}]") should be (false)
     }
   }
 

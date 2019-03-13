@@ -105,9 +105,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       }
       click on module.findElement(By.partialLinkText("Manage this module"))
       val editPerms = module.findElement(By.partialLinkText("Module permissions"))
-      eventually(editPerms.isDisplayed should be {
-        true
-      })
+      eventually(editPerms.isDisplayed should be (true))
       click on editPerms
 
       def pick(table: String, usercodes: Seq[String]) {
@@ -163,9 +161,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       click on module.findElement(By.partialLinkText("Manage this module"))
 
       val addAssignment = module.findElement(By.partialLinkText("Create new assignment"))
-      eventually(addAssignment.isDisplayed should be {
-        true
-      })
+      eventually(addAssignment.isDisplayed should be (true))
       click on addAssignment
     }
 
@@ -178,22 +174,16 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     singleSel("workflowCategory").value = WorkflowCategory.NoneUse.code
 
     cssSelector(s"input[name=createAndAddFeedback]").webElement.click()
-    eventually(pageSource contains "Edit feedback settings" should be {
-      true
-    })
+    eventually(pageSource contains "Edit feedback settings" should be (true))
     click on linkText("Students").findElement.get.underlying
 
     eventually {
-      textArea("massAddUsers").isDisplayed should be {
-        true
-      }
+      textArea("massAddUsers").isDisplayed should be (true)
     }
     if (students.nonEmpty) {
       textArea("massAddUsers").value = students.mkString("\n")
       click on className("add-students-manually")
-      eventually(pageSource contains "Your changes will not be recorded until you save this assignment." should be {
-        true
-      })
+      eventually(pageSource contains "Your changes will not be recorded until you save this assignment." should be (true))
       eventually {
         pageSource should include(students.size + " manually enrolled")
       }
@@ -215,9 +205,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
     val pattern = """.*admin/assignments/(.*)/summary""".r
     val assignmentId = pattern.findAllIn(currentUrl).matchData.toSeq.headOption.map(_.group(1))
-    assignmentId.isDefined should be {
-      true
-    }
+    assignmentId.isDefined should be (true)
     callback(assignmentId.get)
   }
 
@@ -232,22 +220,16 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       When("I click on the edit button")
       click on partialLinkText("Edit assignment")
       Then("I see the edit details screen")
-      eventually(pageSource contains "Edit assignment details" should be {
-        true
-      })
+      eventually(pageSource contains "Edit assignment details" should be (true))
 
       When("I choose Single use")
       singleSel("workflowCategory").value = WorkflowCategory.SingleUse.code
       Then("I see the options for single use workflows")
-      eventually(pageSource contains "Marking workflow type" should be {
-        true
-      })
+      eventually(pageSource contains "Marking workflow type" should be (true))
 
       When("I select single marking add a markers usercode")
       singleSel("workflowType").value = workflowType.name
-      eventually(pageSource contains "Add marker" should be {
-        true
-      })
+      eventually(pageSource contains "Add marker" should be (true))
 
       Seq("markersA" -> markers.headOption.getOrElse(Nil), "markersB" -> markers.tail.headOption.getOrElse(Nil)).foreach { case (field, m) =>
         m.zipWithIndex.foreach { case (marker, i) =>
@@ -307,16 +289,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     When("I click on the edit button again")
     click on partialLinkText("Edit assignment")
     Then("I see the edit details screen")
-    eventually(pageSource contains "Edit assignment details" should be {
-      true
-    })
+    eventually(pageSource contains "Edit assignment details" should be (true))
 
     When("I click on the Markers link")
     click on partialLinkText("Markers")
     Then("I see the assign markers screen")
-    eventually(pageSource contains "Assign markers" should be {
-      true
-    })
+    eventually(pageSource contains "Assign markers" should be (true))
   }
 
   // assumes that you start at the summary screen for an assignment
@@ -340,9 +318,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     click on partialLinkText("Marking")
     eventually({
       val release = partialLinkText("Release selected for marking").webElement
-      release.isDisplayed should be {
-        true
-      }
+      release.isDisplayed should be (true)
       click on release
     })
     Then("I reach the release submissions screen")
@@ -424,16 +400,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     When("I click on the edit button")
     click on partialLinkText("Edit assignment")
     Then("I see the edit details screen")
-    eventually(pageSource contains "Edit assignment details" should be {
-      true
-    })
+    eventually(pageSource contains "Edit assignment details" should be (true))
 
     When("I choose Reusable workflow")
     singleSel("workflowCategory").value = WorkflowCategory.Reusable.code
     Then("I see the reusable workflow list")
-    eventually(pageSource contains "Marking workflow type" should be {
-      true
-    })
+    eventually(pageSource contains "Marking workflow type" should be (true))
 
     When("I select reusable workflow")
     val select = new Select(find(cssSelector("select[name=reusableWorkflow]")).get.underlying)

@@ -12,9 +12,7 @@ class SingleUseWorkflowTest extends BrowserTest with CourseworkFixtures with Giv
       When("I click on the edit button again")
       click on partialLinkText("Edit assignment")
       Then("I see the edit details screen again with all the workflow information saved")
-      eventually(pageSource contains "Edit assignment details" should be {
-        true
-      })
+      eventually(pageSource contains "Edit assignment details" should be (true))
       singleSel("workflowCategory").value should be(WorkflowCategory.SingleUse.code)
       singleSel("workflowType").value should be(SingleMarking.name)
       new TextField(findAll(cssSelector("input.flexi-picker")).toList.head.underlying).value should be(P.Marker1.usercode)
@@ -32,9 +30,7 @@ class SingleUseWorkflowTest extends BrowserTest with CourseworkFixtures with Giv
       When("I click on the edit button again")
       click on partialLinkText("Edit assignment")
       Then("I see the edit details screen again with all the workflow information saved")
-      eventually(pageSource contains "Edit assignment details" should be {
-        true
-      })
+      eventually(pageSource contains "Edit assignment details" should be (true))
       singleSel("workflowCategory").value should be(WorkflowCategory.SingleUse.code)
       singleSel("workflowType").value should be(DoubleMarking.name)
       new TextField(findAll(cssSelector(".markersA input.flexi-picker")).toList.head.underlying).value should be(P.Marker2.usercode)
@@ -48,9 +44,7 @@ class SingleUseWorkflowTest extends BrowserTest with CourseworkFixtures with Giv
       When("I click on the edit button again")
       click on partialLinkText("Edit assignment")
       Then("I see the edit details screen again with all the workflow information saved")
-      eventually(pageSource contains "Edit assignment details" should be {
-        true
-      })
+      eventually(pageSource contains "Edit assignment details" should be (true))
       singleSel("workflowCategory").value should be(WorkflowCategory.SingleUse.code)
       singleSel("workflowType").value should be(ModeratedMarking.name)
       new TextField(findAll(cssSelector(".markersA input.flexi-picker")).toList.head.underlying).value should be(P.Marker1.usercode)

@@ -8,9 +8,7 @@ class ExamAdminTest extends ExamFixtures with GivenWhenThen {
 
     pageTitle should be("Tabula - Exams Management")
     click on linkText("Go to the Test Services admin page")
-    pageSource contains "Test Services" should be {
-      true
-    }
+    pageSource contains "Test Services" should be (true)
 
     // check that we can see some modules on the page.
     findAll(className("module-info")).toList should not be (Nil)

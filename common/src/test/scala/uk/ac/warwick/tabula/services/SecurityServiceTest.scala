@@ -24,21 +24,11 @@ class SecurityServiceTest extends TestBase with Mockito {
 
     val currentUser = new CurrentUser(user, user, god = true)
 
-    securityService.can(currentUser, Permissions.GodMode) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, new Department) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(new StudentRelationshipType), null) should be {
-      true
-    }
-    securityService.can(currentUser, null) should be {
-      true
-    }
-    securityService.can(currentUser, null, null) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.GodMode) should be (true)
+    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, new Department) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(new StudentRelationshipType), null) should be (true)
+    securityService.can(currentUser, null) should be (true)
+    securityService.can(currentUser, null, null) should be (true)
   }
 
   @Test def explicitPermission() {
@@ -60,18 +50,10 @@ class SecurityServiceTest extends TestBase with Mockito {
 
     securityService.roleService = roleService
 
-    securityService.can(currentUser, Permissions.GodMode) should be {
-      false
-    }
-    securityService.can(currentUser, Permissions.Module.Create, department) should be {
-      false
-    }
-    securityService.can(currentUser, Permissions.UserPicker) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.GodMode) should be (false)
+    securityService.can(currentUser, Permissions.Module.Create, department) should be (false)
+    securityService.can(currentUser, Permissions.UserPicker) should be (true)
+    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be (true)
   }
 
   @Test def role() {
@@ -91,22 +73,12 @@ class SecurityServiceTest extends TestBase with Mockito {
 
     securityService.roleService = roleService
 
-    securityService.can(currentUser, Permissions.UserPicker) should be {
-      false
-    }
-    securityService.can(currentUser, Permissions.GodMode) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.UserPicker) should be (false)
+    securityService.can(currentUser, Permissions.GodMode) should be (true)
+    securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be (true)
     // Global perm
-    securityService.can(currentUser, Permissions.Module.Create, department) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(new StudentRelationshipType), null) should be {
-      false
-    }
+    securityService.can(currentUser, Permissions.Module.Create, department) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(new StudentRelationshipType), null) should be (false)
   }
 
   @Test def globalPermission() {
@@ -344,90 +316,40 @@ class SecurityServiceTest extends TestBase with Mockito {
 
     // Can manage type 2 for whole dept
     // Can also manage type 1, but only over student1
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), department) should be {
-      false
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), department) should be {
-      false
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), department) should be (false)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), department) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), department) should be (false)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student1) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student1) should be {
-      false
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student1) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student1) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student1) should be (false)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), studentCourseDetails) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be {
-      false
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), studentCourseDetails) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), studentCourseDetails) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be (false)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student2) should be {
-      false
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {
-      false
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), student2) should be (false)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(type2), student2) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]), student2) should be (false)
 
-    securityService.canForAny(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), Seq(student1, student2)) should be {
-      true
-    }
+    securityService.canForAny(currentUser, Permissions.Profiles.StudentRelationship.Manage(type1), Seq(student1, student2)) should be (true)
 
     // Can read any type over the dept
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), department) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), department) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), department) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), department) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), department) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), department) should be (true)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), student1) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student1) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student1) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), student1) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student1) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student1) should be (true)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), studentCourseDetails) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), studentCourseDetails) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), studentCourseDetails) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), studentCourseDetails) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), studentCourseDetails) should be (true)
 
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), student2) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student2) should be {
-      true
-    }
-    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student2) should be {
-      true
-    }
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type1), student2) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(type2), student2) should be (true)
+    securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]), student2) should be (true)
 
   }
 
@@ -451,12 +373,8 @@ class SecurityServiceTest extends TestBase with Mockito {
    * name equal to each other in future. Sigh
    */
   @Test def equality() {
-    (Permissions.Module.Create == Permissions.AssignmentFeedback.Manage) should be {
-      false
-    }
-    (Permissions.Module.Create == Permissions.Module.Create) should be {
-      true
-    }
+    (Permissions.Module.Create == Permissions.AssignmentFeedback.Manage) should be (false)
+    (Permissions.Module.Create == Permissions.Module.Create) should be (true)
   }
 
   object TestRoleDef extends BuiltInRoleDefinition {
@@ -484,9 +402,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val module = new Module("xxx01")
     securityService.roleService = mock[RoleService]
     securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).toStream
-    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be {
-      false
-    }
+    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (false)
   }
 
   @Test
@@ -496,9 +412,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     val module = new Module("xxx01")
     securityService.roleService = mock[RoleService]
     securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestDelegatableRoleDef, Some(module)) {}).toStream
-    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be {
-      true
-    }
+    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (true)
   }
 
   @Test
@@ -509,9 +423,7 @@ class SecurityServiceTest extends TestBase with Mockito {
     securityService.roleService = mock[RoleService]
     // use a role without delegation, to prove godliness works.
     securityService.roleService.getRolesFor(currentUser, module) returns Seq(new BuiltInRole(TestRoleDef, Some(module)) {}).toStream
-    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be {
-      true
-    }
+    securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, module) should be (true)
   }
 
 }

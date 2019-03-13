@@ -62,12 +62,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(notInSchemePoint, null)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
-      errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be {
-        true
-      }
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be (true)
     }
   }
 
@@ -81,12 +77,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(point1, AttendanceState.Attended)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
-      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {
-        true
-      }
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
     }
   }
 
@@ -101,12 +93,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(point1, AttendanceState.Attended)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
-      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {
-        true
-      }
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
     }
   }
 
@@ -121,12 +109,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(point1, null)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        false
-      }
-      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {
-        false
-      }
+      errors.hasErrors should be (false)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
     }
   }
 
@@ -142,12 +126,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        false
-      }
-      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {
-        false
-      }
+      errors.hasErrors should be (false)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
     }
   }
 
@@ -163,12 +143,8 @@ class StudentRecordCommandTest extends TestBase with Mockito {
       validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
       validator.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
-      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {
-        true
-      }
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
 
     }
   }

@@ -62,9 +62,7 @@ class FeedbackAdjustmentNotificationTest extends TestBase with Mockito {
   @Test
   def shouldCallTextRendererWithCorrectTemplate() {
     val n = createNotification
-    n.content.template should be {
-      "/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl"
-    }
+    n.content.template should be ("/WEB-INF/freemarker/emails/feedback_adjustment_notification.ftl")
   }
 
   @Test

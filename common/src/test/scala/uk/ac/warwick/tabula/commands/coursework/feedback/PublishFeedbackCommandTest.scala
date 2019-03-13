@@ -24,9 +24,7 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
         assignment.closeDate = closeDateAfter
         assignment.openEnded = false
         command.validate(errors)
-        errors.hasGlobalErrors should be {
-          true
-        }
+        errors.hasGlobalErrors should be (true)
         errors.getGlobalError.getCode should be("feedback.publish.notclosed")
       }
 
@@ -34,17 +32,13 @@ class PublishFeedbackCommandTest extends TestBase with Mockito {
         assignment.closeDate = closeDateBefore
         assignment.openEnded = false
         command.validate(errors)
-        errors.hasGlobalErrors should be {
-          false
-        }
+        errors.hasGlobalErrors should be (false)
       }
 
       /* Brave */ new World {
         assignment.openEnded = true
         command.validate(errors)
-        errors.hasGlobalErrors should be {
-          false
-        }
+        errors.hasGlobalErrors should be (false)
       }
 
     }

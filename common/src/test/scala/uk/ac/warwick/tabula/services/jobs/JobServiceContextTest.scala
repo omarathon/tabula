@@ -22,19 +22,13 @@ class JobServiceContextTest extends AppContextTestBase {
 
     // Check that the flags have not actually been updated.
     withClue("Started") {
-      instance.started should be {
-        false
-      }
+      instance.started should be (false)
     }
     withClue("Finished") {
-      instance.finished should be {
-        false
-      }
+      instance.finished should be (false)
     }
     withClue("Succeeded") {
-      instance.succeeded should be {
-        false
-      }
+      instance.succeeded should be (false)
     }
   }
 }

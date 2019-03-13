@@ -47,9 +47,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito {
 
         val mav = createController.adminDepartment(cmd, department, currentUser)
         mav.map.get("hasUnreleasedGroupsets") match {
-          case Some(v: Boolean) => v should be {
-            true
-          }
+          case Some(v: Boolean) => v should be (true)
           case _ => fail()
         }
       }
@@ -78,9 +76,7 @@ class AdminDepartmentHomeControllerTest extends TestBase with Mockito {
 
         val mav = createController.adminDepartment(cmd, department, currentUser)
         mav.map.get("hasUnreleasedGroupsets") match {
-          case Some(v: Boolean) => v should be {
-            false
-          }
+          case Some(v: Boolean) => v should be (false)
           case _ => fail()
         }
 

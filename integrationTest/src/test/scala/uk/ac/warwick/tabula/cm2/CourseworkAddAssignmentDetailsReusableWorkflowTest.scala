@@ -23,9 +23,7 @@ class CourseworkAddAssignmentDetailsReusableWorkflowTest extends BrowserTest wit
     Then("I should see the create new assignment option")
     val createAssignmentLink = manageModule.findElement(By.partialLinkText("Create new assignment"))
     eventually {
-      createAssignmentLink.isDisplayed should be {
-        true
-      }
+      createAssignmentLink.isDisplayed should be (true)
     }
 
     And("I click on create a new assignment link")

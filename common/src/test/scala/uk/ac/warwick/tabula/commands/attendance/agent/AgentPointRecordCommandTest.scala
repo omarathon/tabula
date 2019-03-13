@@ -180,9 +180,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
         student2 -> JHashMap(scheme1point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
       )
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student2.universityId}][${scheme1point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student2.universityId}][${scheme1point1.id}]") should be (true)
     }
   }
 
@@ -196,9 +194,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
         student1 -> JHashMap(scheme1point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
       )
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be (true)
     }
   }
 
@@ -214,9 +210,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
         student1 -> JHashMap(scheme1point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
       )
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be (true)
     }
   }
 
@@ -233,9 +227,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
       )
       scheme1point1.startDate = DateTime.now.plusDays(2).toLocalDate
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be {
-        true
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be (true)
     }
   }
 
@@ -252,9 +244,7 @@ class AgentPointRecordCommandTest extends TestBase with Mockito {
       )
       scheme1point1.startDate = DateTime.now.minusDays(2).toLocalDate
       validator.validate(errors)
-      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be {
-        false
-      }
+      errors.hasFieldErrors(s"checkpointMap[${student1.universityId}][${scheme1point1.id}]") should be (false)
     }
   }
 

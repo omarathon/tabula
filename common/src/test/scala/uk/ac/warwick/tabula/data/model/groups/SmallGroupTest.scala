@@ -40,17 +40,13 @@ class SmallGroupTest extends TestBase with Mockito {
   def equivalentEventsToReturnsTrueForSameGroup() {
     val group = newSmallGroupWithMockedServices
 
-    group.hasEquivalentEventsTo(group) should be {
-      true
-    }
+    group.hasEquivalentEventsTo(group) should be (true)
   }
 
   @Test
   def equivalentEventsToReturnsTrueForGroupsWithNoEvents() {
     val group = newSmallGroupWithMockedServices
-    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be {
-      true
-    }
+    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be (true)
   }
 
   @Test
@@ -60,9 +56,7 @@ class SmallGroupTest extends TestBase with Mockito {
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(equivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {
-      true
-    }
+    group.hasEquivalentEventsTo(group2) should be (true)
   }
 
   @Test
@@ -71,9 +65,7 @@ class SmallGroupTest extends TestBase with Mockito {
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {
-      false
-    }
+    group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
@@ -83,9 +75,7 @@ class SmallGroupTest extends TestBase with Mockito {
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(event)
     group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {
-      false
-    }
+    group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
@@ -129,9 +119,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
     target.permissionsService should be(source.permissionsService)
     target.students should not be source.students
-    target.students.hasSameMembersAs(source.students) should be {
-      true
-    }
+    target.students.hasSameMembersAs(source.students) should be (true)
     target.events.size should be(1)
     target.events.head should be(clonedEvent)
 

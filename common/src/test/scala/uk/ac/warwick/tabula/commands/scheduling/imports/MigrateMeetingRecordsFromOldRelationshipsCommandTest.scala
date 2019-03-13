@@ -54,9 +54,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
     new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
       testObject.meetingRecordService.listAll(relationshipOnEndedCourse) returns Seq()
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 
@@ -65,9 +63,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
     new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
       endedCourse.sprCode = "somethingElse"
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 
@@ -76,9 +72,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
     new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
       currentCourse.latestStudentCourseYearDetails.enrolmentDepartment = Fixtures.department("its")
       validator.validate(errors)
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
     }
   }
 
@@ -86,9 +80,7 @@ class MigrateMeetingRecordsFromOldRelationshipsCommandTest extends TestBase with
   def validate(): Unit = withFakeTime(DateTime.now) {
     new ValidationFixture with StudentWithOneCurrentOneEndedCourse {
       validator.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
       testObject.migrations should be(Map(relationshipOnEndedCourse -> relationshipOnCurrentCourse))
     }
   }

@@ -15,40 +15,24 @@ class DepartmentTest extends TestBase with Mockito {
 
   @Test def settings() {
     val department = new Department
-    department.collectFeedbackRatings should be {
-      false
-    }
-    department.allowExtensionRequests should be {
-      false
-    }
-    department.canRequestExtension should be {
-      false
-    }
+    department.collectFeedbackRatings should be (false)
+    department.allowExtensionRequests should be (false)
+    department.canRequestExtension should be (false)
     department.extensionGuidelineSummary should be(null)
     department.formattedGuidelineSummary should be("")
     department.extensionGuidelineLink should be(null)
-    department.showStudentName should be {
-      false
-    }
-    department.plagiarismDetectionEnabled should be {
-      true
-    }
-    department.turnitinExcludeBibliography should be {
-      true
-    }
-    department.turnitinExcludeQuotations should be {
-      true
-    }
+    department.showStudentName should be (false)
+    department.plagiarismDetectionEnabled should be (true)
+    department.turnitinExcludeBibliography should be (true)
+    department.turnitinExcludeQuotations should be (true)
     department.turnitinSmallMatchPercentageLimit should be(0)
     department.turnitinSmallMatchWordLimit should be(0)
     department.defaultGroupAllocationMethod should be(Manual)
-    department.autoGroupDeregistration should be {
-      true
-    }
+    department.autoGroupDeregistration should be (true)
 
     department.collectFeedbackRatings = true
     department.allowExtensionRequests = true
-    department.extensionGuidelineSummary = "Here is my magic summary.\n\n    Do everything good!"
+    department.extensionGuidelineSummary = "Here is my magic summary.\n\nDo everything good!"
     department.extensionGuidelineLink = "http://warwick.ac.uk"
     department.showStudentName = true
     department.plagiarismDetectionEnabled = false
@@ -59,39 +43,21 @@ class DepartmentTest extends TestBase with Mockito {
     department.defaultGroupAllocationMethod = StudentSignUp
     department.autoGroupDeregistration = false
 
-    department.collectFeedbackRatings should be {
-      true
-    }
-    department.allowExtensionRequests should be {
-      true
-    }
-    department.canRequestExtension should be {
-      true
-    }
-    department.extensionGuidelineSummary should be("Here is my magic summary.\n\n    Do everything good!")
-    department.formattedGuidelineSummary should be("<p>Here is my magic summary.</p><p>Do everything good!</p>")
+    department.collectFeedbackRatings should be (true)
+    department.allowExtensionRequests should be (true)
+    department.canRequestExtension should be (true)
+    department.extensionGuidelineSummary should be("Here is my magic summary.\n\nDo everything good!")
+    department.formattedGuidelineSummary should be("<p>\n    Here is my magic summary.\n  </p><p>\n    Do everything good!\n  </p>")
     department.extensionGuidelineLink should be("http://warwick.ac.uk")
-    department.showStudentName should be {
-      true
-    }
-    department.plagiarismDetectionEnabled should be {
-      false
-    }
-    department.turnitinExcludeBibliography should be {
-      false
-    }
-    department.turnitinExcludeQuotations should be {
-      false
-    }
+    department.showStudentName should be (true)
+    department.plagiarismDetectionEnabled should be (false)
+    department.turnitinExcludeBibliography should be (false)
+    department.turnitinExcludeQuotations should be (false)
     department.turnitinSmallMatchPercentageLimit should be(0)
     department.turnitinSmallMatchWordLimit should be(50)
     department.defaultGroupAllocationMethod should be(StudentSignUp)
-    department.autoGroupDeregistration should be {
-      false
-    }
-    department.autoMarkMissedMonitoringPoints should be {
-      false
-    }
+    department.autoGroupDeregistration should be (false)
+    department.autoMarkMissedMonitoringPoints should be (false)
 
   }
 
@@ -105,9 +71,7 @@ class DepartmentTest extends TestBase with Mockito {
     permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns ownersGroup
     permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition) returns extmanGroup
 
-    department.isOwnedBy("cuscav") should be {
-      false
-    }
+    department.isOwnedBy("cuscav") should be (false)
 
     department.owners.knownType.addUserId("cuscav")
     department.owners.knownType.addUserId("cusebr")
@@ -115,25 +79,15 @@ class DepartmentTest extends TestBase with Mockito {
 
     department.owners.knownType.removeUserId("cusebr")
 
-    department.isOwnedBy("cuscav") should be {
-      true
-    }
-    department.isOwnedBy("curef") should be {
-      true
-    }
-    department.isOwnedBy("cusebr") should be {
-      false
-    }
+    department.isOwnedBy("cuscav") should be (true)
+    department.isOwnedBy("curef") should be (true)
+    department.isOwnedBy("cusebr") should be (false)
 
     ownersGroup.members should be(Seq("cuscav", "curef"))
 
-    department.isExtensionManager("cuscav") should be {
-      false
-    }
+    department.isExtensionManager("cuscav") should be (false)
     extmanGroup.addUserId("cuscav")
-    department.isExtensionManager("cuscav") should be {
-      true
-    }
+    department.isExtensionManager("cuscav") should be (true)
   }
 
   @Test
@@ -179,15 +133,9 @@ class DepartmentTest extends TestBase with Mockito {
   def AllMembersFilterRuleLetsAnyoneIn() {
     new FilterRuleFixture {
       val rule = AllMembersFilterRule
-      rule.matches(notStudentMember, None) should be {
-        true
-      }
-      rule.matches(undergraduate, None) should be {
-        true
-      }
-      rule.matches(postgraduate, None) should be {
-        true
-      }
+      rule.matches(notStudentMember, None) should be (true)
+      rule.matches(undergraduate, None) should be (true)
+      rule.matches(postgraduate, None) should be (true)
     }
   }
 
@@ -199,26 +147,16 @@ class DepartmentTest extends TestBase with Mockito {
   def UGFilterRuleAllowsUndergrads() {
     new FilterRuleFixture {
       val rule = UndergraduateFilterRule
-      rule.matches(notStudentMember, None) should be {
-        false
-      }
-      rule.matches(undergraduate, None) should be {
-        true
-      }
-      rule.matches(postgraduate, None) should be {
-        false
-      }
+      rule.matches(notStudentMember, None) should be (false)
+      rule.matches(undergraduate, None) should be (true)
+      rule.matches(postgraduate, None) should be (false)
 
       // test the various remaining different route types
       postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.InService
-      rule.matches(postgraduate, None) should be {
-        false
-      }
+      rule.matches(postgraduate, None) should be (false)
 
       postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.PGCE
-      rule.matches(postgraduate, None) should be {
-        false
-      }
+      rule.matches(postgraduate, None) should be (false)
     }
   }
 
@@ -226,26 +164,16 @@ class DepartmentTest extends TestBase with Mockito {
   def PGFilterRuleAllowsPostgrads() {
     new FilterRuleFixture {
       val rule = PostgraduateFilterRule
-      rule.matches(notStudentMember, None) should be {
-        false
-      }
-      rule.matches(undergraduate, None) should be {
-        false
-      }
-      rule.matches(postgraduate, None) should be {
-        true
-      }
+      rule.matches(notStudentMember, None) should be (false)
+      rule.matches(undergraduate, None) should be (false)
+      rule.matches(postgraduate, None) should be (true)
 
       // test the various remaining different course types
       postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.InService
-      rule.matches(postgraduate, None) should be {
-        true
-      }
+      rule.matches(postgraduate, None) should be (true)
 
       postgraduate.mostSignificantCourseDetails.get.currentRoute.degreeType = DegreeType.PGCE
-      rule.matches(postgraduate, None) should be {
-        true
-      }
+      rule.matches(postgraduate, None) should be (true)
 
     }
   }
@@ -255,26 +183,14 @@ class DepartmentTest extends TestBase with Mockito {
     new FilterRuleFixture {
       val firstYearRule = new InYearFilterRule(1)
       val secondYearRule = new InYearFilterRule(2)
-      firstYearRule.matches(undergraduate, None) should be {
-        true
-      }
-      firstYearRule.matches(postgraduate, None) should be {
-        false
-      }
-      firstYearRule.matches(notStudentMember, None) should be {
-        false
-      }
+      firstYearRule.matches(undergraduate, None) should be (true)
+      firstYearRule.matches(postgraduate, None) should be (false)
+      firstYearRule.matches(notStudentMember, None) should be (false)
 
-      secondYearRule.matches(undergraduate, None) should be {
-        false
-      }
+      secondYearRule.matches(undergraduate, None) should be (false)
       undergraduate.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.yearOfStudy = 2
-      secondYearRule.matches(undergraduate, None) should be {
-        true
-      }
-      firstYearRule.matches(undergraduate, None) should be {
-        false
-      }
+      secondYearRule.matches(undergraduate, None) should be (true)
+      firstYearRule.matches(undergraduate, None) should be (false)
     }
   }
 
@@ -282,25 +198,13 @@ class DepartmentTest extends TestBase with Mockito {
   def DepartmentRoutesRuleAllowsStudentInRoute() {
     new FilterRuleFixture {
       val deptRoutesRule = DepartmentRoutesFilterRule
-      deptRoutesRule.matches(undergraduate, Option(department)) should be {
-        true
-      }
-      deptRoutesRule.matches(postgraduate, Option(department)) should be {
-        false
-      }
-      deptRoutesRule.matches(notStudentMember, Option(department)) should be {
-        false
-      }
+      deptRoutesRule.matches(undergraduate, Option(department)) should be (true)
+      deptRoutesRule.matches(postgraduate, Option(department)) should be (false)
+      deptRoutesRule.matches(notStudentMember, Option(department)) should be (false)
 
-      deptRoutesRule.matches(undergraduate, Option(otherDepartment)) should be {
-        false
-      }
-      deptRoutesRule.matches(postgraduate, Option(otherDepartment)) should be {
-        true
-      }
-      deptRoutesRule.matches(notStudentMember, Option(otherDepartment)) should be {
-        false
-      }
+      deptRoutesRule.matches(undergraduate, Option(otherDepartment)) should be (false)
+      deptRoutesRule.matches(postgraduate, Option(otherDepartment)) should be (true)
+      deptRoutesRule.matches(notStudentMember, Option(otherDepartment)) should be (false)
 
     }
   }

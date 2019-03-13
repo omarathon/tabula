@@ -92,9 +92,7 @@ class TutorReallocationTest extends BrowserTest with GivenWhenThen with Features
     Then("They can allocate that student to a new tutor")
     eventually(currentUrl should include("/profiles/department/xxx/tutor/reallocate"))
     cssSelector(".students table tbody tr").findAllElements.size should be(1)
-    cssSelector(".students table tbody tr td.check input").findElement.get.isSelected should be {
-      true
-    }
+    cssSelector(".students table tbody tr td.check input").findElement.get.isSelected should be (true)
     cssSelector(".entities table tbody tr").findAllElements.size should be(1)
     cssSelector(s".entities table tbody td.full-name").findElement.get.underlying.getText should be(s"${P.Marker1.usercode} user")
     cssSelector(s".entities table tbody td.counter").findElement.get.underlying.getText should be("1")

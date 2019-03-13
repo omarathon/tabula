@@ -61,12 +61,8 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
 
     And("The group I selected should be displayed")
     val updatedGroupsetInfo = updatedGroupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
-    updatedGroupsetInfo.showsGroup("Group 1") should be {
-      true
-    }
-    updatedGroupsetInfo.showsGroup("Group 2") should be {
-      false
-    }
+    updatedGroupsetInfo.showsGroup("Group 1") should be (true)
+    updatedGroupsetInfo.showsGroup("Group 2") should be (false)
 
   }
 
@@ -164,9 +160,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
 
     And("The group locked icon is shown")
-    groupInfo.showsGroupLockedIcon should be {
-      true
-    }
+    groupInfo.showsGroupLockedIcon should be (true)
 
   }
 
@@ -219,9 +213,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
 
     And("The group locked icon is shown")
-    groupInfo.showsGroupLockedIcon should be {
-      true
-    }
+    groupInfo.showsGroupLockedIcon should be (true)
   }
 
   "A student" should "not be able to select a group which is full" in {
@@ -262,9 +254,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     group2Checkbox.isEnabled should be(true)
 
     And("The group locked icon is not shown")
-    groupsetInfo.showsGroupLockedIcon should be {
-      false
-    }
+    groupsetInfo.showsGroupLockedIcon should be (false)
   }
 
   "A student" should "not be able to leave a self-signup group which doesn't allow switching" in {
@@ -291,9 +281,7 @@ class SelfSignUpTest extends SmallGroupsFixture with GivenWhenThen {
     groupInfo.findLeaveButtonFor("Group 1") should not be 'defined
 
     And("The group locked icon is shown")
-    groupInfo.showsGroupLockedIcon should be {
-      true
-    }
+    groupInfo.showsGroupLockedIcon should be (true)
   }
 
 }

@@ -170,9 +170,7 @@ class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixture
 
     val iframe = frame(find(cssSelector(".modal-body iframe")).get)
     switch to iframe
-    eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be {
-      true
-    })
+    eventually(pageSource contains "Are you sure that you want to delete this feedback template?" should be (true))
 
     executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
 

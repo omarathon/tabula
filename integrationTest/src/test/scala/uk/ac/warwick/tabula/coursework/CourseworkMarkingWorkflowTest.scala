@@ -15,9 +15,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
       Then("I should see the workflows menu option")
       val markingWorkflowsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Marking workflows"))
       eventually {
-        markingWorkflowsLink.isDisplayed should be {
-          true
-        }
+        markingWorkflowsLink.isDisplayed should be (true)
       }
       click on markingWorkflowsLink
     }

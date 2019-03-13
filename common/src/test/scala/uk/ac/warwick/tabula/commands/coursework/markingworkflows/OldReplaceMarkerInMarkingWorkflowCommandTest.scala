@@ -71,9 +71,7 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
     new Fixture {
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("oldMarker") should be {
-        true
-      }
+      errors.hasFieldErrors("oldMarker") should be (true)
     }
   }
 
@@ -82,9 +80,7 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
     new Fixture {
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("newMarker") should be {
-        true
-      }
+      errors.hasFieldErrors("newMarker") should be (true)
     }
   }
 
@@ -94,9 +90,7 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
       validator.oldMarker = marker4.getUserId
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("oldMarker") should be {
-        true
-      }
+      errors.hasFieldErrors("oldMarker") should be (true)
     }
   }
 
@@ -106,9 +100,7 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
       validator.newMarker = "someGuy"
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("newMarker") should be {
-        true
-      }
+      errors.hasFieldErrors("newMarker") should be (true)
     }
   }
 
@@ -117,9 +109,7 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
     new Fixture {
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("confirm") should be {
-        true
-      }
+      errors.hasFieldErrors("confirm") should be (true)
     }
   }
 
@@ -132,15 +122,9 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
 
       var errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasFieldErrors("oldMarker") should be {
-        false
-      }
-      errors.hasFieldErrors("newMarker") should be {
-        false
-      }
-      errors.hasFieldErrors("confirm") should be {
-        false
-      }
+      errors.hasFieldErrors("oldMarker") should be (false)
+      errors.hasFieldErrors("newMarker") should be (false)
+      errors.hasFieldErrors("confirm") should be (false)
     }
   }
 
@@ -150,30 +134,14 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
       command.oldMarker = marker1.getUserId
       command.newMarker = marker3.getUserId
       command.applyInternal()
-      thisMarkingWorkflow.firstMarkers.includesUser(marker1) should be {
-        false
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker1) should be {
-        false
-      }
-      thisMarkingWorkflow.firstMarkers.includesUser(marker3) should be {
-        true
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker3) should be {
-        true
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be {
-        false
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be {
-        false
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker3.getUserId) should be {
-        true
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker3.getUserId) should be {
-        true
-      }
+      thisMarkingWorkflow.firstMarkers.includesUser(marker1) should be (false)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker1) should be (false)
+      thisMarkingWorkflow.firstMarkers.includesUser(marker3) should be (true)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker3) should be (true)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be (false)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be (false)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker3.getUserId) should be (true)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker3.getUserId) should be (true)
       assignment1.firstMarkerMap(marker3.getUserId).knownType.members.size should be(2)
       assignment1.secondMarkerMap(marker3.getUserId).knownType.members.size should be(2)
       verify(mockAssessmentService, times(1)).save(assignment1)
@@ -183,30 +151,14 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
       command.oldMarker = marker1.getUserId
       command.newMarker = marker2.getUserId
       command.applyInternal()
-      thisMarkingWorkflow.firstMarkers.includesUser(marker1) should be {
-        false
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker1) should be {
-        false
-      }
-      thisMarkingWorkflow.firstMarkers.includesUser(marker2) should be {
-        true
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker2) should be {
-        true
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be {
-        false
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be {
-        false
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be {
-        true
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be {
-        true
-      }
+      thisMarkingWorkflow.firstMarkers.includesUser(marker1) should be (false)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker1) should be (false)
+      thisMarkingWorkflow.firstMarkers.includesUser(marker2) should be (true)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker2) should be (true)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be (false)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker1.getUserId) should be (false)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be (true)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be (true)
       assignment1.firstMarkerMap(marker2.getUserId).knownType.members.size should be(4)
       assignment1.secondMarkerMap(marker2.getUserId).knownType.members.size should be(2)
       verify(mockAssessmentService, times(1)).save(assignment1)
@@ -220,30 +172,14 @@ class OldReplaceMarkerInMarkingWorkflowCommandTest extends TestBase with Mockito
       command.oldMarker = marker2.getUserId
       command.newMarker = marker4.getUserId
       command.applyInternal()
-      thisMarkingWorkflow.firstMarkers.includesUser(marker2) should be {
-        false
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker2) should be {
-        false
-      }
-      thisMarkingWorkflow.firstMarkers.includesUser(marker4) should be {
-        true
-      }
-      thisMarkingWorkflow.secondMarkers.includesUser(marker4) should be {
-        true
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be {
-        false
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be {
-        false
-      }
-      assignment1.firstMarkers.asScala.exists(_.marker_id == marker4.getUserId) should be {
-        true
-      }
-      assignment1.secondMarkers.asScala.exists(_.marker_id == marker4.getUserId) should be {
-        true
-      }
+      thisMarkingWorkflow.firstMarkers.includesUser(marker2) should be (false)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker2) should be (false)
+      thisMarkingWorkflow.firstMarkers.includesUser(marker4) should be (true)
+      thisMarkingWorkflow.secondMarkers.includesUser(marker4) should be (true)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be (false)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker2.getUserId) should be (false)
+      assignment1.firstMarkers.asScala.exists(_.marker_id == marker4.getUserId) should be (true)
+      assignment1.secondMarkers.asScala.exists(_.marker_id == marker4.getUserId) should be (true)
       assignment1.firstMarkerMap(marker4.getUserId).knownType.members.size should be(2)
       assignment1.secondMarkerMap(marker4.getUserId).knownType.members.size should be(2)
       verify(mockAssessmentService, times(1)).save(assignment1)

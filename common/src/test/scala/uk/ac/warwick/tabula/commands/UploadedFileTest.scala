@@ -32,21 +32,15 @@ class UploadedFileTest extends TestBase with Mockito {
   def uploads() {
     val uploadedFile = new UploadedFile
     uploadedFile.upload = JArrayList()
-    uploadedFile.hasUploads should be {
-      false
-    }
+    uploadedFile.hasUploads should be (false)
     uploadedFile.uploadOrEmpty should be(JArrayList())
 
     uploadedFile.upload = JArrayList(multiEmpty)
-    uploadedFile.hasUploads should be {
-      false
-    }
+    uploadedFile.hasUploads should be (false)
     uploadedFile.uploadOrEmpty should be(JArrayList())
 
     uploadedFile.upload = JArrayList(multi1)
-    uploadedFile.hasUploads should be {
-      true
-    }
+    uploadedFile.hasUploads should be (true)
     uploadedFile.uploadOrEmpty should be(JArrayList(multi1))
   }
 

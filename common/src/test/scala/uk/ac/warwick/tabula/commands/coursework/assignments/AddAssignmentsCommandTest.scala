@@ -62,9 +62,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
       val errors = new BindException(validator, "command")
       validator.validate(errors)
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -90,9 +88,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
 
         val result = cmd.applyInternal()
 
-        result.exists(_.module == module1) should be {
-          true
-        }
+        result.exists(_.module == module1) should be (true)
         val module1result = result.find(_.module == module1).get
         module1result.name should be("Assignment 1")
         //check the default fields were added.
@@ -106,9 +102,7 @@ class AddAssignmentsCommandTest extends TestBase with Mockito {
           assert(module1result.openEnded === false)
         }
 
-        result.exists(_.module == module3) should be {
-          true
-        }
+        result.exists(_.module == module3) should be (true)
         val module3result = result.find(_.module == module3).get
         module3result.name should be("Assignment 3")
         //check the default fields were added.

@@ -237,9 +237,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.submissions.add(Fixtures.submission("0000001", "0000001"))
     assignment.submissions.add(Fixtures.submission("0000002", "0000002"))
 
-    assignment.needsFeedbackPublishing should be {
-      true
-    }
+    assignment.needsFeedbackPublishing should be (true)
 
     val notification = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment)
     notification.recipients should not be 'empty
@@ -255,17 +253,13 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
     // Feedback released for all assignments without plagiarism investigation
     assignment.submissions.get(1).plagiarismInvestigation = SuspectPlagiarised
-    assignment.needsFeedbackPublishing should be {
-      false
-    }
+    assignment.needsFeedbackPublishing should be (false)
     notification.recipients should be('empty)
     assignment.submissions.get(1).plagiarismInvestigation = NotInvestigated
 
     // Feedback fully released
     assignment.feedbacks.get(1).released = true
-    assignment.needsFeedbackPublishing should be {
-      false
-    }
+    assignment.needsFeedbackPublishing should be (false)
     notification.recipients should be('empty)
   }
 
@@ -314,9 +308,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
     // Feedback fully released
     assignment.feedbacks.get(0).released = true
-    assignment.needsFeedbackPublishing should be {
-      true
-    } // We still haven't released the others
+    assignment.needsFeedbackPublishing should be (true) // We still haven't released the others
     notification.recipients should be('empty)
   }
 

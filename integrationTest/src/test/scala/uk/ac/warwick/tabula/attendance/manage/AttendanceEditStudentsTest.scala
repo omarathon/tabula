@@ -27,9 +27,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     eventually {
       findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
     click on cssSelector("input[name=manuallyAddForm]")
     eventually(pageSource should include("Add students manually"))
@@ -49,17 +47,13 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     eventually {
       findAll(cssSelector(".find-students div.student-filter")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
     click on cssSelector("span[data-placeholder='All routes']")
     eventually {
       findAll(cssSelector("input[name=routes]")).forall {
         _.isDisplayed
-      } should be {
-        true
-      }
+      } should be (true)
     }
     click on cssSelector("input[name=routes]")
 
@@ -106,9 +100,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
       eventually {
         findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
           _.isDisplayed
-        } should be {
-          true
-        }
+        } should be (true)
       }
       cssSelector(".manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
       click on cssSelector("input[name=resetMembership]")
@@ -125,9 +117,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
       eventually {
         findAll(cssSelector(".find-students div.student-filter")).forall {
           _.isDisplayed
-        } should be {
-          true
-        }
+        } should be (true)
       }
       cssSelector(".find-students input[name=excludeIds]").findAllElements.foreach(input => click on input)
       click on cssSelector("input[name=manuallyExclude]")
@@ -146,9 +136,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
       eventually {
         findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
           _.isDisplayed
-        } should be {
-          true
-        }
+        } should be (true)
       }
       cssSelector(".manually-added input[name=resetStudentIds]").findAllElements.foreach(input => click on input)
       click on cssSelector("input[name=resetMembership]")

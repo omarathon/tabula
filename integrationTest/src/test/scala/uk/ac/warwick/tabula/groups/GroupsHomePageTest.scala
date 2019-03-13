@@ -57,9 +57,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
     Then("I should see the released groupset")
     val groupsPage = new GroupsHomePage
-    groupsPage.isCurrentPage should be {
-      true
-    }
+    groupsPage.isCurrentPage should be (true)
 
     groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be('defined)
   }
@@ -119,9 +117,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
     Then("The open page is displayed")
     val batchOpen = new BatchOpenPage("xxx", academicYear)
-    batchOpen.isCurrentPage should be {
-      true
-    }
+    batchOpen.isCurrentPage should be (true)
 
     When("I check the checkbox next to the groupset")
     batchOpen.checkboxForGroupSet(setInfo).isEnabled should be(true)

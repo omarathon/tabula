@@ -113,13 +113,9 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
       workflow.getSubmissions(assignment, currentUser.apparentUser) should be(Seq())
 
-      workflow.studentsChooseMarker should be {
-        true
-      }
+      workflow.studentsChooseMarker should be (true)
       workflow.firstMarkerRoleName should be("Marker")
-      workflow.hasSecondMarker should be {
-        false
-      }
+      workflow.hasSecondMarker should be (false)
       workflow.secondMarkerRoleName should be(None)
       workflow.secondMarkerVerb should be(None)
 
@@ -163,9 +159,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
       workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, null) should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/1234567/feedback/online")
 
       workflow.firstMarkerRoleName should be("First marker")
-      workflow.hasSecondMarker should be {
-        true
-      }
+      workflow.hasSecondMarker should be (true)
       workflow.secondMarkerRoleName should be(Some("Second marker"))
       workflow.secondMarkerVerb should be(Some("mark"))
 
@@ -182,9 +176,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
       workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, null) should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/1234567/feedback/online")
 
       workflow.firstMarkerRoleName should be("First marker")
-      workflow.hasSecondMarker should be {
-        true
-      }
+      workflow.hasSecondMarker should be (true)
       workflow.secondMarkerRoleName should be(Some("Second marker"))
       workflow.secondMarkerVerb should be(Some("mark"))
 
@@ -208,9 +200,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
       workflow.courseworkMarkingUrl(assignment, currentUser.apparentUser, sub4.usercode) should be(s"/$cm1Prefix/admin/module/heron101/assignments/1/marker/1234567/feedback/online/moderation")
 
       workflow.firstMarkerRoleName should be("Marker")
-      workflow.hasSecondMarker should be {
-        true
-      }
+      workflow.hasSecondMarker should be (true)
       workflow.secondMarkerRoleName should be(Some("Moderator"))
       workflow.secondMarkerVerb should be(Some("moderate"))
 

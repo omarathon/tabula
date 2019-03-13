@@ -72,9 +72,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       val command: StubCommand = new StubCommand(groupSet1, actor, userLookup)
 
       command.setBeforeUpdates should equal(groupSet1)
-      command.setBeforeUpdates.eq(groupSet1) should be {
-        false
-      }
+      command.setBeforeUpdates.eq(groupSet1) should be (false)
 
     }
   }
@@ -86,12 +84,8 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1", "user2", "user4"))).build
       command.set.groups = JArrayList(modifiedGroupA, groupB)
 
-      command.hasAffectedStudentsGroups(user4) should be {
-        true
-      }
-      command.hasAffectedStudentsGroups(user1) should be {
-        false
-      }
+      command.hasAffectedStudentsGroups(user4) should be (true)
+      command.hasAffectedStudentsGroups(user1) should be (false)
     }
   }
 
@@ -102,12 +96,8 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       val modifiedGroupA: SmallGroup = groupA.withStudents(createUserGroup(Seq("user1"))).build
       command.set.groups = JArrayList(modifiedGroupA, groupB)
 
-      command.hasAffectedStudentsGroups(user2) should be {
-        true
-      }
-      command.hasAffectedStudentsGroups(user1) should be {
-        false
-      }
+      command.hasAffectedStudentsGroups(user2) should be (true)
+      command.hasAffectedStudentsGroups(user1) should be (false)
     }
   }
 
@@ -119,17 +109,11 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       command.set.groups = JArrayList(modifiedGroupA, groupB)
 
       // group A - affected
-      command.hasAffectedStudentsGroups(user1) should be {
-        true
-      }
-      command.hasAffectedStudentsGroups(user2) should be {
-        true
-      }
+      command.hasAffectedStudentsGroups(user1) should be (true)
+      command.hasAffectedStudentsGroups(user2) should be (true)
 
       // group B - unaffected
-      command.hasAffectedStudentsGroups(user3) should be {
-        false
-      }
+      command.hasAffectedStudentsGroups(user3) should be (false)
 
     }
   }
@@ -149,15 +133,9 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
         case n: SmallGroupSetChangedUserIdRecipientNotification => n.userLookup = userLookup
       }
 
-      notifications.exists(_.recipients == Seq(user1)) should be {
-        true
-      }
-      notifications.exists(_.recipients == Seq(user2)) should be {
-        true
-      }
-      notifications.exists(_.recipients == Seq(user3)) should be {
-        false
-      }
+      notifications.exists(_.recipients == Seq(user1)) should be (true)
+      notifications.exists(_.recipients == Seq(user2)) should be (true)
+      notifications.exists(_.recipients == Seq(user3)) should be (false)
     }
   }
 
@@ -206,14 +184,10 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       group.students.add(test)
 
       val tutor: User = group.events.head.tutors.users.head
-      command.hasAffectedTutorsEvents(tutor1) should be {
-        true
-      }
+      command.hasAffectedTutorsEvents(tutor1) should be (true)
       // should return false for an arbitrary user (worryingly this failed pre TAB-2728)
-      command.hasAffectedTutorsEvents(new User()) should be {
-        false
-      }
-      //			command.hasAffectedTutorsEvents(tutor3) should be { false }
+      command.hasAffectedTutorsEvents(new User()) should be (false)
+      //			command.hasAffectedTutorsEvents(tutor3) should be (false)
     }
   }
 

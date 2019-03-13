@@ -76,9 +76,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
     new CommandFixture {
       val points: Seq[AttendanceMonitoringPoint] = command.applyInternal()
       points.foreach(_.createdDate should be(originalCreatedDate))
-      points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be {
-        true
-      })
+      points.foreach(_.updatedDate.isAfter(originalCreatedDate) should be (true))
       points.find(_.id == templatePoint.id).get.scheme should be(scheme)
       points.find(_.id == secondPoint.id).get.scheme should be(scheme2)
       points.size should be(command.pointsToEdit.size)
@@ -94,13 +92,9 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateName() {
     new Fixture {
       validator.validateName(errors, "Name")
-      errors.hasFieldErrors("name") should be {
-        false
-      }
+      errors.hasFieldErrors("name") should be (false)
       validator.validateName(errors, "")
-      errors.hasFieldErrors("name") should be {
-        true
-      }
+      errors.hasFieldErrors("name") should be (true)
     }
   }
 
@@ -108,17 +102,11 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateWeek() {
     new Fixture {
       validator.validateWeek(errors, 1, AcademicYear(2015), "startWeek")
-      errors.hasFieldErrors("startWeek") should be {
-        false
-      }
+      errors.hasFieldErrors("startWeek") should be (false)
       validator.validateWeek(errors, 52, AcademicYear(2015), "startWeek") // Extended a/y
-      errors.hasFieldErrors("startWeek") should be {
-        false
-      }
+      errors.hasFieldErrors("startWeek") should be (false)
       validator.validateWeek(errors, 54, AcademicYear(2015), "startWeek")
-      errors.hasFieldErrors("startWeek") should be {
-        true
-      }
+      errors.hasFieldErrors("startWeek") should be (true)
     }
   }
 
@@ -126,13 +114,9 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateWeeks() {
     new Fixture {
       validator.validateWeeks(errors, 2, 3)
-      errors.hasFieldErrors("startWeek") should be {
-        false
-      }
+      errors.hasFieldErrors("startWeek") should be (false)
       validator.validateWeeks(errors, 2, 1)
-      errors.hasFieldErrors("startWeek") should be {
-        true
-      }
+      errors.hasFieldErrors("startWeek") should be (true)
     }
   }
 
@@ -140,9 +124,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateDate() {
     new Fixture {
       validator.validateDate(errors, null, null, "startDate")
-      errors.hasFieldErrors("startDate") should be {
-        true
-      }
+      errors.hasFieldErrors("startDate") should be (true)
     }
     new Fixture {
       val date: DateTime = new DateTime().withYear(2013)
@@ -171,17 +153,11 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateDates() {
     new Fixture {
       validator.validateDates(errors, new DateTime().toLocalDate, new DateTime().toLocalDate)
-      errors.hasFieldErrors("startDate") should be {
-        false
-      }
+      errors.hasFieldErrors("startDate") should be (false)
       validator.validateDates(errors, new DateTime().toLocalDate, new DateTime().toLocalDate.plusDays(1))
-      errors.hasFieldErrors("startDate") should be {
-        false
-      }
+      errors.hasFieldErrors("startDate") should be (false)
       validator.validateDates(errors, new DateTime().toLocalDate, new DateTime().toLocalDate.minusDays(1))
-      errors.hasFieldErrors("startDate") should be {
-        true
-      }
+      errors.hasFieldErrors("startDate") should be (true)
     }
   }
 
@@ -189,17 +165,11 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateTypeForEndDate() {
     new Fixture {
       validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Standard, new DateTime().toLocalDate.minusDays(1))
-      errors.hasFieldErrors("pointType") should be {
-        false
-      }
+      errors.hasFieldErrors("pointType") should be (false)
       validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate)
-      errors.hasFieldErrors("pointType") should be {
-        false
-      }
+      errors.hasFieldErrors("pointType") should be (false)
       validator.validateTypeForEndDate(errors, AttendanceMonitoringPointType.Meeting, new DateTime().toLocalDate.minusDays(1))
-      errors.hasFieldErrors("pointType") should be {
-        true
-      }
+      errors.hasFieldErrors("pointType") should be (true)
     }
   }
 
@@ -207,21 +177,15 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateTypeMeeting() {
     new Fixture {
       validator.validateTypeMeeting(errors, mutable.Set(), mutable.Set(), 0, null)
-      errors.hasFieldErrors("meetingRelationships") should be {
-        true
-      }
-      errors.hasFieldErrors("meetingFormats") should be {
-        true
-      }
+      errors.hasFieldErrors("meetingRelationships") should be (true)
+      errors.hasFieldErrors("meetingFormats") should be (true)
     }
     new Fixture {
       val department = new Department
       department.relationshipService = smartMock[RelationshipService]
       department.relationshipService.allStudentRelationshipTypes returns Seq()
       validator.validateTypeMeeting(errors, mutable.Set(StudentRelationshipType("tutor", "tutor", "tutor", "tutee")), mutable.Set(), 0, department)
-      errors.hasFieldErrors("meetingRelationships") should be {
-        true
-      }
+      errors.hasFieldErrors("meetingRelationships") should be (true)
     }
     new Fixture {
       val validRelationship = StudentRelationshipType("tutor", "tutor", "tutor", "tutee")
@@ -230,9 +194,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
       department.relationshipService = smartMock[RelationshipService]
       department.relationshipService.allStudentRelationshipTypes returns Seq(validRelationship)
       validator.validateTypeMeeting(errors, mutable.Set(validRelationship), mutable.Set(), 0, department)
-      errors.hasFieldErrors("meetingRelationships") should be {
-        false
-      }
+      errors.hasFieldErrors("meetingRelationships") should be (false)
     }
   }
 
@@ -240,21 +202,13 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
   def validateTypeSmallGroup() {
     new Fixture {
       validator.validateTypeSmallGroup(errors, JHashSet(), isAnySmallGroupEventModules = false, smallGroupEventQuantity = 0)
-      errors.hasFieldErrors("smallGroupEventQuantity") should be {
-        true
-      }
-      errors.hasFieldErrors("smallGroupEventModules") should be {
-        true
-      }
+      errors.hasFieldErrors("smallGroupEventQuantity") should be (true)
+      errors.hasFieldErrors("smallGroupEventModules") should be (true)
     }
     new Fixture {
       validator.validateTypeSmallGroup(errors, JHashSet(Fixtures.module("a100")), isAnySmallGroupEventModules = false, smallGroupEventQuantity = 1)
-      errors.hasFieldErrors("smallGroupEventQuantity") should be {
-        false
-      }
-      errors.hasFieldErrors("smallGroupEventModules") should be {
-        false
-      }
+      errors.hasFieldErrors("smallGroupEventQuantity") should be (false)
+      errors.hasFieldErrors("smallGroupEventModules") should be (false)
     }
   }
 
@@ -270,9 +224,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionAssignments") should be {
-        true
-      }
+      errors.hasFieldErrors("assignmentSubmissionAssignments") should be (true)
     }
     new Fixture {
       validator.validateTypeAssignmentSubmission(
@@ -284,9 +236,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionAssignments") should be {
-        true
-      }
+      errors.hasFieldErrors("assignmentSubmissionAssignments") should be (true)
     }
     new Fixture {
       validator.validateTypeAssignmentSubmission(
@@ -298,9 +248,7 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(Fixtures.assignment("assignment")),
         AcademicYear.now()
       )
-      errors.hasFieldErrors("assignmentSubmissionAssignments") should be {
-        false
-      }
+      errors.hasFieldErrors("assignmentSubmissionAssignments") should be (false)
     }
 
     new Fixture {
@@ -313,12 +261,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {
-        true
-      }
-      errors.hasFieldErrors("assignmentSubmissionModules") should be {
-        true
-      }
+      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be (true)
+      errors.hasFieldErrors("assignmentSubmissionModules") should be (true)
     }
     new Fixture {
       validator.validateTypeAssignmentSubmission(
@@ -330,12 +274,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {
-        false
-      }
-      errors.hasFieldErrors("assignmentSubmissionModules") should be {
-        false
-      }
+      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be (false)
+      errors.hasFieldErrors("assignmentSubmissionModules") should be (false)
     }
     new Fixture {
       validator.validateTypeAssignmentSubmission(
@@ -347,12 +287,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {
-        false
-      }
-      errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {
-        true
-      }
+      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be (false)
+      errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be (true)
     }
     new Fixture {
       validator.validateTypeAssignmentSubmission(
@@ -364,12 +300,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
         assignmentSubmissionAssignments = JHashSet(),
         academicYear = academicYear2015
       )
-      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be {
-        false
-      }
-      errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be {
-        false
-      }
+      errors.hasFieldErrors("assignmentSubmissionTypeModulesQuantity") should be (false)
+      errors.hasFieldErrors("assignmentSubmissionTypeAnyQuantity") should be (false)
     }
   }
 
@@ -381,18 +313,14 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
       withFakeTime(startDate) {
         validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq(new MonitoringPointReport)
         validator.validateCanPointBeEditedByDate(errors, startDate.toLocalDate, Seq(studentId), AcademicYear(2014))
-        errors.hasFieldErrors("startDate") should be {
-          true
-        }
+        errors.hasFieldErrors("startDate") should be (true)
       }
     }
     new Fixture {
       withFakeTime(startDate) {
         validator.attendanceMonitoringService.findReports(Seq(studentId), AcademicYear(2014), PeriodType.autumnTerm.toString) returns Seq()
         validator.validateCanPointBeEditedByDate(errors, startDate.toLocalDate, Seq(studentId), AcademicYear(2014))
-        errors.hasFieldErrors("startDate") should be {
-          false
-        }
+        errors.hasFieldErrors("startDate") should be (false)
       }
     }
   }
@@ -417,12 +345,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
     new Fixture {
       validator.validateDuplicateForWeekForEdit(errors, "Name", 1, 1, editingPoint)
-      errors.hasFieldErrors("name") should be {
-        false
-      }
-      errors.hasFieldErrors("startWeek") should be {
-        false
-      }
+      errors.hasFieldErrors("name") should be (false)
+      errors.hasFieldErrors("startWeek") should be (false)
     }
     new Fixture {
       val dupPoint = new AttendanceMonitoringPoint
@@ -433,12 +357,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
       scheme.points.add(dupPoint)
       dupPoint.scheme = scheme
       validator.validateDuplicateForWeekForEdit(errors, "Name", 1, 1, editingPoint)
-      errors.hasFieldErrors("name") should be {
-        true
-      }
-      errors.hasFieldErrors("startWeek") should be {
-        true
-      }
+      errors.hasFieldErrors("name") should be (true)
+      errors.hasFieldErrors("startWeek") should be (true)
     }
   }
 
@@ -463,12 +383,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
 
     new Fixture {
       validator.validateDuplicateForDateForEdit(errors, "Name", baseDate, baseDate.plusDays(1), editingPoint)
-      errors.hasFieldErrors("name") should be {
-        false
-      }
-      errors.hasFieldErrors("startDate") should be {
-        false
-      }
+      errors.hasFieldErrors("name") should be (false)
+      errors.hasFieldErrors("startDate") should be (false)
     }
     new Fixture {
       val dupPoint = new AttendanceMonitoringPoint
@@ -479,12 +395,8 @@ class EditAttendancePointCommandTest extends TestBase with Mockito {
       scheme.points.add(dupPoint)
       dupPoint.scheme = scheme
       validator.validateDuplicateForDateForEdit(errors, "Name", baseDate, baseDate.plusDays(1), editingPoint)
-      errors.hasFieldErrors("name") should be {
-        true
-      }
-      errors.hasFieldErrors("startDate") should be {
-        true
-      }
+      errors.hasFieldErrors("name") should be (true)
+      errors.hasFieldErrors("startDate") should be (true)
     }
   }
 

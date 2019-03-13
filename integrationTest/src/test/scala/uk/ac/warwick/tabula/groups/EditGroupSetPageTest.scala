@@ -72,9 +72,7 @@ class EditGroupSetPageTest extends SmallGroupsFixture with GivenWhenThen {
     editGroups.submitAndExit()
 
     Then("The page is the groupset summary page")
-    groupsetSummaryPage.isCurrentPage should be {
-      true
-    }
+    groupsetSummaryPage.isCurrentPage should be (true)
 
     When("I navigate to the edit groups page again")
     groupsetSummaryPage.getGroupsetInfo("xxx01", "Test Lab").get.goToEditGroups

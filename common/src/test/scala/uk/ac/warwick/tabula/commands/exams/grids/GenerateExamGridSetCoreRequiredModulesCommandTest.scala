@@ -80,21 +80,15 @@ class GenerateExamGridSetCoreRequiredModulesCommandTest extends TestBase with Mo
 
     command.validate(errors)
     verify(command.moduleAndDepartmentService, times(1)).findByRouteYearAcademicYear(route1, thisYearOfStudy, thisAcademicYear)
-    errors.hasErrors should be {
-      true
-    }
-    errors.getAllErrors.get(0).getArguments.apply(0).asInstanceOf[String].contains(duffModule.code) should be {
-      true
-    }
+    errors.hasErrors should be (true)
+    errors.getAllErrors.get(0).getArguments.apply(0).asInstanceOf[String].contains(duffModule.code) should be (true)
 
     command.modules.clear()
     command.modules.put(route1, JHashSet(module1))
     val errors1 = new BindException(command, "command")
     command.validate(errors1)
     verify(command.moduleAndDepartmentService, times(1)).findByRouteYearAcademicYear(route1, thisYearOfStudy, thisAcademicYear)
-    errors1.hasErrors should be {
-      false
-    }
+    errors1.hasErrors should be (false)
   }
 
   @Test

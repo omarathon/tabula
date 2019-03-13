@@ -23,9 +23,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       When("I click to mark the assignment")
       eventually({
         val mark = partialLinkText("Mark").webElement
-        mark.isDisplayed should be {
-          true
-        }
+        mark.isDisplayed should be (true)
         click on mark
       })
       Then("I am redirected to the summary screen ")
@@ -34,9 +32,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       When("I expand the student")
       eventually(click on cssSelector(".toggle-icon-large.student-col").webElement)
       Then("Marking and feedback")
-      eventually(pageSource contains "Marking and feedback" should be {
-        true
-      })
+      eventually(pageSource contains "Marking and feedback" should be (true))
 
       When("I fill in the online feedback form with an invalid mark")
       textArea(cssSelector(".big-textarea")).value = "An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces."
@@ -44,25 +40,19 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       textField("grade").value = "1"
       cssSelector("button[type=submit]").webElement.click()
       Then("I see a validation error")
-      eventually(pageSource contains "Marks must be between 0 and 100" should be {
-        true
-      })
+      eventually(pageSource contains "Marks must be between 0 and 100" should be (true))
 
       When("I correct the mistake and submit the form")
       numberField("mark").value = "90"
       cssSelector(s"button[type=submit]").webElement.click()
       Then("The row will collapse")
-      eventually(cssSelector(s"tr.collapsed").webElement.isDisplayed should be {
-        true
-      })
+      eventually(cssSelector(s"tr.collapsed").webElement.isDisplayed should be (true))
 
       go to Path("/coursework")
       When("I click to mark the assignment")
       eventually({
         val mark = partialLinkText("Mark").webElement
-        mark.isDisplayed should be {
-          true
-        }
+        mark.isDisplayed should be (true)
         click on mark
       })
       Then("I am redirected to the summary screen ")
@@ -72,9 +62,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       eventually(cssSelector(".toggle-icon-large.student-col").webElement.isDisplayed shouldBe true)
       click on cssSelector(".toggle-icon-large.student-col").webElement
       Then("The feedback I entered before should be present")
-      eventually(pageSource contains "Marking and feedback" should be {
-        true
-      })
+      eventually(pageSource contains "Marking and feedback" should be (true))
       numberField("mark").value should be("90")
       textField("grade").value should be("1")
       textArea(cssSelector(".big-textarea")).value should be("An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces.")
@@ -83,18 +71,14 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       cssSelector("input[name=markerFeedback]").webElement.click()
       partialLinkText("Confirm selected and send to").webElement.click()
       Then("I end up on the send to confirmation page")
-      eventually(pageSource contains "Send to admin" should be {
-        true
-      })
+      eventually(pageSource contains "Send to admin" should be (true))
 
       When("I confirm and send to admin")
       cssSelector("input[name=confirm]").webElement.click()
       cssSelector("input[type=submit]").webElement.click()
       Then("I end up back on the marker overview page")
       eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
-      eventually(cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be {
-        true
-      })
+      eventually(cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be (true))
 
     }
 

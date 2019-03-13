@@ -16,9 +16,7 @@ class AdministerExamsTest extends ExamFixtures
 
     Then("The user should be shown a link to their department exams")
     click on linkText("Go to the Test Services admin page")
-    pageSource contains "Test Services" should be {
-      true
-    }
+    pageSource contains "Test Services" should be (true)
 
     And("By default none will be shown until clicking the 'Show' button")
     Then("I click on the show button")
@@ -43,12 +41,8 @@ class AdministerExamsTest extends ExamFixtures
 
     Then("This should show the create exam page")
     currentUrl should include(s"/admin/module/xxx01/$year/exams/new")
-    pageSource contains "Create exam for" should be {
-      true
-    }
-    pageSource contains "XXX01" should be {
-      true
-    }
+    pageSource contains "Create exam for" should be (true)
+    pageSource contains "XXX01" should be (true)
 
     Then("The user should be able to enter a name and create the exam")
     textField("name").value = "Module-XXX01-Exam1"
@@ -56,15 +50,9 @@ class AdministerExamsTest extends ExamFixtures
 
     Then("The user should be returned to the module page")
     currentUrl should include(s"/admin/module/xxx01/$year")
-    pageSource contains "Test Services" should be {
-      true
-    }
-    pageSource contains "XXX01" should be {
-      true
-    }
-    pageSource contains "Module-XXX01-Exam1" should be {
-      true
-    }
+    pageSource contains "Test Services" should be (true)
+    pageSource contains "XXX01" should be (true)
+    pageSource contains "Module-XXX01-Exam1" should be (true)
 
     Then("The user can select to edit the exam")
     info = getModuleInfo("XXX01")
@@ -72,20 +60,14 @@ class AdministerExamsTest extends ExamFixtures
 
     val editNewExam = info.findElement(By.partialLinkText("Edit properties"))
     eventually {
-      editNewExam.isDisplayed should be {
-        true
-      }
+      editNewExam.isDisplayed should be (true)
     }
     click on editNewExam
 
     Then("This should show the edit exam page")
     currentUrl should include("/edit")
-    pageSource contains "Edit exam for" should be {
-      true
-    }
-    pageSource contains "XXX01" should be {
-      true
-    }
+    pageSource contains "Edit exam for" should be (true)
+    pageSource contains "XXX01" should be (true)
 
     Then("The user should be able to modify a name and create the exam")
     textField("name").value = "Module-XXX01-Exam1-edited"
@@ -93,15 +75,9 @@ class AdministerExamsTest extends ExamFixtures
 
     Then("The user should be returned to the module page")
     currentUrl should include(s"/admin/module/xxx01/$year")
-    pageSource contains "Test Services" should be {
-      true
-    }
-    pageSource contains "XXX01" should be {
-      true
-    }
-    pageSource contains "Module-XXX01-Exam1-edited" should be {
-      true
-    }
+    pageSource contains "Test Services" should be (true)
+    pageSource contains "XXX01" should be (true)
+    pageSource contains "Module-XXX01-Exam1-edited" should be (true)
   }
 
   def getModuleInfo(moduleCode: String): WebElement = {

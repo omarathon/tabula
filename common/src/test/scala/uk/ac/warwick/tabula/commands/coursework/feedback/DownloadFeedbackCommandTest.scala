@@ -75,9 +75,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
         val errors = new BindException(command, "command")
         withClue(errors) {
-          errors.hasErrors should be {
-            false
-          }
+          errors.hasErrors should be (false)
         }
 
         command.applyInternal().get.filename should be(attachment.name)

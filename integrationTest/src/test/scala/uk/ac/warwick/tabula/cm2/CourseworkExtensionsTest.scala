@@ -21,9 +21,7 @@ class CourseworkExtensionsTest extends BrowserTest with CourseworkFixtures {
     And("I should see the extension settings menu option")
     val extensionsLink = toolbar.findElement(By.partialLinkText("Extension settings"))
     eventually {
-      extensionsLink.isDisplayed should be {
-        true
-      }
+      extensionsLink.isDisplayed should be (true)
     }
 
     When("I click the extensions link")

@@ -65,21 +65,11 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
       info.submission should be(Some(submission))
       info.feedback should be(Some(feedback))
       info.extension should be(Some(extension))
-      info.isExtended should be {
-        true
-      }
-      info.extensionRequested should be {
-        false
-      }
-      info.canSubmit should be {
-        true
-      }
-      info.canReSubmit should be {
-        false
-      }
-      info.hasDisability should be {
-        false
-      }
+      info.isExtended should be (true)
+      info.extensionRequested should be (false)
+      info.canSubmit should be (true)
+      info.canReSubmit should be (false)
+      info.hasDisability should be (false)
     }
   }
 
@@ -107,21 +97,11 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
       info.submission should be(Some(submission))
       info.feedback should be(Some(feedback))
       info.extension should be(Some(extension))
-      info.isExtended should be {
-        true
-      }
-      info.extensionRequested should be {
-        false
-      }
-      info.canSubmit should be {
-        true
-      }
-      info.canReSubmit should be {
-        false
-      }
-      info.hasDisability should be {
-        true
-      }
+      info.isExtended should be (true)
+      info.extensionRequested should be (false)
+      info.canSubmit should be (true)
+      info.canReSubmit should be (false)
+      info.hasDisability should be (true)
     }
   }
 

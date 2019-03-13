@@ -16,51 +16,39 @@ class AbstractGenerateGradeFromMarkControllerTest extends TestBase with Mockito 
   @Test
   def checkDefaultValidSelected(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "60"), Map("1234" -> Seq(gradeBoundary)), Map("1234" -> "B"))
-    result.isDefined should be {
-      true
-    }
+    result.isDefined should be (true)
     result.get should be(gradeBoundary)
   }
 
   @Test
   def checkDefaultInvalidSelected(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "60"), Map("1234" -> Seq(gradeBoundary)), Map("1234" -> "F"))
-    result.isDefined should be {
-      true
-    }
+    result.isDefined should be (true)
     result.get should be(gradeBoundary)
   }
 
   @Test
   def checkDefaultEmptySelectedNoDefault(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "60"), Map("1234" -> Seq(gradeBoundaryNoDefault)), Map("1234" -> ""))
-    result.isDefined should be {
-      false
-    }
+    result.isDefined should be (false)
   }
 
   @Test
   def checkDefaultNullSelectedNoDefault(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "60"), Map("1234" -> Seq(gradeBoundaryNoDefault)), Map("1234" -> null))
-    result.isDefined should be {
-      false
-    }
+    result.isDefined should be (false)
   }
 
   @Test
   def checkDefaultMissingSelectedNoDefault(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "60"), Map("1234" -> Seq(gradeBoundaryNoDefault)), Map())
-    result.isDefined should be {
-      false
-    }
+    result.isDefined should be (false)
   }
 
   @Test
   def checkDefaultMissingSelectedZeroMark(): Unit = {
     val result = cmd.defaultGrade("1234", Map("1234" -> "0"), Map("1234" -> Seq(gradeBoundaryNoDefault)), Map())
-    result.isDefined should be {
-      false
-    }
+    result.isDefined should be (false)
   }
 
 }

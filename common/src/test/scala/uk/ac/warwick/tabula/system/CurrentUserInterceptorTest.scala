@@ -43,24 +43,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      false
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (false)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be('empty)
   }
 
@@ -76,24 +68,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      false
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (false)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be(Some(member))
   }
 
@@ -108,28 +92,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
-    currentUser.realUser.isInstanceOf[AnonymousUser] should be {
-      true
-    }
-    currentUser.apparentUser.isInstanceOf[AnonymousUser] should be {
-      true
-    }
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      false
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.realUser.isInstanceOf[AnonymousUser] should be (true)
+    currentUser.apparentUser.isInstanceOf[AnonymousUser] should be (true)
+    currentUser.god should be (false)
+    currentUser.masquerader should be (false)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be('empty)
   }
 
@@ -151,24 +123,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(masque)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      true
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (true)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be('empty)
   }
 
@@ -190,24 +154,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      false
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (false)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be('empty)
   }
 
@@ -224,24 +180,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      true
-    }
-    currentUser.sysadmin should be {
-      true
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (true)
+    currentUser.sysadmin should be (true)
     currentUser.profile should be('empty)
   }
 
@@ -259,24 +207,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      true
-    }
-    currentUser.masquerader should be {
-      true
-    }
-    currentUser.sysadmin should be {
-      true
-    }
+    currentUser.god should be (true)
+    currentUser.masquerader should be (true)
+    currentUser.sysadmin should be (true)
     currentUser.profile should be('empty)
   }
 
@@ -294,24 +234,16 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 
     val resp = new MockHttpServletResponse
 
-    interceptor.preHandle(req, resp, null) should be {
-      true
-    }
+    interceptor.preHandle(req, resp, null) should be (true)
 
     val currentUser = req.getAttribute(CurrentUser.keyName).asInstanceOf[CurrentUser]
     currentUser should not be null
 
     currentUser.realUser should be(user)
     currentUser.apparentUser should be(user)
-    currentUser.god should be {
-      false
-    }
-    currentUser.masquerader should be {
-      false
-    }
-    currentUser.sysadmin should be {
-      false
-    }
+    currentUser.god should be (false)
+    currentUser.masquerader should be (false)
+    currentUser.sysadmin should be (false)
     currentUser.profile should be('empty)
   }
 

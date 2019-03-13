@@ -87,9 +87,7 @@ class UnallocatedStudentsTest extends BrowserTest with GivenWhenThen with Featur
     eventually(currentUrl should include("/profiles/department/xxx/tutor/allocate"))
     cssSelector("#allocatestudents-tab1 div.students input[name=allocate]").findAllElements.filter(e =>
       e.attribute("value").get == P.Student2.warwickId || e.attribute("value").get == P.Student4.warwickId
-    ).forall(_.isSelected) should be {
-      true
-    }
+    ).forall(_.isSelected) should be (true)
 
   }
 

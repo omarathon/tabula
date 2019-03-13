@@ -24,9 +24,7 @@ class CopyAssignmentsTest extends BrowserTest with CourseworkFixtures {
     And("I should see the create assignments from previous in the assignments menu option")
     val createAssignmentsLink = toolbar.findElement(By.partialLinkText("Create assignments from previous"))
     eventually(timeout(45.seconds), interval(300.millis))({
-      createAssignmentsLink.isDisplayed should be {
-        true
-      }
+      createAssignmentsLink.isDisplayed should be (true)
     })
 
     When("I click the create assignments from previous link")

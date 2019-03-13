@@ -247,9 +247,7 @@ class AssessmentMembershipDaoTest extends PersistenceTestBase {
         session.flush()
 
         val membershipInfo2: ManualMembershipInfo = assignmentMembershipService.departmentsManualMembership(dept, thisYear)
-        membershipInfo2.assignments should be {
-          Seq(assignment5)
-        }
+        membershipInfo2.assignments should be (Seq(assignment5))
       }
     }
   }

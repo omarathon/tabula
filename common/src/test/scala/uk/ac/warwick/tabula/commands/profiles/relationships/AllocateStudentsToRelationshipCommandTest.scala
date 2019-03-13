@@ -32,12 +32,8 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
         "2" -> JArrayList("1") // Student 1 already assigned to agent 2, so this should be ignored
       )
       command.renderAdditions.keySet.size should be(2)
-      command.renderAdditions.keySet.map(_.universityId).contains("1") should be {
-        true
-      }
-      command.renderAdditions.keySet.map(_.universityId).contains("8") should be {
-        true
-      }
+      command.renderAdditions.keySet.map(_.universityId).contains("1") should be (true)
+      command.renderAdditions.keySet.map(_.universityId).contains("8") should be (true)
       command.renderAdditions(student1).size should be(1)
       command.renderAdditions(student1).head should be("Fred")
       command.renderAdditions(student8).size should be(1)
@@ -65,9 +61,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
         "3" -> JArrayList("2") // Student 2 isn't assigned to agent 3, so should be ignored
       )
       command.renderRemovals.keySet.size should be(1)
-      command.renderRemovals.keySet.map(_.universityId).contains("1") should be {
-        true
-      }
+      command.renderRemovals.keySet.map(_.universityId).contains("1") should be (true)
       command.renderRemovals(student1).size should be(1)
       command.renderRemovals(student1).head should be("Jeff")
     }
@@ -84,9 +78,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
         "2" -> JArrayList("2") // Should be ignored
       )
       command.renderRemovals.keySet.size should be(1)
-      command.renderRemovals.keySet.map(_.universityId).contains("1") should be {
-        true
-      }
+      command.renderRemovals.keySet.map(_.universityId).contains("1") should be (true)
       command.renderRemovals(student1).size should be(1)
       command.renderRemovals(student1).head should be("Jeff")
     }

@@ -96,19 +96,11 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
 
       val points = attendanceMonitoringDao.findRelevantPoints(department, academicYear, new LocalDate(2014, 10, 4))
       points.size should be(3)
-      points.contains(point1) should be {
-        true
-      }
-      points.contains(point2) should be {
-        true
-      }
-      points.contains(point3) should be {
-        true
-      }
+      points.contains(point1) should be (true)
+      points.contains(point2) should be (true)
+      points.contains(point3) should be (true)
       // Point too late
-      points.contains(point4) should be {
-        false
-      }
+      points.contains(point4) should be (false)
     }
   }
 
@@ -220,18 +212,14 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
       session.save(student1)
       val result1 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
       result1.size should be(1)
-      result1.head.scdEndDate.isEmpty should be {
-        true
-      }
+      result1.head.scdEndDate.isEmpty should be (true)
 
       // 2 SCDs, 1 null end date
       newSCD.endDate = newSCD.beginDate.plusYears(3)
       session.update(newSCD)
       val result2 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
       result2.size should be(1)
-      result2.head.scdEndDate.isEmpty should be {
-        true
-      }
+      result2.head.scdEndDate.isEmpty should be (true)
 
       // 2 SCDs, no null end date
       student1.freshStudentCourseDetails.zipWithIndex.foreach { case (scd, i) =>
@@ -240,9 +228,7 @@ class AttendanceMonitoringDaoTest extends PersistenceTestBase with Mockito {
       }
       val result3 = attendanceMonitoringDao.getAttendanceMonitoringDataForStudents(Seq(student1.universityId), academicYear)
       result3.size should be(1)
-      result3.head.scdEndDate.nonEmpty should be {
-        true
-      }
+      result3.head.scdEndDate.nonEmpty should be (true)
       import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
       result3.head.scdEndDate.get should be(student1.freshStudentCourseDetails.map(_.endDate).max)
     }

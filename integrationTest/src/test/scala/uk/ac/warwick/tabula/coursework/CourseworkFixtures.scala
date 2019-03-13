@@ -120,9 +120,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
       val editPerms = info.findElement(By.partialLinkText("Edit module permissions"))
       eventually {
-        editPerms.isDisplayed should be {
-          true
-        }
+        editPerms.isDisplayed should be (true)
       }
       click on editPerms
 
@@ -160,9 +158,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
     val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
     eventually {
-      addAssignment.isDisplayed should be {
-        true
-      }
+      addAssignment.isDisplayed should be (true)
     }
 
     click on addAssignment
@@ -205,9 +201,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     Then("I should see the workflows menu option")
     val markingWorkflowsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Marking workflows"))
     eventually {
-      markingWorkflowsLink.isDisplayed should be {
-        true
-      }
+      markingWorkflowsLink.isDisplayed should be (true)
     }
     click on markingWorkflowsLink
     When("I click on the create workflows button")
@@ -257,9 +251,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
     submit()
     verifyPageLoaded(
-      pageSource contains "Thanks, we've received your submission." should be {
-        true
-      }
+      pageSource contains "Thanks, we've received your submission." should be (true)
     )
   }
 
@@ -291,9 +283,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       * instead. Noted here in case of unexpected reversion.
       *
       */
-    textField("requestedExpiryDate").isDisplayed should be {
-      true
-    }
+    textField("requestedExpiryDate").isDisplayed should be (true)
 
     // complete the form
     textArea("reason").value = "I have a desperate need for an extension."
@@ -305,9 +295,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     submit()
 
     verifyPageLoaded(
-      pageSource contains "You have requested an extension" should be {
-        true
-      }
+      pageSource contains "You have requested an extension" should be (true)
     )
   }
 
@@ -324,9 +312,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     if (members.nonEmpty) {
       click on linkText("Add students manually")
       eventually {
-        textArea("massAddUsers").isDisplayed should be {
-          true
-        }
+        textArea("massAddUsers").isDisplayed should be (true)
       }
 
       textArea("massAddUsers").value = members.mkString("\n")
@@ -334,9 +320,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
       // Eventually, a Jax!
       eventually {
-        textArea("massAddUsers").isDisplayed should be {
-          false
-        }
+        textArea("massAddUsers").isDisplayed should be (false)
       }
       // there will be a delay between the dialog being dismissed and the source being updated by the
       // ajax response. So wait some more

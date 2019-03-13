@@ -49,17 +49,13 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
     When("I select all of the unallocated students")
     findAll(cssSelector(".students tbody tr td.check input")).foreach(c => clickOn(c))
     eventually {
-      findAll(cssSelector(".students tbody tr td.check input")).toSeq.forall(_.isSelected) should be {
-        true
-      }
+      findAll(cssSelector(".students tbody tr td.check input")).toSeq.forall(_.isSelected) should be (true)
     }
 
     And("I select all of the entities")
     findAll(cssSelector(".entities tbody tr td.check input")).foreach(c => clickOn(c))
     eventually {
-      findAll(cssSelector(".entities tbody tr td.check input")).toSeq.forall(_.isSelected) should be {
-        true
-      }
+      findAll(cssSelector(".entities tbody tr td.check input")).toSeq.forall(_.isSelected) should be (true)
     }
 
     And("I choose to distribute selected")
@@ -74,9 +70,7 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
     When("I select the first entity")
     checkbox(cssSelector(".entities tbody tr td.check input")).select()
     eventually {
-      find(cssSelector("button[name=action][value=RemoveFromAll]")).get.isEnabled should be {
-        true
-      }
+      find(cssSelector("button[name=action][value=RemoveFromAll]")).get.isEnabled should be (true)
     }
 
     And("I remove all the students")
@@ -96,9 +90,7 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 
     And("I choose to distribute to a single entity")
     eventually {
-      find(cssSelector("button[name=action][value=DistributeSelected]")).get.isEnabled should be {
-        true
-      }
+      find(cssSelector("button[name=action][value=DistributeSelected]")).get.isEnabled should be (true)
     }
     click on cssSelector("button[name=action][value=DistributeSelected]")
 
@@ -124,9 +116,7 @@ class TutorAllocationTest extends BrowserTest with FeaturesDriver with FixturesD
 
     Then("I am prompted to choose the notifications")
     eventually {
-      id("notify-modal").webElement.isDisplayed should be {
-        true
-      }
+      id("notify-modal").webElement.isDisplayed should be (true)
     }
 
     When("I choose to save the changes")

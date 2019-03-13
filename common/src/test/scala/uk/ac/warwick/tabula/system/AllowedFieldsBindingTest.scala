@@ -11,9 +11,7 @@ class AllowedFieldsBindingTest extends TestBase {
     val cmd = new TestCommand
     val binder = new CustomDataBinder(cmd, "command") with AllowedFieldsBinding
 
-    binder.usesDisallowedAnnotation(classOf[TestService]) should be {
-      true
-    }
+    binder.usesDisallowedAnnotation(classOf[TestService]) should be (true)
 
     val request = new MockHttpServletRequest
     request.addParameter("value", "top")

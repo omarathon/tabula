@@ -136,9 +136,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        false
-      }
+      errors.hasErrors should be (false)
     }
   }
 
@@ -152,9 +150,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.noStudents")
@@ -177,9 +173,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("period")
       errors.getFieldError.getCodes should contain("monitoringPointReport.invalidPeriod")
@@ -201,9 +195,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("academicYear")
       errors.getFieldError.getCodes should contain("NotEmpty.academicYear")
@@ -239,9 +231,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.period.alreadyReported")
@@ -278,9 +268,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.student.noPermission")
@@ -317,9 +305,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.missedPointsZero")
@@ -352,9 +338,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.student.noSCD")
@@ -387,9 +371,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
       val errors = new BindException(command, "command")
       command.validate(errors)
 
-      errors.hasErrors should be {
-        true
-      }
+      errors.hasErrors should be (true)
       errors.getErrorCount should be(1)
       errors.getFieldError.getField should be("missedPoints")
       errors.getFieldError.getCodes should contain("monitoringPointReport.student.noSCYD")

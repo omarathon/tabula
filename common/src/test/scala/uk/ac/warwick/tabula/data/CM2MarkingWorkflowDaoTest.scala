@@ -40,9 +40,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
     stageMarker.markers.knownType.members should be(Seq("cuslaj"))
 
     val stage = workflow.initialStages.head
-    stage.nextStages should be {
-      Seq(SingleMarkingCompleted)
-    }
+    stage.nextStages should be (Seq(SingleMarkingCompleted))
   }
 
   @Test def testGetReusableWorkflows(): Unit = transactional { tx =>
@@ -141,24 +139,14 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
 
     val marker1MarkerFeedback = dao.markerFeedbackForMarker(assignment, marker)
     marker1MarkerFeedback.size should be(3)
-    marker1MarkerFeedback.contains(markerFeedback) should be {
-      true
-    }
-    marker1MarkerFeedback.contains(markerFeedback3) should be {
-      true
-    }
-    marker1MarkerFeedback.contains(markerFeedback4) should be {
-      true
-    }
+    marker1MarkerFeedback.contains(markerFeedback) should be (true)
+    marker1MarkerFeedback.contains(markerFeedback3) should be (true)
+    marker1MarkerFeedback.contains(markerFeedback4) should be (true)
 
     val marker2MarkerFeedback = dao.markerFeedbackForMarker(assignment, marker2)
     marker2MarkerFeedback.size should be(2)
-    marker2MarkerFeedback.contains(markerFeedback2) should be {
-      true
-    }
-    marker2MarkerFeedback.contains(markerFeedback5) should be {
-      true
-    }
+    marker2MarkerFeedback.contains(markerFeedback2) should be (true)
+    marker2MarkerFeedback.contains(markerFeedback5) should be (true)
   }
 
 }

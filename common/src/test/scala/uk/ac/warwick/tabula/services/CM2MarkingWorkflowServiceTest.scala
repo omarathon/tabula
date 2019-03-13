@@ -118,9 +118,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
     Seq(feedback.head).foreach(f => f.outstandingStages.asScala should be(Set(DblBlndInitialMarkerB)))
     feedback.tail.foreach(f => f.outstandingStages.asScala should be(Set(DblBlndInitialMarkerA)))
     feedback.foreach(f => verify(fs, times(1)).saveOrUpdate(f))
-    (doneA ++ doneB).isEmpty should be {
-      true
-    }
+    (doneA ++ doneB).isEmpty should be (true)
 
     val initialDone = service.progress(DblBlndInitialMarkerB, Seq(feedback.head)) ++
       service.progress(DblBlndInitialMarkerA, feedback.tail)
@@ -128,16 +126,12 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
     feedback.foreach(f => f.outstandingStages.asScala should be(Set(DblBlndFinalMarker)))
     feedback.foreach(f => verify(fs, times(2)).saveOrUpdate(f))
     initialDone.size should be(3)
-    initialDone.forall(_.stage == DblBlndFinalMarker) should be {
-      true
-    }
+    initialDone.forall(_.stage == DblBlndFinalMarker) should be (true)
 
     val finalDone = service.progress(DblBlndFinalMarker, feedback)
     feedback.foreach(f => f.outstandingStages.asScala should be(Set(DblBlndCompleted)))
     feedback.foreach(f => verify(fs, times(3)).saveOrUpdate(f))
-    finalDone.isEmpty should be {
-      true
-    }
+    finalDone.isEmpty should be (true)
 
     val previous = service.returnFeedback(Seq(DblBlndFinalMarker), feedback)
     feedback.foreach(f => f.outstandingStages.asScala should be(Set(DblBlndFinalMarker)))
@@ -167,9 +161,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
       })
 
       // nothing here as we have no content in the marker feedback
-      service.finish(ModerationMarker, feedback).isEmpty should be {
-        true
-      }
+      service.finish(ModerationMarker, feedback).isEmpty should be (true)
 
       // first markers mark some stuff
       mf1.mark = Some(41)

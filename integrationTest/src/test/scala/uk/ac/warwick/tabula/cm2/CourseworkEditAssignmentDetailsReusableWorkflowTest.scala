@@ -206,9 +206,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
     When("I click on the edit button again")
     click on partialLinkText("Edit assignment")
     Then("I see the edit details screen")
-    eventually(pageSource contains "Edit assignment details" should be {
-      true
-    })
+    eventually(pageSource contains "Edit assignment details" should be (true))
     Then("I change assignment Title")
     textField("name").value = newTitle
 
@@ -392,12 +390,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
             Seq(ModerationMarker.roleName -> markers.headOption.getOrElse(Nil), ModerationModerator.roleName -> markers.tail.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be {
-                  true
-                }
-                pageSource contains marker.usercode should be {
-                  true
-                }
+                pageSource contains field should be (true)
+                pageSource contains marker.usercode should be (true)
               }
             }
 
@@ -407,12 +401,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
               DblSecondMarker.roleName -> markers.tail.headOption.getOrElse(Nil),
               DblFinalMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be {
-                  true
-                }
-                pageSource contains marker.usercode should be {
-                  true
-                }
+                pageSource contains field should be (true)
+                pageSource contains marker.usercode should be (true)
               }
             }
 
@@ -420,21 +410,15 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
           case SingleMarking =>
             Seq(SingleMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be {
-                  true
-                }
-                pageSource contains marker.usercode should be {
-                  true
-                }
+                pageSource contains field should be (true)
+                pageSource contains marker.usercode should be (true)
               }
             }
 
 
           case _ =>
         }
-      case None => pageSource contains "Marking workflow" should be {
-        false
-      }
+      case None => pageSource contains "Marking workflow" should be (false)
     }
     //assignment feedback page details
     checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
