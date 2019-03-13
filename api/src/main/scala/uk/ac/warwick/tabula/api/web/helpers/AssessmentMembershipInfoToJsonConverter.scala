@@ -13,12 +13,8 @@ trait AssessmentMembershipInfoToJsonConverter {
       "excluded" -> membershipInfo.usedExcludeCount,
       "users" -> membershipInfo.items.filterNot(_.itemType == ExcludeType).map { item =>
         Seq(
-          item.userId.map {
-            "userId" -> _
-          },
-          item.universityId.map {
-            "universityId" -> _
-          }
+          item.userId.map("userId" -> _),
+          item.universityId.map("universityId" -> _)
         ).flatten.toMap
       }
     ),

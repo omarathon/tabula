@@ -27,12 +27,8 @@ trait SmallGroupEventToJsonConverter {
       }.orNull,
       "tutors" -> event.tutors.users.map { user =>
         Seq(
-          user.getUserId.maybeText.map {
-            "userId" -> _
-          },
-          user.getWarwickId.maybeText.map {
-            "universityId" -> _
-          }
+          user.getUserId.maybeText.map("userId" -> _),
+          user.getWarwickId.maybeText.map("universityId" -> _)
         ).flatten.toMap
       }
     )

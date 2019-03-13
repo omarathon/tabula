@@ -24,9 +24,7 @@ trait MemberApiFreemarkerHelper {
 
   def str(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, String)] =
     fieldRestriction.restrict(name) {
-      eval(s"$${($propertyName)!}", model).map {
-        name -> _
-      }
+      eval(s"$${($propertyName)!}", model).map(name -> _)
     }
 
   def int(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Int)] =
@@ -45,9 +43,7 @@ trait MemberApiFreemarkerHelper {
 
   def date(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, String)] =
     fieldRestriction.restrict(name) {
-      eval(s"$${($propertyName.toString())!}", model).map {
-        name -> _
-      }
+      eval(s"$${($propertyName.toString())!}", model).map(name -> _)
     }
 
   def boolean(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Boolean)] =
@@ -149,58 +145,38 @@ object MemberApiFreemarkerHelper {
   def addressToJson(address: Address, fieldRestriction: APIFieldRestriction): Map[String, Any] =
     Seq(
       fieldRestriction.restrict("line1") {
-        address.line1.maybeText.map {
-          "line1" -> _
-        }
+        address.line1.maybeText.map("line1" -> _)
       },
       fieldRestriction.restrict("line2") {
-        address.line2.maybeText.map {
-          "line2" -> _
-        }
+        address.line2.maybeText.map("line2" -> _)
       },
       fieldRestriction.restrict("line3") {
-        address.line3.maybeText.map {
-          "line3" -> _
-        }
+        address.line3.maybeText.map("line3" -> _)
       },
       fieldRestriction.restrict("line4") {
-        address.line4.maybeText.map {
-          "line4" -> _
-        }
+        address.line4.maybeText.map("line4" -> _)
       },
       fieldRestriction.restrict("line5") {
-        address.line5.maybeText.map {
-          "line5" -> _
-        }
+        address.line5.maybeText.map("line5" -> _)
       },
       fieldRestriction.restrict("postcode") {
-        address.postcode.maybeText.map {
-          "postcode" -> _
-        }
+        address.postcode.maybeText.map("postcode" -> _)
       },
       fieldRestriction.restrict("telephone") {
-        address.telephone.maybeText.map {
-          "telephone" -> _
-        }
+        address.telephone.maybeText.map("telephone" -> _)
       }
     ).flatten.toMap
 
   def nextOfKinToJson(nextOfKin: NextOfKin, fieldRestriction: APIFieldRestriction): Map[String, Any] =
     Seq(
       fieldRestriction.restrict("firstName") {
-        nextOfKin.firstName.maybeText.map {
-          "firstName" -> _
-        }
+        nextOfKin.firstName.maybeText.map("firstName" -> _)
       },
       fieldRestriction.restrict("lastName") {
-        nextOfKin.lastName.maybeText.map {
-          "lastName" -> _
-        }
+        nextOfKin.lastName.maybeText.map("lastName" -> _)
       },
       fieldRestriction.restrict("relationship") {
-        nextOfKin.relationship.maybeText.map {
-          "relationship" -> _
-        }
+        nextOfKin.relationship.maybeText.map("relationship" -> _)
       }
     ).flatten.toMap
 

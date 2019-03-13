@@ -12,12 +12,8 @@ trait SmallGroupToJsonConverter {
       "name" -> group.name,
       "students" -> group.students.users.map { user =>
         Seq(
-          user.getUserId.maybeText.map {
-            "userId" -> _
-          },
-          user.getWarwickId.maybeText.map {
-            "universityId" -> _
-          }
+          user.getUserId.maybeText.map("userId" -> _),
+          user.getWarwickId.maybeText.map("universityId" -> _)
         ).flatten.toMap
       },
       "maxGroupSize" -> group.maxGroupSize,
