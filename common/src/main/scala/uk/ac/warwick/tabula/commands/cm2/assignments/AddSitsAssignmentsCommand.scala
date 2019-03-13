@@ -228,9 +228,7 @@ trait AddSitsAssignmentsValidation extends SelfValidating with Logging {
 
       // also check that the upstream assignment names don't collide within a module.
       // group items by module, then look for duplicates within each group.
-      val groupedByModule = items.groupBy {
-        _.upstreamAssignment.moduleCodeBasic
-      }
+      val groupedByModule = items.groupBy(_.upstreamAssignment.moduleCodeBasic)
       for ((modCode, moduleItems) <- groupedByModule;
            item <- moduleItems
            if moduleItems.exists(sameNameAs(item))) {

@@ -135,9 +135,7 @@ trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRang
           (weekNumber, week.period)
         }
         .filterNot { case (_, period) => period.isVacation } // Remove vacations - can't do this above as mins would be wrong
-        .groupBy {
-        _._2.periodType
-      }
+        .groupBy(_._2.periodType)
         .map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
 
     Seq(

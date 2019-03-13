@@ -130,9 +130,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
   def existingRoleDefinitions(@PathVariable target: A): SortedMap[RoleDefinition, GeneratedRole] = {
     SortedMap(
       permissionsService.getAllGrantedRolesFor(target)
-        .groupBy {
-          _.roleDefinition
-        }
+        .groupBy(_.roleDefinition)
         .filterKeys {
           _.isAssignable
         }

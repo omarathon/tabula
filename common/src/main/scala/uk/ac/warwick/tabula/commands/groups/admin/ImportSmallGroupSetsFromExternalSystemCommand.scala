@@ -86,9 +86,7 @@ trait LookupEventsFromModuleTimetables {
         Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = true), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
           .events
           .filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(academicYear))
-          .groupBy {
-            _.eventType
-          }
+          .groupBy(_.eventType)
           .toSeq.map { case (eventType, events) =>
           TimetabledSmallGroupEvent(module, eventType, events.sorted)
         }

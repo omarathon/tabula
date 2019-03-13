@@ -66,9 +66,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
         .filter {
           _.overrideType == GrantedPermission.Allow
         }
-        .groupBy {
-          _.permission
-        }
+        .groupBy(_.permission)
         .toSeq
         .map { case (p, grantedPermissions) => PermissionAndUsers(p, grantedPermissions.flatMap(_.users.users).distinct)
         }

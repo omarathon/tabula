@@ -27,9 +27,7 @@ trait SmallGroupEventsController extends GroupsController {
       .map { case (weekNumber, week) =>
         (weekNumber, week.period)
       }
-      .groupBy {
-        _._2
-      }
+      .groupBy(_._2)
       .map { case (term, weekNumbersAndTerms) =>
         (term, WeekRange(weekNumbersAndTerms.keys.min, weekNumbersAndTerms.keys.max))
       }
