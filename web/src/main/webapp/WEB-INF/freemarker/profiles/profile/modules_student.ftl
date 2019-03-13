@@ -38,11 +38,16 @@
 		</#if>
 	</p>
 
-	<#if moduleRegistrations?has_content>
+	<h3>
+		<strong>Year mark:</strong> ${yearMark!"-"}  |
+		<strong>Year Weighting:</strong>
+		<#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if>
+	</h3>
 
+	<#if moduleRegistrationsAndComponents?has_content>
 		<#assign showModuleResults = features.showModuleResults />
-
-		<#list moduleRegistrations as moduleRegistration>
+		<#list moduleRegistrationsAndComponents as moduleRegistrationAndComponent>
+			<#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
 			<div class="striped-section collapsible">
 				<h3 class="section-title">
 					<@fmt.module_name moduleRegistration.module />
@@ -58,32 +63,61 @@
 					</span>
 				</h3>
 				<div class="striped-section-contents ">
-					<div class="item-info row">
-						<div class="col-md-4">
-							<h4><@fmt.module_name moduleRegistration.module false /></h4>
-						</div>
-						<div class="col-md-4">
-							<strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
-							<strong>Occurrence:</strong> ${(moduleRegistration.occurrence)!} <br />
-							<strong>Status:</strong>
-							<#if moduleRegistration.selectionStatus??>
-								${(moduleRegistration.selectionStatus.description)!}
-							<#else>
-								-
-							</#if> <br />
-							<strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
-						</div>
-						<div class="col-md-4">
-							<#if showModuleResults>
-								<strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
-								<strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
-								<strong>Passed CATS:</strong>
-								<#if moduleRegistration.passedCats??>
-									<#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if>
+					<div class="item-info">
+						<div class="row">
+							<div class="col-md-4">
+								<h4><@fmt.module_name moduleRegistration.module false /></h4>
+							</div>
+							<div class="col-md-4">
+								<strong>Assessment group:</strong> ${(moduleRegistration.assessmentGroup)!} <br />
+								<strong>Occurrence:</strong> ${(moduleRegistration.occurrence)!} <br />
+								<strong>Status:</strong>
+								<#if moduleRegistration.selectionStatus??>
+									${(moduleRegistration.selectionStatus.description)!}
 								<#else>
 									-
-								</#if><br />
-							</#if>
+								</#if> <br />
+								<strong>CATS:</strong> ${(moduleRegistration.cats)!} <br />
+							</div>
+							<div class="col-md-4">
+								<#if showModuleResults>
+									<strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"} <br />
+									<strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!"-"} <br />
+									<strong>Passed CATS:</strong>
+									<#if moduleRegistration.passedCats??>
+										<#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if>
+									<#else>
+										-
+									</#if><br />
+								</#if>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12">
+								<strong>Components:</strong><br />
+								<table class="table table-condensed table-striped">
+									<thead>
+									<tr>
+										<th>Sequence</th>
+										<th>Name</th>
+										<th>Weighting</th>
+										<th>Mark</th>
+										<th>Grade</th>
+									</tr>
+									</thead>
+									<tbody>
+									<#list moduleRegistrationAndComponent.components as component>
+										<tr>
+											<td>${component.upstreamGroup.sequence}</td>
+											<td>${component.upstreamGroup.name}</td>
+											<td>${component.upstreamGroup.assessmentComponent.weighting!0}%</td>
+											<td>${component.member.firstAgreedMark!}</td>
+											<td>${component.member.firstAgreedGrade!}</td>
+										</tr>
+									</#list>
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
 				</div>
