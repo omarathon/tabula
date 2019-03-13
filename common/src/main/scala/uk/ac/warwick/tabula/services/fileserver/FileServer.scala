@@ -96,8 +96,8 @@ trait StreamsFiles {
 
     out.setHeader("Content-Disposition", builder.toString)
 
-    // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work
-    out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'")
+    // Restrictive CSP, just enough for Firefox/Chrome's PDF viewer to work plus audio/video
+    out.setHeader("Content-Security-Policy", "default-src 'none'; img-src 'self'; object-src 'self'; plugin-types application/pdf; style-src 'unsafe-inline'; media-src 'self'")
 
     handleCaching(file, request, out)
 
