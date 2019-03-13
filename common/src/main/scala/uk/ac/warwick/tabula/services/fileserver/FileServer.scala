@@ -64,8 +64,8 @@ trait StreamsFiles {
     val mimeType: MediaType = file.contentType match {
       case "application/octet-stream" =>
         // We store files in the object store as application/octet-stream but we can just infer from the filename
-        Option(file.byteSource).map { byteSource =>
-          val is = TikaInputStream.get(byteSource.openStream())
+        Option(file.byteSource).flatMap(bs => Option(bs.openStream())).map { inputStream =>
+          val is = TikaInputStream.get(inputStream)
           try {
             val metadata = new Metadata
             metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, file.filename)
