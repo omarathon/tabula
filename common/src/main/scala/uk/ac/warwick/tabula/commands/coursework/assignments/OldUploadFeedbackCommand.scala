@@ -176,9 +176,7 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
       val allNumbers = uniNumberPattern.findAllIn(filename).matchData.map(_.subgroups(0)).toList
 
       // ignore any numbers longer than 7 characters.
-      val numbers = allNumbers.filter {
-        _.length == 7
-      }
+      val numbers = allNumbers.filter(_.length == 7)
 
       if (numbers.isEmpty) {
         // no numbers at all.

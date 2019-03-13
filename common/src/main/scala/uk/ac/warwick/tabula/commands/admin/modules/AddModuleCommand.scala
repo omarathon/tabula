@@ -53,9 +53,7 @@ trait AddModuleCommandValidation extends SelfValidating {
       if (moduleAndDepartmentService.getModuleByCode(sanitisedCode).isDefined) {
         errors.rejectValue("code", "code.duplicate.module", Array(code.toUpperCase), "")
       }
-      if (department.modules.asScala.exists {
-        _.name equalsIgnoreCase name
-      }) {
+      if (department.modules.asScala.exists(_.name.equalsIgnoreCase(name))) {
         errors.rejectValue("name", "name.duplicate.module", Array(name), "")
       }
     }

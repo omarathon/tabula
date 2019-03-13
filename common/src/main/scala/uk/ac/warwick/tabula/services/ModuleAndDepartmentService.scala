@@ -87,9 +87,7 @@ class ModuleAndDepartmentService extends Logging {
       .filter { module => securityService.can(user, permission, module) }
 
   def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
-    modulesWithPermission(user, permission).filter {
-      _.adminDepartment == dept
-    }
+    modulesWithPermission(user, permission).filter(_.adminDepartment == dept)
 
   def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Module] = {
     departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)

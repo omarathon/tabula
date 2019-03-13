@@ -27,34 +27,45 @@ class XMLBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, over
   def toXML: Elem = {
     <assignment>
       <generic-feedback>
-        {assignment.genericFeedback}
+        { assignment.genericFeedback }
       </generic-feedback>
       <students>
-        {items map studentElement}
+        { items map studentElement }
       </students>
     </assignment> % assignmentData
   }
 
   def studentElement(item: WorkflowItems): Elem = {
     <student>
-      {<submission>
-      {item.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse Nil}
-    </submission> % submissionData(item) % submissionStatusData(item)}{<marking/> % markerData(item) % plagiarismData(item)}{<feedback>
-      {item.enhancedFeedback.flatMap(_.feedback.comments).orNull}
-    </feedback> % feedbackData(item)}{<adjustment/> % adjustmentData(item)}
+      {
+        <submission>
+          {
+            item.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse Nil
+          }
+        </submission> % submissionData(item) % submissionStatusData(item)
+      }
+      { <marking /> % markerData(item) % plagiarismData(item) }
+      {
+        <feedback>
+          { item.enhancedFeedback.flatMap { _.feedback.comments }.orNull }
+        </feedback> % feedbackData(item)
+      }
+      { <adjustment /> % adjustmentData(item) }
     </student> % identityData(item)
   }
 
   def fieldElement(item: SubmissionListItem)(value: SavedFormValue): Seq[Node] =
     if (value.hasAttachments)
-      <field name={value.name}>
-        {value.attachments.asScala map { file =>
-          <file name={file.name} zip-path={item.submission.zipFileName(file)}/>
-      }}
+      <field name={ value.name }>
+        {
+        value.attachments.asScala map { file =>
+            <file name={ file.name } zip-path={ item.submission.zipFileName(file) }/>
+        }
+        }
       </field>
     else if (value.value != null)
-      <field name={value.name}>
-        {value.value}
+      <field name={ value.name }>
+        { value.value }
       </field>
     else
       Nil //empty Node seq, no element
@@ -65,9 +76,9 @@ class CSVBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, over
 
   var topLevelUrl: String = Wire.property("${toplevel.url}")
 
-  def getNoOfColumns(item: WorkflowItems): Int = headers.size
+  def getNoOfColumns(item:WorkflowItems): Int = headers.size
 
-  def getColumn(item: WorkflowItems, i: Int): String = formatData(itemData(item).get(headers(i)))
+  def getColumn(item:WorkflowItems, i:Int): String = formatData(itemData(item).get(headers(i)))
 }
 
 class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, override val module: Module) extends SubmissionAndFeedbackSpreadsheetExport {
@@ -78,9 +89,7 @@ class ExcelBuilder(val items: Seq[WorkflowItems], val assignment: Assignment, ov
     val workbook = new SXSSFWorkbook
     val sheet = generateNewSheet(workbook)
 
-    items foreach {
-      addRow(sheet)(_)
-    }
+    items foreach { addRow(sheet)(_) }
 
     formatWorksheet(sheet)
     workbook
@@ -158,14 +167,13 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
   val items: Seq[WorkflowItems]
 
   val csvFormatter: DateTimeFormatter = DateFormats.CSVDateTime
-
   def csvFormat(i: ReadableInstant): String = csvFormatter print i
 
   val headers: Seq[String] = {
     var extraFields = Set[String]()
 
     // have to iterate all items to ensure complete field coverage. bleh :(
-    items foreach (item => extraFields = extraFields ++ extraFieldData(item).keySet)
+    items foreach ( item => extraFields = extraFields ++ extraFieldData(item).keySet )
 
     // return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
     prefix(identityFields, "student") ++
@@ -217,7 +225,6 @@ trait SubmissionAndFeedbackExport {
   def topLevelUrl: String
 
   val isoFormatter: DateTimeFormatter = DateFormats.IsoDateTime
-
   def isoFormat(i: ReadableInstant): String = isoFormatter print i
 
   // This Seq specifies the core field order
@@ -233,7 +240,7 @@ trait SubmissionAndFeedbackExport {
     else if (assignment.cm2MarkingWorkflow != null) assignment.cm2MarkingWorkflow.allocationOrder
     else Seq()
   val plagiarismFields = Seq("suspected-plagiarised", "similarity-percentage")
-  val feedbackFields = Seq("id", "uploaded", "released", "mark", "grade", "downloaded")
+  val feedbackFields = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
   val adjustmentFields = Seq("mark", "grade", "reason")
 
   protected def assignmentData: Map[String, Any] = Map(
@@ -302,7 +309,7 @@ trait SubmissionAndFeedbackExport {
     var fieldDataMap = mutable.ListMap[String, String]()
 
     student.enhancedSubmission match {
-      case Some(item) => item.submission.values.asScala foreach (value =>
+      case Some(item) => item.submission.values.asScala foreach ( value =>
         if (value.hasAttachments) {
           val attachmentNames = value.attachments.asScala.map { file =>
             (file.name, item.submission.zipFileName(file))
@@ -353,7 +360,7 @@ trait SubmissionAndFeedbackExport {
 
   protected def adjustmentData(student: WorkflowItems): Map[String, Any] = {
     val feedback = student.enhancedFeedback.map(_.feedback)
-    feedback.filter(_.hasPrivateOrNonPrivateAdjustments).map(feedback => {
+    feedback.filter(_.hasPrivateOrNonPrivateAdjustments).map( feedback => {
       feedback.latestMark.map("mark" -> _).toMap ++
         feedback.latestGrade.map("grade" -> _).toMap ++
         Map("reason" -> feedback.latestPrivateOrNonPrivateAdjustment.map(_.reason))

@@ -63,9 +63,7 @@ trait PermissionsTreeBuilderImpl extends PermissionsTreeBuilder {
 
     val permissions =
       permissionsService.getAllGrantedPermissionsFor(target)
-        .filter {
-          _.overrideType == GrantedPermission.Allow
-        }
+        .filter(_.overrideType == GrantedPermission.Allow)
         .groupBy(_.permission)
         .toSeq
         .map { case (p, grantedPermissions) => PermissionAndUsers(p, grantedPermissions.flatMap(_.users.users).distinct)

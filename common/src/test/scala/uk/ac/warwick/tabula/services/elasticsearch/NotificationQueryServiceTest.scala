@@ -93,13 +93,9 @@ class NotificationQueryServiceTest extends ElasticsearchTestBase with Mockito {
     search(index).termQuery("notificationType", "HeronDefeat") should haveTotalHits(50)
 
     // The IDs of notifications we expect our recipient to get.
-    lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter {
-      _.recipient == recipient
-    }
+    lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter(_.recipient == recipient)
     lazy val expectedIds: IndexedSeq[String] = recipientNotifications.map(_.notification.id)
-    lazy val criticalIds: IndexedSeq[String] = recipientNotifications.filter {
-      _.notification.priority == Critical
-    }.map(_.notification.id)
+    lazy val criticalIds: IndexedSeq[String] = recipientNotifications.filter(_.notification.priority == Critical).map(_.notification.id)
     lazy val warningIds: IndexedSeq[String] =
       recipientNotifications.filter { i => i.notification.priority == Warning || i.notification.priority == Critical }
         .map(_.notification.id)

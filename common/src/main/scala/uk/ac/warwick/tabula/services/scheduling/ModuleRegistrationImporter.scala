@@ -75,9 +75,7 @@ class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter 
 
   def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
     benchmarkTask("Fetch module registrations") {
-      val rows = membersAndCategories.filter {
-        _.member.userType == Student
-      }.flatMap { mac =>
+      val rows = membersAndCategories.filter(_.member.userType == Student).flatMap { mac =>
         val universityId = mac.member.universityId
         val params = HashMap(("universityId", universityId))
         queries.flatMap { query =>

@@ -33,9 +33,7 @@ final class FeaturesController extends BaseSysadminController with InitializingB
   override def afterPropertiesSet {
     wrapper = new BeanWrapperImpl(features)
     properties = new BeanWrapperImpl(new FeaturesMessage).getPropertyDescriptors.toList
-      .filter {
-        _.getWriteMethod != null
-      }
+      .filter(_.getWriteMethod != null)
       .sortBy(_.getDisplayName)
   }
 

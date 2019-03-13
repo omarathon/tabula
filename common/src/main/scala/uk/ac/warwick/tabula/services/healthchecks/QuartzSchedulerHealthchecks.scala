@@ -84,9 +84,7 @@ class QuartzSchedulerClusterHealthcheck extends ServiceHealthcheckProvider {
     val schedulers =
       jdbcTemplate.queryAndMap("select * from qrtz_scheduler_state") {
         case (resultSet, _) => QuartzJdbc.Scheduler(resultSet)
-      }.filter {
-        _.clusterName == clusterName
-      }
+      }.filter(_.clusterName == clusterName)
 
     // A scheduler is out of contact if it hasn't contacted the database for 5 minutes
     def stale(s: QuartzJdbc.Scheduler) =

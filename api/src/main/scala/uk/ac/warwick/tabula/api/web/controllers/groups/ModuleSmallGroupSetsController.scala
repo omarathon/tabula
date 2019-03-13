@@ -67,9 +67,7 @@ trait ListSmallGroupSetsForModuleApi {
         "success" -> true,
         "status" -> "ok",
         "academicYear" -> command.academicYear.toString,
-        "groups" -> info.setsWithPermission.filter {
-          _.set.module == module
-        }.map { viewSet => jsonSmallGroupSetObject(viewSet) }
+        "groups" -> info.setsWithPermission.filter(_.set.module == module).map { viewSet => jsonSmallGroupSetObject(viewSet) }
       )))
     }
   }

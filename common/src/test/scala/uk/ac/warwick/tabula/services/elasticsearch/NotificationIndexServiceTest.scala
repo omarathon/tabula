@@ -87,9 +87,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
     }
 
     // The IDs of notifications we expect our recipient to get.
-    lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter {
-      _.recipient == recipient
-    }
+    lazy val recipientNotifications: IndexedSeq[IndexedNotification] = items.filter(_.recipient == recipient)
   }
 
   @After def tearDown(): Unit = {

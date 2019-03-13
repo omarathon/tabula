@@ -131,14 +131,10 @@ abstract class AbstractAssessmentService extends AssessmentService {
   }
 
   def getAssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter {
-      _.module.adminDepartment == department
-    }
+    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module.adminDepartment == department)
 
   def getAssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter {
-      _.module == module
-    }
+    getAssignmentWhereMarker(user.apparentUser, academicYearOption).filter(_.module == module)
 
   def getCM2AssignmentsWhereMarker(user: User, academicYearOption: Option[AcademicYear]): Seq[Assignment] = {
     val workflows = cm2MarkerHelper.findBy(user).map(_.workflow).distinct
@@ -148,14 +144,10 @@ abstract class AbstractAssessmentService extends AssessmentService {
   }
 
   def getCM2AssignmentsByDepartmentAndMarker(department: Department, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter {
-      _.module.adminDepartment == department
-    }
+    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter(_.module.adminDepartment == department)
 
   def getCM2AssignmentsByModuleAndMarker(module: Module, user: CurrentUser, academicYearOption: Option[AcademicYear]): Seq[Assignment] =
-    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter {
-      _.module == module
-    }
+    getCM2AssignmentsWhereMarker(user.apparentUser, academicYearOption).filter(_.module == module)
 
   /**
     * Find a recent assignment within this module or possible department.

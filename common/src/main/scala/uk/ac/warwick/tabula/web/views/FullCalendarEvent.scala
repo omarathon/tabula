@@ -88,9 +88,7 @@ object FullCalendarEvent {
       syllabusPlusName = source.location.collect { case l: MapLocation => l }.flatMap(_.syllabusPlusName),
       name = source.name,
       description = source.description,
-      shorterTitle = source.parent.shortName.map {
-        _ + " "
-      }.getOrElse("") + source.eventType.displayName,
+      shorterTitle = source.parent.shortName.map(_ + " ").getOrElse("") + source.eventType.displayName,
       tutorNames = source.staff.map(_.getFullName).mkString(", "),
       parentType = source.parent match {
         case TimetableEvent.Empty(_, _) => "Empty"

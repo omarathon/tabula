@@ -147,9 +147,7 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
       .filter { route => securityService.can(user, permission, route) }
 
   def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
-    routesWithPermission(user, permission).filter {
-      _.adminDepartment == dept
-    }
+    routesWithPermission(user, permission).filter(_.adminDepartment == dept)
 
   def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route] = {
     moduleAndDepartmentService.departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)

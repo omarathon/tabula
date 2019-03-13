@@ -162,9 +162,7 @@ object CelcatHttpTimetableFetchingService {
       val staffIds: Seq[UniversityId] =
       if (allStaff.nonEmpty)
         summary.maybeText
-          .filter {
-            _.contains(" - ")
-          } // Quick exit - only look for summaries in the right format
+          .filter(_.contains(" - ")) // Quick exit - only look for summaries in the right format
           .map {
           _.split(" - ", 2).last
         } // Strip the "room" from the start

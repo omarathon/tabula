@@ -101,9 +101,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assig
     val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
 
     // Log a ViewOnlineFeedback event if the student itself is viewing
-    feedback.filter {
-      _.usercode == viewer.getUserId
-    }.foreach { feedback =>
+    feedback.filter(_.usercode == viewer.getUserId).foreach { feedback =>
       ViewOnlineFeedbackCommand(feedback).apply()
     }
 

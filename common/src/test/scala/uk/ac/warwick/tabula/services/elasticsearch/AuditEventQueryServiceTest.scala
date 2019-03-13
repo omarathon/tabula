@@ -230,15 +230,11 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
         }
       }
 
-      val beforeEvents: IndexedSeq[AuditEvent] = events.filter {
-        _.eventStage == "before"
-      }
+      val beforeEvents: IndexedSeq[AuditEvent] = events.filter(_.eventStage == "before")
 
       beforeEvents.zipWithIndex.foreach { case (auditEvent, i) =>
         auditEvent.id = i
-        auditEvent.related = events.filter {
-          _.eventId == auditEvent.eventId
-        }
+        auditEvent.related = events.filter(_.eventId == auditEvent.eventId)
       }
 
       queryService.auditEventService.getByIds(any[Seq[Long]]) answers { ids =>
@@ -313,9 +309,7 @@ class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
       events.zipWithIndex.foreach { case (auditEvent, i) =>
         auditEvent.id = i
-        auditEvent.related = events.filter {
-          _.eventId == auditEvent.eventId
-        }
+        auditEvent.related = events.filter(_.eventId == auditEvent.eventId)
         auditEvent.parsedData = Option(auditEvent.data).map {
           json.readValue(_, classOf[Map[String, Any]])
         }
