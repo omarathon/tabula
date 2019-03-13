@@ -118,27 +118,13 @@ trait SmallGroupSetPropertiesRequest[A <: ModifySmallGroupSetCommandState] exten
   @BeanProperty var allowSelfGroupSwitching: JBoolean = true
 
   override def copyTo(state: A, errors: Errors) {
-    Option(name).foreach {
-      state.name = _
-    }
-    Option(format).foreach {
-      state.format = _
-    }
-    Option(allocationMethod).foreach {
-      state.allocationMethod = _
-    }
-    Option(studentsCanSeeTutorName).foreach {
-      state.studentsCanSeeTutorName = _
-    }
-    Option(studentsCanSeeOtherMembers).foreach {
-      state.studentsCanSeeOtherMembers = _
-    }
-    Option(collectAttendance).foreach {
-      state.collectAttendance = _
-    }
-    Option(allowSelfGroupSwitching).foreach {
-      state.allowSelfGroupSwitching = _
-    }
+    Option(name).foreach(state.name = _)
+    Option(format).foreach(state.format = _)
+    Option(allocationMethod).foreach(state.allocationMethod = _)
+    Option(studentsCanSeeTutorName).foreach(state.studentsCanSeeTutorName = _)
+    Option(studentsCanSeeOtherMembers).foreach(state.studentsCanSeeOtherMembers = _)
+    Option(collectAttendance).foreach(state.collectAttendance = _)
+    Option(allowSelfGroupSwitching).foreach(state.allowSelfGroupSwitching = _)
   }
 }
 

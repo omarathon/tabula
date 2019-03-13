@@ -144,97 +144,37 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
       else openDate = closeDate.minusWeeks(2)
     }
 
-    Option(name).foreach {
-      state.name = _
-    }
-    Option(openDate).foreach {
-      state.openDate = _
-    }
-    Option(closeDate).foreach {
-      state.closeDate = _
-    }
-    Option(academicYear).foreach {
-      state.academicYear = _
-    }
-    Option(feedbackTemplate).foreach {
-      state.feedbackTemplate = _
-    }
-    Option(markingWorkflow).foreach {
-      state.markingWorkflow = _
-    }
+    Option(name).foreach(state.name = _)
+    Option(openDate).foreach(state.openDate = _)
+    Option(closeDate).foreach(state.closeDate = _)
+    Option(academicYear).foreach(state.academicYear = _)
+    Option(feedbackTemplate).foreach(state.feedbackTemplate = _)
+    Option(markingWorkflow).foreach(state.markingWorkflow = _)
     Option(includeUsers).foreach { list => state.massAddUsers = list.asScala.mkString("\n") }
-    Option(upstreamGroups).foreach {
-      state.upstreamGroups = _
-    }
-    Option(fileAttachmentLimit).foreach {
-      state.fileAttachmentLimit = _
-    }
-    Option(fileAttachmentTypes).foreach {
-      state.fileAttachmentTypes = _
-    }
-    Option(individualFileSizeLimit).foreach {
-      state.individualFileSizeLimit = _
-    }
-    Option(minWordCount).foreach {
-      state.wordCountMin = _
-    }
-    Option(maxWordCount).foreach {
-      state.wordCountMax = _
-    }
-    Option(wordCountConventions).foreach {
-      state.wordCountConventions = _
-    }
-    Option(openEnded).foreach {
-      state.openEnded = _
-    }
-    Option(collectMarks).foreach {
-      state.collectMarks = _
-    }
-    Option(collectSubmissions).foreach {
-      state.collectSubmissions = _
-    }
-    Option(restrictSubmissions).foreach {
-      state.restrictSubmissions = _
-    }
-    Option(allowLateSubmissions).foreach {
-      state.allowLateSubmissions = _
-    }
-    Option(allowResubmission).foreach {
-      state.allowResubmission = _
-    }
-    Option(displayPlagiarismNotice).foreach {
-      state.displayPlagiarismNotice = _
-    }
-    Option(allowExtensions).foreach {
-      state.allowExtensions = _
-    }
-    Option(extensionAttachmentMandatory).foreach {
-      state.extensionAttachmentMandatory = _
-    }
-    Option(allowExtensionsAfterCloseDate).foreach {
-      state.allowExtensionsAfterCloseDate = _
-    }
-    Option(summative).foreach {
-      state.summative = _
-    }
-    Option(dissertation).foreach {
-      state.dissertation = _
-    }
-    Option(publishFeedback).foreach {
-      state.publishFeedback = _
-    }
-    Option(includeInFeedbackReportWithoutSubmissions).foreach {
-      state.includeInFeedbackReportWithoutSubmissions = _
-    }
-    Option(automaticallyReleaseToMarkers).foreach {
-      state.automaticallyReleaseToMarkers = _
-    }
-    Option(automaticallySubmitToTurnitin).foreach {
-      state.automaticallySubmitToTurnitin = _
-    }
-    Option(hiddenFromStudents).foreach {
-      state.hiddenFromStudents = _
-    }
+    Option(upstreamGroups).foreach(state.upstreamGroups = _)
+    Option(fileAttachmentLimit).foreach(state.fileAttachmentLimit = _)
+    Option(fileAttachmentTypes).foreach(state.fileAttachmentTypes = _)
+    Option(individualFileSizeLimit).foreach(state.individualFileSizeLimit = _)
+    Option(minWordCount).foreach(state.wordCountMin = _)
+    Option(maxWordCount).foreach(state.wordCountMax = _)
+    Option(wordCountConventions).foreach(state.wordCountConventions = _)
+    Option(openEnded).foreach(state.openEnded = _)
+    Option(collectMarks).foreach(state.collectMarks = _)
+    Option(collectSubmissions).foreach(state.collectSubmissions = _)
+    Option(restrictSubmissions).foreach(state.restrictSubmissions = _)
+    Option(allowLateSubmissions).foreach(state.allowLateSubmissions = _)
+    Option(allowResubmission).foreach(state.allowResubmission = _)
+    Option(displayPlagiarismNotice).foreach(state.displayPlagiarismNotice = _)
+    Option(allowExtensions).foreach(state.allowExtensions = _)
+    Option(extensionAttachmentMandatory).foreach(state.extensionAttachmentMandatory = _)
+    Option(allowExtensionsAfterCloseDate).foreach(state.allowExtensionsAfterCloseDate = _)
+    Option(summative).foreach(state.summative = _)
+    Option(dissertation).foreach(state.dissertation = _)
+    Option(publishFeedback).foreach(state.publishFeedback = _)
+    Option(includeInFeedbackReportWithoutSubmissions).foreach(state.includeInFeedbackReportWithoutSubmissions = _)
+    Option(automaticallyReleaseToMarkers).foreach(state.automaticallyReleaseToMarkers = _)
+    Option(automaticallySubmitToTurnitin).foreach(state.automaticallySubmitToTurnitin = _)
+    Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
   }
 
 }

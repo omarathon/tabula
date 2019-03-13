@@ -120,26 +120,12 @@ class SmallGroupEventRequest extends JsonApiRequest[ModifySmallGroupEventCommand
   @BeanProperty var location: String = _
 
   override def copyTo(state: ModifySmallGroupEventCommand, errors: Errors) {
-    Option(title).foreach {
-      state.title = _
-    }
-    Option(tutors).foreach {
-      state.tutors = _
-    }
-    Option(weeks).foreach {
-      state.weeks = _
-    }
-    Option(day).foreach {
-      state.day = _
-    }
-    Option(startTime).foreach {
-      state.startTime = _
-    }
-    Option(endTime).foreach {
-      state.endTime = _
-    }
-    Option(location).foreach {
-      state.location = _
-    }
+    Option(title).foreach(state.title = _)
+    Option(tutors).foreach(state.tutors = _)
+    Option(weeks).foreach(state.weeks = _)
+    Option(day).foreach(state.day = _)
+    Option(startTime).foreach(state.startTime = _)
+    Option(endTime).foreach(state.endTime = _)
+    Option(location).foreach(state.location = _)
   }
 }

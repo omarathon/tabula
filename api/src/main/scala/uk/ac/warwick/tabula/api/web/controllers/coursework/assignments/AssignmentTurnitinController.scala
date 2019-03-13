@@ -73,9 +73,7 @@ class CreateAssignmentTurnitinJobRequest extends JsonApiRequest[SubmitToTurnitin
   @BeanProperty var submitter: User = _
 
   override def copyTo(state: SubmitToTurnitinRequest, errors: Errors): Unit = {
-    Option(submitter).foreach {
-      state.submitter = _
-    }
+    Option(submitter).foreach(state.submitter = _)
   }
 
 }
