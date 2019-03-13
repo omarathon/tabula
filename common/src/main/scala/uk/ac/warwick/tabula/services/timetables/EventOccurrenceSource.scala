@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
@@ -51,6 +51,7 @@ trait AutowiringEventOccurrenceSourceComponent
 
 		val skillsforgeSource = (new SkillsforgeServiceComponent
 			with AutowiringCacheStrategyComponent
+			with AutowiringFeaturesComponent
 			with AutowiringSkillsforgeConfigurationComponent
 			with AutowiringApacheHttpClientComponent
 		).eventOccurrenceSource

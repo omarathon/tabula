@@ -153,6 +153,7 @@ abstract class Features {
 	@Value("${features.moderationSelector:true}") var moderationSelector: Boolean = defaults.moderationSelector
 	@Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
 	@Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
+	@Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
 
 
 
@@ -301,6 +302,7 @@ class FeaturesMessage {
 	@BeanProperty var moderationSelector = true
 	@BeanProperty var bulkModeration = false
 	@BeanProperty var profilesSearchPast = true
+	@BeanProperty var skillsforge = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
