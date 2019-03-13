@@ -29,16 +29,12 @@ trait MemberApiFreemarkerHelper {
 
   def int(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Int)] =
     fieldRestriction.restrict(name) {
-      eval(s"$${($propertyName?c)!}", model).map {
-        name -> _.toInt
-      }
+      eval(s"$${($propertyName?c)!}", model).map(name -> _.toInt)
     }
 
   def double(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, Double)] =
     fieldRestriction.restrict(name) {
-      eval(s"$${($propertyName?c)!}", model).map {
-        name -> _.toDouble
-      }
+      eval(s"$${($propertyName?c)!}", model).map(name -> _.toDouble)
     }
 
   def date(name: String, model: Any, propertyName: String, fieldRestriction: APIFieldRestriction): Option[(String, String)] =
