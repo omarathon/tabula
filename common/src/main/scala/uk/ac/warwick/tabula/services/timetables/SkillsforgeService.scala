@@ -8,7 +8,7 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import org.joda.time.{DateTime, LocalDate}
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation}
+import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation, StudentMember}
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.ApacheHttpClientComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{CurrentUser, RequestFailedException}
+import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent, RequestFailedException}
 
 import scala.collection.Seq
 import scala.concurrent.Future
@@ -24,6 +24,7 @@ import scala.util.control.NonFatal
 
 trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 	self: SkillsForgeConfigurationComponent
+		with FeaturesComponent
 		with ApacheHttpClientComponent =>
 
 	override def eventOccurrenceSource: EventOccurrenceSource = new SkillsforgeService
@@ -35,8 +36,12 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 		val dateParameterFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy")
 
 		// TAB-6942
-		def shouldQuerySkillsforge(member: Member): Boolean =
-			config.enabled && (member.isPgr || (member.homeDepartment.code == "ec" && member.isPgt))
+		private def shouldQuerySkillsforge(member: Member): Boolean = features.skillsforge && existsInSkillsforge(member)
+
+		private def existsInSkillsforge(member: Member): Boolean = member match {
+			case s: StudentMember => s.isPGR || (s.homeDepartment.code == "ec" && s.isPGT)
+			case _ => false
+		}
 
 		override def occurrencesFor(
 				member: Member,
