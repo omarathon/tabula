@@ -43,7 +43,8 @@
             </form>
           <#else>
             <p>
-              <button class="btn btn-primary use-tooltip" disabled title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
+              <button class="btn btn-primary use-tooltip" disabled
+                      title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
                 Refresh SITS data and regenerate grid
               </button>
             </p>
@@ -122,7 +123,8 @@
                 <#list componentInfo as component>
                   <#assign groupAndSequenceAndOccurrence = component._1() />
                   <#assign cName = component._2() />
-                  <th colspan="2"><span class="use-tooltip" title="" data-container="body" data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
+                  <th colspan="2"><span class="use-tooltip" title="" data-container="body"
+                                        data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
                 </#list>
                 <th>Module Mark</th>
                 <th>Module Grade</th>
@@ -188,7 +190,8 @@
                         </#if>
                       </td>
                     <#else>
-                      <td></td><td></td>
+                      <td></td>
+                      <td></td>
                     </#if>
                   </#list>
                   <td>
@@ -223,25 +226,31 @@
           <div class="btn-group dropup">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
             <ul class="dropdown-menu download-options">
-              <li><button class="btn btn-link" type="submit" name="${GenerateModuleExamGridMappingParameters.excel}">Excel grid</button></li>
+              <li>
+                <button class="btn btn-link" type="submit" name="${GenerateModuleExamGridMappingParameters.excel}">Excel grid</button>
+              </li>
             </ul>
           </div>
         </form>
       </div>
     </div>
     <div class='modal fade' id='confirmModal'>
-      <div class='modal-dialog' role='document'><div class='modal-content'>
+      <div class='modal-dialog' role='document'>
+        <div class='modal-content'>
           <div class='modal-body'>
             <p>
               Exam grids contain restricted information. Under the University's
-              <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>information classification scheme</a>,
+              <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/handling/classifications'>information classification
+                scheme</a>,
               student names and University IDs are 'protected', exam marks are 'restricted' and provisional degree classifications are 'reserved'.
             </p>
             <p>
               When you download the data provided you are responsible for managing the security of the
-              information within it. You agree to abide by the University's <a target='_blank' href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
+              information within it. You agree to abide by the University's <a target='_blank'
+                                                                               href='http://www2.warwick.ac.uk/services/legalservices/dataprotection/'>
                 Data Protection Policy
-              </a> and the mandatory working practices for <a target='_blank' href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
+              </a> and the mandatory working practices for <a target='_blank'
+                                                              href='http://www2.warwick.ac.uk/services/gov/informationsecurity/working_practices/assets_protection/'>
                 electronic information asset protection.</a>
             </p>
           </div>
@@ -257,36 +266,36 @@
   <div class="modal fade" id="edit-overcatting-modal"></div>
 
   <script>
-    jQuery(function($){
+    jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
 
       var $form = $('#examGridDocuments'), $confirmModal = $('#confirmModal');
-      $('a.confirm', $confirmModal).on('click', function() {
+      $('a.confirm', $confirmModal).on('click', function () {
         $form.submit();
         $confirmModal.modal('hide');
         $form.find('input.download-option').remove();
       });
-      $('.download-options').on('click', 'button', function(e) {
+      $('.download-options').on('click', 'button', function (e) {
         e.preventDefault();
         e.stopPropagation();
         var $this = $(this);
         $form.find('input.download-option').remove();
         $form.append($('<input/>').attr({
-          'type' : 'hidden',
-          'class' : 'download-option',
-          'name' : $this.attr('name'),
-          'value' : true
+          'type': 'hidden',
+          'class': 'download-option',
+          'name': $this.attr('name'),
+          'value': true
         }));
         $confirmModal.modal('show');
       });
 
 
-      $('a.show-more').on('click', function(e){
+      $('a.show-more').on('click', function (e) {
         e.preventDefault();
         $(this).parent().next('.more').removeClass('hidden').end().end()
           .hide();
       });
-      $('a.show-less').on('click', function(e){
+      $('a.show-less').on('click', function (e) {
         e.preventDefault();
         $(this).closest('.more').addClass('hidden').parent().find('a.show-more').show();
       });
@@ -312,6 +321,7 @@
             .scrollLeft(0);
         }, 0);
       }
+
       $(window).on('id7:reflow', reflowScroll);
       reflowScroll();
 

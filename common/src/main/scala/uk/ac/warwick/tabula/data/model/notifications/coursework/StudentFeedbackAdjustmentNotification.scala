@@ -9,42 +9,45 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 object StudentFeedbackAdjustmentNotification {
-	val templateLocation = "/WEB-INF/freemarker/emails/student_feedback_adjustment_notification.ftl"
+  val templateLocation = "/WEB-INF/freemarker/emails/student_feedback_adjustment_notification.ftl"
 }
 
 @Entity
 @DiscriminatorValue("StudentFeedbackAdjustment")
 class StudentFeedbackAdjustmentNotification
-	extends NotificationWithTarget[AssignmentFeedback, Assignment]
-	with SingleItemNotification[AssignmentFeedback]
-	with SingleRecipientNotification
-	with AutowiringUserLookupComponent
-	with MyWarwickActivity {
+  extends NotificationWithTarget[AssignmentFeedback, Assignment]
+    with SingleItemNotification[AssignmentFeedback]
+    with SingleRecipientNotification
+    with AutowiringUserLookupComponent
+    with MyWarwickActivity {
 
-	def verb = "adjusted"
-	def assignment: Assignment = target.entity
-	def feedback: Feedback = item.entity
+  def verb = "adjusted"
 
-	def recipient: User = userLookup.getUserByUserId(feedback.usercode)
+  def assignment: Assignment = target.entity
 
-	def whatAdjusted: String = {
-		val mark = feedback.latestMark.map(m => "mark")
-		val grade = feedback.latestGrade.map(g => "grade")
-		(mark ++ grade).mkString(" and ")
-	}
+  def feedback: Feedback = item.entity
 
-	def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to your $whatAdjusted"
+  def recipient: User = userLookup.getUserByUserId(feedback.usercode)
 
-	def content = FreemarkerModel(StudentFeedbackAdjustmentNotification.templateLocation,
-		Map(
-			"assignment" -> assignment,
-			"feedback" -> feedback,
-			"whatAdjusted" -> whatAdjusted
-		))
+  def whatAdjusted: String = {
+    val mark = feedback.latestMark.map(m => "mark")
+    val grade = feedback.latestGrade.map(g => "grade")
+    (mark ++ grade).mkString(" and ")
+  }
 
-	def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
-	def urlTitle = "view your feedback"
+  def title = s"${assignment.module.code.toUpperCase} - for ${assignment.name} : Adjustments have been made to your $whatAdjusted"
 
-	priority = Info
+  def content = FreemarkerModel(StudentFeedbackAdjustmentNotification.templateLocation,
+    Map(
+      "assignment" -> assignment,
+      "feedback" -> feedback,
+      "whatAdjusted" -> whatAdjusted
+    ))
+
+  def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
+
+  def urlTitle = "view your feedback"
+
+  priority = Info
 
 }

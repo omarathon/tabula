@@ -10,43 +10,45 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 object ListStudentsGroupsCommand {
-	def apply(member: Member, user: CurrentUser, academicYearOption: Option[AcademicYear]) =
-		new ListStudentsGroupsCommandInternal(member, user, academicYearOption)
-			with ComposableCommand[ViewModules]
-			with ListStudentsGroupsCommandPermissions
-			with AutowiringSmallGroupServiceComponent
-			with Unaudited with ReadOnly
+  def apply(member: Member, user: CurrentUser, academicYearOption: Option[AcademicYear]) =
+    new ListStudentsGroupsCommandInternal(member, user, academicYearOption)
+      with ComposableCommand[ViewModules]
+      with ListStudentsGroupsCommandPermissions
+      with AutowiringSmallGroupServiceComponent
+      with Unaudited with ReadOnly
 }
 
 /**
- * Gets the data for a students view of all small groups they're a member of.
- */
+  * Gets the data for a students view of all small groups they're a member of.
+  */
 class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
+  self: SmallGroupServiceComponent =>
 
-	import GroupsDisplayHelper._
+  import GroupsDisplayHelper._
 
-	def applyInternal(): ViewModules = {
-		val user = member.asSsoUser
-		val memberGroupSets = (smallGroupService.findSmallGroupSetsByMember(user) ++ smallGroupService.findSmallGroupsByStudent(user).map { _.groupSet }).distinct
-		val filteredmemberGroupSets = academicYearOption.map(academicYear => memberGroupSets.filter(_.academicYear == academicYear)).getOrElse(memberGroupSets)
-		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(filteredmemberGroupSets)
-		val isTutor = !(currentUser.apparentUser == user)
-		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user, isTutor))
+  def applyInternal(): ViewModules = {
+    val user = member.asSsoUser
+    val memberGroupSets = (smallGroupService.findSmallGroupSetsByMember(user) ++ smallGroupService.findSmallGroupsByStudent(user).map {
+      _.groupSet
+    }).distinct
+    val filteredmemberGroupSets = academicYearOption.map(academicYear => memberGroupSets.filter(_.academicYear == academicYear)).getOrElse(memberGroupSets)
+    val releasedMemberGroupSets = getGroupSetsReleasedToStudents(filteredmemberGroupSets)
+    val isTutor = !(currentUser.apparentUser == user)
+    val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user, isTutor))
 
-		ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false)
-	}
+    ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false)
+  }
 
 }
 
 trait ListStudentsGroupsCommandState {
-	def member: Member
+  def member: Member
 }
 
 trait ListStudentsGroupsCommandPermissions extends RequiresPermissionsChecking {
-	self: ListStudentsGroupsCommandState =>
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.Read.SmallGroups, member)
-	}
+  self: ListStudentsGroupsCommandState =>
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Profiles.Read.SmallGroups, member)
+  }
 }

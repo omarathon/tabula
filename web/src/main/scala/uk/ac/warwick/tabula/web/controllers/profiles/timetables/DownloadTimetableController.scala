@@ -17,29 +17,29 @@ import scala.util.{Failure, Success}
 @RequestMapping(Array("/profiles/view/{member}/timetable/download/{academicYear}"))
 class DownloadTimetableController extends ProfilesController with TaskBenchmarking with DownloadsTimetable {
 
-	@ModelAttribute("timetableCommand")
-	def timetableCommand(@PathVariable member: Member, currentUser: CurrentUser) =
-		ViewMemberTimetableCommand(mandatory(member), currentUser)
+  @ModelAttribute("timetableCommand")
+  def timetableCommand(@PathVariable member: Member, currentUser: CurrentUser) =
+    ViewMemberTimetableCommand(mandatory(member), currentUser)
 
-	@RequestMapping
-	def render(
-		@ModelAttribute("timetableCommand") cmd: TimetableCommand,
-		@PathVariable member: Member,
-		@PathVariable academicYear: AcademicYear
-	): PDFView = {
-		cmd.academicYear = academicYear
+  @RequestMapping
+  def render(
+    @ModelAttribute("timetableCommand") cmd: TimetableCommand,
+    @PathVariable member: Member,
+    @PathVariable academicYear: AcademicYear
+  ): PDFView = {
+    cmd.academicYear = academicYear
 
-		cmd.apply() match {
-			case Success(result) =>
-				getTimetable(
-					events = result.events,
-					academicYear = academicYear,
-					fileNameSuffix = member.universityId,
-					title = s"${member.fullName.getOrElse("")} (${member.universityId}) for ${academicYear.toString}"
-				)
-			case Failure(t) =>
-				throw new RequestFailedException("The timetabling service could not be reached", t)
-		}
-	}
+    cmd.apply() match {
+      case Success(result) =>
+        getTimetable(
+          events = result.events,
+          academicYear = academicYear,
+          fileNameSuffix = member.universityId,
+          title = s"${member.fullName.getOrElse("")} (${member.universityId}) for ${academicYear.toString}"
+        )
+      case Failure(t) =>
+        throw new RequestFailedException("The timetabling service could not be reached", t)
+    }
+  }
 
 }

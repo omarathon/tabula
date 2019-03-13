@@ -24,17 +24,17 @@ function toTimestamp(now, then) {
   }
 }
 
-function onViewUpdate(view, weeks, $calendar){
+function onViewUpdate(view, weeks, $calendar) {
   updateCalendarTitle(view, weeks);
   $('.popover').hide();
-  $calendar.find('table').attr('role','presentation');
+  $calendar.find('table').attr('role', 'presentation');
 }
 
-function updateCalendarTitle(view, weeks){
+function updateCalendarTitle(view, weeks) {
   if (view.name === 'agendaWeek') {
     var start = view.start.getTime();
     var end = view.end.getTime();
-    var week = $.grep(weeks, function(week) {
+    var week = $.grep(weeks, function (week) {
       return (week.start >= start) && (week.end <= end);
     });
     if (week.length > 0) {
@@ -54,7 +54,7 @@ function updateDownloadButton(view, $calendar, data) {
       , originalHref = $calendarDownloadButton.data('href')
       , args = [
         'calendarView=' + view.name,
-        'renderDate=' + view.start.getTime()/1000
+        'renderDate=' + view.start.getTime() / 1000
       ]
     ;
     if (formData.length > 0) {
@@ -64,7 +64,7 @@ function updateDownloadButton(view, $calendar, data) {
   }
   if ($calendar.data('timetable-download-button')) {
     var $timetableDownloadButtons = $($calendar.data('timetable-download-button'));
-    $timetableDownloadButtons.each(function(){
+    $timetableDownloadButtons.each(function () {
       var $this = $(this), originalHref = $this.data('href');
       if (formData.length > 0) {
         $this.prop('href', originalHref + '?' + formData);
@@ -87,7 +87,7 @@ function renderCalendarEvent(event, element) {
     content = content + "<tr><th>What</th><td>" + event.name + "</td></tr>";
   }
 
-  content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+  content = content + "<tr><th>When</th><td>" + event.formattedInterval + "</td></tr>";
 
   if (event.location && event.location.length > 0) {
     content = content + "<tr><th>Where</th><td>";
@@ -101,7 +101,7 @@ function renderCalendarEvent(event, element) {
     content = content + "</td></tr>";
   }
 
-  if (event.tutorNames.length > 0){
+  if (event.tutorNames.length > 0) {
     content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
   }
 
@@ -145,7 +145,7 @@ function renderCalendarEvent(event, element) {
   }
 
   content = content + "</table>";
-  $(element).tabulaPopover({html:true, container:"body", title:event.shorterTitle, content:content});
+  $(element).tabulaPopover({html: true, container: "body", title: event.shorterTitle, content: content});
 }
 
 
@@ -153,19 +153,22 @@ function handleCalendarError(jqXHR, $container) {
   try {
     var data = $.parseJSON(jqXHR.responseText);
 
-    var errors = $.map(data.errors, function (error) { return error.message; });
+    var errors = $.map(data.errors, function (error) {
+      return error.message;
+    });
 
     $container.find('> .alert-danger').remove();
     $container.prepend(
       $('<div />').addClass('alert').addClass('alert-danger').text(errors.join(', '))
     );
-  } catch (e) {}
+  } catch (e) {
+  }
 }
 
 function getCalendarEvents($container, $loading, url, data, method) {
-  return function (start, end, callback){
+  return function (start, end, callback) {
     var complete = false;
-    setTimeout(function() {
+    setTimeout(function () {
       if (!complete) {
         $loading.show();
         $container.fadeTo('fast', 0.3);
@@ -183,7 +186,7 @@ function getCalendarEvents($container, $loading, url, data, method) {
       // make the from/to params compatible with what FullCalendar sends if you just specify a URL
       // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
       data: data(start, end),
-      success:function(data){
+      success: function (data) {
         if (data.lastUpdated) {
           // Update the last updated timestamp
           $container.find('> .fc-last-updated').remove();
@@ -198,15 +201,15 @@ function getCalendarEvents($container, $loading, url, data, method) {
 
         var events = data.events;
         // TAB-3008 - Change times to Europe/London
-        $.each(events, function(i, event){
+        $.each(events, function (i, event) {
           event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
           event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
         });
-        if ((data.errors||[]).length > 0) {
+        if ((data.errors || []).length > 0) {
           var $errorDiv = $('<div />').addClass('alert').addClass('alert-danger');
           $container.find('> .alert-danger').remove();
           $container.prepend($errorDiv);
-          $.each(data.errors, function(i, error) {
+          $.each(data.errors, function (i, error) {
             $errorDiv.append(error).append('<br />');
           });
         } else {
@@ -214,8 +217,10 @@ function getCalendarEvents($container, $loading, url, data, method) {
         }
         callback(events);
       },
-      error: function(jqXKR){ handleCalendarError(jqXKR, $container) },
-      complete: function() {
+      error: function (jqXKR) {
+        handleCalendarError(jqXKR, $container)
+      },
+      complete: function () {
         complete = true;
         $loading.hide();
         $container.fadeTo('fast', 1);
@@ -223,11 +228,14 @@ function getCalendarEvents($container, $loading, url, data, method) {
     });
   };
 }
+
 exports.getCalendarEvents = getCalendarEvents;
 
 function createCalendar(container, defaultViewName, weeks, eventsCallback, data, hasStartDate, year, month, date, defaultDate) {
   if (!data) {
-    data = function(){ return ""; }
+    data = function () {
+      return "";
+    }
   }
   var showWeekends = (defaultViewName == "month"), $container = $(container);
   var options = {
@@ -255,18 +263,18 @@ function createCalendar(container, defaultViewName, weeks, eventsCallback, data,
     },
     defaultEventMinutes: 30,
     weekends: showWeekends,
-    viewRender: function(view){
+    viewRender: function (view) {
       onViewUpdate(view, weeks, $container);
     },
     header: {
-      left:   'title',
+      left: 'title',
       center: 'month,agendaWeek,agendaDay',
-      right:  'today prev,next'
+      right: 'today prev,next'
     },
     weekNumbers: true,
     weekNumberCalculation: function (moment) {
       var start = moment.getTime();
-      var week = $.grep(weeks, function(week) {
+      var week = $.grep(weeks, function (week) {
         return (week.start >= start);
       });
 
@@ -278,10 +286,10 @@ function createCalendar(container, defaultViewName, weeks, eventsCallback, data,
       // we'll just leave it blank. The day columns still have the date on them.
       return '';
     },
-    eventAfterRender: function(event, element) {
+    eventAfterRender: function (event, element) {
       renderCalendarEvent(event, element);
     },
-    eventAfterAllRender: function(view) {
+    eventAfterAllRender: function (view) {
       updateDownloadButton(view, $container, data);
     }
   };
@@ -293,11 +301,12 @@ function createCalendar(container, defaultViewName, weeks, eventsCallback, data,
   }
   $container.fullCalendar(options);
 }
+
 exports.createCalendar = createCalendar;
 
 function createSmallScreenCalender($container, $loading, url, data, method) {
   var startToSend = new Date();
-  startToSend.setHours(0,0,0,0);
+  startToSend.setHours(0, 0, 0, 0);
 
   function checkScrollAndRefresh() {
     if ($(window).scrollTop() + $(window).height() > $(document).height() - 400) {
@@ -310,7 +319,7 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
 
   function fetchAndRender() {
     var complete = false;
-    setTimeout(function() {
+    setTimeout(function () {
       if (!complete) {
         $loading.show();
       }
@@ -323,10 +332,10 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
       // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
       data: data(startToSend, endToSend),
       type: method,
-      success:function(data){
+      success: function (data) {
         var events = data.events;
         // TAB-3008 - Change times to Europe/London
-        _.forEach(events, function(event){
+        _.forEach(events, function (event) {
           event.start = moment(moment.unix(event.start).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
           event.end = moment(moment.unix(event.end).tz('Europe/London').format('YYYY-MM-DDTHH:mm:ss')).unix();
         });
@@ -335,7 +344,7 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
 
         var eventsByDay = {}
           , todayAtMidnight = moment().hour(0).minute(0).second(0).millisecond(0);
-        _.forEach(events, function(event){
+        _.forEach(events, function (event) {
           var date = moment.unix(event.start).hour(0).minute(0).second(0).millisecond(0);
           if (date.diff(todayAtMidnight) >= 0) {
             if (!_.has(eventsByDay, date.valueOf())) {
@@ -348,7 +357,7 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
         var dates = _.keys(eventsByDay).sort();
 
         if (dates.length > 0) {
-          _.each(dates, function(dateValue) {
+          _.each(dates, function (dateValue) {
             var date = moment(dateValue, 'x')
               , $table = $('<table/>').addClass('table table-condensed').append($('<thead/>')).append('<tbody/>')
               , $thead = $table.find('thead')
@@ -370,7 +379,7 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
             if (date.diff(todayAtMidnight) === 0) {
               $table.addClass('today');
             }
-            _.each(_.sortBy(eventsByDay[dateValue], ['startDate']), function(event) {
+            _.each(_.sortBy(eventsByDay[dateValue], ['startDate']), function (event) {
               var location = '';
               if (event.location.length > 0) {
                 location = '(' + event.location + ')';
@@ -410,13 +419,13 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
           complete = true;
         }
       },
-      error: function(jqXKR){
+      error: function (jqXKR) {
         handleCalendarError(jqXKR, $container);
         $loading.hide();
         complete = true;
       },
-      complete: function() {
-        if (startToSend.valueOf() - new Date().valueOf() > (1000*60*60*24*365)) {
+      complete: function () {
+        if (startToSend.valueOf() - new Date().valueOf() > (1000 * 60 * 60 * 24 * 365)) {
           if ($('.calendar-smallscreen table').length === 0) {
             $loading.html("No events found in the next 12 months").show();
           } else {
@@ -429,50 +438,58 @@ function createSmallScreenCalender($container, $loading, url, data, method) {
       }
     });
   }
+
   fetchAndRender();
 
-  $(window).on('tabula.smallScreenCalender.refresh', function(){
+  $(window).on('tabula.smallScreenCalender.refresh', function () {
     var startToSend = new Date();
-    startToSend.setHours(0,0,0,0);
+    startToSend.setHours(0, 0, 0, 0);
     $container.empty();
     fetchAndRender();
   });
 }
+
 exports.createSmallScreenCalender = createSmallScreenCalender;
 
 // End Timetable calendar exports
 
-$(function() {
-  $('.profile-search').each(function() {
+$(function () {
+  $('.profile-search').each(function () {
     var container = $(this);
 
     var target = container.find('form').prop('action') + '.json';
 
     var xhr = null;
-    container.find('input[name="query"]').prop('autocomplete','off').each(function() {
+    container.find('input[name="query"]').prop('autocomplete', 'off').each(function () {
       var $spinner = $('<div class="spinner-container" />'), $this = $(this);
       $this
         .before($spinner)
-        .on('focus', function(){
+        .on('focus', function () {
           container.find('.use-tooltip').tooltip('show');
         })
-        .on('blur', function(){
+        .on('blur', function () {
           container.find('.use-tooltip').tooltip('hide');
         })
         .typeahead({
-          source: function(query, process) {
+          source: function (query, process) {
             if (xhr != null) {
               xhr.abort();
               xhr = null;
             }
 
             query = $.trim(query);
-            if (query.length < 3) { process([]); return; }
+            if (query.length < 3) {
+              process([]);
+              return;
+            }
 
             // At least one of the search terms must have more than 1 character
             var terms = query.split(/\s+/g);
-            if ($.grep(terms, function(term) { return term.length > 1; }).length == 0) {
-              process([]); return;
+            if ($.grep(terms, function (term) {
+              return term.length > 1;
+            }).length == 0) {
+              process([]);
+              return;
             }
 
             $spinner.spin('small');
@@ -485,21 +502,21 @@ $(function() {
               data: {
                 query: query,
                 searchAllDepts: searchAllDepts,
-                includePast: includePast 	,
+                includePast: includePast,
               },
               success: function (data) {
                 $spinner.spin(false);
 
                 var members = [];
 
-                $.each(data, function(i, member) {
+                $.each(data, function (i, member) {
                   var item = member.name + '|' + member.id + '|' + member.userId + '|' + member.description;
                   members.push(item);
                 });
 
                 process(members);
               },
-              error: function(jqXHR, textStatus, errorThrown) {
+              error: function (jqXHR, textStatus, errorThrown) {
                 if (textStatus !== 'abort') {
                   $spinner.spin(false);
                 }
@@ -507,9 +524,13 @@ $(function() {
             });
           },
 
-          matcher: function(item) { return true; },
-          sorter: function(items) { return items; }, // use 'as-returned' sort
-          highlighter: function(item) {
+          matcher: function (item) {
+            return true;
+          },
+          sorter: function (items) {
+            return items;
+          }, // use 'as-returned' sort
+          highlighter: function (item) {
             var member = item.split('|');
             return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail size-tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
           },
@@ -536,15 +557,15 @@ $(function() {
     });
   });
 
-  $('table.expanding-row-pairs').each(function(){
-    $(this).find('tbody tr').each(function(i){
+  $('table.expanding-row-pairs').each(function () {
+    $(this).find('tbody tr').each(function (i) {
       if (i % 2 === 0) {
         var $selectRow = $(this), $expandRow = $selectRow.next('tr');
         $selectRow.data('expandRow', $expandRow.remove()).find('td:first').addClass('can-expand').prepend(
           $('<i/>').addClass('fa fa-fw fa-caret-right')
         );
       }
-    }).end().on('click', 'td.can-expand', function(){
+    }).end().on('click', 'td.can-expand', function () {
       var $row = $(this).closest('tr');
       if ($row.is('.expanded')) {
         $row.removeClass('expanded').next('tr').remove().end()
@@ -568,7 +589,7 @@ $(function() {
 
   // MEMBER NOTE / EXTENUATING CIRCUMSTANCES STUFF
 
-  $('section.member-notes, section.circumstances').on('click', 'a.create, a.edit', function(e) {
+  $('section.member-notes, section.circumstances').on('click', 'a.create, a.edit', function (e) {
     // Bind click to load create-edit member note
 
     var $this = $(this);
@@ -580,15 +601,15 @@ $(function() {
 
     var url = $this.attr('data-url'), $modal = $('#note-modal'), $modalBody = $modal.find('.modal-body');
 
-    $modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" frameBorder="0" scrolling="no"></iframe>')
-      .find('iframe').on('load', function(){
-      if($(this).contents().find('form').length == 0){
+    $modalBody.html('<iframe src="' + url + '" style="height:100%; width:100%;" frameBorder="0" scrolling="no"></iframe>')
+      .find('iframe').on('load', function () {
+      if ($(this).contents().find('form').length == 0) {
         //Handle empty response from iframe form submission
         $('#note-modal').modal('hide');
         document.location.reload(true);
       } else {
         //Bind iframe form submission to modal button
-        $('#member-note-save').on('click', function(e){
+        $('#member-note-save').on('click', function (e) {
           e.preventDefault();
           $('#note-modal').find('.modal-body').find('iframe').contents().find('form').submit();
           $(this).off();  //remove click event to prevent bindings from building up
@@ -600,11 +621,11 @@ $(function() {
     e.preventDefault();
     e.stopPropagation();
 
-  }).on('click', 'ul.dropdown-menu a:not(.edit)', function(e) {
+  }).on('click', 'ul.dropdown-menu a:not(.edit)', function (e) {
     // Bind click events for dropdown
 
     var $this = $(this);
-    if($this.hasClass('disabled')) {
+    if ($this.hasClass('disabled')) {
       e.preventDefault();
       e.stopPropagation();
       return false;
@@ -617,13 +638,13 @@ $(function() {
 
     $loading.toggleClass('invisible');
 
-    $.post(url, function(data) {
+    $.post(url, function (data) {
       if (data.status == 'successful') {
-        if($this.hasClass('delete') || $this.hasClass('restore')) {
+        if ($this.hasClass('delete') || $this.hasClass('restore')) {
           $dropdownItems.toggleClass('disabled');
           $row.toggleClass('subtle deleted');
           $row.find('.deleted-files').toggleClass('hidden');
-        } else if($this.hasClass('purge')) {
+        } else if ($this.hasClass('purge')) {
           if ($row.hasClass('expanded')) {
             $row.find('td.can-expand').trigger('click');
           }
@@ -641,9 +662,9 @@ $(function() {
 
   // Add in People search data
 
-  $('.peoplesearch-info').each(function(){
+  $('.peoplesearch-info').each(function () {
     var $this = $(this);
-    $.getJSON($this.data('href'), function(data) {
+    $.getJSON($this.data('href'), function (data) {
       var items = [];
       if (data.extensionNumberWithExternal) {
         items.push('<strong>Phone:</strong> ' + data.extensionNumberWithExternal + '<br/>');
@@ -660,7 +681,7 @@ $(function() {
   // Meeting records
 
   var $meetingModal = $("#meeting-modal");
-  $meetingModal.on('submit', 'form', function(e){
+  $meetingModal.on('submit', 'form', function (e) {
     e.preventDefault();
     // reattach the load handler and submit the inner form in the iframe
     $meetingModal.find('iframe')
@@ -690,7 +711,7 @@ $(function() {
 
       // show-time
       $meetingModal.modal('show');
-      $meetingModal.off('shown.bs.modal.meetingRecordFrameLoad').on('shown.bs.modal.meetingRecordFrameLoad', function(){
+      $meetingModal.off('shown.bs.modal.meetingRecordFrameLoad').on('shown.bs.modal.meetingRecordFrameLoad', function () {
         $f.find('[name="title"]').focus();
       });
     } else {
@@ -706,7 +727,7 @@ $(function() {
   }
 
   function prepareMeetingModal($this, targetUrl) {
-    $.get(GlobalScripts.setArgOnUrl(targetUrl, 'modal', ''), function(data) {
+    $.get(GlobalScripts.setArgOnUrl(targetUrl, 'modal', ''), function (data) {
       $meetingModal.html(data);
       var $mb = $meetingModal.find('.modal-body').empty();
       var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
@@ -714,7 +735,7 @@ $(function() {
         .off('load').on('load', meetingRecordIframeHandler)
         .attr('src', GlobalScripts.setArgOnUrl(targetUrl, 'iframe', ''))
         .appendTo($mb);
-    }).fail(function() {
+    }).fail(function () {
       if (!$('#meeting-modal-failure').length) {
         var $error = $('<p id="meeting-modal-failure" class="alert alert-danger hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
         $this.before($error);
@@ -723,15 +744,15 @@ $(function() {
     });
   }
 
-  $('section.meetings').on('click', '.new-meeting-record, .edit-meeting-record', function(e){
+  $('section.meetings').on('click', '.new-meeting-record, .edit-meeting-record', function (e) {
     var $this = $(this);
     prepareMeetingModal($this, $this.attr('href'));
     e.preventDefault();
-  }).on('click', 'ul.dropdown-menu a:not(.edit-meeting-record)', function(e) {
+  }).on('click', 'ul.dropdown-menu a:not(.edit-meeting-record)', function (e) {
     // Bind click events for dropdown
 
     var $this = $(this);
-    if($this.hasClass('disabled')) {
+    if ($this.hasClass('disabled')) {
       e.preventDefault();
       e.stopPropagation();
       return false;
@@ -744,13 +765,13 @@ $(function() {
 
     $loading.toggleClass('invisible');
 
-    $.post(url, function(data) {
+    $.post(url, function (data) {
       if (data.status == 'successful') {
-        if($this.hasClass('delete-meeting-record') || $this.hasClass('restore-meeting-record')) {
+        if ($this.hasClass('delete-meeting-record') || $this.hasClass('restore-meeting-record')) {
           $dropdownItems.toggleClass('disabled');
           $row.toggleClass('subtle deleted');
           $row.find('.deleted-files').toggleClass('hidden');
-        } else if($this.hasClass('purge-meeting-record')) {
+        } else if ($this.hasClass('purge-meeting-record')) {
           if ($row.hasClass('expanded')) {
             $row.find('td.can-expand').trigger('click');
           }
@@ -762,7 +783,7 @@ $(function() {
 
     e.preventDefault();
     e.stopPropagation();
-  }).on('submit', 'form.scheduled-action', function(e) {
+  }).on('submit', 'form.scheduled-action', function (e) {
     // Scheduled meetings
     e.preventDefault();
     var $this = $(this), checkedInput = $this.find('input:checked');
@@ -770,29 +791,32 @@ $(function() {
     switch (checkedInput.val()) {
       case 'confirm': {
         prepareMeetingModal($this, checkedInput.data('formhref'));
-      } break;
+      }
+        break;
       case 'reschedule': {
         $this.closest('tr').prev('tr').find('.edit-meeting-record').trigger('click');
-      } break;
+      }
+        break;
       case 'missed': {
-        $.post(checkedInput.data('formhref'), $this.serialize(), function(data){
-          if(data.status === 'successful') {
+        $.post(checkedInput.data('formhref'), $this.serialize(), function (data) {
+          if (data.status === 'successful') {
             document.location.reload(true);
           } else {
             $this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
           }
         });
-      } break;
+      }
+        break;
     }
   });
 
-  $('section.meetings input.reject').each( function() {
+  $('section.meetings input.reject').each(function () {
     var $this = $(this);
     var $form = $this.closest('form');
     var $commentBox = $form.find('.rejection-comment');
     $this.slideMoreOptions($commentBox, true);
   });
-  $('section.meetings .approval').parent().tabulaAjaxSubmit(function() {
+  $('section.meetings .approval').parent().tabulaAjaxSubmit(function () {
     document.location.reload(true);
   });
 
@@ -804,12 +828,12 @@ $(function() {
   $('#student-groups-view')
     .find('.sign-up-button')
     .addClass('disabled use-tooltip')
-    .prop('disabled',true)
-    .prop('title','Please select a group')
+    .prop('disabled', true)
+    .prop('title', 'Please select a group')
     .end()
     .find('input.group-selection-radio')
-    .on('change', function(){
-      $(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
+    .on('change', function () {
+      $(this).closest('.item-info').find('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled', false).prop('title', '');
     });
 
   // End Seminars

@@ -10,43 +10,43 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
-@RequestMapping(value=Array("/profiles/department/{department}/{relationshipType}/reallocate/{agentId}"))
+@RequestMapping(value = Array("/profiles/department/{department}/{relationshipType}/reallocate/{agentId}"))
 class ReallocateStudentRelationshipsController extends ProfilesController {
 
-	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department): Department = department
+  @ModelAttribute("activeDepartment")
+  def activeDepartment(@PathVariable department: Department): Department = department
 
-	@ModelAttribute("commandActions")
-	def commandActions = FetchDepartmentRelationshipInformationCommand.Actions
+  @ModelAttribute("commandActions")
+  def commandActions = FetchDepartmentRelationshipInformationCommand.Actions
 
-	@ModelAttribute("allocationTypes")
-	def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
+  @ModelAttribute("allocationTypes")
+  def allocationTypes = ExtractRelationshipsFromFileCommand.AllocationTypes
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable agentId: String
-	) =
-		FetchDepartmentRelationshipsForReallocationCommand(mandatory(department), mandatory(relationshipType), agentId)
+  @ModelAttribute("command")
+  def command(
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable agentId: String
+  ) =
+    FetchDepartmentRelationshipsForReallocationCommand(mandatory(department), mandatory(relationshipType), agentId)
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType): Mav = {
-		val results = cmd.apply()
-		if (ajax) {
-			Mav(new JSONView(
-				Map("unallocated" -> results.unallocated.map(studentData => Map(
-					"firstName" -> studentData.firstName,
-					"lastName" -> studentData.lastName,
-					"universityId" -> studentData.universityId
-				)))
-			)).noLayout()
-		} else {
-			Mav("profiles/relationships/reallocate",
-				"unallocated" -> results.unallocated,
-				"allocated" -> results.allocated
-			)
-		}
-	}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[StudentAssociationResult], @PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType): Mav = {
+    val results = cmd.apply()
+    if (ajax) {
+      Mav(new JSONView(
+        Map("unallocated" -> results.unallocated.map(studentData => Map(
+          "firstName" -> studentData.firstName,
+          "lastName" -> studentData.lastName,
+          "universityId" -> studentData.universityId
+        )))
+      )).noLayout()
+    } else {
+      Mav("profiles/relationships/reallocate",
+        "unallocated" -> results.unallocated,
+        "allocated" -> results.allocated
+      )
+    }
+  }
 
 }

@@ -6,5 +6,5 @@ import uk.ac.warwick.tabula.roles.Masquerader
 
 @Component
 class MasqueraderRoleProvider extends WebgroupRoleProvider(Masquerader()) {
-	override var webgroup: String = Wire.property("${permissions.masquerade.group}")
+  override var webgroup: String = Wire.property("${permissions.masquerade.group}")
 }

@@ -10,71 +10,79 @@ import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 trait RequestLevelCaching[A, B] {
-	def cache: Option[Cache[A, B]] = RequestLevelCache.cache(getClass.getName)
-	def cachedBy(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
+  def cache: Option[Cache[A, B]] = RequestLevelCache.cache(getClass.getName)
 
-	// This uses an IdentityHashMap instead of the regular HashMap, which uses reference equality rather than equals()/hashCode()
-	def cachedByIdentity(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
+  def cachedBy(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
+
+  // This uses an IdentityHashMap instead of the regular HashMap, which uses reference equality rather than equals()/hashCode()
+  def cachedByIdentity(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
 }
 
 class RequestLevelCachingError extends Error
 
 object RequestLevelCache {
-	type Cache[A, B] = mutable.Map[A, B]
+  type Cache[A, B] = mutable.Map[A, B]
 
-	private[helpers] val requestLevelCachingLogger = LoggerFactory.getLogger(classOf[RequestLevelCache])
+  private[helpers] val requestLevelCachingLogger = LoggerFactory.getLogger(classOf[RequestLevelCache])
 
-	// Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
-	// for permissions lookups to create the CurrentUser.
-	def cache[A, B](cacheName: String): Option[Cache[A, B]] =
-		EarlyRequestInfo.fromThread.map { _.requestLevelCache.getCacheByName[A, B](cacheName) }
+  // Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
+  // for permissions lookups to create the CurrentUser.
+  def cache[A, B](cacheName: String): Option[Cache[A, B]] =
+    EarlyRequestInfo.fromThread.map {
+      _.requestLevelCache.getCacheByName[A, B](cacheName)
+    }
 
-	def cachedBy[A, B](cacheName: String, key: A)(default: => B): B =
-		EarlyRequestInfo.fromThread.map { _.requestLevelCache.getCacheByName[A, B](cacheName) } match {
-			case Some(cache) => cache.getOrElseUpdate(key, default)
-			case _ =>
-				// Include error to get stack trace
-				requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
-				default
-		}
+  def cachedBy[A, B](cacheName: String, key: A)(default: => B): B =
+    EarlyRequestInfo.fromThread.map {
+      _.requestLevelCache.getCacheByName[A, B](cacheName)
+    } match {
+      case Some(cache) => cache.getOrElseUpdate(key, default)
+      case _ =>
+        // Include error to get stack trace
+        requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
+        default
+    }
 
-	def cachedByIdentity[A, B](cacheName: String, key: A)(default: => B): B =
-		EarlyRequestInfo.fromThread.map { _.requestLevelCache.getIdentityCacheByName[A, B](cacheName) } match {
-			case Some(cache) => cache.getOrElseUpdate(key, default)
-			case _ =>
-				// Include error to get stack trace
-				requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
-				default
-		}
+  def cachedByIdentity[A, B](cacheName: String, key: A)(default: => B): B =
+    EarlyRequestInfo.fromThread.map {
+      _.requestLevelCache.getIdentityCacheByName[A, B](cacheName)
+    } match {
+      case Some(cache) => cache.getOrElseUpdate(key, default)
+      case _ =>
+        // Include error to get stack trace
+        requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
+        default
+    }
 }
 
 class RequestLevelCache {
-	import RequestLevelCache._
 
-	private val cacheMap = mutable.Map[String, Cache[_, _]]()
+  import RequestLevelCache._
 
-	def getCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
-		case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
-		case _ =>
-			val cache = mutable.Map[A, B]()
+  private val cacheMap = mutable.Map[String, Cache[_, _]]()
 
-			// If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
-			cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
-	}
+  def getCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
+    case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
+    case _ =>
+      val cache = mutable.Map[A, B]()
 
-	def getIdentityCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
-		case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
-		case _ =>
-			val cache = new util.IdentityHashMap[A, B]().asScala
+      // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
+      cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
+  }
 
-			// If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
-			cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
-	}
+  def getIdentityCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
+    case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
+    case _ =>
+      val cache = new util.IdentityHashMap[A, B]().asScala
 
-	def shutdown() {
-		for ((_, cache) <- cacheMap) {
-			cache.clear()
-		}
-		cacheMap.clear()
-	}
+      // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
+      cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
+  }
+
+  def shutdown() {
+    for ((_, cache) <- cacheMap) {
+      cache.clear()
+    }
+    cacheMap.clear()
+  }
 }

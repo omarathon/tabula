@@ -13,21 +13,21 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 @Controller
 class OpenSmallGroupSetController extends GroupsController {
 
-	@ModelAttribute("openGroupSetCommand")
-	def getOpenGroupSetCommand(
-		@PathVariable module: Module,
-		@PathVariable set: SmallGroupSet,
-		@PathVariable action: SmallGroupSetSelfSignUpState
-	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState =
-		OpenSmallGroupSetCommand(module.adminDepartment, Seq(set), user.apparentUser, action)
+  @ModelAttribute("openGroupSetCommand")
+  def getOpenGroupSetCommand(
+    @PathVariable module: Module,
+    @PathVariable set: SmallGroupSet,
+    @PathVariable action: SmallGroupSetSelfSignUpState
+  ): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState =
+    OpenSmallGroupSetCommand(module.adminDepartment, Seq(set), user.apparentUser, action)
 
-	@RequestMapping
-	def form(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]): Mav =
-		Mav("groups/admin/groups/open").noLayoutIf(ajax)
+  @RequestMapping
+  def form(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]): Mav =
+    Mav("groups/admin/groups/open").noLayoutIf(ajax)
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]): Mav = {
-		cmd.apply()
-		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]): Mav = {
+    cmd.apply()
+    Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+  }
 }

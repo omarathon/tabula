@@ -12,46 +12,47 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 @Entity
 class AttendanceMonitoringCheckpoint extends GeneratedId {
 
-	@transient var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
+  @transient var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "point_id")
-	@ForeignKey(name="none")
-	var point: AttendanceMonitoringPoint = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "point_id")
+  @ForeignKey(name = "none")
+  var point: AttendanceMonitoringPoint = _
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "student_id")
-	@ForeignKey(name="none")
-	var student: StudentMember = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "student_id")
+  @ForeignKey(name = "none")
+  var student: StudentMember = _
 
-	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
-	@Column(name = "state")
-	private var _state: AttendanceState = _
+  @NotNull
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
+  @Column(name = "state")
+  private var _state: AttendanceState = _
 
-	def state: AttendanceState = _state
-	def state_=(state: AttendanceState) {
-		if (attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)){
-			throw new IllegalArgumentException
-		}
-		_state = state
-	}
+  def state: AttendanceState = _state
 
-	def setStateDangerously(state: AttendanceState): Unit = {
-		_state = state
-	}
+  def state_=(state: AttendanceState) {
+    if (attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)) {
+      throw new IllegalArgumentException
+    }
+    _state = state
+  }
 
-	@NotNull
-	@Column(name = "updated_date")
-	var updatedDate: DateTime = _
+  def setStateDangerously(state: AttendanceState): Unit = {
+    _state = state
+  }
 
-	@NotNull
-	@Column(name = "updated_by")
-	var updatedBy: String = _
+  @NotNull
+  @Column(name = "updated_date")
+  var updatedDate: DateTime = _
 
-	var autoCreated: Boolean = false
+  @NotNull
+  @Column(name = "updated_by")
+  var updatedBy: String = _
 
-	@transient
-	var activePoint = true
+  var autoCreated: Boolean = false
+
+  @transient
+  var activePoint = true
 
 }

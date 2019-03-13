@@ -5,65 +5,87 @@ import uk.ac.warwick.tabula.RequestInfo
 
 class RequestLevelCachingTest extends TestBase {
 
-	val cache = new RequestLevelCaching[String, String] {}
+  val cache = new RequestLevelCaching[String, String] {}
 
-	@Test def withoutRequest {
-		var timesRun = 0
-		def expensiveOp = {
-			timesRun += 1
-			"solution"
-		}
+  @Test def withoutRequest {
+    var timesRun = 0
 
-		cache.cachedBy("key") { expensiveOp } should be ("solution")
-		timesRun should be (1)
+    def expensiveOp = {
+      timesRun += 1
+      "solution"
+    }
 
-		cache.cachedBy("key") { expensiveOp } should be ("solution")
-		timesRun should be (2)
+    cache.cachedBy("key") {
+      expensiveOp
+    } should be("solution")
+    timesRun should be(1)
 
-		cache.cache should be ('empty)
-	}
+    cache.cachedBy("key") {
+      expensiveOp
+    } should be("solution")
+    timesRun should be(2)
 
-	@Test def withRequest {
-		var timesRun = 0
-		def expensiveOp() = {
-			timesRun += 1
-			"solution"
-		}
+    cache.cache should be('empty)
+  }
 
-		withUser("cuscav") {
-			cache.cachedBy("key") { expensiveOp } should be ("solution")
-			timesRun should be (1)
+  @Test def withRequest {
+    var timesRun = 0
 
-			cache.cachedBy("key") { expensiveOp } should be ("solution")
-			timesRun should be (1)
+    def expensiveOp() = {
+      timesRun += 1
+      "solution"
+    }
 
-			cache.cachedBy("other-key") { expensiveOp } should be ("solution")
-			timesRun should be (2)
+    withUser("cuscav") {
+      cache.cachedBy("key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(1)
 
-			cache.cachedBy("other-key") { expensiveOp } should be ("solution")
-			timesRun should be (2)
+      cache.cachedBy("key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(1)
 
-			cache.cachedBy("key") { expensiveOp } should be ("solution")
-			timesRun should be (2)
+      cache.cachedBy("other-key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(2)
 
-			cache.cache should be (Some(Map("key" -> "solution", "other-key" -> "solution")))
-		}
+      cache.cachedBy("other-key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(2)
 
-		// Out of request, cache should be empty again
-		cache.cache should be ('empty)
+      cache.cachedBy("key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(2)
 
-		cache.cachedBy("key") { expensiveOp } should be ("solution")
-		timesRun should be (3)
+      cache.cache should be(Some(Map("key" -> "solution", "other-key" -> "solution")))
+    }
 
-		withUser("cuscav") {
-			cache.cachedBy("key") { expensiveOp } should be ("solution")
-			timesRun should be (4)
+    // Out of request, cache should be empty again
+    cache.cache should be('empty)
 
-			cache.cachedBy("key") { expensiveOp } should be ("solution")
-			timesRun should be (4)
+    cache.cachedBy("key") {
+      expensiveOp
+    } should be("solution")
+    timesRun should be(3)
 
-			cache.cache should be (Some(Map("key" -> "solution")))
-		}
-	}
+    withUser("cuscav") {
+      cache.cachedBy("key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(4)
+
+      cache.cachedBy("key") {
+        expensiveOp
+      } should be("solution")
+      timesRun should be(4)
+
+      cache.cache should be(Some(Map("key" -> "solution")))
+    }
+  }
 
 }

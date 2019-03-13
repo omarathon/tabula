@@ -5,8 +5,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 trait AttendanceTemplatePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPointTemplates.Manage)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPointTemplates.Manage)
+  }
 
 }

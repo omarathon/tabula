@@ -8,32 +8,34 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object ExtensionRevokedNotification {
-	val templateLocation = "/WEB-INF/freemarker/emails/revoke_manual_extension.ftl"
+  val templateLocation = "/WEB-INF/freemarker/emails/revoke_manual_extension.ftl"
 }
 
 @Entity
 @DiscriminatorValue("ExtensionRevoked")
 class ExtensionRevokedNotification extends Notification[Assignment, Unit]
-	with SingleItemNotification[Assignment]
-	with SingleRecipientNotification
-	with UniversityIdOrUserIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with MyWarwickNotification {
+  with SingleItemNotification[Assignment]
+  with SingleRecipientNotification
+  with UniversityIdOrUserIdRecipientNotification
+  with AutowiringUserLookupComponent
+  with MyWarwickNotification {
 
-	priority = Warning
+  priority = Warning
 
-	def assignment: Assignment = item.entity
+  def assignment: Assignment = item.entity
 
-	def verb = "revoke"
+  def verb = "revoke"
 
-	def title: String =	"%s: Your extended deadline for \"%s\" has been revoked".format(assignment.module.code.toUpperCase, assignment.name)
-	def url: String = Routes.assignment(assignment)
-	def urlTitle = "view the assignment"
+  def title: String = "%s: Your extended deadline for \"%s\" has been revoked".format(assignment.module.code.toUpperCase, assignment.name)
 
-	def content = FreemarkerModel(ExtensionRevokedNotification.templateLocation, Map (
-		"assignment" -> assignment,
-		"module" -> assignment.module,
-		"user" -> recipient,
-		"originalAssignmentDate" -> Option(assignment.closeDate).map(dateTimeFormatter.print).orNull
-	))
+  def url: String = Routes.assignment(assignment)
+
+  def urlTitle = "view the assignment"
+
+  def content = FreemarkerModel(ExtensionRevokedNotification.templateLocation, Map(
+    "assignment" -> assignment,
+    "module" -> assignment.module,
+    "user" -> recipient,
+    "originalAssignmentDate" -> Option(assignment.closeDate).map(dateTimeFormatter.print).orNull
+  ))
 }

@@ -10,94 +10,95 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 /**
- * Copies the previous MarkerFeedback item to these marker feedbacks
- */
+  * Copies the previous MarkerFeedback item to these marker feedbacks
+  */
 object PopulateMarkerFeedbackCommand {
-	def apply(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) =
-		new PopulateMarkerFeedbackCommandInternal(assignment, markerFeedback)
-			with ComposableCommand[Seq[MarkerFeedback]]
-			with PopulateMarkerFeedbackPermissions
-			with PopulateMarkerFeedbackDescription
-			with AutowiringFeedbackServiceComponent
+  def apply(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) =
+    new PopulateMarkerFeedbackCommandInternal(assignment, markerFeedback)
+      with ComposableCommand[Seq[MarkerFeedback]]
+      with PopulateMarkerFeedbackPermissions
+      with PopulateMarkerFeedbackDescription
+      with AutowiringFeedbackServiceComponent
 }
 
 trait PopulateMarkerFeedbackCommandState {
-	def assignment: Assignment
-	def markerFeedback: Seq[MarkerFeedback]
+  def assignment: Assignment
+
+  def markerFeedback: Seq[MarkerFeedback]
 }
 
 abstract class PopulateMarkerFeedbackCommandInternal(val assignment: Assignment, val markerFeedback: Seq[MarkerFeedback])
-	extends CommandInternal[Seq[MarkerFeedback]] with PopulateMarkerFeedbackCommandState {
+  extends CommandInternal[Seq[MarkerFeedback]] with PopulateMarkerFeedbackCommandState {
 
-	this: FeedbackServiceComponent =>
+  this: FeedbackServiceComponent =>
 
-	override def applyInternal(): Seq[MarkerFeedback] = {
-		markerFeedback.foreach(mf => {
-			val allMarkerFeedback = mf.feedback.allMarkerFeedback
-			val previousStage = mf.stage.previousStages.headOption
-			for(ps <- previousStage; pmf <- allMarkerFeedback.find(_.stage == ps)) copyPreviousFeedback(pmf, mf)
-		})
-		markerFeedback
-	}
+  override def applyInternal(): Seq[MarkerFeedback] = {
+    markerFeedback.foreach(mf => {
+      val allMarkerFeedback = mf.feedback.allMarkerFeedback
+      val previousStage = mf.stage.previousStages.headOption
+      for (ps <- previousStage; pmf <- allMarkerFeedback.find(_.stage == ps)) copyPreviousFeedback(pmf, mf)
+    })
+    markerFeedback
+  }
 
-	private def copyPreviousFeedback(previous: MarkerFeedback, markerFeedback: MarkerFeedback): MarkerFeedback = {
-		markerFeedback.clearCustomFormValues()
+  private def copyPreviousFeedback(previous: MarkerFeedback, markerFeedback: MarkerFeedback): MarkerFeedback = {
+    markerFeedback.clearCustomFormValues()
 
-		val previousFormValues = previous.customFormValues.asScala.map { formValue =>
-			val newValue = new SavedFormValue()
-			newValue.name = formValue.name
-			newValue.markerFeedback = markerFeedback
-			newValue.value = formValue.value
-			newValue
-		}.toSet[SavedFormValue]
+    val previousFormValues = previous.customFormValues.asScala.map { formValue =>
+      val newValue = new SavedFormValue()
+      newValue.name = formValue.name
+      newValue.markerFeedback = markerFeedback
+      newValue.value = formValue.value
+      newValue
+    }.toSet[SavedFormValue]
 
-		// save custom fields
-		markerFeedback.customFormValues.addAll(previousFormValues.asJava)
+    // save custom fields
+    markerFeedback.customFormValues.addAll(previousFormValues.asJava)
 
-		markerFeedback.grade = previous.grade
-		markerFeedback.mark = previous.mark
+    markerFeedback.grade = previous.grade
+    markerFeedback.mark = previous.mark
 
-		// erase any existing attachments - these will be replaced
-		markerFeedback.clearAttachments()
-		val newAttachments = previous.attachments.asScala.map(fa => {
-			val newAttachment = fa.duplicate()
-			newAttachment.markerFeedback = markerFeedback
-			newAttachment
-		})
-		newAttachments.foreach(markerFeedback.addAttachment)
-		feedbackService.save(markerFeedback)
-		markerFeedback
-	}
+    // erase any existing attachments - these will be replaced
+    markerFeedback.clearAttachments()
+    val newAttachments = previous.attachments.asScala.map(fa => {
+      val newAttachment = fa.duplicate()
+      newAttachment.markerFeedback = markerFeedback
+      newAttachment
+    })
+    newAttachments.foreach(markerFeedback.addAttachment)
+    feedbackService.save(markerFeedback)
+    markerFeedback
+  }
 }
 
 trait PopulateMarkerFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: PopulateMarkerFeedbackCommandState =>
+  self: PopulateMarkerFeedbackCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+  }
 }
 
 trait PopulateMarkerFeedbackDescription extends Describable[Seq[MarkerFeedback]] {
-	self: PopulateMarkerFeedbackCommandState =>
+  self: PopulateMarkerFeedbackCommandState =>
 
-	override lazy val eventName: String = "PopulateMarkerFeedback"
+  override lazy val eventName: String = "PopulateMarkerFeedback"
 
-	override def describe(d: Description) {
-		d.assignment(assignment)
-		d.property("copiedFeedback" -> markerFeedback.size)
-	}
+  override def describe(d: Description) {
+    d.assignment(assignment)
+    d.property("copiedFeedback" -> markerFeedback.size)
+  }
 
 }
 
 trait PopulateMarkerFeedbackComponent {
-	def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback])
+  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback])
 }
 
 trait PopulateMarkerFeedbackComponentImpl extends PopulateMarkerFeedbackComponent {
 
-	def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) {
-		val populateMarkerFeedbackCommand = PopulateMarkerFeedbackCommand(assignment, markerFeedback)
-		populateMarkerFeedbackCommand.apply()
-	}
+  def populateMarkerFeedback(assignment: Assignment, markerFeedback: Seq[MarkerFeedback]) {
+    val populateMarkerFeedbackCommand = PopulateMarkerFeedbackCommand(assignment, markerFeedback)
+    populateMarkerFeedbackCommand.apply()
+  }
 }

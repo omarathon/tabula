@@ -11,22 +11,22 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 
 /**
-	* This isn't exposed anywhere but is useful for acceptance testing
-	*/
+  * This isn't exposed anywhere but is useful for acceptance testing
+  */
 @Controller
 @RequestMapping(Array("/profiles/view/{member}/{academicYear}.pdf"))
 class ExportProfileController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(member: Member, academicYear: AcademicYear): ProfileExportSingleCommand.CommandType = member match {
-		case student: StudentMember => ProfileExportSingleCommand(student, academicYear, user)
-		case _ => throw new ItemNotFoundException
-	}
+  @ModelAttribute("command")
+  def command(member: Member, academicYear: AcademicYear): ProfileExportSingleCommand.CommandType = member match {
+    case student: StudentMember => ProfileExportSingleCommand(student, academicYear, user)
+    case _ => throw new ItemNotFoundException
+  }
 
-	@RequestMapping(produces = Array("application/pdf"))
-	def renderPdf(@Valid @ModelAttribute("command") command: ProfileExportSingleCommand.CommandType): RenderableFile =
-		new RenderableAttachment(command.apply().head)
+  @RequestMapping(produces = Array("application/pdf"))
+  def renderPdf(@Valid @ModelAttribute("command") command: ProfileExportSingleCommand.CommandType): RenderableFile =
+    new RenderableAttachment(command.apply().head)
 
 }

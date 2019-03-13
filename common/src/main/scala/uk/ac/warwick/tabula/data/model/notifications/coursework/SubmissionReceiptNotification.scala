@@ -8,19 +8,19 @@ import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, UniversityI
 @Entity
 @DiscriminatorValue("SubmissionReceipt")
 class SubmissionReceiptNotification extends SubmissionNotification
-	with SingleRecipientNotification
-	with UniversityIdOrUserIdRecipientNotification {
+  with SingleRecipientNotification
+  with UniversityIdOrUserIdRecipientNotification {
 
-	override def onPreSave(isNew: Boolean) {
-		recipientUniversityId = submission.usercode
-	}
+  override def onPreSave(isNew: Boolean) {
+    recipientUniversityId = submission.usercode
+  }
 
-	def title: String = "%s: Submission receipt for \"%s\"".format(moduleCode, assignment.name)
+  def title: String = "%s: Submission receipt for \"%s\"".format(moduleCode, assignment.name)
 
-	@transient val templateLocation = "/WEB-INF/freemarker/emails/submissionreceipt.ftl"
+  @transient val templateLocation = "/WEB-INF/freemarker/emails/submissionreceipt.ftl"
 
-	def urlTitle = "review your submission"
+  def urlTitle = "review your submission"
 
-	def url: String = Routes.assignment(assignment)
+  def url: String = Routes.assignment(assignment)
 
 }

@@ -15,43 +15,43 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/{scheme}/edit/students"))
 class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsController {
 
-	override protected val renderPath = "attendance/manage/editschemestudents"
+  override protected val renderPath = "attendance/manage/editschemestudents"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
-	def saveAndEditPoints(
-		@Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
-		errors: Errors,
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
-		@PathVariable scheme: AttendanceMonitoringScheme
-	): Mav = {
-		if (errors.hasErrors) {
-			val findStudentsForSchemeCommandResult = findCommand.apply()
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
-		} else {
-			val scheme = cmd.apply()
-			RedirectForce(Routes.Manage.editSchemePoints(scheme))
-		}
+  @RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
+  def saveAndEditPoints(
+    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    errors: Errors,
+    @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+    @PathVariable scheme: AttendanceMonitoringScheme
+  ): Mav = {
+    if (errors.hasErrors) {
+      val findStudentsForSchemeCommandResult = findCommand.apply()
+      val editMembershipCommandResult = editMembershipCommand.apply()
+      render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
+    } else {
+      val scheme = cmd.apply()
+      RedirectForce(Routes.Manage.editSchemePoints(scheme))
+    }
 
-	}
+  }
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.saveAndEditProperties))
-	def saveAndEditProperties(
-		@Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
-		errors: Errors,
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
-		@PathVariable scheme: AttendanceMonitoringScheme
-	): Mav = {
-		if (errors.hasErrors) {
-			val findStudentsForSchemeCommandResult = findCommand.apply()
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
-		} else {
-			val scheme = cmd.apply()
-			RedirectForce(Routes.Manage.editScheme(scheme))
-		}
+  @RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.saveAndEditProperties))
+  def saveAndEditProperties(
+    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    errors: Errors,
+    @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+    @PathVariable scheme: AttendanceMonitoringScheme
+  ): Mav = {
+    if (errors.hasErrors) {
+      val findStudentsForSchemeCommandResult = findCommand.apply()
+      val editMembershipCommandResult = editMembershipCommand.apply()
+      render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
+    } else {
+      val scheme = cmd.apply()
+      RedirectForce(Routes.Manage.editScheme(scheme))
+    }
 
-	}
+  }
 }

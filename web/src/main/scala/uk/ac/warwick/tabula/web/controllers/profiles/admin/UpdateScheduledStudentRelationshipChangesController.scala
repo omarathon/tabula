@@ -13,43 +13,43 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 object UpdateScheduledStudentRelationshipChangesControllerActions {
-	final val Apply = "apply"
-	final val Cancel = "cancel"
+  final val Apply = "apply"
+  final val Cancel = "cancel"
 }
 
 @Controller
 @RequestMapping(Array("/profiles/department/{department}/{relationshipType}/scheduled/update"))
 class UpdateScheduledStudentRelationshipChangesController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam action: String
-	): Appliable[Seq[StudentRelationship]] = action match {
-		case UpdateScheduledStudentRelationshipChangesControllerActions.Apply =>
-			ApplyScheduledStudentRelationshipChangesCommand(mandatory(relationshipType), mandatory(department), user)
-		case UpdateScheduledStudentRelationshipChangesControllerActions.Cancel =>
-			CancelScheduledStudentRelationshipChangesCommand(mandatory(relationshipType), mandatory(department), user)
-		case _ =>
-			throw new IllegalArgumentException
-	}
+  @ModelAttribute("command")
+  def command(
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam action: String
+  ): Appliable[Seq[StudentRelationship]] = action match {
+    case UpdateScheduledStudentRelationshipChangesControllerActions.Apply =>
+      ApplyScheduledStudentRelationshipChangesCommand(mandatory(relationshipType), mandatory(department), user)
+    case UpdateScheduledStudentRelationshipChangesControllerActions.Cancel =>
+      CancelScheduledStudentRelationshipChangesCommand(mandatory(relationshipType), mandatory(department), user)
+    case _ =>
+      throw new IllegalArgumentException
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]],
-		errors: BindingResult,
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType
-	): Mav = {
-		if (errors.hasErrors) {
-			throw new BindException(errors)
-		} else {
-			cmd.apply()
-			Redirect(Routes.relationships.scheduled(department, relationshipType))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]],
+    errors: BindingResult,
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType
+  ): Mav = {
+    if (errors.hasErrors) {
+      throw new BindException(errors)
+    } else {
+      cmd.apply()
+      Redirect(Routes.relationships.scheduled(department, relationshipType))
+    }
+  }
 
 }

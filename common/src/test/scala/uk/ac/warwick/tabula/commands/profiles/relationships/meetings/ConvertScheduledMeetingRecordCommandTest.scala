@@ -9,40 +9,42 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ConvertScheduledMeetingRecordCommandTest extends TestBase with Mockito {
 
-	trait Fixture {
-		val meetingRecordDao: MeetingRecordDao = mock[MeetingRecordDao]
-		val notificationService: NotificationService = mock[NotificationService]
-		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+  trait Fixture {
+    val meetingRecordDao: MeetingRecordDao = mock[MeetingRecordDao]
+    val notificationService: NotificationService = mock[NotificationService]
+    val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 
-		var creator: StaffMember = Fixtures.staff(universityId = "12345")
-		val student: StudentMember = Fixtures.student()
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
+    var creator: StaffMember = Fixtures.staff(universityId = "12345")
+    val student: StudentMember = Fixtures.student()
+    val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+    val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 
 
-		val createCommand = new Appliable[MeetingRecord] {
-			override def apply(): MeetingRecord = {
-				new MeetingRecord
-			}
-		}
+    val createCommand = new Appliable[MeetingRecord] {
+      override def apply(): MeetingRecord = {
+        new MeetingRecord
+      }
+    }
 
-		val scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
+    val scheduledMeetingRecord: ScheduledMeetingRecord = new ScheduledMeetingRecord()
 
-		val command = new ConvertScheduledMeetingRecordCommand(creator, scheduledMeetingRecord) with ConvertScheduledMeetingRecordCommandSupport with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
-		}
-		command.createCommand = createCommand
-	}
+    val command = new ConvertScheduledMeetingRecordCommand(creator, scheduledMeetingRecord) with ConvertScheduledMeetingRecordCommandSupport with MeetingRecordServiceComponent {
+      val meetingRecordService: MeetingRecordService = mockMeetingRecordService
+    }
+    command.createCommand = createCommand
+  }
 
-	@Test
-	def apply() { new Fixture {
-		val newMeetingRecord: MeetingRecord = command.applyInternal()
+  @Test
+  def apply() {
+    new Fixture {
+      val newMeetingRecord: MeetingRecord = command.applyInternal()
 
-		verify(mockMeetingRecordService, times(1)).purge(scheduledMeetingRecord)
-	}}
+      verify(mockMeetingRecordService, times(1)).purge(scheduledMeetingRecord)
+    }
+  }
 
-	trait ConvertScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {
-		def fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
-	}
+  trait ConvertScheduledMeetingRecordCommandSupport extends FileAttachmentServiceComponent {
+    def fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
+  }
 
 }

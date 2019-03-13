@@ -17,41 +17,44 @@ import uk.ac.warwick.tabula.helpers.MutablePromise
 
 class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDefinition, String] {
 
-	val relationshipService: MutablePromise[RelationshipService] = promise { Wire[RelationshipService] }
+  val relationshipService: MutablePromise[RelationshipService] = promise {
+    Wire[RelationshipService]
+  }
 
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
+  val basicType = StandardBasicTypes.STRING
 
-	val nullValue = null
-	val nullObject = null
+  override def sqlTypes = Array(Types.VARCHAR)
 
-	override def convertToObject(legacy: String): BuiltInRoleDefinition = {
-		// Hardcoded legacy code. Ew
-		val string = legacy match {
-			case "PersonalTutorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(tutor)"
-			case "SupervisorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(supervisor)"
-			case _ => legacy
-		}
+  val nullValue = null
+  val nullObject = null
 
-		string match {
-			case r"([A-Za-z]+)${roleName}\(\*\)" => {
-				SelectorBuiltInRoleDefinition.of(roleName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
-			}
-			case r"([A-Za-z]+)${roleName}\(([^\)]+)${id}\)" => {
-				val selector = relationshipService.get.getStudentRelationshipTypeById(id) match { // FIXME hard-wired
-					case Some(selector) => selector
-					case _ => relationshipService.get.getStudentRelationshipTypeByUrlPart(id).get // Fall back to url, just in case
-				}
+  override def convertToObject(legacy: String): BuiltInRoleDefinition = {
+    // Hardcoded legacy code. Ew
+    val string = legacy match {
+      case "PersonalTutorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(tutor)"
+      case "SupervisorRoleDefinition" => "StudentRelationshipAgentRoleDefinition(supervisor)"
+      case _ => legacy
+    }
 
-				SelectorBuiltInRoleDefinition.of(roleName, selector)
-			}
-			case _ => RoleDefinition.of(string)
-		}
-	}
+    string match {
+      case r"([A-Za-z]+)${roleName}\(\*\)" => {
+        SelectorBuiltInRoleDefinition.of(roleName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
+      }
+      case r"([A-Za-z]+)${roleName}\(([^\)]+)${id}\)" => {
+        val selector = relationshipService.get.getStudentRelationshipTypeById(id) match { // FIXME hard-wired
+          case Some(selector) => selector
+          case _ => relationshipService.get.getStudentRelationshipTypeByUrlPart(id).get // Fall back to url, just in case
+        }
 
-	override def convertToValue(definition: BuiltInRoleDefinition): String = definition match {
-		case defn: SelectorBuiltInRoleDefinition[_] => "%s(%s)".format(defn.getName, defn.selector.id)
-		case _ => definition.getName
-	}
+        SelectorBuiltInRoleDefinition.of(roleName, selector)
+      }
+      case _ => RoleDefinition.of(string)
+    }
+  }
+
+  override def convertToValue(definition: BuiltInRoleDefinition): String = definition match {
+    case defn: SelectorBuiltInRoleDefinition[_] => "%s(%s)".format(defn.getName, defn.selector.id)
+    case _ => definition.getName
+  }
 
 }

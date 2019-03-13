@@ -14,25 +14,25 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 @RequestMapping(Array("/${cm2.prefix}"))
 class HomeController extends CourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("command")
-	def command(user: CurrentUser): CourseworkHomepageCommand.Command = {
-		CourseworkHomepageCommand(user)
-	}
+  @ModelAttribute("command")
+  def command(user: CurrentUser): CourseworkHomepageCommand.Command = {
+    CourseworkHomepageCommand(user)
+  }
 
-	@RequestMapping
-	def home(@ModelAttribute("command") command: CourseworkHomepageCommand.Command): Mav = {
-		val info = command.apply()
+  @RequestMapping
+  def home(@ModelAttribute("command") command: CourseworkHomepageCommand.Command): Mav = {
+    val info = command.apply()
 
-		Mav("cm2/home/view",
-			"homeDepartment" -> info.homeDepartment,
-			"studentInformation" -> info.studentInformation,
-			"isMarker" -> info.isMarker,
-			"adminInformation" -> info.adminInformation,
-			"embedded" -> false
-		)
-	}
+    Mav("cm2/home/view",
+      "homeDepartment" -> info.homeDepartment,
+      "studentInformation" -> info.studentInformation,
+      "isMarker" -> info.isMarker,
+      "adminInformation" -> info.adminInformation,
+      "embedded" -> false
+    )
+  }
 
 }
 
@@ -41,19 +41,19 @@ class HomeController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/marker"))
 class MarkerHomeController extends CourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("command")
-	def command(user: CurrentUser): CourseworkMarkerHomepageCommand.Command = {
-		CourseworkMarkerHomepageCommand(user)
-	}
+  @ModelAttribute("command")
+  def command(user: CurrentUser): CourseworkMarkerHomepageCommand.Command = {
+    CourseworkMarkerHomepageCommand(user)
+  }
 
-	@RequestMapping
-	def markerHome(@ModelAttribute("command") command: CourseworkMarkerHomepageCommand.Command): Mav =
-		Mav("cm2/home/_marker",
-			"markerInformation" -> command.apply(),
-			"embedded" -> ajax
-		).noLayoutIf(ajax)
+  @RequestMapping
+  def markerHome(@ModelAttribute("command") command: CourseworkMarkerHomepageCommand.Command): Mav =
+    Mav("cm2/home/_marker",
+      "markerInformation" -> command.apply(),
+      "embedded" -> ajax
+    ).noLayoutIf(ajax)
 
 }
 
@@ -62,7 +62,7 @@ class MarkerHomeController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/{academicYear:\\d{4}}", "/${cm2.prefix}/admin", "/${cm2.prefix}/admin/department", "/${cm2.prefix}/submission", "/${cm2.prefix}/module/**"))
 class HomeRewritesController extends BaseController {
 
-	@RequestMapping
-	def rewriteToHome = Redirect(Routes.home)
+  @RequestMapping
+  def rewriteToHome = Redirect(Routes.home)
 
 }

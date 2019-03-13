@@ -4,6 +4,6 @@
 <#assign submitUrl = url('/admin/department/${command.department.code}/sort-modules') />
 <#escape x as x?html>
 
-	<#include "../../_arrange.ftl" />
+  <#include "../../_arrange.ftl" />
 
 </#escape>

@@ -5,53 +5,71 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class SmallGroupFormat(val code: String, val description: String) {
-	def plural: String = description + "s"
+  def plural: String = description + "s"
 
-	// For Spring, the silly bum
-	def getCode: String = code
-	def getDescription: String = description
+  // For Spring, the silly bum
+  def getCode: String = code
 
-	override def toString: String = description
+  def getDescription: String = description
+
+  override def toString: String = description
 }
 
 object SmallGroupFormat {
-	case object Seminar extends SmallGroupFormat("seminar", "Seminar")
-	case object Lab extends SmallGroupFormat("lab", "Lab")
-	case object Tutorial extends SmallGroupFormat("tutorial", "Tutorial")
-	case object Project extends SmallGroupFormat("project", "Project group")
-	case object Example extends SmallGroupFormat("example", "Example Class") { override def plural = "Example Classes" }
-	case object Workshop extends SmallGroupFormat("workshop", "Workshop")
-	case object Lecture extends SmallGroupFormat("lecture", "Lecture")
-	case object Meeting extends SmallGroupFormat("meeting", "Meeting")
-	case object Exam extends SmallGroupFormat("exam", "Exam")
 
-	// lame manual collection. Keep in sync with the case objects above
-	// Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
-	def members = Seq(Seminar, Lab, Tutorial, Project, Example, Workshop, Lecture, Exam, Meeting)
+  case object Seminar extends SmallGroupFormat("seminar", "Seminar")
 
-	def fromCode(code: String): SmallGroupFormat =
-		if (code == null) null
-		else members.find{_.code == code} match {
-			case Some(caseObject) => caseObject
-			case None => throw new IllegalArgumentException()
-		}
+  case object Lab extends SmallGroupFormat("lab", "Lab")
 
-	def fromDescription(description: String): SmallGroupFormat =
-		if (description == null) null
-		else members.find{_.description == description} match {
-			case Some(caseObject) => caseObject
-			case None => throw new IllegalArgumentException()
-		}
+  case object Tutorial extends SmallGroupFormat("tutorial", "Tutorial")
+
+  case object Project extends SmallGroupFormat("project", "Project group")
+
+  case object Example extends SmallGroupFormat("example", "Example Class") {
+    override def plural = "Example Classes"
+  }
+
+  case object Workshop extends SmallGroupFormat("workshop", "Workshop")
+
+  case object Lecture extends SmallGroupFormat("lecture", "Lecture")
+
+  case object Meeting extends SmallGroupFormat("meeting", "Meeting")
+
+  case object Exam extends SmallGroupFormat("exam", "Exam")
+
+  // lame manual collection. Keep in sync with the case objects above
+  // Don't change this to a val https://warwick.slack.com/archives/C029QTGBN/p1493995125972397
+  def members = Seq(Seminar, Lab, Tutorial, Project, Example, Workshop, Lecture, Exam, Meeting)
+
+  def fromCode(code: String): SmallGroupFormat =
+    if (code == null) null
+    else members.find {
+      _.code == code
+    } match {
+      case Some(caseObject) => caseObject
+      case None => throw new IllegalArgumentException()
+    }
+
+  def fromDescription(description: String): SmallGroupFormat =
+    if (description == null) null
+    else members.find {
+      _.description == description
+    } match {
+      case Some(caseObject) => caseObject
+      case None => throw new IllegalArgumentException()
+    }
 }
 
 class SmallGroupFormatUserType extends AbstractBasicUserType[SmallGroupFormat, String] {
 
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
+  val basicType = StandardBasicTypes.STRING
 
-	val nullValue = null
-	val nullObject = null
+  override def sqlTypes = Array(Types.VARCHAR)
 
-	override def convertToObject(string: String): SmallGroupFormat = SmallGroupFormat.fromCode(string)
-	override def convertToValue(format: SmallGroupFormat): String = format.code
+  val nullValue = null
+  val nullObject = null
+
+  override def convertToObject(string: String): SmallGroupFormat = SmallGroupFormat.fromCode(string)
+
+  override def convertToValue(format: SmallGroupFormat): String = format.code
 }

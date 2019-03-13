@@ -17,39 +17,39 @@ import uk.ac.warwick.tabula.data.model.Department
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/notification"))
 class NotificationSettingsController extends AdminController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
-	
-	type NotificationSettingsCommand = Appliable[Department]
+  with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	validatesSelf[SelfValidating]
+  type NotificationSettingsCommand = Appliable[Department]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department): NotificationSettingsCommand = NotificationSettingsCommand(mandatory(department))
+  validatesSelf[SelfValidating]
 
-	override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department): NotificationSettingsCommand = NotificationSettingsCommand(mandatory(department))
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(@PathVariable department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand): Mav = {
-		Mav("admin/notification-settings", "returnTo" -> getReturnTo(Routes.admin.department(department))).crumbs(
-			Breadcrumbs.Department(department)
-		)
-	}
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@RequestMapping(method = Array(POST))
-	def saveSettings(
-		@Valid @ModelAttribute("command") cmd: NotificationSettingsCommand,
-		errors: Errors,
-		@PathVariable department: Department
-	): Mav = {
-		if (errors.hasErrors) {
-			form(department, cmd)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.department(department))
-		}
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@PathVariable department: Department, @ModelAttribute("command") cmd: NotificationSettingsCommand): Mav = {
+    Mav("admin/notification-settings", "returnTo" -> getReturnTo(Routes.admin.department(department))).crumbs(
+      Breadcrumbs.Department(department)
+    )
+  }
+
+  @RequestMapping(method = Array(POST))
+  def saveSettings(
+    @Valid @ModelAttribute("command") cmd: NotificationSettingsCommand,
+    errors: Errors,
+    @PathVariable department: Department
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(department, cmd)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.department(department))
+    }
+  }
 }

@@ -11,24 +11,27 @@ import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model.{Assignment, Member, Module}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/module/{module}/{assignment}/{student}"))
 class OldDownloadFeedbackInProfileController extends OldCourseworkController {
 
-	var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
+  var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
 
-	@ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
-		= new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
+  @ModelAttribute def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable student: Member)
+  = new DownloadFeedbackCommand(module, assignment, mandatory(feedbackDao.getAssignmentFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
 
-	@RequestMapping(value = Array("/all/feedback.zip"))
-	def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member): RenderableFile = {
-		command.filename = null
-		getOne(command)
-	}
+  @RequestMapping(value = Array("/all/feedback.zip"))
+  def getAll(command: DownloadFeedbackCommand, @PathVariable student: Member): RenderableFile = {
+    command.filename = null
+    getOne(command)
+  }
 
-	@RequestMapping(value = Array("/get/{filename}"))
-	def getOne(command: DownloadFeedbackCommand): RenderableFile = {
-		command.apply().getOrElse { throw new ItemNotFoundException() }
-	}
+  @RequestMapping(value = Array("/get/{filename}"))
+  def getOne(command: DownloadFeedbackCommand): RenderableFile = {
+    command.apply().getOrElse {
+      throw new ItemNotFoundException()
+    }
+  }
 
 }

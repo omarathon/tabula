@@ -40,6 +40,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
   ): Workbook = {
     var progress = 0
     val progressMax = entities.size * (leftColumns.size + perYearColumns.size * perYearColumns.values.map(_.size).sum + rightColumns.size)
+
     def stepProgress(): Unit = {
       progress = progress + 1
       status.setProgress(progress, progressMax)
@@ -51,7 +52,7 @@ object GenerateExamGridExporter extends TaskBenchmarking {
     // Styles
     val cellStyleMap = getCellStyleMap(workbook)
 
-    val sheet = workbook.createSheet(academicYear.toString.replace("/","-"))
+    val sheet = workbook.createSheet(academicYear.toString.replace("/", "-"))
     sheet.trackAllColumnsForAutoSizing()
 
     ExamGridSummaryAndKey.summaryAndKey(sheet, cellStyleMap, department, academicYear, courses, routes, yearOfStudy, normalLoadLookup, entities.size, isStudentCount = true)
@@ -72,8 +73,8 @@ object GenerateExamGridExporter extends TaskBenchmarking {
       }
     }).toMap
 
-    val chosenYearColumnCategories = rightColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)
-    val perYearColumnCategories = perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category))
+    val chosenYearColumnCategories = rightColumns.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category)
+    val perYearColumnCategories = perYearColumns.mapValues(_.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category))
 
     var currentColumnIndex = 0
     var categoryRowMaxCellWidth = 0
@@ -314,15 +315,25 @@ object GenerateExamGridExporter extends TaskBenchmarking {
 object ExamGridExportStyles {
 
   sealed trait Style
+
   case object Header extends Style
+
   case object HeaderRotated extends Style
+
   case object Rotated extends Style
+
   case object Fail extends Style
+
   case object Overcat extends Style
+
   case object Overridden extends Style
+
   case object ActualMark extends Style
+
   case object FailAndActualMark extends Style
+
   case object OvercatAndActualMark extends Style
+
   case object BoldText extends Style
 
 
@@ -464,7 +475,8 @@ object ExamGridSummaryAndKey {
       valueCell.setCellValue(value)
       row
     }
-    val gridType =  department.examGridOptions.layout match {
+
+    val gridType = department.examGridOptions.layout match {
       case "short" => "Short Grid"
       case _ => "Full Grid"
     }

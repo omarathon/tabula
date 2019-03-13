@@ -14,65 +14,67 @@ import scala.collection.JavaConverters._
 import scala.collection.JavaConverters._
 
 /**
- * Accepts either id="abc" or ids=["abc","def"] as attributes.
- * Consequently sets a local variable -
- * 	either returned_user = a User
- *  or returned_users = a map of id -> User
- *
- * When users is set, missing_ids will also be a sequence of user IDs
- * that couldn't be found.
- *
- * Set the boolean parameter lookupByUniversityId to true (default false)
- * to search by university ID rather than usercode.
- */
+  * Accepts either id="abc" or ids=["abc","def"] as attributes.
+  * Consequently sets a local variable -
+  * either returned_user = a User
+  * or returned_users = a map of id -> User
+  *
+  * When users is set, missing_ids will also be a sequence of user IDs
+  * that couldn't be found.
+  *
+  * Set the boolean parameter lookupByUniversityId to true (default false)
+  * to search by university ID rather than usercode.
+  */
 class UserLookupTag extends TemplateDirectiveModel {
 
-	@Autowired var userLookup: UserLookupService = _
+  @Autowired var userLookup: UserLookupService = _
 
-	override def execute(env: Environment,
-		params: JMap[_, _],
-		loopVars: Array[TemplateModel],
-		body: TemplateDirectiveBody): Unit = {
+  override def execute(env: Environment,
+    params: JMap[_, _],
+    loopVars: Array[TemplateModel],
+    body: TemplateDirectiveBody): Unit = {
 
-		val wrapper = env.getObjectWrapper()
+    val wrapper = env.getObjectWrapper()
 
-		val user = unwrap[String](params.get("id"))
-		val users = unwrap[JList[String]](params.get("ids"))
-		val lookupByUniversityId = unwrap[JBoolean](params.get("lookupByUniversityId")).exists { _.booleanValue() }
+    val user = unwrap[String](params.get("id"))
+    val users = unwrap[JList[String]](params.get("ids"))
+    val lookupByUniversityId = unwrap[JBoolean](params.get("lookupByUniversityId")).exists {
+      _.booleanValue()
+    }
 
-		if (body == null) {
-			throw new TemplateException("UserLookupTag: must have a body", env);
-		}
+    if (body == null) {
+      throw new TemplateException("UserLookupTag: must have a body", env);
+    }
 
-		if (user.nonEmpty) {
-			val userId = user.get
+    if (user.nonEmpty) {
+      val userId = user.get
 
-			val returnedUser = (if (lookupByUniversityId) userLookup.getUserByWarwickUniId(userId) else userLookup.getUserByUserId(userId))
-			env.getCurrentNamespace().put("returned_user", wrapper.wrap(returnedUser))
-		} else if (users.nonEmpty) {
-			val userIds = users.get
+      val returnedUser = (if (lookupByUniversityId) userLookup.getUserByWarwickUniId(userId) else userLookup.getUserByUserId(userId))
+      env.getCurrentNamespace().put("returned_user", wrapper.wrap(returnedUser))
+    } else if (users.nonEmpty) {
+      val userIds = users.get
 
-			val returnedUsers =
-				if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala)
-				else userLookup.getUsersByUserIds(userIds).asScala
+      val returnedUsers =
+        if (lookupByUniversityId) userLookup.getUsersByWarwickUniIds(userIds.asScala)
+        else userLookup.getUsersByUserIds(userIds).asScala
 
-			val missingUserIds =
-				returnedUsers.values
-					.filterNot(_.isFoundUser())
-					.map { user => if (lookupByUniversityId) user.getWarwickId else user.getUserId }
+      val missingUserIds =
+        returnedUsers.values
+          .filterNot(_.isFoundUser())
+          .map { user => if (lookupByUniversityId) user.getWarwickId else user.getUserId }
 
-			env.getCurrentNamespace().put("returned_users", wrapper.wrap(returnedUsers))
-			env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))
-		} else {
-			throw new TemplateException("UserLookupTag: Either user or users must be specified", env)
-		}
+      env.getCurrentNamespace().put("returned_users", wrapper.wrap(returnedUsers))
+      env.getCurrentNamespace().put("missing_ids", wrapper.wrap(missingUserIds))
+    } else {
+      throw new TemplateException("UserLookupTag: Either user or users must be specified", env)
+    }
 
-		body.render(env.getOut())
+    body.render(env.getOut())
 
-	}
+  }
 
-	def unwrap[A](obj: Any): Option[A] = Option(obj).map { obj =>
-		DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel]).asInstanceOf[A]
-	}
+  def unwrap[A](obj: Any): Option[A] = Option(obj).map { obj =>
+    DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel]).asInstanceOf[A]
+  }
 
 }

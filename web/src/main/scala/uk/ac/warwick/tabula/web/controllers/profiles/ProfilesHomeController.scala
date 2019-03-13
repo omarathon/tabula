@@ -15,33 +15,35 @@ import uk.ac.warwick.tabula.web.Mav
 
 @Controller class ProfilesHomeController extends ProfilesController with ChecksAgent {
 
-	var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand: SearchProfilesCommandInternal with ComposableCommand[Seq[Member]] with Unaudited with SearchProfilesCommandPermissions =
-		restricted(SearchProfilesCommand(currentMember, user)).orNull
+  @ModelAttribute("searchProfilesCommand") def searchProfilesCommand: SearchProfilesCommandInternal with ComposableCommand[Seq[Member]] with Unaudited with SearchProfilesCommandPermissions =
+    restricted(SearchProfilesCommand(currentMember, user)).orNull
 
-	@ModelAttribute("command")
-	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
+  @ModelAttribute("command")
+  def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
-	@RequestMapping(Array("/profiles")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]): Mav = {
+  @RequestMapping(Array("/profiles")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]): Mav = {
 
-		if (!user.isPGR && !isAgent(user.universityId) && optionalCurrentMember.exists(_.userType == Student)) {
-			Redirect(Routes.Profile.identity(currentMember))
-		} else {
-			val info = cmd.apply()
+    if (!user.isPGR && !isAgent(user.universityId) && optionalCurrentMember.exists(_.userType == Student)) {
+      Redirect(Routes.Profile.identity(currentMember))
+    } else {
+      val info = cmd.apply()
 
-			Mav("profiles/home/view",
-				"relationshipTypesMap" -> info.relationshipTypesMap,
-				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
-				"universityId" -> user.universityId,
-				"isPGR" -> user.isPGR,
-				"smallGroups" -> info.currentSmallGroups,
-				"previousSmallGroups" -> info.previousSmallGroups,
-				"adminDepartments" -> info.adminDepartments,
-				"searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map { _.homeDepartment }.toSet)
-			)
-		}
-	}
+      Mav("profiles/home/view",
+        "relationshipTypesMap" -> info.relationshipTypesMap,
+        "relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
+        "universityId" -> user.universityId,
+        "isPGR" -> user.isPGR,
+        "smallGroups" -> info.currentSmallGroups,
+        "previousSmallGroups" -> info.previousSmallGroups,
+        "adminDepartments" -> info.adminDepartments,
+        "searchDepartments" -> (departmentService.departmentsWithPermission(user, Permissions.Profiles.Search) ++ user.profile.map {
+          _.homeDepartment
+        }.toSet)
+      )
+    }
+  }
 
-	@RequestMapping(Array("/profiles/view")) def redirectHome() = Redirect(Routes.home)
+  @RequestMapping(Array("/profiles/view")) def redirectHome() = Redirect(Routes.home)
 }

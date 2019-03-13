@@ -1,1 +1,2 @@
-alter table moduleregistration add column moduleresult varchar(2);
+alter table moduleregistration
+  add column moduleresult varchar(2);

@@ -7,28 +7,28 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AwardDaoComponent, AutowiringAwardDaoComponent}
 
 /**
- * Handles data about awards
- */
+  * Handles data about awards
+  */
 trait AwardServiceComponent {
-	def awardService: AwardService
+  def awardService: AwardService
 }
 
 
 trait AutowiringAwardServiceComponent extends AwardServiceComponent {
-	var awardService: AwardService = Wire[AwardService]
+  var awardService: AwardService = Wire[AwardService]
 }
 
 trait AwardService {
-	def awardFromCode(code: String): Option[Award]
+  def awardFromCode(code: String): Option[Award]
 }
 
 abstract class AbstractAwardService extends AwardService {
-	self: AwardDaoComponent =>
+  self: AwardDaoComponent =>
 
-	def awardFromCode(code: String): Option[Award] = code.maybeText.flatMap {
-		someCode => awardDao.getByCode(someCode.toLowerCase)
-	}
+  def awardFromCode(code: String): Option[Award] = code.maybeText.flatMap {
+    someCode => awardDao.getByCode(someCode.toLowerCase)
+  }
 }
 
-@Service ("awardService")
+@Service("awardService")
 class AwardServiceImpl extends AbstractAwardService with AutowiringAwardDaoComponent

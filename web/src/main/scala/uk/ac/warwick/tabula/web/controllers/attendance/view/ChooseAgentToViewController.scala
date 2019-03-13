@@ -11,12 +11,12 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/agents"))
 class ChooseAgentToViewController extends AttendanceController {
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("attendance/view/chooseagent").crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear)
-		)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("attendance/view/chooseagent").crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear),
+      Breadcrumbs.View.DepartmentForYear(department, academicYear)
+    )
+  }
 
 }

@@ -13,28 +13,28 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(Array("/attendance/check/meeting"))
 class CheckMeetingRecordCheckpointController extends AttendanceController {
 
-	@ModelAttribute("command")
-	def command(
-		@RequestParam student: StudentMember,
-		@RequestParam relationshipType: StudentRelationshipType,
-		@RequestParam meetingFormat: MeetingFormat,
-		@RequestParam meetingDate: DateTime
-	) =
-		CheckMeetingRecordCheckpointCommand(
-			mandatory(student),
-			mandatory(relationshipType),
-			mandatory(meetingFormat),
-			mandatory(meetingDate)
-		)
+  @ModelAttribute("command")
+  def command(
+    @RequestParam student: StudentMember,
+    @RequestParam relationshipType: StudentRelationshipType,
+    @RequestParam meetingFormat: MeetingFormat,
+    @RequestParam meetingDate: DateTime
+  ) =
+    CheckMeetingRecordCheckpointCommand(
+      mandatory(student),
+      mandatory(relationshipType),
+      mandatory(meetingFormat),
+      mandatory(meetingDate)
+    )
 
-	@RequestMapping
-	def render(@ModelAttribute("command") cmd: Appliable[Boolean]) =
-		Mav(
-			new JSONView(
-				Map(
-					"willCheckpointBeCreated" -> cmd.apply()
-				)
-			)
-		)
+  @RequestMapping
+  def render(@ModelAttribute("command") cmd: Appliable[Boolean]) =
+    Mav(
+      new JSONView(
+        Map(
+          "willCheckpointBeCreated" -> cmd.apply()
+        )
+      )
+    )
 
 }

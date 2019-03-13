@@ -12,83 +12,91 @@ import scala.collection.JavaConverters._
 
 class MarksOpenAndCloseDepartmentsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends MarksOpenAndCloseDepartmentsCommandState
-		with ModuleAndDepartmentServiceComponent
-		with MarksPopulateOpenAndCloseDepartmentsCommand {
-			val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
-			moduleAndDepartmentService.allRootDepartments returns Seq()
-	}
+  trait CommandTestSupport extends MarksOpenAndCloseDepartmentsCommandState
+    with ModuleAndDepartmentServiceComponent
+    with MarksPopulateOpenAndCloseDepartmentsCommand {
+    val moduleAndDepartmentService: ModuleAndDepartmentService = mock[ModuleAndDepartmentService]
+    moduleAndDepartmentService.allRootDepartments returns Seq()
+  }
 
-	trait OpenAndCloseDepartmentsWorld {
-		val department: Department = Fixtures.department("in", "IT Services")
-	}
+  trait OpenAndCloseDepartmentsWorld {
+    val department: Department = Fixtures.department("in", "IT Services")
+  }
 
-	trait Fixture extends OpenAndCloseDepartmentsWorld {
-		val now = new DateTime
-		val command = new MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport
-		command.moduleAndDepartmentService.allRootDepartments returns Seq(department)
-		command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
-		val currentYear: AcademicYear = AcademicYear.forDate(now)
-	}
+  trait Fixture extends OpenAndCloseDepartmentsWorld {
+    val now = new DateTime
+    val command = new MarksOpenAndCloseDepartmentsCommandInternal with CommandTestSupport
+    command.moduleAndDepartmentService.allRootDepartments returns Seq(department)
+    command.moduleAndDepartmentService.getDepartmentByCode(department.code) returns Some(department)
+    val currentYear: AcademicYear = AcademicYear.forDate(now)
+  }
 
-	@Test
-	def applyUndergrads() { new Fixture {
-		command.populate()
-		command.applyInternal() should be (DegreeType.Undergraduate)
-		department.canUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate) should be (true)
-	}}
+  @Test
+  def applyUndergrads() {
+    new Fixture {
+      command.populate()
+      command.applyInternal() should be(DegreeType.Undergraduate)
+      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Undergraduate) should be(true)
+    }
+  }
 
-	@Test
-	def applyPostgradsClosed() { new Fixture{
-		command.populate()
-		command.pgMappings = Map(
-			department.code -> DepartmentMarksStateClosed.value
-		).asJava
-		command.updatePostgrads = true
-		command.applyInternal() should be (DegreeType.Postgraduate)
-		department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be (false)
-		department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
-	}}
+  @Test
+  def applyPostgradsClosed() {
+    new Fixture {
+      command.populate()
+      command.pgMappings = Map(
+        department.code -> DepartmentMarksStateClosed.value
+      ).asJava
+      command.updatePostgrads = true
+      command.applyInternal() should be(DegreeType.Postgraduate)
+      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be(false)
+      department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
+    }
+  }
 
-	@Test
-	def applyPostgradsOpenThisYearOnly() { new Fixture{
-		command.populate()
-		command.pgMappings = Map(
-			department.code -> DepartmentMarksStateThisYearOnly.value
-		).asJava
-		command.updatePostgrads = true
-		command.applyInternal() should be (DegreeType.Postgraduate)
-		department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be (true)
-		department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
-	}}
+  @Test
+  def applyPostgradsOpenThisYearOnly() {
+    new Fixture {
+      command.populate()
+      command.pgMappings = Map(
+        department.code -> DepartmentMarksStateThisYearOnly.value
+      ).asJava
+      command.updatePostgrads = true
+      command.applyInternal() should be(DegreeType.Postgraduate)
+      department.canUploadMarksToSitsForYear(currentYear, DegreeType.Postgraduate) should be(true)
+      department.canUploadMarksToSitsForYear(command.previousAcademicYear, DegreeType.Postgraduate) should be(false)
+    }
+  }
 
-	@Test
-	def populate() { new Fixture {
-		command.currentAcademicYear should be (currentYear)
-		command.previousAcademicYear should be (currentYear.-(1))
-		command.ugMappings should be ('empty)
-		command.pgMappings should be ('empty)
-		command.populate()
-		command.ugMappings should not be ('empty)
-		command.pgMappings should not be ('empty)
-		command.ugMappings.size should be (1)
-		command.pgMappings.size should be (1)
-	}}
+  @Test
+  def populate() {
+    new Fixture {
+      command.currentAcademicYear should be(currentYear)
+      command.previousAcademicYear should be(currentYear.-(1))
+      command.ugMappings should be('empty)
+      command.pgMappings should be('empty)
+      command.populate()
+      command.ugMappings should not be ('empty)
+      command.pgMappings should not be ('empty)
+      command.ugMappings.size should be(1)
+      command.pgMappings.size should be(1)
+    }
+  }
 
-	@Test
-	def permssions {
-		val command = new MarksOpenAndCloseDepartmentsCommandPermissions with CommandTestSupport
-		val checking = mock[PermissionsChecking]
-		command.permissionsCheck(checking)
-		verify(checking, times(1)).PermissionCheck(Permissions.Marks.MarksManagement)
-	}
+  @Test
+  def permssions {
+    val command = new MarksOpenAndCloseDepartmentsCommandPermissions with CommandTestSupport
+    val checking = mock[PermissionsChecking]
+    command.permissionsCheck(checking)
+    verify(checking, times(1)).PermissionCheck(Permissions.Marks.MarksManagement)
+  }
 
-	@Test
-	def glueEverythingTogether() {
-			val command = MarksOpenAndCloseDepartmentsCommand()
-			command should be (anInstanceOf[Appliable[DegreeType]])
-			command should be (anInstanceOf[MarksOpenAndCloseDepartmentsCommandPermissions])
-			command should be (anInstanceOf[MarksOpenAndCloseDepartmentsCommandState])
-			command should be (anInstanceOf[Describable[DegreeType]])
-		}
+  @Test
+  def glueEverythingTogether() {
+    val command = MarksOpenAndCloseDepartmentsCommand()
+    command should be(anInstanceOf[Appliable[DegreeType]])
+    command should be(anInstanceOf[MarksOpenAndCloseDepartmentsCommandPermissions])
+    command should be(anInstanceOf[MarksOpenAndCloseDepartmentsCommandState])
+    command should be(anInstanceOf[Describable[DegreeType]])
+  }
 }

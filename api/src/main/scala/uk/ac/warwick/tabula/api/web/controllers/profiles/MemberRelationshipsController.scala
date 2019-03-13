@@ -13,37 +13,37 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 @RequestMapping(Array("/v1/member/{member}/relationships"))
 class MemberRelationshipsController extends ApiController
-	with GetMemberRelationshipsApi
-	with AutowiringRelationshipServiceComponent
+  with GetMemberRelationshipsApi
+  with AutowiringRelationshipServiceComponent
 
 trait GetMemberRelationshipsApi {
 
-	self: ApiController with RelationshipServiceComponent =>
+  self: ApiController with RelationshipServiceComponent =>
 
-	@ModelAttribute("viewStudentRelationshipsCommand")
-	def getCommand(@PathVariable member: Member): ViewMemberRelationshipsCommand.CommandType =
-		 ViewMemberRelationshipsCommand(member)
+  @ModelAttribute("viewStudentRelationshipsCommand")
+  def getCommand(@PathVariable member: Member): ViewMemberRelationshipsCommand.CommandType =
+    ViewMemberRelationshipsCommand(member)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getMember(@PathVariable member: Member, @ModelAttribute("viewStudentRelationshipsCommand") command: Appliable[ViewMemberRelationshipsCommand.Result]): Mav = {
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getMember(@PathVariable member: Member, @ModelAttribute("viewStudentRelationshipsCommand") command: Appliable[ViewMemberRelationshipsCommand.Result]): Mav = {
 
-		val relationshipsTypesWithStuDtls = command.apply().entities
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"relationships" -> relationshipsTypesWithStuDtls.map { case (relationshipType, result) =>
-				Map(
-					"relationshipType" -> Map(
-						"id" -> relationshipType.id,
-						"agentRole" -> relationshipType.agentRole,
-						"studentRole" -> relationshipType.studentRole
-					),
-					"students" -> result.map(scd => Map(
-						"userId" -> scd.student.userId,
-						"universityId" -> scd.student.universityId
-					))
-				)
-			}
-		)))
-	}
+    val relationshipsTypesWithStuDtls = command.apply().entities
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "relationships" -> relationshipsTypesWithStuDtls.map { case (relationshipType, result) =>
+        Map(
+          "relationshipType" -> Map(
+            "id" -> relationshipType.id,
+            "agentRole" -> relationshipType.agentRole,
+            "studentRole" -> relationshipType.studentRole
+          ),
+          "students" -> result.map(scd => Map(
+            "userId" -> scd.student.userId,
+            "universityId" -> scd.student.universityId
+          ))
+        )
+      }
+    )))
+  }
 }

@@ -18,313 +18,321 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 import scala.collection.JavaConverters._
 
 object ModifySmallGroupSetCommand {
-	type Command = Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState
-	type CreateCommand = Appliable[SmallGroupSet] with SelfValidating with CreateSmallGroupSetCommandState
+  type Command = Appliable[SmallGroupSet] with SelfValidating with ModifySmallGroupSetCommandState
+  type CreateCommand = Appliable[SmallGroupSet] with SelfValidating with CreateSmallGroupSetCommandState
 
-	def create(module: Module): CreateCommand =
-		new CreateSmallGroupSetCommandInternal(module)
-			with ComposableCommand[SmallGroupSet]
-			with SetDefaultSmallGroupSetName
-			with CreateSmallGroupSetPermissions
-			with CreateSmallGroupSetDescription
-			with ModifySmallGroupSetValidation
-			with ModifySmallGroupSetsScheduledNotifications
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with GeneratesDefaultWeekRangesWithTermService
+  def create(module: Module): CreateCommand =
+    new CreateSmallGroupSetCommandInternal(module)
+      with ComposableCommand[SmallGroupSet]
+      with SetDefaultSmallGroupSetName
+      with CreateSmallGroupSetPermissions
+      with CreateSmallGroupSetDescription
+      with ModifySmallGroupSetValidation
+      with ModifySmallGroupSetsScheduledNotifications
+      with AutowiringSmallGroupServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with GeneratesDefaultWeekRangesWithTermService
 
-	def edit(module: Module, set: SmallGroupSet): Command =
-		new EditSmallGroupSetCommandInternal(module, set)
-			with ComposableCommand[SmallGroupSet]
-			with EditSmallGroupSetPermissions
-			with EditSmallGroupSetDescription
-			with ModifySmallGroupSetValidation
-			with ModifySmallGroupSetsScheduledNotifications
-			with AutowiringSmallGroupServiceComponent
+  def edit(module: Module, set: SmallGroupSet): Command =
+    new EditSmallGroupSetCommandInternal(module, set)
+      with ComposableCommand[SmallGroupSet]
+      with EditSmallGroupSetPermissions
+      with EditSmallGroupSetDescription
+      with ModifySmallGroupSetValidation
+      with ModifySmallGroupSetsScheduledNotifications
+      with AutowiringSmallGroupServiceComponent
 }
 
 trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
-	def module: Module
-	def existingSet: Option[SmallGroupSet]
+  def module: Module
 
-	def updatingExistingLink(set: SmallGroupSet): Boolean =
-		(allocationMethod == SmallGroupAllocationMethod.Linked
-		&& set.allocationMethod == SmallGroupAllocationMethod.Linked
-		&& linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet)
+  def existingSet: Option[SmallGroupSet]
 
-	def creatingNewLink(set: SmallGroupSet): Boolean =
-		(allocationMethod == SmallGroupAllocationMethod.Linked
-		&& set.allocationMethod != SmallGroupAllocationMethod.Linked)
+  def updatingExistingLink(set: SmallGroupSet): Boolean =
+    (allocationMethod == SmallGroupAllocationMethod.Linked
+      && set.allocationMethod == SmallGroupAllocationMethod.Linked
+      && linkedDepartmentSmallGroupSet != set.linkedDepartmentSmallGroupSet)
 
-	var name: String = _
+  def creatingNewLink(set: SmallGroupSet): Boolean =
+    (allocationMethod == SmallGroupAllocationMethod.Linked
+      && set.allocationMethod != SmallGroupAllocationMethod.Linked)
 
-	var format: SmallGroupFormat = _
+  var name: String = _
 
-	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+  var format: SmallGroupFormat = _
 
-	var allowSelfGroupSwitching: Boolean = true
-	var studentsCanSeeTutorName: Boolean = false
-	var studentsCanSeeOtherMembers: Boolean = false
+  var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
-	var collectAttendance: Boolean = true
+  var allowSelfGroupSwitching: Boolean = true
+  var studentsCanSeeTutorName: Boolean = false
+  var studentsCanSeeOtherMembers: Boolean = false
 
-	var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
+  var collectAttendance: Boolean = true
+
+  var linkedDepartmentSmallGroupSet: DepartmentSmallGroupSet = _
 }
 
 trait CreateSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
-	val existingSet = None
+  val existingSet = None
 }
 
 trait EditSmallGroupSetCommandState extends ModifySmallGroupSetCommandState {
-	def set: SmallGroupSet
-	def existingSet = Some(set)
+  def set: SmallGroupSet
+
+  def existingSet = Some(set)
 }
 
 class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmallGroupSetCommandInternal with CreateSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
+  self: SmallGroupServiceComponent with AssessmentMembershipServiceComponent with GeneratesDefaultWeekRanges =>
 
-	override def applyInternal(): SmallGroupSet = transactional() {
-		val set = new SmallGroupSet(module)
+  override def applyInternal(): SmallGroupSet = transactional() {
+    val set = new SmallGroupSet(module)
 
-		// TAB-2541 By default, new sets should have default week ranges
-		set.defaultWeekRanges = defaultWeekRanges(academicYear)
+    // TAB-2541 By default, new sets should have default week ranges
+    set.defaultWeekRanges = defaultWeekRanges(academicYear)
 
-		copyTo(set)
+    copyTo(set)
 
-		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
-			Option(set.linkedDepartmentSmallGroupSet).foreach { linkedSet =>
-				linkedSet.groups.asScala.foreach { linkedGroup =>
-					val smallGroup = new SmallGroup(set)
-					smallGroup.name = linkedGroup.name
-					smallGroup.linkedDepartmentSmallGroup = linkedGroup
-					set.groups.add(smallGroup)
-				}
-			}
-		} else {
-			// TAB-2535 Automatically link to any available upstream groups
-			for {
-				ua <- assessmentMembershipService.getAssessmentComponents(module)
-				uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
-			} {
-				val ag = new AssessmentGroup
-				ag.assessmentComponent = ua
-				ag.occurrence = uag.occurrence
-				ag.smallGroupSet = set
-				set.assessmentGroups.add(ag)
-			}
-		}
+    if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
+      Option(set.linkedDepartmentSmallGroupSet).foreach { linkedSet =>
+        linkedSet.groups.asScala.foreach { linkedGroup =>
+          val smallGroup = new SmallGroup(set)
+          smallGroup.name = linkedGroup.name
+          smallGroup.linkedDepartmentSmallGroup = linkedGroup
+          set.groups.add(smallGroup)
+        }
+      }
+    } else {
+      // TAB-2535 Automatically link to any available upstream groups
+      for {
+        ua <- assessmentMembershipService.getAssessmentComponents(module)
+        uag <- assessmentMembershipService.getUpstreamAssessmentGroups(ua, academicYear)
+      } {
+        val ag = new AssessmentGroup
+        ag.assessmentComponent = ua
+        ag.occurrence = uag.occurrence
+        ag.smallGroupSet = set
+        set.assessmentGroups.add(ag)
+      }
+    }
 
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 }
 
 trait GeneratesDefaultWeekRanges {
-	def defaultWeekRanges(year: AcademicYear): Seq[WeekRange]
+  def defaultWeekRanges(year: AcademicYear): Seq[WeekRange]
 }
 
 trait GeneratesDefaultWeekRangesWithTermService extends GeneratesDefaultWeekRanges {
-	def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = {
-		val weeks = year.weeks
+  def defaultWeekRanges(year: AcademicYear): Seq[WeekRange] = {
+    val weeks = year.weeks
 
-		val startingWeekNumbers =
-			weeks
-				.map { case (weekNumber, week) =>
-					(weekNumber, week.period)
-				}
-				.filterNot { case (_, period) => period.isVacation } // Remove vacations - can't do this above as mins would be wrong
-				.groupBy { _._2.periodType }
-				.map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
+    val startingWeekNumbers =
+      weeks
+        .map { case (weekNumber, week) =>
+          (weekNumber, week.period)
+        }
+        .filterNot { case (_, period) => period.isVacation } // Remove vacations - can't do this above as mins would be wrong
+        .groupBy {
+        _._2.periodType
+      }
+        .map { case (termType, weekNumbersAndTerms) => (termType, weekNumbersAndTerms.keys.min) } // Map to minimum week number
 
-		Seq(
-			WeekRange(startingWeekNumbers(PeriodType.autumnTerm), startingWeekNumbers(PeriodType.autumnTerm) + 9), // Autumn term
-			WeekRange(startingWeekNumbers(PeriodType.springTerm), startingWeekNumbers(PeriodType.springTerm) + 9), // Spring term
-			WeekRange(startingWeekNumbers(PeriodType.summerTerm), startingWeekNumbers(PeriodType.summerTerm) + 4) // Summer term - only first 5 weeks
-		)
-	}
+    Seq(
+      WeekRange(startingWeekNumbers(PeriodType.autumnTerm), startingWeekNumbers(PeriodType.autumnTerm) + 9), // Autumn term
+      WeekRange(startingWeekNumbers(PeriodType.springTerm), startingWeekNumbers(PeriodType.springTerm) + 9), // Spring term
+      WeekRange(startingWeekNumbers(PeriodType.summerTerm), startingWeekNumbers(PeriodType.summerTerm) + 4) // Summer term - only first 5 weeks
+    )
+  }
 }
 
 trait SetDefaultSmallGroupSetName extends BindListener {
-	self: CreateSmallGroupSetCommandState =>
+  self: CreateSmallGroupSetCommandState =>
 
-	override def onBind(result: BindingResult) {
-		// If we haven't set a name, make one up
-		if (!name.hasText) {
-			Option(format).foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
-		}
-	}
+  override def onBind(result: BindingResult) {
+    // If we haven't set a name, make one up
+    if (!name.hasText) {
+      Option(format).foreach { format => name = "%s %ss".format(module.code.toUpperCase, format) }
+    }
+  }
 }
 
 class EditSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSet) extends ModifySmallGroupSetCommandInternal with EditSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent =>
+  self: SmallGroupServiceComponent =>
 
-	copyFrom(set)
+  copyFrom(set)
 
-	override def applyInternal(): SmallGroupSet = transactional() {
-		if (updatingExistingLink(set) || creatingNewLink(set)) {
-			copyTo(set)
+  override def applyInternal(): SmallGroupSet = transactional() {
+    if (updatingExistingLink(set) || creatingNewLink(set)) {
+      copyTo(set)
 
-			set.groups.asScala.foreach(_.preDelete())
+      set.groups.asScala.foreach(_.preDelete())
 
-			set.groups.clear()
-			linkedDepartmentSmallGroupSet.groups.asScala.foreach { linkedGroup =>
-				val smallGroup = new SmallGroup(set)
-				smallGroup.name = linkedGroup.name
-				smallGroup.linkedDepartmentSmallGroup = linkedGroup
-				set.groups.add(smallGroup)
-			}
-		} else {
-			copyTo(set)
-		}
+      set.groups.clear()
+      linkedDepartmentSmallGroupSet.groups.asScala.foreach { linkedGroup =>
+        val smallGroup = new SmallGroup(set)
+        smallGroup.name = linkedGroup.name
+        smallGroup.linkedDepartmentSmallGroup = linkedGroup
+        set.groups.add(smallGroup)
+      }
+    } else {
+      copyTo(set)
+    }
 
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 }
 
 abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallGroupSet] with ModifySmallGroupSetCommandState {
-	def copyFrom(set: SmallGroupSet) {
-		name = set.name
-		academicYear = set.academicYear
-		format = set.format
-		allocationMethod = set.allocationMethod
-		allowSelfGroupSwitching = set.allowSelfGroupSwitching
-		studentsCanSeeTutorName = set.studentsCanSeeTutorName
-		studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
-		collectAttendance = set.collectAttendance
-		linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
-	}
+  def copyFrom(set: SmallGroupSet) {
+    name = set.name
+    academicYear = set.academicYear
+    format = set.format
+    allocationMethod = set.allocationMethod
+    allowSelfGroupSwitching = set.allowSelfGroupSwitching
+    studentsCanSeeTutorName = set.studentsCanSeeTutorName
+    studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
+    collectAttendance = set.collectAttendance
+    linkedDepartmentSmallGroupSet = set.linkedDepartmentSmallGroupSet
+  }
 
-	def copyTo(set: SmallGroupSet) {
-		set.name = name
-		set.academicYear = academicYear
-		set.format = format
-		set.allocationMethod = allocationMethod
-		set.collectAttendance = collectAttendance
+  def copyTo(set: SmallGroupSet) {
+    set.name = name
+    set.academicYear = academicYear
+    set.format = format
+    set.allocationMethod = allocationMethod
+    set.collectAttendance = collectAttendance
 
-		set.allowSelfGroupSwitching = allowSelfGroupSwitching
-		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
-		set.studentsCanSeeTutorName = studentsCanSeeTutorName
+    set.allowSelfGroupSwitching = allowSelfGroupSwitching
+    set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
+    set.studentsCanSeeTutorName = studentsCanSeeTutorName
 
-		if (allocationMethod == SmallGroupAllocationMethod.Linked) {
-			set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
-		} else if (set.linkedDepartmentSmallGroupSet != null) {
-			// TAB-4032 Unset linked state
-			set.linkedDepartmentSmallGroupSet = null
-			set.groups.asScala.foreach { _.linkedDepartmentSmallGroup = null }
-		}
-	}
+    if (allocationMethod == SmallGroupAllocationMethod.Linked) {
+      set.linkedDepartmentSmallGroupSet = linkedDepartmentSmallGroupSet
+    } else if (set.linkedDepartmentSmallGroupSet != null) {
+      // TAB-4032 Unset linked state
+      set.linkedDepartmentSmallGroupSet = null
+      set.groups.asScala.foreach {
+        _.linkedDepartmentSmallGroup = null
+      }
+    }
+  }
 }
 
 trait ModifySmallGroupSetValidation extends SelfValidating {
-	self: ModifySmallGroupSetCommandState with SmallGroupServiceComponent =>
+  self: ModifySmallGroupSetCommandState with SmallGroupServiceComponent =>
 
-	override def validate(errors: Errors) {
-		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
-		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
+  override def validate(errors: Errors) {
+    if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
+    else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
 
-		if (name.hasText) {
-			val duplicates = smallGroupService.getSmallGroupSetsByNameYearModule(name, academicYear, module)
-			if (duplicates.nonEmpty) {
-				existingSet match {
-					//new set
-					case None => errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
-					case Some(set) => //existingSet
-						if (!duplicates.contains(set)) {
-							errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
-						}
-				}
-			}
-		}
+    if (name.hasText) {
+      val duplicates = smallGroupService.getSmallGroupSetsByNameYearModule(name, academicYear, module)
+      if (duplicates.nonEmpty) {
+        existingSet match {
+          //new set
+          case None => errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
+          case Some(set) => //existingSet
+            if (!duplicates.contains(set)) {
+              errors.rejectValue("name", "smallGroupSet.name.duplicate", Array(name, module.code), "")
+            }
+        }
+      }
+    }
 
-		if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
-		if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
-		else if (allocationMethod == SmallGroupAllocationMethod.Linked && linkedDepartmentSmallGroupSet == null)
-			errors.rejectValue("linkedDepartmentSmallGroupSet", "smallGroupSet.allocationMethod.Linked.NotEmpty")
+    if (format == null) errors.rejectValue("format", "smallGroupSet.format.NotEmpty")
+    if (allocationMethod == null) errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.NotEmpty")
+    else if (allocationMethod == SmallGroupAllocationMethod.Linked && linkedDepartmentSmallGroupSet == null)
+      errors.rejectValue("linkedDepartmentSmallGroupSet", "smallGroupSet.allocationMethod.Linked.NotEmpty")
 
-		existingSet.foreach { set =>
-			if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
+    existingSet.foreach { set =>
+      if (academicYear != set.academicYear) errors.rejectValue("academicYear", "smallGroupSet.academicYear.cantBeChanged")
 
-			if ((updatingExistingLink(set) || creatingNewLink(set)) && hasAttendance(set)
-				&& hasAttendance(set)) {
-				errors.rejectValue("allocationMethod", "smallGroupEvent.allocationMethod.hasAttendance")
-			}
+      if ((updatingExistingLink(set) || creatingNewLink(set)) && hasAttendance(set)
+        && hasAttendance(set)) {
+        errors.rejectValue("allocationMethod", "smallGroupEvent.allocationMethod.hasAttendance")
+      }
 
-			if (set.releasedToStudents || set.releasedToTutors) {
-				if ((set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) || (allocationMethod == SmallGroupAllocationMethod.Linked && !set.linked)) {
-					// Can't unlink or link a released set
-					errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
-				}	else if (set.linked && set.linkedDepartmentSmallGroupSet != linkedDepartmentSmallGroupSet) {
-					// Can't change the link of a released set
-					errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
-				}
-			}
-		}
-	}
+      if (set.releasedToStudents || set.releasedToTutors) {
+        if ((set.linked && allocationMethod != SmallGroupAllocationMethod.Linked) || (allocationMethod == SmallGroupAllocationMethod.Linked && !set.linked)) {
+          // Can't unlink or link a released set
+          errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+        } else if (set.linked && set.linkedDepartmentSmallGroupSet != linkedDepartmentSmallGroupSet) {
+          // Can't change the link of a released set
+          errors.rejectValue("allocationMethod", "smallGroupSet.allocationMethod.released")
+        }
+      }
+    }
+  }
 
-	def hasAttendance(set: SmallGroupSet): Boolean = {
-		set.groups.asScala.exists (
-			group => group.events.exists { event =>
-				smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
-					.exists { _.attendance.asScala.exists { attendance =>
-					attendance.state != AttendanceState.NotRecorded
-				}
-			}}
-		)
-	}
+  def hasAttendance(set: SmallGroupSet): Boolean = {
+    set.groups.asScala.exists(
+      group => group.events.exists { event =>
+        smallGroupService.getAllSmallGroupEventOccurrencesForEvent(event)
+          .exists {
+            _.attendance.asScala.exists { attendance =>
+              attendance.state != AttendanceState.NotRecorded
+            }
+          }
+      }
+    )
+  }
 
 }
 
 trait CreateSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CreateSmallGroupSetCommandState =>
+  self: CreateSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(module))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(module))
+  }
 }
 
 trait CreateSmallGroupSetDescription extends Describable[SmallGroupSet] {
-	self: CreateSmallGroupSetCommandState =>
+  self: CreateSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.module(module).properties("name" -> name)
-	}
+  override def describe(d: Description) {
+    d.module(module).properties("name" -> name)
+  }
 
-	override def describeResult(d: Description, set: SmallGroupSet): Unit =
-		d.smallGroupSet(set)
+  override def describeResult(d: Description, set: SmallGroupSet): Unit =
+    d.smallGroupSet(set)
 }
 
 trait EditSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditSmallGroupSetCommandState =>
+  self: EditSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(set, module)
-		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, module)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+  }
 }
 
 trait EditSmallGroupSetDescription extends Describable[SmallGroupSet] {
-	self: EditSmallGroupSetCommandState =>
+  self: EditSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.smallGroupSet(set)
-	}
+  override def describe(d: Description) {
+    d.smallGroupSet(set)
+  }
 
 }
 
 trait ModifySmallGroupSetsScheduledNotifications
-	extends SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] with GeneratesNotificationsForSmallGroupEventOccurrence {
+  extends SchedulesNotifications[SmallGroupSet, SmallGroupEventOccurrence] with GeneratesNotificationsForSmallGroupEventOccurrence {
 
-	self: SmallGroupServiceComponent with ModifySmallGroupSetCommandState =>
+  self: SmallGroupServiceComponent with ModifySmallGroupSetCommandState =>
 
-	override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
-		if (allocationMethod == SmallGroupAllocationMethod.Linked)
-			// get all the occurrences (even the ones in invalid weeks) so they can be cleared
-			set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
-		else Nil // The set commands spawned will handle notification creation for events
+  override def transformResult(set: SmallGroupSet): Seq[SmallGroupEventOccurrence] =
+    if (allocationMethod == SmallGroupAllocationMethod.Linked)
+    // get all the occurrences (even the ones in invalid weeks) so they can be cleared
+      set.groups.asScala.flatMap(_.events.flatMap(smallGroupService.getOrCreateSmallGroupEventOccurrences))
+    else Nil // The set commands spawned will handle notification creation for events
 
-	override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
-		if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
-		else Nil // The set commands spawned will handle notification creation for events
-	}
+  override def scheduledNotifications(occurrence: SmallGroupEventOccurrence): Seq[ScheduledNotification[SmallGroupEventOccurrence]] = {
+    if (allocationMethod == SmallGroupAllocationMethod.Linked) generateNotifications(occurrence)
+    else Nil // The set commands spawned will handle notification creation for events
+  }
 }

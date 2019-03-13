@@ -21,80 +21,85 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.Iterable
 
 /**
- * Import accredited prior learning data from SITS.
- *
- */
+  * Import accredited prior learning data from SITS.
+  *
+  */
 
 trait AccreditedPriorLearningImporter {
-	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand]
+  def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand]
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class AccreditedPriorLearningImporterImpl extends AccreditedPriorLearningImporter with TaskBenchmarking {
-	import AccreditedPriorLearningImporter._
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  import AccreditedPriorLearningImporter._
 
-	lazy val accreditedPriorLearningQuery = new AccreditedPriorLearningQuery(sits)
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]):
-		Seq[ImportAccreditedPriorLearningCommand] = {
+  lazy val accreditedPriorLearningQuery = new AccreditedPriorLearningQuery(sits)
 
-		benchmarkTask("Fetch accredited prior learning") {
-			membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
-				val universityId = mac.member.universityId
-				accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.map(new ImportAccreditedPriorLearningCommand(_))
-			}.seq
-		}
-	}
+  def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]):
+  Seq[ImportAccreditedPriorLearningCommand] = {
+
+    benchmarkTask("Fetch accredited prior learning") {
+      membersAndCategories.filter {
+        _.member.userType == Student
+      }.flatMap { mac =>
+        val universityId = mac.member.universityId
+        accreditedPriorLearningQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.map(new ImportAccreditedPriorLearningCommand(_))
+      }.seq
+    }
+  }
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxAccreditedPriorLearningImporter extends AccreditedPriorLearningImporter {
-	var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
+  var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
-	def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] =
-		membersAndCategories flatMap { mac =>
-			val universityId = mac.member.universityId
-			val ssoUser = users(universityId)
+  def getAccreditedPriorLearning(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportAccreditedPriorLearningCommand] =
+    membersAndCategories flatMap { mac =>
+      val universityId = mac.member.universityId
+      val ssoUser = users(universityId)
 
-			mac.member.userType match {
-				case Student => studentAccreditedPriorLearningDetails(universityId, ssoUser)
-				case _ => Seq()
-			}
-		}
+      mac.member.userType match {
+        case Student => studentAccreditedPriorLearningDetails(universityId, ssoUser)
+        case _ => Seq()
+      }
+    }
 
-	def studentAccreditedPriorLearningDetails(universityId: String, ssoUser: User): Iterable[ImportAccreditedPriorLearningCommand] = {
-		for {
-			(code, d) <- SandboxData.Departments
-			route <- d.routes.values.toSeq
-			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
-			moduleCode <- route.moduleCodes
-		} yield {
+  def studentAccreditedPriorLearningDetails(universityId: String, ssoUser: User): Iterable[ImportAccreditedPriorLearningCommand] = {
+    for {
+      (code, d) <- SandboxData.Departments
+      route <- d.routes.values.toSeq
+      if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
+      moduleCode <- route.moduleCodes
+    } yield {
 
-			val row = AccreditedPriorLearningRow(
-				scjCode = "%s/1".format(universityId),
-				awardCode = "BA",
-				sequenceNumber = 1,
-				academicYear = AcademicYear.now().toString,
-				cats = new JBigDecimal(15),
-				levelCode = "2",
-				reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"
-			)
+      val row = AccreditedPriorLearningRow(
+        scjCode = "%s/1".format(universityId),
+        awardCode = "BA",
+        sequenceNumber = 1,
+        academicYear = AcademicYear.now().toString,
+        cats = new JBigDecimal(15),
+        levelCode = "2",
+        reason = "Exemption of 30 CATS for 3 terms of Open Studies Languages"
+      )
 
-			new ImportAccreditedPriorLearningCommand(row)
-		}
-	}
+      new ImportAccreditedPriorLearningCommand(row)
+    }
+  }
 }
 
 object AccreditedPriorLearningImporter {
-	val sitsSchema: String = Wire.property("${schema.sits}")
+  val sitsSchema: String = Wire.property("${schema.sits}")
 
-	// Choose the most significant course, flagged by SCJ_UDFA value of Y in the Student Course Join (SCJ) table
-	// if there is one for the student's SPR (Student Programme Route) record.
-	// If there is no most signif SCJ for this SPR, choose the SCJ with the max sequence number.
-	def AccreditedPriorLearning = f"""
+  // Choose the most significant course, flagged by SCJ_UDFA value of Y in the Student Course Join (SCJ) table
+  // if there is one for the student's SPR (Student Programme Route) record.
+  // If there is no most signif SCJ for this SPR, choose the SCJ with the max sequence number.
+  def AccreditedPriorLearning =
+    f"""
 		select scj.scj_code, -- Student Course Join code
 			sac.awd_code,  -- award code, e.g. "BA"
 			sac.sac_seq, -- sequence code on the Student Award Credits table
@@ -128,29 +133,31 @@ object AccreditedPriorLearningImporter {
 		where stu.stu_code = :universityId and sac.ayr_code is not null"""
 
 
-	def mapResultSet(resultSet: ResultSet): AccreditedPriorLearningRow = {
-		new AccreditedPriorLearningRow(resultSet.getString("scj_code"), // Student Course Join code
-		resultSet.getString("awd_code"), // award code
-		resultSet.getInt("sac_seq"), // student award credit sequence code
-		resultSet.getString("ayr_code"),
-		resultSet.getBigDecimal("sac_crdt"), // credit
-		resultSet.getString("lev_code"), // level code
-		resultSet.getString("sac_resn")) // description
-	}
+  def mapResultSet(resultSet: ResultSet): AccreditedPriorLearningRow = {
+    new AccreditedPriorLearningRow(resultSet.getString("scj_code"), // Student Course Join code
+      resultSet.getString("awd_code"), // award code
+      resultSet.getInt("sac_seq"), // student award credit sequence code
+      resultSet.getString("ayr_code"),
+      resultSet.getBigDecimal("sac_crdt"), // credit
+      resultSet.getString("lev_code"), // level code
+      resultSet.getString("sac_resn")) // description
+  }
 
-	class AccreditedPriorLearningQuery(ds: DataSource)
-		extends MappingSqlQuery[AccreditedPriorLearningRow](ds, AccreditedPriorLearning) {
-		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int): AccreditedPriorLearningRow = mapResultSet(resultSet)
-	}
+  class AccreditedPriorLearningQuery(ds: DataSource)
+    extends MappingSqlQuery[AccreditedPriorLearningRow](ds, AccreditedPriorLearning) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): AccreditedPriorLearningRow = mapResultSet(resultSet)
+  }
+
 }
 
 case class AccreditedPriorLearningRow(
-	val scjCode: String,
-	val awardCode: String,
-	val sequenceNumber: Int,
-	val academicYear: String,
-	val cats: JBigDecimal,
-	val levelCode: String,
-	val reason: String) {}
+  val scjCode: String,
+  val awardCode: String,
+  val sequenceNumber: Int,
+  val academicYear: String,
+  val cats: JBigDecimal,
+  val levelCode: String,
+  val reason: String) {}

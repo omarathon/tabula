@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
+
 import javax.validation.Valid
 
 import org.springframework.stereotype.Controller
@@ -15,24 +16,24 @@ import uk.ac.warwick.tabula.data.model.Department.FilterRule
 @RequestMapping(value = Array("/admin/department/{department}/subdepartment/new"))
 class AddSubDepartmentController extends AdminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("allFilterRules")
-	def allFilterRules: Seq[FilterRule] = Department.FilterRule.allFilterRules
+  @ModelAttribute("allFilterRules")
+  def allFilterRules: Seq[FilterRule] = Department.FilterRule.allFilterRules
 
-	@ModelAttribute("addSubDepartmentCommand")
-	def command(@PathVariable department: Department) = AddSubDepartmentCommand(mandatory(department))
+  @ModelAttribute("addSubDepartmentCommand")
+  def command(@PathVariable department: Department) = AddSubDepartmentCommand(mandatory(department))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm() = Mav("admin/department/add/form")
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm() = Mav("admin/department/add/form")
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("addSubDepartmentCommand") command: Appliable[Department], errors: Errors): Mav = {
-		if (errors.hasErrors) showForm()
-		else {
-			val subDepartment = command.apply()
-			Redirect(Routes.admin.department(subDepartment))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("addSubDepartmentCommand") command: Appliable[Department], errors: Errors): Mav = {
+    if (errors.hasErrors) showForm()
+    else {
+      val subDepartment = command.apply()
+      Redirect(Routes.admin.department(subDepartment))
+    }
+  }
 
 }

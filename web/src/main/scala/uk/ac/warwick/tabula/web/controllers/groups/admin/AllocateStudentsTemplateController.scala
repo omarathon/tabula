@@ -11,18 +11,18 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/allocate/template"))
+@RequestMapping(value = Array("/groups/admin/module/{module}/groups/edit/{smallGroupSet}/allocate/template"))
 class AllocateStudentsTemplateController extends BaseController {
 
-	type AllocateStudentsToGroupsTemplateCommand = Appliable[ExcelView]
+  type AllocateStudentsToGroupsTemplateCommand = Appliable[ExcelView]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): AllocateStudentsToGroupsTemplateCommand =
-		AllocateStudentsToGroupsTemplateCommand(module, set)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): AllocateStudentsToGroupsTemplateCommand =
+    AllocateStudentsToGroupsTemplateCommand(module, set)
 
-	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsTemplateCommand): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping
+  def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToGroupsTemplateCommand): ExcelView = {
+    cmd.apply()
+  }
 
 }

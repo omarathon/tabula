@@ -11,50 +11,50 @@ import uk.ac.warwick.tabula.validators.WithinYears
 
 
 class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
-	this: TransactionalComponent =>
+  this: TransactionalComponent =>
 
-	type AssignmentUpdate = Assignment => Unit
+  type AssignmentUpdate = Assignment => Unit
 
-	val assignmentSrv: AssessmentService = Wire[AssessmentService]
-	val departmentDao: DepartmentDao = Wire[DepartmentDao]
+  val assignmentSrv: AssessmentService = Wire[AssessmentService]
+  val departmentDao: DepartmentDao = Wire[DepartmentDao]
 
-	var assignmentName: String = _
-	var deptCode: String = _
+  var assignmentName: String = _
+  var deptCode: String = _
 
-	@WithinYears(maxPast = 3, maxFuture = 3)
-	var openDate: DateTime = _
+  @WithinYears(maxPast = 3, maxFuture = 3)
+  var openDate: DateTime = _
 
-	@WithinYears(maxPast = 3, maxFuture = 3)
-	var closeDate: DateTime = _
+  @WithinYears(maxPast = 3, maxFuture = 3)
+  var closeDate: DateTime = _
 
-	protected def applyInternal(): Seq[Assignment] = {
-		val updateOpenDate = Option(openDate).map(date => (a: Assignment) => a.openDate = date)
-		val updateCloseDate = Option(closeDate).map(date => (a: Assignment) => a.closeDate = date)
-		// add more optional update actions here
+  protected def applyInternal(): Seq[Assignment] = {
+    val updateOpenDate = Option(openDate).map(date => (a: Assignment) => a.openDate = date)
+    val updateCloseDate = Option(closeDate).map(date => (a: Assignment) => a.closeDate = date)
+    // add more optional update actions here
 
-		Seq(updateOpenDate, updateCloseDate).flatten match {
-			case Nil => Nil // nothing to do
-			case actions: Seq[AssignmentUpdate] => {
-				transactional() {
-					val dept = departmentDao.getByCode(deptCode).get
-					val assignment = assignmentSrv.getAssignmentsByName(assignmentName, dept).head
-					for (action <- actions) yield {
-						action(assignment)
-						assignment
-					}
-				}
-			}
+    Seq(updateOpenDate, updateCloseDate).flatten match {
+      case Nil => Nil // nothing to do
+      case actions: Seq[AssignmentUpdate] => {
+        transactional() {
+          val dept = departmentDao.getByCode(deptCode).get
+          val assignment = assignmentSrv.getAssignmentsByName(assignmentName, dept).head
+          for (action <- actions) yield {
+            action(assignment)
+            assignment
+          }
+        }
+      }
 
-		}
-	}
+    }
+  }
 }
 
 object UpdateAssignmentCommand {
-	def apply(): UpdateAssignmentCommand with ComposableCommand[Seq[Assignment]] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited ={
-		new UpdateAssignmentCommand
-			with ComposableCommand[Seq[Assignment]]
-			with AutowiringTransactionalComponent
-			with PubliclyVisiblePermissions
-			with Unaudited
-	}
+  def apply(): UpdateAssignmentCommand with ComposableCommand[Seq[Assignment]] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited = {
+    new UpdateAssignmentCommand
+      with ComposableCommand[Seq[Assignment]]
+      with AutowiringTransactionalComponent
+      with PubliclyVisiblePermissions
+      with Unaudited
+  }
 }

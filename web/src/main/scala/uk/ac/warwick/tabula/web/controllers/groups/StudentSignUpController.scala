@@ -16,62 +16,62 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 
 @Controller
-@RequestMapping(value=Array("/groups/module/{module_code}/groups/{set_id}/signup"))
+@RequestMapping(value = Array("/groups/module/{module_code}/groups/{set_id}/signup"))
 class StudentSignUpController extends GroupsController {
 
-	validatesSelf[AllocateSelfToGroupValidator]
+  validatesSelf[AllocateSelfToGroupValidator]
 
-	@ModelAttribute("command")
-	def command(@PathVariable("set_id") groupSet:SmallGroupSet, user:CurrentUser):Appliable[SmallGroupSet] = {
-		AllocateSelfToGroupCommand(user.apparentUser, groupSet)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable("set_id") groupSet: SmallGroupSet, user: CurrentUser): Appliable[SmallGroupSet] = {
+    AllocateSelfToGroupCommand(user.apparentUser, groupSet)
+  }
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def get(): Mav = Redirect(Routes.home)
+  @RequestMapping(method = Array(GET, HEAD))
+  def get(): Mav = Redirect(Routes.home)
 
-	@RequestMapping(method=Array(POST))
-	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav("groups/signup/problems", "action" -> "signup")
-		} else {
-			val set = command.apply()
-			Redirect(Routes.homeForYear(set.academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def signUp(@Valid @ModelAttribute("command") command: Appliable[SmallGroupSet], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav("groups/signup/problems", "action" -> "signup")
+    } else {
+      val set = command.apply()
+      Redirect(Routes.homeForYear(set.academicYear))
+    }
+  }
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/module/{module_code}/groups/{set_id}/signuptimetableclashinfo"))
+@RequestMapping(value = Array("/groups/module/{module_code}/groups/{set_id}/signuptimetableclashinfo"))
 class StudentSignUpTimetableClashController extends GroupsController with AutowiringSmallGroupServiceComponent {
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def ajaxClashTimetableInfo(@RequestParam group:SmallGroup,  user:CurrentUser): Mav = {
-		val clash = smallGroupService.doesTimetableClashesForStudent(group, user.apparentUser)
-		Mav(new JSONView(Map("clash" -> clash)))
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def ajaxClashTimetableInfo(@RequestParam group: SmallGroup, user: CurrentUser): Mav = {
+    val clash = smallGroupService.doesTimetableClashesForStudent(group, user.apparentUser)
+    Mav(new JSONView(Map("clash" -> clash)))
+  }
 }
 
-@RequestMapping(value=Array("/groups/module/{module_code}/groups/{set_id}/leave"))
+@RequestMapping(value = Array("/groups/module/{module_code}/groups/{set_id}/leave"))
 @Controller
 class StudentUnSignUpController extends GroupsController {
 
-	validatesSelf[DeallocateSelfFromGroupValidator]
+  validatesSelf[DeallocateSelfFromGroupValidator]
 
-	@ModelAttribute("command")
-	def command(@PathVariable("set_id") groupSet:SmallGroupSet, user:CurrentUser):Appliable[SmallGroupSet]={
-		DeallocateSelfFromGroupCommand(user.apparentUser, groupSet)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable("set_id") groupSet: SmallGroupSet, user: CurrentUser): Appliable[SmallGroupSet] = {
+    DeallocateSelfFromGroupCommand(user.apparentUser, groupSet)
+  }
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def get(): Mav = Redirect(Routes.home)
+  @RequestMapping(method = Array(GET, HEAD))
+  def get(): Mav = Redirect(Routes.home)
 
-	@RequestMapping(method=Array(POST))
-	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet], errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav("groups/signup/problems", "action" -> "leave")
-		} else {
-			val set = command.apply()
-			Redirect(Routes.homeForYear(set.academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def signUp(@Valid @ModelAttribute("command") command: Appliable[SmallGroupSet], errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav("groups/signup/problems", "action" -> "leave")
+    } else {
+      val set = command.apply()
+      Redirect(Routes.homeForYear(set.academicYear))
+    }
+  }
 }

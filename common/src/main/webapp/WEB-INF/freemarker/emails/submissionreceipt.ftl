@@ -3,15 +3,15 @@ This message confirms that you made a submission for the assignment '${assignmen
 - Submission date: ${submissionDate}
 - Submission ID: ${submission.id}
 <#if user.warwickId??>
-- University ID: ${user.warwickId}
+  - University ID: ${user.warwickId}
 <#else>
-- User ID: ${user.userId}
+  - User ID: ${user.userId}
 </#if>
 <#if submission.allAttachments??>
 
-Uploaded attachments:
+  Uploaded attachments:
 
-<#list submission.allAttachments as attachment>
-- ${attachment.name}
-</#list>
+  <#list submission.allAttachments as attachment>
+    - ${attachment.name}
+  </#list>
 </#if>

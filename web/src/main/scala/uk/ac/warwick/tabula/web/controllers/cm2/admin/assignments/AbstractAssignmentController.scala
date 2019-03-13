@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import scala.collection.JavaConverters._
 
 abstract class AbstractAssignmentController extends CourseworkController with CurrentAcademicYear {
-	val createMode: String = "new"
-	val editMode: String = "edit"
+  val createMode: String = "new"
+  val editMode: String = "edit"
 
-	@ModelAttribute("ManageAssignmentMappingParameters")
-	def params = ManageAssignmentMappingParameters
+  @ModelAttribute("ManageAssignmentMappingParameters")
+  def params = ManageAssignmentMappingParameters
 
-	@ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
-		academicYear.yearsSurrounding(2, 2).asJava
-	}
+  @ModelAttribute("academicYearChoices") def academicYearChoices: JList[AcademicYear] = {
+    academicYear.yearsSurrounding(2, 2).asJava
+  }
 }

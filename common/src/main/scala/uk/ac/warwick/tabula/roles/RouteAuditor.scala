@@ -11,43 +11,43 @@ case class RouteAuditor(route: model.Route) extends BuiltInRole(RouteAuditorRole
 
 case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Route Auditor"
+  override def description = "Route Auditor"
 
-	GrantsScopedPermission(
-		Route.Administer,
+  GrantsScopedPermission(
+    Route.Administer,
 
-		MonitoringPoints.View,
+    MonitoringPoints.View,
 
-		Profiles.Read.Core,
-		Profiles.Read.Photo,
-		Profiles.Read.NextOfKin,
-	  Profiles.Read.Timetable,
-		Profiles.Read.StudentCourseDetails.Core,
-		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.Read.Core,
+    Profiles.Read.Photo,
+    Profiles.Read.NextOfKin,
+    Profiles.Read.Timetable,
+    Profiles.Read.StudentCourseDetails.Core,
+    Profiles.Read.StudentCourseDetails.Status,
+    Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.Read.Disability, // TAB-4386
+    Profiles.Read.Disability, // TAB-4386
 
-		Profiles.Search,
-		Profiles.ViewSearchResults,
+    Profiles.Search,
+    Profiles.ViewSearchResults,
 
-		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
 
-		MemberNotes.Read,
+    MemberNotes.Read,
 
-		Profiles.Read.SmallGroups,
-		Profiles.Read.Coursework,
-		Profiles.Read.AccreditedPriorLearning,
+    Profiles.Read.SmallGroups,
+    Profiles.Read.Coursework,
+    Profiles.Read.AccreditedPriorLearning,
 
-		// Can read Coursework info for any student on this Route
-		Submission.Read,
-		AssignmentFeedback.Read,
-		ExamFeedback.Read,
-		Extension.Read,
+    // Can read Coursework info for any student on this Route
+    Submission.Read,
+    AssignmentFeedback.Read,
+    ExamFeedback.Read,
+    Extension.Read,
 
-		Profiles.Read.ModuleRegistration.Core,
-		Profiles.Read.ModuleRegistration.Results
-	)
+    Profiles.Read.ModuleRegistration.Core,
+    Profiles.Read.ModuleRegistration.Results
+  )
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
+  def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 }

@@ -1,129 +1,141 @@
 <#escape x as x?html>
-	<#import "*/group_components.ftl" as components />
-	<#assign academicYear=smallGroupSet.academicYear />
+  <#import "*/group_components.ftl" as components />
+  <#assign academicYear=smallGroupSet.academicYear />
 
-	<#-- List of students modal -->
-	<div id="students-list-modal" class="modal fade"></div>
-	<div id="profile-modal" class="modal fade profile-subset"></div>
+<#-- List of students modal -->
+  <div id="students-list-modal" class="modal fade"></div>
+  <div id="profile-modal" class="modal fade profile-subset"></div>
 
-	<div class="striped-section-contents">
-		<#list groups as group>
-			<@spring.nestedPath path="groups[${group.id}]">
-				<div class="item-info">
-					<div class="row">
-						<div class="col-md-10 groupDetail">
-							<h3 class="name inline-block">
-								${group.name!""}
-								<#if ((group.students.size)!0) gt 0>
-									<a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
-										<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
-									</a>
-								<#else>
-									<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
-								</#if>
-							</h3>
-						</div>
-						<div class="col-md-2">
-							<#if is_edit>
-								<#assign addEventUrl><@routes.groups.editseteventsnewevent group /></#assign>
-							<#else>
-								<#assign addEventUrl><@routes.groups.createseteventsnewevent group /></#assign>
-							</#if>
-							<a class="btn btn-default pull-right" href="${addEventUrl}">Add event</a>
-						</div>
-					</div>
+  <div class="striped-section-contents">
+    <#list groups as group>
+      <@spring.nestedPath path="groups[${group.id}]">
+        <div class="item-info">
+          <div class="row">
+            <div class="col-md-10 groupDetail">
+              <h3 class="name inline-block">
+                ${group.name!""}
+                <#if ((group.students.size)!0) gt 0>
+                  <a href="<@routes.groups.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
+                    <small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+                  </a>
+                <#else>
+                  <small><@fmt.p (group.students.size)!0 "student" "students" /></small>
+                </#if>
+              </h3>
+            </div>
+            <div class="col-md-2">
+              <#if is_edit>
+                <#assign addEventUrl><@routes.groups.editseteventsnewevent group /></#assign>
+              <#else>
+                <#assign addEventUrl><@routes.groups.createseteventsnewevent group /></#assign>
+              </#if>
+              <a class="btn btn-default pull-right" href="${addEventUrl}">Add event</a>
+            </div>
+          </div>
 
-					<div class="row">
-						<div class="col-md-12">
-							<ul class="events unstyled">
-								<#list mapGet(command.groups, group).events as event>
-									<@spring.nestedPath path="events[${event_index}]">
-										<li>
-											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
+          <div class="row">
+            <div class="col-md-12">
+              <ul class="events unstyled">
+                <#list mapGet(command.groups, group).events as event>
+                  <@spring.nestedPath path="events[${event_index}]">
+                    <li>
+                      <@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 
-											<@components.eventShortDetails event.event />
-											<@form.errors path="delete" />
+                      <@components.eventShortDetails event.event />
+                      <@form.errors path="delete" />
 
-											<#assign popoverContent><@components.eventDetails event.event /></#assign>
-											<@fmt.help_popover id="events[${event_index}]" content="${popoverContent}" html=true />
+                      <#assign popoverContent><@components.eventDetails event.event /></#assign>
+                      <@fmt.help_popover id="events[${event_index}]" content="${popoverContent}" html=true />
 
-											<div class="buttons pull-right">
-												<#if is_edit>
-													<#assign editEventUrl><@routes.groups.editseteventseditevent event.event /></#assign>
-												<#else>
-													<#assign editEventUrl><@routes.groups.createseteventseditevent event.event /></#assign>
-												</#if>
+                      <div class="buttons pull-right">
+                        <#if is_edit>
+                          <#assign editEventUrl><@routes.groups.editseteventseditevent event.event /></#assign>
+                        <#else>
+                          <#assign editEventUrl><@routes.groups.createseteventseditevent event.event /></#assign>
+                        </#if>
 
-												<a class="btn btn-xs btn-primary" href="${editEventUrl}">Edit</a>
+                        <a class="btn btn-xs btn-primary" href="${editEventUrl}">Edit</a>
 
-												<#if event.hasRecordedAttendance>
-													<div class="use-tooltip" data-container="body" style="display: inline-block;" title="This event can't be deleted as there is attendance recorded against it">
-														<button type="button" class="btn btn-danger btn-xs disabled use-tooltip" aria-label="Close">
-															<i class="fa fa-times"></i>
-														</button>
-													</div>
-												<#else>
-													<button type="button" class="btn btn-danger btn-xs" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete" aria-label="Delete">
-														<i class="fa fa-times"></i>
-													</button>
-												</#if>
+                        <#if event.hasRecordedAttendance>
+                          <div class="use-tooltip" data-container="body" style="display: inline-block;"
+                               title="This event can't be deleted as there is attendance recorded against it">
+                            <button type="button" class="btn btn-danger btn-xs disabled use-tooltip" aria-label="Close">
+                              <i class="fa fa-times"></i>
+                            </button>
+                          </div>
+                        <#else>
+                          <button type="button" class="btn btn-danger btn-xs" data-toggle="delete" data-value="true"
+                                  data-target="#group${group_index}_event${event_index}_delete" aria-label="Delete">
+                            <i class="fa fa-times"></i>
+                          </button>
+                        </#if>
 
-												<button type="button" class="btn btn-primary btn-xs" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete" aria-label="Undo">
-													<i class="fa fa-undo"></i>
-												</button>
+                        <button type="button" class="btn btn-primary btn-xs" data-toggle="delete" data-value="false"
+                                data-target="#group${group_index}_event${event_index}_delete" aria-label="Undo">
+                          <i class="fa fa-undo"></i>
+                        </button>
 
-											</div>
-										</li>
-									</@spring.nestedPath>
-								</#list>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</@spring.nestedPath>
-		</#list>
-	</div>
+                      </div>
+                    </li>
+                  </@spring.nestedPath>
+                </#list>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </@spring.nestedPath>
+    </#list>
+  </div>
 
-	<script type="text/javascript">
-		jQuery(function($) {
-			$('.events button[data-toggle="delete"]').each(function() {
-				var $button = $(this);
-				var $li = $button.closest('li');
-				var $target = $($button.data('target'));
-				var value = "" + $button.data('value');
+  <script type="text/javascript">
+    jQuery(function ($) {
+      $('.events button[data-toggle="delete"]').each(function () {
+        var $button = $(this);
+        var $li = $button.closest('li');
+        var $target = $($button.data('target'));
+        var value = "" + $button.data('value');
 
-				if ($target.val() === value) {
-					$button.hide();
+        if ($target.val() === value) {
+          $button.hide();
 
-					if (value === "true") {
-						$li.addClass('deleted');
-					}
-				}
+          if (value === "true") {
+            $li.addClass('deleted');
+          }
+        }
 
-				$button.on('click', function() {
-					$target.val(value);
+        $button.on('click', function () {
+          $target.val(value);
 
-					if (value === "true") {
-						$li.addClass('deleted');
-					} else {
-						$li.removeClass('deleted');
-					}
+          if (value === "true") {
+            $li.addClass('deleted');
+          } else {
+            $li.removeClass('deleted');
+          }
 
-					$button.hide();
-					$li.find('button[data-toggle="delete"]').filter(function() {
-						var $otherButton = $(this);
-						var otherValue = "" + $otherButton.data('value');
+          $button.hide();
+          $li.find('button[data-toggle="delete"]').filter(function () {
+            var $otherButton = $(this);
+            var otherValue = "" + $otherButton.data('value');
 
-						return otherValue != value && $otherButton.data('target') == $button.data('target');
-					}).show();
-				});
-			});
-		});
-	</script>
+            return otherValue != value && $otherButton.data('target') == $button.data('target');
+          }).show();
+        });
+      });
+    });
+  </script>
 
-	<style type="text/css">
-		.item-info .events li { line-height: 30px; padding: 0 3px; }
-		.item-info .events li button { margin-top: 0; }
-		.item-info .events li:hover { background: #dddddd; }
-	</style>
+  <style type="text/css">
+    .item-info .events li {
+      line-height: 30px;
+      padding: 0 3px;
+    }
+
+    .item-info .events li button {
+      margin-top: 0;
+    }
+
+    .item-info .events li:hover {
+      background: #dddddd;
+    }
+  </style>
 </#escape>

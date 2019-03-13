@@ -15,197 +15,224 @@ import scala.reflect._
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport[A <: PermissionsTarget] extends GrantRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
-		val permissionsService: PermissionsService = mock[PermissionsService]
-		val securityService: SecurityService = mock[SecurityService]
-		val userLookup = new MockUserLookup()
-	}
+  trait CommandTestSupport[A <: PermissionsTarget] extends GrantRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
+    val permissionsService: PermissionsService = mock[PermissionsService]
+    val securityService: SecurityService = mock[SecurityService]
+    val userLookup = new MockUserLookup()
+  }
 
-	// a role with a single permission to keep things simple
-	val singlePermissionsRoleDefinition = new BuiltInRoleDefinition(){
-		override val getName="test"
-		override def description="test"
-		GrantsScopedPermission(
-			Permissions.Department.ArrangeRoutesAndModules)
-		def canDelegateThisRolesPermissions:JBoolean = false
-	}
+  // a role with a single permission to keep things simple
+  val singlePermissionsRoleDefinition = new BuiltInRoleDefinition() {
+    override val getName = "test"
 
-	trait Fixture {
-		val department: Department = Fixtures.department("in", "IT Services")
+    override def description = "test"
 
-		val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
-	}
+    GrantsScopedPermission(
+      Permissions.Department.ArrangeRoutesAndModules)
 
-	@Test def itWorksForNewRole() { new Fixture {
-		command.roleDefinition = DepartmentalAdministratorRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
+    def canDelegateThisRolesPermissions: JBoolean = false
+  }
 
-		command.userLookup.registerUsers("cuscav", "cusebr")
+  trait Fixture {
+    val department: Department = Fixtures.department("in", "IT Services")
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
+    val command = new GrantRoleCommandInternal(department) with CommandTestSupport[Department] with GrantRoleCommandValidation
+  }
 
-		val grantedRole: GrantedRole[Department] = command.applyInternal()
-		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedRole.users.size should be (2)
-		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
-		grantedRole.users.knownType.includesUserId("cusebr") should be (true)
-		grantedRole.users.knownType.includesUserId("cuscao") should be (false)
-		grantedRole.scope should be (department)
+  @Test def itWorksForNewRole() {
+    new Fixture {
+      command.roleDefinition = DepartmentalAdministratorRoleDefinition
+      command.usercodes.add("cuscav")
+      command.usercodes.add("cusebr")
 
-		verify(command.permissionsService, times(1)).saveOrUpdate(any[GrantedRole[Department]])
-		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
-		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
-	}}
+      command.userLookup.registerUsers("cuscav", "cusebr")
 
-	@Test def itWorksWithExisting() { new Fixture {
-		command.roleDefinition = DepartmentalAdministratorRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
+      command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
 
-		command.userLookup.registerUsers("cuscav", "cusebr")
+      val grantedRole: GrantedRole[Department] = command.applyInternal()
+      grantedRole.roleDefinition should be(DepartmentalAdministratorRoleDefinition)
+      grantedRole.users.size should be(2)
+      grantedRole.users.knownType.includesUserId("cuscav") should be(true)
+      grantedRole.users.knownType.includesUserId("cusebr") should be(true)
+      grantedRole.users.knownType.includesUserId("cuscao") should be(false)
+      grantedRole.scope should be(department)
 
-		val existing = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
-		existing.users.knownType.addUserId("cuscao")
+      verify(command.permissionsService, times(1)).saveOrUpdate(any[GrantedRole[Department]])
+      verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+      verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
+    }
+  }
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns Some(existing)
+  @Test def itWorksWithExisting() {
+    new Fixture {
+      command.roleDefinition = DepartmentalAdministratorRoleDefinition
+      command.usercodes.add("cuscav")
+      command.usercodes.add("cusebr")
 
-		val grantedRole: GrantedRole[Department] = command.applyInternal()
-		grantedRole.eq(existing) should be (true)
+      command.userLookup.registerUsers("cuscav", "cusebr")
 
-		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedRole.users.size should be (3)
-		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
-		grantedRole.users.knownType.includesUserId("cusebr") should be (true)
-		grantedRole.users.knownType.includesUserId("cuscao") should be (true)
-		grantedRole.scope should be (department)
+      val existing = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
+      existing.users.knownType.addUserId("cuscao")
 
-		verify(command.permissionsService, times(1)).saveOrUpdate(existing)
-		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
-		verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
-	}}
+      command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns Some(existing)
 
-	@Test def validatePasses() { withUser("cuscav", "0672089") { new Fixture {
-		command.roleDefinition = singlePermissionsRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
-		command.userLookup.registerUsers("cuscav", "cusebr")
+      val grantedRole: GrantedRole[Department] = command.applyInternal()
+      grantedRole.eq(existing) should be(true)
 
-		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns None
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
+      grantedRole.roleDefinition should be(DepartmentalAdministratorRoleDefinition)
+      grantedRole.users.size should be(3)
+      grantedRole.users.knownType.includesUserId("cuscav") should be(true)
+      grantedRole.users.knownType.includesUserId("cusebr") should be(true)
+      grantedRole.users.knownType.includesUserId("cuscao") should be(true)
+      grantedRole.scope should be(department)
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+      verify(command.permissionsService, times(1)).saveOrUpdate(existing)
+      verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cuscav", classTag[Department]))
+      verify(command.permissionsService, atLeast(1)).clearCachesForUser(("cusebr", classTag[Department]))
+    }
+  }
 
-		errors.hasErrors should be (false)
-	}}}
+  @Test def validatePasses() {
+    withUser("cuscav", "0672089") {
+      new Fixture {
+        command.roleDefinition = singlePermissionsRoleDefinition
+        command.usercodes.add("cuscav")
+        command.usercodes.add("cusebr")
+        command.userLookup.registerUsers("cuscav", "cusebr")
 
-	@Test def noUsercodes() { withUser("cuscav", "0672089") { new Fixture {
-		command.roleDefinition = singlePermissionsRoleDefinition
+        command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns None
+        command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
+        val errors = new BindException(command, "command")
+        command.validate(errors)
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+        errors.hasErrors should be(false)
+      }
+    }
+  }
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("usercodes")
-		errors.getFieldError.getCode should be ("NotEmpty")
-	}}}
+  @Test def noUsercodes() {
+    withUser("cuscav", "0672089") {
+      new Fixture {
+        command.roleDefinition = singlePermissionsRoleDefinition
 
-	@Test def duplicateUsercode() { withUser("cuscav", "0672089") { new Fixture {
-		command.roleDefinition = singlePermissionsRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
-		command.usercodes.add("cuscao")
+        command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
+        command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
-		val existing = GrantedRole(department, singlePermissionsRoleDefinition)
-		existing.users.knownType.addUserId("cuscao")
+        val errors = new BindException(command, "command")
+        command.validate(errors)
 
-		command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns Some(existing)
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns true
+        errors.hasErrors should be(true)
+        errors.getErrorCount should be(1)
+        errors.getFieldError.getField should be("usercodes")
+        errors.getFieldError.getCode should be("NotEmpty")
+      }
+    }
+  }
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+  @Test def duplicateUsercode() {
+    withUser("cuscav", "0672089") {
+      new Fixture {
+        command.roleDefinition = singlePermissionsRoleDefinition
+        command.usercodes.add("cuscav")
+        command.usercodes.add("cusebr")
+        command.usercodes.add("cuscao")
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("usercodes")
-		errors.getFieldError.getCode should be ("userId.duplicate")
-	}}}
+        val existing = GrantedRole(department, singlePermissionsRoleDefinition)
+        existing.users.knownType.addUserId("cuscao")
 
-	@Test def noPermission() { withUser("cuscav", "0672089") { new Fixture {
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
-		command.userLookup.registerUsers("cuscav", "cusebr")
+        command.permissionsService.getGrantedRole(department, singlePermissionsRoleDefinition) returns Some(existing)
+        command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns true
 
-		command.permissionsService.getGrantedRole(department, null) returns None
+        val errors = new BindException(command, "command")
+        command.validate(errors)
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+        errors.hasErrors should be(true)
+        errors.getErrorCount should be(1)
+        errors.getFieldError.getField should be("usercodes")
+        errors.getFieldError.getCode should be("userId.duplicate")
+      }
+    }
+  }
 
-		errors.hasErrors should be (true)
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("roleDefinition")
-		errors.getFieldError.getCode should be ("NotEmpty")
-	}}}
+  @Test def noPermission() {
+    withUser("cuscav", "0672089") {
+      new Fixture {
+        command.usercodes.add("cuscav")
+        command.usercodes.add("cusebr")
+        command.userLookup.registerUsers("cuscav", "cusebr")
 
-	@Test def cantGiveWhatYouDontHave() { withUser("cuscav", "0672089") { new Fixture {
-		command.roleDefinition = DepartmentalAdministratorRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
-		command.userLookup.registerUsers("cuscav", "cusebr")
+        command.permissionsService.getGrantedRole(department, null) returns None
 
-		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
-		command.securityService.canDelegate(currentUser,Permissions.Department.ArrangeRoutesAndModules, department) returns false
+        val errors = new BindException(command, "command")
+        command.validate(errors)
 
-		val errors = new BindException(command, "command")
-		command.validate(errors)
+        errors.hasErrors should be(true)
+        errors.getErrorCount should be(1)
+        errors.getFieldError.getField should be("roleDefinition")
+        errors.getFieldError.getCode should be("NotEmpty")
+      }
+    }
+  }
 
-		errors.hasErrors should be (true)
-		(errors.getErrorCount >= 1) should be (true)
-		errors.getFieldError.getField should be ("roleDefinition")
-		errors.getFieldError.getCode should be ("permissions.cantGiveWhatYouDontHave")
-	}}}
+  @Test def cantGiveWhatYouDontHave() {
+    withUser("cuscav", "0672089") {
+      new Fixture {
+        command.roleDefinition = DepartmentalAdministratorRoleDefinition
+        command.usercodes.add("cuscav")
+        command.usercodes.add("cusebr")
+        command.userLookup.registerUsers("cuscav", "cusebr")
 
-	@Test
-	def describe() {
-		val dept = Fixtures.department("in")
-		dept.id = "dept-id"
+        command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns None
+        command.securityService.canDelegate(currentUser, Permissions.Department.ArrangeRoutesAndModules, department) returns false
 
-		val command = new GrantRoleCommandDescription[Department] with CommandTestSupport[Department] {
-			val eventName: String = "test"
+        val errors = new BindException(command, "command")
+        command.validate(errors)
 
-			val scope: Department = dept
-			val grantedRole = None
-		}
+        errors.hasErrors should be(true)
+        (errors.getErrorCount >= 1) should be(true)
+        errors.getFieldError.getField should be("roleDefinition")
+        errors.getFieldError.getCode should be("permissions.cantGiveWhatYouDontHave")
+      }
+    }
+  }
 
-		command.roleDefinition = singlePermissionsRoleDefinition
-		command.usercodes.add("cuscav")
-		command.usercodes.add("cusebr")
+  @Test
+  def describe() {
+    val dept = Fixtures.department("in")
+    dept.id = "dept-id"
 
-		val d = new DescriptionImpl
-		command.describe(d)
+    val command = new GrantRoleCommandDescription[Department] with CommandTestSupport[Department] {
+      val eventName: String = "test"
 
-		d.allProperties should be (Map(
-			"scope" -> "Department[dept-id]",
-			"usercodes" -> "cuscav,cusebr",
-			"roleDefinition" -> "test"
-		))
-	}
+      val scope: Department = dept
+      val grantedRole = None
+    }
 
-	@Test def gluesEverythingTogether() {
-		val department = Fixtures.department("in")
-		val command = GrantRoleCommand(department)
+    command.roleDefinition = singlePermissionsRoleDefinition
+    command.usercodes.add("cuscav")
+    command.usercodes.add("cusebr")
 
-		command should be (anInstanceOf[Appliable[GrantedRole[Department]]])
-		command should be (anInstanceOf[GrantRoleCommandState[Department]])
-		command should be (anInstanceOf[GrantRoleCommandPermissions])
-		command should be (anInstanceOf[SelfValidating])
-		command should be (anInstanceOf[GrantRoleCommandValidation])
-		command should be (anInstanceOf[Describable[GrantedRole[Department]]])
-	}
+    val d = new DescriptionImpl
+    command.describe(d)
+
+    d.allProperties should be(Map(
+      "scope" -> "Department[dept-id]",
+      "usercodes" -> "cuscav,cusebr",
+      "roleDefinition" -> "test"
+    ))
+  }
+
+  @Test def gluesEverythingTogether() {
+    val department = Fixtures.department("in")
+    val command = GrantRoleCommand(department)
+
+    command should be(anInstanceOf[Appliable[GrantedRole[Department]]])
+    command should be(anInstanceOf[GrantRoleCommandState[Department]])
+    command should be(anInstanceOf[GrantRoleCommandPermissions])
+    command should be(anInstanceOf[SelfValidating])
+    command should be(anInstanceOf[GrantRoleCommandValidation])
+    command should be(anInstanceOf[Describable[GrantedRole[Department]]])
+  }
 
 }

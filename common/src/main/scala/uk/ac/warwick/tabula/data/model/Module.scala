@@ -18,80 +18,86 @@ import scala.util.matching.Regex
 
 @Entity
 @NamedQueries(Array(
-	new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
-	new NamedQuery(name = "module.adminDepartment", query = "select m from Module m where adminDepartment = :adminDepartment")))
+  new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
+  new NamedQuery(name = "module.adminDepartment", query = "select m from Module m where adminDepartment = :adminDepartment")))
 class Module extends GeneratedId with PermissionsTarget with Serializable {
 
-	def this(code: String = null, adminDepartment: Department = null) {
-		this()
-		this.code = code
-		this.adminDepartment = adminDepartment
-	}
+  def this(code: String = null, adminDepartment: Department = null) {
+    this()
+    this.code = code
+    this.adminDepartment = adminDepartment
+  }
 
-	var code: String = _
-	var name: String = _
-	var shortName: String = _
+  var code: String = _
+  var name: String = _
+  var shortName: String = _
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
-	var degreeType: DegreeType = _ // ug or pg
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
+  var degreeType: DegreeType = _ // ug or pg
 
-	// The managers are markers/moderators who upload feedback.
-	// They can also publish feedback.
-	// Module assistants can't publish feedback
-	@transient
-	var permissionsService: PermissionsService = Wire.auto[PermissionsService]
-	@transient
-	lazy val managers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
-	@transient
-	lazy val assistants: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
+  // The managers are markers/moderators who upload feedback.
+  // They can also publish feedback.
+  // Module assistants can't publish feedback
+  @transient
+  var permissionsService: PermissionsService = Wire.auto[PermissionsService]
+  @transient
+  lazy val managers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
+  @transient
+  lazy val assistants: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "department_id")
-	var adminDepartment: Department = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id")
+  var adminDepartment: Department = _
 
-	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-	def department: Department = adminDepartment
+  @deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+  def department: Department = adminDepartment
 
-	@deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
-	def department_=(d: Department) { adminDepartment = d }
+  @deprecated("TAB-2589 to be explicit, this should use adminDepartment or teachingDepartments", "84")
+  def department_=(d: Department) {
+    adminDepartment = d
+  }
 
-	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var teachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
+  @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var teachingInfo: JSet[ModuleTeachingInformation] = JHashSet()
 
-	def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map { _.department } + adminDepartment
+  def teachingDepartments: mutable.Set[Department] = teachingInfo.asScala.map {
+    _.department
+  } + adminDepartment
 
-	def permissionsParents: Stream[Department] = Option(adminDepartment).toStream
-	override def humanReadableId: String = code.toUpperCase + " " + name
-	override def urlSlug: String = code
+  def permissionsParents: Stream[Department] = Option(adminDepartment).toStream
 
-	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BatchSize(size=100)
-	@OrderBy("closeDate")
-	var assignments: JList[Assignment] = JArrayList()
+  override def humanReadableId: String = code.toUpperCase + " " + name
 
-	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BatchSize(size=100)
-	var exams: JList[Exam] = JArrayList()
+  override def urlSlug: String = code
 
-	def hasLiveAssignments: Boolean = Option(assignments) match {
-		case Some(a) => a.asScala.exists(_.isAlive)
-		case None => false
-	}
+  @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+  @BatchSize(size = 100)
+  @OrderBy("closeDate")
+  var assignments: JList[Assignment] = JArrayList()
 
-	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BatchSize(size=200)
-	var groupSets: JList[SmallGroupSet] = JArrayList()
+  @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+  @BatchSize(size = 100)
+  var exams: JList[Exam] = JArrayList()
 
-	var active: Boolean = _
+  def hasLiveAssignments: Boolean = Option(assignments) match {
+    case Some(a) => a.asScala.exists(_.isAlive)
+    case None => false
+  }
 
-	var missingFromImportSince: DateTime = _
+  @OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+  @BatchSize(size = 200)
+  var groupSets: JList[SmallGroupSet] = JArrayList()
 
-	override def toString: String = "Module[" + code + "]"
+  var active: Boolean = _
+
+  var missingFromImportSince: DateTime = _
+
+  override def toString: String = "Module[" + code + "]"
 
 
   // true if at least one of this module's SmallGroupSets has not been released to //both students and staff.
-  def hasUnreleasedGroupSets(academicYear: AcademicYear) : Boolean = {
+  def hasUnreleasedGroupSets(academicYear: AcademicYear): Boolean = {
     val allGroupSets = groupSets.asScala.filter(_.academicYear == academicYear)
     allGroupSets.exists(!_.fullyReleased)
   }
@@ -99,43 +105,43 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 object Module extends Logging {
 
-	private val ModuleCodePatternString = "(?i)([a-z]{2,3}[a-z0-9][a-z0-9.][a-z0-9])"
-	// <modulecode> "-" <cats>
-	// where cats can be a decimal number.
-	private val ModuleCatsPattern = new Regex(ModuleCodePatternString + """-(\d+(?:\.\d+)?)""")
+  private val ModuleCodePatternString = "(?i)([a-z]{2,3}[a-z0-9][a-z0-9.][a-z0-9])"
+  // <modulecode> "-" <cats>
+  // where cats can be a decimal number.
+  private val ModuleCatsPattern = new Regex(ModuleCodePatternString + """-(\d+(?:\.\d+)?)""")
 
-	private val ModuleCodeOnlyPattern = new Regex(ModuleCodePatternString)
+  private val ModuleCodeOnlyPattern = new Regex(ModuleCodePatternString)
 
-	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
+  private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
 
-	def nameFromWebgroupName(groupName: String): String = groupName match {
-		case WebgroupPattern(dept, name) => name
-		case _ => groupName
-	}
+  def nameFromWebgroupName(groupName: String): String = groupName match {
+    case WebgroupPattern(dept, name) => name
+    case _ => groupName
+  }
 
-	def stripCats(fullModuleName: String): Option[String] = {
-		fullModuleName.replaceAll("\\s+", "") match {
-			case ModuleCatsPattern(module, _) => Option(module)
-			case ModuleCodeOnlyPattern(module) => Option(module)
-			case _ =>
-				logger.warn(s"Module name $fullModuleName did not fit expected module code pattern")
-				None
-		}
-	}
+  def stripCats(fullModuleName: String): Option[String] = {
+    fullModuleName.replaceAll("\\s+", "") match {
+      case ModuleCatsPattern(module, _) => Option(module)
+      case ModuleCodeOnlyPattern(module) => Option(module)
+      case _ =>
+        logger.warn(s"Module name $fullModuleName did not fit expected module code pattern")
+        None
+    }
+  }
 
-	def extractCats(fullModuleName: String): Option[String] = fullModuleName.replaceAll("\\s+", "") match {
-		case ModuleCatsPattern(_, cats) => Some(cats)
-		case ModuleCodeOnlyPattern(_) => None
-		case _ => None
-	}
+  def extractCats(fullModuleName: String): Option[String] = fullModuleName.replaceAll("\\s+", "") match {
+    case ModuleCatsPattern(_, cats) => Some(cats)
+    case ModuleCodeOnlyPattern(_) => None
+    case _ => None
+  }
 
-	// For sorting a collection by module code. Either pass to the sort function,
-	// or expose as an implicit val.
-	val CodeOrdering: Ordering[Module] = Ordering.by[Module, String] ( _.code )
-	val NameOrdering: Ordering[Module] = Ordering.by { module: Module => (module.name, module.code) }
+  // For sorting a collection by module code. Either pass to the sort function,
+  // or expose as an implicit val.
+  val CodeOrdering: Ordering[Module] = Ordering.by[Module, String](_.code)
+  val NameOrdering: Ordering[Module] = Ordering.by { module: Module => (module.name, module.code) }
 
-	// Companion object is one of the places searched for an implicit Ordering, so
-	// this will be the default when ordering a list of modules.
-	implicit val defaultOrdering = CodeOrdering
+  // Companion object is one of the places searched for an implicit Ordering, so
+  // this will be the default when ordering a list of modules.
+  implicit val defaultOrdering = CodeOrdering
 
 }

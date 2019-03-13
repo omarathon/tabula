@@ -135,7 +135,7 @@ trait StreamsFiles {
           }
 
         case _ =>
-          // Do nothing, it's gone
+        // Do nothing, it's gone
       }
     } else {
       // Inform the client that we accept byte-range requests

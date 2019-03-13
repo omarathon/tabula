@@ -10,60 +10,61 @@ case class DepartmentalAdministrator(department: model.Department) extends Built
 
 case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Departmental Administrator"
+  override def description = "Departmental Administrator"
 
-	//
-	// If you're removing permissions from here, please consider whether you should be
-	// adding them back into UserAccessManager at the same time.
-	//
+  //
+  // If you're removing permissions from here, please consider whether you should be
+  // adding them back into UserAccessManager at the same time.
+  //
 
-	// Implicitly grants module manager role for all modules in this department, and route manager for all routes in this department
-	GeneratesSubRole(ModuleManagerRoleDefinition)
-	GeneratesSubRole(RouteManagerRoleDefinition)
+  // Implicitly grants module manager role for all modules in this department, and route manager for all routes in this department
+  GeneratesSubRole(ModuleManagerRoleDefinition)
+  GeneratesSubRole(RouteManagerRoleDefinition)
 
-	GrantsScopedPermission(
-		Masquerade,
+  GrantsScopedPermission(
+    Masquerade,
 
-		Department.ManageExtensionSettings,
-		Department.ManageDisplaySettings,
-		Department.ManageNotificationSettings,
-		Department.ManageMarkingDescriptors,
-		Department.DownloadFeedbackReport,
-		Department.ViewManualMembershipSummary,
-		Department.ArrangeRoutesAndModules,
+    Department.ManageExtensionSettings,
+    Department.ManageDisplaySettings,
+    Department.ManageNotificationSettings,
+    Department.ManageMarkingDescriptors,
+    Department.DownloadFeedbackReport,
+    Department.ViewManualMembershipSummary,
+    Department.ArrangeRoutesAndModules,
 
-		Assignment.ImportFromExternalSystem,
-		SmallGroups.ImportFromExternalSystem,
+    Assignment.ImportFromExternalSystem,
+    SmallGroups.ImportFromExternalSystem,
 
-		FeedbackTemplate.Read,
-		FeedbackTemplate.Manage,
+    FeedbackTemplate.Read,
+    FeedbackTemplate.Manage,
 
-		MarkingWorkflow.Read,
-		MarkingWorkflow.Manage,
+    MarkingWorkflow.Read,
+    MarkingWorkflow.Manage,
 
-		Department.ManageProfiles,
+    Department.ManageProfiles,
 
-		MonitoringPoints.Report,
+    MonitoringPoints.Report,
 
-		MemberNotes.Delete,
+    MemberNotes.Delete,
 
-		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.MeetingRecord.Approve,
-		Profiles.ScheduledMeetingRecord.Confirm,
+    Profiles.MeetingRecord.Approve,
+    Profiles.ScheduledMeetingRecord.Confirm,
 
-		// TAB-1878
-		Profiles.Read.TelephoneNumber,
-		Profiles.Read.MobileNumber,
+    // TAB-1878
+    Profiles.Read.TelephoneNumber,
+    Profiles.Read.MobileNumber,
 
-		SmallGroups.Read,
+    SmallGroups.Read,
 
-		Department.Reports,
-		Department.ExamGrids
-	)
-	def canDelegateThisRolesPermissions:JBoolean = true
+    Department.Reports,
+    Department.ExamGrids
+  )
+
+  def canDelegateThisRolesPermissions: JBoolean = true
 
 }

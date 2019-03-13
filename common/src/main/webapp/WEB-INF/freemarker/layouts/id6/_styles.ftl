@@ -12,8 +12,8 @@
 <![endif]-->
 <!--[if lt IE 9]>
 <style type="text/css">
-	#container {
-	behavior: url(/static/css/pie.htc);
-	}
+  #container {
+    behavior: url(/static/css/pie.htc);
+  }
 </style>
 <![endif]-->

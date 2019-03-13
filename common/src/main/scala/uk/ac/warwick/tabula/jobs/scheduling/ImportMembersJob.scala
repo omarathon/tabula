@@ -9,46 +9,47 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import scala.collection.JavaConverters._
 
 object ImportMembersJob {
-	val identifier = "import-members"
-	val MembersKey = "members"
+  val identifier = "import-members"
+  val MembersKey = "members"
 
-	def status(universityId: String) = s"Importing $universityId"
+  def status(universityId: String) = s"Importing $universityId"
 
-	def apply(universityIds: Seq[String]) = JobPrototype(identifier, Map(
-		MembersKey -> universityIds.asJava
-	))
+  def apply(universityIds: Seq[String]) = JobPrototype(identifier, Map(
+    MembersKey -> universityIds.asJava
+  ))
 }
 
 @Component
 class ImportMembersJob extends Job {
 
-	val identifier: String = ImportMembersJob.identifier
+  val identifier: String = ImportMembersJob.identifier
 
-	override def run(implicit job: JobInstance): Unit = new Runner(job).run()
+  override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 
-	class Runner(job: JobInstance) {
-		implicit private val _job: JobInstance = job
+  class Runner(job: JobInstance) {
+    implicit private val _job: JobInstance = job
 
-		def run(): Unit = {
-			val memberIds = job.getStrings(ImportMembersJob.MembersKey)
+    def run(): Unit = {
+      val memberIds = job.getStrings(ImportMembersJob.MembersKey)
 
-			updateProgress(0)
+      updateProgress(0)
 
-			memberIds.zipWithIndex.foreach{case (universityId, index) =>
-				updateStatus(ImportMembersJob.status(universityId))
+      memberIds.zipWithIndex.foreach { case (universityId, index) =>
+        updateStatus(ImportMembersJob.status(universityId))
 
-				transactional() {
-					val command = new ImportProfilesCommand
-					command.refresh(universityId, None)
-				}
+        transactional() {
+          val command = new ImportProfilesCommand
+          command.refresh(universityId, None)
+        }
 
-				updateProgress(index + 1, memberIds.size)
-			}
+        updateProgress(index + 1, memberIds.size)
+      }
 
-			updateStatus("Import complete")
-			updateProgress(100)
+      updateStatus("Import complete")
+      updateProgress(100)
 
-			job.succeeded = true
-		}
-	}
+      job.succeeded = true
+    }
+  }
+
 }

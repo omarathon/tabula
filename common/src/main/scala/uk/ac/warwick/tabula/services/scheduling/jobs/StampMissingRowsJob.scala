@@ -14,14 +14,14 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class StampMissingRowsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingProfilesImport)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					StampMissingRowsCommand().apply()
-				}
-			}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingProfilesImport)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          StampMissingRowsCommand().apply()
+        }
+      }
 
-	}
+  }
 
 }

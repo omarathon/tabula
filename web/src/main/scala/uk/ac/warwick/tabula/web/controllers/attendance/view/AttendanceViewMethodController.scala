@@ -16,27 +16,27 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}"))
 class AttendanceViewMethodController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent
-	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent
+  with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.MonitoringPoints.View
+  override val departmentPermission: Permission = Permissions.MonitoringPoints.View
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
+  @Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("attendance/view/viewmethod",
-			"hasSchemes" -> attendanceMonitoringService.listSchemes(mandatory(department), mandatory(academicYear)).nonEmpty
-		).crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.departmentForYear(department, year)): _*)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("attendance/view/viewmethod",
+      "hasSchemes" -> attendanceMonitoringService.listSchemes(mandatory(department), mandatory(academicYear)).nonEmpty
+    ).crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.departmentForYear(department, year)): _*)
+  }
 
 }

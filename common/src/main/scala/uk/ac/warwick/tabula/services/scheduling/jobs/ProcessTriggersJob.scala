@@ -15,15 +15,15 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ProcessTriggersJob extends AutowiredJobBean {
 
-	@Autowired var triggerService: TriggerService = _
+  @Autowired var triggerService: TriggerService = _
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingTriggers)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					triggerService.processTriggers()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingTriggers)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          triggerService.processTriggers()
+        }
+      }
+  }
 
 }

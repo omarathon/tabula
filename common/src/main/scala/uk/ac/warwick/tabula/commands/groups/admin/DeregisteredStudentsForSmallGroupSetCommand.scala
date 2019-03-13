@@ -15,78 +15,82 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object DeregisteredStudentsForSmallGroupSetCommand {
-	def apply(module: Module, set: SmallGroupSet) =
-		new DeregisteredStudentsForSmallGroupSetCommandInternal(module, set)
-			with ComposableCommand[Seq[StudentNotInMembership]]
-			with DeregisteredStudentsForSmallGroupSetPermissions
-			with DeregisteredStudentsForSmallGroupSetDescription
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringProfileServiceComponent
-			with PopulateDeregisteredStudentsForSmallGroupSetCommandState
+  def apply(module: Module, set: SmallGroupSet) =
+    new DeregisteredStudentsForSmallGroupSetCommandInternal(module, set)
+      with ComposableCommand[Seq[StudentNotInMembership]]
+      with DeregisteredStudentsForSmallGroupSetPermissions
+      with DeregisteredStudentsForSmallGroupSetDescription
+      with AutowiringSmallGroupServiceComponent
+      with AutowiringProfileServiceComponent
+      with PopulateDeregisteredStudentsForSmallGroupSetCommandState
 
-	case class StudentNotInMembership(
-		student: MemberOrUser,
-		group: SmallGroup
-	)
+  case class StudentNotInMembership(
+    student: MemberOrUser,
+    group: SmallGroup
+  )
+
 }
 
 trait DeregisteredStudentsForSmallGroupSetCommandState {
-	def module: Module
-	def set: SmallGroupSet
+  def module: Module
 
-	var students: JList[User] = JArrayList()
+  def set: SmallGroupSet
+
+  var students: JList[User] = JArrayList()
 }
 
 trait PopulateDeregisteredStudentsForSmallGroupSetCommandState extends PopulateOnForm {
-	self: DeregisteredStudentsForSmallGroupSetCommandState =>
+  self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-	def populate() {
-		students.clear()
-		students.addAll(set.studentsNotInMembership.sortBy { user => (user.getLastName, user.getFirstName, user.getWarwickId) }.asJavaCollection)
-	}
+  def populate() {
+    students.clear()
+    students.addAll(set.studentsNotInMembership.sortBy { user => (user.getLastName, user.getFirstName, user.getWarwickId) }.asJavaCollection)
+  }
 }
 
 class DeregisteredStudentsForSmallGroupSetCommandInternal(val module: Module, val set: SmallGroupSet)
-	extends CommandInternal[Seq[StudentNotInMembership]]
-		with DeregisteredStudentsForSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent with ProfileServiceComponent =>
+  extends CommandInternal[Seq[StudentNotInMembership]]
+    with DeregisteredStudentsForSmallGroupSetCommandState {
+  self: SmallGroupServiceComponent with ProfileServiceComponent =>
 
-	override def applyInternal(): mutable.Buffer[StudentNotInMembership] =
-		for {
-			student <- students.asScala
-			if !set.members.includesUser(student) // Prevent irrelevant students being sent
+  override def applyInternal(): mutable.Buffer[StudentNotInMembership] =
+    for {
+      student <- students.asScala
+      if !set.members.includesUser(student) // Prevent irrelevant students being sent
 
-			group <- set.groups.asScala
-			if group.students.includesUser(student)
-		} yield {
-			smallGroupService.removeUserFromGroup(student, group)
-			StudentNotInMembership(
-				MemberOrUser(profileService.getMemberByUser(student, disableFilter = true), student),
-				group
-			)
-		}
+      group <- set.groups.asScala
+      if group.students.includesUser(student)
+    } yield {
+      smallGroupService.removeUserFromGroup(student, group)
+      StudentNotInMembership(
+        MemberOrUser(profileService.getMemberByUser(student, disableFilter = true), student),
+        group
+      )
+    }
 
 }
 
 trait DeregisteredStudentsForSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DeregisteredStudentsForSmallGroupSetCommandState =>
+  self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(set, module)
-		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, module)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+  }
 }
 
 trait DeregisteredStudentsForSmallGroupSetDescription extends Describable[Seq[StudentNotInMembership]] {
-	self: DeregisteredStudentsForSmallGroupSetCommandState =>
+  self: DeregisteredStudentsForSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.smallGroupSet(set)
-	}
+  override def describe(d: Description) {
+    d.smallGroupSet(set)
+  }
 
-	override def describeResult(d: Description, result: Seq[StudentNotInMembership]) {
-		d.smallGroupSet(set)
-		 .studentIds(result.flatMap { _.student.universityId.maybeText })
-	}
+  override def describeResult(d: Description, result: Seq[StudentNotInMembership]) {
+    d.smallGroupSet(set)
+      .studentIds(result.flatMap {
+        _.student.universityId.maybeText
+      })
+  }
 
 }

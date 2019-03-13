@@ -7,21 +7,21 @@ import org.junit.Before
 
 trait LenientUserLookup extends Mockito {
 
-	@Autowired var userLookup:SwappableUserLookupService =_
+  @Autowired var userLookup: SwappableUserLookupService = _
 
-	@Before def setup {
-		userLookup.delegate = lenientUserLookup
-	}
+  @Before def setup {
+    userLookup.delegate = lenientUserLookup
+  }
 
-	def lenientUserLookup: UserLookupService = {
-		val backend = mock[UserLookupService]
+  def lenientUserLookup: UserLookupService = {
+    val backend = mock[UserLookupService]
 
-		backend.getUserByWarwickUniId(any[String]) answers { id =>
-			new User(id.asInstanceOf[String]) {
-				setFoundUser(true)
-			}
-		}
+    backend.getUserByWarwickUniId(any[String]) answers { id =>
+      new User(id.asInstanceOf[String]) {
+        setFoundUser(true)
+      }
+    }
 
-		backend
-	}
+    backend
+  }
 }

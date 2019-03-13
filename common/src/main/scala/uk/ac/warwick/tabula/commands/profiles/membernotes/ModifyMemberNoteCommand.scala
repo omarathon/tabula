@@ -14,84 +14,87 @@ import scala.collection.mutable
 
 abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractMemberNote] {
 
-	self: ModifyMemberNoteCommandRequest with ModifyAbstractMemberNoteCommandState
-		with FileAttachmentServiceComponent with MemberNoteServiceComponent =>
+  self: ModifyMemberNoteCommandRequest with ModifyAbstractMemberNoteCommandState
+    with FileAttachmentServiceComponent with MemberNoteServiceComponent =>
 
-	override def applyInternal(): AbstractMemberNote = {
-		copyTo(abstractMemberNote)
+  override def applyInternal(): AbstractMemberNote = {
+    copyTo(abstractMemberNote)
 
-		if (abstractMemberNote.attachments != null) {
-			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-			val filesToRemove: mutable.Buffer[FileAttachment] = abstractMemberNote.attachments.asScala -- filesToKeep
-			abstractMemberNote.attachments = JArrayList[FileAttachment](filesToKeep)
-			fileAttachmentService.deleteAttachments(filesToRemove)
-		}
+    if (abstractMemberNote.attachments != null) {
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
+      val filesToRemove: mutable.Buffer[FileAttachment] = abstractMemberNote.attachments.asScala -- filesToKeep
+      abstractMemberNote.attachments = JArrayList[FileAttachment](filesToKeep)
+      fileAttachmentService.deleteAttachments(filesToRemove)
+    }
 
-		if (!file.attached.isEmpty) {
-			for (attachment <- file.attached.asScala) {
-				abstractMemberNote.addAttachment(attachment)
-			}
-		}
+    if (!file.attached.isEmpty) {
+      for (attachment <- file.attached.asScala) {
+        abstractMemberNote.addAttachment(attachment)
+      }
+    }
 
-		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
-			case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
-			case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
-		}
+    HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
+      case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
+      case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
+    }
 
-		abstractMemberNote
-	}
+    abstractMemberNote
+  }
 
 }
 
 trait ModifyMemberNoteCommandBindListener extends BindListener {
 
-	self: ModifyMemberNoteCommandRequest =>
+  self: ModifyMemberNoteCommandRequest =>
 
-	override def onBind(result: BindingResult) {
-		file.onBind(result)
-	}
+  override def onBind(result: BindingResult) {
+    file.onBind(result)
+  }
 }
 
 trait ModifyAbstractMemberNoteCommandState {
-	def abstractMemberNote: AbstractMemberNote
-	val attachmentTypes: Seq[String] = Seq[String]()
+  def abstractMemberNote: AbstractMemberNote
+
+  val attachmentTypes: Seq[String] = Seq[String]()
 }
 
 trait ModifyMemberNoteCommandState extends ModifyAbstractMemberNoteCommandState {
-	def memberNote: MemberNote
-	override def abstractMemberNote: AbstractMemberNote = memberNote
+  def memberNote: MemberNote
+
+  override def abstractMemberNote: AbstractMemberNote = memberNote
 }
 
 trait ModifyExtenuatingCircumstancesCommandState extends ModifyAbstractMemberNoteCommandState {
-	def circumstances: ExtenuatingCircumstances
-	override def abstractMemberNote: AbstractMemberNote = circumstances
+  def circumstances: ExtenuatingCircumstances
+
+  override def abstractMemberNote: AbstractMemberNote = circumstances
 }
 
 trait ModifyMemberNoteCommandRequest {
-	var title: String = _
-	var note: String = _
-	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] = JArrayList()
+  var title: String = _
+  var note: String = _
+  var file: UploadedFile = new UploadedFile
+  var attachedFiles: JList[FileAttachment] = JArrayList()
 
-	def copyTo(memberNote: AbstractMemberNote) {
-		memberNote.note = note
-		memberNote.title = title
-		memberNote.lastUpdatedDate = DateTime.now
-	}
+  def copyTo(memberNote: AbstractMemberNote) {
+    memberNote.note = note
+    memberNote.title = title
+    memberNote.lastUpdatedDate = DateTime.now
+  }
 }
 
 trait ModifyExtenuatingCircumstancesCommandRequest extends ModifyMemberNoteCommandRequest {
-	var startDate: LocalDate = _
-	var endDate: LocalDate = _
+  var startDate: LocalDate = _
+  var endDate: LocalDate = _
 
-	override def copyTo(memberNote: AbstractMemberNote): Unit = {
-		memberNote match {
-			case circumstance: ExtenuatingCircumstances =>
-				circumstance.startDate = startDate
-				circumstance.endDate = endDate
-			case _ =>
-		}
+  override def copyTo(memberNote: AbstractMemberNote): Unit = {
+    memberNote match {
+      case circumstance: ExtenuatingCircumstances =>
+        circumstance.startDate = startDate
+        circumstance.endDate = endDate
+      case _ =>
+    }
 
-		super.copyTo(memberNote)
-	}
+    super.copyTo(memberNote)
+  }
 }

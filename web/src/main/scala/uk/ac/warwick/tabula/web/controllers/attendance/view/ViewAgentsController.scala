@@ -15,31 +15,31 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/agents/{relationshipType}"))
 class ViewAgentsController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable relationshipType: StudentRelationshipType) =
-		ViewAgentsCommand(mandatory(department), mandatory(academicYear), mandatory(relationshipType))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable relationshipType: StudentRelationshipType) =
+    ViewAgentsCommand(mandatory(department), mandatory(academicYear), mandatory(relationshipType))
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[Seq[ViewAgentsCommandResult]],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable relationshipType: StudentRelationshipType
-	): Mav = {
-		val agents = cmd.apply()
-		Mav("attendance/view/agents",
-			"agents" -> agents,
-			"agentsEmails" -> agents.flatMap(a => Option(a.agentMember)).flatMap(_.email.maybeText)
-		).crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.agents(department, year, relationshipType)): _*)
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[Seq[ViewAgentsCommandResult]],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable relationshipType: StudentRelationshipType
+  ): Mav = {
+    val agents = cmd.apply()
+    Mav("attendance/view/agents",
+      "agents" -> agents,
+      "agentsEmails" -> agents.flatMap(a => Option(a.agentMember)).flatMap(_.email.maybeText)
+    ).crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear),
+      Breadcrumbs.View.DepartmentForYear(department, academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.agents(department, year, relationshipType)): _*)
+  }
 
 }

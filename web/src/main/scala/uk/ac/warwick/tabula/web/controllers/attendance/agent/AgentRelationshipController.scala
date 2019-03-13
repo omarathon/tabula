@@ -11,22 +11,22 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 
 /**
- * Displays the agent relationship screen, allowing users to choose academic year to view.
- */
+  * Displays the agent relationship screen, allowing users to choose academic year to view.
+  */
 @Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}"))
 class AgentRelationshipController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@RequestMapping
-	def home(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
-	): Mav = {
-		Redirect(Routes.Agent.relationshipForYear(relationshipType, activeAcademicYear.getOrElse(AcademicYear.now())))
-	}
+  @RequestMapping
+  def home(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+  ): Mav = {
+    Redirect(Routes.Agent.relationshipForYear(relationshipType, activeAcademicYear.getOrElse(AcademicYear.now())))
+  }
 
 }

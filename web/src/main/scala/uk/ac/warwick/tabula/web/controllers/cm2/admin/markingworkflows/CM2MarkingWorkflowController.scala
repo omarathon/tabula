@@ -10,10 +10,10 @@ import uk.ac.warwick.tabula.web.controllers.cm2.admin.CourseworkDepartmentAndYea
 
 trait CM2MarkingWorkflowController extends CourseworkController with CourseworkDepartmentAndYearController {
 
-	override val departmentPermission: Permission = Permissions.MarkingWorkflow.Manage
+  override val departmentPermission: Permission = Permissions.MarkingWorkflow.Manage
 
-	def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
-		view
-			.crumbsList(Breadcrumbs.department(department, Some(academicYear)))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.cm2.admin.workflows(department, year)): _*)
+  def commonCrumbs(view: Mav, department: Department, academicYear: AcademicYear): Mav =
+    view
+      .crumbsList(Breadcrumbs.department(department, Some(academicYear)))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.cm2.admin.workflows(department, year)): _*)
 }

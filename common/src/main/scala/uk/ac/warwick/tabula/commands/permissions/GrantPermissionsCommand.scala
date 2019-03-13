@@ -20,94 +20,101 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object GrantPermissionsCommand {
-	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A] =
-		new GrantPermissionsCommandInternal(scope)
-			with ComposableCommand[GrantedPermission[A]]
-			with GrantPermissionsCommandPermissions
-			with GrantPermissionsCommandValidation
-			with GrantPermissionsCommandDescription[A]
-			with AutowiringPermissionsServiceComponent
-			with AutowiringSecurityServiceComponent
-			with AutowiringUserLookupComponent
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A] =
+    new GrantPermissionsCommandInternal(scope)
+      with ComposableCommand[GrantedPermission[A]]
+      with GrantPermissionsCommandPermissions
+      with GrantPermissionsCommandValidation
+      with GrantPermissionsCommandDescription[A]
+      with AutowiringPermissionsServiceComponent
+      with AutowiringSecurityServiceComponent
+      with AutowiringUserLookupComponent
 }
 
 class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
-	extends CommandInternal[GrantedPermission[A]] with GrantPermissionsCommandState[A] {
+  extends CommandInternal[GrantedPermission[A]] with GrantPermissionsCommandState[A] {
 
-	self: PermissionsServiceComponent with UserLookupComponent =>
+  self: PermissionsServiceComponent with UserLookupComponent =>
 
-	lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
+  lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
-	def applyInternal(): GrantedPermission[A] = transactional() {
-		val granted = grantedPermission.getOrElse(GrantedPermission(scope, permission, overrideType))
+  def applyInternal(): GrantedPermission[A] = transactional() {
+    val granted = grantedPermission.getOrElse(GrantedPermission(scope, permission, overrideType))
 
-		usercodes.asScala.foreach(granted.users.knownType.addUserId)
+    usercodes.asScala.foreach(granted.users.knownType.addUserId)
 
-		permissionsService.saveOrUpdate(granted)
+    permissionsService.saveOrUpdate(granted)
 
-		// For each usercode that we've added, clear the cache
-		usercodes.asScala.foreach { usercode =>
-			permissionsService.clearCachesForUser((usercode, classTag[A]))
-		}
+    // For each usercode that we've added, clear the cache
+    usercodes.asScala.foreach { usercode =>
+      permissionsService.clearCachesForUser((usercode, classTag[A]))
+    }
 
-		granted
-	}
+    granted
+  }
 
 }
 
 trait GrantPermissionsCommandValidation extends SelfValidating {
-	self: GrantPermissionsCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+  self: GrantPermissionsCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
 
-	def validate(errors: Errors) {
-		if (usercodes.asScala.forall { _.isEmptyOrWhitespace }) {
-			errors.rejectValue("usercodes", "NotEmpty")
-		} else {
-			grantedPermission.map { _.users }.foreach { users =>
-				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode: Boolean = usercodes.asScala.exists { users.knownType.includesUserId }
-				}
+  def validate(errors: Errors) {
+    if (usercodes.asScala.forall {
+      _.isEmptyOrWhitespace
+    }) {
+      errors.rejectValue("usercodes", "NotEmpty")
+    } else {
+      grantedPermission.map {
+        _.users
+      }.foreach { users =>
+        val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+          override def alreadyHasCode: Boolean = usercodes.asScala.exists {
+            users.knownType.includesUserId
+          }
+        }
 
-				usercodeValidator.validate(errors)
-			}
-		}
+        usercodeValidator.validate(errors)
+      }
+    }
 
-		// Ensure that the current user can do everything that they're trying to grant permissions for
-		val user = RequestInfo.fromThread.get.user
+    // Ensure that the current user can do everything that they're trying to grant permissions for
+    val user = RequestInfo.fromThread.get.user
 
-		if (permission == null) errors.rejectValue("permission", "NotEmpty")
-		else if (!user.sysadmin && !securityService.canDelegate(user, permission, scope)) {
-			errors.rejectValue("permission", "permissions.cantGiveWhatYouDontHave", Array(permission.description, scope), "")
-		}
-	}
+    if (permission == null) errors.rejectValue("permission", "NotEmpty")
+    else if (!user.sysadmin && !securityService.canDelegate(user, permission, scope)) {
+      errors.rejectValue("permission", "permissions.cantGiveWhatYouDontHave", Array(permission.description, scope), "")
+    }
+  }
 }
 
 trait GrantPermissionsCommandState[A <: PermissionsTarget] {
-	self: PermissionsServiceComponent =>
+  self: PermissionsServiceComponent =>
 
-	def scope: A
-	var permission: Permission = _
-	var usercodes: JList[String] = JArrayList()
-	var overrideType: Boolean = _
+  def scope: A
 
-	def grantedPermission: Option[GrantedPermission[A]]
+  var permission: Permission = _
+  var usercodes: JList[String] = JArrayList()
+  var overrideType: Boolean = _
+
+  def grantedPermission: Option[GrantedPermission[A]]
 }
 
 trait GrantPermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: GrantPermissionsCommandState[_ <: PermissionsTarget] =>
+  self: GrantPermissionsCommandState[_ <: PermissionsTarget] =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
+  }
 }
 
 trait GrantPermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
-	self: GrantPermissionsCommandState[A] =>
+  self: GrantPermissionsCommandState[A] =>
 
-	def describe(d: Description): Unit = d.properties(
-		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
-		"usercodes" -> usercodes.asScala.mkString(","),
-		"permission" -> permission.getName,
-		"overrideType" -> overrideType)
+  def describe(d: Description): Unit = d.properties(
+    "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
+    "usercodes" -> usercodes.asScala.mkString(","),
+    "permission" -> permission.getName,
+    "overrideType" -> overrideType)
 }
 
 

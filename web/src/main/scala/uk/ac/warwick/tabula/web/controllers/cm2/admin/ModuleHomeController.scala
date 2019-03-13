@@ -14,36 +14,36 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractModuleHomeController
-	extends CourseworkController
-		with AcademicYearScopedController
-		with AutowiringUserSettingsServiceComponent
-		with AutowiringMaintenanceModeServiceComponent {
+  extends CourseworkController
+    with AcademicYearScopedController
+    with AutowiringUserSettingsServiceComponent
+    with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
-		ListEnhancedAssignmentsCommand.module(module, academicYear, user)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+    ListEnhancedAssignmentsCommand.module(module, academicYear, user)
+  }
 
-	@ModelAttribute("skeletonCommand")
-	def skeletonCommand(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
-		ListEnhancedAssignmentsCommand.moduleSkeleton(module, academicYear, user)
-	}
+  @ModelAttribute("skeletonCommand")
+  def skeletonCommand(@PathVariable module: Module, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear], user: CurrentUser): ModuleCommand = {
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+    ListEnhancedAssignmentsCommand.moduleSkeleton(module, academicYear, user)
+  }
 
-	@RequestMapping(params=Array("!ajax", "!skeleton"), headers=Array("!X-Requested-With"))
-	def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
-		Mav("cm2/admin/home/module", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear)
-			.crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
-			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
+  @RequestMapping(params = Array("!ajax", "!skeleton"), headers = Array("!X-Requested-With"))
+  def home(@ModelAttribute("command") command: ModuleCommand, @PathVariable module: Module): Mav =
+    Mav("cm2/admin/home/module", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear)
+      .crumbsList(Breadcrumbs.department(module.adminDepartment, Some(command.academicYear)))
+      .secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.admin.module(module, _)): _*)
 
-	@RequestMapping
-	def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
+  @RequestMapping
+  def homeAjax(@ModelAttribute("command") command: ModuleCommand): Mav =
+    Mav("cm2/admin/home/assignments", "moduleInfo" -> command.apply(), "academicYear" -> command.academicYear).noLayout()
 
-	@RequestMapping(params=Array("skeleton", "!statusFilters"))
-	def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand): Mav =
-		Mav("cm2/admin/home/assignments-skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear, "skeleton" -> true).noLayout()
+  @RequestMapping(params = Array("skeleton", "!statusFilters"))
+  def homeSkeleton(@ModelAttribute("skeletonCommand") skeletonCommand: ModuleCommand): Mav =
+    Mav("cm2/admin/home/assignments-skeleton", "moduleInfo" -> skeletonCommand.apply(), "academicYear" -> skeletonCommand.academicYear, "skeleton" -> true).noLayout()
 
 }
 
@@ -52,9 +52,9 @@ abstract class AbstractModuleHomeController
 @RequestMapping(Array("/${cm2.prefix}/admin/{module}"))
 class ModuleHomeController extends AbstractModuleHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] =
-		retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] =
+    retrieveActiveAcademicYear(None)
 
 }
 
@@ -63,9 +63,9 @@ class ModuleHomeController extends AbstractModuleHomeController {
 @RequestMapping(Array("/${cm2.prefix}/admin/{module}/{academicYear:\\d{4}}"))
 class ModuleHomeForYearController extends AbstractModuleHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+    retrieveActiveAcademicYear(Option(academicYear))
 
 }
 
@@ -73,12 +73,12 @@ class ModuleHomeForYearController extends AbstractModuleHomeController {
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/module/{module}", "/${cm2.prefix}/admin/module/{module}/**"))
 class ModuleHomeRedirectController extends CourseworkController
-	with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@RequestMapping
-	def redirect(@PathVariable module: Module): Mav =
-		Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
+  @RequestMapping
+  def redirect(@PathVariable module: Module): Mav =
+    Redirect(Routes.admin.module(mandatory(module), retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())))
 
 }

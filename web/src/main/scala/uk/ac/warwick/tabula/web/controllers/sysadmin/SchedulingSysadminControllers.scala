@@ -28,125 +28,131 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class ReindexAuditEventsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer: AuditEventIndexService = Wire[AuditEventIndexService]
+  var indexer: AuditEventIndexService = Wire[AuditEventIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var from: DateTime = _
+  @WithinYears(maxPast = 20)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var from: DateTime = _
 
-	def applyInternal(): ElasticsearchIndexingResult = {
-		Await.result(indexer.indexFrom(from), Duration.Inf)
-	}
+  def applyInternal(): ElasticsearchIndexingResult = {
+    Await.result(indexer.indexFrom(from), Duration.Inf)
+  }
 
-	override def describe(d: Description): Unit = d.property("from" -> from)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
-		d.properties(
-			"successful" -> result.successful,
-			"failed" -> result.failed,
-			"timeTaken" -> result.timeTaken,
-			"maxUpdatedDate" -> result.maxUpdatedDate
-		)
+  override def describe(d: Description): Unit = d.property("from" -> from)
+
+  override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
+    d.properties(
+      "successful" -> result.successful,
+      "failed" -> result.failed,
+      "timeTaken" -> result.timeTaken,
+      "maxUpdatedDate" -> result.maxUpdatedDate
+    )
 }
 
 class ReindexNotificationsCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer: NotificationIndexService = Wire[NotificationIndexService]
+  var indexer: NotificationIndexService = Wire[NotificationIndexService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var from: DateTime = _
+  @WithinYears(maxPast = 20)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var from: DateTime = _
 
-	def applyInternal(): ElasticsearchIndexingResult = {
-		Await.result(indexer.indexFrom(from), Duration.Inf)
-	}
+  def applyInternal(): ElasticsearchIndexingResult = {
+    Await.result(indexer.indexFrom(from), Duration.Inf)
+  }
 
-	def describe(d: Description): Unit = d.property("from" -> from)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
-		d.properties(
-			"successful" -> result.successful,
-			"failed" -> result.failed,
-			"timeTaken" -> result.timeTaken,
-			"maxUpdatedDate" -> result.maxUpdatedDate
-		)
+  def describe(d: Description): Unit = d.property("from" -> from)
+
+  override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
+    d.properties(
+      "successful" -> result.successful,
+      "failed" -> result.failed,
+      "timeTaken" -> result.timeTaken,
+      "maxUpdatedDate" -> result.maxUpdatedDate
+    )
 }
 
 class ReindexProfilesCommand extends Command[ElasticsearchIndexingResult] with ReadOnly {
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var indexer: ProfileIndexService = Wire[ProfileIndexService]
-	var mdService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var indexer: ProfileIndexService = Wire[ProfileIndexService]
+  var mdService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var from: DateTime = _
-	var deptCode: String = _
+  @WithinYears(maxPast = 20)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var from: DateTime = _
+  var deptCode: String = _
 
-	def applyInternal(): ElasticsearchIndexingResult = {
-		Await.result(
-			mdService.getDepartmentByCode(deptCode) match {
-				case None => indexer.indexFrom(from)
-				case Some(department) => indexer.indexByDateAndDepartment(from, department)
-			},
-			Duration.Inf
-		)
-	}
+  def applyInternal(): ElasticsearchIndexingResult = {
+    Await.result(
+      mdService.getDepartmentByCode(deptCode) match {
+        case None => indexer.indexFrom(from)
+        case Some(department) => indexer.indexByDateAndDepartment(from, department)
+      },
+      Duration.Inf
+    )
+  }
 
-	def describe(d: Description): Unit = d.property("from" -> from).property("deptCode" -> deptCode)
-	override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
-		d.properties(
-			"successful" -> result.successful,
-			"failed" -> result.failed,
-			"timeTaken" -> result.timeTaken,
-			"maxUpdatedDate" -> result.maxUpdatedDate
-		)
+  def describe(d: Description): Unit = d.property("from" -> from).property("deptCode" -> deptCode)
+
+  override def describeResult(d: Description, result: ElasticsearchIndexingResult): Unit =
+    d.properties(
+      "successful" -> result.successful,
+      "failed" -> result.failed,
+      "timeTaken" -> result.timeTaken,
+      "maxUpdatedDate" -> result.maxUpdatedDate
+    )
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-notifications"))
 class SysadminNotificationsAuditController extends BaseSysadminController {
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexNotificationsCommand
+  @ModelAttribute("reindexForm") def reindexForm = new ReindexNotificationsCommand
 
-	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexNotificationsCommand): Mav = {
-		form.apply()
-		redirectToHome
-	}
+  @RequestMapping(method = Array(POST))
+  def reindex(form: ReindexNotificationsCommand): Mav = {
+    form.apply()
+    redirectToHome
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-audit"))
 class SysadminIndexAuditController extends BaseSysadminController {
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsCommand
+  @ModelAttribute("reindexForm") def reindexForm = new ReindexAuditEventsCommand
 
-	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexAuditEventsCommand): Mav = {
-		form.apply()
-		redirectToHome
-	}
+  @RequestMapping(method = Array(POST))
+  def reindex(form: ReindexAuditEventsCommand): Mav = {
+    form.apply()
+    redirectToHome
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/index/run-profiles"))
 class SysadminIndexProfilesController extends BaseSysadminController {
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesCommand
+  @ModelAttribute("reindexForm") def reindexForm = new ReindexProfilesCommand
 
-	@RequestMapping(method = Array(POST))
-	def reindex(form: ReindexProfilesCommand): Mav = {
-		form.apply()
-		redirectToHome
-	}
+  @RequestMapping(method = Array(POST))
+  def reindex(form: ReindexProfilesCommand): Mav = {
+    form.apply()
+    redirectToHome
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/import"))
 class SchedulingSysadminController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def importModules: Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]()))
-	}
+  @RequestMapping(method = Array(POST))
+  def importModules: Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]()))
+  }
 
 }
 
@@ -154,24 +160,24 @@ class SchedulingSysadminController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-department"))
 class ImportDeptModulesController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def importModules(@RequestParam deptCode: String): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)))
-	}
+  @RequestMapping(method = Array(POST))
+  def importModules(@RequestParam deptCode: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAcademicDataJob]("departmentCodes" -> deptCode)))
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-locations"))
 class ImportMissingEventLocationsController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def importModules(@RequestParam academicYear: String): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportSmallGroupEventLocationsJob]("academicYear" -> academicYear)))
-	}
+  @RequestMapping(method = Array(POST))
+  def importModules(@RequestParam academicYear: String): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportSmallGroupEventLocationsJob]("academicYear" -> academicYear)))
+  }
 }
 
 
@@ -179,24 +185,24 @@ class ImportMissingEventLocationsController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsAssignmentsController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def reindex(): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsJob]()))
-	}
+  @RequestMapping(method = Array(POST))
+  def reindex(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsJob]()))
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits-all-years"))
 class ImportSitsAssignmentsAllYearsController extends BaseSysadminController with AutowiringJobServiceComponent {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def importAllYears(): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsAllYearsJob]()))
-	}
+  @RequestMapping(method = Array(POST))
+  def importAllYears(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportAssignmentsAllYearsJob]()))
+  }
 
 }
 
@@ -204,83 +210,83 @@ class ImportSitsAssignmentsAllYearsController extends BaseSysadminController wit
 @RequestMapping(Array("/sysadmin/import-module-lists"))
 class ImportSitsModuleListsController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST))
-	def reindex(): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportModuleListsJob]()))
-	}
+  @RequestMapping(method = Array(POST))
+  def reindex(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportModuleListsJob]()))
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController with AutowiringJobServiceComponent {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping(method = Array(POST), params = Array("members"))
-	def importSpecificProfiles(@RequestParam members: String): Mav = {
-		val jobInstance = jobService.add(None, ImportMembersJob(members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)))
-		Redirect(Routes.sysadmin.jobs.status(jobInstance))
-	}
+  @RequestMapping(method = Array(POST), params = Array("members"))
+  def importSpecificProfiles(@RequestParam members: String): Mav = {
+    val jobInstance = jobService.add(None, ImportMembersJob(members.split("(\\s|[^A-Za-z\\d\\-_\\.])+").map(_.trim).filterNot(_.isEmpty)))
+    Redirect(Routes.sysadmin.jobs.status(jobInstance))
+  }
 
-	@RequestMapping(method = Array(POST))
-	def importProfiles(@RequestParam deptCode: String): Mav = {
-		if (deptCode.maybeText.isEmpty) {
-			Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]()))
-		} else {
-			Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> deptCode)))
-		}
+  @RequestMapping(method = Array(POST))
+  def importProfiles(@RequestParam deptCode: String): Mav = {
+    if (deptCode.maybeText.isEmpty) {
+      Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesJob]()))
+    } else {
+      Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> deptCode)))
+    }
 
-	}
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles/{universityId}"))
 class ImportSingleProfileController extends BaseSysadminController {
 
-	var profileService: ProfileService = Wire[ProfileService]
+  var profileService: ProfileService = Wire[ProfileService]
 
-	@RequestMapping def form = "sysadmin/reindexprofile"
+  @RequestMapping def form = "sysadmin/reindexprofile"
 
-	@RequestMapping(method = Array(POST))
-	def importProfile(@PathVariable universityId: String): Mav = {
-		val command = new ImportProfilesCommand
+  @RequestMapping(method = Array(POST))
+  def importProfile(@PathVariable universityId: String): Mav = {
+    val command = new ImportProfilesCommand
 
-		val member = profileService.getMemberByUniversityIdStaleOrFresh(universityId) match {
-			case Some(stu: StudentMember) => command.refresh(stu.universityId, Some(stu.userId))
-			case Some(staff: StaffMember) => command.refresh(staff.universityId, Some(staff.userId))
-			case Some(_) => throw new IllegalArgumentException("Tried to refresh a non-staff/student member - not implemented yet")
-			case None => command.refresh(universityId, None)
-		}
+    val member = profileService.getMemberByUniversityIdStaleOrFresh(universityId) match {
+      case Some(stu: StudentMember) => command.refresh(stu.universityId, Some(stu.userId))
+      case Some(staff: StaffMember) => command.refresh(staff.universityId, Some(staff.userId))
+      case Some(_) => throw new IllegalArgumentException("Tried to refresh a non-staff/student member - not implemented yet")
+      case None => command.refresh(universityId, None)
+    }
 
-		// Redirect cross-context
-		Redirect(Routes.profiles.Profile.identity(member.get))
-	}
+    // Redirect cross-context
+    Redirect(Routes.profiles.Profile.identity(member.get))
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/recheck-missing"))
 class RecheckMissingController extends BaseSysadminController {
-	@ModelAttribute("recheckForm") def recheckForm = RecheckMissingRowsCommand()
+  @ModelAttribute("recheckForm") def recheckForm = RecheckMissingRowsCommand()
 
-	@RequestMapping(method = Array(POST))
-	def recheck(@ModelAttribute("recheckForm")form: Appliable[Unit]): Mav = {
-		form.apply()
-		redirectToHome
-	}
+  @RequestMapping(method = Array(POST))
+  def recheck(@ModelAttribute("recheckForm") form: Appliable[Unit]): Mav = {
+    form.apply()
+    redirectToHome
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/complete-scheduled-notification"))
 class CompleteScheduledNotificationsController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping
-	def complete(): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ProcessScheduledNotificationsJob]()))
-	}
+  @RequestMapping
+  def complete(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ProcessScheduledNotificationsJob]()))
+  }
 }
 
 
@@ -288,59 +294,59 @@ class CompleteScheduledNotificationsController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/manual-membership-warning"))
 class ManualMembershipWarningController extends BaseSysadminController {
 
-	var scheduler: Scheduler = Wire[Scheduler]
+  var scheduler: Scheduler = Wire[Scheduler]
 
-	@RequestMapping
-	def warn(): Mav = {
-		Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ManualMembershipWarningJob]()))
-	}
+  @RequestMapping
+  def warn(): Mav = {
+    Redirect(Routes.sysadmin.jobs.quartzStatus(scheduler.scheduleNow[ManualMembershipWarningJob]()))
+  }
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/jobs/quartz-status"))
 class QuartzJobStatusController extends BaseSysadminController with AutowiringTopLevelUrlComponent {
 
-	@RequestMapping
-	def status(@RequestParam key: String): Mav = {
-		if (ajax) {
-			val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
-			val jdbcTemplate = new JdbcTemplate(dataSource)
+  @RequestMapping
+  def status(@RequestParam key: String): Mav = {
+    if (ajax) {
+      val clusterName = Uri.parse(Wire.property("${toplevel.url}")).getAuthority
+      val jdbcTemplate = new JdbcTemplate(dataSource)
 
-			val trigger =
-				jdbcTemplate.queryAndMap("select * from qrtz_triggers") {
-					case (resultSet, _) => QuartzJdbc.Trigger(resultSet)
-				}.filter(_.clusterName == clusterName).find(_.name == key)
+      val trigger =
+        jdbcTemplate.queryAndMap("select * from qrtz_triggers") {
+          case (resultSet, _) => QuartzJdbc.Trigger(resultSet)
+        }.filter(_.clusterName == clusterName).find(_.name == key)
 
-			trigger match {
-				case Some(t) =>
-					// Is this a currently fired job?
-					val firedTrigger =
-						jdbcTemplate.queryAndMap("select * from qrtz_fired_triggers") {
-							case (resultSet, _) => QuartzJdbc.FiredTrigger(resultSet)
-						}.filter(_.clusterName == clusterName).find(_.name == t.name)
+      trigger match {
+        case Some(t) =>
+          // Is this a currently fired job?
+          val firedTrigger =
+            jdbcTemplate.queryAndMap("select * from qrtz_fired_triggers") {
+              case (resultSet, _) => QuartzJdbc.FiredTrigger(resultSet)
+            }.filter(_.clusterName == clusterName).find(_.name == t.name)
 
-					firedTrigger match {
-						case Some(fired) =>
-							Mav(new JSONView(Map(
-								"status" -> (if (fired.executing) "EXECUTING" else "ACQUIRED"),
-								"exists" -> true,
-								"job" -> t.jobName
-							))).noLayout()
-						case _ =>
-							Mav(new JSONView(Map(
-								"status" -> t.state,
-								"exists" -> true,
-								"job" -> t.jobName
-							))).noLayout()
-					}
-				case _ =>
-					Mav(new JSONView(Map(
-						"status" -> "NONE",
-						"exists" -> false
-					))).noLayout()
-			}
-		} else {
-			Mav("sysadmin/jobs/quartz-status", "key" -> key)
-		}
-	}
+          firedTrigger match {
+            case Some(fired) =>
+              Mav(new JSONView(Map(
+                "status" -> (if (fired.executing) "EXECUTING" else "ACQUIRED"),
+                "exists" -> true,
+                "job" -> t.jobName
+              ))).noLayout()
+            case _ =>
+              Mav(new JSONView(Map(
+                "status" -> t.state,
+                "exists" -> true,
+                "job" -> t.jobName
+              ))).noLayout()
+          }
+        case _ =>
+          Mav(new JSONView(Map(
+            "status" -> "NONE",
+            "exists" -> false
+          ))).noLayout()
+      }
+    } else {
+      Mav("sysadmin/jobs/quartz-status", "key" -> key)
+    }
+  }
 }

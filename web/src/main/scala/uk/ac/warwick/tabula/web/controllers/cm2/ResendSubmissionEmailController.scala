@@ -11,34 +11,35 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/resend-receipt"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/resend-receipt"))
 class ResendSubmissionEmailController extends CourseworkController {
 
-	var submissionService: SubmissionService = Wire.auto[SubmissionService]
+  var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
-		new SendSubmissionReceiptCommand(
-			assignment,
-			mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
-			user)
+  @ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser) =
+    new SendSubmissionReceiptCommand(
+      assignment,
+      mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId).filter(_.submitted)),
+      user)
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def nope(form: SendSubmissionReceiptCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
+  @RequestMapping(method = Array(GET, HEAD))
+  def nope(form: SendSubmissionReceiptCommand) = Redirect(Routes.assignment(mandatory(form.assignment)))
 
-	@RequestMapping(method = Array(POST))
-	def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
-		val sent = form.apply()
+  @RequestMapping(method = Array(POST))
+  def sendEmail(form: SendSubmissionReceiptCommand): Mav = {
+    val sent = form.apply()
 
-		Mav("cm2/submit/receipt",
-			"submission" -> form.submission,
-			"module" -> form.assignment.module,
-			"assignment" -> form.assignment,
-			"sent" -> sent,
-			"hasEmail" -> user.email.hasText)
+    Mav("cm2/submit/receipt",
+      "submission" -> form.submission,
+      "module" -> form.assignment.module,
+      "assignment" -> form.assignment,
+      "sent" -> sent,
+      "hasEmail" -> user.email.hasText)
 
-	}
+  }
 
 }

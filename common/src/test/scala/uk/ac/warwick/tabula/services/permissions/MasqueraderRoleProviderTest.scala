@@ -7,25 +7,25 @@ import uk.ac.warwick.tabula.Fixtures
 
 class MasqueraderRoleProviderTest extends TestBase {
 
-	val provider = new MasqueraderRoleProvider
+  val provider = new MasqueraderRoleProvider
 
-	val userLookup = new MockUserLookup
-	provider.userLookup = userLookup
-	provider.webgroup = "tabula-masques"
+  val userLookup = new MockUserLookup
+  provider.userLookup = userLookup
+  provider.webgroup = "tabula-masques"
 
-	userLookup.groupService.usersInGroup ++= Map(
-		("cuscav", "othergroup") -> true,
-		("cuscav", "tabula-masques") -> true
-	)
+  userLookup.groupService.usersInGroup ++= Map(
+    ("cuscav", "othergroup") -> true,
+    ("cuscav", "tabula-masques") -> true
+  )
 
-	@Test def itWorks {
-		withUser("cuscav") {
-			provider.getRolesFor(currentUser) should be (Seq(Masquerader()))
-		}
+  @Test def itWorks {
+    withUser("cuscav") {
+      provider.getRolesFor(currentUser) should be(Seq(Masquerader()))
+    }
 
-		withUser("cusebr") {
-			provider.getRolesFor(currentUser) should be (Seq())
-		}
-	}
+    withUser("cusebr") {
+      provider.getRolesFor(currentUser) should be(Seq())
+    }
+  }
 
 }

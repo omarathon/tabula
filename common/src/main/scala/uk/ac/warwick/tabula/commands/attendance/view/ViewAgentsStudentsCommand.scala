@@ -9,39 +9,42 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ViewAgentsStudentsCommand {
-	def apply(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType, agent: Member) =
-		new ViewAgentsStudentsCommandInternal(department, academicYear, relationshipType, agent)
-			with ViewAgentsStudentsPermissions
-			with AutowiringRelationshipServiceComponent
-			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[FilteredStudentsAttendanceResult]
-			with ViewAgentsStudentsState
-			with ReadOnly with Unaudited
- }
+  def apply(department: Department, academicYear: AcademicYear, relationshipType: StudentRelationshipType, agent: Member) =
+    new ViewAgentsStudentsCommandInternal(department, academicYear, relationshipType, agent)
+      with ViewAgentsStudentsPermissions
+      with AutowiringRelationshipServiceComponent
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ComposableCommand[FilteredStudentsAttendanceResult]
+      with ViewAgentsStudentsState
+      with ReadOnly with Unaudited
+}
 
 class ViewAgentsStudentsCommandInternal(val department: Department, val academicYear: AcademicYear, val relationshipType: StudentRelationshipType, val agent: Member)
-	extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult {
+  extends CommandInternal[FilteredStudentsAttendanceResult] with BuildsFilteredStudentsAttendanceResult {
 
-		self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent =>
+  self: RelationshipServiceComponent with AttendanceMonitoringServiceComponent =>
 
-		def applyInternal(): FilteredStudentsAttendanceResult = {
-			val students = relationshipService.listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
-			buildAttendanceResult(students.size, students, Option(department), academicYear)
-		}
-	}
+  def applyInternal(): FilteredStudentsAttendanceResult = {
+    val students = relationshipService.listCurrentStudentRelationshipsWithMemberInDepartment(relationshipType, agent, department).flatMap(_.studentMember)
+    buildAttendanceResult(students.size, students, Option(department), academicYear)
+  }
+}
 
 trait ViewAgentsStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	 self: ViewAgentsStudentsState =>
+  self: ViewAgentsStudentsState =>
 
-	 def permissionsCheck(p: PermissionsChecking) {
-		 p.PermissionCheck(Permissions.MonitoringPoints.View, department)
-	 }
- }
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.View, department)
+  }
+}
 
 trait ViewAgentsStudentsState {
-	def department: Department
-	def academicYear: AcademicYear
-	def relationshipType: StudentRelationshipType
-	def agent: Member
+  def department: Department
+
+  def academicYear: AcademicYear
+
+  def relationshipType: StudentRelationshipType
+
+  def agent: Member
 }

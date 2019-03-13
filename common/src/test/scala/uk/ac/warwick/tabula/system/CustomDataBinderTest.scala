@@ -8,42 +8,42 @@ import scala.collection.JavaConverters._
 
 class CustomDataBinderTest extends TestBase {
 
-	@Test
-	def customAutoGrowCollectionLimit {
-		val cmd = new TestCommand
-		val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
+  @Test
+  def customAutoGrowCollectionLimit {
+    val cmd = new TestCommand
+    val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
 
-		val pvs = new MutablePropertyValues
+    val pvs = new MutablePropertyValues
 
-		// default auto-grow collection limit is 256 - check we can exceed this
-		for (count <- 0 to 256) {
-			pvs.add("lazyList[" + count + "]", count.toString)
-		}
+    // default auto-grow collection limit is 256 - check we can exceed this
+    for (count <- 0 to 256) {
+      pvs.add("lazyList[" + count + "]", count.toString)
+    }
 
-		binder.bind(pvs)
+    binder.bind(pvs)
 
-		cmd.lazyList.size should be (257)
+    cmd.lazyList.size should be(257)
 
-	}
+  }
 
-	@Test(expected = classOf[InvalidPropertyException])
-	def exceedsCustomAutoGrowCollectionLimit {
+  @Test(expected = classOf[InvalidPropertyException])
+  def exceedsCustomAutoGrowCollectionLimit {
 
-		val cmd = new TestCommand
-		val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
+    val cmd = new TestCommand
+    val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
 
-		val pvs = new MutablePropertyValues
-		for (count <- 0 to 10000) {
-			pvs.add("lazyList[" + count + "]", count.toString)
-		}
+    val pvs = new MutablePropertyValues
+    for (count <- 0 to 10000) {
+      pvs.add("lazyList[" + count + "]", count.toString)
+    }
 
-		binder.bind(pvs)
-	}
+    binder.bind(pvs)
+  }
 
-	trait HasValue {
-		var lazyList:JList[String] = LazyLists.create()
-	}
+  trait HasValue {
+    var lazyList: JList[String] = LazyLists.create()
+  }
 
-	class TestCommand extends HasValue
+  class TestCommand extends HasValue
 
 }

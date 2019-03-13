@@ -4,18 +4,18 @@ import javax.persistence._
 import org.joda.time.DateTime
 
 object FileAttachmentToken {
-	val DefaultTokenValidityMinutes = 30
+  val DefaultTokenValidityMinutes = 30
 }
 
 @Entity
 class FileAttachmentToken extends GeneratedId {
 
-	@Column(name="fileattachment_id")
-	var fileAttachmentId: String = _
+  @Column(name = "fileattachment_id")
+  var fileAttachmentId: String = _
 
-	var expires: DateTime = _
+  var expires: DateTime = _
 
-	@Column(name="date_used")
-	var dateUsed: DateTime = _
+  @Column(name = "date_used")
+  var dateUsed: DateTime = _
 
 }

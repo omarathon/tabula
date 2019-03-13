@@ -12,66 +12,66 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.Mav
 
 object EmergencyMessageCommand {
-	type Command = Appliable[EmergencyMessage] with SelfValidating with PopulateOnForm
+  type Command = Appliable[EmergencyMessage] with SelfValidating with PopulateOnForm
 
-	def apply(): Command =
-		new EmergencyMessageCommandInternal
-			with ComposableCommand[EmergencyMessage]
-			with EmergencyMessageCommandPopulation
-			with EmergencyMessageCommandValidation
-			with ManageEmergencyMessagePermissions
-			with AutowiringEmergencyMessageServiceComponent
-			with AutowiringSettingsSyncQueueComponent
-			with ReadOnly with Unaudited
+  def apply(): Command =
+    new EmergencyMessageCommandInternal
+      with ComposableCommand[EmergencyMessage]
+      with EmergencyMessageCommandPopulation
+      with EmergencyMessageCommandValidation
+      with ManageEmergencyMessagePermissions
+      with AutowiringEmergencyMessageServiceComponent
+      with AutowiringSettingsSyncQueueComponent
+      with ReadOnly with Unaudited
 }
 
 trait EmergencyMessageCommandRequest {
 
-	var enable: Boolean = _
-	var message: String = _
+  var enable: Boolean = _
+  var message: String = _
 
 }
 
 class EmergencyMessageCommandInternal extends CommandInternal[EmergencyMessage] with EmergencyMessageCommandRequest {
-	self: EmergencyMessageServiceComponent with SettingsSyncQueueComponent =>
+  self: EmergencyMessageServiceComponent with SettingsSyncQueueComponent =>
 
-	override def applyInternal(): EmergencyMessage = {
-		if (!enable) {
-			message = null
-		}
-		emergencyMessageService.message = Option(message)
-		if (enable) emergencyMessageService.enable
-		else emergencyMessageService.disable
+  override def applyInternal(): EmergencyMessage = {
+    if (!enable) {
+      message = null
+    }
+    emergencyMessageService.message = Option(message)
+    if (enable) emergencyMessageService.enable
+    else emergencyMessageService.disable
 
-		val msg = new EmergencyMessage(enable, Option(message))
+    val msg = new EmergencyMessage(enable, Option(message))
 
-		settingsSyncQueue.send(msg)
+    settingsSyncQueue.send(msg)
 
-		msg
-	}
+    msg
+  }
 
 }
 
 trait EmergencyMessageCommandPopulation extends PopulateOnForm {
-	self: EmergencyMessageCommandRequest with EmergencyMessageServiceComponent =>
+  self: EmergencyMessageCommandRequest with EmergencyMessageServiceComponent =>
 
-	override def populate(): Unit = {
-		enable = emergencyMessageService.enabled
-		message = emergencyMessageService.message.orNull
-	}
+  override def populate(): Unit = {
+    enable = emergencyMessageService.enabled
+    message = emergencyMessageService.message.orNull
+  }
 }
 
 trait EmergencyMessageCommandValidation extends SelfValidating {
 
-	override def validate(errors: Errors): Unit = {}
+  override def validate(errors: Errors): Unit = {}
 
 }
 
 trait ManageEmergencyMessagePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.ManageEmergencyMessage)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.ManageEmergencyMessage)
+  }
 
 }
 
@@ -79,21 +79,21 @@ trait ManageEmergencyMessagePermissions extends RequiresPermissionsChecking with
 @RequestMapping(Array("/sysadmin/emergencymessage"))
 class EmergencyMessageController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command") def cmd: EmergencyMessageCommand.Command = EmergencyMessageCommand()
+  @ModelAttribute("command") def cmd: EmergencyMessageCommand.Command = EmergencyMessageCommand()
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav =
-		Mav("sysadmin/emergency-message").noLayoutIf(ajax)
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav =
+    Mav("sysadmin/emergency-message").noLayoutIf(ajax)
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav = {
-		if (errors.hasErrors)
-			showForm(form, errors)
-		else {
-			form.apply()
-			Redirect("/sysadmin")
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") form: EmergencyMessageCommand.Command, errors: Errors): Mav = {
+    if (errors.hasErrors)
+      showForm(form, errors)
+    else {
+      form.apply()
+      Redirect("/sysadmin")
+    }
+  }
 }

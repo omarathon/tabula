@@ -16,71 +16,77 @@ import uk.ac.warwick.tabula.services.{AutowiringAssessmentMembershipServiceCompo
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/copy-assignments"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/copy-assignments"))
 class OldCopyModuleAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap with AutowiringFeaturesComponent {
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
+  @ModelAttribute
+  def copyAssignmentsCommand(@PathVariable module: Module) = CopyAssignmentsCommand(module.adminDepartment, Seq(module))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
-		if(features.redirectCM1) {
-			Redirect(CM2Routes.admin.module.copyAssignments(module, cmd.academicYear))
-		} else {
-			Mav("coursework/admin/modules/copy_assignments",
-				"title" -> module.name,
-				"cancel" -> Routes.admin.module(module),
-				"map" -> moduleAssignmentMap(cmd.modules)
-			)
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm(@PathVariable module: Module, cmd: CopyAssignmentsCommand): Mav = {
+    if (features.redirectCM1) {
+      Redirect(CM2Routes.admin.module.copyAssignments(module, cmd.academicYear))
+    } else {
+      Mav("coursework/admin/modules/copy_assignments",
+        "title" -> module.name,
+        "cancel" -> Routes.admin.module(module),
+        "map" -> moduleAssignmentMap(cmd.modules)
+      )
 
-		}
-	}
+    }
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser): Mav = {
-		cmd.apply()
-		Redirect(Routes.admin.module(module))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(cmd: CopyAssignmentsCommand, @PathVariable module: Module, errors: Errors, user: CurrentUser): Mav = {
+    cmd.apply()
+    Redirect(Routes.admin.module(module))
+  }
 
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/copy-assignments"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{department}/copy-assignments"))
 class OldCopyDepartmentAssignmentsController extends OldCourseworkController with UnarchivedAssignmentsMap with AutowiringFeaturesComponent {
 
-	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
-		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy { _.code }
-		CopyAssignmentsCommand(department, modules)
-	}
+  @ModelAttribute
+  def copyAssignmentsCommand(@PathVariable department: Department): CopyAssignmentsCommand with ComposableCommand[Seq[Assignment]] with CopyAssignmentsPermissions with CopyAssignmentsDescription with AutowiringAssessmentServiceComponent with AutowiringAssessmentMembershipServiceComponent = {
+    val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive)).sortBy {
+      _.code
+    }
+    CopyAssignmentsCommand(department, modules)
+  }
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
-		if(features.redirectCM1) {
-			Redirect(CM2Routes.admin.copyAssignments(department, cmd.academicYear))
-		} else {
-			Mav("coursework/admin/modules/copy_assignments",
-				"title" -> department.name,
-				"cancel" -> Routes.admin.department(department),
-				"map" -> moduleAssignmentMap(cmd.modules),
-				"showSubHeadings" -> true
-			)
-		}
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm(@PathVariable department: Department, cmd: CopyAssignmentsCommand): Mav = {
+    if (features.redirectCM1) {
+      Redirect(CM2Routes.admin.copyAssignments(department, cmd.academicYear))
+    } else {
+      Mav("coursework/admin/modules/copy_assignments",
+        "title" -> department.name,
+        "cancel" -> Routes.admin.department(department),
+        "map" -> moduleAssignmentMap(cmd.modules),
+        "showSubHeadings" -> true
+      )
+    }
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser): Mav = {
-		cmd.apply()
-		Redirect(Routes.admin.department(department))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(cmd: CopyAssignmentsCommand, @PathVariable department: Department, errors: Errors, user: CurrentUser): Mav = {
+    cmd.apply()
+    Redirect(Routes.admin.department(department))
+  }
 
 }
 
 trait UnarchivedAssignmentsMap {
 
-	def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
-		for(module <- modules) yield module.code ->  module.assignments.asScala.filter { _.isAlive }
-	).toMap.filterNot(_._2.isEmpty)
+  def moduleAssignmentMap(modules: Seq[Module]): Map[String, Seq[Assignment]] = (
+    for (module <- modules) yield module.code -> module.assignments.asScala.filter {
+      _.isAlive
+    }
+    ).toMap.filterNot(_._2.isEmpty)
 
 }

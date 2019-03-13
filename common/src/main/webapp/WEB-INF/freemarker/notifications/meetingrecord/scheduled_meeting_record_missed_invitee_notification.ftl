@@ -3,5 +3,5 @@ ${actor.fullName} has recorded that a scheduled<#if agentRoles?size == 1> ${agen
 ${meetingRecord.title!'A meeting you no longer have permission to view'} on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
 
 <#if meetingRecord.missedReason?has_content>
-	"${meetingRecord.missedReason}"
+  "${meetingRecord.missedReason}"
 </#if>

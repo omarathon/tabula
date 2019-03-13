@@ -9,61 +9,66 @@ import uk.ac.warwick.tabula.{FreemarkerTestHelpers, SmallGroupEventBuilder, Smal
 
 class SmallGroupSetChangedNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 
-    private trait NotificationFixture extends SmallGroupFixture {
+  private trait NotificationFixture extends SmallGroupFixture {
 
-      val weekRangeFormatter = new StubFreemarkerMethodModel
-      val urlModel = new StubFreemarkerDirectiveModel
-      val timeBuilder= new StubFreemarkerMethodModel
+    val weekRangeFormatter = new StubFreemarkerMethodModel
+    val urlModel = new StubFreemarkerDirectiveModel
+    val timeBuilder = new StubFreemarkerMethodModel
 
-      // make group1 have 2 events (the default fixture only has 1) so we can verify iteration over
-      // the group's events
-      val event: SmallGroupEvent = new SmallGroupEventBuilder()
-        .withDay(DayOfWeek.Monday)
-        .withStartTime(new LocalTime(12,0,0,0))
-        .withLocation("TEST").build
-      event.group = group1
-      group1.addEvent(event)
+    // make group1 have 2 events (the default fixture only has 1) so we can verify iteration over
+    // the group's events
+    val event: SmallGroupEvent = new SmallGroupEventBuilder()
+      .withDay(DayOfWeek.Monday)
+      .withStartTime(new LocalTime(12, 0, 0, 0))
+      .withLocation("TEST").build
+    event.group = group1
+    group1.addEvent(event)
 
 
-      implicit val config: ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap(
-        "url" -> urlModel,
-        "weekRangesFormatter" -> weekRangeFormatter,
-        "timeBuilder"->timeBuilder))
-    }
+    implicit val config: ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap(
+      "url" -> urlModel,
+      "weekRangesFormatter" -> weekRangeFormatter,
+      "timeBuilder" -> timeBuilder))
+  }
 
   @Test
-  def includesTheNameOfTheGroup{
+  def includesTheNameOfTheGroup {
     new NotificationFixture {
       val output: String =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
           Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       output should include(group1.name)
-    }}
+    }
+  }
 
   @Test
-  def includesTheCountOfStudents{new NotificationFixture {
-    val output: String =
-      renderToString(SmallGroupSetChangedNotification.templateLocation,
-				Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
-    output should include("2 students")
-  }}
+  def includesTheCountOfStudents {
+    new NotificationFixture {
+      val output: String =
+        renderToString(SmallGroupSetChangedNotification.templateLocation,
+          Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+      output should include("2 students")
+    }
+  }
 
   @Test
   def callsWeekRangeFormatterForEachEvent() {
     new NotificationFixture {
       val output: String =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-					Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+          Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(weekRangeFormatter.mock, times(2)).exec(anyList())
-    }}
+    }
+  }
 
   @Test
-  def formatsTimeNicelyForEachEvent(){
+  def formatsTimeNicelyForEachEvent() {
     new NotificationFixture {
       val output: String =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-					Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+          Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(timeBuilder.mock, times(2)).exec(anyList())
-    }}
-
+    }
   }
+
+}

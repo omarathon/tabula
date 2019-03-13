@@ -19,61 +19,61 @@ import scala.collection.JavaConverters._
 @Controller
 @RequestMapping(Array("/v1/holidaydates", "/v1/holidaydates.*"))
 class HolidayDatesController extends ApiController
-	with GetHolidayDatesApi
+  with GetHolidayDatesApi
 
 trait GetHolidayDatesApi {
-	self: ApiController =>
+  self: ApiController =>
 
-	lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
+  lazy val holidayDates: Seq[LocalDate] = new WorkingDaysHelperImpl().getHolidayDates.asScala.toSeq.map(_.asJoda).sorted
 
-	@ModelAttribute("holidayDates")
-	def holidayDatesModelAttribute: Seq[LocalDate] = holidayDates
+  @ModelAttribute("holidayDates")
+  def holidayDatesModelAttribute: Seq[LocalDate] = holidayDates
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def jsonTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"dates" -> dates.map(DateFormats.IsoDate.print)
-		)))
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def jsonTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "dates" -> dates.map(DateFormats.IsoDate.print)
+    )))
+  }
 
-	@RequestMapping(method = Array(GET), produces = Array("text/calendar"))
-	def icalTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
-		val cal: Calendar = new Calendar
-		cal.getProperties.add(Version.VERSION_2_0)
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
-		cal.getProperties.add(CalScale.GREGORIAN)
-		cal.getProperties.add(Method.PUBLISH)
-		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT1W")) // 1 week
-		cal.getProperties.add(new XProperty("X-WR-CALNAME", "Statutory and Customary Holiday Days"))
+  @RequestMapping(method = Array(GET), produces = Array("text/calendar"))
+  def icalTermDates(@ModelAttribute("holidayDates") dates: Seq[LocalDate]): Mav = {
+    val cal: Calendar = new Calendar
+    cal.getProperties.add(Version.VERSION_2_0)
+    cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
+    cal.getProperties.add(CalScale.GREGORIAN)
+    cal.getProperties.add(Method.PUBLISH)
+    cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT1W")) // 1 week
+    cal.getProperties.add(new XProperty("X-WR-CALNAME", "Statutory and Customary Holiday Days"))
 
-		def toIcalDate(date: LocalDate): net.fortuna.ical4j.model.Date =
-			new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
+    def toIcalDate(date: LocalDate): net.fortuna.ical4j.model.Date =
+      new net.fortuna.ical4j.model.Date(date.toString("yyyyMMdd"))
 
-		// Join consecutive dates into ranges
-		val dateRanges = dates.tail.toList.foldLeft(List(dates.take(1).toList)) {
-			case (acc @ (lst @ hd :: _) :: tl, el) =>
-				if (el == hd.plusDays(1)) (el :: lst) :: tl
-				else (el :: Nil) :: acc
-			case _ => Nil
-		}.map(_.reverse).reverse
+    // Join consecutive dates into ranges
+    val dateRanges = dates.tail.toList.foldLeft(List(dates.take(1).toList)) {
+      case (acc@(lst@hd :: _) :: tl, el) =>
+        if (el == hd.plusDays(1)) (el :: lst) :: tl
+        else (el :: Nil) :: acc
+      case _ => Nil
+    }.map(_.reverse).reverse
 
-		dateRanges.foreach { range =>
-			val event: VEvent = new VEvent(toIcalDate(range.head), toIcalDate(range.last.plusDays(1)), "University Holiday")
+    dateRanges.foreach { range =>
+      val event: VEvent = new VEvent(toIcalDate(range.head), toIcalDate(range.last.plusDays(1)), "University Holiday")
 
-			event.getProperties.add(new Uid(s"holidayday-${range.map(DateFormats.IsoDate.print).mkString("-")}"))
-			event.getProperties.add(Method.PUBLISH)
-			event.getProperties.add(Transp.OPAQUE)
+      event.getProperties.add(new Uid(s"holidayday-${range.map(DateFormats.IsoDate.print).mkString("-")}"))
+      event.getProperties.add(Method.PUBLISH)
+      event.getProperties.add(Transp.OPAQUE)
 
-			val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
-			event.getProperties.add(organiser)
+      val organiser: Organizer = new Organizer(s"MAILTO:no-reply@tabula.warwick.ac.uk")
+      event.getProperties.add(organiser)
 
-			event.getProperties.add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "OOF"))
+      event.getProperties.add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "OOF"))
 
-			cal.getComponents.add(event)
-		}
+      cal.getComponents.add(event)
+    }
 
-		Mav(new IcalView(cal), "filename" -> s"holidaydates.ics")
-	}
+    Mav(new IcalView(cal), "filename" -> s"holidaydates.ics")
+  }
 }

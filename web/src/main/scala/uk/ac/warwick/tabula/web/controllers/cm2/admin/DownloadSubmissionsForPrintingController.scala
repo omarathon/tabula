@@ -18,49 +18,51 @@ import scala.util.Try
 
 trait DownloadSubmissionsForPrintingController extends CourseworkController with AutowiringUserLookupComponent {
 
-	private def isValidPdf(file: FileAttachment): Boolean = file.name.endsWith(DownloadAdminSubmissionsForPrintingCommand.pdfExtension) &&
-		Try(new PdfReader(file.asByteSource.openStream()).close()).isSuccess
+  private def isValidPdf(file: FileAttachment): Boolean = file.name.endsWith(DownloadAdminSubmissionsForPrintingCommand.pdfExtension) &&
+    Try(new PdfReader(file.asByteSource.openStream()).close()).isSuccess
 
-	@RequestMapping
-	def pdfCheck(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command, @PathVariable assignment: Assignment): Mav = {
-		Mav(new JSONView(Map(
-			"submissionsWithNonPDFs" -> cmd.submissions
-					.map(s => (s, s.allAttachments.filter(file => !isValidPdf(file))))
-					.filter{ case (_, a) => a.nonEmpty}
-					.map{ case (s, a) =>
-						Map(
-							"submission" -> s.id,
-							"universityId" -> s.studentIdentifier,
-							"name" -> (if (assignment.module.adminDepartment.showStudentName) userLookup.getUserByUserId(s.usercode).getFullName else ""),
-							"nonPDFFiles" -> a.map(_.name)
-						)
-					}
-		))).noLayout()
-	}
+  @RequestMapping
+  def pdfCheck(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command, @PathVariable assignment: Assignment): Mav = {
+    Mav(new JSONView(Map(
+      "submissionsWithNonPDFs" -> cmd.submissions
+        .map(s => (s, s.allAttachments.filter(file => !isValidPdf(file))))
+        .filter { case (_, a) => a.nonEmpty }
+        .map { case (s, a) =>
+          Map(
+            "submission" -> s.id,
+            "universityId" -> s.studentIdentifier,
+            "name" -> (if (assignment.module.adminDepartment.showStudentName) userLookup.getUserByUserId(s.usercode).getFullName else ""),
+            "nonPDFFiles" -> a.map(_.name)
+          )
+        }
+    ))).noLayout()
+  }
 
-	@RequestMapping(params = Array("download"))
-	def download(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command): Mav = {
-		Mav(new RenderableFileView(cmd.apply()))
-	}
+  @RequestMapping(params = Array("download"))
+  def download(@ModelAttribute("command") cmd: DownloadSubmissionsForPrintingCommand.Command): Mav = {
+    Mav(new RenderableFileView(cmd.apply()))
+  }
 
 }
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/submissions.pdf"))
 class DownloadAdminSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment): DownloadSubmissionsForPrintingCommand.Command =
-		DownloadAdminSubmissionsForPrintingCommand(assignment)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment): DownloadSubmissionsForPrintingCommand.Command =
+    DownloadAdminSubmissionsForPrintingCommand(assignment)
 
 }
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/submissions.pdf"))
 class DownloadMarkerSubmissionsForPrintingController extends DownloadSubmissionsForPrintingController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, submitter: CurrentUser): DownloadSubmissionsForPrintingCommand.Command =
-		DownloadMarkerSubmissionsForPrintingCommand(assignment, marker, submitter)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable marker: User, submitter: CurrentUser): DownloadSubmissionsForPrintingCommand.Command =
+    DownloadMarkerSubmissionsForPrintingCommand(assignment, marker, submitter)
 
 }

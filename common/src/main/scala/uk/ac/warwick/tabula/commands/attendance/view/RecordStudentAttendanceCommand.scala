@@ -11,41 +11,42 @@ import scala.collection.JavaConverters._
 
 object RecordStudentAttendanceCommand {
 
-	def apply(department: Department, academicYear: AcademicYear, student: StudentMember, user: CurrentUser) =
-		new RecordStudentAttendanceCommandInternal(department, academicYear, student, user)
-			with StudentRecordCommandHelper
-			with RecordStudentAttendanceDescription
-			with RecordStudentAttendanceCommandState
+  def apply(department: Department, academicYear: AcademicYear, student: StudentMember, user: CurrentUser) =
+    new RecordStudentAttendanceCommandInternal(department, academicYear, student, user)
+      with StudentRecordCommandHelper
+      with RecordStudentAttendanceDescription
+      with RecordStudentAttendanceCommandState
 }
 
 
 class RecordStudentAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val student: StudentMember, val user: CurrentUser)
-	extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
+  extends CommandInternal[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
-	self: StudentRecordCommandRequest with AttendanceMonitoringServiceComponent =>
+  self: StudentRecordCommandRequest with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
-		attendanceMonitoringService.setAttendance(student, checkpointMap.asScala.toMap, user)
-	}
+  override def applyInternal(): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal]) = {
+    attendanceMonitoringService.setAttendance(student, checkpointMap.asScala.toMap, user)
+  }
 
 }
 
 trait RecordStudentAttendanceDescription extends Describable[(Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])] {
 
-	self: RecordStudentAttendanceCommandState =>
+  self: RecordStudentAttendanceCommandState =>
 
-	override lazy val eventName = "RecordStudentAttendance"
+  override lazy val eventName = "RecordStudentAttendance"
 
-	override def describe(d: Description) {
-		d.studentIds(Seq(student.universityId))
-	}
+  override def describe(d: Description) {
+    d.studentIds(Seq(student.universityId))
+  }
 }
 
 trait RecordStudentAttendanceCommandState extends StudentRecordCommandState {
 
-	self: AttendanceMonitoringServiceComponent =>
+  self: AttendanceMonitoringServiceComponent =>
 
-	def department: Department
-	override def departmentOption: Option[Department] = Option(department)
+  def department: Department
+
+  override def departmentOption: Option[Department] = Option(department)
 
 }

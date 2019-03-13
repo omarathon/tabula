@@ -9,29 +9,29 @@ case class PreviousUniversityMemberRole(member: model.Member) extends BuiltInRol
 
 case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Previous University Member"
+  override def description = "Previous University Member"
 
-	GrantsScopedPermission(
-		Profiles.Read.Core,
-		Profiles.Read.Photo,
-		Profiles.Read.NextOfKin,
-		Profiles.Read.HomeAndTermTimeAddresses,
-		Profiles.Read.TelephoneNumber,
-		Profiles.Read.MobileNumber,
-		Profiles.Read.Usercode,
-		Profiles.Read.StudentCourseDetails.Core,
-		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.Read.SmallGroups,
-		Profiles.Read.Coursework,
-		Profiles.Read.Timetable,
-		Profiles.Read.TimetablePrivateFeed,
-		Profiles.Read.Disability,
-		Profiles.Read.Tier4VisaRequirement,
-		Profiles.Read.PrivateDetails,
+  GrantsScopedPermission(
+    Profiles.Read.Core,
+    Profiles.Read.Photo,
+    Profiles.Read.NextOfKin,
+    Profiles.Read.HomeAndTermTimeAddresses,
+    Profiles.Read.TelephoneNumber,
+    Profiles.Read.MobileNumber,
+    Profiles.Read.Usercode,
+    Profiles.Read.StudentCourseDetails.Core,
+    Profiles.Read.StudentCourseDetails.Status,
+    Profiles.Read.SmallGroups,
+    Profiles.Read.Coursework,
+    Profiles.Read.Timetable,
+    Profiles.Read.TimetablePrivateFeed,
+    Profiles.Read.Disability,
+    Profiles.Read.Tier4VisaRequirement,
+    Profiles.Read.PrivateDetails,
 
-		MemberNotes.Read,
-		Profiles.Read.ModuleRegistration.Core,
-		Profiles.Read.ModuleRegistration.Results,
+    MemberNotes.Read,
+    Profiles.Read.ModuleRegistration.Core,
+    Profiles.Read.ModuleRegistration.Results,
 
     Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 
@@ -40,16 +40,16 @@ case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRo
     Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
     Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
-		MonitoringPoints.View,
-		SmallGroupEvents.ViewRegister,
+    MonitoringPoints.View,
+    SmallGroupEvents.ViewRegister,
 
-		// Can read own coursework info
-		Submission.Read,
-		AssignmentFeedback.Read,
-		Extension.Read
-	)
+    // Can read own coursework info
+    Submission.Read,
+    AssignmentFeedback.Read,
+    Extension.Read
+  )
 
-	GrantsScopelessPermission(
-		UserPicker
-	)
+  GrantsScopelessPermission(
+    UserPicker
+  )
 }

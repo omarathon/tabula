@@ -397,7 +397,8 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
     // Get the UpstreamAssessmentGroups first as some of them will be empty
     val upstreamGroups: Seq[UpstreamAssessmentGroup] =
       if (groups.isEmpty) Nil
-      else session.newQuery[UpstreamAssessmentGroup]("""
+      else session.newQuery[UpstreamAssessmentGroup](
+        """
         select uag
         from UpstreamAssessmentGroup uag
           join AssessmentComponent ac
@@ -411,14 +412,15 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
         where
           uag.academicYear = :academicYear and
           ag in (:groups)""")
-          .setParameter("academicYear", academicYear)
-          .setParameterList("groups", groups)
-          .seq
+        .setParameter("academicYear", academicYear)
+        .setParameterList("groups", groups)
+        .seq
 
     // Get only current members
     val currentMembers: Map[UpstreamAssessmentGroup, Seq[UpstreamAssessmentGroupMember]] =
       if (upstreamGroups.isEmpty) Map.empty
-      else session.newQuery[UpstreamAssessmentGroupMember]("""
+      else session.newQuery[UpstreamAssessmentGroupMember](
+        """
         select distinct uagm
         from UpstreamAssessmentGroupMember uagm
           join uagm.upstreamAssessmentGroup uag
@@ -432,9 +434,9 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
             scd.statusOnCourse.code not like 'P%'
         where
           uag in (:upstreamGroups)""")
-          .setParameterList("upstreamGroups", upstreamGroups)
-          .seq
-          .groupBy(_.upstreamAssessmentGroup)
+        .setParameterList("upstreamGroups", upstreamGroups)
+        .seq
+        .groupBy(_.upstreamAssessmentGroup)
 
     upstreamGroups.map { group =>
       UpstreamAssessmentGroupInfo(group, currentMembers.getOrElse(group, Nil))

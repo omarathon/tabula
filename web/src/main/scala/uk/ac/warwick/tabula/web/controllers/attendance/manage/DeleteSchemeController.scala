@@ -16,38 +16,38 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/{scheme}/delete"))
 class DeleteSchemeController extends AttendanceController {
 
-	validatesSelf[SelfValidating]
-	type DeleteSchemeCommand = Appliable[AttendanceMonitoringScheme] with DeleteSchemeCommandState
+  validatesSelf[SelfValidating]
+  type DeleteSchemeCommand = Appliable[AttendanceMonitoringScheme] with DeleteSchemeCommandState
 
-	@ModelAttribute("command")
-	def command(@PathVariable scheme: AttendanceMonitoringScheme): DeleteSchemeCommand =
-		DeleteSchemeCommand(mandatory(scheme))
+  @ModelAttribute("command")
+  def command(@PathVariable scheme: AttendanceMonitoringScheme): DeleteSchemeCommand =
+    DeleteSchemeCommand(mandatory(scheme))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: DeleteSchemeCommand): Mav = {
-		Mav("attendance/manage/delete")
-			.crumbs(
-				Breadcrumbs.Manage.HomeForYear(cmd.scheme.academicYear),
-				Breadcrumbs.Manage.DepartmentForYear(cmd.scheme.department, cmd.scheme.academicYear)
-			)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: DeleteSchemeCommand): Mav = {
+    Mav("attendance/manage/delete")
+      .crumbs(
+        Breadcrumbs.Manage.HomeForYear(cmd.scheme.academicYear),
+        Breadcrumbs.Manage.DepartmentForYear(cmd.scheme.department, cmd.scheme.academicYear)
+      )
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("submit"))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: DeleteSchemeCommand,
-		errors: Errors
-		): Mav = {
-			if (errors.hasErrors) {
-				form(cmd)
-			} else {
-				val scheme = cmd.apply()
-				Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
-			}
-	}
+  @RequestMapping(method = Array(POST), params = Array("submit"))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: DeleteSchemeCommand,
+    errors: Errors
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      val scheme = cmd.apply()
+      Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(@PathVariable scheme: AttendanceMonitoringScheme): Mav = {
-		Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
-	}
+  @RequestMapping(method = Array(POST), params = Array("cancel"))
+  def cancel(@PathVariable scheme: AttendanceMonitoringScheme): Mav = {
+    Redirect(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
+  }
 
 }

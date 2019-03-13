@@ -10,52 +10,54 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 
 object ViewDepartmentAttendanceCommand {
-	val RequiredPermission = Permissions.SmallGroupEvents.ViewRegister
+  val RequiredPermission = Permissions.SmallGroupEvents.ViewRegister
 
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
-		new ViewDepartmentAttendanceCommandInternal(department, academicYear, user)
-			with AutowiringSecurityServiceComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with ComposableCommand[Seq[Module]]
-			with ViewDepartmentAttendancePermission
-			with ViewDepartmentAttendanceCommandState
-			with ReadOnly with Unaudited {
-		override lazy val eventName = "ViewDepartmentAttendance"
-	}
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+    new ViewDepartmentAttendanceCommandInternal(department, academicYear, user)
+      with AutowiringSecurityServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with ComposableCommand[Seq[Module]]
+      with ViewDepartmentAttendancePermission
+      with ViewDepartmentAttendanceCommandState
+      with ReadOnly with Unaudited {
+      override lazy val eventName = "ViewDepartmentAttendance"
+    }
 }
 
 class ViewDepartmentAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[Seq[Module]] {
+  extends CommandInternal[Seq[Module]] {
 
-	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent  =>
+  self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-	override def applyInternal(): Seq[Module] = {
-		val modules =
-			if (securityService.can(user, Permissions.SmallGroupEvents.ViewRegister, department)) {
-				department.modules.asScala
-			} else {
-				moduleAndDepartmentService.modulesWithPermission(user, Permissions.SmallGroupEvents.ViewRegister, department).toSeq
-			}
+  override def applyInternal(): Seq[Module] = {
+    val modules =
+      if (securityService.can(user, Permissions.SmallGroupEvents.ViewRegister, department)) {
+        department.modules.asScala
+      } else {
+        moduleAndDepartmentService.modulesWithPermission(user, Permissions.SmallGroupEvents.ViewRegister, department).toSeq
+      }
 
-		modules
-			.filter(m => m.groupSets.asScala.exists(g => g.academicYear == academicYear && g.showAttendanceReports ))
-			.sortBy(m => (m.groupSets.isEmpty, m.code))
-	}
+    modules
+      .filter(m => m.groupSets.asScala.exists(g => g.academicYear == academicYear && g.showAttendanceReports))
+      .sortBy(m => (m.groupSets.isEmpty, m.code))
+  }
 }
 
 trait ViewDepartmentAttendancePermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ViewDepartmentAttendanceCommandState =>
+  self: ViewDepartmentAttendanceCommandState =>
 
-	override def permissionsCheck(p:PermissionsChecking): Unit = {
-		p.PermissionCheckAny(department.modules.asScala.map(
-			CheckablePermission(ViewDepartmentAttendanceCommand.RequiredPermission, _)
-		))
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheckAny(department.modules.asScala.map(
+      CheckablePermission(ViewDepartmentAttendanceCommand.RequiredPermission, _)
+    ))
+  }
 }
 
 trait ViewDepartmentAttendanceCommandState {
-	def department: Department
-	def academicYear: AcademicYear
-	def user: CurrentUser
+  def department: Department
+
+  def academicYear: AcademicYear
+
+  def user: CurrentUser
 }

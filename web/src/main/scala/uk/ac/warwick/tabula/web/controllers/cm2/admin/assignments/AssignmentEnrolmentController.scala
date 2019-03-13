@@ -12,40 +12,40 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
 /**
-	* Controller to populate the user listing for editing, without persistence
-	*/
+  * Controller to populate the user listing for editing, without persistence
+  */
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/enrolment"))
 class AssignmentEnrolmentController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type EditAssignmentMembershipCommand = Appliable[Assignment] with ModifiesAssignmentMembership
+  type EditAssignmentMembershipCommand = Appliable[Assignment] with ModifiesAssignmentMembership
 
-	@ModelAttribute("command")
-	def formObject(@PathVariable assignment: Assignment): EditAssignmentMembershipCommand = {
-		val cmd = EditAssignmentMembershipCommand.stub(mandatory(assignment))
-		cmd.upstreamGroups.clear()
-		cmd
-	}
+  @ModelAttribute("command")
+  def formObject(@PathVariable assignment: Assignment): EditAssignmentMembershipCommand = {
+    val cmd = EditAssignmentMembershipCommand.stub(mandatory(assignment))
+    cmd.upstreamGroups.clear()
+    cmd
+  }
 
-	@RequestMapping
-	def showForm(@ModelAttribute("command") form: EditAssignmentMembershipCommand, @PathVariable assignment: Assignment): Mav = {
-		form.afterBind()
-		Mav("cm2/admin/assignments/enrolment",
-			"department" -> form.module.adminDepartment,
-			"module" -> form.module,
-			"academicYear" -> assignment.academicYear,
-			"availableUpstreamGroups" -> form.availableUpstreamGroups,
-			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> form.assessmentGroups)
-			.crumbsList(Breadcrumbs.assignment(assignment))
-			.noLayout()
-	}
+  @RequestMapping
+  def showForm(@ModelAttribute("command") form: EditAssignmentMembershipCommand, @PathVariable assignment: Assignment): Mav = {
+    form.afterBind()
+    Mav("cm2/admin/assignments/enrolment",
+      "department" -> form.module.adminDepartment,
+      "module" -> form.module,
+      "academicYear" -> assignment.academicYear,
+      "availableUpstreamGroups" -> form.availableUpstreamGroups,
+      "linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
+      "assessmentGroups" -> form.assessmentGroups)
+      .crumbsList(Breadcrumbs.assignment(assignment))
+      .noLayout()
+  }
 
-	@InitBinder
-	def upstreamGroupBinder(binder: WebDataBinder) {
-		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
-	}
+  @InitBinder
+  def upstreamGroupBinder(binder: WebDataBinder) {
+    binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+  }
 }

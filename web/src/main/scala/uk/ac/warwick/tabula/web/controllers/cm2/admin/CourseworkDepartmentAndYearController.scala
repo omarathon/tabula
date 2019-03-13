@@ -8,17 +8,17 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 trait CourseworkDepartmentAndYearController extends DepartmentScopedController with AcademicYearScopedController
-	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	self : CourseworkController =>
+  self: CourseworkController =>
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] =
-		retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] =
+    retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+    retrieveActiveAcademicYear(Option(academicYear))
 
 }

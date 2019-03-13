@@ -84,10 +84,13 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
           UserNavigation("", "")
       }
     }
+
     def create(keys: JList[String]): JMap[String, UserNavigation] = {
       JMap(keys.asScala.map(id => (id, create(id))): _*)
     }
+
     def isSupportsMultiLookups: Boolean = true
+
     def shouldBeCached(response: UserNavigation): Boolean = true
   }
 

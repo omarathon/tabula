@@ -1,144 +1,144 @@
 plugins {
-    id 'com.moowork.node' version '1.2.0'
+  id 'com.moowork.node' version '1.2.0'
 }
 
 // Define cucumber configuration
 configurations {
-    cucumber
-    cucumberCompile {
-        extendsFrom compile
-        // we'll pick out a good bcprov in cucumber
-        exclude group: 'org.bouncycastle'
-    }
+  cucumber
+  cucumberCompile {
+    extendsFrom compile
+    // we'll pick out a good bcprov in cucumber
+    exclude group: 'org.bouncycastle'
+  }
 }
 
 ext {
-    seleniumVersion = '3.141.59'
+  seleniumVersion = '3.141.59'
 }
 
 dependencies {
-    compile project(':common')
-    testCompile project(path: ':common', configuration: 'testArtifacts')
+  compile project(':common')
+  testCompile project(path: ':common', configuration: 'testArtifacts')
 
-    cucumber 'org.jruby:jruby-complete:9.2.5.0'
-    cucumber 'ch.qos.logback:logback-classic:1.2.3'
+  cucumber 'org.jruby:jruby-complete:9.2.5.0'
+  cucumber 'ch.qos.logback:logback-classic:1.2.3'
 
-    testCompile "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+  testCompile "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
 }
 
 test {
-    onlyIf {
-        project.hasProperty('integrationTest')
-    }
+  onlyIf {
+    project.hasProperty('integrationTest')
+  }
 
-    maxParallelForks = 1
+  maxParallelForks = 1
 
-    doFirst {
-        mkdir 'build/integrationTest-screenshots'
-        systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
+  doFirst {
+    mkdir 'build/integrationTest-screenshots'
+    systemProperty 'chrome.binary.path', new File(new File(projectDir, "node_modules/puppeteer/.local-chromium").listFiles()[0], "chrome-linux/chrome").absolutePath
 
-        println "Executing tests against " + System.getProperty("toplevel.url", "https://tabula-test.warwick.ac.uk")
-    }
+    println "Executing tests against " + System.getProperty("toplevel.url", "https://tabula-test.warwick.ac.uk")
+  }
 
-    systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
-    systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
-    systemProperty 'toplevel.url', System.getProperty("toplevel.url")
+  systemProperty 'webdriver.chrome.driver', new File(projectDir, "node_modules/chromedriver/lib/chromedriver/chromedriver").absolutePath
+  systemProperty 'screenshot.dir', new File(projectDir, "build/integrationTest-screenshots").absolutePath
+  systemProperty 'toplevel.url', System.getProperty("toplevel.url")
 }
 
 // run npm install
 task installHeadlessChromeDependency(type: NpmTask) {
-    outputs.dir 'node_modules/puppeteer/.local-chromium'
-    outputs.dir 'node_modules/chromedriver/lib/chromedriver'
-    args = ['install', 'puppeteer', 'chromedriver', '--no-save']
+  outputs.dir 'node_modules/puppeteer/.local-chromium'
+  outputs.dir 'node_modules/chromedriver/lib/chromedriver'
+  args = ['install', 'puppeteer', 'chromedriver', '--no-save']
 }
 
 test.dependsOn 'installHeadlessChromeDependency'
 
 def bundlerEnvironment = [
-    GEM_HOME: 'vendor/gem_home',
-    GEM_PATH: 'vendor/gem_home'
+  GEM_HOME: 'vendor/gem_home',
+  GEM_PATH: 'vendor/gem_home'
 ]
 
 task cukeInstallBundler(type: JavaExec) {
-    copy {
-        from 'src/test/cucumber/.bundle'
-        into 'build/cucumber/.bundle'
-    }
+  copy {
+    from 'src/test/cucumber/.bundle'
+    into 'build/cucumber/.bundle'
+  }
 
-    copy {
-        from 'src/test/cucumber/Gemfile'
-        into 'build/cucumber'
-    }
+  copy {
+    from 'src/test/cucumber/Gemfile'
+    into 'build/cucumber'
+  }
 
-    workingDir 'build/cucumber'
-    outputs.dir 'build/cucumber/vendor/gem_home'
-    environment bundlerEnvironment
+  workingDir 'build/cucumber'
+  outputs.dir 'build/cucumber/vendor/gem_home'
+  environment bundlerEnvironment
 
-    main "org.jruby.Main"
-    classpath configurations.cucumber
+  main "org.jruby.Main"
+  classpath configurations.cucumber
 
-    args "-S", "gem", "install", "bundler"
-    args "--no-ri"
-    args "--no-rdoc"
+  args "-S", "gem", "install", "bundler"
+  args "--no-ri"
+  args "--no-rdoc"
 }
 
 task cukeInstallDeps(type: JavaExec) {
-    dependsOn cukeInstallBundler
+  dependsOn cukeInstallBundler
 
-    workingDir 'build/cucumber'
-    inputs.file 'build/cucumber/Gemfile'
-    outputs.file 'build/cucumber/Gemfile.lock'
-    environment bundlerEnvironment
+  workingDir 'build/cucumber'
+  inputs.file 'build/cucumber/Gemfile'
+  outputs.file 'build/cucumber/Gemfile.lock'
+  environment bundlerEnvironment
 
-    main "org.jruby.Main"
-    classpath configurations.cucumber
+  main "org.jruby.Main"
+  classpath configurations.cucumber
 
-    args "-S", "vendor/gem_home/bin/bundle", "install"
-    args "--path=vendor/bundle"
-    args "--binstubs"
+  args "-S", "vendor/gem_home/bin/bundle", "install"
+  args "--path=vendor/bundle"
+  args "--binstubs"
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
 
 task cucumberReplaceTokens(type: Copy) {
-    dependsOn cukeInstallDeps
+  dependsOn cukeInstallDeps
 
-    inputs.file "src/test/cucumber/tokens-${System.getProperty("server.environment", "test")}.properties"
+  inputs.file "src/test/cucumber/tokens-${System.getProperty("server.environment", "test")}.properties"
 
-    from 'src/test/cucumber/features'
-    into 'build/cucumber/features'
+  from 'src/test/cucumber/features'
+  into 'build/cucumber/features'
 
-    Properties props = new Properties()
-    props.load(new FileInputStream(new File(projectDir, "src/test/cucumber/tokens-${System.getProperty("server.environment", "test")}.properties")))
-    filter(ReplaceTokens, tokens: props)
+  Properties props = new Properties()
+  props.load(new FileInputStream(new File(projectDir, "src/test/cucumber/tokens-${System.getProperty("server.environment", "test")}.properties")))
+  filter(ReplaceTokens, tokens: props)
 }
 
 task cucumber(type: JavaExec) {
-    dependsOn cucumberReplaceTokens
+  dependsOn cucumberReplaceTokens
 
-    // To debug you can add "--jvm-args" (general Gradle feature)
-    main "org.jruby.Main"
-    classpath "src/test/resources/cucumber"
-    classpath configurations.cucumberCompile, configurations.cucumber
-    workingDir 'build/cucumber'
-    environment bundlerEnvironment
+  // To debug you can add "--jvm-args" (general Gradle feature)
+  main "org.jruby.Main"
+  classpath "src/test/resources/cucumber"
+  classpath configurations.cucumberCompile, configurations.cucumber
+  workingDir 'build/cucumber'
+  environment bundlerEnvironment
 
-    args "bin/cucumber"
-    args "--format", "pretty"
-    args "--strict"
-    args "--guess"
-    args "--format", "junit", "--out", "results"
-    args "--format", "html", "--out", "results.html"
-    args "-r", "features"
+  args "bin/cucumber"
+  args "--format", "pretty"
+  args "--strict"
+  args "--guess"
+  args "--format", "junit", "--out", "results"
+  args "--format", "html", "--out", "results.html"
+  args "-r", "features"
 
-    // Can use e.g. -Dfeature.name=blocking to run a single file
-    if (System.getProperty("feature.name", "") != "") {
-        args "-n", System.getProperty("feature.name")
-    }
+  // Can use e.g. -Dfeature.name=blocking to run a single file
+  if (System.getProperty("feature.name", "") != "") {
+    args "-n", System.getProperty("feature.name")
+  }
 
-    environment bundlerEnvironment
+  environment bundlerEnvironment
 
-    systemProperties = [
-        'log4j.disable' : 'ERROR'
-    ]
+  systemProperties = [
+    'log4j.disable': 'ERROR'
+  ]
 }

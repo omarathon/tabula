@@ -3,35 +3,35 @@
 
 <taglib>
 
-    <tlib-version>1.0</tlib-version>
+  <tlib-version>1.0</tlib-version>
 
-    <jsp-version>1.2</jsp-version>
+  <jsp-version>1.2</jsp-version>
 
-    <short-name>SSO</short-name>
+  <short-name>SSO</short-name>
 
-    <uri>https://websignon.warwick.ac.uk</uri>
+  <uri>https://websignon.warwick.ac.uk</uri>
 
-    <description>SSO tags</description>
+  <description>SSO tags</description>
 
-    <tag>
-        <name>loginlink</name>
-        <tag-class>uk.ac.warwick.sso.client.tags.SSOLoginLinkTag</tag-class>
-        <description>Generates a link to login to the new SSO system</description>
-        <attribute>
-            <name>target</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
-    </tag>
-    <tag>
-        <name>logoutlink</name>
-        <tag-class>uk.ac.warwick.sso.client.tags.SSOLogoutLinkTag</tag-class>
-        <description>Generates a link to logout of the new SSO system</description>
-        <attribute>
-            <name>target</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-        </attribute>
-    </tag>
+  <tag>
+    <name>loginlink</name>
+    <tag-class>uk.ac.warwick.sso.client.tags.SSOLoginLinkTag</tag-class>
+    <description>Generates a link to login to the new SSO system</description>
+    <attribute>
+      <name>target</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
+  <tag>
+    <name>logoutlink</name>
+    <tag-class>uk.ac.warwick.sso.client.tags.SSOLogoutLinkTag</tag-class>
+    <description>Generates a link to logout of the new SSO system</description>
+    <attribute>
+      <name>target</name>
+      <required>false</required>
+      <rtexprvalue>true</rtexprvalue>
+    </attribute>
+  </tag>
 
 </taglib>

@@ -25,20 +25,20 @@
 <!-- Use the brand colour of the site -->
 
 <title><#compress>
-	<#if component.subsite>Tabula - </#if>
-	${component.title?default('Tabula')}
-	<#if breadcrumbs??>
-		<#if siblingBreadcrumbs!false>
-			- ${breadcrumbs?first.title}
-		<#else>
-			<#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}
-		</#if>
-	</#if>
-</#compress></title>
+    <#if component.subsite>Tabula - </#if>
+    ${component.title?default('Tabula')}
+    <#if breadcrumbs??>
+      <#if siblingBreadcrumbs!false>
+        - ${breadcrumbs?first.title}
+      <#else>
+        <#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}
+    </#if>
+    </#if>
+  </#compress></title>
 
 <!-- Lato web font -->
 <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
-	  rel="stylesheet" type="text/css">
+      rel="stylesheet" type="text/css">
 
 <@stylesheet "/static/css/id7/render.css" />
 <@stylesheet "/static/css/id7/${component.name?default('common')}.css" />

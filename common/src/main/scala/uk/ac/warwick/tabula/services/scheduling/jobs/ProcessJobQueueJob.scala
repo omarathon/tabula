@@ -14,16 +14,16 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ProcessJobQueueJob extends AutowiredJobBean {
 
-	@Autowired var jobService: JobService = _
+  @Autowired var jobService: JobService = _
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingJobService)
-			exceptionResolver.reportExceptions {
-				implicit val earlyRequestInfo: EarlyRequestInfo = new EarlyRequestInfoImpl
-				EarlyRequestInfo.wrap(earlyRequestInfo) {
-					jobService.run()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingJobService)
+      exceptionResolver.reportExceptions {
+        implicit val earlyRequestInfo: EarlyRequestInfo = new EarlyRequestInfoImpl
+        EarlyRequestInfo.wrap(earlyRequestInfo) {
+          jobService.run()
+        }
+      }
+  }
 
 }

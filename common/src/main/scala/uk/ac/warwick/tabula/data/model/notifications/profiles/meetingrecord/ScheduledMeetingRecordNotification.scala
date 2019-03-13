@@ -19,105 +19,109 @@ import uk.ac.warwick.tabula.services.timetables.{EventOccurrenceService, TermBas
 import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 abstract class ScheduledMeetingRecordNotification
-	extends Notification[ScheduledMeetingRecord, Unit]
-	with SingleItemNotification[ScheduledMeetingRecord] {
+  extends Notification[ScheduledMeetingRecord, Unit]
+    with SingleItemNotification[ScheduledMeetingRecord] {
 
-	self: MyWarwickDiscriminator =>
+  self: MyWarwickDiscriminator =>
 
-	def meeting: ScheduledMeetingRecord = try {
-		item.entity
-	} catch {
-		case _: ClassCastException => throw new ObjectNotFoundException("", "")
-	}
+  def meeting: ScheduledMeetingRecord = try {
+    item.entity
+  } catch {
+    case _: ClassCastException => throw new ObjectNotFoundException("", "")
+  }
 
-	def verbSetting: StringSetting = StringSetting("verb", "")
-	def verb: String = verbSetting.value
+  def verbSetting: StringSetting = StringSetting("verb", "")
 
-	def academicYear: AcademicYear = AcademicYear.forDate(meeting.meetingDate)
+  def verb: String = verbSetting.value
 
-	def url: String = Routes.Profile.relationshipType(
-		meeting.relationships.head.studentCourseDetails,
-		academicYear,
-		meeting.relationships.head.relationshipType
-	)
+  def academicYear: AcademicYear = AcademicYear.forDate(meeting.meetingDate)
 
-	def urlTitle = "view this meeting"
+  def url: String = Routes.Profile.relationshipType(
+    meeting.relationships.head.studentCourseDetails,
+    academicYear,
+    meeting.relationships.head.relationshipType
+  )
 
-	def agentRoles: Seq[String] = meeting.relationshipTypes.map(_.agentRole)
+  def urlTitle = "view this meeting"
+
+  def agentRoles: Seq[String] = meeting.relationshipTypes.map(_.agentRole)
 }
 
 private case class ByteArrayDataSource(bytes: Array[Byte], contentType: String, fileName: String) extends DataSource {
-	override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
-	override def getName: String = fileName
-	override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
-	override def getContentType: String = contentType
+  override def getInputStream: InputStream = new ByteArrayInputStream(bytes)
+
+  override def getName: String = fileName
+
+  override def getOutputStream: OutputStream = throw new UnsupportedOperationException("Read-only javax.activation.DataSource")
+
+  override def getContentType: String = contentType
 }
 
 trait AddsIcalAttachmentToScheduledMeetingNotification extends HasNotificationAttachment {
 
-	self: ScheduledMeetingRecordNotification =>
+  self: ScheduledMeetingRecordNotification =>
 
-	@transient
-	lazy val eventOccurrenceService: EventOccurrenceService = Wire[TermBasedEventOccurrenceService]
+  @transient
+  lazy val eventOccurrenceService: EventOccurrenceService = Wire[TermBasedEventOccurrenceService]
 
-	override def generateAttachments(helper: MimeMessageHelper): Unit = {
-		val message = helper.getMimeMessage
-		val mp = new MimeMultipart("alternative")
+  override def generateAttachments(helper: MimeMessageHelper): Unit = {
+    val message = helper.getMimeMessage
+    val mp = new MimeMultipart("alternative")
 
-		// Text part of the original message
-		val textPart = new MimeBodyPart
-		textPart.setText(message.getContent.asInstanceOf[String])
+    // Text part of the original message
+    val textPart = new MimeBodyPart
+    textPart.setText(message.getContent.asInstanceOf[String])
 
-		// Create ical
-		val cal = new Calendar
-		cal.getProperties.add(Version.VERSION_2_0)
-		cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
-		cal.getProperties.add(CalScale.GREGORIAN)
-		cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
+    // Create ical
+    val cal = new Calendar
+    cal.getProperties.add(Version.VERSION_2_0)
+    cal.getProperties.add(new ProdId("-//Tabula//University of Warwick IT Services//EN"))
+    cal.getProperties.add(CalScale.GREGORIAN)
+    cal.getProperties.add(new XProperty("X-PUBLISHED-TTL", "PT12H"))
 
-		val vEvent = eventOccurrenceService.toVEvent(
-			item.entity.toEventOccurrence(TimetableEvent.Context.Staff).get
-		)
+    val vEvent = eventOccurrenceService.toVEvent(
+      item.entity.toEventOccurrence(TimetableEvent.Context.Staff).get
+    )
 
-		verb match {
-			case "deleted" =>
-				cal.getProperties.add(Method.CANCEL)
-				vEvent.getProperties.add(Status.VEVENT_CANCELLED)
-				vEvent.getProperties.add(new Sequence(1))
-			case "rescheduled" | "updated" =>
-				cal.getProperties.add(Method.PUBLISH)
-				vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
-				vEvent.getProperties.add(new Sequence(1))
-			case _ =>
-				cal.getProperties.add(Method.PUBLISH)
-				vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
-				vEvent.getProperties.add(new Sequence(0))
-		}
+    verb match {
+      case "deleted" =>
+        cal.getProperties.add(Method.CANCEL)
+        vEvent.getProperties.add(Status.VEVENT_CANCELLED)
+        vEvent.getProperties.add(new Sequence(1))
+      case "rescheduled" | "updated" =>
+        cal.getProperties.add(Method.PUBLISH)
+        vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
+        vEvent.getProperties.add(new Sequence(1))
+      case _ =>
+        cal.getProperties.add(Method.PUBLISH)
+        vEvent.getProperties.add(Status.VEVENT_CONFIRMED)
+        vEvent.getProperties.add(new Sequence(0))
+    }
 
-		cal.getComponents.add(vEvent)
+    cal.getComponents.add(vEvent)
 
-		val outputter = new CalendarOutputter
-		val baos = new ByteArrayOutputStream
-		outputter.output(cal, baos)
-		baos.close()
-		val iCal = baos.toByteArray
+    val outputter = new CalendarOutputter
+    val baos = new ByteArrayOutputStream
+    outputter.output(cal, baos)
+    baos.close()
+    val iCal = baos.toByteArray
 
-		// iCal part for Outlook/Office 365
-		val icalPart = new MimeBodyPart
-		icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar; method=" + cal.getMethod.getValue, "meeting.ics")))
+    // iCal part for Outlook/Office 365
+    val icalPart = new MimeBodyPart
+    icalPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar; method=" + cal.getMethod.getValue, "meeting.ics")))
 
-		// Attachment for everyone else
-		val attachmentBodyPart = new MimeBodyPart
-		attachmentBodyPart.setDisposition(Part.ATTACHMENT)
-		attachmentBodyPart.setFileName("meeting.ics")
-		attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "meeting.ics")))
+    // Attachment for everyone else
+    val attachmentBodyPart = new MimeBodyPart
+    attachmentBodyPart.setDisposition(Part.ATTACHMENT)
+    attachmentBodyPart.setFileName("meeting.ics")
+    attachmentBodyPart.setDataHandler(new DataHandler(ByteArrayDataSource(iCal, "text/calendar", "meeting.ics")))
 
-		mp.addBodyPart(textPart)
-		mp.addBodyPart(icalPart)
-		mp.addBodyPart(attachmentBodyPart)
+    mp.addBodyPart(textPart)
+    mp.addBodyPart(icalPart)
+    mp.addBodyPart(attachmentBodyPart)
 
-		message.setContent(mp)
-	}
+    message.setContent(mp)
+  }
 
 }
 

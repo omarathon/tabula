@@ -11,48 +11,48 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 trait ModifyMarkingDescriptorValidation extends SelfValidating {
-	self: ModifyMarkingDescriptorState with MarkingDescriptorServiceComponent =>
+  self: ModifyMarkingDescriptorState with MarkingDescriptorServiceComponent =>
 
-	override def validate(errors: Errors): Unit = {
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "text", "NotEmpty")
+  override def validate(errors: Errors): Unit = {
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "text", "NotEmpty")
 
-		if (markPoints.isEmpty) {
-			errors.rejectValue("markPoints", "markingDescriptor.markPoints.empty")
-		}
+    if (markPoints.isEmpty) {
+      errors.rejectValue("markPoints", "markingDescriptor.markPoints.empty")
+    }
 
-		if (!markPointsAreContiguous) {
-			errors.rejectValue("markPoints", "markingDescriptor.markPoints.nonContiguous")
-		}
+    if (!markPointsAreContiguous) {
+      errors.rejectValue("markPoints", "markingDescriptor.markPoints.nonContiguous")
+    }
 
-		if (markPointsAlreadyExist) {
-			errors.rejectValue("markPoints", "markingDescriptor.markPoints.exists")
-		}
-	}
+    if (markPointsAlreadyExist) {
+      errors.rejectValue("markPoints", "markingDescriptor.markPoints.exists")
+    }
+  }
 
-	private def markPointsAreContiguous: Boolean = {
-		sortedMarkPoints.size == 1 ||
-			sortedMarkPoints.zipWithIndex.drop(1).forall { case (markPoint, index) =>
-				markPoint.previous.contains(sortedMarkPoints(index - 1))
-			}
-	}
+  private def markPointsAreContiguous: Boolean = {
+    sortedMarkPoints.size == 1 ||
+      sortedMarkPoints.zipWithIndex.drop(1).forall { case (markPoint, index) =>
+        markPoint.previous.contains(sortedMarkPoints(index - 1))
+      }
+  }
 
-	def markPointsAlreadyExist: Boolean
+  def markPointsAlreadyExist: Boolean
 }
 
 trait ModifyMarkingDescriptorState {
-	def department: Department
+  def department: Department
 
-	var markPoints: JList[MarkPoint] = _
-	var text: String = _
+  var markPoints: JList[MarkPoint] = _
+  var text: String = _
 
   def sortedMarkPoints: Seq[MarkPoint] = markPoints.asScala.sorted.distinct
 }
 
 trait ModifyMarkingDescriptorPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ModifyMarkingDescriptorState =>
+  self: ModifyMarkingDescriptorState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Department.ManageMarkingDescriptors, mandatory(department))
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Department.ManageMarkingDescriptors, mandatory(department))
+  }
 }
 

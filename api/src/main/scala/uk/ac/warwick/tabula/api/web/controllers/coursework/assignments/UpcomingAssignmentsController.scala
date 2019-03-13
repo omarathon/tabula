@@ -14,36 +14,36 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 object UpcomingAssignmentsController {
-	type ViewUpcomingAssignmentsCommand = Appliable[StudentAssignments]
+  type ViewUpcomingAssignmentsCommand = Appliable[StudentAssignments]
 }
 
 @Controller
 @RequestMapping(Array("/v1/member/{member}/assignments/upcoming"))
 class UpcomingAssignmentsController
-	extends ApiController
-		with GetUpcomingAssignmentsApi
-		with StudentAssignmentInfoToJsonConverter
+  extends ApiController
+    with GetUpcomingAssignmentsApi
+    with StudentAssignmentInfoToJsonConverter
 
 trait GetUpcomingAssignmentsApi {
-	self: ApiController with StudentAssignmentInfoToJsonConverter =>
+  self: ApiController with StudentAssignmentInfoToJsonConverter =>
 
-	@ModelAttribute("getAssignmentsCommand")
-	def command(@PathVariable member: Member): ViewMemberAssignmentsCommand =
-		StudentCourseworkUpcomingCommand(MemberOrUser(member))
+  @ModelAttribute("getAssignmentsCommand")
+  def command(@PathVariable member: Member): ViewMemberAssignmentsCommand =
+    StudentCourseworkUpcomingCommand(MemberOrUser(member))
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("getAssignmentsCommand") command: ViewMemberAssignmentsCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val info = command.apply()
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def list(@ModelAttribute("getAssignmentsCommand") command: ViewMemberAssignmentsCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val info = command.apply()
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"enrolledAssignments" -> info.enrolledAssignments.map(jsonAssignmentInfoObject),
-				"historicAssignments" -> info.historicAssignments.map(jsonAssignmentInfoObject)
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "enrolledAssignments" -> info.enrolledAssignments.map(jsonAssignmentInfoObject),
+        "historicAssignments" -> info.historicAssignments.map(jsonAssignmentInfoObject)
+      )))
+    }
+  }
 }

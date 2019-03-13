@@ -10,23 +10,23 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 /**
- * Displays the students on a small group event of which you are a tutor.
- */
+  * Displays the students on a small group event of which you are a tutor.
+  */
 @Controller
-@RequestMapping(value=Array("/profiles/groups/{smallGroup}/view"))
+@RequestMapping(value = Array("/profiles/groups/{smallGroup}/view"))
 class ViewSmallGroupController extends ProfilesController with AutowiringProfileServiceComponent {
 
-	@ModelAttribute
-	def command(@PathVariable smallGroup: SmallGroup) =
-		new ViewViewableCommand(Permissions.SmallGroups.Read, mandatory(smallGroup))
+  @ModelAttribute
+  def command(@PathVariable smallGroup: SmallGroup) =
+    new ViewViewableCommand(Permissions.SmallGroups.Read, mandatory(smallGroup))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def show(@PathVariable smallGroup: SmallGroup): Mav = {
-		val members = profileService.getAllMembersWithUniversityIds(smallGroup.students.users.map(_.getWarwickId))
-		Mav("profiles/groups/view",
-			"smallGroup" -> smallGroup,
-			"tutees" -> members.sortBy { student =>  (student.lastName, student.firstName) }
-		)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def show(@PathVariable smallGroup: SmallGroup): Mav = {
+    val members = profileService.getAllMembersWithUniversityIds(smallGroup.students.users.map(_.getWarwickId))
+    Mav("profiles/groups/view",
+      "smallGroup" -> smallGroup,
+      "tutees" -> members.sortBy { student => (student.lastName, student.firstName) }
+    )
+  }
 
 }

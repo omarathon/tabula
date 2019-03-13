@@ -22,103 +22,102 @@ import scala.collection.JavaConverters._
 @RequestMapping(value = Array("/profiles/{relationshipType}/meeting/bulk/create"))
 class BulkMeetingRecordController extends ProfilesController with TaskBenchmarking {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("studentRelationships")
-	def studentRelationships(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	): Seq[StudentRelationship] = {
-		benchmarkTask("Get StudentRelationships") {
-			studentCourseDetails.asScala.flatMap { studentCourse =>
-				relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
-			}
-		}
-	}
-
-
-
-	@ModelAttribute("command")
-	def getCommand(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@ModelAttribute("studentRelationships") studentRelationships: Seq[StudentRelationship]
-	): BulkMeetingRecordCommandInternal with AutowiringMeetingRecordServiceComponent with AutowiringFeaturesComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with AutowiringFileAttachmentServiceComponent with ComposableCommand[Seq[MeetingRecord]] with MeetingRecordCommandBindListener with MeetingRecordValidation with BulkMeetingRecordDescription with BulkMeetingRecordPermissions with BulkMeetingRecordCommandState with MeetingRecordCommandRequest with BulkMeetingRecordCommandNotifications = {
-		BulkMeetingRecordCommand(mandatory(studentRelationships), currentMember)
-	}
+  @ModelAttribute("studentRelationships")
+  def studentRelationships(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam studentCourseDetails: JList[StudentCourseDetails]
+  ): Seq[StudentRelationship] = {
+    benchmarkTask("Get StudentRelationships") {
+      studentCourseDetails.asScala.flatMap { studentCourse =>
+        relationshipService.getCurrentRelationship(relationshipType, studentCourse, currentMember)
+      }
+    }
+  }
 
 
-	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
-	def getIframe(
-		@ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	): Mav = {
-		form(cmd, relationshipType, studentCourseDetails, iframe = true)
-	}
+  @ModelAttribute("command")
+  def getCommand(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @ModelAttribute("studentRelationships") studentRelationships: Seq[StudentRelationship]
+  ): BulkMeetingRecordCommandInternal with AutowiringMeetingRecordServiceComponent with AutowiringFeaturesComponent with AutowiringAttendanceMonitoringMeetingRecordServiceComponent with AutowiringFileAttachmentServiceComponent with ComposableCommand[Seq[MeetingRecord]] with MeetingRecordCommandBindListener with MeetingRecordValidation with BulkMeetingRecordDescription with BulkMeetingRecordPermissions with BulkMeetingRecordCommandState with MeetingRecordCommandRequest with BulkMeetingRecordCommandNotifications = {
+    BulkMeetingRecordCommand(mandatory(studentRelationships), currentMember)
+  }
 
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def get(
-		@ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	): Mav = {
-		form(cmd, relationshipType, studentCourseDetails)
-	}
-
-	private def form(
-		cmd: Appliable[Seq[MeetingRecord]],
-		relationshipType: StudentRelationshipType,
-		studentCourseDetails: JList[StudentCourseDetails],
-		iframe: Boolean = false
-	) = {
-		val mav = Mav("profiles/related_students/meeting/bulk_edit",
-			"returnTo" -> getReturnTo(Routes.students(relationshipType)),
-			"isModal" -> ajax,
-			"formats" -> MeetingFormat.members,
-			"isModal" -> ajax,
-			"isIframe" -> iframe,
-			"studentList" -> studentCourseDetails
-		)
-		if (ajax)
-			mav.noLayout()
-		else if (iframe)
-			mav.noNavigation()
-		else
-			mav
-	}
+  @RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
+  def getIframe(
+    @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam studentCourseDetails: JList[StudentCourseDetails]
+  ): Mav = {
+    form(cmd, relationshipType, studentCourseDetails, iframe = true)
+  }
 
 
-	@RequestMapping(method = Array(POST), params = Array("iframe"))
-	def submitIframe(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
-		errors: Errors,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	): Mav = {
-		if (errors.hasErrors) {
-			form(cmd, relationshipType, studentCourseDetails, iframe = true)
-		} else {
-			cmd.apply()
-			Mav("profiles/related_students/meeting/bulk_edit",
-				"success" -> true
-			)
-		}
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def get(
+    @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam studentCourseDetails: JList[StudentCourseDetails]
+  ): Mav = {
+    form(cmd, relationshipType, studentCourseDetails)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
-		errors: Errors,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@RequestParam studentCourseDetails: JList[StudentCourseDetails]
-	): Mav = {
-		if (errors.hasErrors) {
-			form(cmd, relationshipType, studentCourseDetails)
-		} else {
-			cmd.apply()
-			Redirect(Routes.students(relationshipType))
-		}
-	}
+  private def form(
+    cmd: Appliable[Seq[MeetingRecord]],
+    relationshipType: StudentRelationshipType,
+    studentCourseDetails: JList[StudentCourseDetails],
+    iframe: Boolean = false
+  ) = {
+    val mav = Mav("profiles/related_students/meeting/bulk_edit",
+      "returnTo" -> getReturnTo(Routes.students(relationshipType)),
+      "isModal" -> ajax,
+      "formats" -> MeetingFormat.members,
+      "isModal" -> ajax,
+      "isIframe" -> iframe,
+      "studentList" -> studentCourseDetails
+    )
+    if (ajax)
+      mav.noLayout()
+    else if (iframe)
+      mav.noNavigation()
+    else
+      mav
+  }
+
+
+  @RequestMapping(method = Array(POST), params = Array("iframe"))
+  def submitIframe(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
+    errors: Errors,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam studentCourseDetails: JList[StudentCourseDetails]
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, relationshipType, studentCourseDetails, iframe = true)
+    } else {
+      cmd.apply()
+      Mav("profiles/related_students/meeting/bulk_edit",
+        "success" -> true
+      )
+    }
+  }
+
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[MeetingRecord]],
+    errors: Errors,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @RequestParam studentCourseDetails: JList[StudentCourseDetails]
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, relationshipType, studentCourseDetails)
+    } else {
+      cmd.apply()
+      Redirect(Routes.students(relationshipType))
+    }
+  }
 
 }

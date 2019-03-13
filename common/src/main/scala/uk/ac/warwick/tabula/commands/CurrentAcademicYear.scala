@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.AcademicYear
 
 trait CurrentAcademicYear extends HasAcademicYear {
 
-	var academicYear: AcademicYear = AcademicYear.now()
+  var academicYear: AcademicYear = AcademicYear.now()
 
-	def getAcademicYearString: String = Option(academicYear).map(_.toString).getOrElse("")
+  def getAcademicYearString: String = Option(academicYear).map(_.toString).getOrElse("")
 
 }

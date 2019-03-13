@@ -13,36 +13,37 @@ import uk.ac.warwick.tabula.services.turnitinlti.TurnitinLtiService
 import uk.ac.warwick.tabula.web.Mav
 
 /**
- * When setting up a batch of assignments using AddAssignmentsController, we need
- * to open a dialog for entering assignment settings. This controller shows that
- * form, does validation and then the resulting form fields are injected into the
- * original HTML page.
- */
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/shared-options"))
+  * When setting up a batch of assignments using AddAssignmentsController, we need
+  * to open a dialog for entering assignment settings. This controller shows that
+  * form, does validation and then the resulting form fields are injected into the
+  * original HTML page.
+  */
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{department}/shared-options"))
 class OldAssignmentSharedOptionsController extends OldCourseworkController {
 
-	@RequestMapping(method = Array(GET))
-	def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
-		mav(form, department)
-	}
+  @RequestMapping(method = Array(GET))
+  def showForm(@ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
+    mav(form, department)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
-		mav(form, department).addObjects(
-			"submitted" -> true,
-			"hasErrors" -> errors.hasErrors)
-	}
+  @RequestMapping(method = Array(POST))
+  def submitForm(@Valid @ModelAttribute form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav = {
+    mav(form, department).addObjects(
+      "submitted" -> true,
+      "hasErrors" -> errors.hasErrors)
+  }
 
-	def mav(form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav = {
-		Mav("coursework/admin/assignments/shared_options",
-			"department" -> department,
-			"maxWordCount" -> Assignment.MaximumWordCount,
-			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
-		).noLayout()
-	}
+  def mav(form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav = {
+    Mav("coursework/admin/assignments/shared_options",
+      "department" -> department,
+      "maxWordCount" -> Assignment.MaximumWordCount,
+      "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
+    ).noLayout()
+  }
 
-	@ModelAttribute
-	def model(department: Department) = new SharedAssignmentPropertiesForm()
+  @ModelAttribute
+  def model(department: Department) = new SharedAssignmentPropertiesForm()
 
 }

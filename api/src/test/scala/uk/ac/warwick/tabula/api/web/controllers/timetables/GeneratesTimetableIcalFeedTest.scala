@@ -7,16 +7,16 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class GeneratesTimetableIcalFeedTest extends TestBase with Mockito {
 
-	val generator = new GeneratesTimetableIcalFeed with EventOccurrenceServiceComponent {
-		val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
-	}
+  val generator = new GeneratesTimetableIcalFeed with EventOccurrenceServiceComponent {
+    val eventOccurrenceService: EventOccurrenceService = mock[EventOccurrenceService]
+  }
 
-	@Test
-	def emptyTimetableValidates() {
-		val ical = generator.getIcalFeed(Seq(), Fixtures.staff("1234"))
+  @Test
+  def emptyTimetableValidates() {
+    val ical = generator.getIcalFeed(Seq(), Fixtures.staff("1234"))
 
-		new CalendarOutputter().output(ical, new MockHttpServletResponse().getWriter)
-		// doesn't throw an exception
-	}
+    new CalendarOutputter().output(ical, new MockHttpServletResponse().getWriter)
+    // doesn't throw an exception
+  }
 
 }

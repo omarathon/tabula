@@ -15,22 +15,22 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class UpdateMonitoringPointSchemeMembershipJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingAttendanceUpdateSchemes) {
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
-				}
-			}
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					val thisAcademicYear = AcademicYear.now()
-					if (thisAcademicYear.isSITSInFlux(LocalDate.now)) {
-						UnlinkAttendanceMonitoringSchemeCommand().apply()
-					}
-				}
-			}
-		}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingAttendanceUpdateSchemes) {
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          UpdateAttendanceMonitoringSchemeMembershipCommand().apply()
+        }
+      }
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          val thisAcademicYear = AcademicYear.now()
+          if (thisAcademicYear.isSITSInFlux(LocalDate.now)) {
+            UnlinkAttendanceMonitoringSchemeCommand().apply()
+          }
+        }
+      }
+    }
+  }
 
 }

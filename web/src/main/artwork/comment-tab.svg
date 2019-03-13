@@ -2,108 +2,108 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="744.09448819"
-   height="1052.3622047"
-   id="svg2"
-   version="1.1"
-   inkscape:version="0.48.2 r9819"
-   inkscape:export-filename="/home/nick/workspace/courses/src/main/webapp/static/images/app-feedback.png"
-   inkscape:export-xdpi="90"
-   inkscape:export-ydpi="90"
-   sodipodi:docname="New document 1">
+  xmlns:dc="http://purl.org/dc/elements/1.1/"
+  xmlns:cc="http://creativecommons.org/ns#"
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:svg="http://www.w3.org/2000/svg"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  width="744.09448819"
+  height="1052.3622047"
+  id="svg2"
+  version="1.1"
+  inkscape:version="0.48.2 r9819"
+  inkscape:export-filename="/home/nick/workspace/courses/src/main/webapp/static/images/app-feedback.png"
+  inkscape:export-xdpi="90"
+  inkscape:export-ydpi="90"
+  sodipodi:docname="New document 1">
   <defs
-     id="defs4">
+    id="defs4">
     <filter
-       inkscape:collect="always"
-       id="filter3820"
-       x="-0.2171766"
-       width="1.4343532"
-       y="-0.042721206"
-       height="1.0854424">
+      inkscape:collect="always"
+      id="filter3820"
+      x="-0.2171766"
+      width="1.4343532"
+      y="-0.042721206"
+      height="1.0854424">
       <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="2.5085872"
-         id="feGaussianBlur3822" />
+        inkscape:collect="always"
+        stdDeviation="2.5085872"
+        id="feGaussianBlur3822"/>
     </filter>
     <clipPath
-       clipPathUnits="userSpaceOnUse"
-       id="clipPath3830">
+      clipPathUnits="userSpaceOnUse"
+      id="clipPath3830">
       <rect
-         style="opacity:0.82995953;fill:#333333;fill-opacity:1;stroke:none"
-         id="rect3832"
-         width="51.25"
-         height="164.06934"
-         x="394.20148"
-         y="-178.27992"
-         transform="matrix(0,1,-1,0,0,0)" />
+        style="opacity:0.82995953;fill:#333333;fill-opacity:1;stroke:none"
+        id="rect3832"
+        width="51.25"
+        height="164.06934"
+        x="394.20148"
+        y="-178.27992"
+        transform="matrix(0,1,-1,0,0,0)"/>
     </clipPath>
   </defs>
   <sodipodi:namedview
-     id="base"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageopacity="0.0"
-     inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="60.958439"
-     inkscape:cy="733.6749"
-     inkscape:document-units="px"
-     inkscape:current-layer="layer1"
-     showgrid="false"
-     inkscape:window-width="1246"
-     inkscape:window-height="867"
-     inkscape:window-x="229"
-     inkscape:window-y="98"
-     inkscape:window-maximized="0" />
+    id="base"
+    pagecolor="#ffffff"
+    bordercolor="#666666"
+    borderopacity="1.0"
+    inkscape:pageopacity="0.0"
+    inkscape:pageshadow="2"
+    inkscape:zoom="1"
+    inkscape:cx="60.958439"
+    inkscape:cy="733.6749"
+    inkscape:document-units="px"
+    inkscape:current-layer="layer1"
+    showgrid="false"
+    inkscape:window-width="1246"
+    inkscape:window-height="867"
+    inkscape:window-x="229"
+    inkscape:window-y="98"
+    inkscape:window-maximized="0"/>
   <metadata
-     id="metadata7">
+    id="metadata7">
     <rdf:RDF>
       <cc:Work
-         rdf:about="">
+        rdf:about="">
         <dc:format>image/svg+xml</dc:format>
         <dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+          rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
         <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1">
+    inkscape:label="Layer 1"
+    inkscape:groupmode="layer"
+    id="layer1">
     <rect
-       style="opacity:0.93117409;fill:#333333;fill-opacity:1;stroke:none;filter:url(#filter3820)"
-       id="rect2985-2"
-       width="137.42612"
-       height="28.428574"
-       x="32.286942"
-       y="395.14789"
-       transform="matrix(0,-1.0427737,1,0,-310.48717,513.24067)"
-       clip-path="url(#clipPath3830)" />
+      style="opacity:0.93117409;fill:#333333;fill-opacity:1;stroke:none;filter:url(#filter3820)"
+      id="rect2985-2"
+      width="137.42612"
+      height="28.428574"
+      x="32.286942"
+      y="395.14789"
+      transform="matrix(0,-1.0427737,1,0,-310.48717,513.24067)"
+      clip-path="url(#clipPath3830)"/>
     <rect
-       style="fill:#729fcf;fill-opacity:1;stroke:none"
-       id="rect2985"
-       width="143.42789"
-       height="28.428574"
-       x="-477.08765"
-       y="83.714302"
-       transform="matrix(0,-1,1,0,0,0)" />
+      style="fill:#729fcf;fill-opacity:1;stroke:none"
+      id="rect2985"
+      width="143.42789"
+      height="28.428574"
+      x="-477.08765"
+      y="83.714302"
+      transform="matrix(0,-1,1,0,0,0)"/>
     <text
-       xml:space="preserve"
-       style="font-size:22.73797798px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Serif;-inkscape-font-specification:Serif"
-       x="-472.09885"
-       y="106.27958"
-       id="text2987"
-       sodipodi:linespacing="125%"
-       transform="matrix(0,-1,1,0,0,0)"><tspan
+      xml:space="preserve"
+      style="font-size:22.73797798px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Serif;-inkscape-font-specification:Serif"
+      x="-472.09885"
+      y="106.27958"
+      id="text2987"
+      sodipodi:linespacing="125%"
+      transform="matrix(0,-1,1,0,0,0)"><tspan
          sodipodi:role="line"
          id="tspan2989"
          x="-472.09885"

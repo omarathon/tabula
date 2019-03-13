@@ -17,283 +17,290 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, TimeoutException}
 
 class FeedbackReport(department: Department, academicYear: Option[AcademicYear], startDate: DateTime, endDate: DateTime) {
-	import FeedbackReport._
 
-	var auditEventQueryMethods: AuditEventQueryMethods = Wire[AuditEventQueryMethods]
-	var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
-	var submissionService: SubmissionService = Wire[SubmissionService]
-	var feedbackService: FeedbackService = Wire[FeedbackService]
-	val workbook = new SXSSFWorkbook
+  import FeedbackReport._
 
-	var assignmentData : List[AssignmentInfo] = List()
+  var auditEventQueryMethods: AuditEventQueryMethods = Wire[AuditEventQueryMethods]
+  var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  var submissionService: SubmissionService = Wire[SubmissionService]
+  var feedbackService: FeedbackService = Wire[FeedbackService]
+  val workbook = new SXSSFWorkbook
 
-	def generateAssignmentSheet(dept: Department): Sheet = {
-		val sheet = workbook.createSheet("Report for " + safeDeptName(department))
-		sheet.trackAllColumnsForAutoSizing()
+  var assignmentData: List[AssignmentInfo] = List()
 
-		// add header row
-		val header = sheet.createRow(0)
-		val style = headerStyle(workbook)
+  def generateAssignmentSheet(dept: Department): Sheet = {
+    val sheet = workbook.createSheet("Report for " + safeDeptName(department))
+    sheet.trackAllColumnsForAutoSizing()
 
-		// Columns we believe are required for admin report to The Centre TAB-6246
-		addStringCell("Assignment name", header, style)
-		addStringCell("Module code", header, style)
-		addStringCell("Module name", header, style)
-		addStringCell("Did assignment meet required 20 University working days turnaround? (Y/N)", header, style)
-		addStringCell("Exemption", header, style)
-		addStringCell("Notes", header, style)
+    // add header row
+    val header = sheet.createRow(0)
+    val style = headerStyle(workbook)
 
-		// Other columns
-		addStringCell("Close date", header, style)
-		addStringCell("Publish deadline", header, style)
-		addStringCell("Credit bearing", header, style)
-		addStringCell("Expected submissions", header, style)
-		addStringCell("Actual submissions", header, style)
-		addStringCell("Late submissions - within extension", header, style)
-		addStringCell("Late submissions - without extension", header, style)
-		addStringCell("Outstanding feedback", header, style)
-		addStringCell("Total published feedback", header, style)
-		addStringCell("On-time feedback", header, style)
-		addStringCell("On-time feedback %", header, style)
-		addStringCell("Late feedback", header, style)
-		addStringCell("Late feedback %", header, style)
-		addStringCell("Earliest publish date", header, style)
-		addStringCell("Latest publish date", header, style)
+    // Columns we believe are required for admin report to The Centre TAB-6246
+    addStringCell("Assignment name", header, style)
+    addStringCell("Module code", header, style)
+    addStringCell("Module name", header, style)
+    addStringCell("Did assignment meet required 20 University working days turnaround? (Y/N)", header, style)
+    addStringCell("Exemption", header, style)
+    addStringCell("Notes", header, style)
 
-		sheet
-	}
+    // Other columns
+    addStringCell("Close date", header, style)
+    addStringCell("Publish deadline", header, style)
+    addStringCell("Credit bearing", header, style)
+    addStringCell("Expected submissions", header, style)
+    addStringCell("Actual submissions", header, style)
+    addStringCell("Late submissions - within extension", header, style)
+    addStringCell("Late submissions - without extension", header, style)
+    addStringCell("Outstanding feedback", header, style)
+    addStringCell("Total published feedback", header, style)
+    addStringCell("On-time feedback", header, style)
+    addStringCell("On-time feedback %", header, style)
+    addStringCell("Late feedback", header, style)
+    addStringCell("Late feedback %", header, style)
+    addStringCell("Earliest publish date", header, style)
+    addStringCell("Latest publish date", header, style)
 
-	def populateAssignmentSheet(sheet: Sheet) {
-		for (assignmentInfo <- assignmentData) {
-			val row = sheet.createRow(sheet.getLastRowNum + 1)
+    sheet
+  }
 
-			// Columns we believe are required for admin report to The Centre TAB-6246
-			addStringCell(assignmentInfo.assignment.name, row)
-			addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
-			addStringCell(assignmentInfo.moduleName, row)
-			addStringCell(assignmentInfo.feedbackCount match {
-				case FeedbackCount(onTime, 0, _, _) if onTime > 0 => "Y"
-				case FeedbackCount(_, late, _, _) if late > 0 => "N"
-				case _ => "N/A"
-			}, row)
-			addStringCell(if (assignmentInfo.dissertation) "Y" else "N", row)
-			addStringCell("", row)
+  def populateAssignmentSheet(sheet: Sheet) {
+    for (assignmentInfo <- assignmentData) {
+      val row = sheet.createRow(sheet.getLastRowNum + 1)
 
-			// Other columns
-			addDateCell(assignmentInfo.assignment.closeDate, row, dateCellStyle(workbook))
+      // Columns we believe are required for admin report to The Centre TAB-6246
+      addStringCell(assignmentInfo.assignment.name, row)
+      addStringCell(assignmentInfo.moduleCode.toUpperCase, row)
+      addStringCell(assignmentInfo.moduleName, row)
+      addStringCell(assignmentInfo.feedbackCount match {
+        case FeedbackCount(onTime, 0, _, _) if onTime > 0 => "Y"
+        case FeedbackCount(_, late, _, _) if late > 0 => "N"
+        case _ => "N/A"
+      }, row)
+      addStringCell(if (assignmentInfo.dissertation) "Y" else "N", row)
+      addStringCell("", row)
 
-			val publishDeadline = assignmentInfo.assignment.feedbackDeadline.orNull
-			addDateCell(publishDeadline, row, dateCellStyle(workbook))
+      // Other columns
+      addDateCell(assignmentInfo.assignment.closeDate, row, dateCellStyle(workbook))
 
-			addStringCell(if (assignmentInfo.summative) "Summative" else "Formative", row)
+      val publishDeadline = assignmentInfo.assignment.feedbackDeadline.orNull
+      addDateCell(publishDeadline, row, dateCellStyle(workbook))
 
-			addNumericCell(assignmentInfo.membership, row)
-			addNumericCell(assignmentInfo.numberOfSubmissions, row)
-			addNumericCell(assignmentInfo.submissionsLateWithExt, row)
-			addNumericCell(assignmentInfo.submissionsLateWithoutExt, row)
+      addStringCell(if (assignmentInfo.summative) "Summative" else "Formative", row)
 
-			addNumericCell(assignmentInfo.membership - assignmentInfo.totalPublished, row)
-			addNumericCell(assignmentInfo.totalPublished, row)
-			addNumericCell(assignmentInfo.feedbackCount.onTime, row)
-			addPercentageCell(assignmentInfo.feedbackCount.onTime, assignmentInfo.totalPublished, row, workbook)
-			addNumericCell(assignmentInfo.feedbackCount.late, row)
-			addPercentageCell(assignmentInfo.feedbackCount.late, assignmentInfo.totalPublished, row, workbook)
-			addDateCell(assignmentInfo.feedbackCount.earliest, row, dateCellStyle(workbook))
-			addDateCell(assignmentInfo.feedbackCount.latest, row, dateCellStyle(workbook))
-		}
-	}
+      addNumericCell(assignmentInfo.membership, row)
+      addNumericCell(assignmentInfo.numberOfSubmissions, row)
+      addNumericCell(assignmentInfo.submissionsLateWithExt, row)
+      addNumericCell(assignmentInfo.submissionsLateWithoutExt, row)
 
-	def buildAssignmentData() {
-		val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
-		val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
-			&& a.closeDate != null && a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
-		val sortedAssignments = inDateAssignments.sortWith{(a1, a2) =>
-			a1.module.code < a2.module.code || (a1.module.code == a2.module.code && a1.closeDate.isBefore(a2.closeDate))
-		}
+      addNumericCell(assignmentInfo.membership - assignmentInfo.totalPublished, row)
+      addNumericCell(assignmentInfo.totalPublished, row)
+      addNumericCell(assignmentInfo.feedbackCount.onTime, row)
+      addPercentageCell(assignmentInfo.feedbackCount.onTime, assignmentInfo.totalPublished, row, workbook)
+      addNumericCell(assignmentInfo.feedbackCount.late, row)
+      addPercentageCell(assignmentInfo.feedbackCount.late, assignmentInfo.totalPublished, row, workbook)
+      addDateCell(assignmentInfo.feedbackCount.earliest, row, dateCellStyle(workbook))
+      addDateCell(assignmentInfo.feedbackCount.latest, row, dateCellStyle(workbook))
+    }
+  }
 
-		for (assignment <- sortedAssignments) {
-			val feedbackCount = getFeedbackCount(assignment)
-			val totalPublished = feedbackCount.onTime + feedbackCount.late
+  def buildAssignmentData() {
+    val allAssignments = department.modules.asScala.flatMap(_.assignments.asScala).filter(a => academicYear.isEmpty || academicYear.contains(a.academicYear))
+    val inDateAssignments = allAssignments.filter(a => ((a.collectSubmissions && a.submissions.size > 0) || (!a.collectSubmissions && a.includeInFeedbackReportWithoutSubmissions))
+      && a.closeDate != null && a.closeDate.isAfter(startDate) && a.closeDate.isBefore(endDate)).toList
+    val sortedAssignments = inDateAssignments.sortWith { (a1, a2) =>
+      a1.module.code < a2.module.code || (a1.module.code == a2.module.code && a1.closeDate.isBefore(a2.closeDate))
+    }
 
-			val membership = assignmentMembershipService.determineMembershipUsers(assignment).size
+    for (assignment <- sortedAssignments) {
+      val feedbackCount = getFeedbackCount(assignment)
+      val totalPublished = feedbackCount.onTime + feedbackCount.late
 
-			val totalSubmissionsCount =
-				if (assignment.collectSubmissions) assignment.submissions.size
-				else membership
+      val membership = assignmentMembershipService.determineMembershipUsers(assignment).size
 
-			val assignmentInfo = AssignmentInfo(
-				assignment.module.code,
-				assignment.module.name,
-				membership,
-				assignment.summative,
-				assignment.dissertation,
-				totalSubmissionsCount,
-				assignment.submissions.asScala.count(submission => submission.isAuthorisedLate),
-				assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate),
-				feedbackCount,
-				totalPublished,
-				assignment
-			)
+      val totalSubmissionsCount =
+        if (assignment.collectSubmissions) assignment.submissions.size
+        else membership
 
-			assignmentData = assignmentData ++ List(assignmentInfo)
-		}
-	}
+      val assignmentInfo = AssignmentInfo(
+        assignment.module.code,
+        assignment.module.name,
+        membership,
+        assignment.summative,
+        assignment.dissertation,
+        totalSubmissionsCount,
+        assignment.submissions.asScala.count(submission => submission.isAuthorisedLate),
+        assignment.submissions.asScala.count(submission => submission.isLate && !submission.isAuthorisedLate),
+        feedbackCount,
+        totalPublished,
+        assignment
+      )
 
-	def generateModuleSheet(dept: Department): Sheet = {
-		val sheet = workbook.createSheet("Module report for " + safeDeptName(department))
-		sheet.trackAllColumnsForAutoSizing()
+      assignmentData = assignmentData ++ List(assignmentInfo)
+    }
+  }
 
-		val style = headerStyle(workbook)
-		// add header row
-		val header = sheet.createRow(0)
+  def generateModuleSheet(dept: Department): Sheet = {
+    val sheet = workbook.createSheet("Module report for " + safeDeptName(department))
+    sheet.trackAllColumnsForAutoSizing()
 
-		// Columns we believe are required for admin report to The Centre TAB-6246
-		addStringCell("Module name", header, style)
-		addStringCell("Module code", header, style)
-		addStringCell("Did module meet required 20 University working days turnaround? (Y/N)", header, style)
-		addStringCell("Any assignments with exemption", header, style)
-		addStringCell("Notes", header, style)
+    val style = headerStyle(workbook)
+    // add header row
+    val header = sheet.createRow(0)
 
-		// Other columns
-		addStringCell("Number of assignments", header, style)
-		addStringCell("Expected submissions", header, style)
-		addStringCell("Actual submissions", header, style)
-		addStringCell("Late submissions - within extension", header, style)
-		addStringCell("Late submissions - without extension", header, style)
-		addStringCell("Outstanding Feedback", header, style)
-		addStringCell("Total Published Feedback", header, style)
-		addStringCell("On-time feedback", header, style)
-		addStringCell("On-time feedback %", header, style)
-		addStringCell("Late feedback", header, style)
-		addStringCell("Late feedback %", header, style)
+    // Columns we believe are required for admin report to The Centre TAB-6246
+    addStringCell("Module name", header, style)
+    addStringCell("Module code", header, style)
+    addStringCell("Did module meet required 20 University working days turnaround? (Y/N)", header, style)
+    addStringCell("Any assignments with exemption", header, style)
+    addStringCell("Notes", header, style)
 
-		sheet
-	}
+    // Other columns
+    addStringCell("Number of assignments", header, style)
+    addStringCell("Expected submissions", header, style)
+    addStringCell("Actual submissions", header, style)
+    addStringCell("Late submissions - within extension", header, style)
+    addStringCell("Late submissions - without extension", header, style)
+    addStringCell("Outstanding Feedback", header, style)
+    addStringCell("Total Published Feedback", header, style)
+    addStringCell("On-time feedback", header, style)
+    addStringCell("On-time feedback %", header, style)
+    addStringCell("Late feedback", header, style)
+    addStringCell("Late feedback %", header, style)
 
-
-	def populateModuleSheet(sheet: Sheet) {
-		val modules = assignmentData.groupBy(_.assignment.module.code)
-		val sortedModules = TreeMap(modules.toSeq:_*)
-		for ((moduleCode, assignmentInfoList) <- sortedModules) {
-			val row = sheet.createRow(sheet.getLastRowNum + 1)
-
-			val expectedSubmissions = assignmentInfoList.map(_.membership).sum
-			val numberOfSubmissions = assignmentInfoList.map(_.numberOfSubmissions).sum
-			val submissionsLateWithExt = assignmentInfoList.map(_.submissionsLateWithExt).sum
-			val submissionsLateWithoutExt = assignmentInfoList.map(_.submissionsLateWithoutExt).sum
-
-			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
-			val totalUnPublished = numberOfSubmissions - totalPublished
-			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
-			val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
-
-			// Columns we believe are required for admin report to The Centre TAB-6246
-			addStringCell(assignmentInfoList.head.moduleName, row)
-			addStringCell(moduleCode.toUpperCase, row)
-			addStringCell(if (late == 0) "Y" else "N", row)
-			addStringCell(if (assignmentInfoList.exists(_.assignment.dissertation)) "Y" else "N", row)
-			addStringCell("", row)
-
-			// Other columns
-			addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
-			addNumericCell(expectedSubmissions, row)
-			addNumericCell(numberOfSubmissions, row)
-			addNumericCell(submissionsLateWithExt, row)
-			addNumericCell(submissionsLateWithoutExt, row)
-
-			// totalUnPublished vs. outstanding. not necessarily the same thing.
-
-			addNumericCell(totalUnPublished, row)
-			addNumericCell(totalPublished, row)
-			addNumericCell(ontime, row)
-			addPercentageCell(ontime, totalPublished, row, workbook)
-			addNumericCell(late, row)
-			addPercentageCell(late, totalPublished, row, workbook)
-		}
-	}
+    sheet
+  }
 
 
-	/**
-	 * Returns a tuple:
-	 * - first is number of on time feedback
-	 * - second is number of late
-	 * - third is earliest publish date
-	 * - fourth is latest publish date
-	 */
-	def getFeedbackCount(assignment: Assignment): FeedbackCount =  {
-		val submissions: Seq[FeedbackReportGenerator] =
-			if (assignment.collectSubmissions) submissionService.getSubmissionsByAssignment(assignment)
-			else assignmentMembershipService.determineMembershipUsers(assignment).map(SubmissionlessFeedbackReportGenerator(assignment, _))
+  def populateModuleSheet(sheet: Sheet) {
+    val modules = assignmentData.groupBy(_.assignment.module.code)
+    val sortedModules = TreeMap(modules.toSeq: _*)
+    for ((moduleCode, assignmentInfoList) <- sortedModules) {
+      val row = sheet.createRow(sheet.getLastRowNum + 1)
 
-		val times: Seq[FeedbackCount] = for {
-			submission <- submissions
-			feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, submission.usercode)
-			if feedback.released
-			publishEventDate <- Option(feedback.releasedDate).orElse {
-				try {
-					Await.result(
-						auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode, feedback.universityId),
-						5.seconds
-					).headOption.map { _.eventDate }
-				} catch { case timeout: TimeoutException => None }
-			}
-		} yield {
-			// was feedback returned within 20 working days?
-			submission.feedbackDeadline // If the deadline is exempt (e.g. open-ended or dissertation) this will return None
-				.filter(publishEventDate.toLocalDate.isAfter)
-				.map { _ =>  FeedbackCount(0, 1, publishEventDate, publishEventDate) } // was late
-				.getOrElse { FeedbackCount(1, 0, publishEventDate, publishEventDate) } // on time
-		}
+      val expectedSubmissions = assignmentInfoList.map(_.membership).sum
+      val numberOfSubmissions = assignmentInfoList.map(_.numberOfSubmissions).sum
+      val submissionsLateWithExt = assignmentInfoList.map(_.submissionsLateWithExt).sum
+      val submissionsLateWithoutExt = assignmentInfoList.map(_.submissionsLateWithoutExt).sum
 
-		// merge our list of pairs into a single pair of (on time, late)
-		times.foldLeft(FeedbackCount(0, 0, null, null)) { (a, b) =>
-			val onTime = a.onTime + b.onTime
-			val late = a.late + b.late
-			val earliest =
-				if (a.earliest == null) b.earliest
-				else if (b.earliest == null) a.earliest
-				else if (a.earliest.isBefore(b.earliest)) a.earliest
-				else b.earliest
-			val latest =
-				if (a.latest == null) b.latest
-				else if (b.latest == null) a.latest
-				else if (a.latest.isAfter(b.latest)) a.latest
-				else b.latest
+      val totalPublished = assignmentInfoList.map(_.totalPublished).sum
+      val totalUnPublished = numberOfSubmissions - totalPublished
+      val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
+      val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
 
-			FeedbackCount(onTime, late, earliest, latest)
-		}
-	}
+      // Columns we believe are required for admin report to The Centre TAB-6246
+      addStringCell(assignmentInfoList.head.moduleName, row)
+      addStringCell(moduleCode.toUpperCase, row)
+      addStringCell(if (late == 0) "Y" else "N", row)
+      addStringCell(if (assignmentInfoList.exists(_.assignment.dissertation)) "Y" else "N", row)
+      addStringCell("", row)
+
+      // Other columns
+      addNumericCell(assignmentInfoList.groupBy(_.assignment.name).size, row)
+      addNumericCell(expectedSubmissions, row)
+      addNumericCell(numberOfSubmissions, row)
+      addNumericCell(submissionsLateWithExt, row)
+      addNumericCell(submissionsLateWithoutExt, row)
+
+      // totalUnPublished vs. outstanding. not necessarily the same thing.
+
+      addNumericCell(totalUnPublished, row)
+      addNumericCell(totalPublished, row)
+      addNumericCell(ontime, row)
+      addPercentageCell(ontime, totalPublished, row, workbook)
+      addNumericCell(late, row)
+      addPercentageCell(late, totalPublished, row, workbook)
+    }
+  }
+
+
+  /**
+    * Returns a tuple:
+    * - first is number of on time feedback
+    * - second is number of late
+    * - third is earliest publish date
+    * - fourth is latest publish date
+    */
+  def getFeedbackCount(assignment: Assignment): FeedbackCount = {
+    val submissions: Seq[FeedbackReportGenerator] =
+      if (assignment.collectSubmissions) submissionService.getSubmissionsByAssignment(assignment)
+      else assignmentMembershipService.determineMembershipUsers(assignment).map(SubmissionlessFeedbackReportGenerator(assignment, _))
+
+    val times: Seq[FeedbackCount] = for {
+      submission <- submissions
+      feedback <- feedbackService.getAssignmentFeedbackByUsercode(assignment, submission.usercode)
+      if feedback.released
+      publishEventDate <- Option(feedback.releasedDate).orElse {
+        try {
+          Await.result(
+            auditEventQueryMethods.publishFeedbackForStudent(assignment, feedback.usercode, feedback.universityId),
+            5.seconds
+          ).headOption.map {
+            _.eventDate
+          }
+        } catch {
+          case timeout: TimeoutException => None
+        }
+      }
+    } yield {
+      // was feedback returned within 20 working days?
+      submission.feedbackDeadline // If the deadline is exempt (e.g. open-ended or dissertation) this will return None
+        .filter(publishEventDate.toLocalDate.isAfter)
+        .map { _ => FeedbackCount(0, 1, publishEventDate, publishEventDate) } // was late
+        .getOrElse {
+        FeedbackCount(1, 0, publishEventDate, publishEventDate)
+      } // on time
+    }
+
+    // merge our list of pairs into a single pair of (on time, late)
+    times.foldLeft(FeedbackCount(0, 0, null, null)) { (a, b) =>
+      val onTime = a.onTime + b.onTime
+      val late = a.late + b.late
+      val earliest =
+        if (a.earliest == null) b.earliest
+        else if (b.earliest == null) a.earliest
+        else if (a.earliest.isBefore(b.earliest)) a.earliest
+        else b.earliest
+      val latest =
+        if (a.latest == null) b.latest
+        else if (b.latest == null) a.latest
+        else if (a.latest.isAfter(b.latest)) a.latest
+        else b.latest
+
+      FeedbackCount(onTime, late, earliest, latest)
+    }
+  }
 }
 
 object FeedbackReport {
 
-	val AssignmentSheetSize = 15
-	val ModuleSheetSize = 11
+  val AssignmentSheetSize = 15
+  val ModuleSheetSize = 11
 
-	case class FeedbackCount(
-		onTime: Int,
-		late: Int,
-		earliest: DateTime,
-		latest: DateTime
-	)
+  case class FeedbackCount(
+    onTime: Int,
+    late: Int,
+    earliest: DateTime,
+    latest: DateTime
+  )
 
-	case class AssignmentInfo (
-		moduleCode: String,
-		moduleName: String,
-		membership: Int,
-		summative: Boolean,
-		var dissertation: Boolean,
-		numberOfSubmissions: Int,
-		submissionsLateWithExt: Int,
-		submissionsLateWithoutExt: Int,
-		feedbackCount: FeedbackCount,
-		totalPublished: Int,
-		assignment: Assignment
-	)
+  case class AssignmentInfo(
+    moduleCode: String,
+    moduleName: String,
+    membership: Int,
+    summative: Boolean,
+    var dissertation: Boolean,
+    numberOfSubmissions: Int,
+    submissionsLateWithExt: Int,
+    submissionsLateWithoutExt: Int,
+    feedbackCount: FeedbackCount,
+    totalPublished: Int,
+    assignment: Assignment
+  )
 
-	case class SubmissionlessFeedbackReportGenerator(assignment: Assignment, user: User) extends FeedbackReportGenerator {
-		val usercode: String = user.getUserId
-		val feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadline
-	}
+  case class SubmissionlessFeedbackReportGenerator(assignment: Assignment, user: User) extends FeedbackReportGenerator {
+    val usercode: String = user.getUserId
+    val feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadline
+  }
 
 }

@@ -12,26 +12,26 @@ import scala.util.Try
 
 class AssignmentInfoFilterConverter extends TwoWayConverter[String, AssignmentInfoFilter] {
 
-	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
+  @Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
-	override def convertRight(source: String): AssignmentInfoFilter = source match {
-		case r"Module\(([^\)]+)${moduleCode}\)" =>
-			AssignmentInfoFilters.Module(moduleAndDepartmentService.getModuleByCode(sanitise(moduleCode)).getOrElse {
-				moduleAndDepartmentService.getModuleById(moduleCode).orNull
-			})
-		case _ => Try(MarkingMethod.fromCode(source)).map(AssignmentInfoFilters.WorkflowType.apply).orElse(
-			Try(MarkingWorkflowType.fromCode(source)).map(AssignmentInfoFilters.CM2WorkflowType.apply)
-		).getOrElse(AssignmentInfoFilters.of(source))
+  override def convertRight(source: String): AssignmentInfoFilter = source match {
+    case r"Module\(([^\)]+)${moduleCode}\)" =>
+      AssignmentInfoFilters.Module(moduleAndDepartmentService.getModuleByCode(sanitise(moduleCode)).getOrElse {
+        moduleAndDepartmentService.getModuleById(moduleCode).orNull
+      })
+    case _ => Try(MarkingMethod.fromCode(source)).map(AssignmentInfoFilters.WorkflowType.apply).orElse(
+      Try(MarkingWorkflowType.fromCode(source)).map(AssignmentInfoFilters.CM2WorkflowType.apply)
+    ).getOrElse(AssignmentInfoFilters.of(source))
 
-	}
+  }
 
-	override def convertLeft(source: AssignmentInfoFilter): String = Option(source).map {
-		_.getName
-	}.orNull
+  override def convertLeft(source: AssignmentInfoFilter): String = Option(source).map {
+    _.getName
+  }.orNull
 
-	private def sanitise(code: String): String = {
-		if (code == null) throw new IllegalArgumentException
-		else code.toLowerCase
-	}
+  private def sanitise(code: String): String = {
+    if (code == null) throw new IllegalArgumentException
+    else code.toLowerCase
+  }
 
 }

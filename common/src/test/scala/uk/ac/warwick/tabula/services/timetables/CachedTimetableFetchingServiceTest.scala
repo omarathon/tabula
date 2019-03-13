@@ -34,14 +34,14 @@ class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
 
   @Test
   def firstRequestIsPassedThrough(): Unit = new Fixture {
-    cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
+    cache.getTimetableForStudent(studentId).futureValue.events should be(studentEvents)
     verify(delegate, times(1)).getTimetableForStudent(studentId)
   }
 
   @Test
   def repeatedRequestsAreCached(): Unit = new Fixture {
-    cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
-    cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
+    cache.getTimetableForStudent(studentId).futureValue.events should be(studentEvents)
+    cache.getTimetableForStudent(studentId).futureValue.events should be(studentEvents)
     verify(delegate, times(1)).getTimetableForStudent(studentId)
   }
 
@@ -53,10 +53,10 @@ class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
     val staffEvents = Seq(TimetableEvent("test2", "test2", "test2", "test2", TimetableEventType.Lecture, Nil, DayOfWeek.Monday, new LocalTime, new LocalTime, None, TimetableEvent.Parent(None), None, Nil, Nil, AcademicYear(2013), None, Map()))
     delegate.getTimetableForStaff(studentId) returns Future.successful(EventList.fresh(staffEvents))
 
-    cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
-    cache.getTimetableForStudent(studentId).futureValue.events should be (studentEvents)
-    cache.getTimetableForStaff(studentId).futureValue.events should be (staffEvents)
-    cache.getTimetableForStaff(studentId).futureValue.events should be (staffEvents)
+    cache.getTimetableForStudent(studentId).futureValue.events should be(studentEvents)
+    cache.getTimetableForStudent(studentId).futureValue.events should be(studentEvents)
+    cache.getTimetableForStaff(studentId).futureValue.events should be(staffEvents)
+    cache.getTimetableForStaff(studentId).futureValue.events should be(staffEvents)
     verify(delegate, times(1)).getTimetableForStudent(studentId)
     verify(delegate, times(1)).getTimetableForStaff(studentId)
   }
@@ -130,7 +130,7 @@ class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
     val cachedData = transcoder.encode(events)
     cachedData should not be null
 
-    transcoder.decode(cachedData) should be (events)
+    transcoder.decode(cachedData) should be(events)
   }
 
 }

@@ -10,26 +10,26 @@ case class ModuleManager(module: model.Module) extends BuiltInRole(ModuleManager
 
 case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Module Manager"
+  override def description = "Module Manager"
 
-	GeneratesSubRole(ModuleAssistantRoleDefinition)
+  GeneratesSubRole(ModuleAssistantRoleDefinition)
 
-	GrantsScopedPermission(
-		Assignment.Archive,
-		Assignment.Delete,
+  GrantsScopedPermission(
+    Assignment.Archive,
+    Assignment.Delete,
 
-		Submission.SendReceipt,
-		Submission.Delete,
+    Submission.SendReceipt,
+    Submission.Delete,
 
-		AssignmentFeedback.Publish,
+    AssignmentFeedback.Publish,
 
-		SmallGroups.Archive,
-		SmallGroups.Delete,
-		SmallGroups.ImportFromExternalSystem,
+    SmallGroups.Archive,
+    SmallGroups.Delete,
+    SmallGroups.ImportFromExternalSystem,
 
-		Profiles.Read.ModuleRegistration.Core,
-		Profiles.Read.ModuleRegistration.Results
-	)
+    Profiles.Read.ModuleRegistration.Core,
+    Profiles.Read.ModuleRegistration.Results
+  )
 
-	def canDelegateThisRolesPermissions: JBoolean = true
+  def canDelegateThisRolesPermissions: JBoolean = true
 }

@@ -10,47 +10,47 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object AttendanceNoteAttachmentCommand {
-	def apply(student: StudentMember, point: AttendanceMonitoringPoint, user: CurrentUser) =
-		new AttendanceNoteAttachmentCommand(student, point, user)
-		with ComposableCommand[Option[RenderableFile]]
-		with AutowiringAttendanceMonitoringServiceComponent
-		with ReadOnly
-		with AttendanceNoteAttachmentPermissions
-		with AttendanceNoteCommandState
-		with AttendanceNoteAttachmentDescription
+  def apply(student: StudentMember, point: AttendanceMonitoringPoint, user: CurrentUser) =
+    new AttendanceNoteAttachmentCommand(student, point, user)
+      with ComposableCommand[Option[RenderableFile]]
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ReadOnly
+      with AttendanceNoteAttachmentPermissions
+      with AttendanceNoteCommandState
+      with AttendanceNoteAttachmentDescription
 }
 
 class AttendanceNoteAttachmentCommand(val student: StudentMember, val point: AttendanceMonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[Option[RenderableFile]] {
+  extends CommandInternal[Option[RenderableFile]] {
 
-	self: AttendanceMonitoringServiceComponent =>
+  self: AttendanceMonitoringServiceComponent =>
 
-	def applyInternal(): Option[RenderableAttachment] = {
-		attendanceMonitoringService.getAttendanceNote(student, point).flatMap{ note =>
-			Option(note.attachment).map{ attachment =>
-				new RenderableAttachment(attachment)
-			}
-		}
-	}
+  def applyInternal(): Option[RenderableAttachment] = {
+    attendanceMonitoringService.getAttendanceNote(student, point).flatMap { note =>
+      Option(note.attachment).map { attachment =>
+        new RenderableAttachment(attachment)
+      }
+    }
+  }
 
 }
 
 trait AttendanceNoteAttachmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: AttendanceNoteCommandState =>
+  self: AttendanceNoteCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.View, student)
+  }
 }
 
 trait AttendanceNoteAttachmentDescription extends Describable[Option[RenderableFile]] {
-	self: AttendanceNoteCommandState =>
+  self: AttendanceNoteCommandState =>
 
-	override lazy val eventName = "DownloadAttendanceNoteAttachment"
+  override lazy val eventName = "DownloadAttendanceNoteAttachment"
 
-	override def describe(d: Description) {
-		d.studentIds(Seq(student.universityId))
-		d.attendanceMonitoringPoints(Seq(point))
-	}
+  override def describe(d: Description) {
+    d.studentIds(Seq(student.universityId))
+    d.attendanceMonitoringPoints(Seq(point))
+  }
 }

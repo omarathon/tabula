@@ -9,6 +9,6 @@ Feature: GZipped content
     And I set the header user-agent to "<user_agent>"
     Then the content-encoding response header <expected_encoding>
 
-  Examples:
-    | user_agent                                                                                               | expected_encoding |
-    | Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36 | should be "gzip"  |
+    Examples:
+      | user_agent                                                                                               | expected_encoding |
+      | Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36 | should be "gzip"  |

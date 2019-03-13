@@ -12,109 +12,111 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Securi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ProfileExportCommand {
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
-		new ProfileExportCommandInternal(department, academicYear, user)
-			with AutowiringSecurityServiceComponent
-			with AutowiringProfileServiceComponent
-			with ComposableCommand[Seq[AttendanceMonitoringStudentData]]
-			with Unaudited with ReadOnly
-			with ProfileExportPermissions
-			with ProfileExportCommandState
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser) =
+    new ProfileExportCommandInternal(department, academicYear, user)
+      with AutowiringSecurityServiceComponent
+      with AutowiringProfileServiceComponent
+      with ComposableCommand[Seq[AttendanceMonitoringStudentData]]
+      with Unaudited with ReadOnly
+      with ProfileExportPermissions
+      with ProfileExportCommandState
 }
 
 
 class ProfileExportCommandInternal(val department: Department, val academicYear: AcademicYear, user: CurrentUser)
-	extends CommandInternal[Seq[AttendanceMonitoringStudentData]] with TaskBenchmarking {
+  extends CommandInternal[Seq[AttendanceMonitoringStudentData]] with TaskBenchmarking {
 
-	self: ProfileServiceComponent with ProfileExportCommandState with SecurityServiceComponent =>
+  self: ProfileServiceComponent with ProfileExportCommandState with SecurityServiceComponent =>
 
-	override def applyInternal(): Seq[AttendanceMonitoringStudentData] = {
-		val result = {
-			if (searchSingle || searchMulti) {
-				val members = {
-					if (searchSingle) profileService.getAllMembersWithUserId(singleSearch)
-					else profileService.getAllMembersWithUniversityIds(multiSearchEntries)
-				}
-				val students = members.flatMap {
-					case student: StudentMember => Some(student)
-					case _ => None
-				}
-				val (validStudents, noPermission) = students.partition(s => securityService.can(user, Permissions.Department.Reports, s))
+  override def applyInternal(): Seq[AttendanceMonitoringStudentData] = {
+    val result = {
+      if (searchSingle || searchMulti) {
+        val members = {
+          if (searchSingle) profileService.getAllMembersWithUserId(singleSearch)
+          else profileService.getAllMembersWithUniversityIds(multiSearchEntries)
+        }
+        val students = members.flatMap {
+          case student: StudentMember => Some(student)
+          case _ => None
+        }
+        val (validStudents, noPermission) = students.partition(s => securityService.can(user, Permissions.Department.Reports, s))
 
-				notFoundIds = multiSearchEntries.diff(students.map(_.universityId))
-				noPermissionIds = noPermission.map(_.universityId)
+        notFoundIds = multiSearchEntries.diff(students.map(_.universityId))
+        noPermissionIds = noPermission.map(_.universityId)
 
-				validStudents.map(s => {
-					val scd = Option(s.mostSignificantCourse)
-					AttendanceMonitoringStudentData(
-						s.firstName,
-						s.lastName,
-						s.universityId,
-						s.userId,
-						null,
-						null,
-						scd.map(_.currentRoute.code).getOrElse(""),
-						scd.map(_.currentRoute.name).getOrElse(""),
-						scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
-						scd.map(_.sprCode).getOrElse(""),
-						scd.map(_.latestStudentCourseYearDetails).exists { scyd => Option(scyd.casUsed).contains(true) || Option(scyd.tier4Visa).contains(true) }
-					)
-				})
-			} else if (hasBeenFiltered) {
-				benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
-					profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
-						department = department,
-						restrictions = buildRestrictions(academicYear),
-						academicYear
-					)
-				}
-			} else {
-				Seq()
-			}
-		}
-		result.sortBy(s => (s.lastName, s.firstName))
-	}
+        validStudents.map(s => {
+          val scd = Option(s.mostSignificantCourse)
+          AttendanceMonitoringStudentData(
+            s.firstName,
+            s.lastName,
+            s.universityId,
+            s.userId,
+            null,
+            null,
+            scd.map(_.currentRoute.code).getOrElse(""),
+            scd.map(_.currentRoute.name).getOrElse(""),
+            scd.map(_.latestStudentCourseYearDetails.yearOfStudy.toString).getOrElse(""),
+            scd.map(_.sprCode).getOrElse(""),
+            scd.map(_.latestStudentCourseYearDetails).exists { scyd => Option(scyd.casUsed).contains(true) || Option(scyd.tier4Visa).contains(true) }
+          )
+        })
+      } else if (hasBeenFiltered) {
+        benchmarkTask("profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments") {
+          profileService.findAllStudentDataByRestrictionsInAffiliatedDepartments(
+            department = department,
+            restrictions = buildRestrictions(academicYear),
+            academicYear
+          )
+        }
+      } else {
+        Seq()
+      }
+    }
+    result.sortBy(s => (s.lastName, s.firstName))
+  }
 }
 
 trait ProfileExportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ProfileExportCommandState =>
+  self: ProfileExportCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Reports, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Department.Reports, department)
+  }
 
 }
 
 trait ProfileExportCommandState extends FiltersStudents {
-	def department: Department
-	def academicYear: AcademicYear
+  def department: Department
 
-	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
-	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
+  def academicYear: AcademicYear
 
-	var noPermissionIds: Seq[String] = Seq()
-	var notFoundIds: Seq[String] = Seq()
-	// Bind variables
+  var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
+  val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 
-	var page = 1
-	var sortOrder: JList[Order] = JArrayList()
-	var hasBeenFiltered = false
-	var searchSingle = false
-	var searchMulti = false
-	var singleSearch: String = _
-	var multiSearch: String = _
-	def multiSearchEntries: Seq[String] =
-		if (multiSearch == null) Nil
-		else multiSearch split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
+  var noPermissionIds: Seq[String] = Seq()
+  var notFoundIds: Seq[String] = Seq()
+  // Bind variables
 
-	var courseTypes: JList[CourseType] = JArrayList()
-	var routes: JList[Route] = JArrayList()
-	var courses: JList[Course] = JArrayList()
-	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
-	var yearsOfStudy: JList[JInteger] = JArrayList()
-	var levelCodes: JList[String] = JArrayList()
-	var sprStatuses: JList[SitsStatus] = JArrayList()
-	var modules: JList[Module] = JArrayList()
-	var hallsOfResidence: JList[String] = JArrayList()
+  var page = 1
+  var sortOrder: JList[Order] = JArrayList()
+  var hasBeenFiltered = false
+  var searchSingle = false
+  var searchMulti = false
+  var singleSearch: String = _
+  var multiSearch: String = _
+
+  def multiSearchEntries: Seq[String] =
+    if (multiSearch == null) Nil
+    else multiSearch split "(\\s|[^A-Za-z\\d\\-_\\.])+" map (_.trim) filterNot (_.isEmpty)
+
+  var courseTypes: JList[CourseType] = JArrayList()
+  var routes: JList[Route] = JArrayList()
+  var courses: JList[Course] = JArrayList()
+  var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
+  var yearsOfStudy: JList[JInteger] = JArrayList()
+  var levelCodes: JList[String] = JArrayList()
+  var sprStatuses: JList[SitsStatus] = JArrayList()
+  var modules: JList[Module] = JArrayList()
+  var hallsOfResidence: JList[String] = JArrayList()
 }

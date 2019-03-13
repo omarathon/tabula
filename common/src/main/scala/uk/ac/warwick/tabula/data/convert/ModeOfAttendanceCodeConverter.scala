@@ -9,9 +9,14 @@ import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 
 class ModeOfAttendanceCodeConverter extends TwoWayConverter[String, ModeOfAttendance] {
 
-	@Autowired var dao: ModeOfAttendanceDao = _
+  @Autowired var dao: ModeOfAttendanceDao = _
 
-	override def convertRight(code: String): ModeOfAttendance = (Option(code) flatMap { dao.getByCode }).orNull
-	override def convertLeft(moa: ModeOfAttendance): String = (Option(moa) map {_.code}).orNull
+  override def convertRight(code: String): ModeOfAttendance = (Option(code) flatMap {
+    dao.getByCode
+  }).orNull
+
+  override def convertLeft(moa: ModeOfAttendance): String = (Option(moa) map {
+    _.code
+  }).orNull
 
 }

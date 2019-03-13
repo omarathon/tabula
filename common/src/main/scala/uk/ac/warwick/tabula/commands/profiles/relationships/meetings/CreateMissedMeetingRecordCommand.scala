@@ -10,55 +10,55 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import scala.collection.JavaConverters._
 
 object CreateMissedMeetingRecordCommand {
-	def apply(creator: Member, relationships: Seq[StudentRelationship]) =
-		new CreateMissedMeetingRecordCommandInternal(creator, relationships)
-			with AutowiringMeetingRecordServiceComponent
-			with AutowiringFeaturesComponent
-			with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-			with AutowiringFileAttachmentServiceComponent
-			with ComposableCommand[MeetingRecord]
-			with MeetingRecordCommandBindListener
-			with ModifyMeetingRecordValidation
-			with CreateMeetingRecordDescription
-			with ModifyMeetingRecordPermissions
-			with CreateMissedMeetingRecordCommandState
-			with MissedMeetingRecordCommandRequest
-			with CreateMissedMeetingRecordCommandNotifications
-			with PopulateOnForm {
-			override def populate(): Unit = {}
-		}
+  def apply(creator: Member, relationships: Seq[StudentRelationship]) =
+    new CreateMissedMeetingRecordCommandInternal(creator, relationships)
+      with AutowiringMeetingRecordServiceComponent
+      with AutowiringFeaturesComponent
+      with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+      with AutowiringFileAttachmentServiceComponent
+      with ComposableCommand[MeetingRecord]
+      with MeetingRecordCommandBindListener
+      with ModifyMeetingRecordValidation
+      with CreateMeetingRecordDescription
+      with ModifyMeetingRecordPermissions
+      with CreateMissedMeetingRecordCommandState
+      with MissedMeetingRecordCommandRequest
+      with CreateMissedMeetingRecordCommandNotifications
+      with PopulateOnForm {
+      override def populate(): Unit = {}
+    }
 }
 
 class CreateMissedMeetingRecordCommandInternal(val creator: Member, val allRelationships: Seq[StudentRelationship])
-	extends AbstractModifyMeetingRecordCommand {
+  extends AbstractModifyMeetingRecordCommand {
 
-	self: CreateMeetingRecordCommandState with MissedMeetingRecordCommandRequest with MeetingRecordServiceComponent
-		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
-		with FileAttachmentServiceComponent =>
+  self: CreateMeetingRecordCommandState with MissedMeetingRecordCommandRequest with MeetingRecordServiceComponent
+    with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
+    with FileAttachmentServiceComponent =>
 
-	override def applyInternal(): MeetingRecord = {
-		val meeting = new MeetingRecord(creator, relationships.asScala)
-		meeting.missed = true
-		meeting.missedReason = missedReason
-		applyCommon(meeting)
-	}
+  override def applyInternal(): MeetingRecord = {
+    val meeting = new MeetingRecord(creator, relationships.asScala)
+    meeting.missed = true
+    meeting.missedReason = missedReason
+    applyCommon(meeting)
+  }
 
 }
 
 trait CreateMissedMeetingRecordCommandState extends CreateMeetingRecordCommandState {
-	override def missed: Boolean = true
+  override def missed: Boolean = true
 }
 
 trait CreateMissedMeetingRecordCommandNotifications extends Notifies[MeetingRecord, MeetingRecord] {
 
-	self: CreateMeetingRecordCommandState =>
+  self: CreateMeetingRecordCommandState =>
 
-	override def emit(meeting: MeetingRecord) = Seq(
-		Notification.init(new MissedMeetingRecordStudentNotification, creator.asSsoUser, Seq(meeting)),
-		Notification.init(new MissedMeetingRecordAgentNotification, creator.asSsoUser, Seq(meeting))
-	)
+  override def emit(meeting: MeetingRecord) = Seq(
+    Notification.init(new MissedMeetingRecordStudentNotification, creator.asSsoUser, Seq(meeting)),
+    Notification.init(new MissedMeetingRecordAgentNotification, creator.asSsoUser, Seq(meeting))
+  )
 }
 
 trait MissedMeetingRecordCommandRequest extends MeetingRecordCommandRequest {
-	var missedReason: String = _
+  var missedReason: String = _
 }

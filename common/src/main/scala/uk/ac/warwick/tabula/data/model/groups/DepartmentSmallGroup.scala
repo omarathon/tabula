@@ -16,78 +16,84 @@ import scala.collection.JavaConverters._
 
 object DepartmentSmallGroup {
 
-	// For sorting a collection by group name. Either pass to the sort function,
-	// or expose as an implicit val.
-	val NameOrdering: Ordering[DepartmentSmallGroup] = Ordering.by { group: DepartmentSmallGroup => (group.name, group.id) }
+  // For sorting a collection by group name. Either pass to the sort function,
+  // or expose as an implicit val.
+  val NameOrdering: Ordering[DepartmentSmallGroup] = Ordering.by { group: DepartmentSmallGroup => (group.name, group.id) }
 
-	// Companion object is one of the places searched for an implicit Ordering, so
-	// this will be the default when ordering a list of small groups.
-	implicit val defaultOrdering = NameOrdering
+  // Companion object is one of the places searched for an implicit Ordering, so
+  // this will be the default when ordering a list of small groups.
+  implicit val defaultOrdering = NameOrdering
 }
 
 @Entity
 @Access(AccessType.FIELD)
 class DepartmentSmallGroup
-	extends GeneratedId
-	with ToString
-	with PermissionsTarget
-	with Serializable
-	with ToEntityReference {
-	type Entity = DepartmentSmallGroup
-	import DepartmentSmallGroup._
+  extends GeneratedId
+    with ToString
+    with PermissionsTarget
+    with Serializable
+    with ToEntityReference {
+  type Entity = DepartmentSmallGroup
 
-	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+  import DepartmentSmallGroup._
 
-	def this(_set: DepartmentSmallGroupSet) {
-		this()
-		this.groupSet = _set
-	}
+  // FIXME this isn't really optional, but testing is a pain unless it's made so
+  @transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
-	@NotNull
-	var name: String = _
+  def this(_set: DepartmentSmallGroupSet) {
+    this()
+    this.groupSet = _set
+  }
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "set_id", insertable = false, updatable = false)
-	var groupSet: DepartmentSmallGroupSet = _
+  @NotNull
+  var name: String = _
 
-	@OneToMany(mappedBy = "linkedDepartmentSmallGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	@BatchSize(size=200)
-	var linkedGroups: JSet[SmallGroup] = JHashSet()
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "set_id", insertable = false, updatable = false)
+  var groupSet: DepartmentSmallGroupSet = _
 
-	def permissionsParents: Stream[GeneratedId with ToString with PermissionsTarget with Serializable with ToEntityReference] = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
-	override def humanReadableId: String = name
+  @OneToMany(mappedBy = "linkedDepartmentSmallGroup", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+  @BatchSize(size = 200)
+  var linkedGroups: JSet[SmallGroup] = JHashSet()
 
-	/**
-	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
-	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
-	 * the right sort of UserId to use is.
-	 */
-	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "studentsgroup_id")
-	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
-	def students: UnspecifiedTypeUserGroup = {
-		smallGroupService match {
-			case Some(smallGroupService) => {
-				new UserGroupCacheManager(_studentsGroup, smallGroupService.departmentStudentGroupHelper)
-			}
-			case _ => _studentsGroup
-		}
-	}
-	def students_=(group: UserGroup) { _studentsGroup = group }
+  def permissionsParents: Stream[GeneratedId with ToString with PermissionsTarget with Serializable with ToEntityReference] = Option(groupSet).toStream ++ linkedGroups.asScala.toStream
 
-	def toStringProps = Seq(
-		"id" -> id,
-		"name" -> name,
-		"set" -> groupSet)
+  override def humanReadableId: String = name
 
-	def duplicateTo(groupSet: DepartmentSmallGroupSet, transient: Boolean, copyMembership: Boolean = true): DepartmentSmallGroup = {
-		val newGroup = new DepartmentSmallGroup()
-		if (!transient) newGroup.id = id
-		newGroup.groupSet = groupSet
-		newGroup.name = name
-		if (copyMembership) newGroup._studentsGroup = _studentsGroup.duplicate()
-		newGroup
-	}
+  /**
+    * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
+    * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
+    * the right sort of UserId to use is.
+    */
+  @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @JoinColumn(name = "studentsgroup_id")
+  private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+
+  def students: UnspecifiedTypeUserGroup = {
+    smallGroupService match {
+      case Some(smallGroupService) => {
+        new UserGroupCacheManager(_studentsGroup, smallGroupService.departmentStudentGroupHelper)
+      }
+      case _ => _studentsGroup
+    }
+  }
+
+  def students_=(group: UserGroup) {
+    _studentsGroup = group
+  }
+
+  def toStringProps = Seq(
+    "id" -> id,
+    "name" -> name,
+    "set" -> groupSet)
+
+  def duplicateTo(groupSet: DepartmentSmallGroupSet, transient: Boolean, copyMembership: Boolean = true): DepartmentSmallGroup = {
+    val newGroup = new DepartmentSmallGroup()
+    if (!transient) newGroup.id = id
+    newGroup.groupSet = groupSet
+    newGroup.name = name
+    if (copyMembership) newGroup._studentsGroup = _studentsGroup.duplicate()
+    newGroup
+  }
 
 }

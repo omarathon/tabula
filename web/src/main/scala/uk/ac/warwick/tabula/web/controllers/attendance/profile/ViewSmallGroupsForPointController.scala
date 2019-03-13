@@ -15,25 +15,25 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/{point}/groups"))
 class ViewSmallGroupsForPointController extends AttendanceController {
 
-	@ModelAttribute("command")
-	def createCommand(
-		@PathVariable student: StudentMember,
-		@PathVariable point: AttendanceMonitoringPoint,
-		@PathVariable academicYear: AcademicYear
-	) =
-		ViewSmallGroupsForPointCommand(
-			mandatory(student),
-			mandatory(point),
-			ListStudentGroupAttendanceCommand(mandatory(student), mandatory(academicYear)).apply()
-		)
+  @ModelAttribute("command")
+  def createCommand(
+    @PathVariable student: StudentMember,
+    @PathVariable point: AttendanceMonitoringPoint,
+    @PathVariable academicYear: AcademicYear
+  ) =
+    ViewSmallGroupsForPointCommand(
+      mandatory(student),
+      mandatory(point),
+      ListStudentGroupAttendanceCommand(mandatory(student), mandatory(academicYear)).apply()
+    )
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[ViewSmallGroupsForPointCommandResult]): Mav = {
-		val result = cmd.apply()
-		Mav("attendance/profile/groups",
-			"result" -> result,
-			"currentMember" -> currentMember,
-			"isModal" -> ajax
-		).noLayoutIf(ajax)
-	}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[ViewSmallGroupsForPointCommandResult]): Mav = {
+    val result = cmd.apply()
+    Mav("attendance/profile/groups",
+      "result" -> result,
+      "currentMember" -> currentMember,
+      "isModal" -> ajax
+    ).noLayoutIf(ajax)
+  }
 }

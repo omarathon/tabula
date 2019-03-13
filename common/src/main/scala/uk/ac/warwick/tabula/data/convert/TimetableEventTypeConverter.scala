@@ -5,6 +5,9 @@ import uk.ac.warwick.tabula.timetables.TimetableEventType
 
 class TimetableEventTypeConverter extends TwoWayConverter[String, TimetableEventType] {
 
-	override def convertRight(code: String) = TimetableEventType(code)
-	override def convertLeft(format: TimetableEventType): String = (Option(format) map { _.code }).orNull
+  override def convertRight(code: String) = TimetableEventType(code)
+
+  override def convertLeft(format: TimetableEventType): String = (Option(format) map {
+    _.code
+  }).orNull
 }

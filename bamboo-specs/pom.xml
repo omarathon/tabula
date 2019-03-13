@@ -6,7 +6,7 @@
     <groupId>com.atlassian.bamboo</groupId>
     <artifactId>bamboo-specs-parent</artifactId>
     <version>6.7.1</version>
-    <relativePath />
+    <relativePath/>
   </parent>
 
   <groupId>uk.ac.warwick.tabula</groupId>

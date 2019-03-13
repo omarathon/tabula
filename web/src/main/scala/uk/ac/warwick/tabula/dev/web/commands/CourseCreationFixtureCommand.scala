@@ -8,34 +8,34 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class CourseCreationFixtureCommand extends CommandInternal[Course] {
-	this: ModuleAndDepartmentServiceComponent with SessionComponent with TransactionalComponent =>
+  this: ModuleAndDepartmentServiceComponent with SessionComponent with TransactionalComponent =>
 
-	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
-	var courseCode: String = _
-	var courseName: String = _
+  var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
+  var courseCode: String = _
+  var courseName: String = _
 
-	protected def applyInternal(): Course =
-		transactional() {
-			val c = courseAndRouteService.getCourseByCode(courseCode).getOrElse(new Course)
-			c.code = courseCode
-			c.name = courseName
-			c.shortName = courseName
-			c.title = courseName
+  protected def applyInternal(): Course =
+    transactional() {
+      val c = courseAndRouteService.getCourseByCode(courseCode).getOrElse(new Course)
+      c.code = courseCode
+      c.name = courseName
+      c.shortName = courseName
+      c.title = courseName
 
-			courseAndRouteService.saveOrUpdate(c)
-			c
-		}
+      courseAndRouteService.saveOrUpdate(c)
+      c
+    }
 }
 
-object CourseCreationFixtureCommand{
-	def apply(): CourseCreationFixtureCommand with ComposableCommand[Course] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
-		new CourseCreationFixtureCommand
-			with ComposableCommand[Course]
-			with AutowiringModuleAndDepartmentServiceComponent
-			with Daoisms
-			with AutowiringTransactionalComponent
-			with Unaudited
-			with PubliclyVisiblePermissions
+object CourseCreationFixtureCommand {
+  def apply(): CourseCreationFixtureCommand with ComposableCommand[Course] with AutowiringModuleAndDepartmentServiceComponent with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions = {
+    new CourseCreationFixtureCommand
+      with ComposableCommand[Course]
+      with AutowiringModuleAndDepartmentServiceComponent
+      with Daoisms
+      with AutowiringTransactionalComponent
+      with Unaudited
+      with PubliclyVisiblePermissions
 
-	}
+  }
 }

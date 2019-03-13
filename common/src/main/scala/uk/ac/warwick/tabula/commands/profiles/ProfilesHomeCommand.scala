@@ -11,64 +11,70 @@ import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent}
 import scala.collection.JavaConverters._
 
 case class ProfilesHomeInformation(
-	currentSmallGroups: Seq[SmallGroup] = Nil,
-	previousSmallGroups: Seq[SmallGroup] = Nil,
-	relationshipTypesMap: Map[StudentRelationshipType, Boolean] = Map(),
-	adminDepartments: Seq[Department] = Seq()
+  currentSmallGroups: Seq[SmallGroup] = Nil,
+  previousSmallGroups: Seq[SmallGroup] = Nil,
+  relationshipTypesMap: Map[StudentRelationshipType, Boolean] = Map(),
+  adminDepartments: Seq[Department] = Seq()
 )
 
 object ProfilesHomeCommand {
-	def apply(user: CurrentUser, currentMember: Option[Member]) =
-		new ProfilesHomeCommand(user, currentMember)
-			with Command[ProfilesHomeInformation]
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringRelationshipServiceComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringSecurityServiceComponent
-			with Public with ReadOnly with Unaudited
+  def apply(user: CurrentUser, currentMember: Option[Member]) =
+    new ProfilesHomeCommand(user, currentMember)
+      with Command[ProfilesHomeInformation]
+      with AutowiringSmallGroupServiceComponent
+      with AutowiringRelationshipServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringSecurityServiceComponent
+      with Public with ReadOnly with Unaudited
 
 }
 
 abstract class ProfilesHomeCommand(val user: CurrentUser, val currentMember: Option[Member])
-	extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent with CurrentAcademicYear {
+  extends CommandInternal[ProfilesHomeInformation] with TaskBenchmarking with ChecksAgent with CurrentAcademicYear {
 
-	self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
+  self: FeaturesComponent with SmallGroupServiceComponent with RelationshipServiceComponent with ModuleAndDepartmentServiceComponent with SecurityServiceComponent =>
 
-	override def applyInternal(): ProfilesHomeInformation = {
-		if (user.isStaff || isAgent(user.universityId)) {
-			val (smallGroups, previousSmallGroups) =
-				if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") {
-					smallGroupService.findReleasedSmallGroupsByTutor(user).partition(_.groupSet.academicYear == academicYear)
-				}
-				else (Nil, Nil)
+  override def applyInternal(): ProfilesHomeInformation = {
+    if (user.isStaff || isAgent(user.universityId)) {
+      val (smallGroups, previousSmallGroups) =
+        if (features.smallGroupTeachingTutorView) benchmarkTask("Find all small groups with user as tutor") {
+          smallGroupService.findReleasedSmallGroupsByTutor(user).partition(_.groupSet.academicYear == academicYear)
+        }
+        else (Nil, Nil)
 
-			// Get all the relationship types that the current member is an agent of
-			val downwardRelationshipTypes = currentMember.map { m =>
-				benchmarkTask("Get all relationship types with member") { relationshipService.listCurrentStudentRelationshipTypesWithMember(m) }
-			}.getOrElse(Nil)
+      // Get all the relationship types that the current member is an agent of
+      val downwardRelationshipTypes = currentMember.map { m =>
+        benchmarkTask("Get all relationship types with member") {
+          relationshipService.listCurrentStudentRelationshipTypesWithMember(m)
+        }
+      }.getOrElse(Nil)
 
-			// Get all the enabled relationship types for a department
-			// Filtered by department visibility in view
-			val allRelationshipTypes = benchmarkTask("Get all relationship types") { relationshipService.allStudentRelationshipTypes }
+      // Get all the enabled relationship types for a department
+      // Filtered by department visibility in view
+      val allRelationshipTypes = benchmarkTask("Get all relationship types") {
+        relationshipService.allStudentRelationshipTypes
+      }
 
-			// A map from each type to a boolean for whether the current member has downward relationships of that type
-			val relationshipTypesMap = benchmarkTask("Map relationship types to existing ones") { allRelationshipTypes.map { t =>
-				(t, downwardRelationshipTypes.contains(t))
-			}.toMap }
+      // A map from each type to a boolean for whether the current member has downward relationships of that type
+      val relationshipTypesMap = benchmarkTask("Map relationship types to existing ones") {
+        allRelationshipTypes.map { t =>
+          (t, downwardRelationshipTypes.contains(t))
+        }.toMap
+      }
 
-			def withSubDepartments(d: Department): Seq[Department] = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName).flatMap(withSubDepartments)
+      def withSubDepartments(d: Department): Seq[Department] = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName).flatMap(withSubDepartments)
 
-			val adminDepartments = benchmarkTask("Get all departments with permissions to manage profiles") {
-				moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Department.ManageProfiles).toSeq
-					.sortBy(_.fullName).flatMap(withSubDepartments).distinct
-			}
+      val adminDepartments = benchmarkTask("Get all departments with permissions to manage profiles") {
+        moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Department.ManageProfiles).toSeq
+          .sortBy(_.fullName).flatMap(withSubDepartments).distinct
+      }
 
-			ProfilesHomeInformation(
-				currentSmallGroups = smallGroups.sortBy { group => (group.groupSet.module, group.groupSet, group) },
-				previousSmallGroups = previousSmallGroups.sortBy { group => (group.groupSet.academicYear.toString, group.groupSet.module, group.groupSet, group) },
-				relationshipTypesMap = relationshipTypesMap,
-				adminDepartments = adminDepartments
-			)
-		} else ProfilesHomeInformation()
-	}
+      ProfilesHomeInformation(
+        currentSmallGroups = smallGroups.sortBy { group => (group.groupSet.module, group.groupSet, group) },
+        previousSmallGroups = previousSmallGroups.sortBy { group => (group.groupSet.academicYear.toString, group.groupSet.module, group.groupSet, group) },
+        relationshipTypesMap = relationshipTypesMap,
+        adminDepartments = adminDepartments
+      )
+    } else ProfilesHomeInformation()
+  }
 }

@@ -6,36 +6,36 @@ import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceCompon
 
 
 object UserCodeSearchCommand {
-	def apply() =
-		new UserCodeSearchCommandInternal
-			with ComposableCommand[Seq[String]]
-			with AutowiringProfileServiceComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with UserSearchCommandRequest
-			with ReadOnly with Unaudited
+  def apply() =
+    new UserCodeSearchCommandInternal
+      with ComposableCommand[Seq[String]]
+      with AutowiringProfileServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with UserSearchCommandRequest
+      with ReadOnly with Unaudited
 }
 
 abstract class UserCodeSearchCommandInternal extends CommandInternal[Seq[String]] with FiltersStudents {
 
-	self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
+  self: UserSearchCommandRequest with ModuleAndDepartmentServiceComponent =>
 
-	override def applyInternal(): Seq[String] = {
-		if (Option(department).isEmpty && serializeFilter.isEmpty) {
-			throw new IllegalArgumentException("At least one filter value must be defined")
-		}
+  override def applyInternal(): Seq[String] = {
+    if (Option(department).isEmpty && serializeFilter.isEmpty) {
+      throw new IllegalArgumentException("At least one filter value must be defined")
+    }
 
-		val restrictions = buildRestrictions(AcademicYear.now())
+    val restrictions = buildRestrictions(AcademicYear.now())
 
-		Option(department) match {
-			case Some(d) =>
-				Seq(d).flatMap(department =>
-					profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
-						department,
-						restrictions
-					)
-				).distinct
-			case _ =>
-				profileService.findAllUserIdsByRestrictions(restrictions).distinct
-		}
-	}
+    Option(department) match {
+      case Some(d) =>
+        Seq(d).flatMap(department =>
+          profileService.findAllUserIdsByRestrictionsInAffiliatedDepartments(
+            department,
+            restrictions
+          )
+        ).distinct
+      case _ =>
+        profileService.findAllUserIdsByRestrictions(restrictions).distinct
+    }
+  }
 }

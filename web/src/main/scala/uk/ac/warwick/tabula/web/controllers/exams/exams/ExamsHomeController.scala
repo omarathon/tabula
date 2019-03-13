@@ -13,51 +13,53 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 abstract class AbstractExamsHomeController extends ExamsController with TaskBenchmarking
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	@Autowired var assessmentService: AssessmentService = Wire[AssessmentService]
-	@Autowired var examMembershipService: AssessmentMembershipService = _
-	@Autowired var feedbackService: FeedbackService = _
+  @Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  @Autowired var assessmentService: AssessmentService = Wire[AssessmentService]
+  @Autowired var examMembershipService: AssessmentMembershipService = _
+  @Autowired var feedbackService: FeedbackService = _
 
-	@RequestMapping
-	def examsHome(@RequestParam(required = false) marked: Integer, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+  @RequestMapping
+  def examsHome(@RequestParam(required = false) marked: Integer, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		val ownedDepartments = benchmarkTask("Get owned departments") {
-			moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
-		}
+    val ownedDepartments = benchmarkTask("Get owned departments") {
+      moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
+    }
 
-		val ownedModules = benchmarkTask("Get owned modules") {
-			moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
-		}
+    val ownedModules = benchmarkTask("Get owned modules") {
+      moduleAndDepartmentService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
+    }
 
-		val examsForMarking = benchmarkTask("Get exams for marking") {
-			assessmentService.getExamsWhereMarker(user.apparentUser).filter(_.academicYear == academicYear).sortBy(_.module.code).map(exam => {
-				val requiresMarking = examMembershipService.determineMembershipUsersWithOrderForMarker(exam, user.apparentUser)
-				val feedbacks = feedbackService.getExamFeedbackMap(exam, requiresMarking.map(_._1)).values.toSeq.filter(_.latestMark.isDefined)
-				exam -> (feedbacks, requiresMarking)
-			})
-		}.toMap
+    val examsForMarking = benchmarkTask("Get exams for marking") {
+      assessmentService.getExamsWhereMarker(user.apparentUser).filter(_.academicYear == academicYear).sortBy(_.module.code).map(exam => {
+        val requiresMarking = examMembershipService.determineMembershipUsersWithOrderForMarker(exam, user.apparentUser)
+        val feedbacks = feedbackService.getExamFeedbackMap(exam, requiresMarking.map(_._1)).values.toSeq.filter(_.latestMark.isDefined)
+        exam -> (feedbacks, requiresMarking)
+      })
+    }.toMap
 
-		Mav("exams/exams/home/view",
-			"academicYear" -> academicYear,
-			"currentAcademicYear" -> academicYear,
-			"examsForMarking" -> examsForMarking,
-			"ownedDepartments" -> ownedDepartments,
-			"ownedModuleDepartments" -> ownedModules.map { _.adminDepartment },
-			"marked" -> marked
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.exams.Exams.home): _*)
-	}
+    Mav("exams/exams/home/view",
+      "academicYear" -> academicYear,
+      "currentAcademicYear" -> academicYear,
+      "examsForMarking" -> examsForMarking,
+      "ownedDepartments" -> ownedDepartments,
+      "ownedModuleDepartments" -> ownedModules.map {
+        _.adminDepartment
+      },
+      "marked" -> marked
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.exams.Exams.home): _*)
+  }
 }
 
 @Controller
 @RequestMapping(Array("/exams/exams"))
 class ExamsHomeController extends AbstractExamsHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] =
-		retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] =
+    retrieveActiveAcademicYear(None)
 
 }
 
@@ -65,8 +67,8 @@ class ExamsHomeController extends AbstractExamsHomeController {
 @RequestMapping(Array("/exams/exams/{academicYear:\\d{4}}"))
 class ExamsHomeForYearController extends AbstractExamsHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+    retrieveActiveAcademicYear(Option(academicYear))
 
 }

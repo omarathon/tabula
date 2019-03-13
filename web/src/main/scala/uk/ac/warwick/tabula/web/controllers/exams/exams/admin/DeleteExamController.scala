@@ -17,36 +17,36 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 @RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/delete"))
 class DeleteExamController extends ExamsController {
 
-	type DeleteExamCommand = Appliable[Exam] with DeleteExamCommandState
+  type DeleteExamCommand = Appliable[Exam] with DeleteExamCommandState
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable exam : Exam) = DeleteExamCommand(mandatory(exam))
+  @ModelAttribute("command")
+  def command(@PathVariable exam: Exam) = DeleteExamCommand(mandatory(exam))
 
-	@RequestMapping(method = Array(GET))
-	def showForm(@ModelAttribute("command") cmd: DeleteExamCommand): Mav = {
-		render(cmd)
-	}
+  @RequestMapping(method = Array(GET))
+  def showForm(@ModelAttribute("command") cmd: DeleteExamCommand): Mav = {
+    render(cmd)
+  }
 
-	private def render(cmd: DeleteExamCommand) = {
-		Mav("exams/exams/admin/delete").crumbs(
-			Breadcrumbs.Exams.Home(cmd.exam.academicYear),
-			Breadcrumbs.Exams.Department(cmd.exam.module.adminDepartment, cmd.exam.academicYear),
-			Breadcrumbs.Exams.Module(cmd.exam.module, cmd.exam.academicYear)
-		)
-	}
+  private def render(cmd: DeleteExamCommand) = {
+    Mav("exams/exams/admin/delete").crumbs(
+      Breadcrumbs.Exams.Home(cmd.exam.academicYear),
+      Breadcrumbs.Exams.Department(cmd.exam.module.adminDepartment, cmd.exam.academicYear),
+      Breadcrumbs.Exams.Module(cmd.exam.module, cmd.exam.academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: DeleteExamCommand,
-		errors: Errors
-	): Mav = {
-		if (errors.hasErrors) {
-			render(cmd)
-		} else {
-			cmd.apply()
-			Redirect(Routes.Exams.admin.module(cmd.exam.module, cmd.exam.academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: DeleteExamCommand,
+    errors: Errors
+  ): Mav = {
+    if (errors.hasErrors) {
+      render(cmd)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Exams.admin.module(cmd.exam.module, cmd.exam.academicYear))
+    }
+  }
 }

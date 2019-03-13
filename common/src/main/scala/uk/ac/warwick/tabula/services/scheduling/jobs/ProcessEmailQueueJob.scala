@@ -15,15 +15,15 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ProcessEmailQueueJob extends AutowiredJobBean {
 
-	@Autowired var emailNotificationService: EmailNotificationService = _
+  @Autowired var emailNotificationService: EmailNotificationService = _
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingNotificationEmails)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					emailNotificationService.processNotifications()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingNotificationEmails)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          emailNotificationService.processNotifications()
+        }
+      }
+  }
 
 }

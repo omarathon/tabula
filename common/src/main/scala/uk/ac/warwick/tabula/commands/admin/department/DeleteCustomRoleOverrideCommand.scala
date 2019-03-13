@@ -10,52 +10,54 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
 object DeleteCustomRoleOverrideCommand {
-	def apply(department: Department, customRoleDefinition: CustomRoleDefinition, roleOverride: RoleOverride) =
-		new DeleteCustomRoleOverrideCommandInternal(department, customRoleDefinition, roleOverride)
-			with ComposableCommand[RoleOverride]
-			with DeleteCustomRoleOverrideCommandDescription
-			with DeleteCustomRoleOverrideCommandValidation
-			with DeleteCustomRoleOverrideCommandPermissions
-			with AutowiringPermissionsServiceComponent
+  def apply(department: Department, customRoleDefinition: CustomRoleDefinition, roleOverride: RoleOverride) =
+    new DeleteCustomRoleOverrideCommandInternal(department, customRoleDefinition, roleOverride)
+      with ComposableCommand[RoleOverride]
+      with DeleteCustomRoleOverrideCommandDescription
+      with DeleteCustomRoleOverrideCommandValidation
+      with DeleteCustomRoleOverrideCommandPermissions
+      with AutowiringPermissionsServiceComponent
 }
 
 trait DeleteCustomRoleOverrideCommandState {
-	def department: Department
-	def customRoleDefinition: CustomRoleDefinition
-	def roleOverride: RoleOverride
+  def department: Department
+
+  def customRoleDefinition: CustomRoleDefinition
+
+  def roleOverride: RoleOverride
 }
 
 class DeleteCustomRoleOverrideCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition, val roleOverride: RoleOverride) extends CommandInternal[RoleOverride] with DeleteCustomRoleOverrideCommandState {
-	self: PermissionsServiceComponent =>
+  self: PermissionsServiceComponent =>
 
-	override def applyInternal(): RoleOverride = transactional() {
-		customRoleDefinition.overrides.remove(roleOverride)
+  override def applyInternal(): RoleOverride = transactional() {
+    customRoleDefinition.overrides.remove(roleOverride)
 
-		permissionsService.saveOrUpdate(customRoleDefinition)
-		roleOverride
-	}
+    permissionsService.saveOrUpdate(customRoleDefinition)
+    roleOverride
+  }
 }
 
 trait DeleteCustomRoleOverrideCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DeleteCustomRoleOverrideCommandState =>
+  self: DeleteCustomRoleOverrideCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
-		p.mustBeLinked(mandatory(roleOverride), mandatory(customRoleDefinition))
-		p.PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
+    p.mustBeLinked(mandatory(roleOverride), mandatory(customRoleDefinition))
+    p.PermissionCheck(Permissions.RolesAndPermissions.Delete, roleOverride)
+  }
 }
 
 trait DeleteCustomRoleOverrideCommandValidation extends SelfValidating {
-	self: DeleteCustomRoleOverrideCommandState =>
+  self: DeleteCustomRoleOverrideCommandState =>
 
-	override def validate(errors: Errors) {}
+  override def validate(errors: Errors) {}
 }
 
 trait DeleteCustomRoleOverrideCommandDescription extends Describable[RoleOverride] {
-	self: DeleteCustomRoleOverrideCommandState =>
-	// describe the thing that's happening.
-	override def describe(d: Description): Unit =
-		d.customRoleDefinition(customRoleDefinition)
+  self: DeleteCustomRoleOverrideCommandState =>
+  // describe the thing that's happening.
+  override def describe(d: Description): Unit =
+    d.customRoleDefinition(customRoleDefinition)
 }
 

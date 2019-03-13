@@ -10,46 +10,49 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistration]] with Logging {
-	this: SessionComponent with TransactionalComponent  =>
+  this: SessionComponent with TransactionalComponent =>
 
-	var memberDao: MemberDao = Wire[MemberDaoImpl]
-	var moduleDao: ModuleDao = Wire[ModuleDaoImpl]
+  var memberDao: MemberDao = Wire[MemberDaoImpl]
+  var moduleDao: ModuleDao = Wire[ModuleDaoImpl]
 
-	var moduleCode: String = _
-	var universityIds: String = _
-	var academicYear: AcademicYear = _
+  var moduleCode: String = _
+  var universityIds: String = _
+  var academicYear: AcademicYear = _
 
-	protected def applyInternal(): Seq[ModuleRegistration] =
-		transactional() {
-			val module = moduleDao.getByCode(moduleCode).get
-			val cats = new JBigDecimal(12.0)
+  protected def applyInternal(): Seq[ModuleRegistration] =
+    transactional() {
+      val module = moduleDao.getByCode(moduleCode).get
+      val cats = new JBigDecimal(12.0)
 
-			val regs: Seq[ModuleRegistration] =
-				for {
-					uniId <- universityIds.split(",")
-					student <- memberDao.getByUniversityId(uniId).filter { _.isInstanceOf[StudentMember] }.toSeq
-					scd <- student.asInstanceOf[StudentMember].freshStudentCourseDetails
-				} yield {
-					val modReg = new ModuleRegistration(scd, module, cats, academicYear, "A")
-					session.save(modReg)
-					scd.addModuleRegistration(modReg)
-					session.save(scd)
-					session.flush()
+      val regs: Seq[ModuleRegistration] =
+        for {
+          uniId <- universityIds.split(",")
+          student <- memberDao.getByUniversityId(uniId).filter {
+            _.isInstanceOf[StudentMember]
+          }.toSeq
+          scd <- student.asInstanceOf[StudentMember].freshStudentCourseDetails
+        } yield {
+          val modReg = new ModuleRegistration(scd, module, cats, academicYear, "A")
+          session.save(modReg)
+          scd.addModuleRegistration(modReg)
+          session.save(scd)
+          session.flush()
 
-					modReg
-				}
+          modReg
+        }
 
-			regs
-		}
+      regs
+    }
 }
-object ModuleRegistrationFixtureCommand{
-	def apply(): ModuleRegistrationFixtureCommand with ComposableCommand[Seq[ModuleRegistration]] with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions ={
-		new ModuleRegistrationFixtureCommand
-			with ComposableCommand[Seq[ModuleRegistration]]
-			with Daoisms
-		  with AutowiringTransactionalComponent
-			with Unaudited
-			with PubliclyVisiblePermissions
 
-	}
+object ModuleRegistrationFixtureCommand {
+  def apply(): ModuleRegistrationFixtureCommand with ComposableCommand[Seq[ModuleRegistration]] with Daoisms with AutowiringTransactionalComponent with Unaudited with PubliclyVisiblePermissions = {
+    new ModuleRegistrationFixtureCommand
+      with ComposableCommand[Seq[ModuleRegistration]]
+      with Daoisms
+      with AutowiringTransactionalComponent
+      with Unaudited
+      with PubliclyVisiblePermissions
+
+  }
 }

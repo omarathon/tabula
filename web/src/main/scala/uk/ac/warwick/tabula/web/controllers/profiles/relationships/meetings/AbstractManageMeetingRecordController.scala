@@ -13,106 +13,106 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 abstract class AbstractManageMeetingRecordController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("allRelationships")
-	def allRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails
-	): Seq[StudentRelationship] = {
-		relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
-	}
+  @ModelAttribute("allRelationships")
+  def allRelationships(
+    @PathVariable studentCourseDetails: StudentCourseDetails
+  ): Seq[StudentRelationship] = {
+    relationshipService.findCurrentRelationships(mandatory(studentCourseDetails))
+  }
 
-	@ModelAttribute("manageableRelationships")
-	def manageableRelationships(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
-	): Seq[StudentRelationship] = {
-		allRelationships.filter(r => securityService.can(user, Permissions.Profiles.MeetingRecord.Manage(r.relationshipType), studentCourseDetails.student))
-	}
+  @ModelAttribute("manageableRelationships")
+  def manageableRelationships(
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
+  ): Seq[StudentRelationship] = {
+    allRelationships.filter(r => securityService.can(user, Permissions.Profiles.MeetingRecord.Manage(r.relationshipType), studentCourseDetails.student))
+  }
 
-	@ModelAttribute("nonManageableRelationships")
-	def nonManageableRelationships(
-		@ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship],
-		@ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
-	): Seq[StudentRelationship] = {
-		allRelationships.filterNot(manageableRelationships.contains)
-	}
+  @ModelAttribute("nonManageableRelationships")
+  def nonManageableRelationships(
+    @ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship],
+    @ModelAttribute("manageableRelationships") manageableRelationships: Seq[StudentRelationship]
+  ): Seq[StudentRelationship] = {
+    allRelationships.filterNot(manageableRelationships.contains)
+  }
 
-	@RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
-	def getIframe(
-		@ModelAttribute("command") cmd: Appliable[MeetingRecord] with PopulateOnForm,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		cmd.populate()
-		form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
-	}
+  @RequestMapping(method = Array(GET, HEAD), params = Array("iframe"))
+  def getIframe(
+    @ModelAttribute("command") cmd: Appliable[MeetingRecord] with PopulateOnForm,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    cmd.populate()
+    form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
+  }
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def get(
-		@ModelAttribute("command") cmd: Appliable[MeetingRecord] with PopulateOnForm,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		cmd.populate()
-		form(cmd, relationshipType, studentCourseDetails, academicYear)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def get(
+    @ModelAttribute("command") cmd: Appliable[MeetingRecord] with PopulateOnForm,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    cmd.populate()
+    form(cmd, relationshipType, studentCourseDetails, academicYear)
+  }
 
-	private def form(
-		cmd: Appliable[MeetingRecord],
-		relationshipType: StudentRelationshipType,
-		studentCourseDetails: StudentCourseDetails,
-		academicYear: AcademicYear,
-		iframe: Boolean = false
-	) = {
-		val mav = Mav("profiles/related_students/meeting/edit",
-			"returnTo" -> getReturnTo(Routes.Profile.relationshipType(studentCourseDetails, academicYear, relationshipType)),
-			"isModal" -> ajax,
-			"isIframe" -> iframe,
-			"formats" -> MeetingFormat.members,
-			"isStudent" -> (studentCourseDetails.student == currentMember)
-		)
-		if (ajax)
-			mav.noLayout()
-		else if (iframe)
-			mav.noNavigation()
-		else
-			mav
-	}
+  private def form(
+    cmd: Appliable[MeetingRecord],
+    relationshipType: StudentRelationshipType,
+    studentCourseDetails: StudentCourseDetails,
+    academicYear: AcademicYear,
+    iframe: Boolean = false
+  ) = {
+    val mav = Mav("profiles/related_students/meeting/edit",
+      "returnTo" -> getReturnTo(Routes.Profile.relationshipType(studentCourseDetails, academicYear, relationshipType)),
+      "isModal" -> ajax,
+      "isIframe" -> iframe,
+      "formats" -> MeetingFormat.members,
+      "isStudent" -> (studentCourseDetails.student == currentMember)
+    )
+    if (ajax)
+      mav.noLayout()
+    else if (iframe)
+      mav.noNavigation()
+    else
+      mav
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("iframe"))
-	def submitIframe(
-		@Valid @ModelAttribute("command") cmd: Appliable[MeetingRecord],
-		errors: Errors,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) {
-			form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
-		} else {
-			cmd.apply()
-			Mav("profiles/related_students/meeting/edit",
-				"success" -> true
-			)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("iframe"))
+  def submitIframe(
+    @Valid @ModelAttribute("command") cmd: Appliable[MeetingRecord],
+    errors: Errors,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, relationshipType, studentCourseDetails, academicYear, iframe = true)
+    } else {
+      cmd.apply()
+      Mav("profiles/related_students/meeting/edit",
+        "success" -> true
+      )
+    }
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[MeetingRecord],
-		errors: Errors,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) {
-			form(cmd, relationshipType, studentCourseDetails, academicYear)
-		} else {
-			cmd.apply()
-			Redirect(Routes.Profile.relationshipType(studentCourseDetails, academicYear, relationshipType))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[MeetingRecord],
+    errors: Errors,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, relationshipType, studentCourseDetails, academicYear)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Profile.relationshipType(studentCourseDetails, academicYear, relationshipType))
+    }
+  }
 }

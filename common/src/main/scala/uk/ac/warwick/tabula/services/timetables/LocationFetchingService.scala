@@ -57,6 +57,7 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
     }
 
     def isSupportsMultiLookups = true
+
     def shouldBeCached(locations: CacheEntry): Boolean = locations.isSuccess // Don't cache failures
   }
 
@@ -71,9 +72,13 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
 
 trait WAI2GoConfiguration {
   def baseUri: Uri
+
   def cached: Boolean
+
   def defaultHeaders: Map[String, String]
+
   def defaultParameters: Map[String, String]
+
   def queryParameter: String
 }
 
@@ -83,6 +88,7 @@ trait WAI2GoConfigurationComponent {
 
 trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponent {
   val wai2GoConfiguration = new AutowiringWAI2GoConfiguration
+
   class AutowiringWAI2GoConfiguration extends WAI2GoConfiguration {
     val cached = true
 
@@ -101,6 +107,7 @@ trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponen
     )
     val queryParameter = "term"
   }
+
 }
 
 trait LocationFetchingServiceComponent {
@@ -128,7 +135,7 @@ private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) ext
         val responseBody = IOUtils.toString(response.getEntity.getContent)
 
         JSON.parseFull(responseBody) match {
-          case Some(locations: Seq[Map[String, Any]] @unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
+          case Some(locations: Seq[Map[String, Any]]@unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
           case _ => Success(Nil)
         }
       } else {
@@ -165,6 +172,7 @@ object WAI2GoHttpLocationFetchingService {
 }
 
 case class WAI2GoLocation(name: String, building: String, floor: String, locationId: String)
+
 object WAI2GoLocation {
   def fromProperties(properties: Map[String, Any]): Option[WAI2GoLocation] = {
     val name = properties.get("value").collect { case s: String => s }

@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEventType}
 
 class SkillsforgeTest extends TestBase {
 
-	private val testEvent = Json.parse(
-		"""
+  private val testEvent = Json.parse(
+    """
         {
             "bookingId": "00892418-5dbe-4c4a-962a-8349c1c1c147",
             "sessionId": "39f9e1ac-4867-4e82-8f70-3832bac406c2",
@@ -59,50 +59,50 @@ class SkillsforgeTest extends TestBase {
         """).as[JsObject]
 
 
-	@Test
-	def readsDate(): Unit = {
-		val input = "2019-06-20T13:00:00.000+0000"
-		// although the zone offet is correctly honoured, the resulting DateTime
-		// is in the system default zone. This is sort of reasonable as there's no
-		// reliable way to get from zone offset to zone ID.
-		val now = DateTime.parse(input).withZone(DateTimeZone.getDefault)
-		val datetime = Skillsforge.dateTimeReads.reads(JsString(input)).get
-		assert(datetime === now)
-	}
+  @Test
+  def readsDate(): Unit = {
+    val input = "2019-06-20T13:00:00.000+0000"
+    // although the zone offet is correctly honoured, the resulting DateTime
+    // is in the system default zone. This is sort of reasonable as there's no
+    // reliable way to get from zone offset to zone ID.
+    val now = DateTime.parse(input).withZone(DateTimeZone.getDefault)
+    val datetime = Skillsforge.dateTimeReads.reads(JsString(input)).get
+    assert(datetime === now)
+  }
 
-	@Test
-	def toEventOccurrence(): Unit = {
-		val output = Skillsforge.toEventOccurrence(testEvent)
-		assert(output === EventOccurrence(
-			uid = "00892418-5dbe-4c4a-962a-8349c1c1c147",
-			name = "Skillsforge event",
-			title = "Effective Researcher",
-			description = "",
-			eventType = TimetableEventType.Other("Skillsforge"),
-			start = LocalDateTime.parse("2019-02-20T13:00:00.000"),
-			end = LocalDateTime.parse("2019-02-20T17:00:00.000"),
-			location = Some(NamedLocation("Seminar Room 1, Wolfson RE")),
-			parent = Parent(),
-			comments = None,
-			staff = Nil,
-			relatedUrl = None,
-			attendance = None
-		))
-	}
+  @Test
+  def toEventOccurrence(): Unit = {
+    val output = Skillsforge.toEventOccurrence(testEvent)
+    assert(output === EventOccurrence(
+      uid = "00892418-5dbe-4c4a-962a-8349c1c1c147",
+      name = "Skillsforge event",
+      title = "Effective Researcher",
+      description = "",
+      eventType = TimetableEventType.Other("Skillsforge"),
+      start = LocalDateTime.parse("2019-02-20T13:00:00.000"),
+      end = LocalDateTime.parse("2019-02-20T17:00:00.000"),
+      location = Some(NamedLocation("Seminar Room 1, Wolfson RE")),
+      parent = Parent(),
+      comments = None,
+      staff = Nil,
+      relatedUrl = None,
+      attendance = None
+    ))
+  }
 
 
-	@Test
-	def toEventOccurrenceNullLocation(): Unit = {
-		val input = testEvent - "venue" ++ Json.obj("venue" -> JsNull)
-		val output = Skillsforge.toEventOccurrence(input)
-		output.location shouldBe None
-	}
+  @Test
+  def toEventOccurrenceNullLocation(): Unit = {
+    val input = testEvent - "venue" ++ Json.obj("venue" -> JsNull)
+    val output = Skillsforge.toEventOccurrence(input)
+    output.location shouldBe None
+  }
 
-	@Test
-	def toEventOccurrenceNoLocation(): Unit = {
-		val input = testEvent - "venue"
-		val output = Skillsforge.toEventOccurrence(input)
-		output.location shouldBe None
-	}
+  @Test
+  def toEventOccurrenceNoLocation(): Unit = {
+    val input = testEvent - "venue"
+    val output = Skillsforge.toEventOccurrence(input)
+    output.location shouldBe None
+  }
 
 }

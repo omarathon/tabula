@@ -13,29 +13,30 @@ import uk.ac.warwick.tabula.coursework.web.{Routes => CourseworkRoutes}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/edit/{markingworkflow}"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/edit/{markingworkflow}"))
 class OldEditMarkingWorkflowController extends OldCourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def cmd(@PathVariable department: Department, @PathVariable markingworkflow: MarkingWorkflow) =
-		OldEditMarkingWorkflowCommand(department, markingworkflow)
+  @ModelAttribute("command")
+  def cmd(@PathVariable department: Department, @PathVariable markingworkflow: MarkingWorkflow) =
+    OldEditMarkingWorkflowCommand(department, markingworkflow)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
-		Mav("coursework/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState): Mav = {
+    Mav("coursework/admin/markingworkflows/edit", "isExams" -> false).crumbs(Breadcrumbs.Department(cmd.department))
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			cmd.apply()
-			Redirect(CourseworkRoutes.admin.markingWorkflow.list(cmd.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[MarkingWorkflow] with MarkingWorkflowCommandState, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      cmd.apply()
+      Redirect(CourseworkRoutes.admin.markingWorkflow.list(cmd.department))
+    }
+  }
 
 }

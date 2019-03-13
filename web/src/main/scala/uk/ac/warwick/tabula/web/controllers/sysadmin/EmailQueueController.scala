@@ -11,19 +11,19 @@ import uk.ac.warwick.tabula.services.EmailNotificationService
 @RequestMapping(Array("/sysadmin/emails", "/sysadmin/emails/list"))
 class EmailQueueController extends BaseController {
 
-	var emailNotificationService: EmailNotificationService = Wire[EmailNotificationService]
+  var emailNotificationService: EmailNotificationService = Wire[EmailNotificationService]
 
-	val pageSize = 100
+  val pageSize = 100
 
-	@ModelAttribute("emails")
-	def emails(@RequestParam(value = "page", defaultValue = "1") page: Int): Seq[RecipientNotificationInfo] = {
-		val start = ((page - 1) * pageSize)
-		val max = pageSize
+  @ModelAttribute("emails")
+  def emails(@RequestParam(value = "page", defaultValue = "1") page: Int): Seq[RecipientNotificationInfo] = {
+    val start = ((page - 1) * pageSize)
+    val max = pageSize
 
-		emailNotificationService.recentRecipients(start, max)
-	}
+    emailNotificationService.recentRecipients(start, max)
+  }
 
-	@RequestMapping def list(@RequestParam(value = "page", defaultValue = "1") page: Int) =
-		Mav("sysadmin/emails/list", "page" -> page)
+  @RequestMapping def list(@RequestParam(value = "page", defaultValue = "1") page: Int) =
+    Mav("sysadmin/emails/list", "page" -> page)
 
 }

@@ -8,23 +8,23 @@ import uk.ac.warwick.tabula.JavaImports._
 @Access(AccessType.FIELD)
 class ModuleTeachingInformation extends GeneratedId with Serializable {
 
-	def this(m: Module, d: Department, p: JBigDecimal) {
-		this()
-		module = m
-		department = d
-		percentage = p
-	}
+  def this(m: Module, d: Department, p: JBigDecimal) {
+    this()
+    module = m
+    department = d
+    percentage = p
+  }
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "department_id")
-	var department: Department = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id")
+  var department: Department = _
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "module_id")
-	var module: Module = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "module_id")
+  var module: Module = _
 
-	var percentage: JBigDecimal = null
+  var percentage: JBigDecimal = null
 
-	override def toString = s"ModuleTeachingInformation[${module} -> ${department} (${percentage}%)]"
+  override def toString = s"ModuleTeachingInformation[${module} -> ${department} (${percentage}%)]"
 
 }

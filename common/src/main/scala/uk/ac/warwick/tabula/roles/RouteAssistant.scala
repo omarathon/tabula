@@ -11,20 +11,20 @@ case class RouteAssistant(route: model.Route) extends BuiltInRole(RouteAssistant
 
 case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Route Assistant"
+  override def description = "Route Assistant"
 
-	GeneratesSubRole(RouteAuditorRoleDefinition)
+  GeneratesSubRole(RouteAuditorRoleDefinition)
 
-	GrantsScopedPermission(
-		MonitoringPoints.Record,
+  GrantsScopedPermission(
+    MonitoringPoints.Record,
 
-		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.StudentRelationship.Manage(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.Read.Tier4VisaRequirement,
+    Profiles.Read.Tier4VisaRequirement,
 
-		MemberNotes.Create
-	)
+    MemberNotes.Create
+  )
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
+  def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 }

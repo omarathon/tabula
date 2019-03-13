@@ -11,39 +11,39 @@ import uk.ac.warwick.userlookup.User
 
 class ListAllExtensionsCommandTest extends TestBase with Mockito {
 
-	trait Environment {
-		val dept: Department = Fixtures.department("fi", "Film")
-		val year: AcademicYear = AcademicYear.now()
+  trait Environment {
+    val dept: Department = Fixtures.department("fi", "Film")
+    val year: AcademicYear = AcademicYear.now()
 
-		val user1: User = Fixtures.user("0123456", "cuspxp")
-		val userLookup: UserLookupService = smartMock[UserLookupService]
-		userLookup.getUserByUserId("cuspxp") returns user1
+    val user1: User = Fixtures.user("0123456", "cuspxp")
+    val userLookup: UserLookupService = smartMock[UserLookupService]
+    userLookup.getUserByUserId("cuspxp") returns user1
 
-		val extension1: Extension = Fixtures.extension("0123456", "cuspxp")
+    val extension1: Extension = Fixtures.extension("0123456", "cuspxp")
 
-		val assignment1: Assignment = Fixtures.assignment("assignment 1")
-		assignment1.addExtension(extension1)
+    val assignment1: Assignment = Fixtures.assignment("assignment 1")
+    assignment1.addExtension(extension1)
 
-		val assignmentDao: AssessmentDao = smartMock[AssessmentDao]
-		assignmentDao.getAssignments(dept, year) returns Seq(assignment1)
+    val assignmentDao: AssessmentDao = smartMock[AssessmentDao]
+    assignmentDao.getAssignments(dept, year) returns Seq(assignment1)
 
-	}
+  }
 
-	@Test
-	def testApply() {
-		new Environment {
-			val command = new ListAllExtensionsCommand(dept, year)
-			command.assignmentDao = assignmentDao
-			command.userLookup = userLookup
+  @Test
+  def testApply() {
+    new Environment {
+      val command = new ListAllExtensionsCommand(dept, year)
+      command.assignmentDao = assignmentDao
+      command.userLookup = userLookup
 
-			val graph: ExtensionGraph = command.apply().head
-			graph.user should be (user1)
-			graph.isAwaitingReview should be (extension1.awaitingReview)
-			graph.hasApprovedExtension should be (extension1.approved)
-			graph.hasRejectedExtension should be (extension1.rejected)
-			graph.duration should be (extension1.duration)
-			graph.requestedExtraDuration should be (extension1.requestedExtraDuration)
-			graph.extension should be (Some(extension1))
-		}
-	}
+      val graph: ExtensionGraph = command.apply().head
+      graph.user should be(user1)
+      graph.isAwaitingReview should be(extension1.awaitingReview)
+      graph.hasApprovedExtension should be(extension1.approved)
+      graph.hasRejectedExtension should be(extension1.rejected)
+      graph.duration should be(extension1.duration)
+      graph.requestedExtraDuration should be(extension1.requestedExtraDuration)
+      graph.extension should be(Some(extension1))
+    }
+  }
 }

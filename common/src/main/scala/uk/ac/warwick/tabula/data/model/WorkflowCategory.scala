@@ -4,46 +4,46 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 sealed abstract class WorkflowCategory(val code: String, val displayName: String) {
-	// For Spring
-	def getCode: String = code
+  // For Spring
+  def getCode: String = code
 
-	def getDisplayName: String = displayName
+  def getDisplayName: String = displayName
 }
 
 object WorkflowCategory {
 
-	case object NotDecided extends WorkflowCategory("ND", "Please select a workflow")
+  case object NotDecided extends WorkflowCategory("ND", "Please select a workflow")
 
-	case object NoneUse extends WorkflowCategory("N", "None")
+  case object NoneUse extends WorkflowCategory("N", "None")
 
-	case object SingleUse extends WorkflowCategory("S", "Single use")
+  case object SingleUse extends WorkflowCategory("S", "Single use")
 
-	case object Reusable extends WorkflowCategory("R", "Reusable")
+  case object Reusable extends WorkflowCategory("R", "Reusable")
 
 
-	def values = Seq(NotDecided, NoneUse, SingleUse, Reusable)
+  def values = Seq(NotDecided, NoneUse, SingleUse, Reusable)
 
-	def fromCode(code: String): WorkflowCategory = code match {
-		case NotDecided.code => NotDecided
-		case NoneUse.code => NoneUse
-		case SingleUse.code => SingleUse
-		case Reusable.code => Reusable
-		case null => null
-		case _ => throw new IllegalArgumentException()
-	}
+  def fromCode(code: String): WorkflowCategory = code match {
+    case NotDecided.code => NotDecided
+    case NoneUse.code => NoneUse
+    case SingleUse.code => SingleUse
+    case Reusable.code => Reusable
+    case null => null
+    case _ => throw new IllegalArgumentException()
+  }
 
 }
 
 class WorkflowCategoryUserType extends AbstractBasicUserType[WorkflowCategory, String] {
 
-	val basicType = StandardBasicTypes.STRING
+  val basicType = StandardBasicTypes.STRING
 
-	override def sqlTypes = Array(Types.VARCHAR)
+  override def sqlTypes = Array(Types.VARCHAR)
 
-	val nullValue = null
-	val nullObject = null
+  val nullValue = null
+  val nullObject = null
 
-	override def convertToObject(string: String): WorkflowCategory = WorkflowCategory.fromCode(string)
+  override def convertToObject(string: String): WorkflowCategory = WorkflowCategory.fromCode(string)
 
-	override def convertToValue(ctg: WorkflowCategory): String = ctg.code
+  override def convertToValue(ctg: WorkflowCategory): String = ctg.code
 }

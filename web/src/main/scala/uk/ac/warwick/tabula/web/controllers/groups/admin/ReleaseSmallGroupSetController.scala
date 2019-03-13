@@ -15,26 +15,26 @@ import scala.collection.JavaConverters._
 @Controller
 class ReleaseSmallGroupSetController extends GroupsController {
 
-	@ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
-		new ReleaseGroupSetCommandImpl(Seq(set), user.apparentUser)
-	}
+  @ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
+    new ReleaseGroupSetCommandImpl(Seq(set), user.apparentUser)
+  }
 
-	@RequestMapping
-	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav =
-		Mav("groups/admin/groups/release", "isLectures" -> cmd.isLectures).noLayoutIf(ajax)
+  @RequestMapping
+  def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav =
+    Mav("groups/admin/groups/release", "isLectures" -> cmd.isLectures).noLayoutIf(ajax)
 
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav = {
-		val updatedSet = cmd.apply() match {
-			case releasedSet :: Nil => releasedSet.set
-			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
-		}
-		val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.sorted), GroupsViewModel.Tutor)
-		val moduleItem = ViewModule(updatedSet.module, Seq(groupSetItem), canManageGroups = true)
-		Mav("groups/admin/groups/single_groupset",
-			"groupsetItem" -> groupSetItem,
-			"moduleItem" -> moduleItem,
-			"notificationSentMessage" -> cmd.describeOutcome).noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand): Mav = {
+    val updatedSet = cmd.apply() match {
+      case releasedSet :: Nil => releasedSet.set
+      case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
+    }
+    val groupSetItem = ViewSet(updatedSet, ViewGroup.fromGroups(updatedSet.groups.asScala.sorted), GroupsViewModel.Tutor)
+    val moduleItem = ViewModule(updatedSet.module, Seq(groupSetItem), canManageGroups = true)
+    Mav("groups/admin/groups/single_groupset",
+      "groupsetItem" -> groupSetItem,
+      "moduleItem" -> moduleItem,
+      "notificationSentMessage" -> cmd.describeOutcome).noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+  }
 }

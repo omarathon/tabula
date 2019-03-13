@@ -13,181 +13,186 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 object EditSmallGroupSetMembershipCommand {
-	def apply(module: Module, set: SmallGroupSet) =
-		new EditSmallGroupSetMembershipCommandInternal(module, set)
-			with AutowiringUserLookupComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with ComposableCommand[SmallGroupSet]
-			with SmallGroupAutoDeregistration
-			with RemovesUsersFromGroupsCommand
-			with ModifiesSmallGroupSetMembership
-			with EditSmallGroupSetMembershipPermissions
-			with EditSmallGroupSetMembershipDescription
-			with EditSmallGroupSetMembershipValidation
-			with AutowiringSmallGroupServiceComponent
-			with PopulateStateWithExistingData
+  def apply(module: Module, set: SmallGroupSet) =
+    new EditSmallGroupSetMembershipCommandInternal(module, set)
+      with AutowiringUserLookupComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with ComposableCommand[SmallGroupSet]
+      with SmallGroupAutoDeregistration
+      with RemovesUsersFromGroupsCommand
+      with ModifiesSmallGroupSetMembership
+      with EditSmallGroupSetMembershipPermissions
+      with EditSmallGroupSetMembershipDescription
+      with EditSmallGroupSetMembershipValidation
+      with AutowiringSmallGroupServiceComponent
+      with PopulateStateWithExistingData
 
-	/*
-	 * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for groups
+  /*
+   * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for groups
    * to rebuild views within an existing form
-	 */
-	def stub(module: Module, set: SmallGroupSet) =
-		new StubEditSmallGroupSetMembershipCommand(module, set)
-			with AutowiringUserLookupComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with ComposableCommand[SmallGroupSet]
-			with ModifiesSmallGroupSetMembership
-			with StubEditSmallGroupSetMembershipPermissions
-			with Unaudited with ReadOnly
-			with PopulateStateWithExistingData
+   */
+  def stub(module: Module, set: SmallGroupSet) =
+    new StubEditSmallGroupSetMembershipCommand(module, set)
+      with AutowiringUserLookupComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with ComposableCommand[SmallGroupSet]
+      with ModifiesSmallGroupSetMembership
+      with StubEditSmallGroupSetMembershipPermissions
+      with Unaudited with ReadOnly
+      with PopulateStateWithExistingData
 }
 
 trait PopulateStateWithExistingData {
-	self: EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership =>
+  self: EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership =>
 
-	// linked assessmentGroups
-	assessmentGroups = set.assessmentGroups
-	if (set.members != null) members.copyFrom(set.members)
-	academicYear = set.academicYear
+  // linked assessmentGroups
+  assessmentGroups = set.assessmentGroups
+  if (set.members != null) members.copyFrom(set.members)
+  academicYear = set.academicYear
 }
 
 class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
-	self: SmallGroupServiceComponent with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
+  self: SmallGroupServiceComponent with SmallGroupAutoDeregistration with ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	def copyTo(set: SmallGroupSet) {
-		set.assessmentGroups.clear()
-		set.assessmentGroups.addAll(assessmentGroups)
-		for (group <- set.assessmentGroups.asScala if group.smallGroupSet == null) {
-			group.smallGroupSet = set
-		}
+  def copyTo(set: SmallGroupSet) {
+    set.assessmentGroups.clear()
+    set.assessmentGroups.addAll(assessmentGroups)
+    for (group <- set.assessmentGroups.asScala if group.smallGroupSet == null) {
+      group.smallGroupSet = set
+    }
 
-		if (set.members == null) set.members = UserGroup.ofUniversityIds
-		set.members.copyFrom(members)
-	}
+    if (set.members == null) set.members = UserGroup.ofUniversityIds
+    set.members.copyFrom(members)
+  }
 
-	override def applyInternal(): SmallGroupSet = transactional() {
-		if (module.adminDepartment.autoGroupDeregistration) {
-			autoDeregister { () =>
-				copyTo(set)
-				set
-			}
-		} else {
-			copyTo(set)
-		}
+  override def applyInternal(): SmallGroupSet = transactional() {
+    if (module.adminDepartment.autoGroupDeregistration) {
+      autoDeregister { () =>
+        copyTo(set)
+        set
+      }
+    } else {
+      copyTo(set)
+    }
 
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 }
 
 trait EditSmallGroupSetMembershipCommandState extends CurrentAcademicYear {
-	def module: Module
-	def set: SmallGroupSet
+  def module: Module
+
+  def set: SmallGroupSet
 }
 
 trait ModifiesSmallGroupSetMembership extends UpdatesStudentMembership with SpecifiesGroupType {
-	self: EditSmallGroupSetMembershipCommandState with UserLookupComponent with AssessmentMembershipServiceComponent =>
+  self: EditSmallGroupSetMembershipCommandState with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	// start complicated membership stuff
+  // start complicated membership stuff
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map { _.upstreamAssessmentGroupInfos }
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map { _.members }
+  lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(set).map {
+    _.upstreamAssessmentGroupInfos
+  }
+  lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = Option(set).map {
+    _.members
+  }
 
-	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
-		// TAB-4848 get all the groups that are linked even if they're marked not in use
-		upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
-			assessmentGroups.asScala.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
-		}.asJavaCollection)
-	}
+  def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
+    // TAB-4848 get all the groups that are linked even if they're marked not in use
+    upstreamGroups.addAll(allUpstreamGroups.filter { ug =>
+      assessmentGroups.asScala.exists(ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence)
+    }.asJavaCollection)
+  }
 
-	/**
-	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
-	 */
-	def updateAssessmentGroups() {
-		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
-			val template = new AssessmentGroup
-			template.assessmentComponent = ug.assessmentComponent
-			template.occurrence = ug.occurrence
-			template.smallGroupSet = set
-			assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
-		}).distinct.asJava
-	}
+  /**
+    * Convert Spring-bound upstream group references to an AssessmentGroup buffer
+    */
+  def updateAssessmentGroups() {
+    assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
+      val template = new AssessmentGroup
+      template.assessmentComponent = ug.assessmentComponent
+      template.occurrence = ug.occurrence
+      template.smallGroupSet = set
+      assessmentMembershipService.getAssessmentGroup(template) orElse Some(template)
+    }).distinct.asJava
+  }
 
-	// end of complicated membership stuff
+  // end of complicated membership stuff
 }
 
 trait SmallGroupAutoDeregistration {
-	self: AssessmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
+  self: AssessmentMembershipServiceComponent with EditSmallGroupSetMembershipCommandState with ModifiesSmallGroupSetMembership with RemovesUsersFromGroups =>
 
-	def autoDeregister(fn: () => SmallGroupSet): SmallGroupSet = {
-		val oldUsers =
-			assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Option(set.members)).toSet
+  def autoDeregister(fn: () => SmallGroupSet): SmallGroupSet = {
+    val oldUsers =
+      assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Option(set.members)).toSet
 
-		val newUsers =
-			assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
+    val newUsers =
+      assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
 
-		val updatedSet = fn()
+    val updatedSet = fn()
 
-		// Wrap removal in a sub-command so that we can do auditing
-		for {
-			user <- oldUsers -- newUsers
-			group <- updatedSet.groups.asScala
-			if (group.students.includesUser(user))
-		} removeFromGroup(user, group)
+    // Wrap removal in a sub-command so that we can do auditing
+    for {
+      user <- oldUsers -- newUsers
+      group <- updatedSet.groups.asScala
+      if (group.students.includesUser(user))
+    } removeFromGroup(user, group)
 
-		updatedSet
-	}
+    updatedSet
+  }
 }
 
 trait EditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditSmallGroupSetMembershipCommandState =>
+  self: EditSmallGroupSetMembershipCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(set, module)
-		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, module)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+  }
 }
 
 trait EditSmallGroupSetMembershipDescription extends Describable[SmallGroupSet] {
-	self: EditSmallGroupSetMembershipCommandState =>
+  self: EditSmallGroupSetMembershipCommandState =>
 
-	override def describe(d: Description) {
-		d.smallGroupSet(set)
-	}
+  override def describe(d: Description) {
+    d.smallGroupSet(set)
+  }
 
 }
 
 trait EditSmallGroupSetMembershipValidation extends SelfValidating {
-	self: EditSmallGroupSetMembershipCommandState =>
+  self: EditSmallGroupSetMembershipCommandState =>
 
-	override def validate(errors: Errors) {
-		if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
-			errors.reject("smallGroupSet.linked")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (set.allocationMethod == SmallGroupAllocationMethod.Linked) {
+      errors.reject("smallGroupSet.linked")
+    }
+  }
 }
 
 class StubEditSmallGroupSetMembershipCommand(val module: Module, val set: SmallGroupSet, val updateStudentMembershipGroupIsUniversityIds: Boolean = true) extends CommandInternal[SmallGroupSet] with EditSmallGroupSetMembershipCommandState {
-	self: ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
+  self: ModifiesSmallGroupSetMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	override def applyInternal() = throw new UnsupportedOperationException
+  override def applyInternal() = throw new UnsupportedOperationException
 }
 
 trait StubEditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditSmallGroupSetMembershipCommandState =>
+  self: EditSmallGroupSetMembershipCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheckAny(Seq(
-			CheckablePermission(Permissions.SmallGroups.Create, mandatory(module)),
-			CheckablePermission(Permissions.SmallGroups.Update, mandatory(module))
-		))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheckAny(Seq(
+      CheckablePermission(Permissions.SmallGroups.Create, mandatory(module)),
+      CheckablePermission(Permissions.SmallGroups.Update, mandatory(module))
+    ))
+  }
 }
 
 trait RemovesUsersFromGroups {
-	def removeFromGroup(user: User, group: SmallGroup)
+  def removeFromGroup(user: User, group: SmallGroup)
 }
 
 trait RemovesUsersFromGroupsCommand extends RemovesUsersFromGroups {
-	def removeFromGroup(user: User, group: SmallGroup): Unit = new RemoveUserFromSmallGroupCommand(user, group).apply()
+  def removeFromGroup(user: User, group: SmallGroup): Unit = new RemoveUserFromSmallGroupCommand(user, group).apply()
 }

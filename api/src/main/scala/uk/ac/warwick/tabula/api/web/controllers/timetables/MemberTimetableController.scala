@@ -19,37 +19,37 @@ import uk.ac.warwick.tabula.{CurrentUser, DateFormats, RequestFailedException}
 import scala.util.{Failure, Success}
 
 object MemberTimetableController {
-	type ViewMemberTimetableCommand = ViewMemberTimetableCommand.TimetableCommand
+  type ViewMemberTimetableCommand = ViewMemberTimetableCommand.TimetableCommand
 }
 
 @Controller
 @RequestMapping(Array("/v1/member/{member}/timetable"))
 class MemberTimetableController extends ApiController
-	with GetMemberTimetableApi
-	with TimetableEventToJsonConverter
-	with AutowiringProfileServiceComponent
+  with GetMemberTimetableApi
+  with TimetableEventToJsonConverter
+  with AutowiringProfileServiceComponent
 
 trait GetMemberTimetableApi {
-	self: ApiController with TimetableEventToJsonConverter =>
+  self: ApiController with TimetableEventToJsonConverter =>
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("getTimetableCommand")
-	def command(@PathVariable member: Member, currentUser: CurrentUser): ViewMemberTimetableCommand =
-		ViewMemberTimetableCommand(member, currentUser)
+  @ModelAttribute("getTimetableCommand")
+  def command(@PathVariable member: Member, currentUser: CurrentUser): ViewMemberTimetableCommand =
+    ViewMemberTimetableCommand(member, currentUser)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberTimetableCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else command.apply() match {
-			case Success(result) => Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"events" -> result.events.map(jsonTimetableEventObject),
-				"lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
-			)))
-			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
-		}
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewMemberTimetableCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else command.apply() match {
+      case Success(result) => Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "events" -> result.events.map(jsonTimetableEventObject),
+        "lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
+      )))
+      case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
+    }
+  }
 }

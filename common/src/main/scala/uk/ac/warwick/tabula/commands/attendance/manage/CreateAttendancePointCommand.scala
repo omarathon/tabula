@@ -14,168 +14,172 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object CreateAttendancePointCommand {
-	def apply(department: Department, academicYear: AcademicYear, schemes: Seq[AttendanceMonitoringScheme]) =
-		new CreateAttendancePointCommandInternal(department, academicYear, schemes)
-			with ComposableCommand[Seq[AttendanceMonitoringPoint]]
-			with AutowiringAttendanceMonitoringServiceComponent
-			with AutowiringProfileServiceComponent
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with CreateAttendancePointValidation
-			with CreateAttendancePointDescription
-			with CreateAttendancePointPermissions
-			with CreateAttendancePointCommandState
+  def apply(department: Department, academicYear: AcademicYear, schemes: Seq[AttendanceMonitoringScheme]) =
+    new CreateAttendancePointCommandInternal(department, academicYear, schemes)
+      with ComposableCommand[Seq[AttendanceMonitoringPoint]]
+      with AutowiringAttendanceMonitoringServiceComponent
+      with AutowiringProfileServiceComponent
+      with AutowiringSmallGroupServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with CreateAttendancePointValidation
+      with CreateAttendancePointDescription
+      with CreateAttendancePointPermissions
+      with CreateAttendancePointCommandState
 }
 
 
 class CreateAttendancePointCommandInternal(val department: Department, val academicYear: AcademicYear, val schemes: Seq[AttendanceMonitoringScheme])
-	extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking
-		with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
+  extends CommandInternal[Seq[AttendanceMonitoringPoint]] with TaskBenchmarking
+    with GeneratesAttendanceMonitoringSchemeNotifications with RequiresCheckpointTotalUpdate {
 
-	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
-		with ProfileServiceComponent =>
+  self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent
+    with ProfileServiceComponent =>
 
-	override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
-		val points = schemes.map(scheme => {
-			val point = new AttendanceMonitoringPoint
-			point.scheme = scheme
-			point.createdDate = DateTime.now
-			point.updatedDate = DateTime.now
-			copyTo(point)
-			attendanceMonitoringService.saveOrUpdate(point)
-			point
-		})
+  override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
+    val points = schemes.map(scheme => {
+      val point = new AttendanceMonitoringPoint
+      point.scheme = scheme
+      point.createdDate = DateTime.now
+      point.updatedDate = DateTime.now
+      copyTo(point)
+      attendanceMonitoringService.saveOrUpdate(point)
+      point
+    })
 
-		generateNotifications(schemes)
-		updateCheckpointTotals(schemes)
+    generateNotifications(schemes)
+    updateCheckpointTotals(schemes)
 
-		points
-	}
+    points
+  }
 
 }
 
 trait CreateAttendancePointValidation extends SelfValidating with AttendanceMonitoringPointValidation {
 
-	self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
+  self: CreateAttendancePointCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def validate(errors: Errors) {
-		validateSchemePointStyles(errors, pointStyle, schemes)
+  override def validate(errors: Errors) {
+    validateSchemePointStyles(errors, pointStyle, schemes)
 
-		validateName(errors, name)
+    validateName(errors, name)
 
-		pointStyle match {
-			case AttendanceMonitoringPointStyle.Date =>
-				validateDate(errors, startDate, academicYear, "startDate")
-				validateDate(errors, endDate, academicYear, "endDate")
-				if (startDate != null && endDate != null) {
-					validateDates(errors, startDate, endDate)
-					validateCanPointBeEditedByDate(errors, startDate, schemes.flatMap(_.members.members), academicYear)
-					validateDuplicateForDate(errors, name, startDate, endDate, schemes)
-				}
-			case AttendanceMonitoringPointStyle.Week =>
-				validateWeek(errors, startWeek, academicYear, "startWeek")
-				validateWeek(errors, endWeek, academicYear, "endWeek")
-				validateWeeks(errors, startWeek, endWeek)
-				validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
-				validateDuplicateForWeek(errors, name, startWeek, endWeek, schemes)
-		}
+    pointStyle match {
+      case AttendanceMonitoringPointStyle.Date =>
+        validateDate(errors, startDate, academicYear, "startDate")
+        validateDate(errors, endDate, academicYear, "endDate")
+        if (startDate != null && endDate != null) {
+          validateDates(errors, startDate, endDate)
+          validateCanPointBeEditedByDate(errors, startDate, schemes.flatMap(_.members.members), academicYear)
+          validateDuplicateForDate(errors, name, startDate, endDate, schemes)
+        }
+      case AttendanceMonitoringPointStyle.Week =>
+        validateWeek(errors, startWeek, academicYear, "startWeek")
+        validateWeek(errors, endWeek, academicYear, "endWeek")
+        validateWeeks(errors, startWeek, endWeek)
+        validateCanPointBeEditedByWeek(errors, startWeek, schemes.flatMap(_.members.members), academicYear)
+        validateDuplicateForWeek(errors, name, startWeek, endWeek, schemes)
+    }
 
-		if (!errors.hasErrors) {
-			if (pointStyle == AttendanceMonitoringPointStyle.Week) {
-				val weeksForYear = schemes.head.academicYear.weeks
-				startDate = weeksForYear(startWeek).firstDay
-				endDate = weeksForYear(endWeek).lastDay
-			}
-			validateTypeForEndDate(errors, pointType, endDate)
-			pointType match {
-				case AttendanceMonitoringPointType.Meeting =>
-					validateTypeMeeting(
-						errors,
-						meetingRelationships.asScala,
-						meetingFormats.asScala,
-						meetingQuantity,
-						department
-					)
-					validateOverlapMeeting(
-						errors,
-						startDate,
-						endDate,
-						meetingRelationships.asScala,
-						meetingFormats.asScala,
-						schemes
-					)
-				case AttendanceMonitoringPointType.SmallGroup =>
-					validateTypeSmallGroup(
-						errors,
-						smallGroupEventModules,
-						isAnySmallGroupEventModules,
-						smallGroupEventQuantity
-					)
-					validateOverlapSmallGroup(
-						errors,
-						startDate,
-						endDate,
-						smallGroupEventModules,
-						isAnySmallGroupEventModules,
-						schemes
-					)
-				case AttendanceMonitoringPointType.AssignmentSubmission =>
-					validateTypeAssignmentSubmission(
-						errors,
-						assignmentSubmissionType,
-						assignmentSubmissionTypeAnyQuantity,
-						assignmentSubmissionTypeModulesQuantity,
-						assignmentSubmissionModules,
-						assignmentSubmissionAssignments,
-						academicYear
-					)
-					validateOverlapAssignment(
-						errors,
-						startDate,
-						endDate,
-						assignmentSubmissionType,
-						assignmentSubmissionModules,
-						assignmentSubmissionAssignments,
-						isAssignmentSubmissionDisjunction,
-						schemes
-					)
-				case _ =>
-			}
-		}
-	}
+    if (!errors.hasErrors) {
+      if (pointStyle == AttendanceMonitoringPointStyle.Week) {
+        val weeksForYear = schemes.head.academicYear.weeks
+        startDate = weeksForYear(startWeek).firstDay
+        endDate = weeksForYear(endWeek).lastDay
+      }
+      validateTypeForEndDate(errors, pointType, endDate)
+      pointType match {
+        case AttendanceMonitoringPointType.Meeting =>
+          validateTypeMeeting(
+            errors,
+            meetingRelationships.asScala,
+            meetingFormats.asScala,
+            meetingQuantity,
+            department
+          )
+          validateOverlapMeeting(
+            errors,
+            startDate,
+            endDate,
+            meetingRelationships.asScala,
+            meetingFormats.asScala,
+            schemes
+          )
+        case AttendanceMonitoringPointType.SmallGroup =>
+          validateTypeSmallGroup(
+            errors,
+            smallGroupEventModules,
+            isAnySmallGroupEventModules,
+            smallGroupEventQuantity
+          )
+          validateOverlapSmallGroup(
+            errors,
+            startDate,
+            endDate,
+            smallGroupEventModules,
+            isAnySmallGroupEventModules,
+            schemes
+          )
+        case AttendanceMonitoringPointType.AssignmentSubmission =>
+          validateTypeAssignmentSubmission(
+            errors,
+            assignmentSubmissionType,
+            assignmentSubmissionTypeAnyQuantity,
+            assignmentSubmissionTypeModulesQuantity,
+            assignmentSubmissionModules,
+            assignmentSubmissionAssignments,
+            academicYear
+          )
+          validateOverlapAssignment(
+            errors,
+            startDate,
+            endDate,
+            assignmentSubmissionType,
+            assignmentSubmissionModules,
+            assignmentSubmissionAssignments,
+            isAssignmentSubmissionDisjunction,
+            schemes
+          )
+        case _ =>
+      }
+    }
+  }
 
 }
 
 trait CreateAttendancePointPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: CreateAttendancePointCommandState =>
+  self: CreateAttendancePointCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.Manage, department)
+  }
 
 }
 
 trait CreateAttendancePointDescription extends Describable[Seq[AttendanceMonitoringPoint]] {
 
-	self: CreateAttendancePointCommandState =>
+  self: CreateAttendancePointCommandState =>
 
-	override lazy val eventName = "CreateAttendancePoint"
+  override lazy val eventName = "CreateAttendancePoint"
 
-	override def describe(d: Description) {
-		d.attendanceMonitoringSchemes(schemes)
-	}
-	override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
-		d.attendanceMonitoringPoints(points, verbose = true)
-	}
+  override def describe(d: Description) {
+    d.attendanceMonitoringSchemes(schemes)
+  }
+
+  override def describeResult(d: Description, points: Seq[AttendanceMonitoringPoint]) {
+    d.attendanceMonitoringPoints(points, verbose = true)
+  }
 }
 
 trait CreateAttendancePointCommandState extends AttendancePointCommandState {
 
-	self: SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
+  self: SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-	def department: Department
-	def academicYear: AcademicYear
-	def schemes: Seq[AttendanceMonitoringScheme]
-	lazy val pointStyle: AttendanceMonitoringPointStyle = schemes.head.pointStyle
+  def department: Department
+
+  def academicYear: AcademicYear
+
+  def schemes: Seq[AttendanceMonitoringScheme]
+
+  lazy val pointStyle: AttendanceMonitoringPointStyle = schemes.head.pointStyle
 }

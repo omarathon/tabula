@@ -8,44 +8,44 @@ import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, Timetab
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 class MeetingRecordEventOccurrenceSourceComponentTest extends TestBase with Mockito {
-	val student = new StudentMember
-	student.universityId = "university ID"
+  val student = new StudentMember
+  student.universityId = "university ID"
 
-	val user: CurrentUser = mock[CurrentUser]
-	user.profile returns Some(student)
+  val user: CurrentUser = mock[CurrentUser]
+  user.profile returns Some(student)
 
-	val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None, None)
+  val occurrence = EventOccurrence("", "", "", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, TimetableEvent.Parent(), None, Nil, None, None)
 
-	val relationshipType = StudentRelationshipType("t", "t", "t", "t")
-	val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student, DateTime.now))
-	val meetings = Seq(new AbstractMeetingRecord {
-		override def toEventOccurrence(context: TimetableEvent.Context) = Some(occurrence)
-	})
-	meetings.head.relationships = relationships
+  val relationshipType = StudentRelationshipType("t", "t", "t", "t")
+  val relationships = Seq(StudentRelationship(Fixtures.staff(), relationshipType, student, DateTime.now))
+  val meetings = Seq(new AbstractMeetingRecord {
+    override def toEventOccurrence(context: TimetableEvent.Context) = Some(occurrence)
+  })
+  meetings.head.relationships = relationships
 
-	val source = new MeetingRecordEventOccurrenceSourceComponent
-		with RelationshipServiceComponent
-		with MeetingRecordServiceComponent
-		with SecurityServiceComponent {
+  val source = new MeetingRecordEventOccurrenceSourceComponent
+    with RelationshipServiceComponent
+    with MeetingRecordServiceComponent
+    with SecurityServiceComponent {
 
-		val relationshipService: RelationshipService = mock[RelationshipService]
-		val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
-		val securityService: SecurityService = mock[SecurityService]
+    val relationshipService: RelationshipService = mock[RelationshipService]
+    val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+    val securityService: SecurityService = mock[SecurityService]
 
-	}
+  }
 
-	val start = LocalDate.now().minusDays(1)
-	val end = LocalDate.now().plusDays(1)
+  val start = LocalDate.now().minusDays(1)
+  val end = LocalDate.now().plusDays(1)
 
-	source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
-	source.relationshipService.listCurrentStudentRelationshipsWithMember(student) returns Nil
-	source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns true
-	source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
+  source.relationshipService.getAllPastAndPresentRelationships(student) returns relationships
+  source.relationshipService.listCurrentStudentRelationshipsWithMember(student) returns Nil
+  source.securityService.can(user, Permissions.Profiles.MeetingRecord.Read(relationshipType), student) returns true
+  source.meetingRecordService.listAll(relationships.toSet, Some(student)) returns meetings
 
-	@Test
-	def callsBothServicesAndGeneratesOccurrence(){
-		source.eventOccurrenceSource.occurrencesFor(student, user, TimetableEvent.Context.Staff, start, end).futureValue.events should be (Seq(occurrence))
-	}
+  @Test
+  def callsBothServicesAndGeneratesOccurrence() {
+    source.eventOccurrenceSource.occurrencesFor(student, user, TimetableEvent.Context.Staff, start, end).futureValue.events should be(Seq(occurrence))
+  }
 
 
 }

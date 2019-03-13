@@ -9,19 +9,20 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{department}/markingworkflows"))
 class OldListMarkingWorkflowController extends OldCourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = false)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = false)
 
-	@RequestMapping
-	def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable department: Department): Mav = {
-		Mav("coursework/admin/markingworkflows/list",
-		    "markingWorkflowInfo" -> cmd.apply(),
-				"isExams" -> false
-		).crumbs(Breadcrumbs.Department(department))
-	}
+  @RequestMapping
+  def list(@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]], @PathVariable department: Department): Mav = {
+    Mav("coursework/admin/markingworkflows/list",
+      "markingWorkflowInfo" -> cmd.apply(),
+      "isExams" -> false
+    ).crumbs(Breadcrumbs.Department(department))
+  }
 
 }

@@ -11,21 +11,21 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @RequestMapping(value = Array("/profiles/admin/timetablechecker"))
 class TimetableCheckerController extends ProfilesController {
 
-	@ModelAttribute("command")
-	def command(): TimetableCheckerCommand.Command = TimetableCheckerCommand()
+  @ModelAttribute("command")
+  def command(): TimetableCheckerCommand.Command = TimetableCheckerCommand()
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") cmd: TimetableCheckerCommand.Command): Mav = {
-		Mav("profiles/admin/timetablechecker")
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@ModelAttribute("command") cmd: TimetableCheckerCommand.Command): Mav = {
+    Mav("profiles/admin/timetablechecker")
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@ModelAttribute("command") command: TimetableCheckerCommand.Command): Mav = {
-		val wbsFeed = command.apply()
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") command: TimetableCheckerCommand.Command): Mav = {
+    val wbsFeed = command.apply()
 
-		Mav("profiles/admin/timetablechecker_results",
-			"academicYear" -> AcademicYear.now().getLabel.replace("/", ""),
-			"wbsFeed" -> wbsFeed
-		)
-	}
+    Mav("profiles/admin/timetablechecker_results",
+      "academicYear" -> AcademicYear.now().getLabel.replace("/", ""),
+      "wbsFeed" -> wbsFeed
+    )
+  }
 }

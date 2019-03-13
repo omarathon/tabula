@@ -13,35 +13,36 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/publish"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/publish"))
 class PublishFeedbackController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, user: CurrentUser): PublishFeedbackCommand.Command =
-		PublishFeedbackCommand(mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(assignment)))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, user: CurrentUser): PublishFeedbackCommand.Command =
+    PublishFeedbackCommand(mandatory(assignment), user, GenerateGradesFromMarkCommand(mandatory(assignment)))
 
-	@ModelAttribute("isGradeValidation")
-	def isGradeValidation(@PathVariable assignment: Assignment): Boolean =
-		assignment.module.adminDepartment.assignmentGradeValidation
+  @ModelAttribute("isGradeValidation")
+  def isGradeValidation(@PathVariable assignment: Assignment): Boolean =
+    assignment.module.adminDepartment.assignmentGradeValidation
 
-	@RequestMapping(params = Array("!confirm"))
-	def confirmationPage(@ModelAttribute("command") command: PublishFeedbackCommand.Command, @PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/assignments/publish/form",
-			"gradeValidation" -> command.validateGrades,
-			"recipientCheckReport" -> command.recipientCheckReport,
-			"submissionsReport" -> command.submissionsReport
-		).crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping(params = Array("!confirm"))
+  def confirmationPage(@ModelAttribute("command") command: PublishFeedbackCommand.Command, @PathVariable assignment: Assignment): Mav =
+    Mav("cm2/admin/assignments/publish/form",
+      "gradeValidation" -> command.validateGrades,
+      "recipientCheckReport" -> command.recipientCheckReport,
+      "submissionsReport" -> command.submissionsReport
+    ).crumbsList(Breadcrumbs.assignment(assignment))
 
-	@RequestMapping(params = Array("confirm"))
-	def publish(@Valid @ModelAttribute("command") command: PublishFeedbackCommand.Command, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		if (errors.hasErrors) confirmationPage(command, assignment)
-		else {
-			command.apply()
-			Mav("cm2/admin/assignments/publish/done")
-				.crumbsList(Breadcrumbs.assignment(assignment))
-		}
+  @RequestMapping(params = Array("confirm"))
+  def publish(@Valid @ModelAttribute("command") command: PublishFeedbackCommand.Command, errors: Errors, @PathVariable assignment: Assignment): Mav =
+    if (errors.hasErrors) confirmationPage(command, assignment)
+    else {
+      command.apply()
+      Mav("cm2/admin/assignments/publish/done")
+        .crumbsList(Breadcrumbs.assignment(assignment))
+    }
 
 }

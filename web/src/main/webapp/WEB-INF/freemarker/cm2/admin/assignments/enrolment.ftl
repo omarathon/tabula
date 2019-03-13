@@ -3,11 +3,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
 
-<#assign submitUrl><@routes.cm2.enrolment assignment /></#assign>
-<@f.form method="post" action="${submitUrl}">
-	<@f.errors cssClass="error form-errors" />
-	<#import "../assignment_membership_picker_macros.ftl" as membership_picker />
-	<@membership_picker.header command />
-	<@membership_picker.fieldset command submitUrl/>
-</@f.form>
+  <#assign submitUrl><@routes.cm2.enrolment assignment /></#assign>
+  <@f.form method="post" action="${submitUrl}">
+    <@f.errors cssClass="error form-errors" />
+    <#import "../assignment_membership_picker_macros.ftl" as membership_picker />
+    <@membership_picker.header command />
+    <@membership_picker.fieldset command submitUrl/>
+  </@f.form>
 </#escape>

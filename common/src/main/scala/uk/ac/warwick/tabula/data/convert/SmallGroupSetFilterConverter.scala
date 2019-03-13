@@ -10,28 +10,36 @@ import scala.util.Try
 
 class SmallGroupSetFilterConverter extends TwoWayConverter[String, SmallGroupSetFilter] {
 
-	@Autowired var moduleService: ModuleAndDepartmentService = _
-	@Autowired var smallGroupService: SmallGroupService = _
+  @Autowired var moduleService: ModuleAndDepartmentService = _
+  @Autowired var smallGroupService: SmallGroupService = _
 
-	override def convertRight(source: String): SmallGroupSetFilter = source match {
-		case r"Module\(([^\)]+)${moduleCode}\)" =>
-			SmallGroupSetFilters.Module(moduleService.getModuleByCode(sanitise(moduleCode)).getOrElse { moduleService.getModuleById(moduleCode).getOrElse { throw new IllegalArgumentException } })
-		case r"AllocationMethod\.Linked\(([^\)]+)${id}\)" =>
-			SmallGroupSetFilters.AllocationMethod.Linked(smallGroupService.getDepartmentSmallGroupSetById(id).getOrElse { throw new IllegalArgumentException })
-		case r"Term\(([^\)]+)${name}, (\-?[0-9]+)${minWeek}, (\-?[0-9]+)${maxWeek}\)" =>
-			SmallGroupSetFilters.Term(name, WeekRange(minWeek.toInt, maxWeek.toInt))
-		case _ =>
-			Try(SmallGroupFormat.fromCode(source)).map(SmallGroupSetFilters.Format).getOrElse(
-				SmallGroupSetFilters.of(source)
-			)
+  override def convertRight(source: String): SmallGroupSetFilter = source match {
+    case r"Module\(([^\)]+)${moduleCode}\)" =>
+      SmallGroupSetFilters.Module(moduleService.getModuleByCode(sanitise(moduleCode)).getOrElse {
+        moduleService.getModuleById(moduleCode).getOrElse {
+          throw new IllegalArgumentException
+        }
+      })
+    case r"AllocationMethod\.Linked\(([^\)]+)${id}\)" =>
+      SmallGroupSetFilters.AllocationMethod.Linked(smallGroupService.getDepartmentSmallGroupSetById(id).getOrElse {
+        throw new IllegalArgumentException
+      })
+    case r"Term\(([^\)]+)${name}, (\-?[0-9]+)${minWeek}, (\-?[0-9]+)${maxWeek}\)" =>
+      SmallGroupSetFilters.Term(name, WeekRange(minWeek.toInt, maxWeek.toInt))
+    case _ =>
+      Try(SmallGroupFormat.fromCode(source)).map(SmallGroupSetFilters.Format).getOrElse(
+        SmallGroupSetFilters.of(source)
+      )
 
-	}
+  }
 
-	override def convertLeft(source: SmallGroupSetFilter): String = Option(source).map { _.getName }.orNull
+  override def convertLeft(source: SmallGroupSetFilter): String = Option(source).map {
+    _.getName
+  }.orNull
 
-	def sanitise(code: String): String = {
-		if (code == null) throw new IllegalArgumentException
-		else code.toLowerCase
-	}
+  def sanitise(code: String): String = {
+    if (code == null) throw new IllegalArgumentException
+    else code.toLowerCase
+  }
 
 }

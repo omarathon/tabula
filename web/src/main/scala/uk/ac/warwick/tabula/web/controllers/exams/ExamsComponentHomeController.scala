@@ -12,34 +12,34 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/exams"))
 class ExamsComponentHomeController extends ExamsController {
 
-	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
-	@Autowired var features: Features = _
+  @Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
+  @Autowired var features: Features = _
 
-	@RequestMapping
-	def home: Mav = {
-		val homeDepartment = moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
-		val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadExamMarksToSits)
-		val examGridsEnabled = features.examGrids && user.isStaff
+  @RequestMapping
+  def home: Mav = {
+    val homeDepartment = moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode)
+    val examsEnabled = features.exams && user.isStaff && homeDepartment.exists(_.uploadExamMarksToSits)
+    val examGridsEnabled = features.examGrids && user.isStaff
 
-		if (examsEnabled && !examGridsEnabled) {
-			Redirect(Routes.Exams.homeDefaultYear)
-		} else if (!examsEnabled && examGridsEnabled) {
-			Redirect(Routes.Grids.home)
-		} else {
-			Mav("exams/home",
-				"examsEnabled" -> examsEnabled,
-				"examGridsEnabled" -> examGridsEnabled
-			).secondCrumbs(
-				(examsEnabled match {
-					case true => Seq(ExamsBreadcrumbs.Exams.HomeDefaultYear)
-					case false => Nil
-				}) ++
-				(examGridsEnabled match {
-					case true => Seq(ExamsBreadcrumbs.Grids.Home)
-					case false => Nil
-				}): _*
-			)
-		}
-	}
+    if (examsEnabled && !examGridsEnabled) {
+      Redirect(Routes.Exams.homeDefaultYear)
+    } else if (!examsEnabled && examGridsEnabled) {
+      Redirect(Routes.Grids.home)
+    } else {
+      Mav("exams/home",
+        "examsEnabled" -> examsEnabled,
+        "examGridsEnabled" -> examGridsEnabled
+      ).secondCrumbs(
+        (examsEnabled match {
+          case true => Seq(ExamsBreadcrumbs.Exams.HomeDefaultYear)
+          case false => Nil
+        }) ++
+          (examGridsEnabled match {
+            case true => Seq(ExamsBreadcrumbs.Grids.Home)
+            case false => Nil
+          }): _*
+      )
+    }
+  }
 
 }

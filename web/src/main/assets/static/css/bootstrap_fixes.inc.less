@@ -2,116 +2,126 @@
 
 .mceContentBody, #main-content, #custom-header, #custom-footer {
 
-	ul.nav {
-		margin: 0;
-		padding-left: 0;
-	}
+  ul.nav {
+    margin: 0;
+    padding-left: 0;
+  }
 
-	ul.dropdown-menu {
-		padding-left: 0;
-		li { margin-bottom: 0 }
-		a {
-			.transition-none();
-			text-decoration: none !important;
-		}
-	}
+  ul.dropdown-menu {
+    padding-left: 0;
 
-	.nav-tabs > li {
-	  margin-bottom: -1px;
-	}
+    li {
+      margin-bottom: 0
+    }
+
+    a {
+      .transition-none();
+      text-decoration: none !important;
+    }
+  }
+
+  .nav-tabs > li {
+    margin-bottom: -1px;
+  }
 
 }
 
 #container, .tabula-page {
-	.label {
-		cursor: default;
-	}
+  .label {
+    cursor: default;
+  }
 
-	.badge-mini {
-		font-size: 11px;
-		line-height: 10px;
-		padding: 2px 6px;
-	}
+  .badge-mini {
+    font-size: 11px;
+    line-height: 10px;
+    padding: 2px 6px;
+  }
 
-	.tooltip {
-		font-weight: normal;
-		font-style: normal;
-	}
+  .tooltip {
+    font-weight: normal;
+    font-style: normal;
+  }
 
-	.popover {
-		.popover-title {
-			letter-spacing: normal;
-			display: block;
-		}
+  .popover {
+    .popover-title {
+      letter-spacing: normal;
+      display: block;
+    }
 
-		.popover-content {
-			max-height: 350px;
-			overflow-y: auto;
-		}
+    .popover-content {
+      max-height: 350px;
+      overflow-y: auto;
+    }
 
-		p {
-			line-height: 130%;
-			margin-bottom: 7px;
-		}
+    p {
+      line-height: 130%;
+      margin-bottom: 7px;
+    }
 
-		ul {
-			padding-left: 10px;
+    ul {
+      padding-left: 10px;
 
-			li {
-				list-style: inherit;
-				margin-left: 10px;
-				margin-bottom: 6px;
-			}
-		}
-	}
+      li {
+        list-style: inherit;
+        margin-left: 10px;
+        margin-bottom: 6px;
+      }
+    }
+  }
 
-	.nav-tabs {
-		margin: 7px 0 0 0;
-		padding: 0;
+  .nav-tabs {
+    margin: 7px 0 0 0;
+    padding: 0;
 
-		li.active > a {
-			font-weight: bold;
-			color: lighten(@tabulaGray, 15%);
-		}
+    li.active > a {
+      font-weight: bold;
+      color: lighten(@tabulaGray, 15%);
+    }
 
-		li > a {
-			padding: 4px 12px;
-		}
-	}
+    li > a {
+      padding: 4px 12px;
+    }
+  }
 
-	.tab-content {
-		border: 1px solid #ddd;
-		border-top-width: 0;
-		padding: 8px 12px 12px;
-	}
+  .tab-content {
+    border: 1px solid #ddd;
+    border-top-width: 0;
+    padding: 8px 12px 12px;
+  }
 
-	// TAB-3283 Disabled coloured buttons should be grey when disabled
-	.btn-primary,
-	.btn-warning,
-	.btn-danger,
-	.btn-success,
-	.btn-info,
-	.btn-inverse {
-		&.disabled,
-		&[disabled] {
-			.buttonBackground(@btnBackground, @btnBackgroundHighlight, @grayDark, 0 1px 1px rgba(255,255,255,.75));
-		}
-	}
+  // TAB-3283 Disabled coloured buttons should be grey when disabled
+  .btn-primary,
+  .btn-warning,
+  .btn-danger,
+  .btn-success,
+  .btn-info,
+  .btn-inverse {
+    &.disabled,
+    &[disabled] {
+      .buttonBackground(@btnBackground, @btnBackgroundHighlight, @grayDark, 0 1px 1px rgba(255, 255, 255, .75));
+    }
+  }
 }
 
 // TAB-558 override Bootstrap max-width on tables, so that Chrome will trigger the display the pop-out table link
 #container table {
-	max-width: none;
+  max-width: none;
 }
 
 // TAB-358 ID6 headings and Bootstrap forms quarrel a bit
 #container {
-	h1 + h2, h1 + h3, h1 + h4, h1 + h5, h1 + h6  { margin: -18px 0 20px; }
+  h1 + h2, h1 + h3, h1 + h4, h1 + h5, h1 + h6 {
+    margin: -18px 0 20px;
+  }
 
-	h2 + h3, h2 + h4, h2 + h5, h2 + h6,
-	h3 + h4, h3 + h5, h3 + h6,
-	h4 + h5, h4 + h6,
-	h5 + h6 { margin: -8px 0 12px; }
+  h2 + h3, h2 + h4, h2 + h5, h2 + h6,
+  h3 + h4, h3 + h5, h3 + h6,
+  h4 + h5, h4 + h6,
+  h5 + h6 {
+    margin: -8px 0 12px;
+  }
 
-	h1 + form, h2 + form, h3 + form, h4 + form, h5 + form, h6 + form { margin-top: 20px; }
+  h1 + form, h2 + form, h3 + form, h4 + form, h5 + form, h6 + form {
+    margin-top: 20px;
+  }
 }

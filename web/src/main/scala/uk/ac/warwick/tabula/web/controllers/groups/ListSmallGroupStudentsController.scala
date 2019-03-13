@@ -8,26 +8,26 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
-@RequestMapping(value=Array("/groups/group/{group}/studentspopup"))
+@RequestMapping(value = Array("/groups/group/{group}/studentspopup"))
 class ListSmallGroupStudentsController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable group: SmallGroup) =
-		new ListSmallGroupStudentsCommand(group)
+  @ModelAttribute("command")
+  def command(@PathVariable group: SmallGroup) =
+    new ListSmallGroupStudentsCommand(group)
 
-	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: ListSmallGroupStudentsCommand, user: CurrentUser): Mav = {
+  @RequestMapping
+  def ajaxList(@ModelAttribute("command") command: ListSmallGroupStudentsCommand, user: CurrentUser): Mav = {
 
-		val students = command.apply()
-		val userIsMember = students.exists(_.universityId == user.universityId)
-		val showTutors = command.group.groupSet.studentsCanSeeTutorName
+    val students = command.apply()
+    val userIsMember = students.exists(_.universityId == user.universityId)
+    val showTutors = command.group.groupSet.studentsCanSeeTutorName
 
-		Mav("groups/students",
-			"students" -> students,
-			"userUniId" -> user.universityId,
-			"userIsMember" -> userIsMember,
-			"studentsCanSeeTutorName" -> showTutors
-		).noLayout()
-	}
+    Mav("groups/students",
+      "students" -> students,
+      "userUniId" -> user.universityId,
+      "userIsMember" -> userIsMember,
+      "studentsCanSeeTutorName" -> showTutors
+    ).noLayout()
+  }
 
 }

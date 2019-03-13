@@ -22,67 +22,67 @@ import uk.ac.warwick.tabula.permissions.Permission
 
 class ManageRoleTag extends TemplateDirectiveModel {
 
-	@Autowired var securityService: SecurityService = _
-	@Autowired var permissionsService: PermissionsService = _
+  @Autowired var securityService: SecurityService = _
+  @Autowired var permissionsService: PermissionsService = _
 
-	lazy val permissionsConverter = new PermissionUserType
-	lazy val roleDefinitionConverter = new BuiltInRoleDefinitionUserType
+  lazy val permissionsConverter = new PermissionUserType
+  lazy val roleDefinitionConverter = new BuiltInRoleDefinitionUserType
 
-	override def execute(env: Environment,
-		params: JMap[_, _],
-		loopVars: Array[TemplateModel],
-		body: TemplateDirectiveBody): Unit = {
+  override def execute(env: Environment,
+    params: JMap[_, _],
+    loopVars: Array[TemplateModel],
+    body: TemplateDirectiveBody): Unit = {
 
-		val wrapper = env.getObjectWrapper()
+    val wrapper = env.getObjectWrapper()
 
-		val user = RequestInfo.fromThread.get.user
+    val user = RequestInfo.fromThread.get.user
 
-		val permission = unwrap(params.get("permission")).asInstanceOf[Permission]
-		val roleDefinition = unwrap(params.get("roleDefinition")).asInstanceOf[RoleDefinition]
-		val roleName = unwrap(params.get("roleName")).asInstanceOf[String]
-		val permissionName = unwrap(params.get("permissionName")).asInstanceOf[String]
-		val scope = unwrap(params.get("scope")).asInstanceOf[PermissionsTarget]
+    val permission = unwrap(params.get("permission")).asInstanceOf[Permission]
+    val roleDefinition = unwrap(params.get("roleDefinition")).asInstanceOf[RoleDefinition]
+    val roleName = unwrap(params.get("roleName")).asInstanceOf[String]
+    val permissionName = unwrap(params.get("permissionName")).asInstanceOf[String]
+    val scope = unwrap(params.get("scope")).asInstanceOf[PermissionsTarget]
 
-		if (body == null) {
-			throw new TemplateException("ManageRoleTag: must have a body", env);
-		}
+    if (body == null) {
+      throw new TemplateException("ManageRoleTag: must have a body", env);
+    }
 
-		if (permissionName != null) {
-			val perm =
-				if (permission != null) permission
-				else permissionsConverter.convertToObject(permissionName)
-			val canDelegate = securityService.canDelegate(user, perm, scope) || user.god
+    if (permissionName != null) {
+      val perm =
+        if (permission != null) permission
+        else permissionsConverter.convertToObject(permissionName)
+      val canDelegate = securityService.canDelegate(user, perm, scope) || user.god
 
-			val deniedPermissions =
-				if (canDelegate) Seq()
-				else Seq(perm)
+      val deniedPermissions =
+        if (canDelegate) Seq()
+        else Seq(perm)
 
-			env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
-			env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
-		} else if (roleDefinition != null || roleName != null) {
-			val definition =
-				if (roleDefinition != null) roleDefinition
-				else permissionsService.getCustomRoleDefinitionById(roleName).getOrElse {
-					roleDefinitionConverter.convertToObject(roleName)
-				}
+      env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
+      env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
+    } else if (roleDefinition != null || roleName != null) {
+      val definition =
+        if (roleDefinition != null) roleDefinition
+        else permissionsService.getCustomRoleDefinitionById(roleName).getOrElse {
+          roleDefinitionConverter.convertToObject(roleName)
+        }
 
-			val allPermissions = definition.allPermissions(Option(scope)).keys
-			val deniedPermissions = allPermissions.filterNot(securityService.canDelegate(user, _, scope))
+      val allPermissions = definition.allPermissions(Option(scope)).keys
+      val deniedPermissions = allPermissions.filterNot(securityService.canDelegate(user, _, scope))
 
-			val canDelegate = deniedPermissions.isEmpty || user.god
+      val canDelegate = deniedPermissions.isEmpty || user.god
 
-			env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
-			env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
-		} else {
-			throw new TemplateException("ManageRoleTag: Either permissionName or roleName must be specified", env)
-		}
+      env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
+      env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
+    } else {
+      throw new TemplateException("ManageRoleTag: Either permissionName or roleName must be specified", env)
+    }
 
-		body.render(env.getOut())
-	}
+    body.render(env.getOut())
+  }
 
-	def unwrap(obj: Any): AnyRef = {
-		if (obj == null) null
-		else DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel])
-	}
+  def unwrap(obj: Any): AnyRef = {
+    if (obj == null) null
+    else DeepUnwrap.unwrap(obj.asInstanceOf[TemplateModel])
+  }
 
 }

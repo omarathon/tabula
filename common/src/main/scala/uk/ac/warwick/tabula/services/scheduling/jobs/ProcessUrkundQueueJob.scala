@@ -14,14 +14,14 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ProcessUrkundQueueJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.urkundSubmissions)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					ProcessUrkundQueueCommand().apply()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.urkundSubmissions)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          ProcessUrkundQueueCommand().apply()
+        }
+      }
+  }
 
 }
 

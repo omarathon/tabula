@@ -11,27 +11,27 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 
 object AddStudentRelationshipTypeCommand {
-	def apply() =
-		new AddStudentRelationshipTypeCommandInternal
-			with ComposableCommand[StudentRelationshipType]
-			with AutowiringRelationshipServiceComponent
-			with AddStudentRelationshipTypeCommandPermissions
-			with ModifyStudentRelationshipTypeCommandDescription
+  def apply() =
+    new AddStudentRelationshipTypeCommandInternal
+      with ComposableCommand[StudentRelationshipType]
+      with AutowiringRelationshipServiceComponent
+      with AddStudentRelationshipTypeCommandPermissions
+      with ModifyStudentRelationshipTypeCommandDescription
 }
 
 class AddStudentRelationshipTypeCommandInternal extends ModifyStudentRelationshipTypeCommandInternal {
-	this: RelationshipServiceComponent =>
+  this: RelationshipServiceComponent =>
 
-	override def applyInternal(): StudentRelationshipType = transactional() {
-		val tpe = new StudentRelationshipType
-		copyTo(tpe)
-		relationshipService.saveOrUpdate(tpe)
-		tpe
-	}
+  override def applyInternal(): StudentRelationshipType = transactional() {
+    val tpe = new StudentRelationshipType
+    copyTo(tpe)
+    relationshipService.saveOrUpdate(tpe)
+    tpe
+  }
 }
 
 trait AddStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.StudentRelationshipType.Manage)
+  }
 }

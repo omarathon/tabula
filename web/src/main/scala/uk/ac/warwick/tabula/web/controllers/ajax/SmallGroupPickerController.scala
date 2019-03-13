@@ -18,53 +18,53 @@ import scala.util.Try
 @RequestMapping(value = Array("/ajax/smallgrouppicker/query"))
 class SmallGroupPickerController extends BaseController {
 
-	@ModelAttribute("command")
-	def command = SmallGroupPickerCommand()
+  @ModelAttribute("command")
+  def command = SmallGroupPickerCommand()
 
-	@RequestMapping
-	def query(@ModelAttribute("command") cmd: Appliable[Seq[SmallGroup]]): Mav = {
-		val results = cmd.apply()
-		Mav(
-			new JSONView(
-				results.map(result => Map(
-					"id" -> result.id,
-					"name" -> result.name,
-					"groupSet" -> Map(
-						"id" -> result.groupSet.id,
-						"name" -> result.groupSet.name
-					),
-					"module" -> Map(
-						"code" -> result.groupSet.module.code
-					)
-				))
-			)
-		)
-	}
+  @RequestMapping
+  def query(@ModelAttribute("command") cmd: Appliable[Seq[SmallGroup]]): Mav = {
+    val results = cmd.apply()
+    Mav(
+      new JSONView(
+        results.map(result => Map(
+          "id" -> result.id,
+          "name" -> result.name,
+          "groupSet" -> Map(
+            "id" -> result.groupSet.id,
+            "name" -> result.groupSet.name
+          ),
+          "module" -> Map(
+            "code" -> result.groupSet.module.code
+          )
+        ))
+      )
+    )
+  }
 
 }
 
 class SmallGroupPickerCommand extends CommandInternal[Seq[SmallGroup]] {
 
-	self: SmallGroupServiceComponent =>
+  self: SmallGroupServiceComponent =>
 
-	var query: String = _
-	var academicYear: String = _
-	var department: String = _
+  var query: String = _
+  var academicYear: String = _
+  var department: String = _
 
-	def applyInternal(): Seq[SmallGroup] = {
-		if (!query.hasText) {
-			Seq()
-		} else {
-			val year = Try(AcademicYear(academicYear.toInt)).getOrElse(AcademicYear.now())
-			val dept = Option(department).filter(_.nonEmpty)
-			smallGroupService.findSmallGroupsByNameOrModule(query, year, dept)
-		}
-	}
+  def applyInternal(): Seq[SmallGroup] = {
+    if (!query.hasText) {
+      Seq()
+    } else {
+      val year = Try(AcademicYear(academicYear.toInt)).getOrElse(AcademicYear.now())
+      val dept = Option(department).filter(_.nonEmpty)
+      smallGroupService.findSmallGroupsByNameOrModule(query, year, dept)
+    }
+  }
 
 }
 
 object SmallGroupPickerCommand {
-	def apply() = new SmallGroupPickerCommand with Command[Seq[SmallGroup]]
-	with AutowiringSmallGroupServiceComponent
-	with ReadOnly with Unaudited with Public
+  def apply() = new SmallGroupPickerCommand with Command[Seq[SmallGroup]]
+    with AutowiringSmallGroupServiceComponent
+    with ReadOnly with Unaudited with Public
 }

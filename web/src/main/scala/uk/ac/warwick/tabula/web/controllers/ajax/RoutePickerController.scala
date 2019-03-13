@@ -14,45 +14,45 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(value = Array("/ajax/routepicker/query"))
 class RoutePickerController extends BaseController {
 
-	@ModelAttribute("command")
-	def command = RoutePickerCommand()
+  @ModelAttribute("command")
+  def command = RoutePickerCommand()
 
-	@RequestMapping
-	def query(@ModelAttribute("command")cmd: Appliable[Seq[Route]]): Mav = {
-		val routes = cmd.apply()
-		Mav(
-			new JSONView(
-				routes.map(route => Map(
-					"id" -> route.id,
-					"code" -> route.code,
-					"name" -> route.name,
-					"department" -> route.adminDepartment.name
-				))
-			)
-		)
-	}
+  @RequestMapping
+  def query(@ModelAttribute("command") cmd: Appliable[Seq[Route]]): Mav = {
+    val routes = cmd.apply()
+    Mav(
+      new JSONView(
+        routes.map(route => Map(
+          "id" -> route.id,
+          "code" -> route.code,
+          "name" -> route.name,
+          "department" -> route.adminDepartment.name
+        ))
+      )
+    )
+  }
 
 }
 
 class RoutePickerCommand extends CommandInternal[Seq[Route]] {
 
-	self: CourseAndRouteServiceComponent =>
+  self: CourseAndRouteServiceComponent =>
 
-	var query: String = _
+  var query: String = _
 
-	def applyInternal(): Seq[Route] = {
-		if (query.isEmpty) {
-			Seq()
-		} else {
-			courseAndRouteService.findRoutesNamedLike(query)
-		}
-	}
+  def applyInternal(): Seq[Route] = {
+    if (query.isEmpty) {
+      Seq()
+    } else {
+      courseAndRouteService.findRoutesNamedLike(query)
+    }
+  }
 
 }
 
 object RoutePickerCommand {
-	def apply() =
-		new RoutePickerCommand with Command[Seq[Route]]
-		with AutowiringCourseAndRouteServiceComponent
-		with ReadOnly with Unaudited with Public
+  def apply() =
+    new RoutePickerCommand with Command[Seq[Route]]
+      with AutowiringCourseAndRouteServiceComponent
+      with ReadOnly with Unaudited with Public
 }

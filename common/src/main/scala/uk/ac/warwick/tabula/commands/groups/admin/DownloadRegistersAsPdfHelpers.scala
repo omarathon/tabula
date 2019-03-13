@@ -14,57 +14,59 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRende
 import scala.collection.JavaConverters._
 
 trait AutowiringDownloadRegistersAsPdfCommandHelper
-	extends AutowiringSmallGroupServiceComponent
-		with AutowiringFileDaoComponent
-		with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
-		with CombinesPdfs
-		with AutowiredTextRendererComponent
-		with PhotosWarwickMemberPhotoUrlGeneratorComponent
-		with AutowiringUserLookupComponent
-		with AutowiringProfileServiceComponent
-		with AutowiringUserSettingsServiceComponent
-		with AutowiringTopLevelUrlComponent
+  extends AutowiringSmallGroupServiceComponent
+    with AutowiringFileDaoComponent
+    with FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
+    with CombinesPdfs
+    with AutowiredTextRendererComponent
+    with PhotosWarwickMemberPhotoUrlGeneratorComponent
+    with AutowiringUserLookupComponent
+    with AutowiringProfileServiceComponent
+    with AutowiringUserSettingsServiceComponent
+    with AutowiringTopLevelUrlComponent
 
 object DownloadRegistersAsPdfHelper {
 
-	object DisplayName {
-		val Name = "name"
-		val Id = "id"
-		val Both = "both"
-	}
+  object DisplayName {
+    val Name = "name"
+    val Id = "id"
+    val Both = "both"
+  }
 
-	object DisplayCheck {
-		val Checkbox = "checkbox"
-		val SignatureLine = "line"
-	}
+  object DisplayCheck {
+    val Checkbox = "checkbox"
+    val SignatureLine = "line"
+  }
 
-	object SortOrder {
-		val Module = "module"
-		val Tutor = "tutor"
-	}
+  object SortOrder {
+    val Module = "module"
+    val Tutor = "tutor"
+  }
 
-	final val registerTemplate = "/WEB-INF/freemarker/groups/attendance/register-pdf.ftl"
+  final val registerTemplate = "/WEB-INF/freemarker/groups/attendance/register-pdf.ftl"
 
-	type Dependencies = DownloadRegistersAsPdfCommandRequest with DownloadRegistersAsPdfCommandState
-		with GetsOccurrences with PDFGeneratorWithFileStorageComponent with CombinesPdfs
-		with TextRendererComponent with MemberPhotoUrlGeneratorComponent with FileDaoComponent
-		with UserLookupComponent with ProfileServiceComponent with UserSettingsServiceComponent
+  type Dependencies = DownloadRegistersAsPdfCommandRequest with DownloadRegistersAsPdfCommandState
+    with GetsOccurrences with PDFGeneratorWithFileStorageComponent with CombinesPdfs
+    with TextRendererComponent with MemberPhotoUrlGeneratorComponent with FileDaoComponent
+    with UserLookupComponent with ProfileServiceComponent with UserSettingsServiceComponent
 
 }
 
 trait DownloadRegistersAsPdfCommandRequest {
-	var startDate: LocalDate = LocalDate.now()
-	var endDate: LocalDate = LocalDate.now().plusWeeks(1)
-	var smallGroupSets: JList[SmallGroupSet] = JArrayList()
-	def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.map(_.id)
-	var showPhotos = true
-	var displayName = DisplayName.Name
-	var displayCheck = DisplayCheck.Checkbox
-	var sortOrder = SortOrder.Module
-	var studentSortFields: JList[String] = JArrayList()
-	var studentSortOrders: JList[String] = JArrayList()
+  var startDate: LocalDate = LocalDate.now()
+  var endDate: LocalDate = LocalDate.now().plusWeeks(1)
+  var smallGroupSets: JList[SmallGroupSet] = JArrayList()
+
+  def smallGroupSetIds: Seq[String] = smallGroupSets.asScala.map(_.id)
+
+  var showPhotos = true
+  var displayName = DisplayName.Name
+  var displayCheck = DisplayCheck.Checkbox
+  var sortOrder = SortOrder.Module
+  var studentSortFields: JList[String] = JArrayList()
+  var studentSortOrders: JList[String] = JArrayList()
 }
 
 trait GetsOccurrences {
-	def getOccurrences: Seq[SmallGroupEventOccurrence]
+  def getOccurrences: Seq[SmallGroupEventOccurrence]
 }

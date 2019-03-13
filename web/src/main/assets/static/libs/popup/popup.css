@@ -1,6 +1,5 @@
 
-
-.popup{
+.popup {
 	position: absolute;
 	text-align: center;
 	overflow: visible;
@@ -8,14 +7,19 @@
 	z-index: 1000;
 }
 
-.WPopupBox { display: none; }
-.WPopupBox.visible { display: block; }
+.WPopupBox {
+	display: none;
+}
+
+.WPopupBox.visible {
+	display: block;
+}
 
 .WPopupGlass,
 .WPopupBox,
 .WPopupBoxContent {
-  position: absolute;
-  z-index: 1000;
+	position: absolute;
+	z-index: 1000;
 }
 
 .WPopupBox .c,
@@ -30,27 +34,32 @@
 .WPopupBox .bArr,
 .WPopupBox .tArr,
 .WPopupBox .reflection {
-  position: absolute;
+	position: absolute;
 }
 
 .WPopupBox .tr,
 .WPopupBox .r,
-.WPopupBox .br { right: 0px; }
+.WPopupBox .br {
+	right: 0px;
+}
+
 .WPopupBox .br,
 .WPopupBox .b,
 .WPopupBox .bl,
-.WPopupBox .bArr { bottom: 0px; }
+.WPopupBox .bArr {
+	bottom: 0px;
+}
 
-.popup #popupClosebutton hover{
+.popup #popupClosebutton hover {
 	cursor: pointer;
 }
 
-.popup #popupContent{
+.popup #popupContent {
 	background-color: #fffadc;
 }
 
 .popup a:hover {
-	text-decoration:underline;
+	text-decoration: underline;
 }
 
 .WPopupCloseButton img {

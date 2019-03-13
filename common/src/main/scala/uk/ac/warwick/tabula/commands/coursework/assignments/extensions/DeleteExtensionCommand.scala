@@ -14,49 +14,51 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.userlookup.User
 
 object DeleteExtensionCommand {
-	def apply(mod: Module, ass: Assignment, student: User, sub: CurrentUser) =
-		new DeleteExtensionCommandInternal(mod, ass, student, sub)
-			with ComposableCommand[Extension]
-			with DeleteExtensionCommandPermissions
-			with ModifyExtensionCommandDescription
-			with DeleteExtensionCommandNotification
-			with AutowiringUserLookupComponent
-			with HibernateExtensionPersistenceComponent
+  def apply(mod: Module, ass: Assignment, student: User, sub: CurrentUser) =
+    new DeleteExtensionCommandInternal(mod, ass, student, sub)
+      with ComposableCommand[Extension]
+      with DeleteExtensionCommandPermissions
+      with ModifyExtensionCommandDescription
+      with DeleteExtensionCommandNotification
+      with AutowiringUserLookupComponent
+      with HibernateExtensionPersistenceComponent
 }
 
 class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, student: User, sub: CurrentUser)
-	extends ModifyExtensionCommand(mod, ass, student, sub) with ModifyExtensionCommandState {
+  extends ModifyExtensionCommand(mod, ass, student, sub) with ModifyExtensionCommandState {
 
-	self: ExtensionPersistenceComponent with UserLookupComponent =>
+  self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	extension = assignment.findExtension(student.getUserId)
-		.getOrElse({ throw new IllegalStateException("Cannot delete a missing extension") })
+  extension = assignment.findExtension(student.getUserId)
+    .getOrElse({
+      throw new IllegalStateException("Cannot delete a missing extension")
+    })
 
-	def applyInternal(): Extension = transactional() {
-		extension._state = ExtensionState.Revoked
-		assignment.extensions.remove(extension)
-		extension.attachments.asScala.foreach(delete(_))
-		delete(extension)
-		extension
-	}
+  def applyInternal(): Extension = transactional() {
+    extension._state = ExtensionState.Revoked
+    assignment.extensions.remove(extension)
+    extension.attachments.asScala.foreach(delete(_))
+    delete(extension)
+    extension
+  }
 }
 
 trait DeleteExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
-	self: ModifyExtensionCommandState =>
+  self: ModifyExtensionCommandState =>
 
-	def emit(extension: Extension): Seq[ExtensionRevokedNotification] = {
-		val notification = Notification.init(new ExtensionRevokedNotification, submitter.apparentUser, Seq(extension.assignment))
-		notification.recipientUniversityId = extension.usercode
-		Seq(notification)
-	}
+  def emit(extension: Extension): Seq[ExtensionRevokedNotification] = {
+    val notification = Notification.init(new ExtensionRevokedNotification, submitter.apparentUser, Seq(extension.assignment))
+    notification.recipientUniversityId = extension.usercode
+    Seq(notification)
+  }
 }
 
 
 trait DeleteExtensionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ModifyExtensionCommandState =>
+  self: ModifyExtensionCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Extension.Delete, assignment)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.mustBeLinked(assignment, module)
+    p.PermissionCheck(Permissions.Extension.Delete, assignment)
+  }
 }

@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.web.controllers.AbstractGenerateGradeFromMarkControl
 @RequestMapping(Array("/exams/exams/admin/module/{module}/exams/{exam}/generate-grade"))
 class GenerateExamGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Exam] {
 
-	@ModelAttribute("command")
-	override def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam))
+  @ModelAttribute("command")
+  override def command(@PathVariable module: Module, @PathVariable exam: Exam) =
+    OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam))
 
 }

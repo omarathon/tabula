@@ -4,32 +4,40 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbac
 import uk.ac.warwick.tabula.web.controllers.MessageResolver
 
 trait AssignmentStudentMessageResolver {
-	def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String
+  def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String
 }
 
 trait ReplacingAssignmentStudentMessageResolver extends AssignmentStudentMessageResolver {
-	self: MessageResolver =>
+  self: MessageResolver =>
 
-	def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String = {
-		val studentId = student.user.getWarwickId
+  def getMessageForStudent(student: SubmissionAndFeedbackCommand.Student, key: String, args: Object*): String = {
+    val studentId = student.user.getWarwickId
 
-		val firstMarker =
-			student.coursework.enhancedSubmission
-				.flatMap { s => Option(s.submission) }
-				.flatMap { _.firstMarker }
-				.map { _.getWarwickId }
-				.getOrElse("first marker")
+    val firstMarker =
+      student.coursework.enhancedSubmission
+        .flatMap { s => Option(s.submission) }
+        .flatMap {
+          _.firstMarker
+        }
+        .map {
+          _.getWarwickId
+        }
+        .getOrElse("first marker")
 
-		val secondMarker =
-			student.coursework.enhancedSubmission
-				.flatMap { s => Option(s.submission) }
-				.flatMap { _.secondMarker }
-				.map { _.getWarwickId }
-				.getOrElse("second marker")
+    val secondMarker =
+      student.coursework.enhancedSubmission
+        .flatMap { s => Option(s.submission) }
+        .flatMap {
+          _.secondMarker
+        }
+        .map {
+          _.getWarwickId
+        }
+        .getOrElse("second marker")
 
-		getMessage(key, args)
-			.replace("[STUDENT]", studentId)
-			.replace("[FIRST_MARKER]", firstMarker)
-			.replace("[SECOND_MARKER]", secondMarker)
-	}
+    getMessage(key, args)
+      .replace("[STUDENT]", studentId)
+      .replace("[FIRST_MARKER]", firstMarker)
+      .replace("[SECOND_MARKER]", secondMarker)
+  }
 }

@@ -18,29 +18,31 @@ import scala.collection.JavaConverters._
 @Controller
 class SearchStudentsInSmallGroupSetController extends GroupsController {
 
-	type SearchStudentsInSmallGroupSetCommand = Appliable[Seq[Member]]
+  type SearchStudentsInSmallGroupSetCommand = Appliable[Seq[Member]]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): SearchStudentsInSmallGroupSetCommand =
-		SearchStudentsInSmallGroupSetCommand(module, set)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): SearchStudentsInSmallGroupSetCommand =
+    SearchStudentsInSmallGroupSetCommand(module, set)
 
-	@RequestMapping def search(@Valid @ModelAttribute("command") cmd: SearchStudentsInSmallGroupSetCommand, errors: Errors): JSONView = {
-		if (errors.hasErrors) new JSONErrorView(errors)
-		else {
-			val json: JList[Map[String, String]] = cmd.apply().map { member =>
-				Map(
-					"name" -> {member.fullName match {
-						case None => "[Unknown user]"
-						case Some(name) => name
-					}},
-					"id" -> member.universityId,
-					"userId" -> member.userId,
-					"description" -> member.description
-				)
-			}.asJava
+  @RequestMapping def search(@Valid @ModelAttribute("command") cmd: SearchStudentsInSmallGroupSetCommand, errors: Errors): JSONView = {
+    if (errors.hasErrors) new JSONErrorView(errors)
+    else {
+      val json: JList[Map[String, String]] = cmd.apply().map { member =>
+        Map(
+          "name" -> {
+            member.fullName match {
+              case None => "[Unknown user]"
+              case Some(name) => name
+            }
+          },
+          "id" -> member.universityId,
+          "userId" -> member.userId,
+          "description" -> member.description
+        )
+      }.asJava
 
-			new JSONView(json)
-		}
-	}
+      new JSONView(json)
+    }
+  }
 
 }

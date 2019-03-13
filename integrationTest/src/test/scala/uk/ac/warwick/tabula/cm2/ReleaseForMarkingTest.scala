@@ -6,11 +6,11 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.Singl
 
 class ReleaseForMarkingTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-	"Admin" should "be able to release for marking" in {
-		withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
-			releaseForMarking(id)
-			findAll(cssSelector("td.action-col"))foreach(_.underlying.getText should be ("Needs marking"))
-		}
-	}
+  "Admin" should "be able to release for marking" in {
+    withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
+      releaseForMarking(id)
+      findAll(cssSelector("td.action-col")) foreach (_.underlying.getText should be("Needs marking"))
+    }
+  }
 
 }
