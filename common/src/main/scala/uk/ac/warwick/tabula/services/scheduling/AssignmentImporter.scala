@@ -13,11 +13,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter.{AssessmentComponentQuery, GradeBoundaryQuery, UpstreamAssessmentGroupQuery}
 
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssignmentImporterComponent {
   def assignmentImporter: AssignmentImporter
@@ -45,7 +45,8 @@ trait AssignmentImporter {
   var yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 }
 
-@Profile(Array("dev", "test", "production")) @Service
+@Profile(Array("dev", "test", "production"))
+@Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 
   var sits: DataSource = Wire[DataSource]("sitsDataSource")
@@ -122,7 +123,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
   override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
@@ -208,13 +210,12 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 }
 
 
-
 object AssignmentImporter {
   var sitsSchema: String = Wire.property("${schema.sits}")
   var sqlStringCastFunction: String = "to_char"
   var dialectRegexpLike = "regexp_like"
 
-  // Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle, but not in HSQL
+  // Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle (for SITS), but not in HSQL (with the embedded database)
   def castToString(orig: String): String =
     if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
     else orig
@@ -231,7 +232,8 @@ object AssignmentImporter {
     * SMO holds confirmed module registrations and is included to catch module registrations in departments which
     * upload module registrations after confirmation.
     */
-  def GetAssessmentsQuery = s"""
+  def GetAssessmentsQuery =
+    s"""
 		select distinct
 			sms.mod_code as module_code,
 			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -286,7 +288,8 @@ object AssignmentImporter {
 						mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
 						mab.mab_agrp is not null"""
 
-  def GetAllAssessmentGroups = s"""
+  def GetAllAssessmentGroups =
+    s"""
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
@@ -321,7 +324,8 @@ object AssignmentImporter {
 						mav.ayr_code in (:academic_year_code)"""
 
   // for students who register for modules through SITS,this gets their assessments before their choices are confirmed
-  def GetUnconfirmedModuleRegistrations = s"""
+  def GetUnconfirmedModuleRegistrations =
+    s"""
 		select
 			sms.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -341,7 +345,7 @@ object AssignmentImporter {
 				from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
 					join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
 						on scj.scj_sprc = spr.spr_code and
-							(spr.sts_code is null or (spr.sts_code not like 'P%' and spr.sts_code != 'D')) -- no perm withdrawn or deceased students
+							(spr.sts_code is null or spr.sts_code != 'D') -- no deceased students
 
 					join $sitsSchema.cam_sms sms -- Student Module Selection table, storing unconfirmed module registrations
 						on sms.spr_code = scj.scj_sprc
@@ -354,7 +358,7 @@ object AssignmentImporter {
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
+							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
@@ -368,7 +372,8 @@ object AssignmentImporter {
 				sms.ayr_code in (:academic_year_code)"""
 
   // this gets a student's assessments from the SMO table, which stores confirmed module choices
-  def GetConfirmedModuleRegistrations = s"""
+  def GetConfirmedModuleRegistrations =
+    s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -388,7 +393,7 @@ object AssignmentImporter {
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
-							(spr.sts_code is null or (spr.sts_code not like 'P%' and spr.sts_code != 'D')) -- no perm withdrawn or deceased students
+							(spr.sts_code is null or spr.sts_code != 'D') -- no deceased students
 
 					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code and
@@ -402,7 +407,7 @@ object AssignmentImporter {
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
+							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -415,7 +420,8 @@ object AssignmentImporter {
 			where
 				smo.ayr_code in (:academic_year_code)"""
 
-  def GetAutoUploadedConfirmedModuleRegistrations = s"""
+  def GetAutoUploadedConfirmedModuleRegistrations =
+    s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -435,7 +441,7 @@ object AssignmentImporter {
 				from $sitsSchema.srs_scj scj
 					join $sitsSchema.ins_spr spr
 						on scj.scj_sprc = spr.spr_code and
-							(spr.sts_code is null or (spr.sts_code not like 'P%' and spr.sts_code != 'D')) -- no perm withdrawn or deceased students
+							(spr.sts_code is null or spr.sts_code != 'D') -- no deceased students
 
 					join $sitsSchema.cam_smo smo
 						on smo.spr_code = spr.spr_code and
@@ -449,7 +455,7 @@ object AssignmentImporter {
 
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
-							and wss.wss_mabs = mab.mab_seq and $dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$')
+							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -463,7 +469,8 @@ object AssignmentImporter {
 				smo.ayr_code in (:academic_year_code) and
 				ssn.ssn_sprc is null -- no matching SSN"""
 
-  def GetAllAssessmentGroupMembers = s"""
+  def GetAllAssessmentGroupMembers =
+    s"""
 			$GetUnconfirmedModuleRegistrations
 				union all
 			$GetConfirmedModuleRegistrations
@@ -471,7 +478,8 @@ object AssignmentImporter {
 			$GetAutoUploadedConfirmedModuleRegistrations
 		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-  def GetModuleRegistrationsByUniversityId = s"""
+  def GetModuleRegistrationsByUniversityId =
+    s"""
 			$GetUnconfirmedModuleRegistrations
 				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
 				union all
@@ -482,7 +490,8 @@ object AssignmentImporter {
 				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
 		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-  def GetAllGradeBoundaries = s"""
+  def GetAllGradeBoundaries =
+    s"""
 		select
 			mkc.mks_code as marks_code,
 			mkc.mkc_grade as grade,
@@ -496,6 +505,7 @@ object AssignmentImporter {
   class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     compile()
+
     override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
       val a = new AssessmentComponent
       a.moduleCode = rs.getString("module_code")
@@ -516,6 +526,7 @@ object AssignmentImporter {
   class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
     declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
     this.compile()
+
     override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): UpstreamAssessmentGroup =
       mapRowToAssessmentGroup(rs)
   }
@@ -532,6 +543,7 @@ object AssignmentImporter {
 
   class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
     compile()
+
     override def mapRow(rs: ResultSet, rowNumber: Int): GradeBoundary = {
       GradeBoundary(
         rs.getString("marks_code"),

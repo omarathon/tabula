@@ -63,10 +63,16 @@ class GenerateExamGridController extends ExamsController
   override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
   @ModelAttribute("activeDepartment")
-  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  override def activeDepartment(@PathVariable department: Department): Option[Department] =
+    benchmarkTask("activeDepartment") {
+      retrieveActiveDepartment(Option(department))
+    }
 
   @ModelAttribute("activeAcademicYear")
-  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+    benchmarkTask("activeAcademicYear") {
+      retrieveActiveAcademicYear(Option(academicYear))
+    }
 
   validatesSelf[SelfValidating]
 
@@ -76,10 +82,12 @@ class GenerateExamGridController extends ExamsController
 
   @ModelAttribute("selectCourseCommand")
   def selectCourseCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-    GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
+    benchmarkTask("selectCourseCommand") {
+      GenerateExamGridSelectCourseCommand(mandatory(department), mandatory(academicYear), permitRoutesFromRootDepartment = securityService.can(user, departmentPermission, department.rootDepartment))
+    }
 
   @ModelAttribute("gridOptionsCommand")
-  def gridOptionsCommand(@PathVariable department: Department) = {
+  def gridOptionsCommand(@PathVariable department: Department) = benchmarkTask("gridOptionsCommand") {
     if (maintenanceModeService.enabled)
       GenerateExamGridGridOptionsCommand.applyReadOnly(mandatory(department))
     else
@@ -88,17 +96,23 @@ class GenerateExamGridController extends ExamsController
 
   @ModelAttribute("coreRequiredModulesCommand")
   def coreRequiredModulesCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-    GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
+    benchmarkTask("coreRequiredModulesCommand") {
+      GenerateExamGridSetCoreRequiredModulesCommand(mandatory(department), mandatory(academicYear))
+    }
 
   @ModelAttribute("checkOvercatCommand")
   def checkOvercatCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-    GenerateExamGridCheckAndApplyOvercatCommand(department, academicYear, user)
+    benchmarkTask("checkOvercatCommand") {
+      GenerateExamGridCheckAndApplyOvercatCommand(department, academicYear, user)
+    }
 
   @ModelAttribute("GenerateExamGridMappingParameters")
-  def params = GenerateExamGridMappingParameters
+  def params = benchmarkTask("GenerateExamGridMappingParameters") {
+    GenerateExamGridMappingParameters
+  }
 
   @ModelAttribute("gridOptionsQueryString")
-  def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = {
+  def gridOptionsQueryString(@RequestParam params: MultiValueMap[String, String]): String = benchmarkTask("gridOptionsQueryString") {
     params.keySet.asScala.filter(_.startsWith("modules[")).foreach(params.remove)
     UriComponentsBuilder.newInstance().queryParams(params).build().getQuery
   }
@@ -108,10 +122,10 @@ class GenerateExamGridController extends ExamsController
     @PathVariable academicYear: AcademicYear,
     @RequestParam(value = "yearOfStudy", required = false) yearOfStudy: JInteger,
     @RequestParam(value = "levelCode", required = false) levelCode: String
-  ): CoreRequiredModuleLookup = {
+  ): CoreRequiredModuleLookup = benchmarkTask("coreRequiredModuleLookup") {
     if (Option(yearOfStudy).nonEmpty) {
       new CoreRequiredModuleLookupImpl(academicYear, yearOfStudy, moduleRegistrationService)
-    } else if (levelCode != null){
+    } else if (levelCode != null) {
       new CoreRequiredModuleLookupImpl(academicYear, Level.toYearOfStudy(levelCode), moduleRegistrationService)
     } else {
       null
@@ -119,7 +133,9 @@ class GenerateExamGridController extends ExamsController
   }
 
   @ModelAttribute("ExamGridColumnValueType")
-  def examGridColumnValueType = ExamGridColumnValueType
+  def examGridColumnValueType = benchmarkTask("ExamGridColumnValueType") {
+    ExamGridColumnValueType
+  }
 
   @GetMapping
   def selectCourseRender(
@@ -218,7 +234,7 @@ class GenerateExamGridController extends ExamsController
           allRequestParams.set("jobId", jobInstance.id)
         }
         if (usePreviousSettings) {
-          redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
+          redirectToAndClearModel(Grids.jobProgress(department, academicYear), allRequestParams)
         } else {
           redirectToAndClearModel(Grids.options(department, academicYear), allRequestParams)
         }
@@ -259,9 +275,9 @@ class GenerateExamGridController extends ExamsController
       val columnIDs = gridOptionsCommand.apply()._1.map(_.identifier)
 
       if (!maintenanceModeService.enabled && columnIDs.contains(new CoreRequiredModulesColumnOption().identifier) || columnIDs.contains(new ModuleReportsColumnOption().identifier)) {
-        redirectToAndClearModel(Grids.coreRequired(department,academicYear), allRequestParams)
+        redirectToAndClearModel(Grids.coreRequired(department, academicYear), allRequestParams)
       } else {
-        redirectToAndClearModel(Grids.jobProgress(department,academicYear), allRequestParams)
+        redirectToAndClearModel(Grids.jobProgress(department, academicYear), allRequestParams)
       }
     }
   }
@@ -325,22 +341,21 @@ class GenerateExamGridController extends ExamsController
     @PathVariable academicYear: AcademicYear,
     @RequestParam allRequestParams: MultiValueMap[String, String]
   ): Mav = {
-    val jobInstance = Option(jobId).flatMap(jobService.getInstance)
-    if (jobInstance.isDefined && !jobInstance.get.finished) {
+    Option(jobId).flatMap(jobService.getInstance).filterNot(_.finished).map { jobInstance =>
       val studentLastImportDates = selectCourseCommand.apply().map(e =>
         (Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
       ).sortBy(_._2)
       commonCrumbs(
         Mav("exams/grids/generate/jobProgress",
           "jobId" -> jobId,
-          "jobProgress" -> jobInstance.get.progress,
-          "jobStatus" -> jobInstance.get.status,
+          "jobProgress" -> jobInstance.progress,
+          "jobStatus" -> jobInstance.status,
           "studentLastImportDates" -> studentLastImportDates
         ),
         department,
         academicYear
       )
-    } else {
+    }.getOrElse {
       redirectToAndClearModel(Grids.preview(department, academicYear), allRequestParams)
     }
   }
@@ -396,50 +411,70 @@ class GenerateExamGridController extends ExamsController
       )
     }
 
-    val oldestImport = benchmarkTask("oldestImport") { entities.flatMap(_.lastImportDate).reduceOption((a, b) => if(a.isBefore(b)) a else b) }
-    val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") { Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap }
-    val chosenYearColumnCategories = benchmarkTask("chosenYearColumnCategories") { summaryColumns.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category) }
-    val perYearColumnValues = benchmarkTask("perYearColumnValues") { perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap }
-    val perYearColumnCategories = benchmarkTask("perYearColumnCategories") { perYearColumns.mapValues(_.collect{case c: HasExamGridColumnCategory => c}.groupBy(_.category)) }
+    val oldestImport = benchmarkTask("oldestImport") {
+      entities.flatMap(_.lastImportDate).reduceOption((a, b) => if (a.isBefore(b)) a else b)
+    }
+    val chosenYearColumnValues = benchmarkTask("chosenYearColumnValues") {
+      Seq(studentInformationColumns, summaryColumns).flatten.map(c => c -> c.values).toMap
+    }
+    val chosenYearColumnCategories = benchmarkTask("chosenYearColumnCategories") {
+      summaryColumns.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category)
+    }
+    val perYearColumnValues = benchmarkTask("perYearColumnValues") {
+      perYearColumns.values.flatten.toSeq.map(c => c -> c.values).toMap
+    }
+    val perYearColumnCategories = benchmarkTask("perYearColumnCategories") {
+      perYearColumns.mapValues(_.collect { case c: HasExamGridColumnCategory => c }.groupBy(_.category))
+    }
 
     val shortFormLayoutData = if (!gridOptionsCommand.showFullLayout) {
-      val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleExamGridColumn => marks}} }
-      val perYearModuleReportColumns  = benchmarkTask("perYearModuleReportColumns"){ perYearColumns.map{ case (year, columns) => year -> columns.collect{ case marks: ModuleReportsColumn => marks}} }
+      val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns") {
+        perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleExamGridColumn => marks } }
+      }
+      val perYearModuleReportColumns = benchmarkTask("perYearModuleReportColumns") {
+        perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleReportsColumn => marks } }
+      }
 
-      val maxYearColumnSize =  benchmarkTask("maxYearColumnSize") { perYearModuleMarkColumns.map{ case (year, columns) =>
-        val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
-        year -> maxModuleColumns
-      } }
+      val maxYearColumnSize = benchmarkTask("maxYearColumnSize") {
+        perYearModuleMarkColumns.map { case (year, columns) =>
+          val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
+          year -> maxModuleColumns
+        }
+      }
 
       Map(
         "maxYearColumnSize" -> maxYearColumnSize,
         "perYearModuleMarkColumns" -> perYearModuleMarkColumns,
         "perYearModuleReportColumns" -> perYearModuleReportColumns
       )
-    } else { Map[String, Object]() }
+    } else {
+      Map[String, Object]()
+    }
 
     val entitiesPerPage = Option(gridOptionsCommand.entitiesPerPage).filter(_ > 0)
 
-    val mavObjects = Map(
-      "oldestImport" -> oldestImport,
-      "studentInformationColumns" -> studentInformationColumns,
-      "perYearColumns" -> perYearColumns,
-      "summaryColumns" -> summaryColumns,
-      "chosenYearColumnValues" -> chosenYearColumnValues,
-      "perYearColumnValues" -> perYearColumnValues,
-      "chosenYearColumnCategories" -> chosenYearColumnCategories,
-      "perYearColumnCategories" -> perYearColumnCategories,
-      "allEntities" -> entities,
-      "currentPage" -> page,
-      "entities" -> entitiesPerPage.map(perPage => {
-        val start = (page - 1) * perPage
-        entities.slice(start, start + perPage)
-      }).getOrElse(entities),
-      "totalPages" -> entitiesPerPage.map(perPage => Math.ceil(entities.size.toFloat / perPage)).getOrElse(1),
-      "generatedDate" -> DateTime.now,
-      "normalLoadLookup" -> normalLoadLookup,
-      "routeRules" -> routeRules
-    ) ++ shortFormLayoutData
+    val mavObjects = benchmarkTask("Generate model") {
+      Map(
+        "oldestImport" -> oldestImport,
+        "studentInformationColumns" -> studentInformationColumns,
+        "perYearColumns" -> perYearColumns,
+        "summaryColumns" -> summaryColumns,
+        "chosenYearColumnValues" -> chosenYearColumnValues,
+        "perYearColumnValues" -> perYearColumnValues,
+        "chosenYearColumnCategories" -> chosenYearColumnCategories,
+        "perYearColumnCategories" -> perYearColumnCategories,
+        "allEntities" -> entities,
+        "currentPage" -> page,
+        "entities" -> entitiesPerPage.map(perPage => {
+          val start = (page - 1) * perPage
+          entities.slice(start, start + perPage)
+        }).getOrElse(entities),
+        "totalPages" -> entitiesPerPage.map(perPage => Math.ceil(entities.size.toFloat / perPage)).getOrElse(1),
+        "generatedDate" -> DateTime.now,
+        "normalLoadLookup" -> normalLoadLookup,
+        "routeRules" -> routeRules
+      ) ++ shortFormLayoutData
+    }
 
     commonCrumbs(
       Mav("exams/grids/generate/preview", mavObjects).bodyClasses("grid-preview"),
@@ -463,7 +498,6 @@ class GenerateExamGridController extends ExamsController
     checkOvercatCmd: CheckOvercatCommand,
     coreRequiredModuleLookup: CoreRequiredModuleLookup
   ): GridData = {
-
     checkOvercatCmd.selectCourseCommand = selectCourseCommand
     val checkOvercatCommandErrors = new BindException(selectCourseCommand, "checkOvercatCommand")
     checkOvercatCmd.validate(checkOvercatCommandErrors)
@@ -482,8 +516,10 @@ class GenerateExamGridController extends ExamsController
     val (predefinedColumnOptions, customColumnTitles) = gridOptionsCommand.apply()
 
     val overcatSubsets = entities
-      .flatMap(entity => {entity.validYears.get(selectCourseCommand.studyYearByLevelOrBlock).map((entity, _))})
-      .map{ case (entity, entityYear) =>
+      .flatMap(entity => {
+        entity.validYears.get(selectCourseCommand.studyYearByLevelOrBlock).map((entity, _))
+      })
+      .map { case (entity, entityYear) =>
         entityYear -> moduleRegistrationService.overcattedModuleSubsets(
           entityYear,
           entityYear.markOverrides.getOrElse(Map()),
@@ -519,7 +555,7 @@ class GenerateExamGridController extends ExamsController
     val perYearColumns = predefinedColumnOptions.collect { case c: PerYearExamGridColumnOption => c }
       .flatMap(_.getColumns(state).toSeq)
       .filter { case (year, _) => selectedYears.contains(year) }
-      .groupBy { case (year, _) => year}
+      .groupBy { case (year, _) => year }
       .mapValues(_.flatMap { case (_, columns) => columns })
 
     GenerateExamGridAuditCommand(selectCourseCommand).apply()

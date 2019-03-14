@@ -38,7 +38,7 @@ class ImportMembersJob extends Job {
 
       updateProgress(0)
 
-      memberIds.zipWithIndex.foreach{case (universityId, index) =>
+      memberIds.zipWithIndex.foreach { case (universityId, index) =>
         updateStatus(ImportMembersJob.status(universityId))
 
         transactional() {
@@ -56,4 +56,5 @@ class ImportMembersJob extends Job {
       job.succeeded = true
     }
   }
+
 }
