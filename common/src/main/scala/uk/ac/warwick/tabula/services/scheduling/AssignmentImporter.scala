@@ -34,7 +34,7 @@ trait AssignmentImporter {
     */
   def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
 
-  def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit
+  def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
   def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 
@@ -84,9 +84,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
   }
 
-  def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = {
+  def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
     val params: JMap[String, Object] = JMap(
-      "academic_year_code" -> yearsToImportArray,
+      "academic_year_code" -> yearsToImport.map(_.toString).asJava,
       "universityIds" -> members.map(_.universityId).asJava
     )
 
@@ -127,7 +127,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
-  override def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
     if (members.map(_.universityId).contains(umr.universityId)) {
       callback(umr)
     }

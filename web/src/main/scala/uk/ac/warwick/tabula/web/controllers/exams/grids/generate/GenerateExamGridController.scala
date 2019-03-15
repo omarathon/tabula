@@ -222,7 +222,14 @@ class GenerateExamGridController extends ExamsController
         if (!maintenanceModeService.enabled) {
           stopOngoingImportForStudents(students)
 
-          val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId)))
+          val yearsToImport = students
+            .flatMap(_.years.values.flatten)
+            .flatMap(_.studentCourseYearDetails)
+            .map(_.academicYear)
+            .distinct
+            .sorted
+
+          val jobInstance = jobService.add(Some(user), ImportMembersJob(students.map(_.universityId), yearsToImport))
 
           allRequestParams.set("jobId", jobInstance.id)
         }
