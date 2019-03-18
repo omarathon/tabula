@@ -1,10 +1,13 @@
 package uk.ac.warwick.tabula.services.objectstore
 
 import java.io.{File, InputStream}
-import java.util.Properties
+import java.nio.charset.StandardCharsets
+import java.util.{Base64, Properties}
 
 import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
+import javax.crypto.SecretKey
+import javax.crypto.spec.SecretKeySpec
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.{Blob, BlobMetadata}
 import org.jclouds.blobstore.{BlobStore, BlobStoreContext, TransientApiMetadata}
@@ -31,14 +34,16 @@ object ObjectStorageService {
   case class Metadata(
     contentLength: Long,
     contentType: String,
-    fileHash: Option[String]
+    fileHash: Option[String],
+    userMetadata: Map[String, String] = Map()
   )
 
   object Metadata {
     def apply(blobMetadata: BlobMetadata): Metadata = Metadata(
       contentLength = blobMetadata.getSize.longValue,
       contentType = blobMetadata.getContentMetadata.getContentType,
-      fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText
+      fileHash = blobMetadata.getUserMetadata.get("shahex").maybeText,
+      userMetadata = blobMetadata.getUserMetadata.asScala.toMap.filterKeys(_ != "shahex")
     )
   }
 
@@ -132,7 +137,11 @@ class ObjectStorageServiceFactoryBean extends ScalaFactoryBean[ObjectStorageServ
   @transient private var blobStoreContext: BlobStoreContext = _
 
   @Value("${objectstore.container}") var containerName: String = _
+  @Value("${objectstore.container.encrypted}") var encryptedContainerName: String = _
   @Value("${objectstore.provider}") var providerType: String = _
+
+  // Base64-encoded AES encryption key. Use ./gradlew generateEncryptionKey to generate one
+  @Value("${objectstore.encryptionKey}") var encryptionKey: String = _
 
   // This defaults to an empty string
   @Value("${filesystem.attachment.dir:}") var legacyAttachmentsDirectory: String = _
@@ -168,9 +177,25 @@ class ObjectStorageServiceFactoryBean extends ScalaFactoryBean[ObjectStorageServ
 
     blobStoreContext = contextBuilder.buildView(classOf[BlobStoreContext])
 
-    val blobStoreService = new BlobStoreObjectStorageService(blobStoreContext, containerName)
+    val unencryptedBlobStoreService = new BlobStoreObjectStorageService(blobStoreContext, containerName)
 
-    legacyAttachmentsDirectory.maybeText.map(new File(_)) match {
+    val secretKey: SecretKey = {
+      val decodedKey: Array[Byte] = Base64.getDecoder.decode(encryptionKey.getBytes(StandardCharsets.UTF_8))
+      new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES")
+    }
+
+    val encryptedBlobStoreService =
+      new EncryptedObjectStorageService(
+        new BlobStoreObjectStorageService(blobStoreContext, encryptedContainerName),
+        secretKey
+      )
+
+    val blobStoreService = new LegacyAwareObjectStorageService(
+      defaultService = encryptedBlobStoreService,
+      legacyService = unencryptedBlobStoreService
+    )
+
+    val service = legacyAttachmentsDirectory.maybeText.map(new File(_)) match {
       case Some(dir) => new LegacyAwareObjectStorageService(
         defaultService = blobStoreService,
         legacyService = new LegacyFilesystemObjectStorageService(dir)
@@ -178,6 +203,10 @@ class ObjectStorageServiceFactoryBean extends ScalaFactoryBean[ObjectStorageServ
 
       case _ => blobStoreService
     }
+
+    // Spring won't call afterPropertiesSet() on beans created by a FactoryBean
+    service.afterPropertiesSet()
+    service
   }
 
   override def destroy(): Unit = blobStoreContext.close()

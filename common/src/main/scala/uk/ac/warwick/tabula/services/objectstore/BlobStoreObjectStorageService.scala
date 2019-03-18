@@ -41,7 +41,7 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
       .contentDisposition(key)
       .contentType(metadata.contentType)
       .contentLength(metadata.contentLength)
-      .userMetadata(metadata.fileHash.map { h => "shahex" -> h }.toMap.asJava)
+      .userMetadata((metadata.userMetadata ++ metadata.fileHash.map { h => "shahex" -> h }.toMap).asJava)
       .build()
 
     // TAB-4144 Use large object support for anything over 50mb

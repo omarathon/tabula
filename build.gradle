@@ -189,6 +189,18 @@ subprojects {
   war.dependsOn(generateRebel)
 }
 
+task generateEncryptionKey() {
+  doLast {
+    def keyGenerator = javax.crypto.KeyGenerator.getInstance("AES")
+    def random = java.security.SecureRandom.getInstance("SHA1PRNG")
+
+    keyGenerator.init(256, random)
+    def secretKey = keyGenerator.generateKey()
+
+    println new String(java.util.Base64.encoder.encode(secretKey.encoded), java.nio.charset.StandardCharsets.UTF_8)
+  }
+}
+
 wrapper {
   gradleVersion = '5.2'
   distributionType = 'ALL'
