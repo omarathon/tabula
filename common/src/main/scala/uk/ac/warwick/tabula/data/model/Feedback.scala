@@ -87,6 +87,8 @@ trait AssessmentFeedback {
   def academicYear: AcademicYear
 
   def assessmentGroups: JList[AssessmentGroup]
+
+  def fieldNameValuePairsMap: Map[String, String]
 }
 
 trait CM1WorkflowSupport {
@@ -352,18 +354,21 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   // FormValue containing the per-user online feedback comment
   def commentsFormValue: Option[SavedFormValue] = customFormValues.asScala.find(_.name == Assignment.defaultFeedbackTextFieldName)
 
-  def comments: Option[String] = commentsFormValue.map(_.value)
+  def comments: Option[String] = fieldValue(Assignment.defaultFeedbackTextFieldName)
+  def comments_=(value: String): Unit = setFieldValue(Assignment.defaultFeedbackTextFieldName, value)
 
-  def comments_=(value: String) {
-    commentsFormValue
-      .getOrElse({
-        val newValue = new SavedFormValue()
-        newValue.name = Assignment.defaultFeedbackTextFieldName
+  def fieldValue(fieldName: String): Option[String] = customFormValues.asScala.find(_.name == fieldName).map(_.value)
+
+  def setFieldValue(fieldName: String, value: String): Unit = {
+    customFormValues.asScala
+      .find(_.name == fieldName)
+      .getOrElse {
+        val newValue = new SavedFormValue
+        newValue.name = fieldName
         newValue.feedback = this
-        this.customFormValues.add(newValue)
+        customFormValues.add(newValue)
         newValue
-      })
-      .value = value
+      }.value = value
   }
 
   def commentsFormattedHtml: String = formattedHtml(comments)
@@ -439,13 +444,12 @@ class AssignmentFeedback extends Feedback {
 
   def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
-  override def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
-    val currentStages = outstandingStages.asScala
-    val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
-
-    if (stage.order == currentPosition) !currentStages.contains(stage)
-    else stage.order < currentPosition
-  }
+  def fieldNameValuePairsMap: Map[String, String] =
+    customFormValues.asScala.flatMap { formValue =>
+      assignment.feedbackFields.find(_.name == formValue.name).map { feedbackField =>
+        feedbackField.name -> formValue.value
+      }
+    }.toMap
 
   def markPoint: Option[MarkPoint] = if (assignment.useMarkPoints) actualMark.flatMap(MarkPoint.forMark) else None
 
@@ -478,6 +482,8 @@ class ExamFeedback extends Feedback {
   override def assessmentGroups: JavaImports.JList[AssessmentGroup] = exam.assessmentGroups
 
   def permissionsParents: Stream[Exam] = Option(exam).toStream
+
+  def fieldNameValuePairsMap: Map[String, String] = Map.empty
 
 }
 

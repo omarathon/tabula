@@ -19,6 +19,10 @@ class OldOnlineFeedbackFormCommandTest extends TestBase with Mockito {
     assignment.collectMarks = true
     assignment.addDefaultFeedbackFields()
 
+    // Take out the Notes field
+    assignment.feedbackFields.last.assignment = null
+    assignment.fields.remove(assignment.feedbackFields.last)
+
     assignment.feedbackService = smartMock[FeedbackService]
     assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 

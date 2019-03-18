@@ -52,7 +52,9 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
       currentMarkerFeedback.foreach(mf => {
         mf.mark = if (StringUtils.hasText(markItem.actualMark)) Some(markItem.actualMark.toInt) else None
         mf.grade = Option(markItem.actualGrade)
-        mf.comments = markItem.feedbackComment
+        markItem.fieldValues.asScala.foreach { case (fieldName, value) =>
+          mf.setFieldValue(fieldName, value)
+        }
         mf.feedback.updatedDate = DateTime.now
         mf.updatedOn = DateTime.now
         feedbackService.saveOrUpdate(mf.feedback)
@@ -69,8 +71,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
 trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MarkerAddMarksState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
-
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -109,7 +110,7 @@ trait MarkerAddMarksState extends AddMarksState with CanProxy {
     markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
     markItem.actualMark = markerFeedback.mark.map(_.toString).getOrElse("")
     markItem.actualGrade = markerFeedback.grade.getOrElse("")
-    markItem.feedbackComment = markerFeedback.comments.getOrElse("")
+    markItem.fieldValues = markerFeedback.fieldNameValuePairsMap.asJava
     markItem.stage = Some(stage)
     markItem
   }).sortBy(_.user(assignment))
@@ -132,7 +133,10 @@ trait AddMarksState {
     markItem.id = Option(student.getWarwickId).getOrElse(student.getUserId)
     markItem.actualMark = feedback.flatMap(_.actualMark).map(_.toString).getOrElse("")
     markItem.actualGrade = feedback.flatMap(_.actualGrade).getOrElse("")
-    markItem.feedbackComment = feedback.flatMap(_.comments).getOrElse("")
+    feedback.foreach { feedback =>
+      markItem.fieldValues = feedback.fieldNameValuePairsMap.asJava
+    }
+
     markItem
   }).sortBy(_.user(assignment))
 
@@ -237,7 +241,7 @@ trait AddMarksCommandBindListener extends BindListener {
       })
 
       // If a row has no mark or grade, we will quietly ignore it
-      if (!mark.actualMark.hasText && !mark.actualGrade.hasText && !mark.feedbackComment.hasText) {
+      if (!mark.actualMark.hasText && !mark.actualGrade.hasText && !mark.fieldValues.asScala.exists { case (_, v) => v.hasText }) {
         mark.isValid = false
       }
 

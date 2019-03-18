@@ -56,7 +56,9 @@
               </#if>
               <th>Mark</th>
               <th>Grade</th>
-              <th>Feedback</th>
+              <#list assignment.feedbackFields as field>
+                <th>${field.label}</th>
+              </#list>
             </tr>
             <#list itemList as item>
               <@spring.nestedPath path="marks[${item_index}]">
@@ -84,10 +86,13 @@
                     <@spring.bind path="actualGrade">${status.value}</@spring.bind>
                     <@f.errors path="actualGrade" cssClass="error" />
                   </td>
-                  <td>
-                    <@spring.bind path="feedbackComment">${status.value}</@spring.bind>
-                    <@f.errors path="feedbackComment" cssClass="error" />
-                  </td>
+                  <#list assignment.feedbackFields as field>
+                    <@f.hidden path="fieldValues[${field.name}]" />
+                    <td>
+                      <@spring.bind path="fieldValues[${field.name}]">${status.value}</@spring.bind>
+                      <@f.errors path="fieldValues[${field.name}]" cssClass="error" />
+                    </td>
+                  </#list>
                 </tr>
               </@spring.nestedPath>
             </#list>
