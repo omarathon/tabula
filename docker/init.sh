@@ -179,6 +179,7 @@ filesystem.create.missing=true
 
 objectstore.provider=swift
 objectstore.container=tabula
+objectstore.encryptionKey=cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04=
 objectstore.swift.endpoint=http://tabula-objectstorage:8080/auth/v2.0
 objectstore.swift.username=swift
 objectstore.swift.password=fingertips
