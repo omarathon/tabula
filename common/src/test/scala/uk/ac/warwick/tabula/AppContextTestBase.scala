@@ -7,8 +7,8 @@ import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
 import org.springframework.transaction._
 import org.springframework.transaction.support._
 import uk.ac.warwick.tabula.data.Transactions

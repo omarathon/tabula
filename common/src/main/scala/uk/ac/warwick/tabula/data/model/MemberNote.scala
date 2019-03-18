@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
-import javax.persistence._
 import javax.persistence.FetchType._
+import javax.persistence._
 import javax.validation.constraints.NotNull
-
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
