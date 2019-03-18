@@ -40,15 +40,10 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
 
   override def fetch(key: String): RichByteSource = new EncryptedRichByteSource(delegate.fetch(key))
 
-  private[this] class EncryptedByteSource(delegate: ByteSource, iv: IvParameterSpec) extends ByteSource {
-    override def openStream(): InputStream = Option(delegate.openStream()).map(encrypt(secretKey, iv)).orNull
-    override def isEmpty: Boolean = delegate.isEmpty
-  }
-
   override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = {
     val iv = randomIv
 
-    val encrypted = new EncryptedByteSource(in, new IvParameterSpec(iv))
+    val encrypted = new EncryptingByteSource(in, secretKey, new IvParameterSpec(iv))
     val encryptedMetadata = ObjectStorageService.Metadata(
       contentLength = encrypted.size(),
       contentType = "application/octet-stream",
