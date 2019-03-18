@@ -2,19 +2,16 @@ package uk.ac.warwick.tabula.services.objectstore
 
 import java.io.InputStream
 import java.nio.charset.StandardCharsets
-import java.security.SecureRandom
 import java.util.Base64
 
 import com.google.common.io.ByteSource
+import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
-import javax.crypto.{Cipher, CipherInputStream, SecretKey}
+import uk.ac.warwick.tabula.helpers.AESEncryption._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.objectstore.EncryptedObjectStorageService._
 
 object EncryptedObjectStorageService {
-  val transformation: String = "AES/CBC/PKCS5Padding"
-  val random: SecureRandom = SecureRandom.getInstance("SHA1PRNG")
-
   val metadataContentLengthKey: String = "realcontentlength"
   val metadataContentTypeKey: String = "realcontenttype"
   val metadataIVKey: String = "encryptioniv"
@@ -22,26 +19,6 @@ object EncryptedObjectStorageService {
 
 class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: SecretKey)
   extends ObjectStorageService with Logging {
-
-  private[this] def decryptionCipher(iv: IvParameterSpec): Cipher = {
-    val cipher = Cipher.getInstance(transformation)
-    cipher.init(Cipher.DECRYPT_MODE, secretKey, iv)
-    cipher
-  }
-  private[this] def decrypt(iv: IvParameterSpec)(is: InputStream): InputStream = new CipherInputStream(is, decryptionCipher(iv))
-
-  private[this] def randomIv: Array[Byte] = {
-    val iv = Array.fill[Byte](16){0}
-    random.nextBytes(iv)
-    iv
-  }
-
-  private[this] def encryptionCipher(iv: IvParameterSpec): Cipher = {
-    val cipher = Cipher.getInstance(transformation)
-    cipher.init(Cipher.ENCRYPT_MODE, secretKey, iv)
-    cipher
-  }
-  private[this] def encrypt(iv: IvParameterSpec)(is: InputStream): InputStream = new CipherInputStream(is, encryptionCipher(iv))
 
   private[this] def unwrapMetadata(metadata: ObjectStorageService.Metadata): ObjectStorageService.Metadata =
     metadata.copy(
@@ -57,14 +34,14 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
 
     override def openStream(): InputStream = delegate.metadata.map { md =>
       val iv = Base64.getDecoder.decode(md.userMetadata(metadataIVKey).getBytes(StandardCharsets.UTF_8))
-      decrypt(new IvParameterSpec(iv))(delegate.openStream())
+      decrypt(secretKey, new IvParameterSpec(iv))(delegate.openStream())
     }.orNull
   }
 
   override def fetch(key: String): RichByteSource = new EncryptedRichByteSource(delegate.fetch(key))
 
   private[this] class EncryptedByteSource(delegate: ByteSource, iv: IvParameterSpec) extends ByteSource {
-    override def openStream(): InputStream = Option(delegate.openStream()).map(encrypt(iv)).orNull
+    override def openStream(): InputStream = Option(delegate.openStream()).map(encrypt(secretKey, iv)).orNull
     override def isEmpty: Boolean = delegate.isEmpty
   }
 
