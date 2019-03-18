@@ -14,6 +14,7 @@ case object UserAccessMgrRoleDefinition
 
   GeneratesSubRole(DepartmentalAdministratorRoleDefinition)
   GeneratesSubRole(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any[StudentRelationshipType]))
+  GeneratesSubRole(MitigatingCircumstancesOfficerRoleDefinition)
 
   def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 

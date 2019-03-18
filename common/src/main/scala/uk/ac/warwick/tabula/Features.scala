@@ -154,6 +154,7 @@ abstract class Features {
   @Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
+  @Value("${features.mitcircs:false}") var mitCircs: Boolean = defaults.mitCircs
 
 
   private val bean = new BeanWrapperImpl(this)
@@ -301,6 +302,7 @@ class FeaturesMessage {
   @BeanProperty var bulkModeration = false
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
+  @BeanProperty var mitCircs = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

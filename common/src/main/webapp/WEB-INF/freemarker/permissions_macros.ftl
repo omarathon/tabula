@@ -109,7 +109,7 @@
         <#else>
           <div class="row">
             <div class="col-md-12">
-              There is no ${roleName} yet.
+              There are no ${roleName} yet.
             </div>
           </div>
         </#if>

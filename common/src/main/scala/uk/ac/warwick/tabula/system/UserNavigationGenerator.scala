@@ -60,13 +60,20 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     val examGridsEnabled = features.examGrids && user.isStaff &&
       (canDeptAdmin || moduleService.departmentsWithPermission(user, Permissions.Department.ExamGrids).nonEmpty)
 
+    val canManageMitigatingCircumstances = features.mitCircs && user.isStaff &&
+      permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Manage).nonEmpty
+
+    val canViewMitigatingCircumstances = features.mitCircs && (user.isStudent || user.isAlumni) && homeDepartment.exists(_.enableMitCircs)
+
     val modelMap = Map(
       "user" -> user,
       "canAdmin" -> canAdmin,
       "canDeptAdmin" -> canDeptAdmin,
       "canViewProfiles" -> canViewProfiles,
       "examsEnabled" -> examsEnabled,
-      "examGridsEnabled" -> examGridsEnabled
+      "examGridsEnabled" -> examGridsEnabled,
+      "canManageMitigatingCircumstances" -> canManageMitigatingCircumstances,
+      "canViewMitigatingCircumstances" -> canViewMitigatingCircumstances
     )
 
     UserNavigation(
