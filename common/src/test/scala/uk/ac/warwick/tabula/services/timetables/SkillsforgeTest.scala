@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services.timetables
 
-
 import org.joda.time.{DateTime, DateTimeZone, LocalDateTime}
 import play.api.libs.json.{JsNull, JsObject, JsString, Json}
 import uk.ac.warwick.tabula.TestBase
@@ -89,7 +88,6 @@ class SkillsforgeTest extends TestBase {
       attendance = None
     ))
   }
-
 
   @Test
   def toEventOccurrenceNullLocation(): Unit = {
