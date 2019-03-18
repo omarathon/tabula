@@ -90,7 +90,6 @@ class SkillsforgeTest extends TestBase {
 		))
 	}
 
-
 	@Test
 	def toEventOccurrenceNullLocation(): Unit = {
 		val input = testEvent - "venue" ++ Json.obj("venue" -> JsNull)
