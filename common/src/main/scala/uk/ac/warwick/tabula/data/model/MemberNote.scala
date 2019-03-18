@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
+import uk.ac.warwick.tabula.helpers.StringUtils._
+
 @Entity
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "membernote")
@@ -26,7 +28,14 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   @JoinColumn(name = "memberid")
   def member: Member
 
-  var note: String = _
+  @Column(name = "note")
+  private var legacyNote: String = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  private var encryptedNote: String = _
+
+  def note: String = encryptedNote.maybeText.getOrElse(legacyNote)
+  def note_=(note: String): Unit = encryptedNote = note
 
   def escapedNote: String = formattedHtml(note)
 

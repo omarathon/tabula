@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
 import javax.sql.DataSource
-
 import org.hibernate.{Session, SessionFactory}
 import org.junit.Before
 import org.junit.runner.RunWith
@@ -13,6 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction._
 import org.springframework.transaction.support._
 import uk.ac.warwick.tabula.data.Transactions
+import uk.ac.warwick.tabula.data.model.EncryptedString
 
 import scala.language.implicitConversions
 
@@ -39,6 +39,8 @@ trait FieldAccessByReflection {
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 
+  // Obviously don't use this for real, it's just for the tests
+  EncryptedString.encryptionKey = "cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04="
 
 }
 
