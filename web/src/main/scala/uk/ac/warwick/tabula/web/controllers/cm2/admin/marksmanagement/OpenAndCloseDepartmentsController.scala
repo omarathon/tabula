@@ -10,30 +10,31 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/marksmanagement/departments"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/marksmanagement/departments"))
 class OpenAndCloseDepartmentsController extends CourseworkController {
 
-	type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm
+  type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm
 
-	@ModelAttribute("command")
-	def command: OpenAndCloseDepartmentsCommand = MarksOpenAndCloseDepartmentsCommand()
+  @ModelAttribute("command")
+  def command: OpenAndCloseDepartmentsCommand = MarksOpenAndCloseDepartmentsCommand()
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand):Mav = {
-		cmd.populate()
-		Mav("cm2/admin/marksmanagement/open_close_departments")
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
+    cmd.populate()
+    Mav("cm2/admin/marksmanagement/open_close_departments")
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
-		val degreeTypeUpdated: DegreeType = cmd.apply()
-		val mav = Mav("cm2/admin/marksmanagement/open_close_departments")
-		if (degreeTypeUpdated == DegreeType.Undergraduate) {
-			mav.addObjects("undergraduateUpdated" -> true)
-		}	else {
-			mav.addObjects("postgraduateUpdated" -> true)
-		}
-		mav
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
+    val degreeTypeUpdated: DegreeType = cmd.apply()
+    val mav = Mav("cm2/admin/marksmanagement/open_close_departments")
+    if (degreeTypeUpdated == DegreeType.Undergraduate) {
+      mav.addObjects("undergraduateUpdated" -> true)
+    } else {
+      mav.addObjects("postgraduateUpdated" -> true)
+    }
+    mav
+  }
 }

@@ -15,43 +15,45 @@ import org.springframework.web.bind.ServletRequestDataBinder
 import uk.ac.warwick.tabula.Fixtures
 
 class RateFeedbackCommandTest extends TestBase {
-	@Test def nullRating {
-		val (feedback,_,_,_) = deepFeedback
-		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
-		command.features = emptyFeatures
+  @Test def nullRating {
+    val (feedback, _, _, _) = deepFeedback
+    val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
+    command.features = emptyFeatures
 
-		command.wasPrompt.value = null
-		command.wasPrompt.unset = true
-		command.wasHelpful.value = null
-		command.wasHelpful.unset = true
-		val errors = new BindException(command, "command")
-		command.validate(errors)
-		withClue(errors) { errors.hasErrors should be (false) }
-	}
+    command.wasPrompt.value = null
+    command.wasPrompt.unset = true
+    command.wasHelpful.value = null
+    command.wasHelpful.unset = true
+    val errors = new BindException(command, "command")
+    command.validate(errors)
+    withClue(errors) {
+      errors.hasErrors should be(false)
+    }
+  }
 
-	@Test def invalidRating {
-		val (feedback,_,_,_) = deepFeedback
-		val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
-		command.features = emptyFeatures
+  @Test def invalidRating {
+    val (feedback, _, _, _) = deepFeedback
+    val command = new RateFeedbackCommand(feedback.assignment.module, feedback.assignment, feedback)
+    command.features = emptyFeatures
 
-		command.wasPrompt.value = null
-		command.wasPrompt.unset = false
-		val errors = new BindException(command, "command")
-		command.validate(errors)
-		errors.hasFieldErrors("wasPrompt") should be (true)
-	}
+    command.wasPrompt.value = null
+    command.wasPrompt.unset = false
+    val errors = new BindException(command, "command")
+    command.validate(errors)
+    errors.hasFieldErrors("wasPrompt") should be(true)
+  }
 
-	def deepFeedback: (AssignmentFeedback, Assignment, Module, Department) = {
-		val feedback = Fixtures.assignmentFeedback("1234567")
-		val assignment = Fixtures.assignment("my assignment")
-		val module = Fixtures.module("cs118", "Introduction to programming")
-		val department = Fixtures.department("cs", "Computer Science")
-		department.collectFeedbackRatings = true
-		feedback.ratingHelpful = None
-		feedback.ratingPrompt = None
-		feedback.assignment = assignment
-		assignment.module = module
-		module.adminDepartment = department
-		(feedback, assignment, module, department)
-	}
+  def deepFeedback: (AssignmentFeedback, Assignment, Module, Department) = {
+    val feedback = Fixtures.assignmentFeedback("1234567")
+    val assignment = Fixtures.assignment("my assignment")
+    val module = Fixtures.module("cs118", "Introduction to programming")
+    val department = Fixtures.department("cs", "Computer Science")
+    department.collectFeedbackRatings = true
+    feedback.ratingHelpful = None
+    feedback.ratingPrompt = None
+    feedback.assignment = assignment
+    assignment.module = module
+    module.adminDepartment = department
+    (feedback, assignment, module, department)
+  }
 }

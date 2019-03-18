@@ -16,81 +16,83 @@ import uk.ac.warwick.tabula.commands.coursework.assignments.{CanProxy, OldMarkin
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marking-uncompleted"))
 class OldMarkingUncompletedController extends OldCourseworkController {
 
-	type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
+  type MarkingUncompletedCommand = Appliable[Unit] with MarkingUncompletedState with CanProxy
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("markingUncompletedCommand")
-	def command(@PathVariable module: Module,
-							@PathVariable assignment: Assignment,
-							@PathVariable marker: User,
-							submitter: CurrentUser) =
-		OldMarkingUncompletedCommand(module, assignment, marker, submitter)
+  @ModelAttribute("markingUncompletedCommand")
+  def command(@PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    submitter: CurrentUser) =
+    OldMarkingUncompletedCommand(module, assignment, marker, submitter)
 
-	def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
-			Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
-	}
+  def RedirectBack(assignment: Assignment, command: MarkingUncompletedCommand): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback(assignment, command.user))
+  }
 
-	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
-	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment, @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand) = RedirectBack(assignment, form)
+  // shouldn't ever be called as a GET - if it is, just redirect back to the submission list
+  @RequestMapping(method = Array(GET))
+  def get(@PathVariable assignment: Assignment, @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand) = RedirectBack(assignment, form)
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
-		errors: Errors
-	): Mav = {
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
+    errors: Errors
+  ): Mav = {
 
-		val previousStageRole = requestInfo
-			.flatMap(_.requestParameters.get("previousStageRole"))
-			.flatMap(_.headOption)
+    val previousStageRole = requestInfo
+      .flatMap(_.requestParameters.get("previousStageRole"))
+      .flatMap(_.headOption)
 
-		Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
-			"assignment" -> assignment,
-			"formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
-			"marker" -> form.user,
-			"previousStageRole" -> previousStageRole,
-			"isProxying" -> form.isProxying,
-			"proxyingAs" -> marker
-		).crumbs(
-			Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
-		)
-	}
+    Mav("coursework/admin/assignments/markerfeedback/marking-uncomplete",
+      "assignment" -> assignment,
+      "formAction" -> Routes.admin.assignment.markerFeedback.uncomplete(assignment, marker, previousStageRole.getOrElse("Marker")),
+      "marker" -> form.user,
+      "previousStageRole" -> previousStageRole,
+      "isProxying" -> form.isProxying,
+      "proxyingAs" -> marker
+    ).crumbs(
+      Breadcrumbs.Standard(s"Marking for ${assignment.name}", Some(Routes.admin.assignment.markerFeedback(assignment, marker)), "")
+    )
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@Valid @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
-		errors: Errors
-	): Mav = transactional() {
-			if (errors.hasErrors)
-				showForm(module,assignment, marker, form, errors)
-			else {
-				form.apply()
-				RedirectBack(assignment, form)
-			}
-		}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @Valid @ModelAttribute("markingUncompletedCommand") form: MarkingUncompletedCommand,
+    errors: Errors
+  ): Mav = transactional() {
+    if (errors.hasErrors)
+      showForm(module, assignment, marker, form, errors)
+    else {
+      form.apply()
+      RedirectBack(assignment, form)
+    }
+  }
 
 }
 
 
 // Redirects users trying to access a marking workflow using the old style URL
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marking-uncompleted"))
 class OldMarkingUncompletedControllerCurrentUser extends OldCourseworkController {
 
-	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
-		Redirect(Routes.admin.assignment.markerFeedback.uncomplete(assignment, currentUser.apparentUser))
-	}
+  @RequestMapping
+  def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback.uncomplete(assignment, currentUser.apparentUser))
+  }
 
 }

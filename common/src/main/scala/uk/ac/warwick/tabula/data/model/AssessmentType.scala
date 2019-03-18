@@ -10,19 +10,20 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
   * 'E' is not the only kind of exam.
   */
 case class AssessmentType(code: String) extends Convertible[String] {
-	def value: String = code
+  def value: String = code
 }
 
 object AssessmentType {
-	implicit val factory: (String) => AssessmentType = { code:String => AssessmentType(code) }
+  implicit val factory: (String) => AssessmentType = { code: String => AssessmentType(code) }
 
-	// For convenience we have a value for the code for assignments and exams,
-	// but we don't have an exhaustive/unchanging list of possible codes
-	// so can't define a set of case objects for all possible values.
-	val Assignment = AssessmentType("A")
-	val Exam = AssessmentType("E")
+  // For convenience we have a value for the code for assignments and exams,
+  // but we don't have an exhaustive/unchanging list of possible codes
+  // so can't define a set of case objects for all possible values.
+  val Assignment = AssessmentType("A")
+  val Exam = AssessmentType("E")
 }
 
 // usertype for hib, converter for spring
 class AssessmentTypeUserType extends ConvertibleStringUserType[AssessmentType]
+
 class AssessmentTypeConverter extends ConvertibleConverter[String, AssessmentType]

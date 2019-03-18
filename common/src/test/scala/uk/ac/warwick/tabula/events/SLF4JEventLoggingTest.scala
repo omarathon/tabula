@@ -9,21 +9,21 @@ import org.joda.time.DateTime
 
 class SLF4JEventLoggingTest extends TestBase {
 
-	val testLogger: Logger = TestLoggerFactory.getTestLogger("uk.ac.warwick.tabula.AUDIT")
-	val listener = new SLF4JEventListener
+  val testLogger: Logger = TestLoggerFactory.getTestLogger("uk.ac.warwick.tabula.AUDIT")
+  val listener = new SLF4JEventListener
 
-	@Test def writesLogs {
-		val command = new NullCommand().describedAs {(d) =>
-			d.properties("mykey" -> "jibberjabber")
-		}
+  @Test def writesLogs {
+    val command = new NullCommand().describedAs { (d) =>
+      d.properties("mykey" -> "jibberjabber")
+    }
 
-		val description = new DescriptionImpl
-		command.describe(description)
+    val description = new DescriptionImpl
+    command.describe(description)
 
-		val event = Event("1235", command.eventName, null, null, null, null, readOnly = false, description.allProperties, new DateTime)
+    val event = Event("1235", command.eventName, null, null, null, null, readOnly = false, description.allProperties, new DateTime)
 
-		listener.afterCommand(event, null, event)
-		TestLoggerFactory.retrieveEvents(testLogger).map(_.getMessage) should be (Seq("event=Null mykey=jibberjabber"))
-	}
+    listener.afterCommand(event, null, event)
+    TestLoggerFactory.retrieveEvents(testLogger).map(_.getMessage) should be(Seq("event=Null mykey=jibberjabber"))
+  }
 
 }

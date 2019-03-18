@@ -9,37 +9,39 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class OldGenericFeedbackControllerTest extends TestBase with Mockito {
 
-	trait Fixture {
-		val department: Department = Fixtures.department("hz", "Heron studies")
-		val module = new Module
-		module.code = "hn101"
-		module.adminDepartment = department
-		val assignment = new Assignment
-		assignment.module = module
+  trait Fixture {
+    val department: Department = Fixtures.department("hz", "Heron studies")
+    val module = new Module
+    module.code = "hn101"
+    module.adminDepartment = department
+    val assignment = new Assignment
+    assignment.module = module
 
-		val command: OldGenericFeedbackCommand = mock[OldGenericFeedbackCommand]
-	}
+    val command: OldGenericFeedbackCommand = mock[OldGenericFeedbackCommand]
+  }
 
-	@Test def controllerShowsForm() {
-		new Fixture {
-			val controller = new OldGenericFeedbackController
-			val mav: Mav = controller.showForm(assignment, command, null)
-			mav.map("command") should be(command)
-			mav.viewName should be ("coursework/admin/assignments/feedback/generic_feedback")
-		}
-	}
+  @Test def controllerShowsForm() {
+    new Fixture {
+      val controller = new OldGenericFeedbackController
+      val mav: Mav = controller.showForm(assignment, command, null)
+      mav.map("command") should be(command)
+      mav.viewName should be("coursework/admin/assignments/feedback/generic_feedback")
+    }
+  }
 
-	@Test def controllerAppliesCommand() {
-		new Fixture {
-			val controller = new OldGenericFeedbackController { override val ajax = true }
-			val errors: Errors = mock[Errors]
+  @Test def controllerAppliesCommand() {
+    new Fixture {
+      val controller = new OldGenericFeedbackController {
+        override val ajax = true
+      }
+      val errors: Errors = mock[Errors]
 
-			val mav: Mav = controller.submit(assignment, command, errors)
+      val mav: Mav = controller.submit(assignment, command, errors)
 
-			verify(command, times(1)).apply()
+      verify(command, times(1)).apply()
 
-			mav.viewName should be ("ajax_success")
-		}
-	}
+      mav.viewName should be("ajax_success")
+    }
+  }
 
 }

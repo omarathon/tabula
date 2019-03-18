@@ -9,76 +9,76 @@ import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, Au
 import scala.collection.JavaConverters._
 
 object ApplyScheduledStudentRelationshipChangesCommand {
-	def apply(relationshipType: StudentRelationshipType, department: Department, user: CurrentUser) =
-		new ApplyScheduledStudentRelationshipChangesCommandInternal(relationshipType, department, user)
-			with ComposableCommand[Seq[StudentRelationship]]
-			with AutowiringSecurityServiceComponent
-			with AutowiringRelationshipServiceComponent
-			with UpdateScheduledStudentRelationshipChangesValidation
-			with ApplyScheduledStudentRelationshipChangesDescription
-			with UpdateScheduledStudentRelationshipChangesPermissions
-			with ManageStudentRelationshipsState
-			with UpdateScheduledStudentRelationshipChangesCommandRequest
-			with ApplyScheduledStudentRelationshipChangesNotifications
+  def apply(relationshipType: StudentRelationshipType, department: Department, user: CurrentUser) =
+    new ApplyScheduledStudentRelationshipChangesCommandInternal(relationshipType, department, user)
+      with ComposableCommand[Seq[StudentRelationship]]
+      with AutowiringSecurityServiceComponent
+      with AutowiringRelationshipServiceComponent
+      with UpdateScheduledStudentRelationshipChangesValidation
+      with ApplyScheduledStudentRelationshipChangesDescription
+      with UpdateScheduledStudentRelationshipChangesPermissions
+      with ManageStudentRelationshipsState
+      with UpdateScheduledStudentRelationshipChangesCommandRequest
+      with ApplyScheduledStudentRelationshipChangesNotifications
 }
 
 
 class ApplyScheduledStudentRelationshipChangesCommandInternal(val relationshipType: StudentRelationshipType, val department: Department, val user: CurrentUser)
-	extends CommandInternal[Seq[StudentRelationship]] {
+  extends CommandInternal[Seq[StudentRelationship]] {
 
-	self: UpdateScheduledStudentRelationshipChangesCommandRequest with RelationshipServiceComponent =>
+  self: UpdateScheduledStudentRelationshipChangesCommandRequest with RelationshipServiceComponent =>
 
-	override def applyInternal(): Seq[StudentRelationship] = {
-		val applyDate = DateTime.now
-		relationships.asScala.map { relationship =>
-			if (!relationship.isCurrent) {
-				// Future add or replace
-				relationshipService.endStudentRelationships(relationship.replacesRelationships.asScala.toSeq, applyDate)
-				relationshipService.saveStudentRelationship(
-					relationshipType,
-					relationship.studentCourseDetails,
-					relationship.agentMember.map(Left(_)).getOrElse(Right(relationship.agent)),
-					applyDate,
-					relationship.replacesRelationships.asScala.toSeq
-				)
-			} else {
-				// Future remove
-				relationshipService.endStudentRelationships(Seq(relationship), applyDate)
-				relationship
-			}
-		}
-	}
+  override def applyInternal(): Seq[StudentRelationship] = {
+    val applyDate = DateTime.now
+    relationships.asScala.map { relationship =>
+      if (!relationship.isCurrent) {
+        // Future add or replace
+        relationshipService.endStudentRelationships(relationship.replacesRelationships.asScala.toSeq, applyDate)
+        relationshipService.saveStudentRelationship(
+          relationshipType,
+          relationship.studentCourseDetails,
+          relationship.agentMember.map(Left(_)).getOrElse(Right(relationship.agent)),
+          applyDate,
+          relationship.replacesRelationships.asScala.toSeq
+        )
+      } else {
+        // Future remove
+        relationshipService.endStudentRelationships(Seq(relationship), applyDate)
+        relationship
+      }
+    }
+  }
 
 }
 
 trait ApplyScheduledStudentRelationshipChangesDescription extends Describable[Seq[StudentRelationship]] {
 
-	self: ManageStudentRelationshipsState with UpdateScheduledStudentRelationshipChangesCommandRequest =>
+  self: ManageStudentRelationshipsState with UpdateScheduledStudentRelationshipChangesCommandRequest =>
 
-	override lazy val eventName = "ApplyScheduledStudentRelationshipChanges"
+  override lazy val eventName = "ApplyScheduledStudentRelationshipChanges"
 
-	override def describe(d: Description) {
-		d.studentRelationshipType(relationshipType)
-		d.property("relationships", relationships.asScala.map(relationship => Map(
-			"studentRelationship" -> relationship.id,
-			"studentCourseDetails" -> relationship.studentCourseDetails,
-			"agent" -> relationship.agent
-		)))
-	}
+  override def describe(d: Description) {
+    d.studentRelationshipType(relationshipType)
+    d.property("relationships", relationships.asScala.map(relationship => Map(
+      "studentRelationship" -> relationship.id,
+      "studentCourseDetails" -> relationship.studentCourseDetails,
+      "agent" -> relationship.agent
+    )))
+  }
 }
 
 trait ApplyScheduledStudentRelationshipChangesNotifications extends BulkRelationshipChangeNotifier[Seq[StudentRelationship], Seq[StudentRelationship]] {
 
-	self: ManageStudentRelationshipsState with UpdateScheduledStudentRelationshipChangesCommandRequest =>
+  self: ManageStudentRelationshipsState with UpdateScheduledStudentRelationshipChangesCommandRequest =>
 
-	override def emit(relationships: Seq[StudentRelationship]): Seq[Notification[_, _]] = {
-		if (relationships.isEmpty) {
-			Seq()
-		} else {
-			val (removedRelationships, addedRelationships) = relationships.partition(!_.isCurrent)
-			sharedEmit(removedRelationships ++ addedRelationships.flatMap(_.replacesRelationships.asScala), addedRelationships)
-		}
-	}
+  override def emit(relationships: Seq[StudentRelationship]): Seq[Notification[_, _]] = {
+    if (relationships.isEmpty) {
+      Seq()
+    } else {
+      val (removedRelationships, addedRelationships) = relationships.partition(!_.isCurrent)
+      sharedEmit(removedRelationships ++ addedRelationships.flatMap(_.replacesRelationships.asScala), addedRelationships)
+    }
+  }
 }
 
 

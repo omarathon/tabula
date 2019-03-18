@@ -13,138 +13,139 @@ import uk.ac.warwick.tabula.{FeaturesImpl, Mockito, TestBase}
 
 class FileServerTest extends TestBase with Mockito {
 
-	val server = new FileServer
-	server.features = new FeaturesImpl
+  val server = new FileServer
+  server.features = new FeaturesImpl
 
-	val content = "file content"
+  val content = "file content"
 
-	val tmpFile: File = File.createTempFile("fileservertest", ".txt")
-	FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
+  val tmpFile: File = File.createTempFile("fileservertest", ".txt")
+  FileCopyUtils.copy(content.getBytes("UTF-8"), tmpFile)
 
-	@Test def streamEmptyAttachment {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
+  @Test def streamEmptyAttachment {
+    implicit val req = new MockHttpServletRequest
+    implicit val res = new MockHttpServletResponse
 
-		val a = new FileAttachment
-		a.id = "123"
-		a.objectStorageService = smartMock[ObjectStorageService]
+    val a = new FileAttachment
+    a.id = "123"
+    a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns RichByteSource.empty
+    a.objectStorageService.fetch("123") returns RichByteSource.empty
 
-		val file = new RenderableAttachment(a)
+    val file = new RenderableAttachment(a)
 
-		server.stream(file)
+    server.stream(file)
 
-		res.getContentLength() should be (0)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getContentAsByteArray().length should be (0)
-	}
+    res.getContentLength() should be(0)
+    res.getContentType() should be(MediaType.OCTET_STREAM.toString)
+    res.getContentAsByteArray().length should be(0)
+  }
 
-	@Test def streamAttachment {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
+  @Test def streamAttachment {
+    implicit val req = new MockHttpServletRequest
+    implicit val res = new MockHttpServletResponse
 
-		val a = new FileAttachment
-		a.id = "123"
-		a.objectStorageService = smartMock[ObjectStorageService]
+    val a = new FileAttachment
+    a.id = "123"
+    a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
+    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
 
-		val file = new RenderableAttachment(a)
+    val file = new RenderableAttachment(a)
 
-		server.stream(file)
+    server.stream(file)
 
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getHeader("Content-Disposition") should be (null)
-		res.getContentAsString() should be (content)
-	}
+    res.getContentLength() should be(content.length)
+    res.getHeader("Content-Length") should be(content.length.toString)
+    res.getContentType() should be("text/plain")
+    res.getHeader("Content-Disposition") should be("inline")
+    res.getContentAsString() should be(content)
+  }
 
-	@Test def serveAttachment {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = new MockHttpServletResponse
+  @Test def serveAttachment {
+    implicit val req = new MockHttpServletRequest
+    implicit val res = new MockHttpServletResponse
 
-		val a = new FileAttachment
-		a.id = "123"
-		a.objectStorageService = smartMock[ObjectStorageService]
+    val a = new FileAttachment
+    a.id = "123"
+    a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
+    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
 
-		val file = new RenderableAttachment(a)
+    val file = new RenderableAttachment(a)
 
-		server.serve(file)
+    server.serve(file, "steven")
 
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getHeader("Content-Disposition") should be ("attachment")
-		res.getContentAsString() should be (content)
-	}
+    res.getContentLength() should be(content.length)
+    res.getHeader("Content-Length") should be(content.length.toString)
+    res.getContentType() should be("text/plain")
+    res.getHeader("Content-Disposition") should be("inline; filename=\"steven\"")
+    res.getContentAsString() should be(content)
+  }
 
-	@Test def streamHead {
-		implicit val req = new MockHttpServletRequest
-		req.setMethod("HEAD")
+  @Test def streamHead {
+    implicit val req = new MockHttpServletRequest
+    req.setMethod("HEAD")
 
-		implicit val res = new MockHttpServletResponse
+    implicit val res = new MockHttpServletResponse
 
-		val a = new FileAttachment
-		a.id = "123"
-		a.objectStorageService = smartMock[ObjectStorageService]
+    val a = new FileAttachment
+    a.id = "123"
+    a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
+    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
 
-		val file = new RenderableAttachment(a)
+    val file = new RenderableAttachment(a)
 
-		server.stream(file)
+    server.stream(file)
 
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be (null)
-		res.getContentAsByteArray().length should be (0)
-	}
+    res.getContentLength() should be(content.length)
+    res.getHeader("Content-Length") should be(content.length.toString)
+    res.getContentType() should be("application/zip")
+    res.getHeader("Content-Disposition") should be("inline")
+    res.getContentAsByteArray().length should be(0)
+  }
 
-	@Test def serveHead {
-		implicit val req = new MockHttpServletRequest
-		req.setMethod("HEAD")
+  @Test def serveHead {
+    implicit val req = new MockHttpServletRequest
+    req.setMethod("HEAD")
 
-		implicit val res = new MockHttpServletResponse
+    implicit val res = new MockHttpServletResponse
 
-		val a = new FileAttachment
-		a.id = "123"
-		a.objectStorageService = smartMock[ObjectStorageService]
+    val a = new FileAttachment
+    a.id = "123"
+    a.objectStorageService = smartMock[ObjectStorageService]
 
-		a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
+    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
 
-		val file = new RenderableAttachment(a)
+    val file = new RenderableAttachment(a)
 
-		server.serve(file)
+    server.serve(file, "steven.zip")
 
-		res.getContentLength() should be (content.length)
-		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be ("attachment")
-		res.getContentAsByteArray().length should be (0)
-	}
+    res.getContentLength() should be(content.length)
+    res.getHeader("Content-Length") should be(content.length.toString)
+    res.getContentType() should be("application/zip")
+    res.getHeader("Content-Disposition") should be("inline; filename=\"steven.zip\"") // zips are inline
+    res.getContentAsByteArray().length should be(0)
+  }
 
-	@Test def expiresHeader {
-		implicit val req = new MockHttpServletRequest
-		implicit val res = mock[MockHttpServletResponse]
+  @Test def expiresHeader {
+    implicit val req = new MockHttpServletRequest
+    implicit val res = mock[MockHttpServletResponse]
 
-		val time = new DateTime(2012, 6, 7, 8, 9, 10, 0)
-		val period = Hours.THREE
+    val time = new DateTime(2012, 6, 7, 8, 9, 10, 0)
+    val period = Hours.THREE
 
-		val file = mock[RenderableFile]
-		file.cachePolicy returns (CachePolicy(expires = Some(period)))
-		file.contentLength returns None
-		file.suggestedFilename returns None
+    val file = mock[RenderableFile]
+    file.cachePolicy returns (CachePolicy(expires = Some(period)))
+    file.contentLength returns None
+    file.contentType returns "application/octet-stream"
+    file.suggestedFilename returns None
 
-		withFakeTime(time) {
-			server.serve(file)(req, res)
-		}
+    withFakeTime(time) {
+      server.serve(file, "steven")(req, res)
+    }
 
-		verify(res, times(1)).setDateHeader("Expires", time.plus(period).getMillis)
-	}
+    verify(res, times(1)).setDateHeader("Expires", time.plus(period).getMillis)
+  }
 
 }

@@ -8,33 +8,33 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
 trait ModuleInformationController extends ApiController {
-	def jsonModuleObject(module: Module): Map[String, Any] =
-		Map(
-			"code" -> module.code.toUpperCase,
-			"name" -> module.name,
-			"active" -> module.active,
-			"adminDepartment" -> Map(
-				"code" -> module.adminDepartment.code.toUpperCase,
-				"name" -> module.adminDepartment.name
-			)
-		)
+  def jsonModuleObject(module: Module): Map[String, Any] =
+    Map(
+      "code" -> module.code.toUpperCase,
+      "name" -> module.name,
+      "active" -> module.active,
+      "adminDepartment" -> Map(
+        "code" -> module.adminDepartment.code.toUpperCase,
+        "name" -> module.adminDepartment.name
+      )
+    )
 }
 
 @Controller
 @RequestMapping(Array("/v1/module"))
 class ListModulesController extends ModuleInformationController
-	with AutowiringModuleAndDepartmentServiceComponent {
+  with AutowiringModuleAndDepartmentServiceComponent {
 
-	@ModelAttribute("modules")
-	def modules: Seq[Module] = moduleAndDepartmentService.allModules
+  @ModelAttribute("modules")
+  def modules: Seq[Module] = moduleAndDepartmentService.allModules
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("modules") modules: Seq[Module]): Mav =
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"modules" -> modules.map(jsonModuleObject)
-		)))
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def list(@ModelAttribute("modules") modules: Seq[Module]): Mav =
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "modules" -> modules.map(jsonModuleObject)
+    )))
 
 }
 
@@ -42,12 +42,12 @@ class ListModulesController extends ModuleInformationController
 @RequestMapping(Array("/v1/module/{module}"))
 class GetModuleInformationController extends ModuleInformationController {
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def get(@PathVariable module: Module): Mav =
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"module" -> jsonModuleObject(mandatory(module))
-		)))
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def get(@PathVariable module: Module): Mav =
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "module" -> jsonModuleObject(mandatory(module))
+    )))
 
 }

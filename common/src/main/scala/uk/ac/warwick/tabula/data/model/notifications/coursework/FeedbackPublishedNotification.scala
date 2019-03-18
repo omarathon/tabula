@@ -8,34 +8,38 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
-@DiscriminatorValue(value="FeedbackPublished")
+@DiscriminatorValue(value = "FeedbackPublished")
 class FeedbackPublishedNotification
-	extends NotificationWithTarget[AssignmentFeedback, Assignment]
-	with SingleRecipientNotification
-	with SingleItemNotification[AssignmentFeedback]
-	with UniversityIdOrUserIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with AllCompletedActionRequiredNotification {
+  extends NotificationWithTarget[AssignmentFeedback, Assignment]
+    with SingleRecipientNotification
+    with SingleItemNotification[AssignmentFeedback]
+    with UniversityIdOrUserIdRecipientNotification
+    with AutowiringUserLookupComponent
+    with AllCompletedActionRequiredNotification {
 
-	def feedback: AssignmentFeedback = item.entity
-	def assignment: Assignment = feedback.assignment
-	def module: Module = assignment.module
-	def moduleCode: String = module.code.toUpperCase
+  def feedback: AssignmentFeedback = item.entity
 
-	priority = Warning
+  def assignment: Assignment = feedback.assignment
 
-	def verb = "publish"
+  def module: Module = assignment.module
 
-	def title: String = "%s: Your assignment feedback for \"%s\" is now available".format(moduleCode, assignment.name)
+  def moduleCode: String = module.code.toUpperCase
 
-	def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
-		"assignmentName" -> assignment.name,
-		"moduleCode" -> assignment.module.code.toUpperCase,
-		"moduleName" -> assignment.module.name,
-		"path" -> url
-	))
+  priority = Warning
 
-	def url: String = Routes.assignment(assignment)
-	def urlTitle = "view your feedback"
+  def verb = "publish"
+
+  def title: String = "%s: Your assignment feedback for \"%s\" is now available".format(moduleCode, assignment.name)
+
+  def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackready.ftl", Map(
+    "assignmentName" -> assignment.name,
+    "moduleCode" -> assignment.module.code.toUpperCase,
+    "moduleName" -> assignment.module.name,
+    "path" -> url
+  ))
+
+  def url: String = Routes.assignment(assignment)
+
+  def urlTitle = "view your feedback"
 
 }

@@ -5,5 +5,5 @@ import uk.ac.warwick.tabula.services.turnitin.Turnitin
 
 
 trait HasTurnitinApi {
-	var api: Turnitin = Wire[Turnitin]
+  var api: Turnitin = Wire[Turnitin]
 }

@@ -19,16 +19,16 @@ import scala.collection.JavaConverters._
 
 class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 
-	private trait ListKeysFixture {
+  private trait ListKeysFixture {
     val containerName = "tabula"
 
-		val blobStoreContext: BlobStoreContext = mock[BlobStoreContext]
-		val blobStore: BlobStore = mock[BlobStore]
+    val blobStoreContext: BlobStoreContext = mock[BlobStoreContext]
+    val blobStore: BlobStore = mock[BlobStore]
 
-		when(blobStoreContext.getBlobStore) thenReturn blobStore
+    when(blobStoreContext.getBlobStore) thenReturn blobStore
 
     val service = new BlobStoreObjectStorageService(blobStoreContext, containerName)
-		service.afterPropertiesSet()
+    service.afterPropertiesSet()
 
     val metadata1 = new StorageMetadataImpl(StorageType.BLOB, "id1", "1", null, null, null, null, null, Map[String, String]().asJava, null)
     val metadata2 = new StorageMetadataImpl(StorageType.BLOB, "id2", "2", null, null, null, null, null, Map[String, String]().asJava, null)
@@ -44,99 +44,97 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
     val results2 = new PageSetImpl(Seq(metadata4, metadata5, metadata6).asJava, "after2")
     val results3 = new PageSetImpl(Seq(metadata7, metadata8, metadata9).asJava, null)
 
-		when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName)) thenReturn results1
-		when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName, ListContainerOptions.Builder.afterMarker("after1"))) thenReturn results2
-		when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName, ListContainerOptions.Builder.afterMarker("after2"))) thenReturn results3
+    when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName)) thenReturn results1
+    when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName, ListContainerOptions.Builder.afterMarker("after1"))) thenReturn results2
+    when[PageSet[_ <: StorageMetadata]](blobStore.list(containerName, ListContainerOptions.Builder.afterMarker("after2"))) thenReturn results3
   }
 
-	@Test def listKeys(): Unit = new ListKeysFixture {
-		service.listKeys().force.toList should be (List("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+  @Test def listKeys(): Unit = new ListKeysFixture {
+    service.listKeys().force.toList should be(List("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
-		verify(blobStore, times(1)).list(containerName)
-		verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
-		verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after2"))
-	}
+    verify(blobStore, times(1)).list(containerName)
+    verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
+    verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after2"))
+  }
 
-	@Test def listKeysLazy(): Unit = new ListKeysFixture {
-		service.listKeys().take(5).force.toList should be (List("1", "2", "3", "4", "5"))
+  @Test def listKeysLazy(): Unit = new ListKeysFixture {
+    service.listKeys().take(5).force.toList should be(List("1", "2", "3", "4", "5"))
 
-		verify(blobStore, times(1)).list(containerName)
-		verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
-		verify(blobStore, never()).list(containerName, ListContainerOptions.Builder.afterMarker("after2"))
-	}
+    verify(blobStore, times(1)).list(containerName)
+    verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
+    verify(blobStore, never()).list(containerName, ListContainerOptions.Builder.afterMarker("after2"))
+  }
 
-	private trait TransientBlobStoreFixture {
-		val containerName = "tabula"
-		val blobStoreContext: BlobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
+  private trait TransientBlobStoreFixture {
+    val containerName = "tabula"
+    val blobStoreContext: BlobStoreContext = ContextBuilder.newBuilder("transient").buildView(classOf[BlobStoreContext])
 
-		val service = new BlobStoreObjectStorageService(blobStoreContext, "tabula")
-		service.afterPropertiesSet()
+    val service = new BlobStoreObjectStorageService(blobStoreContext, "tabula")
+    service.afterPropertiesSet()
 
-		val byteSource = new ByteSource {
-			override def openStream(): InputStream = getClass.getResourceAsStream("/attachment1.docx")
-		}
-	}
+    val byteSource = new ByteSource {
+      override def openStream(): InputStream = getClass.getResourceAsStream("/attachment1.docx")
+    }
+  }
 
-	@Test def pushAndFetch(): Unit = new TransientBlobStoreFixture {
-		val key = "my-lovely-file"
+  @Test def pushAndFetch(): Unit = new TransientBlobStoreFixture {
+    val key = "my-lovely-file"
+    val hashingFunction = Hashing.goodFastHash(128)
 
-		val md: MessageDigest = MessageDigest.getInstance("MD5")
-		val dis = new DigestInputStream(byteSource.openStream(), md)
-		IOUtils.toByteArray(dis) // pass over the bytes for the DigestInputStream
-		val originalMd5: Array[Byte] = md.digest()
+    val originalMd5: Array[Byte] = byteSource.hash(hashingFunction).asBytes()
 
-		service.push(key, byteSource, ObjectStorageService.Metadata(
-			contentLength = 14949,
-			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = None
-		))
+    service.push(key, byteSource, ObjectStorageService.Metadata(
+      contentLength = 14949,
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      fileHash = None
+    ))
 
-		val fetchedFile: RichByteSource = service.fetch(key)
-		fetchedFile.isEmpty should be (false)
+    val fetchedFile: RichByteSource = service.fetch(key)
+    fetchedFile.isEmpty should be(false)
 
-		val fetchedMd5: Array[Byte] = fetchedFile.hash(Hashing.md5()).asBytes()
-		originalMd5 should be (fetchedMd5)
-	}
+    val fetchedMd5: Array[Byte] = fetchedFile.hash(hashingFunction).asBytes()
+    originalMd5 should be(fetchedMd5)
+  }
 
-	@Test def metadata(): Unit = new TransientBlobStoreFixture {
-		val key = "my-lovely-file"
+  @Test def metadata(): Unit = new TransientBlobStoreFixture {
+    val key = "my-lovely-file"
 
-		service.fetch(key).metadata should be (None)
-		service.push(key, byteSource, ObjectStorageService.Metadata(
-			contentLength = 14949,
-			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
-		))
+    service.fetch(key).metadata should be(None)
+    service.push(key, byteSource, ObjectStorageService.Metadata(
+      contentLength = 14949,
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
+    ))
 
-		service.fetch(key).metadata should be (Some(ObjectStorageService.Metadata(
-			contentLength = 14949,
-			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = Some("f992551ba3325d20a529f0821375ca0b544a4598")
-		)))
-	}
+    service.fetch(key).metadata should be(Some(ObjectStorageService.Metadata(
+      contentLength = 14949,
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      fileHash = Some("f992551ba3325d20a529f0821375ca0b544a4598")
+    )))
+  }
 
-	@Test def exists(): Unit = new TransientBlobStoreFixture {
-		val key = "my-lovely-file"
+  @Test def exists(): Unit = new TransientBlobStoreFixture {
+    val key = "my-lovely-file"
 
-		service.keyExists(key) should be (false)
-		service.push(key, byteSource, ObjectStorageService.Metadata(
-			contentLength = 14949,
-			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = None
-		))
-		service.keyExists(key) should be (true)
-	}
+    service.keyExists(key) should be(false)
+    service.push(key, byteSource, ObjectStorageService.Metadata(
+      contentLength = 14949,
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      fileHash = None
+    ))
+    service.keyExists(key) should be(true)
+  }
 
-	@Test def listKeysTransient(): Unit = new TransientBlobStoreFixture {
-		val key = "my-lovely-file"
+  @Test def listKeysTransient(): Unit = new TransientBlobStoreFixture {
+    val key = "my-lovely-file"
 
-		service.listKeys() should be ('empty)
-		service.push(key, byteSource, ObjectStorageService.Metadata(
-			contentLength = 14949,
-			contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-			fileHash = None
-		))
-		service.listKeys().toList should be (List(key))
-	}
+    service.listKeys() should be('empty)
+    service.push(key, byteSource, ObjectStorageService.Metadata(
+      contentLength = 14949,
+      contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      fileHash = None
+    ))
+    service.listKeys().toList should be(List(key))
+  }
 
 }

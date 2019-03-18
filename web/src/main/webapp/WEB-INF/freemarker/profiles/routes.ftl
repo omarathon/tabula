@@ -41,15 +41,15 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_unconfirmed_meetings department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/unconfirmed" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode agent>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit/${agent.universityId}" />
+  <@_u page="/${relationshipType.urlPart}/${scjCode}/edit/${agent.universityId}" />
 </#macro>
 
 <#macro relationship_add relationshipType scjCode>
-	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
+  <@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 
 <#macro relationship_scheduled_change_cancel relationship>
-	<@_u page="/${relationship.relationshipType.urlPart}/${relationship.studentCourseDetails.urlSafeId}/cancel/${relationship.id}" />
+  <@_u page="/${relationship.relationshipType.urlPart}/${relationship.studentCourseDetails.urlSafeId}/cancel/${relationship.id}" />
 </#macro>
 
 <#macro create_meeting_record scd academicYear relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scd.urlSafeId}/${academicYear.startYear?c}/create" /></#macro>
@@ -94,34 +94,37 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro timetable profile><@_u page="/timetable/${profile.universityId}"/></#macro>
 <#macro timetable_ical profile webcal=true><#compress>
-	<#local https_url><@_u context="/api/v1" page="/timetable/calendar/${profile.timetableHash}.ics" /></#local>
-	<#if webcal>
-		${https_url?replace('https','webcal')}
-	<#else>
-		${https_url}
-	</#if>
+  <#local https_url><@_u context="/api/v1" page="/timetable/calendar/${profile.timetableHash}.ics" /></#local>
+  <#if webcal>
+    ${https_url?replace('https','webcal')}
+  <#else>
+    ${https_url}
+  </#if>
 </#compress></#macro>
 <#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
 <#macro timetable_calendar_download profile><@_u page="/view/${profile.universityId}/timetable/download-calendar"/></#macro>
 <#macro timetable_download profile academicYear><@_u page="/view/${profile.universityId}/timetable/download/${academicYear.startYear?c}"/></#macro>
 
 <#macro mrm_link studentCourseYearDetails>
-	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseYearDetails.studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
-</#macro>
+<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseYearDetails.studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}"
+   target="_blank">
+  </#macro>
 
-<#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
+  <#macro permissions scope><@_u page="/permissions/${scope.urlCategory}/${scope.urlSlug}" context="/admin" /></#macro>
 
-<#macro listmarkersubmissions assignment marker><@_u context="/coursework" page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/list"/></#macro>
+  <#macro listmarkersubmissions assignment marker><@_u context="/coursework" page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/${marker.warwickId}/list"/></#macro>
 
-<#macro listMeetings relationshipType scjCode academicYear><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}"/></#macro>
-<#macro listMeetingsTargetted relationshipType scjCode academicYear meetingId><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}?meeting=${meetingId}"/></#macro>
+  <#macro listMeetings relationshipType scjCode academicYear><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}"/></#macro>
+  <#macro listMeetingsTargetted relationshipType scjCode academicYear meetingId><@_u page="/view/meetings/${relationshipType.urlPart}/${scjCode}/${academicYear.startYear?c}?meeting=${meetingId}"/></#macro>
 
-<#macro listModuleRegs scjCode academicYear><@_u page="/view/modules/${scjCode}/${academicYear.startYear?c}"/></#macro>
+  <#macro listModuleRegs scjCode academicYear><@_u page="/view/modules/${scjCode}/${academicYear.startYear?c}"/></#macro>
 
-<#macro exportProfiles department academicYear filterString>
-	<#if filterString?has_content>
-		<#local filterString>?hasBeenFiltered=true&${filterString}</#local>
-	</#if>
-	<@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/export${filterString}"/>
-</#macro>
-<#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>
+  <#macro exportProfiles department academicYear filterString>
+    <#if filterString?has_content>
+      <#local filterString>?hasBeenFiltered=true&${filterString}</#local>
+    </#if>
+    <@_u context="/reports" page="/${department.code}/${academicYear.startYear?c}/profiles/export${filterString}"/>
+  </#macro>
+  <#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>
+
+  <#macro download studentCourseDetails academicYear><@_u page="/view/${studentCourseDetails.urlSafeId}/${academicYear.value}.zip"/></#macro>

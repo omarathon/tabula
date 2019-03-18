@@ -11,26 +11,28 @@ import uk.ac.warwick.tabula.reports.web.Routes
 @RequestMapping(Array("/reports/{department}/{academicYear}/attendance/all"))
 class AllAttendanceReportController extends AbstractAttendanceReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.identity)
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.identity)
 
-	val pageRenderPath = "allattendance"
-	val filePrefix = "all-monitoring-point-attendance"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.all(department, year)
+  val pageRenderPath = "allattendance"
+  val filePrefix = "all-monitoring-point-attendance"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.all(department, year)
 }
 
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/attendance/unrecorded"))
 class UnrecordedAttendanceReportController extends AbstractAttendanceReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.unrecorded)
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.unrecorded)
 
-	val pageRenderPath = "unrecorded"
-	val filePrefix = "unrecorded-monitoring-points"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.unrecorded(department, year)
+  val pageRenderPath = "unrecorded"
+  val filePrefix = "unrecorded-monitoring-points"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.unrecorded(department, year)
 
 }
 
@@ -38,12 +40,13 @@ class UnrecordedAttendanceReportController extends AbstractAttendanceReportContr
 @RequestMapping(Array("/reports/{department}/{academicYear}/attendance/missed"))
 class MissedAttendanceReportController extends AbstractAttendanceReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.missedUnauthorised)
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllAttendanceReportCommand(mandatory(department), mandatory(academicYear), AttendanceReportFilters.missedUnauthorised)
 
-	val pageRenderPath = "missed"
-	val filePrefix = "missed-monitoring-points"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.missed(department, year)
+  val pageRenderPath = "missed"
+  val filePrefix = "missed-monitoring-points"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.Attendance.missed(department, year)
 
 }

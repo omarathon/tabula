@@ -11,27 +11,27 @@ import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.userlookup.User
 
 /**
- * Sends a message to one or more admins to let them know that the current
- * user thinks they should have access to an assignment.
- */
+  * Sends a message to one or more admins to let them know that the current
+  * user thinks they should have access to an assignment.
+  */
 class RequestAssignmentAccessCommand(module: Module, assignment: Assignment, user: CurrentUser) extends Command[Seq[User]]
-	with Notifies[Seq[User], Assignment] with FreemarkerRendering with UnicodeEmails with Public {
+  with Notifies[Seq[User], Assignment] with FreemarkerRendering with UnicodeEmails with Public {
 
-	mustBeLinked(mandatory(assignment), mandatory(module))
+  mustBeLinked(mandatory(assignment), mandatory(module))
 
-	def admins: Seq[User] = {
-		// lookup the admin users - used to determine the recipients  for notifications
-		module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
-	}
+  def admins: Seq[User] = {
+    // lookup the admin users - used to determine the recipients  for notifications
+    module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
+  }
 
-	// Returns the Seq of admin users
-	override def applyInternal(): Seq[User] = admins
+  // Returns the Seq of admin users
+  override def applyInternal(): Seq[User] = admins
 
-	override def describe(d: Description) {
-		d.assignment(assignment)
-	}
+  override def describe(d: Description) {
+    d.assignment(assignment)
+  }
 
-	def emit(admins: Seq[User]): Seq[RequestAssignmentAccessNotification] = {
-		Seq(Notification.init(new RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
-	}
+  def emit(admins: Seq[User]): Seq[RequestAssignmentAccessNotification] = {
+    Seq(Notification.init(new RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
+  }
 }

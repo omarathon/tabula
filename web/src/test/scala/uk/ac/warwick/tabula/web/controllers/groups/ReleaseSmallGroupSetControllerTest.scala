@@ -39,7 +39,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   def invokesCommand() {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
-			val cmd = mock[ReleaseSmallGroupSetCommand]
+      val cmd = mock[ReleaseSmallGroupSetCommand]
       when(cmd.apply()).thenReturn(Seq(ReleasedSmallGroupSet(new SmallGroupSet(), releasedToStudents = true, releasedToTutors = true)))
 
       controller.submit(cmd).viewName should be("groups/admin/groups/single_groupset")
@@ -48,30 +48,35 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     }
   }
 
-	@Test
-	def returnsContextAsExpected() {
-		withUser("test") {
-			val controller = new ReleaseSmallGroupSetController
-			val cmd = mock[ReleaseSmallGroupSetCommand]
-			val set = new SmallGroupSet()
-			set.module = new Module()
-			cmd.apply() returns Seq(ReleasedSmallGroupSet(set, releasedToStudents = true, releasedToTutors = true))
-			cmd.describeOutcome returns Some("hello")
-			val context = controller.submit(cmd).map
+  @Test
+  def returnsContextAsExpected() {
+    withUser("test") {
+      val controller = new ReleaseSmallGroupSetController
+      val cmd = mock[ReleaseSmallGroupSetCommand]
+      val set = new SmallGroupSet()
+      set.module = new Module()
+      cmd.apply() returns Seq(ReleasedSmallGroupSet(set, releasedToStudents = true, releasedToTutors = true))
+      cmd.describeOutcome returns Some("hello")
+      val context = controller.submit(cmd).map
 
-			val expectedViewSet = new ViewSet(set, ViewGroup.fromGroups(set.groups.asScala), GroupsViewModel.Tutor)
-			context("notificationSentMessage") should be(Some("hello"))
-			context("groupsetItem") should be(expectedViewSet)
-			context("moduleItem") should be(new ViewModule(set.module,Seq(expectedViewSet),true))
-		}
-	}
+      val expectedViewSet = new ViewSet(set, ViewGroup.fromGroups(set.groups.asScala), GroupsViewModel.Tutor)
+      context("notificationSentMessage") should be(Some("hello"))
+      context("groupsetItem") should be(expectedViewSet)
+      context("moduleItem") should be(new ViewModule(set.module, Seq(expectedViewSet), true))
+    }
+  }
 
 
-	@Test
+  @Test
   def moduleListViewModelConvertsModulesToGroupSets() {
 
-		def newGroupSetFor2014 = new SmallGroupSet { academicYear = AcademicYear(2014)}
-		def newGroupSetFor2015 = new SmallGroupSet { academicYear = AcademicYear(2015)}
+    def newGroupSetFor2014 = new SmallGroupSet {
+      academicYear = AcademicYear(2014)
+    }
+
+    def newGroupSetFor2015 = new SmallGroupSet {
+      academicYear = AcademicYear(2015)
+    }
 
     val mod1 = new Module()
     mod1.groupSets = Seq(newGroupSetFor2014, newGroupSetFor2014).asJava
@@ -107,7 +112,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val dept = new Department {
         code = "xx"
       }
-			val year = AcademicYear(2014)
+      val year = AcademicYear(2014)
       val controller = new ReleaseAllSmallGroupSetsController()
       val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
@@ -118,7 +123,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   }
 
   @Test
-  def batchControllerReturnsNewFormWithFlashMessage(){
+  def batchControllerReturnsNewFormWithFlashMessage() {
     withUser("test") {
 
       val controller = new ReleaseAllSmallGroupSetsController()
@@ -126,7 +131,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
       val model = mock[controller.ModuleListViewModel]
       val department = new Department
       department.code = "xyz"
-			val year = AcademicYear(2014)
+      val year = AcademicYear(2014)
       when(model.createCommand(any[User])).thenReturn(command)
 
       val formView = controller.submit(model, department, year)

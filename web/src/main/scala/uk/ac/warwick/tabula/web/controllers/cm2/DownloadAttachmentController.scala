@@ -12,37 +12,43 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}"))
 class DownloadAttachmentController extends CourseworkController {
 
-	var submissionService: SubmissionService = Wire.auto[SubmissionService]
+  var submissionService: SubmissionService = Wire.auto[SubmissionService]
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]]
-		= new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId)), optionalCurrentMember)
+  @ModelAttribute def command(@PathVariable assignment: Assignment, user: CurrentUser): Appliable[Option[RenderableFile]]
+  = new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, user.userId)), optionalCurrentMember)
 
-	@RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
-		command.apply().getOrElse { throw new ItemNotFoundException() }
-	}
+  @RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+  def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
+    command.apply().getOrElse {
+      throw new ItemNotFoundException()
+    }
+  }
 
 }
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/{student}"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}"))
 class DownloadAttachmentForStudentController extends CourseworkController {
 
-	var submissionService: SubmissionService = Wire[SubmissionService]
-	var profileService: ProfileService = Wire.auto[ProfileService]
+  var submissionService: SubmissionService = Wire[SubmissionService]
+  var profileService: ProfileService = Wire.auto[ProfileService]
 
-	@ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): Appliable[Option[RenderableFile]] = {
-		val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
-		new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, student.getUserId)), studentMember)
-	}
+  @ModelAttribute def command(@PathVariable assignment: Assignment, @PathVariable student: User): Appliable[Option[RenderableFile]] = {
+    val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
+    new DownloadAttachmentCommand(assignment, mandatory(submissionService.getSubmissionByUsercode(assignment, student.getUserId)), studentMember)
+  }
 
-	@RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
-		command.apply().getOrElse { throw new ItemNotFoundException() }
-	}
+  @RequestMapping(value = Array("/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+  def getAttachment(command: Appliable[Option[RenderableFile]], user: CurrentUser): RenderableFile = {
+    command.apply().getOrElse {
+      throw new ItemNotFoundException()
+    }
+  }
 
 }

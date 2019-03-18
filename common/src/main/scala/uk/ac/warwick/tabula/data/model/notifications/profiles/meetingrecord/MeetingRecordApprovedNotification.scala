@@ -7,28 +7,29 @@ import uk.ac.warwick.userlookup.User
 @Entity
 @DiscriminatorValue("meetingRecordApproved")
 class MeetingRecordApprovedNotification
-	extends Notification[MeetingRecordApproval, Unit]
-	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval]
-	with MyWarwickActivity {
+  extends Notification[MeetingRecordApproval, Unit]
+    with MeetingRecordNotificationTrait
+    with SingleItemNotification[MeetingRecordApproval]
+    with MyWarwickActivity {
 
-	def approval: MeetingRecordApproval = item.entity
-	def meeting: MeetingRecord = approval.meetingRecord
+  def approval: MeetingRecordApproval = item.entity
 
-	def verb = "approve"
+  def meeting: MeetingRecord = approval.meetingRecord
 
-	override def titleSuffix: String = "approved"
+  def verb = "approve"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"agentRoles" -> agentRoles,
-		"dateFormatter" -> dateOnlyFormatter,
-		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "approved"
-	))
+  override def titleSuffix: String = "approved"
 
-	def urlTitle = "view the meeting record"
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "actor" -> agent,
+    "agentRoles" -> agentRoles,
+    "dateFormatter" -> dateOnlyFormatter,
+    "meetingRecord" -> approval.meetingRecord,
+    "verbed" -> "approved"
+  ))
 
-	def recipients: Seq[User] = Seq(meeting.creator, meeting.student).filterNot(_.asSsoUser == agent).distinct.map(_.asSsoUser)
+  def urlTitle = "view the meeting record"
+
+  def recipients: Seq[User] = Seq(meeting.creator, meeting.student).filterNot(_.asSsoUser == agent).distinct.map(_.asSsoUser)
 }
 

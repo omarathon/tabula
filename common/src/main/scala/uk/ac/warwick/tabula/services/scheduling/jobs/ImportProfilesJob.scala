@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
@@ -19,19 +20,21 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportProfilesJob extends AutowiredJobBean {
 
-	private val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	private val scheduler = Wire[Scheduler]
+  private val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  private val scheduler = Wire[Scheduler]
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingProfilesImport)
-			transactional() {
-				exceptionResolver.reportExceptions {
-					moduleAndDepartmentService.allRootDepartments.foreach(dept => {
-						scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
-					})
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingProfilesImport)
+      transactional() {
+        exceptionResolver.reportExceptions {
+          EarlyRequestInfo.wrap() {
+            moduleAndDepartmentService.allRootDepartments.foreach(dept => {
+              scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
+            })
+          }
+        }
+      }
+  }
 
 }
 
@@ -41,19 +44,21 @@ class ImportProfilesJob extends AutowiredJobBean {
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportProfilesSingleDepartmentJob extends AutowiredJobBean with Logging {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingProfilesImport)
-			exceptionResolver.reportExceptions {
-				val deptCode = Option(context.getMergedJobDataMap.getString("departmentCode")).flatMap(_.maybeText)
-				if (deptCode.isEmpty) {
-					logger.error("Tried to import profiles for a department, but no department code was found.")
-				} else {
-					val cmd = new ImportProfilesCommand()
-					cmd.deptCode = deptCode.get
-					cmd.apply()
-				}
-			}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingProfilesImport)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          val deptCode = Option(context.getMergedJobDataMap.getString("departmentCode")).flatMap(_.maybeText)
+          if (deptCode.isEmpty) {
+            logger.error("Tried to import profiles for a department, but no department code was found.")
+          } else {
+            val cmd = new ImportProfilesCommand()
+            cmd.deptCode = deptCode.get
+            cmd.apply()
+          }
+        }
+      }
 
-	}
+  }
 
 }

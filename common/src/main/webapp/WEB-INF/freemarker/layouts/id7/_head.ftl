@@ -25,34 +25,24 @@
 <!-- Use the brand colour of the site -->
 
 <title><#compress>
-	<#if component.subsite>Tabula - </#if>
-	${component.title?default('Tabula')}
-	<#if breadcrumbs??>
-		<#if siblingBreadcrumbs!false>
-			- ${breadcrumbs?first.title}
-		<#else>
-			<#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}
-		</#if>
-	</#if>
-</#compress></title>
+    <#if component.subsite>Tabula - </#if>
+    ${component.title?default('Tabula')}
+    <#if breadcrumbs??>
+      <#if siblingBreadcrumbs!false>
+        - ${breadcrumbs?first.title}
+      <#else>
+        <#list breadcrumbs as crumb> - ${crumb.title}</#list></#if><#if pageTitle??> - ${pageTitle}
+    </#if>
+    </#if>
+  </#compress></title>
 
 <!-- Lato web font -->
 <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
-	  rel="stylesheet" type="text/css">
+      rel="stylesheet" type="text/css">
 
-<@stylesheet "/static/id7/css/id7.min.css" />
 <@stylesheet "/static/css/id7/render.css" />
 <@stylesheet "/static/css/id7/${component.name?default('common')}.css" />
 
 <@script "/static/js/id7/render.js" />
-<#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
-	<#include "components/${component.name?default('common')}.ftl" />
-<#else>
-	<@script "/static/js/id7/${component.name?default('common')}.js" />
-</#if>
+<@script "/static/js/id7/${component.name?default('common')}.js" />
 
-<!-- HTML5 shim for IE8 support of HTML5 elements -->
-
-<!--[if lt IE 9]>
-<@script "/static/js/id7/vendor/html5shiv-3.7.2.min.js" />
-<![endif]-->

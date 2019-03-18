@@ -7,12 +7,13 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Member, RuntimeMember}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 abstract class CourseworkController extends BaseController with CourseworkBreadcrumbs {
-	final def optionalCurrentMember: Option[Member] = user.profile
-	final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
+  final def optionalCurrentMember: Option[Member] = user.profile
 
-	def mustBeCM2(assignment: Assignment): Assignment =
-		if (!assignment.cm2Assignment) throw new ItemNotFoundException(assignment, "Tried to edit a CM1 assignment using the CM2 edit pages")
-		else assignment
+  final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
+
+  def mustBeCM2(assignment: Assignment): Assignment =
+    if (!assignment.cm2Assignment) throw new ItemNotFoundException(assignment, "Tried to edit a CM1 assignment using the CM2 edit pages")
+    else assignment
 }
 
 /*
@@ -21,11 +22,11 @@ abstract class CourseworkController extends BaseController with CourseworkBreadc
  */
 trait AdminSelectionAction {
 
-	self : BaseController =>
+  self: BaseController =>
 
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+  def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
-	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
-	@RequestMapping
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+  // shouldn't ever be called as a GET - if it is, just redirect back to the submission list
+  @RequestMapping
+  def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
 }

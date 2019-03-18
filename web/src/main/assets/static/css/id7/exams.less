@@ -1,338 +1,433 @@
 @import "embeddable";
+@import (reference) "bootstrap/less/variables";
+@import (reference) "bootstrap/less/mixins";
+@import (reference) "@universityofwarwick/id7/less/variables";
+@import (reference) "bootstrap/less/tooltip";
 
 .table th.rotated, .table td.rotated {
-	vertical-align: bottom;
-	.rotate-outer {
-		position: relative;
-	}
-	.rotate {
-		float: left;
-		position: absolute;
-		-webkit-transform-origin: left bottom;
-		-moz-transform-origin: left bottom;
-		-ms-transform-origin: left bottom;
-		-o-transform-origin: left bottom;
-		transform-origin: left bottom;
-		-webkit-transform: rotateZ(-90deg);
-		-moz-transform: rotateZ(-90deg);
-		-ms-transform: rotateZ(-90deg);
-		-o-transform: rotateZ(-90deg);
-		transform: rotateZ(-90deg);
-		white-space: nowrap;
-		left: 50%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		max-width: 300px;
-	}
+  vertical-align: bottom;
+  text-align: center;
+
+  .rotate {
+    writing-mode: vertical-rl;
+    transform: rotateZ(180deg);
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 300px;
+
+    // We'd like to do this for browsers that support it (Firefox) but it breaks the behaviour when text-overflow: ellipsis is in play
+    @supports (writing-mode: sideways-lr) {
+      writing-mode: sideways-lr
+
+    ;
+      transform: none
+
+    ;
+      text-overflow: clip
+
+    ;
+    }
+
+    margin-top: 5px; // let it breathe a bit
+  }
 }
 
 .simple-assessment-info {
-	.subtle-box-style;
-	padding: 4px;
-	margin: 4px 0;
+  .subtle-box-style;
+  padding: 4px;
+  margin: 4px 0;
 }
 
 #assign-markers {
 
-	.student-list {
-		max-height: 330px;
-		overflow-y: auto;
-		overflow-x: hidden;
-		padding: 10px;
-	}
+  .student-list {
+    max-height: 330px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
+  }
 
-	.marker {
-		margin-bottom: 1em;
-		padding: 1em;
+  .marker {
+    margin-bottom: 1em;
+    padding: 1em;
 
-		&.drop-hover{
-			background-color: #DFF0D8;
-			border-color: #C9DCB9;
-		}
-	}
+    &.drop-hover {
+      background-color: #DFF0D8;
+      border-color: #C9DCB9;
+    }
+  }
 
-	.student {
-		min-width: 200px;
-		padding: 3px 5px;
-		color: white;
-	}
+  .student {
+    min-width: 200px;
+    padding: 3px 5px;
+    color: white;
+  }
 
-	.agentslist {
-		overflow:auto;    /* fix for zero height div when containing floats */
-	}
+  .agentslist {
+    overflow: auto; /* fix for zero height div when containing floats */
+  }
 
-	.agentslist.drag-list-three-col .drag-target {
-		width: 157px;
-		float: left;
-		margin-right: 10px;
-	}
+  .agentslist.drag-list-three-col .drag-target {
+    width: 157px;
+    float: left;
+    margin-right: 10px;
+  }
 
-	.agentslist.drag-list-three-col .drag-target .name {
-		min-height: 3em;
-		display:block;
-		line-height: 1.3em;
-	}
+  .agentslist.drag-list-three-col .drag-target .name {
+    min-height: 3em;
+    display: block;
+    line-height: 1.3em;
+  }
 
-	.direction-icon {
-		font-size: 8em;
-		text-align: center;
-		padding-top: 33px;
-		color: #d6d6d6;
-	}
+  .direction-icon {
+    font-size: 8em;
+    text-align: center;
+    padding-top: 33px;
+    color: #d6d6d6;
+  }
 
 }
 
 .marksUpload {
-	.mark-header {
-		font-weight: bold;
-		border-bottom: 2px solid #ddd;
-	}
+  .mark-header {
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+  }
 }
 
 div.assessment_details {
-	margin-top: 20px;
-	table.component_info {
-		td {
-			border: none;
-		}
-		tr:first-child {
-			border-top-style:hidden;
-		}
-	}
+  margin-top: 20px;
 
-	td.assessment_details_col2 {
-			max-width: 250px;
-			word-wrap: break-word;
-			white-space: pre;
-			white-space: pre-wrap;
-	}
+  table.component_info {
+    td {
+      border: none;
+    }
 
-	td.assessment_details_col {
-		text-align:center;
-		vertical-align:middle;
-	}
-	td.assessment_details_col1, .assessment_componentdetails_header .header_col {
-		max-width: 70px;
-	}
+    tr:first-child {
+      border-top-style: hidden;
+    }
+  }
+
+  td.assessment_details_col2 {
+    max-width: 250px;
+    word-wrap: break-word;
+    white-space: pre;
+    white-space: pre-wrap;
+  }
+
+  td.assessment_details_col {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td.assessment_details_col1, .assessment_componentdetails_header .header_col {
+    max-width: 70px;
+  }
 }
 
 .exam-grid-preview {
-	.key, .overcat-key {
-		.table {
-			margin-bottom: 0;
-			border: 1px solid @table-border-color;
-			float: left;
-			width: auto;
-			max-width: 60%;
-			margin-right: 32px;
+  .key, .overcat-key {
+    .table {
+      margin-bottom: 0;
+      border: 1px solid @table-border-color;
+      float: left;
+      width: auto;
+      max-width: 60%;
+      margin-right: 32px;
 
-			&:last-child {
-				max-width: 40%;
-				margin-right:0;
-		}
-		}
+      &:last-child {
+        max-width: 40%;
+        margin-right: 0;
+      }
+    }
 
-		thead th {
-			text-align: center;
-			background: @table-bg-hover;
-		}
-	}
-	.overcat-key {
-		float: right;
-	}
-	h3 {
-		margin-top: 0;
-	}
-	.id7-table-wrapper-popout {
-		display: none;
-	}
-	.exam-grid-overcat {
-		color: @brand-success;
-		text-decoration: underline;
-	}
-	.exam-grid-override {
-		color: @brand-primary;
-	}
-	.exam-grid-actual-mark {
-		font-style: italic;
-		color: @brand-info;
-	}
-	.exam-grid-fail {
-		color: @brand-danger;
-		text-decoration: underline;
-		border-bottom: 1px solid @brand-danger;
-	}
-	.exam-grid-resit {
-		&:before {content: '[';}
-		&:after {content: ']';}
-	}
-	.grid {
-		&.overcat {
-			margin-bottom: 0;
-		}
-		.student, .assignments, .exams {
-			&.odd {
-				background: @table-bg-accent;
-			}
-		}
-		&.with-hover tr.student:hover {
-			background-color: darken(@table-bg-hover, 5%);
-		}
-		tr.clickable {
-			cursor: pointer;
-		}
-		th, td {
-			border: 1px solid @table-border-color;
-			&.borderless {
-				border-width: 0;
-			}
-			min-width: 30px;
-			vertical-align: bottom;
-		}
-		th {
-			background: @table-bg-hover;
-		}
-		tr.year th {
-			background: @table-bg;
-			text-align: center;
-		}
-		th.has-category {
-			font-weight: normal;
-		}
-		th.bold {
-			font-weight: bold;
-		}
-		tr.new-marks th {
-			vertical-align: middle;
-			text-align: right;
-		}
-		td {
-			white-space: nowrap;
-			&.spacer {
-				border-width: 0;
-				min-width: 15px;
-			}
-		}
+    thead th {
+      text-align: center;
+      background: @table-bg-hover;
+    }
+  }
 
-		input[type="text"] {
-			width: 42px;
-			padding: 6px;
-		}
+  .overcat-key {
+    float: right;
+  }
 
-	}
+  h3 {
+    margin-top: 0;
+  }
+
+  .id7-table-wrapper-popout {
+    display: none;
+  }
+
+  .exam-grid-overcat {
+    color: @brand-success;
+    text-decoration: underline;
+  }
+
+  .exam-grid-override {
+    color: @brand-primary;
+  }
+
+  .exam-grid-actual-mark {
+    font-style: italic;
+    color: @brand-info;
+  }
+
+  .exam-grid-fail {
+    color: @brand-danger;
+    text-decoration: underline;
+    border-bottom: 1px solid @brand-danger;
+  }
+
+  .exam-grid-resit {
+    &:before {
+      content: '[';
+    }
+
+    &:after {
+      content: ']';
+    }
+  }
+
+  .grid {
+    &.overcat {
+      margin-bottom: 0;
+    }
+
+    .student, .assignments, .exams {
+      &.odd {
+        background: @table-bg-accent;
+      }
+    }
+
+    &.with-hover tr.student:hover {
+      background-color: darken(@table-bg-hover, 5%);
+    }
+
+    tr.clickable {
+      cursor: pointer;
+    }
+
+    th, td {
+      border: 1px solid @table-border-color;
+
+      &.borderless {
+        border-width: 0;
+      }
+
+      min-width: 30px;
+      vertical-align: bottom;
+    }
+
+    th {
+      background: @table-bg-hover;
+    }
+
+    tr.year th {
+      background: @table-bg;
+      text-align: center;
+    }
+
+    th.has-category {
+      font-weight: normal;
+    }
+
+    th.bold {
+      font-weight: bold;
+    }
+
+    tr.new-marks th {
+      vertical-align: middle;
+      text-align: right;
+    }
+
+    td {
+      white-space: nowrap;
+
+      &.spacer {
+        border-width: 0;
+        min-width: 15px;
+      }
+    }
+
+    input[type="text"] {
+      width: 42px;
+      padding: 6px;
+    }
+
+  }
 }
 
 .normal-load-editor, .course-weightings-editor {
-	label {
-		line-height: @input-height-base;
-		margin: 0;
-	}
-	.checkbox {
-		input[type=checkbox] {
-			margin-top: 12px;
-		}
-		margin: 0;
-	}
-	.row {
-		margin: 0;
-		border-bottom: 1px solid @table-border-color;
-		padding-top: (@grid-gutter-width / 2);
-		padding-bottom: (@grid-gutter-width / 2);
-		&.even {
-			background-color: @zebra-pale;
-		}
-		& > .col-md-2, & > .col-md-5 {
-			height: @input-height-base;
-			label {
-				max-width: 100%;
-				overflow: hidden;
-				white-space: nowrap;
-				text-overflow: ellipsis;
-			}
-		}
-	}
-	.header {
-		.row {
-			background-color: transparent;
-			padding-top: 0;
-			padding-bottom: 0;
-			border-bottom: 2px solid @table-border-color;
-			&.last {
-				padding-bottom: (@grid-gutter-width / 2);
-			}
-		}
-	}
+  label {
+    line-height: @input-height-base;
+    margin: 0;
+  }
+
+  .checkbox {
+    input[type=checkbox] {
+      margin-top: 12px;
+    }
+
+    margin: 0;
+  }
+
+  .row {
+    margin: 0;
+    border-bottom: 1px solid @table-border-color;
+    padding-top: (@grid-gutter-width / 2);
+    padding-bottom: (@grid-gutter-width / 2);
+
+    &.even {
+      background-color: @zebra-pale;
+    }
+
+    & > .col-md-2, & > .col-md-5 {
+      height: @input-height-base;
+
+      label {
+        max-width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+
+  .header {
+    .row {
+      background-color: transparent;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-bottom: 2px solid @table-border-color;
+
+      &.last {
+        padding-bottom: (@grid-gutter-width / 2);
+      }
+    }
+  }
 }
 
 .year_info .year_info_hdr {
-	margin-top: 20px;
-	margin-left: 5px;
+  margin-top: 20px;
+  margin-left: 5px;
 }
 
 @media print {
 
-	.grid-preview {
-		@page {
-			size: A3 landscape;
-		}
+  .grid-preview {
+    @page {
+      size: A3 landscape;
+    }
 
-		.id7-fixed-width-container, .id7-main-content  {
-			width: 100%;
-			margin-right: 0;
-			margin-left: 0;
-		}
+    .id7-fixed-width-container, .id7-main-content {
+      width: 100%;
+      margin-right: 0;
+      margin-left: 0;
+    }
 
-		.id7-left-border, .id7-right-border, .id7-page-header, .id7-main-content-header, .deptheader, h2, .progress-arrows, footer {
-			display: none;
-		}
+    .id7-left-border, .id7-right-border, .id7-page-header, .id7-main-content-header, .deptheader, h2, .progress-arrows, footer {
+      display: none;
+    }
 
-		.key {
-			margin-bottom: 20px;
-		}
+    .key {
+      margin-bottom: 20px;
+    }
 
-		.table-responsive {
-			overflow: visible;
-			position: absolute;
-		}
+    .table-responsive {
+      overflow: visible;
+      position: absolute;
+    }
 
-		/* hacks to override ID7's over zealous repression of colour */
-		.exam-grid-preview {
-			.exam-grid-fail { color: @brand-danger!important; }
-			.exam-grid-overcat { color: @brand-success!important;}
-			.exam-grid-actual-mark {color: @brand-info!important;}
-		}
+    /* hacks to override ID7's over zealous repression of colour */
 
-		.grid {
-			.year, .student, .category {
-				td:first-child {
-					display: none
-				}
-			}
+    .exam-grid-preview {
+      .exam-grid-fail {
+        color: @brand-danger !important;
+      }
 
-			.header th:first-child {
-				display: none;
-			}
+      .exam-grid-overcat {
+        color: @brand-success !important;
+      }
 
-			// group student rows in tbody tags and try and avoid page breaks on them
-			tbody {
-				page-break-inside: avoid;
-			}
-		}
-	}
+      .exam-grid-actual-mark {
+        color: @brand-info !important;
+      }
+    }
+
+    .grid {
+      .year, .student, .category {
+        td:first-child {
+          display: none
+        }
+      }
+
+      .header th:first-child {
+        display: none;
+      }
+
+      // group student rows in tbody tags and try and avoid page breaks on them
+      tbody {
+        page-break-inside: avoid;
+      }
+    }
+  }
 
 }
 
 div.exam-modulegrid-preview {
-	margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 #examGridSpinner {
-	font-size: 4em;
-	line-height: 4em;
-	text-align: center;
-	font-style: italic;
+  font-size: 4em;
+  line-height: 4em;
+  text-align: center;
+  font-style: italic;
 }
 
-#examGridContainer {
-	opacity: 0;
+.exam-grid-tooltip[data-title]:not([data-title=""]) {
+  position: relative;
+  display: inline-block;
+
+  &::before, &::after {
+    position: absolute;
+    display: block;
+    top: -@tooltip-arrow-width;
+    left: 50%;
+    z-index: @zindex-tooltip;
+    opacity: 0;
+    transition: opacity .15s linear;
+  }
+
+  &::before {
+    content: '';
+    transform: translateX(-50%);
+    border-width: @tooltip-arrow-width @tooltip-arrow-width 0 @tooltip-arrow-width;
+    border-style: solid;
+    border-color: @tooltip-bg transparent transparent transparent;
+  }
+
+  &::after {
+    content: attr(data-title);
+    transform: translateX(-50%) translateY(-100%);
+
+    // Our parent element can be arbitrary since tooltips are by default inserted as a sibling of their target element.
+    // So reset our font and text properties to avoid inheriting weird values.
+    .reset-text();
+    font-size: @font-size-small;
+
+    .tooltip-inner;
+    min-width: 150px;
+
+    pointer-events: none;
+  }
+
+  &:hover {
+    &::before, &::after {
+      opacity: @tooltip-opacity;
+    }
+  }
 }

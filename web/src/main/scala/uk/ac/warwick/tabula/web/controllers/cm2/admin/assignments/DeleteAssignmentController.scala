@@ -18,30 +18,30 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/delete"))
 class DeleteAssignmentController extends CourseworkController {
 
-	validatesSelf[DeleteAssignmentCommand]
+  validatesSelf[DeleteAssignmentCommand]
 
-	@ModelAttribute
-	def formObject(@PathVariable assignment: Assignment) =
-		new DeleteAssignmentCommand(mandatory(assignment))
+  @ModelAttribute
+  def formObject(@PathVariable assignment: Assignment) =
+    new DeleteAssignmentCommand(mandatory(assignment))
 
-	def showForm(form: DeleteAssignmentCommand, assignment: Assignment): Mav = {
-		Mav("cm2/admin/assignments/delete",
-			"assignment" -> assignment
-		).crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  def showForm(form: DeleteAssignmentCommand, assignment: Assignment): Mav = {
+    Mav("cm2/admin/assignments/delete",
+      "assignment" -> assignment
+    ).crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
-	@RequestMapping(method = Array(GET))
-	def deleteAssignment(form: DeleteAssignmentCommand, @PathVariable assignment: Assignment): Mav = {
-		showForm(form, assignment)
-	}
+  @RequestMapping(method = Array(GET))
+  def deleteAssignment(form: DeleteAssignmentCommand, @PathVariable assignment: Assignment): Mav = {
+    showForm(form, assignment)
+  }
 
-	@RequestMapping(method = Array(RequestMethod.POST))
-	def deleteAssignment(@Valid form: DeleteAssignmentCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		if (errors.hasErrors) {
-			showForm(form, assignment)
-		} else {
-			form.apply()
-			Redirect(Routes.admin.department(assignment.module.adminDepartment, assignment.academicYear))
-		}
-	}
+  @RequestMapping(method = Array(RequestMethod.POST))
+  def deleteAssignment(@Valid form: DeleteAssignmentCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    if (errors.hasErrors) {
+      showForm(form, assignment)
+    } else {
+      form.apply()
+      Redirect(Routes.admin.department(assignment.module.adminDepartment, assignment.academicYear))
+    }
+  }
 }

@@ -8,16 +8,16 @@ import uk.ac.warwick.tabula.data.model.MarkingState._
 
 class StateServiceTest extends TestBase with Mockito {
 
-	val mockSession: Session = mock[Session]
-	val service = new StateServiceImpl {
-		override def session: Session = mockSession
-	}
+  val mockSession: Session = mock[Session]
+  val service = new StateServiceImpl {
+    override def session: Session = mockSession
+  }
 
-	@Test
-	def nullState {
-		val markerFeedback = new MarkerFeedback
-		service.updateState(markerFeedback, MarkingCompleted)
-		markerFeedback.state should be (MarkingCompleted)
-	}
+  @Test
+  def nullState {
+    val markerFeedback = new MarkerFeedback
+    service.updateState(markerFeedback, MarkingCompleted)
+    markerFeedback.state should be(MarkingCompleted)
+  }
 
 }

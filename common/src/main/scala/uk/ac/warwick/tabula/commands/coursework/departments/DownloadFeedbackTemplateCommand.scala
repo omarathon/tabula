@@ -12,35 +12,37 @@ import uk.ac.warwick.tabula.permissions._
 
 
 class DownloadFeedbackTemplateCommand(
-		val department: Department,
-		val template: FeedbackTemplate,
-		val filename: String,
-		user: CurrentUser)
-		extends Command[Option[RenderableFile]] with ReadOnly{
+  val department: Department,
+  val template: FeedbackTemplate,
+  val filename: String,
+  user: CurrentUser)
+  extends Command[Option[RenderableFile]] with ReadOnly {
 
-	mustBeLinked(template, department)
-	PermissionCheck(Permissions.FeedbackTemplate.Read, template)
+  mustBeLinked(template, department)
+  PermissionCheck(Permissions.FeedbackTemplate.Read, template)
 
-	private var fileFound: Boolean = _
-	var callback: (RenderableFile) => Unit = _
+  private var fileFound: Boolean = _
+  var callback: (RenderableFile) => Unit = _
 
-	def applyInternal(): Option[RenderableAttachment] = {
+  def applyInternal(): Option[RenderableAttachment] = {
 
-		val attachment = Option(template.attachment)
-		val renderableAttachment = attachment find (_.name == filename) map (a => new RenderableAttachment(a))
+    val attachment = Option(template.attachment)
+    val renderableAttachment = attachment find (_.name == filename) map (a => new RenderableAttachment(a))
 
-		fileFound = renderableAttachment.isDefined
-		if (callback != null) {
-			renderableAttachment.map { callback(_) }
-		}
-		renderableAttachment
-	}
+    fileFound = renderableAttachment.isDefined
+    if (callback != null) {
+      renderableAttachment.map {
+        callback(_)
+      }
+    }
+    renderableAttachment
+  }
 
-	override def describe(d: Description): Unit = d
-		.department(department)
-		.property("template", template.id)
+  override def describe(d: Description): Unit = d
+    .department(department)
+    .property("template", template.id)
 
-	override def describeResult(d: Description): Unit = d
-		.property("fileFound", fileFound)
+  override def describeResult(d: Description): Unit = d
+    .property("fileFound", fileFound)
 
 }

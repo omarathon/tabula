@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 class CreateScheduledMeetingRecordControllerTest extends TestBase with Mockito {
 
-	val controller = new ConvertScheduledMeetingRecordController
+  val controller = new ConvertScheduledMeetingRecordController
 
-	// TAB-2430
-	@Test
-	def createCommand() {
-		val cmd = controller.getCreateCommand(null)
-		cmd should be(null)
-	}
+  // TAB-2430
+  @Test
+  def createCommand() {
+    val cmd = controller.getCreateCommand(null)
+    cmd should be(null)
+  }
 }

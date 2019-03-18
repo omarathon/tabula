@@ -14,24 +14,25 @@ import uk.ac.warwick.tabula.web.Mav
 
 class ViewModuleCommand(module: Module) extends ViewViewableCommand(Permissions.Module.ManageAssignments, module)
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/module/{module}/"))
 class OldModuleController extends OldCourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute def command(@PathVariable module: Module) = new ViewModuleCommand(module)
+  @ModelAttribute def command(@PathVariable module: Module) = new ViewModuleCommand(module)
 
-	@RequestMapping
-	def viewModule(@ModelAttribute cmd: ViewModuleCommand): Mav = {
-		val module = cmd.apply()
+  @RequestMapping
+  def viewModule(@ModelAttribute cmd: ViewModuleCommand): Mav = {
+    val module = cmd.apply()
 
-		Mav("coursework/submit/module",
-			"module" -> module,
-			"assignments" -> module.assignments.asScala
-				.filterNot { _.deleted }
-				.sortBy { _.closeDate }
-				.reverse)
-	}
+    Mav("coursework/submit/module",
+      "module" -> module,
+      "assignments" -> module.assignments.asScala
+        .filterNot(_.deleted)
+        .sortBy(_.closeDate)
+        .reverse)
+  }
 
 }

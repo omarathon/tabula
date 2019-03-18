@@ -9,18 +9,18 @@ import javax.persistence.NamedQuery
 @Entity
 class Award {
 
-	def this(code: String = null, name: String = null) {
-		this()
-		this.code = code
-		this.name = name
-	}
+  def this(code: String = null, name: String = null) {
+    this()
+    this.code = code
+    this.name = name
+  }
 
-	@Id var code: String = _
-	var shortName: String = _
-	var name: String = _
+  @Id var code: String = _
+  var shortName: String = _
+  var name: String = _
 
-	var lastUpdatedDate: DateTime = DateTime.now
+  var lastUpdatedDate: DateTime = DateTime.now
 
-	override def toString: String = name
+  override def toString: String = name
 
 }

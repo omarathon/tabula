@@ -8,10 +8,10 @@ case class SettingsOwner(settings: model.UserSettings) extends BuiltInRole(Setti
 
 object SettingsOwnerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "User Settings Owner"
+  override def description = "User Settings Owner"
 
-	GrantsScopedPermission(
-		UserSettings.Update
-	)
+  GrantsScopedPermission(
+    UserSettings.Update
+  )
 
 }

@@ -23,210 +23,224 @@ import scala.language.implicitConversions
 import scala.util.matching.Regex
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
-with MemberProperties with Unaudited with PropertyCopying {
-	import ImportMemberHelpers._
+  with MemberProperties with Unaudited with PropertyCopying {
 
-	PermissionCheck(Permissions.ImportSystemData)
+  import ImportMemberHelpers._
 
-	var memberDao: MemberDao = Wire[MemberDao]
-	var userLookup: UserLookupService = Wire[UserLookupService]
+  PermissionCheck(Permissions.ImportSystemData)
 
-	// A couple of intermediate properties that will be transformed later
-	var homeDepartmentCode: String = _
+  var memberDao: MemberDao = Wire[MemberDao]
+  var userLookup: UserLookupService = Wire[UserLookupService]
 
-	var membershipLastUpdated: DateTime = _
+  // A couple of intermediate properties that will be transformed later
+  var homeDepartmentCode: String = _
 
-	def this(mac: MembershipInformation, ssoUser: User, rs: Option[ResultSet], ssr: Option[SitsStudentRow] = None) {
-		this()
+  var membershipLastUpdated: DateTime = _
 
-		implicit val resultSet = rs
+  def this(mac: MembershipInformation, ssoUser: User, rs: Option[ResultSet], ssr: Option[SitsStudentRow] = None) {
+    this()
 
-		val member = mac.member
-		this.membershipLastUpdated = member.modified
+    implicit val resultSet = rs
 
-		this.universityId = oneOf(Option(member.universityId), ssr.flatMap(_.universityId), optString("university_id")).get
+    val member = mac.member
+    this.membershipLastUpdated = member.modified
 
-		// TAB-2014
-		this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, ssr.flatMap(_.usercode), optString("user_code")).getOrElse(this.universityId)
+    this.universityId = oneOf(Option(member.universityId), ssr.flatMap(_.universityId), optString("university_id")).get
 
-		this.userType = member.userType
+    // TAB-2014
+    this.userId = oneOf(Option(member.usercode), ssoUser.getUserId.maybeText, ssr.flatMap(_.usercode), optString("user_code")).getOrElse(this.universityId)
 
-		this.title = oneOf(Option(member.title), ssr.flatMap(_.title), optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse ""
+    this.userType = member.userType
 
-		def regexExceptionHandled(fieldNameToDisplay: String, fallbackField: String)(f: => String): String = {
-			try {	f	} catch {
-				case iae: IllegalArgumentException =>
-					// Regex match error
-					logger.error(s"Failed to match $fieldNameToDisplay for ${ssoUser.getUserId}")
-					fallbackField
-			}
-		}
-		this.firstName = oneOf(
-			ssr.flatMap(_.preferredForename),
-			optString("preferred_forename"),
-			Option(member.preferredForenames),
-			Option(ssoUser.getFirstName)
-		).map(s => regexExceptionHandled("firstName", ssoUser.getFirstName){ formatForename(s, ssoUser.getFirstName) }).getOrElse("")
-		this.fullFirstName = oneOf(ssr.flatMap(_.fornames), optString("forenames"), Option(ssoUser.getFirstName))
-			.map(s => regexExceptionHandled("firstName", ssoUser.getFirstName){ formatForename(s, ssoUser.getFirstName) }).getOrElse("")
-		this.lastName = oneOf(ssr.flatMap(_.familyName), optString("family_name"), Option(member.preferredSurname), Option(ssoUser.getLastName))
-			.map(s => regexExceptionHandled("lastName", ssoUser.getLastName){ formatSurname(s, ssoUser.getLastName) }).getOrElse("")
+    this.title = oneOf(Option(member.title), ssr.flatMap(_.title), optString("title")) map {
+      WordUtils.capitalizeFully(_).trim()
+    } getOrElse ""
 
-		this.email = oneOf(Option(member.email), ssr.flatMap(_.emailAddress), optString("email_address"), Option(ssoUser.getEmail)).orNull
-		this.homeEmail = oneOf(Option(member.alternativeEmailAddress), ssr.flatMap(_.alternativeEmailAddress), optString("alternative_email_address")).orNull
+    def regexExceptionHandled(fieldNameToDisplay: String, fallbackField: String)(f: => String): String = {
+      try {
+        f
+      } catch {
+        case iae: IllegalArgumentException =>
+          // Regex match error
+          logger.error(s"Failed to match $fieldNameToDisplay for ${ssoUser.getUserId}")
+          fallbackField
+      }
+    }
 
-		this.gender = oneOf(Option(member.gender), ssr.flatMap(_.gender).map(Gender.fromCode), optString("gender").map(Gender.fromCode)).orNull
+    this.firstName = oneOf(
+      ssr.flatMap(_.preferredForename),
+      optString("preferred_forename"),
+      Option(member.preferredForenames),
+      Option(ssoUser.getFirstName)
+    ).map(s => regexExceptionHandled("firstName", ssoUser.getFirstName) {
+      formatForename(s, ssoUser.getFirstName)
+    }).getOrElse("")
+    this.fullFirstName = oneOf(ssr.flatMap(_.fornames), optString("forenames"), Option(ssoUser.getFirstName))
+      .map(s => regexExceptionHandled("firstName", ssoUser.getFirstName) {
+        formatForename(s, ssoUser.getFirstName)
+      }).getOrElse("")
+    this.lastName = oneOf(ssr.flatMap(_.familyName), optString("family_name"), Option(member.preferredSurname), Option(ssoUser.getLastName))
+      .map(s => regexExceptionHandled("lastName", ssoUser.getLastName) {
+        formatSurname(s, ssoUser.getLastName)
+      }).getOrElse("")
 
-		this.jobTitle = member.position
-		this.phoneNumber = member.phoneNumber
+    this.email = oneOf(Option(member.email), ssr.flatMap(_.emailAddress), optString("email_address"), Option(ssoUser.getEmail)).orNull
+    this.homeEmail = oneOf(Option(member.alternativeEmailAddress), ssr.flatMap(_.alternativeEmailAddress), optString("alternative_email_address")).orNull
 
-		this.inUseFlag = getInUseFlag(oneOf(ssr.flatMap(_.inUseFlag), rs.map(_.getString("in_use_flag"))), member)
-		this.groupName = member.targetGroup
-		this.inactivationDate = member.endDate
+    this.gender = oneOf(Option(member.gender), ssr.flatMap(_.gender).map(Gender.fromCode), optString("gender").map(Gender.fromCode)).orNull
 
-		this.homeDepartmentCode = oneOf(Option(member.departmentCode), Option(ssoUser.getDepartmentCode)).orNull
-		this.dateOfBirth = oneOf(Option(member.dateOfBirth), ssr.flatMap(_.dateOfBirth), optLocalDate("date_of_birth")).orNull
-	}
+    this.jobTitle = member.position
+    this.phoneNumber = member.phoneNumber
 
-	private val basicMemberProperties = Set(
-		// userType is included for new records, but hibernate does not in fact update it for existing records
-		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
-		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
-	)
+    this.inUseFlag = getInUseFlag(oneOf(ssr.flatMap(_.inUseFlag), rs.map(_.getString("in_use_flag"))), member)
+    this.groupName = member.targetGroup
+    this.inactivationDate = member.endDate
 
-	private def setTimetableHashIfMissing(memberBean: BeanWrapper): Boolean = {
-		val existingHash = memberBean.getPropertyValue("timetableHash").asInstanceOf[String]
-		if (!existingHash.hasText) {
-			memberBean.setPropertyValue("timetableHash", UUID.randomUUID.toString)
-			true
-		} else {
-			false
-		}
-	}
+    this.homeDepartmentCode = oneOf(Option(member.departmentCode), Option(ssoUser.getDepartmentCode)).orNull
+    this.dateOfBirth = oneOf(Option(member.dateOfBirth), ssr.flatMap(_.dateOfBirth), optLocalDate("date_of_birth")).orNull
+  }
 
-	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
-	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
-		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
-		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
-		setTimetableHashIfMissing(memberBean)
+  private val basicMemberProperties = Set(
+    // userType is included for new records, but hibernate does not in fact update it for existing records
+    "userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
+    "inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
+  )
+
+  private def setTimetableHashIfMissing(memberBean: BeanWrapper): Boolean = {
+    val existingHash = memberBean.getPropertyValue("timetableHash").asInstanceOf[String]
+    if (!existingHash.hasText) {
+      memberBean.setPropertyValue("timetableHash", UUID.randomUUID.toString)
+      true
+    } else {
+      false
+    }
+  }
+
+  // We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
+  protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper): Boolean =
+    copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
+      copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
+      setTimetableHashIfMissing(memberBean)
 
 }
 
 object ImportMemberHelpers {
 
-	implicit def opt[A](value: A): Option[A] = Option(value)
+  implicit def opt[A](value: A): Option[A] = Option(value)
 
-	/** Return the first Option that has a value, else None. */
-	def oneOf[A](options: Option[A]*): Option[A] = options.flatten.headOption
+  /** Return the first Option that has a value, else None. */
+  def oneOf[A](options: Option[A]*): Option[A] = options.flatten.headOption
 
-	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
-		rs.flatMap { rs =>
-			if (hasColumn(rs, columnName)) Option(rs.getString(columnName))
-			else None
-		}
+  def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
+    rs.flatMap { rs =>
+      if (hasColumn(rs, columnName)) Option(rs.getString(columnName))
+      else None
+    }
 
-	def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
-		rs.flatMap { rs =>
-			if (hasColumn(rs, columnName)) Option(rs.getDate(columnName)).map { new LocalDate(_) }
-			else None
-		}
+  def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
+    rs.flatMap { rs =>
+      if (hasColumn(rs, columnName)) Option(rs.getDate(columnName)).map {
+        new LocalDate(_)
+      }
+      else None
+    }
 
-	def getInteger(resultSet: ResultSet, column: String): Option[Int] = {
-		val intValue = resultSet.getInt(column)
-		if (resultSet.wasNull()) None else Some(intValue)
-	}
+  def getInteger(resultSet: ResultSet, column: String): Option[Int] = {
+    val intValue = resultSet.getInt(column)
+    if (resultSet.wasNull()) None else Some(intValue)
+  }
 
-	def hasColumn(rs: ResultSet, columnName: String): Boolean = {
-		val metadata = rs.getMetaData
-		val cols = for (col <- 1 to metadata.getColumnCount)
-			yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
-		cols.exists(b => b)
-	}
+  def hasColumn(rs: ResultSet, columnName: String): Boolean = {
+    val metadata = rs.getMetaData
+    val cols = for (col <- 1 to metadata.getColumnCount)
+      yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
+    cols.exists(b => b)
+  }
 
-	def toLocalDate(date: Date): LocalDate = {
-		if (date == null) {
-			null
-		} else {
-			new LocalDate(date)
-		}
-	}
+  def toLocalDate(date: Date): LocalDate = {
+    if (date == null) {
+      null
+    } else {
+      new LocalDate(date)
+    }
+  }
 
-	def toAcademicYear(code: String): AcademicYear = {
-		if (code == null || code == "") {
-			null
-		} else {
-			AcademicYear.parse(code)
-		}
-	}
+  def toAcademicYear(code: String): AcademicYear = {
+    if (code == null || code == "") {
+      null
+    } else {
+      AcademicYear.parse(code)
+    }
+  }
 
-	def getInUseFlag(flag: Option[String], member: MembershipMember): String =
-		flag.getOrElse {
-			val (startDate, endDate) = (member.startDate, member.endDate)
-			if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now))
-				"Inactive - Starts " + startDate.toString("dd/MM/yyyy")
-			else if (endDate != null && endDate.toDateTimeAtStartOfDay.isBefore(DateTime.now))
-				"Inactive - Ended " + endDate.toString("dd/MM/yyyy")
-			else "Active"
-		}
+  def getInUseFlag(flag: Option[String], member: MembershipMember): String =
+    flag.getOrElse {
+      val (startDate, endDate) = (member.startDate, member.endDate)
+      if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now))
+        "Inactive - Starts " + startDate.toString("dd/MM/yyyy")
+      else if (endDate != null && endDate.toDateTimeAtStartOfDay.isBefore(DateTime.now))
+        "Inactive - Ended " + endDate.toString("dd/MM/yyyy")
+      else "Active"
+    }
 
-	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
+  private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
 
-	def formatForename(name: String, suggested: String = null): String = {
-		if (name == null || name.equalsIgnoreCase(suggested)) {
-			// Our suggested capitalisation from SSO was correct
-			suggested
-		} else {
-			CapitaliseForenamePattern.replaceAllIn(name, { m: Regex.Match =>
-				m.group(1).toUpperCase + m.group(2).toLowerCase + m.group(3)
-			}).trim()
-		}
-	}
+  def formatForename(name: String, suggested: String = null): String = {
+    if (name == null || name.equalsIgnoreCase(suggested)) {
+      // Our suggested capitalisation from SSO was correct
+      suggested
+    } else {
+      CapitaliseForenamePattern.replaceAllIn(name, { m: Regex.Match =>
+        m.group(1).toUpperCase + m.group(2).toLowerCase + m.group(3)
+      }).trim()
+    }
+  }
 
-	private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
-	private val WholeWordGroup = 1
-	private val FirstLetterGroup = 2
-	private val RemainingLettersGroup = 3
-	private val SeparatorGroup = 4
+  private val CapitaliseSurnamePattern = """(?:((\p{Lu})(\p{L}*))([^\p{L}]?))""".r
+  private val WholeWordGroup = 1
+  private val FirstLetterGroup = 2
+  private val RemainingLettersGroup = 3
+  private val SeparatorGroup = 4
 
-	def formatSurname(name: String, suggested: String = null): String = {
-		if (name.equalsIgnoreCase(suggested)) {
-			// Our suggested capitalisation from SSO was correct
-			suggested
-		} else {
-			/*
-			 * Conventions:
-			 *
-			 * von - do not capitalise de La - capitalise second particle O', Mc,
-			 * Mac, M' - always capitalise
-			 */
+  def formatSurname(name: String, suggested: String = null): String = {
+    if (name.equalsIgnoreCase(suggested)) {
+      // Our suggested capitalisation from SSO was correct
+      suggested
+    } else {
+      /*
+       * Conventions:
+       *
+       * von - do not capitalise de La - capitalise second particle O', Mc,
+       * Mac, M' - always capitalise
+       */
 
-			CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
-				val wholeWord = m.group(WholeWordGroup).toUpperCase
-				val first = m.group(FirstLetterGroup).toUpperCase
-				val remainder = m.group(RemainingLettersGroup).toLowerCase
-				val separator = m.group(SeparatorGroup)
+      CapitaliseSurnamePattern.replaceAllIn(name, { m: Regex.Match =>
+        val wholeWord = m.group(WholeWordGroup).toUpperCase
+        val first = m.group(FirstLetterGroup).toUpperCase
+        val remainder = m.group(RemainingLettersGroup).toLowerCase
+        val separator = m.group(SeparatorGroup)
 
-				if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
-					// Capitalise the first letter of the remainder
-					first +
-						remainder.substring(0, 1) +
-						remainder.substring(1, 2).toUpperCase +
-						remainder.substring(2) +
-						separator
-				} else if (wholeWord.startsWith("MAC") && wholeWord.length() > 3) {
-					// Capitalise the first letter of the remainder
-					first +
-						remainder.substring(0, 2) +
-						remainder.substring(2, 3).toUpperCase +
-						remainder.substring(3) +
-						separator
-				} else if (wholeWord.equals("VON") || wholeWord.equals("D") || wholeWord.equals("DE") || wholeWord.equals("DI")) {
-					// Special case - lowercase the first word
-					first.toLowerCase + remainder + separator
-				} else {
-					first + remainder + separator
-				}
-			}).trim()
-		}
-	}
+        if (wholeWord.startsWith("MC") && wholeWord.length() > 2) {
+          // Capitalise the first letter of the remainder
+          first +
+            remainder.substring(0, 1) +
+            remainder.substring(1, 2).toUpperCase +
+            remainder.substring(2) +
+            separator
+        } else if (wholeWord.startsWith("MAC") && wholeWord.length() > 3) {
+          // Capitalise the first letter of the remainder
+          first +
+            remainder.substring(0, 2) +
+            remainder.substring(2, 3).toUpperCase +
+            remainder.substring(3) +
+            separator
+        } else if (wholeWord.equals("VON") || wholeWord.equals("D") || wholeWord.equals("DE") || wholeWord.equals("DI")) {
+          // Special case - lowercase the first word
+          first.toLowerCase + remainder + separator
+        } else {
+          first + remainder + separator
+        }
+      }).trim()
+    }
+  }
 }

@@ -14,53 +14,53 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.LevelInfo
 
 class ImportLevelCommand(info: LevelInfo)
-	extends Command[(Level, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
-	with Unaudited with PropertyCopying {
+  extends Command[(Level, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
+    with Unaudited with PropertyCopying {
 
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var levelDao: LevelDao = Wire.auto[LevelDao]
+  var levelDao: LevelDao = Wire.auto[LevelDao]
 
-	var code: String = info.code
-	var shortName: String = info.shortName
-	var name: String = info.fullName
+  var code: String = info.code
+  var shortName: String = info.shortName
+  var name: String = info.fullName
 
-	override def applyInternal(): (Level, ImportResult) = transactional() {
-		val levelExisting = levelDao.getByCode(code)
+  override def applyInternal(): (Level, ImportResult) = transactional() {
+    val levelExisting = levelDao.getByCode(code)
 
-		logger.debug("Importing level " + code + " into " + levelExisting)
+    logger.debug("Importing level " + code + " into " + levelExisting)
 
-		val isTransient = !levelExisting.isDefined
+    val isTransient = !levelExisting.isDefined
 
-		val level = levelExisting match {
-			case Some(crs: Level) => crs
-			case _ => new Level()
-		}
+    val level = levelExisting match {
+      case Some(crs: Level) => crs
+      case _ => new Level()
+    }
 
-		val commandBean = new BeanWrapperImpl(this)
-		val levelBean = new BeanWrapperImpl(level)
+    val commandBean = new BeanWrapperImpl(this)
+    val levelBean = new BeanWrapperImpl(level)
 
-		val hasChanged = copyBasicProperties(properties, commandBean, levelBean)
+    val hasChanged = copyBasicProperties(properties, commandBean, levelBean)
 
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + level)
+    if (isTransient || hasChanged) {
+      logger.debug("Saving changes for " + level)
 
-			level.lastUpdatedDate = DateTime.now
-			levelDao.saveOrUpdate(level)
-		}
+      level.lastUpdatedDate = DateTime.now
+      levelDao.saveOrUpdate(level)
+    }
 
-		val result =
-			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
-			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
-			else ImportAcademicInformationCommand.ImportResult()
+    val result =
+      if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+      else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+      else ImportAcademicInformationCommand.ImportResult()
 
-		(level, result)
-	}
+    (level, result)
+  }
 
-	private val properties = Set(
-		"code", "shortName", "name"
-	)
+  private val properties = Set(
+    "code", "shortName", "name"
+  )
 
-	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
+  override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

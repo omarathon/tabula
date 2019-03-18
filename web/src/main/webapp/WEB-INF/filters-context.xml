@@ -20,6 +20,10 @@
       <excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
       <excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
     </mapping>
+    <mapping>
+      <filter ref="xfoFilter"/>
+      <url-pattern>/*</url-pattern>
+    </mapping>
   </filter-stack>
 
 </beans>

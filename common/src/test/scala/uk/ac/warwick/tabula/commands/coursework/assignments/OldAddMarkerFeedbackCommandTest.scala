@@ -11,91 +11,91 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off magic.number
 class OldAddMarkerFeedbackCommandTest extends TestBase with Mockito {
 
-	var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
+  var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
-	// Start from the basis that the store is empty
-	objectStorageService.fetch(any[String]) returns RichByteSource.empty
+  // Start from the basis that the store is empty
+  objectStorageService.fetch(any[String]) returns RichByteSource.empty
 
-	val module: Module = Fixtures.module("cs118")
-	val assignment: Assignment = Fixtures.assignment("my assignment")
-	assignment.module = module
-	assignment.markingWorkflow = new OldStudentsChooseMarkerWorkflow
+  val module: Module = Fixtures.module("cs118")
+  val assignment: Assignment = Fixtures.assignment("my assignment")
+  assignment.module = module
+  assignment.markingWorkflow = new OldStudentsChooseMarkerWorkflow
 
-	val userLookup = new MockUserLookup
-	val user = new User("student")
-	user.setFoundUser(true)
-	user.setWarwickId("1010101")
-	userLookup.users += ("student" -> user)
+  val userLookup = new MockUserLookup
+  val user = new User("student")
+  user.setFoundUser(true)
+  user.setWarwickId("1010101")
+  userLookup.users += ("student" -> user)
 
-	/**
-	 * TAB-535
-	 */
-	@Test def duplicateFileNamesInParent() = withUser("cuscav") {
-		val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
-		cmd.userLookup = userLookup
+  /**
+    * TAB-535
+    */
+  @Test def duplicateFileNamesInParent() = withUser("cuscav") {
+    val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
+    cmd.userLookup = userLookup
 
-		val file = new UploadedFile
-		val a = new FileAttachment
-		a.name = "file.txt"
-		a.objectStorageService = objectStorageService
-		a.uploadedData = ByteSource.wrap("content".getBytes)
-		file.attached.add(a)
+    val file = new UploadedFile
+    val a = new FileAttachment
+    a.name = "file.txt"
+    a.objectStorageService = objectStorageService
+    a.uploadedData = ByteSource.wrap("content".getBytes)
+    file.attached.add(a)
 
-		val item = new OldFeedbackItem("1010101", user)
-		item.file = file
-		cmd.items.add(item)
+    val item = new OldFeedbackItem("1010101", user)
+    item.file = file
+    cmd.items.add(item)
 
-		// Add an existing feedback with the same name
-		val feedback = Fixtures.assignmentFeedback("1010101", "student")
-		feedback.addAttachment(a)
-		assignment.feedbacks.add(feedback)
-		feedback.assignment = assignment
-		val mf = new MarkerFeedback(feedback)
-		feedback.firstMarkerFeedback = mf
+    // Add an existing feedback with the same name
+    val feedback = Fixtures.assignmentFeedback("1010101", "student")
+    feedback.addAttachment(a)
+    assignment.feedbacks.add(feedback)
+    feedback.assignment = assignment
+    val mf = new MarkerFeedback(feedback)
+    feedback.firstMarkerFeedback = mf
 
-		item.submissionExists should be (false)
+    item.submissionExists should be(false)
 
-		val errors = new BindException(cmd, "command")
-		cmd.postExtractValidation(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.postExtractValidation(errors)
 
-		errors.hasErrors should be (false)
+    errors.hasErrors should be(false)
 
-		// This should STILL be false, MarkerFeedback shouldn't match against normal feedback!
-		item.submissionExists should be (false)
-		item.duplicateFileNames should be ('empty)
-	}
+    // This should STILL be false, MarkerFeedback shouldn't match against normal feedback!
+    item.submissionExists should be(false)
+    item.duplicateFileNames should be('empty)
+  }
 
-	@Test def duplicateFileNames() = withUser("cuscav") {
-		val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
-		cmd.userLookup = userLookup
+  @Test def duplicateFileNames() = withUser("cuscav") {
+    val cmd = new OldAddMarkerFeedbackCommand(module, assignment, currentUser.apparentUser, currentUser)
+    cmd.userLookup = userLookup
 
-		val file = new UploadedFile
-		val a = new FileAttachment
-		a.name = "file.txt"
-		a.objectStorageService = objectStorageService
-		a.uploadedData = ByteSource.wrap("content".getBytes)
-		file.attached.add(a)
+    val file = new UploadedFile
+    val a = new FileAttachment
+    a.name = "file.txt"
+    a.objectStorageService = objectStorageService
+    a.uploadedData = ByteSource.wrap("content".getBytes)
+    file.attached.add(a)
 
-		val item = new OldFeedbackItem("1010101", user)
-		item.file = file
-		cmd.items.add(item)
+    val item = new OldFeedbackItem("1010101", user)
+    item.file = file
+    cmd.items.add(item)
 
-		// Add an existing feedback with the same name
-		val feedback = Fixtures.assignmentFeedback("1010101", "student")
-		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		feedback.firstMarkerFeedback.addAttachment(a)
-		assignment.feedbacks.add(feedback)
-		feedback.assignment = assignment
+    // Add an existing feedback with the same name
+    val feedback = Fixtures.assignmentFeedback("1010101", "student")
+    feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
+    feedback.firstMarkerFeedback.addAttachment(a)
+    assignment.feedbacks.add(feedback)
+    feedback.assignment = assignment
 
-		item.submissionExists should be (false)
+    item.submissionExists should be(false)
 
-		val errors = new BindException(cmd, "command")
-		cmd.postExtractValidation(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.postExtractValidation(errors)
 
-		errors.hasErrors should be (false)
+    errors.hasErrors should be(false)
 
-		item.submissionExists should be (true)
-		item.duplicateFileNames should be (Set("file.txt"))
-	}
+    item.submissionExists should be(true)
+    item.duplicateFileNames should be(Set("file.txt"))
+  }
 
 }

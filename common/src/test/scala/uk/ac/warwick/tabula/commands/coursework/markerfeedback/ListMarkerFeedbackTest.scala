@@ -10,50 +10,50 @@ import scala.collection.JavaConverters._
 
 class ListMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with Mockito {
 
-	trait CommandTestSupport extends UserLookupComponent {
-		val userLookup = new MockUserLookup
-	}
+  trait CommandTestSupport extends UserLookupComponent {
+    val userLookup = new MockUserLookup
+  }
 
-	assignment.markingWorkflow.userLookup = mockUserLookup
+  assignment.markingWorkflow.userLookup = mockUserLookup
 
-	@Test
-	def firstMarkerTest() {
-		withUser("cuslaj") {
-			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
-			val markerFeedbackCollections = command.applyInternal()
+  @Test
+  def firstMarkerTest() {
+    withUser("cuslaj") {
+      val command = new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+      val markerFeedbackCollections = command.applyInternal()
 
-			markerFeedbackCollections.head.feedbackItems.size should be (3)
-		}
-		withUser("cuscav") {
-			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
-			val markerFeedbackCollections = command.applyInternal()
+      markerFeedbackCollections.head.feedbackItems.size should be(3)
+    }
+    withUser("cuscav") {
+      val command = new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+      val markerFeedbackCollections = command.applyInternal()
 
-			markerFeedbackCollections.head.feedbackItems.size should be (2)
-		}
-	}
+      markerFeedbackCollections.head.feedbackItems.size should be(2)
+    }
+  }
 
-	@Test
-	def secondMarkerTest() {
-		assignment.feedbacks.asScala.foreach{feedback =>
-			val fmFeedback = new MarkerFeedback(feedback)
-			feedback.firstMarkerFeedback = fmFeedback
-			fmFeedback.state = MarkingState.MarkingCompleted
-			val smFeedback = new MarkerFeedback(feedback)
-			feedback.secondMarkerFeedback = smFeedback
-			smFeedback.state = MarkingState.ReleasedForMarking
-		}
+  @Test
+  def secondMarkerTest() {
+    assignment.feedbacks.asScala.foreach { feedback =>
+      val fmFeedback = new MarkerFeedback(feedback)
+      feedback.firstMarkerFeedback = fmFeedback
+      fmFeedback.state = MarkingState.MarkingCompleted
+      val smFeedback = new MarkerFeedback(feedback)
+      feedback.secondMarkerFeedback = smFeedback
+      smFeedback.state = MarkingState.ReleasedForMarking
+    }
 
-		withUser("cuslat") {
-			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
-			val markerFeedbackCollections = command.applyInternal()
+    withUser("cuslat") {
+      val command = new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+      val markerFeedbackCollections = command.applyInternal()
 
-			markerFeedbackCollections.head.feedbackItems.size should be (3)
-		}
-		withUser("cuday") {
-			val command =	new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
-			val markerFeedbackCollections = command.applyInternal()
+      markerFeedbackCollections.head.feedbackItems.size should be(3)
+    }
+    withUser("cuday") {
+      val command = new OldListMarkerFeedbackCommand(assignment, assignment.module, currentUser.apparentUser, currentUser) with CommandTestSupport
+      val markerFeedbackCollections = command.applyInternal()
 
-			markerFeedbackCollections.head.feedbackItems.size should be (2)
-		}
-	}
+      markerFeedbackCollections.head.feedbackItems.size should be(2)
+    }
+  }
 }

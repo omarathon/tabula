@@ -7,30 +7,31 @@ import uk.ac.warwick.userlookup.User
 @Entity
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
-	extends Notification[MeetingRecordApproval, Unit]
-	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval]
-	with AllCompletedActionRequiredNotification {
+  extends Notification[MeetingRecordApproval, Unit]
+    with MeetingRecordNotificationTrait
+    with SingleItemNotification[MeetingRecordApproval]
+    with AllCompletedActionRequiredNotification {
 
-	priority = NotificationPriority.Warning
+  priority = NotificationPriority.Warning
 
-	def approval: MeetingRecordApproval = item.entity
-	def meeting: MeetingRecord = approval.meetingRecord
+  def approval: MeetingRecordApproval = item.entity
 
-	def verb = "return"
+  def meeting: MeetingRecord = approval.meetingRecord
 
-	def titleSuffix: String = "returned with comments"
+  def verb = "return"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"agentRoles" -> agentRoles,
-		"dateFormatter" -> dateOnlyFormatter,
-		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "returned",
-		"reason" -> approval.comments
-	))
+  def titleSuffix: String = "returned with comments"
 
-	def urlTitle = "edit the record and submit it for approval again"
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "actor" -> agent,
+    "agentRoles" -> agentRoles,
+    "dateFormatter" -> dateOnlyFormatter,
+    "meetingRecord" -> approval.meetingRecord,
+    "verbed" -> "returned",
+    "reason" -> approval.comments
+  ))
 
-	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
+  def urlTitle = "edit the record and submit it for approval again"
+
+  def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }

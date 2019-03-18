@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import org.apache.http.impl.client.CloseableHttpClient
 import org.joda.time.LocalTime
 import org.mockito.Matchers
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import uk.ac.warwick.tabula.data.model.{MapLocation, Module}
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.data.model.{MapLocation, Module, SyllabusPlusLocation}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 import uk.ac.warwick.userlookup.User
 
@@ -14,55 +15,75 @@ import scala.xml.XML
 
 class TimetableFetchingServiceTest extends TestBase with Mockito {
 
-	val module: Module = Fixtures.module("cs132")
+  val module: Module = Fixtures.module("cs132")
 
-	@Test def parseXML() {
-		val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
-		val mockModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		mockModuleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers {codes =>
-			codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
-		}
+  @Test def parseXML() {
+    val userLookup = new MockUserLookup
 
-		val userLookup = new MockUserLookup
+    val tutor = new User("abcdef")
+    tutor.setFoundUser(true)
+    tutor.setWarwickId("1170047")
 
-		val tutor = new User("abcdef")
-		tutor.setFoundUser(true)
-		tutor.setWarwickId("1170047")
+    val student = new User("student")
+    student.setFoundUser(true)
+    student.setWarwickId("1234567")
 
-		val student = new User("student")
-		student.setFoundUser(true)
-		student.setWarwickId("1234567")
+    userLookup.registerUserObjects(tutor, student)
 
-		userLookup.registerUserObjects(tutor, student)
+    val service = new ScientiaHttpTimetableFetchingService(mock[ScientiaConfiguration])
+      with LocationFetchingServiceComponent
+      with SmallGroupServiceComponent
+      with ModuleAndDepartmentServiceComponent
+      with UserLookupComponent
+      with ProfileServiceComponent
+      with SyllabusPlusLocationServiceComponent
+      with ApacheHttpClientComponent {
+      val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
+      val smallGroupService: SmallGroupService = mock[SmallGroupService]
+      val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+      var userLookup: UserLookupService = mock[UserLookupService]
+      val profileService: ProfileService = mock[ProfileService]
+      val syllabusPlusLocationService: SyllabusPlusLocationService = mock[SyllabusPlusLocationService]
+      val httpClient: CloseableHttpClient = mock[CloseableHttpClient]
+    }
 
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), student.getWarwickId, locationFetchingService, mockModuleAndDepartmentService, userLookup)
-		events.size should be (10)
-		events.head should be (TimetableEvent(
-			uid="625c69daa83eaaa6c12da006276eb947",
-			name="CS132L",
-			title="",
-			description="",
-			startTime=new LocalTime(12, 0),
-			endTime=new LocalTime(13, 0),
-			weekRanges=Seq(WeekRange(6, 10)),
-			day=DayOfWeek.Friday,
-			eventType=TimetableEventType.Lecture,
-			location=Some(MapLocation("Lecture Theatre 5", "31389", Some("L5"))),
-			parent=TimetableEvent.Parent(Some(module)),
-			comments=None,
-			staff=Seq(tutor),
-			students=Nil,
-		  year = AcademicYear(2012),
-			relatedUrl = None,
-			attendance = Map()
-		))
-		// When faced with multiple rooms - snatch the first and run away
-		events(1).location should be (Some(MapLocation("MS.02", "40879", Some("MS.02"))))
-		events(1).comments should be (Some("Some comments"))
-		events(1).students should be (Seq(student))
-	}
+    service.moduleAndDepartmentService.getModulesByCodes(Matchers.any[Seq[String]]) answers { codes =>
+      codes.asInstanceOf[Seq[String]].map(code => Fixtures.module(code))
+    }
 
-	val TimetableEvents = """<?xml version="1.0" encoding="UTF-8"?>
+    service.syllabusPlusLocationService.getByUpstreamName(Matchers.any[String]) returns None
+    service.syllabusPlusLocationService.getByUpstreamName("L5") returns Some(SyllabusPlusLocation("L5", "Lecture Theatre 5", "31389"))
+    service.syllabusPlusLocationService.getByUpstreamName("MS.02") returns Some(SyllabusPlusLocation("MS.02", "MS.02", "40879"))
+
+    val events = service.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012), student.getWarwickId, service.locationFetchingService, service.moduleAndDepartmentService, userLookup)
+    events.size should be(10)
+    events.head should be(TimetableEvent(
+      uid = "625c69daa83eaaa6c12da006276eb947",
+      name = "CS132L",
+      title = "",
+      description = "",
+      startTime = new LocalTime(12, 0),
+      endTime = new LocalTime(13, 0),
+      weekRanges = Seq(WeekRange(6, 10)),
+      day = DayOfWeek.Friday,
+      eventType = TimetableEventType.Lecture,
+      location = Some(MapLocation("Lecture Theatre 5", "31389", Some("L5"))),
+      parent = TimetableEvent.Parent(Some(module)),
+      comments = None,
+      staff = Seq(tutor),
+      students = Nil,
+      year = AcademicYear(2012),
+      relatedUrl = None,
+      attendance = Map()
+    ))
+    // When faced with multiple rooms - snatch the first and run away
+    events(1).location should be(Some(MapLocation("MS.02", "40879", Some("MS.02"))))
+    events(1).comments should be(Some("Some comments"))
+    events(1).students should be(Seq(student))
+  }
+
+  val TimetableEvents =
+    """<?xml version="1.0" encoding="UTF-8"?>
 <Data>
    <Activities>
       <Activity>

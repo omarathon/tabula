@@ -8,84 +8,85 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-case class ListSubmissionsResult (
-	fromDate: DateTime,
-	toDate: DateTime,
-	submissions: Seq[Submission]
+case class ListSubmissionsResult(
+  fromDate: DateTime,
+  toDate: DateTime,
+  submissions: Seq[Submission]
 )
 
 object ListMemberSubmissionsCommand {
-	type CommandType = Appliable[ListSubmissionsResult] with ListMemberSubmissionsRequest
+  type CommandType = Appliable[ListSubmissionsResult] with ListMemberSubmissionsRequest
 
-	def apply(member: Member, fromDate: LocalDate, toDate: LocalDate): CommandType =
-		new ListMemberSubmissionsCommandInternal(member, fromDate, toDate)
-			with ComposableCommand[ListSubmissionsResult]
-		  with ListMemberSubmissionsRequest
-			with ListMemberSubmissionsPermissions
-			with AutowiringSubmissionServiceComponent
-		  with ListMemberSubmissionsValidation
-			with Unaudited with ReadOnly
+  def apply(member: Member, fromDate: LocalDate, toDate: LocalDate): CommandType =
+    new ListMemberSubmissionsCommandInternal(member, fromDate, toDate)
+      with ComposableCommand[ListSubmissionsResult]
+      with ListMemberSubmissionsRequest
+      with ListMemberSubmissionsPermissions
+      with AutowiringSubmissionServiceComponent
+      with ListMemberSubmissionsValidation
+      with Unaudited with ReadOnly
 }
 
 trait ListMemberSubmissionsState {
-	def member: Member
+  def member: Member
 }
 
 trait ListMemberSubmissionsRequest extends ListMemberSubmissionsState {
-	def fromDate: LocalDate
-	def toDate: LocalDate
+  def fromDate: LocalDate
+
+  def toDate: LocalDate
 }
 
 trait ListMemberSubmissionsValidation extends SelfValidating {
-	self: ListMemberSubmissionsRequest =>
+  self: ListMemberSubmissionsRequest =>
 
-	override def validate(errors: Errors): Unit = {
-		Option(fromDate) match {
-			case Some(fromDate: LocalDate) =>
-				if (Option(toDate).isEmpty)
-					errors.reject( "listSubmissions.api.noToDate")
-				else if (fromDate.isAfter(toDate))
-					errors.reject("listSubmissions.api.fromDateAfterToDate")
-			case _ =>
-				if (Option(toDate).isDefined)
-					errors.reject("listSubmissions.api.noFromDate")
-		}
-	}
+  override def validate(errors: Errors): Unit = {
+    Option(fromDate) match {
+      case Some(fromDate: LocalDate) =>
+        if (Option(toDate).isEmpty)
+          errors.reject("listSubmissions.api.noToDate")
+        else if (fromDate.isAfter(toDate))
+          errors.reject("listSubmissions.api.fromDateAfterToDate")
+      case _ =>
+        if (Option(toDate).isDefined)
+          errors.reject("listSubmissions.api.noFromDate")
+    }
+  }
 }
 
 trait ListMemberSubmissionsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ListMemberSubmissionsState =>
+  self: ListMemberSubmissionsState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Submission.Read, member)
-		p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, member)
-		p.PermissionCheck(Permissions.Extension.Read, member)
-		p.PermissionCheck(Permissions.Module.ManageAssignments, member)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Submission.Read, member)
+    p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, member)
+    p.PermissionCheck(Permissions.Extension.Read, member)
+    p.PermissionCheck(Permissions.Module.ManageAssignments, member)
+  }
 }
 
 abstract class ListMemberSubmissionsCommandInternal(val member: Member, val fromDate: LocalDate, val toDate: LocalDate)
-	extends CommandInternal[ListSubmissionsResult] with ListMemberSubmissionsState with TaskBenchmarking {
+  extends CommandInternal[ListSubmissionsResult] with ListMemberSubmissionsState with TaskBenchmarking {
 
-		self: SubmissionServiceComponent
-		with ListMemberSubmissionsRequest
-		with ListMemberSubmissionsPermissions =>
+  self: SubmissionServiceComponent
+    with ListMemberSubmissionsRequest
+    with ListMemberSubmissionsPermissions =>
 
-	override def applyInternal(): ListSubmissionsResult = {
+  override def applyInternal(): ListSubmissionsResult = {
 
-		val submissionsFromDate = Option(fromDate).map(_.toDateTimeAtStartOfDay).getOrElse(
-			DateTime.now.minusYears(1).withTimeAtStartOfDay
-		)
-		val submissionsToDate = Option(toDate).map(_.plusDays(1).toDateTimeAtStartOfDay).getOrElse(
-			DateTime.now.withTimeAtStartOfDay
-		)
+    val submissionsFromDate = Option(fromDate).map(_.toDateTimeAtStartOfDay).getOrElse(
+      DateTime.now.minusYears(1).withTimeAtStartOfDay
+    )
+    val submissionsToDate = Option(toDate).map(_.plusDays(1).toDateTimeAtStartOfDay).getOrElse(
+      DateTime.now.withTimeAtStartOfDay
+    )
 
-		val submissions = submissionService.getSubmissionsBetweenDates(member.userId, submissionsFromDate, submissionsToDate)
+    val submissions = submissionService.getSubmissionsBetweenDates(member.userId, submissionsFromDate, submissionsToDate)
 
-		ListSubmissionsResult (
-			fromDate = submissionsFromDate,
-			toDate = submissionsToDate,
-			submissions = submissions
-		)
-	}
+    ListSubmissionsResult(
+      fromDate = submissionsFromDate,
+      toDate = submissionsToDate,
+      submissions = submissions
+    )
+  }
 }

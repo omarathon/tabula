@@ -12,21 +12,21 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(Array("/profiles/view/subset/{student}"))
 class ViewProfileSubsetController extends ProfilesController {
 
-	@ModelAttribute("command")
-	def getViewProfileSubsetCommand(@PathVariable student: User) =
-		ViewProfileSubsetCommand(student, profileService)
+  @ModelAttribute("command")
+  def getViewProfileSubsetCommand(@PathVariable student: User) =
+    ViewProfileSubsetCommand(student, profileService)
 
-	@RequestMapping
-	def viewProfile(@ModelAttribute("command") command: Appliable[ProfileSubset]): Mav = {
+  @RequestMapping
+  def viewProfile(@ModelAttribute("command") command: Appliable[ProfileSubset]): Mav = {
 
-		val profileSubset = command.apply()
+    val profileSubset = command.apply()
 
-		Mav("profiles/profile/view_subset",
-			"isMember" -> profileSubset.isMember,
-			"studentUser" -> profileSubset.user,
-			"profile" -> profileSubset.profile,
-			"studentCourseDetails" -> profileSubset.courseDetails
-		).noLayout()
-	}
+    Mav("profiles/profile/view_subset",
+      "isMember" -> profileSubset.isMember,
+      "studentUser" -> profileSubset.user,
+      "profile" -> profileSubset.profile,
+      "studentCourseDetails" -> profileSubset.courseDetails
+    ).noLayout()
+  }
 
 }

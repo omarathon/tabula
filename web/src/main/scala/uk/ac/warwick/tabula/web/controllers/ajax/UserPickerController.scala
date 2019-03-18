@@ -18,77 +18,86 @@ import scala.collection.JavaConverters._
 
 @Controller
 class UserPickerController extends BaseController {
-	var json: ObjectMapper = Wire.auto[ObjectMapper]
+  var json: ObjectMapper = Wire.auto[ObjectMapper]
 
-	@RequestMapping(value = Array("/ajax/userpicker/form"))
-	def form: Mav = Mav("ajax/userpicker/form").noLayout()
+  @RequestMapping(value = Array("/ajax/userpicker/form"))
+  def form: Mav = Mav("ajax/userpicker/form").noLayout()
 
-	@RequestMapping(value = Array("/ajax/userpicker/query.json"))
-	def queryJson(form: UserPickerCommand, out: Writer): Unit = {
-		def toJson(user: User) = Map(
-			"value" -> user.getUserId,
-			"label" -> user.getFullName,
-			"type" -> user.getUserType,
-			"dept" -> user.getShortDepartment)
-		json.writeValue(out, (form.apply() map toJson));
-	}
+  @RequestMapping(value = Array("/ajax/userpicker/query.json"))
+  def queryJson(form: UserPickerCommand, out: Writer): Unit = {
+    def toJson(user: User) = Map(
+      "value" -> user.getUserId,
+      "label" -> user.getFullName,
+      "type" -> user.getUserType,
+      "dept" -> user.getShortDepartment)
 
-	@RequestMapping(value = Array("/ajax/userpicker/query"))
-	def query(form: UserPickerCommand, out: Writer): Mav = {
-		val foundUsers = form.apply()
-		val (staff, students) = foundUsers.partition { _.isStaff }
-		Mav("ajax/userpicker/results",
-			"staff" -> staff,
-			"students" -> students).noLayout()
-	}
+    json.writeValue(out, (form.apply() map toJson));
+  }
+
+  @RequestMapping(value = Array("/ajax/userpicker/query"))
+  def query(form: UserPickerCommand, out: Writer): Mav = {
+    val foundUsers = form.apply()
+    val (staff, students) = foundUsers.partition {
+      _.isStaff
+    }
+    Mav("ajax/userpicker/results",
+      "staff" -> staff,
+      "students" -> students).noLayout()
+  }
 
 }
 
 object UserPickerController {
-	class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
-		PermissionCheck(Permissions.UserPicker)
 
-		var userLookup: UserLookupService = Wire.auto[UserLookupService]
+  class UserPickerCommand extends Command[Seq[User]] with ReadOnly with Unaudited {
+    PermissionCheck(Permissions.UserPicker)
 
-		var firstName: String = ""
-		var lastName: String = ""
+    var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
-		def applyInternal(): Seq[User] = {
-			var users = userLookup.findUsersWithFilter(filter.asJava).asScala
-			if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards.asJava).asScala.filter { !users.contains(_) }
+    var firstName: String = ""
+    var lastName: String = ""
 
-			users
-		}
+    def applyInternal(): Seq[User] = {
+      var users = userLookup.findUsersWithFilter(filter.asJava).asScala
+      if (users.size < 10) users ++= userLookup.findUsersWithFilter(filterBackwards.asJava).asScala.filter {
+        !users.contains(_)
+      }
 
-		/**
-		 * If one word is given, it's used as surname.
-		 * If more words are given, the first two are used
-		 * 	as firstname and surname.
-		 */
-		def setQuery(q: String) {
-			firstName = ""
-			lastName = ""
-			q.split("\\s").toList match {
-				case Nil =>
-				case surname :: Nil => lastName = surname
-				case first :: second :: _ => firstName = first; lastName = second
-			}
-		}
-		def query: String = if (firstName == "") lastName else firstName + " " + lastName
-		def query_=(q: String): Unit = setQuery(q)
+      users
+    }
 
-		def filter: Map[String, String] = {
-			item("givenName", firstName) ++ item("sn", lastName)
-		}
+    /**
+      * If one word is given, it's used as surname.
+      * If more words are given, the first two are used
+      * as firstname and surname.
+      */
+    def setQuery(q: String) {
+      firstName = ""
+      lastName = ""
+      q.split("\\s").toList match {
+        case Nil =>
+        case surname :: Nil => lastName = surname
+        case first :: second :: _ => firstName = first; lastName = second
+      }
+    }
 
-		// filter with surname as firstname and viceversa, in case we get no results
-		def filterBackwards: Map[String, String] = {
-			item("givenName", lastName) ++ item("sn", firstName)
-		}
+    def query: String = if (firstName == "") lastName else firstName + " " + lastName
 
-		private def item(name: String, value: String): Map[String, String] = value match {
-			case s: String if s.hasText => Map(name -> (value + "*"))
-			case _ => Map.empty
-		}
-	}
+    def query_=(q: String): Unit = setQuery(q)
+
+    def filter: Map[String, AnyRef] = {
+      item("givenName", firstName) ++ item("sn", lastName)
+    }
+
+    // filter with surname as firstname and viceversa, in case we get no results
+    def filterBackwards: Map[String, AnyRef] = {
+      item("givenName", lastName) ++ item("sn", firstName)
+    }
+
+    private def item(name: String, value: String): Map[String, String] = value match {
+      case s: String if s.hasText => Map(name -> (value + "*"))
+      case _ => Map.empty
+    }
+  }
+
 }

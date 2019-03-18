@@ -17,64 +17,64 @@ import uk.ac.warwick.userlookup.User
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/feedback"))
 class AddMarkerFeedbackController extends CourseworkController {
 
-	@ModelAttribute
-	def command(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		user: CurrentUser
-	) = {
-		mandatory(Option(assignment.cm2MarkingWorkflow))
-		new AddMarkerFeedbackCommand(assignment, marker, user)
-	}
+  @ModelAttribute
+  def command(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    user: CurrentUser
+  ) = {
+    mandatory(Option(assignment.cm2MarkingWorkflow))
+    new AddMarkerFeedbackCommand(assignment, marker, user)
+  }
 
-	@RequestMapping
-	def uploadForm(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@ModelAttribute cmd: AddMarkerFeedbackCommand
-	): Mav =
-		Mav("cm2/admin/assignments/markerfeedback/form",
-			"isProxying" -> cmd.isProxying,
-			"proxyingAs" -> marker
-		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
+  @RequestMapping
+  def uploadForm(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @ModelAttribute cmd: AddMarkerFeedbackCommand
+  ): Mav =
+    Mav("cm2/admin/assignments/markerfeedback/form",
+      "isProxying" -> cmd.isProxying,
+      "proxyingAs" -> marker
+    ).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
 
-	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def confirmUpload(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@ModelAttribute cmd: AddMarkerFeedbackCommand,
-		errors: Errors): Mav = {
-		cmd.preExtractValidation(errors)
-		if (errors.hasErrors) {
-			uploadForm(assignment, marker, cmd)
-		} else {
-			cmd.postExtractValidation(errors)
-			cmd.processStudents()
+  @RequestMapping(method = Array(POST), params = Array("!confirm"))
+  def confirmUpload(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @ModelAttribute cmd: AddMarkerFeedbackCommand,
+    errors: Errors): Mav = {
+    cmd.preExtractValidation(errors)
+    if (errors.hasErrors) {
+      uploadForm(assignment, marker, cmd)
+    } else {
+      cmd.postExtractValidation(errors)
+      cmd.processStudents()
 
-			Mav("cm2/admin/assignments/markerfeedback/preview",
-				"isProxying" -> cmd.isProxying,
-				"proxyingAs" -> marker
-			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
-		}
-	}
+      Mav("cm2/admin/assignments/markerfeedback/preview",
+        "isProxying" -> cmd.isProxying,
+        "proxyingAs" -> marker
+      ).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def doUpload(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
+  @RequestMapping(method = Array(POST), params = Array("confirm=true"))
+  def doUpload(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @ModelAttribute cmd: AddMarkerFeedbackCommand, errors: Errors): Mav = {
 
-		cmd.preExtractValidation(errors)
-		cmd.postExtractValidation(errors)
+    cmd.preExtractValidation(errors)
+    cmd.postExtractValidation(errors)
 
-		if (errors.hasErrors) {
-			confirmUpload(assignment, marker, cmd, errors)
-		} else {
-			// do apply, redirect back
-			cmd.apply()
-			Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
-		}
-	}
+    if (errors.hasErrors) {
+      confirmUpload(assignment, marker, cmd, errors)
+    } else {
+      // do apply, redirect back
+      cmd.apply()
+      Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
+    }
+  }
 
 }
 
@@ -83,8 +83,8 @@ class AddMarkerFeedbackController extends CourseworkController {
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/feedback"))
 class AddMarkerFeedbackControllerCurrentUser extends CourseworkController {
 
-	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
-		Redirect(Routes.admin.assignment.markerFeedback.feedback(assignment, currentUser.apparentUser))
-	}
+  @RequestMapping
+  def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback.feedback(assignment, currentUser.apparentUser))
+  }
 }

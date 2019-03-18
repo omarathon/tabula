@@ -7,5 +7,5 @@ import uk.ac.warwick.tabula.roles.Sysadmin
 
 @Component
 class SysadminRoleProvider extends WebgroupRoleProvider(Sysadmin()) {
-	override var webgroup: String = Wire.property("${permissions.admin.group}")
+  override var webgroup: String = Wire.property("${permissions.admin.group}")
 }

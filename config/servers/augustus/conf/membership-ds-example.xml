@@ -1,5 +1,0 @@
-<Resource name="jdbc/MembershipDS" auth="Container"
-		  type="javax.sql.DataSource" driverClassName="oracle.jdbc.OracleDriver"
-		  url="jdbc:oracle:thin://@omega:1521:uowp"
-		  username="USERNAME" password="PASSWORD" maxTotal="5" maxIdle="3"
-		  maxWaitMillis="-1"/>

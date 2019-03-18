@@ -10,106 +10,110 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 import scala.collection.JavaConverters._
 
-sealed abstract class DepartmentState (val value: String)
+sealed abstract class DepartmentState(val value: String)
+
 case object DepartmentStateClosed extends DepartmentState("closed")
+
 case object DepartmentStateThisYearOnly extends DepartmentState("openCurrent")
+
 case object DepartmentStateThisYearAndLastYear extends DepartmentState("openCurrentAndPrevious")
 
 object OpenAndCloseDepartmentsCommand {
-	def apply() =
-		new OpenAndCloseDepartmentsCommandInternal
-		with ComposableCommand[DegreeType]
-		with AutowiringModuleAndDepartmentServiceComponent
-		with PopulateOpenAndCloseDepartmentsCommand
-		with OpenAndCloseDepartmentsCommandState
-		with OpenAndCloseDepartmentsCommandPermissions
-		with OpenAndCloseDepartmentsCommandDescription
+  def apply() =
+    new OpenAndCloseDepartmentsCommandInternal
+      with ComposableCommand[DegreeType]
+      with AutowiringModuleAndDepartmentServiceComponent
+      with PopulateOpenAndCloseDepartmentsCommand
+      with OpenAndCloseDepartmentsCommandState
+      with OpenAndCloseDepartmentsCommandPermissions
+      with OpenAndCloseDepartmentsCommandDescription
 }
 
 class OpenAndCloseDepartmentsCommandInternal extends CommandInternal[DegreeType] {
 
-	self: OpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
+  self: OpenAndCloseDepartmentsCommandState with ModuleAndDepartmentServiceComponent =>
 
-	def applyInternal(): DegreeType = {
-		if (updatePostgrads){
-			updateDepartments(pgMappings, DegreeType.Postgraduate)
-			DegreeType.Postgraduate
-		} else {
-			updateDepartments(ugMappings, DegreeType.Undergraduate)
-			DegreeType.Undergraduate
-		}
-	}
+  def applyInternal(): DegreeType = {
+    if (updatePostgrads) {
+      updateDepartments(pgMappings, DegreeType.Postgraduate)
+      DegreeType.Postgraduate
+    } else {
+      updateDepartments(ugMappings, DegreeType.Undergraduate)
+      DegreeType.Undergraduate
+    }
+  }
 
-	private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType ) {
-		mapping.asScala.foreach {
-			case (key, value) => {
-				val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).get
-				dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
-				dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
-			}
-		}
-	}
+  private def updateDepartments(mapping: JMap[String, String], degreeType: DegreeType) {
+    mapping.asScala.foreach {
+      case (key, value) => {
+        val dept: Department = moduleAndDepartmentService.getDepartmentByCode(key).get
+        dept.setUploadMarksToSitsForYear(currentAcademicYear, degreeType, thisYearOpen(value))
+        dept.setUploadMarksToSitsForYear(previousAcademicYear, degreeType, lastYearOpen(value))
+      }
+    }
+  }
 
-	private def thisYearOpen(deptStateValue: String) = deptStateValue != DepartmentStateClosed.value
-	private def lastYearOpen(deptStateValue: String) = deptStateValue ==  DepartmentStateThisYearAndLastYear.value
+  private def thisYearOpen(deptStateValue: String) = deptStateValue != DepartmentStateClosed.value
+
+  private def lastYearOpen(deptStateValue: String) = deptStateValue == DepartmentStateThisYearAndLastYear.value
 
 }
 
 trait OpenAndCloseDepartmentsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Marks.MarksManagement)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Marks.MarksManagement)
+  }
 }
 
 trait OpenAndCloseDepartmentsCommandDescription extends Describable[DegreeType] {
 
-	self: OpenAndCloseDepartmentsCommandState =>
+  self: OpenAndCloseDepartmentsCommandState =>
 
-	def describe(d: Description): Unit = d.properties(
-		"degreeType" -> {
-			if (updatePostgrads) DegreeType.Postgraduate
-			else DegreeType.Undergraduate
-		}
-	)
+  def describe(d: Description): Unit = d.properties(
+    "degreeType" -> {
+      if (updatePostgrads) DegreeType.Postgraduate
+      else DegreeType.Undergraduate
+    }
+  )
 }
 
 trait OpenAndCloseDepartmentsCommandState {
-	self: ModuleAndDepartmentServiceComponent =>
+  self: ModuleAndDepartmentServiceComponent =>
 
-	lazy val currentAcademicYear: AcademicYear = AcademicYear.now()
-	lazy val previousAcademicYear: AcademicYear = currentAcademicYear.previous
+  lazy val currentAcademicYear: AcademicYear = AcademicYear.now()
+  lazy val previousAcademicYear: AcademicYear = currentAcademicYear.previous
 
-	lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments
-	var ugMappings: JMap[String, String] = JHashMap()
-	var pgMappings: JMap[String, String] = JHashMap()
+  lazy val departments: Seq[Department] = moduleAndDepartmentService.allRootDepartments
+  var ugMappings: JMap[String, String] = JHashMap()
+  var pgMappings: JMap[String, String] = JHashMap()
 
-	var updatePostgrads: Boolean = _
+  var updatePostgrads: Boolean = _
 }
 
 trait PopulateOpenAndCloseDepartmentsCommand extends PopulateOnForm {
 
-	self: OpenAndCloseDepartmentsCommandState =>
+  self: OpenAndCloseDepartmentsCommandState =>
 
-	override def populate(): Unit = {
+  override def populate(): Unit = {
 
-		ugMappings = departments.map {d =>
-			d.code -> getState(d, DegreeType.Undergraduate).value
-		}.toMap.asJava
-		pgMappings = departments.map {d =>
-			d.code -> getState(d, DegreeType.Postgraduate).value
-		}.toMap.asJava
+    ugMappings = departments.map { d =>
+      d.code -> getState(d, DegreeType.Undergraduate).value
+    }.toMap.asJava
+    pgMappings = departments.map { d =>
+      d.code -> getState(d, DegreeType.Postgraduate).value
+    }.toMap.asJava
 
-	}
+  }
 
-	def getState(department: Department, degreeType: DegreeType): DepartmentState = {
+  def getState(department: Department, degreeType: DegreeType): DepartmentState = {
 
-		val canUploadThisYear = department.canUploadMarksToSitsForYear(currentAcademicYear, degreeType)
-		val canUploadLastYear = department.canUploadMarksToSitsForYear(previousAcademicYear, degreeType)
+    val canUploadThisYear = department.canUploadMarksToSitsForYear(currentAcademicYear, degreeType)
+    val canUploadLastYear = department.canUploadMarksToSitsForYear(previousAcademicYear, degreeType)
 
-		if (canUploadThisYear && canUploadLastYear) DepartmentStateThisYearAndLastYear
-		else if (canUploadThisYear) DepartmentStateThisYearOnly
-		else DepartmentStateClosed
+    if (canUploadThisYear && canUploadLastYear) DepartmentStateThisYearAndLastYear
+    else if (canUploadThisYear) DepartmentStateThisYearOnly
+    else DepartmentStateClosed
 
-	}
+  }
 }

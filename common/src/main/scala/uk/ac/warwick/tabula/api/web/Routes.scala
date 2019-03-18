@@ -8,73 +8,78 @@ import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
- * Generates URLs to various locations, to reduce the number of places where URLs
- * are hardcoded and repeated.
- *
- * For methods called "apply", you can leave out the "apply" and treat the object like a function.
- */
+  * Generates URLs to various locations, to reduce the number of places where URLs
+  * are hardcoded and repeated.
+  *
+  * For methods called "apply", you can leave out the "apply" and treat the object like a function.
+  */
 object Routes {
-	import RoutesUtils._
-	private val context = "/api/v1"
 
-	object assignment {
-		def apply(assignment: Assignment): String =
-			context + "/module/%s/assignments/%s" format (encoded(assignment.module.code), encoded(assignment.id))
-	}
+  import RoutesUtils._
 
-	object department {
-		object assignments {
-			def apply(department: Department): String =
-				s"$context/department/${encoded(department.code)}/assignments"
-			def xml(department: Department): String =
-				s"$context/department/${encoded(department.code)}/assignments.xml"
-		}
-	}
+  private val context = "/api/v1"
 
-	object submission {
-		def apply(submission: Submission): String =
-			context + "/module/%s/assignments/%s/submissions/%s" format (encoded(submission.assignment.module.code), encoded(submission.assignment.id), encoded(submission.id))
-	}
+  object assignment {
+    def apply(assignment: Assignment): String =
+      context + "/module/%s/assignments/%s" format(encoded(assignment.module.code), encoded(assignment.id))
+  }
 
-	object turnitin {
-		def submitAssignmentCallback(assignment: Assignment): String =
-			context + "/turnitin/turnitin-submit-assignment-response/assignment/%s" format encoded(assignment.id)
-	}
+  object department {
 
-	object attachment {
-		def apply(attachment: FileAttachment): String =
-			context + "/attachments/%s" format encoded(attachment.id)
-	}
+    object assignments {
+      def apply(department: Department): String =
+        s"$context/department/${encoded(department.code)}/assignments"
 
-	object job {
-		def apply(job: JobInstance): String =
-			context + "/job/%s" format encoded(job.id)
-	}
+      def xml(department: Department): String =
+        s"$context/department/${encoded(department.code)}/assignments.xml"
+    }
 
-	object timetables {
-		def calendar(member: Member): String =
-			context + "/member/%s/timetable/calendar" format encoded(member.universityId)
+  }
 
-		def calendarICal(member: Member): String =
-			context + "/member/%s/timetable/calendar.ics" format encoded(member.universityId)
+  object submission {
+    def apply(submission: Submission): String =
+      context + "/module/%s/assignments/%s/submissions/%s" format(encoded(submission.assignment.module.code), encoded(submission.assignment.id), encoded(submission.id))
+  }
 
-		def calendarICalForHash(timetableHash: String): String =
-			context + "/timetable/calendar/%s.ics" format encoded(timetableHash)
-	}
+  object turnitin {
+    def submitAssignmentCallback(assignment: Assignment): String =
+      context + "/turnitin/turnitin-submit-assignment-response/assignment/%s" format encoded(assignment.id)
+  }
 
-	object groupSet {
-		def apply(groupSet: SmallGroupSet): String =
-			context + "/module/%s/groups/%s" format (encoded(groupSet.module.code), encoded(groupSet.id))
-	}
+  object attachment {
+    def apply(attachment: FileAttachment): String =
+      context + "/attachments/%s" format encoded(attachment.id)
+  }
 
-	object group {
-		def apply(group: SmallGroup): String =
-			context + "/module/%s/groups/%s/groups/%s" format (encoded(group.groupSet.module.code), encoded(group.groupSet.id), encoded(group.id))
-	}
+  object job {
+    def apply(job: JobInstance): String =
+      context + "/job/%s" format encoded(job.id)
+  }
 
-	object event {
-		def apply(event: SmallGroupEvent): String =
-			context + "/module/%s/groups/%s/groups/%s/events/%s" format (encoded(event.group.groupSet.module.code), encoded(event.group.groupSet.id), encoded(event.group.id), encoded(event.id))
-	}
+  object timetables {
+    def calendar(member: Member): String =
+      context + "/member/%s/timetable/calendar" format encoded(member.universityId)
+
+    def calendarICal(member: Member): String =
+      context + "/member/%s/timetable/calendar.ics" format encoded(member.universityId)
+
+    def calendarICalForHash(timetableHash: String): String =
+      context + "/timetable/calendar/%s.ics" format encoded(timetableHash)
+  }
+
+  object groupSet {
+    def apply(groupSet: SmallGroupSet): String =
+      context + "/module/%s/groups/%s" format(encoded(groupSet.module.code), encoded(groupSet.id))
+  }
+
+  object group {
+    def apply(group: SmallGroup): String =
+      context + "/module/%s/groups/%s/groups/%s" format(encoded(group.groupSet.module.code), encoded(group.groupSet.id), encoded(group.id))
+  }
+
+  object event {
+    def apply(event: SmallGroupEvent): String =
+      context + "/module/%s/groups/%s/groups/%s/events/%s" format(encoded(event.group.groupSet.module.code), encoded(event.group.groupSet.id), encoded(event.group.id), encoded(event.id))
+  }
 
 }

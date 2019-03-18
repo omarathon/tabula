@@ -15,24 +15,24 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/new/{scheme}/students"))
 class AddStudentsToSchemeController extends AbstractManageSchemeStudentsController {
 
-	override protected val renderPath = "attendance/manage/addstudentsoncreate"
+  override protected val renderPath = "attendance/manage/addstudentsoncreate"
 
-	@RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
-	def saveAndAddPoints(
-		@Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
-		errors: Errors,
-		@ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
-		@ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
-		@PathVariable scheme: AttendanceMonitoringScheme
-	): Mav = {
-		if (errors.hasErrors) {
-			val findStudentsForSchemeCommandResult = findCommand.apply()
-			val editMembershipCommandResult = editMembershipCommand.apply()
-			render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
-		} else {
-			val scheme = cmd.apply()
-			RedirectForce(Routes.Manage.addPointsToNewScheme(scheme))
-		}
+  @RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
+  def saveAndAddPoints(
+    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    errors: Errors,
+    @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
+    @PathVariable scheme: AttendanceMonitoringScheme
+  ): Mav = {
+    if (errors.hasErrors) {
+      val findStudentsForSchemeCommandResult = findCommand.apply()
+      val editMembershipCommandResult = editMembershipCommand.apply()
+      render(scheme, findStudentsForSchemeCommandResult, editMembershipCommandResult)
+    } else {
+      val scheme = cmd.apply()
+      RedirectForce(Routes.Manage.addPointsToNewScheme(scheme))
+    }
 
-	}
+  }
 }

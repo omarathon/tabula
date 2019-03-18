@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence._
-
 import org.hibernate.annotations.BatchSize
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
+import uk.ac.warwick.tabula.data.model.MeetingRecordApprovalType.{AllApprovals, OneApproval}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
@@ -17,10 +17,10 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object MeetingRecord {
-	val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
-	val MeetingTooOldThresholdYears = 5
-	val MaxTitleLength = 140
-	val MaxLocationLength = 255
+  val DefaultMeetingTimeOfDay = 12 // Should be used for legacy meetings (where isRealTime is false)
+  val MeetingTooOldThresholdYears = 5
+  val MaxTitleLength = 140
+  val MaxLocationLength = 255
 }
 
 @Entity
@@ -28,71 +28,89 @@ object MeetingRecord {
 @DiscriminatorValue("standard")
 class MeetingRecord extends AbstractMeetingRecord {
 
-	def this(creator: Member, relationships: Seq[StudentRelationship]) {
-		this()
-		this.creator = creator
-		this.relationships = relationships
-	}
+  def this(creator: Member, relationships: Seq[StudentRelationship]) {
+    this()
+    this.creator = creator
+    this.relationships = relationships
+  }
 
-	@transient
-	var securityService: SecurityService = Wire[SecurityService]
+  @transient
+  var securityService: SecurityService = Wire[SecurityService]
 
-	@Column(name="real_time")
-	var isRealTime: Boolean = true
+  @Column(name = "real_time")
+  var isRealTime: Boolean = true
 
-	def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = {
-		if (isRealTime) {
-			this.asEventOccurrence(context)
-		}	else {
-			None
-		}
-	}
+  def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] = {
+    if (isRealTime) {
+      this.asEventOccurrence(context)
+    } else {
+      None
+    }
+  }
 
-	// Workflow definitions
+  // Workflow definitions
 
-	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
-	@BatchSize(size=200)
-	var approvals: JList[MeetingRecordApproval] = JArrayList()
+  @OneToMany(mappedBy = "meetingRecord", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @BatchSize(size = 200)
+  var approvals: JList[MeetingRecordApproval] = JArrayList()
 
-	// true if the specified user needs to perform a workflow action on this meeting record
-	def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
+  // true if the specified user needs to perform a workflow action on this meeting record
+  def pendingActionBy(user: CurrentUser): Boolean = pendingApprovalBy(user) || pendingRevisionBy(user)
 
-	// The meeting record is approved when all approvals are in the Approved state
-	def isApproved: Boolean = approvals.asScala.forall(approval => approval.state == Approved)
+  // The meeting record is approved when all required approvals are Approved
+  def isApproved: Boolean = approvals.asScala.filter(_.required).forall(_.approved)
 
-	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
-	def isAttendanceApproved: Boolean = ((creator != null && relationships.map(_.agent).contains(creator.universityId)) || isApproved) && !missed
+  // for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
+  def isAttendanceApproved: Boolean = ((creator != null && relationships.map(_.agent).contains(creator.universityId)) || isApproved) && !missed
 
-	def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
-	def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)
-	def pendingApprovalBy(user: CurrentUser): Boolean =
-		approvals.asScala.exists(approval =>
-			approval.state == Pending &&
-				user.universityId != creator.universityId &&
-				(pendingApprovals.exists(_.approver.universityId == user.apparentUser.getWarwickId ) ||
-					securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
-	)
+  def isPendingApproval: Boolean = approvals.asScala.exists(approval => approval.state == Pending)
 
-	def pendingApprovers: List[Member] = pendingApprovals.map(_.approver).toList
-	def pendingApproverNames: String = memberNames(pendingApprovers)
+  def pendingApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Pending)
 
-	def isRejected: Boolean =  approvals.asScala.exists(approval => approval.state == Rejected)
-	def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
-	def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
-	// people who have had a draft version rejected
-	def pendingRevisionBy(user: CurrentUser): Boolean = isRejected && user.universityId == creator.universityId
+  def pendingApprovalBy(user: CurrentUser): Boolean =
+    approvals.asScala.exists(approval =>
+      approval.state == Pending &&
+        user.universityId != creator.universityId &&
+        (pendingApprovals.exists(_.approver.universityId == user.apparentUser.getWarwickId) ||
+          securityService.can(user, Permissions.Profiles.MeetingRecord.Approve, approval))
+    )
 
-	def willBeApprovedFollowingApprovalBy(user: CurrentUser): Boolean = pendingApprovers.map(_.universityId).forall(_ == user.universityId)
+  def pendingApprovers: List[Member] = pendingApprovals.map(_.approver).toList
 
-	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-	def approvedDate: Option[DateTime] = approvals.asScala.filter(_.state == Approved).map(_.lastUpdatedDate).sorted.headOption
+  def isRejected: Boolean = approvals.asScala.exists(approval => approval.state == Rejected)
 
-	def approvedBy: Option[Member] = approvals.asScala.filter(_.state == Approved).flatMap(a => Option(a.approvedBy)).headOption
+  def rejectedApprovals: mutable.Buffer[MeetingRecordApproval] = approvals.asScala.filter(_.state == Rejected)
 
-	def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
-		case Seq(single) => single
-		case init :+ last => s"${init.mkString(", ")} and $last"
-	}
+  def rejectedBy(member: Member): Boolean = rejectedApprovals.exists(_.approver == member)
 
-	// End of workflow definitions
+  // people who have had a draft version rejected
+  def pendingRevisionBy(user: CurrentUser): Boolean = isRejected && user.universityId == creator.universityId
+
+  def willBeApprovedFollowingApprovalBy(user: CurrentUser): Boolean = approvalType match {
+    case OneApproval => pendingApprovers.map(_.universityId).contains(user.universityId)
+    case AllApprovals => pendingApprovers.map(_.universityId).forall(_ == user.universityId)
+  }
+
+  import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+
+  def approvedDate: Option[DateTime] = approvals.asScala.filter(_.approved).map(_.lastUpdatedDate).sorted.headOption
+
+  def approvedBy: Option[Member] = approvals.asScala.filter(_.approved).flatMap(a => Option(a.approvedBy)).headOption
+
+  def pendingApprovalsDescription: String = pendingApprovers.sortBy(p => p.lastName -> p.firstName).flatMap(_.fullName) match {
+    case Nil => "nobody"
+    case Seq(single) => single
+    case init :+ last =>
+      val andOr = approvalType match {
+        case OneApproval => "or"
+        case AllApprovals => "and"
+      }
+      s"${init.mkString(", ")} $andOr $last"
+  }
+
+  def department: Department = student.homeDepartment
+
+  def approvalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
+
+  // End of workflow definitions
 }

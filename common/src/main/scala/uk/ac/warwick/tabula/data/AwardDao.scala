@@ -7,29 +7,31 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Award
 
 trait AwardDaoComponent {
-	val awardDao: AwardDao
+  val awardDao: AwardDao
 }
 
 trait AutowiringAwardDaoComponent extends AwardDaoComponent {
-	val awardDao: AwardDao = Wire[AwardDao]
+  val awardDao: AwardDao = Wire[AwardDao]
 }
 
 trait AwardDao {
-	def saveOrUpdate(award: Award)
-	def getByCode(code: String): Option[Award]
-	def getAllAwardCodes: Seq[String]
+  def saveOrUpdate(award: Award)
+
+  def getByCode(code: String): Option[Award]
+
+  def getAllAwardCodes: Seq[String]
 
 }
 
 @Repository
 class AwardDaoImpl extends AwardDao with Daoisms {
 
-	def saveOrUpdate(award: Award): Unit = session.saveOrUpdate(award)
+  def saveOrUpdate(award: Award): Unit = session.saveOrUpdate(award)
 
-	def getByCode(code: String): Option[Award] =
-		session.newQuery[Award]("from Award award where code = :code").setString("code", code).uniqueResult
+  def getByCode(code: String): Option[Award] =
+    session.newQuery[Award]("from Award award where code = :code").setString("code", code).uniqueResult
 
-	def getAllAwardCodes: Seq[String] =
-		session.newQuery[String]("select distinct code from Award").seq
+  def getAllAwardCodes: Seq[String] =
+    session.newQuery[String]("select distinct code from Award").seq
 
 }

@@ -63,7 +63,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				   data-hash="${introHash("related-depts", "anywhere")}"
 				   data-title="Related departments"
 				   data-placement="bottom"
-				   data-html="true"
+				   data-html="true" aria-label="Help"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 			<#-- the dropdown itself -->
@@ -111,10 +111,8 @@ preposition: Text to relate the title to the department name in the second line,
 					   id="departmentsWithPermission-intro"
 					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
 					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
-					   data-title="Other departments"
-					   data-placement="bottom"
-					   data-html="true"
-					   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+					   data-title="Other departments" aria-label="Help" data-placement="bottom"
+					   data-html="true" data-content="${introText}"><i class="fa fa-question-circle"></i></a>
 				</#if>
 				<#-- the dropdown itself -->
 				<div class="dept-switcher dropdown">
@@ -431,7 +429,7 @@ preposition: Text to relate the title to the department name in the second line,
 	<#local id_attr></#local>
 	<#if id?has_content><#local id_attr>id='${id}'</#local></#if>
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+	<#noescape><${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#nested></${type}></#noescape>
 </#macro>
 
 <#macro bulk_email emails title subject limit=500>
@@ -447,18 +445,16 @@ preposition: Text to relate the title to the department name in the second line,
 			<#if emails?size gt limit>
 		   		title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
-				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+				href="mailto:${user.email}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>&subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-		<a data-content="There is a known issue with sending emails to long lists of staff or students. If the '${title}' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
-		   title=""
-		   data-container="body"
-		   data-placement="left"
-		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
+		   title="" aria-label="Help" data-container="body"
+		   data-placement="left" href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
 
@@ -498,9 +494,8 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro help_popover id title="" content="" html=false cssClass="">
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
-	   <#if title?has_content> data-title="${title}"</#if>
-	   data-content="${content}"
-	   data-container="body"
+	   <#if title?has_content> datcommon/src/main/webapp/WEB-INF/freemarker/formatters.ftla-title="${title}"</#if>
+	   data-content="${content}" data-container="body" aria-label="Help"
 	   <#if html>data-html="true"</#if>
 	><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>
@@ -519,7 +514,7 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro format_list_of_members members><#compress>
 	<#list members as item><#--
--->		${item.officialName}<#--
+-->		${item.fullName}<#--
 -->		<#if item_has_next><#--
 -->			<#if item_index == members?size -2>and<#else>,</#if><#--
 -->		</#if><#--

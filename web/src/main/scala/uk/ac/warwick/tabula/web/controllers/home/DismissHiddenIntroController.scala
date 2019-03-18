@@ -17,34 +17,34 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 @RequestMapping(Array("/settings/showIntro/{settingHash}"))
 class DismissHiddenIntroController extends TabulaHomepageController {
 
-	validatesSelf[DismissHiddenIntroCommand]
+  validatesSelf[DismissHiddenIntroCommand]
 
-	var userSettingsService: UserSettingsService = Wire.auto[UserSettingsService]
+  var userSettingsService: UserSettingsService = Wire.auto[UserSettingsService]
 
-	private def getUserSettings(user: CurrentUser) =
-		userSettingsService.getByUserId(user.apparentId)
+  private def getUserSettings(user: CurrentUser) =
+    userSettingsService.getByUserId(user.apparentId)
 
-	@ModelAttribute def command(user: CurrentUser, @PathVariable("settingHash") hash: String): DismissHiddenIntroCommand = {
-		val usersettings = getUserSettings(user)
-		usersettings match {
-			case Some(setting) => new DismissHiddenIntroCommand(user, setting, hash)
-			case None => new DismissHiddenIntroCommand(user, new UserSettings(user.apparentId), hash)
-		}
-	}
+  @ModelAttribute def command(user: CurrentUser, @PathVariable("settingHash") hash: String): DismissHiddenIntroCommand = {
+    val usersettings = getUserSettings(user)
+    usersettings match {
+      case Some(setting) => new DismissHiddenIntroCommand(user, setting, hash)
+      case None => new DismissHiddenIntroCommand(user, new UserSettings(user.apparentId), hash)
+    }
+  }
 
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def viewSettings(user: CurrentUser, command: DismissHiddenIntroCommand, errors:Errors): Mav = {
-		 Mav(new JSONView(Map("dismiss" -> command.dismiss)))
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def viewSettings(user: CurrentUser, command: DismissHiddenIntroCommand, errors: Errors): Mav = {
+    Mav(new JSONView(Map("dismiss" -> command.dismiss)))
+  }
 
-	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid command: DismissHiddenIntroCommand, errors:Errors): Mav = {
-		if (errors.hasErrors){
-			Mav(new JSONErrorView(errors))
-		} else {
-			command.apply()
-			Mav(new JSONView(Map("status" -> "success")))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def saveSettings(@Valid command: DismissHiddenIntroCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      command.apply()
+      Mav(new JSONView(Map("status" -> "success")))
+    }
+  }
 }

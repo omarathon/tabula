@@ -23,49 +23,49 @@ import scala.collection.JavaConverters._
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/{stagePosition}/marking-completed"))
 class MarkingCompletedController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type Command = Appliable[Seq[AssignmentFeedback]] with WorkflowProgressState
+  type Command = Appliable[Seq[AssignmentFeedback]] with WorkflowProgressState
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =
-		MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stagePosition))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable marker: User, @PathVariable stagePosition: Int, currentUser: CurrentUser): Command =
+    MarkingCompletedCommand(mandatory(assignment), mandatory(marker), currentUser, mandatory(stagePosition))
 
-	// shouldn't ever be called as anything other than POST - if it is, just redirect back to the submission list
-	@RequestMapping
-	def get(@ModelAttribute("command") command: Command) =
-		Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
+  // shouldn't ever be called as anything other than POST - if it is, just redirect back to the submission list
+  @RequestMapping
+  def get(@ModelAttribute("command") command: Command) =
+    Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@PathVariable stagePosition: Int,
-		@ModelAttribute("command") command: Command,
-		errors: Errors
-	): Mav = {
-		Mav("cm2/admin/assignments/markers/marking_complete_confirmation",
-			"formAction" -> Routes.admin.assignment.markerFeedback.complete(assignment, stagePosition, marker),
-			"department" -> command.assignment.module.adminDepartment,
-			"isProxying" -> command.isProxying,
-			"proxyingAs" -> marker,
-			"nextStagesDescription" -> command.markerFeedback.asScala.headOption.flatMap(_.stage.nextStagesDescription).getOrElse("")
-		)
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @PathVariable stagePosition: Int,
+    @ModelAttribute("command") command: Command,
+    errors: Errors
+  ): Mav = {
+    Mav("cm2/admin/assignments/markers/marking_complete_confirmation",
+      "formAction" -> Routes.admin.assignment.markerFeedback.complete(assignment, stagePosition, marker),
+      "department" -> command.assignment.module.adminDepartment,
+      "isProxying" -> command.isProxying,
+      "proxyingAs" -> marker,
+      "nextStagesDescription" -> command.markerFeedback.asScala.headOption.flatMap(_.stage.nextStagesDescription).getOrElse("")
+    )
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User,
-		@PathVariable stagePosition: Int,
-		@Valid @ModelAttribute("command") command: Command,
-		errors: Errors
-	): Mav = {
-		if (errors.hasErrors)
-			showForm(assignment, marker, stagePosition, command, errors)
-		else {
-			command.apply()
-			Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User,
+    @PathVariable stagePosition: Int,
+    @Valid @ModelAttribute("command") command: Command,
+    errors: Errors
+  ): Mav = {
+    if (errors.hasErrors)
+      showForm(assignment, marker, stagePosition, command, errors)
+    else {
+      command.apply()
+      Redirect(Routes.admin.assignment.markerFeedback(command.assignment, command.marker))
+    }
+  }
 }

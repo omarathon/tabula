@@ -9,7 +9,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 -->
 
 <#macro _u page context=component.context!('/exams')>
-	<@url context=context page=page />
+  <@url context=context page=page />
 </#macro>
 
 <#macro home><@_u page="/" /></#macro>
@@ -57,6 +57,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro generateGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate" /></#macro>
 <#macro generateGridSkipImport department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/import/skip" /></#macro>
 <#macro generateGridPreview department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/preview" /></#macro>
+<#macro gridCheckStudent department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/preview/checkstudent" /></#macro>
 <#macro generateGridOptions department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/options" /></#macro>
 <#macro generateGridCoreRequired department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/generate/corerequired" /></#macro>
 <#macro generateModuleGrid department academicYear><@_u page="/grids/${department.code}/${academicYear.startYear?c}/module/generate" /></#macro>

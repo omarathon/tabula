@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.exams.grids.columns.{ChosenYearExamGridColumn, PerYe
 import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 
 case class GridData(
-	entities: Seq[ExamGridEntity],
-	studentInformationColumns: Seq[ChosenYearExamGridColumn],
-	perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
-	summaryColumns: Seq[ChosenYearExamGridColumn],
-	weightings: Map[Course, Seq[CourseYearWeighting]],
-	normalLoadLookup: NormalLoadLookup,
-	routeRulesLookup: UpstreamRouteRuleLookup
+  entities: Seq[ExamGridEntity],
+  studentInformationColumns: Seq[ChosenYearExamGridColumn],
+  perYearColumns: Map[YearOfStudy, Seq[PerYearExamGridColumn]],
+  summaryColumns: Seq[ChosenYearExamGridColumn],
+  weightings: Map[Course, Seq[CourseYearWeighting]],
+  normalLoadLookup: NormalLoadLookup,
+  routeRulesLookup: UpstreamRouteRuleLookup
 )

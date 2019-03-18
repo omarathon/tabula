@@ -9,37 +9,41 @@ import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
 
 /**
-	* Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
-	*/
+  * Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
+  */
 @Entity
 class UpstreamModuleList {
 
-	def this(code: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
-		this()
-		this.code = code
-		this.academicYear = academicYear
-		this.route = route
-		this.yearOfStudy = yearOfStudy
-	}
+  def this(code: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
+    this()
+    this.code = code
+    this.academicYear = academicYear
+    this.route = route
+    this.yearOfStudy = yearOfStudy
+  }
 
-	@Id
-	var code: String = _
-	def id: String = code
+  @Id
+  var code: String = _
 
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYear: AcademicYear = _
+  def id: String = code
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "routeCode", referencedColumnName="code")
-	var route: Route = _
+  @Basic
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+  var academicYear: AcademicYear = _
 
-	var yearOfStudy: JInteger = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "routeCode", referencedColumnName = "code")
+  var route: Route = _
 
-	@OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	val entries: JSet[UpstreamModuleListEntry] = JHashSet()
+  var yearOfStudy: JInteger = _
 
-	def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
+  // Where the last letter of the FMC_CODE is U
+  def unusualOptions: Boolean = code.takeRight(1) == "U"
+
+  @OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  val entries: JSet[UpstreamModuleListEntry] = JHashSet()
+
+  def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
 
 }

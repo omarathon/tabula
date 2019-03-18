@@ -8,10 +8,12 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class AbstractMeetingRecordIdConverter extends TwoWayConverter[String, AbstractMeetingRecord] {
 
-	@Autowired var dao: MeetingRecordDao = _
+  @Autowired var dao: MeetingRecordDao = _
 
-	override def convertRight(id: String): AbstractMeetingRecord = (Option(id) flatMap { dao.get }).orNull
+  override def convertRight(id: String): AbstractMeetingRecord = (Option(id) flatMap {
+    dao.get
+  }).orNull
 
-	override def convertLeft(meetingRecord: AbstractMeetingRecord): String = (Option(meetingRecord) map {_.id}).orNull
+  override def convertLeft(meetingRecord: AbstractMeetingRecord): String = (Option(meetingRecord).map(_.id)).orNull
 
 }

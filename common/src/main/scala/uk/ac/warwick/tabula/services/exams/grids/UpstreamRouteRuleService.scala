@@ -8,36 +8,38 @@ import uk.ac.warwick.tabula.data.{AutowiringUpstreamRouteRuleDaoComponent, Upstr
 
 trait UpstreamRouteRuleService {
 
-	def saveOrUpdate(list: UpstreamRouteRule): Unit
-	def removeAll(): Unit
-	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule]
+  def saveOrUpdate(list: UpstreamRouteRule): Unit
+
+  def removeAll(): Unit
+
+  def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule]
 
 }
 
 abstract class AbstractUpstreamRouteRuleService extends UpstreamRouteRuleService {
 
-	self: UpstreamRouteRuleDaoComponent =>
+  self: UpstreamRouteRuleDaoComponent =>
 
-	def saveOrUpdate(list: UpstreamRouteRule): Unit =
-		upstreamRouteRuleDao.saveOrUpdate(list)
+  def saveOrUpdate(list: UpstreamRouteRule): Unit =
+    upstreamRouteRuleDao.saveOrUpdate(list)
 
-	def removeAll(): Unit =
-		upstreamRouteRuleDao.removeAll()
+  def removeAll(): Unit =
+    upstreamRouteRuleDao.removeAll()
 
-	def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule] =
-		upstreamRouteRuleDao.list(route, academicYear, level)
+  def list(route: Route, academicYear: AcademicYear, level: Level): Seq[UpstreamRouteRule] =
+    upstreamRouteRuleDao.list(route, academicYear, level)
 
 }
 
 @Service("upstreamRouteRuleService")
 class UpstreamRouteRuleServiceImpl
-	extends AbstractUpstreamRouteRuleService
-		with AutowiringUpstreamRouteRuleDaoComponent
+  extends AbstractUpstreamRouteRuleService
+    with AutowiringUpstreamRouteRuleDaoComponent
 
 trait UpstreamRouteRuleServiceComponent {
-	def upstreamRouteRuleService: UpstreamRouteRuleService
+  def upstreamRouteRuleService: UpstreamRouteRuleService
 }
 
 trait AutowiringUpstreamRouteRuleServiceComponent extends UpstreamRouteRuleServiceComponent {
-	var upstreamRouteRuleService: UpstreamRouteRuleService = Wire[UpstreamRouteRuleService]
+  var upstreamRouteRuleService: UpstreamRouteRuleService = Wire[UpstreamRouteRuleService]
 }

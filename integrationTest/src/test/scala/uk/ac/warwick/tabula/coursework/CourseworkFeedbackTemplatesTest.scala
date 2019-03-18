@@ -6,141 +6,118 @@ import org.openqa.selenium.By
 
 class CourseworkFeedbackTemplatesTest extends BrowserTest with CourseworkFixtures {
 
-	def currentCount() = {
-		if (id("feedback-template-list").findElement.isEmpty) 0
-		else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
-	}
+  def currentCount(): Int = {
+    if (id("feedback-template-list").findElement.isEmpty) 0
+    else id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size
+  }
 
-	"Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
-		var templatePage = "/cm1/admin/department/xxx/settings/feedback-templates"
-		go to Path(templatePage)
-		currentUrl should include(templatePage)
-		var currCnt = currentCount()
+  "Department admin" should "be able to manage feedback templates" in as(P.Admin1) {
+    var templatePage = "/cm1/admin/department/xxx/settings/feedback-templates"
+    go to Path(templatePage)
+    currentUrl should include(templatePage)
+    var currCnt = currentCount()
 
-		def uploadNewTemplate(file: String) {
+    def uploadNewTemplate(file: String) {
 
-			ifPhantomJSDriver(
-				operation = { d =>
-          // This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-					d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-				},
-				otherwise = { _ =>
-					click on getInputByLabel("Upload feedback forms").get
-					pressKeys(getClass.getResource(file).getFile)
-				}
-			)
-			currCnt = currentCount()
+      click on getInputByLabel("Upload feedback forms").get
+      pressKeys(getClass.getResource(file).getFile)
 
-			ifPhantomJSDriver(
-				operation = { d =>
-					// This hangs forever for some reason in PhantomJS if you use the normal pressKeys method
-					d.executePhantomJS("var page = this; page.uploadFile('input[type=file]', '" + getClass.getResource(file).getFile + "');")
-				},
-				otherwise = { _ =>
-					click on getInputByLabel("Upload feedback forms").get
-					pressKeys(getClass.getResource(file).getFile)
-				}
-			)
+      currCnt = currentCount()
 
-			click on cssSelector(".btn-primary")
+      click on getInputByLabel("Upload feedback forms").get
+      pressKeys(getClass.getResource(file).getFile)
 
-			eventually {
-				// We make sure that we haven't left the page
-				currentUrl should endWith("/settings/feedback-templates/")
+      click on cssSelector(".btn-primary")
 
-				// Check that we have one more row in the feedback template list
-				id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(currCnt + 1)
-			}
-		}
+      eventually {
+        // We make sure that we haven't left the page
+        currentUrl should endWith("/settings/feedback-templates/")
 
-		uploadNewTemplate("/file1.txt")
-		currCnt = currentCount()
+        // Check that we have one more row in the feedback template list
+        id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(currCnt + 1)
+      }
+    }
 
-		// Just so we have two to work with, let's upload a second file as well
-		uploadNewTemplate("/file2.txt")
-		currCnt = currentCount()
+    uploadNewTemplate("/file1.txt")
+    currCnt = currentCount()
 
-		// TODO Check that clicking the download links work
+    // Just so we have two to work with, let's upload a second file as well
+    uploadNewTemplate("/file2.txt")
+    currCnt = currentCount()
 
-		// Edit template 1. The rows actually appear in db insert order, so we need to find the right row first
-		{
-			val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == "file1.txt"
-			})
-			row should be('defined)
+    // TODO Check that clicking the download links work
 
-			click on (row.get.findElement(By.partialLinkText("Edit")))
-		}
+    // Edit template 1. The rows actually appear in db insert order, so we need to find the right row first
+    {
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == "file1.txt"
+      })
+      row should be('defined)
 
-		eventually {
-			find("feedback-template-model") map {
-				_.isDisplayed
-			} should be(Some(true))
+      click on row.get.findElement(By.partialLinkText("Edit"))
+    }
 
-			val ifr = find(cssSelector(".modal-body iframe"))
-			ifr map {
-				_.isDisplayed
-			} should be(Some(true))
-		}
+    eventually {
+      find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
-		switch to frame(find(cssSelector(".modal-body iframe")).get)
+      val ifr = find(cssSelector(".modal-body iframe"))
+      ifr.map(_.isDisplayed) should be(Some(true))
+    }
 
-		// Set a name and description TODO check update
-		textField("name").value = "extension template"
-		textArea("description").value = "my extension template"
-		submit
+    switch to frame(find(cssSelector(".modal-body iframe")).get)
 
-		switch to defaultContent
+    // Set a name and description TODO check update
+    textField("name").value = "extension template"
+    textArea("description").value = "my extension template"
+    submit
 
-		var beforeDelete = currentCount()
+    switch to defaultContent
 
-		// This works, but it doesn't reload the page automatically properly. Do it manually
-		reloadPage
+    var beforeDelete = currentCount()
 
-		{
-			val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+    // This works, but it doesn't reload the page automatically properly. Do it manually
+    reloadPage
 
-			val names = tbody.findElements(By.tagName("tr")).asScala.map({
-				_.findElement(By.tagName("td")).getText
-			}).toSet[String]
-			names should be(Set("extension template", "file2.txt"))
-		}
+    {
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
 
-		// Delete the file2.txt template
-		{
-			beforeDelete = currentCount()
+      val names = tbody.findElements(By.tagName("tr")).asScala.map({
+        _.findElement(By.tagName("td")).getText
+      }).toSet[String]
+      names should be(Set("extension template", "file2.txt"))
+    }
 
-			val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == "file2.txt"
-			})
-			row should be('defined)
+    // Delete the file2.txt template
+    {
+      beforeDelete = currentCount()
 
-			click on (row.get.findElement(By.partialLinkText("Delete")))
-		}
+      val tbody = id("feedback-template-list").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == "file2.txt"
+      })
+      row should be('defined)
 
-		eventually {
-			find("feedback-template-model") map {
-				_.isDisplayed
-			} should be(Some(true))
+      click on row.get.findElement(By.partialLinkText("Delete"))
+    }
 
-			val ifr = find(cssSelector(".modal-body iframe"))
-			ifr map {
-				_.isDisplayed
-			} should be(Some(true))
-		}
+    eventually {
+      find("feedback-template-model").map(_.isDisplayed) should be(Some(true))
 
-		switch to frame(find(cssSelector(".modal-body iframe")).get)
+      val ifr = find(cssSelector(".modal-body iframe"))
+      ifr.map(_.isDisplayed) should be(Some(true))
+    }
 
-		executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
+    switch to frame(find(cssSelector(".modal-body iframe")).get)
 
-		switch to defaultContent
+    executeScript("jQuery('#deleteFeedbackTemplateCommand').submit()")
 
-		// This works, but it doesn't reload the page automatically properly. Do it manually
-		reloadPage
+    switch to defaultContent
 
-		id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (beforeDelete-1)
+    // This works, but it doesn't reload the page automatically properly. Do it manually
+    reloadPage
+
+    eventually(id("feedback-template-list").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(beforeDelete - 1))
 
   }
 

@@ -15,32 +15,33 @@ import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/department/{dept}/settings/extensions"))
 class OldExtensionSettingsController extends OldCourseworkController {
 
-	@Autowired var moduleService: ModuleAndDepartmentService = _
+  @Autowired var moduleService: ModuleAndDepartmentService = _
 
-	@ModelAttribute def extensionSettingsCommand(@PathVariable dept:Department) = new ExtensionSettingsCommand(mandatory(dept))
+  @ModelAttribute def extensionSettingsCommand(@PathVariable dept: Department) = new ExtensionSettingsCommand(mandatory(dept))
 
-	validatesSelf[ExtensionSettingsCommand]
+  validatesSelf[ExtensionSettingsCommand]
 
-	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
+  // Add the common breadcrumbs to the model.
+  def crumbed(mav: Mav, dept: Department): Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
-	@RequestMapping(method=Array(RequestMethod.GET, RequestMethod.HEAD))
-	def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd:ExtensionSettingsCommand, errors:Errors): Mav =
-		crumbed(Mav("coursework/admin/extension-settings",
-			"department" -> dept
-		), dept)
+  @RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
+  def viewSettings(@PathVariable dept: Department, user: CurrentUser, cmd: ExtensionSettingsCommand, errors: Errors): Mav =
+    crumbed(Mav("coursework/admin/extension-settings",
+      "department" -> dept
+    ), dept)
 
-	@RequestMapping(method=Array(RequestMethod.POST))
-	def saveSettings(@Valid cmd:ExtensionSettingsCommand, errors:Errors): Mav = {
-		if (errors.hasErrors){
-			viewSettings(cmd.department, user, cmd, errors)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.department(cmd.department))
-		}
-	}
+  @RequestMapping(method = Array(RequestMethod.POST))
+  def saveSettings(@Valid cmd: ExtensionSettingsCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      viewSettings(cmd.department, user, cmd, errors)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.department(cmd.department))
+    }
+  }
 }

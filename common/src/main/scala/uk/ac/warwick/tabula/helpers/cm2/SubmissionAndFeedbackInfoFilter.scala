@@ -10,478 +10,479 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 /**
-	* Filters a set of "Student" case objects (which are a representation of the current
-	* state of a single student's submission workflow on an assignment, containing the
-	* submission, extension and feedback where available). Provides a predicate for
-	* filtering Student objects, and an applies() method to see whether it is even relevant
-	* for an assignment (for example, if an assignment doesn't take submissions, there's no
-	* point offering a filter for Unsubmitted students).
-	*/
+  * Filters a set of "Student" case objects (which are a representation of the current
+  * state of a single student's submission workflow on an assignment, containing the
+  * submission, extension and feedback where available). Provides a predicate for
+  * filtering Student objects, and an applies() method to see whether it is even relevant
+  * for an assignment (for example, if an assignment doesn't take submissions, there's no
+  * point offering a filter for Unsubmitted students).
+  */
 
 
 sealed abstract class SubmissionAndFeedbackInfoFilter extends CaseObjectEqualityFixes[SubmissionAndFeedbackInfoFilter] {
-	def getName: String = SubmissionAndFeedbackInfoFilters.shortName(getClass)
+  def getName: String = SubmissionAndFeedbackInfoFilters.shortName(getClass)
 
-	def description: String
+  def description: String
 
-	def predicateWithAdditionalFilters(item: AssignmentSubmissionStudentInfo, additionalFilters: Seq[SubmissionAndFeedbackInfoFilter]): Boolean = true
+  def predicateWithAdditionalFilters(item: AssignmentSubmissionStudentInfo, additionalFilters: Seq[SubmissionAndFeedbackInfoFilter]): Boolean = true
 
-	def predicate(item: AssignmentSubmissionStudentInfo): Boolean
+  def predicate(item: AssignmentSubmissionStudentInfo): Boolean
 
-	def apply(assignment: Assignment): Boolean
+  def apply(assignment: Assignment): Boolean
 
 }
 
 sealed abstract class SubmissionAndFeedbackInfoMarkerFilter extends SubmissionAndFeedbackInfoFilter {
 
-	def predicate(item: AssignmentSubmissionStudentInfo): Boolean = true
+  def predicate(item: AssignmentSubmissionStudentInfo): Boolean = true
 
-	def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean
+  def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean
 
-	def apply(assignment: Assignment): Boolean = true
+  def apply(assignment: Assignment): Boolean = true
 }
 
 
 object SubmissionAndFeedbackInfoFilters {
 
-	private val ObjectClassPrefix = SubmissionAndFeedbackInfoFilters.getClass.getName
+  private val ObjectClassPrefix = SubmissionAndFeedbackInfoFilters.getClass.getName
 
-	def shortName(clazz: Class[_ <: SubmissionAndFeedbackInfoFilter]): String
-		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
+  def shortName(clazz: Class[_ <: SubmissionAndFeedbackInfoFilter]): String
+  = clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length - 1).replace('$', '.')
 
-	def of(name: String): SubmissionAndFeedbackInfoFilter = {
+  def of(name: String): SubmissionAndFeedbackInfoFilter = {
 
-		// CM2 Workflowfilter have different logic as they are dynamically generated unlike other fixed case classes
-		val workflowFilter = SubmissionAndFeedbackInfoFilters.Statuses.allWorkflowFilters.get(name)
+    // CM2 Workflowfilter have different logic as they are dynamically generated unlike other fixed case classes
+    val workflowFilter = SubmissionAndFeedbackInfoFilters.Statuses.allWorkflowFilters.get(name)
 
-		workflowFilter.getOrElse(try {
-			// Go through the magical hierarchy
-			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
-			clz.getDeclaredField("MODULE$").get(null).asInstanceOf[SubmissionAndFeedbackInfoFilter]
-		} catch {
-			case _: ClassNotFoundException => throw new IllegalArgumentException("CM2TestFilter " + name + " not recognised")
-			case _: ClassCastException => throw new IllegalArgumentException("CM2TestFilter " + name + " is not an endpoint of the hierarchy")
-		})
-	}
+    workflowFilter.getOrElse(try {
+      // Go through the magical hierarchy
+      val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$') + "$")
+      clz.getDeclaredField("MODULE$").get(null).asInstanceOf[SubmissionAndFeedbackInfoFilter]
+    } catch {
+      case _: ClassNotFoundException => throw new IllegalArgumentException("CM2TestFilter " + name + " not recognised")
+      case _: ClassCastException => throw new IllegalArgumentException("CM2TestFilter " + name + " is not an endpoint of the hierarchy")
+    })
+  }
 
-	object SubmissionStates {
+  object SubmissionStates {
 
-		case object Submitted extends SubmissionAndFeedbackInfoFilter {
-			val description = "Submitted"
+    case object Submitted extends SubmissionAndFeedbackInfoFilter {
+      val description = "Submitted"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
-				item.coursework.enhancedSubmission.isDefined
-			}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
+        item.coursework.enhancedSubmission.isDefined
+      }
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+    }
 
-		case object Unsubmitted extends SubmissionAndFeedbackInfoFilter {
-			val description = "No submission"
+    case object Unsubmitted extends SubmissionAndFeedbackInfoFilter {
+      val description = "No submission"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
-				item.coursework.enhancedSubmission.isEmpty
-			}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
+        item.coursework.enhancedSubmission.isEmpty
+      }
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+    }
 
-		case object OnTime extends SubmissionAndFeedbackInfoFilter {
-			val description = "Submitted on time"
+    case object OnTime extends SubmissionAndFeedbackInfoFilter {
+      val description = "Submitted on time"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
-				item.coursework.enhancedSubmission.exists(item => !item.submission.isLate && !item.submission.isAuthorisedLate)
-			}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
+        item.coursework.enhancedSubmission.exists(item => !item.submission.isLate && !item.submission.isAuthorisedLate)
+      }
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+    }
 
-		case object WithExtension extends SubmissionAndFeedbackInfoFilter {
-			val description = "Submitted with extension"
+    case object WithExtension extends SubmissionAndFeedbackInfoFilter {
+      val description = "Submitted with extension"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
-				item.coursework.enhancedExtension.isDefined
-			}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
+        item.coursework.enhancedExtension.isDefined
+      }
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
+    }
 
-		case object LateSubmission extends SubmissionAndFeedbackInfoFilter {
-			val description = "Late submission"
+    case object LateSubmission extends SubmissionAndFeedbackInfoFilter {
+      val description = "Late submission"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(item => item.submission.isLate && !item.submission.isAuthorisedLate)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(item => item.submission.isLate && !item.submission.isAuthorisedLate)
+    }
 
-		case object DisabilityDisclosed extends SubmissionAndFeedbackInfoFilter {
-			val description = "Disability disclosed"
+    case object DisabilityDisclosed extends SubmissionAndFeedbackInfoFilter {
+      val description = "Disability disclosed"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(_.submission.useDisability)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(_.submission.useDisability)
+    }
 
-		case object ExtensionRequested extends SubmissionAndFeedbackInfoFilter {
-			val description = "Extension requested"
+    case object ExtensionRequested extends SubmissionAndFeedbackInfoFilter {
+      val description = "Extension requested"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedExtension.isDefined && !item.coursework.enhancedExtension.get.extension.isManual
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedExtension.isDefined && !item.coursework.enhancedExtension.get.extension.isManual
+    }
 
-		case object ExtensionDenied extends SubmissionAndFeedbackInfoFilter {
-			val description = "Extension denied"
+    case object ExtensionDenied extends SubmissionAndFeedbackInfoFilter {
+      val description = "Extension denied"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Rejected)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Rejected)
+    }
 
-		case object ExtensionGranted extends SubmissionAndFeedbackInfoFilter {
-			val description = "Extension granted"
+    case object ExtensionGranted extends SubmissionAndFeedbackInfoFilter {
+      val description = "Extension granted"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.allowExtensions
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Approved)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Approved)
+    }
 
-		lazy val allSubmissionStates = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed)
-	}
+    lazy val allSubmissionStates = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed)
+  }
 
 
-	object PlagiarismStatuses {
+  object PlagiarismStatuses {
 
-		case object NotCheckedForPlagiarism extends SubmissionAndFeedbackInfoFilter {
-			val description = "Unchecked"
+    case object NotCheckedForPlagiarism extends SubmissionAndFeedbackInfoFilter {
+      val description = "Unchecked"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(!_.submission.hasOriginalityReport.booleanValue)
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(!_.submission.hasOriginalityReport.booleanValue)
 
-			def apply(assignment: Assignment): Boolean =
-				assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
-		}
+      def apply(assignment: Assignment): Boolean =
+        assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+    }
 
-		case object CheckedForPlagiarism extends SubmissionAndFeedbackInfoFilter {
-			val description = "Checked"
+    case object CheckedForPlagiarism extends SubmissionAndFeedbackInfoFilter {
+      val description = "Checked"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(_.submission.hasOriginalityReport.booleanValue)
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(_.submission.hasOriginalityReport.booleanValue)
 
-			def apply(assignment: Assignment): Boolean =
-				assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
-		}
+      def apply(assignment: Assignment): Boolean =
+        assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+    }
 
-		case object MarkedPlagiarised extends SubmissionAndFeedbackInfoFilter {
-			val description = "Suspected plagiarism"
+    case object MarkedPlagiarised extends SubmissionAndFeedbackInfoFilter {
+      val description = "Suspected plagiarism"
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(_.submission.suspectPlagiarised.booleanValue)
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+    }
 
-		case object WithOverlapPercentage extends SubmissionAndFeedbackInfoFilter {
-			val description = "Plagiarism overlap percentage between..."
+    case object WithOverlapPercentage extends SubmissionAndFeedbackInfoFilter {
+      val description = "Plagiarism overlap percentage between..."
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = true
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = true
 
-			override def predicateWithAdditionalFilters(item: AssignmentSubmissionStudentInfo, additionalFilters: Seq[SubmissionAndFeedbackInfoFilter]): Boolean = {
-				additionalFilters.exists {
-					case additionalFilter: OverlapPlagiarismFilter =>
-						additionalFilter.predicate(item)
-					case _ => true
-				}
-			}
+      override def predicateWithAdditionalFilters(item: AssignmentSubmissionStudentInfo, additionalFilters: Seq[SubmissionAndFeedbackInfoFilter]): Boolean = {
+        additionalFilters.exists {
+          case additionalFilter: OverlapPlagiarismFilter =>
+            additionalFilter.predicate(item)
+          case _ => true
+        }
+      }
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
-		}
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions
+    }
 
-		lazy val allPlagiarismStatuses = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage)
-	}
+    lazy val allPlagiarismStatuses = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage)
+  }
 
-	object ExtensionStatuses {
-		case object NoExtension extends SubmissionAndFeedbackInfoFilter {
-			override def description: String = "No extension"
+  object ExtensionStatuses {
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = !item.coursework.enhancedExtension.map(_.extension).exists(_.relevant)
+    case object NoExtension extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "No extension"
 
-			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
-		}
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = !item.coursework.enhancedExtension.map(_.extension).exists(_.relevant)
 
-		case object ExtensionAwaitingReview extends SubmissionAndFeedbackInfoFilter {
-			override def description: String = "Extension awaiting review"
+      def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+    }
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(_.extension.awaitingReview)
+    case object ExtensionAwaitingReview extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "Extension awaiting review"
 
-			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
-		}
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(_.extension.awaitingReview)
 
-		case object ExtensionApproved extends SubmissionAndFeedbackInfoFilter {
-			override def description: String = "Extension approved"
+      def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
+    }
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.map(_.extension).filter(_.relevant).exists(_.approved)
+    case object ExtensionApproved extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "Extension approved"
 
-			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
-		}
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.map(_.extension).filter(_.relevant).exists(_.approved)
 
-		case object ExtensionRejected extends SubmissionAndFeedbackInfoFilter {
-			override def description: String = "Extension rejected"
+      def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+    }
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.rejected)
+    case object ExtensionRejected extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "Extension rejected"
 
-			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
-		}
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.rejected)
 
-		case object ExtensionRevoked extends SubmissionAndFeedbackInfoFilter {
-			override def description: String = "Extension revoked"
+      def apply(assignment: Assignment): Boolean = assignment.extensionsPossible && assignment.module.adminDepartment.allowExtensionRequests
+    }
 
-			override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.revoked)
+    case object ExtensionRevoked extends SubmissionAndFeedbackInfoFilter {
+      override def description: String = "Extension revoked"
 
-			def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
-		}
+      override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedExtension.exists(ee => ee.extension.revoked)
 
-		val allExtensionStatuses = Seq(NoExtension, ExtensionAwaitingReview, ExtensionApproved, ExtensionRejected, ExtensionRevoked)
-	}
+      def apply(assignment: Assignment): Boolean = assignment.extensionsPossible
+    }
 
-	object Statuses {
+    val allExtensionStatuses = Seq(NoExtension, ExtensionAwaitingReview, ExtensionApproved, ExtensionRejected, ExtensionRevoked)
+  }
 
-		case object NotReleasedForMarking extends SubmissionAndFeedbackInfoFilter {
-			def description = "Not released to markers"
+  object Statuses {
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.head.feedback.notReleasedToMarkers
-				} else {
-					!item.assignment.isReleasedForMarking(item.user.getUserId)
-				}
+    case object NotReleasedForMarking extends SubmissionAndFeedbackInfoFilter {
+      def description = "Not released to markers"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        if (item.assignment.cm2Assignment) {
+          item.coursework.enhancedFeedback.head.feedback.notReleasedToMarkers
+        } else {
+          !item.assignment.isReleasedForMarking(item.user.getUserId)
+        }
 
-		case object MarkedByFirst extends SubmissionAndFeedbackInfoFilter {
-			def description = "Marked by first marker"
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
+    case object MarkedByFirst extends SubmissionAndFeedbackInfoFilter {
+      def description = "Marked by first marker"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null && !assignment.cm2Assignment
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedFeedback.exists(_.feedback.getFirstMarkerFeedback.exists(_.state == MarkingCompleted))
 
-		case object MarkedBySecond extends SubmissionAndFeedbackInfoFilter {
-			def description = "Marked by second marker"
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null && !assignment.cm2Assignment
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
+    case object MarkedBySecond extends SubmissionAndFeedbackInfoFilter {
+      def description = "Marked by second marker"
 
-			def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null &&
-				assignment.markingWorkflow.hasSecondMarker && !assignment.cm2Assignment
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedFeedback.exists(_.feedback.getSecondMarkerFeedback.exists(_.state == MarkingCompleted))
 
-		case object NoFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "No feedback"
+      def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.markingWorkflow != null &&
+        assignment.markingWorkflow.hasSecondMarker && !assignment.cm2Assignment
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					//submissions where the marking has not been finalised. If there is no marking workflow we still want this (just shows ones that the admin hasn't uploaded feedback for)
-					!item.coursework.enhancedFeedback.exists(_.feedback.hasContent)
-				} else {
-					// existing cm1 filter logic as it is
-					item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
-				}
+    case object NoFeedback extends SubmissionAndFeedbackInfoFilter {
+      def description = "No feedback"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        if (item.assignment.cm2Assignment) {
+          //submissions where the marking has not been finalised. If there is no marking workflow we still want this (just shows ones that the admin hasn't uploaded feedback for)
+          !item.coursework.enhancedFeedback.exists(_.feedback.hasContent)
+        } else {
+          // existing cm1 filter logic as it is
+          item.coursework.enhancedFeedback.forall(_.feedback.isPlaceholder)
+        }
 
-		case object AdjustedFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "Adjusted feedback"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.latestPrivateOrNonPrivateAdjustment.isDefined)
+    case object AdjustedFeedback extends SubmissionAndFeedbackInfoFilter {
+      def description = "Adjusted feedback"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedFeedback.exists(_.feedback.latestPrivateOrNonPrivateAdjustment.isDefined)
 
-		case object UnreleasedFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "Unreleased feedback"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
+    case object UnreleasedFeedback extends SubmissionAndFeedbackInfoFilter {
+      def description = "Unreleased feedback"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.feedback.released)
 
-		case object LateFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "Late feedback"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean = (for {
-				enhancedSubmission <- item.coursework.enhancedSubmission
-				feedbackDeadline <- enhancedSubmission.submission.feedbackDeadline
-				enhancedFeedback <- item.coursework.enhancedFeedback
-			} yield {
-				val feedback = enhancedFeedback.feedback
+    case object LateFeedback extends SubmissionAndFeedbackInfoFilter {
+      def description = "Late feedback"
 
-				if (feedback.released) {
-					val feedbackReleasedDate = feedback.releasedDate.toLocalDate
-					// Was the feedback released late?
-					feedbackDeadline.isBefore(feedbackReleasedDate)
-				} else {
-					// Would the feedback be late if it were released now?
-					feedbackDeadline.isBefore(LocalDate.now)
-				}
-			}).getOrElse(false) // There is no feedback deadline
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean = (for {
+        enhancedSubmission <- item.coursework.enhancedSubmission
+        feedbackDeadline <- enhancedSubmission.submission.feedbackDeadline
+        enhancedFeedback <- item.coursework.enhancedFeedback
+      } yield {
+        val feedback = enhancedFeedback.feedback
 
-			def apply(assignment: Assignment) = true
-		}
+        if (feedback.released) {
+          val feedbackReleasedDate = feedback.releasedDate.toLocalDate
+          // Was the feedback released late?
+          feedbackDeadline.isBefore(feedbackReleasedDate)
+        } else {
+          // Would the feedback be late if it were released now?
+          feedbackDeadline.isBefore(LocalDate.now)
+        }
+      }).getOrElse(false) // There is no feedback deadline
 
-		case object ReleasedFeedback extends SubmissionAndFeedbackInfoFilter {
-			def description = "Released feedback"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.exists(_.feedback.released)
-				} else {
-					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.feedback.released)
-				}
+    case object ReleasedFeedback extends SubmissionAndFeedbackInfoFilter {
+      def description = "Released feedback"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        if (item.assignment.cm2Assignment) {
+          item.coursework.enhancedFeedback.exists(_.feedback.released)
+        } else {
+          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.feedback.released)
+        }
 
-		case object SubmissionNotDownloaded extends SubmissionAndFeedbackInfoFilter {
-			def description = "Submission not downloaded"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(!_.downloaded)
+    case object SubmissionNotDownloaded extends SubmissionAndFeedbackInfoFilter {
+      def description = "Submission not downloaded"
 
-			def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(!_.downloaded)
 
-		case object SubmissionDownloaded extends SubmissionAndFeedbackInfoFilter {
-			def description = "Submission downloaded"
+      def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				item.coursework.enhancedSubmission.exists(_.downloaded)
+    case object SubmissionDownloaded extends SubmissionAndFeedbackInfoFilter {
+      def description = "Submission downloaded"
 
-			def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        item.coursework.enhancedSubmission.exists(_.downloaded)
 
-		case object FeedbackNotDownloaded extends SubmissionAndFeedbackInfoFilter {
-			def description = "Feedback not downloaded"
+      def apply(assignment: Assignment) = (!assignment.cm2Assignment && Option(assignment.markingWorkflow).isDefined) || (assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).isDefined)
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					!item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
-				} else {
-					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
-				}
+    case object FeedbackNotDownloaded extends SubmissionAndFeedbackInfoFilter {
+      def description = "Feedback not downloaded"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        if (item.assignment.cm2Assignment) {
+          !item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
+        } else {
+          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(!_.downloaded)
+        }
 
-		case object FeedbackDownloaded extends SubmissionAndFeedbackInfoFilter {
-			def description = "Feedback downloaded"
+      def apply(assignment: Assignment) = true
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
-				if (item.assignment.cm2Assignment) {
-					item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
-				} else {
-					item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.downloaded)
-				}
+    case object FeedbackDownloaded extends SubmissionAndFeedbackInfoFilter {
+      def description = "Feedback downloaded"
 
-			def apply(assignment: Assignment) = true
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo): Boolean =
+        if (item.assignment.cm2Assignment) {
+          item.coursework.enhancedFeedback.exists { i => i.downloaded || (i.feedback.released && !i.feedback.hasAttachments && i.onlineViewed) }
+        } else {
+          item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).exists(_.downloaded)
+        }
 
-		// Filter options for cm2 workflows
-		def allWorkflowFilters: Map[String, SubmissionAndFeedbackInfoFilter] = {
-			case class WorkflowFilter(stage: MarkingWorkflowStage) extends SubmissionAndFeedbackInfoFilter {
+      def apply(assignment: Assignment) = true
+    }
 
-				override def getName: String = stage.name
+    // Filter options for cm2 workflows
+    def allWorkflowFilters: Map[String, SubmissionAndFeedbackInfoFilter] = {
+      case class WorkflowFilter(stage: MarkingWorkflowStage) extends SubmissionAndFeedbackInfoFilter {
 
-				//FIXME - need stage description. Currently even though we have First and final marker but both have same role and we can see 2 same entries in filter (Marker)
-				override def description: String = s"Marked by ${stage.roleName.toLowerCase}"
+        override def getName: String = stage.name
 
-				override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.isDefined &&
-					item.coursework.enhancedFeedback.get.feedback.isMarkedByStage(stage)
+        //FIXME - need stage description. Currently even though we have First and final marker but both have same role and we can see 2 same entries in filter (Marker)
+        override def description: String = s"Marked by ${stage.roleName.toLowerCase}"
 
-				override def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow != null && assignment.cm2MarkingWorkflow.workflowType.allStages.contains(stage)
-			}
+        override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.isDefined &&
+          item.coursework.enhancedFeedback.get.feedback.isMarkedByStage(stage)
 
-			val allPossibleStages = MarkingWorkflowType.allPossibleStages.values.flatten.toSeq
-			allPossibleStages.sortBy(s => s.order).map(s => s.name -> WorkflowFilter(s)).distinct.toMap
+        override def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow != null && assignment.cm2MarkingWorkflow.workflowType.allStages.contains(stage)
+      }
 
-		}
+      val allPossibleStages = MarkingWorkflowType.allPossibleStages.values.flatten.toSeq
+      allPossibleStages.sortBy(s => s.order).map(s => s.name -> WorkflowFilter(s)).distinct.toMap
 
-		lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded) ++ allWorkflowFilters.values
+    }
 
-		// marker specific filters
-		case object MarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
-			def description = "Marked"
+    lazy val allStatuses: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotReleasedForMarking, MarkedByFirst, MarkedBySecond, NoFeedback, AdjustedFeedback, UnreleasedFeedback, LateFeedback, ReleasedFeedback, SubmissionNotDownloaded, SubmissionDownloaded, FeedbackNotDownloaded, FeedbackDownloaded) ++ allWorkflowFilters.values
 
-			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
+    // marker specific filters
+    case object MarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+      def description = "Marked"
 
-			override def apply(assignment: Assignment): Boolean = assignment.collectMarks
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+        item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
 
-		case object NotMarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
-			def description = "Not marked"
+      override def apply(assignment: Assignment): Boolean = assignment.collectMarks
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
+    case object NotMarkedByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+      def description = "Not marked"
 
-			override def apply(assignment: Assignment): Boolean = assignment.collectMarks
-		}
+      def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+        item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasMarkOrGrade))
 
-		case object FeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
-			def description = "Feedback"
+      override def apply(assignment: Assignment): Boolean = assignment.collectMarks
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
-		}
+    case object FeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+      def description = "Feedback"
 
-		case object NoFeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
-			def description = "No feedback"
+      def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+        item.coursework.enhancedFeedback.exists(_.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
-				item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
-		}
+    case object NoFeedbackByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+      def description = "No feedback"
 
-		case object NotSentByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
-			def description = "Not sent"
+      def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean =
+        item.coursework.enhancedFeedback.exists(ef => !ef.feedback.markerFeedback.asScala.exists(mf => mf.marker == marker && mf.hasFeedbackOrComments))
+    }
 
-			def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean = item.coursework.enhancedFeedback.exists(ef => {
-				val outstandingStages = ef.feedback.outstandingStages.asScala
-				ef.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasContent && outstandingStages.contains(mf.stage))
-			})
-		}
-	}
+    case object NotSentByMarker extends SubmissionAndFeedbackInfoMarkerFilter {
+      def description = "Not sent"
 
+      def predicate(item: AssignmentSubmissionStudentInfo, marker: User): Boolean = item.coursework.enhancedFeedback.exists(ef => {
+        val outstandingStages = ef.feedback.outstandingStages.asScala
+        ef.feedback.allMarkerFeedback.exists(mf => mf.marker == marker && mf.hasContent && outstandingStages.contains(mf.stage))
+      })
+    }
 
+  }
 
-	class OverlapPlagiarismFilter extends SubmissionAndFeedbackInfoFilter {
-		var min: Int = _
-		var max: Int = _
 
-		override def description: String = "Between two numbers"
+  class OverlapPlagiarismFilter extends SubmissionAndFeedbackInfoFilter {
+    var min: Int = _
+    var max: Int = _
 
-		def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
-			item.coursework.enhancedSubmission.exists(item => {
-				item.submission.allAttachments
-					.flatMap(a => Option(a.originalityReport))
-					.flatMap(_.overlap)
-					.map(overlap => overlap >= min && overlap <= max)
-					.exists(b => b)
-			})
+    override def description: String = "Between two numbers"
 
-		}
+    def predicate(item: AssignmentSubmissionStudentInfo): Boolean = {
+      item.coursework.enhancedSubmission.exists(item => {
+        item.submission.allAttachments
+          .flatMap(a => Option(a.originalityReport))
+          .flatMap(_.overlap)
+          .map(overlap => overlap >= min && overlap <= max)
+          .exists(b => b)
+      })
 
-		def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
-	}
+    }
+
+    def apply(assignment: Assignment): Boolean = assignment.collectSubmissions && assignment.module.adminDepartment.plagiarismDetectionEnabled
+  }
 
 
 }

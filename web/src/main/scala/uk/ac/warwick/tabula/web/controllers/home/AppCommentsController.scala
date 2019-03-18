@@ -19,32 +19,32 @@ import scala.concurrent.Future
 @RequestMapping(Array("/help"))
 class AppCommentsController extends BaseController with AutowiringModuleAndDepartmentServiceComponent {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command = AppCommentCommand(user)
+  @ModelAttribute("command")
+  def command = AppCommentCommand(user)
 
-	@ModelAttribute("Recipients")
-	def Recipients = AppCommentCommand.Recipients
+  @ModelAttribute("Recipients")
+  def Recipients = AppCommentCommand.Recipients
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[Future[JBoolean]]): Mav = {
-		val hasDeptAdmin = Option(user).exists(_.loggedIn) &&
-			moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption).isDefined
-		Mav("home/comments",
-			"hasDeptAdmin" -> hasDeptAdmin
-		)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: Appliable[Future[JBoolean]]): Mav = {
+    val hasDeptAdmin = Option(user).exists(_.loggedIn) &&
+      moduleAndDepartmentService.getDepartmentByCode(user.apparentUser.getDepartmentCode).flatMap(_.owners.users.headOption).isDefined
+    Mav("home/comments",
+      "hasDeptAdmin" -> hasDeptAdmin
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]] with AppCommentCommandRequest, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			cmd.apply()
-			Mav("home/comments-success", "previousPage" -> cmd.url)
-		}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]] with AppCommentCommandRequest, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      cmd.apply()
+      Mav("home/comments-success", "previousPage" -> cmd.url)
+    }
 
-	}
+  }
 
 }

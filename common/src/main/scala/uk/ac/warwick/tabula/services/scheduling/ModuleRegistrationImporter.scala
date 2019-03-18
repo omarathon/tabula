@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services.scheduling
 import java.sql.{ResultSet, Types}
 
 import javax.sql.DataSource
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringBuilder, ToStringStyle}
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
@@ -26,138 +27,141 @@ import scala.collection.immutable.{HashMap, Iterable}
 import scala.util.Try
 
 /**
- * Import module registration data from SITS.
- *
- */
+  * Import module registration data from SITS.
+  *
+  */
 trait ModuleRegistrationImporter {
-	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand]
+  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand]
 }
 
 trait AbstractModuleRegistrationImporter extends ModuleRegistrationImporter with Logging {
 
-	var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
-	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var studentCourseDetailsDao: StudentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Iterable[ImportModuleRegistrationsCommand] = {
-		val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
-			moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
-				case None =>
-					logger.warn(s"No stem module for $sitsModuleCode found in Tabula for SCJ: ${moduleRows.map(_.scjCode).distinct.mkString(", ")}")
-					None
-				case Some(module) => Some(module)
-			}
-		}.toSet
-		val tabulaModuleCodes = tabulaModules.map(_.code)
-		val rowsBySCD: Map[StudentCourseDetails, Seq[ModuleRegistrationRow]] = rows.groupBy(_.scjCode).map { case (scjCode, scjRows) =>
-			studentCourseDetailsDao.getByScjCode(scjCode).getOrElse {
-				logger.error("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
-				null
-			} -> scjRows.filter(row => {
-				val moduleCode = Module.stripCats(row.sitsModuleCode)
-				moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
-			})
-		}
-		rowsBySCD.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
-	}
+  protected def applyForRows(rows: Seq[ModuleRegistrationRow]): Iterable[ImportModuleRegistrationsCommand] = {
+    val tabulaModules: Set[Module] = rows.groupBy(_.sitsModuleCode).flatMap { case (sitsModuleCode, moduleRows) =>
+      moduleAndDepartmentService.getModuleBySitsCode(sitsModuleCode) match {
+        case None =>
+          logger.warn(s"No stem module for $sitsModuleCode found in Tabula for SCJ: ${moduleRows.map(_.scjCode).distinct.mkString(", ")}")
+          None
+        case Some(module) => Some(module)
+      }
+    }.toSet
+    val tabulaModuleCodes = tabulaModules.map(_.code)
+    val rowsBySCD: Map[StudentCourseDetails, Seq[ModuleRegistrationRow]] = rows.groupBy(_.scjCode).map { case (scjCode, scjRows) =>
+      studentCourseDetailsDao.getByScjCode(scjCode).getOrElse {
+        logger.error("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
+        null
+      } -> scjRows.filter(row => {
+        val moduleCode = Module.stripCats(row.sitsModuleCode)
+        moduleCode.isDefined && tabulaModuleCodes.contains(moduleCode.get.toLowerCase)
+      })
+    }
+    rowsBySCD.filterKeys(_ != null).map { case (scd, scdRows) => new ImportModuleRegistrationsCommand(scd, scdRows, tabulaModules) }
+  }
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class ModuleRegistrationImporterImpl extends AbstractModuleRegistrationImporter with TaskBenchmarking {
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	lazy val queries = Seq(
-		new UnconfirmedModuleRegistrationsQuery(sits),
-		new ConfirmedModuleRegistrationsQuery(sits)
-	)
+  lazy val queries: Seq[MappingSqlQuery[ModuleRegistrationRow]] = Seq(
+    new UnconfirmedModuleRegistrationsQuery(sits),
+    new ConfirmedModuleRegistrationsQuery(sits)
+  )
 
-	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
-		benchmarkTask("Fetch module registrations") {
-			val rows = membersAndCategories.filter { _.member.userType == Student }.flatMap { mac =>
-				val universityId = mac.member.universityId
-				val params = HashMap(("universityId", universityId))
-				queries.flatMap { query =>
-					query.executeByNamedParam(params.asJava).asScala
-				}.distinct
-			}.seq
-			applyForRows(rows).toSeq
-		}
-	}
+  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
+    benchmarkTask("Fetch module registrations") {
+      val rows = membersAndCategories.filter(_.member.userType == Student).flatMap { mac =>
+        val universityId = mac.member.universityId
+        val params = HashMap(("universityId", universityId))
+        queries.flatMap { query =>
+          query.executeByNamedParam(params.asJava).asScala
+        }.distinct
+      }.seq
+
+      applyForRows(rows).toSeq
+    }
+  }
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImporter {
-	var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
+  var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
-	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
-		membersAndCategories flatMap { mac =>
-			val universityId = mac.member.universityId
-			val ssoUser = users(universityId)
+  def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
+    membersAndCategories flatMap { mac =>
+      val universityId = mac.member.universityId
+      val ssoUser = users(universityId)
 
-			mac.member.userType match {
-				case Student => studentModuleRegistrationDetails(universityId, ssoUser)
-				case _ => Seq()
-			}
-		}
+      mac.member.userType match {
+        case Student => studentModuleRegistrationDetails(universityId, ssoUser)
+        case _ => Seq()
+      }
+    }
 
-	def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
-		val rows = (for {
-			(_, d) <- SandboxData.Departments
-			route <- d.routes.values.toSeq
-			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
-			moduleCode <- route.moduleCodes
-		} yield {
+  def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
+    val rows = (for {
+      (_, d) <- SandboxData.Departments
+      route <- d.routes.values.toSeq
+      if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
+      moduleCode <- route.moduleCodes
+    } yield {
+      val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
+      val markScheme = if (isPassFail) "PF" else "WAR"
 
-			val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
-			val markScheme = if (isPassFail) "PF" else "WAR"
+      val mark = if (isPassFail) {
+        if (math.random < 0.25) 0 else 100
+      } else {
+        (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+          Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+        ).sum % 100
+      }
 
-			val mark = if (isPassFail) {
-				if(math.random < 0.25) 0 else 100
-			} else {
-				(universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-					Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-				).sum % 100
-			}
+      val grade =
+        if (isPassFail) if (mark == 100) "P" else "F"
+        else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
 
-			val grade =
-				if(isPassFail) if (mark == 100) "P" else "F"
-				else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
+      new ModuleRegistrationRow(
+        scjCode = "%s/1".format(universityId),
+        sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
+        cats = new JBigDecimal(15),
+        assessmentGroup = "A",
+        selectionStatusCode = (universityId.toInt + Try(moduleCode.substring(3).toInt).getOrElse(0)) % 2 match {
+          case 0 => "C"
+          case _ => "O"
+        },
+        occurrence = "A",
+        academicYear = AcademicYear.now().toString,
+        actualMark = Some(new JBigDecimal(mark)),
+        actualGrade = grade,
+        agreedMark = Some(new JBigDecimal(mark)),
+        agreedGrade = grade,
+        markScheme = markScheme,
+        moduleResult = if (mark < 40) "F" else "P"
+      )
+    }).toSeq
 
-			new ModuleRegistrationRow(
-				scjCode = "%s/1".format(universityId),
-				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
-				cats = new JBigDecimal(15),
-				assessmentGroup = "A",
-				selectionStatusCode = (universityId.toInt + Try(moduleCode.substring(3).toInt).getOrElse(0)) % 2 match {
-					case 0 => "C"
-					case _ => "O"
-				},
-				occurrence = "A",
-				academicYear = AcademicYear.now().toString,
-				actualMark = Some(new JBigDecimal(mark)),
-				actualGrade = grade,
-				agreedMark = Some(new JBigDecimal(mark)),
-				agreedGrade = grade,
-				markScheme = markScheme
-			)
-		}).toSeq
-
-		applyForRows(rows)
-	}
+    applyForRows(rows)
+  }
 }
 
 object ModuleRegistrationImporter {
-	val sitsSchema: String = Wire.property("${schema.sits}")
+  val sitsSchema: String = Wire.property("${schema.sits}")
 
-	// a list of all the markscheme codes that we consider to be pass/fail modules
-	final val PassFailMarkSchemeCodes = Seq("PF")
+  // a list of all the markscheme codes that we consider to be pass/fail modules
+  final val PassFailMarkSchemeCodes = Seq("PF")
 
-	// union 2 things -
-	// 1. unconfirmed module registrations from the SMS table
-	// 2. confirmed module registrations from the SMO table
+  // union 2 things -
+  // 1. unconfirmed module registrations from the SMS table
+  // 2. confirmed module registrations from the SMO table
 
-	def UnconfirmedModuleRegistrations = s"""
+  def UnconfirmedModuleRegistrations =
+    s"""
 			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group,
 			sms.ses_code, -- e.g. C for core or O for option
 			sms.ayr_code, sms_occl as occurrence,
@@ -165,7 +169,8 @@ object ModuleRegistrationImporter {
 			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
 			smr_agrg, -- agreed overall module grade
-	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
+			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+			smr_rslt  -- result of module
 				from $sitsSchema.ins_stu stu -- student
 					join $sitsSchema.ins_spr spr -- Student Programme Route, needed for SPR code
 						on spr.spr_stuc = stu.stu_code
@@ -184,15 +189,17 @@ object ModuleRegistrationImporter {
 
 				where stu.stu_code = :universityId"""
 
-	// The check on SMO_RTSC excludes WMG cancelled modules or module registrations
-	def ConfirmedModuleRegistrations = s"""
+  // The check on SMO_RTSC excludes WMG cancelled modules or module registrations
+  def ConfirmedModuleRegistrations =
+    s"""
 			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group,
 			smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence,
 			smr_actm, -- actual overall module mark
 			smr_actg, -- actual overall module grade
 			smr_agrm, -- agreed overall module mark
 			smr_agrg, -- agreed overall module grade
-	 		smr_mksc -- mark scheme - used to work out if this is a pass/fail module
+			smr_mksc, -- mark scheme - used to work out if this is a pass/fail module
+			smr_rslt  -- result of module
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr
 						on spr.spr_stuc = stu.stu_code
@@ -212,81 +219,125 @@ object ModuleRegistrationImporter {
 
 				where stu.stu_code = :universityId"""
 
-	def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
-		new ModuleRegistrationRow(
-			resultSet.getString("scj_code"),
-			resultSet.getString("mod_code"),
-			resultSet.getBigDecimal("credit"),
-			resultSet.getString("assess_group"),
-			resultSet.getString("ses_code"),
-			resultSet.getString("occurrence"),
-			resultSet.getString("ayr_code"),
-			Option(resultSet.getBigDecimal("smr_actm")),
-			resultSet.getString("smr_actg"),
-			Option(resultSet.getBigDecimal("smr_agrm")),
-			resultSet.getString("smr_agrg"),
-			resultSet.getString("smr_mksc")
-		)
-	}
+  def mapResultSet(resultSet: ResultSet): ModuleRegistrationRow = {
+    new ModuleRegistrationRow(
+      resultSet.getString("scj_code"),
+      resultSet.getString("mod_code"),
+      resultSet.getBigDecimal("credit"),
+      resultSet.getString("assess_group"),
+      resultSet.getString("ses_code"),
+      resultSet.getString("occurrence"),
+      resultSet.getString("ayr_code"),
+      Option(resultSet.getBigDecimal("smr_actm")),
+      resultSet.getString("smr_actg"),
+      Option(resultSet.getBigDecimal("smr_agrm")),
+      resultSet.getString("smr_agrg"),
+      resultSet.getString("smr_mksc"),
+      resultSet.getString("smr_rslt"),
+    )
+  }
 
-	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
-		extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
-			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
-	}
+  class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
+    extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    compile()
 
-	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
-		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
-			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			compile()
-			override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
-	}
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+  }
+
+  class ConfirmedModuleRegistrationsQuery(ds: DataSource)
+    extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int): ModuleRegistrationRow = mapResultSet(resultSet)
+  }
+
 }
 
-// Full class rather than case class so it can be BeanWrapped
-class ModuleRegistrationRow {
+// Full class rather than case class so it can be BeanWrapped (these need to be vars)
+class ModuleRegistrationRow(
+  var scjCode: String,
+  var sitsModuleCode: String,
+  var cats: JBigDecimal,
+  var assessmentGroup: String,
+  var selectionStatusCode: String,
+  var occurrence: String,
+  var academicYear: String,
+  var actualMark: Option[JBigDecimal],
+  var actualGrade: String,
+  var agreedMark: Option[JBigDecimal],
+  var agreedGrade: String,
+  var passFail: Boolean,
+  var moduleResult: String,
+) {
 
-	var scjCode: String = _
-	var sitsModuleCode: String = _
-	var cats: JBigDecimal = _
-	var assessmentGroup: String = _
-	var selectionStatusCode: String = _
-	var occurrence: String = _
-	var academicYear: String = _
-	var actualMark: Option[JBigDecimal] = _
-	var actualGrade: String = _
-	var agreedMark: Option[JBigDecimal] = _
-	var agreedGrade: String = _
-	var passFail: Boolean = _
+  def this(
+    scjCode: String,
+    sitsModuleCode: String,
+    cats: JBigDecimal,
+    assessmentGroup: String,
+    selectionStatusCode: String,
+    occurrence: String,
+    academicYear: String,
+    actualMark: Option[JBigDecimal],
+    actualGrade: String,
+    agreedMark: Option[JBigDecimal],
+    agreedGrade: String,
+    markScheme: String,
+    moduleResult: String
+  ) {
+    this(scjCode, sitsModuleCode, cats, assessmentGroup, selectionStatusCode, occurrence, academicYear, actualMark, actualGrade, agreedMark, agreedGrade, ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme), moduleResult)
+  }
 
-	def this(
-		scjCode: String,
-		sitsModuleCode: String,
-		cats: JBigDecimal,
-		assessmentGroup: String,
-		selectionStatusCode: String,
-		occurrence: String,
-		academicYear: String,
-		actualMark: Option[JBigDecimal],
-		actualGrade: String,
-		agreedMark: Option[JBigDecimal],
-		agreedGrade: String,
-		markScheme: String
-	) {
-		this()
-		this.scjCode = scjCode
-		this.sitsModuleCode = sitsModuleCode
-		this.cats = cats
-		this.assessmentGroup = assessmentGroup
-		this.selectionStatusCode = selectionStatusCode
-		this.occurrence = occurrence
-		this.academicYear = academicYear
-		this.actualMark = actualMark
-		this.actualGrade = actualGrade
-		this.agreedMark = agreedMark
-		this.agreedGrade = agreedGrade
-		this.passFail = ModuleRegistrationImporter.PassFailMarkSchemeCodes.contains(markScheme)
-	}
+  override def toString: String =
+    new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+      .append(scjCode)
+      .append(sitsModuleCode)
+      .append(cats)
+      .append(assessmentGroup)
+      .append(selectionStatusCode)
+      .append(occurrence)
+      .append(academicYear)
+      .append(actualMark)
+      .append(actualGrade)
+      .append(agreedMark)
+      .append(agreedGrade)
+      .append(passFail)
+      .build()
 
+  override def hashCode(): Int =
+    new HashCodeBuilder()
+      .append(scjCode)
+      .append(sitsModuleCode)
+      .append(cats)
+      .append(assessmentGroup)
+      .append(selectionStatusCode)
+      .append(occurrence)
+      .append(academicYear)
+      .append(actualMark)
+      .append(actualGrade)
+      .append(agreedMark)
+      .append(agreedGrade)
+      .append(passFail)
+      .build()
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ModuleRegistrationRow =>
+      new EqualsBuilder()
+        .append(scjCode, that.scjCode)
+        .append(sitsModuleCode, that.sitsModuleCode)
+        .append(cats, that.cats)
+        .append(assessmentGroup, that.assessmentGroup)
+        .append(selectionStatusCode, that.selectionStatusCode)
+        .append(occurrence, that.occurrence)
+        .append(academicYear, that.academicYear)
+        .append(actualMark, that.actualMark)
+        .append(actualGrade, that.actualGrade)
+        .append(agreedMark, that.agreedMark)
+        .append(agreedGrade, that.agreedGrade)
+        .append(passFail, that.passFail)
+        .build()
+    case _ => false
+  }
 }

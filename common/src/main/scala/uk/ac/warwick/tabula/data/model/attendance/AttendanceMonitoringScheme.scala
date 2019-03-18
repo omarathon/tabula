@@ -18,72 +18,74 @@ import scala.collection.JavaConverters._
 @Entity
 class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
 
-	override type Entity = AttendanceMonitoringScheme
+  override type Entity = AttendanceMonitoringScheme
 
-	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var attendanceMonitoringService: Option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers] = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
+  // FIXME this isn't really optional, but testing is a pain unless it's made so
+  @transient var attendanceMonitoringService: Option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers] = Wire.option[AttendanceMonitoringService with AttendanceMonitoringMembershipHelpers]
 
-	var name: String = _
+  var name: String = _
 
-	def displayName: String = {
-		if (name.hasText)
-			name
-		else
-		// TODO Could probably come up with something better here
-			"Untitled scheme"
-	}
+  def displayName: String = {
+    if (name.hasText)
+      name
+    else
+    // TODO Could probably come up with something better here
+      "Untitled scheme"
+  }
 
-	def shortDisplayName: String = displayName
+  def shortDisplayName: String = displayName
 
-	@NotNull
-	@Column(name = "academicyear")
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYear: AcademicYear = _
+  @NotNull
+  @Column(name = "academicyear")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+  var academicYear: AcademicYear = _
 
-	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "membersgroup_id")
-	private var _members: UserGroup = UserGroup.ofUniversityIds
-	def members: KnownTypeUserGroup = {
-		attendanceMonitoringService match {
-			case Some(service) =>
-				new UserGroupCacheManager(_members, service.membersHelper)
-			case _ => _members
-		}
-	}
-	def members_=(group: UserGroup) { _members = group }
+  @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @JoinColumn(name = "membersgroup_id")
+  private var _members: UserGroup = UserGroup.ofUniversityIds
 
-	@Column(name = "member_query")
-	var memberQuery: String = _
+  def members: KnownTypeUserGroup = {
+    attendanceMonitoringService match {
+      case Some(service) =>
+        new UserGroupCacheManager(_members, service.membersHelper)
+      case _ => _members
+    }
+  }
 
-	@OneToMany(mappedBy = "scheme", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var points: JList[AttendanceMonitoringPoint] = JArrayList()
+  def members_=(group: UserGroup) {
+    _members = group
+  }
 
-	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointStyleUserType")
-	@Column(name = "point_style")
-	var pointStyle: AttendanceMonitoringPointStyle = _
+  @Column(name = "member_query")
+  var memberQuery: String = _
 
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name = "department_id")
-	var department: Department = _
+  @OneToMany(mappedBy = "scheme", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  var points: JList[AttendanceMonitoringPoint] = JArrayList()
 
-	@NotNull
-	@Column(name = "created_date")
-	var createdDate: DateTime = _
+  @NotNull
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointStyleUserType")
+  @Column(name = "point_style")
+  var pointStyle: AttendanceMonitoringPointStyle = _
 
-	@NotNull
-	@Column(name = "updated_date")
-	var updatedDate: DateTime = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "department_id")
+  var department: Department = _
 
-	def permissionsParents: Stream[Department] = Option(department).toStream
+  @NotNull
+  @Column(name = "created_date")
+  var createdDate: DateTime = _
 
-	def hasRecordedCheckpoints: Boolean =
-		attendanceMonitoringService.exists { service =>
-			points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0}
-		}
+  @NotNull
+  @Column(name = "updated_date")
+  var updatedDate: DateTime = _
 
-	override def toEntityReference: EntityReference[Entity] = new AttendanceMonitoringSchemeEntityReference().put(this)
+  def permissionsParents: Stream[Department] = Option(department).toStream
+
+  def hasRecordedCheckpoints: Boolean =
+    attendanceMonitoringService.exists { service =>
+      points.asScala.exists { point => service.countCheckpointsForPoint(point) > 0 }
+    }
 }
 
 

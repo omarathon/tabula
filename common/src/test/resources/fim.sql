@@ -1,2 +1,3 @@
 -- let's make a fake FIM
-select 1 from (VALUES(0));
+select 1
+from (VALUES (0));

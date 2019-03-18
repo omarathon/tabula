@@ -10,66 +10,66 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object EditAssignmentMembershipCommand {
-	/*
-	 * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for assignment
+  /*
+   * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for assignment
    * to rebuild views within an existing form
-	 */
-	def stub(assignment: Assignment) =
-		new StubEditAssignmentMembershipCommand(assignment)
-			with AutowiringUserLookupComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with ComposableCommand[Assignment]
-			with ModifiesAssignmentMembership
-			with StubEditAssignmentMembershipPermissions
-			with Unaudited with ReadOnly
+   */
+  def stub(assignment: Assignment) =
+    new StubEditAssignmentMembershipCommand(assignment)
+      with AutowiringUserLookupComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with ComposableCommand[Assignment]
+      with ModifiesAssignmentMembership
+      with StubEditAssignmentMembershipPermissions
+      with Unaudited with ReadOnly
 }
 
 trait EditAssignmentMembershipCommandState extends HasAcademicYear {
-	def assignment: Assignment
-	def module: Module = assignment.module
-	def academicYear: AcademicYear = assignment.academicYear
+  def assignment: Assignment
+
+  def module: Module = assignment.module
+
+  def academicYear: AcademicYear = assignment.academicYear
 }
 
 class StubEditAssignmentMembershipCommand(val assignment: Assignment, val updateStudentMembershipGroupIsUniversityIds: Boolean = false) extends CommandInternal[Assignment]
-	with EditAssignmentMembershipCommandState {
-	self: ModifiesAssignmentMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
+  with EditAssignmentMembershipCommandState {
+  self: ModifiesAssignmentMembership with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	override def applyInternal() = throw new UnsupportedOperationException
+  override def applyInternal() = throw new UnsupportedOperationException
 }
 
 trait StubEditAssignmentMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditAssignmentMembershipCommandState =>
+  self: EditAssignmentMembershipCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheckAny(Seq(CheckablePermission(Permissions.Assignment.Create, assignment.module),
-			CheckablePermission(Permissions.Assignment.Update, assignment.module)))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheckAny(Seq(CheckablePermission(Permissions.Assignment.Create, assignment.module),
+      CheckablePermission(Permissions.Assignment.Update, assignment.module)))
+  }
 }
 
 trait ModifiesAssignmentMembership extends UpdatesStudentMembership with SpecifiesGroupType {
-	self: EditAssignmentMembershipCommandState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
+  self: EditAssignmentMembershipCommandState with HasAcademicYear with UserLookupComponent with AssessmentMembershipServiceComponent =>
 
-	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] = Option(assignment).map {
-		_.upstreamAssessmentGroups
-	}
-	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
+  lazy val existingGroups: Option[Seq[UpstreamAssessmentGroupInfo]] = Option(assignment).map(_.upstreamAssessmentGroupInfos)
+  lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = None
 
-	def copyMembers(assignment: Assignment) {
-		if (assignment.members != null) {
-			members.copyFrom(assignment.members)
-		}
+  def copyMembers(assignment: Assignment) {
+    if (assignment.members != null) {
+      members.copyFrom(assignment.members)
+    }
 
-	}
+  }
 
-	def updateAssessmentGroups() {
-		assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
-			val template = new AssessmentGroup
-			template.assessmentComponent = ug.assessmentComponent
-			template.occurrence = ug.occurrence
-			template.assignment = assignment
-			assessmentMembershipService.getAssessmentGroup(template).orElse(Some(template))
-		}).distinct.asJava
-	}
+  def updateAssessmentGroups() {
+    assessmentGroups = upstreamGroups.asScala.flatMap(ug => {
+      val template = new AssessmentGroup
+      template.assessmentComponent = ug.assessmentComponent
+      template.occurrence = ug.occurrence
+      template.assignment = assignment
+      assessmentMembershipService.getAssessmentGroup(template).orElse(Some(template))
+    }).distinct.asJava
+  }
 }
 
 

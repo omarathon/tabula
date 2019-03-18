@@ -3,7 +3,9 @@ Further details related to this request:
 <#if moduleManagers?has_content >
 Module Manager<#if (moduleManagers?size > 1)>s</#if>
 <#list moduleManagers as manager>
-${manager.fullName} (${manager.warwickId!}) (${manager.email})
+<#if manager.foundUser>
+${manager.fullName} (${manager.warwickId!}) <#if manager.email??>(${manager.email})</#if>
+</#if>
 </#list>
 </#if>
 

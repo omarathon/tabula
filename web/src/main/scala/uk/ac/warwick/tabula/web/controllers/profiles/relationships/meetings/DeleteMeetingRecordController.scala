@@ -16,33 +16,33 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 abstract class AbstractRemoveMeetingRecordController extends ProfilesController {
 
-	def doApply(command: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
-		if (!errors.hasErrors) {
-			command.apply()
-			Mav(new JSONView(Map("status" -> "successful")))
-		}
-		else {
-			Mav(new JSONErrorView(errors))
-		}
-	}
+  def doApply(command: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
+    if (!errors.hasErrors) {
+      command.apply()
+      Mav(new JSONView(Map("status" -> "successful")))
+    }
+    else {
+      Mav(new JSONErrorView(errors))
+    }
+  }
 }
 
 @Controller
 @RequestMapping(value = Array("/profiles/*/meeting/{meetingRecord}/delete"))
 class DeleteMeetingRecordController extends AbstractRemoveMeetingRecordController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("deleteMeetingRecordCommand")
-	def getDeleteCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): DeleteMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with DeleteMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with DeleteScheduledMeetingRecordNotification = {
-		DeleteMeetingRecordCommand(meetingRecord, currentUser)
-	}
+  @ModelAttribute("deleteMeetingRecordCommand")
+  def getDeleteCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): DeleteMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with DeleteMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with DeleteScheduledMeetingRecordNotification = {
+    DeleteMeetingRecordCommand(meetingRecord, currentUser)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def deleteMeetingRecord(@Valid @ModelAttribute("deleteMeetingRecordCommand") deleteCommand: Appliable[AbstractMeetingRecord],
-			errors: Errors): Mav = {
-		doApply(deleteCommand, errors)
-	}
+  @RequestMapping(method = Array(POST))
+  def deleteMeetingRecord(@Valid @ModelAttribute("deleteMeetingRecordCommand") deleteCommand: Appliable[AbstractMeetingRecord],
+    errors: Errors): Mav = {
+    doApply(deleteCommand, errors)
+  }
 
 }
 
@@ -50,19 +50,19 @@ class DeleteMeetingRecordController extends AbstractRemoveMeetingRecordControlle
 @RequestMapping(value = Array("/profiles/*/meeting/{meetingRecord}/restore"))
 class RestoreMeetingRecordController extends AbstractRemoveMeetingRecordController {
 
-	showDeletedItems
+  showDeletedItems
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("restoreMeetingRecordCommand")
-	def getRestoreCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): RestoreMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with RestoreScheduledMeetingRecordNotification = {
-		RestoreMeetingRecordCommand(meetingRecord, currentUser)
-	}
+  @ModelAttribute("restoreMeetingRecordCommand")
+  def getRestoreCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): RestoreMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState with RestoreScheduledMeetingRecordNotification = {
+    RestoreMeetingRecordCommand(meetingRecord, currentUser)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def restoreMeetingRecord(@Valid @ModelAttribute("restoreMeetingRecordCommand") restoreCommand: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
-		doApply(restoreCommand, errors)
-	}
+  @RequestMapping(method = Array(POST))
+  def restoreMeetingRecord(@Valid @ModelAttribute("restoreMeetingRecordCommand") restoreCommand: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
+    doApply(restoreCommand, errors)
+  }
 
 }
 
@@ -70,18 +70,18 @@ class RestoreMeetingRecordController extends AbstractRemoveMeetingRecordControll
 @RequestMapping(value = Array("/profiles/*/meeting/{meetingRecord}/purge"))
 class PurgeMeetingRecordController extends AbstractRemoveMeetingRecordController {
 
-	showDeletedItems
+  showDeletedItems
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("purgeMeetingRecordCommand")
-	def getPurgeCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): PurgeMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState = {
-		PurgeMeetingRecordCommand(meetingRecord, currentUser)
-	}
+  @ModelAttribute("purgeMeetingRecordCommand")
+  def getPurgeCommand(@PathVariable meetingRecord: AbstractMeetingRecord, currentUser: CurrentUser): PurgeMeetingRecordCommand with ComposableCommand[AbstractMeetingRecord] with AutowiringMeetingRecordServiceComponent with RestoreMeetingRecordCommandValidation with RemoveMeetingRecordPermissions with RemoveMeetingRecordDescription with RemoveMeetingRecordState = {
+    PurgeMeetingRecordCommand(meetingRecord, currentUser)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def purgeMeetingRecord(@Valid @ModelAttribute("purgeMeetingRecordCommand") purgeCommand: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
-		doApply(purgeCommand, errors)
-	}
+  @RequestMapping(method = Array(POST))
+  def purgeMeetingRecord(@Valid @ModelAttribute("purgeMeetingRecordCommand") purgeCommand: Appliable[AbstractMeetingRecord], errors: Errors): Mav = {
+    doApply(purgeCommand, errors)
+  }
 
 }

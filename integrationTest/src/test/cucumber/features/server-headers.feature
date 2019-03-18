@@ -7,8 +7,8 @@ Feature: Standard server headers
     Then the Vary response header should be "Accept-Encoding"
 
     Examples:
-      | url |
-      | https://@HOST@/ |
+      | url                        |
+      | https://@HOST@/            |
       | https://@HOST@/coursework/ |
 
   Scenario: Request file from static

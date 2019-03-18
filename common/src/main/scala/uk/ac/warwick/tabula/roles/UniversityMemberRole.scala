@@ -10,22 +10,22 @@ case class UniversityMemberRole(member: model.Member) extends BuiltInRole(Univer
 
 case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "University Member"
+  override def description = "University Member"
 
-	GeneratesSubRole(PreviousUniversityMemberRoleDefinition)
+  GeneratesSubRole(PreviousUniversityMemberRoleDefinition)
 
-	// As per discussion in TAB-753, anyone at the University can see anyone else's core information
-	GrantsGlobalPermission(
-		Profiles.Read.Core
-	)
+  // As per discussion in TAB-753, anyone at the University can see anyone else's core information
+  GrantsGlobalPermission(
+    Profiles.Read.Core
+  )
 
-	GrantsScopedPermission(
-		Profiles.Read.Photo,
+  GrantsScopedPermission(
+    Profiles.Read.Photo,
     Profiles.MeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
-	)
+    Profiles.ScheduledMeetingRecord.Manage(PermissionsSelector.Any[StudentRelationshipType])
+  )
 
-	GrantsScopelessPermission(
-		UserPicker
-	)
+  GrantsScopelessPermission(
+    UserPicker
+  )
 }

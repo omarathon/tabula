@@ -16,30 +16,30 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(Array("/attendance/agent/{relationshipType}/{academicYear}"))
 class AgentStudentsController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent
-	with HasMonthNames {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent
+  with HasMonthNames {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable relationshipType: StudentRelationshipType, @PathVariable academicYear: AcademicYear) =
-		AgentStudentsCommand(mandatory(relationshipType), mandatory(academicYear), mandatory(currentMember))
+  @ModelAttribute("command")
+  def command(@PathVariable relationshipType: StudentRelationshipType, @PathVariable academicYear: AcademicYear) =
+    AgentStudentsCommand(mandatory(relationshipType), mandatory(academicYear), mandatory(currentMember))
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[AgentStudentsCommandResult],
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		val result = cmd.apply()
-		Mav("attendance/agent/list",
-			"studentAttendance" -> result.studentAttendance,
-			"visiblePeriods" -> result.studentAttendance.results.flatMap(_.groupedPointCheckpointPairs.keys).distinct,
-			"department" -> currentMember.homeDepartment,
-			"canRecordAny" -> securityService.canForAny(user, Permissions.MonitoringPoints.Record, result.studentAttendance.results.map(_.student)),
-			"groupedPoints" -> result.groupedPoints
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Agent.relationshipForYear(relationshipType, year)):_*)
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[AgentStudentsCommandResult],
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    val result = cmd.apply()
+    Mav("attendance/agent/list",
+      "studentAttendance" -> result.studentAttendance,
+      "visiblePeriods" -> result.studentAttendance.results.flatMap(_.groupedPointCheckpointPairs.keys).distinct,
+      "department" -> currentMember.homeDepartment,
+      "canRecordAny" -> securityService.canForAny(user, Permissions.MonitoringPoints.Record, result.studentAttendance.results.map(_.student)),
+      "groupedPoints" -> result.groupedPoints
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Agent.relationshipForYear(relationshipType, year)): _*)
+  }
 
 }

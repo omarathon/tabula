@@ -11,96 +11,97 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.AnonymousUser
 
 object AdminGetSingleSubmissionCommand {
-	type Result = RenderableFile
-	type Command = Appliable[Result] with AdminGetSingleSubmissionCommandState
+  type Result = RenderableFile
+  type Command = Appliable[Result] with AdminGetSingleSubmissionCommandState
 
-	val AdminPermission = Permissions.Submission.Read
+  val AdminPermission = Permissions.Submission.Read
 
-	def single(assignment: Assignment, submission: Submission, filename: String) =
-		new AdminGetSingleSubmissionFileCommandInternal(assignment, submission, filename)
-			with ComposableCommand[Result]
-			with AdminGetSingleSubmissionCommandPermissions
-			with AdminGetSingleSubmissionFileCommandDescription
-			with AutowiringUserLookupComponent
-			with ReadOnly
+  def single(assignment: Assignment, submission: Submission, filename: String) =
+    new AdminGetSingleSubmissionFileCommandInternal(assignment, submission, filename)
+      with ComposableCommand[Result]
+      with AdminGetSingleSubmissionCommandPermissions
+      with AdminGetSingleSubmissionFileCommandDescription
+      with AutowiringUserLookupComponent
+      with ReadOnly
 
-	def zip(assignment: Assignment, submission: Submission) =
-		new AdminGetSingleSubmissionAsZipCommandInternal(assignment, submission)
-			with ComposableCommand[Result]
-			with AdminGetSingleSubmissionCommandPermissions
-			with AdminGetSingleSubmissionAsZipCommandDescription
-			with ReadOnly
-			with AutowiringZipServiceComponent
+  def zip(assignment: Assignment, submission: Submission) =
+    new AdminGetSingleSubmissionAsZipCommandInternal(assignment, submission)
+      with ComposableCommand[Result]
+      with AdminGetSingleSubmissionCommandPermissions
+      with AdminGetSingleSubmissionAsZipCommandDescription
+      with ReadOnly
+      with AutowiringZipServiceComponent
 }
 
 trait AdminGetSingleSubmissionCommandState {
-	def assignment: Assignment
-	def submission: Submission
+  def assignment: Assignment
+
+  def submission: Submission
 }
 
 trait AdminGetSingleSubmissionFilenameCommandState extends AdminGetSingleSubmissionCommandState {
-	def filename: String
+  def filename: String
 }
 
 class AdminGetSingleSubmissionFileCommandInternal(val assignment: Assignment, val submission: Submission, val filename: String)
-	extends CommandInternal[Result] with AdminGetSingleSubmissionFilenameCommandState {
-	self: UserLookupComponent =>
+  extends CommandInternal[Result] with AdminGetSingleSubmissionFilenameCommandState {
+  self: UserLookupComponent =>
 
-	override def applyInternal(): RenderableFile = {
-		val user = userLookup.getUserByUserId(submission.usercode)
-		val moduleCode = assignment.module.code
+  override def applyInternal(): RenderableFile = {
+    val user = userLookup.getUserByUserId(submission.usercode)
+    val moduleCode = assignment.module.code
 
-		val userIdentifier = if (!assignment.showStudentNames || user == null || user.isInstanceOf[AnonymousUser]) {
-			submission.studentIdentifier
-		} else {
-			s"${user.getFullName} - ${submission.studentIdentifier}"
-		}
+    val userIdentifier = if (!assignment.showStudentNames || user == null || user.isInstanceOf[AnonymousUser]) {
+      submission.studentIdentifier
+    } else {
+      s"${user.getFullName} - ${submission.studentIdentifier}"
+    }
 
-		submission.allAttachments
-			.find(_.name == filename)
-			.map(a => new RenderableAttachment(a, Some(s"$moduleCode - $userIdentifier - $filename")))
-			.getOrElse {
-				throw new ItemNotFoundException()
-			}
-	}
+    submission.allAttachments
+      .find(_.name == filename)
+      .map(a => new RenderableAttachment(a, Some(s"$moduleCode - $userIdentifier - $filename")))
+      .getOrElse {
+        throw new ItemNotFoundException()
+      }
+  }
 }
 
 class AdminGetSingleSubmissionAsZipCommandInternal(val assignment: Assignment, val submission: Submission)
-	extends CommandInternal[Result] with AdminGetSingleSubmissionCommandState {
-	self: ZipServiceComponent =>
+  extends CommandInternal[Result] with AdminGetSingleSubmissionCommandState {
+  self: ZipServiceComponent =>
 
-	override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
+  override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
 }
 
 trait AdminGetSingleSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: AdminGetSingleSubmissionCommandState =>
+  self: AdminGetSingleSubmissionCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		mustBeLinked(submission, assignment)
-		p.PermissionCheck(AdminPermission, mandatory(submission))
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    mustBeLinked(submission, assignment)
+    p.PermissionCheck(AdminPermission, mandatory(submission))
+  }
 }
 
 trait AdminGetSingleSubmissionFileCommandDescription extends Describable[Result] {
-	self: AdminGetSingleSubmissionFilenameCommandState =>
+  self: AdminGetSingleSubmissionFilenameCommandState =>
 
-	override lazy val eventName: String = "AdminGetSingleSubmission"
+  override lazy val eventName: String = "AdminGetSingleSubmission"
 
-	override def describe(d: Description): Unit =
-		d.submission(submission).properties(
-			"studentId" -> submission.studentIdentifier,
-			"filename" -> filename
-		)
+  override def describe(d: Description): Unit =
+    d.submission(submission).properties(
+      "studentId" -> submission.studentIdentifier,
+      "filename" -> filename
+    )
 }
 
 trait AdminGetSingleSubmissionAsZipCommandDescription extends Describable[Result] {
-	self: AdminGetSingleSubmissionCommandState =>
+  self: AdminGetSingleSubmissionCommandState =>
 
-	override lazy val eventName: String = "AdminGetSingleSubmission"
+  override lazy val eventName: String = "AdminGetSingleSubmission"
 
-	override def describe(d: Description): Unit =
-		d.submission(submission).properties(
-			"studentId" -> submission.studentIdentifier,
-			"attachmentCount" -> submission.allAttachments.size
-		)
+  override def describe(d: Description): Unit =
+    d.submission(submission).properties(
+      "studentId" -> submission.studentIdentifier,
+      "attachmentCount" -> submission.allAttachments.size
+    )
 }

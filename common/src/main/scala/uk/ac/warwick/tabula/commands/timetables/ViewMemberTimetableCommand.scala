@@ -16,110 +16,110 @@ import scala.concurrent.Await
 import scala.util.Try
 
 object ViewMemberTimetableCommand extends Logging {
-	private[timetables] type ReturnType = Try[EventList]
-	type TimetableCommand = Appliable[ReturnType] with ViewMemberTimetableRequest with SelfValidating
-	val RequiredPermission = Permissions.Profiles.Read.Timetable
+  private[timetables] type ReturnType = Try[EventList]
+  type TimetableCommand = Appliable[ReturnType] with ViewMemberTimetableRequest with SelfValidating
+  val RequiredPermission = Permissions.Profiles.Read.Timetable
 
-	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
-		case student: StudentMember =>
-			new ViewStudentTimetableCommandInternal(student, currentUser)
-				with ComposableCommand[ReturnType]
-				with ViewMemberTimetablePermissions
-				with ViewMemberTimetableValidation
-				with Unaudited with ReadOnly
-				with AutowiringStudentTimetableEventSourceComponent
+  def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
+    case student: StudentMember =>
+      new ViewStudentTimetableCommandInternal(student, currentUser)
+        with ComposableCommand[ReturnType]
+        with ViewMemberTimetablePermissions
+        with ViewMemberTimetableValidation
+        with Unaudited with ReadOnly
+        with AutowiringStudentTimetableEventSourceComponent
 
-		case staff: StaffMember =>
-			new ViewStaffTimetableCommandInternal(staff, currentUser)
-				with ComposableCommand[ReturnType]
-				with ViewMemberTimetablePermissions
-				with ViewMemberTimetableValidation
-				with Unaudited with ReadOnly
-				with AutowiringStaffTimetableEventSourceComponent
+    case staff: StaffMember =>
+      new ViewStaffTimetableCommandInternal(staff, currentUser)
+        with ComposableCommand[ReturnType]
+        with ViewMemberTimetablePermissions
+        with ViewMemberTimetableValidation
+        with Unaudited with ReadOnly
+        with AutowiringStaffTimetableEventSourceComponent
 
-		case _ =>
-			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
-			throw new ItemNotFoundException
-	}
+    case _ =>
+      logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
+      throw new ItemNotFoundException
+  }
 }
 
 abstract class ViewStudentTimetableCommandInternal(val member: StudentMember, currentUser: CurrentUser)
-	extends CommandInternal[ReturnType]
-		with ViewMemberTimetableRequest {
+  extends CommandInternal[ReturnType]
+    with ViewMemberTimetableRequest {
 
-	self: StudentTimetableEventSourceComponent =>
+  self: StudentTimetableEventSourceComponent =>
 
-	def applyInternal(): Try[EventList] = {
-		Try(Await.result(studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student), ViewMemberEventsCommand.Timeout))
-			.map { events => events.filter { event => event.year == academicYear }}
-	}
+  def applyInternal(): Try[EventList] = {
+    Try(Await.result(studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student), ViewMemberEventsCommand.Timeout))
+      .map { events => events.filter { event => event.year == academicYear } }
+  }
 
 }
 
 abstract class ViewStaffTimetableCommandInternal(val member: StaffMember, currentUser: CurrentUser)
-	extends CommandInternal[ReturnType]
-	with ViewMemberTimetableRequest {
+  extends CommandInternal[ReturnType]
+    with ViewMemberTimetableRequest {
 
-	self: StaffTimetableEventSourceComponent =>
+  self: StaffTimetableEventSourceComponent =>
 
-	def applyInternal(): ReturnType = {
-		Try(Await.result(staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff), ViewMemberEventsCommand.Timeout))
-			.map { events => events.filter { event => event.year == academicYear }}
-	}
+  def applyInternal(): ReturnType = {
+    Try(Await.result(staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff), ViewMemberEventsCommand.Timeout))
+      .map { events => events.filter { event => event.year == academicYear } }
+  }
 
 }
 
 // State - unmodifiable pre-requisites
 trait ViewMemberTimetableState {
-	val member: Member
+  val member: Member
 }
 
 // Request parameters
 trait ViewMemberTimetableRequest extends ViewMemberTimetableState
-	with CurrentAcademicYear
+  with CurrentAcademicYear
 
 trait ViewMemberTimetablePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewMemberTimetableState =>
+  self: ViewMemberTimetableState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(ViewMemberTimetableCommand.RequiredPermission, mandatory(member))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(ViewMemberTimetableCommand.RequiredPermission, mandatory(member))
+  }
 }
 
 trait ViewMemberTimetableValidation extends SelfValidating {
-	self: ViewMemberTimetableRequest =>
+  self: ViewMemberTimetableRequest =>
 
-	override def validate(errors: Errors) {
-		if (academicYear == null) {
-			errors.rejectValue("academicYear", "NotEmpty")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (academicYear == null) {
+      errors.rejectValue("academicYear", "NotEmpty")
+    }
+  }
 }
 
 trait ViewStaffMemberTimetableCommandFactory {
-	def apply(staffMember: StaffMember): Appliable[ReturnType] with CurrentAcademicYear
+  def apply(staffMember: StaffMember): Appliable[ReturnType] with CurrentAcademicYear
 }
 
 class ViewStaffMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
-	extends ViewStaffMemberTimetableCommandFactory {
+  extends ViewStaffMemberTimetableCommandFactory {
 
-	def apply(staffMember: StaffMember) =
-		ViewMemberTimetableCommand(
-			staffMember,
-			currentUser
-		)
+  def apply(staffMember: StaffMember) =
+    ViewMemberTimetableCommand(
+      staffMember,
+      currentUser
+    )
 }
 
 trait ViewStudentMemberTimetableCommandFactory {
-	def apply(student: StudentMember): Appliable[ReturnType] with CurrentAcademicYear
+  def apply(student: StudentMember): Appliable[ReturnType] with CurrentAcademicYear
 }
 
 class ViewStudentMemberTimetableCommandFactoryImpl(currentUser: CurrentUser)
-	extends ViewStudentMemberTimetableCommandFactory {
+  extends ViewStudentMemberTimetableCommandFactory {
 
-	def apply(student: StudentMember) =
-		ViewMemberTimetableCommand(
-			student,
-			currentUser
-		)
+  def apply(student: StudentMember) =
+    ViewMemberTimetableCommand(
+      student,
+      currentUser
+    )
 }

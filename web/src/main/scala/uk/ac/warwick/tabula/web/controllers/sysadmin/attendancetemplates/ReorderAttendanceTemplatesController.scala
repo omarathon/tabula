@@ -13,13 +13,13 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/sysadmin/attendancetemplates/reorder"))
 class ReorderAttendanceTemplatesController extends BaseSysadminController {
 
-	@ModelAttribute("command")
-	def command = ReorderAttendanceTemplatesCommand()
+  @ModelAttribute("command")
+  def command = ReorderAttendanceTemplatesCommand()
 
-	@RequestMapping
-	def submit(@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringTemplate]]): Mav = {
-		cmd.apply()
-		Redirect(Routes.AttendanceTemplates.home)
-	}
+  @RequestMapping
+  def submit(@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringTemplate]]): Mav = {
+    cmd.apply()
+    Redirect(Routes.AttendanceTemplates.home)
+  }
 
 }

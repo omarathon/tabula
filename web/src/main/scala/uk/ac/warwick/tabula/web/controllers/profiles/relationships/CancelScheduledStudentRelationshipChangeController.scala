@@ -13,34 +13,34 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 
 object CancelScheduledStudentRelationshipChangeController {
-	final val scheduledAgentChangeCancel = "scheduledAgentChangeCancel"
+  final val scheduledAgentChangeCancel = "scheduledAgentChangeCancel"
 }
 
 @Controller
 @RequestMapping(Array("/profiles/{relationshipType}/{studentCourseDetails}/cancel/{relationship}"))
 class CancelScheduledStudentRelationshipChangeController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable relationship: StudentRelationship): Appliable[Seq[StudentRelationship]] =
-		CancelScheduledStudentRelationshipChangesCommand.applyForRelationship(
-			mandatory(relationship).relationshipType,
-			mandatory(relationship).studentCourseDetails.department,
-			user,
-			mandatory(relationship)
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable relationship: StudentRelationship): Appliable[Seq[StudentRelationship]] =
+    CancelScheduledStudentRelationshipChangesCommand.applyForRelationship(
+      mandatory(relationship).relationshipType,
+      mandatory(relationship).studentCourseDetails.department,
+      user,
+      mandatory(relationship)
+    )
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]], errors: BindingResult): Mav = {
-		if (errors.hasErrors) {
-			throw new BindException(errors)
-		} else {
-			val result = cmd.apply()
-			Redirect(Routes.Profile.relationshipType(result.head.studentCourseDetails.student, result.head.relationshipType),
-				"scheduledAgentChangeCancel" -> true
-			)
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentRelationship]], errors: BindingResult): Mav = {
+    if (errors.hasErrors) {
+      throw new BindException(errors)
+    } else {
+      val result = cmd.apply()
+      Redirect(Routes.Profile.relationshipType(result.head.studentCourseDetails.student, result.head.relationshipType),
+        "scheduledAgentChangeCancel" -> true
+      )
+    }
+  }
 
 }

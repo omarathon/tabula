@@ -9,28 +9,28 @@ import javax.persistence.NamedQuery
 
 @Entity
 @NamedQueries(Array(
-	new NamedQuery(name = "modeofattendance.code", query = "select modeOfAttendance from ModeOfAttendance modeOfAttendance where code = :code")))
+  new NamedQuery(name = "modeofattendance.code", query = "select modeOfAttendance from ModeOfAttendance modeOfAttendance where code = :code")))
 class ModeOfAttendance {
 
-	def this(code: String = null, shortName: String = null, fullName: String = null) {
-		this()
-		this.code = code
-		this.shortName = shortName
-		this.fullName = fullName
-	}
+  def this(code: String = null, shortName: String = null, fullName: String = null) {
+    this()
+    this.code = code
+    this.shortName = shortName
+    this.fullName = fullName
+  }
 
-	@Id var code: String = _
-	var shortName: String = _
-	var fullName: String = _
+  @Id var code: String = _
+  var shortName: String = _
+  var fullName: String = _
 
-	var lastUpdatedDate: DateTime = DateTime.now
+  var lastUpdatedDate: DateTime = DateTime.now
 
-	override def toString: String = fullName.toLowerCase()
+  override def toString: String = fullName.toLowerCase()
 
-	def fullNameAliased: String = {
-		if (code.equals("F"))
-			"Full-time"
-		else fullName
-	}
+  def fullNameAliased: String = {
+    if (code.equals("F"))
+      "Full-time"
+    else fullName
+  }
 
 }

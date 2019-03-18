@@ -19,161 +19,172 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object SmallGroup {
-	final val DefaultGroupSize = 15
-	object Settings {
-		val MaxGroupSize = "MaxGroupSize"
-	}
+  final val DefaultGroupSize = 15
 
-	// For sorting a collection by group name. Either pass to the sort function,
-	// or expose as an implicit val.
-	val NameOrdering = new Ordering[SmallGroup] {
-		def compare(a: SmallGroup, b: SmallGroup): Int = {
-			val nameCompare = StringUtils.AlphaNumericStringOrdering.compare(a.name, b.name)
-			if (nameCompare != 0) nameCompare else a.id compare b.id
-		}
-	}
+  object Settings {
+    val MaxGroupSize = "MaxGroupSize"
+  }
 
-	// Companion object is one of the places searched for an implicit Ordering, so
-	// this will be the default when ordering a list of small groups.
-	implicit val defaultOrdering = NameOrdering
+  // For sorting a collection by group name. Either pass to the sort function,
+  // or expose as an implicit val.
+  val NameOrdering = new Ordering[SmallGroup] {
+    def compare(a: SmallGroup, b: SmallGroup): Int = {
+      val nameCompare = StringUtils.AlphaNumericStringOrdering.compare(a.name, b.name)
+      if (nameCompare != 0) nameCompare else a.id compare b.id
+    }
+  }
+
+  // Companion object is one of the places searched for an implicit Ordering, so
+  // this will be the default when ordering a list of small groups.
+  implicit val defaultOrdering = NameOrdering
 }
 
 /**
- * Represents a single small teaching group within a group set.
- */
+  * Represents a single small teaching group within a group set.
+  */
 @Entity
 @Access(AccessType.FIELD)
 class SmallGroup
-		extends GeneratedId
-		with ToString
-		with PermissionsTarget
-		with HasSettings
-		with Serializable
-		with PostLoadBehaviour
-		with ToEntityReference {
-	type Entity = SmallGroup
-	import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
+  extends GeneratedId
+    with ToString
+    with PermissionsTarget
+    with HasSettings
+    with Serializable
+    with PostLoadBehaviour
+    with ToEntityReference {
+  type Entity = SmallGroup
 
-	@transient var permissionsService: PermissionsService = Wire[PermissionsService]
+  import uk.ac.warwick.tabula.data.model.groups.SmallGroup._
 
-	// FIXME this isn't really optional, but testing is a pain unless it's made so
-	@transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+  @transient var permissionsService: PermissionsService = Wire[PermissionsService]
 
-	def this(_set: SmallGroupSet) {
-		this()
-		this.groupSet = _set
-	}
+  // FIXME this isn't really optional, but testing is a pain unless it's made so
+  @transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
 
-	@Column(name="name")
-	private var _name: String = _
-	def name: String = Option(linkedDepartmentSmallGroup).map { _.name }.getOrElse(_name)
-	def name_=(name: String) { _name = name }
+  def this(_set: SmallGroupSet) {
+    this()
+    this.groupSet = _set
+  }
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "set_id", insertable = false, updatable = false)
-	var groupSet: SmallGroupSet = _
+  @Column(name = "name")
+  private var _name: String = _
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
-	@JoinColumn(name = "group_id")
-	@BatchSize(size=200)
-	private val _events: JList[SmallGroupEvent] = JArrayList()
+  def name: String = Option(linkedDepartmentSmallGroup).map(_.name).getOrElse(_name)
 
-	def events: mutable.Buffer[SmallGroupEvent] = _events.asScala.sorted
-	private def events_=(e: Seq[SmallGroupEvent]) {
-		_events.clear()
-		_events.addAll(e.asJava)
-	}
+  def name_=(name: String) {
+    _name = name
+  }
 
-	def addEvent(event: SmallGroupEvent): Boolean = _events.add(event)
-	def removeEvent(event: SmallGroupEvent): Boolean = _events.remove(event)
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "set_id", insertable = false, updatable = false)
+  var groupSet: SmallGroupSet = _
 
-	// A linked departmental small group; if this is linked, allocations aren't kept here.
-	@ManyToOne(fetch = FetchType.LAZY, optional = true)
-	@JoinColumn(name = "linked_dept_group_id")
-	var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
+  @OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @JoinColumn(name = "group_id")
+  @BatchSize(size = 200)
+  private val _events: JList[SmallGroupEvent] = JArrayList()
 
-	def permissionsParents: Stream[SmallGroupSet] = Option(groupSet).toStream
-	override def humanReadableId: String = name
+  def events: mutable.Buffer[SmallGroupEvent] = _events.asScala.sorted
 
-	/**
-	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
-	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
-	 * the right sort of UserId to use is.
-	 */
-	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "studentsgroup_id")
-	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+  private def events_=(e: Seq[SmallGroupEvent]) {
+    _events.clear()
+    _events.addAll(e.asJava)
+  }
+
+  def addEvent(event: SmallGroupEvent): Boolean = _events.add(event)
+
+  def removeEvent(event: SmallGroupEvent): Boolean = _events.remove(event)
+
+  // A linked departmental small group; if this is linked, allocations aren't kept here.
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
+  @JoinColumn(name = "linked_dept_group_id")
+  var linkedDepartmentSmallGroup: DepartmentSmallGroup = _
+
+  def permissionsParents: Stream[SmallGroupSet] = Option(groupSet).toStream
+
+  override def humanReadableId: String = name
+
+  /**
+    * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
+    * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
+    * the right sort of UserId to use is.
+    */
+  @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @JoinColumn(name = "studentsgroup_id")
+  private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+
   def students: UnspecifiedTypeUserGroup = {
-		linkedDepartmentSmallGroup match {
-			case ldsg: DepartmentSmallGroup => ldsg.students
-			case _ =>
-				smallGroupService match {
-					case Some(service) =>
-						new UserGroupCacheManager(_studentsGroup, service.studentGroupHelper)
-					case _ => _studentsGroup
-				}
-		}
-	}
-	def students_=(group: UserGroup) { _studentsGroup = group }
+    linkedDepartmentSmallGroup match {
+      case ldsg: DepartmentSmallGroup => ldsg.students
+      case _ =>
+        smallGroupService match {
+          case Some(service) =>
+            new UserGroupCacheManager(_studentsGroup, service.studentGroupHelper)
+          case _ => _studentsGroup
+        }
+    }
+  }
 
-	def maxGroupSize = JInteger(getIntSetting(Settings.MaxGroupSize))
-	def maxGroupSize_=(defaultSize:JInteger): Unit =
-		defaultSize match {
-			case null => removeMaxGroupSize()
-			case _ => settings += (Settings.MaxGroupSize -> defaultSize)
-		}
+  def students_=(group: UserGroup) {
+    _studentsGroup = group
+  }
 
-	def removeMaxGroupSize(): Unit = settings -= Settings.MaxGroupSize
+  def maxGroupSize = JInteger(getIntSetting(Settings.MaxGroupSize))
 
-	def isFull: Boolean = Option(maxGroupSize).exists(_ <= students.size)
+  def maxGroupSize_=(defaultSize: JInteger): Unit =
+    defaultSize match {
+      case null => removeMaxGroupSize()
+      case _ => settings += (Settings.MaxGroupSize -> defaultSize)
+    }
 
-	def toStringProps = Seq(
-		"id" -> id,
-		"name" -> name,
-		"set" -> groupSet)
+  def removeMaxGroupSize(): Unit = settings -= Settings.MaxGroupSize
+
+  def isFull: Boolean = Option(maxGroupSize).exists(_ <= students.size)
+
+  def toStringProps = Seq(
+    "id" -> id,
+    "name" -> name,
+    "set" -> groupSet)
 
 
-  def hasEquivalentEventsTo(other:SmallGroup): Boolean = {
-    (this eq other ) ||
-    {
+  def hasEquivalentEventsTo(other: SmallGroup): Boolean = {
+    (this eq other) || {
       val eventsSC = events
       val otherEvents = other.events
-      val allMyEventsExistOnOther = eventsSC.forall(ev=>otherEvents.exists(oe=>oe.isEquivalentTo(ev)))
-      val allOthersEventsExistOnMe = otherEvents.forall(oe=>eventsSC.exists(ev=>ev.isEquivalentTo(oe)))
+      val allMyEventsExistOnOther = eventsSC.forall(ev => otherEvents.exists(oe => oe.isEquivalentTo(ev)))
+      val allOthersEventsExistOnMe = otherEvents.forall(oe => eventsSC.exists(ev => ev.isEquivalentTo(oe)))
       allMyEventsExistOnOther && allOthersEventsExistOnMe
     }
   }
 
   def duplicateTo(groupSet: SmallGroupSet, transient: Boolean, copyEvents: Boolean = true, copyMembership: Boolean = true): SmallGroup = {
     val newGroup = new SmallGroup()
-		if (!transient) newGroup.id = id
+    if (!transient) newGroup.id = id
     if (copyEvents) newGroup.events = events.map(_.duplicateTo(newGroup, transient = transient))
     newGroup.groupSet = groupSet
     newGroup.name = name
-		newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup
+    newGroup.linkedDepartmentSmallGroup = linkedDepartmentSmallGroup
     newGroup.permissionsService = permissionsService
-		if (copyMembership && _studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
-		newGroup.settings = Map() ++ (if (settings != null) settings else Map())
+    if (copyMembership && _studentsGroup != null) newGroup._studentsGroup = _studentsGroup.duplicate()
+    newGroup.settings = Map() ++ (if (settings != null) settings else Map())
     newGroup
   }
 
-	def postLoad {
-		ensureSettings
-	}
+  def postLoad {
+    ensureSettings
+  }
 
-	def preDelete(): Unit = {
-		events.foreach { event =>
-			smallGroupService match {
-				case Some(service) => service.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
-					eventOccurrence => eventOccurrence.attendance.asScala.exists {
-						attendance => attendance.state != AttendanceState.NotRecorded
-					}).foreach(service.delete)
-				case _ =>
-			}
-		}
-	}
+  def preDelete(): Unit = {
+    events.foreach { event =>
+      smallGroupService match {
+        case Some(service) => service.getAllSmallGroupEventOccurrencesForEvent(event).filterNot(
+          eventOccurrence => eventOccurrence.attendance.asScala.exists {
+            attendance => attendance.state != AttendanceState.NotRecorded
+          }).foreach(service.delete)
+        case _ =>
+      }
+    }
+  }
 
-	def hasScheduledEvents: Boolean = events.exists(!_.isUnscheduled)
-
-	override def toEntityReference: SmallGroupEntityReference = new SmallGroupEntityReference().put(this)
+  def hasScheduledEvents: Boolean = events.exists(!_.isUnscheduled)
 }

@@ -20,204 +20,205 @@ import scala.util.{Failure, Success, Try}
 
 abstract class AbstractMeetingRecordCommand {
 
-	self: MeetingRecordCommandRequest with MeetingRecordServiceComponent
-		with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
-		with FileAttachmentServiceComponent =>
+  self: MeetingRecordCommandRequest with MeetingRecordServiceComponent
+    with FeaturesComponent with AttendanceMonitoringMeetingRecordServiceComponent
+    with FileAttachmentServiceComponent =>
 
-	protected def applyCommon(meeting: MeetingRecord): MeetingRecord = {
-		meeting.title = title
-		meeting.description = description
+  protected def applyCommon(meeting: MeetingRecord): MeetingRecord = {
+    meeting.title = title
+    meeting.description = description
 
-		if (meeting.isRealTime) {
-			if (meetingDateStr.hasText && meetingTimeStr.hasText) {
-				meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-			}
-			if (meetingDateStr.hasText && meetingEndTimeStr.hasText) {
-				meeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
-			}
-		} else {
-			meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
-			meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
-		}
-		if (meetingLocation.hasText) {
-			if (meetingLocationId.hasText) {
-				meeting.meetingLocation = MapLocation(meetingLocation, meetingLocationId)
-			} else {
-				meeting.meetingLocation = NamedLocation(meetingLocation)
-			}
-		} else {
-			meeting.meetingLocation = null
-		}
+    if (meeting.isRealTime) {
+      if (meetingDateStr.hasText && meetingTimeStr.hasText) {
+        meeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
+      }
+      if (meetingDateStr.hasText && meetingEndTimeStr.hasText) {
+        meeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
+      }
+    } else {
+      meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
+      meeting.meetingEndDate = meetingEndDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay).plusHours(1)
+    }
+    if (meetingLocation.hasText) {
+      if (meetingLocationId.hasText) {
+        meeting.meetingLocation = MapLocation(meetingLocation, meetingLocationId)
+      } else {
+        meeting.meetingLocation = NamedLocation(meetingLocation)
+      }
+    } else {
+      meeting.meetingLocation = null
+    }
 
-		meeting.format = format
-		meeting.lastUpdatedDate = DateTime.now
-		persistAttachments(meeting)
+    meeting.format = format
+    meeting.lastUpdatedDate = DateTime.now
+    persistAttachments(meeting)
 
-		// persist the meeting record
-		meetingRecordService.saveOrUpdate(meeting)
+    // persist the meeting record
+    meetingRecordService.saveOrUpdate(meeting)
 
-		if (features.meetingRecordApproval && !meeting.missed) {
-			updateMeetingApproval(meeting)
-		}
+    if (features.meetingRecordApproval && !meeting.missed) {
+      updateMeetingApproval(meeting)
+    }
 
-		if (features.attendanceMonitoringMeetingPointType) {
-			attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
-		}
+    if (features.attendanceMonitoringMeetingPointType) {
+      attendanceMonitoringMeetingRecordService.updateCheckpoints(meeting)
+    }
 
-		meeting
-	}
+    meeting
+  }
 
-	private def persistAttachments(meeting: MeetingRecord) {
+  private def persistAttachments(meeting: MeetingRecord) {
 
-		// delete attachments that have been removed
-		if (meeting.attachments != null) {
-			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-			val filesToRemove = meeting.attachments.asScala -- filesToKeep
-			meeting.attachments = JArrayList[FileAttachment](filesToKeep)
-			fileAttachmentService.deleteAttachments(filesToRemove)
-		}
+    // delete attachments that have been removed
+    if (meeting.attachments != null) {
+      val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
+      val filesToRemove = meeting.attachments.asScala -- filesToKeep
+      meeting.attachments = JArrayList[FileAttachment](filesToKeep)
+      fileAttachmentService.deleteAttachments(filesToRemove)
+    }
 
-		val newAttachments = file.attached.asScala.map(_.duplicate())
-		newAttachments.foreach(meeting.addAttachment)
-	}
+    val newAttachments = file.attached.asScala.map(_.duplicate())
+    newAttachments.foreach(meeting.addAttachment)
+  }
 
-	private def updateMeetingApproval(meetingRecord: MeetingRecord): Seq[MeetingRecordApproval] = {
-		def createOrUpdateApproval(approver: Member): MeetingRecordApproval = {
-			val meetingRecordApproval = meetingRecord.approvals.asScala.find(_.approver == approver).getOrElse {
-				val newMeetingRecordApproval = new MeetingRecordApproval()
-				newMeetingRecordApproval.approver = approver
-				newMeetingRecordApproval.meetingRecord = meetingRecord
-				meetingRecord.approvals.add(newMeetingRecordApproval)
-				newMeetingRecordApproval
-			}
-			meetingRecordApproval.state = Pending
-			meetingRecordService.saveOrUpdate(meetingRecordApproval)
-			meetingRecordApproval
-		}
+  private def updateMeetingApproval(meetingRecord: MeetingRecord): Seq[MeetingRecordApproval] = {
+    def createOrUpdateApproval(approver: Member): MeetingRecordApproval = {
+      val meetingRecordApproval = meetingRecord.approvals.asScala.find(_.approver == approver).getOrElse {
+        val newMeetingRecordApproval = new MeetingRecordApproval()
+        newMeetingRecordApproval.approver = approver
+        newMeetingRecordApproval.meetingRecord = meetingRecord
+        meetingRecord.approvals.add(newMeetingRecordApproval)
+        newMeetingRecordApproval
+      }
+      meetingRecordApproval.state = Pending
+      meetingRecordService.saveOrUpdate(meetingRecordApproval)
+      meetingRecordApproval
+    }
 
-		// Remove approvals for any removed participants
-		meetingRecord.approvals.asScala.filterNot(a => meetingRecord.participants.contains(a.approver)).foreach { approval =>
-			approval.meetingRecord = null
-			meetingRecord.approvals.remove(approval)
-			meetingRecordService.purge(approval)
-		}
+    // Remove approvals for any removed participants
+    meetingRecord.approvals.asScala.filterNot(a => meetingRecord.participants.contains(a.approver)).foreach { approval =>
+      approval.meetingRecord = null
+      meetingRecord.approvals.remove(approval)
+      meetingRecordService.purge(approval)
+    }
 
-		val approvers = if (meetingRecord.participants.contains(meetingRecord.creator)) {
-			// Approval is required from all participants except the person who created the record
-			meetingRecord.participants.filter(_ != meetingRecord.creator)
-		} else {
-			// The record was created on behalf of the agents
-			// Only the student needs to approve the record
-			Seq(meetingRecord.student)
-		}
+    val approvers = if (meetingRecord.participants.contains(meetingRecord.creator)) {
+      // Approval is required from all participants except the person who created the record
+      meetingRecord.participants.filter(_ != meetingRecord.creator)
+    } else {
+      // The record was created on behalf of the agents
+      // Only the student needs to approve the record
+      Seq(meetingRecord.student)
+    }
 
-		approvers.map(createOrUpdateApproval)
-	}
+    approvers.map(createOrUpdateApproval)
+  }
 }
 
 trait MeetingRecordCommandBindListener extends BindListener {
 
-	self: MeetingRecordCommandRequest =>
+  self: MeetingRecordCommandRequest =>
 
-	override def onBind(result: BindingResult): Unit = transactional() {
-		file.onBind(result)
-	}
+  override def onBind(result: BindingResult): Unit = transactional() {
+    file.onBind(result)
+  }
 }
 
 trait MeetingRecordValidation extends SelfValidating {
 
-	self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
+  self: MeetingRecordCommandRequest with MeetingRecordCommandState =>
 
-	override def validate(errors: Errors) {
+  override def validate(errors: Errors) {
 
-		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		if (title.length > MeetingRecord.MaxTitleLength) {
-			errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")
-		}
+    rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
+    if (title.length > MeetingRecord.MaxTitleLength) {
+      errors.rejectValue("title", "meetingRecord.title.long", Array(MeetingRecord.MaxTitleLength.toString), "")
+    }
 
-		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
+    rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
-		val dateToCheck: DateTime = if (isRealTime) {
-			Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
-				.orElse(Try(DatePickerFormatter.parseDateTime(meetingDateStr)))
-				.getOrElse(null)
-		} else {
-			meetingDate.toDateTimeAtStartOfDay
-		}
+    val dateToCheck: DateTime = if (isRealTime) {
+      Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
+        .orElse(Try(DatePickerFormatter.parseDateTime(meetingDateStr)))
+        .getOrElse(null)
+    } else {
+      meetingDate.toDateTimeAtStartOfDay
+    }
 
-		if(meetingLocation.length > MeetingRecord.MaxLocationLength) {
-			errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
-		}
+    if (meetingLocation.length > MeetingRecord.MaxLocationLength) {
+      errors.rejectValue("meetingLocation", "meetingRecord.location.long", Array(MeetingRecord.MaxLocationLength.toString), "")
+    }
 
-		if (dateToCheck == null) {
-			errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
-		} else {
-			if (dateToCheck.isAfter(DateTime.now)) {
-				errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
-			} else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
-				errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
-			}
-		}
+    if (dateToCheck == null) {
+      errors.rejectValue("meetingDateStr", "meetingRecord.date.missing")
+    } else {
+      if (dateToCheck.isAfter(DateTime.now)) {
+        errors.rejectValue("meetingDateStr", "meetingRecord.date.future")
+      } else if (dateToCheck.isBefore(DateTime.now.minusYears(MeetingRecord.MeetingTooOldThresholdYears))) {
+        errors.rejectValue("meetingDateStr", "meetingRecord.date.prehistoric")
+      }
+    }
 
-		if (meetingTimeStr.isEmptyOrWhitespace) {
-			errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
-		}
-		if (meetingEndTimeStr.isEmptyOrWhitespace) {
-			errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
-		}
+    if (meetingTimeStr.isEmptyOrWhitespace) {
+      errors.rejectValue("meetingTimeStr", "meetingRecord.starttime.missing")
+    }
+    if (meetingEndTimeStr.isEmptyOrWhitespace) {
+      errors.rejectValue("meetingEndTimeStr", "meetingRecord.endtime.missing")
+    }
 
-		if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
+    if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
 
-			val startDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
-			val endDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr))
+      val startDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr))
+      val endDateTime: Try[DateTime] = Try(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr))
 
-			(startDateTime, endDateTime) match {
-				case (Failure(_), Failure(_)) =>
-					errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
-					errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
-				case (Failure(_), _) => errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
-				case (_, Failure(_)) => errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
-				case (Success(start), Success(end)) if end.isBefore(start) || start.isEqual(end) => errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
-				case _ => // no validation errors
-			}
-		}
-	}
+      (startDateTime, endDateTime) match {
+        case (Failure(_), Failure(_)) =>
+          errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
+          errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
+        case (Failure(_), _) => errors.rejectValue("meetingTimeStr", "meetingRecord.time.invalid")
+        case (_, Failure(_)) => errors.rejectValue("meetingEndTimeStr", "meetingRecord.time.invalid")
+        case (Success(start), Success(end)) if end.isBefore(start) || start.isEqual(end) => errors.rejectValue("meetingTimeStr", "meetingRecord.date.endbeforestart")
+        case _ => // no validation errors
+      }
+    }
+  }
 }
 
 trait MeetingRecordCommandState {
-	def creator: Member
-	val attachmentTypes: Seq[String] = Seq[String]()
-	var isRealTime: Boolean = true
+  def creator: Member
+
+  val attachmentTypes: Seq[String] = Seq[String]()
+  var isRealTime: Boolean = true
 }
 
 trait MeetingRecordCommandRequest {
-	var title: String = _
-	var description: String = _
+  var title: String = _
+  var description: String = _
 
-	var relationships: JList[StudentRelationship] = JArrayList()
+  var relationships: JList[StudentRelationship] = JArrayList()
 
-	var meetingDate: LocalDate = _
-	var meetingDateStr: String  = _
-	if(meetingDate != null){
-		meetingDateStr = meetingDate.toString(DatePickerFormatter)
-	}
+  var meetingDate: LocalDate = _
+  var meetingDateStr: String = _
+  if (meetingDate != null) {
+    meetingDateStr = meetingDate.toString(DatePickerFormatter)
+  }
 
-	var meetingTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
-	var meetingTimeStr: String  = meetingTime.toString(TimePickerFormatter)
+  var meetingTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+  var meetingTimeStr: String = meetingTime.toString(TimePickerFormatter)
 
-	var meetingEndDate: LocalDate = _
+  var meetingEndDate: LocalDate = _
 
-	var meetingEndTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
-	var meetingEndTimeStr: String  = meetingEndTime.toString(TimePickerFormatter)
+  var meetingEndTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
+  var meetingEndTimeStr: String = meetingEndTime.toString(TimePickerFormatter)
 
-	var meetingDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
-	var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
+  var meetingDateTime: DateTime = DateTime.now.hourOfDay.roundFloorCopy
+  var meetingEndDateTime: DateTime = DateTime.now.plusHours(1).hourOfDay.roundFloorCopy
 
-	var meetingLocation: String = _
-	var meetingLocationId: String = _
+  var meetingLocation: String = _
+  var meetingLocationId: String = _
 
-	var format: MeetingFormat = _
-	var file: UploadedFile = new UploadedFile
-	var attachedFiles: JList[FileAttachment] = _
+  var format: MeetingFormat = _
+  var file: UploadedFile = new UploadedFile
+  var attachedFiles: JList[FileAttachment] = _
 }
 

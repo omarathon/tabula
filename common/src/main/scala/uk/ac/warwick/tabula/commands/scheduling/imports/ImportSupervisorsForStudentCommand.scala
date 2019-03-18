@@ -11,41 +11,41 @@ import uk.ac.warwick.tabula.services.scheduling.SupervisorImporter
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 
 class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourseDetails)
-	extends Command[Unit] with Unaudited with Logging {
-	PermissionCheck(Permissions.ImportSystemData)
+  extends Command[Unit] with Unaudited with Logging {
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var supervisorImporter: SupervisorImporter = Wire.auto[SupervisorImporter]
-	var profileService: ProfileService = Wire.auto[ProfileService]
-	var relationshipService: RelationshipService = Wire.auto[RelationshipService]
+  var supervisorImporter: SupervisorImporter = Wire.auto[SupervisorImporter]
+  var profileService: ProfileService = Wire.auto[ProfileService]
+  var relationshipService: RelationshipService = Wire.auto[RelationshipService]
 
-	def applyInternal() {
-		if (studentCourseDetails.currentRoute != null && studentCourseDetails.currentRoute.degreeType == Postgraduate) {
-			transactional() {
-				importSupervisors()
-			}
-		}
-	}
+  def applyInternal() {
+    if (studentCourseDetails.currentRoute != null && studentCourseDetails.currentRoute.degreeType == Postgraduate) {
+      transactional() {
+        importSupervisors()
+      }
+    }
+  }
 
-	override def describe(d: Description): Unit = d.property("sprCode" -> studentCourseDetails.sprCode)
+  override def describe(d: Description): Unit = d.property("sprCode" -> studentCourseDetails.sprCode)
 
-	def importSupervisors() {
-		relationshipService
-			.getStudentRelationshipTypesWithRdxType // only look for relationship types that are in RDX
-			.filter { relType => // where the department settings specify that SITS should be the source
-				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(relType.defaultSource)
-				source == StudentRelationshipSource.SITS
-			}
-			.foreach { relationshipType =>
-				val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode, relationshipType)
-				val supervisors = supervisorUniIds.flatMap { case (supervisorUniId, percentage) =>
-					val m = profileService.getMemberByUniversityId(supervisorUniId)
-					if (m.isEmpty) {
-						logger.warn("Can't save supervisor " + supervisorUniId + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
-					}
-					m.map { m => (m, percentage) }
-				}
+  def importSupervisors() {
+    relationshipService
+      .getStudentRelationshipTypesWithRdxType // only look for relationship types that are in RDX
+      .filter { relType => // where the department settings specify that SITS should be the source
+      val source = Option(studentCourseDetails.department).map(_.getStudentRelationshipSource(relType)).getOrElse(relType.defaultSource)
+      source == StudentRelationshipSource.SITS
+    }
+      .foreach { relationshipType =>
+        val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode, relationshipType)
+        val supervisors = supervisorUniIds.flatMap { case (supervisorUniId, percentage) =>
+          val m = profileService.getMemberByUniversityId(supervisorUniId)
+          if (m.isEmpty) {
+            logger.warn("Can't save supervisor " + supervisorUniId + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
+          }
+          m.map { m => (m, percentage) }
+        }
 
-				relationshipService.replaceStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, supervisors)
-			}
-	}
+        relationshipService.replaceStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, supervisors)
+      }
+  }
 }

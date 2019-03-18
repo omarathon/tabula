@@ -8,38 +8,38 @@ import uk.ac.warwick.tabula.data.AutowiringMarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.MarkingWorkflowDaoComponent
 
 trait MarkingWorkflowServiceComponent {
-	def markingWorkflowService: MarkingWorkflowService
+  def markingWorkflowService: MarkingWorkflowService
 }
 
 trait AutowiringMarkingWorkflowServiceComponent extends MarkingWorkflowServiceComponent {
-	var markingWorkflowService: MarkingWorkflowService = Wire[MarkingWorkflowService]
+  var markingWorkflowService: MarkingWorkflowService = Wire[MarkingWorkflowService]
 }
 
 trait MarkingWorkflowService {
-	def save(markingWorkflow: MarkingWorkflow): Unit
+  def save(markingWorkflow: MarkingWorkflow): Unit
 
-	/** All assignments using this marking workflow. */
-	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment]
+  /** All assignments using this marking workflow. */
+  def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment]
 
-	/** All exams using this marking workflow. */
-	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam]
+  /** All exams using this marking workflow. */
+  def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam]
 }
 
 abstract class AbstractMarkingWorkflowService extends MarkingWorkflowService {
-	self: MarkingWorkflowDaoComponent
-		with Logging =>
+  self: MarkingWorkflowDaoComponent
+    with Logging =>
 
-	def save(markingWorkflow: MarkingWorkflow): Unit = markingWorkflowDao.save(markingWorkflow)
+  def save(markingWorkflow: MarkingWorkflow): Unit = markingWorkflowDao.save(markingWorkflow)
 
-	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
-		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
+  def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
+    markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 
-	def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
-		markingWorkflowDao.getExamsUsingMarkingWorkflow(markingWorkflow)
+  def getExamsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Exam] =
+    markingWorkflowDao.getExamsUsingMarkingWorkflow(markingWorkflow)
 }
 
 @Service("markingWorkflowService")
 class MarkingWorkflowServiceImpl
-	extends AbstractMarkingWorkflowService
-		with AutowiringMarkingWorkflowDaoComponent
-		with Logging
+  extends AbstractMarkingWorkflowService
+    with AutowiringMarkingWorkflowDaoComponent
+    with Logging

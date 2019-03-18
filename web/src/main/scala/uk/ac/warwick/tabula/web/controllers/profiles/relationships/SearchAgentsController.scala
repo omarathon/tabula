@@ -16,16 +16,16 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @Controller
 class SearchAgentsController extends ProfilesController with SearchJSONHelpers {
 
-	type SearchAgentsCommand = Appliable[Seq[Member]] with AbstractSearchProfilesCommandState
+  type SearchAgentsCommand = Appliable[Seq[Member]] with AbstractSearchProfilesCommandState
 
-	override val formMav = null
+  override val formMav = null
 
-	@ModelAttribute("searchAgentsCommand")
-	def searchAgentsCommand = SearchAgentsCommand(user)
+  @ModelAttribute("searchAgentsCommand")
+  def searchAgentsCommand = SearchAgentsCommand(user)
 
-	@RequestMapping(value=Array("/profiles/relationships/agents/search.json"), params=Array("query"))
-	def submitAgentSearchJSON(@Valid @ModelAttribute("searchAgentsCommand") cmd: SearchAgentsCommand, errors: Errors): Mav = {
-		submitJson(cmd, errors)
-	}
+  @RequestMapping(value = Array("/profiles/relationships/agents/search.json"), params = Array("query"))
+  def submitAgentSearchJSON(@Valid @ModelAttribute("searchAgentsCommand") cmd: SearchAgentsCommand, errors: Errors): Mav = {
+    submitJson(cmd, errors)
+  }
 
 }

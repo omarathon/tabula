@@ -16,84 +16,84 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 abstract class AssignmentSubmissionsController extends ApiController
-	with SubmissionToJsonConverter
+  with SubmissionToJsonConverter
 
 @Controller
 @RequestMapping(
-	method = Array(RequestMethod.GET),
-	value = Array("/v1/module/{module}/assignments/{assignment}/submissions")
+  method = Array(RequestMethod.GET),
+  value = Array("/v1/module/{module}/assignments/{assignment}/submissions")
 )
 class GetAssignmentSubmissionsController extends AssignmentSubmissionsController
-	with ListSubmissionsForAssignmentApi
+  with ListSubmissionsForAssignmentApi
 
 trait ListSubmissionsForAssignmentApi {
-	self: AssignmentSubmissionsController =>
+  self: AssignmentSubmissionsController =>
 
-	@ModelAttribute("listCommand")
-	def listCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-		SubmissionAndFeedbackCommand(module, assignment)
+  @ModelAttribute("listCommand")
+  def listCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+    SubmissionAndFeedbackCommand(module, assignment)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val results = command.apply()
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def list(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val results = command.apply()
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"submissions" -> results.students.map { student =>
-					student.user.getWarwickId.maybeText.getOrElse(student.user.getUserId) -> jsonSubmissionObject(student)
-				}.toMap
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "submissions" -> results.students.map { student =>
+          student.user.getWarwickId.maybeText.getOrElse(student.user.getUserId) -> jsonSubmissionObject(student)
+        }.toMap
+      )))
+    }
+  }
 }
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}/submissions/{submission}"))
 class AssignmentSubmissionController extends AssignmentSubmissionsController
-	with GetSubmissionApi
+  with GetSubmissionApi
 
 trait GetSubmissionApi {
-	self: AssignmentSubmissionsController =>
+  self: AssignmentSubmissionsController =>
 
-	@ModelAttribute("listCommand")
-	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-		SubmissionAndFeedbackCommand(module, assignment)
+  @ModelAttribute("listCommand")
+  def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+    SubmissionAndFeedbackCommand(module, assignment)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def get(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment, @PathVariable submission: Submission): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val result = mandatory(command.apply().students.find(_.coursework.enhancedSubmission.exists(_.submission == mandatory(submission))))
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def get(@Valid @ModelAttribute("listCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment, @PathVariable submission: Submission): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val result = mandatory(command.apply().students.find(_.coursework.enhancedSubmission.exists(_.submission == mandatory(submission))))
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"submission" -> jsonSubmissionObject(result)
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "submission" -> jsonSubmissionObject(result)
+      )))
+    }
+  }
 }
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/assignments/{assignment}/submissions/{submission}/{filename}"))
 class AssignmentSubmissionDownloadFileController extends ApiController
-	with DownloadSingleSubmissionAttachmentApi
+  with DownloadSingleSubmissionAttachmentApi
 
 trait DownloadSingleSubmissionAttachmentApi {
-	self: ApiController =>
+  self: ApiController =>
 
-	@ModelAttribute("downloadAttachmentCommand")
-	def downloadAttachmentCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submission: Submission, @PathVariable filename: String): AdminGetSingleSubmissionCommand.Command = {
-		mustBeLinked(mandatory(assignment), mandatory(module))
-		AdminGetSingleSubmissionCommand.single(mandatory(assignment), mandatory(submission), filename)
-	}
+  @ModelAttribute("downloadAttachmentCommand")
+  def downloadAttachmentCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable submission: Submission, @PathVariable filename: String): AdminGetSingleSubmissionCommand.Command = {
+    mustBeLinked(mandatory(assignment), mandatory(module))
+    AdminGetSingleSubmissionCommand.single(mandatory(assignment), mandatory(submission), filename)
+  }
 
-	@RequestMapping(method = Array(GET))
-	def download(@ModelAttribute("downloadAttachmentCommand") command: AdminGetSingleSubmissionCommand.Command): RenderableFile =
-		command.apply()
+  @RequestMapping(method = Array(GET))
+  def download(@ModelAttribute("downloadAttachmentCommand") command: AdminGetSingleSubmissionCommand.Command): RenderableFile =
+    command.apply()
 }

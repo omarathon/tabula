@@ -12,11 +12,30 @@
   font-size: 11px;
   line-height: 1.4;
   .opacity(0);
-  &.in     { .opacity(80); }
-  &.top    { margin-top:  -3px; padding: 5px 0; }
-  &.right  { margin-left:  3px; padding: 0 5px; }
-  &.bottom { margin-top:   3px; padding: 5px 0; }
-  &.left   { margin-left: -3px; padding: 0 5px; }
+
+  &.in {
+    .opacity(80);
+  }
+
+  &.top {
+    margin-top: -3px;
+    padding: 5px 0;
+  }
+
+  &.right {
+    margin-left: 3px;
+    padding: 0 5px;
+  }
+
+  &.bottom {
+    margin-top: 3px;
+    padding: 5px 0;
+  }
+
+  &.left {
+    margin-left: -3px;
+    padding: 0 5px;
+  }
 }
 
 // Wrapper for the tooltip content
@@ -38,6 +57,7 @@
   border-color: transparent;
   border-style: solid;
 }
+
 .tooltip {
   &.top .tooltip-arrow {
     bottom: 0;
@@ -46,6 +66,7 @@
     border-width: @tooltipArrowWidth @tooltipArrowWidth 0;
     border-top-color: @tooltipArrowColor;
   }
+
   &.right .tooltip-arrow {
     top: 50%;
     left: 0;
@@ -53,6 +74,7 @@
     border-width: @tooltipArrowWidth @tooltipArrowWidth @tooltipArrowWidth 0;
     border-right-color: @tooltipArrowColor;
   }
+
   &.left .tooltip-arrow {
     top: 50%;
     right: 0;
@@ -60,6 +82,7 @@
     border-width: @tooltipArrowWidth 0 @tooltipArrowWidth @tooltipArrowWidth;
     border-left-color: @tooltipArrowColor;
   }
+
   &.bottom .tooltip-arrow {
     top: 0;
     left: 50%;

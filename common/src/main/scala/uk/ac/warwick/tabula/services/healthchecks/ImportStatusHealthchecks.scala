@@ -16,71 +16,81 @@ import scala.concurrent.duration._
 
 abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvider {
 
-	def WarningThreshold: Duration
-	def ErrorThreshold: Duration
-	def HealthcheckName: String
+  def WarningThreshold: Duration
 
-	/**
-		* Fetch a list of audit events, most recent first, relating to this import
-		*/
-	protected def auditEvents: Seq[AuditEvent]
+  def ErrorThreshold: Duration
 
-	protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
-		// Get the last one that's successful
-		val lastSuccessful = imports.find { event => !event.hadError && !event.isIncomplete }
+  def HealthcheckName: String
 
-		// Do we have a current running import?
-		val isRunning = imports.headOption.filter(_.isIncomplete)
+  /**
+    * Fetch a list of audit events, most recent first, relating to this import
+    */
+  protected def auditEvents: Seq[AuditEvent]
 
-		// Did the last import fail
-		val lastFailed = imports.find(!_.isIncomplete).filter(_.hadError)
-		//TAB-5698 - ensure we have some audit
-		val status =
-			if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow))
-				ServiceHealthcheck.Status.Error
-			else if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || lastFailed.nonEmpty)
-				ServiceHealthcheck.Status.Warning
-			else
-				ServiceHealthcheck.Status.Okay
+  protected def getServiceHealthCheck(imports: Seq[AuditEvent]): ServiceHealthcheck = {
+    //we currently fetch latest 1000 audit events and then extract related department events. It is possible no successful event will be among that big lot (TAB-6681 - all failed in the lot). In that case lastSuccessful will be none.
+    // Get the last one that's successful
+    val lastSuccessful = imports.find(_.isSuccessful)
 
-		val successMessage =
-			lastSuccessful.map { event => s"Last successful import ${naturalTime(event.eventDate.toDate)}" }
+    // Do we have a current running import?
+    val isRunning = imports.headOption.filter(_.isRunning)
 
-		val runningMessage =
-			isRunning.map { event => s"import started ${naturalTime(event.eventDate.toDate)}" }
+    // Find the last failed import
+    val lastFailed = imports.find(_.hadError)
 
-		val failedMessage =
-			lastFailed.map { event => s"last import failed ${naturalTime(event.eventDate.toDate)}" }
+    // if there is lastFailed after lastSuccessful we treat it as error and don't check threshold. Errors need sorting asap
+    val isError = lastFailed.isDefined && lastSuccessful.isDefined && lastFailed.get.eventDate.isAfter(lastSuccessful.get.eventDate)
 
-		val message = Seq(
-			successMessage.orElse(Some("No successful import found")),
-			runningMessage,
-			failedMessage
-		).flatten.mkString(", ")
+    // if all are failed events among the lot for this specific dept (TAB-6681) - classified as warning
+    val isWarning = lastFailed.isDefined && !lastSuccessful.isDefined
 
-		val lastSuccessfulHoursAgo: Double =
-			lastSuccessful.map { event =>
-				val d = new org.joda.time.Duration(event.eventDate, DateTime.now)
-				d.toStandardSeconds.getSeconds / 3600.0
-			}.getOrElse(0)
+    //TAB-5698 - ensure we have some audit
+    val status =
+      if ((lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(ErrorThreshold.toMillis.toInt).isAfterNow)) || isError)
+        ServiceHealthcheck.Status.Error
+      else if (lastSuccessful.isDefined && !lastSuccessful.exists(_.eventDate.plusMillis(WarningThreshold.toMillis.toInt).isAfterNow) || isWarning)
+        ServiceHealthcheck.Status.Warning
+      else
+        ServiceHealthcheck.Status.Okay
 
-		ServiceHealthcheck(
-			name = HealthcheckName,
-			status = status,
-			testedAt = DateTime.now,
-			message = message,
-			performanceData = Seq(
-				ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo, WarningThreshold.toHours, ErrorThreshold.toHours)
-			)
-		)
-	}
+    val successMessage =
+      lastSuccessful.map { event => s"Last successful import ${naturalTime(event.eventDate.toDate)}" }
 
-	@Scheduled(fixedRate = 60 * 1000) // 1 minute
-	def run(): Unit = transactional(readOnly = true) {
-		val imports = auditEvents
+    val runningMessage =
+      isRunning.map { event => s"import started ${naturalTime(event.eventDate.toDate)}" }
 
-		update(getServiceHealthCheck(imports))
-	}
+    val failedMessage =
+      lastFailed.map { event => s"last import failed ${naturalTime(event.eventDate.toDate)}" }
+
+    val message = Seq(
+      successMessage.orElse(Some("No successful import found")),
+      runningMessage,
+      failedMessage
+    ).flatten.mkString(", ")
+
+    val lastSuccessfulHoursAgo: Double =
+      lastSuccessful.map { event =>
+        val d = new org.joda.time.Duration(event.eventDate, DateTime.now)
+        d.toStandardSeconds.getSeconds / 3600.0
+      }.getOrElse(0)
+
+    ServiceHealthcheck(
+      name = HealthcheckName,
+      status = status,
+      testedAt = DateTime.now,
+      message = message,
+      performanceData = Seq(
+        ServiceHealthcheck.PerformanceData("last_successful_hours", lastSuccessfulHoursAgo, WarningThreshold.toHours, ErrorThreshold.toHours)
+      )
+    )
+  }
+
+  @Scheduled(fixedRate = 60 * 1000) // 1 minute
+  def run(): Unit = transactional(readOnly = true) {
+    val imports = auditEvents
+
+    update(getServiceHealthCheck(imports))
+  }
 
 }
 
@@ -88,15 +98,15 @@ abstract class AbstractImportStatusHealthcheck extends ServiceHealthcheckProvide
 @Profile(Array("scheduling"))
 class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 2 days, critical if no import for 3 days
-	override val WarningThreshold: FiniteDuration = 2.days
-	override val ErrorThreshold: FiniteDuration = 3.days
-	override val HealthcheckName = "import-academic"
+  // Warn if no successful import for 2 days, critical if no import for 3 days
+  override val WarningThreshold: FiniteDuration = 2.days
+  override val ErrorThreshold: FiniteDuration = 3.days
+  override val HealthcheckName = "import-academic"
 
-	override protected def auditEvents: Seq[AuditEvent] = {
-		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 1.minute)
-	}
+  override protected def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:ImportAcademicInformation", 0, 50), 1.minute)
+  }
 
 }
 
@@ -104,63 +114,64 @@ class AcademicDataImportStatusHealthcheck extends AbstractImportStatusHealthchec
 @Profile(Array("scheduling"))
 class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold: FiniteDuration = 3.days
-	override val ErrorThreshold: FiniteDuration = 4.days
-	override val HealthcheckName = "import-profiles"
+  // Warn if no successful import for 3 days, critical for 4 days
+  override val WarningThreshold: FiniteDuration = 3.days
+  override val ErrorThreshold: FiniteDuration = 4.days
+  override val HealthcheckName = "import-profiles"
 
-	lazy val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  lazy val moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	override protected def auditEvents: Seq[AuditEvent] = {
-		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportProfiles", 0, 1000), 1.minute)
-	}
+  override protected def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:ImportProfiles", 0, 1000), 1.minute)
+  }
 
-	private def checkDepartment(imports: Seq[AuditEvent], department: Department): (Department, ServiceHealthcheck) = {
-		val thisDepartmentImports = imports.filter(event =>
-			event.data == "{\"deptCode\":\"%s\"}".format(department.code)
-				// legacy imports
-				|| event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
-		)
-		(department, getServiceHealthCheck(thisDepartmentImports))
-	}
+  private def checkDepartment(imports: Seq[AuditEvent], department: Department): (Department, ServiceHealthcheck) = {
+    val thisDepartmentImports = imports.filter(event =>
+      event.data == "{\"deptCode\":\"%s\"}".format(department.code)
+        // legacy imports
+        || event.data == "{\"deptCode\":null}" || event.data == "{\"deptCode\":\"\"}"
+    )
+    (department, getServiceHealthCheck(thisDepartmentImports))
+  }
 
-	@Scheduled(fixedRate = 60 * 1000) // 1 minute
-	override def run(): Unit = transactional(readOnly = true) {
-		val allRootDepartments = moduleAndDepartmentService.allRootDepartments
-		val imports = auditEvents
+  @Scheduled(fixedRate = 60 * 1000) // 1 minute
+  override def run(): Unit = transactional(readOnly = true) {
+    val allRootDepartments = moduleAndDepartmentService.allRootDepartments
+    val imports = auditEvents
 
-		val healthchecks = allRootDepartments.map(department => checkDepartment(imports, department))
+    val healthchecks = allRootDepartments.map(department => checkDepartment(imports, department))
 
-		val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
-			val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
-			val warnings = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Warning }
+    val (department, healthcheckToUpdate): (Department, ServiceHealthcheck) = {
+      val errors = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Error }
+      val warnings = healthchecks.filter { case (_, check) => check.status == ServiceHealthcheck.Status.Warning }
 
-			// Show oldest import
-			def sorted(departmentAndChecks: Seq[(Department, ServiceHealthcheck)]): (Department, ServiceHealthcheck) = {
-				departmentAndChecks.sortBy { case (_, check) => check.performanceData.head.value match {
-					case lastSuccessfulHoursAgo: Double => lastSuccessfulHoursAgo
-					case _ => 0
-				}}.last
-			}
+      // Show oldest import
+      def sorted(departmentAndChecks: Seq[(Department, ServiceHealthcheck)]): (Department, ServiceHealthcheck) = {
+        departmentAndChecks.sortBy { case (_, check) => check.performanceData.head.value match {
+          case lastSuccessfulHoursAgo: Double => lastSuccessfulHoursAgo
+          case _ => 0
+        }
+        }.last
+      }
 
-			if (errors.nonEmpty) {
-				sorted(errors)
-			} else if (warnings.nonEmpty) {
-				sorted(warnings)
-			} else {
-				sorted(healthchecks)
-			}
-		}
+      if (errors.nonEmpty) {
+        sorted(errors)
+      } else if (warnings.nonEmpty) {
+        sorted(warnings)
+      } else {
+        sorted(healthchecks)
+      }
+    }
 
-		update(ServiceHealthcheck(
-			name = healthcheckToUpdate.name,
-			status = healthcheckToUpdate.status,
-			testedAt = healthcheckToUpdate.testedAt,
-			message = Seq(healthcheckToUpdate.message, s"oldest department ${department.code}").mkString(", "),
-			performanceData = healthcheckToUpdate.performanceData
-		))
-	}
+    update(ServiceHealthcheck(
+      name = healthcheckToUpdate.name,
+      status = healthcheckToUpdate.status,
+      testedAt = healthcheckToUpdate.testedAt,
+      message = Seq(healthcheckToUpdate.message, s"oldest department ${department.code}").mkString(", "),
+      performanceData = healthcheckToUpdate.performanceData
+    ))
+  }
 
 }
 
@@ -168,15 +179,15 @@ class ProfileImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 @Profile(Array("scheduling"))
 class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold: FiniteDuration = 3.days
-	override val ErrorThreshold: FiniteDuration = 4.days
-	override val HealthcheckName = "import-assignments"
+  // Warn if no successful import for 3 days, critical for 4 days
+  override val WarningThreshold: FiniteDuration = 3.days
+  override val ErrorThreshold: FiniteDuration = 4.days
+  override val HealthcheckName = "import-assignments"
 
-	override protected def auditEvents: Seq[AuditEvent] = {
-		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 1.minute)
-	}
+  override protected def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:ImportAssignments", 0, 50), 1.minute)
+  }
 
 }
 
@@ -184,15 +195,15 @@ class AssignmentImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 @Profile(Array("scheduling"))
 class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold: FiniteDuration = 3.days
-	override val ErrorThreshold: FiniteDuration = 4.days
-	override val HealthcheckName = "import-module-lists"
+  // Warn if no successful import for 3 days, critical for 4 days
+  override val WarningThreshold: FiniteDuration = 3.days
+  override val ErrorThreshold: FiniteDuration = 4.days
+  override val HealthcheckName = "import-module-lists"
 
-	override protected def auditEvents: Seq[AuditEvent] = {
-		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportModuleLists", 0, 50), 1.minute)
-	}
+  override protected def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:ImportModuleLists", 0, 50), 1.minute)
+  }
 
 }
 
@@ -200,14 +211,14 @@ class ModuleListImportStatusHealthcheck extends AbstractImportStatusHealthcheck 
 @Profile(Array("scheduling"))
 class RouteRuleImportStatusHealthcheck extends AbstractImportStatusHealthcheck {
 
-	// Warn if no successful import for 3 days, critical for 4 days
-	override val WarningThreshold: FiniteDuration = 3.days
-	override val ErrorThreshold: FiniteDuration = 4.days
-	override val HealthcheckName = "import-route-rules"
+  // Warn if no successful import for 3 days, critical for 4 days
+  override val WarningThreshold: FiniteDuration = 3.days
+  override val ErrorThreshold: FiniteDuration = 4.days
+  override val HealthcheckName = "import-route-rules"
 
-	override protected def auditEvents: Seq[AuditEvent] = {
-		val queryService = Wire[AuditEventQueryService]
-		Await.result(queryService.query("eventType:ImportRouteRules", 0, 50), 1.minute)
-	}
+  override protected def auditEvents: Seq[AuditEvent] = {
+    val queryService = Wire[AuditEventQueryService]
+    Await.result(queryService.query("eventType:ImportRouteRules", 0, 50), 1.minute)
+  }
 
 }

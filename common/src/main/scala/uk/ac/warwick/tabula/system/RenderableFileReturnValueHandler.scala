@@ -12,25 +12,26 @@ import uk.ac.warwick.tabula.helpers.{Ordered, Logging}
 import uk.ac.warwick.tabula.services.fileserver.{StreamsFiles, RenderableFile}
 
 /**
- * Allows a controller method to return a RenderableFile
- */
+  * Allows a controller method to return a RenderableFile
+  */
 class RenderableFileReturnValueHandler extends HandlerMethodReturnValueHandler with Logging with Ordered {
 
-	override def supportsReturnType(methodParam: MethodParameter): Boolean =
-		classOf[RenderableFile] isAssignableFrom methodParam.getMethod.getReturnType
+  override def supportsReturnType(methodParam: MethodParameter): Boolean =
+    classOf[RenderableFile] isAssignableFrom methodParam.getMethod.getReturnType
 
-	override def handleReturnValue(
-		returnValue: Object,
-		returnType: MethodParameter,
-		mavContainer: ModelAndViewContainer,
-		webRequest: NativeWebRequest): Unit = returnValue match {
-			case file: RenderableFile => mavContainer.setView(new RenderableFileView(file))
-		}
+  override def handleReturnValue(
+    returnValue: Object,
+    returnType: MethodParameter,
+    mavContainer: ModelAndViewContainer,
+    webRequest: NativeWebRequest): Unit = returnValue match {
+    case file: RenderableFile => mavContainer.setView(new RenderableFileView(file))
+  }
 }
 
 class RenderableFileView(file: RenderableFile) extends View with StreamsFiles with AutowiringFeaturesComponent {
-	def getContentType: String = file.contentType
-	def render(model: JMap[String, _], in: HttpServletRequest, out: HttpServletResponse) {
-		stream(file)(in, out)
-	}
+  override def getContentType: String = file.contentType
+
+  def render(model: JMap[String, _], in: HttpServletRequest, out: HttpServletResponse) {
+    stream(file)(in, out)
+  }
 }

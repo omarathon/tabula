@@ -12,29 +12,29 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
- * Displays the view home screen, allowing users to choose the department and academic year to view.
- */
+  * Displays the view home screen, allowing users to choose the department and academic year to view.
+  */
 abstract class AbstractAttendanceViewHomeController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("command")
-	def createCommand(user: CurrentUser) = HomeCommand(user)
+  @ModelAttribute("command")
+  def createCommand(user: CurrentUser) = HomeCommand(user)
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val info = cmd.apply()
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    val info = cmd.apply()
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		if (info.viewPermissions.size == 1) {
-			Redirect(Routes.View.departmentForYear(info.viewPermissions.head, academicYear))
-		} else {
-			Mav("attendance/view/home",
-				"academicYear" -> academicYear,
-				"viewPermissions" -> info.viewPermissions
-			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.homeForYear(year)): _*)
-		}
-	}
+    if (info.viewPermissions.size == 1) {
+      Redirect(Routes.View.departmentForYear(info.viewPermissions.head, academicYear))
+    } else {
+      Mav("attendance/view/home",
+        "academicYear" -> academicYear,
+        "viewPermissions" -> info.viewPermissions
+      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.homeForYear(year)): _*)
+    }
+  }
 
 }
 
@@ -42,8 +42,8 @@ abstract class AbstractAttendanceViewHomeController extends AttendanceController
 @RequestMapping(Array("/attendance/view"))
 class AttendanceViewHomeController extends AbstractAttendanceViewHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 }
 
@@ -51,7 +51,7 @@ class AttendanceViewHomeController extends AbstractAttendanceViewHomeController 
 @RequestMapping(value = Array("/attendance/view/{academicYear:\\d{4}}"))
 class AttendanceViewHomeForYearController extends AbstractAttendanceViewHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 }

@@ -4,10 +4,10 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 
 abstract class GroupsController extends BaseController with GroupsBreadcrumbs {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	final override def onPreRequest {
+  final override def onPreRequest {
 
-	}
+  }
 
 }

@@ -20,33 +20,33 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates"))
 class FeedbackTemplateController extends CourseworkController
-	with DepartmentScopedController with AutowiringUserLookupComponent
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringCourseAndRouteServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AutowiringUserLookupComponent
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringCourseAndRouteServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	override def departmentPermission: Permission = Permissions.FeedbackTemplate.Manage
+  override def departmentPermission: Permission = Permissions.FeedbackTemplate.Manage
 
-	@ModelAttribute("bulkFeedbackTemplateCommand")
-	def bulkFeedbackTemplateCommand(@PathVariable department: Department) =
-		new BulkFeedbackTemplateCommand(mandatory(department))
+  @ModelAttribute("bulkFeedbackTemplateCommand")
+  def bulkFeedbackTemplateCommand(@PathVariable department: Department) =
+    new BulkFeedbackTemplateCommand(mandatory(department))
 
-	@ModelAttribute("activeDepartment")
-	def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@RequestMapping
-	def list(@PathVariable department: Department): Mav =
-		Mav("cm2/admin/feedbackforms/manage-feedback-templates")
-			.crumbsList(Breadcrumbs.department(department, None))
+  @RequestMapping
+  def list(@PathVariable department: Department): Mav =
+    Mav("cm2/admin/feedbackforms/manage-feedback-templates")
+      .crumbsList(Breadcrumbs.department(department, None))
 
-	@RequestMapping(method = Array(POST))
-	def saveBulk(@Valid @ModelAttribute("bulkFeedbackTemplateCommand") cmd: BulkFeedbackTemplateCommand, errors: Errors, @PathVariable department: Department): Mav =
-		if (errors.hasErrors) list(department)
-		else {
-			cmd.apply()
-			Redirect(Routes.admin.feedbackTemplates(cmd.department))
-		}
+  @RequestMapping(method = Array(POST))
+  def saveBulk(@Valid @ModelAttribute("bulkFeedbackTemplateCommand") cmd: BulkFeedbackTemplateCommand, errors: Errors, @PathVariable department: Department): Mav =
+    if (errors.hasErrors) list(department)
+    else {
+      cmd.apply()
+      Redirect(Routes.admin.feedbackTemplates(cmd.department))
+    }
 
 }
 
@@ -55,23 +55,23 @@ class FeedbackTemplateController extends CourseworkController
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/edit/{template}"))
 class EditFeedbackTemplateController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("editFeedbackTemplateCommand")
-	def editFeedbackTemplateCommand(@PathVariable department: Department, @PathVariable template: FeedbackTemplate) =
-		new EditFeedbackTemplateCommand(department, template)
+  @ModelAttribute("editFeedbackTemplateCommand")
+  def editFeedbackTemplateCommand(@PathVariable department: Department, @PathVariable template: FeedbackTemplate) =
+    new EditFeedbackTemplateCommand(department, template)
 
-	@RequestMapping
-	def edit(): Mav =
-		Mav("cm2/admin/feedbackforms/edit-feedback-template").noNavigation()
+  @RequestMapping
+  def edit(): Mav =
+    Mav("cm2/admin/feedbackforms/edit-feedback-template").noNavigation()
 
-	@RequestMapping(method = Array(POST))
-	def save(@Valid @ModelAttribute("editFeedbackTemplateCommand") cmd: EditFeedbackTemplateCommand, errors: Errors, @PathVariable department: Department): Mav =
-		if (errors.hasErrors) edit()
-		else {
-			cmd.apply()
-			Mav("ajax_success").noNavigation()
-		}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("editFeedbackTemplateCommand") cmd: EditFeedbackTemplateCommand, errors: Errors, @PathVariable department: Department): Mav =
+    if (errors.hasErrors) edit()
+    else {
+      cmd.apply()
+      Mav("ajax_success").noNavigation()
+    }
 
 }
 
@@ -80,20 +80,20 @@ class EditFeedbackTemplateController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/delete/{template}"))
 class DeleteFeedbackTemplateController extends CourseworkController {
 
-	@ModelAttribute("deleteFeedbackTemplateCommand")
-	def deleteFeedbackTemplateCommand(@PathVariable department: Department, @PathVariable template: FeedbackTemplate) =
-		new DeleteFeedbackTemplateCommand(department, template)
+  @ModelAttribute("deleteFeedbackTemplateCommand")
+  def deleteFeedbackTemplateCommand(@PathVariable department: Department, @PathVariable template: FeedbackTemplate) =
+    new DeleteFeedbackTemplateCommand(department, template)
 
-	@RequestMapping
-	def deleteCheck(): Mav =
-		Mav("cm2/admin/feedbackforms/delete-feedback-template").noNavigation()
+  @RequestMapping
+  def deleteCheck(): Mav =
+    Mav("cm2/admin/feedbackforms/delete-feedback-template").noNavigation()
 
-	@RequestMapping(method = Array(POST))
-	def delete(@Valid @ModelAttribute("deleteFeedbackTemplateCommand") cmd: DeleteFeedbackTemplateCommand, errors: Errors): Mav =
-		if (errors.hasErrors) deleteCheck()
-		else {
-			cmd.apply()
-			Mav("ajax_success").noNavigation()
-		}
+  @RequestMapping(method = Array(POST))
+  def delete(@Valid @ModelAttribute("deleteFeedbackTemplateCommand") cmd: DeleteFeedbackTemplateCommand, errors: Errors): Mav =
+    if (errors.hasErrors) deleteCheck()
+    else {
+      cmd.apply()
+      Mav("ajax_success").noNavigation()
+    }
 
 }

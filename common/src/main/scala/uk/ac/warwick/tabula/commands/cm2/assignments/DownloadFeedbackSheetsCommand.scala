@@ -11,79 +11,79 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 /**
- * Downloads a feedback sheet per student in the assignment member list
- */
+  * Downloads a feedback sheet per student in the assignment member list
+  */
 object DownloadFeedbackSheetsCommand {
-	type Result = RenderableFile
-	type Command = Appliable[RenderableFile] with DownloadFeedbackSheetsCommandState
+  type Result = RenderableFile
+  type Command = Appliable[RenderableFile] with DownloadFeedbackSheetsCommandState
 
-	val AdminPermission = Permissions.AssignmentFeedback.Read
+  val AdminPermission = Permissions.AssignmentFeedback.Read
 
-	def apply(assignment: Assignment): Command =
-		new DownloadFeedbackSheetsCommandInternal(assignment)
-			with ComposableCommand[Result]
-			with DownloadFeedbackSheetsCommandPermissions
-			with DownloadFeedbackSheetsCommandDescription
-			with ReadOnly
-			with AutowiringAssessmentMembershipServiceComponent
-			with AutowiringZipServiceComponent
-			with AllMembersDownloadFeedbackSheetsCommandAssignmentMembership
+  def apply(assignment: Assignment): Command =
+    new DownloadFeedbackSheetsCommandInternal(assignment)
+      with ComposableCommand[Result]
+      with DownloadFeedbackSheetsCommandPermissions
+      with DownloadFeedbackSheetsCommandDescription
+      with ReadOnly
+      with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringZipServiceComponent
+      with AllMembersDownloadFeedbackSheetsCommandAssignmentMembership
 
-	def marker(assignment: Assignment, students: Seq[User]): Command =
-		new DownloadFeedbackSheetsCommandInternal(assignment)
-			with ComposableCommand[Result]
-			with DownloadFeedbackSheetsCommandPermissions
-			with DownloadFeedbackSheetsCommandDescription
-			with ReadOnly
-			with AutowiringAssessmentMembershipServiceComponent
-			with AutowiringZipServiceComponent
-			with DownloadFeedbackSheetsCommandAssignmentMembership {
-			val members: Seq[User] = students
-		}
+  def marker(assignment: Assignment, students: Seq[User]): Command =
+    new DownloadFeedbackSheetsCommandInternal(assignment)
+      with ComposableCommand[Result]
+      with DownloadFeedbackSheetsCommandPermissions
+      with DownloadFeedbackSheetsCommandDescription
+      with ReadOnly
+      with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringZipServiceComponent
+      with DownloadFeedbackSheetsCommandAssignmentMembership {
+      val members: Seq[User] = students
+    }
 }
 
 trait DownloadFeedbackSheetsCommandState {
-	def assignment: Assignment
+  def assignment: Assignment
 }
 
 trait DownloadFeedbackSheetsCommandAssignmentMembership {
-	def members: Seq[User]
+  def members: Seq[User]
 }
 
 trait AllMembersDownloadFeedbackSheetsCommandAssignmentMembership extends DownloadFeedbackSheetsCommandAssignmentMembership {
-	self: DownloadFeedbackSheetsCommandState with AssessmentMembershipServiceComponent =>
+  self: DownloadFeedbackSheetsCommandState with AssessmentMembershipServiceComponent =>
 
-	lazy val members: Seq[User] = assessmentMembershipService.determineMembershipUsers(assignment)
+  lazy val members: Seq[User] = assessmentMembershipService.determineMembershipUsers(assignment)
 }
 
 class DownloadFeedbackSheetsCommandInternal(val assignment: Assignment)
-	extends CommandInternal[Result] with DownloadFeedbackSheetsCommandState with Logging {
-	self: ZipServiceComponent with DownloadFeedbackSheetsCommandAssignmentMembership =>
+  extends CommandInternal[Result] with DownloadFeedbackSheetsCommandState with Logging {
+  self: ZipServiceComponent with DownloadFeedbackSheetsCommandAssignmentMembership =>
 
-	override def applyInternal(): RenderableFile = {
-		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)
+  override def applyInternal(): RenderableFile = {
+    if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)
 
-		zipService.getMemberFeedbackTemplates(members, assignment)
-	}
+    zipService.getMemberFeedbackTemplates(members, assignment)
+  }
 
 }
 
 trait DownloadFeedbackSheetsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadFeedbackSheetsCommandState =>
+  self: DownloadFeedbackSheetsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(AdminPermission, mandatory(assignment))
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(AdminPermission, mandatory(assignment))
 }
 
 trait DownloadFeedbackSheetsCommandDescription extends Describable[Result] {
-	self: DownloadFeedbackSheetsCommandState
-		with DownloadFeedbackSheetsCommandAssignmentMembership =>
+  self: DownloadFeedbackSheetsCommandState
+    with DownloadFeedbackSheetsCommandAssignmentMembership =>
 
-	override lazy val eventName: String = "DownloadFeedbackSheets"
+  override lazy val eventName: String = "DownloadFeedbackSheets"
 
-	override def describe(d: Description): Unit = {
-		d.assignment(assignment)
-		d.studentIds(members.flatMap(m => Option(m.getWarwickId)))
-		d.studentUsercodes(members.map(_.getUserId))
-	}
+  override def describe(d: Description): Unit = {
+    d.assignment(assignment)
+    d.studentIds(members.flatMap(m => Option(m.getWarwickId)))
+    d.studentUsercodes(members.map(_.getUserId))
+  }
 }

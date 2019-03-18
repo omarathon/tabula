@@ -24,159 +24,160 @@ import scala.collection.JavaConverters._
 import scala.xml.Elem
 
 abstract class AbstractAttendanceReportController extends ReportsController
-	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	override val departmentPermission: Permission = Permissions.Department.Reports
+  override val departmentPermission: Permission = Permissions.Department.Reports
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
-	
-	def command(department: Department, academicYear: AcademicYear): AllAttendanceReportCommand.CommandType
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	val pageRenderPath: String
-	val filePrefix: String
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String
+  def command(department: Department, academicYear: AcademicYear): AllAttendanceReportCommand.CommandType
 
-	type AttendanceReportProcessor = Appliable[AttendanceReportProcessorResult] with AttendanceReportProcessorState
+  val pageRenderPath: String
+  val filePrefix: String
 
-	@ModelAttribute("processor")
-	def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		AttendanceReportProcessor(mandatory(department), mandatory(academicYear))
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String
 
-	@RequestMapping(method = Array(GET))
-	def page(
-		@Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		Mav(s"reports/attendancemonitoring/$pageRenderPath")
-			.crumbs(ReportsBreadcrumbs.Attendance.Home(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(urlGeneratorFactory(department)): _*)
-	}
+  type AttendanceReportProcessor = Appliable[AttendanceReportProcessorResult] with AttendanceReportProcessorState
 
-	@RequestMapping(method = Array(POST))
-	def apply(
-		@Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) Mav(new JSONErrorView(errors))
-		else {
-			val result = cmd.apply()
-			val allStudents: Seq[Map[String, String]] = result.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
-				Map(
-					"firstName" -> studentData.firstName,
-					"lastName" -> studentData.lastName,
-					"userId" -> studentData.userId,
-					"universityId" -> studentData.universityId,
-					"yearOfStudy" -> studentData.yearOfStudy,
-					"sprCode" -> studentData.sprCode,
-					"route" -> studentData.routeCode,
-					"tier4Requirements" -> studentData.tier4Requirements.toString
-				)
-			)
-			val intervalFormatter = new IntervalFormatter
-			val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_0)
-			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-			val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
-				Map(
-					"id" -> point.id,
-					"name" -> point.name,
-					"startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
-					"endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
-					"intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))),
-					"late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
-				)
-			)
-			Mav(new JSONView(Map(
-				"attendance" -> result.map { case (studentData, pointMap) =>
-					studentData.universityId -> pointMap.map { case (point, state) =>
-						point.id -> Option(state).map(_.dbValue).orNull
-					}
-				},
-				"students" -> allStudents,
-				"points" -> allPoints
-			)))
-		}
-	}
+  @ModelAttribute("processor")
+  def processor(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    AttendanceReportProcessor(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping(method = Array(POST), value = Array("/download.csv"))
-	def csv(
-		@ModelAttribute("processor") processor: AttendanceReportProcessor,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam data: String
-	): CSVView = {
-		val processorResult = getProcessorResult(processor, data)
+  @RequestMapping(method = Array(GET))
+  def page(
+    @Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    Mav(s"reports/attendancemonitoring/$pageRenderPath")
+      .crumbs(ReportsBreadcrumbs.Attendance.Home(department, academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(urlGeneratorFactory(department)): _*)
+  }
 
-		val writer = new StringWriter
-		val csvBuilder = new AttendanceReportExporter(processorResult, department)
-		val doc = new GoodCsvDocument(csvBuilder, null)
+  @RequestMapping(method = Array(POST))
+  def apply(
+    @Valid @ModelAttribute("command") cmd: AllAttendanceReportCommand.CommandType,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) Mav(new JSONErrorView(errors))
+    else {
+      val result = cmd.apply()
+      val allStudents: Seq[Map[String, String]] = result.keys.toSeq.sortBy(s => (s.lastName, s.firstName)).map(studentData =>
+        Map(
+          "firstName" -> studentData.firstName,
+          "lastName" -> studentData.lastName,
+          "userId" -> studentData.userId,
+          "universityId" -> studentData.universityId,
+          "yearOfStudy" -> studentData.yearOfStudy,
+          "sprCode" -> studentData.sprCode,
+          "route" -> studentData.routeCode,
+          "tier4Requirements" -> studentData.tier4Requirements.toString
+        )
+      )
+      val intervalFormatter = new IntervalFormatter
+      val wrapper = new DefaultObjectWrapper(Configuration.VERSION_2_3_28)
+      import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+      val allPoints: Seq[Map[String, String]] = result.values.flatMap(_.keySet).toSeq.distinct.sortBy(p => (p.startDate, p.endDate)).map(point =>
+        Map(
+          "id" -> point.id,
+          "name" -> point.name,
+          "startDate" -> point.startDate.toDateTimeAtStartOfDay.getMillis.toString,
+          "endDate" -> point.endDate.toDateTimeAtStartOfDay.getMillis.toString,
+          "intervalString" -> intervalFormatter.exec(JList(wrapper.wrap(point.startDate), wrapper.wrap(point.endDate))),
+          "late" -> point.endDate.toDateTimeAtStartOfDay.plusDays(1).isBeforeNow.toString
+        )
+      )
+      Mav(new JSONView(Map(
+        "attendance" -> result.map { case (studentData, pointMap) =>
+          studentData.universityId -> pointMap.map { case (point, state) =>
+            point.id -> Option(state).map(_.dbValue).orNull
+          }
+        },
+        "students" -> allStudents,
+        "points" -> allPoints
+      )))
+    }
+  }
 
-		doc.setHeaderLine(true)
-		csvBuilder.headers foreach (header => doc.addHeaderField(header))
-		processorResult.attendance.keys.foreach(item => doc.addLine(item))
-		doc.write(writer)
+  @RequestMapping(method = Array(POST), value = Array("/download.csv"))
+  def csv(
+    @ModelAttribute("processor") processor: AttendanceReportProcessor,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam data: String
+  ): CSVView = {
+    val processorResult = getProcessorResult(processor, data)
 
-		new CSVView(s"$filePrefix-${department.code}.csv", writer.toString)
-	}
+    val writer = new StringWriter
+    val csvBuilder = new AttendanceReportExporter(processorResult, department)
+    val doc = new GoodCsvDocument(csvBuilder, null)
 
-	@RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
-	def xlsx(
-		@ModelAttribute("processor") processor: AttendanceReportProcessor,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam data: String
-	): ExcelView = {
-		val processorResult = getProcessorResult(processor, data)
+    doc.setHeaderLine(true)
+    csvBuilder.headers foreach (header => doc.addHeaderField(header))
+    processorResult.attendance.keys.foreach(item => doc.addLine(item))
+    doc.write(writer)
 
-		val workbook = new AttendanceReportExporter(processorResult, department).toXLSX
+    new CSVView(s"$filePrefix-${department.code}.csv", writer.toString)
+  }
 
-		new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
-	}
+  @RequestMapping(method = Array(POST), value = Array("/download.xlsx"))
+  def xlsx(
+    @ModelAttribute("processor") processor: AttendanceReportProcessor,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam data: String
+  ): ExcelView = {
+    val processorResult = getProcessorResult(processor, data)
 
-	@RequestMapping(method = Array(POST), value = Array("/download.xml"))
-	def xml(
-		@ModelAttribute("processor") processor: AttendanceReportProcessor,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam data: String
-	): Elem = {
-		val processorResult = getProcessorResult(processor, data)
+    val workbook = new AttendanceReportExporter(processorResult, department).toXLSX
 
-		new AttendanceReportExporter(processorResult, department).toXML
-	}
+    new ExcelView(s"$filePrefix-${department.code}.xlsx", workbook)
+  }
 
-	private def getProcessorResult(processor: AttendanceReportProcessor, data: String): AttendanceReportProcessorResult = {
-		val request = JsonHelper.fromJson[AttendanceReportRequest](data)
-		request.copyTo(processor)
-		processor.apply()
-	}
+  @RequestMapping(method = Array(POST), value = Array("/download.xml"))
+  def xml(
+    @ModelAttribute("processor") processor: AttendanceReportProcessor,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam data: String
+  ): Elem = {
+    val processorResult = getProcessorResult(processor, data)
+
+    new AttendanceReportExporter(processorResult, department).toXML
+  }
+
+  private def getProcessorResult(processor: AttendanceReportProcessor, data: String): AttendanceReportProcessorResult = {
+    val request = JsonHelper.fromJson[AttendanceReportRequest](data)
+    request.copyTo(processor)
+    processor.apply()
+  }
 
 }
 
 class AttendanceReportRequest extends Serializable {
 
-	var attendance: JMap[String, JMap[String, String]] =
-		LazyMaps.create{_: String => JMap[String, String]() }.asJava
+  var attendance: JMap[String, JMap[String, String]] =
+    LazyMaps.create { _: String => JMap[String, String]() }.asJava
 
-	var students: JList[JMap[String, String]] = JArrayList()
+  var students: JList[JMap[String, String]] = JArrayList()
 
-	var points: JList[JMap[String, String]] = JArrayList()
+  var points: JList[JMap[String, String]] = JArrayList()
 
-	def copyTo(state: AttendanceReportProcessorState) {
-		state.attendance = attendance
+  def copyTo(state: AttendanceReportProcessorState) {
+    state.attendance = attendance
 
-		state.students = students
+    state.students = students
 
-		state.points = points
-	}
+    state.points = points
+  }
 }

@@ -9,82 +9,83 @@ import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, ExtenuatingCircumsta
 import uk.ac.warwick.tabula.services.{AutowiringMemberNoteServiceComponent, MemberNoteServiceComponent}
 
 object DeleteMemberNoteCommand {
-	def apply(memberNote: MemberNote, member: Member) =
-		new DeleteAbstractMemberNoteCommandInternal(memberNote, member)
-			with AutowiringMemberNoteServiceComponent
-			with ComposableCommand[AbstractMemberNote]
-			with DeleteMemberNoteValidation
-			with DeleteMemberNotePermissions
-			with DeleteMemberNoteCommandState
-			with Describable[AbstractMemberNote] {
+  def apply(memberNote: MemberNote, member: Member) =
+    new DeleteAbstractMemberNoteCommandInternal(memberNote, member)
+      with AutowiringMemberNoteServiceComponent
+      with ComposableCommand[AbstractMemberNote]
+      with DeleteMemberNoteValidation
+      with DeleteMemberNotePermissions
+      with DeleteMemberNoteCommandState
+      with Describable[AbstractMemberNote] {
 
-			override lazy val eventName = "DeleteMemberNote"
+      override lazy val eventName = "DeleteMemberNote"
 
-			override def describe(d: Description) {
-				d.memberNote(memberNote)
-			}
-		}
+      override def describe(d: Description) {
+        d.memberNote(memberNote)
+      }
+    }
 }
 
 object DeleteExtenuatingCircumstancesCommand {
-	def apply(circumstances: ExtenuatingCircumstances, member: Member) =
-		new DeleteAbstractMemberNoteCommandInternal(circumstances, member)
-			with AutowiringMemberNoteServiceComponent
-			with ComposableCommand[AbstractMemberNote]
-			with DeleteMemberNoteValidation
-			with DeleteMemberNotePermissions
-			with DeleteMemberNoteCommandState
-			with Describable[AbstractMemberNote] {
+  def apply(circumstances: ExtenuatingCircumstances, member: Member) =
+    new DeleteAbstractMemberNoteCommandInternal(circumstances, member)
+      with AutowiringMemberNoteServiceComponent
+      with ComposableCommand[AbstractMemberNote]
+      with DeleteMemberNoteValidation
+      with DeleteMemberNotePermissions
+      with DeleteMemberNoteCommandState
+      with Describable[AbstractMemberNote] {
 
-			override lazy val eventName = "DeleteExtenuatingCircumstances"
+      override lazy val eventName = "DeleteExtenuatingCircumstances"
 
-			override def describe(d: Description) {
-				d.extenuatingCircumstances(circumstances)
-			}
-		}
+      override def describe(d: Description) {
+        d.extenuatingCircumstances(circumstances)
+      }
+    }
 }
 
 
 class DeleteAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMemberNote, val member: Member)
-	extends CommandInternal[AbstractMemberNote] {
+  extends CommandInternal[AbstractMemberNote] {
 
-	self: MemberNoteServiceComponent =>
+  self: MemberNoteServiceComponent =>
 
-	override def applyInternal(): AbstractMemberNote = {
-		abstractMemberNote.deleted = true
-		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
-			case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
-			case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
-		}
-		abstractMemberNote
-	}
+  override def applyInternal(): AbstractMemberNote = {
+    abstractMemberNote.deleted = true
+    HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
+      case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
+      case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
+    }
+    abstractMemberNote
+  }
 
 }
 
 trait DeleteMemberNoteValidation extends SelfValidating {
 
-	self: DeleteMemberNoteCommandState =>
+  self: DeleteMemberNoteCommandState =>
 
-	override def validate(errors: Errors) {
-		if (abstractMemberNote.deleted) {
-			errors.reject("profiles.memberNote.delete.notDeleted")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (abstractMemberNote.deleted) {
+      errors.reject("profiles.memberNote.delete.notDeleted")
+    }
+  }
 
 }
 
 trait DeleteMemberNotePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: DeleteMemberNoteCommandState =>
+  self: DeleteMemberNoteCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(abstractMemberNote, member)
-		p.PermissionCheck(Permissions.MemberNotes.Delete, abstractMemberNote)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(abstractMemberNote, member)
+    p.PermissionCheck(Permissions.MemberNotes.Delete, abstractMemberNote)
+  }
 
 }
 
 trait DeleteMemberNoteCommandState {
-	def abstractMemberNote: AbstractMemberNote
-	def member: Member
+  def abstractMemberNote: AbstractMemberNote
+
+  def member: Member
 }

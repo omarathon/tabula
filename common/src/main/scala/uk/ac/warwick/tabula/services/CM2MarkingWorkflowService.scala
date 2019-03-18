@@ -10,291 +10,312 @@ import uk.ac.warwick.tabula.data.AutowiringCM2MarkingWorkflowDaoComponent
 import uk.ac.warwick.tabula.data.model.markingworkflow._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.helpers.Logging
 
 object CM2MarkingWorkflowService {
-	type Marker = User
-	type Student = User
-	type Allocations = Map[Marker, Set[Student]]
+  type Marker = User
+  type Student = User
+  type Allocations = Map[Marker, Set[Student]]
 }
 
 trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
-	def save(workflow: CM2MarkingWorkflow): Unit
-	def delete(workflow: CM2MarkingWorkflow): Unit
-	def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
-	def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
+  def save(workflow: CM2MarkingWorkflow): Unit
 
-	/** All assignments using this marking workflow. */
-	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
+  def delete(workflow: CM2MarkingWorkflow): Unit
 
-	// move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
-	def progress(markerStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
+  def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
-	// finalise the specified feedback using the marker feedback from the specified stage - allows stages of the workflow to be skipped
-	def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback]
+  def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback]
 
-	// copy the details from the given MarkerFeedback to it's parent feedback
-	def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback
+  /** All assignments using this marking workflow. */
+  def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment]
 
-	// essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
-	def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
+  def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment]
 
-	// add new markers for a workflow stage
-	def addMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
-	// remove the specified markers from a stage - they cannot have any existing marker feedback
-	def removeMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
-	// for a given assignment and workflow stage specify the markers for each student
-	def allocateMarkersForStage(
-		assignment: Assignment,
-		markerStage: MarkingWorkflowStage,
-		allocations: Allocations
-	): Seq[MarkerFeedback]
+  // move feedback onto the next stage when all the current stages are finished - returns the markerFeedback for the next stage if applicable
+  def progress(markerStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback]
 
-	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
-	def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations
-	// an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
-	def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]]
+  // finalise the specified feedback using the marker feedback from the specified stage - allows stages of the workflow to be skipped
+  def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback]
 
-	def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
+  // copy the details from the given MarkerFeedback to it's parent feedback
+  def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback
 
-	def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User]
+  // essentially an undo for progressFeedback if it was done in error - not a normal step in the workflow
+  def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback]
 
-	def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow]
+  // add new markers for a workflow stage
+  def addMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
+
+  // remove the specified markers from a stage - they cannot have any existing marker feedback
+  def removeMarkersForStage(workflow: CM2MarkingWorkflow, markerStage: MarkingWorkflowStage, markers: Seq[Marker]): Unit
+
+  // for a given assignment and workflow stage specify the markers for each student
+  def allocateMarkersForStage(
+    assignment: Assignment,
+    markerStage: MarkingWorkflowStage,
+    allocations: Allocations
+  ): Seq[MarkerFeedback]
+
+  // an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
+  def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations
+
+  // an anonymous Marker may be present in the map if a marker has been unassigned - these need to be handled
+  def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]]
+
+  def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]]
+
+  def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User]
+
+  def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow]
 }
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-	with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with Logging {
+  with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with Logging {
 
-	override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
+  override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
-	override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
+  override def delete(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.delete(workflow)
 
-	override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
-		f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.asJava
-		feedbackService.saveOrUpdate(f)
-		f
-	})
+  override def releaseForMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+    f.outstandingStages = f.assignment.cm2MarkingWorkflow.initialStages.toSet.asJava
+    feedbackService.saveOrUpdate(f)
+    f
+  })
 
-	override def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
-		f.outstandingStages.clear()
-		feedbackService.saveOrUpdate(f)
-		f
-	})
+  override def stopMarking(feedbacks: Seq[AssignmentFeedback]): Seq[AssignmentFeedback] = feedbacks.map(f => {
+    f.outstandingStages.clear()
+    feedbackService.saveOrUpdate(f)
+    f
+  })
 
-	def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
-		markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
+  def getAssignmentsUsingMarkingWorkflow(workflow: CM2MarkingWorkflow): Seq[Assignment] =
+    markingWorkflowDao.getAssignmentsUsingMarkingWorkflow(workflow)
 
-	override def progress(currentStage: MarkingWorkflowStage , feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
-		// don't progress if nextStages is empty
-		if(currentStage.nextStages.isEmpty)
-			throw new IllegalArgumentException("cannot progress feedback past the final stage")
+  def getAssignmentsUsingMarkingWorkflows(workflows: Seq[CM2MarkingWorkflow]): Seq[Assignment] =
+    markingWorkflowDao.getAssignmentsUsingMarkingWorkflows(workflows)
 
-		// don't progress if outstanding stages doesn't contain the one we are trying to complete
-		if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
-			throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
+  override def progress(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[MarkerFeedback] = {
+    // don't progress if nextStages is empty
+    if (currentStage.nextStages.isEmpty)
+      throw new IllegalArgumentException("cannot progress feedback past the final stage")
 
-		feedbacks.flatMap(f => {
-			val remainingStages = f.outstandingStages.asScala diff Seq(currentStage)
-			val releasedMarkerFeedback: Seq[MarkerFeedback] = if(remainingStages.isEmpty) {
-				f.outstandingStages = currentStage.nextStages.asJava
-				f.allMarkerFeedback.filter(mf => currentStage.nextStages.contains(mf.stage))
-			} else {
-				f.outstandingStages = remainingStages.asJava
-				Nil
-			}
-			feedbackService.saveOrUpdate(f)
-			releasedMarkerFeedback
-		})
-	}
+    // don't progress if outstanding stages doesn't contain the one we are trying to complete
+    if (feedbacks.exists(f => !f.outstandingStages.asScala.contains(currentStage)))
+      throw new IllegalArgumentException(s"some of the specified feedback doesn't have outstanding stage - $currentStage")
 
-	override def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback] = {
+    feedbacks.flatMap(f => {
+      val remainingStages = f.outstandingStages.asScala diff Set(currentStage)
+      val releasedMarkerFeedback: Seq[MarkerFeedback] = if (remainingStages.isEmpty) {
+        f.outstandingStages = currentStage.nextStages.toSet.asJava
+        f.allMarkerFeedback.filter(mf => currentStage.nextStages.contains(mf.stage))
+      } else {
+        f.outstandingStages = remainingStages.asJava
+        Nil
+      }
+      feedbackService.saveOrUpdate(f)
+      releasedMarkerFeedback
+    })
+  }
 
-		if(currentStage.isInstanceOf[FinalStage])
-			throw new IllegalArgumentException("cannot progress feedback past the final stage")
+  override def finish(currentStage: MarkingWorkflowStage, feedbacks: Seq[Feedback]): Seq[Feedback] = {
 
-		// find marker feedback from the specified stage that we want to finalise - make sure it has content
-		val mfAtStage = for {
-			feedback <- feedbacks
-			markerFeedback <- feedback.allMarkerFeedback if markerFeedback.stage == currentStage
-		} yield markerFeedback
+    if (currentStage.isInstanceOf[FinalStage])
+      throw new IllegalArgumentException("cannot progress feedback past the final stage")
 
-		val (mfToFinalise, mfToSkip) = mfAtStage.partition(_.hasContent)
+    // find marker feedback from the specified stage that we want to finalise - make sure it has content
+    val mfAtStage = for {
+      feedback <- feedbacks
+      markerFeedback <- feedback.allMarkerFeedback if markerFeedback.stage == currentStage
+    } yield markerFeedback
 
-		if (mfToSkip.nonEmpty)
-			logger.info(s"No feedback is available for ${mfToSkip.map(_.student.getUserId).mkString(", ")} at ${currentStage.description} - skipping")
+    val (mfToFinalise, mfToSkip) = mfAtStage.partition(_.hasContent)
 
-		// find the final stage for this workflow
-		val finalStage: MarkingWorkflowStage = {
-			def findFinalStage(stage: MarkingWorkflowStage): MarkingWorkflowStage = stage match {
-				case f: FinalStage => f
-				case s: MarkingWorkflowStage if s.nextStages.nonEmpty => findFinalStage(s.nextStages.head)
-				case _ => throw new IllegalStateException(s"Dead end in workflow at stage ${stage.description}")
-			}
-			findFinalStage(currentStage)
-		}
+    if (mfToSkip.nonEmpty)
+      logger.info(s"No feedback is available for ${mfToSkip.map(_.student.getUserId).mkString(", ")} at ${currentStage.description} - skipping")
 
-		// move the stage pointer on feedback to the end of the workflow and finalise the feedback
-		mfToFinalise.map(mf => {
-			mf.feedback.outstandingStages = JArrayList(finalStage)
-			finaliseFeedback(mf)
-		})
+    // find the final stage for this workflow
+    val finalStage: MarkingWorkflowStage = {
+      def findFinalStage(stage: MarkingWorkflowStage): MarkingWorkflowStage = stage match {
+        case f: FinalStage => f
+        case s: MarkingWorkflowStage if s.nextStages.nonEmpty => findFinalStage(s.nextStages.head)
+        case _ => throw new IllegalStateException(s"Dead end in workflow at stage ${stage.description}")
+      }
 
-	}
+      findFinalStage(currentStage)
+    }
 
-	override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = {
-		val parent = markerFeedback.feedback
+    // move the stage pointer on feedback to the end of the workflow and finalise the feedback
+    mfToFinalise.map(mf => {
+      mf.feedback.outstandingStages = JHashSet(finalStage)
+      finaliseFeedback(mf)
+    })
 
-		parent.clearCustomFormValues()
+  }
 
-		// save custom fields
-		parent.customFormValues.addAll(markerFeedback.customFormValues.asScala.map { formValue =>
-			val newValue = new SavedFormValue()
-			newValue.name = formValue.name
-			newValue.feedback = formValue.markerFeedback.feedback
-			newValue.value = formValue.value
-			newValue
-		}.asJava)
+  override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = {
+    val parent = markerFeedback.feedback
 
-		parent.actualGrade = markerFeedback.grade
-		parent.actualMark = markerFeedback.mark
+    parent.clearCustomFormValues()
 
-		parent.updatedDate = DateTime.now
+    // save custom fields
+    parent.customFormValues.addAll(markerFeedback.customFormValues.asScala.map { formValue =>
+      val newValue = new SavedFormValue()
+      newValue.name = formValue.name
+      newValue.feedback = formValue.markerFeedback.feedback
+      newValue.value = formValue.value
+      newValue
+    }.asJava)
 
-		// erase any existing attachments - these will be replaced
-		parent.clearAttachments()
+    parent.actualGrade = markerFeedback.grade
+    parent.actualMark = markerFeedback.mark
 
-		markerFeedback.attachments.asScala.foreach(parent.addAttachment)
-		zipService.invalidateIndividualFeedbackZip(parent)
+    parent.updatedDate = DateTime.now
 
-		feedbackService.saveOrUpdate(parent)
-		parent
-	}
+    // erase any existing attachments - these will be replaced
+    parent.clearAttachments()
 
-	override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
-		if(stages.isEmpty)
-			throw new IllegalArgumentException(s"Must supply a target stage to return to")
+    markerFeedback.attachments.asScala.foreach(parent.addAttachment)
+    zipService.invalidateIndividualFeedbackZip(parent)
 
-		if(stages.map(_.order).distinct.tail.nonEmpty)
-			throw new IllegalArgumentException(s"The following stages aren't all in the same workflow step - ${stages.map(_.name).mkString(", ")}")
+    feedbackService.saveOrUpdate(parent)
+    parent
+  }
 
-		feedbacks.flatMap(f => {
-			f.outstandingStages = stages.asJava
-			feedbackService.saveOrUpdate(f)
-			f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
-		})
-	}
+  override def returnFeedback(stages: Seq[MarkingWorkflowStage], feedbacks: Seq[AssignmentFeedback]): Seq[MarkerFeedback] = {
+    if (stages.isEmpty)
+      throw new IllegalArgumentException(s"Must supply a target stage to return to")
+
+    if (stages.map(_.order).distinct.tail.nonEmpty)
+      throw new IllegalArgumentException(s"The following stages aren't all in the same workflow step - ${stages.map(_.name).mkString(", ")}")
+
+    feedbacks.flatMap(f => {
+      f.outstandingStages = stages.toSet.asJava
+      feedbackService.saveOrUpdate(f)
+      f.allMarkerFeedback.filter(mf => f.outstandingStages.contains(mf.stage))
+    })
+  }
 
 
-	override def addMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
-		val markersForStage = workflow.stageMarkers.asScala.find(_.stage == stage).getOrElse(
-			new StageMarkers(stage, workflow)
-		)
-		// usergroup handles dupes for us :)
-		markers.foreach(markersForStage.markers.add)
-		markingWorkflowDao.saveOrUpdate(markersForStage)
-	}
+  override def addMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
+    val markersForStage = workflow.stageMarkers.asScala.find(_.stage == stage).getOrElse(
+      new StageMarkers(stage, workflow)
+    )
+    // usergroup handles dupes for us :)
+    markers.foreach(markersForStage.markers.add)
+    markingWorkflowDao.saveOrUpdate(markersForStage)
+  }
 
-	override def removeMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
-		val markersForStage = workflow.stageMarkers.asScala.find(_.stage == stage).getOrElse(
-			throw new IllegalArgumentException("Can't remove markers for this stage as none exist")
-		)
-		markers.foreach(marker => {
-			val existing = workflow.assignments.asScala.flatMap(a => feedbackByMarker(a, stage).getOrElse(marker, Nil))
-			if (existing.nonEmpty)
-				throw new IllegalArgumentException(s"Can't remove marker ${marker.getUserId} for this stage as they have marker feedback in progress")
-			markersForStage.markers.remove(marker)
-		})
-		markingWorkflowDao.saveOrUpdate(markersForStage)
-	}
+  override def removeMarkersForStage(workflow: CM2MarkingWorkflow, stage: MarkingWorkflowStage, markers: Seq[Marker]): Unit = {
+    val markersForStage = workflow.stageMarkers.asScala.find(_.stage == stage).getOrElse(
+      throw new IllegalArgumentException("Can't remove markers for this stage as none exist")
+    )
+    markers.foreach(marker => {
+      val existing = workflow.assignments.asScala.flatMap(a => feedbackByMarker(a, stage).getOrElse(marker, Nil))
+      if (existing.nonEmpty)
+        throw new IllegalArgumentException(s"Can't remove marker ${marker.getUserId} for this stage as they have marker feedback in progress")
+      markersForStage.markers.remove(marker)
+    })
+    markingWorkflowDao.saveOrUpdate(markersForStage)
+  }
 
-	// for a given assignment and workflow stage specify the markers for each student
-	override def allocateMarkersForStage(assignment: Assignment, stage: MarkingWorkflowStage, allocations: Allocations): Seq[MarkerFeedback] = {
-		val workflow = assignment.cm2MarkingWorkflow
-		if (workflow == null) throw new IllegalArgumentException("Can't assign markers for an assignment with no workflow")
+  // for a given assignment and workflow stage specify the markers for each student
+  override def allocateMarkersForStage(assignment: Assignment, stage: MarkingWorkflowStage, allocations: Allocations): Seq[MarkerFeedback] = {
+    val workflow = assignment.cm2MarkingWorkflow
+    if (workflow == null) throw new IllegalArgumentException("Can't assign markers for an assignment with no workflow")
 
-		val existingMarkerFeedback = allMarkerFeedbackForStage(assignment, stage)
+    val existingMarkerFeedback = allMarkerFeedbackForStage(assignment, stage)
 
-		// if any students did have a marker and now don't, remove the marker ID
-		existingMarkerFeedback
-			.filter(mf => !allocations.values.toSeq.flatten.contains(mf.student))
-			.foreach(mf => {
-				mf.marker = null
-				feedbackService.save(mf)
-			})
+    // if any students did have a marker and now don't, remove the marker ID
+    existingMarkerFeedback
+      .filter(mf => !allocations.values.toSeq.flatten.contains(mf.student))
+      .foreach(mf => {
+        mf.marker = null
+        feedbackService.save(mf)
+      })
 
-		for((marker, students) <- allocations.toSeq; student <- students) yield {
-			val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
-				val newFeedback = new AssignmentFeedback
-				newFeedback.assignment = assignment
-				newFeedback.uploaderId = marker.getUserId
-				newFeedback.usercode = student.getUserId
-				newFeedback._universityId = student.getWarwickId
-				newFeedback.released = false
-				newFeedback.createdDate = DateTime.now
-				assignment.feedbacks.add(newFeedback)
-				feedbackService.saveOrUpdate(newFeedback)
-				newFeedback
-			})
+    for ((marker, students) <- allocations.toSeq; student <- students) yield {
+      val parentFeedback = assignment.feedbacks.asScala.find(_.usercode == student.getUserId).getOrElse({
+        val newFeedback = new AssignmentFeedback
+        newFeedback.assignment = assignment
+        newFeedback.uploaderId = marker.getUserId
+        newFeedback.usercode = student.getUserId
+        newFeedback._universityId = student.getWarwickId
+        newFeedback.released = false
+        newFeedback.createdDate = DateTime.now
+        assignment.feedbacks.add(newFeedback)
+        feedbackService.saveOrUpdate(newFeedback)
+        newFeedback
+      })
 
-			val markerFeedback = existingMarkerFeedback.find(_.student == student).getOrElse({
-				val newMarkerFeedback = new MarkerFeedback(parentFeedback)
-				newMarkerFeedback.stage = stage
-				newMarkerFeedback
-			})
+      val markerFeedback = existingMarkerFeedback.find(_.student == student).getOrElse({
+        val newMarkerFeedback = new MarkerFeedback(parentFeedback)
+        newMarkerFeedback.stage = stage
+        newMarkerFeedback
+      })
 
-			// set the marker (possibly moving the MarkerFeedback to another marker - any existing data remains)
-			markerFeedback.marker = if (marker.isFoundUser) marker else null
-			feedbackService.save(markerFeedback)
-			markerFeedback
-		}
-	}
+      // set the marker (possibly moving the MarkerFeedback to another marker - any existing data remains)
+      markerFeedback.marker = if (marker.isFoundUser) marker else null
+      feedbackService.save(markerFeedback)
+      markerFeedback
+    }
+  }
 
-	private def allMarkerFeedbackForStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback] =
-		markingWorkflowDao.markerFeedbackForAssignmentAndStage(assignment, stage)
+  private def allMarkerFeedbackForStage(assignment: Assignment, stage: MarkingWorkflowStage): Seq[MarkerFeedback] =
+    markingWorkflowDao.markerFeedbackForAssignmentAndStage(assignment, stage)
 
-	override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations = {
-		feedbackByMarker(assignment,stage).map{ case (marker, markerFeedbacks) =>
-			marker -> markerFeedbacks.map(_.student).toSet
-		}
-	}
+  override def getMarkerAllocations(assignment: Assignment, stage: MarkingWorkflowStage): Allocations = {
+    val feedback = feedbackByMarker(assignment, stage)
+    val usercodes = feedback.values.flatten.map(_.feedback.usercode).toSet
 
-	// marker can be an Anon marker if marking
-	override def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]] = {
-		allMarkerFeedbackForStage(assignment,stage).groupBy(_.marker)
-	}
+    val students = {
+      if (usercodes.isEmpty) Map.empty[String, User]
+      else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+    }.withDefault(new AnonymousUser(_))
 
-	override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {
-		val unsortedMap = markingWorkflowDao.markerFeedbackForMarker(assignment, marker).groupBy(_.stage)
-		TreeMap(unsortedMap.toSeq:_*)
-	}
+    feedback.map { case (marker, markerFeedbacks) =>
+      marker -> markerFeedbacks.map { mf => students(mf.feedback.usercode) }.toSet
+    }
+  }
 
-	override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
-		getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
+  // marker can be an Anon marker if marking
+  override def feedbackByMarker(assignment: Assignment, stage: MarkingWorkflowStage): Map[Marker, Seq[MarkerFeedback]] = {
+    allMarkerFeedbackForStage(assignment, stage).groupBy(_.marker)
+  }
 
-	override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
-		markingWorkflowDao.getReusableWorkflows(department, academicYear)
-	}
+  override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {
+    val unsortedMap = markingWorkflowDao.markerFeedbackForMarker(assignment, marker).groupBy(_.stage)
+    TreeMap(unsortedMap.toSeq: _*)
+  }
+
+  override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
+    getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
+
+  override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
+    markingWorkflowDao.getReusableWorkflows(department, academicYear)
+  }
 
 }
 
 trait WorkflowUserGroupHelpers {
-	val markerHelper: UserGroupMembershipHelper[StageMarkers]
+  val markerHelper: UserGroupMembershipHelper[StageMarkers]
 }
 
 trait WorkflowUserGroupHelpersImpl extends WorkflowUserGroupHelpers {
-	val markerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
+  val markerHelper = new UserGroupMembershipHelper[StageMarkers]("_markers")
 }
 
 trait CM2MarkingWorkflowServiceComponent {
-	def cm2MarkingWorkflowService: CM2MarkingWorkflowService
+  def cm2MarkingWorkflowService: CM2MarkingWorkflowService
 }
 
 trait AutowiringCM2MarkingWorkflowServiceComponent extends CM2MarkingWorkflowServiceComponent {
-	def cm2MarkingWorkflowService: CM2MarkingWorkflowService =  Wire.auto[CM2MarkingWorkflowService]
+  def cm2MarkingWorkflowService: CM2MarkingWorkflowService = Wire.auto[CM2MarkingWorkflowService]
 }

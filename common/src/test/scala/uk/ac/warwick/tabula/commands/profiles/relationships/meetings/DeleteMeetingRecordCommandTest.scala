@@ -7,59 +7,65 @@ import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordService
 
 class DeleteMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val someTime: DateTime = dateTime(2013, DateTimeConstants.APRIL)
-	val mockMeetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
-	val student: StudentMember = Fixtures.student()
-	var creator: StaffMember = Fixtures.staff("9876543", "staffmember")
-	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-	var relationship: StudentRelationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
+  val someTime: DateTime = dateTime(2013, DateTimeConstants.APRIL)
+  val mockMeetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
+  val student: StudentMember = Fixtures.student()
+  var creator: StaffMember = Fixtures.staff("9876543", "staffmember")
+  val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+  var relationship: StudentRelationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student, DateTime.now)
 
-	val user: CurrentUser = smartMock[CurrentUser]
-	user.universityId returns "9876543"
+  val user: CurrentUser = smartMock[CurrentUser]
+  user.universityId returns "9876543"
 
-	trait Fixture {
-		val meeting = new MeetingRecord
-		meeting.creator = creator
-		meeting.relationships = Seq(relationship)
-	}
+  trait Fixture {
+    val meeting = new MeetingRecord
+    meeting.creator = creator
+    meeting.relationships = Seq(relationship)
+  }
 
-	@Test
-	def testDeleted() { new Fixture {
-		var deleted: Boolean = meeting.deleted
-		deleted should be {false}
+  @Test
+  def testDeleted() {
+    new Fixture {
+      var deleted: Boolean = meeting.deleted
+      deleted should be (false)
 
-		val cmd = new DeleteMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
-		}
-		cmd.applyInternal()
+      val cmd = new DeleteMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+        val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+      }
+      cmd.applyInternal()
 
-		deleted = meeting.deleted
-		deleted should be {true}
-	}}
+      deleted = meeting.deleted
+      deleted should be (true)
+    }
+  }
 
-	@Test
-	def testRestore() { new Fixture {
-		meeting.deleted = true
+  @Test
+  def testRestore() {
+    new Fixture {
+      meeting.deleted = true
 
-		val cmd = new RestoreMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
-		}
-		cmd.applyInternal()
+      val cmd = new RestoreMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+        val meetingRecordService: MeetingRecordService = mockMeetingRecordService
+      }
+      cmd.applyInternal()
 
-		val deleted: Boolean = meeting.deleted
-		deleted should be {false}
-	}}
+      val deleted: Boolean = meeting.deleted
+      deleted should be (false)
+    }
+  }
 
-	@Test
-	def testPurge() { new Fixture {
-		meeting.deleted = true
+  @Test
+  def testPurge() {
+    new Fixture {
+      meeting.deleted = true
 
-		val cmd = new PurgeMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
-		}
+      val cmd = new PurgeMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+        val meetingRecordService: MeetingRecordService = mockMeetingRecordService
+      }
 
-		cmd.applyInternal()
+      cmd.applyInternal()
 
-		verify(mockMeetingRecordService, times(1)).purge(meeting)
-	}}
+      verify(mockMeetingRecordService, times(1)).purge(meeting)
+    }
+  }
 }

@@ -9,124 +9,123 @@ import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, CM2MarkingWorkf
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 
-
 class AddMarkingWorkflowCommandTest extends TestBase with Mockito with ValidatorHelpers {
 
-	trait Fixture {
+  trait Fixture {
 
-		val marker1 = Fixtures.user("1170836", "cuslaj")
-		val marker2 = Fixtures.user("1170837", "cuslak")
-		val marker3 = Fixtures.user("1170838", "cuslal")
-		val marker4 = Fixtures.user("1170839", "cuslam")
-		val userlookupService = Fixtures.userLookupService(marker1, marker2, marker3, marker4)
-		val workflowService = smartMock[CM2MarkingWorkflowService]
-		val dept = Fixtures.department("in")
+    val marker1 = Fixtures.user("1170836", "cuslaj")
+    val marker2 = Fixtures.user("1170837", "cuslak")
+    val marker3 = Fixtures.user("1170838", "cuslal")
+    val marker4 = Fixtures.user("1170839", "cuslam")
+    val userlookupService = Fixtures.userLookupService(marker1, marker2, marker3, marker4)
+    val workflowService = smartMock[CM2MarkingWorkflowService]
+    val dept = Fixtures.department("in")
 
 
-		val validator = new AddMarkingWorkflowValidation with ModifyMarkingWorkflowState with UserLookupComponent {
-			val userLookup = userlookupService
-			val department = dept
-			val academicYear = AcademicYear(2016)
+    val validator = new AddMarkingWorkflowValidation with ModifyMarkingWorkflowState with UserLookupComponent {
+      val userLookup = userlookupService
+      val department = dept
+      val academicYear = AcademicYear(2016)
 
-			markersA = JArrayList()
-			markersB = JArrayList()
-		}
+      markersA = JArrayList()
+      markersB = JArrayList()
+    }
 
-		val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016)) with ModifyMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
-			val userLookup = userlookupService
-			val cm2MarkingWorkflowService = workflowService
-			workflowName = "name"
-			markersA = JArrayList(marker1.getUserId, marker2.getUserId)
-			markersB = JArrayList(marker3.getUserId)
-		}
-	}
+    val cmd = new AddMarkingWorkflowCommandInternal(dept, AcademicYear(2016)) with ModifyMarkingWorkflowState with CM2MarkingWorkflowServiceComponent with UserLookupComponent {
+      val userLookup = userlookupService
+      val cm2MarkingWorkflowService = workflowService
+      workflowName = "name"
+      markersA = JArrayList(marker1.getUserId, marker2.getUserId)
+      markersB = JArrayList(marker3.getUserId)
+    }
+  }
 
-	@Test
-	def validateNullWorkflowType(): Unit = {
-		new Fixture {
-			hasError(validator, "workflowType")
-			validator.workflowType = SingleMarking
-			hasNoError(validator, "workflowType")
-		}
-	}
+  @Test
+  def validateNullWorkflowType(): Unit = {
+    new Fixture {
+      hasError(validator, "workflowType")
+      validator.workflowType = SingleMarking
+      hasNoError(validator, "workflowType")
+    }
+  }
 
-	@Test
-	def validateEmptyName(): Unit = {
-		new Fixture {
-			validator.workflowType = SingleMarking
-			hasError(validator, "workflowName")
-			validator.workflowName = ""
-			hasError(validator, "workflowName")
-			validator.workflowName = "a name"
-			hasNoError(validator, "workflowName")
-		}
-	}
+  @Test
+  def validateEmptyName(): Unit = {
+    new Fixture {
+      validator.workflowType = SingleMarking
+      hasError(validator, "workflowName")
+      validator.workflowName = ""
+      hasError(validator, "workflowName")
+      validator.workflowName = "a name"
+      hasNoError(validator, "workflowName")
+    }
+  }
 
-	@Test
-	def validateMarkerA(): Unit = {
-		new Fixture {
-			validator.workflowType = SingleMarking
-			validator.workflowName = "a name"
-			hasError(validator, "markersA")
+  @Test
+  def validateMarkerA(): Unit = {
+    new Fixture {
+      validator.workflowType = SingleMarking
+      validator.workflowName = "a name"
+      hasError(validator, "markersA")
 
-			validator.markersA = JArrayList("notauser")
-			hasError(validator, "markersA")
+      validator.markersA = JArrayList("notauser")
+      hasError(validator, "markersA")
 
-			validator.markersA = JArrayList("cuslaj", "cuslaj")
-			hasError(validator, "markersA")
+      validator.markersA = JArrayList("cuslaj", "cuslaj")
+      hasError(validator, "markersA")
 
-			validator.markersA = JArrayList("cuslaj", "cuslak")
-			hasNoError(validator, "markersA")
-		}
-	}
+      validator.markersA = JArrayList("cuslaj", "cuslak")
+      hasNoError(validator, "markersA")
+    }
+  }
 
-	@Test
-	def validateMarkerB(): Unit = {
-		new Fixture {
-			validator.workflowType = SingleMarking
-			validator.workflowName = "a name"
-			validator.markersA = JArrayList("cuslaj", "cuslak")
-			hasNoError(validator, "markersB")
+  @Test
+  def validateMarkerB(): Unit = {
+    new Fixture {
+      validator.workflowType = SingleMarking
+      validator.workflowName = "a name"
+      validator.markersA = JArrayList("cuslaj", "cuslak")
+      hasNoError(validator, "markersB")
 
-			validator.workflowType = DoubleMarking
-			hasError(validator, "markersB")
+      validator.workflowType = DoubleMarking
+      hasError(validator, "markersB")
 
-			validator.markersB = JArrayList("notauser")
-			hasError(validator, "markersB")
+      validator.markersB = JArrayList("notauser")
+      hasError(validator, "markersB")
 
-			validator.markersB = JArrayList("cuslaj", "cuslaj")
-			hasError(validator, "markersB")
+      validator.markersB = JArrayList("cuslaj", "cuslaj")
+      hasError(validator, "markersB")
 
-			validator.markersB = JArrayList("cuslaj", "cuslak")
-			hasNoError(validator, "markersB")
-		}
-	}
+      validator.markersB = JArrayList("cuslaj", "cuslak")
+      hasNoError(validator, "markersB")
+    }
+  }
 
-	@Test
-	def validateDupeNames(): Unit = new Fixture {
+  @Test
+  def validateDupeNames(): Unit = new Fixture {
 
-		val wflow = SingleMarkerWorkflow("name", dept, Seq(marker1))
-		wflow.academicYear = AcademicYear(2016)
-		dept.addCM2MarkingWorkflow(wflow)
+    val wflow = SingleMarkerWorkflow("name", dept, Seq(marker1))
+    wflow.academicYear = AcademicYear(2016)
+    dept.addCM2MarkingWorkflow(wflow)
 
-		validator.workflowName = "name"
-		hasError(validator, "workflowName")
+    validator.workflowName = "name"
+    hasError(validator, "workflowName")
 
-		wflow.academicYear = AcademicYear(2015)
-		hasNoError(validator, "workflowName")
-	}
+    wflow.academicYear = AcademicYear(2015)
+    hasNoError(validator, "workflowName")
+  }
 
-	@Test
-	def applyTest(): Unit = new Fixture {
-		cmd.workflowType = SingleMarking
-		var wflow = cmd.applyInternal()
-		wflow.workflowType should be (SingleMarking)
-		wflow.name should be (cmd.workflowName)
-		wflow.department should be (cmd.department)
-		wflow.academicYear should be (cmd.academicYear)
-		wflow.workflowType should be (SingleMarking)
-		verify(workflowService, times(1)).save(wflow)
-	}
+  @Test
+  def applyTest(): Unit = new Fixture {
+    cmd.workflowType = SingleMarking
+    var wflow = cmd.applyInternal()
+    wflow.workflowType should be(SingleMarking)
+    wflow.name should be(cmd.workflowName)
+    wflow.department should be(cmd.department)
+    wflow.academicYear should be(cmd.academicYear)
+    wflow.workflowType should be(SingleMarking)
+    verify(workflowService, times(1)).save(wflow)
+  }
 
 
 }

@@ -15,34 +15,34 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}/groups/reusable"))
+@RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}/groups/reusable"))
 class ListDepartmentSmallGroupSetsController extends GroupsController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AcademicYearScopedController
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AcademicYearScopedController
+  with AutowiringMaintenanceModeServiceComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	type ListDepartmentSmallGroupSetsCommand = Appliable[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState
+  type ListDepartmentSmallGroupSetsCommand = Appliable[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState
 
-	override val departmentPermission: Permission = Permissions.SmallGroups.Create
+  override val departmentPermission: Permission = Permissions.SmallGroups.Create
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		ListDepartmentSmallGroupSetsCommand(department, academicYear)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    ListDepartmentSmallGroupSetsCommand(department, academicYear)
 
-	@RequestMapping
-	def list(@ModelAttribute("command") command: ListDepartmentSmallGroupSetsCommand, @PathVariable department: Department): Mav = {
-		Mav("groups/admin/groups/reusable/list",
-			"sets" -> command.apply()
-		).crumbs(Breadcrumbs.Department(command.department, command.academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(command.academicYear)(year => Routes.admin.reusable(department, year)):_*)
-	}
+  @RequestMapping
+  def list(@ModelAttribute("command") command: ListDepartmentSmallGroupSetsCommand, @PathVariable department: Department): Mav = {
+    Mav("groups/admin/groups/reusable/list",
+      "sets" -> command.apply()
+    ).crumbs(Breadcrumbs.Department(command.department, command.academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(command.academicYear)(year => Routes.admin.reusable(department, year)): _*)
+  }
 
 }

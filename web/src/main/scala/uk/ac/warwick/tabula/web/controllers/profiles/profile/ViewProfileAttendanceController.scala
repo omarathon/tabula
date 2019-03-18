@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.attendance.profile.AttendanceProfileCommand
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand
 import uk.ac.warwick.tabula.data.model._
@@ -16,52 +17,56 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 @RequestMapping(Array("/profiles/view"))
 class ViewProfileAttendanceController extends AbstractViewProfileController {
 
-	@RequestMapping(Array("/{member}/attendance"))
-	def viewByMemberMapping(
-		@PathVariable member: Member,
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
-	): Mav = {
-		mandatory(member) match {
-			case student: StudentMember if student.mostSignificantCourseDetails.nonEmpty =>
-				viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
-			case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
-				viewByCourse(student.freshOrStaleStudentCourseDetails.last, activeAcademicYear)
-			case _ =>
-				Redirect(Routes.Profile.identity(member))
-		}
-	}
+  @RequestMapping(Array("/{member}/attendance"))
+  def viewByMemberMapping(
+    @PathVariable member: Member,
+    @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+  ): Mav = {
+    mandatory(member) match {
+      case student: StudentMember if student.mostSignificantCourseDetails.nonEmpty =>
+        viewByCourse(student.mostSignificantCourseDetails.get, activeAcademicYear)
+      case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
+        viewByCourse(student.freshOrStaleStudentCourseDetails.last, activeAcademicYear)
+      case _ =>
+        Redirect(Routes.Profile.identity(member))
+    }
+  }
 
-	@RequestMapping(Array("/course/{studentCourseDetails}/{academicYear}/attendance"))
-	def viewByCourseMapping(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		val activeAcademicYear: Option[AcademicYear] = Some(mandatory(academicYear))
-		viewByCourse(studentCourseDetails, activeAcademicYear)
-	}
+  @RequestMapping(Array("/course/{studentCourseDetails}/{academicYear}/attendance"))
+  def viewByCourseMapping(
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    val activeAcademicYear: Option[AcademicYear] = Some(mandatory(academicYear))
+    viewByCourse(studentCourseDetails, activeAcademicYear)
+  }
 
-	private def viewByCourse(
-		studentCourseDetails: StudentCourseDetails,
-		activeAcademicYear: Option[AcademicYear]
-	): Mav = {
-		val student = studentCourseDetails.student
+  private def viewByCourse(
+    studentCourseDetails: StudentCourseDetails,
+    activeAcademicYear: Option[AcademicYear]
+  ): Mav = {
+    if (activeAcademicYear.exists(_.startYear < yearZero)) {
+      throw new ItemNotFoundException(activeAcademicYear.get, s"Not displaying attendance as the year pre-dates Tabula: ${activeAcademicYear.get}")
+    }
 
-		val monitoringPointAttendanceCommand = restricted(AttendanceProfileCommand(mandatory(student), mandatory(activeAcademicYear)))
-		val seminarAttendanceCommand = restricted(ListStudentGroupAttendanceCommand(mandatory(student), mandatory(activeAcademicYear)))
+    val student = studentCourseDetails.student
 
-		Mav("profiles/profile/attendance_student",
-			"student" -> student,
-			"hasMonitoringPointAttendancePermission" -> monitoringPointAttendanceCommand.nonEmpty,
-			"hasSeminarAttendancePermission" -> seminarAttendanceCommand.nonEmpty,
-			"monitoringPointAttendanceCommandResult" -> monitoringPointAttendanceCommand.map(_.apply()).orNull,
-			"seminarAttendanceCommandResult" -> seminarAttendanceCommand.map(_.apply()).orNull,
-			"isSelf" -> (user.universityId.maybeText.getOrElse("") == student.universityId),
-			"allCheckpointStates" -> AttendanceState.values.sortBy(state => state.description),
-			"monthNames" -> MonthNames(activeAcademicYear.get),
-			"academicYear" -> activeAcademicYear
-		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.AttendanceIdentifier): _*)
-			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.attendance(scyd)): _*)
+    val monitoringPointAttendanceCommand = restricted(AttendanceProfileCommand(mandatory(student), mandatory(activeAcademicYear)))
+    val seminarAttendanceCommand = restricted(ListStudentGroupAttendanceCommand(mandatory(student), mandatory(activeAcademicYear)))
 
-	}
+    Mav("profiles/profile/attendance_student",
+      "student" -> student,
+      "hasMonitoringPointAttendancePermission" -> monitoringPointAttendanceCommand.nonEmpty,
+      "hasSeminarAttendancePermission" -> seminarAttendanceCommand.nonEmpty,
+      "monitoringPointAttendanceCommandResult" -> monitoringPointAttendanceCommand.map(_.apply()).orNull,
+      "seminarAttendanceCommandResult" -> seminarAttendanceCommand.map(_.apply()).orNull,
+      "isSelf" -> (user.universityId.maybeText.getOrElse("") == student.universityId),
+      "allCheckpointStates" -> AttendanceState.values.sortBy(state => state.description),
+      "monthNames" -> MonthNames(activeAcademicYear.get),
+      "academicYear" -> activeAcademicYear
+    ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.AttendanceIdentifier): _*)
+      .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.attendance(scyd)): _*)
+
+  }
 
 }

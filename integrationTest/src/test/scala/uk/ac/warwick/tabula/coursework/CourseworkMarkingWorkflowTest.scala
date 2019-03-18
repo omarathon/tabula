@@ -7,112 +7,113 @@ import org.openqa.selenium.By
 
 class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
-	"Department admin" should "be able to manage marking workflow" in as(P.Admin1) {
-		def openMarkingWorkflowSettings() = {
-			When("I should be able to click on the Manage button")
-			click on cssSelector(".dept-settings a.dropdown-toggle")
+  "Department admin" should "be able to manage marking workflow" in as(P.Admin1) {
+    def openMarkingWorkflowSettings() = {
+      When("I should be able to click on the Manage button")
+      click on cssSelector(".dept-settings a.dropdown-toggle")
 
-			Then("I should see the workflows menu option")
-			val markingWorkflowsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Marking workflows"))
-			eventually {
-				markingWorkflowsLink.isDisplayed should be {true}
-			}
-			click on markingWorkflowsLink
-		}
+      Then("I should see the workflows menu option")
+      val markingWorkflowsLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Marking workflows"))
+      eventually {
+        markingWorkflowsLink.isDisplayed should be (true)
+      }
+      click on markingWorkflowsLink
+    }
 
-		When("I go the cm1 workflow page")
-		var page = "/cm1/admin/department/xxx/markingworkflows"
-		go to Path(page)
-		eventually{
-			currentUrl should include(page)
-		}
+    When("I go the cm1 workflow page")
+    var page = "/cm1/admin/department/xxx/markingworkflows"
+    go to Path(page)
+    eventually {
+      currentUrl should include(page)
+    }
 
 
 
-//		click on linkText("Go to the Test Services admin page")
+    //		click on linkText("Go to the Test Services admin page")
 
-//		Then("I should be able to open workflow settings")
-	//	openMarkingWorkflowSettings()
+    //		Then("I should be able to open workflow settings")
+    //	openMarkingWorkflowSettings()
 
-		Then("There should be one at first")
-		cssSelector("table.marking-workflows tbody tr").findAllElements.size should be (1)
+    Then("There should be one at first")
+    cssSelector("table.marking-workflows tbody tr").findAllElements.size should be(1)
 
-		When("I click on the create workflows button")
-		click on partialLinkText("Create")
+    When("I click on the create workflows button")
+    click on partialLinkText("Create")
 
-		And("I enter the necessary data")
-		textField("name").value = "Marking workflow 1"
-		singleSel("markingMethod").value = "StudentsChooseMarker"
-		textField("firstMarkers").value = P.Marker1.usercode
+    And("I enter the necessary data")
+    textField("name").value = "Marking workflow 1"
+    singleSel("markingMethod").value = "StudentsChooseMarker"
+    textField("firstMarkers").value = P.Marker1.usercode
 
-		Then("Another marker field should magically appear")
-		eventually {
-			findAll(cssSelector("input.flexi-picker")).toList.count(_.isDisplayed) should be (2)
-		}
+    Then("Another marker field should magically appear")
+    eventually {
+      findAll(cssSelector("input.flexi-picker")).toList.count(_.isDisplayed) should be(2)
+    }
 
-		When("I enter another marker")
-		new TextField(findAll(cssSelector("input.flexi-picker")).toList.apply(1).underlying).value = P.Marker2.usercode
-		submit()
+    When("I enter another marker")
+    new TextField(findAll(cssSelector("input.flexi-picker")).toList.apply(1).underlying).value = P.Marker2.usercode
+    submit()
 
-		Then("I should be redirected back to the marking workflow page")
-		currentUrl should endWith ("/markingworkflows")
+    Then("I should be redirected back to the marking workflow page")
+    currentUrl should endWith("/markingworkflows")
 
-		When("I create another marking workflow")
-		click on partialLinkText("Create")
-		textField("name").value = "Marking workflow 2"
-		singleSel("markingMethod").value = "StudentsChooseMarker"
-		textField("firstMarkers").value = P.Marker3.usercode
-		submit()
+    When("I create another marking workflow")
+    click on partialLinkText("Create")
+    textField("name").value = "Marking workflow 2"
+    singleSel("markingMethod").value = "StudentsChooseMarker"
+    textField("firstMarkers").value = P.Marker3.usercode
+    submit()
 
-		Then("I should have three marking workflows on the page")
-		className("marking-workflows").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (3)
+    Then("I should have three marking workflows on the page")
+    className("marking-workflows").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(3)
 
-		When("I edit marking workflow 1")
-		({
-			// brackets/braces isolate vals and prevent block being treated as implicit for When() above
-			val tbody = className("marking-workflows").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == "Marking workflow 1"
-			})
-			row should be('defined)
+    When("I edit marking workflow 1")
+    ({
+      // brackets/braces isolate vals and prevent block being treated as implicit for When() above
+      val tbody = className("marking-workflows").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == "Marking workflow 1"
+      })
+      row should be('defined)
 
-			click on row.get.findElement(By.partialLinkText("Modify"))
-		})
+      click on row.get.findElement(By.partialLinkText("Modify"))
+    })
 
-		Then("I should see the correct fields")
-		textField("name").value should be ("Marking workflow 1")
-		textField("firstMarkers").value should be (P.Marker1.usercode)
+    Then("I should see the correct fields")
+    textField("name").value should be("Marking workflow 1")
+    val markers = findAll(name("firstMarkers")).map { el => new TextField(el.underlying).value }.filterNot(_.isEmpty).toSet
+    markers should be(Set(P.Marker1.usercode, P.Marker2.usercode))
 
-		When("I cancel that edit")
-		click on linkText("Cancel")
+    When("I cancel that edit")
+    click on linkText("Cancel")
 
-		And("I delete marking workflow 2")
-		({
-			val tbody = className("marking-workflows").webElement.findElement(By.tagName("tbody"))
-			val row = tbody.findElements(By.tagName("tr")).asScala.find({
-				_.findElement(By.tagName("td")).getText == "Marking workflow 2"
-			})
-			row should be('defined)
+    And("I delete marking workflow 2")
+    ({
+      val tbody = className("marking-workflows").webElement.findElement(By.tagName("tbody"))
+      val row = tbody.findElements(By.tagName("tr")).asScala.find({
+        _.findElement(By.tagName("td")).getText == "Marking workflow 2"
+      })
+      row should be('defined)
 
-			click on row.get.findElement(By.partialLinkText("Delete"))
-		})
+      click on row.get.findElement(By.partialLinkText("Delete"))
+    })
 
-		Then("I should get a confirmation modal")
-		eventually {
-			find("marking-workflow-modal") map { _.isDisplayed } should be (Some(true))
-		}
+    Then("I should get a confirmation modal")
+    eventually {
+      find("marking-workflow-modal").map(_.isDisplayed) should be(Some(true))
+    }
 
-		And("It should have a dangerous button")
-		eventually {
-			Option(id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))) should be ('defined)
-		}
+    And("It should have a dangerous button")
+    eventually {
+      Option(id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))) should be('defined)
+    }
 
-		When("I click the dangerous button")
-		click on id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))
+    When("I click the dangerous button")
+    click on id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))
 
-		Then("I should have two marking workflows left")
-		eventually {
-			className("marking-workflows").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be (2)
-		}
-	}
+    Then("I should have two marking workflows left")
+    eventually {
+      className("marking-workflows").webElement.findElement(By.tagName("tbody")).findElements(By.tagName("tr")).size should be(2)
+    }
+  }
 }

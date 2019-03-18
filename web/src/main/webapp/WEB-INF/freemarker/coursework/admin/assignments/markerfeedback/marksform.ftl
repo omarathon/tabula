@@ -4,10 +4,10 @@
 <#assign cancelUrl><@routes.coursework.listmarkersubmissions assignment marker/></#assign>
 <#assign generateUrl><@routes.coursework.generateGradesForMarks assignment=assignment /></#assign>
 <@courses_macros.marksForm
-	assignment = assignment
-	templateUrl = templateUrl
-	formUrl = formUrl
-	commandName = "markerAddMarksCommand"
-	cancelUrl = cancelUrl
-	generateUrl = generateUrl
+assignment = assignment
+templateUrl = templateUrl
+formUrl = formUrl
+commandName = "markerAddMarksCommand"
+cancelUrl = cancelUrl
+generateUrl = generateUrl
 />

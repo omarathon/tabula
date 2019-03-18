@@ -14,52 +14,52 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.SitsStatusInfo
 
 class ImportSitsStatusCommand(info: SitsStatusInfo) extends Command[(SitsStatus, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
-	with Unaudited with PropertyCopying {
+  with Unaudited with PropertyCopying {
 
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var sitsStatusDao: SitsStatusDao = Wire.auto[SitsStatusDao]
+  var sitsStatusDao: SitsStatusDao = Wire.auto[SitsStatusDao]
 
-	var code: String = info.code
-	var shortName: String = info.shortName
-	var fullName: String = info.fullName
+  var code: String = info.code
+  var shortName: String = info.shortName
+  var fullName: String = info.fullName
 
-	override def applyInternal(): (SitsStatus, ImportResult) = transactional() ({
-		val sitsStatusExisting = sitsStatusDao.getByCode(code)
+  override def applyInternal(): (SitsStatus, ImportResult) = transactional()({
+    val sitsStatusExisting = sitsStatusDao.getByCode(code)
 
-		logger.debug("Importing SITS status " + code + " into " + sitsStatusExisting)
+    logger.debug("Importing SITS status " + code + " into " + sitsStatusExisting)
 
-		val isTransient = !sitsStatusExisting.isDefined
+    val isTransient = !sitsStatusExisting.isDefined
 
-		val sitsStatus = sitsStatusExisting match {
-			case Some(sitsStatus: SitsStatus) => sitsStatus
-			case _ => new SitsStatus()
-		}
+    val sitsStatus = sitsStatusExisting match {
+      case Some(sitsStatus: SitsStatus) => sitsStatus
+      case _ => new SitsStatus()
+    }
 
-		val commandBean = new BeanWrapperImpl(ImportSitsStatusCommand.this)
-		val sitsStatusBean = new BeanWrapperImpl(sitsStatus)
+    val commandBean = new BeanWrapperImpl(ImportSitsStatusCommand.this)
+    val sitsStatusBean = new BeanWrapperImpl(sitsStatus)
 
-		val hasChanged = copyBasicProperties(properties, commandBean, sitsStatusBean)
+    val hasChanged = copyBasicProperties(properties, commandBean, sitsStatusBean)
 
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + sitsStatus)
+    if (isTransient || hasChanged) {
+      logger.debug("Saving changes for " + sitsStatus)
 
-			sitsStatus.lastUpdatedDate = DateTime.now
-			sitsStatusDao.saveOrUpdate(sitsStatus)
-		}
+      sitsStatus.lastUpdatedDate = DateTime.now
+      sitsStatusDao.saveOrUpdate(sitsStatus)
+    }
 
-		val result =
-			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
-			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
-			else ImportAcademicInformationCommand.ImportResult()
+    val result =
+      if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+      else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+      else ImportAcademicInformationCommand.ImportResult()
 
-		(sitsStatus, result)
-	})
+    (sitsStatus, result)
+  })
 
-	private val properties = Set(
-		"code", "shortName", "fullName"
-	)
+  private val properties = Set(
+    "code", "shortName", "fullName"
+  )
 
-	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
+  override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

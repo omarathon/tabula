@@ -95,6 +95,7 @@ details, summary {
 // These styles can be applied regardless of whether the fallback is needed
 summary {
   .cursor-pointer();
+
   &:focus {
     outline: none;
   }
@@ -344,6 +345,7 @@ summary {
     width: 30em;
     padding: 2em;
   }
+
   .submission-receipt {
     border: 1px solid #CCC;
     padding: 1em;
@@ -354,6 +356,7 @@ summary {
   .feedback-list, .submission-list {
     div.checkbox.check-all {
       padding: 0.5em 0 0.3em 1.9em;
+
       input {
         vertical-align: middle;
       }
@@ -386,9 +389,11 @@ summary {
       > span {
         color: @tabulaGrayLight;
       }
+
       .alert {
         margin-bottom: 0;
       }
+
       .marker-notes-warn {
         width: 75%;
         margin: 1rem 0 0 0;
@@ -452,6 +457,7 @@ summary {
           .mg-label {
             display: table-cell;
             padding-right: 0.5rem;
+
             + div {
               padding-right: 0.5rem;
             }
@@ -508,9 +514,11 @@ summary {
         margin-left: -13px;
         margin-top: -1px;
       }
+
       &.open {
         height: auto;
         white-space: inherit;
+
         &::before {
           content: @detailsDownArrow;
         }
@@ -535,12 +543,15 @@ summary {
       &.student {
         background-color: @studentBackground;
       }
+
       &.submission {
         background-color: @submissionBackground;
       }
+
       &.plagiarism {
         background-color: @plagiarismBackground;
       }
+
       &.feedback {
         background-color: @feedbackBackground;
       }
@@ -553,6 +564,7 @@ summary {
     tbody {
       tr.selected td {
         background-color: @errorBackground;
+
         &:hover {
           background-color: @errorBackground;
         }
@@ -573,6 +585,7 @@ summary {
         white-space: nowrap;
       }
     }
+
     .status span {
       display: inline-block;
     }
@@ -650,6 +663,7 @@ summary {
 
       .stage-group {
         margin-top: 12px;
+
         &:first-child {
           margin-top: 0;
         }
@@ -709,6 +723,7 @@ summary {
     &.alt-row {
       background-color: @zebra-pale;
     }
+
     &:last-child {
       .border-radius(0px 0px @box-style-border-radius @box-style-border-radius);
     }
@@ -718,11 +733,13 @@ summary {
       float: left;
       margin-right: 1em;
     }
+
     .stats, .middle {
       font-size: 0.85em;
       width: 44em;
       float: left;
     }
+
     .assignment-buttons, .right {
       float: right;
       width: 11em;
@@ -741,20 +758,25 @@ summary {
       }
 
     }
+
     .feedback-published {
       line-height: 1.4em;
       font-size: 13px;
     }
+
     span.label-like {
       color: @subtle-text-color;
     }
+
     .submission-count, .feedback-count, .submission-and-feedback-count {
 
     }
+
     .has-unreleased-feedback, .has-unapproved-extensions {
       color: @warningText;
       display: block;
     }
+
     .no-unreleased-feedback {
       color: @subtle-text-color;
       display: block;
@@ -821,9 +843,11 @@ summary {
     &.late {
       color: @warningText;
     }
+
     &.extended {
       color: @blue;
     }
+
     &.not-open {
       color: #606060;
     }
@@ -836,6 +860,7 @@ summary {
   .end-assignment-info {
     clear: both;
   }
+
   .end-floats {
     clear: both;
   }
@@ -864,6 +889,7 @@ summary {
       padding-right: 1em;
       border-right: 1px solid #eee;
     }
+
     #zip-column {
       padding-left: 1em;
     }
@@ -881,11 +907,13 @@ summary {
       border: 1px solid #999;
       line-height: 2em;
       .transition(none);
+
       &:hover, &.hover {
         .vertical-gradient(darken(#2c5893, 20%), #2c5893);
         color: white;
         text-shadow: none;
       }
+
       &.disabled {
         .opacity-one(0.5);
         cursor: default;
@@ -935,15 +963,18 @@ summary {
       padding: 0;
       margin: 0;
       list-style: none;
+
       li {
         padding: 5px 0 5px 10px;
         margin: 3px 0;
+
         a {
           max-width: 28em;
           overflow: hidden;
           white-space: nowrap;
           text-overflow: ellipsis;
         }
+
         &:not(:last-child) {
           border-bottom: solid 1px #aaa;
         }
@@ -953,6 +984,7 @@ summary {
     ul.user-list {
       list-style: none;
       padding-left: 0;
+
       li {
         margin: 0;
       }
@@ -1119,15 +1151,18 @@ summary {
   .permission-group {
     .box-style;
     padding: 0.5em;
+
     h3 {
       line-height: 1em;
     }
+
     .description {
       color: #666;
     }
 
     table.permission-list {
       margin: 1em 0 0.3em 1em;
+
       tr.anon-user {
         color: #666;
       }
@@ -1139,9 +1174,11 @@ summary {
     ul {
       margin: 0.2em;
     }
+
     li {
       list-style: none;
     }
+
     margin-bottom: 1em;
   }
 
@@ -1156,6 +1193,7 @@ summary {
     /* Unwrap presentation tables into a 1-column stack */
     table[role=presentation] {
       display: block;
+
       tr, td {
         display: block;
       }
@@ -1186,6 +1224,7 @@ summary {
   .mod-name, .route-name {
     color: #666;
     font-size: 85%;
+
     &:before {
       content: '// ';
       position: relative;
@@ -1231,6 +1270,7 @@ summary {
     table {
       width: 100%;
     }
+
     td.user-id {
       white-space: nowrap;
       width: 5%;
@@ -1238,6 +1278,7 @@ summary {
       font-weight: bold;
       color: darkblue;
     }
+
     tr:hover {
       background-color: #ddd;
       background-color: fadeout(lighten(#ff0, 30%), 40%);
@@ -1268,6 +1309,7 @@ summary {
     span.label {
       cursor: help;
     }
+
     cursor: help;
     border-bottom: 1px dotted @grayLight;
   }
@@ -1306,6 +1348,7 @@ summary {
       height: 155px;
       background: url(../images/app-feedback.png) no-repeat;
       .cursor-pointer();
+
       span {
         display: none;
       }
@@ -1315,9 +1358,11 @@ summary {
   #feedback-rating-container {
     float: right;
     width: 23em;
+
     #feedback-rating {
       margin: @grid-size;
     }
+
     .box-style();
   }
 
@@ -1337,14 +1382,17 @@ summary {
     font-size: 100% !important; // override Bootstrap
     height: 1.3em;
     width: 100%;
+
     &, &[readonly] {
       cursor: pointer !important;
     }
   }
+
   span.copyable-url-container {
     display: block;
     position: relative;
   }
+
   span.press-ctrl-c {
     position: absolute;
     top: 1.7em;
@@ -1363,9 +1411,11 @@ summary {
   .subtle {
     color: @subtle-text-color;
   }
+
   .subtler {
     color: @very-subtle-text-color;
   }
+
   .very-subtle {
     color: @very-subtle-text-color;
     font-size: @very-subtle-font-size;
@@ -1384,6 +1434,7 @@ summary {
     .date {
       white-space: nowrap;
     }
+
     td, th {
       padding: 4px;
     }
@@ -1407,6 +1458,7 @@ summary {
   a.btn {
     text-decoration: none;
   }
+
   #container {
     a [class^="icon-"],
     a [class*=" icon-"],
@@ -1424,6 +1476,7 @@ summary {
 
   a.btn-like {
     color: @textColor;
+
     &:hover {
       color: @tabulaTurquoise;
     }
@@ -1432,6 +1485,7 @@ summary {
   .originality-report {
     text-align: right;
     .hyphenate-words();
+
     img {
       vertical-align: middle
     }
@@ -1459,15 +1513,19 @@ summary {
   .similarity-0 {
     .similarity-box(@btnSuccessBackgroundHighlight);
   }
+
   .similarity-1 {
     .similarity-box(@btnInfoBackgroundHighlight);
   }
+
   .similarity-2 {
     .similarity-box(@tabulaOrangeLight);
   }
+
   .similarity-3 {
     .similarity-box(@btnWarningBackgroundHighlight);
   }
+
   .similarity-4 {
     .similarity-box(@btnDangerBackgroundHighlight);
   }
@@ -1495,10 +1553,12 @@ summary {
     .item-type-include {
       color: @tabulaGreenDark;
     }
+
     .item-type-exclude {
       color: @tabulaGrayLight;
       text-decoration: line-through;
     }
+
     .item-type-sits {
       color: @tabulaGrayDark;
     }
@@ -1514,60 +1574,79 @@ summary {
     .label-A {
       background-color: @tabulaTurquoise;
     }
+
     .label-B {
       background-color: @tabulaPurple;
     }
+
     .label-C {
       background-color: @tabulaBlueLight;
     }
+
     .label-D {
       background-color: @tabulaGreen;
     }
+
     .label-E {
       background-color: @tabulaPink;
     }
+
     .label-F {
       background-color: @tabulaBlue;
     }
+
     .label-G {
       background-color: @tabulaGreenDark;
     }
+
     .label-H {
       background-color: @tabulaOrangeLight;
     }
+
     .label-I {
       background-color: @tabulaBlueDark;
     }
+
     .label-J {
       background-color: @tabulaYellowGreen;
     }
+
     .label-K {
       background-color: @tabulaOrange;
     }
+
     .label-L {
       background-color: @tabulaRed;
     }
+
     .label-M {
       background-color: @tabulaGreenLight;
     }
+
     .label-N {
       background-color: @tabulaOrangeDark;
     }
+
     .label-O {
       background-color: @tabulaRedDark;
     }
+
     .label-P {
       background-color: @tabulaPurpleDark;
     }
+
     .label-Q {
       background-color: @tabulaGrayLight;
     }
+
     .label-R {
       background-color: @tabulaGrayDark;
     }
+
     .label-S {
       background-color: @tabulaGray;
     }
+
     // if you've gone past S then you have too many options. Grey for you!
   }
 
@@ -1601,6 +1680,7 @@ summary {
       top: 40px;
       left: 50px;
     }
+
     h4 + a + .dropdown {
       top: -10px;
     }
@@ -1623,6 +1703,7 @@ summary {
         }
       }
     }
+
     h4.with-related + a,
     h4.with-related + a + .use-introductory {
       margin-top: -13px;
@@ -1790,6 +1871,7 @@ summary {
           }
         }
       }
+
       &.wide {
         max-width: 600px;
 
@@ -1890,9 +1972,11 @@ summary {
         .disabled {
           cursor: not-allowed;
         }
+
         .icon-move {
           cursor: move;
         }
+
         .icon-resize-small, .icon-resize-full, .icon-minus-sign-alt, .icon-plus-sign-alt {
           cursor: pointer;
         }
@@ -1985,6 +2069,7 @@ summary {
       }
     }
   }
+
   // #container
 
 }
@@ -2143,12 +2228,15 @@ input.flexi-picker {
   &.success {
     background-color: @successBackground;
   }
+
   &.error {
     background-color: @errorBackground;
   }
+
   &.warning {
     background-color: @warningBackground;
   }
+
   &.info {
     background-color: @infoBackground;
   }
@@ -2159,12 +2247,15 @@ input.flexi-picker {
   &.success:hover {
     background-color: darken(@successBackground, 5%);
   }
+
   &.error:hover {
     background-color: darken(@errorBackground, 5%);
   }
+
   &.warning:hover {
     background-color: darken(@warningBackground, 5%);
   }
+
   &.info:hover {
     background-color: darken(@infoBackground, 5%);
   }
@@ -2199,6 +2290,7 @@ input.flexi-picker {
     height: 1em;
     line-height: 1em;
     vertical-align: -16%;
+
     &.icon-fixed-width {
       width: 16/14em;
     }
@@ -2206,10 +2298,12 @@ input.flexi-picker {
     .icon-stack-base {
       font-size: 1em;
     }
+
     .icon-stack-small {
       font-size: 0.6em;
     }
   }
+
   .icon-stack.icon-stack-right {
     .icon-stack-small {
       width: auto;
@@ -2222,6 +2316,7 @@ input.flexi-picker {
       padding-right: 0;
     }
   }
+
   .icon-filled-white {
     background: white;
   }
@@ -2320,6 +2415,7 @@ ul.nav-pills {
     .filter-short-values {
       width: 120px;
     }
+
     .filter-list {
       width: 300px;
     }
@@ -2364,6 +2460,7 @@ ul.nav-pills {
     margin-bottom: @grid-size * 0.75;
     border-bottom: 1px solid #cccccc;
   }
+
   .headline {
     i {
       padding-right: 1em;
@@ -2371,9 +2468,11 @@ ul.nav-pills {
       left: 8px;
       top: -1px;
     }
+
     h5 {
       display: inline;
     }
+
     a h5 {
       color: @linkColor;
     }
@@ -2383,19 +2482,24 @@ ul.nav-pills {
     i {
       color: @tabulaGreen;
     }
+
     .title {
       text-decoration: line-through;
     }
   }
+
   .priority-trivial .headline i {
     color: @tabulaBlue;
   }
+
   .priority-info .headline i {
     color: @tabulaBlue;
   }
+
   .priority-warning .headline i {
     color: @tabulaOrangeLight;
   }
+
   .priority-critical .headline i {
     color: @tabulaRed;
   }
@@ -2406,6 +2510,7 @@ ul.nav-pills {
     display: inline;
     padding-left: 1em;
   }
+
   .content {
     padding-left: @grid-size * 2.5;
 
@@ -2414,18 +2519,22 @@ ul.nav-pills {
     p {
       margin: 0 0 0.2em !important;
     }
+
     ul {
       margin: 0.2em !important;
     }
+
     li {
       margin: 0 !important;
       color: @tabulaGray;
     }
 
   }
+
   .more-link {
     margin-top: @grid-size;
   }
+
   .deleted-notice {
     margin-bottom: 0;
   }
@@ -2468,6 +2577,7 @@ ul.nav-pills {
 
       * {
         white-space: normal;
+
         &:first-child::after {
           content: "";
         }

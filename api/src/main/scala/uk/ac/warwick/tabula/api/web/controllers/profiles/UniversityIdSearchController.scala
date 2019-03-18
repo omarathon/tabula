@@ -13,27 +13,27 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 @RequestMapping(Array("/v1/universityIdSearch"))
 class UniversityIdSearchController extends ApiController
-	with AutowiringProfileServiceComponent {
+  with AutowiringProfileServiceComponent {
 
-	final override def onPreRequest {
-		session.enableFilter(Member.ActiveOnlyFilter)
-		session.enableFilter(Member.FreshOnlyFilter)
-	}
+  final override def onPreRequest {
+    session.enableFilter(Member.ActiveOnlyFilter)
+    session.enableFilter(Member.FreshOnlyFilter)
+  }
 
-	@ModelAttribute("getCommand")
-	def getCommand: Appliable[Seq[String]] = UniversityIdSearchCommand()
+  @ModelAttribute("getCommand")
+  def getCommand: Appliable[Seq[String]] = UniversityIdSearchCommand()
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def search(
-		@ModelAttribute("getCommand") command: Appliable[Seq[String]],
-		@RequestParam(required = false) level: String
-	): Mav = {
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"universityIds" -> command.apply()
-		)))
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def search(
+    @ModelAttribute("getCommand") command: Appliable[Seq[String]],
+    @RequestParam(required = false) level: String
+  ): Mav = {
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "universityIds" -> command.apply()
+    )))
 
 
-	}
+  }
 }

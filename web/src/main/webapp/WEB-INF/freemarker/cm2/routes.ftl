@@ -6,35 +6,35 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
    we're repeating ourselves here. OR expose Routes directly.
 -->
 <#macro _u page context=cm2Context>
-	<@url context=context page=page />
+  <@url context=context page=page />
 </#macro>
 
 <#macro home><@_u page="/" /></#macro>
 <#macro markerHome><@_u page="/marker" /></#macro>
 
 <#macro depthome module academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear?c}/?moduleFilters=Module(${module.code})#module-${module.code}" />
-	<#else>
-		<@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.code}" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear?c}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+  <#else>
+    <@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+  </#if>
 </#macro>
 <#macro departmenthome department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" />
-	<#else>
-		<@_u page="/admin/department/${department.code}" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}" />
+  <#else>
+    <@_u page="/admin/department/${department.code}" />
+  </#if>
 </#macro>
 <#macro modulehome module academicYear><@_u page="/admin/${module.code}/${academicYear.startYear?c}" /></#macro>
 <#macro downloadSubmission submission filename><@_u page="/admin/assignments/${submission.assignment.id}/submissions/download/${submission.id}/${filename?url}"/></#macro>
 
 <#macro filterExtensions academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/extensions/${academicYear.startYear?c}"/>
-	<#else>
-		<@_u page="/admin/extensions"/>
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/extensions/${academicYear.startYear?c}"/>
+  <#else>
+    <@_u page="/admin/extensions"/>
+  </#if>
 </#macro>
 <#macro extensionDetail extension><@_u page="/admin/extensions/${extension.id}/detail"/></#macro>
 <#macro extensiondetail assignment usercode><@_u page="/admin/assignments/${assignment.id}/extensions/${usercode}/detail" /></#macro>
@@ -43,11 +43,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionSettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 
 <#macro reusableWorkflowsHome department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows" />
-	<#else>
-		<@_u page="/admin/department/${department.code}/markingworkflows" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows" />
+  <#else>
+    <@_u page="/admin/department/${department.code}/markingworkflows" />
+  </#if>
 </#macro>
 <#macro reusableWorkflowAdd department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/add" /></#macro>
 <#macro reusableWorkflowAddToCurrentYear department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/copy" /></#macro>
@@ -56,11 +56,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro reusableWorkflowReplaceMarker department academicYear workflow><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/markingworkflows/${workflow.id}/replace" /></#macro>
 
 <#macro feedbackreport department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/reports/feedback"/>
-	<#else>
-		<@_u page="/admin/department/${department.code}/reports/feedback"/>
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/reports/feedback"/>
+  <#else>
+    <@_u page="/admin/department/${department.code}/reports/feedback"/>
+  </#if>
 </#macro>
 
 <#macro createassignmentdetails module academicYear><@_u page="/admin/${module.code}/${academicYear.startYear?c}/assignments/new" /></#macro>
@@ -77,24 +77,26 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentrequestaccess assignment><@_u page="/submission/${assignment.id}/request-access"/></#macro>
 <#macro assignmentdelete assignment><@_u page="/admin/assignments/${assignment.id}/delete"/></#macro>
 <#macro create_sitsassignments department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/setup-assignments" />
-	<#else>
-		<@_u page="/admin/department/${department.code}/setup-assignments" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/setup-assignments" />
+  <#else>
+    <@_u page="/admin/department/${department.code}/setup-assignments" />
+  </#if>
 </#macro>
 <#macro assignmentSharedOptions department><@_u page="/admin/department/${department.code}/shared-options" /></#macro>
 
 <#macro copy_assignments_previous department academicYear="">
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/copy-assignments" />
-	<#else>
-		<@_u page="/admin/department/${department.code}/copy-assignments" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/copy-assignments" />
+  <#else>
+    <@_u page="/admin/department/${department.code}/copy-assignments" />
+  </#if>
 </#macro>
 <#macro copy_assignments_previous_module module academicYear><@_u page="/admin/${module.code}/${academicYear.startYear?c}/copy-assignments" /></#macro>
 
 <#macro editassignmentdetails assignment><@_u page="/admin/assignments/${assignment.id}/edit" /></#macro>
+
+<#macro enhancedAssignmentDetails assignment><@_u page="/admin/assignments/detail/${assignment.id}" /></#macro>
 
 <#macro feedbackSummary assignment studentid><@_u page="/admin/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro feedbackAudit assignment studentid><@_u page="/admin/assignments/${assignment.id}/audit/${studentid}"/></#macro>

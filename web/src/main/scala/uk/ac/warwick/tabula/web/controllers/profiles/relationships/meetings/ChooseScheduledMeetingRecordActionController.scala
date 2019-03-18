@@ -12,42 +12,42 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @RequestMapping(Array("/profiles/{relationshipType}/meeting/{studentCourseDetails}/schedule/{meetingRecord}/chooseaction"))
 class ChooseScheduledMeetingRecordActionController extends ProfilesController {
 
-	@RequestMapping(params = Array("action=confirm"))
-	def confirm(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable meetingRecord: ScheduledMeetingRecord
-	): Mav = {
-		Redirect(Routes.scheduledMeeting.confirm(meetingRecord, studentCourseDetails, relationshipType))
-	}
+  @RequestMapping(params = Array("action=confirm"))
+  def confirm(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable meetingRecord: ScheduledMeetingRecord
+  ): Mav = {
+    Redirect(Routes.scheduledMeeting.confirm(meetingRecord, studentCourseDetails, relationshipType))
+  }
 
-	@RequestMapping(params = Array("action=reschedule"))
-	def reschedule(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable meetingRecord: ScheduledMeetingRecord
-	): Mav = {
-		Redirect(Routes.scheduledMeeting.reschedule(meetingRecord, studentCourseDetails, relationshipType))
-	}
+  @RequestMapping(params = Array("action=reschedule"))
+  def reschedule(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable meetingRecord: ScheduledMeetingRecord
+  ): Mav = {
+    Redirect(Routes.scheduledMeeting.reschedule(meetingRecord, studentCourseDetails, relationshipType))
+  }
 
-	@RequestMapping(params = Array("action=missed"))
-	def missed(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable studentCourseDetails: StudentCourseDetails,
-		@PathVariable meetingRecord: ScheduledMeetingRecord
-	): Mav = {
-		Redirect(Routes.scheduledMeeting.missed(meetingRecord, studentCourseDetails, relationshipType))
-	}
+  @RequestMapping(params = Array("action=missed"))
+  def missed(
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable studentCourseDetails: StudentCourseDetails,
+    @PathVariable meetingRecord: ScheduledMeetingRecord
+  ): Mav = {
+    Redirect(Routes.scheduledMeeting.missed(meetingRecord, studentCourseDetails, relationshipType))
+  }
 
-	@RequestMapping
-	def none(
-		@PathVariable meetingRecord: ScheduledMeetingRecord
-	): Mav = {
-		Redirect(
-			Routes.Profile.relationshipType(
-				meetingRecord.student,
-				meetingRecord.relationshipTypes.head
-			)
-		)
-	}
+  @RequestMapping
+  def none(
+    @PathVariable meetingRecord: ScheduledMeetingRecord
+  ): Mav = {
+    Redirect(
+      Routes.Profile.relationshipType(
+        meetingRecord.student,
+        meetingRecord.relationshipTypes.head
+      )
+    )
+  }
 }

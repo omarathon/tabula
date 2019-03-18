@@ -7,19 +7,19 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 
 <#-- Outputs false as the value if the value is missing. -->
 <#macro hiddenorfalse path>
-	<@spring.bind path=path>
-		<#local value=status.value!'false' />
-		<#if value=''>
-			<#local value="false" />
-		</#if>
-	<input type="hidden" name="${status.expression}" value="${value}" />
-	</@spring.bind>
+  <@spring.bind path=path>
+    <#local value=status.value!'false' />
+    <#if value=''>
+      <#local value="false" />
+    </#if>
+    <input type="hidden" name="${status.expression}" value="${value}" />
+  </@spring.bind>
 </#macro>
 
 <@hiddenorfalse path="collectSubmissions" />
 <@hiddenorfalse path="collectMarks" />
 <#if !(ignoreQueueFeedbackForSits!false)>
-	<@hiddenorfalse path="queueFeedbackForSits" />
+  <@hiddenorfalse path="queueFeedbackForSits" />
 </#if>
 <@hiddenorfalse path="restrictSubmissions" />
 <@hiddenorfalse path="allowLateSubmissions" />

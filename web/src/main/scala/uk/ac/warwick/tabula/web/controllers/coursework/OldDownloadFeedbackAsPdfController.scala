@@ -15,36 +15,37 @@ import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/module/{module}/{assignment}/{student}/feedback.pdf"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/module/{module}/{assignment}/{student}/feedback.pdf"))
 class OldDownloadFeedbackAsPdfController extends OldCourseworkController {
 
-	type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
-	var feedbackService: FeedbackService = Wire[FeedbackService]
+  type DownloadFeedbackAsPdfCommand = Appliable[Feedback]
+  var feedbackService: FeedbackService = Wire[FeedbackService]
 
-	@ModelAttribute def command(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable student: User): DownloadFeedbackAsPdfCommand = {
+  @ModelAttribute def command(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @PathVariable student: User): DownloadFeedbackAsPdfCommand = {
 
-		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
-		if (!user.loggedIn) {
-			throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
-		}
+    // We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
+    if (!user.loggedIn) {
+      throw PermissionDeniedException(user, Permissions.AssignmentFeedback.Read, assignment)
+    }
 
-		DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)))
-	}
+    DownloadFeedbackAsPdfCommand(module, assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)))
+  }
 
-	@RequestMapping
-	def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: User): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
-		new PDFView(
-			"feedback.pdf",
-			DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
-			Map(
-				"feedback" -> command.apply(),
-				"studentId" -> CurrentUser.studentIdentifier(student)
-			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
-	}
+  @RequestMapping
+  def viewAsPdf(command: DownloadFeedbackAsPdfCommand, @PathVariable student: User): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
+    new PDFView(
+      "feedback.pdf",
+      DownloadFeedbackAsPdfCommand.feedbackDownloadTemple,
+      Map(
+        "feedback" -> command.apply(),
+        "studentId" -> CurrentUser.studentIdentifier(student)
+      )
+    ) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
+  }
 
 }

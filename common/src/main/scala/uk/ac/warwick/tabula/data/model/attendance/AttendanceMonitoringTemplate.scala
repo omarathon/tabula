@@ -12,23 +12,23 @@ import uk.ac.warwick.tabula.data.model.GeneratedId
 @Table(name = "attendancetemplate")
 class AttendanceMonitoringTemplate extends GeneratedId {
 
-	@NotNull
-	var templateName: String = _
+  @NotNull
+  var templateName: String = _
 
-	@NotNull
-	var position: Int = _
+  @NotNull
+  var position: Int = _
 
-	@OneToMany(mappedBy = "scheme", fetch = FetchType.LAZY, cascade=Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=100)
-	var points: JList[AttendanceMonitoringTemplatePoint] = JArrayList()
+  @OneToMany(mappedBy = "scheme", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 100)
+  var points: JList[AttendanceMonitoringTemplatePoint] = JArrayList()
 
-	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointStyleUserType")
-	@Column(name = "point_style")
-	var pointStyle: AttendanceMonitoringPointStyle = _
+  @NotNull
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointStyleUserType")
+  @Column(name = "point_style")
+  var pointStyle: AttendanceMonitoringPointStyle = _
 
-	var createdDate: DateTime = _
+  var createdDate: DateTime = _
 
-	var updatedDate: DateTime = _
+  var updatedDate: DateTime = _
 
 }

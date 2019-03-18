@@ -11,31 +11,31 @@ import scala.collection.JavaConverters._
 
 trait OldFeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
-	this: ReleasedState with UserAware with UserLookupComponent with Logging =>
+  this: ReleasedState with UserAware with UserLookupComponent with Logging =>
 
-	def blankNotification: OldReleaseToMarkerNotification
+  def blankNotification: OldReleaseToMarkerNotification
 
-	def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
-		// emit notifications to each second marker that has new feedback
-		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(mf => {
-			val marker = mf.getMarkerUsercode
-			marker.getOrElse("unassigned")
-		})
+  def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
+    // emit notifications to each second marker that has new feedback
+    val markerMap: Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(mf => {
+      val marker = mf.getMarkerUsercode
+      marker.getOrElse("unassigned")
+    })
 
-		val unassignedFeedback = markerMap.get("unassigned")
-		if(unassignedFeedback.isDefined){
-			logger.warn(s"${unassignedFeedback.get.size} marker feedback were released without a second marker for ${assignment.name}")
-		}
+    val unassignedFeedback = markerMap.get("unassigned")
+    if (unassignedFeedback.isDefined) {
+      logger.warn(s"${unassignedFeedback.get.size} marker feedback were released without a second marker for ${assignment.name}")
+    }
 
-		markerMap.filterNot(_._1 == "unassigned").map{ case (usercode, markerFeedbacks) =>
-			val notification = Notification.init(blankNotification, user, markerFeedbacks, assignment)
-			notification.recipientUserId = usercode
-			notification
-		}.toSeq
-	}
+    markerMap.filterNot(_._1 == "unassigned").map { case (usercode, markerFeedbacks) =>
+      val notification = Notification.init(blankNotification, user, markerFeedbacks, assignment)
+      notification.recipientUserId = usercode
+      notification
+    }.toSeq
+  }
 }
 
 trait ReleasedState {
-	val assignment: Assignment
-	var newReleasedFeedback: JList[MarkerFeedback] = JArrayList()
+  val assignment: Assignment
+  var newReleasedFeedback: JList[MarkerFeedback] = JArrayList()
 }

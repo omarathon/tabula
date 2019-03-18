@@ -10,11 +10,11 @@ case class Submitter(submission: model.Submission) extends BuiltInRole(Submitter
 
 case object SubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Submitted Assignment"
+  override def description = "Submitted Assignment"
 
-	GrantsScopedPermission(
-		Submission.Read,
-		Submission.SendReceipt
-	)
+  GrantsScopedPermission(
+    Submission.Read,
+    Submission.SendReceipt
+  )
 
 }

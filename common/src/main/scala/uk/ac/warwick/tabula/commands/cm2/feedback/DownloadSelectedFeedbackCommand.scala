@@ -14,53 +14,53 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import scala.collection.JavaConverters._
 
 /**
- * Download one or more submissions from an assignment, as a Zip.
- */
+  * Download one or more submissions from an assignment, as a Zip.
+  */
 class DownloadSelectedFeedbackCommand(val assignment: Assignment, user: CurrentUser)
-	extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
+  extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
 
-	PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+  PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
 
-	var assignmentService: AssessmentService = Wire[AssessmentService]
-	var zipService: ZipService = Wire[ZipService]
-	var feedbackDao: FeedbackDao = Wire[FeedbackDao]
-	var jobService: JobService = Wire[JobService]
+  var assignmentService: AssessmentService = Wire[AssessmentService]
+  var zipService: ZipService = Wire[ZipService]
+  var feedbackDao: FeedbackDao = Wire[FeedbackDao]
+  var jobService: JobService = Wire[JobService]
 
 
-	var filename: String = _
+  var filename: String = _
 
-	var students: JList[String] = JArrayList()
+  var students: JList[String] = JArrayList()
 
-	var feedbacks: JList[AssignmentFeedback] = _
+  var feedbacks: JList[AssignmentFeedback] = _
 
-	override def applyInternal(): Either[RenderableFile, JobInstance] = {
-		if (students.isEmpty) throw new ItemNotFoundException
+  override def applyInternal(): Either[RenderableFile, JobInstance] = {
+    if (students.isEmpty) throw new ItemNotFoundException
 
-		feedbacks = students.asScala
-			.flatMap(feedbackDao.getAssignmentFeedbackByUsercode(assignment, _))
-			.filter(f => !assignment.hasCM2Workflow || f.isMarkingCompleted)
-			.asJava
+    feedbacks = students.asScala
+      .flatMap(feedbackDao.getAssignmentFeedbackByUsercode(assignment, _))
+      .filter(f => !assignment.hasCM2Workflow || f.isMarkingCompleted)
+      .asJava
 
-		if (feedbacks.asScala.exists(_.assignment != assignment)) {
-				throw new IllegalStateException("Selected feedback doesn't match the assignment")
-		}
+    if (feedbacks.asScala.exists(_.assignment != assignment)) {
+      throw new IllegalStateException("Selected feedback doesn't match the assignment")
+    }
 
-		if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
-			val zip = zipService.getSomeFeedbacksZip(feedbacks.asScala)
-			Left(zip)
-		} else {
-			Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))
-		}
-	}
+    if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
+      val zip = zipService.getSomeFeedbacksZip(feedbacks.asScala)
+      Left(zip)
+    } else {
+      Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))
+    }
+  }
 
-	override def describe(d: Description): Unit = d
-		.assignment(assignment)
-		.studentUsercodes(students.asScala)
+  override def describe(d: Description): Unit = d
+    .assignment(assignment)
+    .studentUsercodes(students.asScala)
 
-	override def describeResult(d: Description): Unit = d
-		.assignment(assignment)
-		.studentIds(feedbacks.asScala.flatMap(_.universityId))
-		.studentUsercodes(students.asScala) // is usercodes
-		.properties(
-			"feedbackCount" -> Option(feedbacks).map(_.size).getOrElse(0))
+  override def describeResult(d: Description): Unit = d
+    .assignment(assignment)
+    .studentIds(feedbacks.asScala.flatMap(_.universityId))
+    .studentUsercodes(students.asScala) // is usercodes
+    .properties(
+    "feedbackCount" -> Option(feedbacks).map(_.size).getOrElse(0))
 }

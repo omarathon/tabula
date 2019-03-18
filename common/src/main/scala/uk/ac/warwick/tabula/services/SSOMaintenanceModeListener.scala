@@ -16,88 +16,90 @@ import uk.ac.warwick.util.queue.conversion.ItemType
 import scala.util.{Failure, Success, Try}
 
 /**
- * TAB-106 This bean registers an observer to the maintenance mode service,
- * which swaps out the SSO configuration to old mode SSO whenever maintenance
- * mode is enabled, and swaps it back to new mode when it's disabled.
- *
- * This listener both listens to the queue and observes, as the queue listener
- * automatically removes messages from the same source, which we don't want.
- */
+  * TAB-106 This bean registers an observer to the maintenance mode service,
+  * which swaps out the SSO configuration to old mode SSO whenever maintenance
+  * mode is enabled, and swaps it back to new mode when it's disabled.
+  *
+  * This listener both listens to the queue and observes, as the queue listener
+  * automatically removes messages from the same source, which we don't want.
+  */
 class SSOMaintenanceModeListener extends QueueListener with InitializingBean with Logging with ServletContextAware with AutowiringMaintenanceModeServiceComponent {
 
-	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
+  var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
 
-	def config: Option[SSOConfiguration] = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
-		case config: SSOConfiguration => Some(config)
-		case _ => None
-	}
-	def cache: Option[DatabaseUserCache] = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
-		case cache: DatabaseUserCache => Some(cache)
-		case _ => None
-	}
+  def config: Option[SSOConfiguration] = servletContext.getAttribute(SSOConfigLoader.SSO_CONFIG_KEY) match {
+    case config: SSOConfiguration => Some(config)
+    case _ => None
+  }
 
-	def switchToOldMode(): Unit = {
-		config.foreach { config =>
-			Try {
-				if ("new".equals(config.getString("mode"))) {
-					config.setProperty("mode", "old")
-					config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/slogin")
-				}
-			} match {
-				case Success(_) =>
-				case Failure(t) =>
-					logger.error("Couldn't switch SSO config to 'new' mode", t)
-			}
-		}
+  def cache: Option[DatabaseUserCache] = servletContext.getAttribute(SSOConfigLoader.SSO_CACHE_KEY) match {
+    case cache: DatabaseUserCache => Some(cache)
+    case _ => None
+  }
 
-		// Turn database clustering off as well
-		cache.foreach(_.setDatabaseEnabled(false))
-	}
+  def switchToOldMode(): Unit = {
+    config.foreach { config =>
+      Try {
+        if ("new".equals(config.getString("mode"))) {
+          config.setProperty("mode", "old")
+          config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/slogin")
+        }
+      } match {
+        case Success(_) =>
+        case Failure(t) =>
+          logger.error("Couldn't switch SSO config to 'new' mode", t)
+      }
+    }
 
-	def switchToNewMode(): Unit = {
-		config.foreach { config =>
-			Try {
-				if ("old".equals(config.getString("mode"))) {
-					logger.info("Detected maintenance mode disabled; switching SSO config to 'new' mode")
+    // Turn database clustering off as well
+    cache.foreach(_.setDatabaseEnabled(false))
+  }
 
-					config.setProperty("mode", "new")
-					config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/hs")
-				}
-			} match {
-				case Success(_) =>
-				case Failure(t) =>
-					logger.error("Couldn't switch SSO config to 'new' mode", t)
-			}
-		}
+  def switchToNewMode(): Unit = {
+    config.foreach { config =>
+      Try {
+        if ("old".equals(config.getString("mode"))) {
+          logger.info("Detected maintenance mode disabled; switching SSO config to 'new' mode")
 
-		// Turn database clustering back on as well
-		cache.foreach(_.setDatabaseEnabled(true))
-	}
+          config.setProperty("mode", "new")
+          config.setProperty("origin.login.location", "https://websignon.warwick.ac.uk/origin/hs")
+        }
+      } match {
+        case Success(_) =>
+        case Failure(t) =>
+          logger.error("Couldn't switch SSO config to 'new' mode", t)
+      }
+    }
 
-	override def isListeningToQueue = true
-	override def onReceive(item: Any): Unit = {
-		item match {
-			case message: MaintenanceModeMessage =>
-				if (message.enabled) switchToOldMode()
-				else switchToNewMode()
-		}
-	}
+    // Turn database clustering back on as well
+    cache.foreach(_.setDatabaseEnabled(true))
+  }
 
-	override def afterPropertiesSet(): Unit = {
-		queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
+  override def isListeningToQueue = true
 
-		maintenanceModeService.changingState.observe { enabled =>
-			if (enabled) switchToOldMode()
-			else switchToNewMode()
-		}
+  override def onReceive(item: Any): Unit = {
+    item match {
+      case message: MaintenanceModeMessage =>
+        if (message.enabled) switchToOldMode()
+        else switchToNewMode()
+    }
+  }
 
-		if (maintenanceModeService.enabled) switchToOldMode()
-	}
+  override def afterPropertiesSet(): Unit = {
+    queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
 
-	private var servletContext: ServletContext = _
+    maintenanceModeService.changingState.observe { enabled =>
+      if (enabled) switchToOldMode()
+      else switchToNewMode()
+    }
 
-	override def setServletContext(servletContext: ServletContext): Unit = {
-		this.servletContext = servletContext
-	}
+    if (maintenanceModeService.enabled) switchToOldMode()
+  }
+
+  private var servletContext: ServletContext = _
+
+  override def setServletContext(servletContext: ServletContext): Unit = {
+    this.servletContext = servletContext
+  }
 
 }

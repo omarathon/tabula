@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import java.io.IOException
+
+import com.itextpdf.text.ExceptionConverter
 import javax.servlet.ServletException
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-
 import org.springframework.beans.TypeMismatchException
 import org.springframework.beans.factory.annotation.{Autowired, Required}
 import org.springframework.http.HttpStatus
@@ -20,7 +21,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.profiles.DefaultPhoto
 import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, Ordered}
-import uk.ac.warwick.tabula.system.{RenderableFileView, CurrentUserInterceptor, RequestInfoInterceptor}
+import uk.ac.warwick.tabula.system.{CurrentUserInterceptor, RenderableFileView, RequestInfoInterceptor}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.ControllerViews
 import uk.ac.warwick.tabula.web.views.JSONView
@@ -29,166 +30,172 @@ import uk.ac.warwick.util.core.ExceptionUtils
 import scala.collection.JavaConverters._
 
 /**
- * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
- *
- * Errors not caught by Spring will be forwarded by the web.xml error handler to
- * ErrorController which delegates to ExceptionResolver.doResolve(e), so all errors
- * should come here eventually.
- */
+  * Implements the Spring HandlerExceptionResolver SPI to catch all errors.
+  *
+  * Errors not caught by Spring will be forwarded by the web.xml error handler to
+  * ErrorController which delegates to ExceptionResolver.doResolve(e), so all errors
+  * should come here eventually.
+  */
 class ExceptionResolver extends HandlerExceptionResolver with Logging with Ordered with ControllerViews {
 
-	@Required var defaultView: String = _
+  @Required var defaultView: String = _
 
-	@Autowired var exceptionHandler: ExceptionHandler = _
+  @Autowired var exceptionHandler: ExceptionHandler = _
 
-	@Autowired var userInterceptor: CurrentUserInterceptor = _
-	@Autowired var infoInterceptor: RequestInfoInterceptor = _
+  @Autowired var userInterceptor: CurrentUserInterceptor = _
+  @Autowired var infoInterceptor: RequestInfoInterceptor = _
 
-	@Autowired var contentNegotiationManager: ContentNegotiationManager = _
+  @Autowired var contentNegotiationManager: ContentNegotiationManager = _
 
-	/**
-	 * If the interesting exception matches one of these exceptions then
-	 * the given view name will be used instead of defaultView.
-	 *
-	 * Doesn't check subclasses, the exception class has to match exactly.
-	 */
-	@Required var viewMappings: JMap[String, String] = JHashMap[String, String]()
+  /**
+    * If the interesting exception matches one of these exceptions then
+    * the given view name will be used instead of defaultView.
+    *
+    * Doesn't check subclasses, the exception class has to match exactly.
+    */
+  @Required var viewMappings: JMap[String, String] = JHashMap[String, String]()
 
-	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
-		val interceptors = List(userInterceptor, infoInterceptor)
-		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
+  override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
+    val interceptors = List(userInterceptor, infoInterceptor)
+    for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
 
-		doResolve(e, Some(request), Some(response)).noLayoutIf(ajax).toModelAndView
-	}
+    doResolve(e, Some(request), Some(response)).noLayoutIf(ajax).toModelAndView
+  }
 
-	override def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
+  override def requestInfo: Option[RequestInfo] = RequestInfo.fromThread
 
-	private def ajax = requestInfo.exists { _.ajax }
+  private def ajax = requestInfo.exists(_.ajax)
 
-	/**
-	 * Resolve an exception outside of a request. Doesn't return a model/view.
-	 */
-	def resolveException(e: Exception) { doResolve(e) }
+  /**
+    * Resolve an exception outside of a request. Doesn't return a model/view.
+    */
+  def resolveException(e: Exception) {
+    doResolve(e)
+  }
 
-	/**
-	 * Simpler interface for ErrorController to delegate to, which is called when an exception
-	 * happens beyond Spring's grasp.
-	 */
-	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
-		def loggedIn = requestInfo.exists { _.user.loggedIn }
-		def isAjaxRequest = request.isDefined && ("XMLHttpRequest" == request.get.getHeader("X-Requested-With"))
+  /**
+    * Simpler interface for ErrorController to delegate to, which is called when an exception
+    * happens beyond Spring's grasp.
+    */
+  def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
+    def loggedIn = requestInfo.exists(_.user.loggedIn)
 
-		e match {
-			// Handle unresolvable @PathVariables as a page not found (404). HFC-408
-			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
+    def isAjaxRequest = request.isDefined && ("XMLHttpRequest" == request.get.getHeader("X-Requested-With"))
 
-			// Handle request method not supported as a 405
-			case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new MethodNotSupportedException(methodNotSupported), request, response)
+    e match {
+      // Handle unresolvable @PathVariables as a page not found (404). HFC-408
+      case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
 
-			// Handle missing servlet param exceptions as 400
-			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
+      // Handle request method not supported as a 405
+      case methodNotSupported: HttpRequestMethodNotSupportedException => handle(new MethodNotSupportedException(methodNotSupported), request, response)
 
-			// Handle missing request body
-			case missingBody: HttpMessageNotReadableException => handle(new RequestBodyMissingException(missingBody), request, response)
+      // Handle missing servlet param exceptions as 400
+      case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
 
-			// TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
-			case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists { _.isJsonRequest } => RedirectToSignin()
+      // Handle missing request body
+      case missingBody: HttpMessageNotReadableException => handle(new RequestBodyMissingException(missingBody), request, response)
 
-			case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
+      // TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
+      case permDenied: PermissionsError if !loggedIn && !isAjaxRequest && !request.exists(_.isJsonRequest) => RedirectToSignin()
 
-			// TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
-			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)
+      case e: IOException if ExceptionHandler.isClientAbortException(e) => Mav(null.asInstanceOf[String])
+      case e: ExceptionConverter if e.getException.isInstanceOf[IOException] && ExceptionHandler.isClientAbortException(e.getException.asInstanceOf[IOException]) => Mav(null.asInstanceOf[String])
 
-			case exception: Throwable => handle(exception, request, response)
-			case _ => handleNull
-		}
-	}
+      // TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
+      case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)
 
-	/**
-	 * Catch any exception in the given callback. Useful for wrapping some
-	 * work that's done outside of a request, such as a scheduled task, because
-	 * otherwise the exception will be only minimally logged by the scheduler.
-	 */
-	def reportExceptions[A](fn: => A): A =
-		try fn
-		catch { case throwable: Throwable => handle(throwable, None, None); throw throwable }
+      case exception: Throwable => handle(exception, request, response)
+      case _ => handleNull
+    }
+  }
 
-	private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
-		val token = ExceptionTokens.newToken
+  /**
+    * Catch any exception in the given callback. Useful for wrapping some
+    * work that's done outside of a request, such as a scheduled task, because
+    * otherwise the exception will be only minimally logged by the scheduler.
+    */
+  def reportExceptions[A](fn: => A): A =
+    try fn
+    catch {
+      case throwable: Throwable => handle(throwable, None, None); throw throwable
+    }
 
-		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
+  private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
+    val token = ExceptionTokens.newToken
 
-		if (logger.isDebugEnabled && interestingException != null) {
-			logger.debug(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
-		}
+    val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
-		val mav = Mav(defaultView,
-			"originalException" -> exception,
-			"exception" -> interestingException,
-			"token" -> token,
-			"stackTrace" -> ExceptionHandler.renderStackTrace(interestingException))
+    if (logger.isDebugEnabled && interestingException != null) {
+      logger.debug(s"Handling exception ${interestingException.getClass.getName} (${interestingException.getMessage})")
+    }
 
-		// handler will do logging, emailing
-		try {
-			exceptionHandler.exception(ExceptionContext(token, interestingException, request))
-		} catch {
-			// This is very bad and should never happen - but still try to avoid showing
-			// a plain exception to the user.
-			case e: Exception => logger.error("Exception handling exception!", e)
-		}
+    val mav = Mav(defaultView,
+      "originalException" -> exception,
+      "exception" -> interestingException,
+      "token" -> token,
+      "stackTrace" -> ExceptionHandler.renderStackTrace(interestingException))
 
-		viewMappings.get(interestingException.getClass.getName) match {
-			case view: String => mav.viewName = view
-			case null => //keep defaultView
-		}
+    // handler will do logging, emailing
+    try {
+      exceptionHandler.exception(ExceptionContext(token, interestingException, request))
+    } catch {
+      // This is very bad and should never happen - but still try to avoid showing
+      // a plain exception to the user.
+      case e: Exception => logger.error("Exception handling exception!", e)
+    }
 
-		val httpStatus = interestingException match {
-			case error: UserError => error.httpStatus
-			case _ => HttpStatus.INTERNAL_SERVER_ERROR
-		}
+    viewMappings.get(interestingException.getClass.getName) match {
+      case view: String => mav.viewName = view
+      case null => //keep defaultView
+    }
 
-		val statusReason = interestingException match {
-			case error: UserError => error.httpStatusReason
-			case _ => httpStatus.getReasonPhrase
-		}
+    val httpStatus = interestingException match {
+      case error: UserError => error.httpStatus
+      case _ => HttpStatus.INTERNAL_SERVER_ERROR
+    }
 
-		response.foreach { _.setStatus(httpStatus.value()) }
+    val statusReason = interestingException match {
+      case error: UserError => error.httpStatusReason
+      case _ => httpStatus.getReasonPhrase
+    }
 
-		request.foreach { request =>
-			if (request.isJsonRequest) {
-				mav.viewName = null
+    response.foreach(_.setStatus(httpStatus.value()))
 
-				val error =
-					if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR)
-						Map(
-							"message" -> interestingException.getMessage,
-							"stackTrace" -> ExceptionHandler.renderStackTrace(interestingException)
-						)
-					else
-						Map(
-							"message" -> interestingException.getMessage
-						)
+    request.foreach { request =>
+      if (request.isJsonRequest) {
+        mav.viewName = null
 
-				mav.view = new JSONView(Map(
-					"success" -> false,
-					"status" -> statusReason.toLowerCase.replace(' ', '_'),
-					"errors" -> Array(error)
-				))
-			} else if (request.requestedUri.getPath.startsWith("/profiles/view/photo") && contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request)).asScala.exists(_.getType == "image")) {
-				// FIXME this is a bit general, and would be confusing if you were downloading jpg of someone's submission
-				response.foreach(_.addHeader("X-Error", interestingException.getMessage))
+        val error =
+          if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR)
+            Map(
+              "message" -> interestingException.getMessage,
+              "stackTrace" -> ExceptionHandler.renderStackTrace(interestingException)
+            )
+          else
+            Map(
+              "message" -> interestingException.getMessage
+            )
 
-				mav.viewName = null
-				mav.view = new RenderableFileView(DefaultPhoto)
-			}
-		}
+        mav.view = new JSONView(Map(
+          "success" -> false,
+          "status" -> statusReason.toLowerCase.replace(' ', '_'),
+          "errors" -> Array(error)
+        ))
+      } else if (request.requestedUri.getPath.startsWith("/profiles/view/photo") && contentNegotiationManager.resolveMediaTypes(new ServletWebRequest(request)).asScala.exists(_.getType == "image")) {
+        // FIXME this is a bit general, and would be confusing if you were downloading jpg of someone's submission
+        response.foreach(_.addHeader("X-Error", interestingException.getMessage))
 
-		mav
-	}
+        mav.viewName = null
+        mav.view = new RenderableFileView(DefaultPhoto)
+      }
+    }
 
-	private def handleNull = {
-		logger.error("Unexpectedly tried to resolve a null exception!")
-		Mav(defaultView)
-	}
+    mav
+  }
+
+  private def handleNull = {
+    logger.error("Unexpectedly tried to resolve a null exception!")
+    Mav(defaultView)
+  }
 
 }

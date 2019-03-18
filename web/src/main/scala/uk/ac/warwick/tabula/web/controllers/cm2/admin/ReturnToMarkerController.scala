@@ -18,30 +18,30 @@ import uk.ac.warwick.tabula.web.controllers.cm2.{AdminSelectionAction, Coursewor
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/return-submissions"))
 class ReturnToMarkerController extends CourseworkController with AdminSelectionAction {
 
-	validatesSelf[SelfValidating]
-	type Command = Appliable[Seq[AssignmentFeedback]] with ReturnToMarkerRequest
+  validatesSelf[SelfValidating]
+  type Command = Appliable[Seq[AssignmentFeedback]] with ReturnToMarkerRequest
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
-		mandatory(Option(assignment.cm2MarkingWorkflow))
-		ReturnToMarkerCommand(mandatory(assignment), user)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, user: CurrentUser): Command = {
+    mandatory(Option(assignment.cm2MarkingWorkflow))
+    ReturnToMarkerCommand(mandatory(assignment), user)
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav =
-		Mav(
-			"cm2/admin/assignments/submissionsandfeedback/return-submission",
-			"allStages" -> assignment.cm2MarkingWorkflow.allStages
-		).crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(@PathVariable assignment: Assignment, @ModelAttribute("command") cmd: Command, errors: Errors): Mav =
+    Mav(
+      "cm2/admin/assignments/submissionsandfeedback/return-submission",
+      "allStages" -> assignment.cm2MarkingWorkflow.allStages
+    ).crumbsList(Breadcrumbs.assignment(assignment))
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		if (errors.hasErrors)
-			showForm(assignment, cmd, errors)
-		else {
-			cmd.apply()
-			RedirectBack(assignment)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(@PathVariable assignment: Assignment, @Valid @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    if (errors.hasErrors)
+      showForm(assignment, cmd, errors)
+    else {
+      cmd.apply()
+      RedirectBack(assignment)
+    }
+  }
 
 }

@@ -12,18 +12,18 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/{smallGroupSet}/template"))
+@RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}/groups/reusable/{smallGroupSet}/template"))
 class AllocateStudentsToDepartmentalSmallGroupsTemplateController extends BaseController {
 
-	type AllocateStudentsToDepartmentalSmallGroupsTemplateCommand = Appliable[ExcelView]
+  type AllocateStudentsToDepartmentalSmallGroupsTemplateCommand = Appliable[ExcelView]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsTemplateCommand =
-		AllocateStudentsToDepartmentalSmallGroupsTemplateCommand(department, set)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): AllocateStudentsToDepartmentalSmallGroupsTemplateCommand =
+    AllocateStudentsToDepartmentalSmallGroupsTemplateCommand(department, set)
 
-	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsTemplateCommand): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping
+  def getTemplate(@Valid @ModelAttribute("command") cmd: AllocateStudentsToDepartmentalSmallGroupsTemplateCommand): ExcelView = {
+    cmd.apply()
+  }
 
 }

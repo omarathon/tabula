@@ -14,31 +14,31 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/${cm2.prefix}/submission/{assignment}/{studentMember}"))
 class AssignmentInformationForStudentController extends CourseworkController {
 
-	type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState
+  type StudentSubmissionAndFeedbackCommand = Appliable[StudentSubmissionInformation] with StudentMemberSubmissionAndFeedbackCommandState
 
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable studentMember: Member): StudentSubmissionAndFeedbackCommand =
-		StudentSubmissionAndFeedbackCommand(assignment, studentMember, user)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable studentMember: Member): StudentSubmissionAndFeedbackCommand =
+    StudentSubmissionAndFeedbackCommand(assignment, studentMember, user)
 
-	@RequestMapping
-	def assignmentGadgetInStudentProfile(@ModelAttribute("command") command: StudentSubmissionAndFeedbackCommand): Mav = {
-		val info = command.apply()
+  @RequestMapping
+  def assignmentGadgetInStudentProfile(@ModelAttribute("command") command: StudentSubmissionAndFeedbackCommand): Mav = {
+    val info = command.apply()
 
-		Mav(
-			"cm2/submit/assignment",
-			"feedback" -> info.feedback,
-			"submission" -> info.submission,
-			"justSubmitted" -> false,
-			"canSubmit" -> info.canSubmit,
-			"canReSubmit" -> info.canReSubmit,
-			"hasExtension" -> info.extension.isDefined,
-			"hasActiveExtension" -> info.extension.exists(_.approved), // active = has been approved
-			"extension" -> info.extension,
-			"isExtended" -> info.isExtended,
-			"extensionRequested" -> info.extensionRequested,
-			"isSelf" -> (user.universityId == command.studentMember.universityId))
-			.withTitle(command.assignment.module.name + " (" + command.assignment.module.code.toUpperCase + ")" + " - " + command.assignment.name)
-	}
+    Mav(
+      "cm2/submit/assignment",
+      "feedback" -> info.feedback,
+      "submission" -> info.submission,
+      "justSubmitted" -> false,
+      "canSubmit" -> info.canSubmit,
+      "canReSubmit" -> info.canReSubmit,
+      "hasExtension" -> info.extension.isDefined,
+      "hasActiveExtension" -> info.extension.exists(_.approved), // active = has been approved
+      "extension" -> info.extension,
+      "isExtended" -> info.isExtended,
+      "extensionRequested" -> info.extensionRequested,
+      "isSelf" -> (user.universityId == command.studentMember.universityId))
+      .withTitle(command.assignment.module.name + " (" + command.assignment.module.code.toUpperCase + ")" + " - " + command.assignment.name)
+  }
 
 }

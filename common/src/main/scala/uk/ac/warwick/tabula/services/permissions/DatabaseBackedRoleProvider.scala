@@ -11,14 +11,14 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class DatabaseBackedRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
 
-	var service: PermissionsService = Wire[PermissionsService]
+  var service: PermissionsService = Wire[PermissionsService]
 
-	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for DatabaseBackedRoleProvider") {
-		service.getGrantedRolesFor[PermissionsTarget](user).map { _.build() }
-	}
+  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for DatabaseBackedRoleProvider") {
+    service.getGrantedRolesFor[PermissionsTarget](user).map(_.build())
+  }
 
-	def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
+  def rolesProvided = Set(classOf[RoleBuilder.GeneratedRole])
 
-	// This isn't exhaustive because we use the cache now - it used to be though.
+  // This isn't exhaustive because we use the cache now - it used to be though.
 
 }

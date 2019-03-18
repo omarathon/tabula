@@ -7,40 +7,40 @@ import uk.ac.warwick.tabula.{MockUserLookup, Fixtures, Mockito, PersistenceTestB
 
 class FeedbackForSitsDaoTest extends PersistenceTestBase with Mockito {
 
-	trait Environment {
-		val feedbackForSitsDao = new FeedbackForSitsDaoImpl
-		val mockUserLookup = new MockUserLookup
+  trait Environment {
+    val feedbackForSitsDao = new FeedbackForSitsDaoImpl
+    val mockUserLookup = new MockUserLookup
 
-		feedbackForSitsDao.sessionFactory = sessionFactory
+    feedbackForSitsDao.sessionFactory = sessionFactory
 
-		SSOUserType.userLookup = smartMock[UserLookupService]
-	}
+    SSOUserType.userLookup = smartMock[UserLookupService]
+  }
 
-	@Test
-	def testIt = withUser("0070790", "cusdx") {
-		new Environment {
-			val assignment: Assignment = Fixtures.assignment("some assignment")
+  @Test
+  def testIt = withUser("0070790", "cusdx") {
+    new Environment {
+      val assignment: Assignment = Fixtures.assignment("some assignment")
 
-			val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567")
-			feedback.assignment = assignment
+      val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("1234567")
+      feedback.assignment = assignment
 
-			val feedbackForSits = new FeedbackForSits
-			feedbackForSits.init(feedback, currentUser.apparentUser)
+      val feedbackForSits = new FeedbackForSits
+      feedbackForSits.init(feedback, currentUser.apparentUser)
 
-			transactional { tx =>
-				session.saveOrUpdate(assignment)
-				session.saveOrUpdate(feedback)
+      transactional { tx =>
+        session.saveOrUpdate(assignment)
+        session.saveOrUpdate(feedback)
 
-				feedbackForSitsDao.saveOrUpdate(feedbackForSits)
-				session.flush()
-				session.clear()
+        feedbackForSitsDao.saveOrUpdate(feedbackForSits)
+        session.flush()
+        session.clear()
 
-				feedbackForSitsDao.getByFeedback(feedback) should be(Some(feedbackForSits))
+        feedbackForSitsDao.getByFeedback(feedback) should be(Some(feedbackForSits))
 
-				feedbackForSitsDao.feedbackToLoad should be(Seq(feedbackForSits))
-		}
-		}
-	}
+        feedbackForSitsDao.feedbackToLoad should be(Seq(feedbackForSits))
+      }
+    }
+  }
 
 
 }

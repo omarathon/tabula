@@ -15,26 +15,26 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/review"))
 class AssignmentReviewController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment): ViewViewableCommand[Assignment] = {
-		notDeleted(assignment)
-		new ViewViewableCommand(Permissions.Assignment.Read, mandatory(assignment))
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment): ViewViewableCommand[Assignment] = {
+    notDeleted(assignment)
+    new ViewViewableCommand(Permissions.Assignment.Read, mandatory(assignment))
+  }
 
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[Assignment]): Mav = {
-		val assignment = cmd.apply()
-		val sharedPropertiesForm = new SharedAssignmentPropertiesForm
-		sharedPropertiesForm.copySharedFrom(assignment)
-		Mav("cm2/admin/assignments/assignment_review_details",
-			"module" -> assignment.module,
-			"assignment" -> assignment,
-			"membershipInfo" -> assignment.membershipInfo,
-			"sharedPropertiesForm" -> sharedPropertiesForm,
-			"AssignmentAnonymity" -> AssignmentAnonymity)
-			.crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: Appliable[Assignment]): Mav = {
+    val assignment = cmd.apply()
+    val sharedPropertiesForm = new SharedAssignmentPropertiesForm
+    sharedPropertiesForm.copySharedFrom(assignment)
+    Mav("cm2/admin/assignments/assignment_review_details",
+      "module" -> assignment.module,
+      "assignment" -> assignment,
+      "membershipInfo" -> assignment.membershipInfo,
+      "sharedPropertiesForm" -> sharedPropertiesForm,
+      "AssignmentAnonymity" -> AssignmentAnonymity)
+      .crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
 }
 

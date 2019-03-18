@@ -12,21 +12,21 @@ import uk.ac.warwick.tabula.services.SmallGroupService
 /** Simply marks a set as archived. */
 class ArchiveSmallGroupSetCommand(val module: Module, val set: SmallGroupSet) extends Command[SmallGroupSet] {
 
-	mustBeLinked(set, module)
-	PermissionCheck(Permissions.SmallGroups.Archive, set)
+  mustBeLinked(set, module)
+  PermissionCheck(Permissions.SmallGroups.Archive, set)
 
-	var service: SmallGroupService = Wire[SmallGroupService]
+  var service: SmallGroupService = Wire[SmallGroupService]
 
-	var unarchive = false
+  var unarchive = false
 
-	def applyInternal(): SmallGroupSet = transactional() {
-		set.archived = !unarchive
-		service.saveOrUpdate(set)
-		set
-	}
+  def applyInternal(): SmallGroupSet = transactional() {
+    set.archived = !unarchive
+    service.saveOrUpdate(set)
+    set
+  }
 
-	def describe(description: Description): Unit = description
-		.smallGroupSet(set)
-		.property("unarchive" -> unarchive)
+  def describe(description: Description): Unit = description
+    .smallGroupSet(set)
+    .property("unarchive" -> unarchive)
 
 }

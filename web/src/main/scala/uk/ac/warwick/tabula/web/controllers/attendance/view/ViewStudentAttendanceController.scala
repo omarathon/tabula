@@ -16,32 +16,32 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/students/{student}"))
 class ViewStudentAttendanceController extends AttendanceController with HasMonthNames
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) =
-		ViewStudentAttendanceCommand(mandatory(department), mandatory(academicYear), mandatory(student))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember) =
+    ViewStudentAttendanceCommand(mandatory(department), mandatory(academicYear), mandatory(student))
 
-	@RequestMapping
-	def home(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember,
-		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]],
-		currentUser: CurrentUser
-	): Mav = {
-		Mav("attendance/view/student",
-			"isSelf" -> (currentUser.apparentId == student.userId),
-			"groupedPointMap" -> cmd.apply()
-		).crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear),
-			Breadcrumbs.View.Students(department, academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.student(department, year, student)): _*)
-	}
+  @RequestMapping
+  def home(
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable student: StudentMember,
+    @ModelAttribute("command") cmd: Appliable[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]],
+    currentUser: CurrentUser
+  ): Mav = {
+    Mav("attendance/view/student",
+      "isSelf" -> (currentUser.apparentId == student.userId),
+      "groupedPointMap" -> cmd.apply()
+    ).crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear),
+      Breadcrumbs.View.DepartmentForYear(department, academicYear),
+      Breadcrumbs.View.Students(department, academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.View.student(department, year, student)): _*)
+  }
 
 }
