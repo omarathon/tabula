@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 import org.joda.time.{DateTime, LocalDate, Seconds}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.MarkerWorkflowCache.Json
 import uk.ac.warwick.tabula.commands.cm2.assignments.AssignmentInfoFilters.DueDateFilter
@@ -18,7 +20,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2._
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, CacheStrategyComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula._
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.collections.Pair
 
@@ -242,7 +243,7 @@ object AssignmentProgressCache {
 	/**
 		* 7 days in seconds - we can cache this for a reasonably long time because we don't cache across deadline boundaries
 		*/
-	final val CacheExpiryTime: Long = 60 * 60 * 24 * 7
+	final val CacheExpiryTime: Duration = Duration.ofDays(7)
 }
 
 trait AssignmentProgressCache extends TaskBenchmarking {
@@ -331,29 +332,29 @@ trait AssignmentProgressCache extends TaskBenchmarking {
 			}
 		))
 
-	lazy val assignmentProgressCache: Cache[AssignmentId, Json] = {
-		val cache = Caches.newCache(CacheName, assignmentProgressCacheEntryFactory, CacheExpiryTime, cacheStrategy)
-		cache.setExpiryStrategy(new TTLCacheExpiryStrategy[AssignmentId, Json] {
-			override def getTTL(entry: CacheEntry[AssignmentId, Json]): Pair[Number, TimeUnit] = {
-				// Extend the cache time to the next deadline if it's shorter than the default cache expiry
-				val seconds: Number = assessmentService.getAssignmentById(entry.getKey) match {
-					case Some(assignment) if !assignment.isClosed && Option(assignment.closeDate).nonEmpty =>
-						Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
+	lazy val assignmentProgressCache: Cache[AssignmentId, Json] =
+		Caches.builder(CacheName, assignmentProgressCacheEntryFactory, cacheStrategy)
+			.expireAfterWrite(CacheExpiryTime)
+			.expiryStategy(new TTLCacheExpiryStrategy[AssignmentId, Json] {
+				override def getTTL(entry: CacheEntry[AssignmentId, Json]): Pair[Number, TimeUnit] = {
+					// Extend the cache time to the next deadline if it's shorter than the default cache expiry
+					val seconds: Number = assessmentService.getAssignmentById(entry.getKey) match {
+						case Some(assignment) if !assignment.isClosed && Option(assignment.closeDate).nonEmpty =>
+							Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
 
-					case Some(assignment) =>
-						val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+						case Some(assignment) =>
+							val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
 
-						futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
-							.getOrElse(CacheExpiryTime)
+							futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
+								.getOrElse(CacheExpiryTime.getSeconds)
 
-					case _ => CacheExpiryTime
+						case _ => CacheExpiryTime.getSeconds
+					}
+
+					Pair.of(seconds, TimeUnit.SECONDS)
 				}
-
-				Pair.of(seconds, TimeUnit.SECONDS)
-			}
-		})
-		cache
-	}
+			})
+  		.build()
 }
 
 trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgressCache {

@@ -36,6 +36,7 @@ import org.junit.rules.Timeout
 import org.junit.Rule
 import freemarker.template._
 import java.util
+import java.util.{Locale, TimeZone}
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import freemarker.core.Environment
@@ -66,6 +67,10 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
 
 	Transactions.enabled = false
 	EventHandling.enabled = false
+
+	System.setProperty("user.country", "GB")
+	System.setProperty("user.language", "en")
+	System.setProperty("user.timezone", "Europe/London")
 
 	// IntelliJ tests via JUnit only half-fill this property, so set it here.
 	if (System.getProperty("TestProcessId") == "F${surefire.forkNumber}") {

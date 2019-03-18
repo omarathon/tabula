@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import javax.sql.DataSource
+import org.hibernate.`type`.Type
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Criterion, DetachedCriteria, Projection, PropertySubqueryExpression}
+import org.hibernate.criterion._
 import org.hibernate.proxy.HibernateProxy
-import org.hibernate.{Hibernate, Session, SessionFactory}
+import org.hibernate.{Criteria, Hibernate, Session, SessionFactory}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 import uk.ac.warwick.tabula.data.model._
@@ -88,6 +89,13 @@ trait HelperRestrictions extends Logging {
 		(property, value) => org.hibernate.criterion.Restrictions.like(property, HibernateHelpers.initialiseAndUnproxy(value)).ignoreCase
 }
 
+case class SimpleAggregateProjection(fn: String, property: String) extends AggregateProjection(fn, property)
+
+trait HelperProjections {
+	def any(propertyName: String): Projection = SimpleAggregateProjection("bool_or", propertyName) // Any of the values are true
+	def every(propertyName: String): Projection = SimpleAggregateProjection("bool_and", propertyName) // All of the values are true
+}
+
 trait HibernateHelpers {
 	def initialiseAndUnproxy[A >: Null](entity: A): A =
 		Option(entity).map { proxy =>
@@ -99,7 +107,7 @@ trait HibernateHelpers {
 		}.orNull
 }
 
-object HibernateHelpers extends HibernateHelpers with HelperRestrictions
+object HibernateHelpers extends HibernateHelpers with HelperRestrictions with HelperProjections
 
 object Daoisms {
 	/**
@@ -125,7 +133,7 @@ object Daoisms {
 
 	// The maximum number of clauses supported in an IN(..) before it will
 	// unceremoniously fail. Use `grouped` with this to split up work
-	val MaxInClauseCount = 1000
+	val MaxInClauseCount: Int = Short.MaxValue.toInt // Oh Postgres you fantastic bastard
 }
 
 /**
@@ -136,7 +144,7 @@ object Daoisms {
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
+trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HelperProjections with HibernateHelpers {
 	@transient private var _dataSource = Wire.option[DataSource]("dataSource")
 	def dataSource: DataSource = _dataSource.orNull
 	def dataSource_=(dataSource: DataSource) { _dataSource = Option(dataSource) }

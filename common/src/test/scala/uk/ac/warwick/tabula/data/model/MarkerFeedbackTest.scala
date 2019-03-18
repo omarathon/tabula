@@ -46,7 +46,7 @@ class MarkerFeedbackTest extends PersistenceTestBase with Mockito {
 
 		val feedback = flushing(session) {
 			val feedback = Fixtures.assignmentFeedback(universityId = idFormat(1))
-			val assignment = new Assignment
+			val assignment = Fixtures.assignment("Cool essay")
 			feedback.assignment = assignment
 			session.save(assignment)
 			session.save(feedback)

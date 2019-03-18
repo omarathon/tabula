@@ -70,13 +70,15 @@ class MarkerRoleProviderTest extends TestBase with Mockito {
 	}
 
 	@Test def forModule() = withCurrentUser(cuscavUser) {
-		provider.getRolesFor(currentUser, mod1) should be (Seq(Marker(assignmentIsMarker1)))
-		provider.getRolesFor(currentUser, mod2) should be (Seq(Marker(assignmentIsMarker2)))
-		provider.getRolesFor(currentUser, mod3) should be (Seq())
+		// Since MarkerRole is only ever granted at the Assessment level, we shouldn't be returning any for Modules
+		provider.getRolesFor(currentUser, mod1) should be (Nil)
+		provider.getRolesFor(currentUser, mod2) should be (Nil)
+		provider.getRolesFor(currentUser, mod3) should be (Nil)
 	}
 
 	@Test def forDepartment() = withCurrentUser(cuscavUser) {
-		provider.getRolesFor(currentUser, dept) should be (Seq(Marker(assignmentIsMarker1), Marker(assignmentIsMarker2)))
+		// Since MarkerRole is only ever granted at the Assessment level, we shouldn't be returning any for Departments
+		provider.getRolesFor(currentUser, dept) should be (Nil)
 	}
 
 	@Test def handlesDefault() = withCurrentUser(cuscavUser) {

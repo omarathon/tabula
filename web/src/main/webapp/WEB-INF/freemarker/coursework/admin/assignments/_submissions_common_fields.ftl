@@ -174,7 +174,7 @@ so that they can be passed around between requests.
 					<@form.field>
 						<@f.errors path="fileAttachmentTypes" cssClass="error" />
 						<@f.input path="fileAttachmentTypes"  type="hidden" />
-						<script type="text/javascript" src="/static/js/textList.js"></script>
+						<@script "/static/js/textList.js" />
 						<script type="text/javascript">
 							jQuery(function($){
 								var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');

@@ -87,19 +87,28 @@ class ModuleRegistration() extends GeneratedId	with PermissionsTarget with CanBe
 	@Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
 	var passFail: Boolean = _
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleResultUserType")
+	@Column(name="moduleresult")
+	var moduleResult: ModuleResult = _
+
+	def passedCats: Option[Boolean] = moduleResult match {
+		case _: ModuleResult.Pass.type => Some(true)
+		case _: ModuleResult.Fail.type => Some(false)
+		case _ => None
+	}
+
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"${studentCourseDetails.scjCode}-$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroups", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
 			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = false)
 		}
 
 	def upstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"${studentCourseDetails.scjCode}-$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
-			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true)
-				.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId)
-		}
+		RequestLevelCache.cachedBy("ModuleRegistration.upstreamAssessmentGroupMembers", s"$academicYear-$toSITSCode-$assessmentGroup-$occurrence") {
+			membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
+		}.filter(_.universityId == studentCourseDetails.student.universityId)
 
 	def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-		upstreamAssessmentGroups.flatMap(_.members.asScala).filter(_.universityId == studentCourseDetails.student.universityId && !studentCourseDetails.statusOnCourse.code.startsWith("P"))
+		upstreamAssessmentGroupMembers.filter(_ => !studentCourseDetails.statusOnCourse.code.startsWith("P"))
 
 	override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
 

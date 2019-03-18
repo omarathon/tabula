@@ -80,7 +80,8 @@ abstract class CopySmallGroupSetsCommandInternal(val department: Department, val
 
 			// Try and guess SITS links for the new year
 			set.assessmentGroups.asScala
-				.filter { _.toUpstreamAssessmentGroupInfo(targetAcademicYear).isDefined } // Only where defined in the new year
+				// Only where defined in the new year
+				.filter(_.toUpstreamAssessmentGroupInfo(targetAcademicYear).nonEmpty)
 				.foreach { group =>
 					val newGroup = new AssessmentGroup
 					newGroup.assessmentComponent = group.assessmentComponent

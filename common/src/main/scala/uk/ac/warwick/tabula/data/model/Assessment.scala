@@ -48,7 +48,7 @@ trait Assessment extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	// converts the assessmentGroups to UpstreamAssessmentGroupInfo
 	def upstreamAssessmentGroupInfos: Seq[UpstreamAssessmentGroupInfo] = RequestLevelCache.cachedBy("Assessment.upstreamAssessmentGroupInfos", id) {
-		assessmentGroups.asScala.flatMap(_.toUpstreamAssessmentGroupInfo(academicYear))
+		assessmentMembershipService.getUpstreamAssessmentGroupInfo(assessmentGroups.asScala, academicYear)
 	}
 
 	// Gets a breakdown of the membership for this assessment. Note that this cannot be sorted by seat number

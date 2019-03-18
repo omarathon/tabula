@@ -28,7 +28,7 @@ class SandboxMemberDataRoleProvider extends ScopelessRoleProvider with TaskBench
 			val allDepartments = departmentService.get.allDepartments.toStream
 
 			val member = new RuntimeMember(user) {
-				this.homeDepartment = allDepartments.head
+				allDepartments.headOption.foreach(this.homeDepartment = _)
 				override def affiliatedDepartments: Stream[Department] = allDepartments
 				override def touchedDepartments: Stream[Department] = allDepartments
 			}

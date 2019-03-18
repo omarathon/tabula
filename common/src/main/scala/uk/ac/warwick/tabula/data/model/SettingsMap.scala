@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.Lob
-
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.HasSettings._
@@ -49,7 +47,6 @@ object HasSettings {
 
 trait HasSettings {
 
-	@Lob
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	protected var settings: Map[String, Any] = Map()
 

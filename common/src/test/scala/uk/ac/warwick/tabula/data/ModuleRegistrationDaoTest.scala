@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.junit.Before
-
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.ModuleSelectionStatus
@@ -27,12 +25,10 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 	@Test def testModReg {
 		transactional { tx =>
-			val stuMem = new StudentMember("0123456")
-			stuMem.userId = "abcde"
+			val stuMem = Fixtures.student("0123456", "abcde")
 			memDao.saveOrUpdate(stuMem)
 
-			val scd: StudentCourseDetails = new StudentCourseDetails(stuMem, "0123456/1")
-			scdDao.saveOrUpdate(scd)
+			val scd = stuMem.mostSignificantCourse
 
 			val year = AcademicYear(2012)
 			val nonexistantModReg = modRegDao.getByUsercodesAndYear(Seq("abcde"), year)
@@ -86,12 +82,10 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 	@Test def testGetByNotionalKey {
 		transactional { tx =>
-			val stuMem = new StudentMember("0123456")
-			stuMem.userId = "abcde"
+			val stuMem = Fixtures.student("0123456", "abcde")
 			memDao.saveOrUpdate(stuMem)
 
-			val scd = new StudentCourseDetails(stuMem, "0123456/1")
-			scd.sprCode = "0123456/2"
+			val scd = stuMem.mostSignificantCourse
 
 			val module = new Module
 

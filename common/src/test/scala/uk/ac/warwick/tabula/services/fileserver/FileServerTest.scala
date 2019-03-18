@@ -56,8 +56,8 @@ class FileServerTest extends TestBase with Mockito {
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getHeader("Content-Disposition") should be (null)
+		res.getContentType() should be ("text/plain")
+		res.getHeader("Content-Disposition") should be ("inline")
 		res.getContentAsString() should be (content)
 	}
 
@@ -73,12 +73,12 @@ class FileServerTest extends TestBase with Mockito {
 
 		val file = new RenderableAttachment(a)
 
-		server.serve(file)
+		server.serve(file, "steven")
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
-		res.getContentType() should be (MediaType.OCTET_STREAM.toString)
-		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getContentType() should be ("text/plain")
+		res.getHeader("Content-Disposition") should be ("inline; filename=\"steven\"")
 		res.getContentAsString() should be (content)
 	}
 
@@ -101,7 +101,7 @@ class FileServerTest extends TestBase with Mockito {
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
 		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be (null)
+		res.getHeader("Content-Disposition") should be ("inline")
 		res.getContentAsByteArray().length should be (0)
 	}
 
@@ -119,12 +119,12 @@ class FileServerTest extends TestBase with Mockito {
 
 		val file = new RenderableAttachment(a)
 
-		server.serve(file)
+		server.serve(file, "steven.zip")
 
 		res.getContentLength() should be (content.length)
 		res.getHeader("Content-Length") should be (content.length.toString)
 		res.getContentType() should be ("application/zip")
-		res.getHeader("Content-Disposition") should be ("attachment")
+		res.getHeader("Content-Disposition") should be ("inline; filename=\"steven.zip\"") // zips are inline
 		res.getContentAsByteArray().length should be (0)
 	}
 
@@ -138,10 +138,11 @@ class FileServerTest extends TestBase with Mockito {
 		val file = mock[RenderableFile]
 		file.cachePolicy returns (CachePolicy(expires = Some(period)))
 		file.contentLength returns None
+		file.contentType returns "application/octet-stream"
 		file.suggestedFilename returns None
 
 		withFakeTime(time) {
-			server.serve(file)(req, res)
+			server.serve(file, "steven")(req, res)
 		}
 
 		verify(res, times(1)).setDateHeader("Expires", time.plus(period).getMillis)

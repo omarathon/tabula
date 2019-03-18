@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula._
-  import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
+
 import scala.collection.JavaConverters._
 
 class AssessmentMembershipServiceTest extends TestBase with Mockito {
@@ -65,21 +65,33 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
 		val user = new User("cuscav").tap { _.setWarwickId("0672089") }
 
-		val excludedGroup = mock[UnspecifiedTypeUserGroup]
+		service.userLookup = new MockUserLookup().tap(_.registerUserObjects(user))
+		service.profileService = smartMock[ProfileService]
+
+		service.profileService.getAllMembersWithUniversityIds(Seq("0123456", "0123457", "0672089")) returns
+			Seq(
+				Fixtures.student("0123456"),
+				Fixtures.student("0123457"),
+				Fixtures.staff(universityId = "0672089", userId = "cuscav")
+			)
+
+		val excludedGroup = smartMock[UnspecifiedTypeUserGroup]
 		excludedGroup.excludesUser(user) returns true
 
 		service.isStudentCurrentMember(user, Nil, Some(excludedGroup)) should be (false)
 		verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
-		val includedGroup = mock[UnspecifiedTypeUserGroup]
+		val includedGroup = smartMock[UnspecifiedTypeUserGroup]
 		includedGroup.excludesUser(user) returns false
 		includedGroup.includesUser(user) returns true
 
 		service.isStudentCurrentMember(user, Nil, Some(includedGroup)) should be (true)
 
-		val notInGroup = mock[UnspecifiedTypeUserGroup]
-		includedGroup.excludesUser(user) returns false
-		includedGroup.includesUser(user) returns false
+		val notInGroup = smartMock[UnspecifiedTypeUserGroup]
+		notInGroup.excludesUser(user) returns false
+		notInGroup.includesUser(user) returns false
+		notInGroup.users returns Nil
+		notInGroup.excludes returns Nil
 
 		service.isStudentCurrentMember(user, Nil, Some(notInGroup)) should be (false)
 

@@ -1,1 +1,0 @@
-update notification set notification_type = 'FinaliseFeedback' where notification_type ='CM2FinaliseFeedback';

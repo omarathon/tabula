@@ -30,7 +30,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 	}) with UserLookupComponent with ProfileServiceComponent with CacheStrategyComponent with LocationFetchingServiceComponent with ModuleAndDepartmentServiceComponent with ApacheHttpClientComponent with FeaturesComponent {
 		val userLookup = new MockUserLookup
 		val profileService = mock[ProfileService]
-		val cacheStrategy = CacheStrategy.InMemoryOnly
+		val cacheStrategy = CacheStrategy.CaffeineRequired
 		val locationFetchingService: LocationFetchingService = (_: String) => Success(Nil)
 		val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
 		moduleAndDepartmentService.getModuleByCode(Matchers.any[String]) answers {moduleCode =>

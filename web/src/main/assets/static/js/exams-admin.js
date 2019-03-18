@@ -1,4 +1,5 @@
-(function ($) { "use strict";
+import $ from 'jquery';
+import _ from 'lodash-es';
 
 /**
  * Scripts used only by the exams admin section.
@@ -255,6 +256,4 @@ $(function(){
 
 	});
 
-})
-
-}(jQuery));
+});

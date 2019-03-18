@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 
 	val provider = new AssignmentSubmitterRoleProvider
-	val assignmentMembershipService: AssessmentMembershipService = mock[AssessmentMembershipService]
+	val assignmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
 
 	@Test def unrestrictedAssignment = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")

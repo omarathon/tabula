@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class SubmissionTest extends PersistenceTestBase {
@@ -24,7 +24,7 @@ class SubmissionTest extends PersistenceTestBase {
 			submission._universityId = "0000001"
 			submission.usercode = "steve"
 
-			val assignment = new Assignment
+			val assignment = Fixtures.assignment("Steven")
 			session.save(assignment)
 
 			submission.assignment = assignment

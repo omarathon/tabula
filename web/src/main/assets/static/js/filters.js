@@ -1,5 +1,5 @@
-(function ($) {
-	'use strict';
+/* eslint-env browser */
+import $ from 'jquery';
 
 $.fn.enableFilters = function(options) {
 
@@ -223,5 +223,3 @@ $.fn.enableFilters = function(options) {
 $(function(){
 	$('.filters').enableFilters();
 });
-
-})(jQuery);

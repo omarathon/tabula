@@ -28,7 +28,7 @@
 			<#if result.upcoming?has_content>
 				<#list result.upcoming as enhancedAssignment>
 					<div class="row item-info">
-						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>10</#if>">
+						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
 							<h4>
 								<#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
 									<@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
@@ -38,7 +38,7 @@
 							</h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-4">
 							<#if enhancedAssignment.assignment.openDate?has_content>
 								Opens <@fmt.date date=enhancedAssignment.assignment.openDate relative=false />
 							</#if>
@@ -66,7 +66,7 @@
 
 				<#list result.todo as enhancedAssignment>
 					<div class="row item-info">
-						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>10</#if>">
+						<div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
 							<h4>
 								<#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
 									<@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
@@ -77,7 +77,7 @@
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
 						<#if enhancedAssignment.submissionDeadline?has_content>
-							<div class="col-md-5">
+							<div class="col-md-4">
 								<#if enhancedAssignment.submissionDeadline.beforeNow>
 									<#assign context>
 										<#if enhancedAssignment.extension?? && enhancedAssignment.extension.approved>
@@ -100,7 +100,7 @@
 								Deadline <@fmt.date date=enhancedAssignment.submissionDeadline relative=false />
 							</div>
 						</#if>
-						<div class="col-md-2">
+						<div class="col-md-3">
 							<#if isSelf>
 							<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">Submit</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
@@ -145,7 +145,7 @@
 							<h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-4">
 							<#if enhancedAssignment.feedbackDeadlineWorkingDaysAway?has_content>
 								<#if (enhancedAssignment.feedbackDeadlineWorkingDaysAway > 0)>
 									Feedback due in <strong><@fmt.p enhancedAssignment.feedbackDeadlineWorkingDaysAway "working day" /></strong><br />
@@ -173,7 +173,7 @@
 								<span class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
 							</#if>
 						</div>
-						<div class="col-md-2">
+						<div class="col-md-3">
 							<#if isSelf>
 								<a href="<@routes.cm2.assignment enhancedAssignment.assignment />?returnTo=${info.requestedUri}" class="btn btn-primary btn-block">View receipt</a>
 								<#if enhancedAssignment.assignment.extensionsPossible>
@@ -216,7 +216,7 @@
 							</h4>
 							<h4>${enhancedAssignment.assignment.name!}</h4>
 						</div>
-						<div class="col-md-5">
+						<div class="col-md-4">
 							<#if enhancedAssignment.submissionDeadline?has_content>
 								Closed <@fmt.date date=enhancedAssignment.submissionDeadline relative=false />
 							</#if>
@@ -237,7 +237,7 @@
 								<span class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
 							</#if>
 						</div>
-						<div class="col-md-2">
+						<div class="col-md-3">
 							<#assign assignmentLink><#compress>
 								<#if isSelf>
 									<@routes.cm2.assignment enhancedAssignment.assignment />

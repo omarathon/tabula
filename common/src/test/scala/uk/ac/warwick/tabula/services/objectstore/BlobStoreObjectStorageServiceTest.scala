@@ -79,11 +79,9 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 
 	@Test def pushAndFetch(): Unit = new TransientBlobStoreFixture {
 		val key = "my-lovely-file"
+		val hashingFunction = Hashing.goodFastHash(128)
 
-		val md: MessageDigest = MessageDigest.getInstance("MD5")
-		val dis = new DigestInputStream(byteSource.openStream(), md)
-		IOUtils.toByteArray(dis) // pass over the bytes for the DigestInputStream
-		val originalMd5: Array[Byte] = md.digest()
+		val originalMd5: Array[Byte] = byteSource.hash(hashingFunction).asBytes()
 
 		service.push(key, byteSource, ObjectStorageService.Metadata(
 			contentLength = 14949,
@@ -94,7 +92,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
 		val fetchedFile: RichByteSource = service.fetch(key)
 		fetchedFile.isEmpty should be (false)
 
-		val fetchedMd5: Array[Byte] = fetchedFile.hash(Hashing.md5()).asBytes()
+		val fetchedMd5: Array[Byte] = fetchedFile.hash(hashingFunction).asBytes()
 		originalMd5 should be (fetchedMd5)
 	}
 

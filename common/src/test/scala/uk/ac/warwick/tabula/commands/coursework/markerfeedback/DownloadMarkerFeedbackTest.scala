@@ -38,7 +38,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
 		command.zipService = zipService
 		val renderable = command.applyInternal()
-		val stream = new ZipInputStream(renderable.inputStream)
+		val stream = new ZipInputStream(renderable.byteSource.openStream())
 		val items = Zips.map(stream){item => item.getName}
 		items.size should be (1)
 	}}
@@ -49,7 +49,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
 		assignment.markingWorkflow.userLookup = mockUserLookup
 		command.zipService = zipService
 		val renderable = command.applyInternal()
-		val stream = new ZipInputStream(renderable.inputStream)
+		val stream = new ZipInputStream(renderable.byteSource.openStream())
 		val items = Zips.map(stream){item => item.getName}
 		items.size should be (3)
 	}}

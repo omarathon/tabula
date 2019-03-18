@@ -140,8 +140,8 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
 			}
 		}
 	}
-	lazy val normalLoadLookup: NormalLoadLookup = new NormalLoadLookup(academicYear, selectCourseCommand.studyYearByLevelOrBlock, normalCATSLoadService)
-	lazy val routeRulesLookup: UpstreamRouteRuleLookup = new UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)
+	lazy val normalLoadLookup: NormalLoadLookup = NormalLoadLookup(academicYear, selectCourseCommand.studyYearByLevelOrBlock, normalCATSLoadService)
+	lazy val routeRulesLookup: UpstreamRouteRuleLookup = UpstreamRouteRuleLookup(academicYear, upstreamRouteRuleService)
 
 	lazy val overcatSubsets: Map[ExamGridEntity, Map[YearOfStudy, Seq[(BigDecimal, Seq[ModuleRegistration])]]] =
 		entities.map(entity => {

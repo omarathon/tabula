@@ -48,7 +48,7 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
     withUser("cuslaj", "1111111") {
       val command = new DownloadMarkersSubmissionsCommand(assignment.module, assignment, currentUser.apparentUser, currentUser) with CommandTestSupport
 			val zip = command.applyInternal()
-      val stream = new ZipInputStream(zip.inputStream)
+      val stream = new ZipInputStream(zip.byteSource.openStream())
       val items = Zips.map(stream) {
         item => item.getName
       }

@@ -7,14 +7,13 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import org.springframework.beans.factory.BeanInitializationException
 import org.hibernate.SessionFactory
 import javax.sql.DataSource
+import org.hibernate.`type`.StringType
 
 /**
  * Selects a Unicode string from the database to see if it gets there and
  * back again in one piece. It doesn't store it anywhere, so it's just a
  * check of the database connection, not whether you're using a Unicode-safe
- * column type like NVARCHAR2.
- *
- * The select query is currently Oracle specific, so this isn't loaded in tests.
+ * column type.
  */
 trait DatabaseEncodingChecker extends InitializingBean with Logging {
 
@@ -22,7 +21,7 @@ trait DatabaseEncodingChecker extends InitializingBean with Logging {
 
 	def fetchString: String
 
-	override def afterPropertiesSet {
+	override def afterPropertiesSet(): Unit = {
 		val fetchedString = fetchString
 
 		if (testString != fetchedString) {
@@ -37,9 +36,9 @@ trait DatabaseEncodingChecker extends InitializingBean with Logging {
 class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: SessionFactory) extends DatabaseEncodingChecker {
 
 	override def fetchString: String = closeThis(sessionFactory.openSession()) { session =>
-		val query = session.createSQLQuery("select :string from dual")
-		query.setString("string", testString)
-		query.uniqueResult().toString()
+		val query = session.createSQLQuery("select :string")
+		query.setParameter("string", testString, StringType.INSTANCE)
+		query.uniqueResult().toString
 	}
 
 }
@@ -47,7 +46,7 @@ class SessionFactoryDatabaseEncodingChecker @Autowired() (val sessionFactory: Se
 class DataSourceDatabaseEncodingChecker @Autowired() (val dataSource: DataSource) extends DatabaseEncodingChecker {
 
 	override def fetchString: String = closeThis(dataSource.getConnection) { conn =>
-		closeThis(conn.prepareStatement("select ? from dual")) { stmt =>
+		closeThis(conn.prepareStatement("select ?")) { stmt =>
 			stmt.setString(1, testString)
 			closeThis(stmt.executeQuery()) { rs =>
 				rs.next()

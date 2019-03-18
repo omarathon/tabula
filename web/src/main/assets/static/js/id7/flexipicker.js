@@ -64,11 +64,11 @@ RichResultField.prototype.store = function (value, text) {
  */
 var TabulaTypeahead = function(options) {
 	// Twitter typeahead doesn't work for Tabula, so the replaced Bootstrap typeahead is aliased as bootstrap3Typeahead
-	var mergedOptions = $.extend({}, $.fn.bootstrap3Typeahead.defaults, {
+	var mergedOptions = $.extend({}, $.fn.typeahead.defaults, {
 		source: options.source,
 		item: options.item
 	});
-	var $typeahead = options.element.bootstrap3Typeahead(mergedOptions).data('typeahead');
+	var $typeahead = options.element.typeahead(mergedOptions).data('typeahead');
 
 	// Overridden lookup() method uses this to delay the AJAX call
 	$typeahead.delay = 100;

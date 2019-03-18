@@ -265,7 +265,7 @@ trait SingleItemNotification[A >: Null <: ToEntityReference] {
 		try {
 			items.asScala.filter(_.entity != null).head
 		} catch {
-			case _: IndexOutOfBoundsException => throw new ObjectNotFoundException("", "")
+			case _ @ (_: IndexOutOfBoundsException | _: NoSuchElementException) => throw new ObjectNotFoundException("", "")
 		}
 }
 

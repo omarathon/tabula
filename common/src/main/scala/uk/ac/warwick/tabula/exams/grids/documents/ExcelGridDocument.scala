@@ -65,9 +65,11 @@ class ExcelGridDocument extends ExamGridDocument
 	): FileAttachment = {
 		val mergedCells: Boolean = options.get("mergedCells").fold(false)(_.asInstanceOf[Boolean])
 
-		val coreRequiredModuleLookup = buildCoreRequiredModuleLookup(academicYear, selectCourseCommand.yearOfStudy, selectCourseCommand.levelCode)
+		val coreRequiredModuleLookup = benchmark("Build core-required module lookup") {
+			buildCoreRequiredModuleLookup(academicYear, selectCourseCommand.yearOfStudy, selectCourseCommand.levelCode)
+		}
 
-		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, weightings, normalLoadLookup, _) = benchmarkTask("GridData") {
+		val GridData(entities, studentInformationColumns, perYearColumns, summaryColumns, _, normalLoadLookup, _) = benchmarkTask("GridData") {
 			checkAndApplyOvercatAndGetGridData(
 				selectCourseCommand,
 				gridOptionsCommand,
@@ -105,71 +107,75 @@ class ExcelGridDocument extends ExamGridDocument
 		status.stageNumber = 3
 		status.setMessage("Building the spreadsheet")
 
-		val workbook = if (gridOptionsCommand.showFullLayout) {
-			GenerateExamGridExporter(
-				department = department,
-				academicYear = academicYear,
-				courses = selectCourseCommand.courses.asScala,
-				routes = selectCourseCommand.routes.asScala,
-				yearOfStudy = selectCourseCommand.yearOfStudy,
-				normalLoadLookup = normalLoadLookup,
-				entities = entities,
-				leftColumns = studentInformationColumns,
-				perYearColumns = perYearColumns,
-				rightColumns = summaryColumns,
-				chosenYearColumnValues = chosenYearColumnValues,
-				perYearColumnValues = perYearColumnValues,
-				showComponentMarks = gridOptionsCommand.showComponentMarks,
-				mergedCells = mergedCells,
-				status = status
-			)
-		} else {
-			val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns") {
-				perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleExamGridColumn => marks } }
-			}
-			val perYearModuleReportColumns = benchmarkTask("perYearModuleReportColumns") {
-				perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleReportsColumn => marks } }
-			}
+		val workbook = benchmarkTask("Build workbook") {
+			if (gridOptionsCommand.showFullLayout) benchmarkTask("Generate full layout workbook") {
+				GenerateExamGridExporter(
+					department = department,
+					academicYear = academicYear,
+					courses = selectCourseCommand.courses.asScala,
+					routes = selectCourseCommand.routes.asScala,
+					yearOfStudy = selectCourseCommand.yearOfStudy,
+					normalLoadLookup = normalLoadLookup,
+					entities = entities,
+					leftColumns = studentInformationColumns,
+					perYearColumns = perYearColumns,
+					rightColumns = summaryColumns,
+					chosenYearColumnValues = chosenYearColumnValues,
+					perYearColumnValues = perYearColumnValues,
+					showComponentMarks = gridOptionsCommand.showComponentMarks,
+					mergedCells = mergedCells,
+					status = status
+				)
+			} else {
+				val perYearModuleMarkColumns = benchmarkTask("perYearModuleMarkColumns") {
+					perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleExamGridColumn => marks } }
+				}
+				val perYearModuleReportColumns = benchmarkTask("perYearModuleReportColumns") {
+					perYearColumns.map { case (year, columns) => year -> columns.collect { case marks: ModuleReportsColumn => marks } }
+				}
 
-			val maxYearColumnSize = benchmarkTask("maxYearColumnSize") {
-				perYearModuleMarkColumns.map { case (year, columns) =>
-					val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
-					year -> maxModuleColumns
+				val maxYearColumnSize = benchmarkTask("maxYearColumnSize") {
+					perYearModuleMarkColumns.map { case (year, columns) =>
+						val maxModuleColumns = (entities.map(entity => columns.count(c => !c.isEmpty(entity, year))) ++ Seq(1)).max
+						year -> maxModuleColumns
+					}
+				}
+
+				// for each entity have a list of all modules with marks and padding at the end for empty cells
+				val moduleColumnsPerEntity = benchmarkTask("moduleColumnsPerEntity") {
+					entities.map(entity => {
+						entity -> perYearModuleMarkColumns.map { case (year, modules) =>
+							val hasValue: Seq[Option[ModuleExamGridColumn]] = modules.filter(m => !m.isEmpty(entity, year)).map(Some.apply)
+							val padding: Seq[Option[ModuleExamGridColumn]] = (1 to maxYearColumnSize(year) - hasValue.size).map(_ => None)
+							year -> (hasValue ++ padding)
+						}
+					}).toMap
+				}
+
+				benchmarkTask("Generate short form workbook") {
+					GenerateExamGridShortFormExporter(
+						department = department,
+						academicYear = academicYear,
+						courses = selectCourseCommand.courses.asScala,
+						routes = selectCourseCommand.routes.asScala,
+						yearOfStudy = selectCourseCommand.yearOfStudy,
+						normalLoadLookup = normalLoadLookup,
+						entities = entities,
+						leftColumns = studentInformationColumns,
+						perYearColumns = perYearColumns,
+						rightColumns = summaryColumns,
+						chosenYearColumnValues = chosenYearColumnValues,
+						perYearColumnValues = perYearColumnValues,
+						moduleColumnsPerEntity = moduleColumnsPerEntity,
+						perYearModuleMarkColumns = perYearModuleMarkColumns,
+						perYearModuleReportColumns = perYearModuleReportColumns,
+						maxYearColumnSize,
+						showComponentMarks = gridOptionsCommand.showComponentMarks,
+						mergedCells = mergedCells,
+						status = status
+					)
 				}
 			}
-
-			// for each entity have a list of all modules with marks and padding at the end for empty cells
-			val moduleColumnsPerEntity = benchmarkTask("moduleColumnsPerEntity") {
-				entities.map(entity => {
-					entity -> perYearModuleMarkColumns.map { case (year, modules) =>
-						val hasValue: Seq[Option[ModuleExamGridColumn]] = modules.filter(m => !m.isEmpty(entity, year)).map(Some.apply)
-						val padding: Seq[Option[ModuleExamGridColumn]] = (1 to maxYearColumnSize(year) - hasValue.size).map(_ => None)
-						year -> (hasValue ++ padding)
-					}
-				}).toMap
-			}
-
-			GenerateExamGridShortFormExporter(
-				department = department,
-				academicYear = academicYear,
-				courses = selectCourseCommand.courses.asScala,
-				routes = selectCourseCommand.routes.asScala,
-				yearOfStudy = selectCourseCommand.yearOfStudy,
-				normalLoadLookup = normalLoadLookup,
-				entities = entities,
-				leftColumns = studentInformationColumns,
-				perYearColumns = perYearColumns,
-				rightColumns = summaryColumns,
-				chosenYearColumnValues = chosenYearColumnValues,
-				perYearColumnValues = perYearColumnValues,
-				moduleColumnsPerEntity = moduleColumnsPerEntity,
-				perYearModuleMarkColumns = perYearModuleMarkColumns,
-				perYearModuleReportColumns = perYearModuleReportColumns,
-				maxYearColumnSize,
-				showComponentMarks = gridOptionsCommand.showComponentMarks,
-				mergedCells = mergedCells,
-				status = status
-			)
 		}
 
 		status.stageNumber = 4
@@ -193,7 +199,7 @@ class ExcelGridDocument extends ExamGridDocument
 		)
 
 		val out = new ByteArrayOutputStream()
-		workbook.write(out)
+		benchmarkTask("Write the workbook into memory") { workbook.write(out) }
 		out.close()
 
 		file.uploadedData = ByteSource.wrap(out.toByteArray)

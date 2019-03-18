@@ -25,17 +25,41 @@
 
 	<import resource="hibernate-packages-context.xml" />
 
+	<bean id="flywayConfig" class="org.flywaydb.core.api.configuration.ClassicConfiguration"
+		p:dataSource-ref="dataSource"
+	/>
+
+	<bean id="flyway" class="org.flywaydb.core.Flyway" init-method="migrate">
+		<constructor-arg ref="flywayConfig"/>
+	</bean>
+
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan-ref="hibernatePackages"
-		p:hibernateProperties-ref="hibernateProperties" />
+		p:hibernateProperties-ref="hibernateProperties"
+		depends-on="flyway"
+	/>
 
 	<bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 
+	<bean id="tabulaEncodingChecker" class="uk.ac.warwick.tabula.system.SessionFactoryDatabaseEncodingChecker"
+		c:sessionFactory-ref="sessionFactory"
+	/>
+
+	<util:properties id="hibernateProperties">
+		<prop key="hibernate.jdbc.batch_size">20</prop>
+		<prop key="hibernate.dialect">uk.ac.warwick.tabula.system.PostgreSQL10Dialect</prop>
+		<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
+		<prop key="defaultNChar">true</prop>
+		<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+	</util:properties>
+
+	<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.system.PostgreSQL10Dialect" />
+
 	<beans profile="console">
 		<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-		    <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+		    <property name="driverClassName" value="org.postgresql.Driver"/>
 		    <property name="url" value="${db.url}"/>
 		    <property name="username" value="${db.username}"/>
 		    <property name="password" value="${db.password}"/>
@@ -59,27 +83,6 @@
 		    <property name="username" value="${fim.db.username}"/>
 		    <property name="password" value="${fim.db.password}"/>
 		</bean>
-	</beans>
-
-	<beans profile="dev,sandbox,production,console">
-
-		<bean id="tabulaEncodingChecker" class="uk.ac.warwick.tabula.system.SessionFactoryDatabaseEncodingChecker"
-			c:sessionFactory-ref="sessionFactory"
-		 />
-
-		<util:properties id="jdbcProperties">
-			<prop key="defaultNChar">true</prop>
-		</util:properties>
-		<util:properties id="hibernateProperties">
-			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.oracle.Oracle12cDialect</prop>
-			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
-			<prop key="defaultNChar">true</prop>
-			<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
-		</util:properties>
-
-		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle12cDialect" />
-
 	</beans>
 
 	<beans profile="dev,sandbox,production">
@@ -111,9 +114,7 @@
 	</beans>
 
 	<beans profile="test">
-		<jdbc:embedded-database id="dataSource" />
-
-		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
+		<bean id="dataSource" class="uk.ac.warwick.tabula.PostgreSQLEmbeddedDatabaseFactoryBean" lazy-init="false" />
 
 		<import resource="hibernate-test-scripts-context.xml" />
 
@@ -129,13 +130,6 @@
 		<bean id="membershipInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner"
 			p:dataSource-ref="fimDataSource"
 			p:scripts="fim.sql" />
-
-		<util:properties id="hibernateProperties">
-			<prop key="hibernate.jdbc.batch_size">20</prop>
-			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.hsql.HSQLDialect</prop>
-			<prop key="hibernate.hbm2ddl.auto">create</prop>
-			<!-- <prop key="hibernate.show_sql">true</prop>  -->
-		</util:properties>
 
 	</beans>
 

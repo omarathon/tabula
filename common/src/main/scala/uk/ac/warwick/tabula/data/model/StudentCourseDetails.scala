@@ -243,7 +243,7 @@ trait BasicStudentCourseProperties {
 	var expectedEndDate: LocalDate = _
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var courseYearLength: String = _
+	var courseYearLength: JInteger = _
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _

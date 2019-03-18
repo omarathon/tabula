@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValue, ExamGridCo
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 
 import scala.collection.mutable
+import scala.math.BigDecimal.RoundingMode
 
 object ModuleExamGridColumn {
 
@@ -160,11 +161,14 @@ abstract class ModuleExamGridColumn(state: ExamGridColumnState, val module: Modu
 		})
 	}
 
+	private def scaled(bg: JBigDecimal): JBigDecimal =
+		JBigDecimal(Option(bg).map(_.setScale(2, RoundingMode.HALF_UP)))
+
 	private def getModuleRegistration(entity: ExamGridEntityYear): Option[ModuleRegistration] = {
 		entity.moduleRegistrations.find(mr =>
 			mr.module == module &&
-				mr.cats == cats &&
-				(moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
+			scaled(mr.cats) == scaled(cats) &&
+			(moduleSelectionStatus.isEmpty || mr.selectionStatus == moduleSelectionStatus.get)
 		)
 	}
 

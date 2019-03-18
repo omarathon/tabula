@@ -21,7 +21,7 @@ class CourseAndRouteServiceTest extends PersistenceTestBase with Mockito {
 			val permissionsDao = new PermissionsDaoImpl
 			val rolesByIdCache = new GrantedRoleByIdCache(permissionsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)
-			val cacheStrategy = CacheStrategy.InMemoryOnly
+			val cacheStrategy = CacheStrategy.CaffeineRequired
 			val userLookup: MockUserLookup = userLookupService
 		}
 

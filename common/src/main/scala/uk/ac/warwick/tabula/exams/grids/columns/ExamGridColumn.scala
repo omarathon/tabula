@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.exams.grids.columns
 
+import com.google.common.annotations.VisibleForTesting
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -190,7 +191,8 @@ abstract class ChosenYearExamGridColumn(state: ExamGridColumnState) extends Exam
 		result
 	}
 
-	protected def result: Map[ExamGridEntity, ExamGridColumnValue]
+	@VisibleForTesting
+	def result: Map[ExamGridEntity, ExamGridColumnValue]
 }
 
 

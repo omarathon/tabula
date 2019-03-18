@@ -20,9 +20,6 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 
 	@Transactional
 	@Test def add() {
-		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
-		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
-
 		withUser("abc") {
 
 			val dept = new Department

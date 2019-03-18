@@ -1,12 +1,16 @@
 Tabula
 ==========
 
-This is Tabula, the 'MyDepartment' system including a number of modules. It has a [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
+This is Tabula, the University of Warwick's student administration system including a number of modules. It has an internal [JIRA project](https://bugs.elab.warwick.ac.uk/browse/TAB).
+
+![Screenshot](screenshot.png)
 
 Currently, the modules that are in Tabula are:
 
-- web - Static content and homepage
+- common - Data model and "Commands", which perform actions in Tabula
+- web - Static content and web controllers for several major sections:
   - coursework - Coursework Submission, the Assignment Management project that used to be [Horses for Courses](https://bugs.elab.warwick.ac.uk/browse/HFC)
+  - exams - Exam Management, exam marks (deprecated) and exam grids
   - profiles - Student Profiles
   - groups - Small Group Teaching management
   - attendance - Monitoring point management and recording
@@ -14,12 +18,101 @@ Currently, the modules that are in Tabula are:
   - reports - Report generation for other modules
 - api - API-specific details
 
-Note: This is likely to change to being 3 modules: web, reports and api (possibly with common? commands? who knows).
+Table of Contents
+----------
+
+- [Quick start](#quick-start)
+  - [Pre-requisites](#pre-requisites)
+- [Setting up for development](#setting-up-for-development)
+	- [ActiveMQ](#activemq)
+  - [Elasticsearch](#elasticsearch)
+  - [Java 8 JDK](#java-8-jdk)
+  - [Starting Tomcat](#starting-tomcat)
+  - [Apache](#apache)
+  - [Local properties](#local-properties)
+  - [Troubleshooting updates](#troubleshooting-updates)
+  - [Deployment](#deployment)
+  - [Building assets](#building-assets)
+- [Directory structure](#directory-structure)
+- [WAR overlays](#war-overlays)
+- [Database schema changes](#database-schema-changes)
+- [Code style](#code-style)
+- [Validation](#validation)
+- [Running code on bind (pre-validation)](#running-code-on-bind-pre-validation)
+
+Quick start
+-----------
+
+We provide a Docker set up that can be used with `docker-compose` to build and deploy Tabula locally.
+
+### Pre-requisites
+
+1. You're running on Linux or macOS
+2. You've installed [Docker Engine](https://docs.docker.com/install/) and [docker-compose](https://docs.docker.com/compose/install/).
+3. You've got a stable hostname. If you're on-campus but don't have a hostname registered to your workstation, contact IT Services.
+4. You've got an SSO provider ID registered with the IT Services Web Team.
+5. You've got a stable IP address and it's whitelisted for the SSO sentry (contact IT Services Web Team if necessary).
+
+### Building Tabula
+
+You should be able to access source and binaries from mvn.elab.warwick.ac.uk when you resolve dependencies. If you're using an IDE (we recommend IntelliJ IDEA)
+this should mean you'll get code completion and the original source of dependencies that haven't been fully open-sourced.
+
+The gradle wrapper should be able to now build wars, if you run `./gradlew war` from the root directory it should build `api/build/libs/api.war`
+and `web/build/libs/ROOT.war`.
+
+### Running the Tomcat container with dependencies
+
+*macOS note*: The standard `head` on macOS may be incompatible with `docker/init.sh`, you may want to get `ghead` from Homebrew and
+replace instances in the script before running.
+
+First, run `docker/init.sh` (i.e. run it from the root of the project, rather than `cd`'ing into the docker directory). This will ask you
+three questions:
+
+1. What's the hostname of your machine (i.e. localdev.warwick.ac.uk)
+2. What's your email address (for obtaining an SSL certificate from Let's Encrypt)
+3. What's your SSO provider ID (or leave blank for `urn:localdev.warwick.ac.uk:tabula:service` - you'll get this when you register for an SSO provider ID with the ITS Web Team).
+
+This generates the necessary properties files to run Tabula in `docker/data`. You shouldn't need to run `docker/init.sh` again except when there's been
+a change in the properties required; if you're just changing properties files you can just change these files directly without regenerating them.
+
+You can now start the Docker containers with `sudo docker-compose up --build` (again, you'll only need `--build` when configuration changes have been made).
+This will get everything running and you should get a 404 for https://localdev.warwick.ac.uk/ (and a 401 basic auth prompt for http://localdev.warwick.ac.uk:8080/manager).
+
+Now, you can deploy the application with `./gradlew cargoDeployRemote` which will connect to the Manager application on Tomcat and deploy the application there.
+If you make changes and want to re-deploy without starting from scratch you can run `./gradlew cargoRedeployRemote`; if you use JRebel and you've set it up with
+the remote server correctly you should be able to make changes live without a redeploy.
+
+### Populating data
+
+Once you've got the application running, it'll spew some errors that are expected when there isn't any data in either
+the database or Elasticsearch. You'll need to go to https://localdev.warwick.ac.uk/sysadmin (note, this requires that your
+logged-in user is a member of the WebGroup `in-tabula-local-dev-sysadmins`, you can edit the generated `docker/data/tomcat/lib/tabula.properties` to use
+a different group).
+
+WebGroups can be created in the [WebGroups system](https://webgroups.warwick.ac.uk/) by staff, or you can use an existing group
+such as `all-staff` to allow any staff member at the University (for example).
+
+Click in the 3 boxes for "Rebuild audit event index from", "Rebuild profiles index from" and "Rebuild notification stream index from" so
+that they're populated with a date, and click "Index". This should complete immediately as no data will be indexed, but it will create the index
+structure in Elasticsearch.
+
+Next, start the Imports in the top right:
+
+* Departments, modules, routes etc.
+* SITS assignments, ALL YEARS
+* SITS module lists
+* Profiles (leave deptCode empty)
+
+As `tabula.properties` specifies this is a sandbox instance, this will complete quickly and with completely fake data.
+
+You can then go to "List departments in the system", click a department and "View department admins" to grant permissions, enabling
+God mode will allow your user to bypass permissions checks and add ordinary permissions.
 
 Setting up for development
 ----------
 
-Install Tomcat 8 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
+Install the latest Tomcat 8.5 from here: http://tomcat.apache.org/download-80.cgi - on Unix, it makes sense just to extract Tomcat into `/opt` and then symlink it to `/usr/local/tomcat-8` or wherever is convenient. You can then upgrade Tomcat without breaking any configuration by just changing that symlink.
 
 Create a new base directory for Tabula's config and deployment, e.g. `/var/tomcat/instances/tabula`. The structure and contents of this directory should be as follows:
 
@@ -38,6 +131,7 @@ tabula/
 │   ├── jtds-1.3.1.jar
 │   ├── logback.xml
 │   ├── ojdbc8.jar
+│   ├── postgresql-42.2.5.jar
 │   ├── tabula.properties
 │   ├── tabula-sso-config.xml
 │   └── warwick-logging-1.1-all.xml
@@ -75,17 +169,21 @@ This is just copied from the `conf` directory in the Tomcat 8 install. I couldn'
 
 ### `lib/warwick-logging-1.1.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.1-all.jar
+You can get this from https://pkg.elab.warwick.ac.uk/ch.qos.logback/warwick-logging-1.1-all.jar
 
 Note that this dependency replaces previous dependencies on logback, logstash-logback-encoder, jackson and slf4j-api
 
 ### `lib/jtds-1.3.1.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
+You can get this from https://pkg.elab.warwick.ac.uk/net.sourceforge.jtds/jtds-1.3.1.jar
 
 ### `lib/ojdbc8.jar`
 
-You can get this from http://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
+You can get this from https://pkg.elab.warwick.ac.uk/oracle.com/ojdbc8.jar
+
+### `lib/postgresql-42.2.5.jar`
+
+You can get this from http://central.maven.org/maven2/org/postgresql/postgresql/42.2.5/postgresql-42.2.5.jar
 
 ### `lib/logback.xml`
 
@@ -233,7 +331,7 @@ even for Scala).
 Gradle unit test results go to a HTML file which is pretty good, so you probably don't want to spend too long trying to make the
 console output more verbose.
 
-If you run `node_modules/.bin/gulp` from inside the `web` folder in a tab, that will constantly build assets and JRebel will
+If you run `npm run watch` from inside the `web` folder in a tab, that will constantly build assets and JRebel will
 then sync these across to the war, along with WEB-INF content such as Freemarker views.
 
 Some other useful Gradle commands:
@@ -254,20 +352,16 @@ Some other useful Gradle commands:
 
 ### Building assets
 
-The `web` module contains a call to `node_modules/.bin/gulp assets` to build assets as part of the deployment.
+The `web` module contains a call to `npm run build` to build assets with Webpack as part of the deployment.
 You can run this manually to build new static content into `build/rootContent` (which is monitored by JRebel for changes).
 
-If you don't want to mess with gulp at all, you can call `./gradlew gulp_assets` to rebuild the assets (or replace `assets` with another task name as below).
+If you don't want to mess with webpack at all, you can call `./gradlew webpack` to rebuild the assets.
 
-Other useful `gulp` commands:
+Other useful `npm` commands:
 
-- `gulp assets` - build all assets and exit
-- `gulp` - build all assets then watch for any changes and rebuild
-- `gulp watch-assets` - just watch for changes before rebuilding
-- `gulp clean` - clean out anything from `build/rootContent` (sometimes necessary if you delete files)
-- `gulp concat-scripts-id6` - generate the concatenated JS files for ID6 modules
-- `gulp concat-scripts-id7` - generate the concatenated JS files for ID7 modules
-- `gulp compile-less` - compile any LESS files to CSS
+- `npm run build` - build all production assets and exit
+- `npm run dev` - build assets for development and exit
+- `npm run watch` - watch for changes to files and re-build development assets
 
 At the moment, we still have a lot of JS libraries in `src/main/assets/static/libs/` - these should be gradually replaced
 with proper dependency management in `package.json` (we already do this for ID7). If you need to update ID7, change the version
@@ -287,7 +381,7 @@ Directory structure
       - `scala` - Scala source files
       - `java` - Java source files
       - `resources` - non-code files that will be available in the app classpath
-      - `assets` - JS/CSS files etc. to be asset-processed by gulp before being added to the WAR
+      - `assets` - JS/CSS files etc. to be asset-processed by webpack before being added to the WAR
       - `webapp` - other non-code files that make up the WAR.
       - `artwork` - source graphics not included in the app, but used to generate static images. Usually SVG/Inkscape.
     - `test`

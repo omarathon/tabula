@@ -76,6 +76,13 @@ object EarlyRequestInfo {
 	}
 
 	def open(info: EarlyRequestInfo): Unit = threadLocal.set(Some(info))
+	def wrap[A](info: EarlyRequestInfo = new EarlyRequestInfoImpl)(fn: => A): A =
+		try {
+			open(info)
+			fn
+		} finally {
+			close()
+		}
 
 	/** Only useful for an edge case. Use #fromThread usually.
 		* If a full RequestInfo is available, this is used instead of

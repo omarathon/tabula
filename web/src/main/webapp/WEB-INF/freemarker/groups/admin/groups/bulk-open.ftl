@@ -62,7 +62,7 @@
 
 </@f.form>
 </#escape>
-<@script "/static/js/sortable-table.js" />
+
 <script type="text/javascript">
 	jQuery("#groups-table").bigList({});
 </script>

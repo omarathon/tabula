@@ -91,9 +91,6 @@
 </#if>
 
 <style type="text/css">
-	@import url("<@url resource="/static/css/fullcalendar.css" />");
-	@import url("<@url resource="/static/css/fullcalendar-custom.css" />");
-
 	.fc-event.allday {
 		font-weight: bold;
 		color: white !important;
@@ -125,6 +122,18 @@
 </style>
 
 <script type="text/javascript">
+	function once(func) {
+    var result;
+		var n = 2;
+    if (--n > 0) {
+      result = func.apply(this, arguments);
+    }
+    if (n <= 1) {
+      func = undefined;
+    }
+    return result;
+	}
+
 	jQuery(function($) {
 		$(function(){
 			$('.timetable-ical-link').on('click', function(e){
@@ -135,7 +144,7 @@
 
 		var weeks = <#noescape>${weekRangesDumper()}</#noescape>;
 
-		var createCalendarOnce = _.once(function () {
+		var createCalendarOnce = once(function () {
 			var $calendar = $('.calendar');
 
 			Profiles.createCalendar(
@@ -169,7 +178,7 @@
 			$calendar.find('table').attr('role', 'presentation');
 		});
 
-		var createSmallScreenCalendarOnce = _.once(function () {
+		var createSmallScreenCalendarOnce = once(function () {
 			Profiles.createSmallScreenCalender(
 				$('.calendar-smallscreen'),
 				$('.calendar-smallscreen-loading'),

@@ -1,5 +1,0 @@
-ALTER table smallgroupevent
-ADD CONSTRAINT check_startend_eventtime
-CHECK (
-    (STARTTIME IS NULL AND ENDTIME IS NULL) OR (STARTTIME IS NOT NULL AND ENDTIME IS NOT NULL)
-);

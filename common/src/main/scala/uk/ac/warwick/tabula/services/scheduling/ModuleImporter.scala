@@ -62,8 +62,6 @@ class ModuleImporterImpl extends ModuleImporter with Logging with AutowiringApac
 				JSON.parseFull(json) match {
 					case Some(departments: Seq[Map[String, Any]] @unchecked) =>
 						departments
-							.filterNot(_.get("deleted").exists(_ == true))
-							.filterNot(_.get("inUse").exists(_ == false))
 							.filter(_.get("code").collect { case s: String => s }.orNull.hasText)
 							.map { properties =>
 								DepartmentInfo(

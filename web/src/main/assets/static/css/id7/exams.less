@@ -1,28 +1,30 @@
 @import "embeddable";
+@import (reference) "bootstrap/less/variables";
+@import (reference) "bootstrap/less/mixins";
+@import (reference) "@universityofwarwick/id7/less/variables";
+@import (reference) "bootstrap/less/tooltip";
 
 .table th.rotated, .table td.rotated {
 	vertical-align: bottom;
-	.rotate-outer {
-		position: relative;
-	}
+	text-align: center;
+
 	.rotate {
-		float: left;
-		position: absolute;
-		-webkit-transform-origin: left bottom;
-		-moz-transform-origin: left bottom;
-		-ms-transform-origin: left bottom;
-		-o-transform-origin: left bottom;
-		transform-origin: left bottom;
-		-webkit-transform: rotateZ(-90deg);
-		-moz-transform: rotateZ(-90deg);
-		-ms-transform: rotateZ(-90deg);
-		-o-transform: rotateZ(-90deg);
-		transform: rotateZ(-90deg);
+		writing-mode: vertical-rl;
+		transform: rotateZ(180deg);
+
 		white-space: nowrap;
-		left: 50%;
 		overflow: hidden;
 		text-overflow: ellipsis;
-		max-width: 300px;
+		max-height: 300px;
+
+		// We'd like to do this for browsers that support it (Firefox) but it breaks the behaviour when text-overflow: ellipsis is in play
+		@supports (writing-mode: sideways-lr) {
+			writing-mode: sideways-lr;
+			transform: none;
+			text-overflow: clip;
+		}
+
+		margin-top: 5px; // let it breathe a bit
 	}
 }
 
@@ -333,6 +335,46 @@ div.exam-modulegrid-preview {
 	font-style: italic;
 }
 
-#examGridContainer {
-	opacity: 0;
+.exam-grid-tooltip[data-title]:not([data-title=""]) {
+	position: relative;
+	display: inline-block;
+
+	&::before, &::after {
+		position: absolute;
+		display: block;
+		top: -@tooltip-arrow-width;
+		left: 50%;
+		z-index: @zindex-tooltip;
+		opacity: 0;
+		transition: opacity .15s linear;
+	}
+
+	&::before {
+		content: '';
+		transform: translateX(-50%);
+		border-width: @tooltip-arrow-width @tooltip-arrow-width 0 @tooltip-arrow-width;
+		border-style: solid;
+		border-color: @tooltip-bg transparent transparent transparent;
+	}
+
+	&::after {
+		content: attr(data-title);
+		transform: translateX(-50%) translateY(-100%);
+
+		// Our parent element can be arbitrary since tooltips are by default inserted as a sibling of their target element.
+		// So reset our font and text properties to avoid inheriting weird values.
+		.reset-text();
+		font-size: @font-size-small;
+
+		.tooltip-inner;
+		min-width: 150px;
+
+		pointer-events: none;
+	}
+
+	&:hover {
+		&::before, &::after {
+			opacity: @tooltip-opacity;
+		}
+	}
 }

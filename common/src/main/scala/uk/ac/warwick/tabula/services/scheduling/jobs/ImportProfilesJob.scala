@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.BeanDefinition
 import org.springframework.context.annotation.{Profile, Scope}
 import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.commands.scheduling.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
@@ -26,9 +27,11 @@ class ImportProfilesJob extends AutowiredJobBean {
 		if (features.schedulingProfilesImport)
 			transactional() {
 				exceptionResolver.reportExceptions {
-					moduleAndDepartmentService.allRootDepartments.foreach(dept => {
-						scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
-					})
+					EarlyRequestInfo.wrap() {
+						moduleAndDepartmentService.allRootDepartments.foreach(dept => {
+							scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
+						})
+					}
 				}
 			}
 	}
@@ -44,13 +47,15 @@ class ImportProfilesSingleDepartmentJob extends AutowiredJobBean with Logging {
 	override def executeInternal(context: JobExecutionContext): Unit = {
 		if (features.schedulingProfilesImport)
 			exceptionResolver.reportExceptions {
-				val deptCode = Option(context.getMergedJobDataMap.getString("departmentCode")).flatMap(_.maybeText)
-				if (deptCode.isEmpty) {
-					logger.error("Tried to import profiles for a department, but no department code was found.")
-				} else {
-					val cmd = new ImportProfilesCommand()
-					cmd.deptCode = deptCode.get
-					cmd.apply()
+				EarlyRequestInfo.wrap() {
+					val deptCode = Option(context.getMergedJobDataMap.getString("departmentCode")).flatMap(_.maybeText)
+					if (deptCode.isEmpty) {
+						logger.error("Tried to import profiles for a department, but no department code was found.")
+					} else {
+						val cmd = new ImportProfilesCommand()
+						cmd.deptCode = deptCode.get
+						cmd.apply()
+					}
 				}
 			}
 

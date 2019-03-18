@@ -65,7 +65,7 @@ object Assignment {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = 0")
+@FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @Access(AccessType.FIELD)

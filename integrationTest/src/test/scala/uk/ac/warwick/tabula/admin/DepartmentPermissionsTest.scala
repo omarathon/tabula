@@ -4,8 +4,6 @@ import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.{BrowserTest, LoginDetails}
 
-// n.b. this test doesn't work with the FirefoxDriver because the UI pops up modal dialogs which the
-// test isn't expecting. HTMLUnit ignores them.
 class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
 	private def usercodes(parentElement: String) = findAll(cssSelector(s"$parentElement .row .very-subtle")).toList.map(_.underlying.getText.trim)
