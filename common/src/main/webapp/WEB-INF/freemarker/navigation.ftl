@@ -26,10 +26,12 @@
       </#if>
     </#if>
 
-    <#if canManageMitigatingCircumstances>
-      <li class="mitcircs-active"><a href="<@url page="/" context="/mitcircs" />">Mitigating Circumstances</a></li>
-    <#elseif canViewMitigatingCircumstances >
-      <li class="mitcircs-active"><a href="<@url page="/profile" context="/mitcircs" />">My Mitigating Circumstances</a></li>
+    <#if features.mitCircs>
+      <#if canManageMitigatingCircumstances>
+        <li class="mitcircs-active"><a href="<@url page="/" context="/mitcircs" />">Mitigating Circumstances</a></li>
+      <#elseif canViewMitigatingCircumstances >
+        <li class="mitcircs-active"><a href="<@url page="/profile" context="/mitcircs" />">My Mitigating Circumstances</a></li>
+      </#if>
     </#if>
 
     <#if features.reports && canDeptAdmin>

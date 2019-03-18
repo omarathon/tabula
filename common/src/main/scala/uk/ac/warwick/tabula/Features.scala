@@ -154,7 +154,7 @@ abstract class Features {
   @Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
-  @Value("${features.mitcircs:false}") var mitCircs: Boolean = defaults.mitCircs
+  @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
 
 
   private val bean = new BeanWrapperImpl(this)
