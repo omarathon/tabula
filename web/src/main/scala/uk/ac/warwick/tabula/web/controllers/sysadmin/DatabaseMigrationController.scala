@@ -1039,7 +1039,6 @@ object DatabaseMigrationController {
       StringColumn("id"),
       StringColumn("name"),
       StringColumn("submission_id"),
-      StringColumn("value_old"),
       StringColumn("feedback_id"),
       StringColumn("marker_feedback_id"),
       StringColumn("value"),
