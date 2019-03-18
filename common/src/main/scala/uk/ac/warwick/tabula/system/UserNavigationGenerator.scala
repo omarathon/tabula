@@ -63,7 +63,8 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     val canManageMitigatingCircumstances = features.mitCircs && user.isStaff &&
       permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Manage).nonEmpty
 
-    val canViewMitigatingCircumstances = features.mitCircs && (user.isStudent || user.isAlumni) && homeDepartment.exists(_.enableMitCircs)
+    val canViewMitigatingCircumstances = features.mitCircs && (user.isStudent || user.isAlumni) &&
+      (for(member <- user.profile; dept <- homeDepartment) yield { dept.subDepartmentsContaining(member) }).getOrElse(Stream.empty).exists(_.enableMitCircs)
 
     val modelMap = Map(
       "user" -> user,
