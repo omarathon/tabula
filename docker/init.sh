@@ -177,6 +177,8 @@ activemq.broker=tcp://tabula-activemq:61616
 base.data.dir=/usr/local/tomcat/temp
 filesystem.create.missing=true
 
+tabula.database.encryptionKey=cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04=
+
 objectstore.provider=swift
 objectstore.container=tabula
 objectstore.encryptionKey=cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04=
