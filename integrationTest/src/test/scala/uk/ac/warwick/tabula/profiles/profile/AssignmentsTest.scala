@@ -21,7 +21,7 @@ class AssignmentsTest extends BrowserTest with GivenWhenThen with FeaturesDriver
     click on linkText("Assignments")
 
     Then("They see an assignment that needs submitting")
-    cssSelector("div.striped-section.todo div.row a.btn-primary").findElement.isDefined
+    eventually(cssSelector("div.striped-section.todo div.row a.btn-primary").findElement.isDefined)
 
   }
 

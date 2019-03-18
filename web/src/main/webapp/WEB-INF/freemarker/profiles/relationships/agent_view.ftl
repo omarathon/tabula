@@ -115,8 +115,7 @@
     <#if missingCount == 0>
       <h4 class="subtle">All students in ${department.name} have ${relationshipType.agentRole}s recorded</h4>
     <#else>
-      <h4><a href="<@routes.profiles.relationship_missing department relationshipType />">View <@fmt.p missingCount "student" /> with
-          no ${relationshipType.agentRole}</a></h4>
+      <h4><a href="<@routes.profiles.relationship_missing department relationshipType />">View <@fmt.p missingCount "student" /> with no ${relationshipType.agentRole}</a></h4>
     </#if>
 
     <#if scheduledCount == 0>

@@ -669,12 +669,11 @@
               <div class="col-md-12">
                 <#if setItem.viewerMustSignUp>
                 <div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
-									<input type=" radio
-                "
-                name="group"
-                value="${group.id}"
-                ${group.full?string(' disabled ','')}
-                class="radio inline group-selection-radio"/>
+                  <input type="radio"
+                    name="group"
+                    value="${group.id}"
+                    ${group.full?string(' disabled ','')}
+                    class="radio inline group-selection-radio"/>
               </div>
               <div style="margin-left: 20px;">
                 <#else>
