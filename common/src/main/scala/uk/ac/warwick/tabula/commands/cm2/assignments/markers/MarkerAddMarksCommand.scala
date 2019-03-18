@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.{Assignment, MarkPoint, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
@@ -72,8 +71,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
 trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: MarkerAddMarksState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
-
+  def permissionsCheck(p: PermissionsChecking): Unit = {
     p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, assignment)
     if (submitter.apparentUser != marker) {
       p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, assignment)
@@ -243,7 +241,7 @@ trait AddMarksCommandBindListener extends BindListener {
       })
 
       // If a row has no mark or grade, we will quietly ignore it
-      if (!mark.actualMark.hasText && !mark.actualGrade.hasText && !mark.feedbackComment.hasText) {
+      if (!mark.actualMark.hasText && !mark.actualGrade.hasText && !mark.fieldValues.asScala.exists { case (_, v) => v.hasText }) {
         mark.isValid = false
       }
 
