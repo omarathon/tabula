@@ -3,8 +3,7 @@
   <h1>Sorry</h1>
 
   <#if (user.loggedIn)!false>
-    <p>Sorry<#if user??> ${user.firstName?default('')}<#if user.masquerading> (really ${user.realUser.firstName})</#if></#if>, you don't have permission to see
-      that.</p>
+    <p>Sorry<#if user??> ${user.firstName?default('')}<#if user.masquerading> (really ${user.realUser.firstName})</#if></#if>, you don't have permission to see that.</p>
 
     <#if !((user.sysadmin)!false) && (user.masquerading)!false>
       <div class="alert alert-warning">
