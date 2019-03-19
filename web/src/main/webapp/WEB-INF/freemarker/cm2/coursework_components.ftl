@@ -1380,9 +1380,9 @@
   <div id="tip-content-${attachment.id}" class="hide">
     <p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
     <p class="similarity-subcategories-tooltip">
-      Web: ${r.webOverlap}%<br>
-      Student papers: ${r.studentOverlap}%<br>
-      Publications: ${r.publicationOverlap}%
+      Web: ${r.webOverlap!"-"}%<br>
+      Student papers: ${r.studentOverlap!"-"}%<br>
+      Publications: ${r.publicationOverlap!"-"}%
     </p>
     <p>
       <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
