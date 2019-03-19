@@ -36,7 +36,7 @@ class ReturnToMarkerCommandInternal(val assignment: Assignment, val currentUser:
     // only move feedback backwards in the workflow
     val feedbackToReturn = feedbacks.filter(f => {
       val targetIndex = targetStages.asScala.headOption.map(_.order).getOrElse(0)
-      targetIndex < f.currentStageIndex
+      targetIndex <= f.currentStageIndex
     })
 
     returnedMarkerFeedback = cm2MarkingWorkflowService.returnFeedback(targetStages.asScala, feedbackToReturn).asJava
