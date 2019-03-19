@@ -94,7 +94,7 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
       .createAlias("notification", "notification")
       .add(is("emailSent", true))
       .add(is("dismissed", false))
-      .add(isNotNull("attemptedAt"))
+      .add(gt("attemptedAt", DateTime.now.minusDays(1)))
       .addOrder(Order.desc("notification.created"))
       .setMaxResults(1)
       .seq.headOption
