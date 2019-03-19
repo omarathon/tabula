@@ -250,6 +250,16 @@
         </fieldset>
       </#if>
 
+      <#if features.mitCircs>
+        <fieldset id="mitcircs-options">
+          <h2>Mitigating circumstances options</h2>
+          <@bs3form.checkbox path="enableMitCircs">
+            <@f.checkbox path="enableMitCircs" id="enableMitCircs" />
+            Enable mitigating circumstances
+          </@bs3form.checkbox>
+        </fieldset>
+      </#if>
+
       <div class="fix-footer">
         <input type="submit" value="Save" class="btn btn-primary">
         <#if (returnTo!"")?length gt 0>

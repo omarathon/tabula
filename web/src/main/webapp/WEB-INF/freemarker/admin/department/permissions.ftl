@@ -47,6 +47,14 @@
         <@pm.roleTable perms_url "admin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
       </div>
 
+      <#if features.mitCircs>
+        <div class="col-md-6">
+          <h3 class="permissionTitle">Mitigating circumstances officers
+            <@fmt.help_popover id="mcos" title="Mitigating circumstances officers" content="A Mitigating circumstances officers can create and review mitigating circumstances submissions." html=true /></h3>
+
+          <@pm.roleTable perms_url "mco-table" department "MitigatingCircumstancesOfficerRoleDefinition" "mitigating circumstances officers" />
+        </div>
+      </#if>
     </div>
 
     <#assign scope=department />

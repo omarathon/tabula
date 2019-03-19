@@ -56,6 +56,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
     LazyMaps.create { _: StudentRelationshipType => JMap[CourseType, JBoolean]() }.asJava
   var autoMarkMissedMonitoringPoints: Boolean = department.autoMarkMissedMonitoringPoints
   var meetingRecordApprovalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
+  var enableMitCircs: Boolean = department.enableMitCircs
 
   def populate() {
     relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
@@ -95,6 +96,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
     }
     department.autoMarkMissedMonitoringPoints = autoMarkMissedMonitoringPoints
     department.meetingRecordApprovalType = meetingRecordApprovalType
+    department.enableMitCircs = enableMitCircs
 
     moduleAndDepartmentService.saveOrUpdate(department)
     department

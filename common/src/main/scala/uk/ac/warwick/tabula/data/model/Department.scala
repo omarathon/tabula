@@ -297,6 +297,9 @@ class Department extends GeneratedId
     settings += (Settings.MissedMonitoringPointsNotificationLevelHigh -> levels.high)
   }
 
+  def enableMitCircs: Boolean = getBooleanSetting(Settings.EnableMitCircs, default = false)
+  def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
+
   def nameToShow: ExamGridStudentIdentificationColumnValue =
     getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
 
@@ -598,6 +601,8 @@ object Department {
     val MissedMonitoringPointsNotificationLevelLow = "missedMonitoringPointsNotificationLevelLow"
     val MissedMonitoringPointsNotificationLevelMedium = "missedMonitoringPointsNotificationLevelMedium"
     val MissedMonitoringPointsNotificationLevelHigh = "missedMonitoringPointsNotificationLevelHigh"
+
+    val EnableMitCircs = "enableMitCircs"
 
     object MissedMonitoringPointsNotificationLevels {
 
