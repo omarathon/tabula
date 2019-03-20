@@ -7,6 +7,7 @@ import java.util.TimeZone
 import javax.annotation.Resource
 import com.fasterxml.jackson.core.JsonParseException
 import com.fasterxml.jackson.databind.{JsonMappingException, ObjectMapper}
+import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.dialect.Dialect
 import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
 import org.joda.time.{DateTime, DateTimeZone}
@@ -158,7 +159,7 @@ class AuditEventServiceImpl extends AuditEventService {
   def getByIds(ids: Seq[Long]): Seq[AuditEvent] =
     ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
       val query = session.createSQLQuery(idsSql)
-      query.setParameterList("ids", group.asJava)
+      query.setParameterList("ids", group.asJava, StandardBasicTypes.LONG)
       val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
       addRelated(results.map(mapListToObject))
     }.toSeq
@@ -166,7 +167,7 @@ class AuditEventServiceImpl extends AuditEventService {
   def getByEventIds(ids: Seq[String]): Map[String, Seq[AuditEvent]] =
     ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
       val query = session.createSQLQuery(eventIdsSql)
-      query.setParameterList("ids", group.asJava)
+      query.setParameterList("ids", group.asJava, StandardBasicTypes.STRING)
       val results = query.list.asScala.asInstanceOf[Seq[Array[Object]]]
       results.map(mapListToObject).groupBy(_.eventId)
     }.toMap
