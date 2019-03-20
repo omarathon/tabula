@@ -59,7 +59,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
     val grade = id("main").webElement.findElement(By.name("marks[0].actualGrade"))
     grade.sendKeys("2.2")
 
-    val feedbackComment = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
+    val feedbackComment = id("main").webElement.findElement(By.name("marks[0].fieldValues[feedbackText]"))
     feedbackComment.sendKeys("Interesting essay")
 
     And("I save them")
@@ -108,7 +108,7 @@ class MarksGradeFeedbackAdjustmentTest extends BrowserTest with CourseworkFixtur
     grade2.clear()
     grade2.sendKeys("2.1")
 
-    val feedbackComment2 = id("main").webElement.findElement(By.name("marks[0].feedbackComment"))
+    val feedbackComment2 = id("main").webElement.findElement(By.name("marks[0].fieldValues[feedbackText]"))
     feedbackComment2.clear()
     feedbackComment2.sendKeys("Very good")
 

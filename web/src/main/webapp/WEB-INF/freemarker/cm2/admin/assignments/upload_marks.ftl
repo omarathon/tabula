@@ -62,9 +62,11 @@
             <div class="col-md-2">
               <label>Grade</label>
             </div>
-            <div class="col-md-${feedbackColumnWidth}">
-              <label>Feedback</label>
-            </div>
+            <#list assignment.feedbackFields as field>
+              <div class="col-md-${feedbackColumnWidth / assignment.feedbackFields?size}">
+                <label>${field.label}</label>
+              </div>
+            </#list>
           </div>
           <#list command.existingMarks as markItem>
             <div class="row mark-row">
@@ -109,12 +111,14 @@
                   </#if>
                 </div>
               </div>
-              <div class="col-md-${feedbackColumnWidth}">
-                <div class="form-group">
-                  <textarea class="small-textarea form-control" name="marks[${markItem_index}].feedbackComment"
-                            placeholder="Feedback"><#if markItem.feedbackComment??>${markItem.feedbackComment}</#if></textarea>
+              <#list assignment.feedbackFields as field>
+                <div class="col-md-${feedbackColumnWidth / assignment.feedbackFields?size}">
+                  <div class="form-group">
+                  <textarea class="small-textarea form-control" name="marks[${markItem_index}].fieldValues[${field.name}]"
+                            placeholder="${field.label}"><#if markItem.fieldValues[field.name]??>${markItem.fieldValues[field.name]}</#if></textarea>
+                  </div>
                 </div>
-              </div>
+              </#list>
             </div>
           </#list>
           <input type="hidden" name="isfile" value="false" />

@@ -66,7 +66,6 @@
                   <@f.hidden path="id" />
                   <@f.hidden path="actualMark" />
                   <@f.hidden path="actualGrade" />
-                  <@f.hidden path="feedbackComment" />
                   <input type="hidden" name="marks[${item_index}].isValid" value="<@spring.bind path="valid">${status.value}</@spring.bind>" />
                   <td>
                     <@spring.bind path="id">${status.value}</@spring.bind>
@@ -89,7 +88,7 @@
                   <#list assignment.feedbackFields as field>
                     <@f.hidden path="fieldValues[${field.name}]" />
                     <td>
-                      <@spring.bind path="fieldValues[${field.name}]">${status.value}</@spring.bind>
+                      <@spring.bind path="fieldValues[${field.name}]">${status.value!}</@spring.bind>
                       <@f.errors path="fieldValues[${field.name}]" cssClass="error" />
                     </td>
                   </#list>

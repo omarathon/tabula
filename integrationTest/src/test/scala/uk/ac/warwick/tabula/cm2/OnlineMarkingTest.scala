@@ -27,7 +27,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
         click on mark
       })
       Then("I am redirected to the summary screen ")
-      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
+      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/marker/"))
 
       When("I expand the student")
       eventually(click on cssSelector(".toggle-icon-large.student-col").webElement)
@@ -35,7 +35,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       eventually(pageSource contains "Marking and feedback" should be (true))
 
       When("I fill in the online feedback form with an invalid mark")
-      textArea(cssSelector(".big-textarea")).value = "An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces."
+      textArea(xpath("//textarea[@rows='6']")).value = "An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces."
       numberField("mark").value = "9000"
       textField("grade").value = "1"
       cssSelector("button[type=submit]").webElement.click()
@@ -65,7 +65,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       eventually(pageSource contains "Marking and feedback" should be (true))
       numberField("mark").value should be("90")
       textField("grade").value should be("1")
-      textArea(cssSelector(".big-textarea")).value should be("An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces.")
+      textArea(xpath("//textarea[@rows='6']")).value should be("An inspired treatise on the dangers posed by Ardea cinerea. They are truly one of the greatest threats our world faces.")
 
       When("I select the feedback and click send to ...")
       cssSelector("input[name=markerFeedback]").webElement.click()
