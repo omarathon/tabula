@@ -12,8 +12,8 @@ Feature: Standard server headers
       | https://@HOST@/coursework/ |
 
   Scenario: Request file from static
-    Given there is a file at https://@HOST@/static/js/home.js.484115321229
-    When I request https://@HOST@/static/js/home.js.484115321229
+    Given there is a file at https://@HOST@/static/js/id7/home.js.484115321229
+    When I request https://@HOST@/static/js/id7/home.js.484115321229
     Then the Vary response header should be "Accept-Encoding"
     And the Content-Type response header should be "application/javascript"
     And the ETag response header should exist
