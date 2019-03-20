@@ -92,48 +92,38 @@ trait UserGroupMembershipHelperLookup {
 
   lazy val simpleEntityName: String = runtimeClass.getSimpleName
 
-  // A series of confusing variables for building joined queries across paths split by.dots
-  private lazy val pathParts = {
-    val parts = path.split("\\.").toList.reverse
+  require(!path.contains('.'), "Nested paths for UserGroupMembershipHelper are no longer supported")
 
-    if (parts.size > 2) throw new IllegalArgumentException("Only allowed one or two parts to the path")
-
-    parts
-  }
-
-  // The actual name of the UserGroup
-  lazy val usergroupName: String = pathParts.head
-  // A possible table to join through to get to userProp
-  lazy val joinTable: Option[String] = pathParts.tail.headOption
-  // The overall property name, possibly including the joinTable
-  lazy val prop: String = joinTable.fold("")(_ + ".") + usergroupName
-
-  lazy val groupsByUserSql: String = {
-    val leftJoin = joinTable.fold("")(table => s"left join r.$table as $table")
-
+  lazy val groupsByUserHql: String = {
     // skip the university IDs check if we know we only ever use usercodes
     val universityIdsClause =
       if (checkUniversityIds)
-        s""" or (
-					$prop.universityIds = true and
-					((:universityId in elements($prop.staticIncludeUsers)
-					or :universityId in elements($prop.includeUsers))
-					and :universityId not in elements($prop.excludeUsers))
-				)"""
+        """ or (
+          ug.universityIds = true and
+          ((:universityId in elements(ug.staticIncludeUsers)
+          or :universityId in elements(ug.includeUsers))
+          and :universityId not in elements(ug.excludeUsers))
+        )"""
       else ""
 
+    def joinRestriction(alias: String): String =
+      if (checkUniversityIds)
+        s"""on (
+          (ug.universityIds = false and $alias = :userId) or
+          (ug.universityIds = true and $alias = :universityId)
+        )"""
+      else s"on ug.universityIds = false and $alias = :userId"
+
     s"""
-			select r.id
-			from $simpleEntityName r
-			$leftJoin
+      select r.id
+      from $simpleEntityName r
+        inner join r.$path ug
+        left join ug.staticIncludeUsers static ${joinRestriction("static")}
+        left join ug.includeUsers include ${joinRestriction("include")}
+        left join ug.excludeUsers exclude ${joinRestriction("exclude")}
 			where
-				(
-					$prop.universityIds = false and
-			 		((:userId in elements($prop.staticIncludeUsers)
-					or :userId in elements($prop.includeUsers))
-					and :userId not in elements($prop.excludeUsers))
-				) $universityIdsClause
-		"""
+        (static is not null or include is not null) and exclude is null
+    """
   }
 
   // To override in tests
@@ -144,7 +134,7 @@ trait UserGroupMembershipHelperLookup {
   }.getOrElse(Nil)
 
   protected def findByInternal(user: User): Seq[String] = {
-    val groupsByUser = session.createQuery(groupsByUserSql)
+    val groupsByUser = session.createQuery(groupsByUserHql)
       .setString("universityId", user.getWarwickId)
       .setString("userId", user.getUserId)
       .list.asInstanceOf[JList[String]]
@@ -156,12 +146,8 @@ trait UserGroupMembershipHelperLookup {
       else {
         val criteria = session.createCriteria(runtimeClass)
 
-        joinTable.foreach { table =>
-          criteria.createAlias(table, table)
-        }
-
         criteria
-          .createAlias(prop, "usergroupAlias")
+          .createAlias(path, "usergroupAlias")
           .add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
           .setProjection(Projections.id())
           .list.asInstanceOf[JList[String]]
