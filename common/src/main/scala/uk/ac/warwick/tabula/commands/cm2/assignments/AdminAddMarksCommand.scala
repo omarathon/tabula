@@ -53,7 +53,7 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
           newFeedback
         }
         feedback.actualMark = if (StringUtils.hasText(markItem.actualMark)) Some(markItem.actualMark.toInt) else None
-        feedback.actualGrade = Option(markItem.actualGrade)
+        feedback.actualGrade = Some(markItem.actualGrade).filter(StringUtils.hasText)
         markItem.fieldValues.asScala.foreach { case (fieldName, value) =>
           feedback.setFieldValue(fieldName, value)
         }
