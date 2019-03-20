@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.http.client.ResponseHandler
+import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.client.methods.RequestBuilder
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventLi
 import uk.ac.warwick.tabula.timetables.{TimetableEvent, TimetableEventType}
 
 import scala.concurrent.Future
-import scala.util.Try
+import scala.util.{Failure, Try}
 import scala.xml.Elem
 
 trait ExamTimetableConfiguration {
@@ -59,7 +59,7 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
       ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, toplevelUrl)
     }
 
-  private def featureProtected(arg: String)(f: (String) => Future[EventList]): Future[EventList] = {
+  private def featureProtected(arg: String)(f: String => Future[EventList]): Future[EventList] = {
     if (features.personalExamTimetables) {
       f(arg)
     } else {
@@ -74,8 +74,8 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 
   def doRequest(param: String): Future[EventList] = {
     userLookup.getUserByWarwickUniId(param) match {
-      case user if !user.isFoundUser =>
-        logger.warn(s"Tried to get exam timetable for $param but could find no such user")
+      case user if !user.isFoundUser || user.isLoginDisabled =>
+        logger.info(s"Tried to get exam timetable for $param but could find no active user")
         Future.successful(EventList(Nil, None))
       case user =>
         val endpoint = s"${examTimetableConfiguration.examTimetableUrl}timetable.xml"
@@ -88,8 +88,12 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
         val result = Future {
           httpClient.execute(req, handler(param))
         }
-        result.onFailure { case e =>
-          logger.warn(s"Request for $endpoint failed: ${e.getMessage}")
+        result.onComplete {
+          case Failure(e: HttpResponseException) =>
+            logger.warn(s"Request for $endpoint failed: HTTP ${e.getStatusCode}", e)
+          case Failure(e) =>
+            logger.warn(s"Request for $endpoint failed", e)
+          case _ =>
         }
         result.map(EventList.fresh)
     }
@@ -250,8 +254,10 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
     val result = Future {
       httpClient.execute(req, handler)
     }
-    result.onFailure { case e =>
-      logger.warn(s"Request for $endpoint failed: ${e.getMessage}")
+    result.onComplete {
+      case Failure(e) =>
+        logger.warn(s"Request for $endpoint failed", e)
+      case _ =>
     }
     result
   }
