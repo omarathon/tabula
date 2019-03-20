@@ -15,7 +15,7 @@ import scala.language.implicitConversions
   * who submitted it.
   */
 class SendSubmissionReceiptCommand(val assignment: Assignment, val submission: Submission, val user: CurrentUser)
-  extends Command[Boolean] with Notifies[Boolean, Submission] with ReadOnly {
+  extends Command[Boolean] with Notifies[Boolean, Submission] {
 
   PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
 
