@@ -152,7 +152,7 @@
           var xhr = null;
           container.find('input[name="query"]').prop('autocomplete', 'off').each(function () {
             var $spinner = $('<div class="spinner-container" />');
-            $(this).before($spinner).bootstrap3Typeahead({
+            $(this).before($spinner).typeahead({
               source: function (query, process) {
                 if (xhr != null) {
                   xhr.abort();
@@ -185,7 +185,7 @@
                   });
 
                   process(members);
-                }).error(function (jqXHR, textStatus, errorThrown) {
+                }).fail(function (jqXHR, textStatus, errorThrown) {
                   if (textStatus != "abort") $spinner.spin(false);
                 });
               },
