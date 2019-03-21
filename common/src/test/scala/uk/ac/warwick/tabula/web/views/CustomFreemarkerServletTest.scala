@@ -11,22 +11,22 @@ import freemarker.template.utility.DeepUnwrap
 
 class CustomFreemarkerServletTest extends TestBase with Mockito {
 
-	val servlet = new CustomFreemarkerServlet
+  val servlet = new CustomFreemarkerServlet
 
-	@Test def preTemplateProcess = withUser("cuscav") {
-		val req = new MockHttpServletRequest
-		val res = new MockHttpServletResponse
+  @Test def preTemplateProcess = withUser("cuscav") {
+    val req = new MockHttpServletRequest
+    val res = new MockHttpServletResponse
 
-		val template = new Template("mytemplate", new StringReader(""), null)
-		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
-		model.put("contentType", "text/plain")
+    val template = new Template("mytemplate", new StringReader(""), null)
+    val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
+    model.put("contentType", "text/plain")
 
-		servlet.preTemplateProcess(req, res, template, model)
+    servlet.preTemplateProcess(req, res, template, model)
 
-		DeepUnwrap.unwrap(model.get("user")) should be (currentUser)
-		DeepUnwrap.unwrap(model.get("info")) should be (RequestInfo.fromThread.get)
+    DeepUnwrap.unwrap(model.get("user")) should be(currentUser)
+    DeepUnwrap.unwrap(model.get("info")) should be(RequestInfo.fromThread.get)
 
-		res.getContentType() should be ("text/plain")
-	}
+    res.getContentType() should be("text/plain")
+  }
 
 }

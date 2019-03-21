@@ -193,6 +193,11 @@ Logback config. An alternative would be to package this up with the WARs, but th
 
 Properties passed into the app. You can get one of these off of tabula-test and then personalise it.
 
+#### Encryption keys
+
+Don't just use the encryption keys from tabula-test or any other instance, generate new ones for your local instance
+by running `./gradlew generateEncryptionKey` and using that for `objectstore.encryptionKey` and `tabula.database.encryptionKey`.
+
 ### `lib/tabula-sso-config.xml`
 
 The usual SSO config guff. You will need to get this configuration added to Web Sign-on for SSO to work.
@@ -349,6 +354,7 @@ Some other useful Gradle commands:
 - `./gradlew --continuous` - continuously compile sources as they are saved in your IDE
 - `./gradlew test --continuous` - continuously compile sources and run tests as they are saved in your IDE (tests only run if it passes)
 - `./gradlew web:test --tests *.ApplicationTest --continuous` - continously compile and run a single test
+- `./gradlew generateEncryptionKey` - print a Base64-encoded encryption key for use in `tabula.properties` for object storage or database
 
 ### Building assets
 

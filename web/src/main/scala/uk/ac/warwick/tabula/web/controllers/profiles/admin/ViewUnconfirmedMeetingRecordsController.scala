@@ -12,19 +12,19 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfilesController
 @RequestMapping(value = Array("/profiles/department/{department}/{relationshipType}/unconfirmed"))
 class ViewUnconfirmedMeetingRecordsController extends ProfilesController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
-		ViewUnconfirmedMeetingRecordsCommand(mandatory(department), mandatory(relationshipType))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable relationshipType: StudentRelationshipType) =
+    ViewUnconfirmedMeetingRecordsCommand(mandatory(department), mandatory(relationshipType))
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[Map[String, Int]],
-		@PathVariable department: Department,
-		@PathVariable relationshipType: StudentRelationshipType
-	): Mav = {
-		Mav("profiles/relationships/unconfirmed",
-			"tutorMap" -> cmd.apply()
-		)
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[Map[String, Int]],
+    @PathVariable department: Department,
+    @PathVariable relationshipType: StudentRelationshipType
+  ): Mav = {
+    Mav("profiles/relationships/unconfirmed",
+      "tutorMap" -> cmd.apply()
+    )
+  }
 
 }

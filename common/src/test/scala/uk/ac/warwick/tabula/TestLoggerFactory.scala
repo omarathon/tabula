@@ -9,42 +9,42 @@ import scala.collection.JavaConverters._
 
 object TestLoggerFactory {
 
-	type Appender = logback.core.read.ListAppender[ILoggingEvent]
+  type Appender = logback.core.read.ListAppender[ILoggingEvent]
 
-	private val loggers = new ThreadLocal[List[logback.classic.Logger]] {
-		override def initialValue = Nil
-	}
+  private val loggers = new ThreadLocal[List[logback.classic.Logger]] {
+    override def initialValue = Nil
+  }
 
-	def getTestLogger(name: String): Logger = {
-		val logger = LoggerFactory.getLogger(name).asInstanceOf[logback.classic.Logger]
-		val appender = new Appender
-		appender.start()
-		appender.setName("TestLogAppender")
-		logger.detachAndStopAllAppenders()
-		logger.setLevel(Level.DEBUG)
-		logger.addAppender(appender)
-		storeLogger(logger)
-		logger
-	}
+  def getTestLogger(name: String): Logger = {
+    val logger = LoggerFactory.getLogger(name).asInstanceOf[logback.classic.Logger]
+    val appender = new Appender
+    appender.start()
+    appender.setName("TestLogAppender")
+    logger.detachAndStopAllAppenders()
+    logger.setLevel(Level.DEBUG)
+    logger.addAppender(appender)
+    storeLogger(logger)
+    logger
+  }
 
-	def retrieveEvents(logger: logback.classic.Logger) : Seq[ILoggingEvent] = {
-		val appender: Appender = logger.iteratorForAppenders().next.asInstanceOf[Appender]
-		appender.list.asScala
-	}
+  def retrieveEvents(logger: logback.classic.Logger): Seq[ILoggingEvent] = {
+    val appender: Appender = logger.iteratorForAppenders().next.asInstanceOf[Appender]
+    appender.list.asScala
+  }
 
-	def tearDown() : Unit = {
-		for (logger <- loggers.get) {
-			logger.detachAndStopAllAppenders()
-		}
-		loggers.remove()
-	}
+  def tearDown(): Unit = {
+    for (logger <- loggers.get) {
+      logger.detachAndStopAllAppenders()
+    }
+    loggers.remove()
+  }
 
-	private def storeLogger(logger: logback.classic.Logger) = {
-		val list = loggers.get match {
-			case null => List(logger)
-			case tail => logger :: tail
-		}
-		loggers.set(list)
-	}
+  private def storeLogger(logger: logback.classic.Logger) = {
+    val list = loggers.get match {
+      case null => List(logger)
+      case tail => logger :: tail
+    }
+    loggers.set(list)
+  }
 
 }

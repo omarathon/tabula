@@ -7,45 +7,45 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 
 object DownloadExtensionAttachmentCommand {
-	def apply(extension: Extension, filename: String) = new DownloadExtensionAttachmentCommandInternal(extension, filename)
-		with ComposableCommand[Option[RenderableAttachment]]
-		with DownloadExtensionAttachmentPermissions
-		with DownloadExtensionAttachmentDescription
+  def apply(extension: Extension, filename: String) = new DownloadExtensionAttachmentCommandInternal(extension, filename)
+    with ComposableCommand[Option[RenderableAttachment]]
+    with DownloadExtensionAttachmentPermissions
+    with DownloadExtensionAttachmentDescription
 }
 
 class DownloadExtensionAttachmentCommandInternal(val extension: Extension, val filename: String)
-	extends CommandInternal[Option[RenderableAttachment]] with DownloadExtensionAttachmentState  {
+  extends CommandInternal[Option[RenderableAttachment]] with DownloadExtensionAttachmentState {
 
-	def applyInternal(): Option[RenderableAttachment] = {
-		val allAttachments = extension.nonEmptyAttachments
-		allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
-	}
+  def applyInternal(): Option[RenderableAttachment] = {
+    val allAttachments = extension.nonEmptyAttachments
+    allAttachments find (_.name == filename) map (a => new RenderableAttachment(a))
+  }
 }
 
 trait DownloadExtensionAttachmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadExtensionAttachmentState =>
+  self: DownloadExtensionAttachmentState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Extension.Read, extension)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Extension.Read, extension)
+  }
 }
 
 trait DownloadExtensionAttachmentDescription extends Describable[Option[RenderableAttachment]] {
-	self: DownloadExtensionAttachmentState =>
+  self: DownloadExtensionAttachmentState =>
 
-	override lazy val eventName: String = "DownloadExtensionAttachment"
+  override lazy val eventName: String = "DownloadExtensionAttachment"
 
-	override def describe(d: Description) {
-		d.assignment(extension.assignment)
-		d.property("filename", filename)
-	}
+  override def describe(d: Description) {
+    d.assignment(extension.assignment)
+    d.property("filename", filename)
+  }
 
-	override def describeResult(d: Description, result: Option[RenderableAttachment]) {
-		d.property("fileFound", result.isDefined)
-	}
+  override def describeResult(d: Description, result: Option[RenderableAttachment]) {
+    d.property("fileFound", result.isDefined)
+  }
 }
 
 trait DownloadExtensionAttachmentState {
-	val extension: Extension
-	val filename: String
+  val extension: Extension
+  val filename: String
 }

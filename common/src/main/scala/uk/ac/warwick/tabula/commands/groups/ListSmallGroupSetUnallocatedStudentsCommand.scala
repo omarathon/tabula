@@ -7,49 +7,49 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
-case class UnallocatedStudentsInformation (
-	smallGroupSet: SmallGroupSet,
-	membersNotInGroups: Seq[MemberOrUser],
-	userIsMember: Boolean,
+case class UnallocatedStudentsInformation(
+  smallGroupSet: SmallGroupSet,
+  membersNotInGroups: Seq[MemberOrUser],
+  userIsMember: Boolean,
   showTutors: Boolean
 )
 
 object ListSmallGroupSetUnallocatedStudentsCommand {
-	def apply(smallGroupSet: SmallGroupSet, user: CurrentUser): ListSmallGroupSetUnallocatedStudentsCommandInternal with ComposableCommand[UnallocatedStudentsInformation] with AutowiringProfileServiceComponent with ListSmallGroupSetUnallocatedStudentsCommandPermissions with Unaudited with ReadOnly = {
-		new ListSmallGroupSetUnallocatedStudentsCommandInternal(smallGroupSet, user)
-			with ComposableCommand[UnallocatedStudentsInformation]
-			with AutowiringProfileServiceComponent
-			with ListSmallGroupSetUnallocatedStudentsCommandPermissions
-			with Unaudited with ReadOnly
-	}
+  def apply(smallGroupSet: SmallGroupSet, user: CurrentUser): ListSmallGroupSetUnallocatedStudentsCommandInternal with ComposableCommand[UnallocatedStudentsInformation] with AutowiringProfileServiceComponent with ListSmallGroupSetUnallocatedStudentsCommandPermissions with Unaudited with ReadOnly = {
+    new ListSmallGroupSetUnallocatedStudentsCommandInternal(smallGroupSet, user)
+      with ComposableCommand[UnallocatedStudentsInformation]
+      with AutowiringProfileServiceComponent
+      with ListSmallGroupSetUnallocatedStudentsCommandPermissions
+      with Unaudited with ReadOnly
+  }
 }
 
 class ListSmallGroupSetUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupSet, val user: CurrentUser)
-	extends CommandInternal[UnallocatedStudentsInformation] with ListSmallGroupSetUnallocatedStudentsCommandState  {
-	self:ProfileServiceComponent =>
+  extends CommandInternal[UnallocatedStudentsInformation] with ListSmallGroupSetUnallocatedStudentsCommandState {
+  self: ProfileServiceComponent =>
 
-		override def applyInternal(): UnallocatedStudentsInformation = {
-				val studentsNotInGroups = smallGroupSet.unallocatedStudents
-				val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
-				val showTutors = smallGroupSet.studentsCanSeeTutorName
+  override def applyInternal(): UnallocatedStudentsInformation = {
+    val studentsNotInGroups = smallGroupSet.unallocatedStudents
+    val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
+    val showTutors = smallGroupSet.studentsCanSeeTutorName
 
-				val membersNotInGroups = studentsNotInGroups map { user =>
-						val member = profileService.getMemberByUniversityId(user.getWarwickId)
-						MemberOrUser(member, user)
-				}
+    val membersNotInGroups = studentsNotInGroups map { user =>
+      val member = profileService.getMemberByUniversityId(user.getWarwickId)
+      MemberOrUser(member, user)
+    }
 
-				UnallocatedStudentsInformation(smallGroupSet, membersNotInGroups, userIsMember, showTutors)
-			}
+    UnallocatedStudentsInformation(smallGroupSet, membersNotInGroups, userIsMember, showTutors)
+  }
 }
 
 trait ListSmallGroupSetUnallocatedStudentsCommandState {
-	val user: CurrentUser
-	val smallGroupSet: SmallGroupSet
+  val user: CurrentUser
+  val smallGroupSet: SmallGroupSet
 }
 
 trait ListSmallGroupSetUnallocatedStudentsCommandPermissions extends RequiresPermissionsChecking {
-	self:ListSmallGroupSetUnallocatedStudentsCommandState =>
-		def permissionsCheck(p: PermissionsChecking) {
-			p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
-		}
+  self: ListSmallGroupSetUnallocatedStudentsCommandState =>
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
+  }
 }

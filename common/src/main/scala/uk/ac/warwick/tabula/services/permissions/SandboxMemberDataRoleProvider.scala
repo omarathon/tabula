@@ -15,31 +15,36 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.helpers.MutablePromise
 
 /**
- * Role provider that only runs in the sandbox environment, where there are no
- * member details for the currently logged in user.
- */
-@Profile(Array("sandbox")) @Component
+  * Role provider that only runs in the sandbox environment, where there are no
+  * member details for the currently logged in user.
+  */
+@Profile(Array("sandbox"))
+@Component
 class SandboxMemberDataRoleProvider extends ScopelessRoleProvider with TaskBenchmarking {
 
-	val departmentService: MutablePromise[ModuleAndDepartmentService] = promise { Wire[ModuleAndDepartmentService] }
+  val departmentService: MutablePromise[ModuleAndDepartmentService] = promise {
+    Wire[ModuleAndDepartmentService]
+  }
 
-	def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for SandboxMemberDataRoleProvider"){
-		if (user.realUser.isLoggedIn) {
-			val allDepartments = departmentService.get.allDepartments.toStream
+  def getRolesFor(user: CurrentUser): Stream[Role] = benchmarkTask("Get roles for SandboxMemberDataRoleProvider") {
+    if (user.realUser.isLoggedIn) {
+      val allDepartments = departmentService.get.allDepartments.toStream
 
-			val member = new RuntimeMember(user) {
-				allDepartments.headOption.foreach(this.homeDepartment = _)
-				override def affiliatedDepartments: Stream[Department] = allDepartments
-				override def touchedDepartments: Stream[Department] = allDepartments
-			}
+      val member = new RuntimeMember(user) {
+        allDepartments.headOption.foreach(this.homeDepartment = _)
 
-			UniversityMemberRole(member) #:: (member.userType match {
-				case Staff | Emeritus => allDepartments map StaffRole
-				case _ => Stream.empty[Role]
-			})
-		} else Stream.empty
-	}
+        override def affiliatedDepartments: Stream[Department] = allDepartments
 
-	def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
+        override def touchedDepartments: Stream[Department] = allDepartments
+      }
+
+      UniversityMemberRole(member) #:: (member.userType match {
+        case Staff | Emeritus => allDepartments map StaffRole
+        case _ => Stream.empty[Role]
+      })
+    } else Stream.empty
+  }
+
+  def rolesProvided = Set(classOf[StaffRole], classOf[UniversityMemberRole])
 
 }

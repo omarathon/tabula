@@ -15,70 +15,70 @@ import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServic
 import scala.collection.JavaConverters._
 
 object PassListDocument extends ExamGridDocumentPrototype {
-	override val identifier: String = "PassList"
+  override val identifier: String = "PassList"
 
-	def options(confidential: Boolean): Map[String, Any] = Map("confidential" -> confidential)
+  def options(confidential: Boolean): Map[String, Any] = Map("confidential" -> confidential)
 }
 
 @Component
 class PassListDocument extends ExamGridDocument
-	with AutowiringProgressionServiceComponent
-	with AutowiringNormalCATSLoadServiceComponent
-	with AutowiringUpstreamRouteRuleServiceComponent {
-	override val identifier: String = PassListDocument.identifier
+  with AutowiringProgressionServiceComponent
+  with AutowiringNormalCATSLoadServiceComponent
+  with AutowiringUpstreamRouteRuleServiceComponent {
+  override val identifier: String = PassListDocument.identifier
 
-	override val contentType: String = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  override val contentType: String = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 
-	override def apply(
-		department: Department,
-		academicYear: AcademicYear,
-		selectCourseCommand: SelectCourseCommand,
-		gridOptionsCommand: GridOptionsCommand,
-		checkOvercatCommand: CheckOvercatCommand,
-		options: Map[String, Any],
-		status: StatusAdapter
-	): FileAttachment = {
-		val isConfidential: Boolean = options.get("confidential").fold(false)(_.asInstanceOf[Boolean])
+  override def apply(
+    department: Department,
+    academicYear: AcademicYear,
+    selectCourseCommand: SelectCourseCommand,
+    gridOptionsCommand: GridOptionsCommand,
+    checkOvercatCommand: CheckOvercatCommand,
+    options: Map[String, Any],
+    status: StatusAdapter
+  ): FileAttachment = {
+    val isConfidential: Boolean = options.get("confidential").fold(false)(_.asInstanceOf[Boolean])
 
-		val entities = selectCourseCommand.apply()
+    val entities = selectCourseCommand.apply()
 
-		val document = ExamGridPassListExporter(
-			entities,
-			selectCourseCommand.department,
-			selectCourseCommand.courses.asScala,
-			selectCourseCommand.yearOfStudy,
-			selectCourseCommand.academicYear,
-			progressionService,
-			NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
-			UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
-			isConfidential,
-			calculateYearMarks = gridOptionsCommand.calculateYearMarks,
-			selectCourseCommand.isLevelGrid
-		)
+    val document = ExamGridPassListExporter(
+      entities,
+      selectCourseCommand.department,
+      selectCourseCommand.courses.asScala,
+      selectCourseCommand.yearOfStudy,
+      selectCourseCommand.academicYear,
+      progressionService,
+      NormalLoadLookup(selectCourseCommand.academicYear, selectCourseCommand.yearOfStudy, normalCATSLoadService),
+      UpstreamRouteRuleLookup(selectCourseCommand.academicYear, upstreamRouteRuleService),
+      isConfidential,
+      calculateYearMarks = gridOptionsCommand.calculateYearMarks,
+      selectCourseCommand.isLevelGrid
+    )
 
-		val file = new FileAttachment()
+    val file = new FileAttachment()
 
-		file.name = "%sPass list for %s %s %s %s.docx".format(
-			if (isConfidential) "Confidential " else "",
-			selectCourseCommand.department.name,
-			selectCourseCommand.courses.size match {
-				case 1 => selectCourseCommand.courses.get(0).code
-				case n => s"$n courses"
-			},
-			selectCourseCommand.routes.size match {
-				case 0 => "All routes"
-				case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
-				case n => s"$n routes"
-			},
-			selectCourseCommand.academicYear.toString.replace("/", "-")
-		)
+    file.name = "%sPass list for %s %s %s %s.docx".format(
+      if (isConfidential) "Confidential " else "",
+      selectCourseCommand.department.name,
+      selectCourseCommand.courses.size match {
+        case 1 => selectCourseCommand.courses.get(0).code
+        case n => s"$n courses"
+      },
+      selectCourseCommand.routes.size match {
+        case 0 => "All routes"
+        case 1 => selectCourseCommand.routes.get(0).code.toUpperCase
+        case n => s"$n routes"
+      },
+      selectCourseCommand.academicYear.toString.replace("/", "-")
+    )
 
-		val out = new ByteArrayOutputStream()
-		document.write(out)
-		out.close()
+    val out = new ByteArrayOutputStream()
+    document.write(out)
+    out.close()
 
-		file.uploadedData = ByteSource.wrap(out.toByteArray)
+    file.uploadedData = ByteSource.wrap(out.toByteArray)
 
-		file
-	}
+    file
+  }
 }

@@ -7,418 +7,424 @@ import $ from 'jquery';
 
 var exports = {};
 
-exports.bindModulePickers = function(){
-	$('.module-search-query')
-		.closest('.module-choice')
-		.find('.modules-list').on('click', '.remove', function(e){
-			e.preventDefault();
-			$(this).closest('li').remove();
-		}).end()
-		.end()
-		.each(function(){
-			var $this = $(this),
-				$parent = $this.closest('.module-choice'),
-				$hiddenInput = $parent.find('input[type=hidden]:first');
-			$this.on('change', function(){
-				if ($(this).data('moduleid') === undefined || $(this).data('moduleid').length === 0)
-					return;
+exports.bindModulePickers = function () {
+  $('.module-search-query')
+    .closest('.module-choice')
+    .find('.modules-list').on('click', '.remove', function (e) {
+    e.preventDefault();
+    $(this).closest('li').remove();
+  }).end()
+    .end()
+    .each(function () {
+      var $this = $(this),
+        $parent = $this.closest('.module-choice'),
+        $hiddenInput = $parent.find('input[type=hidden]:first');
+      $this.on('change', function () {
+        if ($(this).data('moduleid') === undefined || $(this).data('moduleid').length === 0)
+          return;
 
-				$this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
-				var icon = $('<i/>').addClass('icon-fixed-width');
-				if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
-					icon.addClass('icon-exclamation-sign').attr({
-						'title':'This module has no small groups set up in Tabula'
-					});
-				}
-				if ($this.hasClass('assignment') && $this.data('hasassignments') != true) {
-					icon.addClass('icon-exclamation-sign').attr({
-						'title':'This module has no assignments set up in Tabula'
-					});
-				}
-				$this.closest('.module-choice').find('.modules-list ol').append(
-					$('<li/>').append(
-						$('<input/>').attr({
-							'type':'hidden',
-							'name':$hiddenInput.attr('name').replace('_',''),
-							'value':$this.data('moduleid')
-						})
-					).append(
-						icon
-					).append(
-						$('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
-					).append(
-						$('<a/>').attr('href', '#').addClass('remove').text('Remove')
-					)
-				);
-				$this.data('moduleid','').val('');
-			});
-		});
-	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
-		checkGroups: true
-	});
-	$('.pointTypeOption.assignmentSubmission .module-search-query').modulePicker({
-		checkAssignments: true
-	});
+        $this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
+        var icon = $('<i/>').addClass('icon-fixed-width');
+        if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
+          icon.addClass('icon-exclamation-sign').attr({
+            'title': 'This module has no small groups set up in Tabula'
+          });
+        }
+        if ($this.hasClass('assignment') && $this.data('hasassignments') != true) {
+          icon.addClass('icon-exclamation-sign').attr({
+            'title': 'This module has no assignments set up in Tabula'
+          });
+        }
+        $this.closest('.module-choice').find('.modules-list ol').append(
+          $('<li/>').append(
+            $('<input/>').attr({
+              'type': 'hidden',
+              'name': $hiddenInput.attr('name').replace('_', ''),
+              'value': $this.data('moduleid')
+            })
+          ).append(
+            icon
+          ).append(
+            $('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
+          ).append(
+            $('<a/>').attr('href', '#').addClass('remove').text('Remove')
+          )
+        );
+        $this.data('moduleid', '').val('');
+      });
+    });
+  $('.pointTypeOption.smallGroup .module-search-query').modulePicker({
+    checkGroups: true
+  });
+  $('.pointTypeOption.assignmentSubmission .module-search-query').modulePicker({
+    checkAssignments: true
+  });
 };
 
-exports.bindAssignmentPickers = function(){
-	$('.assignment-search-query')
-		.closest('.assignment-choice')
-		.find('.assignments-list').on('click', '.remove', function(e){
-			e.preventDefault();
-			$(this).closest('li').remove();
-		}).end()
-		.end()
-		.each(function(){
-			var $this = $(this),
-				$parent = $this.closest('.assignment-choice'),
-				$hiddenInput = $parent.find('input[type=hidden]:first');
-			$this.on('change', function(){
-				if ($(this).data('assignmentid') === undefined || $(this).data('assignmentid').length === 0)
-					return;
+exports.bindAssignmentPickers = function () {
+  $('.assignment-search-query')
+    .closest('.assignment-choice')
+    .find('.assignments-list').on('click', '.remove', function (e) {
+    e.preventDefault();
+    $(this).closest('li').remove();
+  }).end()
+    .end()
+    .each(function () {
+      var $this = $(this),
+        $parent = $this.closest('.assignment-choice'),
+        $hiddenInput = $parent.find('input[type=hidden]:first');
+      $this.on('change', function () {
+        if ($(this).data('assignmentid') === undefined || $(this).data('assignmentid').length === 0)
+          return;
 
-				$this.closest('.assignment-choice').find('.assignments-list ol').append(
-					$('<li/>').append(
-						$('<input/>').attr({
-							'type':'hidden',
-							'name':$hiddenInput.attr('name').replace('_',''),
-							'value':$this.data('assignmentid')
-						})
-					).append(
-						$('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
-					).append(
-						$('<a/>').attr('href', '#').addClass('remove').text('Remove')
-					)
-				);
-				$this.data('assignmentid','').val('');
-			});
-		});
+        $this.closest('.assignment-choice').find('.assignments-list ol').append(
+          $('<li/>').append(
+            $('<input/>').attr({
+              'type': 'hidden',
+              'name': $hiddenInput.attr('name').replace('_', ''),
+              'value': $this.data('assignmentid')
+            })
+          ).append(
+            $('<span/>').attr('title', $this.val()).html($this.val() + '&nbsp;')
+          ).append(
+            $('<a/>').attr('href', '#').addClass('remove').text('Remove')
+          )
+        );
+        $this.data('assignmentid', '').val('');
+      });
+    });
 
-	$('.pointTypeOption.assignmentSubmission .assignment-search-query').assignmentPicker({});
+  $('.pointTypeOption.assignmentSubmission .assignment-search-query').assignmentPicker({});
 };
 
-$(function(){
+$(function () {
 
-	// Scripts for Add students
-	(function(){
-		$('.mass-add-users')
-			.find('textarea').on('keyup', function(){
-				var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
-				if ($this.val().length === 0) {
-					$addButton.addClass('disabled');
-				} else {
-					$addButton.removeClass('disabled');
-				}
-			}).end()
-		;
+  // Scripts for Add students
+  (function () {
+    $('.mass-add-users')
+      .find('textarea').on('keyup', function () {
+      var $this = $(this), $addButton = $this.closest('.mass-add-users').find('input.btn.add-students');
+      if ($this.val().length === 0) {
+        $addButton.addClass('disabled');
+      } else {
+        $addButton.removeClass('disabled');
+      }
+    }).end()
+    ;
 
-		var updateButtons = function(){
-			var checkboxes = $('.manually-added tbody input')
-				, checkedBoxes = checkboxes.filter(function(){ return $(this).is(':checked'); });
-			if (checkedBoxes.length == 0) {
-				$('.manually-added summary input.btn-warning').attr('disabled', true);
-			} else {
-				$('.manually-added summary input.btn-warning').attr('disabled', false);
-			}
-		};
-		updateButtons();
-		$('.manually-added')
-			.find('.for-check-all').append(
-				$('<input/>').addClass('check-all use-tooltip').attr({
-					type: 'checkbox',
-					title: 'Select all/none'
-				}).addClass('collection-check-all')
-			).end().bigList({
-				onChange: updateButtons
-			});
+    var updateButtons = function () {
+      var checkboxes = $('.manually-added tbody input')
+        , checkedBoxes = checkboxes.filter(function () {
+        return $(this).is(':checked');
+      });
+      if (checkedBoxes.length == 0) {
+        $('.manually-added summary input.btn-warning').attr('disabled', true);
+      } else {
+        $('.manually-added summary input.btn-warning').attr('disabled', false);
+      }
+    };
+    updateButtons();
+    $('.manually-added')
+      .find('.for-check-all').append(
+      $('<input/>').addClass('check-all use-tooltip').attr({
+        type: 'checkbox',
+        title: 'Select all/none'
+      }).addClass('collection-check-all')
+    ).end().bigList({
+      onChange: updateButtons
+    });
 
-		if ($('.add-student-to-scheme').length > 0) {
-			$('.fix-area').fixHeaderFooter();
+    if ($('.add-student-to-scheme').length > 0) {
+      $('.fix-area').fixHeaderFooter();
 
-			$('.tablesorter').find('th.sortable').addClass('header').on('click', function() {
-				var $th = $(this)
-					, sortDescending = function() {
-						$('#sortOrder').val('desc(' + $th.data('field') + ')');
-						$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-						$th.addClass('headerSortUp');
-					}, sortAscending = function() {
-						$('#sortOrder').val('asc(' + $th.data('field') + ')');
-						$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-						$th.addClass('headerSortDown');
-					}, $form = $th.closest('form')
-					, $container = $th.closest('div.striped-section');
+      $('.tablesorter').find('th.sortable').addClass('header').on('click', function () {
+        var $th = $(this)
+          , sortDescending = function () {
+          $('#sortOrder').val('desc(' + $th.data('field') + ')');
+          $th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+          $th.addClass('headerSortUp');
+        }, sortAscending = function () {
+          $('#sortOrder').val('asc(' + $th.data('field') + ')');
+          $th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+          $th.addClass('headerSortDown');
+        }, $form = $th.closest('form')
+          , $container = $th.closest('div.striped-section');
 
-				if ($th.hasClass('headerSortUp')) {
-					sortAscending();
-				} else if ($th.hasClass('headerSortDown')) {
-					sortDescending();
-				} else {
-					// not currently sorted on this column, default sort depends on column
-					if ($th.hasClass('unrecorded-col') || $th.hasClass('missed-col')) {
-						sortDescending();
-					} else {
-						sortAscending();
-					}
-				}
+        if ($th.hasClass('headerSortUp')) {
+          sortAscending();
+        } else if ($th.hasClass('headerSortDown')) {
+          sortDescending();
+        } else {
+          // not currently sorted on this column, default sort depends on column
+          if ($th.hasClass('unrecorded-col') || $th.hasClass('missed-col')) {
+            sortDescending();
+          } else {
+            sortAscending();
+          }
+        }
 
-				if ($container.data('submitparam').length > 0) {
-					$form.append($('<input/>').attr({
-						'type': 'hidden',
-						'name': $container.data('submitparam'),
-						'value': true
-					}));
-				}
-				$form.submit();
-			});
+        if ($container.data('submitparam').length > 0) {
+          $form.append($('<input/>').attr({
+            'type': 'hidden',
+            'name': $container.data('submitparam'),
+            'value': true
+          }));
+        }
+        $form.submit();
+      });
 
-			$('.pagination').on('click', 'a', function() {
-				var $this = $(this), $form = $this.closest('form'), $container = $this.closest('div.striped-section');
-				if ($this.data('page').toString.length > 0) {
-					$form.find('input[name="page"]').remove().end()
-						.append($('<input/>').attr({
-							'type': 'hidden',
-							'name': 'page',
-							'value': $this.data('page')
-						})
-					);
-				}
-				if ($container.data('submitparam').length > 0) {
-					$form.find('input[name="' + $container.data('submitparam') + '"]').remove().end()
-						.append($('<input/>').attr({
-							'type': 'hidden',
-							'name': $container.data('submitparam'),
-							'value': true
-						})
-					);
-				}
-				$form.submit();
-			});
+      $('.pagination').on('click', 'a', function () {
+        var $this = $(this), $form = $this.closest('form'), $container = $this.closest('div.striped-section');
+        if ($this.data('page').toString.length > 0) {
+          $form.find('input[name="page"]').remove().end()
+            .append($('<input/>').attr({
+                'type': 'hidden',
+                'name': 'page',
+                'value': $this.data('page')
+              })
+            );
+        }
+        if ($container.data('submitparam').length > 0) {
+          $form.find('input[name="' + $container.data('submitparam') + '"]').remove().end()
+            .append($('<input/>').attr({
+                'type': 'hidden',
+                'name': $container.data('submitparam'),
+                'value': true
+              })
+            );
+        }
+        $form.submit();
+      });
 
-			var prependClearLink = function($list) {
-				if (!$list.find('input:checked').length) {
-					$list.find('.clear-this-filter').remove();
-				} else {
-					if (!$list.find('.clear-this-filter').length) {
-						$list.find('> ul').prepend(
-							$('<li />').addClass('clear-this-filter')
-								.append(
-									$('<button />').attr('type', 'button')
-										.addClass('btn btn-link')
-										.html('<i class="fa fa-ban"></i> Clear selected items')
-										.on('click', function() {
-											$list.find('input:checked').each(function() {
-												var $checkbox = $(this);
-												$checkbox.prop('checked', false);
-												updateFilter($checkbox);
-											});
-										})
-								)
-								.append($('<hr />'))
-						);
-					}
-				}
-			};
+      var prependClearLink = function ($list) {
+        if (!$list.find('input:checked').length) {
+          $list.find('.clear-this-filter').remove();
+        } else {
+          if (!$list.find('.clear-this-filter').length) {
+            $list.find('> ul').prepend(
+              $('<li />').addClass('clear-this-filter')
+                .append(
+                  $('<button />').attr('type', 'button')
+                    .addClass('btn btn-link')
+                    .html('<i class="fa fa-ban"></i> Clear selected items')
+                    .on('click', function () {
+                      $list.find('input:checked').each(function () {
+                        var $checkbox = $(this);
+                        $checkbox.prop('checked', false);
+                        updateFilter($checkbox);
+                      });
+                    })
+                )
+                .append($('<hr />'))
+            );
+          }
+        }
+      };
 
-			var updateFilter = function($el) {
-				// Update the filter content
-				var $list = $el.closest('ul');
-				var shortValues = $list.find(':checked').map(function() {
-					return $(this).data('short-value');
-				}).get();
-				var $fsv = $el.closest('.btn-group').find('.filter-short-values');
-				if (shortValues.length) {
-					$el.closest('.btn-group').removeClass('empty-filter');
-					$fsv.html($fsv.data("prefix") + shortValues.join(', '));
-				} else {
-					$el.closest('.btn-group').addClass('empty-filter');
-					$fsv.html($fsv.data('placeholder'));
-				}
+      var updateFilter = function ($el) {
+        // Update the filter content
+        var $list = $el.closest('ul');
+        var shortValues = $list.find(':checked').map(function () {
+          return $(this).data('short-value');
+        }).get();
+        var $fsv = $el.closest('.btn-group').find('.filter-short-values');
+        if (shortValues.length) {
+          $el.closest('.btn-group').removeClass('empty-filter');
+          $fsv.html($fsv.data("prefix") + shortValues.join(', '));
+        } else {
+          $el.closest('.btn-group').addClass('empty-filter');
+          $fsv.html($fsv.data('placeholder'));
+        }
 
-				updateSearchButton($el);
-				updateClearAllButton($el);
-			};
+        updateSearchButton($el);
+        updateClearAllButton($el);
+      };
 
-			var updateClearAllButton = function($el) {
-				var $filterList = $el.closest(".student-filter");
+      var updateClearAllButton = function ($el) {
+        var $filterList = $el.closest(".student-filter");
 
-				if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-					$('.clear-all-filters').attr("disabled", "disabled");
-				} else {
-					$('.clear-all-filters').removeAttr("disabled");
-				}
-			};
+        if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
+          $('.clear-all-filters').attr("disabled", "disabled");
+        } else {
+          $('.clear-all-filters').removeAttr("disabled");
+        }
+      };
 
-			var updateSearchButton = function($el) {
-				var $filter = $el.closest('.student-filter');
-				if ($filter.find('input:checked').length > 0) {
-					$filter.find('button.search').attr('disabled', false);
-				} else {
-					$filter.find('button.search').attr('disabled', true);
-				}
-			};
+      var updateSearchButton = function ($el) {
+        var $filter = $el.closest('.student-filter');
+        if ($filter.find('input:checked').length > 0) {
+          $filter.find('button.search').attr('disabled', false);
+        } else {
+          $filter.find('button.search').attr('disabled', true);
+        }
+      };
 
-			$('.student-filter input').on('change', function() {
-				// Load the new results
-				var $input = $(this);
-				if ($input.is('.prevent-reload')) return;
-				updateFilter($input);
-				$('.student-filter-change').val(true);
-			});
+      $('.student-filter input').on('change', function () {
+        // Load the new results
+        var $input = $(this);
+        if ($input.is('.prevent-reload')) return;
+        updateFilter($input);
+        $('.student-filter-change').val(true);
+      });
 
-			// Re-order elements inside the dropdown when opened
-			$('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function() {
-				var $this = $(this);
-				if (!$this.closest('.btn-group').hasClass('open')) {
-					// Re-order before it's opened!
-					var $list = $this.closest('.btn-group').find('.filter-list');
-					var items = $list.find('li.check-list-item').get();
+      // Re-order elements inside the dropdown when opened
+      $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function () {
+        var $this = $(this);
+        if (!$this.closest('.btn-group').hasClass('open')) {
+          // Re-order before it's opened!
+          var $list = $this.closest('.btn-group').find('.filter-list');
+          var items = $list.find('li.check-list-item').get();
 
-					items.sort(function(a, b) {
-						var aChecked = $(a).find('input').is(':checked');
-						var bChecked = $(b).find('input').is(':checked');
+          items.sort(function (a, b) {
+            var aChecked = $(a).find('input').is(':checked');
+            var bChecked = $(b).find('input').is(':checked');
 
-						if (aChecked && !bChecked) return -1;
-						else if (!aChecked && bChecked) return 1;
-						else return $(a).data('natural-sort') - $(b).data('natural-sort');
-					});
+            if (aChecked && !bChecked) return -1;
+            else if (!aChecked && bChecked) return 1;
+            else return $(a).data('natural-sort') - $(b).data('natural-sort');
+          });
 
-					$.each(items, function(item, el) {
-						$list.find('> ul').append(el);
-					});
+          $.each(items, function (item, el) {
+            $list.find('> ul').append(el);
+          });
 
-					prependClearLink($list);
-				}
-			});
+          prependClearLink($list);
+        }
+      });
 
-			$('.clear-all-filters').on('click', function() {
-				$('.filter-list').each(function() {
-					var $list = $(this);
+      $('.clear-all-filters').on('click', function () {
+        $('.filter-list').each(function () {
+          var $list = $(this);
 
-					$list.find('input:checked').each(function() {
-						var $checkbox = $(this);
-						$checkbox.prop('checked', false);
-						updateFilter($checkbox);
-					});
+          $list.find('input:checked').each(function () {
+            var $checkbox = $(this);
+            $checkbox.prop('checked', false);
+            updateFilter($checkbox);
+          });
 
-					prependClearLink($list);
-				});
-			});
+          prependClearLink($list);
+        });
+      });
 
-			var updateFilterFromPicker = function($picker, name, value, shortValue) {
-				if (value === undefined || value.length === 0)
-					return;
+      var updateFilterFromPicker = function ($picker, name, value, shortValue) {
+        if (value === undefined || value.length === 0)
+          return;
 
-				shortValue = shortValue || value;
+        shortValue = shortValue || value;
 
-				var $ul = $picker.closest('ul');
+        var $ul = $picker.closest('ul');
 
-				var $li = $ul.find('input[value="' + value + '"]').closest('li');
-				if ($li.length) {
-					$li.find('input').prop('checked', true);
-					if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
-						$li.insertBefore($ul.find('li.check-list-item:first'));
-					}
-				} else {
-					$('<li/>').addClass('check-list-item').append(
-						$('<label/>').addClass('checkbox').append(
-							$('<input/>').attr({
-								'type':'checkbox',
-								'name':name,
-								'value':value,
-								'checked':true
-							}).data('short-value', shortValue)
-						).append(
-							$picker.val()
-						)
-					).insertBefore($ul.find('li.check-list-item:first'));
-				}
+        var $li = $ul.find('input[value="' + value + '"]').closest('li');
+        if ($li.length) {
+          $li.find('input').prop('checked', true);
+          if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
+            $li.insertBefore($ul.find('li.check-list-item:first'));
+          }
+        } else {
+          $('<li/>').addClass('check-list-item').append(
+            $('<label/>').addClass('checkbox').append(
+              $('<input/>').attr({
+                'type': 'checkbox',
+                'name': name,
+                'value': value,
+                'checked': true
+              }).data('short-value', shortValue)
+            ).append(
+              $picker.val()
+            )
+          ).insertBefore($ul.find('li.check-list-item:first'));
+        }
 
-				updateFilter($picker);
-			};
+        updateFilter($picker);
+      };
 
-			$('.route-search-query').on('change', function(){
-				var $picker = $(this);
-				if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
-					return;
+      $('.route-search-query').on('change', function () {
+        var $picker = $(this);
+        if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
+          return;
 
-				updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
+        updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
 
-				$picker.data('routecode','').val('');
-			}).routePicker({});
+        $picker.data('routecode', '').val('');
+      }).routePicker({});
 
-			$('.module-search-query').on('change', function(){
-				var $picker = $(this);
-				if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
-					return;
+      $('.module-search-query').on('change', function () {
+        var $picker = $(this);
+        if ($picker.data('modulecode') === undefined || $picker.data('modulecode').length === 0)
+          return;
 
-				updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
+        updateFilterFromPicker($picker, 'modules', $picker.data('modulecode'), $picker.data('modulecode').toUpperCase());
 
-				$picker.data('modulecode','').val('');
-			}).modulePicker({});
-		}
-	})();
+        $picker.data('modulecode', '').val('');
+      }).modulePicker({});
+    }
+  })();
 
-	// Add points
-	(function(){
-		var updateButtons = function(){
-			var weekCheckboxes = $('.add-points-to-schemes table.week tbody input')
-				, weekCheckedBoxes = weekCheckboxes.filter(function(){ return $(this).is(':checked'); })
-				, dateCheckboxes = $('.add-points-to-schemes table.date tbody input')
-				, dateCheckedBoxes = dateCheckboxes.filter(function(){ return $(this).is(':checked'); })
-				;
-			if (weekCheckedBoxes.length === 0 && dateCheckedBoxes.length === 0) {
-				$('.add-points-to-schemes p button').attr('disabled', true);
-				$('.add-points-to-schemes span.alert').hide();
-			} else if (weekCheckedBoxes.length > 0 && dateCheckedBoxes.length > 0) {
-				$('.add-points-to-schemes p button').attr('disabled', true);
-				$('.add-points-to-schemes span.alert').show();
-			} else {
-				$('.add-points-to-schemes p button').attr('disabled', false);
-				$('.add-points-to-schemes span.alert').hide();
-			}
-		};
-		updateButtons();
-		$('.add-points-to-schemes')
-			.find('.for-check-all').append(
-				$('<input/>').addClass('check-all use-tooltip').attr({
-					type: 'checkbox',
-					title: 'Select all/none'
-				}).on('click', function(){
-					$(this).closest('table').find('tbody input').prop('checked', this.checked);
-					updateButtons();
-				})
-			).end()
-			.find('tbody tr').on('click', function(){
-				var $input = $(this).find('input');
-				$input.prop('checked', !$input.is(':checked'));
-				updateButtons();
-			}).end()
-			.find('table tbody input').on('click', function(e){
-				e.stopPropagation();
-				updateButtons();
-			}).end()
-			.find('button').on('click', function(){
-				var $this = $(this), $form = $this.closest('form');
-				$form.attr('action', $this.data('href')).submit();
-			})
-		;
-	})();
+  // Add points
+  (function () {
+    var updateButtons = function () {
+      var weekCheckboxes = $('.add-points-to-schemes table.week tbody input')
+        , weekCheckedBoxes = weekCheckboxes.filter(function () {
+          return $(this).is(':checked');
+        })
+        , dateCheckboxes = $('.add-points-to-schemes table.date tbody input')
+        , dateCheckedBoxes = dateCheckboxes.filter(function () {
+          return $(this).is(':checked');
+        })
+      ;
+      if (weekCheckedBoxes.length === 0 && dateCheckedBoxes.length === 0) {
+        $('.add-points-to-schemes p button').attr('disabled', true);
+        $('.add-points-to-schemes span.alert').hide();
+      } else if (weekCheckedBoxes.length > 0 && dateCheckedBoxes.length > 0) {
+        $('.add-points-to-schemes p button').attr('disabled', true);
+        $('.add-points-to-schemes span.alert').show();
+      } else {
+        $('.add-points-to-schemes p button').attr('disabled', false);
+        $('.add-points-to-schemes span.alert').hide();
+      }
+    };
+    updateButtons();
+    $('.add-points-to-schemes')
+      .find('.for-check-all').append(
+      $('<input/>').addClass('check-all use-tooltip').attr({
+        type: 'checkbox',
+        title: 'Select all/none'
+      }).on('click', function () {
+        $(this).closest('table').find('tbody input').prop('checked', this.checked);
+        updateButtons();
+      })
+    ).end()
+      .find('tbody tr').on('click', function () {
+      var $input = $(this).find('input');
+      $input.prop('checked', !$input.is(':checked'));
+      updateButtons();
+    }).end()
+      .find('table tbody input').on('click', function (e) {
+      e.stopPropagation();
+      updateButtons();
+    }).end()
+      .find('button').on('click', function () {
+      var $this = $(this), $form = $this.closest('form');
+      $form.attr('action', $this.data('href')).submit();
+    })
+    ;
+  })();
 
-	// TAB-5653
-	if (navigator.userAgent.indexOf('Mobile') !== -1) {
-		$('button.use-tooltip')
-			.tooltip('destroy')
-			.tooltip({
-				trigger: 'focus'
-			})
-			.on('click', function () {
-				$(this).focus();
-			});
+  // TAB-5653
+  if (navigator.userAgent.indexOf('Mobile') !== -1) {
+    $('button.use-tooltip')
+      .tooltip('destroy')
+      .tooltip({
+        trigger: 'focus'
+      })
+      .on('click', function () {
+        $(this).focus();
+      });
 
-		$(window).on('scroll', function () {
-			$('button.use-tooltip:focus').blur();
-		});
-	}
+    $(window).on('scroll', function () {
+      $('button.use-tooltip:focus').blur();
+    });
+  }
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

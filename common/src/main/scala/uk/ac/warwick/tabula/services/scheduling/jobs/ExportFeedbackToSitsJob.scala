@@ -14,13 +14,13 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ExportFeedbackToSitsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingExportFeedbackToSits)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					ExportFeedbackToSitsCommand().apply()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingExportFeedbackToSits)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          ExportFeedbackToSitsCommand().apply()
+        }
+      }
+  }
 
 }

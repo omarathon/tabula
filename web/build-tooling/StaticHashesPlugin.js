@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-restricted-syntax */
-import { createHash } from 'crypto';
+import {createHash} from 'crypto';
 import path from 'path';
 import slash from 'slash';
 
@@ -8,7 +8,7 @@ import slash from 'slash';
  * Webpack plugin to hash all of the assets and write that hash to a single file.
  */
 module.exports = class StaticHashesPlugin {
-  constructor({ dest = 'WEB-INF/static-hashes.properties', base = false, hash = 'md5', delimiter = '=', maxLength = 12, salt = 'a' } = {}) {
+  constructor({dest = 'WEB-INF/static-hashes.properties', base = false, hash = 'md5', delimiter = '=', maxLength = 12, salt = 'a'} = {}) {
     this.options = {
       dest,
       base,
@@ -21,8 +21,8 @@ module.exports = class StaticHashesPlugin {
 
   apply(compiler) {
     compiler.hooks.emit.tapAsync('StaticHashesPlugin', (compilation, done) => {
-      const { assets } = compilation;
-      const { dest, hash, delimiter, maxLength, salt } = this.options;
+      const {assets} = compilation;
+      const {dest, hash, delimiter, maxLength, salt} = this.options;
       const hashes = {};
 
       const base = this.options.base || path.dirname(dest);

@@ -8,51 +8,55 @@ import uk.ac.warwick.tabula.services.objectstore.{AutowiringObjectStorageService
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
 object ObjectStorageMigrationCommand {
-	type CommandType = Appliable[Set[String]]
+  type CommandType = Appliable[Set[String]]
 
-	// The number of keys to transfer per run
-	val BatchSize = 1000
+  // The number of keys to transfer per run
+  val BatchSize = 1000
 
-	def apply(): CommandType =
-		new ObjectStorageMigrationCommandInternal
-			with ComposableCommand[Set[String]]
-			with ObjectStorageMigrationPermissions
-			with AutowiringObjectStorageServiceComponent
-			with AutowiringFileDaoComponent
-			with SHAFileHasherComponent
-			with Unaudited with ReadOnly
+  def apply(): CommandType =
+    new ObjectStorageMigrationCommandInternal
+      with ComposableCommand[Set[String]]
+      with ObjectStorageMigrationPermissions
+      with AutowiringObjectStorageServiceComponent
+      with AutowiringFileDaoComponent
+      with SHAFileHasherComponent
+      with Unaudited with ReadOnly
 }
 
 class ObjectStorageMigrationCommandInternal extends CommandInternal[Set[String]] with TaskBenchmarking {
-	self: ObjectStorageServiceComponent with FileDaoComponent with FileHasherComponent =>
+  self: ObjectStorageServiceComponent with FileDaoComponent with FileHasherComponent =>
 
-	override def applyInternal(): Set[String] = objectStorageService match {
-		case legacyAware: LegacyAwareObjectStorageService =>
-			val defaultStore = legacyAware.defaultService
-			val legacyStore = legacyAware.legacyService
+  override def applyInternal(): Set[String] = objectStorageService match {
+    case legacyAware: LegacyAwareObjectStorageService =>
+      val defaultStore = legacyAware.defaultService
+      val legacyStore = legacyAware.legacyService
 
-			val legacyKeys = benchmarkTask("Get all FileAttachment IDs") { fileDao.getAllFileIds(None) }
-			val defaultKeys = benchmarkTask("Get all object store keys") { defaultStore.listKeys().toSet }
+      val legacyKeys = benchmarkTask("Get all FileAttachment IDs") {
+        fileDao.getAllFileIds(None)
+      }
+      val defaultKeys = benchmarkTask("Get all object store keys") {
+        defaultStore.listKeys().toSet
+      }
 
-			val keysToMigrate = legacyKeys -- defaultKeys
+      val keysToMigrate = legacyKeys -- defaultKeys
 
-			benchmarkTask(s"Migrate $BatchSize keys") {
-				keysToMigrate.take(BatchSize).flatMap { key =>
-					Option(legacyStore.fetch(key)).filterNot(_.isEmpty).map { obj =>
-						logger.info(s"Migrating blob (size: ${obj.size} bytes) for key $key to default store")
-						defaultStore.push(key, obj, obj.metadata.get.copy(fileHash = Some(fileHasher.hash(obj.openStream()))))
-						key
-					}
-				}
-			}
-		case _ =>
-			logger.warn("No legacy aware object storage service found - can this be removed?")
-			Set.empty
-	}
+      benchmarkTask(s"Migrate $BatchSize keys") {
+        keysToMigrate.take(BatchSize).flatMap { key =>
+          Option(legacyStore.fetch(key)).filterNot(_.isEmpty).map { obj =>
+            logger.info(s"Migrating blob (size: ${obj.size} bytes) for key $key to default store")
+            defaultStore.push(key, obj, obj.metadata.get.copy(fileHash = Some(fileHasher.hash(obj.openStream()))))
+            key
+          }
+        }
+      }
+    case _ =>
+      logger.warn("No legacy aware object storage service found - can this be removed?")
+      Set.empty
+  }
 }
 
 trait ObjectStorageMigrationPermissions extends RequiresPermissionsChecking {
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.ReplicaSyncing)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.ReplicaSyncing)
+  }
 }

@@ -23,110 +23,113 @@ import scala.util.Try
 
 object ImportSmallGroupEventsFromExternalSystemCommand {
 
-	val Timeout: FiniteDuration = 15.seconds
+  val Timeout: FiniteDuration = 15.seconds
 
-	val RequiredPermission = Permissions.SmallGroups.Update
+  val RequiredPermission = Permissions.SmallGroups.Update
 
-	def apply(module: Module, set: SmallGroupSet) =
-		new ImportSmallGroupEventsFromExternalSystemCommandInternal(module, set)
-			with ComposableCommand[Seq[SmallGroupEvent]]
-			with ImportSmallGroupEventsFromExternalSystemPermissions
-			with ImportSmallGroupEventsFromExternalSystemDescription
-			with CommandSmallGroupEventGenerator
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringUserLookupComponent
-			with AutowiringScientiaTimetableFetchingServiceComponent
-			with LookupEventsFromModuleTimetable
+  def apply(module: Module, set: SmallGroupSet) =
+    new ImportSmallGroupEventsFromExternalSystemCommandInternal(module, set)
+      with ComposableCommand[Seq[SmallGroupEvent]]
+      with ImportSmallGroupEventsFromExternalSystemPermissions
+      with ImportSmallGroupEventsFromExternalSystemDescription
+      with CommandSmallGroupEventGenerator
+      with AutowiringSmallGroupServiceComponent
+      with AutowiringUserLookupComponent
+      with AutowiringScientiaTimetableFetchingServiceComponent
+      with LookupEventsFromModuleTimetable
 
-	def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent): Boolean =
-		event.year == academicYear
+  def isValidForYear(academicYear: AcademicYear)(event: TimetableEvent): Boolean =
+    event.year == academicYear
 
-	def isImportByDefault(eventType: TimetableEventType): Boolean =
-		eventType == TimetableEventType.Practical || eventType == TimetableEventType.Seminar || eventType == TimetableEventType.Other("WRB-ACTIVE")
+  def isImportByDefault(eventType: TimetableEventType): Boolean =
+    eventType == TimetableEventType.Practical || eventType == TimetableEventType.Seminar || eventType == TimetableEventType.Other("WRB-ACTIVE")
 
-	class EventToImport {
-		def this(event: TimetableEvent) {
-			this()
-			timetableEvent = event
-		}
+  class EventToImport {
+    def this(event: TimetableEvent) {
+      this()
+      timetableEvent = event
+    }
 
-		var timetableEvent: TimetableEvent = _
-		var group: SmallGroup = _
-	}
+    var timetableEvent: TimetableEvent = _
+    var group: SmallGroup = _
+  }
 
 }
 
 trait ImportSmallGroupEventsFromExternalSystemRequestState {
-	var eventsToImport: JList[EventToImport] = JArrayList()
+  var eventsToImport: JList[EventToImport] = JArrayList()
 }
 
 trait ImportSmallGroupEventsFromExternalSystemCommandState {
-	def module: Module
-	def set: SmallGroupSet
+  def module: Module
+
+  def set: SmallGroupSet
 }
 
 class ImportSmallGroupEventsFromExternalSystemCommandInternal(val module: Module, val set: SmallGroupSet)
-	extends CommandInternal[Seq[SmallGroupEvent]]
-		with ImportSmallGroupEventsFromExternalSystemCommandState
-		with ImportSmallGroupEventsFromExternalSystemRequestState {
-	self: SmallGroupEventGenerator with UserLookupComponent with SmallGroupServiceComponent =>
+  extends CommandInternal[Seq[SmallGroupEvent]]
+    with ImportSmallGroupEventsFromExternalSystemCommandState
+    with ImportSmallGroupEventsFromExternalSystemRequestState {
+  self: SmallGroupEventGenerator with UserLookupComponent with SmallGroupServiceComponent =>
 
-	override def applyInternal(): mutable.Buffer[SmallGroupEvent] = transactional() {
-		val events = eventsToImport.asScala
-			.map { e => (e.timetableEvent, Option(e.group)) }
-			.filter { case (_, group) => group.nonEmpty }
-			.map { case (e, group) =>
-				val tutorUsercodes = e.staff.map { _.getUserId }
+  override def applyInternal(): mutable.Buffer[SmallGroupEvent] = transactional() {
+    val events = eventsToImport.asScala
+      .map { e => (e.timetableEvent, Option(e.group)) }
+      .filter { case (_, group) => group.nonEmpty }
+      .map { case (e, group) =>
+        val tutorUsercodes = e.staff.map(_.getUserId)
 
-				createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
-			}
+        createEvent(module, set, group.get, e.weekRanges, e.day, e.startTime, e.endTime, e.location, e.name, tutorUsercodes)
+      }
 
-		smallGroupService.saveOrUpdate(set)
-		events
-	}
+    smallGroupService.saveOrUpdate(set)
+    events
+  }
 }
 
 trait LookupEventsFromModuleTimetable extends PopulateOnForm {
-	self: ImportSmallGroupEventsFromExternalSystemCommandState
-		with ImportSmallGroupEventsFromExternalSystemRequestState
-		with ModuleTimetableFetchingServiceComponent =>
+  self: ImportSmallGroupEventsFromExternalSystemCommandState
+    with ImportSmallGroupEventsFromExternalSystemRequestState
+    with ModuleTimetableFetchingServiceComponent =>
 
-	eventsToImport.clear()
-	eventsToImport.addAll(Try {
-		Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
-			.events
-			.filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
-			.sorted
-			.map(new EventToImport(_))
-	}.recover {
-		case _: TimeoutException | _: TimetableEmptyException => Nil
-	}.get.asJava)
+  eventsToImport.clear()
+  eventsToImport.addAll(Try {
+    Await.result(timetableFetchingService.getTimetableForModule(module.code.toUpperCase, includeStudents = false), ImportSmallGroupEventsFromExternalSystemCommand.Timeout)
+      .events
+      .filter(ImportSmallGroupEventsFromExternalSystemCommand.isValidForYear(set.academicYear))
+      .sorted
+      .map(new EventToImport(_))
+  }.recover {
+    case _: TimeoutException | _: TimetableEmptyException => Nil
+  }.get.asJava)
 
-	override def populate(): Unit = {
-		if (set.groups.asScala.forall { _.events.isEmpty }) {
-			set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
-				if (eventsToImport.size() > index) {
-					eventsToImport.get(index).group = group
-				}
-			}
-		}
-	}
+  override def populate(): Unit = {
+    if (set.groups.asScala.forall {
+      _.events.isEmpty
+    }) {
+      set.groups.asScala.sorted.zipWithIndex.foreach { case (group, index) =>
+        if (eventsToImport.size() > index) {
+          eventsToImport.get(index).group = group
+        }
+      }
+    }
+  }
 }
 
 trait ImportSmallGroupEventsFromExternalSystemPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ImportSmallGroupEventsFromExternalSystemCommandState =>
+  self: ImportSmallGroupEventsFromExternalSystemCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		mustBeLinked(mandatory(set), mandatory(module))
-		p.PermissionCheck(RequiredPermission, set)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    mustBeLinked(mandatory(set), mandatory(module))
+    p.PermissionCheck(RequiredPermission, set)
+  }
 
 }
 
 trait ImportSmallGroupEventsFromExternalSystemDescription extends Describable[Seq[SmallGroupEvent]] {
-	self: ImportSmallGroupEventsFromExternalSystemCommandState =>
+  self: ImportSmallGroupEventsFromExternalSystemCommandState =>
 
-	override def describe(d: Description): Unit =
-		d.smallGroupSet(set)
+  override def describe(d: Description): Unit =
+    d.smallGroupSet(set)
 
 }

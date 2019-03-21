@@ -19,49 +19,50 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/turnitin"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/turnitin"))
 class TurnitinController extends CourseworkController with AutowiringTurnitinLtiQueueServiceComponent {
 
-	type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
+  type SubmitToTurnitinCommand = SubmitToTurnitinCommand.CommandType
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def model(@PathVariable assignment: Assignment, user: CurrentUser) =
-		SubmitToTurnitinCommand(assignment, user)
+  @ModelAttribute("command")
+  def model(@PathVariable assignment: Assignment, user: CurrentUser) =
+    SubmitToTurnitinCommand(assignment, user)
 
-	@ModelAttribute("incompatibleFiles")
-	def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
-		val allAttachments = mandatory(assignment).submissions.asScala.flatMap{ _.allAttachments }
-		allAttachments.filterNot(a =>
-			TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
-		)
-	}
+  @ModelAttribute("incompatibleFiles")
+  def incompatibleFiles(@PathVariable assignment: Assignment): mutable.Buffer[FileAttachment] = {
+    val allAttachments = mandatory(assignment).submissions.asScala.flatMap(_.allAttachments)
+    allAttachments.filterNot(a =>
+      TurnitinLtiService.validFileType(a) && TurnitinLtiService.validFileSize(a)
+    )
+  }
 
-	@RequestMapping
-	def confirm(@PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/assignments/turnitin/form")
-			.crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping
+  def confirm(@PathVariable assignment: Assignment): Mav =
+    Mav("cm2/admin/assignments/turnitin/form")
+      .crumbsList(Breadcrumbs.assignment(assignment))
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		if (errors.hasErrors) {
-			confirm(assignment)
-		} else {
-			command.apply()
-			Redirect(Routes.admin.assignment.turnitin.status(command.assignment))
-		}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") command: SubmitToTurnitinCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+    if (errors.hasErrors) {
+      confirm(assignment)
+    } else {
+      command.apply()
+      Redirect(Routes.admin.assignment.turnitin.status(command.assignment))
+    }
 
-	@RequestMapping(value = Array("/status"))
-	def status(@PathVariable assignment: Assignment): Mav = {
-		val assignmentStatus = turnitinLtiQueueService.getAssignmentStatus(assignment)
-		if (ajax) {
-			Mav(new JSONView(assignmentStatus.toMap))
-		} else {
-			Mav("cm2/admin/assignments/turnitin/status", "status" -> assignmentStatus)
-				.crumbsList(Breadcrumbs.assignment(assignment))
-		}
-	}
+  @RequestMapping(value = Array("/status"))
+  def status(@PathVariable assignment: Assignment): Mav = {
+    val assignmentStatus = turnitinLtiQueueService.getAssignmentStatus(assignment)
+    if (ajax) {
+      Mav(new JSONView(assignmentStatus.toMap))
+    } else {
+      Mav("cm2/admin/assignments/turnitin/status", "status" -> assignmentStatus)
+        .crumbsList(Breadcrumbs.assignment(assignment))
+    }
+  }
 
 }

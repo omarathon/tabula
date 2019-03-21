@@ -12,23 +12,23 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.LazyLists
 
 class MyCommand {
-	var attached: JList[FileAttachment] = LazyLists.create()
+  var attached: JList[FileAttachment] = LazyLists.create()
 }
 
 class BindStatusTest extends TestBase {
 
-	@Test def bindList {
-		val ctx = new GenericWebApplicationContext
+  @Test def bindList {
+    val ctx = new GenericWebApplicationContext
 
-		val req = new MockHttpServletRequest
-		req.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx)
-		val request = new RequestContext(req, new HashMap[String,Object])
+    val req = new MockHttpServletRequest
+    req.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ctx)
+    val request = new RequestContext(req, new HashMap[String, Object])
 
-		val command = new MyCommand
-		val attachment = new FileAttachment
-		command.attached.add(attachment)
-		request.getModel().put("myCommand", command)
-		val status = request.getBindStatus("myCommand.attached")
-		status.getValue() should be (command.attached)
-	}
+    val command = new MyCommand
+    val attachment = new FileAttachment
+    command.attached.add(attachment)
+    request.getModel().put("myCommand", command)
+    val status = request.getBindStatus("myCommand.attached")
+    status.getValue() should be(command.attached)
+  }
 }

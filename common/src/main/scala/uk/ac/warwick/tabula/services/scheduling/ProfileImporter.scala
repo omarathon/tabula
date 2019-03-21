@@ -28,390 +28,395 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
-case class MembershipInformation(member: MembershipMember,  sitsApplicantInfo: Option[SitsApplicantInfo] = None)
+case class MembershipInformation(member: MembershipMember, sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
 trait ProfileImporter {
 
-	import ProfileImporter._
+  import ProfileImporter._
 
-	var features: Features = Wire[Features]
+  var features: Features = Wire[Features]
 
-	def getMemberDetails(
-		memberInfo: Seq[MembershipInformation],
-		users: Map[UniversityId, User],
-		importCommandFactory: ImportCommandFactory
-	): Seq[ImportMemberCommand]
+  def getMemberDetails(
+    memberInfo: Seq[MembershipInformation],
+    users: Map[UniversityId, User],
+    importCommandFactory: ImportCommandFactory
+  ): Seq[ImportMemberCommand]
 
-	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
+  def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 
-	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
+  def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
 
-	def multipleStudentInformationQuery: MultipleStudentInformationQuery
+  def multipleStudentInformationQuery: MultipleStudentInformationQuery
 
-	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
+  def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 
-	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
+  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation]
 
-	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation]
+  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation]
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
-	import ProfileImporter._
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  import ProfileImporter._
 
-	var fim: DataSource = Wire[DataSource]("fimDataSource")
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	private val SQLServerMaxParameterCount: Int = 2000
+  var fim: DataSource = Wire[DataSource]("fimDataSource")
 
-	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
-	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
+  private val SQLServerMaxParameterCount: Int = 2000
 
-	lazy val applicantQuery = new ApplicantQuery(sits)
+  lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(fim)
+  lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(fim)
 
-	lazy val applicantByUniversityIdQuery = new ApplicantByUniversityIdQuery(sits)
+  lazy val applicantQuery = new ApplicantQuery(sits)
 
-	def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
+  lazy val applicantByUniversityIdQuery = new ApplicantByUniversityIdQuery(sits)
 
-	def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
+  def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
-	def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
+  def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
 
-	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = {
-		universityIds.toSeq.grouped(SQLServerMaxParameterCount).flatMap(ids =>
-			membershipUniversityIdPresenceQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.toSet
-		).toSet
-	}
+  def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
-		: Seq[ImportMemberCommand] = {
-		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
+  def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = {
+    universityIds.toSeq.grouped(SQLServerMaxParameterCount).flatMap(ids =>
+      membershipUniversityIdPresenceQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava).asScala.toSet
+    ).toSet
+  }
 
-		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
-			userType match {
-				case Staff | Emeritus => members.map { info =>
-					val ssoUser = users(info.member.universityId)
-					new ImportStaffMemberCommand(info, ssoUser)
-				}
-				case Student =>	members.map { info =>
-						val universityId = info.member.universityId
-						val ssoUser = users(universityId)
+  def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
+  : Seq[ImportMemberCommand] = {
+    // TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
-						val sitsRows = studentInformationQuery.executeByNamedParam(
-							Map("universityId" -> universityId).asJava
-						).asScala
-						ImportStudentRowCommand(
-							info,
-							ssoUser,
-							sitsRows,
-							importCommandFactory
-						)
-					}.seq
-				case Applicant | Other => members.map { info =>
-					val ssoUser = users(info.member.universityId)
-					new ImportOtherMemberCommand(info, ssoUser)
-				}
-				case _ => Seq()
-			}
-		}.toSeq
-	}
+    memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
+      userType match {
+        case Staff | Emeritus => members.map { info =>
+          val ssoUser = users(info.member.universityId)
+          new ImportStaffMemberCommand(info, ssoUser)
+        }
+        case Student => members.map { info =>
+          val universityId = info.member.universityId
+          val ssoUser = users(universityId)
 
-	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
-		// Magic student recruitment department - get membership information directly from SITS for applicants
-		if (department.code == applicantDepartmentCode) {
-			val members = applicantQuery.execute().asScala
-			val universityIds = members.map { case (membershipInfo, _) =>  membershipInfo.universityId }
+          val sitsRows = studentInformationQuery.executeByNamedParam(
+            Map("universityId" -> universityId).asJava
+          ).asScala
+          ImportStudentRowCommand(
+            info,
+            ssoUser,
+            sitsRows,
+            importCommandFactory
+          )
+        }.seq
+        case Applicant | Other => members.map { info =>
+          val ssoUser = users(info.member.universityId)
+          new ImportOtherMemberCommand(info, ssoUser)
+        }
+        case _ => Seq()
+      }
+    }.toSeq
+  }
 
-			// Filter out people in UOW_CURRENT_MEMBERS to avoid double import
-			val universityIdsInMembership =
-				universityIds.grouped(SQLServerMaxParameterCount).flatMap { ids =>
-					membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
-				}
+  def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
+  // Magic student recruitment department - get membership information directly from SITS for applicants
+    if (department.code == applicantDepartmentCode) {
+      val members = applicantQuery.execute().asScala
+      val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }
 
-			members
-				.filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
-				.map { case (m, a) => MembershipInformation(m, Some(a)) }
-		} else {
-			membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
-				MembershipInformation(member)
-			}
-		}
+      // Filter out people in UOW_CURRENT_MEMBERS to avoid double import
+      val universityIdsInMembership =
+        universityIds.grouped(SQLServerMaxParameterCount).flatMap { ids =>
+          membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJavaCollection).asJava).asScala.map(_.universityId)
+        }
 
-	def head(result: Any): Option[MembershipInformation] = result match {
-		case result: List[MembershipMember @unchecked] => result.headOption.map(m => MembershipInformation(m))
-		case _ => None
-	}
+      members
+        .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
+        .map { case (m, a) => MembershipInformation(m, Some(a)) }
+    } else {
+      membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
+        MembershipInformation(member)
+      }
+    }
 
-	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
-		Option(membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
-	}
+  def head(result: Any): Option[MembershipInformation] = result match {
+    case result: List[MembershipMember@unchecked] => result.headOption.map(m => MembershipInformation(m))
+    case _ => None
+  }
 
-	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = {
-		Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
-	}
+  def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] = {
+    Option(membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+  }
 
-	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
-		universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
-			Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
-				.asScala
-				.map { case (m,a) => MembershipInformation(m, Some(a)) }
-			).getOrElse(Seq.empty)
-		}.toSet
-	}
+  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = {
+    Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> universityId).asJava).asScala.toList).flatMap(head)
+  }
+
+  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
+    universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+      Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
+        .asScala
+        .map { case (m, a) => MembershipInformation(m, Some(a)) }
+      ).getOrElse(Seq.empty)
+    }.toSet
+  }
 
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxProfileImporter extends ProfileImporter {
-	var profileService: ProfileService = Wire[ProfileService]
+  var profileService: ProfileService = Wire[ProfileService]
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
-		memberInfo map { info => info.member.userType match {
-			case Student => studentMemberDetails(importCommandFactory)(info)
-			case _ => staffMemberDetails(info)
-		}}
+  def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
+    memberInfo map { info =>
+      info.member.userType match {
+        case Student => studentMemberDetails(importCommandFactory)(info)
+        case _ => staffMemberDetails(info)
+      }
+    }
 
-	def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
-		val member = mac.member
-		val ssoUser = new User(member.usercode)
-		ssoUser.setFoundUser(true)
-		ssoUser.setVerified(true)
-		ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
-		ssoUser.setDepartmentCode(member.departmentCode)
-		ssoUser.setEmail(member.email)
-		ssoUser.setFirstName(member.preferredForenames)
-		ssoUser.setLastName(member.preferredSurname)
-		ssoUser.setStudent(true)
-		ssoUser.setWarwickId(member.universityId)
+  def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
+    val member = mac.member
+    val ssoUser = new User(member.usercode)
+    ssoUser.setFoundUser(true)
+    ssoUser.setVerified(true)
+    ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
+    ssoUser.setDepartmentCode(member.departmentCode)
+    ssoUser.setEmail(member.email)
+    ssoUser.setFirstName(member.preferredForenames)
+    ssoUser.setLastName(member.preferredSurname)
+    ssoUser.setStudent(true)
+    ssoUser.setWarwickId(member.universityId)
 
-		val route = SandboxData.route(member.universityId.toLong)
-		val yearOfStudy = ((member.universityId.toLong % 3) + 1).toInt
+    val route = SandboxData.route(member.universityId.toLong)
+    val yearOfStudy = ((member.universityId.toLong % 3) + 1).toInt
 
-		val rows = (1 to yearOfStudy).map(thisYearOfStudy => {
-			SitsStudentRow(new MapResultSet(Map(
-				"university_id" -> member.universityId,
-				"title" -> member.title,
-				"preferred_forename" -> member.preferredForenames,
-				"forenames" -> member.preferredForenames,
-				"family_name" -> member.preferredSurname,
-				"gender" -> member.gender.dbValue,
-				"email_address" -> member.email,
-				"user_code" -> member.usercode,
-				"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
-				"in_use_flag" -> "Active",
-				"alternative_email_address" -> "%s%s@hotmail.com".format(member.preferredSurname.toLowerCase, member.preferredForenames.toLowerCase),
-				"mobile_number" -> (if (member.universityId.toLong % 3 == 0) null else s"0700${member.universityId}"),
-				"nationality" -> (if (member.universityId.toLong % 3 == 0) "Kittitian/Nevisian" else "British (ex. Channel Islands & Isle of Man)"),
-				"second_nationality" -> (if (member.universityId.toLong % 3 == 0) "Syrian" else null),
-				"course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
-				"course_year_length" -> "3",
-				"spr_code" -> "%s/1".format(member.universityId),
-				"route_code" -> route.code.toUpperCase,
-				"department_code" -> member.departmentCode.toUpperCase,
-				"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
-				"spr_status_code" -> "C",
-				"scj_status_code" -> "C",
-				"level_code" -> thisYearOfStudy.toString,
-				"spr_tutor1" -> null,
-				"spr_academic_year_start" -> (AcademicYear.now() - yearOfStudy + 1).toString,
-				"scj_tutor1" -> null,
-				"scj_transfer_reason_code" -> null,
-				"scj_code" -> "%s/1".format(member.universityId),
-				"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
-				"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
-				"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
-				"most_signif_indicator" -> "Y",
-				"funding_source" -> null,
-				"enrolment_status_code" -> "C",
-				"study_block" -> thisYearOfStudy,
-				"study_level" -> thisYearOfStudy.toString,
-				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
-				"block_occurrence" -> (if (member.universityId.toLong % 5 == 0) "I" else "C"),
-				"sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
-				"sce_sequence_number" -> thisYearOfStudy,
-				"sce_route_code" -> route.code.toUpperCase,
-				"enrolment_department_code" -> member.departmentCode.toUpperCase,
-				"mod_reg_status" -> "CON",
-				"disability" -> (member.universityId.toLong % 100 match {
-					case 1 => "G" // Learning difficulty
-					case 4 => "F" // Mental health condition
-					case 5 => "I" // Unclassified disability
-					case n if n > 70 => "99" // Not known
-					case _ => "A" // No disability
-				}),
-				"disabilityFunding" -> (member.universityId.toLong % 100 match {
-					case 4 => "4" // In receipt
-					case 5 => "5" // Not in receipt
-					case 9 => "9" // Unknown
-					case _ => null
-				}),
-				"mst_type" -> "L",
-				"sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
-					char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
-				).sum % 100)
-			)))
-		})
+    val rows = (1 to yearOfStudy).map(thisYearOfStudy => {
+      SitsStudentRow(new MapResultSet(Map(
+        "university_id" -> member.universityId,
+        "title" -> member.title,
+        "preferred_forename" -> member.preferredForenames,
+        "forenames" -> member.preferredForenames,
+        "family_name" -> member.preferredSurname,
+        "gender" -> member.gender.dbValue,
+        "email_address" -> member.email,
+        "user_code" -> member.usercode,
+        "date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
+        "in_use_flag" -> "Active",
+        "alternative_email_address" -> "%s%s@hotmail.com".format(member.preferredSurname.toLowerCase, member.preferredForenames.toLowerCase),
+        "mobile_number" -> (if (member.universityId.toLong % 3 == 0) null else s"0700${member.universityId}"),
+        "nationality" -> (if (member.universityId.toLong % 3 == 0) "Kittitian/Nevisian" else "British (ex. Channel Islands & Isle of Man)"),
+        "second_nationality" -> (if (member.universityId.toLong % 3 == 0) "Syrian" else null),
+        "course_code" -> "%c%s-%s".format(route.courseType.courseCodeChars.head, member.departmentCode.toUpperCase, route.code.toUpperCase),
+        "course_year_length" -> "3",
+        "spr_code" -> "%s/1".format(member.universityId),
+        "route_code" -> route.code.toUpperCase,
+        "department_code" -> member.departmentCode.toUpperCase,
+        "award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
+        "spr_status_code" -> "C",
+        "scj_status_code" -> "C",
+        "level_code" -> thisYearOfStudy.toString,
+        "spr_tutor1" -> null,
+        "spr_academic_year_start" -> (AcademicYear.now() - yearOfStudy + 1).toString,
+        "scj_tutor1" -> null,
+        "scj_transfer_reason_code" -> null,
+        "scj_code" -> "%s/1".format(member.universityId),
+        "begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
+        "end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+        "expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+        "most_signif_indicator" -> "Y",
+        "funding_source" -> null,
+        "enrolment_status_code" -> "C",
+        "study_block" -> thisYearOfStudy,
+        "study_level" -> thisYearOfStudy.toString,
+        "mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
+        "block_occurrence" -> (if (member.universityId.toLong % 5 == 0) "I" else "C"),
+        "sce_academic_year" -> (AcademicYear.now() - (yearOfStudy - thisYearOfStudy)).toString,
+        "sce_sequence_number" -> thisYearOfStudy,
+        "sce_route_code" -> route.code.toUpperCase,
+        "enrolment_department_code" -> member.departmentCode.toUpperCase,
+        "mod_reg_status" -> "CON",
+        "disability" -> (member.universityId.toLong % 100 match {
+          case 1 => "G" // Learning difficulty
+          case 4 => "F" // Mental health condition
+          case 5 => "I" // Unclassified disability
+          case n if n > 70 => "99" // Not known
+          case _ => "A" // No disability
+        }),
+        "disabilityFunding" -> (member.universityId.toLong % 100 match {
+          case 4 => "4" // In receipt
+          case 5 => "5" // Not in receipt
+          case 9 => "9" // Unknown
+          case _ => null
+        }),
+        "mst_type" -> "L",
+        "sce_agreed_mark" -> new JBigDecimal((member.universityId ++ member.universityId).toCharArray.map(char =>
+          char.toString.toInt * member.universityId.toCharArray.apply(0).toString.toInt * thisYearOfStudy
+        ).sum % 100)
+      )))
+    })
 
-		ImportStudentRowCommand(
-			mac,
-			ssoUser,
-			rows,
-			importCommandFactory
-		)
-	}
+    ImportStudentRowCommand(
+      mac,
+      ssoUser,
+      rows,
+      importCommandFactory
+    )
+  }
 
-	def staffMemberDetails(mac: MembershipInformation): ImportStaffMemberCommand = {
-		val member = mac.member
-		val ssoUser = new User(member.usercode)
-		ssoUser.setFoundUser(true)
-		ssoUser.setVerified(true)
-		ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
-		ssoUser.setDepartmentCode(member.departmentCode)
-		ssoUser.setEmail(member.email)
-		ssoUser.setFirstName(member.preferredForenames)
-		ssoUser.setLastName(member.preferredSurname)
-		ssoUser.setStaff(true)
-		ssoUser.setWarwickId(member.universityId)
+  def staffMemberDetails(mac: MembershipInformation): ImportStaffMemberCommand = {
+    val member = mac.member
+    val ssoUser = new User(member.usercode)
+    ssoUser.setFoundUser(true)
+    ssoUser.setVerified(true)
+    ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
+    ssoUser.setDepartmentCode(member.departmentCode)
+    ssoUser.setEmail(member.email)
+    ssoUser.setFirstName(member.preferredForenames)
+    ssoUser.setLastName(member.preferredSurname)
+    ssoUser.setStaff(true)
+    ssoUser.setWarwickId(member.universityId)
 
-		new ImportStaffMemberCommand(mac, ssoUser)
-	}
+    new ImportStaffMemberCommand(mac, ssoUser)
+  }
 
-	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
-		SandboxData.Departments.get(department.code).map(dept =>
-			studentsForDepartment(dept) ++ staffForDepartment(dept)
-		).getOrElse(Seq())
-	}
+  def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
+    SandboxData.Departments.get(department.code).map(dept =>
+      studentsForDepartment(dept) ++ staffForDepartment(dept)
+    ).getOrElse(Seq())
+  }
 
-	def staffForDepartment(department: SandboxData.Department): IndexedSeq[MembershipInformation] =
-		(department.staffStartId to department.staffEndId).map { uniId =>
-			val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
-			val name = SandboxData.randomName(uniId, gender)
-			val title = "Professor"
-			val userType = MemberUserType.Staff
-			val groupName = "Academic staff"
+  def staffForDepartment(department: SandboxData.Department): IndexedSeq[MembershipInformation] =
+    (department.staffStartId to department.staffEndId).map { uniId =>
+      val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
+      val name = SandboxData.randomName(uniId, gender)
+      val title = "Professor"
+      val userType = MemberUserType.Staff
+      val groupName = "Academic staff"
 
-			MembershipInformation(
-				MembershipMember(
-					uniId.toString,
-					department.code,
-					"%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
-					groupName,
-					title,
-					name.givenName,
-					name.familyName,
-					groupName,
-					DateTime.now.minusYears(40).toLocalDate.withDayOfYear((uniId % 364) + 1),
-					department.code + "s" + uniId.toString.takeRight(3),
-					DateTime.now.minusYears(10).toLocalDate,
-					null,
-					DateTime.now,
-					null,
-					gender,
-					null,
-					userType,
-					JBoolean(Some(true))
-				)
-			)
-		}
+      MembershipInformation(
+        MembershipMember(
+          uniId.toString,
+          department.code,
+          "%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
+          groupName,
+          title,
+          name.givenName,
+          name.familyName,
+          groupName,
+          DateTime.now.minusYears(40).toLocalDate.withDayOfYear((uniId % 364) + 1),
+          department.code + "s" + uniId.toString.takeRight(3),
+          DateTime.now.minusYears(10).toLocalDate,
+          null,
+          DateTime.now,
+          null,
+          gender,
+          null,
+          userType,
+          JBoolean(Some(true))
+        )
+      )
+    }
 
-	def studentsForDepartment(department: SandboxData.Department): Seq[MembershipInformation] =
-		department.routes.values.flatMap { route =>
-			(route.studentsStartId to route.studentsEndId).map { uniId =>
-				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
-				val name = SandboxData.randomName(uniId, gender)
-				val title = gender match {
-					case Gender.Male => "Mr"
-					case _ => "Miss"
-				}
-				// Every fifth student is part time
-				val isPartTime = uniId % 5 == 0
+  def studentsForDepartment(department: SandboxData.Department): Seq[MembershipInformation] =
+    department.routes.values.flatMap { route =>
+      (route.studentsStartId to route.studentsEndId).map { uniId =>
+        val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
+        val name = SandboxData.randomName(uniId, gender)
+        val title = gender match {
+          case Gender.Male => "Mr"
+          case _ => "Miss"
+        }
+        // Every fifth student is part time
+        val isPartTime = uniId % 5 == 0
 
-				val userType = MemberUserType.Student
-				val groupName = route.degreeType match {
-					case DegreeType.Undergraduate => if (isPartTime) "Undergraduate - part-time" else "Undergraduate - full-time"
-					case _ =>
-						if (route.isResearch)
-							if (isPartTime) "Postgraduate (research) PT" else "Postgraduate (research) FT"
-						else
-							if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
-				}
+        val userType = MemberUserType.Student
+        val groupName = route.degreeType match {
+          case DegreeType.Undergraduate => if (isPartTime) "Undergraduate - part-time" else "Undergraduate - full-time"
+          case _ =>
+            if (route.isResearch)
+              if (isPartTime) "Postgraduate (research) PT" else "Postgraduate (research) FT"
+            else if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
+        }
 
-				MembershipInformation(
-					MembershipMember(
-						uniId.toString,
-						department.code,
-						"%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
-						groupName,
-						title,
-						name.givenName,
-						name.familyName,
-						groupName,
-						DateTime.now.minusYears(19).toLocalDate.withDayOfYear((uniId % 364) + 1),
-						department.code + uniId.toString.takeRight(4),
-						DateTime.now.minusYears(1).toLocalDate,
-						DateTime.now.plusYears(2).toLocalDate,
-						DateTime.now,
-						null,
-						gender,
-						null,
-						userType,
-						null
-					)
-				)
-			}
-		}.toSeq
+        MembershipInformation(
+          MembershipMember(
+            uniId.toString,
+            department.code,
+            "%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
+            groupName,
+            title,
+            name.givenName,
+            name.familyName,
+            groupName,
+            DateTime.now.minusYears(19).toLocalDate.withDayOfYear((uniId % 364) + 1),
+            department.code + uniId.toString.takeRight(4),
+            DateTime.now.minusYears(1).toLocalDate,
+            DateTime.now.plusYears(2).toLocalDate,
+            DateTime.now,
+            null,
+            gender,
+            null,
+            userType,
+            null
+          )
+        )
+      }
+    }.toSeq
 
-	def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] =
-		profileService.getMemberByUniversityIdStaleOrFresh(universityId).map { member =>
-			MembershipInformation(
-				MembershipMember(
-					member.universityId,
-					member.homeDepartment.code,
-					member.email,
-					member.groupName,
-					member.title,
-					member.firstName,
-					member.lastName,
-					member.jobTitle,
-					member.dateOfBirth,
-					member.userId,
-					DateTime.now.minusYears(1).toLocalDate,
-					DateTime.now.plusYears(2).toLocalDate,
-					member.lastUpdatedDate,
-					member.phoneNumber,
-					member.gender,
-					member.homeEmail,
-					member.userType,
-					member match {
-						case staff: StaffMember => staff.teachingStaff
-						case _ => null
-					}
-				)
-			)
-		}
+  def membershipInfoForIndividual(universityId: String): Option[MembershipInformation] =
+    profileService.getMemberByUniversityIdStaleOrFresh(universityId).map { member =>
+      MembershipInformation(
+        MembershipMember(
+          member.universityId,
+          member.homeDepartment.code,
+          member.email,
+          member.groupName,
+          member.title,
+          member.firstName,
+          member.lastName,
+          member.jobTitle,
+          member.dateOfBirth,
+          member.userId,
+          DateTime.now.minusYears(1).toLocalDate,
+          DateTime.now.plusYears(2).toLocalDate,
+          member.lastUpdatedDate,
+          member.phoneNumber,
+          member.gender,
+          member.homeEmail,
+          member.userType,
+          member match {
+            case staff: StaffMember => staff.teachingStaff
+            case _ => null
+          }
+        )
+      )
+    }
 
-	def multipleStudentInformationQuery = throw new UnsupportedOperationException
-	def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
+  def multipleStudentInformationQuery = throw new UnsupportedOperationException
 
-	def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
+  def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 
-	def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = throw new UnsupportedOperationException
+  def getApplicantMemberFromSits(universityId: String): Option[MembershipInformation] = throw new UnsupportedOperationException
+
+  def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = throw new UnsupportedOperationException
 }
 
 object ProfileImporter extends Logging {
 
-	import ImportMemberHelpers._
+  import ImportMemberHelpers._
 
-	var features: Features = Wire[Features]
+  var features: Features = Wire[Features]
 
-	type UniversityId = String
+  type UniversityId = String
 
-	val applicantDepartmentCode: String = "sl"
-	val sitsSchema: String = Wire.property("${schema.sits}")
+  val applicantDepartmentCode: String = "sl"
+  val sitsSchema: String = Wire.property("${schema.sits}")
 
-	private def GetStudentInformation = f"""
+  private def GetStudentInformation =
+    f"""
 			select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
@@ -519,41 +524,44 @@ object ProfileImporter extends Logging {
 				on spr.prs_code = prs.prs_code
 		 """
 
-	def GetSingleStudentInformation: UniversityId = GetStudentInformation + f"""
+  def GetSingleStudentInformation: UniversityId = GetStudentInformation +
+    f"""
 			where stu.stu_code = :universityId
 			order by stu.stu_code
 		"""
 
-	def GetMultipleStudentsInformation: UniversityId = GetStudentInformation + f"""
+  def GetMultipleStudentsInformation: UniversityId = GetStudentInformation +
+    f"""
 			where stu.stu_code in (:universityIds)
 			order by stu.stu_code
 		"""
 
-	class StudentInformationQuery(ds: DataSource)
-		extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation) {
+  class StudentInformationQuery(ds: DataSource)
+    extends MappingSqlQuery[SitsStudentRow](ds, GetSingleStudentInformation) {
 
-		var features: Features = Wire.auto[Features]
+    var features: Features = Wire.auto[Features]
 
-		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
+    declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 
-		compile()
+    compile()
 
-		override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
-	}
+    override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
+  }
 
-	class MultipleStudentInformationQuery(ds: DataSource)
-		extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation) {
+  class MultipleStudentInformationQuery(ds: DataSource)
+    extends MappingSqlQuery[SitsStudentRow](ds, GetMultipleStudentsInformation) {
 
-		var features: Features = Wire.auto[Features]
+    var features: Features = Wire.auto[Features]
 
-		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 
-		compile()
+    compile()
 
-		override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
-	}
+    override def mapRow(rs: ResultSet, rowNumber: Int) = SitsStudentRow(rs)
+  }
 
-	val GetApplicantInformation = f"""
+  val GetApplicantInformation =
+    f"""
 		select
 			stu.stu_code as universityId,
 			'SL' as deptCode,
@@ -586,132 +594,142 @@ object ProfileImporter extends Logging {
 			stu.stu_udf3 is null -- no IT account
 		"""
 
-	val GetApplicantsByUniversityIdInformation = f"""$GetApplicantInformation and stu.stu_code in (:universityIds)"""
+  val GetApplicantsByUniversityIdInformation = f"""$GetApplicantInformation and stu.stu_code in (:universityIds)"""
 
-	class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantInformation) {
+  class ApplicantQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantInformation) {
 
-		val SqlDatePattern = "yyyy/MM/dd"
-		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
+    val SqlDatePattern = "yyyy/MM/dd"
+    val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
 
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
-	}
+    compile()
 
-	val GetMembershipByUniversityIdInformation = """
+    override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
+  }
+
+  val GetMembershipByUniversityIdInformation =
+    """
 		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
 		"""
 
-	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
-		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
-	}
+  class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    compile()
 
-	class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantsByUniversityIdInformation) {
-		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
-		val SqlDatePattern = "yyyy/MM/dd"
-		val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
+    override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
+  }
 
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
-	}
+  class ApplicantByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[(MembershipMember, SitsApplicantInfo)](ds, GetApplicantsByUniversityIdInformation) {
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    val SqlDatePattern = "yyyy/MM/dd"
+    val SqlDateTimeFormat: DateTimeFormatter = DateTimeFormat.forPattern(SqlDatePattern)
 
-	val GetUniversityIdsPresentInMembership = """
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): (MembershipMember, SitsApplicantInfo) = toApplicantMember(rs, guessUsercode = false, SqlDateTimeFormat)
+  }
+
+  val GetUniversityIdsPresentInMembership =
+    """
 		select universityId from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and universityId in (:universityIds)
 	"""
 
-	class MembershipUniversityIdPresenceQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetUniversityIdsPresentInMembership) {
-		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("universityId")
-	}
+  class MembershipUniversityIdPresenceQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetUniversityIdsPresentInMembership) {
+    declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
+    compile()
 
-	val GetMembershipByDepartmentInformation = """
+    override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("universityId")
+  }
+
+  val GetMembershipByDepartmentInformation =
+    """
 		select * from FIMSynchronizationService.dbo.UOW_Current_Accounts where warwickPrimary = 'Yes' and deptCode = :departmentCode
 		"""
 
-	class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
-		declareParameter(new SqlParameter("departmentCode", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
-	}
+  class MembershipByDepartmentQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByDepartmentInformation) {
+    declareParameter(new SqlParameter("departmentCode", Types.VARCHAR))
+    compile()
 
-	private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =
-		MembershipMember(
-			universityId 						= rs.getString("universityId"),
-			departmentCode					= rs.getString("deptCode"),
-			email										= rs.getString("mail"),
-			targetGroup							= rs.getString("targetGroup"),
-			title										= rs.getString("title"),
-			preferredForenames			= rs.getString("preferredFirstname"),
-			preferredSurname				= rs.getString("preferredSurname"),
-			position								= rs.getString("jobTitle"),
-			dateOfBirth							= rs.getString("dateOfBirth").maybeText.map(dateTimeFormater.parseLocalDate).orNull,
-			usercode								= rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
-			startDate								= rs.getString("startDate").maybeText.flatMap(d => Try(dateTimeFormater.parseLocalDate(d)).toOption).orNull,
-			endDate									= rs.getString("endDate").maybeText.map(dateTimeFormater.parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
-			modified								= sqlDateToDateTime(rs.getDate("last_modification_date")),
-			phoneNumber							= rs.getString("telephoneNumber"), // unpopulated in FIM
-			gender									= Gender.fromCode(rs.getString("gender")),
-			alternativeEmailAddress	= rs.getString("externalEmail"),
-			userType								= MemberUserType.fromTargetGroup(rs.getString("targetGroup")),
-			teachingStaff           = JBoolean(Option(rs.getString("warwickTeachingStaff")).map(_ == "Y"))
-		)
-	
-	private def toApplicantMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) = {
+    override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
+  }
 
-		implicit val resultSet: Option[ResultSet] = Some(rs)
+  private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =
+    MembershipMember(
+      universityId = rs.getString("universityId"),
+      departmentCode = rs.getString("deptCode"),
+      email = rs.getString("mail"),
+      targetGroup = rs.getString("targetGroup"),
+      title = rs.getString("title"),
+      preferredForenames = rs.getString("preferredFirstname"),
+      preferredSurname = rs.getString("preferredSurname"),
+      position = rs.getString("jobTitle"),
+      dateOfBirth = rs.getString("dateOfBirth").maybeText.map(dateTimeFormater.parseLocalDate).orNull,
+      usercode = rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
+      startDate = rs.getString("startDate").maybeText.flatMap(d => Try(dateTimeFormater.parseLocalDate(d)).toOption).orNull,
+      endDate = rs.getString("endDate").maybeText.map(dateTimeFormater.parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
+      modified = sqlDateToDateTime(rs.getDate("last_modification_date")),
+      phoneNumber = rs.getString("telephoneNumber"), // unpopulated in FIM
+      gender = Gender.fromCode(rs.getString("gender")),
+      alternativeEmailAddress = rs.getString("externalEmail"),
+      userType = MemberUserType.fromTargetGroup(rs.getString("targetGroup")),
+      teachingStaff = JBoolean(Option(rs.getString("warwickTeachingStaff")).map(_ == "Y"))
+    )
 
-		val applicantInfo = SitsApplicantInfo(
-			mobileNumber = optString("mobile_number").orNull,
-			disability = optString("disability").orNull,
-			disabilityFunding = optString("disabilityFunding").orNull,
-			nationality = optString("nationality").orNull,
-			secondNationality = optString("second_nationality").orNull
-		)
+  private def toApplicantMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) = {
 
-		(membershipToMember(rs, guessUsercode, dateTimeFormatter), applicantInfo)
-	}
+    implicit val resultSet: Option[ResultSet] = Some(rs)
 
-	private def sqlDateToDateTime(date: java.sql.Date): DateTime =
-		(Option(date) map { new DateTime(_) }).orNull
+    val applicantInfo = SitsApplicantInfo(
+      mobileNumber = optString("mobile_number").orNull,
+      disability = optString("disability").orNull,
+      disabilityFunding = optString("disabilityFunding").orNull,
+      nationality = optString("nationality").orNull,
+      secondNationality = optString("second_nationality").orNull
+    )
+
+    (membershipToMember(rs, guessUsercode, dateTimeFormatter), applicantInfo)
+  }
+
+  private def sqlDateToDateTime(date: java.sql.Date): DateTime =
+    (Option(date) map {
+      new DateTime(_)
+    }).orNull
 
 }
 
 case class MembershipMember(
-	universityId: String = null,
-	departmentCode: String = null,
-	email: String = null,
-	targetGroup: String = null,
-	title: String = null,
-	preferredForenames: String = null,
-	preferredSurname: String = null,
-	position: String = null,
-	dateOfBirth: LocalDate = null,
-	usercode: String = null,
-	startDate: LocalDate = null,
-	endDate: LocalDate = null,
-	modified: DateTime = null,
-	phoneNumber: String = null,
-	gender: Gender = null,
-	alternativeEmailAddress: String = null,
-	userType: MemberUserType,
-	teachingStaff: JBoolean
+  universityId: String = null,
+  departmentCode: String = null,
+  email: String = null,
+  targetGroup: String = null,
+  title: String = null,
+  preferredForenames: String = null,
+  preferredSurname: String = null,
+  position: String = null,
+  dateOfBirth: LocalDate = null,
+  usercode: String = null,
+  startDate: LocalDate = null,
+  endDate: LocalDate = null,
+  modified: DateTime = null,
+  phoneNumber: String = null,
+  gender: Gender = null,
+  alternativeEmailAddress: String = null,
+  userType: MemberUserType,
+  teachingStaff: JBoolean
 )
 
 case class SitsApplicantInfo(
-	mobileNumber: String = null,
-	disability: String = null,
-	disabilityFunding: String = null,
-	nationality: String = null,
-	secondNationality: String = null
+  mobileNumber: String = null,
+  disability: String = null,
+  disabilityFunding: String = null,
+  nationality: String = null,
+  secondNationality: String = null
 )
 
 
 trait ProfileImporterComponent {
-	def profileImporter: ProfileImporter
+  def profileImporter: ProfileImporter
 }
 
 trait AutowiringProfileImporterComponent extends ProfileImporterComponent {
-	var profileImporter: ProfileImporter = Wire[ProfileImporter]
+  var profileImporter: ProfileImporter = Wire[ProfileImporter]
 }

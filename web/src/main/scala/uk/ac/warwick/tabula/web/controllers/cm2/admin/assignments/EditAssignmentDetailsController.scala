@@ -19,54 +19,54 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/edit"))
 class EditAssignmentDetailsController extends AbstractAssignmentController {
 
-	type EditAssignmentDetailsCommand = Appliable[Assignment] with EditAssignmentDetailsCommandState with PopulateOnForm
-	validatesSelf[SelfValidating]
+  type EditAssignmentDetailsCommand = Appliable[Assignment] with EditAssignmentDetailsCommandState with PopulateOnForm
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def createAssignmentDetailsCommand(@PathVariable assignment: Assignment) =
-		EditAssignmentDetailsCommand(mustBeCM2(mandatory(assignment)))
+  @ModelAttribute("command")
+  def createAssignmentDetailsCommand(@PathVariable assignment: Assignment) =
+    EditAssignmentDetailsCommand(mustBeCM2(mandatory(assignment)))
 
-	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
-		cmd.populate()
-		showForm(cmd, assignment)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@ModelAttribute("command") cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
+    cmd.populate()
+    showForm(cmd, assignment)
+  }
 
-	def showForm(cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
-		val module = assignment.module
-		val canDeleteAssignment = !assignment.deleted  && assignment.submissions.isEmpty && !assignment.hasReleasedFeedback
-		val canDeleteMarkers = cmd.workflowCategory != SingleUse || cmd.workflow.exists(_.canDeleteMarkers)
-		Mav("cm2/admin/assignments/edit_assignment_details",
-			"department" -> module.adminDepartment,
-			"module" -> module,
-			"academicYear" -> cmd.academicYear,
-			"reusableWorkflows" -> cmd.availableWorkflows,
-			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
-			"workflow" -> cmd.workflow,
-			"canEditWorkflowType" -> !assignment.isReleasedForMarking,
-			// if the current workflow type isn't Single use then allow markers to be deleted if we switch to it
-			"canDeleteMarkers" -> canDeleteMarkers,
-			"canDeleteAssignment" -> canDeleteAssignment,
-			"possibleAnonymityOptions" -> AssignmentAnonymity.values,
-			"departmentAnonymity" -> (if(module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
-		)
-			.crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  def showForm(cmd: EditAssignmentDetailsCommand, @PathVariable assignment: Assignment): Mav = {
+    val module = assignment.module
+    val canDeleteAssignment = !assignment.deleted && assignment.submissions.isEmpty && !assignment.hasReleasedFeedback
+    val canDeleteMarkers = cmd.workflowCategory != SingleUse || cmd.workflow.exists(_.canDeleteMarkers)
+    Mav("cm2/admin/assignments/edit_assignment_details",
+      "department" -> module.adminDepartment,
+      "module" -> module,
+      "academicYear" -> cmd.academicYear,
+      "reusableWorkflows" -> cmd.availableWorkflows,
+      "availableWorkflows" -> MarkingWorkflowType.values.sorted,
+      "workflow" -> cmd.workflow,
+      "canEditWorkflowType" -> !assignment.isReleasedForMarking,
+      // if the current workflow type isn't Single use then allow markers to be deleted if we switch to it
+      "canDeleteMarkers" -> canDeleteMarkers,
+      "canDeleteAssignment" -> canDeleteAssignment,
+      "possibleAnonymityOptions" -> AssignmentAnonymity.values,
+      "departmentAnonymity" -> (if (module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
+    )
+      .crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
-	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		submit(cmd, errors, assignment, RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, editMode)))
+  @RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
+  def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav =
+    submit(cmd, errors, assignment, RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, editMode)))
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndEditDetails, "action!=refresh", "action!=update"))
-	def saveAndExit(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		submit(cmd, errors, assignment, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)))
-	}
+  @RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.editAndEditDetails, "action!=refresh", "action!=update"))
+  def saveAndExit(@Valid @ModelAttribute("command") cmd: EditAssignmentDetailsCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    submit(cmd, errors, assignment, Redirect(Routes.admin.assignment.submissionsandfeedback(assignment)))
+  }
 
-	private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, mav: Mav) = {
-		if (errors.hasErrors) showForm(cmd, assignment)
-		else {
-			cmd.apply()
-			mav
-		}
-	}
+  private def submit(cmd: EditAssignmentDetailsCommand, errors: Errors, assignment: Assignment, mav: Mav) = {
+    if (errors.hasErrors) showForm(cmd, assignment)
+    else {
+      cmd.apply()
+      mav
+    }
+  }
 }

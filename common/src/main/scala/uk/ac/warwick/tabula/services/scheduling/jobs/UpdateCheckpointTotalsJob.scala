@@ -15,19 +15,19 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class UpdateCheckpointTotalsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingAttendanceUpdateTotals) {
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					val command = UpdateAttendanceMonitoringCheckpointTotalsCommand()
-					val errors = new BindException(command, "command")
-					command.validate(errors)
-					if (!errors.hasErrors) {
-						command.apply()
-					}
-				}
-			}
-		}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingAttendanceUpdateTotals) {
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          val command = UpdateAttendanceMonitoringCheckpointTotalsCommand()
+          val errors = new BindException(command, "command")
+          command.validate(errors)
+          if (!errors.hasErrors) {
+            command.apply()
+          }
+        }
+      }
+    }
+  }
 
 }

@@ -11,78 +11,79 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object CreateMonitoringSchemeCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new CreateMonitoringSchemeCommandInternal(department, academicYear)
-			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[AttendanceMonitoringScheme]
-			with CreateMonitoringSchemeValidation
-			with CreateMonitoringSchemeDescription
-			with CreateMonitoringSchemePermissions
-			with CreateMonitoringSchemeCommandState
+  def apply(department: Department, academicYear: AcademicYear) =
+    new CreateMonitoringSchemeCommandInternal(department, academicYear)
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ComposableCommand[AttendanceMonitoringScheme]
+      with CreateMonitoringSchemeValidation
+      with CreateMonitoringSchemeDescription
+      with CreateMonitoringSchemePermissions
+      with CreateMonitoringSchemeCommandState
 }
 
 
 class CreateMonitoringSchemeCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[AttendanceMonitoringScheme] {
+  extends CommandInternal[AttendanceMonitoringScheme] {
 
-	self: CreateMonitoringSchemeCommandState with AttendanceMonitoringServiceComponent =>
+  self: CreateMonitoringSchemeCommandState with AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): AttendanceMonitoringScheme = {
-		val scheme = new AttendanceMonitoringScheme
-		scheme.department = department
-		scheme.academicYear = academicYear
-		scheme.name = name
-		scheme.pointStyle = pointStyle
-		scheme.createdDate = DateTime.now
-		scheme.updatedDate = DateTime.now
-		attendanceMonitoringService.saveOrUpdate(scheme)
-		scheme
-	}
+  override def applyInternal(): AttendanceMonitoringScheme = {
+    val scheme = new AttendanceMonitoringScheme
+    scheme.department = department
+    scheme.academicYear = academicYear
+    scheme.name = name
+    scheme.pointStyle = pointStyle
+    scheme.createdDate = DateTime.now
+    scheme.updatedDate = DateTime.now
+    attendanceMonitoringService.saveOrUpdate(scheme)
+    scheme
+  }
 
 }
 
 trait CreateMonitoringSchemeValidation extends SelfValidating {
 
-	self: CreateMonitoringSchemeCommandState =>
+  self: CreateMonitoringSchemeCommandState =>
 
-	override def validate(errors: Errors) {
-		if (pointStyle == null) {
-			errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.null")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (pointStyle == null) {
+      errors.rejectValue("pointStyle", "attendanceMonitoringScheme.pointStyle.null")
+    }
+  }
 
 }
 
 trait CreateMonitoringSchemePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: CreateMonitoringSchemeCommandState =>
+  self: CreateMonitoringSchemeCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(department))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(department))
+  }
 
 }
 
 trait CreateMonitoringSchemeDescription extends Describable[AttendanceMonitoringScheme] {
 
-	self: CreateMonitoringSchemeCommandState =>
+  self: CreateMonitoringSchemeCommandState =>
 
-	override lazy val eventName = "CreateMonitoringScheme"
+  override lazy val eventName = "CreateMonitoringScheme"
 
-	override def describe(d: Description): Unit = {
-		d.department(department)
-	}
+  override def describe(d: Description): Unit = {
+    d.department(department)
+  }
 
-	override def describeResult(d: Description, result: AttendanceMonitoringScheme): Unit = {
-		d.attendanceMonitoringScheme(result)
-	}
+  override def describeResult(d: Description, result: AttendanceMonitoringScheme): Unit = {
+    d.attendanceMonitoringScheme(result)
+  }
 }
 
 trait CreateMonitoringSchemeCommandState {
-	def department: Department
-	def academicYear: AcademicYear
+  def department: Department
 
-	// Bind variables
-	var name: String = _
-	var pointStyle: AttendanceMonitoringPointStyle = _
+  def academicYear: AcademicYear
+
+  // Bind variables
+  var name: String = _
+  var pointStyle: AttendanceMonitoringPointStyle = _
 }

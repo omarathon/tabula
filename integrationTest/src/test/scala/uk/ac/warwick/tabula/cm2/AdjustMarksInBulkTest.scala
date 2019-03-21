@@ -5,99 +5,99 @@ import uk.ac.warwick.tabula.BrowserTest
 
 class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 
-	private def openBulkAdjustmentScreen(): Unit = {
+  private def openBulkAdjustmentScreen(): Unit = {
 
-			click on linkText("Coursework Management")
-			currentUrl.contains("/coursework/") should be(true)
+    click on linkText("Coursework Management")
+    currentUrl.contains("/coursework/") should be(true)
 
-			When("I go the admin page")
-			click on linkText("Test Services")
+    When("I go the admin page")
+    click on linkText("Test Services")
 
-			eventually {
-				And("ensure I'm looking at the current year")
-				loadCurrentAcademicYearTab()
+    eventually {
+      And("ensure I'm looking at the current year")
+      loadCurrentAcademicYearTab()
 
-				Then("I should get to the department page")
-				currentUrl.contains("/department/xxx") should be(true)
-			}
+      Then("I should get to the department page")
+      currentUrl.contains("/department/xxx") should be(true)
+    }
 
-			eventually {
-				When("I expand the the module")
-				val testModule = id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
-				click on testModule
-			}
+    eventually {
+      When("I expand the the module")
+      val testModule = id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
+      click on testModule
+    }
 
-			eventually {
-				And("click on the cm2 assignment")
-				val cm2Assignment = id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
-				click on cm2Assignment
-			}
+    eventually {
+      And("click on the cm2 assignment")
+      val cm2Assignment = id("main").webElement.findElements(By.cssSelector("h5.assignment-name a")).get(0)
+      click on cm2Assignment
+    }
 
-			eventually {
-				Then("I should get to the summary page")
-				currentUrl.contains("/summary") should be(true)
-			}
+    eventually {
+      Then("I should get to the summary page")
+      currentUrl.contains("/summary") should be(true)
+    }
 
-			When("I click on the Feedback dropdown without selecting any students")
-			val feedbackDropdown = id("main").webElement.findElements(By.cssSelector("a.dropdown-toggle")).get(2)
-			click on feedbackDropdown
+    When("I click on the Feedback dropdown without selecting any students")
+    val feedbackDropdown = id("main").webElement.findElements(By.cssSelector("a.dropdown-toggle")).get(2)
+    click on feedbackDropdown
 
-			Then("The adjustments link is disabled")
-			val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(10)
-			eventually {
-				adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(true)
-			}
+    Then("The adjustments link is disabled")
+    val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(10)
+    eventually {
+      adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(true)
+    }
 
-			When("I select the all student checkbox")
-			val selectAll = id("main").webElement.findElements(By.cssSelector(".collection-check-all")).get(0)
-			click on selectAll
+    When("I select the all student checkbox")
+    val selectAll = id("main").webElement.findElements(By.cssSelector(".collection-check-all")).get(0)
+    click on selectAll
 
-			And("Select the feedback dropdown")
-			click on feedbackDropdown
+    And("Select the feedback dropdown")
+    click on feedbackDropdown
 
-			Then("The adjustments link is enabled")
-			adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(false)
-			val adjustmentsLink = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li .form-post")).get(4)
-			adjustmentsLink.isDisplayed should be (true)
+    Then("The adjustments link is enabled")
+    adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(false)
+    val adjustmentsLink = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li .form-post")).get(4)
+    adjustmentsLink.isDisplayed should be(true)
 
-			When("I click on the adjustments link")
-			click on adjustmentsLink
+    When("I click on the adjustments link")
+    click on adjustmentsLink
 
-			Then("I am taken to the adjustments page")
-			eventually {
-				currentUrl.contains("/feedback/adjustments") should be(true)
-			}
+    Then("I am taken to the adjustments page")
+    eventually {
+      currentUrl.contains("/feedback/adjustments") should be(true)
+    }
 
-			And("I click on the bulk adjust buttons")
-			val bulkAdjustButton = id("main").webElement.findElements(By.cssSelector("div.pull-right a")).get(0)
-			bulkAdjustButton.isEnabled should be (true)
-			click on bulkAdjustButton
+    And("I click on the bulk adjust buttons")
+    val bulkAdjustButton = id("main").webElement.findElements(By.cssSelector("div.pull-right a")).get(0)
+    bulkAdjustButton.isEnabled should be(true)
+    click on bulkAdjustButton
 
-	}
+  }
 
-	private def adjustMarks(): Unit = {
+  private def adjustMarks(): Unit = {
 
-		When("I upload an adjustments file")
-		click on find(cssSelector("input[type=file]")).get
-		pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+    When("I upload an adjustments file")
+    click on find(cssSelector("input[type=file]")).get
+    pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
 
-		And("Click on the upload button")
-		click on cssSelector("button.btn-primary").webElement
-		Then("summary confirmations should be displayed")
-		cssSelector("input#privateAdjustment1").webElement.isEnabled should be (true)
+    And("Click on the upload button")
+    click on cssSelector("button.btn-primary").webElement
+    Then("summary confirmations should be displayed")
+    cssSelector("input#privateAdjustment1").webElement.isEnabled should be(true)
 
-		When("I click on the confirm button")
-		click on cssSelector(".btn-primary").webElement
+    When("I click on the confirm button")
+    click on cssSelector(".btn-primary").webElement
 
-		Then("I am returned to the summary page")
-		currentUrl.contains("/summary") should be(true)
+    Then("I am returned to the summary page")
+    currentUrl.contains("/summary") should be(true)
 
-	}
+  }
 
-	"Admin" should "be able to ajust marks in bulk" in as(P.Admin1) {
+  "Admin" should "be able to ajust marks in bulk" in as(P.Admin1) {
 
-		openBulkAdjustmentScreen()
-		adjustMarks()
+    openBulkAdjustmentScreen()
+    adjustMarks()
 
-	}
+  }
 }

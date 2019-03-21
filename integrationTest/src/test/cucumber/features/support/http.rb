@@ -10,15 +10,18 @@ module HttpHelper
 
   def request(uri)
     if uri.query then
-      p="#{uri.path}?#{uri.query}"
+      p = "#{uri.path}?#{uri.query}"
     else
-      p=uri.path
+      p = uri.path
     end
 
     case @method
-      when 'HEAD' then Net::HTTP::Head.new(p, @headers)
-      when 'GET' then Net::HTTP::Get.new(p, @headers)
-      else raise "Unexpected @method: #{@method}"
+    when 'HEAD' then
+      Net::HTTP::Head.new(p, @headers)
+    when 'GET' then
+      Net::HTTP::Get.new(p, @headers)
+    else
+      raise "Unexpected @method: #{@method}"
     end
   end
 
@@ -48,7 +51,7 @@ module HttpHelper
         # Do same-host redirects inside keepalive
         while is_redirecting and uri.host == connection_uri.host and uri.port == connection_uri.port and redirect_count < 10
           http.request(request(uri)) {|res|
-            @response  = res
+            @response = res
             if @expected_responses[@url]
               res.code.should == @expected_responses[@url].to_s
             end

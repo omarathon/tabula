@@ -15,33 +15,33 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 @Controller
 @RequestMapping(Array("/profiles/view"))
 class DownloadProfileController extends AbstractViewProfileController with AutowiringZipServiceComponent {
-	def command(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Option[Appliable[Seq[FileAttachment]]] =
-		restricted(ProfileExportSingleCommand(studentCourseDetails.student, academicYear, user))
+  def command(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear): Option[Appliable[Seq[FileAttachment]]] =
+    restricted(ProfileExportSingleCommand(studentCourseDetails.student, academicYear, user))
 
-	@GetMapping(Array("/{member}/download"))
-	def formByMember(@PathVariable student: StudentMember, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav =
-		form(student.mostSignificantCourse, activeAcademicYear)
+  @GetMapping(Array("/{member}/download"))
+  def formByMember(@PathVariable student: StudentMember, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav =
+    form(student.mostSignificantCourse, activeAcademicYear)
 
-	@GetMapping(Array("/{studentCourseDetails}/{academicYear}/download"))
-	def formByCourse(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): Mav =
-		form(studentCourseDetails, Some(mandatory(academicYear)))
+  @GetMapping(Array("/{studentCourseDetails}/{academicYear}/download"))
+  def formByCourse(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): Mav =
+    form(studentCourseDetails, Some(mandatory(academicYear)))
 
-	private def form(studentCourseDetails: StudentCourseDetails, activeAcademicYear: Option[AcademicYear]) = {
-		val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).map(_.academicYear).getOrElse(AcademicYear.now())
+  private def form(studentCourseDetails: StudentCourseDetails, activeAcademicYear: Option[AcademicYear]) = {
+    val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).map(_.academicYear).getOrElse(AcademicYear.now())
 
-		Mav("profiles/profile/download",
-			"hasPermission" -> command(studentCourseDetails, thisAcademicYear).nonEmpty,
-			"member" -> studentCourseDetails.student
-		).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.DownloadIdentifier): _*)
-			.secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.download(scyd)): _*)
-	}
+    Mav("profiles/profile/download",
+      "hasPermission" -> command(studentCourseDetails, thisAcademicYear).nonEmpty,
+      "member" -> studentCourseDetails.student
+    ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.DownloadIdentifier): _*)
+      .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.download(scyd)): _*)
+  }
 
-	@PostMapping(Array("/{studentCourseDetails}/{academicYear}.zip"))
-	def download(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): RenderableFile = {
-		val fileAttachments = mandatory(command(studentCourseDetails, academicYear)).apply()
+  @PostMapping(Array("/{studentCourseDetails}/{academicYear}.zip"))
+  def download(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): RenderableFile = {
+    val fileAttachments = mandatory(command(studentCourseDetails, academicYear)).apply()
 
-		zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
-			ZipFileItem.apply(if (index == 0) a.name else s"${a.id}-${a.name}", a.asByteSource, a.actualDataLength)
-		})
-	}
+    zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
+      ZipFileItem.apply(if (index == 0) a.name else s"${a.id}-${a.name}", a.asByteSource, a.actualDataLength)
+    })
+  }
 }

@@ -16,30 +16,30 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 @RequestMapping(value = Array("/profiles/*/meeting/{meetingRecord}/missed"))
 class ScheduledMeetingRecordMissedController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def getCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =
-		ScheduledMeetingRecordMissedCommand(mandatory(meetingRecord))
+  @ModelAttribute("command")
+  def getCommand(@PathVariable meetingRecord: ScheduledMeetingRecord) =
+    ScheduledMeetingRecordMissedCommand(mandatory(meetingRecord))
 
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") command: Appliable[ScheduledMeetingRecord],
-		errors: Errors,
-		@PathVariable meetingRecord: ScheduledMeetingRecord
-	): Mav = {
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") command: Appliable[ScheduledMeetingRecord],
+    errors: Errors,
+    @PathVariable meetingRecord: ScheduledMeetingRecord
+  ): Mav = {
 
-		if (!errors.hasErrors) {
-			command.apply()
-			val resultMap = Map(
-				"status" -> "successful"
-			)
-			Mav(new JSONView(resultMap))
-		} else {
-			val additionalData = Map("formId" -> "meeting-%s".format(meetingRecord.id))
-			Mav(new JSONErrorView(errors, additionalData))
-		}
+    if (!errors.hasErrors) {
+      command.apply()
+      val resultMap = Map(
+        "status" -> "successful"
+      )
+      Mav(new JSONView(resultMap))
+    } else {
+      val additionalData = Map("formId" -> "meeting-%s".format(meetingRecord.id))
+      Mav(new JSONErrorView(errors, additionalData))
+    }
 
-	}
+  }
 }

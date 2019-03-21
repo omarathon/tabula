@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.system
+
 import scala.collection.JavaConverters._
 import org.springframework.web.bind.support.WebBindingInitializer
 import org.springframework.web.context.request.NativeWebRequest
@@ -10,28 +11,28 @@ import uk.ac.warwick.tabula.services.SecurityService
 import org.springframework.validation.DataBinder
 
 /**
- * Factory that creates a DataBinder instance every time an object needs binding
- * from a request. We use our own custom data binder.
- */
+  * Factory that creates a DataBinder instance every time an object needs binding
+  * from a request. We use our own custom data binder.
+  */
 class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initializer: WebBindingInitializer)
-	extends ServletRequestDataBinderFactory(binderMethods.asJava, initializer) {
+  extends ServletRequestDataBinderFactory(binderMethods.asJava, initializer) {
 
-	trait CustomDataBinderDependencies {
-		// dependency for PermissionsBinding
-		val securityService: SecurityService = Wire.auto[SecurityService]
-	}
+  trait CustomDataBinderDependencies {
+    // dependency for PermissionsBinding
+    val securityService: SecurityService = Wire.auto[SecurityService]
+  }
 
-	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest): CustomDataBinder with CustomDataBinderDependencies with PermissionsBinding with AllowedFieldsBinding with BindListenerBinding with NoAutoGrownNestedPaths = {
-		new CustomDataBinder(target, objectName)
-				with CustomDataBinderDependencies
-				with PermissionsBinding
-				with AllowedFieldsBinding
-				with BindListenerBinding
-				with NoAutoGrownNestedPaths
-	}
+  override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest): CustomDataBinder with CustomDataBinderDependencies with PermissionsBinding with AllowedFieldsBinding with BindListenerBinding with NoAutoGrownNestedPaths = {
+    new CustomDataBinder(target, objectName)
+      with CustomDataBinderDependencies
+      with PermissionsBinding
+      with AllowedFieldsBinding
+      with BindListenerBinding
+      with NoAutoGrownNestedPaths
+  }
 
 }
 
 trait NoAutoGrownNestedPaths extends DataBinder {
-	setAutoGrowNestedPaths(false)
+  setAutoGrowNestedPaths(false)
 }

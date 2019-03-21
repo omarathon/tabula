@@ -14,127 +14,139 @@ import uk.ac.warwick.util.termdates.AcademicYearPeriod.PeriodType
 
 class StudentRecordCommandTest extends TestBase with Mockito {
 
-	trait Fixture {
-		val thisAcademicYear = AcademicYear(2014)
-		val thisStudent: StudentMember = Fixtures.student("1234")
+  trait Fixture {
+    val thisAcademicYear = AcademicYear(2014)
+    val thisStudent: StudentMember = Fixtures.student("1234")
 
-		val validator = new StudentRecordValidation
-			with AttendanceMonitoringServiceComponent with StudentRecordCommandState
-			with StudentRecordCommandRequest {
+    val validator = new StudentRecordValidation
+      with AttendanceMonitoringServiceComponent with StudentRecordCommandState
+      with StudentRecordCommandRequest {
 
-			val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
-			val academicYear: AcademicYear = thisAcademicYear
-			val student: StudentMember = thisStudent
-			val user = null
-		}
+      val attendanceMonitoringService: AttendanceMonitoringService = smartMock[AttendanceMonitoringService]
+      val academicYear: AcademicYear = thisAcademicYear
+      val student: StudentMember = thisStudent
+      val user = null
+    }
 
-		val scheme = new AttendanceMonitoringScheme
-		val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 1, 1)
-		point1.id = "1"
-		validator.attendanceMonitoringService.getPointById(point1.id) returns Option(point1)
-		val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name2", 2, 2)
-		point2.id = "2"
-		validator.attendanceMonitoringService.getPointById(point2.id) returns Option(point2)
-		val notInSchemePoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null, "notInScheme", 1, 1)
-		notInSchemePoint.id = "3"
-		validator.attendanceMonitoringService.getPointById(notInSchemePoint.id) returns Option(notInSchemePoint)
+    val scheme = new AttendanceMonitoringScheme
+    val point1: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name1", 1, 1)
+    point1.id = "1"
+    validator.attendanceMonitoringService.getPointById(point1.id) returns Option(point1)
+    val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "name2", 2, 2)
+    point2.id = "2"
+    validator.attendanceMonitoringService.getPointById(point2.id) returns Option(point2)
+    val notInSchemePoint: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(null, "notInScheme", 1, 1)
+    notInSchemePoint.id = "3"
+    validator.attendanceMonitoringService.getPointById(notInSchemePoint.id) returns Option(notInSchemePoint)
 
-		validator.attendanceMonitoringService.getCheckpoints(Seq(point1, point2), thisStudent, withFlush = false) returns Map()
+    validator.attendanceMonitoringService.getCheckpoints(Seq(point1, point2), thisStudent, withFlush = false) returns Map()
 
-		val attendanceMonitoringPointConverter = new AttendanceMonitoringPointIdConverter
-		attendanceMonitoringPointConverter.service = validator.attendanceMonitoringService
-		val conversionService = new GenericConversionService()
-		conversionService.addConverter(attendanceMonitoringPointConverter)
+    val attendanceMonitoringPointConverter = new AttendanceMonitoringPointIdConverter
+    attendanceMonitoringPointConverter.service = validator.attendanceMonitoringService
+    val conversionService = new GenericConversionService()
+    conversionService.addConverter(attendanceMonitoringPointConverter)
 
-		var binder = new WebDataBinder(validator, "command")
-		binder.setConversionService(conversionService)
-		val errors: BindingResult = binder.getBindingResult
+    var binder = new WebDataBinder(validator, "command")
+    binder.setConversionService(conversionService)
+    val errors: BindingResult = binder.getBindingResult
 
-	}
+  }
 
-	@Test
-	def invalidPoint() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
+  @Test
+  def invalidPoint() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(notInSchemePoint, null)
-		validator.validate(errors)
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(notInSchemePoint, null)
+      validator.validate(errors)
 
-		errors.hasErrors should be {true}
-		errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be {true}
-	}}
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${notInSchemePoint.id}]") should be (true)
+    }
+  }
 
-	@Test
-	def alreadyReported() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
+  @Test
+  def alreadyReported() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, AttendanceState.Attended)
-		validator.validate(errors)
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(point1, AttendanceState.Attended)
+      validator.validate(errors)
 
-		errors.hasErrors should be {true}
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
-	}}
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
+    }
+  }
 
-	@Test
-	def tooSoon() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
+  @Test
+  def tooSoon() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns Seq()
 
-		point1.startDate = DateTime.now.plusDays(2).toLocalDate
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, AttendanceState.Attended)
-		validator.validate(errors)
+      point1.startDate = DateTime.now.plusDays(2).toLocalDate
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(point1, AttendanceState.Attended)
+      validator.validate(errors)
 
-		errors.hasErrors should be {true}
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
-	}}
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
+    }
+  }
 
-	@Test
-	def beforeStartDateButNull() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
+  @Test
+  def beforeStartDateButNull() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
 
-		point1.startDate = DateTime.now.plusDays(2).toLocalDate
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, null)
-		validator.validate(errors)
+      point1.startDate = DateTime.now.plusDays(2).toLocalDate
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(point1, null)
+      validator.validate(errors)
 
-		errors.hasErrors should be {false}
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {false}
-	}}
+      errors.hasErrors should be (false)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
+    }
+  }
 
-	@Test
-	def beforeStartDateButAuthorised() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
-		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns Some(new AttendanceMonitoringNote)
+  @Test
+  def beforeStartDateButAuthorised() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
+      validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns Some(new AttendanceMonitoringNote)
 
-		point1.startDate = DateTime.now.plusDays(2).toLocalDate
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
-		validator.validate(errors)
+      point1.startDate = DateTime.now.plusDays(2).toLocalDate
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
+      validator.validate(errors)
 
-		errors.hasErrors should be {false}
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {false}
-	}}
+      errors.hasErrors should be (false)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (false)
+    }
+  }
 
-	@Test
-	def authorisedWithNoNote() { new Fixture {
-		validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
-		validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
-		validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns None
+  @Test
+  def authorisedWithNoNote() {
+    new Fixture {
+      validator.attendanceMonitoringService.listStudentsPoints(thisStudent, None, thisAcademicYear) returns Seq(point1, point2)
+      validator.attendanceMonitoringService.findNonReportedTerms(Seq(thisStudent), thisAcademicYear) returns PeriodType.values().toSeq.map(_.toString)
+      validator.attendanceMonitoringService.getAttendanceNote(thisStudent, point1) returns None
 
-		point1.startDate = DateTime.now.plusDays(2).toLocalDate
-		validator.checkpointMap = JHashMap()
-		validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
-		validator.validate(errors)
+      point1.startDate = DateTime.now.plusDays(2).toLocalDate
+      validator.checkpointMap = JHashMap()
+      validator.checkpointMap.put(point1, AttendanceState.MissedAuthorised)
+      validator.validate(errors)
 
-		errors.hasErrors should be {true}
-		errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be {true}
+      errors.hasErrors should be (true)
+      errors.hasFieldErrors(s"checkpointMap[${point1.id}]") should be (true)
 
-	}}
+    }
+  }
 
 }

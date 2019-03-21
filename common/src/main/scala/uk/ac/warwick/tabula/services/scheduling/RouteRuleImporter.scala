@@ -24,71 +24,80 @@ import scala.util.matching.Regex
 
 trait RouteRuleImporter {
 
-	def getRouteRules: Seq[UpstreamRouteRule]
+  def getRouteRules: Seq[UpstreamRouteRule]
 
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class RouteRuleImporterImpl extends RouteRuleImporter with InitializingBean
-	with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent with AutowiringUpstreamModuleListServiceComponent with AutowiringLevelServiceComponent {
+  with TaskBenchmarking with AutowiringCourseAndRouteServiceComponent with AutowiringUpstreamModuleListServiceComponent with AutowiringLevelServiceComponent {
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	var routeRuleQuery: UpstreamRouteRuleQuery = _
+  var routeRuleQuery: UpstreamRouteRuleQuery = _
 
-	override def afterPropertiesSet() {
-		routeRuleQuery = new UpstreamRouteRuleQuery(sits)
-	}
+  override def afterPropertiesSet() {
+    routeRuleQuery = new UpstreamRouteRuleQuery(sits)
+  }
 
-	override def getRouteRules: Seq[UpstreamRouteRule] = {
-		val rows = benchmarkTask("Fetch route rules") { routeRuleQuery.execute }
-		// Remove rows that have null entires that aren't allowed
-		val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null &&  r.moduleListCode.nonEmpty)
-		// Batch fetch the routes and module lists
-		val routeCodes = nonEmptyRows.map(_.routeCode).distinct
-		val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
-		val routes = transactional(readOnly = true) { courseAndRouteService.getRoutesByCodes(routeCodes) }
-		val moduleLists = transactional(readOnly = true) { upstreamModuleListService.findByCodes(moduleListCodes) }
-		val levels = transactional(readOnly = true) { levelService.getAllLevels }
+  override def getRouteRules: Seq[UpstreamRouteRule] = {
+    val rows = benchmarkTask("Fetch route rules") {
+      routeRuleQuery.execute
+    }
+    // Remove rows that have null entires that aren't allowed
+    val nonEmptyRows = rows.asScala.filter(r => r.routeCode.hasText && r.levelCode.hasText && r.moduleListCode != null && r.moduleListCode.nonEmpty)
+    // Batch fetch the routes and module lists
+    val routeCodes = nonEmptyRows.map(_.routeCode).distinct
+    val moduleListCodes = nonEmptyRows.map(_.moduleListCode).distinct
+    val routes = transactional(readOnly = true) {
+      courseAndRouteService.getRoutesByCodes(routeCodes)
+    }
+    val moduleLists = transactional(readOnly = true) {
+      upstreamModuleListService.findByCodes(moduleListCodes)
+    }
+    val levels = transactional(readOnly = true) {
+      levelService.getAllLevels
+    }
 
-		// Remove rows that have invalid routes and module lists
-		val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.levelCode, r.moduleListCode))
-			.filter { case((routeCode, levelCode, moduleListCode), _) =>
-				routes.exists(_.code == routeCode) && levels.exists(_.code == levelCode) && moduleLists.exists(_.code == moduleListCode)
-			}.values.flatten.toSeq
+    // Remove rows that have invalid routes and module lists
+    val validRows: Seq[UpstreamRouteRuleRow] = nonEmptyRows.groupBy(r => (r.routeCode, r.levelCode, r.moduleListCode))
+      .filter { case ((routeCode, levelCode, moduleListCode), _) =>
+        routes.exists(_.code == routeCode) && levels.exists(_.code == levelCode) && moduleLists.exists(_.code == moduleListCode)
+      }.values.flatten.toSeq
 
-		validRows.groupBy(r => (r.routeCode, r.levelCode, r.academicYear)).map { case((routeCode, levelCode, academicYearOption), groupedRows) =>
-			val route = routes.find(_.code == routeCode).get
-			val rule = new UpstreamRouteRule(academicYearOption, route, levelCode)
-			rule.entries.addAll(groupedRows.map(row => new UpstreamRouteRuleEntry(
-				rule,
-				moduleLists.find(_.code == row.moduleListCode).get,
-				row.minCats,
-				row.maxCats,
-				row.minModules,
-				row.maxModules
-			)).asJava)
-			rule
-		}.toSeq
-	}
+    validRows.groupBy(r => (r.routeCode, r.levelCode, r.academicYear)).map { case ((routeCode, levelCode, academicYearOption), groupedRows) =>
+      val route = routes.find(_.code == routeCode).get
+      val rule = new UpstreamRouteRule(academicYearOption, route, levelCode)
+      rule.entries.addAll(groupedRows.map(row => new UpstreamRouteRuleEntry(
+        rule,
+        moduleLists.find(_.code == row.moduleListCode).get,
+        row.minCats,
+        row.maxCats,
+        row.minModules,
+        row.maxModules
+      )).asJava)
+      rule
+    }.toSeq
+  }
 }
 
 @Profile(Array("sandbox"))
 @Service
 class SandboxRouteRuleImporter extends RouteRuleImporter {
 
-	override def getRouteRules: Seq[UpstreamRouteRule] = Seq()
+  override def getRouteRules: Seq[UpstreamRouteRule] = Seq()
 
 }
 
 object RouteRuleImporter {
 
-	var sitsSchema: String = Wire.property("${schema.sits}")
+  var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val academicYearPattern: Regex = ".*(\\d\\d/\\d\\d).*".r
+  val academicYearPattern: Regex = ".*(\\d\\d/\\d\\d).*".r
 
-	def GetRouteRules: String = """
+  def GetRouteRules: String =
+    """
 		select
 			pmr.pwy_code as route_code,
 			pmr.lev_code as level_code,
@@ -102,35 +111,36 @@ object RouteRuleImporter {
 			join %s.cam_pmb pmb on pmb.pwy_code = pmr.pwy_code and pmb.pmr_code = pmr.pmr_code
 	""".format(sitsSchema, sitsSchema)
 
-	case class UpstreamRouteRuleRow(
-		routeCode: String,
-		levelCode: String,
-		academicYear: Option[AcademicYear],
-		moduleListCode: String,
-		minCats: Option[BigDecimal],
-		maxCats: Option[BigDecimal],
-		minModules: Option[Int],
-		maxModules: Option[Int]
-	)
+  case class UpstreamRouteRuleRow(
+    routeCode: String,
+    levelCode: String,
+    academicYear: Option[AcademicYear],
+    moduleListCode: String,
+    minCats: Option[BigDecimal],
+    maxCats: Option[BigDecimal],
+    minModules: Option[Int],
+    maxModules: Option[Int]
+  )
 
-	class UpstreamRouteRuleQuery(ds: DataSource) extends MappingSqlQuery[UpstreamRouteRuleRow](ds, GetRouteRules) {
-		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): UpstreamRouteRuleRow = {
-			val academicYear = rs.getString("description").maybeText.flatMap {
-				case academicYearPattern(academicYearString) => Option(academicYearString)
-				case _ => None
-			}.map(AcademicYear.parse)
-			UpstreamRouteRuleRow(
-				rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
-				rs.getString("level_code").maybeText.orNull,
-				academicYear,
-				rs.getString("module_list"),
-				Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),
-				Option(rs.getBigDecimal("max_cats")).map(BigDecimal.apply),
-				ImportMemberHelpers.getInteger(rs, "min_modules"),
-				ImportMemberHelpers.getInteger(rs, "max_modules")
-			)
-		}
-	}
+  class UpstreamRouteRuleQuery(ds: DataSource) extends MappingSqlQuery[UpstreamRouteRuleRow](ds, GetRouteRules) {
+    this.compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): UpstreamRouteRuleRow = {
+      val academicYear = rs.getString("description").maybeText.flatMap {
+        case academicYearPattern(academicYearString) => Option(academicYearString)
+        case _ => None
+      }.map(AcademicYear.parse)
+      UpstreamRouteRuleRow(
+        rs.getString("route_code").maybeText.map(_.toLowerCase).orNull,
+        rs.getString("level_code").maybeText.orNull,
+        academicYear,
+        rs.getString("module_list"),
+        Option(rs.getBigDecimal("min_cats")).map(BigDecimal.apply),
+        Option(rs.getBigDecimal("max_cats")).map(BigDecimal.apply),
+        ImportMemberHelpers.getInteger(rs, "min_modules"),
+        ImportMemberHelpers.getInteger(rs, "max_modules")
+      )
+    }
+  }
 
 }

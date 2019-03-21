@@ -11,36 +11,37 @@ import uk.ac.warwick.spring.Wire
 
 class JSONErrorView(val errors: Errors, val additionalData: Map[String, _]) extends JSONView(Map()) {
 
-	def this(errors: Errors) = this(errors, Map())
+  def this(errors: Errors) = this(errors, Map())
 
-	var messageSource: MessageSource = Wire.auto[MessageSource]
+  var messageSource: MessageSource = Wire.auto[MessageSource]
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
-		response.setContentType(getContentType())
-		response.setStatus(HttpStatus.BAD_REQUEST.value())
+  override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
+    response.setContentType(getContentType())
+    response.setStatus(HttpStatus.BAD_REQUEST.value())
 
-		val out = response.getWriter
-		val errorList = errors.getFieldErrors
-		val errorMap = Map() ++ errorList.asScala.map (error => (error.getField, getMessage(error.getCode, error.getArguments: _*)))
+    val out = response.getWriter
+    val errorList = errors.getFieldErrors
+    val errorMap = Map() ++ errorList.asScala.map(error => (error.getField, getMessage(error.getCode, error.getArguments: _*)))
 
-		val globalErrors = errors.getGlobalErrors.asScala.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
-		val fieldErrors = errors.getFieldErrors.asScala.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+    val globalErrors = errors.getGlobalErrors.asScala.map { error => GlobalError(error.getCode, getMessage(error.getCode, error.getArguments: _*)) }.toArray
+    val fieldErrors = errors.getFieldErrors.asScala.map { error => FieldError(error.getCode, error.getField, getMessage(error.getCode, error.getArguments: _*)) }.toArray
 
-		val errorJson = Map(
-			"success" -> false,
-			"status" -> "bad_request",
-			"result" -> errorMap,
-			"errors" -> (globalErrors ++ fieldErrors)
-		)
+    val errorJson = Map(
+      "success" -> false,
+      "status" -> "bad_request",
+      "result" -> errorMap,
+      "errors" -> (globalErrors ++ fieldErrors)
+    )
 
-		val finalJson = errorJson ++ additionalData
+    val finalJson = errorJson ++ additionalData
 
-		objectMapper.writeValue(out, finalJson)
-	}
+    objectMapper.writeValue(out, finalJson)
+  }
 
-	def getMessage(key: String, args: Object*): String = messageSource.getMessage(key, if (args == null) Array() else args.toArray, null)
+  def getMessage(key: String, args: Object*): String = messageSource.getMessage(key, if (args == null) Array() else args.toArray, null)
 
-	case class GlobalError(code: String, message: String)
-	case class FieldError(code: String, field: String, message: String)
+  case class GlobalError(code: String, message: String)
+
+  case class FieldError(code: String, field: String, message: String)
 
 }

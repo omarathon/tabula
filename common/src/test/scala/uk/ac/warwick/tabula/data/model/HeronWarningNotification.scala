@@ -6,43 +6,51 @@ import org.hibernate.annotations.Type
 import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
-	val templateLocation = "/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl"
-	val heronRant = "They are after your delicious eye jelly. Throw rocks at them!"
+  val templateLocation = "/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl"
+  val heronRant = "They are after your delicious eye jelly. Throw rocks at them!"
 }
 
 @Entity
-@DiscriminatorValue(value="HeronWarning")
+@DiscriminatorValue(value = "HeronWarning")
 class HeronWarningNotification extends Notification[MeetingRecord, Unit]
-	with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
-	with MyWarwickActivity {
+  with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
+  with MyWarwickActivity {
 
-	import HeronWarningNotification._
+  import HeronWarningNotification._
 
-	@transient val verb: String = "Heron"
+  @transient val verb: String = "Heron"
 
-	def title: String = "You all need to know. Herons would love to kill you in your sleep"
-	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
-	def url: String = "/beware/herons"
-	def urlTitle = "see how evil herons really are"
-	def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
+  def title: String = "You all need to know. Herons would love to kill you in your sleep"
+
+  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+
+  def url: String = "/beware/herons"
+
+  def urlTitle = "see how evil herons really are"
+
+  def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
 }
 
 @Entity
-@DiscriminatorValue(value="HeronDefeat")
+@DiscriminatorValue(value = "HeronDefeat")
 class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
-with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
-	with MyWarwickActivity {
+  with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
+  with MyWarwickActivity {
 
-	import HeronWarningNotification._
+  import HeronWarningNotification._
 
-	@transient val verb: String = "Heron"
+  @transient val verb: String = "Heron"
 
-	def title: String = "A heron has been defeated. Rejoice"
-	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
-	def url: String = "/beware/herons"
-	def urlTitle = "wallow in glory"
-	def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
+  def title: String = "A heron has been defeated. Rejoice"
+
+  def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+
+  def url: String = "/beware/herons"
+
+  def urlTitle = "wallow in glory"
+
+  def recipient: User = item.entity.relationships.head.agentMember.get.asSsoUser
 
 }
 

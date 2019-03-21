@@ -17,72 +17,72 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.cm2.web.Routes
 
 
-
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/edit"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/edit"))
 class OldEditAssignmentController extends OldCourseworkController {
 
-	validatesSelf[EditAssignmentCommand]
+  validatesSelf[EditAssignmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
-		new EditAssignmentCommand(module, mandatory(assignment), user)
-	}
+  @ModelAttribute def formObject(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
+    new EditAssignmentCommand(module, mandatory(assignment), user)
+  }
 
-	@RequestMapping
-	def showForm(form: EditAssignmentCommand, openDetails: Boolean = false): Mav = {
-		form.afterBind()
+  @RequestMapping
+  def showForm(form: EditAssignmentCommand, openDetails: Boolean = false): Mav = {
+    form.afterBind()
 
-		val (module, assignment) = (form.module, form.assignment)
-		form.copyGroupsFrom(assignment)
+    val (module, assignment) = (form.module, form.assignment)
+    form.copyGroupsFrom(assignment)
 
-		val couldDelete = canDelete(module, assignment)
-		Mav("coursework/admin/assignments/edit",
-			"department" -> module.adminDepartment,
-			"module" -> module,
-			"assignment" -> assignment,
-			"academicYear" -> assignment.academicYear,
-			"canDelete" -> couldDelete,
-			"availableUpstreamGroups" -> form.availableUpstreamGroups,
-			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
-			"assessmentGroups" -> form.assessmentGroups,
-			"maxWordCount" -> Assignment.MaximumWordCount,
-			"openDetails" -> openDetails,
-			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
-		).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
-	}
+    val couldDelete = canDelete(module, assignment)
+    Mav("coursework/admin/assignments/edit",
+      "department" -> module.adminDepartment,
+      "module" -> module,
+      "assignment" -> assignment,
+      "academicYear" -> assignment.academicYear,
+      "canDelete" -> couldDelete,
+      "availableUpstreamGroups" -> form.availableUpstreamGroups,
+      "linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
+      "assessmentGroups" -> form.assessmentGroups,
+      "maxWordCount" -> Assignment.MaximumWordCount,
+      "openDetails" -> openDetails,
+      "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
+    ).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
+  }
 
-	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=submit"))
-	def submit(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
-		form.afterBind()
-		if (errors.hasErrors) {
-			showForm(form)
-		} else {
-			val assignment = form.apply()
-			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
-		}
+  @RequestMapping(method = Array(RequestMethod.POST), params = Array("action=submit"))
+  def submit(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
+    form.afterBind()
+    if (errors.hasErrors) {
+      showForm(form)
+    } else {
+      val assignment = form.apply()
+      Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+    }
 
-	}
+  }
 
-	@RequestMapping(method = Array(RequestMethod.POST), params = Array("action=update"))
-	def update(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
-		form.afterBind()
-		if (!errors.hasErrors) {
-			form.apply()
-		}
+  @RequestMapping(method = Array(RequestMethod.POST), params = Array("action=update"))
+  def update(@Valid form: EditAssignmentCommand, errors: Errors): Mav = {
+    form.afterBind()
+    if (!errors.hasErrors) {
+      form.apply()
+    }
 
-		showForm(form, openDetails = true)
-	}
+    showForm(form, openDetails = true)
+  }
 
-	@InitBinder
-	def upstreamGroupBinder(binder: WebDataBinder) {
-		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
-	}
+  @InitBinder
+  def upstreamGroupBinder(binder: WebDataBinder) {
+    binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+  }
 
-	private def canDelete(module: Module, assignment: Assignment): Boolean = {
-		val cmd = new DeleteAssignmentCommand(module, assignment)
-		val errors = new BeanPropertyBindingResult(cmd, "cmd")
-		cmd.prechecks(errors)
-		!errors.hasErrors
-	}
+  private def canDelete(module: Module, assignment: Assignment): Boolean = {
+    val cmd = new DeleteAssignmentCommand(module, assignment)
+    val errors = new BeanPropertyBindingResult(cmd, "cmd")
+    cmd.prechecks(errors)
+    !errors.hasErrors
+  }
 
 }

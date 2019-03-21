@@ -6,18 +6,18 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.pdf.PDFGeneratorComponent
 import scala.collection.JavaConverters._
 
-class PDFView(filename: String, templateName: String, context: Map[String,_]) extends View {
-	this: PDFGeneratorComponent =>
+class PDFView(filename: String, templateName: String, context: Map[String, _]) extends View {
+  this: PDFGeneratorComponent =>
 
-	override def getContentType() = "application/pdf"
+  override def getContentType() = "application/pdf"
 
-	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) {
-		response.setContentType(s"$getContentType; charset=UTF-8")
-		response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
+  override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) {
+    response.setContentType(s"$getContentType; charset=UTF-8")
+    response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
-		val mergedModel = JMap((context.toSeq ++ model.asScala.toSeq) :_*)
-		val out = response.getOutputStream
+    val mergedModel = JMap((context.toSeq ++ model.asScala.toSeq): _*)
+    val out = response.getOutputStream
 
-		pdfGenerator.renderTemplate(templateName, mergedModel, out)
-	}
+    pdfGenerator.renderTemplate(templateName, mergedModel, out)
+  }
 }

@@ -7,58 +7,58 @@ import uk.ac.warwick.tabula.{MockUserLookup, Mockito, TestBase}
 
 class GetMemberCalendarJsonApiTest extends TestBase with Mockito {
 
-	val api = new ApiController with GetMemberCalendarJsonApi with PathVariableMemberCalendarApi with UserLookupComponent {
-		val userLookup = new MockUserLookup
-	}
+  val api = new ApiController with GetMemberCalendarJsonApi with PathVariableMemberCalendarApi with UserLookupComponent {
+    val userLookup = new MockUserLookup
+  }
 
-	@Test
-	def colouriseBasedOnModule(){
-		// create a bunch events spread over 3 modules, with blank colours
-		val events = for {
-			i<- 1 until 21
-			j = i%3}
-			yield {
-				FullCalendarEvent(
-					title=s"Test event $i",
-					fullTitle="",
-					allDay = false,
-					start=0L,
-					end=0L,
-					formattedStartTime="",
-					formattedEndTime="",
-					formattedInterval="",
-					syllabusPlusName=None,
-					parentType="Module",
-					parentShortName=s"module$j",
-					parentFullName=s"Module $j",
-					relatedUrl = None
-				)
-			}
+  @Test
+  def colouriseBasedOnModule() {
+    // create a bunch events spread over 3 modules, with blank colours
+    val events = for {
+      i <- 1 until 21
+      j = i % 3}
+      yield {
+        FullCalendarEvent(
+          title = s"Test event $i",
+          fullTitle = "",
+          allDay = false,
+          start = 0L,
+          end = 0L,
+          formattedStartTime = "",
+          formattedEndTime = "",
+          formattedInterval = "",
+          syllabusPlusName = None,
+          parentType = "Module",
+          parentShortName = s"module$j",
+          parentFullName = s"Module $j",
+          relatedUrl = None
+        )
+      }
 
-		// Add a Busy event at the end
-		val coloured = FullCalendarEvent.colourEvents(events :+
+    // Add a Busy event at the end
+    val coloured = FullCalendarEvent.colourEvents(events :+
 
-			FullCalendarEvent(
-				title=s"Busy",
-				fullTitle="",
-				allDay = false,
-				start=0L,
-				end=0L,
-				formattedStartTime="",
-				formattedEndTime="",
-				formattedInterval="",
-				syllabusPlusName=None,
-				relatedUrl = None
-			)
-		)
+      FullCalendarEvent(
+        title = s"Busy",
+        fullTitle = "",
+        allDay = false,
+        start = 0L,
+        end = 0L,
+        formattedStartTime = "",
+        formattedEndTime = "",
+        formattedInterval = "",
+        syllabusPlusName = None,
+        relatedUrl = None
+      )
+    )
 
-		// every event should have a colour
-		coloured.find(_.backgroundColor=="") should not be 'defined
+    // every event should have a colour
+    coloured.find(_.backgroundColor == "") should not be 'defined
 
-		// there should be 4 colours in use
-		coloured.map(_.backgroundColor).distinct.size should be(4)
+    // there should be 4 colours in use
+    coloured.map(_.backgroundColor).distinct.size should be(4)
 
-		coloured.last.backgroundColor should be ("#bbb")
-	}
+    coloured.last.backgroundColor should be("#bbb")
+  }
 
 }

@@ -6,23 +6,29 @@ import uk.ac.warwick.tabula.{AppContextTestBase, EarlyRequestInfoImpl}
 
 class JobServiceContextTest extends AppContextTestBase {
 
-	@Autowired var jobService: JobService = _
+  @Autowired var jobService: JobService = _
 
-	@Test def containsSubmissionZipJob() {
-		jobService.jobs.length should (be > 1)
-		jobService.jobs map (_.identifier) should contain ("submission-zip-file")
-	}
+  @Test def containsSubmissionZipJob() {
+    jobService.jobs.length should (be > 1)
+    jobService.jobs map (_.identifier) should contain("submission-zip-file")
+  }
 
-	@Test def unknownJobType() {
-		jobService.jobs map (_.identifier) should not contain "unknown-job-type"
+  @Test def unknownJobType() {
+    jobService.jobs map (_.identifier) should not contain "unknown-job-type"
 
-		val instance = JobInstanceImpl.fromPrototype(JobPrototype("unknown", Map()))
+    val instance = JobInstanceImpl.fromPrototype(JobPrototype("unknown", Map()))
 
-		jobService.processInstance(instance)(new EarlyRequestInfoImpl)
+    jobService.processInstance(instance)(new EarlyRequestInfoImpl)
 
-		// Check that the flags have not actually been updated.
-		withClue("Started") { instance.started should be {false} }
-		withClue("Finished") { instance.finished should be {false} }
-		withClue("Succeeded") { instance.succeeded should be {false} }
-	}
+    // Check that the flags have not actually been updated.
+    withClue("Started") {
+      instance.started should be (false)
+    }
+    withClue("Finished") {
+      instance.finished should be (false)
+    }
+    withClue("Succeeded") {
+      instance.succeeded should be (false)
+    }
+  }
 }

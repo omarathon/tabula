@@ -10,57 +10,57 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/marker-allocation/{assignment}"))
+@RequestMapping(value = Array("/groups/admin/marker-allocation/{assignment}"))
 class OldSmallGroupsMarkerAllocationController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment): OldSmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with OldSmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
-		OldSmallGroupsMarkerAllocationCommand(assignment)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment): OldSmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with OldSmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
+    OldSmallGroupsMarkerAllocationCommand(assignment)
+  }
 
-	@RequestMapping(method=Array(GET))
-	def getGroupMembership(
-		@PathVariable assignment:Assignment,
-		@ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
-	): Mav = {
+  @RequestMapping(method = Array(GET))
+  def getGroupMembership(
+    @PathVariable assignment: Assignment,
+    @ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
+  ): Mav = {
 
-		val allocations = cmd.apply()
+    val allocations = cmd.apply()
 
-		Mav("groups/admin/module/marker-allocation",
-			"sets" -> allocations.map(_.set),
-			"assessment" -> assignment,
-			"allocations" -> allocations,
-			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
-			"firstMarkerRole" -> assignment.markingWorkflow.firstMarkerRoleName,
-			"secondMarkerRole" -> assignment.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
-		).noLayout()
-	}
+    Mav("groups/admin/module/marker-allocation",
+      "sets" -> allocations.map(_.set),
+      "assessment" -> assignment,
+      "allocations" -> allocations,
+      "hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
+      "firstMarkerRole" -> assignment.markingWorkflow.firstMarkerRoleName,
+      "secondMarkerRole" -> assignment.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
+    ).noLayout()
+  }
 }
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/marker-allocation/exam/{exam}"))
+@RequestMapping(value = Array("/groups/admin/marker-allocation/exam/{exam}"))
 class SmallGroupsExamMarkerAllocationController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable exam: Exam): OldSmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with OldSmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
-		OldSmallGroupsMarkerAllocationCommand(exam)
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable exam: Exam): OldSmallGroupsMarkerAllocationCommandInternal with ComposableCommand[Seq[SetAllocation]] with OldSmallGroupsMarkerAllocationCommandPermissions with AutowiringSmallGroupServiceComponent with AutowiringAssessmentMembershipServiceComponent with Unaudited = {
+    OldSmallGroupsMarkerAllocationCommand(exam)
+  }
 
-	@RequestMapping(method=Array(GET))
-	def getGroupMembership(
-		@PathVariable exam: Exam,
-		@ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
-	): Mav = {
+  @RequestMapping(method = Array(GET))
+  def getGroupMembership(
+    @PathVariable exam: Exam,
+    @ModelAttribute("command") cmd: Appliable[Seq[SetAllocation]]
+  ): Mav = {
 
-		val allocations = cmd.apply()
+    val allocations = cmd.apply()
 
-		Mav("groups/admin/module/marker-allocation",
-			"sets" -> allocations.map(_.set),
-			"assessment" -> exam,
-			"allocations" -> allocations,
-			"hasSecondMarker" -> exam.markingWorkflow.hasSecondMarker,
-			"firstMarkerRole" -> exam.markingWorkflow.firstMarkerRoleName,
-			"secondMarkerRole" -> exam.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
-		).noLayout()
-	}
+    Mav("groups/admin/module/marker-allocation",
+      "sets" -> allocations.map(_.set),
+      "assessment" -> exam,
+      "allocations" -> allocations,
+      "hasSecondMarker" -> exam.markingWorkflow.hasSecondMarker,
+      "firstMarkerRole" -> exam.markingWorkflow.firstMarkerRoleName,
+      "secondMarkerRole" -> exam.markingWorkflow.secondMarkerRoleName.getOrElse("Second marker")
+    ).noLayout()
+  }
 }

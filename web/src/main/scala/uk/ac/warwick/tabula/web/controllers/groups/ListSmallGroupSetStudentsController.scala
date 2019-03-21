@@ -9,22 +9,22 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
-@RequestMapping(value=Array("/groups/{smallGroupSet}/studentspopup"))
+@RequestMapping(value = Array("/groups/{smallGroupSet}/studentspopup"))
 class ListSmallGroupSetStudentsController extends GroupsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable smallGroupSet: SmallGroupSet, user: CurrentUser) =
-		ListSmallGroupSetStudentsCommand(smallGroupSet, user)
+  @ModelAttribute("command")
+  def command(@PathVariable smallGroupSet: SmallGroupSet, user: CurrentUser) =
+    ListSmallGroupSetStudentsCommand(smallGroupSet, user)
 
-	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: Appliable[StudentsInformation]): Mav = {
-		val info = command.apply()
+  @RequestMapping
+  def ajaxList(@ModelAttribute("command") command: Appliable[StudentsInformation]): Mav = {
+    val info = command.apply()
 
-		Mav("groups/students",
-			"students" -> info.members,
-			"userUniId" -> user.universityId,
-			"userIsMember" -> info.userIsMember,
-			"studentsCanSeeTutorName" -> info.showTutors
-		).noLayout()
-	}
+    Mav("groups/students",
+      "students" -> info.members,
+      "userUniId" -> user.universityId,
+      "userIsMember" -> info.userIsMember,
+      "studentsCanSeeTutorName" -> info.showTutors
+    ).noLayout()
+  }
 }

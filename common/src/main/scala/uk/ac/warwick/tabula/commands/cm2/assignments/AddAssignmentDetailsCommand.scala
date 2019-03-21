@@ -36,6 +36,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent =>
 
   private var _prefilled: Boolean = _
+
   def prefilled: Boolean = _prefilled
 
   markersA = JArrayList()
@@ -48,7 +49,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
 
     assignment.addDefaultFields()
     copyTo(assignment)
-    if(workflowCategory == WorkflowCategory.SingleUse){
+    if (workflowCategory == WorkflowCategory.SingleUse) {
       createAndSaveSingleUseWorkflow(assignment)
     }
     assessmentService.save(assignment)
@@ -79,7 +80,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
     openDate = assignment.openDate
     closeDate = assignment.closeDate
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)
-    if(assignment.workflowCategory.contains(WorkflowCategory.Reusable)){
+    if (assignment.workflowCategory.contains(WorkflowCategory.Reusable)) {
       reusableWorkflow = assignment.cm2MarkingWorkflow
     }
     copySharedDetailFrom(assignment)
@@ -88,7 +89,7 @@ class CreateAssignmentDetailsCommandInternal(val module: Module, val academicYea
 }
 
 trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with SharedAssignmentDetailProperties {
-  self: AssessmentServiceComponent  with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
+  self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def copyTo(assignment: Assignment) {
     assignment.name = name
@@ -103,11 +104,11 @@ trait AssignmentDetailsCopy extends ModifyAssignmentDetailsCommandState with Sha
     }
 
     assignment.workflowCategory = Some(workflowCategory)
-    if(workflowCategory == WorkflowCategory.Reusable){
+    if (workflowCategory == WorkflowCategory.Reusable) {
       assignment.cm2MarkingWorkflow = reusableWorkflow
     }
     assignment.cm2Assignment = true
-		assignment.anonymity = anonymity
+    assignment.anonymity = anonymity
     copySharedDetailTo(assignment)
   }
 }
@@ -117,6 +118,7 @@ trait ModifyAssignmentDetailsCommandState {
   self: AssessmentServiceComponent with UserLookupComponent with CM2MarkingWorkflowServiceComponent with ModifyMarkingWorkflowState =>
 
   def module: Module
+
   def academicYear: AcademicYear
 
   @Length(max = 200)
@@ -141,7 +143,7 @@ trait ModifyAssignmentDetailsCommandState {
   lazy val availableWorkflows: Seq[CM2MarkingWorkflow] =
     cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
 
-  var anonymity:AssignmentAnonymity = _
+  var anonymity: AssignmentAnonymity = _
 
 }
 
@@ -154,34 +156,34 @@ trait CreateAssignmentDetailsCommandState extends ModifyAssignmentDetailsCommand
 }
 
 trait ModifyAssignmentDetailsValidation extends SelfValidating with ModifyMarkingWorkflowValidation {
-	self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
-		with UserLookupComponent =>
+  self: ModifyAssignmentDetailsCommandState with BooleanAssignmentDetailProperties with AssessmentServiceComponent with ModifyMarkingWorkflowState
+    with UserLookupComponent =>
 
-	// validation shared between add and edit
-	def genericValidate(errors: Errors): Unit = {
-		if (openDate == null) {
-			errors.rejectValue("openDate", "openDate.missing")
-		}
+  // validation shared between add and edit
+  def genericValidate(errors: Errors): Unit = {
+    if (openDate == null) {
+      errors.rejectValue("openDate", "openDate.missing")
+    }
 
-		if (!openEnded) {
-			if (closeDate == null) {
-				errors.rejectValue("closeDate", "closeDate.missing")
-			} else if (openDate != null && openDate.isAfter(closeDate)) {
-				errors.rejectValue("closeDate", "closeDate.early")
-			}
-		}
-		if (workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null) {
-			errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
-		} else if (workflowCategory == WorkflowCategory.SingleUse) {
-			if (workflowType == null){
-				errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
-			} else if ((workflowType.name == "DoubleBlind") && (markersA.size() <= 1)){
-				errors.rejectValue("markersA", "NotEnough.markersA", Array("two"), "")
-			}else{
-				markerValidation(errors, workflowType)
-			}
-		}
-	}
+    if (!openEnded) {
+      if (closeDate == null) {
+        errors.rejectValue("closeDate", "closeDate.missing")
+      } else if (openDate != null && openDate.isAfter(closeDate)) {
+        errors.rejectValue("closeDate", "closeDate.early")
+      }
+    }
+    if (workflowCategory == WorkflowCategory.Reusable && reusableWorkflow == null) {
+      errors.rejectValue("reusableWorkflow", "markingWorkflow.reusableWorkflow.none")
+    } else if (workflowCategory == WorkflowCategory.SingleUse) {
+      if (workflowType == null) {
+        errors.rejectValue("workflowType", "markingWorkflow.workflowType.none")
+      } else if ((workflowType.name == "DoubleBlind") && (markersA.size() <= 1)) {
+        errors.rejectValue("markersA", "NotEnough.markersA", Array("two"), "")
+      } else {
+        markerValidation(errors, workflowType)
+      }
+    }
+  }
 }
 
 
@@ -222,7 +224,7 @@ trait CreateAssignmentDetailsDescription extends Describable[Assignment] {
       "closeDate" -> closeDate,
       "workflowCtg" -> Option(workflowCategory).map(_.code).orNull,
       "workflowType" -> Option(workflowType).map(_.name).orNull,
-			"anonymity" -> Option(anonymity).map(_.code).orNull
+      "anonymity" -> Option(anonymity).map(_.code).orNull
     )
   }
 

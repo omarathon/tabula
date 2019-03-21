@@ -15,45 +15,45 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/report"))
 class ReportStudentsChoosePeriodController extends AttendanceController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
-		ReportStudentsChoosePeriodCommand(mandatory(department), mandatory(academicYear), user.apparentUser)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, user: CurrentUser) =
+    ReportStudentsChoosePeriodCommand(mandatory(department), mandatory(academicYear), user.apparentUser)
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(
-		@ModelAttribute("command") cmd: Appliable[StudentReport],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		Mav("attendance/view/reportperiod").crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear),
-			Breadcrumbs.View.Students(department, academicYear)
-		)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(
+    @ModelAttribute("command") cmd: Appliable[StudentReport],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    Mav("attendance/view/reportperiod").crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear),
+      Breadcrumbs.View.DepartmentForYear(department, academicYear),
+      Breadcrumbs.View.Students(department, academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[StudentReport],
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if(errors.hasErrors) {
-			form(cmd, department, academicYear)
-		} else {
-			val studentReport = cmd.apply()
-			Mav("attendance/view/reportstudents",
-				"studentMissedReportCounts" -> studentReport.studentReportCounts,
-				"unrecordedStudentsCount" -> studentReport.studentReportCounts.count(_.unrecorded > 0)
-			).crumbs(
-				Breadcrumbs.View.HomeForYear(academicYear),
-				Breadcrumbs.View.DepartmentForYear(department, academicYear),
-				Breadcrumbs.View.Students(department, academicYear)
-			)
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[StudentReport],
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, department, academicYear)
+    } else {
+      val studentReport = cmd.apply()
+      Mav("attendance/view/reportstudents",
+        "studentMissedReportCounts" -> studentReport.studentReportCounts,
+        "unrecordedStudentsCount" -> studentReport.studentReportCounts.count(_.unrecorded > 0)
+      ).crumbs(
+        Breadcrumbs.View.HomeForYear(academicYear),
+        Breadcrumbs.View.DepartmentForYear(department, academicYear),
+        Breadcrumbs.View.Students(department, academicYear)
+      )
+    }
+  }
 
 }

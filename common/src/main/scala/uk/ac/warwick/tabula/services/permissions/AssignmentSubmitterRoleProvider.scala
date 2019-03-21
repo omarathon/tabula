@@ -12,18 +12,18 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class AssignmentSubmitterRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for AssignmentSubmitterRoleProvider") {
-		scope match {
-			case assignment: Assignment =>
-				if (assignment.canSubmit(user.apparentUser))
-					Stream(customRoleFor(assignment.module.adminDepartment)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
-				else Stream.empty
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for AssignmentSubmitterRoleProvider") {
+    scope match {
+      case assignment: Assignment =>
+        if (assignment.canSubmit(user.apparentUser))
+          Stream(customRoleFor(assignment.module.adminDepartment)(AssignmentSubmitterRoleDefinition, assignment).getOrElse(AssignmentSubmitter(assignment)))
+        else Stream.empty
 
-			// AssignmentSubmitter is only checked at the assignment level
-			case _ => Stream.empty
-		}
-	}
+      // AssignmentSubmitter is only checked at the assignment level
+      case _ => Stream.empty
+    }
+  }
 
-	def rolesProvided = Set(classOf[AssignmentSubmitter])
+  def rolesProvided = Set(classOf[AssignmentSubmitter])
 
 }

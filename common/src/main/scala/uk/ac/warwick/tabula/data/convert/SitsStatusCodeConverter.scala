@@ -9,9 +9,12 @@ import uk.ac.warwick.tabula.data.SitsStatusDao
 
 class SitsStatusCodeConverter extends TwoWayConverter[String, SitsStatus] {
 
-	@Autowired var dao: SitsStatusDao = _
+  @Autowired var dao: SitsStatusDao = _
 
-	override def convertRight(code: String): SitsStatus = (Option(code) flatMap { dao.getByCode }).orNull
-	override def convertLeft(moa: SitsStatus): String = (Option(moa) map {_.code}).orNull
+  override def convertRight(code: String): SitsStatus = (Option(code) flatMap {
+    dao.getByCode
+  }).orNull
+
+  override def convertLeft(moa: SitsStatus): String = (Option(moa).map(_.code)).orNull
 
 }

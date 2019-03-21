@@ -8,5 +8,5 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
 import scala.concurrent.Future
 
 trait MemberTimetableEventSource[A <: Member] {
-	def eventsFor(member: A, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
+  def eventsFor(member: A, currentUser: CurrentUser, context: TimetableEvent.Context): Future[EventList]
 }

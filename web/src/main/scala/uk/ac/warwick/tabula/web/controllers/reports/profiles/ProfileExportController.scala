@@ -14,27 +14,27 @@ import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, Reports
 @RequestMapping(Array("/reports/{department}/{academicYear}/profiles/export"))
 class ProfileExportController extends ReportsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		ProfileExportCommand(department, academicYear, user)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    ProfileExportCommand(department, academicYear, user)
 
-	@RequestMapping
-	def generateReport(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringStudentData]],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		val results = cmd.apply()
-		if (ajax) {
-			Mav("reports/profiles/_filter", "results" -> results).noLayout()
-		} else {
-			Mav("reports/profiles/filter", "results" -> results).crumbs(
-				ReportsBreadcrumbs.Home.Department(department),
-				ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
-				ReportsBreadcrumbs.Profiles.Home(department, academicYear)
-			)
-		}
-	}
+  @RequestMapping
+  def generateReport(
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringStudentData]],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    val results = cmd.apply()
+    if (ajax) {
+      Mav("reports/profiles/_filter", "results" -> results).noLayout()
+    } else {
+      Mav("reports/profiles/filter", "results" -> results).crumbs(
+        ReportsBreadcrumbs.Home.Department(department),
+        ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear),
+        ReportsBreadcrumbs.Profiles.Home(department, academicYear)
+      )
+    }
+  }
 
 
 }

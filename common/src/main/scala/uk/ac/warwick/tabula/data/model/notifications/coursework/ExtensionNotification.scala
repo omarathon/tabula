@@ -7,14 +7,16 @@ import uk.ac.warwick.userlookup.User
 
 
 abstract class ExtensionNotification extends NotificationWithTarget[Extension, Assignment]
-	with SingleItemNotification[Extension]
-	with AutowiringUserLookupComponent {
+  with SingleItemNotification[Extension]
+  with AutowiringUserLookupComponent {
 
-	self: MyWarwickDiscriminator =>
+  self: MyWarwickDiscriminator =>
 
-	def extension: Extension = item.entity
-	def assignment: Assignment = target.entity
-	def student: User = userLookup.getUserByUserId(extension.usercode)
+  def extension: Extension = item.entity
 
-	def titlePrefix: String = target.entity.module.code.toUpperCase + ": "
+  def assignment: Assignment = target.entity
+
+  def student: User = userLookup.getUserByUserId(extension.usercode)
+
+  def titlePrefix: String = target.entity.module.code.toUpperCase + ": "
 }

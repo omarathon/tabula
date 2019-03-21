@@ -14,80 +14,82 @@ import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, DateFormats}
 
 object FeedbackReportCommand {
-	type Result = JobInstance
-	type Command = Appliable[Result] with FeedbackReportCommandState with SelfValidating
+  type Result = JobInstance
+  type Command = Appliable[Result] with FeedbackReportCommandState with SelfValidating
 
-	val AdminPermission = Permissions.Department.DownloadFeedbackReport
+  val AdminPermission = Permissions.Department.DownloadFeedbackReport
 
-	def apply(department: Department, academicYear: AcademicYear, user: CurrentUser): Command =
-		new FeedbackReportCommandInternal(department, academicYear, user)
-			with FeedbackReportCommandRequest
-			with ComposableCommand[Result]
-			with FeedbackReportCommandPermissions
-			with FeedbackReportCommandValidation
-			with FeedbackReportCommandDescription
-			with AutowiringJobServiceComponent
+  def apply(department: Department, academicYear: AcademicYear, user: CurrentUser): Command =
+    new FeedbackReportCommandInternal(department, academicYear, user)
+      with FeedbackReportCommandRequest
+      with ComposableCommand[Result]
+      with FeedbackReportCommandPermissions
+      with FeedbackReportCommandValidation
+      with FeedbackReportCommandDescription
+      with AutowiringJobServiceComponent
 }
 
 trait FeedbackReportCommandState {
-	def department: Department
-	def academicYear: AcademicYear
-	def user: CurrentUser
+  def department: Department
+
+  def academicYear: AcademicYear
+
+  def user: CurrentUser
 }
 
 trait FeedbackReportCommandRequest {
-	self: FeedbackReportCommandState =>
+  self: FeedbackReportCommandState =>
 
-	@WithinYears(maxFuture = 3, maxPast = 3)
-	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var startDate: DateTime = DateTime.now.minusMonths(3).withTimeAtStartOfDay()
+  @WithinYears(maxFuture = 3, maxPast = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var startDate: DateTime = DateTime.now.minusMonths(3).withTimeAtStartOfDay()
 
-	@WithinYears(maxFuture = 3, maxPast = 3)
-	@DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
-	var endDate: DateTime = DateTime.now.plusDays(1).withTimeAtStartOfDay()
+  @WithinYears(maxFuture = 3, maxPast = 3)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var endDate: DateTime = DateTime.now.plusDays(1).withTimeAtStartOfDay()
 }
 
 class FeedbackReportCommandInternal(val department: Department, val academicYear: AcademicYear, val user: CurrentUser)
-	extends CommandInternal[Result] with FeedbackReportCommandState {
-	self: FeedbackReportCommandRequest
-		with JobServiceComponent =>
+  extends CommandInternal[Result] with FeedbackReportCommandState {
+  self: FeedbackReportCommandRequest
+    with JobServiceComponent =>
 
-	override def applyInternal(): Result =
-		jobService.add(Option(user), FeedbackReportJob(department, academicYear, startDate, endDate))
+  override def applyInternal(): Result =
+    jobService.add(Option(user), FeedbackReportJob(department, academicYear, startDate, endDate))
 
 }
 
 trait FeedbackReportCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FeedbackReportCommandState =>
+  self: FeedbackReportCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(AdminPermission, mandatory(department))
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(AdminPermission, mandatory(department))
+  }
 }
 
 trait FeedbackReportCommandValidation extends SelfValidating {
-	self: FeedbackReportCommandRequest =>
+  self: FeedbackReportCommandRequest =>
 
-	override def validate(errors: Errors): Unit = {
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "feedback.report.emptyDate")
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "feedback.report.emptyDate")
-		if (endDate.isBefore(startDate)) {
-			errors.rejectValue("startDate", "feedback.report.dateRange")
-		}
-	}
+  override def validate(errors: Errors): Unit = {
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "startDate", "feedback.report.emptyDate")
+    ValidationUtils.rejectIfEmptyOrWhitespace(errors, "endDate", "feedback.report.emptyDate")
+    if (endDate.isBefore(startDate)) {
+      errors.rejectValue("startDate", "feedback.report.dateRange")
+    }
+  }
 }
 
 trait FeedbackReportCommandDescription extends Describable[Result] {
-	self: FeedbackReportCommandState with FeedbackReportCommandRequest =>
+  self: FeedbackReportCommandState with FeedbackReportCommandRequest =>
 
-	override lazy val eventName: String = "FeedbackReport"
+  override lazy val eventName: String = "FeedbackReport"
 
-	override def describe(d: Description): Unit =
-		d.department(department).properties(
-			"startDate" -> startDate,
-			"endDate" -> endDate
-		)
+  override def describe(d: Description): Unit =
+    d.department(department).properties(
+      "startDate" -> startDate,
+      "endDate" -> endDate
+    )
 
-	override def describeResult(d: Description, result: Result): Unit =
-		d.property("jobInstance" -> result.id)
+  override def describeResult(d: Description, result: Result): Unit =
+    d.property("jobInstance" -> result.id)
 }

@@ -6,5 +6,5 @@ import uk.ac.warwick.tabula.roles.AcademicOfficeUser
 
 @Component
 class AcademicOfficeRoleProvider extends WebgroupRoleProvider(AcademicOfficeUser()) {
-	override var webgroup: String = Wire.property("${permissions.academicoffice.group}")
+  override var webgroup: String = Wire.property("${permissions.academicoffice.group}")
 }

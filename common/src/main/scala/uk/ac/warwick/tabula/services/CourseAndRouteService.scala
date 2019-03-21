@@ -17,155 +17,181 @@ import scala.collection.JavaConverters._
 import scala.reflect._
 
 /**
- * Handles data about courses and routes
- */
+  * Handles data about courses and routes
+  */
 trait CourseAndRouteServiceComponent {
-	def courseAndRouteService: CourseAndRouteService
+  def courseAndRouteService: CourseAndRouteService
 }
 
 trait AutowiringCourseAndRouteServiceComponent extends CourseAndRouteServiceComponent {
-	var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
+  var courseAndRouteService: CourseAndRouteService = Wire[CourseAndRouteService]
 }
 
 trait CourseAndRouteService extends RouteDaoComponent with CourseDaoComponent with SecurityServiceComponent with PermissionsServiceComponent with ModuleAndDepartmentServiceComponent {
 
-	def save(route: Route): Unit
-	def saveOrUpdate(course: Course): Unit
-	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit
-	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit
+  def save(route: Route): Unit
 
-	def delete(teachingInfo: RouteTeachingInformation): Unit
-	def delete(courseYearWeighting: CourseYearWeighting): Unit
+  def saveOrUpdate(course: Course): Unit
 
-	def allRoutes: Seq[Route]
-	def getRouteById(id: String): Option[Route]
-	def getRouteByCode(code: String): Option[Route]
-	def getRoutesByCodes(codes: Seq[String]): Seq[Route]
-	def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route]
-	def findRoutesNamedLike(query: String): Seq[Route]
-	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int
-	def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route]
-	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
-	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route]
-	def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
+  def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit
 
-	def getCourseByCode(code: String): Option[Course]
-	def findCoursesInDepartment(department: Department): Seq[Course]
-	def findCoursesNamedLike(query: String): Seq[Course]
+  def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit
 
-	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
+  def delete(teachingInfo: RouteTeachingInformation): Unit
 
-	def addRouteManager(route: Route, owner: String): Unit
-	def removeRouteManager(route: Route, owner: String): Unit
+  def delete(courseYearWeighting: CourseYearWeighting): Unit
 
-	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
-	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
+  def allRoutes: Seq[Route]
+
+  def getRouteById(id: String): Option[Route]
+
+  def getRouteByCode(code: String): Option[Route]
+
+  def getRoutesByCodes(codes: Seq[String]): Seq[Route]
+
+  def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route]
+
+  def findRoutesNamedLike(query: String): Seq[Route]
+
+  def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int
+
+  def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route]
+
+  def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
+
+  def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route]
+
+  def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route]
+
+  def getCourseByCode(code: String): Option[Course]
+
+  def findCoursesInDepartment(department: Department): Seq[Course]
+
+  def findCoursesNamedLike(query: String): Seq[Course]
+
+  def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation]
+
+  def addRouteManager(route: Route, owner: String): Unit
+
+  def removeRouteManager(route: Route, owner: String): Unit
+
+  def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting]
+
+  def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting]
 
 }
 
 abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
-	self: RouteDaoComponent with CourseDaoComponent =>
+  self: RouteDaoComponent with CourseDaoComponent =>
 
-	def allRoutes: Seq[Route] = transactional(readOnly = true) { routeDao.allRoutes }
+  def allRoutes: Seq[Route] = transactional(readOnly = true) {
+    routeDao.allRoutes
+  }
 
-	def save(route: Route): Unit = routeDao.saveOrUpdate(route)
-	def getRouteById(id: String): Option[Route] = transactional(readOnly = true) { routeDao.getById(id) }
+  def save(route: Route): Unit = routeDao.saveOrUpdate(route)
 
-	def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap {
-		rcode => transactional(readOnly = true) { routeDao.getByCode(rcode.toLowerCase) }
-	}
+  def getRouteById(id: String): Option[Route] = transactional(readOnly = true) {
+    routeDao.getById(id)
+  }
 
-	def getRoutesByCodes(codes: Seq[String]): Seq[Route] = transactional(readOnly = true) {
-		routeDao.getAllByCodes(codes.map(_.toLowerCase))
-	}
+  def getRouteByCode(code: String): Option[Route] = code.maybeText.flatMap {
+    rcode => transactional(readOnly = true) {
+      routeDao.getByCode(rcode.toLowerCase)
+    }
+  }
 
-	def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
-		ccode => courseDao.getByCode(ccode)
-	}
+  def getRoutesByCodes(codes: Seq[String]): Seq[Route] = transactional(readOnly = true) {
+    routeDao.getAllByCodes(codes.map(_.toLowerCase))
+  }
 
-	def saveOrUpdate(course: Course): Unit =
-		courseDao.saveOrUpdate(course)
+  def getCourseByCode(code: String): Option[Course] = code.maybeText.flatMap {
+    ccode => courseDao.getByCode(ccode)
+  }
 
-	def findCoursesInDepartment(department: Department): Seq[Course] =
-		courseDao.findByDepartment(department)
+  def saveOrUpdate(course: Course): Unit =
+    courseDao.saveOrUpdate(course)
 
-	def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route] = if(activeOnly){
-		routeDao.findActiveByDepartment(department)
-	} else {
-		routeDao.findByDepartment(department)
-	}
+  def findCoursesInDepartment(department: Department): Seq[Course] =
+    courseDao.findByDepartment(department)
 
-	def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit = transactional() {
-		routeDao.saveOrUpdate(teachingInfo)
-	}
+  def findRoutesInDepartment(department: Department, activeOnly: Boolean = true): Seq[Route] = if (activeOnly) {
+    routeDao.findActiveByDepartment(department)
+  } else {
+    routeDao.findByDepartment(department)
+  }
 
-	def delete(teachingInfo: RouteTeachingInformation): Unit = transactional() {
-		routeDao.delete(teachingInfo)
-	}
+  def saveOrUpdate(teachingInfo: RouteTeachingInformation): Unit = transactional() {
+    routeDao.saveOrUpdate(teachingInfo)
+  }
 
-	def findRoutesNamedLike(query: String): Seq[Route] =
-		routeDao.findRoutesNamedLike(query)
+  def delete(teachingInfo: RouteTeachingInformation): Unit = transactional() {
+    routeDao.delete(teachingInfo)
+  }
 
-	def findCoursesNamedLike(query: String): Seq[Course] =
-		courseDao.findCoursesNamedLike(query)
+  def findRoutesNamedLike(query: String): Seq[Route] =
+    routeDao.findRoutesNamedLike(query)
 
-	def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation] = transactional(readOnly = true) {
-		routeDao.getTeachingInformationByRouteCodeAndDepartmentCode(routeCode, departmentCode)
-	}
+  def findCoursesNamedLike(query: String): Seq[Course] =
+    courseDao.findCoursesNamedLike(query)
 
-	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int = transactional() {
-		routeDao.stampMissingRows(dept, seenCodes)
-	}
+  def getRouteTeachingInformation(routeCode: String, departmentCode: String): Option[RouteTeachingInformation] = transactional(readOnly = true) {
+    routeDao.getTeachingInformationByRouteCodeAndDepartmentCode(routeCode, departmentCode)
+  }
 
-	def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route] =
-		permissionsService.getAllPermissionDefinitionsFor[Route](user, permission)
-			.filter { route => securityService.can(user, permission, route) }
+  def stampMissingRoutes(dept: Department, seenCodes: Seq[String]): Int = transactional() {
+    routeDao.stampMissingRows(dept, seenCodes)
+  }
 
-	def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
-		routesWithPermission(user, permission).filter { _.adminDepartment == dept }
+  def routesWithPermission(user: CurrentUser, permission: Permission): Set[Route] =
+    permissionsService.getAllPermissionDefinitionsFor[Route](user, permission)
+      .filter { route => securityService.can(user, permission, route) }
 
-	def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route] = {
-		moduleAndDepartmentService.departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)
-	}
-	def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] = {
-		if (moduleAndDepartmentService.departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
-	}
+  def routesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] =
+    routesWithPermission(user, permission).filter(_.adminDepartment == dept)
 
-	def addRouteManager(route: Route, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
-		role.users.knownType.addUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Route]))
-	}
+  def routesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Route] = {
+    moduleAndDepartmentService.departmentsWithPermission(user, permission) flatMap (dept => dept.routes.asScala)
+  }
 
-	def removeRouteManager(route: Route, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
-		role.users.knownType.removeUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Route]))
-	}
+  def routesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Route] = {
+    if (moduleAndDepartmentService.departmentsWithPermission(user, permission) contains dept) dept.routes.asScala.toSet else Set()
+  }
 
-	def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting] =
-		courseDao.getCourseYearWeighting(courseCode, academicYear, yearOfStudy)
+  def addRouteManager(route: Route, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
+    role.users.knownType.addUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Route]))
+  }
 
-	def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting] =
-		RequestLevelCache.cachedBy("CourseAndRouteService.findAllCourseYearWeightings", s"${courses.map(_.code).sorted.mkString("-")}-$academicYear") {
-			courseDao.findAllCourseYearWeightings(courses, academicYear)
-		}
+  def removeRouteManager(route: Route, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(route, RouteManagerRoleDefinition)
+    role.users.knownType.removeUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Route]))
+  }
 
-	def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit =
-		courseDao.saveOrUpdate(courseYearWeighting)
+  def getCourseYearWeighting(courseCode: String, academicYear: AcademicYear, yearOfStudy: YearOfStudy): Option[CourseYearWeighting] =
+    courseDao.getCourseYearWeighting(courseCode, academicYear, yearOfStudy)
 
-	def delete(courseYearWeighting: CourseYearWeighting): Unit =
-		courseDao.delete(courseYearWeighting)
+  def findAllCourseYearWeightings(courses: Seq[Course], academicYear: AcademicYear): Seq[CourseYearWeighting] =
+    RequestLevelCache.cachedBy("CourseAndRouteService.findAllCourseYearWeightings", s"${courses.map(_.code).sorted.mkString("-")}-$academicYear") {
+      courseDao.findAllCourseYearWeightings(courses, academicYear)
+    }
+
+  def saveOrUpdate(courseYearWeighting: CourseYearWeighting): Unit =
+    courseDao.saveOrUpdate(courseYearWeighting)
+
+  def delete(courseYearWeighting: CourseYearWeighting): Unit =
+    courseDao.delete(courseYearWeighting)
 
 }
 
 @Service("courseAndRouteService")
 class CourseAndRouteServiceImpl
-	extends AbstractCourseAndRouteService
-		with AutowiringRouteDaoComponent
-		with AutowiringCourseDaoComponent
-		with AutowiringSecurityServiceComponent
-		with AutowiringPermissionsServiceComponent
-		with AutowiringModuleAndDepartmentServiceComponent
+  extends AbstractCourseAndRouteService
+    with AutowiringRouteDaoComponent
+    with AutowiringCourseDaoComponent
+    with AutowiringSecurityServiceComponent
+    with AutowiringPermissionsServiceComponent
+    with AutowiringModuleAndDepartmentServiceComponent

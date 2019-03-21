@@ -17,49 +17,52 @@ import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
 trait SitsAcademicYearAware {
-	var sitsAcademicYearService: SitsAcademicYearService = Wire[SitsAcademicYearService]
+  var sitsAcademicYearService: SitsAcademicYearService = Wire[SitsAcademicYearService]
 
-	def getCurrentSitsAcademicYearString: String = sitsAcademicYearService.getCurrentSitsAcademicYearString
+  def getCurrentSitsAcademicYearString: String = sitsAcademicYearService.getCurrentSitsAcademicYearString
 
-	def getCurrentSitsAcademicYear: AcademicYear = {
-		AcademicYear.parse(getCurrentSitsAcademicYearString)
-	}
+  def getCurrentSitsAcademicYear: AcademicYear = {
+    AcademicYear.parse(getCurrentSitsAcademicYearString)
+  }
 }
 
 trait SitsAcademicYearService {
-	def getCurrentSitsAcademicYearString: String
+  def getCurrentSitsAcademicYearString: String
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class SitsAcademicYearServiceImpl extends SitsAcademicYearService with EnvironmentAwareness {
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	private lazy val isDev = environment.acceptsProfiles(of("dev"))
+  private lazy val isDev = environment.acceptsProfiles(of("dev"))
 
-	val GetCurrentAcademicYear = """
+  val GetCurrentAcademicYear =
+    """
 		select GET_AYR() ayr from dual
 		"""
 
-	def getCurrentSitsAcademicYearString: String =
-		Option(new GetCurrentAcademicYearQuery(sits).execute().asScala.head)
-  		.getOrElse {
-				if (isDev) // Fall back for when SITS clone is being refreshed
-					AcademicYear.now().toString()
-				else
-					throw new IllegalArgumentException("No current SITS academic year was available")
-			}
+  def getCurrentSitsAcademicYearString: String =
+    Option(new GetCurrentAcademicYearQuery(sits).execute().asScala.head)
+      .getOrElse {
+        if (isDev) // Fall back for when SITS clone is being refreshed
+          AcademicYear.now().toString()
+        else
+          throw new IllegalArgumentException("No current SITS academic year was available")
+      }
 
-	class GetCurrentAcademicYearQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetCurrentAcademicYear) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("ayr")
-	}
+  class GetCurrentAcademicYearQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetCurrentAcademicYear) {
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): String = rs.getString("ayr")
+  }
+
 }
 
 @Profile(Array("sandbox"))
 @Service
 class SandboxSitsAcademicYearService extends SitsAcademicYearService {
 
-	def getCurrentSitsAcademicYearString: String =
-		AcademicYear.now().toString()
+  def getCurrentSitsAcademicYearString: String =
+    AcademicYear.now().toString()
 }

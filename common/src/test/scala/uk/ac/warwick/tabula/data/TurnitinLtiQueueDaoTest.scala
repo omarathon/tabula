@@ -12,222 +12,228 @@ import scala.collection.JavaConverters._
 
 class TurnitinLtiQueueDaoTest extends PersistenceTestBase {
 
-	val turnitinLtiQueueDao = new TurnitinLtiQueueDaoImpl
+  val turnitinLtiQueueDao = new TurnitinLtiQueueDaoImpl
 
-	@Before def setup(): Unit = {
-		turnitinLtiQueueDao.sessionFactory = sessionFactory
-	}
+  @Before def setup(): Unit = {
+    turnitinLtiQueueDao.sessionFactory = sessionFactory
+  }
 
-	@After def tidyUp(): Unit = transactional { tx =>
-		session.createCriteria(classOf[Assignment]).list().asInstanceOf[JList[Assignment]].asScala.foreach(session.delete)
-		session.createCriteria(classOf[Submission]).list().asInstanceOf[JList[Submission]].asScala.foreach(session.delete)
-		session.createCriteria(classOf[SavedFormValue]).list().asInstanceOf[JList[SavedFormValue]].asScala.foreach(session.delete)
-		session.createCriteria(classOf[FileAttachment]).list().asInstanceOf[JList[FileAttachment]].asScala.foreach(session.delete)
-		session.createCriteria(classOf[OriginalityReport]).list().asInstanceOf[JList[OriginalityReport]].asScala.foreach(session.delete)
-	}
+  @After def tidyUp(): Unit = transactional { tx =>
+    session.createCriteria(classOf[Assignment]).list().asInstanceOf[JList[Assignment]].asScala.foreach(session.delete)
+    session.createCriteria(classOf[Submission]).list().asInstanceOf[JList[Submission]].asScala.foreach(session.delete)
+    session.createCriteria(classOf[SavedFormValue]).list().asInstanceOf[JList[SavedFormValue]].asScala.foreach(session.delete)
+    session.createCriteria(classOf[FileAttachment]).list().asInstanceOf[JList[FileAttachment]].asScala.foreach(session.delete)
+    session.createCriteria(classOf[OriginalityReport]).list().asInstanceOf[JList[OriginalityReport]].asScala.foreach(session.delete)
+  }
 
-	@Test
-	def findAssignmentToProcessSuccess(): Unit = transactional { tx => {
-		val assignmentToProcess = Fixtures.assignment("test")
-		assignmentToProcess.submitToTurnitin = true
-		assignmentToProcess.lastSubmittedToTurnitin = DateTime.now.minusMinutes(20)
-		assignmentToProcess.turnitinId = null
-		assignmentToProcess.submitToTurnitinRetries = 0
-		session.save(assignmentToProcess)
+  @Test
+  def findAssignmentToProcessSuccess(): Unit = transactional { tx => {
+    val assignmentToProcess = Fixtures.assignment("test")
+    assignmentToProcess.submitToTurnitin = true
+    assignmentToProcess.lastSubmittedToTurnitin = DateTime.now.minusMinutes(20)
+    assignmentToProcess.turnitinId = null
+    assignmentToProcess.submitToTurnitinRetries = 0
+    session.save(assignmentToProcess)
 
-		val assignmentToProcessLater = Fixtures.assignment("test")
-		assignmentToProcessLater.submitToTurnitin = true
-		assignmentToProcessLater.lastSubmittedToTurnitin = DateTime.now.minusMinutes(10)
-		assignmentToProcessLater.turnitinId = null
-		assignmentToProcessLater.submitToTurnitinRetries = 0
-		session.save(assignmentToProcessLater)
+    val assignmentToProcessLater = Fixtures.assignment("test")
+    assignmentToProcessLater.submitToTurnitin = true
+    assignmentToProcessLater.lastSubmittedToTurnitin = DateTime.now.minusMinutes(10)
+    assignmentToProcessLater.turnitinId = null
+    assignmentToProcessLater.submitToTurnitinRetries = 0
+    session.save(assignmentToProcessLater)
 
-		turnitinLtiQueueDao.findAssignmentToProcess.get should be (assignmentToProcess)
-	}}
+    turnitinLtiQueueDao.findAssignmentToProcess.get should be(assignmentToProcess)
+  }
+  }
 
-	@Test
-	def findAssignmentToProcessNoneFound(): Unit = transactional { tx => {
-		val assignmentDontSubmit = Fixtures.assignment("test")
-		assignmentDontSubmit.submitToTurnitin = false
-		session.save(assignmentDontSubmit)
+  @Test
+  def findAssignmentToProcessNoneFound(): Unit = transactional { tx => {
+    val assignmentDontSubmit = Fixtures.assignment("test")
+    assignmentDontSubmit.submitToTurnitin = false
+    session.save(assignmentDontSubmit)
 
-		val assignmentTooSoon = Fixtures.assignment("test")
-		assignmentTooSoon.submitToTurnitin = true
-		assignmentTooSoon.lastSubmittedToTurnitin = DateTime.now
-		session.save(assignmentTooSoon)
+    val assignmentTooSoon = Fixtures.assignment("test")
+    assignmentTooSoon.submitToTurnitin = true
+    assignmentTooSoon.lastSubmittedToTurnitin = DateTime.now
+    session.save(assignmentTooSoon)
 
-		val assignmentAlreadyDone = Fixtures.assignment("test")
-		assignmentAlreadyDone.submitToTurnitin = true
-		assignmentAlreadyDone.lastSubmittedToTurnitin = DateTime.now.minusHours(1)
-		assignmentAlreadyDone.turnitinId = "1234"
-		session.save(assignmentAlreadyDone)
+    val assignmentAlreadyDone = Fixtures.assignment("test")
+    assignmentAlreadyDone.submitToTurnitin = true
+    assignmentAlreadyDone.lastSubmittedToTurnitin = DateTime.now.minusHours(1)
+    assignmentAlreadyDone.turnitinId = "1234"
+    session.save(assignmentAlreadyDone)
 
-		val assignmentTooManyRetries = Fixtures.assignment("test")
-		assignmentTooManyRetries.submitToTurnitin = true
-		assignmentTooManyRetries.lastSubmittedToTurnitin = DateTime.now.minusHours(1)
-		assignmentTooManyRetries.turnitinId = null
-		assignmentTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAssignmentMaxRetries
-		session.save(assignmentTooManyRetries)
+    val assignmentTooManyRetries = Fixtures.assignment("test")
+    assignmentTooManyRetries.submitToTurnitin = true
+    assignmentTooManyRetries.lastSubmittedToTurnitin = DateTime.now.minusHours(1)
+    assignmentTooManyRetries.turnitinId = null
+    assignmentTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAssignmentMaxRetries
+    session.save(assignmentTooManyRetries)
 
-		turnitinLtiQueueDao.findAssignmentToProcess.isEmpty should be {true}
-	}}
+    turnitinLtiQueueDao.findAssignmentToProcess.isEmpty should be (true)
+  }
+  }
 
-	private def fullCompleteReport(assignment: Assignment, universityId: String): OriginalityReport = {
-		val report = new OriginalityReport
-		report.reportReceived = true
-		report.submitToTurnitinRetries = 0
-		report.reportRequestRetries = 0
-		val attachment = new FileAttachment
-		val submissionValue = new SavedFormValue
-		submissionValue.name = "originalityReport"
-		val submission = Fixtures.submission(universityId)
-		report.attachment = attachment
-		attachment.submissionValue = submissionValue
-		submissionValue.submission = submission
-		submission.assignment = assignment
-		session.save(attachment)
-		session.save(submission)
-		session.save(submissionValue)
-		session.save(attachment)
-		report
-	}
+  private def fullCompleteReport(assignment: Assignment, universityId: String): OriginalityReport = {
+    val report = new OriginalityReport
+    report.reportReceived = true
+    report.submitToTurnitinRetries = 0
+    report.reportRequestRetries = 0
+    val attachment = new FileAttachment
+    val submissionValue = new SavedFormValue
+    submissionValue.name = "originalityReport"
+    val submission = Fixtures.submission(universityId)
+    report.attachment = attachment
+    attachment.submissionValue = submissionValue
+    submissionValue.submission = submission
+    submission.assignment = assignment
+    session.save(attachment)
+    session.save(submission)
+    session.save(submissionValue)
+    session.save(attachment)
+    report
+  }
 
-	private def validReportForSubmission(assignment: Assignment, universityId: String): OriginalityReport = {
-		val report = fullCompleteReport(assignment, universityId)
-		report.reportReceived = false
-		report.turnitinId = null
-		report.lastSubmittedToTurnitin = DateTime.now.minusMinutes(20)
-		report.submitToTurnitinRetries = 0
-		report
-	}
+  private def validReportForSubmission(assignment: Assignment, universityId: String): OriginalityReport = {
+    val report = fullCompleteReport(assignment, universityId)
+    report.reportReceived = false
+    report.turnitinId = null
+    report.lastSubmittedToTurnitin = DateTime.now.minusMinutes(20)
+    report.submitToTurnitinRetries = 0
+    report
+  }
 
-	@Test
-	def findReportToProcessForSubmissionSuccess(): Unit = transactional { tx => {
-		val assignment = Fixtures.assignment("done")
-		assignment.turnitinId = "1234"
-		assignment.submitToTurnitin = true
-		session.save(assignment)
+  @Test
+  def findReportToProcessForSubmissionSuccess(): Unit = transactional { tx => {
+    val assignment = Fixtures.assignment("done")
+    assignment.turnitinId = "1234"
+    assignment.submitToTurnitin = true
+    session.save(assignment)
 
-		val reportToProcess = validReportForSubmission(assignment, "0000001")
-		session.save(reportToProcess)
+    val reportToProcess = validReportForSubmission(assignment, "0000001")
+    session.save(reportToProcess)
 
-		val reportToProcessLater = validReportForSubmission(assignment, "0000002")
-		reportToProcessLater.lastSubmittedToTurnitin = DateTime.now.minusMinutes(10)
-		session.save(reportToProcessLater)
+    val reportToProcessLater = validReportForSubmission(assignment, "0000002")
+    reportToProcessLater.lastSubmittedToTurnitin = DateTime.now.minusMinutes(10)
+    session.save(reportToProcessLater)
 
-		turnitinLtiQueueDao.findReportToProcessForSubmission.get should be (reportToProcess)
-	}}
+    turnitinLtiQueueDao.findReportToProcessForSubmission.get should be(reportToProcess)
+  }
+  }
 
-	@Test
-	def findReportToProcessForSubmissionNoneFound(): Unit = transactional { tx => {
-		val assignment = Fixtures.assignment("done")
-		assignment.turnitinId = "1234"
-		assignment.submitToTurnitin = true
-		session.save(assignment)
+  @Test
+  def findReportToProcessForSubmissionNoneFound(): Unit = transactional { tx => {
+    val assignment = Fixtures.assignment("done")
+    assignment.turnitinId = "1234"
+    assignment.submitToTurnitin = true
+    session.save(assignment)
 
-		val reportAlreadyDone = validReportForSubmission(assignment, "0000001")
-		reportAlreadyDone.turnitinId = "1234"
-		session.save(reportAlreadyDone)
+    val reportAlreadyDone = validReportForSubmission(assignment, "0000001")
+    reportAlreadyDone.turnitinId = "1234"
+    session.save(reportAlreadyDone)
 
-		val reportTooSoon = validReportForSubmission(assignment, "0000002")
-		reportTooSoon.lastSubmittedToTurnitin = DateTime.now
-		session.save(reportTooSoon)
+    val reportTooSoon = validReportForSubmission(assignment, "0000002")
+    reportTooSoon.lastSubmittedToTurnitin = DateTime.now
+    session.save(reportTooSoon)
 
-		val reportTooManyRetries = validReportForSubmission(assignment, "0000003")
-		reportTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
-		session.save(reportTooManyRetries)
+    val reportTooManyRetries = validReportForSubmission(assignment, "0000003")
+    reportTooManyRetries.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
+    session.save(reportTooManyRetries)
 
-		turnitinLtiQueueDao.findReportToProcessForSubmission.isEmpty should be {true}
-	}}
+    turnitinLtiQueueDao.findReportToProcessForSubmission.isEmpty should be (true)
+  }
+  }
 
-	private def validReportForReport(assignment: Assignment, universityId: String): OriginalityReport = {
-		val report = fullCompleteReport(assignment, universityId)
-		report.turnitinId = "1234"
-		report.fileRequested = DateTime.now
-		report.reportReceived = false
-		report.lastReportRequest = DateTime.now.minusMinutes(20)
-		report.reportRequestRetries = 0
-		report
-	}
+  private def validReportForReport(assignment: Assignment, universityId: String): OriginalityReport = {
+    val report = fullCompleteReport(assignment, universityId)
+    report.turnitinId = "1234"
+    report.fileRequested = DateTime.now
+    report.reportReceived = false
+    report.lastReportRequest = DateTime.now.minusMinutes(20)
+    report.reportRequestRetries = 0
+    report
+  }
 
-	@Test
-	def findReportToProcessForReportSuccess(): Unit = transactional { tx => {
-		val assignment = Fixtures.assignment("done")
-		assignment.turnitinId = "1234"
-		assignment.submitToTurnitin = true
-		session.save(assignment)
+  @Test
+  def findReportToProcessForReportSuccess(): Unit = transactional { tx => {
+    val assignment = Fixtures.assignment("done")
+    assignment.turnitinId = "1234"
+    assignment.submitToTurnitin = true
+    session.save(assignment)
 
-		val reportToProcess = validReportForReport(assignment, "0000001")
-		session.save(reportToProcess)
+    val reportToProcess = validReportForReport(assignment, "0000001")
+    session.save(reportToProcess)
 
-		val reportToProcessLater = validReportForReport(assignment, "0000002")
-		reportToProcessLater.lastReportRequest = DateTime.now.minusMinutes(10)
-		session.save(reportToProcessLater)
+    val reportToProcessLater = validReportForReport(assignment, "0000002")
+    reportToProcessLater.lastReportRequest = DateTime.now.minusMinutes(10)
+    session.save(reportToProcessLater)
 
-		turnitinLtiQueueDao.findReportToProcessForReport(false).get should be (reportToProcess)
-	}}
+    turnitinLtiQueueDao.findReportToProcessForReport(false).get should be(reportToProcess)
+  }
+  }
 
-	@Test
-	def findReportToProcessForReportNoneFound(): Unit = transactional { tx => {
-		val assignment = Fixtures.assignment("done")
-		assignment.turnitinId = "1234"
-		assignment.submitToTurnitin = true
-		session.save(assignment)
+  @Test
+  def findReportToProcessForReportNoneFound(): Unit = transactional { tx => {
+    val assignment = Fixtures.assignment("done")
+    assignment.turnitinId = "1234"
+    assignment.submitToTurnitin = true
+    session.save(assignment)
 
-		val reportAlreadyDone = validReportForReport(assignment, "0000001")
-		reportAlreadyDone.reportReceived = true
-		session.save(reportAlreadyDone.attachment)
-		session.save(reportAlreadyDone)
+    val reportAlreadyDone = validReportForReport(assignment, "0000001")
+    reportAlreadyDone.reportReceived = true
+    session.save(reportAlreadyDone.attachment)
+    session.save(reportAlreadyDone)
 
-		val reportTooSoon = validReportForReport(assignment, "0000002")
-		reportTooSoon.lastReportRequest = DateTime.now
-		session.save(reportTooSoon.attachment)
-		session.save(reportTooSoon)
+    val reportTooSoon = validReportForReport(assignment, "0000002")
+    reportTooSoon.lastReportRequest = DateTime.now
+    session.save(reportTooSoon.attachment)
+    session.save(reportTooSoon)
 
-		val reportTooManyRetries = validReportForReport(assignment, "0000003")
-		reportTooManyRetries.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
-		session.save(reportTooManyRetries.attachment)
-		session.save(reportTooManyRetries)
+    val reportTooManyRetries = validReportForReport(assignment, "0000003")
+    reportTooManyRetries.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
+    session.save(reportTooManyRetries.attachment)
+    session.save(reportTooManyRetries)
 
-		val reportNotSubmitted = validReportForReport(assignment, "0000004")
-		reportNotSubmitted.turnitinId = null
-		session.save(reportNotSubmitted.attachment)
-		session.save(reportNotSubmitted)
+    val reportNotSubmitted = validReportForReport(assignment, "0000004")
+    reportNotSubmitted.turnitinId = null
+    session.save(reportNotSubmitted.attachment)
+    session.save(reportNotSubmitted)
 
-		turnitinLtiQueueDao.findReportToProcessForReport(false).isEmpty should be {true}
-	}}
+    turnitinLtiQueueDao.findReportToProcessForReport(false).isEmpty should be (true)
+  }
+  }
 
-	@Test
-	def listCompletedAssignments(): Unit = transactional { tx =>
-  	val completeAssignment = Fixtures.assignment("done")
-		completeAssignment.turnitinId = "1234"
-		completeAssignment.submitToTurnitin = true
-		session.save(completeAssignment)
+  @Test
+  def listCompletedAssignments(): Unit = transactional { tx =>
+    val completeAssignment = Fixtures.assignment("done")
+    completeAssignment.turnitinId = "1234"
+    completeAssignment.submitToTurnitin = true
+    session.save(completeAssignment)
 
-		val completeReportReceieved = fullCompleteReport(completeAssignment, "0000001")
-		completeReportReceieved.reportReceived = true
-		session.save(completeReportReceieved)
-		val completeReportMaxSubmitRetry = fullCompleteReport(completeAssignment, "0000002")
-		completeReportMaxSubmitRetry.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
-		session.save(completeReportMaxSubmitRetry)
-		val completeReportMaxReportRetry = fullCompleteReport(completeAssignment, "0000003")
-		completeReportMaxReportRetry.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
-		session.save(completeReportMaxReportRetry)
+    val completeReportReceieved = fullCompleteReport(completeAssignment, "0000001")
+    completeReportReceieved.reportReceived = true
+    session.save(completeReportReceieved)
+    val completeReportMaxSubmitRetry = fullCompleteReport(completeAssignment, "0000002")
+    completeReportMaxSubmitRetry.submitToTurnitinRetries = TurnitinLtiService.SubmitAttachmentMaxRetries
+    session.save(completeReportMaxSubmitRetry)
+    val completeReportMaxReportRetry = fullCompleteReport(completeAssignment, "0000003")
+    completeReportMaxReportRetry.reportRequestRetries = TurnitinLtiService.ReportRequestMaxRetries
+    session.save(completeReportMaxReportRetry)
 
-		val incompleteAssignment = Fixtures.assignment("not-yet")
-		incompleteAssignment.turnitinId = "1234"
-		incompleteAssignment.submitToTurnitin = true
-		session.save(incompleteAssignment)
+    val incompleteAssignment = Fixtures.assignment("not-yet")
+    incompleteAssignment.turnitinId = "1234"
+    incompleteAssignment.submitToTurnitin = true
+    session.save(incompleteAssignment)
 
-		val incompleteReport = fullCompleteReport(incompleteAssignment, "0000004")
-		incompleteReport.reportReceived = false
-		incompleteReport.submitToTurnitinRetries = 0
-		incompleteReport.reportRequestRetries = 0
-		session.save(incompleteReport)
+    val incompleteReport = fullCompleteReport(incompleteAssignment, "0000004")
+    incompleteReport.reportReceived = false
+    incompleteReport.submitToTurnitinRetries = 0
+    incompleteReport.reportRequestRetries = 0
+    session.save(incompleteReport)
 
-		val result = turnitinLtiQueueDao.listCompletedAssignments
-		result.size should be (1)
-		result.head should be (completeAssignment)
-	}
+    val result = turnitinLtiQueueDao.listCompletedAssignments
+    result.size should be(1)
+    result.head should be(completeAssignment)
+  }
 
 }

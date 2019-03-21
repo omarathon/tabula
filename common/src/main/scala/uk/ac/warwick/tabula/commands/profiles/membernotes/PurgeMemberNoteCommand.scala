@@ -7,65 +7,65 @@ import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, ExtenuatingCircumsta
 import uk.ac.warwick.tabula.services.{AutowiringMemberNoteServiceComponent, MemberNoteServiceComponent}
 
 object PurgeMemberNoteCommand {
-	def apply(memberNote: MemberNote, member: Member) =
-		new PurgeAbstractMemberNoteCommandInternal(memberNote, member)
-			with AutowiringMemberNoteServiceComponent
-			with ComposableCommand[AbstractMemberNote]
-			with PurgeMemberNoteValidation
-			with DeleteMemberNotePermissions
-			with DeleteMemberNoteCommandState
-			with Describable[AbstractMemberNote] {
+  def apply(memberNote: MemberNote, member: Member) =
+    new PurgeAbstractMemberNoteCommandInternal(memberNote, member)
+      with AutowiringMemberNoteServiceComponent
+      with ComposableCommand[AbstractMemberNote]
+      with PurgeMemberNoteValidation
+      with DeleteMemberNotePermissions
+      with DeleteMemberNoteCommandState
+      with Describable[AbstractMemberNote] {
 
-			override lazy val eventName = "PurgeMemberNote"
+      override lazy val eventName = "PurgeMemberNote"
 
-			override def describe(d: Description) {
-				d.memberNote(memberNote)
-			}
-		}
+      override def describe(d: Description) {
+        d.memberNote(memberNote)
+      }
+    }
 }
 
 object PurgeExtenuatingCircumstancesCommand {
-	def apply(circumstances: ExtenuatingCircumstances, member: Member) =
-		new PurgeAbstractMemberNoteCommandInternal(circumstances, member)
-			with AutowiringMemberNoteServiceComponent
-			with ComposableCommand[AbstractMemberNote]
-			with PurgeMemberNoteValidation
-			with DeleteMemberNotePermissions
-			with DeleteMemberNoteCommandState
-			with Describable[AbstractMemberNote] {
+  def apply(circumstances: ExtenuatingCircumstances, member: Member) =
+    new PurgeAbstractMemberNoteCommandInternal(circumstances, member)
+      with AutowiringMemberNoteServiceComponent
+      with ComposableCommand[AbstractMemberNote]
+      with PurgeMemberNoteValidation
+      with DeleteMemberNotePermissions
+      with DeleteMemberNoteCommandState
+      with Describable[AbstractMemberNote] {
 
-			override lazy val eventName = "PurgeExtenuatingCircumstances"
+      override lazy val eventName = "PurgeExtenuatingCircumstances"
 
-			override def describe(d: Description) {
-				d.extenuatingCircumstances(circumstances)
-			}
-		}
+      override def describe(d: Description) {
+        d.extenuatingCircumstances(circumstances)
+      }
+    }
 }
 
 
 class PurgeAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMemberNote, val member: Member)
-	extends CommandInternal[AbstractMemberNote] {
+  extends CommandInternal[AbstractMemberNote] {
 
-	self: MemberNoteServiceComponent =>
+  self: MemberNoteServiceComponent =>
 
-	override def applyInternal(): AbstractMemberNote = {
-		HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
-			case memberNote: MemberNote => memberNoteService.delete(memberNote)
-			case circumstances: ExtenuatingCircumstances => memberNoteService.delete(circumstances)
-		}
-		abstractMemberNote
-	}
+  override def applyInternal(): AbstractMemberNote = {
+    HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
+      case memberNote: MemberNote => memberNoteService.delete(memberNote)
+      case circumstances: ExtenuatingCircumstances => memberNoteService.delete(circumstances)
+    }
+    abstractMemberNote
+  }
 
 }
 
 trait PurgeMemberNoteValidation extends SelfValidating {
 
-	self: DeleteMemberNoteCommandState =>
+  self: DeleteMemberNoteCommandState =>
 
-	override def validate(errors: Errors) {
-		if (!abstractMemberNote.deleted) {
-			errors.reject("profiles.memberNote.delete.notDeleted")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (!abstractMemberNote.deleted) {
+      errors.reject("profiles.memberNote.delete.notDeleted")
+    }
+  }
 
 }

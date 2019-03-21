@@ -15,34 +15,34 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 @Controller
 @RequestMapping(Array("/exams/grids"))
 class ExamGridsHomeController extends ExamsController
-	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent with CurrentAcademicYear {
+  with DepartmentScopedController with AcademicYearScopedController
+  with AutowiringModuleAndDepartmentServiceComponent with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent with CurrentAcademicYear {
 
-	override def departmentPermission: Permission = Permissions.Department.ExamGrids
+  override def departmentPermission: Permission = Permissions.Department.ExamGrids
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(department: Department): Option[Department] = retrieveActiveDepartment(None)
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(department: Department): Option[Department] = retrieveActiveDepartment(None)
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("activeDepartment") activeDepartment: Option[Department],
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
-	): Mav = {
-		if (activeDepartment.isDefined && activeAcademicYear.isDefined) {
-			Redirect(Routes.Grids.departmentAcademicYear(activeDepartment.get, activeAcademicYear.get))
-		} else if (activeDepartment.isDefined) {
-			Redirect(Routes.Grids.departmentAcademicYear(activeDepartment.get, academicYear))
-		} else {
-			val featureFilteredDepartments = departmentsWithPermission
-			Mav("exams/grids/home",
-				"featureFilteredDepartments" -> featureFilteredDepartments,
-				"academicYear" -> academicYear
-			)
-		}
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("activeDepartment") activeDepartment: Option[Department],
+    @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+  ): Mav = {
+    if (activeDepartment.isDefined && activeAcademicYear.isDefined) {
+      Redirect(Routes.Grids.departmentAcademicYear(activeDepartment.get, activeAcademicYear.get))
+    } else if (activeDepartment.isDefined) {
+      Redirect(Routes.Grids.departmentAcademicYear(activeDepartment.get, academicYear))
+    } else {
+      val featureFilteredDepartments = departmentsWithPermission
+      Mav("exams/grids/home",
+        "featureFilteredDepartments" -> featureFilteredDepartments,
+        "academicYear" -> academicYear
+      )
+    }
+  }
 
 }

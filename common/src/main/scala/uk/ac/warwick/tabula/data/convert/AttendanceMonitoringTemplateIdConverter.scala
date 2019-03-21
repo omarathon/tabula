@@ -8,9 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class AttendanceMonitoringTemplateIdConverter extends TwoWayConverter[String, AttendanceMonitoringTemplate] {
 
-	@Autowired var service: AttendanceMonitoringService = _
+  @Autowired var service: AttendanceMonitoringService = _
 
-	override def convertRight(id: String): AttendanceMonitoringTemplate = (Option(id) flatMap { service.getTemplateSchemeById }).orNull
-	override def convertLeft(scheme: AttendanceMonitoringTemplate): String = (Option(scheme) map {_.id}).orNull
+  override def convertRight(id: String): AttendanceMonitoringTemplate = (Option(id) flatMap {
+    service.getTemplateSchemeById
+  }).orNull
+
+  override def convertLeft(scheme: AttendanceMonitoringTemplate): String = (Option(scheme).map(_.id)).orNull
 
 }

@@ -16,56 +16,56 @@ import uk.ac.warwick.userlookup.User
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}/marks"))
 class MarkerUploadMarksController extends CourseworkController {
 
-	type Command = Appliable[Seq[MarkerFeedback]] with MarkerAddMarksState with AddMarksCommandBindListener
+  type Command = Appliable[Seq[MarkerFeedback]] with MarkerAddMarksState with AddMarksCommandBindListener
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
-		MarkerAddMarksCommand(mandatory(assignment), mandatory(marker), currentUser, GenerateGradesFromMarkCommand(assignment))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
+    MarkerAddMarksCommand(mandatory(assignment), mandatory(marker), currentUser, GenerateGradesFromMarkCommand(assignment))
 
-	@RequestMapping
-	def viewForm (@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		Mav("cm2/admin/assignments/upload_marks",
-			"isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
-			"templateUrl" -> Routes.admin.assignment.markerFeedback.marksTemplate(assignment, marker),
-			"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
-			"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
-			"isProxying" -> cmd.isProxying,
-			"proxyingAs" -> marker
-		).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
-	}
+  @RequestMapping
+  def viewForm(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    Mav("cm2/admin/assignments/upload_marks",
+      "isGradeValidation" -> cmd.assignment.module.adminDepartment.assignmentGradeValidation,
+      "templateUrl" -> Routes.admin.assignment.markerFeedback.marksTemplate(assignment, marker),
+      "formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
+      "cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
+      "isProxying" -> cmd.isProxying,
+      "proxyingAs" -> marker
+    ).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("!confirm"))
-	def preview(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		if (errors.hasErrors) viewForm(assignment, marker, cmd, errors)
-		else {
-			cmd.postBindValidation(errors)
-			Mav("cm2/admin/assignments/upload_marks_preview",
-				"formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
-				"cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
-				"isProxying" -> cmd.isProxying,
-				"proxyingAs" -> marker
-			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirm"))
+  def preview(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    if (errors.hasErrors) viewForm(assignment, marker, cmd, errors)
+    else {
+      cmd.postBindValidation(errors)
+      Mav("cm2/admin/assignments/upload_marks_preview",
+        "formUrl" -> Routes.admin.assignment.markerFeedback.marks(assignment, marker),
+        "cancelUrl" -> Routes.admin.assignment.markerFeedback(assignment, marker),
+        "isProxying" -> cmd.isProxying,
+        "proxyingAs" -> marker
+      ).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, proxying = cmd.isProxying))
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def upload(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
-		cmd.apply()
-		Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirm=true"))
+  def upload(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") cmd: Command, errors: Errors): Mav = {
+    cmd.apply()
+    Redirect(Routes.admin.assignment.markerFeedback(assignment, marker))
+  }
 
 }
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks"))
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/marks"))
 class CurrentMarkerUploadMarksController extends CourseworkController {
 
-	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
-		Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
-	}
+  @RequestMapping
+  def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback.marks(assignment, currentUser.apparentUser))
+  }
 }

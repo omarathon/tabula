@@ -6,20 +6,20 @@ import com.sksamuel.elastic4s.searches.SearchRequest
 import org.springframework.beans.factory.annotation.Autowired
 
 abstract class AbstractQueryService
-	extends ElasticsearchClientComponent
-		with ElasticsearchIndexName
-		with ElasticsearchIndexType
-		with ElasticsearchSearching {
+  extends ElasticsearchClientComponent
+    with ElasticsearchIndexName
+    with ElasticsearchIndexType
+    with ElasticsearchSearching {
 
-	@Autowired var client: ElasticClient = _
+  @Autowired var client: ElasticClient = _
 
 }
 
 trait ElasticsearchSearching {
-	self: ElasticsearchClientComponent
-		with ElasticsearchIndexName
-		with ElasticsearchIndexType =>
+  self: ElasticsearchClientComponent
+    with ElasticsearchIndexName
+    with ElasticsearchIndexType =>
 
-	protected def searchRequest: SearchRequest = search(index)
+  protected def searchRequest: SearchRequest = search(index)
 
 }

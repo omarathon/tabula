@@ -18,8 +18,8 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/sysadmin/turnitinlti"))
 class TurnitinLtiAdminController extends BaseSysadminController {
 
-	@RequestMapping
-	def home = Mav("sysadmin/turnitinlti/home")
+  @RequestMapping
+  def home = Mav("sysadmin/turnitinlti/home")
 
 }
 
@@ -27,119 +27,119 @@ class TurnitinLtiAdminController extends BaseSysadminController {
 @RequestMapping(value = Array("/sysadmin/turnitinlti/submitassignment"))
 class TurnitinLtiSubmitAssignmentController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("turnitinLtiSubmitAssignmentCommand")
-	def turnitinLtiSubmitAssignmentCommand(user: CurrentUser) = TurnitinLtiSubmitAssignmentCommand(user)
+  @ModelAttribute("turnitinLtiSubmitAssignmentCommand")
+  def turnitinLtiSubmitAssignmentCommand(user: CurrentUser) = TurnitinLtiSubmitAssignmentCommand(user)
 
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/submit-assignment")
+  @annotation.RequestMapping(method = Array(GET, HEAD))
+  def form() = Mav("sysadmin/turnitinlti/submit-assignment")
 
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmitAssignmentCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
-		if (errors.hasErrors){
-			form()
-		} else {
-			val response: TurnitinLtiResponse = cmd.apply()
-			Mav("sysadmin/turnitinlti/submit-assignment-done",
-				"response" -> response)
-		}
+  @annotation.RequestMapping(method = Array(POST))
+  def add(@Valid @ModelAttribute("turnitinLtiSubmitAssignmentCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
+    if (errors.hasErrors) {
+      form()
+    } else {
+      val response: TurnitinLtiResponse = cmd.apply()
+      Mav("sysadmin/turnitinlti/submit-assignment-done",
+        "response" -> response)
+    }
 }
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/turnitinlti/submitpaper"))
 class TurnitinLtiSubmitPaperController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("turnitinLtiSubmitPaperCommand")
-	def turnitinLtiSubmitPaperCommand(user: CurrentUser) = TurnitinLtiSubmitPaperCommand(user)
+  @ModelAttribute("turnitinLtiSubmitPaperCommand")
+  def turnitinLtiSubmitPaperCommand(user: CurrentUser) = TurnitinLtiSubmitPaperCommand(user)
 
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/submit-paper")
+  @annotation.RequestMapping(method = Array(GET, HEAD))
+  def form() = Mav("sysadmin/turnitinlti/submit-paper")
 
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmitPaperCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
-		if (errors.hasErrors){
-			form()
-		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
-		}
+  @annotation.RequestMapping(method = Array(POST))
+  def add(@Valid @ModelAttribute("turnitinLtiSubmitPaperCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
+    if (errors.hasErrors) {
+      form()
+    } else {
+      cmd.apply()
+      Redirect("/sysadmin/turnitinlti")
+    }
 }
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/turnitinlti/listendpoints"))
 class TurnitinLtiListEndpointsController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("turnitinLtiListEndpointsCommand")
-	def turnitinLtiListEndpointsCommand(user: CurrentUser) = TurnitinLtiListEndpointsCommand(user)
+  @ModelAttribute("turnitinLtiListEndpointsCommand")
+  def turnitinLtiListEndpointsCommand(user: CurrentUser) = TurnitinLtiListEndpointsCommand(user)
 
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/list-endpoints")
+  @annotation.RequestMapping(method = Array(GET, HEAD))
+  def form() = Mav("sysadmin/turnitinlti/list-endpoints")
 
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiListEndpointsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
-		if (errors.hasErrors){
-			form()
-		} else {
-			cmd.apply()
-			Redirect("/sysadmin/turnitinlti")
-		}
+  @annotation.RequestMapping(method = Array(POST))
+  def add(@Valid @ModelAttribute("turnitinLtiListEndpointsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
+    if (errors.hasErrors) {
+      form()
+    } else {
+      cmd.apply()
+      Redirect("/sysadmin/turnitinlti")
+    }
 }
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/turnitinlti/submissiondetails"))
 class TurnitinLtiSubmissionDetailsController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("turnitinLtiSubmissionDetailsCommand")
-	def turnitinLtiSubmissionDetailsCommand = TurnitinLtiSubmissionDetailsCommand()
+  @ModelAttribute("turnitinLtiSubmissionDetailsCommand")
+  def turnitinLtiSubmissionDetailsCommand = TurnitinLtiSubmissionDetailsCommand()
 
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/submission-details")
+  @annotation.RequestMapping(method = Array(GET, HEAD))
+  def form() = Mav("sysadmin/turnitinlti/submission-details")
 
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
-	if (errors.hasErrors){
-		form()
-	} else {
-		val response: TurnitinLtiResponse = cmd.apply()
-		Mav("sysadmin/turnitinlti/submission-result",
-			"response" -> response,
-			"submission_info" -> response.submissionInfo)
-	}
+  @annotation.RequestMapping(method = Array(POST))
+  def add(@Valid @ModelAttribute("turnitinLtiSubmissionDetailsCommand") cmd: Appliable[TurnitinLtiResponse], errors: Errors): Mav =
+    if (errors.hasErrors) {
+      form()
+    } else {
+      val response: TurnitinLtiResponse = cmd.apply()
+      Mav("sysadmin/turnitinlti/submission-result",
+        "response" -> response,
+        "submission_info" -> response.submissionInfo)
+    }
 
 }
 
 object LtiConformanceTesterGenerateController {
-	type LtiConformanceTesterPopulateFormCommand = Appliable[Map[String, String]]
-	with LtiConformanceTesterPopulateFormCommandState
+  type LtiConformanceTesterPopulateFormCommand = Appliable[Map[String, String]]
+    with LtiConformanceTesterPopulateFormCommandState
 }
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/turnitinlti/conformancetester-generate"))
 class LtiConformanceTesterGenerateController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("ltiConformanceTesterPopulateFormCommand")
-	def ltiConformanceTesterPopulateFormCommand(user: CurrentUser) = LtiConformanceTesterPopulateFormCommand(user)
+  @ModelAttribute("ltiConformanceTesterPopulateFormCommand")
+  def ltiConformanceTesterPopulateFormCommand(user: CurrentUser) = LtiConformanceTesterPopulateFormCommand(user)
 
-	@annotation.RequestMapping(method=Array(GET, HEAD))
-	def form() = Mav("sysadmin/turnitinlti/conformance-tester-generate")
+  @annotation.RequestMapping(method = Array(GET, HEAD))
+  def form() = Mav("sysadmin/turnitinlti/conformance-tester-generate")
 
-	@annotation.RequestMapping(method=Array(POST))
-	def add(@Valid @ModelAttribute("ltiConformanceTesterPopulateFormCommand") cmd: LtiConformanceTesterPopulateFormCommand, errors: Errors): Mav =
-		if (errors.hasErrors){
-			form()
-		} else {
-			val response = cmd.apply()
-			Mav("sysadmin/turnitinlti/conformance-tester-generate-result",
-				"response" -> response,
-				"endpoint" -> cmd.endpoint)
-		}
+  @annotation.RequestMapping(method = Array(POST))
+  def add(@Valid @ModelAttribute("ltiConformanceTesterPopulateFormCommand") cmd: LtiConformanceTesterPopulateFormCommand, errors: Errors): Mav =
+    if (errors.hasErrors) {
+      form()
+    } else {
+      val response = cmd.apply()
+      Mav("sysadmin/turnitinlti/conformance-tester-generate-result",
+        "response" -> response,
+        "endpoint" -> cmd.endpoint)
+    }
 }

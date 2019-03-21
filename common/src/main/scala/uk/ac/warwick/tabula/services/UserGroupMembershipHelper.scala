@@ -28,7 +28,9 @@ import scala.reflect._
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
   def findBy(user: User): Seq[A]
+
   def cacheName: String
+
   def cache: Option[Cache[String, Array[String]]]
 }
 
@@ -51,7 +53,7 @@ trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
   *
   * TODO PermissionsService ought to use this when it is fully featured
   */
-private[services] class UserGroupMembershipHelper[A <: StringId with Serializable : ClassTag] (val path: String, val checkUniversityIds: Boolean = true)
+private[services] class UserGroupMembershipHelper[A <: StringId with Serializable : ClassTag](val path: String, val checkUniversityIds: Boolean = true)
   extends UserGroupMembershipHelperMethods[A]
     with UserGroupMembershipHelperLookup
     with Daoisms
@@ -60,7 +62,7 @@ private[services] class UserGroupMembershipHelper[A <: StringId with Serializabl
 
   val runtimeClass: Class[_] = classTag[A].runtimeClass
 
-  lazy val cacheName: String = simpleEntityName + "-" + path.replace(".","-")
+  lazy val cacheName: String = simpleEntityName + "-" + path.replace(".", "-")
   lazy val cache: Option[Cache[String, Array[String]]] = Wire.optionNamed[Cache[String, Array[String]]](cacheName)
 
   def findBy(user: User): Seq[A] = RequestLevelCache.cachedBy(s"UserGroupMembershipHelper[${runtimeClass.getName}].$path", user.getUserId) {
@@ -83,62 +85,56 @@ trait UserGroupMembershipHelperLookup {
   self: SessionComponent with HelperRestrictions with UserLookupComponent =>
 
   def runtimeClass: Class[_]
+
   def path: String
+
   def checkUniversityIds: Boolean
 
   lazy val simpleEntityName: String = runtimeClass.getSimpleName
 
-  // A series of confusing variables for building joined queries across paths split by.dots
-  private lazy val pathParts = {
-    val parts = path.split("\\.").toList.reverse
+  require(!path.contains('.'), "Nested paths for UserGroupMembershipHelper are no longer supported")
 
-    if (parts.size > 2) throw new IllegalArgumentException("Only allowed one or two parts to the path")
-
-    parts
-  }
-
-  // The actual name of the UserGroup
-  lazy val usergroupName: String = pathParts.head
-  // A possible table to join through to get to userProp
-  lazy val joinTable: Option[String] = pathParts.tail.headOption
-  // The overall property name, possibly including the joinTable
-  lazy val prop: String = joinTable.fold("")(_ + ".") + usergroupName
-
-  lazy val groupsByUserSql: String = {
-    val leftJoin = joinTable.fold("")( table => s"left join r.$table as $table" )
-
+  lazy val groupsByUserHql: String = {
     // skip the university IDs check if we know we only ever use usercodes
     val universityIdsClause =
-      if (checkUniversityIds) s""" or (
-					$prop.universityIds = true and
-					((:universityId in elements($prop.staticIncludeUsers)
-					or :universityId in elements($prop.includeUsers))
-					and :universityId not in elements($prop.excludeUsers))
-				)"""
+      if (checkUniversityIds)
+        """ or (
+          ug.universityIds = true and
+          ((:universityId in elements(ug.staticIncludeUsers)
+          or :universityId in elements(ug.includeUsers))
+          and :universityId not in elements(ug.excludeUsers))
+        )"""
       else ""
 
+    def joinRestriction(alias: String): String =
+      if (checkUniversityIds)
+        s"""on (
+          (ug.universityIds = false and $alias = :userId) or
+          (ug.universityIds = true and $alias = :universityId)
+        )"""
+      else s"on ug.universityIds = false and $alias = :userId"
+
     s"""
-			select r.id
-			from $simpleEntityName r
-			$leftJoin
+      select r.id
+      from $simpleEntityName r
+        inner join r.$path ug
+        left join ug.staticIncludeUsers static ${joinRestriction("static")}
+        left join ug.includeUsers include ${joinRestriction("include")}
+        left join ug.excludeUsers exclude ${joinRestriction("exclude")}
 			where
-				(
-					$prop.universityIds = false and
-			 		((:userId in elements($prop.staticIncludeUsers)
-					or :userId in elements($prop.includeUsers))
-					and :userId not in elements($prop.excludeUsers))
-				) $universityIdsClause
-		"""
+        (static is not null or include is not null) and exclude is null
+    """
   }
 
   // To override in tests
   protected def getUser(usercode: String): User = userLookup.getUserByUserId(usercode)
+
   protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map {
     usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala
   }.getOrElse(Nil)
 
   protected def findByInternal(user: User): Seq[String] = {
-    val groupsByUser = session.createQuery(groupsByUserSql)
+    val groupsByUser = session.createQuery(groupsByUserHql)
       .setString("universityId", user.getWarwickId)
       .setString("userId", user.getUserId)
       .list.asInstanceOf[JList[String]]
@@ -150,12 +146,8 @@ trait UserGroupMembershipHelperLookup {
       else {
         val criteria = session.createCriteria(runtimeClass)
 
-        joinTable.foreach { table =>
-          criteria.createAlias(table, table)
-        }
-
         criteria
-          .createAlias(prop, "usergroupAlias")
+          .createAlias(path, "usergroupAlias")
           .add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
           .setProjection(Projections.id())
           .list.asInstanceOf[JList[String]]
@@ -167,7 +159,7 @@ trait UserGroupMembershipHelperLookup {
 }
 
 class UserGroupMembershipCacheFactory(val runtimeClass: Class[_], val path: String, val checkUniversityIds: Boolean = true)
-  extends SingularCacheEntryFactory[String, Array[String]] with UserGroupMembershipHelperLookup with Daoisms with AutowiringUserLookupComponent  with TaskBenchmarking {
+  extends SingularCacheEntryFactory[String, Array[String]] with UserGroupMembershipHelperLookup with Daoisms with AutowiringUserLookupComponent with TaskBenchmarking {
 
   def create(usercode: String): Array[String] = {
     val user = getUser(usercode)
@@ -184,7 +176,7 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
   @BeanProperty var path: String = _
   @BeanProperty var checkUniversityIds = true
 
-  def cacheName: String = runtimeClass.getSimpleName + "-" + path.replace(".","-")
+  def cacheName: String = runtimeClass.getSimpleName + "-" + path.replace(".", "-")
 
   def createInstance: Cache[String, Array[String]] =
     Caches.builder(
@@ -225,6 +217,7 @@ class UserGroupMembershipHelperCacheService extends QueueListener with Initializ
   }
 
   override def isListeningToQueue = true
+
   override def onReceive(item: Any) {
     logger.debug(s"Synchronising item $item for $context")
     item match {
@@ -263,18 +256,21 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
       true
     } else false
   }
+
   def remove(user: User): Boolean = {
     if (underlying.remove(user)) {
       cacheService.foreach(_.invalidate(helper, user))
       true
     } else false
   }
+
   def exclude(user: User): Boolean = {
     if (underlying.exclude(user)) {
       cacheService.foreach(_.invalidate(helper, user))
       true
     } else false
   }
+
   def unexclude(user: User): Boolean = {
     if (underlying.unexclude(user)) {
       cacheService.foreach(_.invalidate(helper, user))
@@ -292,24 +288,28 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
       true
     } else false
   }
+
   def removeUserId(userId: String): Boolean = {
     if (underlying.knownType.removeUserId(userId)) {
       cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
       true
     } else false
   }
+
   def excludeUserId(userId: String): Boolean = {
     if (underlying.knownType.excludeUserId(userId)) {
       cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
       true
     } else false
   }
+
   def unexcludeUserId(userId: String): Boolean = {
     if (underlying.knownType.unexcludeUserId(userId)) {
       cacheService.foreach(_.invalidate(helper, getUserFromUserId(userId)))
       true
     } else false
   }
+
   def staticUserIds_=(newIds: Seq[String]): Unit = {
     val existingIds = underlying.knownType.staticUserIds
     val addedIds = newIds.diff(existingIds)
@@ -322,6 +322,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
     for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
       cacheService.invalidate(helper, user)
   }
+
   def includedUserIds_=(newIds: Seq[String]): Unit = {
     val existingIds = underlying.knownType.includedUserIds
     val addedIds = newIds.diff(existingIds)
@@ -334,6 +335,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
     for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
       cacheService.invalidate(helper, user)
   }
+
   def excludedUserIds_=(newIds: Seq[String]): Unit = {
     val existingIds = underlying.knownType.excludedUserIds
     val addedIds = newIds.diff(existingIds)
@@ -346,6 +348,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
     for (cacheService <- cacheService; user <- allIds.map(getUserFromUserId))
       cacheService.invalidate(helper, user)
   }
+
   def copyFrom(otherGroup: UnspecifiedTypeUserGroup): Unit = {
     val existingIds = underlying.knownType.members
     val newIds = otherGroup.knownType.members
@@ -362,23 +365,40 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
   }
 
   def users: Seq[User] = underlying.users
+
   def baseWebgroup: String = underlying.baseWebgroup
+
   def excludes: Seq[User] = underlying.excludes
+
   def size: Int = underlying.size
+
   def isEmpty: Boolean = underlying.isEmpty
+
   def includesUser(user: User): Boolean = underlying.includesUser(user)
+
   def excludesUser(user: User): Boolean = underlying.excludesUser(user)
+
   def hasSameMembersAs(other: UnspecifiedTypeUserGroup): Boolean = underlying.hasSameMembersAs(other)
+
   def duplicate() = new UserGroupCacheManager(underlying.duplicate(), helper) // Should this be wrapped or not?
   val universityIds: Boolean = underlying.universityIds
+
   def knownType: UserGroupCacheManager = this
+
   def allIncludedIds: Seq[String] = underlying.knownType.allIncludedIds
+
   def allExcludedIds: Seq[String] = underlying.knownType.allExcludedIds
+
   def members: Seq[String] = underlying.knownType.members
+
   def includedUserIds: Seq[String] = underlying.knownType.includedUserIds
+
   def excludedUserIds: Seq[String] = underlying.knownType.excludedUserIds
+
   def staticUserIds: Seq[String] = underlying.knownType.staticUserIds
+
   def includesUserId(userId: String): Boolean = underlying.knownType.includesUserId(userId)
+
   def excludesUserId(userId: String): Boolean = underlying.knownType.excludesUserId(userId)
 
   override def toString: String =

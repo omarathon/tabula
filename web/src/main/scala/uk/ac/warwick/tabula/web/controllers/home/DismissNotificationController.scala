@@ -13,24 +13,24 @@ import uk.ac.warwick.tabula.web.views.MarkdownRendererImpl
 @Controller
 class DismissNotificationController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {
 
-	@ModelAttribute("dismissCommand")
-	def dismissCommand(user: CurrentUser, @PathVariable notification: Notification[_ >: Null <: ToEntityReference ,_]) =
-		DismissNotificationCommand(Seq(notification), dismiss=true, user.apparentUser)
+  @ModelAttribute("dismissCommand")
+  def dismissCommand(user: CurrentUser, @PathVariable notification: Notification[_ >: Null <: ToEntityReference, _]) =
+    DismissNotificationCommand(Seq(notification), dismiss = true, user.apparentUser)
 
-	@ModelAttribute("restoreCommand")
-	def restoreCommand(user: CurrentUser, @PathVariable notification: Notification[_ >: Null <: ToEntityReference ,_]) =
-		DismissNotificationCommand(Seq(notification), dismiss=false, user.apparentUser)
+  @ModelAttribute("restoreCommand")
+  def restoreCommand(user: CurrentUser, @PathVariable notification: Notification[_ >: Null <: ToEntityReference, _]) =
+    DismissNotificationCommand(Seq(notification), dismiss = false, user.apparentUser)
 
 
-	@RequestMapping(value=Array("/activity/dismiss/{notification}"))
-	def dismiss(@ModelAttribute("dismissCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
-		val activities = command.apply()
-		toMav(activities)
-	}
+  @RequestMapping(value = Array("/activity/dismiss/{notification}"))
+  def dismiss(@ModelAttribute("dismissCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
+    val activities = command.apply()
+    toMav(activities)
+  }
 
-	@RequestMapping(value=Array("/activity/restore/{notification}"))
-	def restore(@ModelAttribute("restoreCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
-		val activities = command.apply()
-		toMav(activities)
-	}
+  @RequestMapping(value = Array("/activity/restore/{notification}"))
+  def restore(@ModelAttribute("restoreCommand") command: Appliable[Seq[Activity[_]]]): Mav = {
+    val activities = command.apply()
+    toMav(activities)
+  }
 }

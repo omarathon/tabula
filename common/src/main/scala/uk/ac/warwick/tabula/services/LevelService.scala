@@ -7,30 +7,32 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{LevelDaoComponent, AutowiringLevelDaoComponent}
 
 /**
- * Handles data about levels
- */
+  * Handles data about levels
+  */
 trait LevelServiceComponent {
-	def levelService: LevelService
+  def levelService: LevelService
 }
 
 
 trait AutowiringLevelServiceComponent extends LevelServiceComponent {
-	var levelService: LevelService = Wire[LevelService]
+  var levelService: LevelService = Wire[LevelService]
 }
 
 trait LevelService {
-	def levelFromCode(code: String): Option[Level]
-	def getAllLevels: Seq[Level]
+  def levelFromCode(code: String): Option[Level]
+
+  def getAllLevels: Seq[Level]
 }
 
 abstract class AbstractLevelService extends LevelService {
-	self: LevelDaoComponent =>
+  self: LevelDaoComponent =>
 
-	def levelFromCode(code: String): Option[Level] = code.maybeText.flatMap {
-		someCode => levelDao.getByCode(someCode)
-	}
-	def getAllLevels: Seq[Level] =	levelDao.getAllLevels
+  def levelFromCode(code: String): Option[Level] = code.maybeText.flatMap {
+    someCode => levelDao.getByCode(someCode)
+  }
+
+  def getAllLevels: Seq[Level] = levelDao.getAllLevels
 }
 
-@Service ("levelService")
+@Service("levelService")
 class LevelServiceImpl extends AbstractLevelService with AutowiringLevelDaoComponent

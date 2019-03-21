@@ -1,20 +1,20 @@
 <#escape x as x?html>
-<#import "../reports_macros.ftl" as reports_macros />
+  <#import "../reports_macros.ftl" as reports_macros />
 
-<#function route_function dept>
-	<#local result><@routes.reports.missedAttendance dept academicYear /></#local>
-	<#return result />
-</#function>
-<@fmt.id7_deptheader title="Missed monitoring points for ${department.name}" route_function=route_function />
+  <#function route_function dept>
+    <#local result><@routes.reports.missedAttendance dept academicYear /></#local>
+    <#return result />
+  </#function>
+  <@fmt.id7_deptheader title="Missed monitoring points for ${department.name}" route_function=route_function />
 
-<#assign reportUrl><@routes.reports.missedAttendance department academicYear /></#assign>
-<@reports_macros.reportLoader reportUrl>
-	<ul class="dropdown-menu">
-		<li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadCsv department academicYear />">CSV</a></li>
-		<li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadXlsx department academicYear />">Excel</a></li>
-		<li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadXml department academicYear />">XML</a></li>
-	</ul>
-</@reports_macros.reportLoader>
-<@reports_macros.attendanceMonitoringReportScript />
+  <#assign reportUrl><@routes.reports.missedAttendance department academicYear /></#assign>
+  <@reports_macros.reportLoader reportUrl>
+    <ul class="dropdown-menu">
+      <li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadCsv department academicYear />">CSV</a></li>
+      <li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadXlsx department academicYear />">Excel</a></li>
+      <li><a href="#" data-href="<@routes.reports.missedAttendanceDownloadXml department academicYear />">XML</a></li>
+    </ul>
+  </@reports_macros.reportLoader>
+  <@reports_macros.attendanceMonitoringReportScript />
 
 </#escape>

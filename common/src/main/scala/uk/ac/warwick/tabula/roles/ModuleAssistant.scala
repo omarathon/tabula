@@ -8,40 +8,40 @@ case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssis
 
 case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Module Assistant"
+  override def description = "Module Assistant"
 
-	GeneratesSubRole(ModuleAuditorRoleDefinition)
-	GeneratesSubRole(MarkerRoleDefinition)
+  GeneratesSubRole(ModuleAuditorRoleDefinition)
+  GeneratesSubRole(MarkerRoleDefinition)
 
-	GrantsScopedPermission(
-		RolesAndPermissions.Read,
+  GrantsScopedPermission(
+    RolesAndPermissions.Read,
 
-		Assignment.Create,
-		Assignment.Update,
-		Assignment.MarkOnBehalf,
+    Assignment.Create,
+    Assignment.Update,
+    Assignment.MarkOnBehalf,
 
-		Submission.ManagePlagiarismStatus,
-		Submission.CheckForPlagiarism,
-		Submission.ReleaseForMarking,
-		// No Submission.Create() here for obvious reasons!
-		Submission.Update,
+    Submission.ManagePlagiarismStatus,
+    Submission.CheckForPlagiarism,
+    Submission.ReleaseForMarking,
+    // No Submission.Create() here for obvious reasons!
+    Submission.Update,
 
-		Extension.Create,
-		Extension.Update,
-		Extension.Delete,
+    Extension.Create,
+    Extension.Update,
+    Extension.Delete,
 
-		AssignmentFeedback.Manage,
-		AssignmentFeedback.DownloadMarksTemplate,
-		AssignmentMarkerFeedback.Manage,
-		ExamFeedback.Manage,
-		ExamFeedback.DownloadMarksTemplate,
-		ExamMarkerFeedback.Manage,
+    AssignmentFeedback.Manage,
+    AssignmentFeedback.DownloadMarksTemplate,
+    AssignmentMarkerFeedback.Manage,
+    ExamFeedback.Manage,
+    ExamFeedback.DownloadMarksTemplate,
+    ExamMarkerFeedback.Manage,
 
-		SmallGroups.Create,
-		SmallGroupEvents.Register,
-		SmallGroups.Update,
-		SmallGroups.Allocate
-	)
+    SmallGroups.Create,
+    SmallGroupEvents.Register,
+    SmallGroups.Update,
+    SmallGroups.Allocate
+  )
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
+  def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
 }

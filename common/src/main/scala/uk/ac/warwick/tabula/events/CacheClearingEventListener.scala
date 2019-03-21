@@ -7,24 +7,25 @@ import uk.ac.warwick.util.cache.{CacheStore, Caches}
 
 class CacheClearingEventListener extends EventListener with AutowiringCacheStrategyComponent {
 
-	lazy val markerWorkflowCacheStore: CacheStore[MarkerWorkflowCache.AssignmentId, MarkerWorkflowCache.Json] =
-		Caches.builder(MarkerWorkflowCache.CacheName, cacheStrategy).buildStore()
+  lazy val markerWorkflowCacheStore: CacheStore[MarkerWorkflowCache.AssignmentId, MarkerWorkflowCache.Json] =
+    Caches.builder(MarkerWorkflowCache.CacheName, cacheStrategy).buildStore()
 
-	lazy val assignmentProgressCacheStore: CacheStore[AssignmentProgressCache.AssignmentId, AssignmentProgressCache.Json] =
-		Caches.builder(AssignmentProgressCache.CacheName, cacheStrategy).buildStore()
+  lazy val assignmentProgressCacheStore: CacheStore[AssignmentProgressCache.AssignmentId, AssignmentProgressCache.Json] =
+    Caches.builder(AssignmentProgressCache.CacheName, cacheStrategy).buildStore()
 
-	override def beforeCommand(event: Event): Unit = {}
-	override def onException(event: Event, exception: Throwable): Unit = {}
+  override def beforeCommand(event: Event): Unit = {}
 
-	override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
-		val data = beforeEvent.extra ++ event.extra
-		data.get("assignment") match {
-			case Some(id: String) if !event.readOnly =>
-				markerWorkflowCacheStore.remove(id)
-				assignmentProgressCacheStore.remove(id)
+  override def onException(event: Event, exception: Throwable): Unit = {}
 
-			case _ => // Do nothing
-		}
-	}
+  override def afterCommand(event: Event, returnValue: Any, beforeEvent: Event): Unit = {
+    val data = beforeEvent.extra ++ event.extra
+    data.get("assignment") match {
+      case Some(id: String) if !event.readOnly =>
+        markerWorkflowCacheStore.remove(id)
+        assignmentProgressCacheStore.remove(id)
+
+      case _ => // Do nothing
+    }
+  }
 
 }

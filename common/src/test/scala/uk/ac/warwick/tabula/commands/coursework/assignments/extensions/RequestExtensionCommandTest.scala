@@ -12,186 +12,185 @@ import scala.collection.JavaConverters._
 // scalastyle:off magic.number
 class RequestExtensionCommandTest extends TestBase with Mockito {
 
-	@Test
-	def itWorks() {
-		withUser("cuslat", "1171795") {
-			withFakeTime(dateTime(2014, 2, 11)) {
+  @Test
+  def itWorks() {
+    withUser("cuslat", "1171795") {
+      withFakeTime(dateTime(2014, 2, 11)) {
 
-				val currentUser = RequestInfo.fromThread.get.user
-				val assignment = newDeepAssignment()
-				assignment.closeDate = DateTime.now.plusMonths(1)
-				assignment.module.adminDepartment.allowExtensionRequests = true
+        val currentUser = RequestInfo.fromThread.get.user
+        val assignment = newDeepAssignment()
+        assignment.closeDate = DateTime.now.plusMonths(1)
+        assignment.module.adminDepartment.allowExtensionRequests = true
 
-				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
-				command.requestedExpiryDate = DateTime.now.plusMonths(2)
-				command.reason  = "Fun fun fun"
-				command.readGuidelines = true
-				command.disabilityAdjustment = true
-				val errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.hasErrors should be {false}
+        val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
+        command.requestedExpiryDate = DateTime.now.plusMonths(2)
+        command.reason = "Fun fun fun"
+        command.readGuidelines = true
+        command.disabilityAdjustment = true
+        val errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.hasErrors should be (false)
 
-				var returnedExtension = command.applyInternal()
+        var returnedExtension = command.applyInternal()
 
-				returnedExtension.requestedExpiryDate should be (Some(DateTime.now.plusMonths(2)))
-				returnedExtension.reason should be ("Fun fun fun")
-				returnedExtension.disabilityAdjustment should be {true}
-				returnedExtension.requestedOn should be (DateTime.now)
-				returnedExtension.approved should be {false}
-				returnedExtension.rejected should be {false}
-				returnedExtension.reviewedOn should be (null)
-				returnedExtension.usercode should be (currentUser.userId)
-				returnedExtension.universityId should be (Some(currentUser.universityId))
-				returnedExtension.assignment should be (assignment)
-				returnedExtension.attachments.isEmpty should be {true}
+        returnedExtension.requestedExpiryDate should be(Some(DateTime.now.plusMonths(2)))
+        returnedExtension.reason should be("Fun fun fun")
+        returnedExtension.disabilityAdjustment should be (true)
+        returnedExtension.requestedOn should be(DateTime.now)
+        returnedExtension.approved should be (false)
+        returnedExtension.rejected should be (false)
+        returnedExtension.reviewedOn should be(null)
+        returnedExtension.usercode should be(currentUser.userId)
+        returnedExtension.universityId should be(Some(currentUser.universityId))
+        returnedExtension.assignment should be(assignment)
+        returnedExtension.attachments.isEmpty should be (true)
 
-				// check boolean is correctly propagated
-				command.disabilityAdjustment = false
-				returnedExtension = command.applyInternal()
-				returnedExtension.disabilityAdjustment should be {false}
+        // check boolean is correctly propagated
+        command.disabilityAdjustment = false
+        returnedExtension = command.applyInternal()
+        returnedExtension.disabilityAdjustment should be (false)
 
-				command.disabilityAdjustment = null
-				returnedExtension = command.applyInternal()
-				returnedExtension.disabilityAdjustment should be {false}
-			}
-		}
-	}
-
-
-	@Test
-	def extensionReuse() {
-		withUser("cuslat", "1171795") {
-			withFakeTime(dateTime(2014, 2, 11)) {
-
-				val currentUser = RequestInfo.fromThread.get.user
-				var assignment = newDeepAssignment()
-				val newExtension = new Extension {
-					_universityId = currentUser.universityId
-					usercode = currentUser.userId
-				}
-				newExtension.approve()
-				newExtension.reviewedOn = DateTime.now
-				assignment.addExtension(newExtension)
-
-				var command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
-				var returnedExtension = command.applyInternal()
-
-				returnedExtension.approved should be {true}
-				returnedExtension.reviewedOn should be (DateTime.now)
-
-				assignment = newDeepAssignment()
-				command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
-				returnedExtension = command.applyInternal()
-
-				returnedExtension.approved should be {false}
-				returnedExtension.reviewedOn should be (null)
-
-			}
-		}
-	}
+        command.disabilityAdjustment = null
+        returnedExtension = command.applyInternal()
+        returnedExtension.disabilityAdjustment should be (false)
+      }
+    }
+  }
 
 
-	@Test
-	def validation() {
-		withUser("cuslat", "1171795") {
-			withFakeTime(dateTime(2014, 2, 11)) {
+  @Test
+  def extensionReuse() {
+    withUser("cuslat", "1171795") {
+      withFakeTime(dateTime(2014, 2, 11)) {
 
-				val currentUser = RequestInfo.fromThread.get.user
-				val assignment = newDeepAssignment()
-				assignment.closeDate = DateTime.now.plusMonths(1)
+        val currentUser = RequestInfo.fromThread.get.user
+        var assignment = newDeepAssignment()
+        val newExtension = new Extension {
+          _universityId = currentUser.universityId
+          usercode = currentUser.userId
+        }
+        newExtension.approve()
+        newExtension.reviewedOn = DateTime.now
+        assignment.addExtension(newExtension)
 
-				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
-				var errors = new BindException(command, "command")
-				errors.hasErrors should be {false}
-				command.validate(errors)
-				errors.hasErrors should be {true}
+        var command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
+        var returnedExtension = command.applyInternal()
 
-				errors.getFieldErrors("readGuidelines").isEmpty should be {false}
-				command.readGuidelines = true
-				errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.getFieldErrors("readGuidelines").isEmpty should be {true}
+        returnedExtension.approved should be (true)
+        returnedExtension.reviewedOn should be(DateTime.now)
 
-				errors.getFieldErrors("reason").isEmpty should be {false}
-				command.reason = "Hello sailor"
-				errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.getFieldErrors("reason").isEmpty should be {true}
+        assignment = newDeepAssignment()
+        command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
+        returnedExtension = command.applyInternal()
 
-				errors.getFieldErrors("requestedExpiryDate").isEmpty should be {false}
-				command.requestedExpiryDate = DateTime.now
-				errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.getFieldErrors("requestedExpiryDate").isEmpty should be {false}
-				errors.getFieldError("requestedExpiryDate").getCode should be ("extension.requestedExpiryDate.beforeAssignmentExpiry")
+        returnedExtension.approved should be (false)
+        returnedExtension.reviewedOn should be(null)
 
-				command.requestedExpiryDate = DateTime.now.plusMonths(2)
-				errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.getFieldErrors("requestedExpiryDate").isEmpty should be {true}
-
-				assignment.extensionAttachmentMandatory = true
-				errors = new BindException(command, "command")
-				command.validate(errors)
-				errors.getFieldErrors("file").asScala.nonEmpty should be {true}
-			}
-		}
-	}
+      }
+    }
+  }
 
 
+  @Test
+  def validation() {
+    withUser("cuslat", "1171795") {
+      withFakeTime(dateTime(2014, 2, 11)) {
 
-	@Test
-	def attachmentDeletion() {
-		withUser("cuslat", "1171795") {
-			withFakeTime(dateTime(2014, 2, 11)) {
+        val currentUser = RequestInfo.fromThread.get.user
+        val assignment = newDeepAssignment()
+        assignment.closeDate = DateTime.now.plusMonths(1)
 
-				val currentUser = RequestInfo.fromThread.get.user
-				val assignment = newDeepAssignment()
+        val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
+        var errors = new BindException(command, "command")
+        errors.hasErrors should be (false)
+        command.validate(errors)
+        errors.hasErrors should be (true)
 
-				val newExtension = new Extension {
-					_universityId = currentUser.universityId
-					usercode = currentUser.userId
-				}
-				val attachment = new FileAttachment
+        errors.getFieldErrors("readGuidelines").isEmpty should be (false)
+        command.readGuidelines = true
+        errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.getFieldErrors("readGuidelines").isEmpty should be (true)
 
-				newExtension.addAttachment(attachment)
-				assignment.addExtension(newExtension)
+        errors.getFieldErrors("reason").isEmpty should be (false)
+        command.reason = "Hello sailor"
+        errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.getFieldErrors("reason").isEmpty should be (true)
 
-				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
-				// populate command's view of attachments
-				command.presetValues(newExtension)
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (false)
+        command.requestedExpiryDate = DateTime.now
+        errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (false)
+        errors.getFieldError("requestedExpiryDate").getCode should be("extension.requestedExpiryDate.beforeAssignmentExpiry")
 
-				var returnedExtension = command.applyInternal()
-				returnedExtension.attachments.asScala.head should be (attachment)
+        command.requestedExpiryDate = DateTime.now.plusMonths(2)
+        errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.getFieldErrors("requestedExpiryDate").isEmpty should be (true)
 
-				command.attachedFiles.remove(attachment)
-				returnedExtension = command.applyInternal()
-				returnedExtension.attachments.isEmpty should be {true}
-			}
-		}
-	}
+        assignment.extensionAttachmentMandatory = true
+        errors = new BindException(command, "command")
+        command.validate(errors)
+        errors.getFieldErrors("file").asScala.nonEmpty should be (true)
+      }
+    }
+  }
 
 
+  @Test
+  def attachmentDeletion() {
+    withUser("cuslat", "1171795") {
+      withFakeTime(dateTime(2014, 2, 11)) {
+
+        val currentUser = RequestInfo.fromThread.get.user
+        val assignment = newDeepAssignment()
+
+        val newExtension = new Extension {
+          _universityId = currentUser.universityId
+          usercode = currentUser.userId
+        }
+        val attachment = new FileAttachment
+
+        newExtension.addAttachment(attachment)
+        assignment.addExtension(newExtension)
+
+        val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
+        // populate command's view of attachments
+        command.presetValues(newExtension)
+
+        var returnedExtension = command.applyInternal()
+        returnedExtension.attachments.asScala.head should be(attachment)
+
+        command.attachedFiles.remove(attachment)
+        returnedExtension = command.applyInternal()
+        returnedExtension.attachments.isEmpty should be (true)
+      }
+    }
+  }
 
 
+  trait RequestExtensionCommandTestSupport extends FileAttachmentServiceComponent
+    with RelationshipServiceComponent
+    with ExtensionPersistenceComponent
+    with RequestExtensionCommandValidation
+    with Mockito {
 
-	trait RequestExtensionCommandTestSupport extends FileAttachmentServiceComponent
-				with RelationshipServiceComponent
-				with ExtensionPersistenceComponent
-				with RequestExtensionCommandValidation
-				with Mockito {
+    this: RequestExtensionCommandInternal =>
 
-					this : RequestExtensionCommandInternal =>
+    val fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
 
-					val fileAttachmentService: FileAttachmentService = mock[FileAttachmentService]
+    def apply(): Extension = this.applyInternal()
 
-					def apply(): Extension = this.applyInternal()
+    var relationshipService: RelationshipService = mock[RelationshipService]
 
-					var relationshipService: RelationshipService = mock[RelationshipService]
-					def delete(attachment: FileAttachment) {}
-					def delete(extension: Extension) {}
-					def save(extension: Extension) {}
+    def delete(attachment: FileAttachment) {}
 
-	}
+    def delete(extension: Extension) {}
+
+    def save(extension: Extension) {}
+
+  }
 
 }

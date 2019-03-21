@@ -19,56 +19,58 @@ import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent}
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
 class SubmissionAndFeedbackController extends CourseworkController with AutowiringFeaturesComponent with AutowiringAssessmentMembershipServiceComponent {
 
-	@ModelAttribute("submissionAndFeedbackCommand")
-	def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
-		SubmissionAndFeedbackCommand(assignment)
+  @ModelAttribute("submissionAndFeedbackCommand")
+  def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
+    SubmissionAndFeedbackCommand(assignment)
 
-	@RequestMapping(Array("", "/list"))
-	def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		assignment.module.adminDepartment.assignmentInfoView match {
-			case Assignment.Settings.InfoViewType.Summary =>
-				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
-			case Assignment.Settings.InfoViewType.Table =>
-				Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
-			case _ => // default
-				if (features.assignmentProgressTableByDefault)
-					Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
-				else
-					Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
-		}
-	}
+  @RequestMapping(Array("", "/list"))
+  def list(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    assignment.module.adminDepartment.assignmentInfoView match {
+      case Assignment.Settings.InfoViewType.Summary =>
+        Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+      case Assignment.Settings.InfoViewType.Table =>
+        Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+      case _ => // default
+        if (features.assignmentProgressTableByDefault)
+          Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+        else
+          Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+    }
+  }
 
-	@ModelAttribute("allSubmissionStatesFilters")
-	def allSubmissionStatesFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
-		SubmissionAndFeedbackInfoFilters.SubmissionStates.allSubmissionStates.filter(_.apply(assignment))
+  @ModelAttribute("allSubmissionStatesFilters")
+  def allSubmissionStatesFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
+    SubmissionAndFeedbackInfoFilters.SubmissionStates.allSubmissionStates.filter(_.apply(assignment))
 
-	@ModelAttribute("allPlagiarismFilters")
-	def allPlagiarismFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
-		SubmissionAndFeedbackInfoFilters.PlagiarismStatuses.allPlagiarismStatuses.filter(_.apply(assignment))
+  @ModelAttribute("allPlagiarismFilters")
+  def allPlagiarismFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
+    SubmissionAndFeedbackInfoFilters.PlagiarismStatuses.allPlagiarismStatuses.filter(_.apply(assignment))
 
-	@ModelAttribute("allExtensionFilters")
-	def allExtensionFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
-		SubmissionAndFeedbackInfoFilters.ExtensionStatuses.allExtensionStatuses.filter(_.apply(assignment))
+  @ModelAttribute("allExtensionFilters")
+  def allExtensionFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
+    SubmissionAndFeedbackInfoFilters.ExtensionStatuses.allExtensionStatuses.filter(_.apply(assignment))
 
-	@ModelAttribute("allStatusFilters")
-	def allStatusFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
-		SubmissionAndFeedbackInfoFilters.Statuses.allStatuses.filter(_.apply(assignment))
+  @ModelAttribute("allStatusFilters")
+  def allStatusFilters(@PathVariable assignment: Assignment): Seq[SubmissionAndFeedbackInfoFilter] =
+    SubmissionAndFeedbackInfoFilters.Statuses.allStatuses.filter(_.apply(assignment))
 
-	@ModelAttribute("department") def department(@PathVariable assignment: Assignment): Department = assignment.module.adminDepartment
-	@ModelAttribute("module") def module(@PathVariable assignment: Assignment): Module = assignment.module
-	@ModelAttribute("academicYear") def academicYear(@PathVariable assignment: Assignment): AcademicYear = assignment.academicYear
+  @ModelAttribute("department") def department(@PathVariable assignment: Assignment): Department = assignment.module.adminDepartment
 
-	@RequestMapping(Array("/summary"))
-	def summary(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
-		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
-		else if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/summary_results", "results" -> command.apply()).noLayout()
-		else Mav("cm2/admin/assignments/submissionsandfeedback/summary")
-			.crumbsList(Breadcrumbs.assignment(assignment, active = true))
+  @ModelAttribute("module") def module(@PathVariable assignment: Assignment): Module = assignment.module
 
-	@RequestMapping(Array("/table"))
-	def table(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
-		if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/table_results", "results" -> command.apply()).noLayout()
-		else Mav("cm2/admin/assignments/submissionsandfeedback/table")
-			.crumbsList(Breadcrumbs.assignment(assignment, active = true))
+  @ModelAttribute("academicYear") def academicYear(@PathVariable assignment: Assignment): AcademicYear = assignment.academicYear
+
+  @RequestMapping(Array("/summary"))
+  def summary(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
+    if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
+    else if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/summary_results", "results" -> command.apply()).noLayout()
+    else Mav("cm2/admin/assignments/submissionsandfeedback/summary")
+      .crumbsList(Breadcrumbs.assignment(assignment, active = true))
+
+  @RequestMapping(Array("/table"))
+  def table(@ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): Mav =
+    if (ajax) Mav("cm2/admin/assignments/submissionsandfeedback/table_results", "results" -> command.apply()).noLayout()
+    else Mav("cm2/admin/assignments/submissionsandfeedback/table")
+      .crumbsList(Breadcrumbs.assignment(assignment, active = true))
 
 }

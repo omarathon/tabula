@@ -21,88 +21,90 @@ import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear}
 @Controller
 @RequestMapping(Array("/attendance/profile/{student}/{academicYear}/record"))
 class ProfileRecordController extends AttendanceController
-	with HasMonthNames with GroupsPoints
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with HasMonthNames with GroupsPoints
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
+  @Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	var points: Seq[AttendanceMonitoringPoint] = _
+  var points: Seq[AttendanceMonitoringPoint] = _
 
-	@InitBinder // do on each request
-	def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
-			points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
-	}
+  @InitBinder // do on each request
+  def populatePoints(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Unit = {
+    points = attendanceMonitoringService.listStudentsPoints(mandatory(student), None, mandatory(academicYear))
+  }
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember
-	) =
-		StudentRecordCommand(mandatory(academicYear), mandatory(student), user)
+  @ModelAttribute("command")
+  def command(
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable student: StudentMember
+  ) =
+    StudentRecordCommand(mandatory(academicYear), mandatory(student), user)
 
-	@ModelAttribute("attendanceNotes")
-	def attendanceNotes(@PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] =
-		attendanceMonitoringService.getAttendanceNoteMap(mandatory(student))
+  @ModelAttribute("attendanceNotes")
+  def attendanceNotes(@PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] =
+    attendanceMonitoringService.getAttendanceNoteMap(mandatory(student))
 
-	@ModelAttribute("groupedPointMap")
-	def groupedPointMap(@PathVariable student: StudentMember): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
-		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, mandatory(student))
-		val groupedPoints = groupByTerm(points, groupSimilar = false) ++
-			groupByMonth(points, groupSimilar = false)
-		groupedPoints.map{case(period, thesePoints) =>
-			period -> thesePoints.map{ groupedPoint =>
-				groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
-			}
-		}
-	}
+  @ModelAttribute("groupedPointMap")
+  def groupedPointMap(@PathVariable student: StudentMember): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
+    val checkpointMap = attendanceMonitoringService.getCheckpoints(points, mandatory(student))
+    val groupedPoints = groupByTerm(points, groupSimilar = false) ++
+      groupByMonth(points, groupSimilar = false)
+    groupedPoints.map { case (period, thesePoints) =>
+      period -> thesePoints.map { groupedPoint =>
+        groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
+      }
+    }
+  }
 
-	@ModelAttribute("reportedPointMap")
-	def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[AcademicPeriod]] = {
-		val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
-		points.map{ point => point -> {
-			val term = point.scheme.academicYear.termOrVacationForDate(point.startDate)
-			if (nonReportedTerms.contains(term.periodType.toString)) {
-				None
-			} else {
-				Option(term)
-			}
-		}}.toMap
-	}
+  @ModelAttribute("reportedPointMap")
+  def reportedPointMap(@PathVariable academicYear: AcademicYear, @PathVariable student: StudentMember): Map[AttendanceMonitoringPoint, Option[AcademicPeriod]] = {
+    val nonReportedTerms = attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(academicYear))
+    points.map { point =>
+      point -> {
+        val term = point.scheme.academicYear.termOrVacationForDate(point.startDate)
+        if (nonReportedTerms.contains(term.periodType.toString)) {
+          None
+        } else {
+          Option(term)
+        }
+      }
+    }.toMap
+  }
 
-	@RequestMapping(method = Array(GET))
-	def form(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember
-	): Mav = {
-		cmd.populate()
-		render(academicYear, student)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable student: StudentMember
+  ): Mav = {
+    cmd.populate()
+    render(academicYear, student)
+  }
 
-	private def render(academicYear: AcademicYear, student: StudentMember) = {
-		Mav("attendance/record",
-			"department" -> student.homeDepartment,
-			"returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
-		).crumbs(
-			Breadcrumbs.Profile.ProfileForYear(mandatory(student), mandatory(academicYear))
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Profile.record(student, year)):_*)
-	}
+  private def render(academicYear: AcademicYear, student: StudentMember) = {
+    Mav("attendance/record",
+      "department" -> student.homeDepartment,
+      "returnTo" -> getReturnTo(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
+    ).crumbs(
+      Breadcrumbs.Profile.ProfileForYear(mandatory(student), mandatory(academicYear))
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Profile.record(student, year)): _*)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
-		errors: Errors,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable student: StudentMember
-	): Mav = {
-		if (errors.hasErrors) {
-			render(academicYear, student)
-		} else {
-			cmd.apply()
-			Redirect(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm,
+    errors: Errors,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable student: StudentMember
+  ): Mav = {
+    if (errors.hasErrors) {
+      render(academicYear, student)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Profile.profileForYear(mandatory(student), mandatory(academicYear)))
+    }
+  }
 
 }

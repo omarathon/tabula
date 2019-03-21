@@ -13,41 +13,41 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "student_id")
-	var student: Member = _
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "student_id")
+  var student: Member = _
 
-	var updatedDate: DateTime = _
+  var updatedDate: DateTime = _
 
-	@NotNull
-	var updatedBy: String = _
+  @NotNull
+  var updatedBy: String = _
 
-	var note: String = _
+  var note: String = _
 
-	def escapedNote: String = formattedHtml(note)
+  def escapedNote: String = formattedHtml(note)
 
-	def truncatedNote: String = {
-		Option(note).fold("")(note => {
-			val breakIterator: BreakIterator = BreakIterator.getWordInstance
-			breakIterator.setText(note)
-			val length = Math.min(note.length, breakIterator.following(Math.min(50, note.length)))
-			if (length < 0 || length == note.length) {
-				note
-			} else {
-				note.substring(0, length) + 0x2026.toChar // 0x2026 being unicode horizontal ellipsis (TAB-1891)
-			}
-		})
-	}
+  def truncatedNote: String = {
+    Option(note).fold("")(note => {
+      val breakIterator: BreakIterator = BreakIterator.getWordInstance
+      breakIterator.setText(note)
+      val length = Math.min(note.length, breakIterator.following(Math.min(50, note.length)))
+      if (length < 0 || length == note.length) {
+        note
+      } else {
+        note.substring(0, length) + 0x2026.toChar // 0x2026 being unicode horizontal ellipsis (TAB-1891)
+      }
+    })
+  }
 
-	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
-	@JoinColumn(name = "attachment_id")
-	var attachment: FileAttachment = _
+  @OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
+  @JoinColumn(name = "attachment_id")
+  var attachment: FileAttachment = _
 
-	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AbsenceTypeUserType")
-	@Column(name = "absence_type")
-	var absenceType: AbsenceType = _
+  @NotNull
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AbsenceTypeUserType")
+  @Column(name = "absence_type")
+  var absenceType: AbsenceType = _
 
-	def hasContent: Boolean = note.hasText || attachment != null || absenceType != null
+  def hasContent: Boolean = note.hasText || attachment != null || absenceType != null
 
 }

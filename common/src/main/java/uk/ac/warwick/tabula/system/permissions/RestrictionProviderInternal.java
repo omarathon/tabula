@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * of the object.
  * The scope is the containing object (although it's not checked for
  * scope-less permissions, obviously).
- *
+ * <p>
  * Don't use this annotation directly because the default behaviour
  * is to only add it to the private field. Instead use
  * uk.ac.warwick.tabula.system.permissions.RestrictionProvider which is an alias to this
@@ -22,9 +22,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestrictionProviderInternal {
 
-    /**
-     * Name of the function to call. The function must return Seq[Permission]
-     */
-    String value();
+  /**
+   * Name of the function to call. The function must return Seq[Permission]
+   */
+  String value();
 
 }

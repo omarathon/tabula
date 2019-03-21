@@ -12,63 +12,64 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 case class CheckpointResult(
-	attendedMonitoringPointStudentList: Seq[StudentMember],
-	missedUnauthorisedMonitoringPointStudentList: Seq[StudentMember],
-	missedAuthorisedMonitoringPointStudentList: Seq[StudentMember]
+  attendedMonitoringPointStudentList: Seq[StudentMember],
+  missedUnauthorisedMonitoringPointStudentList: Seq[StudentMember],
+  missedAuthorisedMonitoringPointStudentList: Seq[StudentMember]
 )
 
 object CheckEventAttendanceCheckpointsCommand {
-	def apply(occurrence: SmallGroupEventOccurrence) =
-		new CheckEventAttendanceCheckpointsCommandInternal(occurrence)
-			with ComposableCommand[CheckpointResult]
-			with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
-			with CheckEventAttendanceCheckpointsPermissions
-			with CheckEventAttendanceCheckpointsCommandState
-			with ReadOnly with Unaudited
+  def apply(occurrence: SmallGroupEventOccurrence) =
+    new CheckEventAttendanceCheckpointsCommandInternal(occurrence)
+      with ComposableCommand[CheckpointResult]
+      with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
+      with CheckEventAttendanceCheckpointsPermissions
+      with CheckEventAttendanceCheckpointsCommandState
+      with ReadOnly with Unaudited
 }
 
 
 class CheckEventAttendanceCheckpointsCommandInternal(val occurrence: SmallGroupEventOccurrence)
-	extends CommandInternal[CheckpointResult] {
+  extends CommandInternal[CheckpointResult] {
 
-	self: CheckEventAttendanceCheckpointsCommandState with AttendanceMonitoringEventAttendanceServiceComponent =>
+  self: CheckEventAttendanceCheckpointsCommandState with AttendanceMonitoringEventAttendanceServiceComponent =>
 
-	override def applyInternal(): CheckpointResult = {
-		val attendanceList = attendances.asScala.map{ case (universityId, state) =>
-			val attendance = new SmallGroupEventAttendance
-			attendance.occurrence = occurrence
-			attendance.state = state
-			attendance.universityId = universityId
-			attendance
-		}.toSeq
-		val studentListWithCheckpoints = attendanceMonitoringEventAttendanceService.getCheckpoints(attendanceList).map(a => a.student).distinct
-		if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
-			val (unauthorisedCheckpoints, authorisedCheckpoints) =
-				attendanceMonitoringEventAttendanceService.getMissedCheckpoints(attendanceList)
-					.partition { case (checkpoint, _) => checkpoint.state == AttendanceState.MissedUnauthorised }
-			CheckpointResult(
-				studentListWithCheckpoints,
-				unauthorisedCheckpoints.map { case (a, _) => a.student }.distinct,
-				authorisedCheckpoints.map { case (a, _) => a.student }.distinct
-			)
-		} else {
-			CheckpointResult(studentListWithCheckpoints, Seq(), Seq())
-		}
-	}
+  override def applyInternal(): CheckpointResult = {
+    val attendanceList = attendances.asScala.map { case (universityId, state) =>
+      val attendance = new SmallGroupEventAttendance
+      attendance.occurrence = occurrence
+      attendance.state = state
+      attendance.universityId = universityId
+      attendance
+    }.toSeq
+    val studentListWithCheckpoints = attendanceMonitoringEventAttendanceService.getCheckpoints(attendanceList).map(a => a.student).distinct
+    if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
+      val (unauthorisedCheckpoints, authorisedCheckpoints) =
+        attendanceMonitoringEventAttendanceService.getMissedCheckpoints(attendanceList)
+          .partition { case (checkpoint, _) => checkpoint.state == AttendanceState.MissedUnauthorised }
+      CheckpointResult(
+        studentListWithCheckpoints,
+        unauthorisedCheckpoints.map { case (a, _) => a.student }.distinct,
+        authorisedCheckpoints.map { case (a, _) => a.student }.distinct
+      )
+    } else {
+      CheckpointResult(studentListWithCheckpoints, Seq(), Seq())
+    }
+  }
 
 }
 
 trait CheckEventAttendanceCheckpointsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: CheckEventAttendanceCheckpointsCommandState =>
+  self: CheckEventAttendanceCheckpointsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, occurrence)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroupEvents.Register, occurrence)
+  }
 
 }
 
 trait CheckEventAttendanceCheckpointsCommandState {
-	def occurrence: SmallGroupEventOccurrence
-	var attendances: JMap[String, AttendanceState] = JHashMap()
+  def occurrence: SmallGroupEventOccurrence
+
+  var attendances: JMap[String, AttendanceState] = JHashMap()
 }

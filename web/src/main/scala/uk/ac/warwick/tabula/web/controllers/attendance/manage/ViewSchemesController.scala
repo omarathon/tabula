@@ -17,37 +17,37 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}"))
 class ViewSchemesController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent
-	with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent
+  with DepartmentScopedController with AutowiringModuleAndDepartmentServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.MonitoringPoints.Manage
+  override val departmentPermission: Permission = Permissions.MonitoringPoints.Manage
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear)
-		= ViewSchemesCommand(mandatory(department), mandatory(academicYear), user)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear)
+  = ViewSchemesCommand(mandatory(department), mandatory(academicYear), user)
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringScheme]],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		val schemes = cmd.apply()
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringScheme]],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    val schemes = cmd.apply()
 
-		Mav("attendance/manage/list",
-			"schemes" -> schemes,
-			"havePoints" -> (schemes.map{_.points.size}.sum > 0)
-		).crumbs(
-			Breadcrumbs.Manage.HomeForYear(academicYear),
-			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.departmentForYear(department, year)): _*)
-	}
+    Mav("attendance/manage/list",
+      "schemes" -> schemes,
+      "havePoints" -> (schemes.map(_.points.size).sum > 0)
+    ).crumbs(
+      Breadcrumbs.Manage.HomeForYear(academicYear),
+      Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.departmentForYear(department, year)): _*)
+  }
 
 }

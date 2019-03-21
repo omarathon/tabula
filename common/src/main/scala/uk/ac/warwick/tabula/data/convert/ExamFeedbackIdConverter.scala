@@ -7,9 +7,10 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 
 class ExamFeedbackIdConverter extends TwoWayConverter[String, ExamFeedback] {
 
-	@Autowired var service: FeedbackDao = _
+  @Autowired var service: FeedbackDao = _
 
-	override def convertRight(id: String): ExamFeedback = service.getExamFeedback(id).orNull
-	override def convertLeft(feedback: ExamFeedback): String = (Option(feedback) map {_.id}).orNull
+  override def convertRight(id: String): ExamFeedback = service.getExamFeedback(id).orNull
+
+  override def convertLeft(feedback: ExamFeedback): String = (Option(feedback).map(_.id)).orNull
 
 }

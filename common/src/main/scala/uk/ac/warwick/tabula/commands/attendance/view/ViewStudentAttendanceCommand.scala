@@ -10,49 +10,51 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ViewStudentAttendanceCommand {
-	def apply(department: Department, academicYear: AcademicYear, student: StudentMember) =
-		new ViewStudentAttendanceCommandInternal(department, academicYear, student)
-			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
-			with ViewStudentAttendancePermissions
-			with ViewStudentAttendanceCommandState
-			with ReadOnly with Unaudited
+  def apply(department: Department, academicYear: AcademicYear, student: StudentMember) =
+    new ViewStudentAttendanceCommandInternal(department, academicYear, student)
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ComposableCommand[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
+      with ViewStudentAttendancePermissions
+      with ViewStudentAttendanceCommandState
+      with ReadOnly with Unaudited
 }
 
 
 class ViewStudentAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val student: StudentMember)
-	extends CommandInternal[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
-		with GroupsPoints with TaskBenchmarking {
+  extends CommandInternal[Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]]]
+    with GroupsPoints with TaskBenchmarking {
 
-	self: AttendanceMonitoringServiceComponent =>
+  self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
-		val points = benchmarkTask("listStudentsPoints"){
-			attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
-		}
-		val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
-		val groupedPoints = groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
-		groupedPoints.map{case(period, thesePoints) =>
-			period -> thesePoints.map{ groupedPoint =>
-				groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
-			}
-		}
-	}
+  override def applyInternal(): Map[String, Seq[(AttendanceMonitoringPoint, AttendanceMonitoringCheckpoint)]] = {
+    val points = benchmarkTask("listStudentsPoints") {
+      attendanceMonitoringService.listStudentsPoints(student, Option(department), academicYear)
+    }
+    val checkpointMap = attendanceMonitoringService.getCheckpoints(points, student)
+    val groupedPoints = groupByTerm(points, groupSimilar = false) ++ groupByMonth(points, groupSimilar = false)
+    groupedPoints.map { case (period, thesePoints) =>
+      period -> thesePoints.map { groupedPoint =>
+        groupedPoint.templatePoint -> checkpointMap.getOrElse(groupedPoint.templatePoint, null)
+      }
+    }
+  }
 
 }
 
 trait ViewStudentAttendancePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ViewStudentAttendanceCommandState =>
+  self: ViewStudentAttendanceCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.View, student)
+  }
 
 }
 
 trait ViewStudentAttendanceCommandState {
-	def department: Department
-	def academicYear: AcademicYear
-	def student: StudentMember
+  def department: Department
+
+  def academicYear: AcademicYear
+
+  def student: StudentMember
 }

@@ -1,4 +1,3 @@
-
 describe('Example', () => {
 
   it('should run tests', () => {

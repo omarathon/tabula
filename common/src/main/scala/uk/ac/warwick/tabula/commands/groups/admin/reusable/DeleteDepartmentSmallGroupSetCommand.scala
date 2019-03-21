@@ -11,69 +11,70 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import scala.collection.JavaConverters._
 
 object DeleteDepartmentSmallGroupSetCommand {
-	def apply(department: Department, set: DepartmentSmallGroupSet) =
-		new DeleteDepartmentSmallGroupSetCommandInternal(department, set)
-			with ComposableCommand[DepartmentSmallGroupSet]
-			with DeleteDepartmentSmallGroupSetValidation
-			with DeleteDepartmentSmallGroupSetPermissions
-			with DeleteDepartmentSmallGroupSetDescription
-			with AutowiringSmallGroupServiceComponent
+  def apply(department: Department, set: DepartmentSmallGroupSet) =
+    new DeleteDepartmentSmallGroupSetCommandInternal(department, set)
+      with ComposableCommand[DepartmentSmallGroupSet]
+      with DeleteDepartmentSmallGroupSetValidation
+      with DeleteDepartmentSmallGroupSetPermissions
+      with DeleteDepartmentSmallGroupSetDescription
+      with AutowiringSmallGroupServiceComponent
 }
 
 trait DeleteDepartmentSmallGroupSetCommandState {
-	def department: Department
-	def set: DepartmentSmallGroupSet
+  def department: Department
 
-	var confirm = false
+  def set: DepartmentSmallGroupSet
+
+  var confirm = false
 }
 
 class DeleteDepartmentSmallGroupSetCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
-	extends CommandInternal[DepartmentSmallGroupSet] with DeleteDepartmentSmallGroupSetCommandState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[DepartmentSmallGroupSet] with DeleteDepartmentSmallGroupSetCommandState {
+  self: SmallGroupServiceComponent =>
 
-	override def applyInternal(): DepartmentSmallGroupSet = transactional() {
-		set.markDeleted()
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+  override def applyInternal(): DepartmentSmallGroupSet = transactional() {
+    set.markDeleted()
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 }
 
 trait DeleteDepartmentSmallGroupSetValidation extends SelfValidating {
-	self: DeleteDepartmentSmallGroupSetCommandState =>
+  self: DeleteDepartmentSmallGroupSetCommandState =>
 
-	override def validate(errors: Errors) {
-		if (!confirm) {
-			errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
-		} else {
-			validateCanDelete(errors)
-		}
-	}
+  override def validate(errors: Errors) {
+    if (!confirm) {
+      errors.rejectValue("confirm", "smallGroupSet.delete.confirm")
+    } else {
+      validateCanDelete(errors)
+    }
+  }
 
-	def validateCanDelete(errors: Errors) {
-		if (set.deleted) {
-			errors.reject("smallGroupSet.delete.deleted")
-		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod ==  SmallGroupAllocationMethod.StudentSignUp  &&  !set.canBeDeleted }) {
-			errors.reject("smallGroupSet.delete.studentSignUpReleased")
-		} else if (set.linkedSets.asScala.exists { set => set.allocationMethod !=  SmallGroupAllocationMethod.StudentSignUp &&  !set.canBeDeleted }) {
-			errors.reject("smallGroupSet.delete.released")
-		}
-	}
+  def validateCanDelete(errors: Errors) {
+    if (set.deleted) {
+      errors.reject("smallGroupSet.delete.deleted")
+    } else if (set.linkedSets.asScala.exists { set => set.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted }) {
+      errors.reject("smallGroupSet.delete.studentSignUpReleased")
+    } else if (set.linkedSets.asScala.exists { set => set.allocationMethod != SmallGroupAllocationMethod.StudentSignUp && !set.canBeDeleted }) {
+      errors.reject("smallGroupSet.delete.released")
+    }
+  }
 }
 
 trait DeleteDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DeleteDepartmentSmallGroupSetCommandState =>
+  self: DeleteDepartmentSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(set, department)
-		p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(set))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, department)
+    p.PermissionCheck(Permissions.SmallGroups.Delete, mandatory(set))
+  }
 }
 
 trait DeleteDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
-	self: DeleteDepartmentSmallGroupSetCommandState =>
+  self: DeleteDepartmentSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.department(set.department).properties("smallGroupSet" -> set.id)
-	}
+  override def describe(d: Description) {
+    d.department(set.department).properties("smallGroupSet" -> set.id)
+  }
 
 }

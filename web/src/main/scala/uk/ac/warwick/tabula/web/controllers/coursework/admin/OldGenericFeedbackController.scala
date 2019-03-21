@@ -12,35 +12,36 @@ import javax.validation.Valid
 
 import org.springframework.context.annotation.Profile
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/generic"))
 class OldGenericFeedbackController extends OldCourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		OldGenericFeedbackCommand(module, assignment)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+    OldGenericFeedbackCommand(module, assignment)
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@PathVariable assignment: Assignment,
-							 @ModelAttribute("command") command: OldGenericFeedbackCommand,
-							 errors: Errors): Mav = {
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@PathVariable assignment: Assignment,
+    @ModelAttribute("command") command: OldGenericFeedbackCommand,
+    errors: Errors): Mav = {
 
-		Mav("coursework/admin/assignments/feedback/generic_feedback",
-			"command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
-				Breadcrumbs.Department(assignment.module.adminDepartment),
-				Breadcrumbs.Module(assignment.module)
-			)
-	}
+    Mav("coursework/admin/assignments/feedback/generic_feedback",
+      "command" -> command, "ajax" -> ajax).noLayoutIf(ajax).crumbs(
+      Breadcrumbs.Department(assignment.module.adminDepartment),
+      Breadcrumbs.Module(assignment.module)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@PathVariable assignment: Assignment,
-						 @ModelAttribute("command") @Valid command: OldGenericFeedbackCommand,
-						 errors: Errors): Mav = {
-		command.apply()
-		if(ajax)
-			Mav("ajax_success")
-		else
-			Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@PathVariable assignment: Assignment,
+    @ModelAttribute("command") @Valid command: OldGenericFeedbackCommand,
+    errors: Errors): Mav = {
+    command.apply()
+    if (ajax)
+      Mav("ajax_success")
+    else
+      Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
+  }
 
 }

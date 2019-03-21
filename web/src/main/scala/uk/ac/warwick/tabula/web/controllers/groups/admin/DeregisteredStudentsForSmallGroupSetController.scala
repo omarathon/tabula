@@ -20,56 +20,58 @@ import scala.collection.mutable
 @RequestMapping(Array("/groups/admin/module/{module}/groups/{smallGroupSet}/deregistered"))
 class DeregisteredStudentsForSmallGroupSetController extends GroupsController with AutowiringProfileServiceComponent {
 
-	type DeregisteredStudentsForSmallGroupSetCommand = Appliable[Seq[StudentNotInMembership]] with PopulateOnForm
+  type DeregisteredStudentsForSmallGroupSetCommand = Appliable[Seq[StudentNotInMembership]] with PopulateOnForm
 
-	@ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
-		DeregisteredStudentsForSmallGroupSetCommand(module, set)
+  @ModelAttribute("command") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): DeregisteredStudentsForSmallGroupSetCommand =
+    DeregisteredStudentsForSmallGroupSetCommand(module, set)
 
-	@ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[StudentNotInMembership] =
-		set.studentsNotInMembership.map { user =>
-			val member = profileService.getMemberByUser(user, disableFilter = true)
+  @ModelAttribute("students") def students(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[StudentNotInMembership] =
+    set.studentsNotInMembership.map { user =>
+      val member = profileService.getMemberByUser(user, disableFilter = true)
 
-			// Safe to do a .get here as studentsNotInMembership mandates that this is defined
-			val group = set.groups.asScala.find { _.students.includesUser(user) }.get
+      // Safe to do a .get here as studentsNotInMembership mandates that this is defined
+      val group = set.groups.asScala.find {
+        _.students.includesUser(user)
+      }.get
 
-			StudentNotInMembership(MemberOrUser(member, user), group)
-		}
+      StudentNotInMembership(MemberOrUser(member, user), group)
+    }
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form(
-		@PathVariable("smallGroupSet") set: SmallGroupSet,
-		@ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand
-	): Mav = {
-		cmd.populate()
-		renderForm(set, cmd)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(
+    @PathVariable("smallGroupSet") set: SmallGroupSet,
+    @ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand
+  ): Mav = {
+    cmd.populate()
+    renderForm(set, cmd)
+  }
 
-	private def renderForm(set: SmallGroupSet, cmd: DeregisteredStudentsForSmallGroupSetCommand) =
-		Mav("groups/admin/groups/deregistered/form",
-			"returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
-		).crumbs(
-				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
-				Breadcrumbs.ModuleForYear(set.module, set.academicYear)
-			)
+  private def renderForm(set: SmallGroupSet, cmd: DeregisteredStudentsForSmallGroupSetCommand) =
+    Mav("groups/admin/groups/deregistered/form",
+      "returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
+    ).crumbs(
+      Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
+      Breadcrumbs.ModuleForYear(set.module, set.academicYear)
+    )
 
-	@RequestMapping(method = Array(POST))
-	def save(
-		@Valid @ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand,
-		errors: Errors,
-		@PathVariable("smallGroupSet") set: SmallGroupSet
-	): Mav = {
-		if (errors.hasErrors) renderForm(set, cmd)
-		else {
-			val removed = cmd.apply()
+  @RequestMapping(method = Array(POST))
+  def save(
+    @Valid @ModelAttribute("command") cmd: DeregisteredStudentsForSmallGroupSetCommand,
+    errors: Errors,
+    @PathVariable("smallGroupSet") set: SmallGroupSet
+  ): Mav = {
+    if (errors.hasErrors) renderForm(set, cmd)
+    else {
+      val removed = cmd.apply()
 
-			Mav("groups/admin/groups/deregistered/results",
-				"removed" -> removed,
-				"returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
-			).crumbs(
-				Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
-				Breadcrumbs.ModuleForYear(set.module, set.academicYear)
-			)
-		}
-	}
+      Mav("groups/admin/groups/deregistered/results",
+        "removed" -> removed,
+        "returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
+      ).crumbs(
+        Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
+        Breadcrumbs.ModuleForYear(set.module, set.academicYear)
+      )
+    }
+  }
 
 }

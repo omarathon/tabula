@@ -13,58 +13,60 @@ import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceCompone
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.cm2.web.Routes
 
-@Profile(Array("cm1Enabled")) @Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent  with AutowiringFeaturesComponent {
+@Profile(Array("cm1Enabled"))
+@Controller class OldHomeController extends OldCourseworkController with AutowiringModuleAndDepartmentServiceComponent with AutowiringFeaturesComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
+  @ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
-	@RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
-		if(features.redirectCM1) {
-			Redirect(Routes.home)
-		} else {
-			cmd.apply() match {
-				case Some(info) =>
-					Mav("coursework/home/view",
-						"student" -> MemberOrUser(user.profile, user.apparentUser),
-						"enrolledAssignments" -> info.enrolledAssignments,
-						"historicAssignments" -> info.historicAssignments,
-						"assignmentsForMarking" -> info.assignmentsForMarking,
-						"ownedDepartments" -> info.ownedDepartments,
-						"ownedModule" -> info.ownedModules,
-						"ownedModuleDepartments" -> info.ownedModules.map { _.adminDepartment },
-						"ajax" -> ajax,
-						"userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
-					)
-				case _ => Mav("coursework/home/view")
-			}
+  @RequestMapping(Array("/${cm1.prefix}")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser): Mav =
+    if (features.redirectCM1) {
+      Redirect(Routes.home)
+    } else {
+      cmd.apply() match {
+        case Some(info) =>
+          Mav("coursework/home/view",
+            "student" -> MemberOrUser(user.profile, user.apparentUser),
+            "enrolledAssignments" -> info.enrolledAssignments,
+            "historicAssignments" -> info.historicAssignments,
+            "assignmentsForMarking" -> info.assignmentsForMarking,
+            "ownedDepartments" -> info.ownedDepartments,
+            "ownedModule" -> info.ownedModules,
+            "ownedModuleDepartments" -> info.ownedModules.map(_.adminDepartment),
+            "ajax" -> ajax,
+            "userHomeDepartment" -> moduleAndDepartmentService.getDepartmentByCode(user.departmentCode)
+          )
+        case _ => Mav("coursework/home/view")
+      }
 
-		}
+    }
 }
 
-@Profile(Array("cm1Enabled")) @Controller class OldHomeActivitiesPageletController extends OldCourseworkController {
+@Profile(Array("cm1Enabled"))
+@Controller class OldHomeActivitiesPageletController extends OldCourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("command") def command(
-		user: CurrentUser,
-		@PathVariable lastUpdatedDate: Long) =
-			CourseworkHomepageActivityPageletCommand(user, new DateTime(lastUpdatedDate))
+  @ModelAttribute("command") def command(
+    user: CurrentUser,
+    @PathVariable lastUpdatedDate: Long) =
+    CourseworkHomepageActivityPageletCommand(user, new DateTime(lastUpdatedDate))
 
-	@RequestMapping(Array("/${cm1.prefix}/api/activity/pagelet/{lastUpdatedDate}"))
-	def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]): Mav = {
-		try {
-			cmd.apply() match {
-				case Some(pagedActivities) =>
-					Mav("coursework/home/activities",
-						"activities" -> pagedActivities,
-						"async" -> true).noLayout()
-				case _ => Mav("coursework/home/empty").noLayout()
-			}
-		} catch {
-			case e: IllegalStateException =>
-				Mav("coursework/home/activities",
-				"expired" -> true).noLayout()
-		}
-	}
+  @RequestMapping(Array("/${cm1.prefix}/api/activity/pagelet/{lastUpdatedDate}"))
+  def pagelet(@ModelAttribute("command") cmd: Appliable[Option[PagedActivities]]): Mav = {
+    try {
+      cmd.apply() match {
+        case Some(pagedActivities) =>
+          Mav("coursework/home/activities",
+            "activities" -> pagedActivities,
+            "async" -> true).noLayout()
+        case _ => Mav("coursework/home/empty").noLayout()
+      }
+    } catch {
+      case e: IllegalStateException =>
+        Mav("coursework/home/activities",
+          "expired" -> true).noLayout()
+    }
+  }
 }

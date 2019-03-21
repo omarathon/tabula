@@ -10,26 +10,27 @@ import uk.ac.warwick.tabula.services.{AutowiringCM2MarkingWorkflowServiceCompone
 
 
 object ListReusableWorkflowsCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new ListReusableWorkflowsCommandInternal(department, academicYear)
-			with ComposableCommand[Seq[CM2MarkingWorkflow]]
-			with ListReusableWorkflowsState
-			with MarkingWorkflowDepartmentPermissions
-			with AutowiringCM2MarkingWorkflowServiceComponent
-			with Unaudited
+  def apply(department: Department, academicYear: AcademicYear) =
+    new ListReusableWorkflowsCommandInternal(department, academicYear)
+      with ComposableCommand[Seq[CM2MarkingWorkflow]]
+      with ListReusableWorkflowsState
+      with MarkingWorkflowDepartmentPermissions
+      with AutowiringCM2MarkingWorkflowServiceComponent
+      with Unaudited
 }
 
 class ListReusableWorkflowsCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[CM2MarkingWorkflow]] with ListReusableWorkflowsState {
+  extends CommandInternal[Seq[CM2MarkingWorkflow]] with ListReusableWorkflowsState {
 
-	this: CM2MarkingWorkflowServiceComponent  =>
+  this: CM2MarkingWorkflowServiceComponent =>
 
-	def applyInternal() = {
-		cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
-	}
+  def applyInternal() = {
+    cm2MarkingWorkflowService.getReusableWorkflows(department, academicYear)
+  }
 }
 
 trait ListReusableWorkflowsState {
-	def department: Department
-	def academicYear: AcademicYear
+  def department: Department
+
+  def academicYear: AcademicYear
 }

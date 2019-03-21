@@ -13,19 +13,19 @@ window.Supports.multipleFiles = !!('multiple' in (document.createElement('input'
 var exports = {};
 
 // All WPopupBoxes will inherit this default configuration.
-WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
+WPopupBox.defaultConfig = {imageroot: '/static/libs/popup/'};
 
 // Tabula-specific rendition of tablesorter plugin for sortable tables
-jQuery.fn.sortableTable = function(settings) {
+jQuery.fn.sortableTable = function (settings) {
   settings = settings || {};
 
   var $table = $(this);
   if ($table.tablesorter) {
     var headerSettings = {};
-    $('th', $table).each(function(index){
+    $('th', $table).each(function (index) {
       var sortable = $(this).hasClass("sortable");
       var customSorter = $(this).data("sorter");
-      if(!sortable){
+      if (!sortable) {
         headerSettings[index] = {sorter: false};
       } else if (customSorter) {
         headerSettings[index] = {sorter: customSorter};
@@ -37,10 +37,10 @@ jQuery.fn.sortableTable = function(settings) {
 };
 
 // Tabula-specific rendition of date and date-time pickers
-jQuery.fn.tabulaDateTimePicker = function() {
+jQuery.fn.tabulaDateTimePicker = function () {
   var $this = $(this);
   // if there is no datepicker bound to this input then add one
-  if(!$this.data("datepicker")){
+  if (!$this.data("datepicker")) {
     $this.datetimepicker({
       format: "dd-M-yyyy hh:ii:ss",
       weekStart: 1,
@@ -48,7 +48,7 @@ jQuery.fn.tabulaDateTimePicker = function() {
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3
-    }).on('show', function(ev){
+    }).on('show', function (ev) {
       var d = new Date(ev.date.valueOf()),
         minutes = d.getUTCMinutes(),
         seconds = d.getUTCSeconds(),
@@ -65,25 +65,29 @@ jQuery.fn.tabulaDateTimePicker = function() {
         $(this).datetimepicker('update');
       }
 
-    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+      $(this).prev("input").focus();
+    });
   }
 
-  $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+  $(this).on('changeDate', function () {
+    offsetEndDateTime($(this));
+  });
 
 };
 
 // 5-minute resolution
-jQuery.fn.tabulaDateTimeMinutePicker = function() {
+jQuery.fn.tabulaDateTimeMinutePicker = function () {
   var $this = $(this);
   // if there is no datepicker bound to this input then add one
-  if(!$this.data("datepicker")){
+  if (!$this.data("datepicker")) {
     $this.datetimepicker({
       format: "dd-M-yyyy hh:ii:ss",
       weekStart: 1,
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3
-    }).on('show', function(ev){
+    }).on('show', function (ev) {
       var d = new Date(ev.date.valueOf()),
         seconds = d.getUTCSeconds(),
         millis = d.getUTCMilliseconds();
@@ -98,17 +102,21 @@ jQuery.fn.tabulaDateTimeMinutePicker = function() {
         $(this).datetimepicker('update');
       }
 
-    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+      $(this).prev("input").focus();
+    });
   }
 
-  $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+  $(this).on('changeDate', function () {
+    offsetEndDateTime($(this));
+  });
 
 };
 
-jQuery.fn.tabulaDatePicker = function() {
+jQuery.fn.tabulaDatePicker = function () {
   var $this = $(this);
   // if there is no datepicker bound to this input then add one
-  if(!$this.data("datepicker")){
+  if (!$this.data("datepicker")) {
     $this.datetimepicker({
       format: "dd-M-yyyy",
       weekStart: 1,
@@ -116,13 +124,17 @@ jQuery.fn.tabulaDatePicker = function() {
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3
-    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+      $(this).prev("input").focus();
+    });
   }
 
-  $(this).on('changeDate', function(){ offsetEndDate($(this)); });
+  $(this).on('changeDate', function () {
+    offsetEndDate($(this));
+  });
 };
 
-jQuery.fn.tabulaTimePicker = function() {
+jQuery.fn.tabulaTimePicker = function () {
 
   $(this).datetimepicker({
     format: "hh:ii:ss",
@@ -132,7 +144,7 @@ jQuery.fn.tabulaTimePicker = function() {
     autoclose: true,
     fontAwesome: true,
     bootcssVer: 3
-  }).on('show', function(ev){
+  }).on('show', function (ev) {
 
     var d = new Date(ev.date.valueOf()),
       seconds = d.getUTCSeconds(),
@@ -148,9 +160,13 @@ jQuery.fn.tabulaTimePicker = function() {
       $(this).datetimepicker('update');
 
     }
-  }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+  }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+    $(this).prev("input").focus();
+  });
 
-  $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+  $(this).on('changeDate', function () {
+    offsetEndDateTime($(this));
+  });
 
 
 };
@@ -169,10 +185,10 @@ jQuery.fn.selectOffset = function () {
 
 
 function offsetEndDateTime($element) {
-  if($element.hasClass('startDateTime')) {
+  if ($element.hasClass('startDateTime')) {
 
     var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
-    var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+    var $endDateInput = $element.closest('.dateTimePair').find('.endDateTime');
     var endDatePicker = $endDateInput.data('datetimepicker');
 
     if ($endDateInput.length > 0) {
@@ -181,7 +197,7 @@ function offsetEndDateTime($element) {
       $endDateInput.closest('.control-group').addClass('warning').removeClass('error');
     }
 
-  } else if ($element.hasClass('endDateTime')){
+  } else if ($element.hasClass('endDateTime')) {
 
 
     $element.closest('.control-group').removeClass('warning');
@@ -199,9 +215,9 @@ function offsetEndDateTime($element) {
 }
 
 function offsetEndDate($element) {
-  if($element.hasClass('startDateTime')) {
+  if ($element.hasClass('startDateTime')) {
     var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
-    var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+    var $endDateInput = $element.closest('.dateTimePair').find('.endDateTime');
     var endDatePicker = $endDateInput.data('datetimepicker');
 
     if ($endDateInput.length > 0) {
@@ -209,7 +225,7 @@ function offsetEndDate($element) {
       endDatePicker.setValue();
       $endDateInput.closest('.form-group').addClass('has-warning').removeClass('has-error');
     }
-  } else if ($element.hasClass('endDateTime')){
+  } else if ($element.hasClass('endDateTime')) {
     $element.closest('.form-group').removeClass('warning');
 
     var $startDateInput = $element.closest('.dateTimePair').find('.startDateTime');
@@ -229,7 +245,7 @@ function offsetEndDate($element) {
  Triggers a 'tabula.slideMoreOptions.shown' event on the div when it is revealed and a
  'tabula.slideMoreOptions.hidden' event when it is hidden.
  */
-jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
+jQuery.fn.slideMoreOptions = function ($slidingDiv, showWhenChecked) {
   if ($(this).hasClass('slideMoreOptions-init')) {
     return false;
   } else {
@@ -239,18 +255,19 @@ jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
   var $this = $(this);
   var name = $this.attr("name");
   var $form = $this.closest('form');
-  var doNothing = function(){};
+  var doNothing = function () {
+  };
 
-  var show = function($div, data) {
+  var show = function ($div, data) {
     if (data === 'init') $div.show(); // no animation on init
-    else $div.stop().slideDown('fast', function(){
+    else $div.stop().slideDown('fast', function () {
       $div.trigger('tabula.slideMoreOptions.shown');
     });
   };
 
-  var hide = function($div, data) {
+  var hide = function ($div, data) {
     if (data === 'init') $div.hide(); // no animation on init
-    else $div.stop().slideUp('fast' , function(){
+    else $div.stop().slideUp('fast', function () {
       $div.trigger('tabula.slideMoreOptions.hidden');
     });
   };
@@ -259,12 +276,12 @@ jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
   // for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
   var $changeTargets = $("input[name='" + name + "']", $form);
   if (showWhenChecked) {
-    $changeTargets.change(function(event, data) {
+    $changeTargets.change(function (event, data) {
       if ($this.is(':checked')) show($slidingDiv, data);
       else hide($slidingDiv, data);
     });
   } else {
-    $changeTargets.change(function(event, data) {
+    $changeTargets.change(function (event, data) {
       if ($this.is(':checked')) hide($slidingDiv, data);
       else show($slidingDiv, data);
     });
@@ -274,14 +291,14 @@ jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
 
 
 // submit bootstrap form using Ajax
-jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
+jQuery.fn.tabulaAjaxSubmit = function (successCallback) {
   if ($(this).hasClass('tabulaAjaxSubmit-init')) {
     return false;
   } else {
     $(this).addClass('tabulaAjaxSubmit-init')
   }
 
-  var errorHandler = function($form, data) {
+  var errorHandler = function ($form, data) {
     var scopeSelector = (data.formId !== undefined) ? "#" + data.formId + " " : "";
     if ($form.is('.double-submit-protection')) {
       $form.find('.submit-buttons .btn').removeClass('disabled');
@@ -303,7 +320,7 @@ jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
     $(scopeSelector + "div.error").remove();
     $(scopeSelector + '.has-error').removeClass('has-error');
     var error;
-    for(error in data.result){
+    for (error in data.result) {
       if (data.result.hasOwnProperty(error)) {
         var message = data.result[error];
         var inputSelector = scopeSelector + "input[name='" + error + "']";
@@ -326,21 +343,20 @@ jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
     }
   };
 
-  $(this).on('submit', 'form', function(e) {
+  $(this).on('submit', 'form', function (e) {
     e.preventDefault();
     var $form = $(this).trigger('tabula.ajaxSubmit');
-    $.post($form.attr('action'), $form.serialize(), function(data){
-      if(data.status === "error") {
+    $.post($form.attr('action'), $form.serialize(), function (data) {
+      if (data.status === "error") {
         errorHandler($form, data);
       } else {
         successCallback(data)
       }
-    }).fail(function(response){
+    }).fail(function (response) {
       errorHandler($form, response.responseJSON);
     });
   });
 };
-
 
 
 /*
@@ -351,7 +367,7 @@ jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
  * $(el).data('spinContainer').spin('small');
  * $(el).data('spinContainer').spin(false);
  */
-jQuery.fn.tabulaPrepareSpinners = function(selector) {
+jQuery.fn.tabulaPrepareSpinners = function (selector) {
   selector = selector || '.spinnable';
 
   // filter selector and descendants
@@ -364,7 +380,7 @@ jQuery.fn.tabulaPrepareSpinners = function(selector) {
       window.pendingSpinner = null;
     }
 
-    $spinnable.each(function() {
+    $spinnable.each(function () {
       var $this = $(this);
 
       if ($this.data('spinContainer')) {
@@ -396,10 +412,12 @@ jQuery.fn.tabulaPrepareSpinners = function(selector) {
 
         if ($this.is('.spinner-auto')) {
           // spin only after 500ms
-          $this.click(function(e) {
+          $this.click(function (e) {
             if (!$this.is('.disabled')) {
               var $container = $this.data('spinContainer');
-              window.pendingSpinner = setTimeout(function() { $container.spin('small'); }, 500);
+              window.pendingSpinner = setTimeout(function () {
+                $container.spin('small');
+              }, 500);
             }
           });
         }
@@ -417,14 +435,14 @@ jQuery.fn.tabulaPrepareSpinners = function(selector) {
  * Obviously this won't make it impossible to submit twice, if JS is
  * disabled or altered.
  */
-jQuery.fn.tabulaSubmitOnce = function() {
+jQuery.fn.tabulaSubmitOnce = function () {
   var $this = $(this);
 
   if ($this.is('form') && !$this.data('submitOnceHandled')) {
     $this.data('submitOnceHandled', true);
     $this.removeData('submitOnceSubmitted');
 
-    $this.on('submit tabula.ajaxSubmit', function(event) {
+    $this.on('submit tabula.ajaxSubmit', function (event) {
       var $this = $(event.target),
         submitted = $this.data('submitOnceSubmitted');
 
@@ -434,7 +452,7 @@ jQuery.fn.tabulaSubmitOnce = function() {
         $this.data('submitOnceSubmitted', true);
         // For FF and other browsers with BFCache/History Cache,
         // re-enable the form if you click Back.
-        $(window).on('pageshow', function() {
+        $(window).on('pageshow', function () {
           $buttons.removeClass('disabled');
           $this.removeData('submitOnceSubmitted');
         });
@@ -451,7 +469,7 @@ jQuery.fn.tabulaSubmitOnce = function() {
 /*
  Customised Popover wrapper. Implements click away to dismiss.
  */
-$.fn.tabulaPopover = function(options) {
+$.fn.tabulaPopover = function (options) {
   var $items = this, initClass = 'tabulaPopover-init';
 
   // filter already initialized popovers
@@ -465,7 +483,7 @@ $.fn.tabulaPopover = function(options) {
   var options = $.extend({}, defaults, options);
 
 
-  $items.on('click', function(e) {
+  $items.on('click', function (e) {
     $(this).tooltip('disable');
     $(this).trigger('mouseout');
 
@@ -479,12 +497,12 @@ $.fn.tabulaPopover = function(options) {
   });
 
   // TAB-2920
-  $items.on('hidden', function(e){
+  $items.on('hidden', function (e) {
     e.stopPropagation();
   });
 
   // Click away to dismiss
-  $('html').on('click.popoverDismiss', function(e) {
+  $('html').on('click.popoverDismiss', function (e) {
     // if clicking anywhere other than the popover itself
     if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
       $items.popover('hide');
@@ -493,9 +511,9 @@ $.fn.tabulaPopover = function(options) {
   });
 
   // TAB-945 support popovers within fix-on-scroll
-  $items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
+  $items.closest('.fix-on-scroll').on('fixed', function (e, isFixed, fixLocation) {
     // Re-position any currently shown popover whenever we trigger a change in fix behaviour
-    $items.each(function() {
+    $items.each(function () {
       var $item = $(this);
       var popover = $item.popover().data('bs.popover');
       var $tip = popover.tip();
@@ -515,11 +533,11 @@ $.fn.tabulaPopover = function(options) {
    * call its popover() method again to get an object reference and then go diving
    * for a reference to the new popover itself in the DOM.
    */
-  $items.on('shown.bs.popover', function(e) {
+  $items.on('shown.bs.popover', function (e) {
     var $po = $(e.target).popover().data('bs.popover').tip();
     $po.data('creator', $(e.target));
   });
-  $('body').on('click', '.popover .close', function(e) {
+  $('body').on('click', '.popover .close', function (e) {
     var $creator = $(e.target).parents('.popover').data('creator');
     if ($creator) {
       $creator.popover('hide');
@@ -528,13 +546,13 @@ $.fn.tabulaPopover = function(options) {
   });
 
   // now that's all done, bind the popover
-  $items.each(function() {
+  $items.each(function () {
     // allow each popover to override the container via a data attribute
-    $(this).popover($.extend({}, options, { container: $(this).data('container') })).addClass(initClass);
+    $(this).popover($.extend({}, options, {container: $(this).data('container')})).addClass(initClass);
   });
 
   // ensure popovers/introductorys override title with data-title attribute where available
-  $items.each(function() {
+  $items.each(function () {
     if ($(this).attr('data-title')) {
       $(this).attr('data-original-title', $(this).attr('data-title'));
     }
@@ -547,18 +565,18 @@ $.fn.tabulaPopover = function(options) {
  Invoke on .nav-tabs to overflow items into a dropdown
  instead of onto another row.
  */
-jQuery.fn.tabOverflow = function() {
+jQuery.fn.tabOverflow = function () {
 
   var selector = '.nav-tabs', $target = $(this).find(selector).add($(this).filter(selector)), initClass = selector + '-overflow-inited';
   // filter already initialized tabs
   $target = $target.not(initClass);
 
   // Packs the given list items into a dropdown.
-  var overflowThese = function($items) {
+  var overflowThese = function ($items) {
     var $dropdown = $('<li>').addClass('dropdown').addClass('pull-right');
     var $link = $('<a>').addClass('dropdown-toggle').html('More...');
     var $caret = $('<b>').addClass('caret');
-    var $ul = $('<ul>', { 'class' : 'dropdown-menu' });
+    var $ul = $('<ul>', {'class': 'dropdown-menu'});
     $dropdown
       .append($ul)
       .append($link.append($caret));
@@ -568,10 +586,10 @@ jQuery.fn.tabOverflow = function() {
   };
 
   function overflow($items) {
-    $items.each(function(i, e) {
+    $items.each(function (i, e) {
       var x = 0;
       // find the first child that hits a new line by comparing leftness.
-      $(e).children().each(function(j, child) {
+      $(e).children().each(function (j, child) {
         var left = $(child).position().left;
         if (left < x) {
           // The first prev() is so nextAll includes child;
@@ -604,14 +622,14 @@ jQuery.fn.tabOverflow = function() {
   overflow($target);
 
   // on click, move active tab to head, and reflow
-  this.on('click', '.dropdown-menu li', function() {
+  this.on('click', '.dropdown-menu li', function () {
     var $tabs = $(this).closest(selector);
     $tabs.prepend($(this));
     reflow($tabs);
   });
 
   // on tabbable sort or custom change, reflow
-  this.on('tabbablechanged sortstop', function() {
+  this.on('tabbablechanged sortstop', function () {
     var $tabs = $(this).find(selector).add($(this).filter(selector));
     reflow($tabs);
     // if active item pushed into dropdown, try again
@@ -630,16 +648,16 @@ jQuery.fn.tabOverflow = function() {
 // collapsible striped section
 // exported so can be called on-demand e.g. after an ajax-load
 // adds a class to prevent double-init
-exports.initCollapsible = function($el) {
-  if (typeof($el) === 'undefined') {
+exports.initCollapsible = function ($el) {
+  if (typeof ($el) === 'undefined') {
     $el = $('.striped-section.collapsible');
   }
 
-  $el.filter(':not(.collapsible-init)').each(function() {
+  $el.filter(':not(.collapsible-init)').each(function () {
     var $section = $(this).addClass('collapsible-init'),
       checkboxToggle = $section.hasClass('checkbox-toggle'),
       $icon = $('<i />'),
-      open = function() {
+      open = function () {
         return $section.hasClass('expanded');
       };
 
@@ -655,16 +673,18 @@ exports.initCollapsible = function($el) {
       }
     }
 
-    var populateContent = function(onComplete) { onComplete(); };
+    var populateContent = function (onComplete) {
+      onComplete();
+    };
     if ($section.data('populate') && $section.data('href')) {
       $section.data('loaded', false).data('loading', false);
-      var formdata = { ts: new Date().getTime() };
+      var formdata = {ts: new Date().getTime()};
       if ($section.data('form')) {
         formdata = $($section.data('form')).serialize();
       }
 
       // Populate function
-      populateContent = function(onComplete) {
+      populateContent = function (onComplete) {
         if ($section.data('loaded')) onComplete();
         else if ($section.data('loading')) {
         } // prevent multiple invocation
@@ -677,7 +697,7 @@ exports.initCollapsible = function($el) {
           $.post(
             $section.data('href'),
             formdata,
-            function(html) {
+            function (html) {
               $target.html(html);
               $target.find('a.ajax-modal').ajaxModalLink();
               $target.find('.use-tooltip').tooltip();
@@ -695,7 +715,7 @@ exports.initCollapsible = function($el) {
 
     if (checkboxToggle) {
       var $checkbox = $section.find('input.toggle-collapsible');
-      $checkbox.on('change', function(){
+      $checkbox.on('change', function () {
         if ($(this).is(':checked')) {
           $section.addClass('expanded');
           $checkbox.parent().find('.toggle-collapsible-on').removeClass('hidden');
@@ -707,7 +727,7 @@ exports.initCollapsible = function($el) {
         }
       });
     } else {
-      $title.css('cursor', 'pointer').on('click', function(e) {
+      $title.css('cursor', 'pointer').on('click', function (e) {
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
           return;
@@ -722,7 +742,7 @@ exports.initCollapsible = function($el) {
           $section.removeClass('expanded');
           $icon.removeClass().addClass('fa fa-fw fa-chevron-right');
         } else {
-          populateContent(function() {
+          populateContent(function () {
             $section.addClass('expanded');
             $icon.removeClass().addClass('fa fa-fw fa-chevron-down');
 
@@ -750,18 +770,18 @@ exports.initCollapsible = function($el) {
   });
 };
 
-exports.resizeModalIframes = function(height){
+exports.resizeModalIframes = function (height) {
   //Adding extra height for 'browser knows iframe size' purposes
   $('.modal-body > iframe').height(height + 36);
 };
 
-exports.setArgOnUrl = function(url, argName, argValue){
-  if(url.indexOf('?') === -1) {
+exports.setArgOnUrl = function (url, argName, argValue) {
+  if (url.indexOf('?') === -1) {
     return url + '?' + argName + '=' + argValue;
   } else {
     var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),
       found = false,
-      newArgs = $.map(args, function(pair){
+      newArgs = $.map(args, function (pair) {
         var arg = pair.split('=');
         if (arg[0] === argName) {
           found = true;
@@ -777,10 +797,10 @@ exports.setArgOnUrl = function(url, argName, argValue){
   }
 };
 
-exports.scrollableTableSetup = function() {
-  $('.scrollable-table .right').find('.table-responsive').on('scroll', function(){
+exports.scrollableTableSetup = function () {
+  $('.scrollable-table .right').find('.table-responsive').on('scroll', function () {
     var $this = $(this);
-    if($this.scrollLeft() > 0) {
+    if ($this.scrollLeft() > 0) {
       $this.parent(':not(.left-shadow)').addClass('left-shadow');
     } else {
       $this.parent().removeClass('left-shadow');
@@ -788,15 +808,17 @@ exports.scrollableTableSetup = function() {
   });
 };
 
-exports.tableSortMatching = function(tableArray) {
-  var matchSorting = function($sourceTable, targetTables){
+exports.tableSortMatching = function (tableArray) {
+  var matchSorting = function ($sourceTable, targetTables) {
     var $sourceRows = $sourceTable.find('tbody tr');
-    $.each(targetTables, function(i, $table){
+    $.each(targetTables, function (i, $table) {
       var $tbody = $table.find('tbody');
       var oldRows = $tbody.find('tr').detach();
-      $.each($sourceRows, function(j, row){
+      $.each($sourceRows, function (j, row) {
         var $sourceRow = $(row);
-        oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+        oldRows.filter(function () {
+          return $(this).data('sortId') == $sourceRow.data('sortId');
+        }).appendTo($tbody);
       });
     });
   };
@@ -804,17 +826,19 @@ exports.tableSortMatching = function(tableArray) {
   if (tableArray.length < 2)
     return;
 
-  $.each(tableArray, function(i){
+  $.each(tableArray, function (i) {
     var otherTables = tableArray.slice();
     otherTables.splice(i, 1);
-    this.on('sortEnd', function(){
+    this.on('sortEnd', function () {
       matchSorting($(this), otherTables);
-    }).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+    }).find('tbody tr').each(function (i) {
+      $(this).data('sortId', i);
+    });
   });
 };
 
 // on ready
-$(function() {
+$(function () {
   // form behavioural hooks
   $('input.date-time-picker').tabulaDateTimePicker();
   $('input.date-picker').tabulaDatePicker();
@@ -828,7 +852,7 @@ $(function() {
   $body.tabulaPrepareSpinners();
 
   // repeat these hooks for modals when shown
-  $body.on('shown.bs.modal', function() {
+  $body.on('shown.bs.modal', function () {
     var $m = $(this);
     $m.find('input.date-time-picker').tabulaDateTimePicker();
     $m.find('input.date-picker').tabulaDatePicker();
@@ -843,9 +867,9 @@ $(function() {
 
       $form.areYouSure();
 
-      $m.find('[data-dismiss="modal"]').on('click', function(e) {
+      $m.find('[data-dismiss="modal"]').on('click', function (e) {
         $form.trigger('checkForm.areYouSure');
-        if($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')){
+        if ($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')) {
           e.preventDefault();
           e.stopImmediatePropagation();
         } else {
@@ -860,14 +884,14 @@ $(function() {
   });
 
   // TAB-4210 http://stackoverflow.com/questions/27371918/stacking-modals-scrolls-the-main-page-when-one-is-closed
-  $body.on('hidden.bs.modal', function() {
+  $body.on('hidden.bs.modal', function () {
     // If there are other open modals, re-add the modal-open class to the body
     if ($('.modal').hasClass('in')) {
       $body.addClass('modal-open');
     }
   });
 
-  $(document).on("ajaxComplete", function(e, xhr) {
+  $(document).on("ajaxComplete", function (e, xhr) {
     if (xhr.responseText && xhr.responseText.indexOf('<details') != -1) {
       $('details').details();
     }
@@ -881,9 +905,9 @@ $(function() {
     var $this = $(this);
     var originalText = $this.html();
     if (!$this.hasClass('clicked') && !$this.hasClass('disabled') && !$this.parent().hasClass('disabled')) {
-      $this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
-      setTimeout(function(){
-        $this.removeClass('clicked').css({opacity:1}).html(originalText);
+      $this.addClass('clicked').css({opacity: 0.5}).width($this.width()).html('Please wait&hellip;');
+      setTimeout(function () {
+        $this.removeClass('clicked').css({opacity: 1}).html(originalText);
       }, 5000);
       return true;
     } else {
@@ -892,7 +916,7 @@ $(function() {
     }
   });
 
-  $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
+  $('a.copyable-url').copyable({prefixLinkText: true}).tooltip();
 
   // add .use-tooltip class and title attribute to enable cool looking tooltips.
   // http://twitter.github.com/bootstrap/javascript.html#tooltips
@@ -919,7 +943,7 @@ $(function() {
     template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
   });
 
-  $('.use-introductory:not(.auto)').each(function() {
+  $('.use-introductory:not(.auto)').each(function () {
     var template = $(this).data('bs.popover').options.template;
     $(this).data('bs.popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
   });
@@ -928,11 +952,11 @@ $(function() {
   $('.use-introductory.auto').popover('show');
 
   // persist introductory popover auto-show state
-  $('.id7-fixed-width-container').on('change', '.introductory .footer input', function(e) {
+  $('.id7-fixed-width-container').on('change', '.introductory .footer input', function (e) {
     // If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
     var hash = $(e.target).parents('.introductory').data('creator').data('hash');
     // use this hook to persist showOnLoad state with some ajax shizzle
-    $.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
+    $.post('/settings/showIntro/' + hash, {dismiss: $(this).is(':checked')});
   });
 
   /* details/summary polyfill
@@ -947,13 +971,13 @@ $(function() {
 
   // togglers - relies on everything being in a section element
   var $tabulaPage = $(".tabula-page");
-  $tabulaPage.on("click", ".open-all-details", function() {
+  $tabulaPage.on("click", ".open-all-details", function () {
     var $container = $(this).closest('section');
     $container.find('details:not(' + openSlctr + ') summary').click();
     $container.find(".open-all-details").hide();
     $container.find(".close-all-details").show();
   });
-  $tabulaPage.on("click", ".close-all-details", function() {
+  $tabulaPage.on("click", ".close-all-details", function () {
     var $container = $(this).closest('section');
     $container.find('details' + openSlctr + ' summary').click();
     $container.find(".close-all-details").hide();
@@ -964,8 +988,8 @@ $(function() {
   exports.initCollapsible();
 
   // Form dirty checking
-  $('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty':true, 'renamedFieldsMarksDirty':true});
-  $('.dirty-check-ignore').on('click', function() {
+  $('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty': true, 'renamedFieldsMarksDirty': true});
+  $('.dirty-check-ignore').on('click', function () {
     $('form.dirty-check').trigger('reinitialize.areYouSure');
   });
 
@@ -978,11 +1002,11 @@ $(function() {
   if ($('.fix-on-scroll').length) {
     var gutter = $('#navigation').height();
 
-    $(window).scroll(function() {
+    $(window).scroll(function () {
       var scrollTop = $(this).scrollTop() + gutter;
 
       if (!$('body.is-smallscreen').length) {
-        $('.fix-on-scroll:visible').each(function() {
+        $('.fix-on-scroll:visible').each(function () {
           var $this = $(this);
 
           var $scrollContainer = $this.closest('.fix-on-scroll-container');
@@ -1051,7 +1075,7 @@ $(function() {
     $t.prepend($lt);
     $t.trigger('tabbablechanged');
 
-    var reset = function() { // to list
+    var reset = function () { // to list
       $t.hide();
       var $cols = $t.find('.cols');
       $cols.find('.gadget').appendTo($panes);
@@ -1062,18 +1086,18 @@ $(function() {
       $t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
     };
 
-    $(document).on('tabbablechanged', function(e, options) {
+    $(document).on('tabbablechanged', function (e, options) {
       $('.tooltip').remove();
       $t.show().find('.tab-container i, .layout-tools i').tooltip();
-      if (typeof(options) === 'object' && typeof(options.callback) == typeof(Function)) options.callback();
+      if (typeof (options) === 'object' && typeof (options.callback) == typeof (Function)) options.callback();
     });
 
     // layout options
-    var tabLayout = function() { // tabify
+    var tabLayout = function () { // tabify
       reset();
       var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
       var $tabs = $tabContainer.find('ul');
-      $panes.children('li').each(function() {
+      $panes.children('li').each(function () {
 
         var title = $(this).attr('data-title');
         if (!title) {
@@ -1090,16 +1114,20 @@ $(function() {
         handle: '.icon-move',
         placeholder: 'tabbable-placeholder'
       }).show().find('li:first > a').tab('show');
-      $t.trigger('tabbablechanged', {'callback': function() { $('.tabbable').tabOverflow(); }, 'layout': 'tabbed'});
+      $t.trigger('tabbablechanged', {
+        'callback': function () {
+          $('.tabbable').tabOverflow();
+        }, 'layout': 'tabbed'
+      });
     };
     $t.on('click', '.layout-tools .icon-folder-close', tabLayout);
 
-    var gadgetLayout = function() { // gadgetify
+    var gadgetLayout = function () { // gadgetify
       reset();
       var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
       var paneCount = $panes.children('li').length;
       $t.append($cols);
-      $panes.children('li').each(function(idx) {
+      $panes.children('li').each(function (idx) {
         var $gadget = $(this).addClass('gadget');
         var title = $(this).attr('data-title') || $(this).find('h4').first().text();
         var link = '#' + $(this).attr('id');
@@ -1111,7 +1139,7 @@ $(function() {
         $gadget.prepend($gadgetHeaderTab).find('.tab-container li > a').tab('show');
 
         // populate columns (dumbly)
-        $(this).appendTo(idx < paneCount/2 ? $cols.children().first() : $cols.children().last());
+        $(this).appendTo(idx < paneCount / 2 ? $cols.children().first() : $cols.children().last());
       });
 
       // make sortable & finish up rendering
@@ -1126,14 +1154,14 @@ $(function() {
     };
     $t.on('click', '.layout-tools .icon-th-large', gadgetLayout);
 
-    var listLayout = function() { // listify
+    var listLayout = function () { // listify
       reset();
       $t.trigger('tabbablechanged', {'layout': 'list'});
     };
     $t.on('click', '.layout-tools .icon-reorder', listLayout);
 
     // tab controls
-    $t.on("click", ".tab-container .icon-resize-small", function(e) {
+    $t.on("click", ".tab-container .icon-resize-small", function (e) {
       e.stopPropagation();
       var $a = $(this).parent();
       var title = $a.data("title");
@@ -1142,7 +1170,7 @@ $(function() {
       $t.trigger('tabbablechanged');
     });
 
-    $t.on("click", ".tab-container .icon-resize-full", function(e) {
+    $t.on("click", ".tab-container .icon-resize-full", function (e) {
       e.stopPropagation();
       var $a = $(this).parent();
       var title = $a.data("title");
@@ -1151,7 +1179,7 @@ $(function() {
       $t.trigger('tabbablechanged');
     });
 
-    $t.on("click", ".tab-container .icon-minus-sign-alt", function(e) {
+    $t.on("click", ".tab-container .icon-minus-sign-alt", function (e) {
       e.stopPropagation();
       var $a = $(this).parent();
       $a.closest('.gadget').find('.tab-content').slideUp('fast');
@@ -1161,7 +1189,7 @@ $(function() {
       $t.trigger('tabbablechanged');
     });
 
-    $t.on("click", ".tab-container .icon-plus-sign-alt", function(e) {
+    $t.on("click", ".tab-container .icon-plus-sign-alt", function (e) {
       e.stopPropagation();
       var $a = $(this).parent();
       $a.closest('.gadget').find('.tab-content').slideDown('fast');
@@ -1193,9 +1221,9 @@ $(function() {
 
   if (window !== window.top) {
     // this is an iframe
-    (function(){
+    (function () {
       var bodyHeight = $('body').height();
-      setInterval(function(){
+      setInterval(function () {
         var newBodyHeight = $('body').height();
         if (newBodyHeight !== bodyHeight) {
           bodyHeight = newBodyHeight;
@@ -1208,28 +1236,28 @@ $(function() {
 
   // Prevent clicks on filtering dropdowns from closing window
   // and enable a close button
-  $('.dropdown-menu.filter-list').on('click', function(e) {
+  $('.dropdown-menu.filter-list').on('click', function (e) {
     e.stopImmediatePropagation();
-  }).find('button[data-dismiss=dropdown]').on('click', function(e){
+  }).find('button[data-dismiss=dropdown]').on('click', function (e) {
     e.stopPropagation();
     $(this).closest('.dropdown-menu').dropdown('toggle');
   });
 
-  $('[data-loading-text]').on('click', function(){
+  $('[data-loading-text]').on('click', function () {
     $(this).button('loading');
   });
 
   // SCRIPTS FOR ATTENDANCE NOTES
-  (function(){
-    var addArgToUrl = function(url, argName, argValue){
-      if(url.indexOf('?') > 0) {
+  (function () {
+    var addArgToUrl = function (url, argName, argValue) {
+      if (url.indexOf('?') > 0) {
         return url + '&' + argName + '=' + argValue;
       } else {
         return url + '?' + argName + '=' + argValue;
       }
     };
 
-    var attendanceNoteIframeLoad = function(iFrame){
+    var attendanceNoteIframeLoad = function (iFrame) {
       var $m = $('#attendance-note-modal'), $f = $(iFrame).contents();
 
       if ($f.find(".attendance-note-success").length > 0) {
@@ -1238,13 +1266,13 @@ $(function() {
           , state = $f.find(".attendance-note-success").data('state')
           , $links;
 
-        if(linkId === "bulk") {
+        if (linkId === "bulk") {
           $links = $('#recordAttendance').find('a.attendance-note');
         } else {
           $links = $(linkId);
         }
 
-        $links.each(function(i, link){
+        $links.each(function (i, link) {
           var $link = $(link);
           $link.attr('data-original-title', state + ' attendance note');
           if (state === 'Edit') {
@@ -1266,27 +1294,27 @@ $(function() {
         // wipe any existing state information for the submit protection
         $form.removeData('submitOnceSubmitted');
         $m.modal("show");
-        $m.on("shown.bs.modal", function() {
+        $m.on("shown.bs.modal", function () {
           $f.find("[name='note']").focus();
         });
       }
     };
 
-    var attendanceNoteIframeHandler = function() {
+    var attendanceNoteIframeHandler = function () {
       attendanceNoteIframeLoad(this);
       $(this).off('load', attendanceNoteIframeHandler);
     };
 
-    var attendanceNoteClickHandler = function(href, $target){
+    var attendanceNoteClickHandler = function (href, $target) {
       var $m = $('#attendance-note-modal');
-      if($m.length  === 0) {
+      if ($m.length === 0) {
         $m = $('<div />').attr({
-          'id' : 'attendance-note-modal',
-          'class' : 'modal fade'
+          'id': 'attendance-note-modal',
+          'class': 'modal fade'
         }).appendTo($('body'));
       }
 
-      $m.off('submit', 'form').on('submit', 'form', function(e){
+      $m.off('submit', 'form').on('submit', 'form', function (e) {
         e.preventDefault();
         // reattach the load handler and submit the inner form in the iframe
         $m.find('iframe')
@@ -1300,7 +1328,7 @@ $(function() {
 
       var $icon = $target.find('i');
       $icon.removeClass("fa-pencil-square-o").addClass("fa-spinner fa-spin");
-      $.get(href, function(data){
+      $.get(href, function (data) {
         $m.html(data);
         $m.find('.modal-body').empty();
         var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
@@ -1312,29 +1340,29 @@ $(function() {
       });
     };
 
-    $('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', function(event){
+    $('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', function (event) {
       event.preventDefault();
       attendanceNoteClickHandler($(this).attr('href'), $(this));
     });
 
     // Popovers are created on click so binding directly to A tags won't work
-    $('body').on('click', '.popover a.attendance-note-modal', function(event){
+    $('body').on('click', '.popover a.attendance-note-modal', function (event) {
       var $this = $(this), $m = $('#attendance-note-modal');
       event.preventDefault();
-      if($m.length  === 0) {
+      if ($m.length === 0) {
         $m = $('<div />').attr({
-          'id' : 'attendance-note-modal',
-          'class' : 'modal fade'
+          'id': 'attendance-note-modal',
+          'class': 'modal fade'
         }).appendTo($('body'));
       }
 
-      $.get($this.attr('href'), function(data){
+      $.get($this.attr('href'), function (data) {
         $m.html(data).modal('show');
         $this.closest('.popover').find('button.close').trigger('click');
-        $m.find('.modal-footer .btn-primary').on('click', function(e){
+        $m.find('.modal-footer .btn-primary').on('click', function (e) {
           e.preventDefault();
           var link = $(this).attr('href');
-          $m.modal('hide').on('hidden.bs.modal.attendance-note', function(){
+          $m.modal('hide').on('hidden.bs.modal.attendance-note', function () {
             $m.off('hidden.bs.modal.attendance-note');
             attendanceNoteClickHandler(link, $());
           });
@@ -1345,7 +1373,7 @@ $(function() {
   // END SCRIPTS FOR ATTENDANCE NOTES
 
   // Radio-style buttons
-  $('[data-toggle="radio-buttons"]').on('click', 'button', function(){
+  $('[data-toggle="radio-buttons"]').on('click', 'button', function () {
     $(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
     $(this).addClass('active');
   });
@@ -1360,19 +1388,19 @@ $(function() {
 // we use extend() to add to any existing variable rather than clobber it
 window.GlobalScripts = jQuery.extend(window.GlobalScripts, exports);
 
-$(function() {
+$(function () {
 // If there's an element with an id of 'scroll-container', max-size it to fit to the bottom of
 // the page, with scrollbars if needed
-  $('#scroll-container').each(function(){
+  $('#scroll-container').each(function () {
     var scrollable = $(this);
     // window.height includes horizontal scrollbar on mozilla so add 20px of padding.
     var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
-    scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
+    scrollable.css({'max-height': elementHeight, 'overflow-y': 'auto'});
   });
 });
 
 // code for department settings - lives here as department settings is included in most modules
-$(function() {
+$(function () {
   var $deptSettingsForm = $('.department-settings-form');
   if (!$deptSettingsForm.length) return;
 
@@ -1380,12 +1408,12 @@ $(function() {
 
   $deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
 
-  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden', function () {
     // what is `this` here? can it ever be checked?
-    if(!$(this).is(':checked')){
+    if (!$(this).is(':checked')) {
       $('#small-match-options').find('input[type=text]').val('0');
     }
-  }).find('input').on('disable.radiocontrolled', function() {
+  }).find('input').on('disable.radiocontrolled', function () {
     this.value = '0';
   });
 
@@ -1397,11 +1425,11 @@ $(function() {
 
 });
 
-$(function() {
-  $(document.body).on('click', 'a.disabled', function(e) {
+$(function () {
+  $(document.body).on('click', 'a.disabled', function (e) {
     e.preventDefault();
   });
-  $(document.body).on('click', 'button.disabled', function(e) {
+  $(document.body).on('click', 'button.disabled', function (e) {
     e.preventDefault();
   });
 });

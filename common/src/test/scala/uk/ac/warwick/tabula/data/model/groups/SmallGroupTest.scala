@@ -17,76 +17,76 @@ class SmallGroupTest extends TestBase with Mockito {
   val notEquivalentEvent: SmallGroupEvent = newEventWithMockedServices
   notEquivalentEvent.day = DayOfWeek.Monday
 
-	val sessionFactory: SessionFactory = smartMock[SessionFactory]
-	val session: Session = smartMock[Session]
-	sessionFactory.getCurrentSession returns session
-	sessionFactory.openSession() returns session
+  val sessionFactory: SessionFactory = smartMock[SessionFactory]
+  val session: Session = smartMock[Session]
+  sessionFactory.getCurrentSession returns session
+  sessionFactory.openSession() returns session
 
-	def newSmallGroupWithMockedServices: SmallGroup = {
-		val group = new SmallGroup()
-		group.permissionsService = mock[PermissionsService]
-		group.smallGroupService = None
-		group
-	}
+  def newSmallGroupWithMockedServices: SmallGroup = {
+    val group = new SmallGroup()
+    group.permissionsService = mock[PermissionsService]
+    group.smallGroupService = None
+    group
+  }
 
-	def newEventWithMockedServices: SmallGroupEvent = {
-		val event = new SmallGroupEvent()
-		event.smallGroupService = None
-		event.permissionsService = mock[PermissionsService]
-		event
-	}
+  def newEventWithMockedServices: SmallGroupEvent = {
+    val event = new SmallGroupEvent()
+    event.smallGroupService = None
+    event.permissionsService = mock[PermissionsService]
+    event
+  }
 
   @Test
   def equivalentEventsToReturnsTrueForSameGroup() {
     val group = newSmallGroupWithMockedServices
 
-    group.hasEquivalentEventsTo(group) should be{true}
+    group.hasEquivalentEventsTo(group) should be (true)
   }
 
   @Test
-  def equivalentEventsToReturnsTrueForGroupsWithNoEvents(){
+  def equivalentEventsToReturnsTrueForGroupsWithNoEvents() {
     val group = newSmallGroupWithMockedServices
-    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be {true}
+    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be (true)
   }
 
   @Test
-  def equivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(){
+  def equivalentEventsToReturnsTrueForGroupsWithEquivalentEvents() {
 
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(equivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {true}
+    group.hasEquivalentEventsTo(group2) should be (true)
   }
 
   @Test
-  def equivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(){
+  def equivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents() {
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {false}
+    group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
-  def equivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(){
+  def equivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents() {
     val group = newSmallGroupWithMockedServices
     group.addEvent(event)
     val group2 = newSmallGroupWithMockedServices
     group2.addEvent(event)
-		group2.addEvent(notEquivalentEvent)
-    group.hasEquivalentEventsTo(group2) should be {false}
+    group2.addEvent(notEquivalentEvent)
+    group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
-  def duplicateCopiesAllFields(){
+  def duplicateCopiesAllFields() {
 
     val source = newSmallGroupWithMockedServices
     val clonedEvent = newEventWithMockedServices
 
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
-    val event:SmallGroupEvent = new SmallGroupEvent{
+    val event: SmallGroupEvent = new SmallGroupEvent {
       override def duplicateTo(g: SmallGroup, transient: Boolean): SmallGroupEvent = clonedEvent
     }
 
@@ -96,10 +96,10 @@ class SmallGroupTest extends TestBase with Mockito {
     source.groupSet = sourceSet
     source.permissionsService = mock[PermissionsService]
 
-		// would be nice to use a mock here, but they don't work well with GeneratedId classes
-		val studentsGroup = UserGroup.ofUniversityIds
-		studentsGroup.sessionFactory = sessionFactory
-		studentsGroup.addUserId("test user")
+    // would be nice to use a mock here, but they don't work well with GeneratedId classes
+    val studentsGroup = UserGroup.ofUniversityIds
+    studentsGroup.sessionFactory = sessionFactory
+    studentsGroup.addUserId("test user")
     source.students = studentsGroup
 
     source.id = "123"
@@ -119,45 +119,49 @@ class SmallGroupTest extends TestBase with Mockito {
 
     target.permissionsService should be(source.permissionsService)
     target.students should not be source.students
-		target.students.hasSameMembersAs(source.students) should be{true}
+    target.students.hasSameMembersAs(source.students) should be (true)
     target.events.size should be(1)
     target.events.head should be(clonedEvent)
 
   }
 
-	@Test
-	def fullReportsFullnessWhenGroupSizeSet(){
+  @Test
+  def fullReportsFullnessWhenGroupSizeSet() {
 
-		// set up a group with 1 member, with group size limits enabled
-		val group = newSmallGroupWithMockedServices
-		group.groupSet = new SmallGroupSet()
-		group.students.add(new User("test") {{ setWarwickId("00000001") }})
+    // set up a group with 1 member, with group size limits enabled
+    val group = newSmallGroupWithMockedServices
+    group.groupSet = new SmallGroupSet()
+    group.students.add(new User("test") {
+      {
+        setWarwickId("00000001")
+      }
+    })
 
 
-		group.maxGroupSize = 2
-		group should not be 'full
+    group.maxGroupSize = 2
+    group should not be 'full
 
-		group.maxGroupSize = 1
-		group should be('full)
+    group.maxGroupSize = 1
+    group should be('full)
 
-		group.maxGroupSize = 0
-		group should be('full)
+    group.maxGroupSize = 0
+    group should be('full)
 
-	}
+  }
 
-	@Test
-	def sortIsAlphanumeric(): Unit = {
-		val group1 = Fixtures.smallGroup("Group 1")
-		val group2 = Fixtures.smallGroup("group 2")
-		val group3 = Fixtures.smallGroup("group 20")
-		val group4 = Fixtures.smallGroup("Group 10")
-		val group5 = Fixtures.smallGroup("Group 9")
-		val group6 = Fixtures.smallGroup("Late group 1")
+  @Test
+  def sortIsAlphanumeric(): Unit = {
+    val group1 = Fixtures.smallGroup("Group 1")
+    val group2 = Fixtures.smallGroup("group 2")
+    val group3 = Fixtures.smallGroup("group 20")
+    val group4 = Fixtures.smallGroup("Group 10")
+    val group5 = Fixtures.smallGroup("Group 9")
+    val group6 = Fixtures.smallGroup("Late group 1")
 
-		for (i <- 1 to 10) {
-			val shuffled = Random.shuffle(Seq(group1, group2, group3, group4, group5, group6))
+    for (i <- 1 to 10) {
+      val shuffled = Random.shuffle(Seq(group1, group2, group3, group4, group5, group6))
 
-			shuffled.sorted should be (Seq(group1, group2, group5, group4, group3, group6))
-		}
-	}
+      shuffled.sorted should be(Seq(group1, group2, group5, group4, group3, group6))
+    }
+  }
 }

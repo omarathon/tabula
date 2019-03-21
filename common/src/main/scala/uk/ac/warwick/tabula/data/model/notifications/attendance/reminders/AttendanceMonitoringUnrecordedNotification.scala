@@ -14,104 +14,104 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringSe
 import uk.ac.warwick.userlookup.User
 
 abstract class AbstractAttendanceMonitoringUnrecordedNotification
-	extends Notification[Department, Unit]
-	with SingleItemNotification[Department]
-	with AllCompletedActionRequiredNotification {
+  extends Notification[Department, Unit]
+    with SingleItemNotification[Department]
+    with AllCompletedActionRequiredNotification {
 
-	override final def verb = "record"
+  override final def verb = "record"
 
-	priority = NotificationPriority.Critical
+  priority = NotificationPriority.Critical
 
-	@transient
-	var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
+  @transient
+  var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]
 
-	@transient
-	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  @transient
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
-	final def referenceDate: DateTime = created.plusDays(-7)
+  final def referenceDate: DateTime = created.plusDays(-7)
 
-	@transient
-	lazy val academicYear: AcademicYear = AcademicYear.forDate(referenceDate)
+  @transient
+  lazy val academicYear: AcademicYear = AcademicYear.forDate(referenceDate)
 
-	final def department: Department = item.entity
+  final def department: Department = item.entity
 
 }
 
 @Entity
-@DiscriminatorValue(value="AttendanceMonitoringUnrecordedPoints")
+@DiscriminatorValue(value = "AttendanceMonitoringUnrecordedPoints")
 class AttendanceMonitoringUnrecordedPointsNotification
-	extends AbstractAttendanceMonitoringUnrecordedNotification {
+  extends AbstractAttendanceMonitoringUnrecordedNotification {
 
-	override final def url: String = Routes.View.pointsUnrecorded(department, academicYear)
+  override final def url: String = Routes.View.pointsUnrecorded(department, academicYear)
 
-	override final def urlTitle = "record attendance for these points"
+  override final def urlTitle = "record attendance for these points"
 
-	override def title: String = {
-		val pointsCount = unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).size
+  override def title: String = {
+    val pointsCount = unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).size
 
-		s"$pointsCount monitoring ${if (pointsCount == 1) "point needs" else "points need"} recording"
-	}
+    s"$pointsCount monitoring ${if (pointsCount == 1) "point needs" else "points need"} recording"
+  }
 
-	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_points_notification.ftl"
+  final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_points_notification.ftl"
 
-	@transient
-	final lazy val unrecordedPoints: Seq[AttendanceMonitoringPoint] = {
-		attendanceMonitoringService.findUnrecordedPoints(department, academicYear, referenceDate.toLocalDate)
-	}
+  @transient
+  final lazy val unrecordedPoints: Seq[AttendanceMonitoringPoint] = {
+    attendanceMonitoringService.findUnrecordedPoints(department, academicYear, referenceDate.toLocalDate)
+  }
 
-	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
-		"department" -> department,
-		"academicYear" -> academicYear,
-		"points" -> unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).map{case(_, groupedPoints) => groupedPoints.head}
-	))
+  override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
+    "department" -> department,
+    "academicYear" -> academicYear,
+    "points" -> unrecordedPoints.groupBy(p => (p.name, p.startDate, p.endDate)).map { case (_, groupedPoints) => groupedPoints.head }
+  ))
 
-	override final def recipients: Seq[User] = {
-		if (unrecordedPoints.nonEmpty) {
-			// department.owners is not populated correctly if department not fetched directly
-			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
-		} else {
-			Seq()
-		}
-	}
+  override final def recipients: Seq[User] = {
+    if (unrecordedPoints.nonEmpty) {
+      // department.owners is not populated correctly if department not fetched directly
+      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+    } else {
+      Seq()
+    }
+  }
 
 }
 
 @Entity
-@DiscriminatorValue(value="AttendanceMonitoringUnrecordedStudents")
+@DiscriminatorValue(value = "AttendanceMonitoringUnrecordedStudents")
 class AttendanceMonitoringUnrecordedStudentsNotification
-	extends AbstractAttendanceMonitoringUnrecordedNotification {
+  extends AbstractAttendanceMonitoringUnrecordedNotification {
 
-	override final def url: String = Routes.View.studentsUnrecorded(department, academicYear)
+  override final def url: String = Routes.View.studentsUnrecorded(department, academicYear)
 
-	override final def urlTitle = "record attendance for these students"
+  override final def urlTitle = "record attendance for these students"
 
-	override def title: String = {
-		val studentsCount = unrecordedStudents.size
+  override def title: String = {
+    val studentsCount = unrecordedStudents.size
 
-		s"$studentsCount ${if (studentsCount == 1) "student needs" else "students need"} monitoring points recording"
-	}
+    s"$studentsCount ${if (studentsCount == 1) "student needs" else "students need"} monitoring points recording"
+  }
 
-	final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_students_notification.ftl"
+  final def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/attendancemonitoring/attendance_monitoring_unrecorded_students_notification.ftl"
 
-	@transient
-	final lazy val unrecordedStudents: Seq[AttendanceMonitoringStudentData] = {
-		attendanceMonitoringService.findUnrecordedStudents(department, academicYear, created.toLocalDate)
-			.sortBy(u => (u.lastName, u.firstName))
-	}
+  @transient
+  final lazy val unrecordedStudents: Seq[AttendanceMonitoringStudentData] = {
+    attendanceMonitoringService.findUnrecordedStudents(department, academicYear, created.toLocalDate)
+      .sortBy(u => (u.lastName, u.firstName))
+  }
 
-	override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
-		"department" -> department,
-		"academicYear" -> academicYear,
-		"students" -> unrecordedStudents,
-		"truncatedStudents" -> unrecordedStudents.slice(0, 10)
-	))
+  override def content: FreemarkerModel = FreemarkerModel(FreemarkerTemplate, Map(
+    "department" -> department,
+    "academicYear" -> academicYear,
+    "students" -> unrecordedStudents,
+    "truncatedStudents" -> unrecordedStudents.slice(0, 10)
+  ))
 
-	@transient
-	override def recipients: Seq[User] =
-		if (unrecordedStudents.nonEmpty) {
-			// department.owners is not populated correctly if department not fetched directly
-			moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
-		} else {
-			Seq()
-		}
+  @transient
+  override def recipients: Seq[User] =
+    if (unrecordedStudents.nonEmpty) {
+      // department.owners is not populated correctly if department not fetched directly
+      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+    } else {
+      Seq()
+    }
 }

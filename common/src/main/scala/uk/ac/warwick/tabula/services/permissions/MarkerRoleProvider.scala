@@ -14,28 +14,30 @@ import uk.ac.warwick.tabula.services.AssessmentService
 @Component
 class MarkerRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	val assignmentService: MutablePromise[AssessmentService] = promise { Wire[AssessmentService] }
+  val assignmentService: MutablePromise[AssessmentService] = promise {
+    Wire[AssessmentService]
+  }
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
-		def getRoles(assessmentsForMarker: Stream[Assessment]) = assessmentsForMarker.map { assessment =>
-			customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
-		}
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MarkerRoleProvider") {
+    def getRoles(assessmentsForMarker: Stream[Assessment]) = assessmentsForMarker.map { assessment =>
+      customRoleFor(assessment.module.adminDepartment)(MarkerRoleDefinition, assessment).getOrElse(Marker(assessment))
+    }
 
-		scope match {
-			case assignment: Assignment if assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).exists(_.allMarkers.contains(user.apparentUser)) =>
-				getRoles(Stream(assignment))
+    scope match {
+      case assignment: Assignment if assignment.cm2Assignment && Option(assignment.cm2MarkingWorkflow).exists(_.allMarkers.contains(user.apparentUser)) =>
+        getRoles(Stream(assignment))
 
-			case assignment: Assignment if !assignment.cm2Assignment && assignment.isMarker(user.apparentUser) =>
-				getRoles(Stream(assignment))
+      case assignment: Assignment if !assignment.cm2Assignment && assignment.isMarker(user.apparentUser) =>
+        getRoles(Stream(assignment))
 
-			case exam: Exam if exam.isMarker(user.apparentUser) =>
-				getRoles(Stream(exam))
+      case exam: Exam if exam.isMarker(user.apparentUser) =>
+        getRoles(Stream(exam))
 
-			// We don't need to check for the marker role on any other scopes
-			case _ => Stream.empty
-		}
-	}
+      // We don't need to check for the marker role on any other scopes
+      case _ => Stream.empty
+    }
+  }
 
-	def rolesProvided: Set[Class[_ <: Role]] = Set(classOf[Marker])
+  def rolesProvided: Set[Class[_ <: Role]] = Set(classOf[Marker])
 
 }

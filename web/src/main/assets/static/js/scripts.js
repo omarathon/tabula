@@ -1,29 +1,30 @@
-const { jQuery, WPopupBox } = window;
+const {jQuery, WPopupBox} = window;
 
 /**
  * Cross-app scripting.
  * Only for code that is common across Tabula UI.
  * There are specific scripts for individual modules; use those for local code.
  */
-(function ($) { "use strict";
+(function ($) {
+  "use strict";
   window.Supports = {};
   window.Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
 
   var exports = {};
 
   // All WPopupBoxes will inherit this default configuration.
-  WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
+  WPopupBox.defaultConfig = {imageroot: '/static/libs/popup/'};
 
   // Tabula-specific rendition of tablesorter plugin for sortable tables
-  jQuery.fn.sortableTable = function(settings) {
+  jQuery.fn.sortableTable = function (settings) {
     settings = settings || {};
 
     var $table = $(this);
     if ($table.tablesorter) {
       var headerSettings = {};
-      $('th', $table).each(function(index){
+      $('th', $table).each(function (index) {
         var sortable = $(this).hasClass("sortable");
-        if(!sortable){
+        if (!sortable) {
           headerSettings[index] = {sorter: false};
         }
       });
@@ -33,16 +34,16 @@ const { jQuery, WPopupBox } = window;
   };
 
   // Tabula-specific rendition of date and date-time pickers
-  jQuery.fn.tabulaDateTimePicker = function() {
+  jQuery.fn.tabulaDateTimePicker = function () {
     var $this = $(this);
     // if there is no datepicker bound to this input then add one
-    if(!$this.data("datepicker")){
+    if (!$this.data("datepicker")) {
       $this.datetimepicker({
         format: "dd-M-yyyy hh:ii:ss",
         weekStart: 1,
         minView: 'day',
         autoclose: true
-      }).on('show', function(ev){
+      }).on('show', function (ev) {
         var d = new Date(ev.date.valueOf()),
           minutes = d.getUTCMinutes(),
           seconds = d.getUTCSeconds(),
@@ -59,23 +60,27 @@ const { jQuery, WPopupBox } = window;
           $(this).datetimepicker('update');
         }
 
-      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+        $(this).prev("input").focus();
+      });
     }
 
-    $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+    $(this).on('changeDate', function () {
+      offsetEndDateTime($(this));
+    });
 
   };
 
   // 5-minute resolution
-  jQuery.fn.tabulaDateTimeMinutePicker = function() {
+  jQuery.fn.tabulaDateTimeMinutePicker = function () {
     var $this = $(this);
     // if there is no datepicker bound to this input then add one
-    if(!$this.data("datepicker")){
+    if (!$this.data("datepicker")) {
       $this.datetimepicker({
         format: "dd-M-yyyy hh:ii:ss",
         weekStart: 1,
         autoclose: true
-      }).on('show', function(ev){
+      }).on('show', function (ev) {
         var d = new Date(ev.date.valueOf()),
           seconds = d.getUTCSeconds(),
           millis = d.getUTCMilliseconds();
@@ -90,29 +95,37 @@ const { jQuery, WPopupBox } = window;
           $(this).datetimepicker('update');
         }
 
-      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+        $(this).prev("input").focus();
+      });
     }
 
-    $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+    $(this).on('changeDate', function () {
+      offsetEndDateTime($(this));
+    });
 
   };
 
-  jQuery.fn.tabulaDatePicker = function() {
+  jQuery.fn.tabulaDatePicker = function () {
     var $this = $(this);
     // if there is no datepicker bound to this input then add one
-    if(!$this.data("datepicker")){
+    if (!$this.data("datepicker")) {
       $this.datepicker({
         format: "dd-M-yyyy",
         weekStart: 1,
         minView: 'day',
         autoclose: true
-      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+      }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+        $(this).prev("input").focus();
+      });
     }
 
-    $(this).on('changeDate', function(){ offsetEndDate($(this)); });
+    $(this).on('changeDate', function () {
+      offsetEndDate($(this));
+    });
   };
 
-  jQuery.fn.tabulaTimePicker = function() {
+  jQuery.fn.tabulaTimePicker = function () {
 
     $(this).datetimepicker({
       format: "hh:ii:ss",
@@ -120,7 +133,7 @@ const { jQuery, WPopupBox } = window;
       startView: 'day',
       maxView: 'day',
       autoclose: true
-    }).on('show', function(ev){
+    }).on('show', function (ev) {
 
       var d = new Date(ev.date.valueOf()),
         minutes = d.getUTCMinutes(),
@@ -137,9 +150,13 @@ const { jQuery, WPopupBox } = window;
         $(this).datetimepicker('update');
 
       }
-    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+    }).next('.add-on').css({'cursor': 'pointer'}).on('click', function () {
+      $(this).prev("input").focus();
+    });
 
-    $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+    $(this).on('changeDate', function () {
+      offsetEndDateTime($(this));
+    });
 
 
   };
@@ -158,10 +175,10 @@ const { jQuery, WPopupBox } = window;
 
 
   function offsetEndDateTime($element) {
-    if($element.hasClass('startDateTime')) {
+    if ($element.hasClass('startDateTime')) {
 
       var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
-      var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+      var $endDateInput = $element.closest('.dateTimePair').find('.endDateTime');
       var endDatePicker = $endDateInput.data('datetimepicker');
 
       if ($endDateInput.length > 0) {
@@ -170,7 +187,7 @@ const { jQuery, WPopupBox } = window;
         $endDateInput.closest('.control-group').addClass('warning').removeClass('error');
       }
 
-    } else if ($element.hasClass('endDateTime')){
+    } else if ($element.hasClass('endDateTime')) {
 
 
       $element.closest('.control-group').removeClass('warning');
@@ -188,9 +205,9 @@ const { jQuery, WPopupBox } = window;
   }
 
   function offsetEndDate($element) {
-    if($element.hasClass('startDateTime')) {
+    if ($element.hasClass('startDateTime')) {
       var endDate = $element.data('datepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
-      var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+      var $endDateInput = $element.closest('.dateTimePair').find('.endDateTime');
       var endDatePicker = $endDateInput.data('datepicker');
 
       if ($endDateInput.length > 0) {
@@ -198,7 +215,7 @@ const { jQuery, WPopupBox } = window;
         endDatePicker.setValue();
         $endDateInput.closest('.control-group').addClass('warning').removeClass('error');
       }
-    } else if ($element.hasClass('endDateTime')){
+    } else if ($element.hasClass('endDateTime')) {
       $element.closest('.control-group').removeClass('warning');
 
       var $startDateInput = $element.closest('.dateTimePair').find('.startDateTime');
@@ -218,7 +235,7 @@ const { jQuery, WPopupBox } = window;
      Triggers a 'tabula.slideMoreOptions.shown' event on the div when it is revealed and a
      'tabula.slideMoreOptions.hidden' event when it is hidden.
   */
-  jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
+  jQuery.fn.slideMoreOptions = function ($slidingDiv, showWhenChecked) {
     if ($(this).hasClass('slideMoreOptions-init')) {
       return false;
     } else {
@@ -228,18 +245,19 @@ const { jQuery, WPopupBox } = window;
     var $this = $(this);
     var name = $this.attr("name");
     var $form = $this.closest('form');
-    var doNothing = function(){};
+    var doNothing = function () {
+    };
 
-    var show = function($div, data) {
+    var show = function ($div, data) {
       if (data === 'init') $div.show(); // no animation on init
-      else $div.stop().slideDown('fast', function(){
+      else $div.stop().slideDown('fast', function () {
         $div.trigger('tabula.slideMoreOptions.shown');
       });
     };
 
-    var hide = function($div, data) {
+    var hide = function ($div, data) {
       if (data === 'init') $div.hide(); // no animation on init
-      else $div.stop().slideUp('fast' , function(){
+      else $div.stop().slideUp('fast', function () {
         $div.trigger('tabula.slideMoreOptions.hidden');
       });
     }
@@ -248,12 +266,12 @@ const { jQuery, WPopupBox } = window;
     // for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
     var $changeTargets = $("input[name='" + name + "']", $form);
     if (showWhenChecked) {
-      $changeTargets.change(function(event, data) {
+      $changeTargets.change(function (event, data) {
         if ($this.is(':checked')) show($slidingDiv, data);
         else hide($slidingDiv, data);
       });
     } else {
-      $changeTargets.change(function(event, data) {
+      $changeTargets.change(function (event, data) {
         if ($this.is(':checked')) hide($slidingDiv, data);
         else show($slidingDiv, data);
       });
@@ -263,20 +281,20 @@ const { jQuery, WPopupBox } = window;
 
 
   // submit bootstrap form using Ajax
-  jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
+  jQuery.fn.tabulaAjaxSubmit = function (successCallback) {
     if ($(this).hasClass('tabulaAjaxSubmit-init')) {
       return false;
     } else {
       $(this).addClass('tabulaAjaxSubmit-init')
     }
 
-    $(this).on('submit', 'form', function(e){
+    $(this).on('submit', 'form', function (e) {
       e.preventDefault();
       var $form = $(this);
-      $.post($form.attr('action'), $form.serialize(), function(data){
+      $.post($form.attr('action'), $form.serialize(), function (data) {
         var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
 
-        if(data.status == "error"){
+        if (data.status == "error") {
           if ($form.is('.double-submit-protection')) {
             $form.find('.submit-buttons .btn').removeClass('disabled');
             $form.removeData('submitOnceSubmitted');
@@ -286,7 +304,7 @@ const { jQuery, WPopupBox } = window;
           $(scopeSelector + "span.error").remove();
           $(scopeSelector + '.error').removeClass('error');
           var error;
-          for(error in data.result){
+          for (error in data.result) {
             var message = data.result[error];
             var inputSelector = scopeSelector + "input[name='" + error + "']";
             var textareaSelector = scopeSelector + "textarea[name='" + error + "']";
@@ -295,7 +313,7 @@ const { jQuery, WPopupBox } = window;
             $field.closest(".control-group").addClass("error");
 
             // insert error message
-            $field.last().after('<span class="error help-inline">'+message+'</span>');
+            $field.last().after('<span class="error help-inline">' + message + '</span>');
           }
         } else {
           successCallback(data)
@@ -303,7 +321,6 @@ const { jQuery, WPopupBox } = window;
       });
     });
   }
-
 
 
   /*
@@ -314,7 +331,7 @@ const { jQuery, WPopupBox } = window;
    * $(el).data('spinContainer').spin('small');
    * $(el).data('spinContainer').spin(false);
    */
-  jQuery.fn.tabulaPrepareSpinners = function(selector) {
+  jQuery.fn.tabulaPrepareSpinners = function (selector) {
     selector = selector || '.spinnable';
 
     // filter selector and descendants
@@ -327,7 +344,7 @@ const { jQuery, WPopupBox } = window;
         window.pendingSpinner = null;
       }
 
-      $spinnable.each(function() {
+      $spinnable.each(function () {
         var $this = $(this);
 
         if ($this.data('spinContainer')) {
@@ -359,10 +376,12 @@ const { jQuery, WPopupBox } = window;
 
           if ($this.is('.spinner-auto')) {
             // spin only after 500ms
-            $this.click(function(e) {
+            $this.click(function (e) {
               if (!$this.is('.disabled')) {
                 var $container = $this.data('spinContainer');
-                window.pendingSpinner = setTimeout(function() { $container.spin('small'); }, 500);
+                window.pendingSpinner = setTimeout(function () {
+                  $container.spin('small');
+                }, 500);
               }
             });
           }
@@ -380,14 +399,14 @@ const { jQuery, WPopupBox } = window;
    * Obviously this won't make it impossible to submit twice, if JS is
    * disabled or altered.
    */
-  jQuery.fn.tabulaSubmitOnce = function() {
+  jQuery.fn.tabulaSubmitOnce = function () {
     var $this = $(this);
 
     if ($this.is('form') && !$this.data('submitOnceHandled')) {
       $this.data('submitOnceHandled', true);
       $this.removeData('submitOnceSubmitted');
 
-      $(this).on('submit', function(event) {
+      $(this).on('submit', function (event) {
         var $this = $(event.target),
           submitted = $this.data('submitOnceSubmitted');
 
@@ -397,7 +416,7 @@ const { jQuery, WPopupBox } = window;
           $this.data('submitOnceSubmitted', true);
           // For FF and other browsers with BFCache/History Cache,
           // re-enable the form if you click Back.
-          $(window).on('pageshow', function() {
+          $(window).on('pageshow', function () {
             $buttons.removeClass('disabled');
             $this.removeData('submitOnceSubmitted');
           });
@@ -414,7 +433,7 @@ const { jQuery, WPopupBox } = window;
   /*
     Customised Popover wrapper. Implements click away to dismiss.
   */
-  $.fn.tabulaPopover = function(options) {
+  $.fn.tabulaPopover = function (options) {
     var $items = this, initClass = 'tabulaPopover-init';
 
     // filter already initialized popovers
@@ -427,7 +446,7 @@ const { jQuery, WPopupBox } = window;
     var options = $.extend({}, defaults, options);
 
 
-    $items.on('click', function(e) {
+    $items.on('click', function (e) {
       $(this).tooltip('disable');
       $(this).trigger('mouseout');
 
@@ -441,12 +460,12 @@ const { jQuery, WPopupBox } = window;
     });
 
     // TAB-2920
-    $items.on('hidden', function(e){
+    $items.on('hidden', function (e) {
       e.stopPropagation();
     });
 
     // Click away to dismiss
-    $('html').on('click.popoverDismiss', function(e) {
+    $('html').on('click.popoverDismiss', function (e) {
       // if clicking anywhere other than the popover itself
       if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
         $items.popover('hide');
@@ -455,9 +474,9 @@ const { jQuery, WPopupBox } = window;
     });
 
     // TAB-945 support popovers within fix-on-scroll
-    $items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
+    $items.closest('.fix-on-scroll').on('fixed', function (e, isFixed, fixLocation) {
       // Re-position any currently shown popover whenever we trigger a change in fix behaviour
-      $items.each(function() {
+      $items.each(function () {
         var $item = $(this);
         var popover = $item.popover().data('popover');
         var $tip = popover.tip();
@@ -477,11 +496,11 @@ const { jQuery, WPopupBox } = window;
      * call its popover() method again to get an object reference and then go diving
      * for a reference to the new popover itself in the DOM.
      */
-    $items.on('shown', function(e) {
+    $items.on('shown', function (e) {
       var $po = $(e.target).popover().data('popover').tip();
       $po.data('creator', $(e.target));
     });
-    $('body').on('click', '.popover .close', function(e) {
+    $('body').on('click', '.popover .close', function (e) {
       var $creator = $(e.target).parents('.popover').data('creator');
       if ($creator) {
         $creator.popover('hide');
@@ -490,13 +509,13 @@ const { jQuery, WPopupBox } = window;
     });
 
     // now that's all done, bind the popover
-    $items.each(function() {
+    $items.each(function () {
       // allow each popover to override the container via a data attribute
-      $(this).popover($.extend({}, options, { container: $(this).data('container') })).addClass(initClass);
+      $(this).popover($.extend({}, options, {container: $(this).data('container')})).addClass(initClass);
     });
 
     // ensure popovers/introductorys override title with data-title attribute where available
-    $items.each(function() {
+    $items.each(function () {
       if ($(this).attr('data-title')) {
         $(this).attr('data-original-title', $(this).attr('data-title'));
       }
@@ -509,18 +528,18 @@ const { jQuery, WPopupBox } = window;
     Invoke on .nav-tabs to overflow items into a dropdown
     instead of onto another row.
   */
-  jQuery.fn.tabOverflow = function() {
+  jQuery.fn.tabOverflow = function () {
 
     var selector = '.nav-tabs', $target = $(this).find(selector).add($(this).filter(selector)), initClass = selector + '-overflow-inited';
     // filter already initialized tabs
     $target = $target.not(initClass);
 
     // Packs the given list items into a dropdown.
-    var overflowThese = function($items) {
+    var overflowThese = function ($items) {
       var $dropdown = $('<li>').addClass('dropdown').addClass('pull-right');
       var $link = $('<a>').addClass('dropdown-toggle').html('More...');
       var $caret = $('<b>').addClass('caret');
-      var $ul = $('<ul>', { 'class' : 'dropdown-menu' });
+      var $ul = $('<ul>', {'class': 'dropdown-menu'});
       $dropdown
         .append($ul)
         .append($link.append($caret));
@@ -530,10 +549,10 @@ const { jQuery, WPopupBox } = window;
     };
 
     function overflow($items) {
-      $items.each(function(i, e) {
+      $items.each(function (i, e) {
         var x = 0;
         // find the first child that hits a new line by comparing leftness.
-        $(e).children().each(function(j, child) {
+        $(e).children().each(function (j, child) {
           var left = $(child).position().left;
           if (left < x) {
             // The first prev() is so nextAll includes child;
@@ -566,14 +585,14 @@ const { jQuery, WPopupBox } = window;
     overflow($target);
 
     // on click, move active tab to head, and reflow
-    this.on('click', '.dropdown-menu li', function() {
+    this.on('click', '.dropdown-menu li', function () {
       var $tabs = $(this).closest(selector);
       $tabs.prepend($(this));
       reflow($tabs);
     });
 
     // on tabbable sort or custom change, reflow
-    this.on('tabbablechanged sortstop', function() {
+    this.on('tabbablechanged sortstop', function () {
       var $tabs = $(this).find(selector).add($(this).filter(selector));
       reflow($tabs);
       // if active item pushed into dropdown, try again
@@ -592,14 +611,14 @@ const { jQuery, WPopupBox } = window;
   // collapsible striped section
   // exported so can be called on-demand e.g. after an ajax-load
   // adds a class to prevent double-init
-  exports.initCollapsible = function($el) {
-    if (typeof($el) === 'undefined') {
+  exports.initCollapsible = function ($el) {
+    if (typeof ($el) === 'undefined') {
       $el = $('.striped-section.collapsible');
     }
 
-    $el.filter(':not(.collapsible-init)').each(function() {
+    $el.filter(':not(.collapsible-init)').each(function () {
       var $section = $(this).addClass('collapsible-init');
-      var open = function() {
+      var open = function () {
         return $section.hasClass('expanded');
       };
 
@@ -614,12 +633,14 @@ const { jQuery, WPopupBox } = window;
         $title.prepend(' ').prepend($icon);
       }
 
-      var populateContent = function(onComplete) { onComplete(); }
+      var populateContent = function (onComplete) {
+        onComplete();
+      }
       if ($section.data('populate') && $section.data('href')) {
         $section.data('loaded', false).data('loading', false);
 
         // Populate function
-        populateContent = function(onComplete) {
+        populateContent = function (onComplete) {
           if ($section.data('loaded')) onComplete();
           else if ($section.data('loading')) return; // prevent multiple invocation
           else {
@@ -630,10 +651,10 @@ const { jQuery, WPopupBox } = window;
 
             $target.load(
               $section.data('href'),
-              { ts: new Date().getTime() },
-              function() {
+              {ts: new Date().getTime()},
+              function () {
                 // FIXME This sucks, need to change id6scripts.js to expose this as a function!
-                $target.find('table').each(function() {
+                $target.find('table').each(function () {
                   var t = $(this);
                   if (t.is(':visible') && Math.floor(t.width()) > t.parent().width()) {
                     t.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
@@ -641,7 +662,7 @@ const { jQuery, WPopupBox } = window;
                 });
 
                 if ($('body.is-smallscreen').length === 0 && $target.find('div.sb-wide-table-wrapper').length > 0) {
-                  var popoutLinkHandler = function(event) {
+                  var popoutLinkHandler = function (event) {
                     event.stopPropagation();
                     event.preventDefault();
                     if (!Shadowbox.initialized) {
@@ -650,7 +671,7 @@ const { jQuery, WPopupBox } = window;
                     }
                     var tableWrapper = $(this).closest('div').find('div.sb-wide-table-wrapper')
                     Shadowbox.open({
-                      link : this,
+                      link: this,
                       content: '<div class="sb-wide-table-wrapper" style="background: white;">'
                         + tableWrapper.html()
                         + '</div>',
@@ -660,7 +681,7 @@ const { jQuery, WPopupBox } = window;
                     })
                   };
 
-                  var generatePopoutLink = function(){
+                  var generatePopoutLink = function () {
                     return $('<span/>')
                       .addClass('sb-table-wrapper-popout')
                       .append('(')
@@ -672,9 +693,9 @@ const { jQuery, WPopupBox } = window;
                       ).append(')');
                   };
 
-                  $target.find('div.sb-wide-table-wrapper > table').each(function(){
+                  $target.find('div.sb-wide-table-wrapper > table').each(function () {
                     var $this = $(this);
-                    if($this.is(':visible') && !$this.hasClass('sb-no-wrapper-table-popout') && Math.floor($this.width()) > $this.parent().width()){
+                    if ($this.is(':visible') && !$this.hasClass('sb-no-wrapper-table-popout') && Math.floor($this.width()) > $this.parent().width()) {
                       $this.parent().parent('div').prepend(generatePopoutLink()).append(generatePopoutLink())
                     }
                   });
@@ -690,7 +711,7 @@ const { jQuery, WPopupBox } = window;
         }
       }
 
-      $title.css('cursor', 'pointer').on('click', function(e) {
+      $title.css('cursor', 'pointer').on('click', function (e) {
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
           return;
@@ -705,7 +726,7 @@ const { jQuery, WPopupBox } = window;
           $section.removeClass('expanded');
           $icon.removeClass().addClass('icon-fixed-width icon-chevron-right');
         } else {
-          populateContent(function() {
+          populateContent(function () {
             $section.addClass('expanded');
             $icon.removeClass().addClass('icon-fixed-width icon-chevron-down');
 
@@ -728,13 +749,13 @@ const { jQuery, WPopupBox } = window;
     });
   };
 
-  exports.resizeModalIframes = function(height){
+  exports.resizeModalIframes = function (height) {
     //Adding extra height for 'browser knows iframe size' purposes
     $('.modal-body > iframe').height(height + 36);
   };
 
   // on ready
-  $(function() {
+  $(function () {
     // form behavioural hooks
     $('input.date-time-picker').tabulaDateTimePicker();
     $('input.date-picker').tabulaDatePicker();
@@ -747,7 +768,7 @@ const { jQuery, WPopupBox } = window;
     $('body').tabulaPrepareSpinners();
 
     // repeat these hooks for modals when shown
-    $('body').on('shown', '.modal', function() {
+    $('body').on('shown', '.modal', function () {
       var $m = $(this);
       $m.find('input.date-time-picker').tabulaDateTimePicker();
       $m.find('input.date-picker').tabulaDatePicker();
@@ -762,9 +783,9 @@ const { jQuery, WPopupBox } = window;
 
         $form.areYouSure();
 
-        $m.find('[data-dismiss="modal"]').on('click', function(e) {
+        $m.find('[data-dismiss="modal"]').on('click', function (e) {
           $form.trigger('checkForm.areYouSure');
-          if($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')){
+          if ($form.hasClass('dirty') && !window.confirm('You have unsaved changes! \n\n Are you sure you want to close this form?')) {
             e.preventDefault();
             e.stopImmediatePropagation();
           } else {
@@ -778,7 +799,7 @@ const { jQuery, WPopupBox } = window;
       }
     });
 
-    $(document).on("ajaxComplete", function(e, xhr) {
+    $(document).on("ajaxComplete", function (e, xhr) {
       if (xhr.responseText && xhr.responseText.indexOf('<details') != -1) {
         $('details').details();
       }
@@ -792,9 +813,9 @@ const { jQuery, WPopupBox } = window;
       var $this = $(this);
       var originalText = $this.html();
       if (!$this.hasClass('clicked') && !$this.hasClass('disabled') && !$this.parent().hasClass('disabled')) {
-        $this.addClass('clicked').css({opacity:0.5}).width($this.width()).html('Please wait&hellip;');
-        setTimeout(function(){
-          $this.removeClass('clicked').css({opacity:1}).html(originalText);
+        $this.addClass('clicked').css({opacity: 0.5}).width($this.width()).html('Please wait&hellip;');
+        setTimeout(function () {
+          $this.removeClass('clicked').css({opacity: 1}).html(originalText);
         }, 5000);
         return true;
       } else {
@@ -803,7 +824,7 @@ const { jQuery, WPopupBox } = window;
       }
     });
 
-    $('a.copyable-url').copyable({prefixLinkText:true}).tooltip();
+    $('a.copyable-url').copyable({prefixLinkText: true}).tooltip();
 
     // add .use-tooltip class and title attribute to enable cool looking tooltips.
     // http://twitter.github.com/bootstrap/javascript.html#tooltips
@@ -830,7 +851,7 @@ const { jQuery, WPopupBox } = window;
       template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
     });
 
-    $('.use-introductory:not(.auto)').each(function() {
+    $('.use-introductory:not(.auto)').each(function () {
       var template = $(this).data('popover').options.template;
       $(this).data('popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
     });
@@ -839,11 +860,11 @@ const { jQuery, WPopupBox } = window;
     $('.use-introductory.auto').popover('show');
 
     // persist introductory popover auto-show state
-    $('#container').on('change', '.introductory .footer input', function(e) {
+    $('#container').on('change', '.introductory .footer input', function (e) {
       // If intro text is changed to reflect new features, its hash should change to ensure end users see the new version
       var hash = $(e.target).parents('.introductory').data('creator').data('hash');
       // use this hook to persist showOnLoad state with some ajax shizzle
-      $.post('/settings/showIntro/' + hash, { dismiss: $(this).is(':checked') });
+      $.post('/settings/showIntro/' + hash, {dismiss: $(this).is(':checked')});
     });
 
     /* details/summary polyfill
@@ -857,13 +878,13 @@ const { jQuery, WPopupBox } = window;
     var openSlctr = $.fn.details.support ? '[open]' : '.open';
 
     // togglers - relies on everything being in a section element
-    $(".tabula-page").on("click", ".open-all-details", function() {
+    $(".tabula-page").on("click", ".open-all-details", function () {
       var $container = $(this).closest('section');
       $container.find('details:not(' + openSlctr + ') summary').click();
       $container.find(".open-all-details").hide();
       $container.find(".close-all-details").show();
     });
-    $(".tabula-page").on("click", ".close-all-details", function() {
+    $(".tabula-page").on("click", ".close-all-details", function () {
       var $container = $(this).closest('section');
       $container.find('details' + openSlctr + ' summary').click();
       $container.find(".close-all-details").hide();
@@ -876,8 +897,8 @@ const { jQuery, WPopupBox } = window;
     //$('table.sticky-table-headers').fixedHeaderTable('show');
 
     // Form dirty checking
-    $('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty':true, 'renamedFieldsMarksDirty':true});
-    $('a.dirty-check-ignore').on('click', function() {
+    $('form.dirty-check').areYouSure({'addRemoveFieldsMarksDirty': true, 'renamedFieldsMarksDirty': true});
+    $('a.dirty-check-ignore').on('click', function () {
       $('form.dirty-check').trigger('reinitialize.areYouSure');
     });
 
@@ -890,11 +911,11 @@ const { jQuery, WPopupBox } = window;
     if ($('.fix-on-scroll').length) {
       var gutter = $('#navigation').height();
 
-      $(window).scroll(function() {
+      $(window).scroll(function () {
         var scrollTop = $(this).scrollTop() + gutter;
 
         if (!$('body.is-smallscreen').length) {
-          $('.fix-on-scroll:visible').each(function() {
+          $('.fix-on-scroll:visible').each(function () {
             var $this = $(this);
 
             var $scrollContainer = $this.closest('.fix-on-scroll-container');
@@ -963,7 +984,7 @@ const { jQuery, WPopupBox } = window;
       $t.prepend($lt);
       $t.trigger('tabbablechanged');
 
-      var reset = function() { // to list
+      var reset = function () { // to list
         $t.hide();
         var $cols = $t.find('.cols');
         $cols.find('.gadget').appendTo($panes);
@@ -974,18 +995,18 @@ const { jQuery, WPopupBox } = window;
         $t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
       }
 
-      $(document).on('tabbablechanged', function(e, options) {
+      $(document).on('tabbablechanged', function (e, options) {
         $('.tooltip').remove();
         $t.show().find('.tab-container i, .layout-tools i').tooltip();
-        if (typeof(options) === 'object' && typeof(options.callback) == typeof(Function)) options.callback();
+        if (typeof (options) === 'object' && typeof (options.callback) == typeof (Function)) options.callback();
       });
 
       // layout options
-      var tabLayout = function() { // tabify
+      var tabLayout = function () { // tabify
         reset();
         var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
         var $tabs = $tabContainer.find('ul');
-        $panes.children('li').each(function() {
+        $panes.children('li').each(function () {
 
           var title = $(this).attr('data-title');
           if (!title) {
@@ -1002,16 +1023,20 @@ const { jQuery, WPopupBox } = window;
           handle: '.icon-move',
           placeholder: 'tabbable-placeholder'
         }).show().find('li:first > a').tab('show');
-        $t.trigger('tabbablechanged', {'callback': function() { $('.tabbable').tabOverflow(); }, 'layout': 'tabbed'});
+        $t.trigger('tabbablechanged', {
+          'callback': function () {
+            $('.tabbable').tabOverflow();
+          }, 'layout': 'tabbed'
+        });
       };
       $t.on('click', '.layout-tools .icon-folder-close', tabLayout);
 
-      var gadgetLayout = function() { // gadgetify
+      var gadgetLayout = function () { // gadgetify
         reset();
         var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
         var paneCount = $panes.children('li').length;
         $t.append($cols);
-        $panes.children('li').each(function(idx) {
+        $panes.children('li').each(function (idx) {
           var $gadget = $(this).addClass('gadget');
           var title = $(this).attr('data-title') || $(this).find('h4').first().text();
           var link = '#' + $(this).attr('id');
@@ -1023,7 +1048,7 @@ const { jQuery, WPopupBox } = window;
           $gadget.prepend($gadgetHeaderTab).find('.tab-container li > a').tab('show');
 
           // populate columns (dumbly)
-          $(this).appendTo(idx < paneCount/2 ? $cols.children().first() : $cols.children().last());
+          $(this).appendTo(idx < paneCount / 2 ? $cols.children().first() : $cols.children().last());
         });
 
         // make sortable & finish up rendering
@@ -1038,14 +1063,14 @@ const { jQuery, WPopupBox } = window;
       };
       $t.on('click', '.layout-tools .icon-th-large', gadgetLayout);
 
-      var listLayout = function() { // listify
+      var listLayout = function () { // listify
         reset();
         $t.trigger('tabbablechanged', {'layout': 'list'});
       };
       $t.on('click', '.layout-tools .icon-reorder', listLayout);
 
       // tab controls
-      $t.on("click", ".tab-container .icon-resize-small", function(e) {
+      $t.on("click", ".tab-container .icon-resize-small", function (e) {
         e.stopPropagation();
         var $a = $(this).parent();
         var title = $a.data("title");
@@ -1054,7 +1079,7 @@ const { jQuery, WPopupBox } = window;
         $t.trigger('tabbablechanged');
       });
 
-      $t.on("click", ".tab-container .icon-resize-full", function(e) {
+      $t.on("click", ".tab-container .icon-resize-full", function (e) {
         e.stopPropagation();
         var $a = $(this).parent();
         var title = $a.data("title");
@@ -1063,7 +1088,7 @@ const { jQuery, WPopupBox } = window;
         $t.trigger('tabbablechanged');
       });
 
-      $t.on("click", ".tab-container .icon-minus-sign-alt", function(e) {
+      $t.on("click", ".tab-container .icon-minus-sign-alt", function (e) {
         e.stopPropagation();
         var $a = $(this).parent();
         $a.closest('.gadget').find('.tab-content').slideUp('fast');
@@ -1073,7 +1098,7 @@ const { jQuery, WPopupBox } = window;
         $t.trigger('tabbablechanged');
       });
 
-      $t.on("click", ".tab-container .icon-plus-sign-alt", function(e) {
+      $t.on("click", ".tab-container .icon-plus-sign-alt", function (e) {
         e.stopPropagation();
         var $a = $(this).parent();
         $a.closest('.gadget').find('.tab-content').slideDown('fast');
@@ -1104,7 +1129,7 @@ const { jQuery, WPopupBox } = window;
     $('.tabula-filtered-list').filteredList();
 
     // TAB-1236 Ensure modals fit in the viewport
-    $('.modal').on('shown', function(e){
+    $('.modal').on('shown', function (e) {
       if (this == e.target) {
         var $this = $(this)
           , modalBodyHeight = $this.find('.modal-body').height()
@@ -1127,9 +1152,9 @@ const { jQuery, WPopupBox } = window;
 
     if (window != window.top) {
       // this is an iframe
-      (function(){
+      (function () {
         var bodyHeight = $('body').height();
-        setInterval(function(){
+        setInterval(function () {
           var newBodyHeight = $('body').height();
           if (newBodyHeight != bodyHeight) {
             bodyHeight = newBodyHeight;
@@ -1142,28 +1167,28 @@ const { jQuery, WPopupBox } = window;
 
     // Prevent clicks on filtering dropdowns from closing window
     // and enable a close button
-    $('.dropdown-menu.filter-list').on('click', function(e) {
+    $('.dropdown-menu.filter-list').on('click', function (e) {
       e.stopImmediatePropagation();
-    }).find('button[data-dismiss=dropdown]').on('click', function(e){
+    }).find('button[data-dismiss=dropdown]').on('click', function (e) {
       e.stopPropagation();
       $(this).closest('.dropdown-menu').dropdown('toggle');
     });
 
-    $('[data-loading-text]').on('click', function(){
+    $('[data-loading-text]').on('click', function () {
       $(this).button('loading');
     });
 
     // SCRIPTS FOR ATTENDANCE NOTES
-    (function(){
-      var addArgToUrl = function(url, argName, argValue){
-        if(url.indexOf('?') > 0) {
+    (function () {
+      var addArgToUrl = function (url, argName, argValue) {
+        if (url.indexOf('?') > 0) {
           return url + '&' + argName + '=' + argValue;
         } else {
           return url + '?' + argName + '=' + argValue;
         }
       };
 
-      var attendanceNoteIframeLoad = function(iFrame){
+      var attendanceNoteIframeLoad = function (iFrame) {
         var $m = $('#attendance-note-modal'), $f = $(iFrame).contents();
 
         if ($f.find(".attendance-note-success").length > 0) {
@@ -1172,13 +1197,13 @@ const { jQuery, WPopupBox } = window;
             , state = $f.find(".attendance-note-success").data('state')
             , $links;
 
-          if(linkId === "bulk") {
+          if (linkId === "bulk") {
             $links = $('#recordAttendance a.attendance-note');
           } else {
             $links = $(linkId);
           }
 
-          $links.each(function(i, link){
+          $links.each(function (i, link) {
             var $link = $(link);
             $link.attr('data-original-title', state + ' attendance note');
             if (state === 'Edit') {
@@ -1200,27 +1225,27 @@ const { jQuery, WPopupBox } = window;
           // wipe any existing state information for the submit protection
           $form.removeData('submitOnceSubmitted');
           $m.modal("show");
-          $m.on("shown", function() {
+          $m.on("shown", function () {
             $f.find("[name='note']").focus();
           });
         }
       };
 
-      var attendanceNoteIframeHandler = function() {
+      var attendanceNoteIframeHandler = function () {
         attendanceNoteIframeLoad(this);
         $(this).off('load', attendanceNoteIframeHandler);
       };
 
-      var attendanceNoteClickHandler = function(href, $target){
+      var attendanceNoteClickHandler = function (href, $target) {
         var $m = $('#attendance-note-modal');
-        if($m.length  === 0) {
+        if ($m.length === 0) {
           $m = $('<div />').attr({
-            'id' : 'attendance-note-modal',
-            'class' : 'modal hide fade'
+            'id': 'attendance-note-modal',
+            'class': 'modal hide fade'
           }).appendTo($('#column-1-content'));
         }
 
-        $m.off('submit', 'form').on('submit', 'form', function(e){
+        $m.off('submit', 'form').on('submit', 'form', function (e) {
           e.preventDefault();
           // reattach the load handler and submit the inner form in the iframe
           $m.find('iframe')
@@ -1234,7 +1259,7 @@ const { jQuery, WPopupBox } = window;
 
         var $icon = $target.find('i');
         $icon.removeClass("icon-edit").addClass("icon-spinner icon-spin");
-        $.get(href, function(data){
+        $.get(href, function (data) {
           $m.html(data);
           $m.find('.modal-body').empty();
           var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
@@ -1246,34 +1271,34 @@ const { jQuery, WPopupBox } = window;
         });
       };
 
-      $('#recordAttendance').on('click', 'a.btn.attendance-note', function(event){
+      $('#recordAttendance').on('click', 'a.btn.attendance-note', function (event) {
         event.preventDefault();
         attendanceNoteClickHandler($(this).attr('href'), $(this));
       });
 
-      $('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', function(event){
+      $('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', function (event) {
         event.preventDefault();
         attendanceNoteClickHandler($(this).attr('href'), $(this));
       });
 
       // Popovers are created on click so binding directly to A tags won't work
-      $('body').on('click', '.popover a.attendance-note-modal', function(event){
+      $('body').on('click', '.popover a.attendance-note-modal', function (event) {
         var $this = $(this), $m = $('#attendance-note-modal');
         event.preventDefault();
-        if($m.length  === 0) {
+        if ($m.length === 0) {
           $m = $('<div />').attr({
-            'id' : 'attendance-note-modal',
-            'class' : 'modal hide fade'
+            'id': 'attendance-note-modal',
+            'class': 'modal hide fade'
           }).appendTo($('#column-1-content'));
         }
 
-        $.get($this.attr('href'), function(data){
+        $.get($this.attr('href'), function (data) {
           $m.html(data).modal('show');
           $this.closest('.popover').find('button.close').trigger('click');
-          $m.find('.modal-footer .btn-primary').on('click', function(e){
+          $m.find('.modal-footer .btn-primary').on('click', function (e) {
             e.preventDefault();
             var $target = $(this);
-            $m.modal('hide').on('hidden', function(){
+            $m.modal('hide').on('hidden', function () {
               $m.off('hidden');
               attendanceNoteClickHandler($target.attr('href'), $target);
             });
@@ -1291,19 +1316,19 @@ const { jQuery, WPopupBox } = window;
 
 })(jQuery);
 
-jQuery(function($){
+jQuery(function ($) {
 // If there's an element with an id of 'scroll-container', max-size it to fit to the bottom of
 // the page, with scrollbars if needed
-  $('#scroll-container').each(function(){
+  $('#scroll-container').each(function () {
     var scrollable = $(this);
     // window.height includes horizontal scrollbar on mozilla so add 20px of padding.
     var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
-    scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
+    scrollable.css({'max-height': elementHeight, 'overflow-y': 'auto'});
   });
 });
 
 // code for department settings - lives here as department settings is included in most modules
-jQuery(function($){
+jQuery(function ($) {
   var $deptSettingsForm = $('.department-settings-form');
   if (!$deptSettingsForm.length) return;
 
@@ -1311,12 +1336,12 @@ jQuery(function($){
 
   $deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
 
-  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden', function () {
     // what is `this` here? can it ever be checked?
-    if(!$(this).is(':checked')){
+    if (!$(this).is(':checked')) {
       $('#small-match-options input[type=text]').val('0');
     }
-  }).find('input').on('disable.radiocontrolled', function() {
+  }).find('input').on('disable.radiocontrolled', function () {
     this.value = '0';
   });
 
@@ -1329,14 +1354,14 @@ jQuery(function($){
 });
 
 // component switcher at the top of every screen (other than homepage)
-jQuery(function($){
-  var loadContent = function() {
+jQuery(function ($) {
+  var loadContent = function () {
     var $el = $(this);
     if ($el.data('loaded')) {
       return $el.data('popover').$tip.find('.popover-content').html();
     } else {
       $.get('/', function (data) {
-        var $componentList = $('<div>'+data+'</div>').find('ul#home-list');
+        var $componentList = $('<div>' + data + '</div>').find('ul#home-list');
         $el.data('popover').$tip.find('.popover-content').html('').append($componentList);
         $el.data('loaded', true);
         $el.data('popover').show();
@@ -1356,11 +1381,11 @@ jQuery(function($){
   });
 });
 
-jQuery(function($) {
-  $(document.body).on('click', 'a.disabled', function(e) {
+jQuery(function ($) {
+  $(document.body).on('click', 'a.disabled', function (e) {
     e.preventDefault();
   });
-  $(document.body).on('click', 'button.disabled', function(e) {
+  $(document.body).on('click', 'button.disabled', function (e) {
     e.preventDefault();
   });
 });

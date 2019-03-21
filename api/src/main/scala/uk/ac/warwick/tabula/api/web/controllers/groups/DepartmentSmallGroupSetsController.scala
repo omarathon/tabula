@@ -15,37 +15,37 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 @Controller
 @RequestMapping(Array("/v1/department/{department}/groups"))
 class DepartmentSmallGroupSetsController extends ApiController
-	with ListSmallGroupSetsForDepartmentApi
-	with SmallGroupSetToJsonConverter
-	with SmallGroupToJsonConverter
-	with SmallGroupEventToJsonConverter
-	with AssessmentMembershipInfoToJsonConverter
+  with ListSmallGroupSetsForDepartmentApi
+  with SmallGroupSetToJsonConverter
+  with SmallGroupToJsonConverter
+  with SmallGroupEventToJsonConverter
+  with AssessmentMembershipInfoToJsonConverter
 
 trait ListSmallGroupSetsForDepartmentApi {
-	self: ApiController with SmallGroupSetToJsonConverter =>
+  self: ApiController with SmallGroupSetToJsonConverter =>
 
-	type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
+  type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
-	@ModelAttribute("listCommand")
-	def command(@PathVariable department: Department, @RequestParam(required = false) academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand = {
-		val year = Option(academicYear).getOrElse(AcademicYear.now())
+  @ModelAttribute("listCommand")
+  def command(@PathVariable department: Department, @RequestParam(required = false) academicYear: AcademicYear, user: CurrentUser): AdminSmallGroupsHomeCommand = {
+    val year = Option(academicYear).getOrElse(AcademicYear.now())
 
-		AdminSmallGroupsHomeCommand(mandatory(department), year, user, calculateProgress = false)
-	}
+    AdminSmallGroupsHomeCommand(mandatory(department), year, user, calculateProgress = false)
+  }
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val info = command.apply()
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def list(@ModelAttribute("listCommand") command: AdminSmallGroupsHomeCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val info = command.apply()
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"academicYear" -> command.academicYear.toString,
-				"groups" -> info.setsWithPermission.map { viewSet => jsonSmallGroupSetObject(viewSet) }
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "academicYear" -> command.academicYear.toString,
+        "groups" -> info.setsWithPermission.map { viewSet => jsonSmallGroupSetObject(viewSet) }
+      )))
+    }
+  }
 }

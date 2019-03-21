@@ -17,35 +17,36 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/new"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/new"))
 class OldAddFeedbackController extends OldCourseworkController {
 
-	@ModelAttribute("addFeedbackCommand")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
-		new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
+  @ModelAttribute("addFeedbackCommand")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) =
+    new OldAddFeedbackCommand(module, assignment, user.apparentUser, user)
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def showForm(@ModelAttribute("addFeedbackCommand") form: OldAddFeedbackCommand): Mav = {
-		Mav("coursework/admin/assignments/feedback/form",
-			"department" -> form.module.adminDepartment,
-			"module" -> form.module,
-			"assignment" -> form.assignment)
-			.crumbs(Breadcrumbs.Department(form.module.adminDepartment), Breadcrumbs.Module(form.module))
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@ModelAttribute("addFeedbackCommand") form: OldAddFeedbackCommand): Mav = {
+    Mav("coursework/admin/assignments/feedback/form",
+      "department" -> form.module.adminDepartment,
+      "module" -> form.module,
+      "assignment" -> form.assignment)
+      .crumbs(Breadcrumbs.Department(form.module.adminDepartment), Breadcrumbs.Module(form.module))
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid form: OldAddFeedbackCommand, errors: Errors): Mav = {
-		transactional() {
-			form.preExtractValidation(errors)
-			form.postExtractValidation(errors)
-			if (errors.hasErrors) {
-				showForm(form)
-			} else {
-				form.apply()
-				Mav("redirect:" + Routes.admin.module(form.module))
-			}
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid form: OldAddFeedbackCommand, errors: Errors): Mav = {
+    transactional() {
+      form.preExtractValidation(errors)
+      form.postExtractValidation(errors)
+      if (errors.hasErrors) {
+        showForm(form)
+      } else {
+        form.apply()
+        Mav("redirect:" + Routes.admin.module(form.module))
+      }
+    }
+  }
 
 }

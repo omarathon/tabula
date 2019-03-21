@@ -9,87 +9,101 @@ import uk.ac.warwick.tabula.services._
 
 class AddExamCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends ExamState
-		with AssessmentServiceComponent
-		with UserLookupComponent
-		with HasAcademicYear
-		with SpecifiesGroupType
-		with AssessmentMembershipServiceComponent {
-			val assessmentService: AssessmentService = smartMock[AssessmentService]
-			val userLookup = new MockUserLookup
-			var assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
-		}
+  trait CommandTestSupport extends ExamState
+    with AssessmentServiceComponent
+    with UserLookupComponent
+    with HasAcademicYear
+    with SpecifiesGroupType
+    with AssessmentMembershipServiceComponent {
+    val assessmentService: AssessmentService = smartMock[AssessmentService]
+    val userLookup = new MockUserLookup
+    var assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+  }
 
-	trait Fixture {
-		val module: Module = Fixtures.module("ab123", "Test module")
-		val academicYear = AcademicYear(2014)
-		val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
+  trait Fixture {
+    val module: Module = Fixtures.module("ab123", "Test module")
+    val academicYear = AcademicYear(2014)
+    val command = new AddExamCommandInternal(module, academicYear) with CommandTestSupport
 
-		val validator = new ExamValidation with ExamState with AssessmentServiceComponent
-			with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
-			with AssessmentMembershipServiceComponent {
+    val validator = new ExamValidation with ExamState with AssessmentServiceComponent
+      with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
+      with AssessmentMembershipServiceComponent {
 
-			def module: Module = command.module
-			def academicYear: AcademicYear = command.academicYear
+      def module: Module = command.module
 
-			override val assessmentService: AssessmentService = smartMock[AssessmentService]
-			override val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
-			override val userLookup: UserLookupService = smartMock[UserLookupService]
-			override def existingGroups = None
-			override def existingMembers = None
-			override def updateAssessmentGroups() = List()
-		}
-	}
+      def academicYear: AcademicYear = command.academicYear
 
-	@Test def apply() { new Fixture {
-		command.name = "Some exam"
+      override val assessmentService: AssessmentService = smartMock[AssessmentService]
+      override val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+      override val userLookup: UserLookupService = smartMock[UserLookupService]
 
-		val exam: Exam = command.applyInternal()
-		exam.name should be ("Some exam")
+      override def existingGroups = None
 
-		verify(command.assessmentService, times(1)).save(exam)
-	}}
+      override def existingMembers = None
 
-	@Test def rejectEmptyCode() { new Fixture {
+      override def updateAssessmentGroups() = List()
+    }
+  }
 
-		validator.name = "    "
+  @Test def apply() {
+    new Fixture {
+      command.name = "Some exam"
 
-		val errors = new BindException(validator, "command")
-		validator.validate(errors)
+      val exam: Exam = command.applyInternal()
+      exam.name should be("Some exam")
 
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("name")
-		errors.getFieldError.getCodes should contain ("exam.name.empty")
-	}}
+      verify(command.assessmentService, times(1)).save(exam)
+    }
+  }
 
-	@Test def validateValid() { new Fixture {
+  @Test def rejectEmptyCode() {
+    new Fixture {
 
-		def name = "ab123"
-		validator.name = name
+      validator.name = "    "
 
-		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq()
+      val errors = new BindException(validator, "command")
+      validator.validate(errors)
 
-		val errors = new BindException(validator, "command")
-		validator.validate(errors)
+      errors.getErrorCount should be(1)
+      errors.getFieldError.getField should be("name")
+      errors.getFieldError.getCodes should contain("exam.name.empty")
+    }
+  }
 
-		errors.getErrorCount should be (0)
-		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
-		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
-	}}
+  @Test def validateValid() {
+    new Fixture {
 
-	@Test def rejectIfDuplicateName() { new Fixture {
+      def name = "ab123"
 
-		def name = "exam1"
-		validator.name = name
+      validator.name = name
 
-		validator.assessmentService.getExamByNameYearModule(name, academicYear ,module) returns Seq(Fixtures.exam(name))
+      validator.assessmentService.getExamByNameYearModule(name, academicYear, module) returns Seq()
 
-		val errors = new BindException(validator, "command")
-		validator.validate(errors)
+      val errors = new BindException(validator, "command")
+      validator.validate(errors)
 
-		errors.getErrorCount should be (1)
-		errors.getFieldErrorCount("name") should be (1)
-		verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear ,module)
-		verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
-	}}
+      errors.getErrorCount should be(0)
+      verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear, module)
+      verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
+    }
+  }
+
+  @Test def rejectIfDuplicateName() {
+    new Fixture {
+
+      def name = "exam1"
+
+      validator.name = name
+
+      validator.assessmentService.getExamByNameYearModule(name, academicYear, module) returns Seq(Fixtures.exam(name))
+
+      val errors = new BindException(validator, "command")
+      validator.validate(errors)
+
+      errors.getErrorCount should be(1)
+      errors.getFieldErrorCount("name") should be(1)
+      verify(validator.assessmentService, times(1)).getExamByNameYearModule(name, academicYear, module)
+      verify(validator.assessmentService, atMost(1)).getExamByNameYearModule(any[String], any[AcademicYear], any[Module])
+    }
+  }
 }

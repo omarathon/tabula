@@ -11,61 +11,64 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringS
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object UnlinkAttendanceMonitoringSchemeCommand {
-	def apply() =
-		new UnlinkAttendanceMonitoringSchemeCommandInternal
-			with AutowiringAttendanceMonitoringServiceComponent
-			with ComposableCommand[Map[Department, Seq[AttendanceMonitoringScheme]]]
-			with UnlinkAttendanceMonitoringSchemeDescription
-			with UnlinkAttendanceMonitoringSchemePermissions
-			with UnlinkAttendanceMonitoringSchemeNotifications
+  def apply() =
+    new UnlinkAttendanceMonitoringSchemeCommandInternal
+      with AutowiringAttendanceMonitoringServiceComponent
+      with ComposableCommand[Map[Department, Seq[AttendanceMonitoringScheme]]]
+      with UnlinkAttendanceMonitoringSchemeDescription
+      with UnlinkAttendanceMonitoringSchemePermissions
+      with UnlinkAttendanceMonitoringSchemeNotifications
 }
 
 
 class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Map[Department, Seq[AttendanceMonitoringScheme]]] {
 
-	self: AttendanceMonitoringServiceComponent =>
+  self: AttendanceMonitoringServiceComponent =>
 
-	override def applyInternal(): Map[Department, Seq[AttendanceMonitoringScheme]] = {
-		val academicYear = AcademicYear.now()
-		val schemeMap = transactional() {
-			attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(academicYear)
-		}
-		schemeMap.map{ case(department, schemes) => department -> schemes.map{scheme => transactional() {
-			scheme.memberQuery = ""
-			scheme.members.includedUserIds = ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).distinct
-			attendanceMonitoringService.saveOrUpdate(scheme)
-			scheme
-		}}}
-	}
+  override def applyInternal(): Map[Department, Seq[AttendanceMonitoringScheme]] = {
+    val academicYear = AcademicYear.now()
+    val schemeMap = transactional() {
+      attendanceMonitoringService.findSchemesLinkedToSITSByDepartment(academicYear)
+    }
+    schemeMap.map { case (department, schemes) => department -> schemes.map { scheme =>
+      transactional() {
+        scheme.memberQuery = ""
+        scheme.members.includedUserIds = ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).distinct
+        attendanceMonitoringService.saveOrUpdate(scheme)
+        scheme
+      }
+    }
+    }
+  }
 
 }
 
 trait UnlinkAttendanceMonitoringSchemePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.UpdateMembership)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MonitoringPoints.UpdateMembership)
+  }
 
 }
 
 trait UnlinkAttendanceMonitoringSchemeDescription extends Describable[Map[Department, Seq[AttendanceMonitoringScheme]]] {
 
-	override lazy val eventName = "UnlinkAttendanceMonitoringScheme"
+  override lazy val eventName = "UnlinkAttendanceMonitoringScheme"
 
-	override def describe(d: Description) {
+  override def describe(d: Description) {
 
-	}
+  }
 
-	override def describeResult(d: Description, result: Map[Department, Seq[AttendanceMonitoringScheme]]) {
-		d.property("updatedSchemes" -> result.map{case(dept, schemes) => dept.code -> schemes.map(_.id)})
-	}
+  override def describeResult(d: Description, result: Map[Department, Seq[AttendanceMonitoringScheme]]) {
+    d.property("updatedSchemes" -> result.map { case (dept, schemes) => dept.code -> schemes.map(_.id) })
+  }
 }
 
 trait UnlinkAttendanceMonitoringSchemeNotifications extends Notifies[Map[Department, Seq[AttendanceMonitoringScheme]], Map[Department, Seq[AttendanceMonitoringScheme]]] {
 
-	def emit(result: Map[Department, Seq[AttendanceMonitoringScheme]]): Seq[UnlinkedAttendanceMonitoringSchemeNotification] = {
-		result.map { case (department, schemes) =>
-			Notification.init(new UnlinkedAttendanceMonitoringSchemeNotification, null, schemes, department)
-		}.toSeq
-	}
+  def emit(result: Map[Department, Seq[AttendanceMonitoringScheme]]): Seq[UnlinkedAttendanceMonitoringSchemeNotification] = {
+    result.map { case (department, schemes) =>
+      Notification.init(new UnlinkedAttendanceMonitoringSchemeNotification, null, schemes, department)
+    }.toSeq
+  }
 }

@@ -21,45 +21,45 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @Controller
 @RequestMapping(value = Array("/groups/admin/department/{department}/{academicYear}"))
 class DownloadRegistersAsPdfController extends GroupsController with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = AdminSmallGroupsHomeCommand.RequiredPermission
+  override val departmentPermission: Permission = AdminSmallGroupsHomeCommand.RequiredPermission
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	hideDeletedItems
+  hideDeletedItems
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		DownloadRegistersAsPdfCommand(mandatory(department), mandatory(academicYear), "registers.pdf", user)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    DownloadRegistersAsPdfCommand(mandatory(department), mandatory(academicYear), "registers.pdf", user)
 
-	@RequestMapping(value = Array("/registers"))
-	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("groups/admin/groups/print")
-			.crumbs(Breadcrumbs.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.registers(department, year)):_*)
-	}
+  @RequestMapping(value = Array("/registers"))
+  def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("groups/admin/groups/print")
+      .crumbs(Breadcrumbs.Department(department, academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.admin.registers(department, year)): _*)
+  }
 
-	@RequestMapping(method = Array(POST), value = Array("/registers.pdf"))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[RenderableFile],
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) {
-			form(department, academicYear)
-		} else {
-			Mav(new RenderableFileView(cmd.apply()))
-		}
-	}
+  @RequestMapping(method = Array(POST), value = Array("/registers.pdf"))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[RenderableFile],
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(department, academicYear)
+    } else {
+      Mav(new RenderableFileView(cmd.apply()))
+    }
+  }
 
 }
 

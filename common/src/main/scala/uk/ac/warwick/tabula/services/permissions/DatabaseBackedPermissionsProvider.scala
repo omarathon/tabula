@@ -9,17 +9,17 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 @Component
 class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 
-	var service: PermissionsService = Wire[PermissionsService]
+  var service: PermissionsService = Wire[PermissionsService]
 
-	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =
-		service.getGrantedPermissionsFor[PermissionsTarget](user) map {
-			case global: GrantedPermission[_] if global.scopeType == "___GLOBAL___" =>
-				PermissionDefinition(global.permission, None, global.overrideType)
+  def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =
+    service.getGrantedPermissionsFor[PermissionsTarget](user) map {
+      case global: GrantedPermission[_] if global.scopeType == "___GLOBAL___" =>
+        PermissionDefinition(global.permission, None, global.overrideType)
 
-			case grantedPermission =>
-				PermissionDefinition(grantedPermission.permission, Some(grantedPermission.scope), grantedPermission.overrideType)
-		}
+      case grantedPermission =>
+        PermissionDefinition(grantedPermission.permission, Some(grantedPermission.scope), grantedPermission.overrideType)
+    }
 
-	// This isn't exhaustive because we use the cache now - it used to be though.
+  // This isn't exhaustive because we use the cache now - it used to be though.
 
 }

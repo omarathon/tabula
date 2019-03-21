@@ -9,13 +9,17 @@ import uk.ac.warwick.tabula.data.model.permissions.PermissionUserType
 
 class PermissionConverter extends TwoWayConverter[String, Permission] {
 
-	val userType = new PermissionUserType
+  val userType = new PermissionUserType
 
-	override def convertLeft(permission: Permission): String = Option(permission).map(userType.convertToValue).orNull
+  override def convertLeft(permission: Permission): String = Option(permission).map(userType.convertToValue).orNull
 
-	override def convertRight(name: String): Permission = {
-		if (!name.hasText) null
-		else try { userType.convertToObject(name) } catch { case e: IllegalArgumentException => null }
-	}
+  override def convertRight(name: String): Permission = {
+    if (!name.hasText) null
+    else try {
+      userType.convertToObject(name)
+    } catch {
+      case e: IllegalArgumentException => null
+    }
+  }
 
 }

@@ -7,10 +7,10 @@ import uk.ac.warwick.tabula.JavaImports
 case class AssignmentSubmitter(assignment: model.Assignment) extends BuiltInRole(AssignmentSubmitterRoleDefinition, assignment)
 
 case object AssignmentSubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
-	override def description = "Enrolled On Assignment"
+  override def description = "Enrolled On Assignment"
 
-	GrantsScopedPermission(
-		Submission.Create,
-		Extension.MakeRequest
-	)
+  GrantsScopedPermission(
+    Submission.Create,
+    Extension.MakeRequest
+  )
 }

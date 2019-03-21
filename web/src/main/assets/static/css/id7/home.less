@@ -1,47 +1,52 @@
 @import (reference) "colours.less";
 
 ul.boolean-list {
-	list-style: none;
+  list-style: none;
 
-	li {
-		:before {
-			margin: 0 1em;
-		}
+  li {
+    :before {
+      margin: 0 1em;
+    }
 
-		&.true{
-			color:@tabulaGreen;
-			&:before {
-				content: '\2714';
-			}
-		}
+    &.true {
+      color: @tabulaGreen;
 
-		&.false{
-			color:@tabulaRedDark;
-			&:before {
-				content: '\2718';
-			}
-		}
-	}
+      &:before {
+        content: '\2714';
+      }
+    }
+
+    &.false {
+      color: @tabulaRedDark;
+
+      &:before {
+        content: '\2718';
+      }
+    }
+  }
 }
 
 table.sits-debug {
-	tr {
-		&.true {
-			color:@tabulaGreen;
-			a {
-				color: @tabulaGreen;
-			}
-		}
-		&.false {
-			color:@tabulaRedDark;
-			a {
-				color: @tabulaRedDark;
-			}
-		}
+  tr {
+    &.true {
+      color: @tabulaGreen;
 
-		td.selected {
-			font-weight: bold;
-			color: @tabulaOrangeDark;
-		}
-	}
+      a {
+        color: @tabulaGreen;
+      }
+    }
+
+    &.false {
+      color: @tabulaRedDark;
+
+      a {
+        color: @tabulaRedDark;
+      }
+    }
+
+    td.selected {
+      font-weight: bold;
+      color: @tabulaOrangeDark;
+    }
+  }
 }

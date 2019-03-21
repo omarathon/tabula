@@ -20,218 +20,220 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait AssignmentImporterComponent {
-	def assignmentImporter: AssignmentImporter
+  def assignmentImporter: AssignmentImporter
 }
 
 trait AutowiringAssignmentImporterComponent extends AssignmentImporterComponent {
-	val assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
+  val assignmentImporter: AssignmentImporter = Wire[AssignmentImporter]
 }
 
 trait AssignmentImporter {
-	/**
-	 * Iterates through ALL module registration elements,
-	 * passing each ModuleRegistration item to the given callback for it to process.
-	 */
-	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
+  /**
+    * Iterates through ALL module registration elements,
+    * passing each ModuleRegistration item to the given callback for it to process.
+    */
+  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
 
-	def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit
+  def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit
 
-	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
+  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 
-	def getAllAssessmentComponents: Seq[AssessmentComponent]
+  def getAllAssessmentComponents: Seq[AssessmentComponent]
 
-	def getAllGradeBoundaries: Seq[GradeBoundary]
+  def getAllGradeBoundaries: Seq[GradeBoundary]
 
-	var yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
+  var yearsToImport: Seq[AcademicYear] = AcademicYear.allCurrent() :+ AcademicYear.now().next
 }
 
-@Profile(Array("dev", "test", "production")) @Service
+@Profile(Array("dev", "test", "production"))
+@Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
-	var assessmentComponentQuery: AssessmentComponentQuery = _
-	var gradeBoundaryQuery: GradeBoundaryQuery = _
-	var jdbc: NamedParameterJdbcTemplate = _
+  var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
+  var assessmentComponentQuery: AssessmentComponentQuery = _
+  var gradeBoundaryQuery: GradeBoundaryQuery = _
+  var jdbc: NamedParameterJdbcTemplate = _
 
-	override def afterPropertiesSet() {
-		assessmentComponentQuery = new AssessmentComponentQuery(sits)
-		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
-		gradeBoundaryQuery = new GradeBoundaryQuery(sits)
-		jdbc = new NamedParameterJdbcTemplate(sits)
-	}
+  override def afterPropertiesSet() {
+    assessmentComponentQuery = new AssessmentComponentQuery(sits)
+    upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(sits)
+    gradeBoundaryQuery = new GradeBoundaryQuery(sits)
+    jdbc = new NamedParameterJdbcTemplate(sits)
+  }
 
-	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
-		"academic_year_code" -> yearsToImportArray)).asScala
+  def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray)).asScala
 
-	private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
+  private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
 
-	// This will be quite a few thousand records, but not more than
-	// 20k. Shouldn't cause any memory problems, so no point complicating
-	// it by trying to stream or batch the data.
-	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
-		"academic_year_code" -> yearsToImportArray)).asScala
+  // This will be quite a few thousand records, but not more than
+  // 20k. Shouldn't cause any memory problems, so no point complicating
+  // it by trying to stream or batch the data.
+  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
+    "academic_year_code" -> yearsToImportArray)).asScala
 
-	/**
-	 * Iterates through ALL module registration elements in ADS (that's many),
-	 * passing each ModuleRegistration item to the given callback for it to process.
-	 */
-	def allMembers(callback: UpstreamModuleRegistration => Unit) {
-		val params: JMap[String, Object] = JMap(
-			"academic_year_code" -> yearsToImportArray)
-		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
-	}
+  /**
+    * Iterates through ALL module registration elements in ADS (that's many),
+    * passing each ModuleRegistration item to the given callback for it to process.
+    */
+  def allMembers(callback: UpstreamModuleRegistration => Unit) {
+    val params: JMap[String, Object] = JMap(
+      "academic_year_code" -> yearsToImportArray)
+    jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+  }
 
-	def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = {
-		val params: JMap[String, Object] = JMap(
-			"academic_year_code" -> yearsToImportArray,
-			"universityIds" -> members.map(_.universityId).asJava
-		)
+  def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
+    val params: JMap[String, Object] = JMap(
+      "academic_year_code" -> yearsToImport.map(_.toString).asJava,
+      "universityIds" -> members.map(_.universityId).asJava
+    )
 
-		jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
-	}
+    jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId, params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
+  }
 
-	class UpstreamModuleRegistrationRowCallbackHandler(callback: UpstreamModuleRegistration => Unit) extends RowCallbackHandler {
-		override def processRow(rs: ResultSet) {
-			callback(UpstreamModuleRegistration(
-				year = rs.getString("academic_year_code"),
-				sprCode = rs.getString("spr_code"),
-				seatNumber = rs.getString("seat_number"),
-				occurrence = rs.getString("mav_occurrence"),
-				sequence = rs.getString("sequence"),
-				moduleCode = rs.getString("module_code"),
-				assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group")),
-				actualMark = rs.getString("actual_mark"),
-				actualGrade = rs.getString("actual_grade"),
-				agreedMark = rs.getString("agreed_mark"),
-				agreedGrade = rs.getString("agreed_grade"),
-				resitActualMark = rs.getString("resit_actual_mark"),
-				resitActualGrade = rs.getString("resit_actual_grade"),
-				resitAgreedMark = rs.getString("resit_agreed_mark"),
-				resitAgreedGrade = rs.getString("resit_agreed_grade")
-			))
-		}
-	}
+  class UpstreamModuleRegistrationRowCallbackHandler(callback: UpstreamModuleRegistration => Unit) extends RowCallbackHandler {
+    override def processRow(rs: ResultSet) {
+      callback(UpstreamModuleRegistration(
+        year = rs.getString("academic_year_code"),
+        sprCode = rs.getString("spr_code"),
+        seatNumber = rs.getString("seat_number"),
+        occurrence = rs.getString("mav_occurrence"),
+        sequence = rs.getString("sequence"),
+        moduleCode = rs.getString("module_code"),
+        assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group")),
+        actualMark = rs.getString("actual_mark"),
+        actualGrade = rs.getString("actual_grade"),
+        agreedMark = rs.getString("agreed_mark"),
+        agreedGrade = rs.getString("agreed_grade"),
+        resitActualMark = rs.getString("resit_actual_mark"),
+        resitActualGrade = rs.getString("resit_actual_grade"),
+        resitAgreedMark = rs.getString("resit_agreed_mark"),
+        resitAgreedGrade = rs.getString("resit_agreed_grade")
+      ))
+    }
+  }
 
-	/** Convert incoming null assessment groups into the NONE value */
-	private def convertAssessmentGroupFromSITS(string: String) =
-		if (string == null) AssessmentComponent.NoneAssessmentGroup
-		else string
+  /** Convert incoming null assessment groups into the NONE value */
+  private def convertAssessmentGroupFromSITS(string: String) =
+    if (string == null) AssessmentComponent.NoneAssessmentGroup
+    else string
 
-	def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala
+  def getAllGradeBoundaries: Seq[GradeBoundary] = gradeBoundaryQuery.execute().asScala
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 
-	override def specificMembers(members: Seq[MembershipMember])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
-		if (members.map(_.universityId).contains(umr.universityId)) {
-			callback(umr)
-		}
-	})
+  override def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = allMembers(umr => {
+    if (members.map(_.universityId).contains(umr.universityId)) {
+      callback(umr)
+    }
+  })
 
-	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
-		var moduleCodesToIds = Map[String, Seq[Range]]()
+  def allMembers(callback: UpstreamModuleRegistration => Unit): Unit = {
+    var moduleCodesToIds = Map[String, Seq[Range]]()
 
-		for {
-			(code, d) <- SandboxData.Departments
-			route <- d.routes.values.toSeq
-			moduleCode <- route.moduleCodes
-		} {
-			val range = route.studentsStartId to route.studentsEndId
+    for {
+      (code, d) <- SandboxData.Departments
+      route <- d.routes.values.toSeq
+      moduleCode <- route.moduleCodes
+    } {
+      val range = route.studentsStartId to route.studentsEndId
 
-			moduleCodesToIds = moduleCodesToIds + (
-				moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-			)
-		}
+      moduleCodesToIds = moduleCodesToIds + (
+        moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
+        )
+    }
 
-		for {
-			(moduleCode, ranges) <- moduleCodesToIds
-			range <- ranges
-			uniId <- range
-		} callback(
-			UpstreamModuleRegistration(
-				year = AcademicYear.now().toString,
-				sprCode = "%d/1".format(uniId),
-				seatNumber = "0",
-				occurrence = "A",
-				sequence = "A01",
-				moduleCode = "%s-15".format(moduleCode.toUpperCase),
-				assessmentGroup = "A",
-				actualMark = "",
-				actualGrade = "",
-				agreedMark = "",
-				agreedGrade = "",
-				resitActualMark = "",
-				resitActualGrade = "",
-				resitAgreedMark = "",
-				resitAgreedGrade = ""
-			)
-		)
+    for {
+      (moduleCode, ranges) <- moduleCodesToIds
+      range <- ranges
+      uniId <- range
+    } callback(
+      UpstreamModuleRegistration(
+        year = AcademicYear.now().toString,
+        sprCode = "%d/1".format(uniId),
+        seatNumber = "0",
+        occurrence = "A",
+        sequence = "A01",
+        moduleCode = "%s-15".format(moduleCode.toUpperCase),
+        assessmentGroup = "A",
+        actualMark = "",
+        actualGrade = "",
+        agreedMark = "",
+        agreedGrade = "",
+        resitActualMark = "",
+        resitActualGrade = "",
+        resitAgreedMark = "",
+        resitAgreedGrade = ""
+      )
+    )
 
-	}
+  }
 
-	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		for {
-			(code, d) <- SandboxData.Departments.toSeq
-			route <- d.routes.values.toSeq
-			moduleCode <- route.moduleCodes
-		} yield {
-			val ag = new UpstreamAssessmentGroup()
-			ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-			ag.academicYear = AcademicYear.now()
-			ag.assessmentGroup = "A"
-			ag.occurrence = "A"
-			ag.sequence = "A01"
-			ag
-		}
+  def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+    for {
+      (code, d) <- SandboxData.Departments.toSeq
+      route <- d.routes.values.toSeq
+      moduleCode <- route.moduleCodes
+    } yield {
+      val ag = new UpstreamAssessmentGroup()
+      ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      ag.academicYear = AcademicYear.now()
+      ag.assessmentGroup = "A"
+      ag.occurrence = "A"
+      ag.sequence = "A01"
+      ag
+    }
 
-	def getAllAssessmentComponents: Seq[AssessmentComponent] =
-		for {
-			(code, d) <- SandboxData.Departments.toSeq
-			route <- d.routes.values.toSeq
-			moduleCode <- route.moduleCodes
-		} yield {
-			val a = new AssessmentComponent
-			a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-			a.sequence = "A01"
-			a.name = "Coursework"
-			a.assessmentGroup = "A"
-			a.assessmentType = AssessmentType.Assignment
-			a.inUse = true
-			a.marksCode = "TABULA-UG"
-			a
-		}
+  def getAllAssessmentComponents: Seq[AssessmentComponent] =
+    for {
+      (code, d) <- SandboxData.Departments.toSeq
+      route <- d.routes.values.toSeq
+      moduleCode <- route.moduleCodes
+    } yield {
+      val a = new AssessmentComponent
+      a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+      a.sequence = "A01"
+      a.name = "Coursework"
+      a.assessmentGroup = "A"
+      a.assessmentType = AssessmentType.Assignment
+      a.inUse = true
+      a.marksCode = "TABULA-UG"
+      a
+    }
 
-	def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
+  def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
 }
-
 
 
 object AssignmentImporter {
-	var sitsSchema: String = Wire.property("${schema.sits}")
-	var sqlStringCastFunction: String = "to_char"
-	var dialectRegexpLike = "regexp_like"
+  var sitsSchema: String = Wire.property("${schema.sits}")
+  var sqlStringCastFunction: String = "to_char"
+  var dialectRegexpLike = "regexp_like"
 
-	// Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle (for SITS), but not in HSQL (with the embedded database)
-	def castToString(orig: String): String =
-		if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
-		else orig
+  // Because we have a mismatch between nvarchar2 and chars in the text, we need to cast some results to chars in Oracle (for SITS), but not in HSQL (with the embedded database)
+  def castToString(orig: String): String =
+    if (sqlStringCastFunction.hasText) s"$sqlStringCastFunction($orig)"
+    else orig
 
-	/** Get AssessmentComponents, and also some fake ones for linking to
-		* the group of students with no selected assessment group.
-		*
-		* The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
-		* assessment components which make up modules.
-		* This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
-		* specified.
-		*
-		* SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
-		* SMO holds confirmed module registrations and is included to catch module registrations in departments which
-		* upload module registrations after confirmation.
-		*/
-	def GetAssessmentsQuery = s"""
+  /** Get AssessmentComponents, and also some fake ones for linking to
+    * the group of students with no selected assessment group.
+    *
+    * The actual assessment components come from CAM_MAB ("Module Assessment Body") which contains the
+    * assessment components which make up modules.
+    * This is unioned with module registrations (in SMS and SMO) where assessment group (SMS_AGRP and SMO_AGRP) is not
+    * specified.
+    *
+    * SMS holds unconfirmed module registrations and is included to catch module registrations not approved yet.
+    * SMO holds confirmed module registrations and is included to catch module registrations in departments which
+    * upload module registrations after confirmation.
+    */
+  def GetAssessmentsQuery =
+    s"""
 		select distinct
 			sms.mod_code as module_code,
 			'${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -286,7 +288,8 @@ object AssignmentImporter {
 						mod.mot_code not in ('S-', 'D') and -- MOT = module type code - not suspended, discontinued?
 						mab.mab_agrp is not null"""
 
-	def GetAllAssessmentGroups = s"""
+  def GetAllAssessmentGroups =
+    s"""
 		select distinct
 			mav.ayr_code as academic_year_code,
 			mav.mod_code as module_code,
@@ -320,8 +323,9 @@ object AssignmentImporter {
 						mab.mab_agrp is not null and
 						mav.ayr_code in (:academic_year_code)"""
 
-	// for students who register for modules through SITS,this gets their assessments before their choices are confirmed
-	def GetUnconfirmedModuleRegistrations = s"""
+  // for students who register for modules through SITS,this gets their assessments before their choices are confirmed
+  def GetUnconfirmedModuleRegistrations =
+    s"""
 		select
 			sms.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -367,8 +371,9 @@ object AssignmentImporter {
 			where
 				sms.ayr_code in (:academic_year_code)"""
 
-	// this gets a student's assessments from the SMO table, which stores confirmed module choices
-	def GetConfirmedModuleRegistrations = s"""
+  // this gets a student's assessments from the SMO table, which stores confirmed module choices
+  def GetConfirmedModuleRegistrations =
+    s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -415,7 +420,8 @@ object AssignmentImporter {
 			where
 				smo.ayr_code in (:academic_year_code)"""
 
-	def GetAutoUploadedConfirmedModuleRegistrations = s"""
+  def GetAutoUploadedConfirmedModuleRegistrations =
+    s"""
 		select
 			smo.ayr_code as academic_year_code,
 			spr.spr_code as spr_code,
@@ -463,7 +469,8 @@ object AssignmentImporter {
 				smo.ayr_code in (:academic_year_code) and
 				ssn.ssn_sprc is null -- no matching SSN"""
 
-	def GetAllAssessmentGroupMembers = s"""
+  def GetAllAssessmentGroupMembers =
+    s"""
 			$GetUnconfirmedModuleRegistrations
 				union all
 			$GetConfirmedModuleRegistrations
@@ -471,7 +478,8 @@ object AssignmentImporter {
 			$GetAutoUploadedConfirmedModuleRegistrations
 		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-	def GetModuleRegistrationsByUniversityId = s"""
+  def GetModuleRegistrationsByUniversityId =
+    s"""
 			$GetUnconfirmedModuleRegistrations
 				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
 				union all
@@ -482,7 +490,8 @@ object AssignmentImporter {
 				and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)
 		order by academic_year_code, module_code, assessment_group, mav_occurrence, sequence, spr_code"""
 
-	def GetAllGradeBoundaries = s"""
+  def GetAllGradeBoundaries =
+    s"""
 		select
 			mkc.mks_code as marks_code,
 			mkc.mkc_grade as grade,
@@ -493,54 +502,57 @@ object AssignmentImporter {
 		where mkc_proc = 'SAS' and mkc_minm is not null and mkc_maxm is not null
 	"""
 
-	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
-		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
-			val a = new AssessmentComponent
-			a.moduleCode = rs.getString("module_code")
-			a.sequence = rs.getString("seq")
-			a.name = rs.getString("name")
-			a.assessmentGroup = rs.getString("assessment_group")
-			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
-			a.inUse = rs.getString("in_use") match {
-				case "Y" | "y" => true
-				case _ => false
-			}
-			a.marksCode = rs.getString("marks_code")
-			a.weighting = rs.getInt("weight")
-			a
-		}
-	}
+  class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
+    declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
+    compile()
 
-	class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
-		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
-		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): UpstreamAssessmentGroup =
-			mapRowToAssessmentGroup(rs)
-	}
+    override def mapRow(rs: ResultSet, rowNumber: Int): AssessmentComponent = {
+      val a = new AssessmentComponent
+      a.moduleCode = rs.getString("module_code")
+      a.sequence = rs.getString("seq")
+      a.name = rs.getString("name")
+      a.assessmentGroup = rs.getString("assessment_group")
+      a.assessmentType = AssessmentType(rs.getString("assessment_code"))
+      a.inUse = rs.getString("in_use") match {
+        case "Y" | "y" => true
+        case _ => false
+      }
+      a.marksCode = rs.getString("marks_code")
+      a.weighting = rs.getInt("weight")
+      a
+    }
+  }
 
-	def mapRowToAssessmentGroup(rs: ResultSet): UpstreamAssessmentGroup = {
-		val ag = new UpstreamAssessmentGroup()
-		ag.moduleCode = rs.getString("module_code")
-		ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
-		ag.assessmentGroup = rs.getString("assessment_group")
-		ag.occurrence = rs.getString("mav_occurrence")
-		ag.sequence = rs.getString("seq")
-		ag
-	}
+  class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
+    declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
+    this.compile()
 
-	class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int): GradeBoundary = {
-			GradeBoundary(
-				rs.getString("marks_code"),
-				rs.getString("grade"),
-				rs.getInt("minimum_mark"),
-				rs.getInt("maximum_mark"),
-				rs.getString("signal_status")
-			)
-		}
-	}
+    override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): UpstreamAssessmentGroup =
+      mapRowToAssessmentGroup(rs)
+  }
+
+  def mapRowToAssessmentGroup(rs: ResultSet): UpstreamAssessmentGroup = {
+    val ag = new UpstreamAssessmentGroup()
+    ag.moduleCode = rs.getString("module_code")
+    ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
+    ag.assessmentGroup = rs.getString("assessment_group")
+    ag.occurrence = rs.getString("mav_occurrence")
+    ag.sequence = rs.getString("seq")
+    ag
+  }
+
+  class GradeBoundaryQuery(ds: DataSource) extends MappingSqlQuery[GradeBoundary](ds, GetAllGradeBoundaries) {
+    compile()
+
+    override def mapRow(rs: ResultSet, rowNumber: Int): GradeBoundary = {
+      GradeBoundary(
+        rs.getString("marks_code"),
+        rs.getString("grade"),
+        rs.getInt("minimum_mark"),
+        rs.getInt("maximum_mark"),
+        rs.getString("signal_status")
+      )
+    }
+  }
 
 }

@@ -7,11 +7,11 @@ case class SmallGroupMember(smallGroup: SmallGroup) extends BuiltInRole(SmallGro
 
 case object SmallGroupMemberRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Small group member"
+  override def description = "Small group member"
 
-	GrantsScopedPermission(
-		SmallGroups.Read,
-		SmallGroups.ReadMembership
-	)
+  GrantsScopedPermission(
+    SmallGroups.Read,
+    SmallGroups.ReadMembership
+  )
 
 }

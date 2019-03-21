@@ -68,7 +68,7 @@ private[fileserver] object HttpHeaderParameterEncoding {
     * render("filename", "foo.txt") ==> "filename=foo.txt"
     * render("filename", "naïve.txt") ==> "filename=na_ve.txt; filename*=utf8''na%C3%AFve.txt"
     * ]]
-    */
+    **/
   def encodeToBuilder(name: String, value: String, builder: StringBuilder): Unit = {
     // This flag gets set if we encounter extended characters when rendering the
     // regular parameter value.

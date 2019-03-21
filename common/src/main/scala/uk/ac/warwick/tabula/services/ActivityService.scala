@@ -13,50 +13,52 @@ import scala.concurrent.Future
 import scala.language.implicitConversions
 
 object ActivityService {
-	case class PagedActivities(items: Seq[Activity[_]], lastUpdatedDate: Option[DateTime], totalHits: Long)
 
-	implicit def pagedAuditEventsToActivities(in: Future[PagedAuditEvents]): Future[PagedActivities] =
-		in.map { pagedEvents =>
-			PagedActivities(pagedEvents.items.flatMap(Activity.apply), pagedEvents.lastUpdatedDate, pagedEvents.totalHits)
-		}
+  case class PagedActivities(items: Seq[Activity[_]], lastUpdatedDate: Option[DateTime], totalHits: Long)
+
+  implicit def pagedAuditEventsToActivities(in: Future[PagedAuditEvents]): Future[PagedActivities] =
+    in.map { pagedEvents =>
+      PagedActivities(pagedEvents.items.flatMap(Activity.apply), pagedEvents.lastUpdatedDate, pagedEvents.totalHits)
+    }
 }
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
- *  and specifically is only noticing new submission events.
- *  In the future it'll likely make sense to serve events of interest at whichever
- *  depth of Tabula we're looking from, and look directly at typed Activity[A] rather
- *  than just Activity[AuditEvent]
- * */
+  * and specifically is only noticing new submission events.
+  * In the future it'll likely make sense to serve events of interest at whichever
+  * depth of Tabula we're looking from, and look directly at typed Activity[A] rather
+  * than just Activity[AuditEvent]
+  * */
 @Service
 class ActivityService {
-	import ActivityService._
 
-	private val StreamSize = 8
+  import ActivityService._
 
-	var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
-	var assignmentService: AssessmentService = Wire[AssessmentService]
-	var auditQueryService: AuditEventNoteworthySubmissionsService = Wire[AuditEventNoteworthySubmissionsService]
+  private val StreamSize = 8
 
-	// first page
-	def getNoteworthySubmissions(user: CurrentUser): Future[PagedActivities] =
-		auditQueryService.noteworthySubmissionsForModules(getModules(user), None, StreamSize)
+  var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var assignmentService: AssessmentService = Wire[AssessmentService]
+  var auditQueryService: AuditEventNoteworthySubmissionsService = Wire[AuditEventNoteworthySubmissionsService]
 
-	// following pages
-	def getNoteworthySubmissions(user: CurrentUser, lastUpdatedDate: DateTime): Future[PagedActivities] =
-		auditQueryService.noteworthySubmissionsForModules(getModules(user), Some(lastUpdatedDate), StreamSize)
+  // first page
+  def getNoteworthySubmissions(user: CurrentUser): Future[PagedActivities] =
+    auditQueryService.noteworthySubmissionsForModules(getModules(user), None, StreamSize)
 
-	private def getModules(user: CurrentUser): Seq[Module] = {
-		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
-		val adminModules = moduleService.modulesInDepartmentsWithPermission(user, Permissions.Module.ManageAssignments)
+  // following pages
+  def getNoteworthySubmissions(user: CurrentUser, lastUpdatedDate: DateTime): Future[PagedActivities] =
+    auditQueryService.noteworthySubmissionsForModules(getModules(user), Some(lastUpdatedDate), StreamSize)
 
-		(ownedModules ++ adminModules).toSeq
-	}
+  private def getModules(user: CurrentUser): Seq[Module] = {
+    val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
+    val adminModules = moduleService.modulesInDepartmentsWithPermission(user, Permissions.Module.ManageAssignments)
+
+    (ownedModules ++ adminModules).toSeq
+  }
 }
 
 trait ActivityServiceComponent {
-	def activityService: ActivityService
+  def activityService: ActivityService
 }
 
 trait AutowiringActivityServiceComponent extends ActivityServiceComponent {
-	var activityService: ActivityService = Wire[ActivityService]
+  var activityService: ActivityService = Wire[ActivityService]
 }

@@ -9,48 +9,48 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
 class EditMarkingWorkflowCommandTest extends TestBase with Mockito with ValidatorHelpers {
 
-	trait Fixture {
+  trait Fixture {
 
-		val marker1 = Fixtures.user("1170836", "cuslaj")
-		val marker2 = Fixtures.user("1170837", "cuslak")
-		val marker3 = Fixtures.user("1170838", "cuslal")
+    val marker1 = Fixtures.user("1170836", "cuslaj")
+    val marker2 = Fixtures.user("1170837", "cuslak")
+    val marker3 = Fixtures.user("1170838", "cuslal")
 
-		val userlookupService = Fixtures.userLookupService(marker1, marker2, marker3)
-		val workflowService = smartMock[CM2MarkingWorkflowService]
-		val dept = Fixtures.department("in")
-		val wflow = SingleMarkerWorkflow("workflow1", dept, Seq(marker1))
-		wflow.id = "workflow1"
-		wflow.academicYear = AcademicYear(2016)
+    val userlookupService = Fixtures.userLookupService(marker1, marker2, marker3)
+    val workflowService = smartMock[CM2MarkingWorkflowService]
+    val dept = Fixtures.department("in")
+    val wflow = SingleMarkerWorkflow("workflow1", dept, Seq(marker1))
+    wflow.id = "workflow1"
+    wflow.academicYear = AcademicYear(2016)
 
-		val validator = new EditMarkingWorkflowValidation with EditMarkingWorkflowState with UserLookupComponent {
-			val userLookup = userlookupService
-			val department = dept
-			val academicYear = AcademicYear(2016)
-			val workflow = Some(wflow)
-			markersA = JArrayList("cuslaj", "cuslak")
-			markersB = JArrayList()
-		}
-	}
+    val validator = new EditMarkingWorkflowValidation with EditMarkingWorkflowState with UserLookupComponent {
+      val userLookup = userlookupService
+      val department = dept
+      val academicYear = AcademicYear(2016)
+      val workflow = Some(wflow)
+      markersA = JArrayList("cuslaj", "cuslak")
+      markersB = JArrayList()
+    }
+  }
 
-	@Test
-	def validateDupeNames(): Unit = new Fixture {
+  @Test
+  def validateDupeNames(): Unit = new Fixture {
 
-		val wflow2 = SingleMarkerWorkflow("workflow2", dept, Seq(marker1))
-		wflow2.academicYear = AcademicYear(2016)
-		wflow2.id = "workflow2"
-		wflow.academicYear = AcademicYear(2016)
-		dept.addCM2MarkingWorkflow(wflow)
-		dept.addCM2MarkingWorkflow(wflow2)
+    val wflow2 = SingleMarkerWorkflow("workflow2", dept, Seq(marker1))
+    wflow2.academicYear = AcademicYear(2016)
+    wflow2.id = "workflow2"
+    wflow.academicYear = AcademicYear(2016)
+    dept.addCM2MarkingWorkflow(wflow)
+    dept.addCM2MarkingWorkflow(wflow2)
 
-		validator.workflowName = "workflow2"
-		hasError(validator, "workflowName")
+    validator.workflowName = "workflow2"
+    hasError(validator, "workflowName")
 
-		validator.workflowName = "workflow1"
-		hasNoError(validator, "workflowName")
+    validator.workflowName = "workflow1"
+    hasNoError(validator, "workflowName")
 
-		validator.workflowName = "workflow2"
-		wflow2.academicYear = AcademicYear(2015)
-		hasNoError(validator, "workflowName")
-	}
+    validator.workflowName = "workflow2"
+    wflow2.academicYear = AcademicYear(2015)
+    hasNoError(validator, "workflowName")
+  }
 
 }

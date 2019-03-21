@@ -8,31 +8,31 @@ import uk.ac.warwick.tabula.Mockito
 
 class ExtensionIdConverterTest extends TestBase with Mockito {
 
-	val converter = new ExtensionIdConverter
-	val service: ExtensionService = mock[ExtensionService]
-	converter.service = service
+  val converter = new ExtensionIdConverter
+  val service: ExtensionService = mock[ExtensionService]
+  converter.service = service
 
-	@Test def validInput {
-		val extension = new Extension
-		extension.id = "steve"
+  @Test def validInput {
+    val extension = new Extension
+    extension.id = "steve"
 
-		service.getExtensionById("steve") returns (Some(extension))
+    service.getExtensionById("steve") returns (Some(extension))
 
-		converter.convertRight("steve") should be (extension)
-	}
+    converter.convertRight("steve") should be(extension)
+  }
 
-	@Test def invalidInput {
-		service.getExtensionById("20X6") returns (None)
+  @Test def invalidInput {
+    service.getExtensionById("20X6") returns (None)
 
-		converter.convertRight("20X6") should be (null)
-	}
+    converter.convertRight("20X6") should be(null)
+  }
 
-	@Test def formatting {
-		val extension = new Extension
-		extension.id = "steve"
+  @Test def formatting {
+    val extension = new Extension
+    extension.id = "steve"
 
-		converter.convertLeft(extension) should be ("steve")
-		converter.convertLeft(null) should be (null)
-	}
+    converter.convertLeft(extension) should be("steve")
+    converter.convertLeft(null) should be(null)
+  }
 
 }

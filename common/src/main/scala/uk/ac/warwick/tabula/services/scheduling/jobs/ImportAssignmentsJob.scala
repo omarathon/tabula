@@ -14,13 +14,13 @@ import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
 @Scope(value = BeanDefinition.SCOPE_PROTOTYPE)
 class ImportAssignmentsJob extends AutowiredJobBean {
 
-	override def executeInternal(context: JobExecutionContext): Unit = {
-		if (features.schedulingAssignmentsImport)
-			exceptionResolver.reportExceptions {
-				EarlyRequestInfo.wrap() {
-					ImportAssignmentsCommand().apply()
-				}
-			}
-	}
+  override def executeInternal(context: JobExecutionContext): Unit = {
+    if (features.schedulingAssignmentsImport)
+      exceptionResolver.reportExceptions {
+        EarlyRequestInfo.wrap() {
+          ImportAssignmentsCommand().apply()
+        }
+      }
+  }
 
 }

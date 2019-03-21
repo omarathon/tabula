@@ -20,74 +20,74 @@ import scala.collection.JavaConverters._
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/new"))
 class CreateAttendancePointController extends AttendanceController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam schemes: JList[AttendanceMonitoringScheme]
-	) =
-		CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala)
+  @ModelAttribute("command")
+  def command(
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam schemes: JList[AttendanceMonitoringScheme]
+  ) =
+    CreateAttendancePointCommand(mandatory(department), mandatory(academicYear), schemes.asScala)
 
-	@RequestMapping(method = Array(POST))
-	def form(
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		Mav("attendance/manage/newpoint",
-			"allMeetingFormats" -> MeetingFormat.members,
-			"returnTo" -> getReturnTo("")
-		).crumbs(
-			Breadcrumbs.Manage.HomeForYear(academicYear),
-			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
-		)
-	}
+  @RequestMapping(method = Array(POST))
+  def form(
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    Mav("attendance/manage/newpoint",
+      "allMeetingFormats" -> MeetingFormat.members,
+      "returnTo" -> getReturnTo("")
+    ).crumbs(
+      Breadcrumbs.Manage.HomeForYear(academicYear),
+      Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("submit"))
-	def submitNormal(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) {
-			form(cmd, department, academicYear)
-		} else {
-			doApply(cmd)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("submit"))
+  def submitNormal(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors) {
+      form(cmd, department, academicYear)
+    } else {
+      doApply(cmd)
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("submitConfirm"))
-	def submitSkipOverlap(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors && errors.getErrorCount != 1 && errors.getAllErrors.get(0).getCode != "attendanceMonitoringPoint.overlaps") {
-			form(cmd, department, academicYear)
-		} else {
-			doApply(cmd)
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("submitConfirm"))
+  def submitSkipOverlap(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]],
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (errors.hasErrors && errors.getErrorCount != 1 && errors.getAllErrors.get(0).getCode != "attendanceMonitoringPoint.overlaps") {
+      form(cmd, department, academicYear)
+    } else {
+      doApply(cmd)
+    }
+  }
 
-	private def doApply(cmd: Appliable[Seq[AttendanceMonitoringPoint]]) = {
-		val points = cmd.apply()
-		Redirect(
-			getReturnTo(""),
-			"points" -> points.size.toString,
-			"schemes" -> points.map(_.scheme.id).mkString(",")
-		)
-	}
+  private def doApply(cmd: Appliable[Seq[AttendanceMonitoringPoint]]) = {
+    val points = cmd.apply()
+    Redirect(
+      getReturnTo(""),
+      "points" -> points.size.toString,
+      "schemes" -> points.map(_.scheme.id).mkString(",")
+    )
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(@RequestParam schemes: JList[AttendanceMonitoringScheme]): Mav = {
-		Redirect(
-			getReturnTo(""),
-			"schemes" -> schemes.asScala.map(_.id).mkString(",")
-		)
-	}
+  @RequestMapping(method = Array(POST), params = Array("cancel"))
+  def cancel(@RequestParam schemes: JList[AttendanceMonitoringScheme]): Mav = {
+    Redirect(
+      getReturnTo(""),
+      "schemes" -> schemes.asScala.map(_.id).mkString(",")
+    )
+  }
 
 }

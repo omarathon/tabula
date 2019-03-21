@@ -13,22 +13,22 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 @Controller
 class ArchiveSmallGroupSetController extends GroupsController {
 
-	@ModelAttribute("smallGroupSet") def set(@PathVariable set: SmallGroupSet): SmallGroupSet = set
+  @ModelAttribute("smallGroupSet") def set(@PathVariable set: SmallGroupSet): SmallGroupSet = set
 
-	@ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable set: SmallGroupSet) =
-		new ArchiveSmallGroupSetCommand(module, set)
+  @ModelAttribute("archiveSmallGroupSetCommand") def cmd(@PathVariable module: Module, @PathVariable set: SmallGroupSet) =
+    new ArchiveSmallGroupSetCommand(module, set)
 
-	@RequestMapping
-	def form(cmd: ArchiveSmallGroupSetCommand): Mav =
-		Mav("groups/admin/groups/archive").noLayoutIf(ajax)
+  @RequestMapping
+  def form(cmd: ArchiveSmallGroupSetCommand): Mav =
+    Mav("groups/admin/groups/archive").noLayoutIf(ajax)
 
-	@RequestMapping(method = Array(POST))
-	def submit(cmd: ArchiveSmallGroupSetCommand): Mav = {
-		cmd.apply()
-		if (ajax)
-			Mav("ajax_success").noLayout()
-		else
-			Redirect(Routes.home)
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(cmd: ArchiveSmallGroupSetCommand): Mav = {
+    cmd.apply()
+    if (ajax)
+      Mav("ajax_success").noLayout()
+    else
+      Redirect(Routes.home)
+  }
 
 }

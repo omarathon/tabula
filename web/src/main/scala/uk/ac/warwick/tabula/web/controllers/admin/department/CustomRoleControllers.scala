@@ -21,234 +21,244 @@ import uk.ac.warwick.tabula.roles.{RoleDefinition, SelectorBuiltInRoleDefinition
 import uk.ac.warwick.tabula.services.RelationshipService
 
 trait CustomRoleControllerMethods extends AdminController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	var permissionsService: PermissionsService = Wire[PermissionsService]
-	var relationshipService: RelationshipService = Wire[RelationshipService]
+  var permissionsService: PermissionsService = Wire[PermissionsService]
+  var relationshipService: RelationshipService = Wire[RelationshipService]
 
-	@ModelAttribute("allRoleDefinitions")
-	def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser): Seq[RoleDefinition] = transactional(readOnly = true) {
-		val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
+  @ModelAttribute("allRoleDefinitions")
+  def grantableRoleDefinitions(@PathVariable department: Department, user: CurrentUser): Seq[RoleDefinition] = transactional(readOnly = true) {
+    val builtInRoleDefinitions = ReflectionHelper.allBuiltInRoleDefinitions
 
-		def parentDepartments[B <: PermissionsTarget](permissionsTarget: B): Seq[Department] = permissionsTarget match {
-			case department: Department => Seq(department)
-			case _ => permissionsTarget.permissionsParents.flatMap(parentDepartments)
-		}
+    def parentDepartments[B <: PermissionsTarget](permissionsTarget: B): Seq[Department] = permissionsTarget match {
+      case department: Department => Seq(department)
+      case _ => permissionsTarget.permissionsParents.flatMap(parentDepartments)
+    }
 
-		val allDepartments = parentDepartments(department)
+    val allDepartments = parentDepartments(department)
 
-		val relationshipTypes =
-			if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter { _.defaultDisplay }
-			else allDepartments.flatMap { _.displayedStudentRelationshipTypes }.distinct
+    val relationshipTypes =
+      if (allDepartments.isEmpty) relationshipService.allStudentRelationshipTypes.filter(_.defaultDisplay)
+      else allDepartments.flatMap(_.displayedStudentRelationshipTypes).distinct
 
-		val selectorBuiltInRoleDefinitions =
-			ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
-				SelectorBuiltInRoleDefinition.of(name, PermissionsSelector.Any[StudentRelationshipType]) +:
-					relationshipTypes.map { relationshipType =>
-						SelectorBuiltInRoleDefinition.of(name, relationshipType)
-					}
-			}
+    val selectorBuiltInRoleDefinitions =
+      ReflectionHelper.allSelectorBuiltInRoleDefinitionNames.flatMap { name =>
+        SelectorBuiltInRoleDefinition.of(name, PermissionsSelector.Any[StudentRelationshipType]) +:
+          relationshipTypes.map { relationshipType =>
+            SelectorBuiltInRoleDefinition.of(name, relationshipType)
+          }
+      }
 
-		val customRoleDefinitions = allDepartments.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
+    val customRoleDefinitions = allDepartments.flatMap { department => permissionsService.getCustomRoleDefinitionsFor(department) }
 
-		(builtInRoleDefinitions ++ customRoleDefinitions ++ selectorBuiltInRoleDefinitions).filter { _.isAssignable }
-	}
+    (builtInRoleDefinitions ++ customRoleDefinitions ++ selectorBuiltInRoleDefinitions).filter(_.isAssignable)
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles", "/admin/department/{department}/customroles/list"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles", "/admin/department/{department}/customroles/list"))
 class ListCustomRolesController extends CustomRoleControllerMethods {
-	import ListCustomRolesCommand._
 
-	type ListCustomRolesCommand = Appliable[Seq[CustomRoleInfo]] with ListCustomRolesCommandState
+  import ListCustomRolesCommand._
 
-	@ModelAttribute("command") def command(@PathVariable department: Department) = ListCustomRolesCommand(department)
+  type ListCustomRolesCommand = Appliable[Seq[CustomRoleInfo]] with ListCustomRolesCommandState
 
-	@RequestMapping
-	def list(@ModelAttribute("command") command: ListCustomRolesCommand): Mav = {
-		Mav("admin/department/customroles/list",
-			"customRoles" -> command.apply()
-		).crumbs(
-			Breadcrumbs.Department(command.department)
-		)
-	}
+  @ModelAttribute("command") def command(@PathVariable department: Department) = ListCustomRolesCommand(department)
+
+  @RequestMapping
+  def list(@ModelAttribute("command") command: ListCustomRolesCommand): Mav = {
+    Mav("admin/department/customroles/list",
+      "customRoles" -> command.apply()
+    ).crumbs(
+      Breadcrumbs.Department(command.department)
+    )
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/add"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/add"))
 class AddCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
-	type AddCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with AddCustomRoleDefinitionCommandState
+  type AddCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with AddCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department) = AddCustomRoleDefinitionCommand(department)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department) = AddCustomRoleDefinitionCommand(department)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department): Mav =
-		Mav("admin/department/customroles/add").crumbs(
-			Breadcrumbs.Department(department)
-		)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@PathVariable department: Department): Mav =
+    Mav("admin/department/customroles/add").crumbs(
+      Breadcrumbs.Department(department)
+    )
 
-	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: AddCustomRoleDefinitionCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(command.department)
-		} else {
-			command.apply()
-			Redirect(Routes.admin.department.customRoles(command.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("command") command: AddCustomRoleDefinitionCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(command.department)
+    } else {
+      command.apply()
+      Redirect(Routes.admin.department.customRoles(command.department))
+    }
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/edit"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/edit"))
 class EditCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
-	type EditCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with EditCustomRoleDefinitionCommandState
+  type EditCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with EditCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
-		EditCustomRoleDefinitionCommand(department, customRoleDefinition)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
+    EditCustomRoleDefinitionCommand(department, customRoleDefinition)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department): Mav =
-		Mav("admin/department/customroles/edit").crumbs(
-			Breadcrumbs.Department(department)
-		)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@PathVariable department: Department): Mav =
+    Mav("admin/department/customroles/edit").crumbs(
+      Breadcrumbs.Department(department)
+    )
 
-	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: EditCustomRoleDefinitionCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(command.department)
-		} else {
-			command.apply()
-			Redirect(Routes.admin.department.customRoles(command.customRoleDefinition.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("command") command: EditCustomRoleDefinitionCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(command.department)
+    } else {
+      command.apply()
+      Redirect(Routes.admin.department.customRoles(command.customRoleDefinition.department))
+    }
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/delete"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/delete"))
 class DeleteCustomRoleDefinitionController extends CustomRoleControllerMethods {
 
-	type DeleteCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with DeleteCustomRoleDefinitionCommandState
+  type DeleteCustomRoleDefinitionCommand = Appliable[CustomRoleDefinition] with DeleteCustomRoleDefinitionCommandState
 
-	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
-		DeleteCustomRoleDefinitionCommand(department, customRoleDefinition)
+  @ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
+    DeleteCustomRoleDefinitionCommand(department, customRoleDefinition)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(): Mav = Mav("admin/department/customroles/delete").noLayoutIf(ajax)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(): Mav = Mav("admin/department/customroles/delete").noLayoutIf(ajax)
 
-	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleDefinitionCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form()
-		} else {
-			command.apply()
-			Redirect(Routes.admin.department.customRoles(command.customRoleDefinition.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleDefinitionCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form()
+    } else {
+      command.apply()
+      Redirect(Routes.admin.department.customRoles(command.customRoleDefinition.department))
+    }
+  }
 }
 
 trait CustomRoleOverridesControllerMethods extends AdminController {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("allPermissions") def allPermissions(@PathVariable department: Department): Map[String, Seq[(String, String)]] = {
-		def groupFn(p: Permission) = {
-			val simpleName = Permissions.shortName(p.getClass)
+  @ModelAttribute("allPermissions") def allPermissions(@PathVariable department: Department): Map[String, Seq[(String, String)]] = {
+    def groupFn(p: Permission) = {
+      val simpleName = Permissions.shortName(p.getClass)
 
-			val parentName =
-				if (simpleName.indexOf('.') == -1) ""
-				else simpleName.substring(0, simpleName.lastIndexOf('.'))
+      val parentName =
+        if (simpleName.indexOf('.') == -1) ""
+        else simpleName.substring(0, simpleName.lastIndexOf('.'))
 
-			parentName
-		}
+      parentName
+    }
 
-		val relationshipTypes = department.displayedStudentRelationshipTypes
+    val relationshipTypes = department.displayedStudentRelationshipTypes
 
-		ReflectionHelper.allPermissions
-			.filter { p => groupFn(p).hasText }
-			.sortBy { p => groupFn(p) }
-			.flatMap { p =>
-			if (p.isInstanceOf[SelectorPermission[_]]) {
-				p +: relationshipTypes.map { relationshipType =>
-					SelectorPermission.of(p.getName, relationshipType)
-				}
-			} else {
-				Seq(p)
-			}
-		}
-			.groupBy(groupFn)
-			.map { case (key, value) => (key, value.map { p =>
-			val name = p match {
-				case p: SelectorPermission[_] => p.toString()
-				case _ => p.getName
-			}
+    ReflectionHelper.allPermissions
+      .filter { p => groupFn(p).hasText }
+      .sortBy { p => groupFn(p) }
+      .flatMap { p =>
+        if (p.isInstanceOf[SelectorPermission[_]]) {
+          p +: relationshipTypes.map { relationshipType =>
+            SelectorPermission.of(p.getName, relationshipType)
+          }
+        } else {
+          Seq(p)
+        }
+      }
+      .groupBy(groupFn)
+      .map { case (key, value) => (key, value.map { p =>
+        val name = p match {
+          case p: SelectorPermission[_] => p.toString()
+          case _ => p.getName
+        }
 
-			(name, name)
-		})}
-	}
+        (name, name)
+      })
+      }
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides", "/admin/department/{department}/customroles/{customRoleDefinition}/overrides/list"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides", "/admin/department/{department}/customroles/{customRoleDefinition}/overrides/list"))
 class ListCustomRoleDefinitionOverridesController extends CustomRoleOverridesControllerMethods {
-	import ListCustomRoleOverridesCommand._
 
-	type ListCustomRoleOverridesCommand = Appliable[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState
+  import ListCustomRoleOverridesCommand._
 
-	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
-		ListCustomRoleOverridesCommand(department, customRoleDefinition)
+  type ListCustomRoleOverridesCommand = Appliable[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState
 
-	@RequestMapping
-	def list(@ModelAttribute("command") command: ListCustomRoleOverridesCommand): Mav = {
-		Mav("admin/department/customroles/overrides",
-			"roleInfo" -> command.apply()
-		).crumbs(
-			Breadcrumbs.Department(command.department)
-		)
-	}
+  @ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
+    ListCustomRoleOverridesCommand(department, customRoleDefinition)
+
+  @RequestMapping
+  def list(@ModelAttribute("command") command: ListCustomRoleOverridesCommand): Mav = {
+    Mav("admin/department/customroles/overrides",
+      "roleInfo" -> command.apply()
+    ).crumbs(
+      Breadcrumbs.Department(command.department)
+    )
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides/add"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides/add"))
 class AddCustomRoleOverrideController extends CustomRoleOverridesControllerMethods {
 
-	type AddCustomRoleOverrideCommand = Appliable[RoleOverride] with AddCustomRoleOverrideCommandState
+  type AddCustomRoleOverrideCommand = Appliable[RoleOverride] with AddCustomRoleOverrideCommandState
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
-		AddCustomRoleOverrideCommand(department, customRoleDefinition)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition) =
+    AddCustomRoleOverrideCommand(department, customRoleDefinition)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@PathVariable department: Department): Mav =
-		Mav("admin/department/customroles/addOverride").crumbs(
-			Breadcrumbs.Department(department)
-		)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@PathVariable department: Department): Mav =
+    Mav("admin/department/customroles/addOverride").crumbs(
+      Breadcrumbs.Department(department)
+    )
 
-	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: AddCustomRoleOverrideCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(command.department)
-		} else {
-			command.apply()
-			Redirect(Routes.admin.department.customRoles.overrides(command.customRoleDefinition))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("command") command: AddCustomRoleOverrideCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(command.department)
+    } else {
+      command.apply()
+      Redirect(Routes.admin.department.customRoles.overrides(command.customRoleDefinition))
+    }
+  }
 }
 
-@Controller @RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides/{roleOverride}/delete"))
+@Controller
+@RequestMapping(Array("/admin/department/{department}/customroles/{customRoleDefinition}/overrides/{roleOverride}/delete"))
 class DeleteCustomRoleOverrideController extends CustomRoleOverridesControllerMethods {
 
-	type DeleteCustomRoleOverrideCommand = Appliable[RoleOverride] with DeleteCustomRoleOverrideCommandState
+  type DeleteCustomRoleOverrideCommand = Appliable[RoleOverride] with DeleteCustomRoleOverrideCommandState
 
-	@ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition, @PathVariable roleOverride: RoleOverride) =
-		DeleteCustomRoleOverrideCommand(department, customRoleDefinition, roleOverride)
+  @ModelAttribute("command") def command(@PathVariable department: Department, @PathVariable customRoleDefinition: CustomRoleDefinition, @PathVariable roleOverride: RoleOverride) =
+    DeleteCustomRoleOverrideCommand(department, customRoleDefinition, roleOverride)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(): Mav = Mav("admin/department/customroles/deleteOverride").noLayoutIf(ajax)
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(): Mav = Mav("admin/department/customroles/deleteOverride").noLayoutIf(ajax)
 
-	@RequestMapping(method=Array(POST))
-	def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleOverrideCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form()
-		} else {
-			command.apply()
-			Redirect(Routes.admin.department.customRoles.overrides(command.customRoleDefinition))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def save(@Valid @ModelAttribute("command") command: DeleteCustomRoleOverrideCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form()
+    } else {
+      command.apply()
+      Redirect(Routes.admin.department.customRoles.overrides(command.customRoleDefinition))
+    }
+  }
 }

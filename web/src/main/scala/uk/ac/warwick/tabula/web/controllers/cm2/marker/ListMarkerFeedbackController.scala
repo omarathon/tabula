@@ -16,9 +16,9 @@ import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
 object ListMarkerFeedbackController {
-	val AllPlagiarismFilters = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
-	val AllSubmissionFilters = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted)
-	val AllMarkerStatuses = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
+  val AllPlagiarismFilters = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
+  val AllSubmissionFilters = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted)
+  val AllMarkerStatuses = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
 }
 
 @Profile(Array("cm2Enabled"))
@@ -26,36 +26,37 @@ object ListMarkerFeedbackController {
 @RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/marker/{marker}"))
 class ListMarkerFeedbackController extends CourseworkController {
 
-	type Command = Appliable[Seq[EnhancedFeedbackForOrderAndStage]] with ListMarkerFeedbackState
-	import ListMarkerFeedbackController._
+  type Command = Appliable[Seq[EnhancedFeedbackForOrderAndStage]] with ListMarkerFeedbackState
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
-		ListMarkerFeedbackCommand(assignment, marker, currentUser)
+  import ListMarkerFeedbackController._
 
-	@RequestMapping
-	def list(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") command: Command): Mav = {
-		val workflow = mandatory(command.assignment.cm2MarkingWorkflow)
-		if (ajax) {
-			Mav("cm2/admin/assignments/markers/marker_feedback_list",
-				"feedbackByOrderAndStage" -> command.apply(),
-				"activeWorkflowPosition" -> command.activeWorkflowPosition,
-				"assignment" -> command.assignment,
-				"workflowType" -> workflow.workflowType,
-				"marker" -> command.marker,
-				"AssignmentAnonymity" -> AssignmentAnonymity
-			).noLayout()
-		} else {
-			Mav("cm2/admin/assignments/markers/assignment",
-				"allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
-				"allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
-				"allMarkerStateFilters" -> AllMarkerStatuses.filter(_.apply(command.assignment)),
-				"department" -> command.assignment.module.adminDepartment,
-				"assignment" -> command.assignment,
-				"isProxying" -> command.isProxying,
-				"proxyingAs" -> marker
-			).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, active = true, proxying = command.isProxying))
-		}
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment, @PathVariable marker: User, currentUser: CurrentUser): Command =
+    ListMarkerFeedbackCommand(assignment, marker, currentUser)
+
+  @RequestMapping
+  def list(@PathVariable assignment: Assignment, @PathVariable marker: User, @ModelAttribute("command") command: Command): Mav = {
+    val workflow = mandatory(command.assignment.cm2MarkingWorkflow)
+    if (ajax) {
+      Mav("cm2/admin/assignments/markers/marker_feedback_list",
+        "feedbackByOrderAndStage" -> command.apply(),
+        "activeWorkflowPosition" -> command.activeWorkflowPosition,
+        "assignment" -> command.assignment,
+        "workflowType" -> workflow.workflowType,
+        "marker" -> command.marker,
+        "AssignmentAnonymity" -> AssignmentAnonymity
+      ).noLayout()
+    } else {
+      Mav("cm2/admin/assignments/markers/assignment",
+        "allSubmissionStatesFilters" -> AllSubmissionFilters.filter(_.apply(command.assignment)),
+        "allPlagiarismFilters" -> AllPlagiarismFilters.filter(_.apply(command.assignment)),
+        "allMarkerStateFilters" -> AllMarkerStatuses.filter(_.apply(command.assignment)),
+        "department" -> command.assignment.module.adminDepartment,
+        "assignment" -> command.assignment,
+        "isProxying" -> command.isProxying,
+        "proxyingAs" -> marker
+      ).crumbsList(Breadcrumbs.markerAssignment(assignment, marker, active = true, proxying = command.isProxying))
+    }
+  }
 
 }

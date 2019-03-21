@@ -20,6 +20,7 @@ private[fileserver] case class ByteRange(start: Long, end: Long) extends Ordered
   }
 
   private def mergedStart(other: ByteRange) = math.min(start, other.start)
+
   private def mergedEnd(other: ByteRange) = math.max(end, other.end)
 }
 
@@ -238,7 +239,8 @@ private[fileserver] object RangeSet {
   //     An origin server MUST ignore a Range header field that contains a
   //     range unit it does not understand.  A proxy MAY discard a Range
   //     header field that contains a range unit it does not understand.
-  val WithEntityLengthRangeSetPattern: Regex = """^bytes=[0-9,-]+""".r
+  val WithEntityLengthRangeSetPattern: Regex =
+  """^bytes=[0-9,-]+""".r
 
   val WithoutEntityLengthRangeSetPattern: Regex = """^bytes=([0-9]+-[0-9]+,?)+""".r
 

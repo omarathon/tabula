@@ -8,32 +8,33 @@ import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import uk.ac.warwick.tabula.helpers.Logging
 
 /**
- * Stores a Map[String, Any] as JSON and inflates it back out.
- * &lt;Paul Daniels&gt;Magic!&lt;/Paul Daniels&gt;
+  * Stores a Map[String, Any] as JSON and inflates it back out.
+  * &lt;Paul Daniels&gt;Magic!&lt;/Paul Daniels&gt;
   */
 class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] with Logging {
 
-	/** Sad face, Hibernate user types are instantiated in a weird way that make dependency injection hard */
-	lazy val jsonMapper: ObjectMapper = JsonObjectMapperFactory.instance
+  /** Sad face, Hibernate user types are instantiated in a weird way that make dependency injection hard */
+  lazy val jsonMapper: ObjectMapper = JsonObjectMapperFactory.instance
 
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
+  val basicType = StandardBasicTypes.STRING
 
-	val nullValue = null
-	val nullObject = null
+  override def sqlTypes = Array(Types.VARCHAR)
 
-	override def convertToObject(string: String): Map[String, Any] =
-		if (jsonMapper != null) jsonMapper.readValue(string, classOf[Map[String, Any]])
-		else {
-			logger.warn("No JSON mapper defined. This should only happen in unit tests!")
-			nullObject
-		}
+  val nullValue = null
+  val nullObject = null
 
-	override def convertToValue(map: Map[String, Any]): String =
-		if (jsonMapper != null) jsonMapper.writeValueAsString(map)
-		else {
-			logger.warn("No JSON mapper defined. This should only happen in unit tests!")
-			nullValue
-		}
+  override def convertToObject(string: String): Map[String, Any] =
+    if (jsonMapper != null) jsonMapper.readValue(string, classOf[Map[String, Any]])
+    else {
+      logger.warn("No JSON mapper defined. This should only happen in unit tests!")
+      nullObject
+    }
+
+  override def convertToValue(map: Map[String, Any]): String =
+    if (jsonMapper != null) jsonMapper.writeValueAsString(map)
+    else {
+      logger.warn("No JSON mapper defined. This should only happen in unit tests!")
+      nullValue
+    }
 
 }

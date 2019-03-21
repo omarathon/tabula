@@ -11,21 +11,21 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import scala.util.{Failure, Success, Try}
 
 /**
-	* Returns the start date (inclusive) and end date (exclusive, the first datetime NOT in the provided academic year)
-	* of the requested academic year
-	*/
+  * Returns the start date (inclusive) and end date (exclusive, the first datetime NOT in the provided academic year)
+  * of the requested academic year
+  */
 @Controller
 @RequestMapping(Array("/ajax/academicyearfromdate"))
 class AcademicYearFromDateController extends BaseController {
 
-	@RequestMapping
-	def result(@RequestParam date: LocalDate): Mav =
-		Try(AcademicYear.forDate(date)) match {
-			case Success(academicYear) => Mav(new JSONView(Map(
-				"startYear" -> academicYear.startYear,
-				"string" -> academicYear.toString
-			)))
-			case Failure(e) => throw new ItemNotFoundException(date, s"Couldn't find an academic year for $date: $e")
-		}
+  @RequestMapping
+  def result(@RequestParam date: LocalDate): Mav =
+    Try(AcademicYear.forDate(date)) match {
+      case Success(academicYear) => Mav(new JSONView(Map(
+        "startYear" -> academicYear.startYear,
+        "string" -> academicYear.toString
+      )))
+      case Failure(e) => throw new ItemNotFoundException(date, s"Couldn't find an academic year for $date: $e")
+    }
 
 }

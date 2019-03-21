@@ -13,128 +13,131 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ModifyDepartmentSmallGroupSetCommand {
-	def create(department: Department, academicYear: AcademicYear) =
-		new CreateDepartmentSmallGroupSetCommandInternal(department, academicYear)
-			with ComposableCommand[DepartmentSmallGroupSet]
-			with ModifyDepartmentSmallGroupSetCommandValidation
-			with CreateDepartmentSmallGroupSetPermissions
-			with CreateDepartmentSmallGroupSetDescription
-			with AutowiringSmallGroupServiceComponent
+  def create(department: Department, academicYear: AcademicYear) =
+    new CreateDepartmentSmallGroupSetCommandInternal(department, academicYear)
+      with ComposableCommand[DepartmentSmallGroupSet]
+      with ModifyDepartmentSmallGroupSetCommandValidation
+      with CreateDepartmentSmallGroupSetPermissions
+      with CreateDepartmentSmallGroupSetDescription
+      with AutowiringSmallGroupServiceComponent
 
-	def edit(department: Department, academicYear: AcademicYear, set: DepartmentSmallGroupSet) =
-		new EditDepartmentSmallGroupSetCommandInternal(department, academicYear, set)
-			with ComposableCommand[DepartmentSmallGroupSet]
-			with ModifyDepartmentSmallGroupSetCommandValidation
-			with EditDepartmentSmallGroupSetPermissions
-			with EditDepartmentSmallGroupSetDescription
-			with AutowiringSmallGroupServiceComponent
+  def edit(department: Department, academicYear: AcademicYear, set: DepartmentSmallGroupSet) =
+    new EditDepartmentSmallGroupSetCommandInternal(department, academicYear, set)
+      with ComposableCommand[DepartmentSmallGroupSet]
+      with ModifyDepartmentSmallGroupSetCommandValidation
+      with EditDepartmentSmallGroupSetPermissions
+      with EditDepartmentSmallGroupSetDescription
+      with AutowiringSmallGroupServiceComponent
 }
 
 trait ModifyDepartmentSmallGroupSetState {
-	def department: Department
-	def academicYear: AcademicYear
-	def existingSet: Option[DepartmentSmallGroupSet]
+  def department: Department
 
-	var name: String = _
+  def academicYear: AcademicYear
+
+  def existingSet: Option[DepartmentSmallGroupSet]
+
+  var name: String = _
 }
 
 trait CreateDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroupSetState {
-	val existingSet = None
+  val existingSet = None
 }
 
 class CreateDepartmentSmallGroupSetCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends ModifyDepartmentSmallGroupSetCommandInternal with CreateDepartmentSmallGroupSetCommandState {
+  extends ModifyDepartmentSmallGroupSetCommandInternal with CreateDepartmentSmallGroupSetCommandState {
 
-	self: SmallGroupServiceComponent =>
+  self: SmallGroupServiceComponent =>
 
-	def applyInternal(): DepartmentSmallGroupSet = transactional() {
-		val set = new DepartmentSmallGroupSet(department)
-		set.academicYear = academicYear
-		copyTo(set)
+  def applyInternal(): DepartmentSmallGroupSet = transactional() {
+    val set = new DepartmentSmallGroupSet(department)
+    set.academicYear = academicYear
+    copyTo(set)
 
-		smallGroupService.saveOrUpdate(set)
-		set
-	}
+    smallGroupService.saveOrUpdate(set)
+    set
+  }
 
 }
 
 trait EditDepartmentSmallGroupSetCommandState extends ModifyDepartmentSmallGroupSetState {
-	def smallGroupSet: DepartmentSmallGroupSet
-	lazy val existingSet = Some(smallGroupSet)
+  def smallGroupSet: DepartmentSmallGroupSet
+
+  lazy val existingSet = Some(smallGroupSet)
 }
 
 class EditDepartmentSmallGroupSetCommandInternal(val department: Department, val academicYear: AcademicYear, val smallGroupSet: DepartmentSmallGroupSet)
-	extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
+  extends ModifyDepartmentSmallGroupSetCommandInternal with EditDepartmentSmallGroupSetCommandState {
 
-	self: SmallGroupServiceComponent =>
+  self: SmallGroupServiceComponent =>
 
-	copyFrom(smallGroupSet)
+  copyFrom(smallGroupSet)
 
-	def applyInternal(): DepartmentSmallGroupSet = transactional() {
-		copyTo(smallGroupSet)
+  def applyInternal(): DepartmentSmallGroupSet = transactional() {
+    copyTo(smallGroupSet)
 
-		smallGroupService.saveOrUpdate(smallGroupSet)
-		smallGroupSet
-	}
+    smallGroupService.saveOrUpdate(smallGroupSet)
+    smallGroupSet
+  }
 
 }
 
 abstract class ModifyDepartmentSmallGroupSetCommandInternal
-	extends CommandInternal[DepartmentSmallGroupSet] with ModifyDepartmentSmallGroupSetState {
+  extends CommandInternal[DepartmentSmallGroupSet] with ModifyDepartmentSmallGroupSetState {
 
-	def copyFrom(set: DepartmentSmallGroupSet) {
-		name = set.name
-	}
+  def copyFrom(set: DepartmentSmallGroupSet) {
+    name = set.name
+  }
 
-	def copyTo(set: DepartmentSmallGroupSet) {
-		set.name = name
+  def copyTo(set: DepartmentSmallGroupSet) {
+    set.name = name
 
-		if (set.members == null) set.members = UserGroup.ofUniversityIds
-	}
+    if (set.members == null) set.members = UserGroup.ofUniversityIds
+  }
 }
 
 trait ModifyDepartmentSmallGroupSetCommandValidation extends SelfValidating {
-	self: ModifyDepartmentSmallGroupSetState =>
+  self: ModifyDepartmentSmallGroupSetState =>
 
-	override def validate(errors: Errors) {
-		if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
-		else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
-	}
+  override def validate(errors: Errors) {
+    if (!name.hasText) errors.rejectValue("name", "smallGroupSet.name.NotEmpty")
+    else if (name.orEmpty.length > 200) errors.rejectValue("name", "smallGroupSet.name.Length", Array[Object](200: JInteger), "")
+  }
 }
 
 trait CreateDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CreateDepartmentSmallGroupSetCommandState =>
+  self: CreateDepartmentSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
+  }
 }
 
 trait CreateDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
-	self: CreateDepartmentSmallGroupSetCommandState =>
+  self: CreateDepartmentSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.department(department).properties("name" -> name)
-	}
+  override def describe(d: Description) {
+    d.department(department).properties("name" -> name)
+  }
 
-	override def describeResult(d: Description, set: DepartmentSmallGroupSet): Unit =
-		d.department(set.department).properties("smallGroupSet" -> set.id)
+  override def describeResult(d: Description, set: DepartmentSmallGroupSet): Unit =
+    d.department(set.department).properties("smallGroupSet" -> set.id)
 }
 
 trait EditDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: EditDepartmentSmallGroupSetCommandState =>
+  self: EditDepartmentSmallGroupSetCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		mustBeLinked(smallGroupSet, department)
-		p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(smallGroupSet))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(smallGroupSet, department)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(smallGroupSet))
+  }
 }
 
 trait EditDepartmentSmallGroupSetDescription extends Describable[DepartmentSmallGroupSet] {
-	self: EditDepartmentSmallGroupSetCommandState =>
+  self: EditDepartmentSmallGroupSetCommandState =>
 
-	override def describe(d: Description) {
-		d.department(smallGroupSet.department).properties("smallGroupSet" -> smallGroupSet.id)
-	}
+  override def describe(d: Description) {
+    d.department(smallGroupSet.department).properties("smallGroupSet" -> smallGroupSet.id)
+  }
 
 }

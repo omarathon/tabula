@@ -13,21 +13,21 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/groups"))
 class SmallGroupsHomeController extends ReportsController
-	with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.Department.Reports
+  override val departmentPermission: Permission = Permissions.Department.Reports
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("reports/smallgroups/home")
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.reports.SmallGroups.home(department, year)): _*)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("reports/smallgroups/home")
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.reports.SmallGroups.home(department, year)): _*)
+  }
 
 }

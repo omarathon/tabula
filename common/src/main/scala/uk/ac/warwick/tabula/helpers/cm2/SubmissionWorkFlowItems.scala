@@ -8,23 +8,27 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.immutable.ListMap
 
 case class SubmissionListItem(submission: Submission, downloaded: Boolean)
-case class ExtensionListItem (extension: Extension,	within: Boolean)
+
+case class ExtensionListItem(extension: Extension, within: Boolean)
+
 case class FeedbackListItem(feedback: Feedback, downloaded: Boolean, onlineViewed: Boolean, feedbackForSits: Option[FeedbackForSits])
-case class Progress (percentage: Int, t: String, messageCode: String)
+
+case class Progress(percentage: Int, t: String, messageCode: String)
 
 // Simple object holder
-case class AssignmentSubmissionStudentInfo (
-	user: User,
-	progress: Progress,
-	nextStage: Option[WorkflowStage],
-	stages: ListMap[String, WorkflowStages.StageProgress],
-	coursework: WorkflowItems,
-	assignment: Assignment,
-	disability: Option[Disability]
+case class AssignmentSubmissionStudentInfo(
+  user: User,
+  progress: Progress,
+  nextStage: Option[WorkflowStage],
+  stages: ListMap[String, WorkflowStages.StageProgress],
+  coursework: WorkflowItems,
+  assignment: Assignment,
+  disability: Option[Disability]
 )
-case class WorkflowItems (
-	student: User,
-	enhancedSubmission: Option[SubmissionListItem],
-	enhancedFeedback: Option[FeedbackListItem],
-	enhancedExtension: Option[ExtensionListItem]
+
+case class WorkflowItems(
+  student: User,
+  enhancedSubmission: Option[SubmissionListItem],
+  enhancedFeedback: Option[FeedbackListItem],
+  enhancedExtension: Option[ExtensionListItem]
 )

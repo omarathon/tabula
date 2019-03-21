@@ -8,36 +8,36 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 
 object SearchAssignmentsCommand {
-	def apply(module: Module) =
-		new SearchAssignmentsCommandInternal(module)
-			with ComposableCommand[Seq[Assignment]]
-			with SearchAssignmentCommandState
-			with AutowiringAssessmentServiceComponent
-			with SearchAssignmentsPermissions
-			with ReadOnly
-			with Unaudited
+  def apply(module: Module) =
+    new SearchAssignmentsCommandInternal(module)
+      with ComposableCommand[Seq[Assignment]]
+      with SearchAssignmentCommandState
+      with AutowiringAssessmentServiceComponent
+      with SearchAssignmentsPermissions
+      with ReadOnly
+      with Unaudited
 
 }
 
 class SearchAssignmentsCommandInternal(val module: Module)
-	extends CommandInternal[Seq[Assignment]] with SearchAssignmentCommandState {
+  extends CommandInternal[Seq[Assignment]] with SearchAssignmentCommandState {
 
-	self: AssessmentServiceComponent =>
+  self: AssessmentServiceComponent =>
 
-	override def applyInternal(): Seq[Assignment] =
-		assessmentService.getAssignmentsByName(query, module.adminDepartment)
+  override def applyInternal(): Seq[Assignment] =
+    assessmentService.getAssignmentsByName(query, module.adminDepartment)
 }
 
 trait SearchAssignmentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: SearchAssignmentCommandState =>
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.Assignment.Read, module)
-	}
+  self: SearchAssignmentCommandState =>
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.Assignment.Read, module)
+  }
 }
 
 
 trait SearchAssignmentCommandState {
-	var query: String = _
+  var query: String = _
 
-	def module: Module
+  def module: Module
 }

@@ -11,56 +11,56 @@ import uk.ac.warwick.tabula.data.model.UserSettings
 
 class UserSettingFunctionTest extends TestBase with Mockito {
 
-	val fn = new UserSettingFunction
+  val fn = new UserSettingFunction
 
-	val settingsService: UserSettingsService = mock[UserSettingsService]
-	fn.userSettings = settingsService
+  val settingsService: UserSettingsService = mock[UserSettingsService]
+  fn.userSettings = settingsService
 
-	@Test def noSettings = withUser("cuscav") {
-		val args: JList[TemplateModel] = JArrayList()
+  @Test def noSettings = withUser("cuscav") {
+    val args: JList[TemplateModel] = JArrayList()
 
-		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
-		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
+    // Use a SimpleHash as a workaround to wrapping things manually
+    val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
+    model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 
-		args.add(model.get("settingName"))
+    args.add(model.get("settingName"))
 
-		settingsService.getByUserId("cuscav") returns (None)
+    settingsService.getByUserId("cuscav") returns (None)
 
-		fn.exec(args) should be (null)
-	}
+    fn.exec(args) should be(null)
+  }
 
-	@Test def hasSetting = withUser("cuscav") {
-		val args: JList[TemplateModel] = JArrayList()
+  @Test def hasSetting = withUser("cuscav") {
+    val args: JList[TemplateModel] = JArrayList()
 
-		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
-		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
+    // Use a SimpleHash as a workaround to wrapping things manually
+    val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
+    model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 
-		args.add(model.get("settingName"))
+    args.add(model.get("settingName"))
 
-		val settings = new UserSettings
-		settings.bulkEmailSeparator = ","
+    val settings = new UserSettings
+    settings.bulkEmailSeparator = ","
 
-		settingsService.getByUserId("cuscav") returns (Some(settings))
+    settingsService.getByUserId("cuscav") returns (Some(settings))
 
-		fn.exec(args) should be (",")
-	}
+    fn.exec(args) should be(",")
+  }
 
-	@Test def doesntHaveSetting = withUser("cuscav") {
-		val args: JList[TemplateModel] = JArrayList()
+  @Test def doesntHaveSetting = withUser("cuscav") {
+    val args: JList[TemplateModel] = JArrayList()
 
-		// Use a SimpleHash as a workaround to wrapping things manually
-		val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
-		model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
+    // Use a SimpleHash as a workaround to wrapping things manually
+    val model = new SimpleHash(null.asInstanceOf[ObjectWrapper])
+    model.put("settingName", UserSettings.Settings.BulkEmailSeparator)
 
-		args.add(model.get("settingName"))
+    args.add(model.get("settingName"))
 
-		val settings = new UserSettings
+    val settings = new UserSettings
 
-		settingsService.getByUserId("cuscav") returns (Some(settings))
+    settingsService.getByUserId("cuscav") returns (Some(settings))
 
-		fn.exec(args) should be (null)
-	}
+    fn.exec(args) should be(null)
+  }
 
 }

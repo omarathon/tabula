@@ -7,138 +7,140 @@ import uk.ac.warwick.tabula.JavaImports._
 
 class CustomRoleDefinitionTest extends TestBase {
 
-	case object TestBuiltInDefinition extends BuiltInRoleDefinition {
-		import Permissions._
+  case object TestBuiltInDefinition extends BuiltInRoleDefinition {
 
-		override def description = "Test"
+    import Permissions._
 
-		GrantsScopelessPermission(ImportSystemData)
-		GrantsScopedPermission(Department.ManageExtensionSettings)
-		GrantsGlobalPermission(Module.Create)
-		def canDelegateThisRolesPermissions:JBoolean = false
+    override def description = "Test"
 
-	}
+    GrantsScopelessPermission(ImportSystemData)
+    GrantsScopedPermission(Department.ManageExtensionSettings)
+    GrantsGlobalPermission(Module.Create)
 
-	@Test def polymorphicGetterAndSetter {
-		val crd = new CustomRoleDefinition
-		crd.baseRoleDefinition should be (null)
+    def canDelegateThisRolesPermissions: JBoolean = false
 
-		crd.baseRoleDefinition = TestBuiltInDefinition
-		crd.baseRoleDefinition should be (TestBuiltInDefinition)
-		crd.builtInBaseRoleDefinition should be (TestBuiltInDefinition)
-		crd.customBaseRoleDefinition should be (null)
+  }
 
-		val other = new CustomRoleDefinition
-		crd.baseRoleDefinition = other
-		crd.baseRoleDefinition should be (other)
-		crd.builtInBaseRoleDefinition should be (null)
-		crd.customBaseRoleDefinition should be (other)
-	}
+  @Test def polymorphicGetterAndSetter {
+    val crd = new CustomRoleDefinition
+    crd.baseRoleDefinition should be(null)
 
-	@Test def getPermissions {
-		val crd = new CustomRoleDefinition
-		crd.baseRoleDefinition = TestBuiltInDefinition
+    crd.baseRoleDefinition = TestBuiltInDefinition
+    crd.baseRoleDefinition should be(TestBuiltInDefinition)
+    crd.builtInBaseRoleDefinition should be(TestBuiltInDefinition)
+    crd.customBaseRoleDefinition should be(null)
 
-		val dept = Fixtures.department("in")
+    val other = new CustomRoleDefinition
+    crd.baseRoleDefinition = other
+    crd.baseRoleDefinition should be(other)
+    crd.builtInBaseRoleDefinition should be(null)
+    crd.customBaseRoleDefinition should be(other)
+  }
 
-		crd.permissions(Some(dept)) should be (Map(
-			Permissions.Department.ManageExtensionSettings -> Some(dept),
-			Permissions.Module.Create -> None,
-			Permissions.ImportSystemData -> None
-		))
+  @Test def getPermissions {
+    val crd = new CustomRoleDefinition
+    crd.baseRoleDefinition = TestBuiltInDefinition
 
-		val ro1 = new RoleOverride
-		ro1.permission = Permissions.Module.ManageAssignments
-		ro1.overrideType = RoleOverride.Allow
+    val dept = Fixtures.department("in")
 
-		crd.overrides.add(ro1)
+    crd.permissions(Some(dept)) should be(Map(
+      Permissions.Department.ManageExtensionSettings -> Some(dept),
+      Permissions.Module.Create -> None,
+      Permissions.ImportSystemData -> None
+    ))
 
-		crd.permissions(Some(dept)) should be (Map(
-			Permissions.Department.ManageExtensionSettings -> Some(dept),
-			Permissions.Module.Create -> None,
-			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.ImportSystemData -> None
-		))
+    val ro1 = new RoleOverride
+    ro1.permission = Permissions.Module.ManageAssignments
+    ro1.overrideType = RoleOverride.Allow
 
-		val ro2 = new RoleOverride
-		ro2.permission = Permissions.Department.ManageExtensionSettings
-		ro2.overrideType = RoleOverride.Deny
+    crd.overrides.add(ro1)
 
-		crd.overrides.add(ro2)
+    crd.permissions(Some(dept)) should be(Map(
+      Permissions.Department.ManageExtensionSettings -> Some(dept),
+      Permissions.Module.Create -> None,
+      Permissions.Module.ManageAssignments -> Some(dept),
+      Permissions.ImportSystemData -> None
+    ))
 
-		crd.permissions(Some(dept)) should be (Map(
-			Permissions.Module.Create -> None,
-			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.ImportSystemData -> None
-		))
+    val ro2 = new RoleOverride
+    ro2.permission = Permissions.Department.ManageExtensionSettings
+    ro2.overrideType = RoleOverride.Deny
 
-		val crd2 = new CustomRoleDefinition
-		crd2.baseRoleDefinition = crd
+    crd.overrides.add(ro2)
 
-		val ro3 = new RoleOverride
-		ro3.permission = Permissions.Department.ManageExtensionSettings
-		ro3.overrideType = RoleOverride.Allow
+    crd.permissions(Some(dept)) should be(Map(
+      Permissions.Module.Create -> None,
+      Permissions.Module.ManageAssignments -> Some(dept),
+      Permissions.ImportSystemData -> None
+    ))
 
-		crd2.overrides.add(ro3)
+    val crd2 = new CustomRoleDefinition
+    crd2.baseRoleDefinition = crd
 
-		crd2.permissions(Some(dept)) should be (Map(
-			Permissions.Department.ManageExtensionSettings -> Some(dept),
-			Permissions.Module.Create -> None,
-			Permissions.Module.ManageAssignments -> Some(dept),
-			Permissions.ImportSystemData -> None
-		))
-	}
+    val ro3 = new RoleOverride
+    ro3.permission = Permissions.Department.ManageExtensionSettings
+    ro3.overrideType = RoleOverride.Allow
 
-	@Test
-	def delegatablePermisionsIsNilIfCanDelegateIsFalse(){
-		val crd = new CustomRoleDefinition
-		crd.baseRoleDefinition = TestBuiltInDefinition
-		val dept = Fixtures.department("in")
+    crd2.overrides.add(ro3)
 
-		crd.permissions(Some(dept)) should not be (Map.empty)
+    crd2.permissions(Some(dept)) should be(Map(
+      Permissions.Department.ManageExtensionSettings -> Some(dept),
+      Permissions.Module.Create -> None,
+      Permissions.Module.ManageAssignments -> Some(dept),
+      Permissions.ImportSystemData -> None
+    ))
+  }
 
-		crd.delegatablePermissions(Some(dept)) should be (Map.empty)
-	}
+  @Test
+  def delegatablePermisionsIsNilIfCanDelegateIsFalse() {
+    val crd = new CustomRoleDefinition
+    crd.baseRoleDefinition = TestBuiltInDefinition
+    val dept = Fixtures.department("in")
 
-	@Test
-	def delegatablePermisionsIsEqualToAllPermisionsIfCanDelegateIsTrue(){
-		val crd = new CustomRoleDefinition
-		crd.baseRoleDefinition = TestBuiltInDefinition
-		val dept = Fixtures.department("in")
-		crd.canDelegateThisRolesPermissions = true
-		crd.permissions(Some(dept)) should not be (Map.empty)
+    crd.permissions(Some(dept)) should not be (Map.empty)
 
-		crd.delegatablePermissions(Some(dept)) should be (crd.permissions(Some(dept)))
-	}
+    crd.delegatablePermissions(Some(dept)) should be(Map.empty)
+  }
 
-	/*
-	* Whether or not a base role definition sets the "canDelegate" flag is irrelevant to this Role's delegatability
-	*
-	* The permissions that a role grants are always delegatable if that role has canDelegate=true, and never if not
-	*
-	* Otherwise, you'd end up having to make delegatable copies of every base role, and keep them in sync with the
-	* originals, which kind of misses the point of re-using the base role definition
-	 */
-	@Test
-	def delegatablePermisionsIsIgnoredOnBaseRoleDefinition(){
-		val baseCrd = new CustomRoleDefinition
-		baseCrd.baseRoleDefinition = TestBuiltInDefinition
-		val dept = Fixtures.department("in")
+  @Test
+  def delegatablePermisionsIsEqualToAllPermisionsIfCanDelegateIsTrue() {
+    val crd = new CustomRoleDefinition
+    crd.baseRoleDefinition = TestBuiltInDefinition
+    val dept = Fixtures.department("in")
+    crd.canDelegateThisRolesPermissions = true
+    crd.permissions(Some(dept)) should not be (Map.empty)
 
-		baseCrd.canDelegateThisRolesPermissions = true
+    crd.delegatablePermissions(Some(dept)) should be(crd.permissions(Some(dept)))
+  }
 
-		val derivedCrd = new CustomRoleDefinition
-		derivedCrd.customBaseRoleDefinition = baseCrd
+  /*
+  * Whether or not a base role definition sets the "canDelegate" flag is irrelevant to this Role's delegatability
+  *
+  * The permissions that a role grants are always delegatable if that role has canDelegate=true, and never if not
+  *
+  * Otherwise, you'd end up having to make delegatable copies of every base role, and keep them in sync with the
+  * originals, which kind of misses the point of re-using the base role definition
+   */
+  @Test
+  def delegatablePermisionsIsIgnoredOnBaseRoleDefinition() {
+    val baseCrd = new CustomRoleDefinition
+    baseCrd.baseRoleDefinition = TestBuiltInDefinition
+    val dept = Fixtures.department("in")
 
-		derivedCrd.permissions(Some(dept)) should not be (Map.empty)
-		derivedCrd.delegatablePermissions(Some(dept)) should be (Map.empty)
+    baseCrd.canDelegateThisRolesPermissions = true
+
+    val derivedCrd = new CustomRoleDefinition
+    derivedCrd.customBaseRoleDefinition = baseCrd
+
+    derivedCrd.permissions(Some(dept)) should not be (Map.empty)
+    derivedCrd.delegatablePermissions(Some(dept)) should be(Map.empty)
 
 
-		baseCrd.canDelegateThisRolesPermissions = false
-		derivedCrd.canDelegateThisRolesPermissions = true
+    baseCrd.canDelegateThisRolesPermissions = false
+    derivedCrd.canDelegateThisRolesPermissions = true
 
-		derivedCrd.delegatablePermissions(Some(dept)) should be (baseCrd.permissions(Some(dept)))
-	}
+    derivedCrd.delegatablePermissions(Some(dept)) should be(baseCrd.permissions(Some(dept)))
+  }
 
 
 }

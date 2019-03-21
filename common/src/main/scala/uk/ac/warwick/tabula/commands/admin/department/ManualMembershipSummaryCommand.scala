@@ -8,31 +8,31 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, Auto
 
 
 object ManualMembershipSummaryCommand {
-	def apply(department: Department) = new ManualMembershipSummaryCommandInternal(department)
-		with ComposableCommand[ManualMembershipInfo]
-		with ReadOnly with Unaudited
-		with ManualMembershipSummaryPermissions
-		with AutowiringAssessmentMembershipServiceComponent
+  def apply(department: Department) = new ManualMembershipSummaryCommandInternal(department)
+    with ComposableCommand[ManualMembershipInfo]
+    with ReadOnly with Unaudited
+    with ManualMembershipSummaryPermissions
+    with AutowiringAssessmentMembershipServiceComponent
 }
 
 class ManualMembershipSummaryCommandInternal(val department: Department) extends CommandInternal[ManualMembershipInfo]
-	with ManualMembershipSummaryState with CurrentAcademicYear {
+  with ManualMembershipSummaryState with CurrentAcademicYear {
 
-	self: AssessmentMembershipServiceComponent =>
+  self: AssessmentMembershipServiceComponent =>
 
-	def applyInternal(): ManualMembershipInfo = {
-		assessmentMembershipService.departmentsManualMembership(department, academicYear)
-	}
+  def applyInternal(): ManualMembershipInfo = {
+    assessmentMembershipService.departmentsManualMembership(department, academicYear)
+  }
 }
 
 trait ManualMembershipSummaryPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ManualMembershipSummaryState =>
+  self: ManualMembershipSummaryState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.ViewManualMembershipSummary, department)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Department.ViewManualMembershipSummary, department)
+  }
 }
 
 trait ManualMembershipSummaryState {
-	val department: Department
+  val department: Department
 }

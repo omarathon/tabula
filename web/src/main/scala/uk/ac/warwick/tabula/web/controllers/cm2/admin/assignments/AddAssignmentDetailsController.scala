@@ -20,61 +20,61 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/{academicYear}/assignments/new"))
 class AddAssignmentDetailsController extends AbstractAssignmentController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	import MarkingWorkflowType.ordering
+  import MarkingWorkflowType.ordering
 
-	type CreateAssignmentDetailsCommand = CreateAssignmentDetailsCommandInternal with Appliable[Assignment] with CreateAssignmentDetailsCommandState
+  type CreateAssignmentDetailsCommand = CreateAssignmentDetailsCommandInternal with Appliable[Assignment] with CreateAssignmentDetailsCommandState
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
-		retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] =
+    retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("command")
-	def createAssignmentDetailsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
-		CreateAssignmentDetailsCommand(mandatory(module), mandatory(academicYear))
+  @ModelAttribute("command")
+  def createAssignmentDetailsCommand(@PathVariable module: Module, @PathVariable academicYear: AcademicYear) =
+    CreateAssignmentDetailsCommand(mandatory(module), mandatory(academicYear))
 
-	@RequestMapping
-	def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand, @PathVariable academicYear: AcademicYear): Mav = {
-		form.prefillFromRecentAssignment()
-		showForm(form, academicYear)
-	}
+  @RequestMapping
+  def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand, @PathVariable academicYear: AcademicYear): Mav = {
+    form.prefillFromRecentAssignment()
+    showForm(form, academicYear)
+  }
 
-	def showForm(form: CreateAssignmentDetailsCommand, academicYear: AcademicYear): Mav = {
-		val module = form.module
+  def showForm(form: CreateAssignmentDetailsCommand, academicYear: AcademicYear): Mav = {
+    val module = form.module
 
-		Mav("cm2/admin/assignments/new_assignment_details",
-			"department" -> module.adminDepartment,
-			"module" -> module,
-			"academicYear" -> form.academicYear,
-			"reusableWorkflows" -> form.availableWorkflows,
-			"availableWorkflows" -> MarkingWorkflowType.values.sorted,
-			"canDeleteMarkers" -> true,
-			"possibleAnonymityOptions" -> AssignmentAnonymity.values,
-			"departmentAnonymity" -> (if(module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
-		)
-			.crumbsList(Breadcrumbs.module(module, form.academicYear, active = true))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.assignment.createAssignmentDetails(module, _)): _*)
-	}
+    Mav("cm2/admin/assignments/new_assignment_details",
+      "department" -> module.adminDepartment,
+      "module" -> module,
+      "academicYear" -> form.academicYear,
+      "reusableWorkflows" -> form.availableWorkflows,
+      "availableWorkflows" -> MarkingWorkflowType.values.sorted,
+      "canDeleteMarkers" -> true,
+      "possibleAnonymityOptions" -> AssignmentAnonymity.values,
+      "departmentAnonymity" -> (if (module.adminDepartment.showStudentName) AssignmentAnonymity.NameAndID else AssignmentAnonymity.IDOnly)
+    )
+      .crumbsList(Breadcrumbs.module(module, form.academicYear, active = true))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(Routes.admin.assignment.createAssignmentDetails(module, _)): _*)
+  }
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
-	def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable academicYear: AcademicYear): Mav = {
-		if (errors.hasErrors) showForm(cmd, academicYear)
-		else {
-			val assignment = cmd.apply()
-			RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, createMode))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddFeedback, "action!=refresh", "action!=update, action=submit"))
+  def submitAndAddFeedback(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable academicYear: AcademicYear): Mav = {
+    if (errors.hasErrors) showForm(cmd, academicYear)
+    else {
+      val assignment = cmd.apply()
+      RedirectForce(Routes.admin.assignment.createOrEditFeedback(assignment, createMode))
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddDetails, "action!=refresh", "action!=update"))
-	def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
-		if (errors.hasErrors) showForm(cmd, academicYear)
-		else {
-			val assignment = cmd.apply()
-			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array(ManageAssignmentMappingParameters.createAndAddDetails, "action!=refresh", "action!=update"))
+  def saveAndExit(@Valid @ModelAttribute("command") cmd: CreateAssignmentDetailsCommand, errors: Errors, @PathVariable module: Module, @PathVariable academicYear: AcademicYear): Mav = {
+    if (errors.hasErrors) showForm(cmd, academicYear)
+    else {
+      val assignment = cmd.apply()
+      Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+    }
+  }
 
 }

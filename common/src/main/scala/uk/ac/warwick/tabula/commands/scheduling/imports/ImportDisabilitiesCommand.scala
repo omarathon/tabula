@@ -13,50 +13,50 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.DisabilityInfo
 
 class ImportDisabilitiesCommand(info: DisabilityInfo)
-	extends Command[(Disability, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
-	with Unaudited with PropertyCopying {
+  extends Command[(Disability, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
+    with Unaudited with PropertyCopying {
 
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var disabilityDao: DisabilityDao = Wire.auto[DisabilityDao]
+  var disabilityDao: DisabilityDao = Wire.auto[DisabilityDao]
 
-	var code: String = info.code
-	var shortName: String = info.shortName
-	var sitsDefinition: String = info.definition
+  var code: String = info.code
+  var shortName: String = info.shortName
+  var sitsDefinition: String = info.definition
 
-	override def applyInternal(): (Disability, ImportAcademicInformationCommand.ImportResult) = transactional() {
-		val disabilityExisting = disabilityDao.getByCode(code)
+  override def applyInternal(): (Disability, ImportAcademicInformationCommand.ImportResult) = transactional() {
+    val disabilityExisting = disabilityDao.getByCode(code)
 
-		logger.debug("Importing disability " + code + " into " + disabilityExisting)
+    logger.debug("Importing disability " + code + " into " + disabilityExisting)
 
-		val isTransient = !disabilityExisting.isDefined
+    val isTransient = !disabilityExisting.isDefined
 
-		val disability = disabilityExisting.getOrElse(new Disability)
+    val disability = disabilityExisting.getOrElse(new Disability)
 
-		val commandBean = new BeanWrapperImpl(this)
-		val disabilityBean = new BeanWrapperImpl(disability)
+    val commandBean = new BeanWrapperImpl(this)
+    val disabilityBean = new BeanWrapperImpl(disability)
 
-		val hasChanged = copyBasicProperties(properties, commandBean, disabilityBean)
+    val hasChanged = copyBasicProperties(properties, commandBean, disabilityBean)
 
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + disability)
+    if (isTransient || hasChanged) {
+      logger.debug("Saving changes for " + disability)
 
-			disability.lastUpdatedDate = DateTime.now
-			disabilityDao.saveOrUpdate(disability)
-		}
+      disability.lastUpdatedDate = DateTime.now
+      disabilityDao.saveOrUpdate(disability)
+    }
 
-		val result =
-			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
-			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
-			else ImportAcademicInformationCommand.ImportResult()
+    val result =
+      if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+      else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+      else ImportAcademicInformationCommand.ImportResult()
 
-		(disability, result)
-	}
+    (disability, result)
+  }
 
-	private val properties = Set(
-		"code", "shortName", "sitsDefinition"
-	)
+  private val properties = Set(
+    "code", "shortName", "sitsDefinition"
+  )
 
-	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
+  override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

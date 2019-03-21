@@ -9,20 +9,23 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/settings/feedback-templates/download/{template}/{filename}"))
 class DownloadFeedbackTemplateController extends CourseworkController {
 
-	@ModelAttribute def command(
-		@PathVariable department: Department,
-		@PathVariable template: FeedbackTemplate,
-		@PathVariable filename: String,
-		user:CurrentUser) =
-			new DownloadFeedbackTemplateCommand(mandatory(department), mandatory(template), filename, mandatory(user))
+  @ModelAttribute def command(
+    @PathVariable department: Department,
+    @PathVariable template: FeedbackTemplate,
+    @PathVariable filename: String,
+    user: CurrentUser) =
+    new DownloadFeedbackTemplateCommand(mandatory(department), mandatory(template), filename, mandatory(user))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def getAttachment(command: DownloadFeedbackTemplateCommand, user:CurrentUser): RenderableFile = {
-		command.apply().getOrElse{ throw new ItemNotFoundException() }
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def getAttachment(command: DownloadFeedbackTemplateCommand, user: CurrentUser): RenderableFile = {
+    command.apply().getOrElse {
+      throw new ItemNotFoundException()
+    }
+  }
 
 }

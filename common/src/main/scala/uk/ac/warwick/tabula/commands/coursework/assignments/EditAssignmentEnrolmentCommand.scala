@@ -12,22 +12,22 @@ import uk.ac.warwick.tabula.AcademicYear
 
 
 /**
- * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for an assignment
- * via the ModifyAssignmentCommand to rebuild views within an existing form
- */
+  * This is a stub class, which isn't applied, but exposes the student membership (enrolment) for an assignment
+  * via the ModifyAssignmentCommand to rebuild views within an existing form
+  */
 class EditAssignmentEnrolmentCommand(module: Module = null, academicYear: AcademicYear) extends ModifyAssignmentCommand(module) with Unaudited {
 
-	PermissionCheckAny(
-		Seq(CheckablePermission(Permissions.Assignment.Create, module),
-			CheckablePermission(Permissions.Assignment.Update, module))
-	)
+  PermissionCheckAny(
+    Seq(CheckablePermission(Permissions.Assignment.Create, module),
+      CheckablePermission(Permissions.Assignment.Update, module))
+  )
 
-	// not required
-	def assignment: Assignment = null
+  // not required
+  def assignment: Assignment = null
 
-	// not required
-	def contextSpecificValidation(errors: Errors) {}
+  // not required
+  def contextSpecificValidation(errors: Errors) {}
 
-	// not required
-	override def applyInternal(): Assignment = throw new UnsupportedOperationException
+  // not required
+  override def applyInternal(): Assignment = throw new UnsupportedOperationException
 }

@@ -16,34 +16,34 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/sysadmin/attendancetemplates/{template}/edit"))
 class EditAttendanceTemplateController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable template: AttendanceMonitoringTemplate) = EditAttendanceTemplateCommand(mandatory(template))
+  @ModelAttribute("command")
+  def command(@PathVariable template: AttendanceMonitoringTemplate) = EditAttendanceTemplateCommand(mandatory(template))
 
-	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplate] with PopulateOnForm): Mav = {
-		cmd.populate()
-		render
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplate] with PopulateOnForm): Mav = {
+    cmd.populate()
+    render
+  }
 
-	private def render = {
-		Mav("sysadmin/attendancetemplates/edit").crumbs(
-			SysadminBreadcrumbs.AttendanceTemplates.Home
-		)
-	}
+  private def render = {
+    Mav("sysadmin/attendancetemplates/edit").crumbs(
+      SysadminBreadcrumbs.AttendanceTemplates.Home
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplate],
-		errors: Errors
-	): Mav = {
-		if (errors.hasErrors) {
-			render
-		} else {
-			cmd.apply()
-			Redirect(Routes.AttendanceTemplates.home)
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplate],
+    errors: Errors
+  ): Mav = {
+    if (errors.hasErrors) {
+      render
+    } else {
+      cmd.apply()
+      Redirect(Routes.AttendanceTemplates.home)
+    }
+  }
 
 }

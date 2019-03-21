@@ -10,56 +10,57 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 trait ReportPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ReportCommandState =>
+  self: ReportCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Department.Reports, department)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Department.Reports, department)
+  }
 
 }
 
 trait ReportCommandState {
-	def department: Department
-	def academicYear: AcademicYear
+  def department: Department
+
+  def academicYear: AcademicYear
 }
 
 trait ReportCommandRequest {
-	self: ReportCommandState =>
+  self: ReportCommandState =>
 
-	var startDate: LocalDate = {
-		val twoWeeksAgo = LocalDate.now.minusWeeks(2)
-		if (twoWeeksAgo.isBefore(academicYear.firstDay))
-			academicYear.firstDay
-		else if (twoWeeksAgo.isAfter(academicYear.lastDay))
-			academicYear.lastDay.minusWeeks(4)
-		else
-			twoWeeksAgo
-	}
+  var startDate: LocalDate = {
+    val twoWeeksAgo = LocalDate.now.minusWeeks(2)
+    if (twoWeeksAgo.isBefore(academicYear.firstDay))
+      academicYear.firstDay
+    else if (twoWeeksAgo.isAfter(academicYear.lastDay))
+      academicYear.lastDay.minusWeeks(4)
+    else
+      twoWeeksAgo
+  }
 
-	var endDate: LocalDate = {
-		val twoWeeksTime = startDate.plusWeeks(4)
-		if (twoWeeksTime.isAfter(academicYear.lastDay))
-			academicYear.lastDay
-		else
-			twoWeeksTime
-	}
+  var endDate: LocalDate = {
+    val twoWeeksTime = startDate.plusWeeks(4)
+    if (twoWeeksTime.isAfter(academicYear.lastDay))
+      academicYear.lastDay
+    else
+      twoWeeksTime
+  }
 }
 
 trait ReportCommandRequestValidation extends SelfValidating {
-	self: ReportCommandRequest with ReportCommandState =>
+  self: ReportCommandRequest with ReportCommandState =>
 
-	override def validate(errors: Errors): Unit = {
-		if (startDate == null) errors.rejectValue("startDate", "NotEmpty")
-		if (endDate == null) errors.rejectValue("endDate", "NotEmpty")
+  override def validate(errors: Errors): Unit = {
+    if (startDate == null) errors.rejectValue("startDate", "NotEmpty")
+    if (endDate == null) errors.rejectValue("endDate", "NotEmpty")
 
-		if (startDate != null && endDate != null) {
-			if (endDate.isBefore(startDate)) errors.rejectValue("endDate", "reports.dates.endBeforeStart")
+    if (startDate != null && endDate != null) {
+      if (endDate.isBefore(startDate)) errors.rejectValue("endDate", "reports.dates.endBeforeStart")
 
-			if (startDate.isBefore(academicYear.firstDay)) errors.rejectValue("startDate", "reports.dates.min")
-			else if (startDate.isAfter(academicYear.lastDay)) errors.rejectValue("startDate", "reports.dates.max")
+      if (startDate.isBefore(academicYear.firstDay)) errors.rejectValue("startDate", "reports.dates.min")
+      else if (startDate.isAfter(academicYear.lastDay)) errors.rejectValue("startDate", "reports.dates.max")
 
-			if (endDate.isBefore(academicYear.firstDay)) errors.rejectValue("endDate", "reports.dates.min")
-			else if (endDate.isAfter(academicYear.lastDay)) errors.rejectValue("endDate", "reports.dates.max")
-		}
-	}
+      if (endDate.isBefore(academicYear.firstDay)) errors.rejectValue("endDate", "reports.dates.min")
+      else if (endDate.isAfter(academicYear.lastDay)) errors.rejectValue("endDate", "reports.dates.max")
+    }
+  }
 }

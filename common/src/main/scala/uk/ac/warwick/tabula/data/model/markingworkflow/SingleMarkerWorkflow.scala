@@ -8,35 +8,36 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.Sing
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
 import uk.ac.warwick.userlookup.User
 
-@Entity @DiscriminatorValue("Single")
+@Entity
+@DiscriminatorValue("Single")
 class SingleMarkerWorkflow extends CM2MarkingWorkflow {
-	def workflowType = SingleMarking
+  def workflowType = SingleMarking
 
-	override def replaceMarkers(markers: Seq[Marker]*): Unit = {
-		val firstMarkers = markers.toList match {
-			case fm :: _ => fm
-			case _ => throw new IllegalArgumentException("Must add a list of markers")
-		}
+  override def replaceMarkers(markers: Seq[Marker]*): Unit = {
+    val firstMarkers = markers.toList match {
+      case fm :: _ => fm
+      case _ => throw new IllegalArgumentException("Must add a list of markers")
+    }
 
-		replaceStageMarkers(SingleMarker, firstMarkers)
-	}
+    replaceStageMarkers(SingleMarker, firstMarkers)
+  }
 
 }
 
 object SingleMarkerWorkflow {
-	def apply(name: String, department: Department, firstMarkers: Seq[User]): SingleMarkerWorkflow = {
+  def apply(name: String, department: Department, firstMarkers: Seq[User]): SingleMarkerWorkflow = {
 
-		val singleWorkflow = new SingleMarkerWorkflow
-		singleWorkflow.name = name
-		singleWorkflow.department = department
+    val singleWorkflow = new SingleMarkerWorkflow
+    singleWorkflow.name = name
+    singleWorkflow.department = department
 
-		val singleMarkers = new StageMarkers()
-		singleMarkers.stage = SingleMarker
-		singleMarkers.workflow = singleWorkflow
-		firstMarkers.foreach(singleMarkers.markers.add)
+    val singleMarkers = new StageMarkers()
+    singleMarkers.stage = SingleMarker
+    singleMarkers.workflow = singleWorkflow
+    firstMarkers.foreach(singleMarkers.markers.add)
 
-		singleWorkflow.stageMarkers = JList(singleMarkers)
+    singleWorkflow.stageMarkers = JList(singleMarkers)
 
-		singleWorkflow
-	}
+    singleWorkflow
+  }
 }

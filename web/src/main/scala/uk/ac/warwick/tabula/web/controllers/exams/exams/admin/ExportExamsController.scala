@@ -13,52 +13,52 @@ import uk.ac.warwick.util.csv.GoodCsvDocument
 
 @Controller
 @RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}"))
-class ExportExamsController extends ExamsController with ExamExports  {
+class ExportExamsController extends ExamsController with ExamExports {
 
-	@RequestMapping(Array("/export.csv"))
-	def csv (
-		@PathVariable module: Module,
-		@PathVariable exam: Exam,
-		@PathVariable academicYear: AcademicYear
-	): CSVView = {
+  @RequestMapping(Array("/export.csv"))
+  def csv(
+    @PathVariable module: Module,
+    @PathVariable exam: Exam,
+    @PathVariable academicYear: AcademicYear
+  ): CSVView = {
 
-		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply()
-		val writer = new StringWriter
-		val csvBuilder = new CSVBuilder(results.students, results, exam, module, academicYear)
-		val doc = new GoodCsvDocument(csvBuilder, null)
+    val command = ViewExamCommand(module, academicYear, exam)
+    val results = command.apply()
+    val writer = new StringWriter
+    val csvBuilder = new CSVBuilder(results.students, results, exam, module, academicYear)
+    val doc = new GoodCsvDocument(csvBuilder, null)
 
-		doc.setHeaderLine(true)
-		csvBuilder.headers foreach (header => doc.addHeaderField(header))
+    doc.setHeaderLine(true)
+    csvBuilder.headers foreach (header => doc.addHeaderField(header))
 
-		results.students foreach (item => doc.addLine(item))
-		doc.write(writer)
+    results.students foreach (item => doc.addLine(item))
+    doc.write(writer)
 
-		new CSVView(module.code + "-" + exam.name + ".csv", writer.toString)
-	}
+    new CSVView(module.code + "-" + exam.name + ".csv", writer.toString)
+  }
 
-	@RequestMapping(Array("/export.xml"))
-	def xml(
-		@PathVariable module: Module,
-		@PathVariable exam: Exam,
-		@PathVariable academicYear: AcademicYear
-	): XmlView = {
-		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply()
-		new XmlView(new XMLBuilder(results.students, results, exam, module, academicYear).toXML, Some(module.code + "-" + exam.id + ".xml"))
-	}
+  @RequestMapping(Array("/export.xml"))
+  def xml(
+    @PathVariable module: Module,
+    @PathVariable exam: Exam,
+    @PathVariable academicYear: AcademicYear
+  ): XmlView = {
+    val command = ViewExamCommand(module, academicYear, exam)
+    val results = command.apply()
+    new XmlView(new XMLBuilder(results.students, results, exam, module, academicYear).toXML, Some(module.code + "-" + exam.id + ".xml"))
+  }
 
-	@RequestMapping(Array("/export.xlsx"))
-	def toXLSX(
-		@PathVariable module: Module,
-		@PathVariable exam: Exam,
-		@PathVariable academicYear: AcademicYear
-	): ExcelView = {
+  @RequestMapping(Array("/export.xlsx"))
+  def toXLSX(
+    @PathVariable module: Module,
+    @PathVariable exam: Exam,
+    @PathVariable academicYear: AcademicYear
+  ): ExcelView = {
 
-		val command = ViewExamCommand(module, academicYear, exam)
-		val results = command.apply()
+    val command = ViewExamCommand(module, academicYear, exam)
+    val results = command.apply()
 
-		val workbook = new ExcelBuilder(results.students, results, module).toXLSX
-		new ExcelView(module.code + "-" + exam.name + ".xlsx", workbook)
-	}
+    val workbook = new ExcelBuilder(results.students, results, module).toXLSX
+    new ExcelView(module.code + "-" + exam.name + ".xlsx", workbook)
+  }
 }

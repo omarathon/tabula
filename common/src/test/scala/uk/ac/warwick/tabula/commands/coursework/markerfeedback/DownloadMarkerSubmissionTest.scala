@@ -18,10 +18,10 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
   @Before
   def setup() {
     val attachment = new FileAttachment
-		attachment.id = "123"
+    attachment.id = "123"
 
-		attachment.objectStorageService = zipService.objectStorageService
-		attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
+    attachment.objectStorageService = zipService.objectStorageService
+    attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
 
     assignment.submissions.asScala.foreach {
       submission =>
@@ -31,23 +31,23 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
           sv
         })
     }
-		assignment.markingWorkflow.userLookup = mockUserLookup
+    assignment.markingWorkflow.userLookup = mockUserLookup
   }
 
-	trait CommandTestSupport extends ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent {
-		val assessmentService: AssessmentService = smartMock[AssessmentService]
-		val stateService: StateService = smartMock[StateService]
-		val zipService = new ZipService
-		zipService.userLookup = mockUserLookup
-		zipService.features = Features.empty
-		zipService.objectStorageService = createTransientObjectStore()
-	}
+  trait CommandTestSupport extends ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent {
+    val assessmentService: AssessmentService = smartMock[AssessmentService]
+    val stateService: StateService = smartMock[StateService]
+    val zipService = new ZipService
+    zipService.userLookup = mockUserLookup
+    zipService.features = Features.empty
+    zipService.objectStorageService = createTransientObjectStore()
+  }
 
   @Test
   def downloadSubmissionsTest() {
     withUser("cuslaj", "1111111") {
       val command = new DownloadMarkersSubmissionsCommand(assignment.module, assignment, currentUser.apparentUser, currentUser) with CommandTestSupport
-			val zip = command.applyInternal()
+      val zip = command.applyInternal()
       val stream = new ZipInputStream(zip.byteSource.openStream())
       val items = Zips.map(stream) {
         item => item.getName

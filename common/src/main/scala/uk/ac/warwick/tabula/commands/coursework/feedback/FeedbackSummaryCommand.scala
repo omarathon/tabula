@@ -8,41 +8,41 @@ import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, Feedba
 import uk.ac.warwick.tabula.permissions.Permissions
 
 object FeedbackSummaryCommand {
-	def apply(assignment: Assignment, student: User) =
-		new FeedbackSummaryCommandInternal(assignment, student)
-			with ComposableCommand[Option[Feedback]]
-			with FeedbackSummaryCommandPermissions
-			with FeedbackSummaryCommandDescription
-			with AutowiringFeedbackServiceComponent
-			with ReadOnly
+  def apply(assignment: Assignment, student: User) =
+    new FeedbackSummaryCommandInternal(assignment, student)
+      with ComposableCommand[Option[Feedback]]
+      with FeedbackSummaryCommandPermissions
+      with FeedbackSummaryCommandDescription
+      with AutowiringFeedbackServiceComponent
+      with ReadOnly
 }
 
 class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: User)
-	extends CommandInternal[Option[Feedback]] with FeedbackSummaryCommandState {
+  extends CommandInternal[Option[Feedback]] with FeedbackSummaryCommandState {
 
-	this : FeedbackServiceComponent =>
+  this: FeedbackServiceComponent =>
 
-	def applyInternal(): Option[AssignmentFeedback] =
-		feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
+  def applyInternal(): Option[AssignmentFeedback] =
+    feedbackService.getAssignmentFeedbackByUsercode(assignment, student.getUserId)
 }
 
 trait FeedbackSummaryCommandState {
-	val student: User
-	val assignment: Assignment
+  val student: User
+  val assignment: Assignment
 }
 
 trait FeedbackSummaryCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FeedbackSummaryCommandState =>
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
-	}
+  self: FeedbackSummaryCommandState =>
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.AssignmentFeedback.Read, assignment)
+  }
 }
 
 trait FeedbackSummaryCommandDescription extends Describable[Option[Feedback]] {
-	self: FeedbackSummaryCommandState =>
-	def describe(d: Description) {
-		d.assignment(assignment)
-		d.studentIds(Option(student.getWarwickId).toSeq)
-		d.studentUsercodes(student.getUserId)
-	}
+  self: FeedbackSummaryCommandState =>
+  def describe(d: Description) {
+    d.assignment(assignment)
+    d.studentIds(Option(student.getWarwickId).toSeq)
+    d.studentUsercodes(student.getUserId)
+  }
 }

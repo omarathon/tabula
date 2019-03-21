@@ -10,23 +10,23 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import scala.collection.JavaConverters._
 
 class DownloadAllSubmissionsCommand(
-		val module: Module,
-		val assignment: Assignment,
-		val filename: String)
-		extends Command[RenderableFile] with ReadOnly {
+  val module: Module,
+  val assignment: Assignment,
+  val filename: String)
+  extends Command[RenderableFile] with ReadOnly {
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read, assignment)
+  mustBeLinked(assignment, module)
+  PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var zipService: ZipService = Wire.auto[ZipService]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
+  override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
 
-	override def describe(d: Description): Unit = d
-		.assignment(assignment)
-		.studentIds(assignment.submissions.asScala.flatMap(_.universityId))
-		.studentUsercodes(assignment.submissions.asScala.map(_.usercode))
-		.properties(
-			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
+  override def describe(d: Description): Unit = d
+    .assignment(assignment)
+    .studentIds(assignment.submissions.asScala.flatMap(_.universityId))
+    .studentUsercodes(assignment.submissions.asScala.map(_.usercode))
+    .properties(
+      "submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 
 }

@@ -7,18 +7,17 @@ import org.scalatest.Matchers
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Millis, Seconds, Span}
 
-class GroupsHomePage (implicit val webDriver:WebDriver) extends WebBrowser with Eventually with Matchers with ModuleAndGroupSetList {
+class GroupsHomePage(implicit val webDriver: WebDriver) extends WebBrowser with Eventually with Matchers with ModuleAndGroupSetList {
 
-	override implicit val patienceConfig =
-		PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
+  override implicit val patienceConfig =
+    PatienceConfig(timeout = Span(30, Seconds), interval = Span(200, Millis))
 
-	val url: String = FunctionalTestProperties.SiteRoot + "/groups/"
+  val url: String = FunctionalTestProperties.SiteRoot + "/groups/"
 
-	def isCurrentPage: Boolean =  {
-		currentUrl should include("/groups/")
-		pageTitle == "Tabula - Small Group Teaching"
-	}
-
+  def isCurrentPage: Boolean = {
+    currentUrl should include("/groups/")
+    pageTitle == "Tabula - Small Group Teaching"
+  }
 
 
 }

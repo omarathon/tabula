@@ -10,38 +10,38 @@ import uk.ac.warwick.userlookup.User
 
 
 object FinishMarkingCommand {
-	def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
-		new FinishMarkingCommandInternal(assignment, marker, submitter, stagePosition)
-			with ComposableCommand[Seq[AssignmentFeedback]]
-			with WorkflowProgressValidation
-			with WorkflowProgressPermissions
-			with FinishMarkingDescription
-			with AutowiringCM2MarkingWorkflowServiceComponent
-			with FinaliseFeedbackComponentImpl
-			with PopulateMarkerFeedbackComponentImpl
-			with FinaliseFeedbackNotifier
+  def apply(assignment: Assignment, marker: User, submitter: CurrentUser, stagePosition: Int) =
+    new FinishMarkingCommandInternal(assignment, marker, submitter, stagePosition)
+      with ComposableCommand[Seq[AssignmentFeedback]]
+      with WorkflowProgressValidation
+      with WorkflowProgressPermissions
+      with FinishMarkingDescription
+      with AutowiringCM2MarkingWorkflowServiceComponent
+      with FinaliseFeedbackComponentImpl
+      with PopulateMarkerFeedbackComponentImpl
+      with FinaliseFeedbackNotifier
 }
 
 class FinishMarkingCommandInternal(val assignment: Assignment, val marker: User, val submitter: CurrentUser, val stagePosition: Int)
-	extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with WorkflowProgressValidation {
+  extends CommandInternal[Seq[AssignmentFeedback]] with WorkflowProgressState with WorkflowProgressValidation {
 
-	self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
+  self: CM2MarkingWorkflowServiceComponent with FinaliseFeedbackComponent with PopulateMarkerFeedbackComponent =>
 
-	def applyInternal(): Seq[AssignmentFeedback] = transactional() {
+  def applyInternal(): Seq[AssignmentFeedback] = transactional() {
 
-		val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
-			.filterKeys(_.order == stagePosition)
-			.mapValues(_.filter(feedbackForRelease.contains))
+    val feedbackForReleaseByStage = cm2MarkingWorkflowService.getAllFeedbackForMarker(assignment, marker)
+      .filterKeys(_.order == stagePosition)
+      .mapValues(_.filter(feedbackForRelease.contains))
 
-		feedbackForReleaseByStage.flatMap{case (stage, mf) =>
-			val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
-			cm2MarkingWorkflowService.finish(stage, f)
-		}.collect{ case f: AssignmentFeedback => f }.toSeq
+    feedbackForReleaseByStage.flatMap { case (stage, mf) =>
+      val f = mf.map(mf => HibernateHelpers.initialiseAndUnproxy(mf.feedback)).filter(_.outstandingStages.contains(stage))
+      cm2MarkingWorkflowService.finish(stage, f)
+    }.collect { case f: AssignmentFeedback => f }.toSeq
 
-	}
+  }
 }
 
 trait FinishMarkingDescription extends WorkflowProgressDescription {
-	self: WorkflowProgressState =>
-	override lazy val eventName: String = "FinishMarking"
+  self: WorkflowProgressState =>
+  override lazy val eventName: String = "FinishMarking"
 }

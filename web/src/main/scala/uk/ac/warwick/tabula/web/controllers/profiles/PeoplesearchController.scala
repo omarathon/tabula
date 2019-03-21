@@ -13,11 +13,11 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @RequestMapping(value = Array("/profiles/view/peoplesearch/{member}"))
 class PeoplesearchController extends ProfilesController {
 
-	@ModelAttribute("peoplesearchCommand") def command(@PathVariable member: Member , user: CurrentUser) =
-		PeoplesearchCommand(member, user)
+  @ModelAttribute("peoplesearchCommand") def command(@PathVariable member: Member, user: CurrentUser) =
+    PeoplesearchCommand(member, user)
 
-	@RequestMapping(produces = Array("application/json"))
-	def render(@ModelAttribute("peoplesearchCommand") cmd: Appliable[Map[String, String]]): Mav = {
-		Mav(new JSONView(cmd.apply()))
-	}
+  @RequestMapping(produces = Array("application/json"))
+  def render(@ModelAttribute("peoplesearchCommand") cmd: Appliable[Map[String, String]]): Mav = {
+    Mav(new JSONView(cmd.apply()))
+  }
 }
