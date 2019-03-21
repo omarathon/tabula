@@ -28,7 +28,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     val assignments = {
@@ -39,7 +39,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     val feedback = {
@@ -50,7 +50,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     val meetings = {
@@ -61,7 +61,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     val groups = {
@@ -72,7 +72,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     val checkpoints = {
@@ -83,7 +83,7 @@ class MetricsController extends BaseSysadminController with Daoisms {
 				""")
       q.setTimestamp("startDate", startDate.toDate)
       q.setTimestamp("endDate", endDate.toDate)
-      q.uniqueResult().asInstanceOf[JBigDecimal]
+      q.uniqueResult().asInstanceOf[JBigInteger]
     }
 
     Mav("sysadmin/metrics",

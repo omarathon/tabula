@@ -31,6 +31,7 @@ trait JavaImports {
   type JInteger = java.lang.Integer
   type JLong = java.lang.Long
   type JBigDecimal = java.math.BigDecimal
+  type JBigInteger = java.math.BigInteger
   type JFloat = java.lang.Float
 
   def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
@@ -48,6 +49,8 @@ trait JavaImports {
   def JLong(l: Option[Long]) = ToJLong(l)
 
   def JBigDecimal(bd: Option[BigDecimal]) = ToJBigDecimal(bd)
+
+  def JBigInteger(bi: Option[BigInt]) = ToJBigInteger(bi)
 
   def JFloat(f: Option[Float]) = ToJFloat(f)
 
@@ -74,6 +77,12 @@ trait JavaImports {
     * None as null.
     */
   protected implicit def ToJBigDecimal(bd: Option[BigDecimal]): JBigDecimal = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
+
+  /**
+    * Converts an Option[BigInt] to a Java BigInteger, by interpreting
+    * None as null.
+    */
+  protected implicit def ToJBigInteger(bi: Option[BigInt]): JBigInteger = (bi map (bi => new java.math.BigInteger(bi.toString(10), 10))).orNull
 
   /**
     * Converts an Option[Float] to a Java Float, by interpreting
