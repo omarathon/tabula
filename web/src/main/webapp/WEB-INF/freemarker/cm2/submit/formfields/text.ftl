@@ -1,7 +1,7 @@
 <#if field.name == "notes">
   <#assign rows = "3" />
   <#assign helpText>
-    Notes are visible to markers, moderators and administrators for this assignment. Notes are not normally shared with students.
+    Notes are visible to markers, moderators and administrators for this assignment. Notes are not normally shared with students but could be disclosed at the request of the student concerned.
   </#assign>
 <#else>
   <#assign rows = "6" />

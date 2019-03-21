@@ -246,7 +246,7 @@ $(function () {
         $row.addClass('expanded').after($row.data('expandRow'))
           .find('td i.fa-caret-right').removeClass('fa-caret-right').addClass('fa-caret-down');
         //Tooltip invocation for row expansion to trigger tooltip. Invoking at top level does not trigger tooltips.
-        $('.use-tooltip').tooltip();
+        $('.use-tooltip').tooltip({ sanitize: false, });
       }
     }).find('tr.expand td.can-expand').trigger('click');
   });
