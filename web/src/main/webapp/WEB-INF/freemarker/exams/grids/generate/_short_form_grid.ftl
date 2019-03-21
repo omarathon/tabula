@@ -4,7 +4,7 @@
   <#macro showMarksShort entity markType>
     <#list years as year>
       <#if gridOptionsCommand.showComponentMarks>
-        <th><span class="exam-grid-tooltip" data-title="${markType.description}">${markType.label}</span></th>
+        <th><span class="tabula-tooltip" data-title="${markType.description}">${markType.label}</span></th>
       </#if>
 
       <#assign colsUsed = 0 />

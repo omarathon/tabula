@@ -25,7 +25,7 @@
 
     <script type="text/javascript">
       (function ($) {
-        $('.use-tooltip').tooltip();
+        $('.use-tooltip').tooltip({ sanitize: false, });
         GlobalScripts.initCollapsible();
       })(jQuery);
     </script>

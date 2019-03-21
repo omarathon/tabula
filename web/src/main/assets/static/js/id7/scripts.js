@@ -700,7 +700,7 @@ exports.initCollapsible = function ($el) {
             function (html) {
               $target.html(html);
               $target.find('a.ajax-modal').ajaxModalLink();
-              $target.find('.use-tooltip').tooltip();
+              $target.find('.use-tooltip').tooltip({ sanitize: false, });
               $target.find('.use-popover').tabulaPopover({
                 trigger: 'click',
                 container: 'body'
@@ -916,11 +916,11 @@ $(function () {
     }
   });
 
-  $('a.copyable-url').copyable({prefixLinkText: true}).tooltip();
+  $('a.copyable-url').copyable({prefixLinkText: true}).tooltip({ sanitize: false, });
 
   // add .use-tooltip class and title attribute to enable cool looking tooltips.
   // http://twitter.github.com/bootstrap/javascript.html#tooltips
-  $('.use-tooltip').tooltip();
+  $('.use-tooltip[title]:not([title=""])').tooltip({ sanitize: false, });
 
   // add .use-popover and optional data- attributes to enable a cool popover.
   // http://twitter.github.com/bootstrap/javascript.html#popovers
@@ -1088,7 +1088,7 @@ $(function () {
 
     $(document).on('tabbablechanged', function (e, options) {
       $('.tooltip').remove();
-      $t.show().find('.tab-container i, .layout-tools i').tooltip();
+      $t.show().find('.tab-container i, .layout-tools i').tooltip({ sanitize: false, });
       if (typeof (options) === 'object' && typeof (options.callback) == typeof (Function)) options.callback();
     });
 

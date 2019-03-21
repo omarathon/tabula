@@ -54,7 +54,7 @@
     jQuery(function ($) {
       <#-- dynamically attach check-all checkbox -->
       $('.for-check-all').append($('<input />', {type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none', checked: 'checked'}));
-      $('.check-all').tooltip();
+      $('.check-all').tooltip({ sanitize: false, });
       $('.table-checkable').on('click', 'th .check-all', function (e) {
         var $table = $(this).closest('table');
         var checkStatus = this.checked;

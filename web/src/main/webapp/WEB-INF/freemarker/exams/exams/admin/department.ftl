@@ -89,7 +89,7 @@
       jQuery(document.body).on('loaded.collapsible', '.module-info', function () {
         var $module = jQuery(this);
         Exams.zebraStripeExams($module);
-        $module.find('.use-tooltip').tooltip();
+        $module.find('.use-tooltip').tooltip({ sanitize: false, });
       });
     </script>
 
