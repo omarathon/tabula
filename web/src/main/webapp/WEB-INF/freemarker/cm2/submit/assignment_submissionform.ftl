@@ -48,6 +48,7 @@
         });
       </script>
     </#if>
+
     <@f.errors cssClass="alert alert-warning"></@f.errors>
 
     <@bs3form.labelled_form_group path="" labelText="University ID">
