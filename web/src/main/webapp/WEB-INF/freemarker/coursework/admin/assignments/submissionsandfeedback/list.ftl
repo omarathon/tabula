@@ -188,7 +188,7 @@
               </td>
               <td class="submitted">
                 <#if submission?? && submission.submittedDate??>
-                  <span class="date use-tooltip" title="${lateness!''}" data-container="body">
+                  <span class="date tabula-tooltip" data-title="${lateness!''}">
 										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 									</span>
                 </#if>

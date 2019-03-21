@@ -179,7 +179,7 @@
       jQuery(document.body).on('loaded.collapsible', '.module-info', function () {
         var $module = jQuery(this);
         Courses.zebraStripeAssignments($module);
-        $module.find('.use-tooltip').tooltip();
+        $module.find('.use-tooltip').tooltip({ sanitize: false, });
         $module.find('.use-popover').tabulaPopover({
           trigger: 'click',
           container: '#container'

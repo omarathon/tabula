@@ -521,5 +521,9 @@ preposition: Text to relate the title to the department name in the second line,
 -->	</#list><#--
 --></#compress></#macro>
 
+<#function strip_html input>
+  <#return input?replace('<[^>]+>','','r') />
+</#function>
+
 </#escape>
 

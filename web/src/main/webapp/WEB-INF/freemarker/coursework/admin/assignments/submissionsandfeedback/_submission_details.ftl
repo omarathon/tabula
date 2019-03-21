@@ -39,7 +39,7 @@
     </#compress></a><#--
 		--></#if><#--
 		--><#if submission.submittedDate??> <#compress>
-      <span class="date use-tooltip" title="<@lateness submission />" data-container="body"><#compress>
+      <span class="date tabula-tooltip" data-title="<@lateness submission />"><#compress>
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</#compress></span>
     </#compress></#if><#--
