@@ -108,7 +108,7 @@
   </#if>
   <script>
     jQuery(function ($) {
-      $('.use-tooltip').tooltip();
+      $('.use-tooltip').tooltip({ sanitize: false, });
     })
   </script>
 </#escape>

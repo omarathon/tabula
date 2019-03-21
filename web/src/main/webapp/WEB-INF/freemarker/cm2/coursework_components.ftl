@@ -65,7 +65,7 @@
 </#macro>
 
 <#macro progress_bar tooltip percentage class="default">
-  <div class="progress use-tooltip" title="${tooltip}" data-html="true" data-container="body">
+  <div class="progress" data-title="${fmt.strip_html(tooltip)}">
     <div class="progress-bar progress-bar-${class}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100"
          style="width: ${percentage?c}%;">
     </div>
@@ -148,18 +148,18 @@
 
   <div class="stage-progress-bar time-progress-bar">
     <#if assignment.opened>
-      <span class="fa-stack">
+      <span class="fa-stack tabula-tooltip" data-title="Assignment ready">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x fa-check-circle-o text-success use-tooltip" title="Assignment ready" data-container="body"></i>
+				<i class="fa fa-stack-1x fa-check-circle-o text-success"></i>
 			</span>
     <#else>
-      <span class="fa-stack">
+      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x fa-circle-o text-default use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x fa-circle-o text-default"></i>
 			</span>
     </#if>
 
-    <div class="bar use-tooltip" title="${tooltip}" data-html="true" data-container="body">
+    <div class="bar tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
       <div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100"
            style="width: ${percentage?c}%;">
       </div>
@@ -178,9 +178,9 @@
       <#local icon = 'fa-exclamation-circle' />
     </#if>
 
-    <span class="fa-stack">
+    <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-			<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${tooltip}" data-html="true" data-container="body"></i>
+			<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 		</span>
   </div>
 </#macro>
@@ -472,11 +472,11 @@
       </#if>
 
       <#if stageInfo_index gt 0>
-        <div class="bar bar-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></div>
+        <div class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
-      <span class="fa-stack">
+      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
     </#list>
   </div>
@@ -500,12 +500,12 @@
 
       <#local title><@workflowMessage progress.stage.actionCode assignment student /></#local>
       <#if progress_index gt 0>
-        <div class="bar bar-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></div>
+        <div class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
       <#local title><@workflowMessage progress.messageCode assignment student /></#local>
-      <span class="fa-stack">
+      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title?html}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
     </#list>
   </div>
@@ -525,8 +525,8 @@
       <h4 class="name">
         <#-- If the user can administer the assignment, link them to the admin page here -->
         <#if can.do("Module.ManageAssignments", assignment.module)>
-          <a href="<@routes.cm2.depthome assignment.module assignment.academicYear/>" class="use-tooltip"
-             title="Return to module management for <@fmt.module_name assignment.module false />">
+          <a href="<@routes.cm2.depthome assignment.module assignment.academicYear/>" class="tabula-tooltip"
+             data-title="Return to module management for <@fmt.module_name assignment.module false />">
             <span class="ass-name">${assignment.name}</span>
           </a>
         <#else>
@@ -949,9 +949,9 @@
         <#local title = 'Preconditions not met' />
       </#if>
 
-      <span class="fa-stack">
+      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
-				<i class="fa fa-stack-1x ${icon} text-${state} use-tooltip" title="${title}" data-html="true" data-container="body"></i>
+				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
 
       <#local content><#nested/></#local>
@@ -1223,7 +1223,7 @@
             <#elseif feedback.attachments?size gt 1>
               <#local downloadUrl><@routes.cm2.downloadMarkerFeedbackAll assignment feedback.marker feedback stage.description+" feedback" /></#local>
             </#if>
-            <a class="btn btn-default long-running use-tooltip" href="${downloadUrl}">Download feedback</a>
+            <a class="btn btn-default long-running" href="${downloadUrl}">Download feedback</a>
             <ul class="feedback-attachments hide">
               <#list feedback.attachments as attachment>
                 <li id="attachment-${attachment.id}" class="attachment">
@@ -1248,7 +1248,7 @@
               </form>
             </div>
           <#else>
-            <a class="copy-feedback btn btn-default long-running use-tooltip" href="#">Copy comments and files</a>
+            <a class="copy-feedback btn btn-default long-running" href="#">Copy comments and files</a>
           </#if>
         </#if>
       </div>
@@ -1310,7 +1310,7 @@
 <#macro submission_details submission=[] showDisabilityDisclosure=false student=""><@compress single_line=true>
   <#if submission?has_content>
     <#if submission.submittedDate??>
-      <span class="date use-tooltip" title="<@lateness submission />" data-container="body">
+      <span class="date tabula-tooltip" data-title="<@lateness submission />">
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</span>
     </#if>

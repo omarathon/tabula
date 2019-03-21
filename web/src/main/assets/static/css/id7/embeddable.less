@@ -1,7 +1,7 @@
+@import (reference) "bootstrap/less/variables.less";
 @import (reference) "@universityofwarwick/id7/less/variables.less";
-@import (reference) "bootstrap/less/mixins/text-emphasis.less";
-@import (reference) "bootstrap/less/mixins/vendor-prefixes.less";
-@import (reference) "bootstrap/less/mixins/buttons.less";
+@import (reference) "bootstrap/less/mixins.less";
+@import (reference) "bootstrap/less/tooltip.less";
 @import (reference) "colours.less";
 @import (reference) "../css3.less";
 
@@ -1434,5 +1434,49 @@ a.white-text-decoration {
 
   &[data-succeeded="false"][data-finished="true"] {
     .text-emphasis-variant(@state-danger-text);
+  }
+}
+
+.tabula-tooltip[data-title]:not([data-title=""]) {
+  position: relative;
+  display: inline-block;
+
+  &::before, &::after {
+    position: absolute;
+    display: block;
+    top: -@tooltip-arrow-width;
+    left: 50%;
+    z-index: @zindex-tooltip;
+    opacity: 0;
+    transition: opacity .15s linear;
+  }
+
+  &::before {
+    content: '';
+    transform: translateX(-50%);
+    border-width: @tooltip-arrow-width @tooltip-arrow-width 0 @tooltip-arrow-width;
+    border-style: solid;
+    border-color: @tooltip-bg transparent transparent transparent;
+  }
+
+  &::after {
+    content: attr(data-title);
+    transform: translateX(-50%) translateY(-100%);
+
+    // Our parent element can be arbitrary since tooltips are by default inserted as a sibling of their target element.
+    // So reset our font and text properties to avoid inheriting weird values.
+    .reset-text();
+    font-size: @font-size-small;
+
+    .tooltip-inner;
+    min-width: 150px;
+
+    pointer-events: none;
+  }
+
+  &:hover {
+    &::before, &::after {
+      opacity: @tooltip-opacity;
+    }
   }
 }
