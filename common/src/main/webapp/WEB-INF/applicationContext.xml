@@ -321,6 +321,7 @@
 
   <bean id="oAuthFilter" class="uk.ac.warwick.sso.client.oauth.OAuthFilter"/>
   <bean id="trustedApplicationFilter" class="uk.ac.warwick.sso.client.trusted.TrustedApplicationFilter"/>
+  <bean id="acceptedUserSourceFilter" class="uk.ac.warwick.tabula.web.filters.AcceptedUserSourceFilter"/>
 
   <bean id="priorityTaskExecutionService" class="uk.ac.warwick.util.concurrency.TaskExecutionService" destroy-method="shutdown">
     <constructor-arg value="4" type="int"/>
@@ -362,6 +363,10 @@
     </mapping>
     <mapping name="sso">
       <filter ref="ssoClientFilter"/>
+
+      <!-- Intentionally before TrustedApplicationsFilter, we're only really bothered about people authenticating the old fashioned way -->
+      <filter ref="acceptedUserSourceFilter"/>
+
       <filter ref="oAuthFilter"/>
       <filter ref="trustedApplicationFilter"/>
       <url-pattern>/*</url-pattern>

@@ -139,7 +139,7 @@
             <th class="feedback sortable">Files</th>
             <th class="feedback sortable" data-sorter="customdate">Updated</th>
             <#if assignment.collectMarks>
-              <th class="feedback sortable">Mark</th>
+              <th class="feedback sortable" data-sorter="percent">Mark</th>
               <th class="feedback sortable">Grade</th>
             </#if>
             <th class="feedback">Summary</th>
@@ -184,7 +184,7 @@
               </td>
               <#if submission?? && submission.submittedDate??>
                 <td class="submitted" data-datesort="${submission.submittedDate.millis?c!''}">
-								<span class="date use-tooltip" title="${lateness!''}" data-container="body">
+								<span class="date tabula-tooltip" data-title="${lateness!''}">
 									<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 								</span>
                 </td>
@@ -280,7 +280,7 @@
                     <#local feedback = enhancedFeedback.feedback>
                     <#if feedback.actualMark??>${feedback.actualMark}%</#if>
                     <#if feedback.hasPrivateOrNonPrivateAdjustments>
-                      (Adjusted to - ${feedback.latestMark}%)
+                      (Adjusted to ${feedback.latestMark}%)
                     </#if>
                   </#if>
                 </td>
@@ -289,7 +289,7 @@
                     <#local feedback = enhancedFeedback.feedback>
                     ${(feedback.actualGrade)!''}
                     <#if feedback.hasPrivateOrNonPrivateAdjustments && feedback.latestGrade??>
-                      (Adjusted to - ${feedback.latestGrade})
+                      (Adjusted to ${feedback.latestGrade})
                     </#if>
                   </#if>
                 </td>
@@ -385,7 +385,6 @@
         },
         format: function (s, table, cell, cellIndex) {
           var $cell = $(cell);
-          console.log($cell.attr('data-datesort'));
           return $cell.attr('data-datesort') || s;
         },
         parsed: false,

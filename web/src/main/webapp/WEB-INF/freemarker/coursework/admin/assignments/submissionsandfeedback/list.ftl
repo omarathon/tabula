@@ -188,7 +188,7 @@
               </td>
               <td class="submitted">
                 <#if submission?? && submission.submittedDate??>
-                  <span class="date use-tooltip" title="${lateness!''}" data-container="body">
+                  <span class="date tabula-tooltip" data-title="${lateness!''}">
 										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 									</span>
                 </#if>
@@ -272,7 +272,7 @@
                   <#if student.coursework.enhancedFeedback??>
                     ${(student.coursework.enhancedFeedback.feedback.actualMark)!''}%
                     <#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments>
-                      (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestMark}%)
+                      (Adjusted to ${student.coursework.enhancedFeedback.feedback.latestMark}%)
                     </#if>
                   </#if>
                 </td>
@@ -280,7 +280,7 @@
                   <#if student.coursework.enhancedFeedback??>
                     ${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
                     <#if student.coursework.enhancedFeedback.feedback.hasPrivateOrNonPrivateAdjustments && student.coursework.enhancedFeedback.feedback.latestGrade??>
-                      (Adjusted to - ${student.coursework.enhancedFeedback.feedback.latestGrade})
+                      (Adjusted to ${student.coursework.enhancedFeedback.feedback.latestGrade})
                     </#if>
                   </#if>
                 </td>

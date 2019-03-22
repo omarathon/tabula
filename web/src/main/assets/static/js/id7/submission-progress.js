@@ -45,7 +45,12 @@ class SubmissionProgress {
     const request = new XMLHttpRequest();
     this.request = request;
 
-    request.open($form.attr('method') || 'POST', $form.attr('action'), true);
+    let action = $form.attr('action');
+    if (action.indexOf('#') !== -1) {
+      action = action.substring(0, action.indexOf('#'));
+    }
+
+    request.open($form.attr('method') || 'POST', action, true);
 
     request.upload.addEventListener('progress', (evt) => {
       if (evt.lengthComputable) {
@@ -163,7 +168,7 @@ class SubmissionProgress {
       window.location.assign(this.request.responseURL);
     } else {
       // IE11 doesn't support responseURL so guess at it
-      window.location.assign(`${window.location.origin}${window.location.pathname}?justSubmitted=true`);
+      window.location.assign(`${window.location.origin || ''}${window.location.pathname}?justSubmitted=true`);
     }
   }
 }

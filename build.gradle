@@ -31,7 +31,7 @@ ext {
   elastic4sVersion = "6.5.0"
   poiVersion = "4.0.1"
   tilesVersion = "3.0.8"
-  jcloudsVersion = "2.1.1"
+  jcloudsVersion = "2.1.2"
   warwickUtilsVersion = "20190227"
   surefireVersion = "2.19.1"
 }

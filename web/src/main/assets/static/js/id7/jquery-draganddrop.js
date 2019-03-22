@@ -132,7 +132,7 @@
       });
 
       // recalculate items per target if any of the targets have limits less than/equal to
-      if (itemCountToBeDividedUp !== itemsPerTarget) {
+      if (unlimitedTargets !== 0 && itemCountToBeDividedUp !== itemsPerTarget) {
         itemsPerTarget = Math.floor(itemCountToBeDividedUp / unlimitedTargets)
       }
 

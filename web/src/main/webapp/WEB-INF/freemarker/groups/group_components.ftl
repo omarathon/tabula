@@ -498,7 +498,7 @@
         var $module = jQuery(this);
         Groups.zebraStripeGroups($module);
         $module.mapPopups();
-        $module.find('.use-tooltip').tooltip();
+        $module.find('.use-tooltip').tooltip({ sanitize: false, });
         $module.find('.use-popover').tabulaPopover({
           trigger: 'click',
           container: 'body'

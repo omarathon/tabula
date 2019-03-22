@@ -190,7 +190,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 }
 
 @Service("turnitinLtiQueueService")
-class AutowiringEventServiceImpl
+class AutowiringTurnitinLtiQueueService
   extends AbstractTurnitinLtiQueueService
     with AutowriringTurnitinLtiQueueDaoComponent
     with AutowiringOriginalityReportServiceComponent
