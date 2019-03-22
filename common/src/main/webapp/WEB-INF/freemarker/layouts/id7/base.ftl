@@ -74,7 +74,7 @@
                     <li><a href="http://warwick.ac.uk/business">Business</a></li>
                     <li><a href="http://warwick.ac.uk/alumni">Alumni</a></li>
                     <li><a href="http://warwick.ac.uk/news">News</a></li>
-                    <li><a href="http://warwick.ac.uk/global">Global</a></li>
+                    <li><a href="http://warwick.ac.uk/engagement">Engagement</a></li>
                   </ul>
                 </nav>
               </div>

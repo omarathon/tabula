@@ -4,7 +4,6 @@ import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.SingleMarking
 
-
 class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
   var assignmentId: String = _
@@ -16,7 +15,6 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       releaseForMarking(id)
     }
   }
-
 
   "Marker" should "be able to mark work and send to next step" in {
     as(P.Marker1) {
@@ -56,7 +54,7 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
         click on mark
       })
       Then("I am redirected to the summary screen ")
-      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
+      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/marker/"))
 
       When("I expand the student again")
       eventually(cssSelector(".toggle-icon-large.student-col").webElement.isDisplayed shouldBe true)
@@ -77,11 +75,9 @@ class OnlineMarkingTest extends BrowserTest with CourseworkFixtures with GivenWh
       cssSelector("input[name=confirm]").webElement.click()
       cssSelector("input[type=submit]").webElement.click()
       Then("I end up back on the marker overview page")
-      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/mark"))
-      eventually(cssSelector("i[data-original-title=Marked]").webElement.getAttribute("class").contains("text-success") should be (true))
-
+      eventually(currentUrl should include(s"/admin/assignments/$assignmentId/marker/"))
+      eventually(xpath("//span[@data-title=\"Marked\"]/i[contains(@class, \"fa-check-circle-o\")]").webElement.getAttribute("class").contains("text-success") should be (true))
     }
-
   }
 
 }
