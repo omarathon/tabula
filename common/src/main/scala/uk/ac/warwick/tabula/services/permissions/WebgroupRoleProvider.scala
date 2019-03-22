@@ -28,7 +28,7 @@ abstract class WebgroupRoleProvider[A <: BuiltInRole : ClassTag](role: A) extend
       if (user.realId.hasText && groupService.isUserInGroup(user.realId, webgroup)) Stream(role)
       else Stream.empty
     } catch {
-      case e: GroupServiceException => Stream.empty
+      case _: GroupServiceException => Stream.empty
     }
   }
 
