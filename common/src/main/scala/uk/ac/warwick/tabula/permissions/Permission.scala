@@ -153,6 +153,8 @@ object Permissions {
 
   case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
 
+  case object ViewObjectStorage extends ScopelessPermission("View and search object storage")
+
   case object DownloadZipFromJob extends ScopelessPermission("Download ZIP file from Job")
 
   case object ManageSyllabusPlusLocations extends ScopelessPermission("Manage Syllabus+ location mappings")
