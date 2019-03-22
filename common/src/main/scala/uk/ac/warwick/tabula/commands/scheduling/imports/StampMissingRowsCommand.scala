@@ -200,12 +200,12 @@ trait ChecksStudentsInSits {
   )
 
   def checkSitsForStudents(universityIds: Set[String]): StudentsFound = {
-    val parsedSitsRows = universityIds.grouped(Daoisms.MaxInClauseCount).zipWithIndex.map { case (ids, groupCount) =>
+    val parsedSitsRows = universityIds.grouped(Daoisms.MaxInClauseCountOracle).zipWithIndex.map { case (ids, groupCount) =>
       val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(
         Map("universityIds" -> ids.toSeq.asJava).asJava
       ).asScala
 
-      logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCount} students requested from SITS; ${sitsRows.size} rows found")
+      logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCountOracle} students requested from SITS; ${sitsRows.size} rows found")
       (
         sitsRows.map(_.universityId.getOrElse("")).distinct,
         sitsRows.map(_.scjCode).distinct,

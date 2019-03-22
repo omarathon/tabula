@@ -154,7 +154,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
   }
 
   def getApplicantMembersFromSits(universityIds: Set[String]): Set[MembershipInformation] = {
-    universityIds.grouped(Daoisms.MaxInClauseCount).flatMap { ids =>
+    universityIds.grouped(Daoisms.MaxInClauseCountOracle).flatMap { ids =>
       Option(applicantByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> ids.asJava).asJava)
         .asScala
         .map { case (m, a) => MembershipInformation(m, Some(a)) }
