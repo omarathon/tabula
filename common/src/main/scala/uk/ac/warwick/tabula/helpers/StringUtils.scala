@@ -31,9 +31,7 @@ trait StringUtils {
 
     def safeLowercase: String = Option(string).map(_.toLowerCase).getOrElse("")
 
-    def safeLength: Int = Option(string).fold(0) {
-      _.length
-    }
+    def safeLength: Int = Option(string).fold(0)(_.length)
 
     def safeContains(substring: String): Boolean = Option(string).exists(_.contains(substring))
 

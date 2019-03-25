@@ -21,8 +21,8 @@ module.exports = class StaticHashesPlugin {
 
   apply(compiler) {
     compiler.hooks.emit.tapAsync('StaticHashesPlugin', (compilation, done) => {
-      const {assets} = compilation;
-      const {dest, hash, delimiter, maxLength, salt} = this.options;
+      const { assets } = compilation;
+      const { dest, hash, delimiter, maxLength, salt } = this.options;
       const hashes = {};
 
       const base = this.options.base || path.dirname(dest);
@@ -46,6 +46,10 @@ module.exports = class StaticHashesPlugin {
           }
 
           hashes[slash(filePath)] = fileHash;
+
+          // Identical to original file but with hash before the extension
+          // Note $& refers to the whole match, not $0. Thanks, Perl
+          assets[filename.replace(/\.[^\.]+$/, `.${fileHash}$&`)] = assets[filename];
         }
       }
 
