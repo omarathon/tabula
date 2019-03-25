@@ -23,13 +23,6 @@
     <to last="true">null</to>
   </rule>
 
-  <!-- RewriteRule ^(/static/.*?)\.[0-9]{10,16}$ $1$2 [QSA] -->
-  <rule>
-    <note>Static content suffixes</note>
-    <from>^(/static/.*?)\.[0-9]{10,16}$</from>
-    <to qsappend="true">$1</to>
-  </rule>
-
   <!-- RewriteRule ^/courses(.*)$ /coursework$1 [QSA,L,R=301] -->
   <rule>
     <note>TAB-46 Rewrite legacy /courses to /coursework</note>

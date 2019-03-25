@@ -1,17 +1,26 @@
 package uk.ac.warwick.tabula.web.views
 
 import java.util.Properties
-import javax.annotation.Resource
 
 import freemarker.core.Environment
 import freemarker.template._
+import javax.annotation.Resource
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.web.EscapingUriParser
 
-/**
-  *
-  */
+import scala.util.matching.Regex
+
+object UrlMethodModel {
+  val pattern: Regex = "\\.[^\\.]+$".r
+
+  def addSuffix(path: String, staticHashes: Properties): String =
+    staticHashes.getProperty(path.substring("/static/".length)) match {
+      case hash: String => pattern.replaceFirstIn(path, s".$hash$$0")
+      case _ => path
+    }
+}
+
 class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
 
   // Default behaviour now is to assume provided path is relative to root, i.e. includes the servlet context.
@@ -27,7 +36,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
   private def rewrite(path: String, contextOverridden: Option[String]) = {
     val contextNoRoot = contextOverridden.getOrElse(context) match {
       case "/" => ""
-      case context => context
+      case ctx => ctx
     }
 
     contextNoRoot + path
@@ -36,7 +45,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
   override def exec(args: JList[_]): TemplateModel = {
     if (args.size >= 1) {
       val contextOverridden =
-        if (args.size > 1) Option(args.get(1).toString())
+        if (args.size > 1) Option(args.get(1).toString)
         else None
 
       val prependTopLevelUrl =
@@ -50,7 +59,7 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
         if (prependTopLevelUrl) toplevelUrl
         else ""
 
-      new SimpleScalar(prefix + encode(rewrite(args.get(0).toString(), contextOverridden)))
+      new SimpleScalar(prefix + encode(rewrite(args.get(0).toString, contextOverridden)))
     } else {
       throw new IllegalArgumentException("")
     }
@@ -63,29 +72,22 @@ class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModelEx {
 
     val path: String = if (params.containsKey("page")) {
       val contextOverridden =
-        if (params.containsKey("context")) Option(params.get("context").toString())
+        if (params.containsKey("context")) Option(params.get("context").toString)
         else None
 
-      rewrite(params.get("page").toString(), contextOverridden)
+      rewrite(params.get("page").toString, contextOverridden)
     } else if (params.containsKey("resource")) {
-      addSuffix(params.get("resource").toString())
+      UrlMethodModel.addSuffix(params.get("resource").toString, staticHashes)
     } else {
       throw new IllegalArgumentException("")
     }
 
-    val writer = env.getOut()
+    val writer = env.getOut
     writer.write(toplevelUrl)
     writer.write(encode(path))
 
   }
 
   def encode(url: String): String = parser.parse(url).toString
-
-  def addSuffix(path: String): String = {
-    staticHashes.getProperty(path.substring("/static/".length)) match {
-      case hash: String => path + "." + hash
-      case _ => path
-    }
-  }
 
 }

@@ -6,6 +6,7 @@ import RemovePlugin from 'remove-files-webpack-plugin';
 import {ProvidePlugin} from 'webpack';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import MomentLocalesPlugin from 'moment-locales-webpack-plugin';
+import BrotliPlugin from 'brotli-webpack-plugin';
 
 import StaticHashesPlugin from './build-tooling/StaticHashesPlugin';
 import WatchEventsPlugin from './build-tooling/WatchEventsPlugin';
@@ -170,6 +171,10 @@ const commonConfig = merge([
     plugins: [
       new StaticHashesPlugin({
         base: 'static',
+      }),
+      new BrotliPlugin({
+        asset: '[path].br',
+        test: /\.[0-9]{10,16}\.(js|css|html|svg|map)$/, // Only hash-marked assets
       }),
     ],
   },
