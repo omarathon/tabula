@@ -21,26 +21,31 @@
 
 <table class="students table table-striped sticky-table-headers expanding-table">
   <thead>
-  <tr>
-    <th>First name</th>
-    <th>Last name</th>
-    <th>Module</th>
-    <th>Assignment</th>
-    <th>Status</th>
-    <th>Extension length</th>
-    <th>Submission due</th>
-  </tr>
+    <tr>
+      <th>First name</th>
+      <th>Last name</th>
+      <th>University ID</th>
+      <th>Module</th>
+      <th>Assignment</th>
+      <th>Status</th>
+      <th>Extension length</th>
+      <th>Submission due</th>
+    </tr>
   </thead>
   <tbody>
   <#list results.extensions as graph>
     <tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed expandable-row">
-      <td class="student-col toggle-cell toggle-icon">&nbsp;${graph.user.firstName}</td>
-      <td class="student-col toggle-cell">&nbsp;${graph.user.lastName}
-        &nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
+      <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
+      <td class="student-col toggle-cell toggle-icon">${graph.user.firstName}</td>
+      <td class="student-col toggle-cell">${graph.user.lastName}</td>
+      <td class="id toggle-cell">
+        <#assign identifier = graph.user.warwickId!graph.user.userId />
+        ${identifier} <@pl.profile_link identifier />
+      </td>
       <td><@fmt.module_name graph.extension.assignment.module false /></td>
       <td><a href="<@routes.cm2.assignmentextensions graph.extension.assignment />">${graph.extension.assignment.name}</a></td>
       <td>${graph.extension.state.description}</td>
-      <td>
+      <td data-datesort="<#if (graph.duration > 0)>${graph.duration}<#elseif (graph.requestedExtraDuration > 0) >${graph.requestedExtraDuration}<#else>0</#if>">
         <#if graph.hasApprovedExtension || graph.isAwaitingReview() || graph.extension.moreInfoRequired>
           <#if graph.duration != 0>
             <@fmt.p graph.duration "day"/>
@@ -63,3 +68,37 @@
   </#list>
   </tbody>
 </table>
+
+<script type="text/javascript">
+  (function ($) {
+    // add a custom parser for the date column
+    $.tablesorter.addParser({
+      id: 'customdate',
+      is: function (s, table, cell, $cell) {
+        return false; /*return false so this parser is not auto detected*/
+      },
+      format: function (s, table, cell, cellIndex) {
+        var $cell = $(cell);
+        return $cell.attr('data-datesort') || s;
+      },
+      parsed: false,
+      type: 'numeric'
+    });
+
+
+    $('.expanding-table').expandingTable({
+      contentUrlFunction: function ($row) {
+        return $row.data('detailurl');
+      },
+      useIframe: true,
+      tableSorterOptions: {
+        sortList: [[1, 0], [0, 0]],
+        headers: {
+          6: {sorter: 'customdate'},
+          7: {sorter: 'customdate'}
+        }
+      },
+      preventContentIdInUrl: true
+    });
+  })(jQuery);
+</script>
