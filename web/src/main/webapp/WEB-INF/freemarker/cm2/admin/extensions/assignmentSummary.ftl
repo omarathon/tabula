@@ -4,7 +4,7 @@
 <#--noinspection FtlWellformednessInspection-->
 
 <#macro row graph>
-  <#assign state = (graph.extension.state.description)!"No extension" />
+  <#local state = (graph.extension.state.description)!"No extension" />
   <tr class="itemContainer"
       data-contentid="${assignment.id}__${graph.user.userId}"
       data-detailurl="<@routes.cm2.extensiondetail assignment graph.user.userId />"
@@ -12,8 +12,11 @@
 
     <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
     <td class="student-col toggle-cell toggle-icon">${graph.user.firstName}</td>
-    <td class="student-col toggle-cell">${graph.user.lastName}
-      &nbsp;<#if graph.user.warwickId??><@pl.profile_link graph.user.warwickId /><#else><@pl.profile_link graph.user.userId /></#if></td>
+    <td class="student-col toggle-cell">${graph.user.lastName}</td>
+    <td class="id toggle-cell">
+      <#local identifier = graph.user.warwickId!graph.user.userId />
+      ${identifier} <@pl.profile_link identifier />
+    </td>
 
     <td class="status-col toggle-cell content-cell">
       <dl style="margin: 0; border-bottom: 0;">
@@ -27,7 +30,7 @@
         </dd>
       </dl>
     </td>
-    <td class="duration-col toggle-cell<#if graph.hasApprovedExtension> approved<#else> very-subtle</#if>">
+    <td class="duration-col toggle-cell<#if graph.hasApprovedExtension> approved<#else> very-subtle</#if>" data-datesort="<#if (graph.duration > 0)>${graph.duration}<#elseif (graph.requestedExtraDuration > 0) >${graph.requestedExtraDuration}<#else>0</#if>">
       <#if (graph.duration > 0)>
         ${graph.duration} days
       <#elseif (graph.requestedExtraDuration > 0) >
@@ -73,15 +76,16 @@
            data-max-days="${maxDaysToDisplayAsProgressBar}"
            data-row-to-open="${assignment.id}__${extensionToOpen!""}">
       <thead>
-      <tr>
-        <#-- TAB-2063 no respect for dept settings, we always want to see a name here -->
-        <th class="student-col">First name</th>
-        <th class="student-col">Last name</th>
+        <tr>
+          <#-- TAB-2063 no respect for dept settings, we always want to see a name here -->
+          <th class="student-col">First name</th>
+          <th class="student-col">Last name</th>
+          <th class="student-col">University ID</th>
 
-        <th class="status-col">Status</th>
-        <th class="duration-col">Length of extension</th>
-        <th class="deadline-col">Submission Deadline</th>
-      </tr>
+          <th class="status-col">Status</th>
+          <th class="duration-col">Length of extension</th>
+          <th class="deadline-col">Submission Deadline</th>
+        </tr>
       </thead>
 
       <tbody>
@@ -119,8 +123,8 @@
           tableSorterOptions: {
             sortList: [[1, 0], [0, 0]],
             headers: {
-              3: {sorter: false},
-              4: {sorter: 'customdate'}
+              4: {sorter: 'customdate'},
+              5: {sorter: 'customdate'}
             }
           },
           preventContentIdInUrl: true
