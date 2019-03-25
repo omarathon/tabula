@@ -39,7 +39,12 @@
     </p>
 
     <h3>
-      <strong>Year mark:</strong> ${yearMark!"-"} |
+      <#if yearMark?? && weightedMeanYearMark?? && yearMark?string != weightedMeanYearMark?string>
+        <strong>Year mark:</strong> ${yearMark!"-"} (weighted mean: ${weightedMeanYearMark!"-"})
+      <#else>
+        <strong>Year mark:</strong> ${yearMark!"-"}
+      </#if>
+      |
       <strong>Year Weighting:</strong>
       <#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if>
     </h3>
