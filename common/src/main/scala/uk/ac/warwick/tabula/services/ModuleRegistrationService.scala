@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JBigDecimal
-import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntityYear
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringModuleRegistrationDaoComponent, ModuleRegistrationDaoComponent}
 
@@ -47,7 +46,7 @@ trait ModuleRegistrationService {
   def agreedWeightedMeanYearMark(moduleRegistrations: Seq[ModuleRegistration], markOverrides: Map[Module, BigDecimal], allowEmpty: Boolean): Either[String, BigDecimal]
 
   def overcattedModuleSubsets(
-    entity: ExamGridEntityYear,
+    moduleRegistrations: Seq[ModuleRegistration],
     markOverrides: Map[Module, BigDecimal],
     normalLoad: BigDecimal,
     rules: Seq[UpstreamRouteRule]
@@ -113,12 +112,12 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
     calculateYearMark(moduleRegistrations, markOverrides, allowEmpty) { mr => Option(mr.agreedMark) }
 
   def overcattedModuleSubsets(
-    entity: ExamGridEntityYear,
+    moduleRegistrations: Seq[ModuleRegistration],
     markOverrides: Map[Module, BigDecimal],
     normalLoad: BigDecimal,
     rules: Seq[UpstreamRouteRule]
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
-    val validRecords = entity.moduleRegistrations.filterNot(_.deleted)
+    val validRecords = moduleRegistrations.filterNot(_.deleted)
     if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
       Seq()
     } else {

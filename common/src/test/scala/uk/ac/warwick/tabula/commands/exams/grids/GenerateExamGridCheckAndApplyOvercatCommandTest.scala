@@ -58,7 +58,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
         yearOfStudy = thisYearOfStudy
       }
       state.selectCourseCommand = selectCourseCommand
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null)
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null)
       state.filteredEntities.isEmpty should be (true)
     }
   }
@@ -76,10 +76,10 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       val years: JSet[String] = JHashSet()
       years.add("Year3")
       selectCourseCommand.courseYearsToShow = years
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null, null)
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(null, null)
       state.filteredEntities.isEmpty should be (false)
       state.filteredEntities.head should be(entity)
-      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
     }
   }
 
@@ -99,10 +99,10 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       selectCourseCommand.courseYearsToShow = years
 
 
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq((BigDecimal(0), Seq(mr1)))
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq((BigDecimal(0), Seq(mr1)))
 
       state.filteredEntities.isEmpty should be (true)
-      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
     }
   }
 
@@ -121,7 +121,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       years.add("Year3")
       selectCourseCommand.courseYearsToShow = years
 
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
         (BigDecimal(50), Seq(mr1)),
         (BigDecimal(40), Seq(mr2))
       )
@@ -129,7 +129,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       state.filteredEntities.isEmpty should be (false)
       state.filteredEntities.head should be(entity)
       state.overcatSubsets(state.filteredEntities.head).head._2.head should be(BigDecimal(50), Seq(mr1))
-      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
     }
   }
 
@@ -147,7 +147,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       val years: JSet[String] = JHashSet()
       years.add("Year3")
       selectCourseCommand.courseYearsToShow = years
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
         (BigDecimal(50), Seq(mr1, mr2)),
         (BigDecimal(40), Seq(mr1))
       )
@@ -155,7 +155,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       state.filteredEntities.isEmpty should be (false)
       state.filteredEntities.head should be(entity)
       state.overcatSubsets(state.filteredEntities.head).head._2.head should be(BigDecimal(50), Seq(mr1, mr2))
-      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
     }
   }
 
@@ -173,7 +173,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       val years: JSet[String] = JHashSet()
       years.add("Year3")
       selectCourseCommand.courseYearsToShow = years
-      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
+      state.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
         (BigDecimal(50), Seq(mr2)),
         (BigDecimal(40), Seq(mr1, mr2))
       )
@@ -181,7 +181,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
       state.filteredEntities.isEmpty should be (false)
       state.filteredEntities.head should be(entity)
       state.overcatSubsets(state.filteredEntities.head).head._2.head should be(BigDecimal(50), Seq(mr2))
-      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+      verify(state.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
     }
   }
 
@@ -215,7 +215,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
     val routeRule = new UpstreamRouteRule(None, null, null)
     cmd.upstreamRouteRuleService.list(thisRoute, thisAcademicYear, scyd.level.get) returns Seq(routeRule)
     cmd.selectCourseCommand = selectCourseCommand
-    cmd.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
+    cmd.moduleRegistrationService.overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule)) returns Seq(
       (BigDecimal(50), Seq(mr1, mr2)),
       (BigDecimal(40), Seq(mr1))
     )
@@ -225,7 +225,7 @@ class GenerateExamGridCheckAndApplyOvercatCommandTest extends TestBase with Mock
     cmd.filteredEntities.isEmpty should be (false)
     cmd.filteredEntities.head should be(entity)
     cmd.overcatSubsets(cmd.filteredEntities.head).head._2.head should be(BigDecimal(50), Seq(mr1, mr2))
-    verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy), Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
+    verify(cmd.moduleRegistrationService, times(1)).overcattedModuleSubsets(entity.validYears(thisYearOfStudy).moduleRegistrations, Map(), thisRoute.degreeType.normalCATSLoad, Seq(routeRule))
 
     val result = cmd.applyInternal()
     result.entities.size should be(1)
