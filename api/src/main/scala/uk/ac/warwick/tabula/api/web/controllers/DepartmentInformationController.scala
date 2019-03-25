@@ -19,14 +19,16 @@ trait DepartmentInformationController extends ApiController {
       Some("modules" -> department.modules.asScala.sorted.map { module =>
         Map(
           "code" -> module.code.trim.toUpperCase,
-          "name" -> module.name
+          "name" -> module.name,
+          "active" -> module.active,
         )
       }),
       Some("routes" -> department.routes.asScala.sorted.map { route =>
         Map(
           "code" -> route.code.trim.toUpperCase,
           "name" -> route.name,
-          "degreeType" -> route.degreeType.description
+          "degreeType" -> route.degreeType.description,
+          "active" -> route.active,
         )
       }),
       Option(department.parent).map { parent =>
