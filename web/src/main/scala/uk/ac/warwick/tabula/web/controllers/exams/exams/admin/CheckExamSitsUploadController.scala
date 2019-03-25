@@ -37,7 +37,7 @@ class CheckExamSitsUploadController extends ExamsController with AutowiringProfi
     } else {
       Mav("exams/exams/admin/check_sits",
         "result" -> cmd.apply(),
-        "assessmentGroupPairs" -> feedback.assessmentGroups.asScala.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
+        "assessmentGroupPairs" -> feedback.assessmentGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
         "sprCodes" -> sprCodes
       )
     }
