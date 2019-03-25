@@ -225,78 +225,80 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 
       // Now sort out properties
       val hasSequence = registrations.filter(r => r.sequence != null)
-      assessmentGroups.foreach(group => {
+      assessmentGroups.foreach { group =>
         // Find the registrations for this exact group (including sequence)
         val theseRegistrations = hasSequence.filter(_.toExactUpstreamAssessmentGroup.isEquivalentTo(group))
         if (theseRegistrations.nonEmpty) {
           val registrationsByStudent = theseRegistrations.groupBy(_.sprCode)
           // Where there are multiple values for each of the properties (seat number, mark, and grade) we need to flatten them to a single value.
           // Where there is ambiguity, set the value to None
-          val propertiesMap: Map[String, UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case (sprCode, studentRegistrations) => sprCode -> {
-            if (studentRegistrations.size == 1) {
-              new UpstreamAssessmentGroupMemberProperties {
-                position = Try(studentRegistrations.head.seatNumber.toInt).toOption
-                actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
-                actualGrade = studentRegistrations.head.actualGrade.maybeText
-                agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
-                agreedGrade = studentRegistrations.head.agreedGrade.maybeText
-                resitActualMark = Try(BigDecimal(studentRegistrations.head.resitActualMark)).toOption
-                resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
-                resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
-                resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
-              }
-            } else {
-              def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
-
-              def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
-
-              def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
-
-              def resolveDuplicates[A](props: Seq[A], description: String): Option[A] = {
-                if (props.distinct.size > 1) {
-                  logger.warn("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
-                    description,
-                    props.mkString(", "),
-                    sprCode,
-                    group.toString,
-                    description.capitalize
-                  ))
-                  None
-                } else {
-                  props.headOption
+          val propertiesMap: Map[String, UpstreamAssessmentGroupMemberProperties] = registrationsByStudent.map { case (sprCode, studentRegistrations) =>
+            sprCode -> {
+              if (studentRegistrations.size == 1) {
+                new UpstreamAssessmentGroupMemberProperties {
+                  position = Try(studentRegistrations.head.seatNumber.toInt).toOption
+                  actualMark = Try(BigDecimal(studentRegistrations.head.actualMark)).toOption
+                  actualGrade = studentRegistrations.head.actualGrade.maybeText
+                  agreedMark = Try(BigDecimal(studentRegistrations.head.agreedMark)).toOption
+                  agreedGrade = studentRegistrations.head.agreedGrade.maybeText
+                  resitActualMark = Try(BigDecimal(studentRegistrations.head.resitActualMark)).toOption
+                  resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
+                  resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
+                  resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
                 }
-              }
+              } else {
+                def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
 
-              new UpstreamAssessmentGroupMemberProperties {
-                position = resolveDuplicates(validInts(studentRegistrations.map(_.seatNumber)), "seat number")
-                actualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.actualMark)), "actual mark")
-                actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
-                agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
-                agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
-                resitActualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
-                resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
-                resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
-                resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
+                def validBigDecimals(strings: Seq[String]): Seq[BigDecimal] = strings.filter(s => Try(BigDecimal(s)).isSuccess).map(BigDecimal(_))
+
+                def validStrings(strings: Seq[String]): Seq[String] = strings.filter(s => s.maybeText.isDefined)
+
+                def resolveDuplicates[A](props: Seq[A], description: String): Option[A] = {
+                  if (props.distinct.size > 1) {
+                    logger.warn("Found multiple %ss (%s) for %s for Assessment Group %s. %s will be null".format(
+                      description,
+                      props.mkString(", "),
+                      sprCode,
+                      group.toString,
+                      description.capitalize
+                    ))
+                    None
+                  } else {
+                    props.headOption
+                  }
+                }
+
+                new UpstreamAssessmentGroupMemberProperties {
+                  position = resolveDuplicates(validInts(studentRegistrations.map(_.seatNumber)), "seat number")
+                  actualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.actualMark)), "actual mark")
+                  actualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.actualGrade)), "actual grade")
+                  agreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.agreedMark)), "agreed mark")
+                  agreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.agreedGrade)), "agreed grade")
+                  resitActualMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitActualMark)), "resit actual mark")
+                  resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
+                  resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
+                  resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
+                }
               }
             }
           }
-          }
 
-          propertiesMap.foreach { case (sprCode, properties) => group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
-            member.position = properties.position
-            member.actualMark = properties.actualMark
-            member.actualGrade = properties.actualGrade
-            member.agreedMark = properties.agreedMark
-            member.agreedGrade = properties.agreedGrade
-            member.resitActualMark = properties.resitActualMark
-            member.resitActualGrade = properties.resitActualGrade
-            member.resitAgreedMark = properties.resitAgreedMark
-            member.resitAgreedGrade = properties.resitAgreedGrade
-            assessmentMembershipService.save(member)
-          }
+          propertiesMap.foreach { case (sprCode, properties) =>
+            group.members.asScala.find(_.universityId == SprCode.getUniversityId(sprCode)).foreach { member =>
+              member.position = properties.position
+              member.actualMark = properties.actualMark
+              member.actualGrade = properties.actualGrade
+              member.agreedMark = properties.agreedMark
+              member.agreedGrade = properties.agreedGrade
+              member.resitActualMark = properties.resitActualMark
+              member.resitActualGrade = properties.resitActualGrade
+              member.resitAgreedMark = properties.resitAgreedMark
+              member.resitAgreedGrade = properties.resitAgreedGrade
+              assessmentMembershipService.save(member)
+            }
           }
         }
-      })
+      }
 
       modifiedAssignments = modifiedAssignments ++ assessmentComponents.flatMap(_.linkedAssignments)
 
