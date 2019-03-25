@@ -6,7 +6,6 @@ import javax.annotation.Resource
 import javax.servlet.FilterChain
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter._
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.util.web.filter.AbstractHttpFilter
@@ -16,15 +15,6 @@ import scala.util.matching.Regex
 
 object StaticContentHeadersFilter {
   val StaticContentExpiry: FiniteDuration = 365.days
-
-  // This should match the extensions in webpack.config.babel in the BrotliPlugin test
-  val BrotliCompressedExtensions: Map[String, String] = Map(
-    "js" -> "application/json; charset=UTF-8",
-    "css" -> "text/css; charset=UTF-8",
-    "html" -> "text/html; charset=UTF-8",
-    "svg" -> "image/svg+xml; charset=UTF-8",
-    "map" -> "application/json; charset=UTF-8",
-  )
 
   def setImmutableCacheHeaders(res: HttpServletResponse): Unit = {
     res.setHeader("Cache-Control", s"public, max-age=${StaticContentExpiry.toSeconds}, immutable")
@@ -45,17 +35,7 @@ class StaticContentHeadersFilter extends AbstractHttpFilter {
         // Already hashed resource
         setImmutableCacheHeaders(res)
 
-        if (req.getHeader("Accept-Encoding").orEmpty.split(',').map(_.trim).contains("br") && BrotliCompressedExtensions.contains(m.group(1))) {
-          // Forward the request onto the brotli-compressed version
-          res.setHeader("Content-Encoding", "br")
-
-          // Need to set Content-Type ourselves
-          res.setHeader("Content-Type", BrotliCompressedExtensions(m.group(1)))
-
-          req.getRequestDispatcher(s"${req.getRequestURI}.br").forward(req, res)
-        } else {
-          chain.doFilter(req, res)
-        }
+        chain.doFilter(req, res)
 
       case _ if staticHashes.containsKey(req.getRequestURI.substring("/static/".length)) =>
         // Send a redirect to the (current) immutable version of the resource
