@@ -119,6 +119,7 @@ task webpack(type: NpmTask) {
   inputs.dir('build-tooling').withPathSensitivity(PathSensitivity.RELATIVE)
   inputs.dir('src/main/assets/static').withPathSensitivity(PathSensitivity.RELATIVE)
   outputs.dir 'build/rootContent/static'
+  outputs.file 'build/rootContent/WEB-INF/static-hashes.properties'
   outputs.cacheIf { true }
 
   if (isDevBuild) {
