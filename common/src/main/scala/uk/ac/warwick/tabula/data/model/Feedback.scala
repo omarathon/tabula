@@ -6,11 +6,11 @@ import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.{AcademicYear, JavaImports}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -86,7 +86,7 @@ trait AssessmentFeedback {
 
   def academicYear: AcademicYear
 
-  def assessmentGroups: JList[AssessmentGroup]
+  def assessmentGroups: Seq[AssessmentGroup]
 
   def fieldNameValuePairsMap: Map[String, String]
 }
@@ -440,7 +440,10 @@ class AssignmentFeedback extends Feedback {
 
   override def academicYear: AcademicYear = assignment.academicYear
 
-  override def assessmentGroups: JavaImports.JList[AssessmentGroup] = assignment.assessmentGroups
+  // Will only return assessment groups that are relevant to this Feedback item
+  override def assessmentGroups: Seq[AssessmentGroup] = assignment.assessmentGroups.asScala.filter { assessmentGroup =>
+    assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
+  }
 
   def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
@@ -479,7 +482,9 @@ class ExamFeedback extends Feedback {
 
   override def academicYear: AcademicYear = exam.academicYear
 
-  override def assessmentGroups: JavaImports.JList[AssessmentGroup] = exam.assessmentGroups
+  override def assessmentGroups: Seq[AssessmentGroup] = exam.assessmentGroups.asScala.filter { assessmentGroup =>
+    assessmentGroup.toUpstreamAssessmentGroupInfo(academicYear).exists(_.allMembers.exists { m => universityId.contains(m.universityId) })
+  }
 
   def permissionsParents: Stream[Exam] = Option(exam).toStream
 

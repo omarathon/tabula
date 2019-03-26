@@ -35,7 +35,7 @@ class CheckAssignmentSitsUploadController extends CourseworkController
     Mav("cm2/admin/assignments/publish/check_sits",
       "result" -> cmd.apply(),
       "feedbackForSits" -> feedbackForSitsService.getByFeedback(feedback),
-      "assessmentGroupPairs" -> feedback.assessmentGroups.asScala.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
+      "assessmentGroupPairs" -> feedback.assessmentGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
       "sprCodes" -> sprCodes
     ).crumbsList(Breadcrumbs.assignment(assignment))
   }
