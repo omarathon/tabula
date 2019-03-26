@@ -73,19 +73,19 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     val weightedMeanYearMark: Option[BigDecimal] =
       moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
 
-    val normalLoad: BigDecimal =
-      normalCATSLoadService.find(studentCourseYearDetails.route, academicYear, studentCourseYearDetails.yearOfStudy).map(_.normalLoad)
-        .getOrElse(studentCourseYearDetails.route.degreeType.normalCATSLoad)
+    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
+      val normalLoad: BigDecimal =
+        normalCATSLoadService.find(studentCourseYearDetails.route, academicYear, studentCourseYearDetails.yearOfStudy).map(_.normalLoad)
+          .getOrElse(studentCourseYearDetails.route.degreeType.normalCATSLoad)
 
-    val routeRules: Seq[UpstreamRouteRule] =
-      studentCourseYearDetails.level.map { l =>
-        upstreamRouteRuleService.list(studentCourseYearDetails.route, academicYear, l)
-      }.getOrElse(Nil)
+      val routeRules: Seq[UpstreamRouteRule] =
+        studentCourseYearDetails.level.map { l =>
+          upstreamRouteRuleService.list(studentCourseYearDetails.route, academicYear, l)
+        }.getOrElse(Nil)
 
-    val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
-      moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
+      val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
+        moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
 
-    val yearMark: Option[BigDecimal] =
       if (overcatSubsets.size <= 1) {
         // If the there's only one valid subset, just choose the mean mark
         weightedMeanYearMark
@@ -100,6 +100,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
             }
           }
       }
+    }
 
     val yearWeighting = courseAndRouteService.getCourseYearWeighting(
       studentCourseYearDetails.studentCourseDetails.course.code,
