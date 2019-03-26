@@ -214,8 +214,8 @@
         </#local>
       <#elseif !assignment.opened>
         <#local submissionStatus>
-          <strong>Assignment open:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
-                                                  data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
+          <strong>Assignment open:</strong>
+          <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
         </#local>
       <#elseif assignment.openEnded>
         <#local submissionStatus>
@@ -276,8 +276,8 @@
           </#local>
         <#elseif !(info.submission??) && info.studentDeadline??>
           <#local feedbackStatus>
-            <strong>Assignment due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
-                                                   data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
+            <strong>Assignment due:</strong>
+            <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
           </#local>
         </#if>
       </#if>
@@ -550,12 +550,26 @@
     <div class="col-md-${show_actions?string('4', '6')}">
       <@stage_progress_bar info.stages />
 
+      <#if !assignment.opened>
+        <div>
+          <strong>Submissions open:</strong>
+          <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span>
+        </div>
+      </#if>
+
+      <#if !assignment.openEnded && !assignment.closed>
+        <div>
+          <strong>Submissions due:</strong>
+          <span class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+        </div>
+      </#if>
+
       <#if info.feedbackDeadline??>
-        <p>
+        <div>
           <strong>Student feedback due:</strong>
           <span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                 data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
-        </p>
+        </div>
       </#if>
 
       <#if info.extensionCount gt 0 || info.unsubmittedCount gt 0 || info.lateSubmissionsCount gt 0>
