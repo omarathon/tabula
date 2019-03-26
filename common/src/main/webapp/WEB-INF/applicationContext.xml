@@ -201,6 +201,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.SyllabusPlusLocationConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkPointConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkingDescriptorConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeConverter"/>
   </util:list>
 
   <bean id="typeConverter"

@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula
 import java.math
 
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
-import uk.ac.warwick.tabula.Fixtures.assessmentGroup
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
@@ -512,6 +512,15 @@ object Fixtures extends Mockito {
     }
 
     userLookup
+  }
+
+  def mitigatingCircumstancesSubmission(creator: String, student: String): MitigatingCircumstancesSubmission = {
+    val s = new MitigatingCircumstancesSubmission
+    s.creator = user(creator, creator)
+    s.student = member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember]
+    s.startDate = DateTime.now()
+    s.endDate = DateTime.now().plusWeeks(2)
+    s
   }
 
 }
