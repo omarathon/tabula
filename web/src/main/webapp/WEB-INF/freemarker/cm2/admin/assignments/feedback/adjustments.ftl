@@ -72,7 +72,7 @@
         <div class="late-penalty">
           <button class="btn btn-xs use-suggested-mark"
                   data-mark="${proposedAdjustment!""}"
-                  data-comment="Your submission was <@components.lateness command.submission /> late. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
+                  data-comment="Your submission was <@components.lateness command.submission />. ${marksSubtracted} marks have been subtracted (${latePenalty} for each working day late).">
             Use suggested mark - ${proposedAdjustment!""}
           </button>
           <a class="use-popover cue-popover" id="popover-${marking.extractId(command.student)}" data-html="true"
