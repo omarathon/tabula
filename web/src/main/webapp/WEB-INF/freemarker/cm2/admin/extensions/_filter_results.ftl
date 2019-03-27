@@ -19,22 +19,25 @@
   </div>
 </div>
 
-<table class="students table table-striped sticky-table-headers expanding-table">
+<table id="student-extension-management" class="students table table-striped sticky-table-headers expanding-table">
   <thead>
     <tr>
-      <th>First name</th>
-      <th>Last name</th>
-      <th>University ID</th>
+      <th class="student-col">First name</th>
+      <th class="student-col">Last name</th>
+      <th class="student-col">University ID</th>
       <th>Module</th>
       <th>Assignment</th>
-      <th>Status</th>
-      <th>Extension length</th>
-      <th>Submission due</th>
+      <th class="status-col">Status</th>
+      <th class="duration-col">Extension length</th>
+      <th class="deadline-col">Submission due</th>
     </tr>
   </thead>
   <tbody>
   <#list results.extensions as graph>
-    <tr data-toggle="collapse" data-target="#extension${graph.extension.id}" class="clickable collapsed expandable-row">
+    <tr class="itemContainer"
+        data-contentid="extension${graph.extension.id}"
+        data-detailurl="<@routes.cm2.extensionDetail graph.extension />"
+    >
       <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
       <td class="student-col toggle-cell toggle-icon">${graph.user.firstName}</td>
       <td class="student-col toggle-cell">${graph.user.lastName}</td>
@@ -44,26 +47,31 @@
       </td>
       <td><@fmt.module_name graph.extension.assignment.module false /></td>
       <td><a href="<@routes.cm2.assignmentextensions graph.extension.assignment />">${graph.extension.assignment.name}</a></td>
-      <td>${graph.extension.state.description}</td>
-      <td data-datesort="<#if (graph.duration > 0)>${graph.duration}<#elseif (graph.requestedExtraDuration > 0) >${graph.requestedExtraDuration}<#else>0</#if>">
-        <#if graph.hasApprovedExtension || graph.isAwaitingReview() || graph.extension.moreInfoRequired>
-          <#if graph.duration != 0>
-            <@fmt.p graph.duration "day"/>
-          <#else>
-            <@fmt.p graph.requestedExtraDuration "day"/>
-          </#if>
+
+      <td class="status-col toggle-cell content-cell">
+        <dl style="margin: 0; border-bottom: 0;">
+          <dt>
+            ${graph.extension.state.description}
+          </dt>
+          <dd style="display: none;" class="table-content-container" data-contentid="extension${graph.extension.id}">
+            <div id="content-extension${graph.extension.id}" class="content-container" data-contentid="extension${graph.extension.id}">
+              <p>No extension data is currently available.</p>
+            </div>
+          </dd>
+        </dl>
+      </td>
+
+      <td class="duration-col toggle-cell<#if graph.hasApprovedExtension> approved<#else> very-subtle</#if>" data-datesort="<#if (graph.duration > 0)>${graph.duration}<#elseif (graph.requestedExtraDuration > 0) >${graph.requestedExtraDuration}<#else>0</#if>">
+        <#if (graph.duration > 0)>
+          ${graph.duration} days
+        <#elseif (graph.requestedExtraDuration > 0) >
+          ${graph.requestedExtraDuration} days requested
+        <#else>
+          N/A
         </#if>
       </td>
-      <td <#if graph.deadline?has_content>data-datesort="${graph.deadline.millis?c!''}"</#if>
-          class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>">
-        <#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if>
-      </td>
-    </tr>
-    <#assign detailUrl><@routes.cm2.extensionDetail graph.extension /></#assign>
-    <tr id="extension${graph.extension.id}" data-detailurl="${detailUrl}" class="collapse detail-row">
-      <td colspan="7" class="detailrow-container">
-        <i class="fa fa-spinner fa-spin"></i> Loading
-      </td>
+      <td data-datesort="${graph.deadline.millis?c!''}"
+          class="deadline-col <#if graph.hasApprovedExtension>approved<#else>very-subtle</#if>"><#if graph.deadline?has_content><@fmt.date date=graph.deadline /></#if></td>
     </tr>
   </#list>
   </tbody>
