@@ -554,6 +554,8 @@ object Permissions {
 
   object MitigatingCircumstancesSubmission {
 
+    case object Create extends Permission("Create new mitigating circumstances submissions")
+
     case object Manage extends Permission("List, create, update and delete mitigating circumstances submissions and associated messages.")
 
     case object Read extends Permission("View the details and messages associated with a mitigating circumstances submission")
