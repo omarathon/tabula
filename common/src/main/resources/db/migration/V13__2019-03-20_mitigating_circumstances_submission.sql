@@ -1,7 +1,7 @@
 create sequence mit_circ_sequence start 1000 increment by 1;
 
 create table MitigatingCircumstancesSubmission(
-  id varchar(255) primary key,
+  id varchar(255),
   key integer not null,
   createdDate timestamp(6) not null,
   creator varchar(255) not null,
@@ -12,7 +12,7 @@ create table MitigatingCircumstancesSubmission(
   endDate timestamp(6) not null,
   reason bytea not null,
   constraint pk_mitigatingcircumstancessubmission primary key (id),
-  constraint fk_mitcircssub_student foreign key (universityId) references member (id) on delete restrict
+  constraint fk_mitcircssub_student foreign key (universityId) references member (universityId) on delete restrict
 );
 
 create unique index idx_mitcircssub_key on MitigatingCircumstancesSubmission (key);
