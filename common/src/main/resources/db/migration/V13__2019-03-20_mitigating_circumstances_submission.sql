@@ -10,5 +10,10 @@ create table MitigatingCircumstancesSubmission(
   issueTypeDetails bytea,
   startDate timestamp(6) not null,
   endDate timestamp(6) not null,
-  reason bytea
+  reason bytea not null,
+  constraint pk_mitigatingcircumstancessubmission primary key (id),
+  constraint fk_mitcircssub_student foreign key (universityId) references member (id) on delete restrict
 );
+
+create unique index idx_mitcircssub_key on MitigatingCircumstancesSubmission (key);
+create unique index idx_mitcircssub_student on MitigatingCircumstancesSubmission (universityId);

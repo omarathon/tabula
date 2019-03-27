@@ -8,10 +8,12 @@ import uk.ac.warwick.tabula.data.model.{Notification, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
 
 import scala.beans.BeanProperty
 
@@ -31,12 +33,12 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cr
 
   self: MitCircsSubmissionServiceComponent  =>
 
-  def applyInternal(): MitigatingCircumstancesSubmission = {
+  def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     val submission = new MitigatingCircumstancesSubmission(student, creator)
     submission.startDate = startDate
     submission.endDate = endDate
     submission.issueType = issueType
-    if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else issueTypeDetails = null
+    if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission

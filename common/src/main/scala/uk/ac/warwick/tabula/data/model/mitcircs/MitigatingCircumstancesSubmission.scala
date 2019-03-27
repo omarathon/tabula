@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 import java.io.Serializable
 
 import javax.persistence._
-import org.hibernate.annotations.{DynamicInsert, Type}
+import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
@@ -12,7 +12,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
-@DynamicInsert
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
@@ -27,7 +26,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     this.student = student
   }
 
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   var key: JLong = _
 
   @Column(nullable = false)
@@ -41,7 +40,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
+  @Column(nullable = false)
   var startDate: DateTime = _
+
+  @Column(nullable = false)
   var endDate: DateTime = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeUserType")
@@ -51,15 +53,16 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var issueTypeDetails: String = _ // free text for use when the issue type is Other
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(nullable = false)
   var reason: String = _
-
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
     "student" -> student.universityId
   )
 
-  override def permissionsParents: Stream[PermissionsTarget] = ???
+  // Don't use the student as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
+  override def permissionsParents: Stream[PermissionsTarget] = Stream(student.homeDepartment)
 }
 
 

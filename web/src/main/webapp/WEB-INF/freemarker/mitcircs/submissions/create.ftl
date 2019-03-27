@@ -11,7 +11,7 @@
           <@bs3form.labelled_form_group "startDate" "Start Date">
             <div class="input-group">
               <@f.input path="startDate" cssClass="form-control date-time-picker" />
-              <#if endOffset?has_content><input class="endoffset" type="hidden" data-end-offset="1209600000" /></#if>
+              <#if endOffset?has_content><input class="endoffset" type="hidden" /></#if>
               <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
             </div>
           </@bs3form.labelled_form_group>
@@ -20,7 +20,7 @@
           <@bs3form.labelled_form_group "endDate" "End Date">
             <div class="input-group">
               <@f.input path="endDate" cssClass="form-control date-time-picker" />
-              <#if endOffset?has_content><input class="endoffset" type="hidden" data-end-offset="1209600000" /></#if>
+              <#if endOffset?has_content><input class="endoffset" type="hidden" /></#if>
               <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
             </div>
           </@bs3form.labelled_form_group>
@@ -41,7 +41,7 @@
       </@bs3form.labelled_form_group>
 
       <@bs3form.labelled_form_group "reason" "Details">
-        <@f.textarea path="reason" cssClass="form-control" rows="5" cssStyle="height: 150px;" />
+        <@f.textarea path="reason" cssClass="form-control" rows="5" />
         <div class="help-block">Please provide further details of the mitigating circumstances and how they have affected your assessments</div>
       </@bs3form.labelled_form_group>
 

@@ -12,7 +12,7 @@ class MitigatingCircumstancesSubmitterRoleProvider extends RoleProvider with Tas
 
   def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for MitigatingCircumstancesSubmitterRoleProvider") {
     scope match {
-      case student: StudentMember if student.homeDepartment.subDepartmentsContaining(student).nonEmpty => Stream(MitigatingCircumstancesSubmitter(student))
+      case student: StudentMember if student.homeDepartment.subDepartmentsContaining(student).exists(_.enableMitCircs) => Stream(MitigatingCircumstancesSubmitter(student))
       // MitigatingCircumstancesSubmitter is only checked against students
       case _ => Stream.empty
     }
