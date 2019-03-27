@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.TestBase
 
 // scalastyle:off magic.number
@@ -24,6 +24,13 @@ class DurationFormatterTest extends TestBase {
 
     check(start.minusHours(2).minusMinutes(25), "2 hours and 25 minutes ago")
     check(start, "0 seconds ago")
+
+    check(
+      new DateTime(2019, DateTimeConstants.MARCH, 25, 14, 0, 0, 0),
+      new DateTime(2019, DateTimeConstants.MARCH, 27, 12, 8, 33, 0),
+      roundUp = true,
+      "1 day and 22 hours"
+    )
   }
 
   @Test def formatTag(): Unit = {

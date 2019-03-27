@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, PermissionsService}
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService, SecurityService}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, ModuleAndDepartmentService, ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, Features}
 import uk.ac.warwick.userlookup.{User, UserLookupInterface}
@@ -34,6 +34,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
   var routeService: CourseAndRouteService = Wire[CourseAndRouteService]
   var permissionsService: PermissionsService = Wire[PermissionsService]
   var securityService: SecurityService = Wire[SecurityService]
+  var profileService: ProfileService = Wire[ProfileService]
   var userLookup: UserLookupInterface = Wire[UserLookupInterface]
   var features: Features = Wire[Features]
 
@@ -64,7 +65,8 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
       permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Manage).nonEmpty
 
     val canViewMitigatingCircumstances = (user.isStudent || user.isAlumni) &&
-      (for(member <- user.profile; dept <- homeDepartment) yield { dept.subDepartmentsContaining(member) }).getOrElse(Stream.empty).exists(_.enableMitCircs)
+      (for(member <- profileService.getMemberByUser(user.apparentUser); dept <- homeDepartment)
+        yield { dept.subDepartmentsContaining(member) }).getOrElse(Stream.empty).exists(_.enableMitCircs)
 
     val modelMap = Map(
       "user" -> user,
