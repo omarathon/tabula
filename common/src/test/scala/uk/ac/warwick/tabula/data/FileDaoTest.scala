@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 
+import scala.concurrent.Future
+
 // scalastyle:off magic.number
 @Transactional
 class FileDaoTest extends PersistenceTestBase with Mockito {
@@ -96,7 +98,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
           //val blob = loadedAttachment.data
           loadedAttachment.fileDao = dao
           loadedAttachment.objectStorageService = objectStorageService
-          loadedAttachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap(bytes), None)
+          loadedAttachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(ByteSource.wrap(bytes), None))
 
           val data = loadedAttachment.asByteSource.asCharSource(StandardCharsets.UTF_8).read()
           data should be(string)

@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.language.postfixOps
 import scala.util.matching.Regex
 
@@ -135,7 +137,7 @@ class FileAttachment extends GeneratedId {
   }
 
   @transient
-  lazy val asByteSource: RichByteSource = objectStorageService.fetch(id)
+  lazy val asByteSource: RichByteSource = Await.result(objectStorageService.fetch(id), Duration.Inf)
 
   def duplicate(): FileAttachment = {
     val newFile = new FileAttachment(name)
@@ -160,7 +162,7 @@ class FileAttachment extends GeneratedId {
     token
   }
 
-  def hasData: Boolean = id.hasText && objectStorageService.keyExists(id)
+  def hasData: Boolean = id.hasText && Await.result(objectStorageService.keyExists(id), Duration.Inf)
 
   @transient var uploadedData: ByteSource = _
 

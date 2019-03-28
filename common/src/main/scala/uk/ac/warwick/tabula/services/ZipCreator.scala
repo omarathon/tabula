@@ -10,6 +10,7 @@ import org.apache.commons.compress.archivers.zip.{ZipArchiveEntry, ZipArchiveOut
 import org.springframework.http.HttpStatus
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.FileHasherComponent
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Closeables, Logging}
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
@@ -18,6 +19,8 @@ import uk.ac.warwick.tabula.system.exceptions.UserError
 import uk.ac.warwick.util.core.spring.FileUtils
 
 import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
   * An item in a Zip file. Can be a file or a folder.
@@ -69,17 +72,18 @@ trait ZipCreator extends Logging with TaskBenchmarking {
     * it becomes stale.
     */
   @throws[ZipRequestTooLargeError]("if the file doesn't exist and the items are too large to be zipped")
-  def getZip(name: String, items: Seq[ZipItem]): RenderableFile = {
-    objectStorageService.renderable(objectKey(name), Some(name)).getOrElse {
-      writeZip(name, items)
-    }
-  }
+  def getZip(name: String, items: Seq[ZipItem]): Future[RenderableFile] =
+    objectStorageService.renderable(objectKey(name), Some(name))
+      .flatMap {
+        case Some(f) => Future.successful(f)
+        case _ => writeZip(name, items)
+      }
 
   /**
     * Create a new Zip with a randomly generated name.
     */
   @throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-  def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = { (_, _) => }): RenderableFile = benchmarkTask("Create unnamed zip") {
+  def createUnnamedZip(items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] = benchmarkTask("Create unnamed zip") {
     writeZip(unusedName, items, progressCallback)
   }
 
@@ -89,34 +93,34 @@ trait ZipCreator extends Logging with TaskBenchmarking {
   private val CompressionLevel = Deflater.BEST_COMPRESSION
 
   @throws[ZipRequestTooLargeError]("if the items are too large to be zipped")
-  private def writeZip(name: String, items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = { (_, _) => }): RenderableFile = {
-    if (isOverSizeLimit(items)) throw new ZipRequestTooLargeError
+  private def writeZip(name: String, items: Seq[ZipItem], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] =
+    if (isOverSizeLimit(items)) {
+      Future.failed(new ZipRequestTooLargeError)
+    } else {
+      // Create a temporary file
+      val file = File.createTempFile(name, ".zip")
 
-    // Create a temporary file
-    val file = File.createTempFile(name, ".zip")
+      val future =
+        Future {
+          openZipStream(file) { zip =>
+            zip.setLevel(CompressionLevel)
+            // HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip
+            zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
+            writeItems(items, zip, progressCallback)
+          }
+        }.flatMap { _ =>
+          val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
 
-    try {
-      openZipStream(file) { (zip) =>
-        zip.setLevel(CompressionLevel)
-        // HFC-70 Windows compatible, but fixes filenames in good apps like 7-zip
-        zip.setCreateUnicodeExtraFields(UnicodeExtraFieldPolicy.NOT_ENCODEABLE)
-        writeItems(items, zip, progressCallback)
-      }
+          // Upload the zip to the object store
+          objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
+        }.flatMap { _ =>
+          objectStorageService.renderable(objectKey(name), Some(name)).map(_.get)
+        }
 
-      val hash = Closeables.closeThis(new FileInputStream(file))(fileHasher.hash)
+      future.onComplete { _ => if (!file.delete()) file.deleteOnExit() }
 
-      // Upload the zip to the object store
-      benchmarkTask("Push zip to object store") {
-        objectStorageService.push(objectKey(name), Files.asByteSource(file), ObjectStorageService.Metadata(contentLength = file.length(), contentType = "application/zip", fileHash = Some(hash)))
-      }
-
-      benchmarkTask("Return renderable zip") {
-        objectStorageService.renderable(objectKey(name), Some(name)).get
-      }
-    } finally {
-      if (!file.delete()) file.deleteOnExit()
+      future
     }
-  }
 
   private val UnusedFilenameAttempts = 100
 
@@ -124,7 +128,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
   private def unusedName: String =
     Stream.range(1, UnusedFilenameAttempts)
       .map { _ => randomUUID }
-      .find { name => !objectStorageService.keyExists(objectKey(name)) }
+      .find { name => !Await.result(objectStorageService.keyExists(objectKey(name)), Duration.Inf) }
       .getOrElse(throw new IllegalStateException("Couldn't find unique key"))
 
   private def randomUUID: String = UUID.randomUUID.toString.replace("-", "")
@@ -134,33 +138,34 @@ trait ZipCreator extends Logging with TaskBenchmarking {
     *
     * @param name The name as passed to getZip when creating the file.
     */
-  def invalidate(name: String): Unit = objectStorageService.delete(objectKey(name))
+  def invalidate(name: String): Future[Unit] = objectStorageService.delete(objectKey(name))
 
   private def writeItems(items: Seq[ZipItem], zip: ZipArchiveOutputStream, progressCallback: (Int, Int) => Unit = { (_, _) => }): Unit = benchmarkTask("Write zip items") {
     def writeFolder(basePath: String, items: Seq[ZipItem]) {
-      items.zipWithIndex.foreach { case (item, index) => item match {
-        case file: ZipFileItem if Option(file.source).nonEmpty && file.length > 0 =>
-          benchmarkTask(s"Write ${file.name}") {
-            try {
-              val entry = new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength))
-              logger.info(s"Creating entry named ${entry.getName}")
-              zip.putArchiveEntry(entry)
-              logger.info(s"Copying file into archive")
-              file.source.copyTo(zip)
-              logger.info("Closing archive entry")
-              zip.closeArchiveEntry()
-              progressCallback(index, items.size)
-            } catch {
-              case e: Exception =>
-                logger.error("Exception adding file to archive", e)
-                throw e
+      items.zipWithIndex.foreach { case (item, index) =>
+        item match {
+          case file: ZipFileItem if Option(file.source).nonEmpty && file.length > 0 =>
+            benchmarkTask(s"Write ${file.name}") {
+              try {
+                val entry = new ZipArchiveEntry(basePath + trunc(file.name, MaxFileLength))
+                logger.info(s"Creating entry named ${entry.getName}")
+                zip.putArchiveEntry(entry)
+                logger.info(s"Copying file into archive")
+                file.source.copyTo(zip)
+                logger.info("Closing archive entry")
+                zip.closeArchiveEntry()
+                progressCallback(index, items.size)
+              } catch {
+                case e: Exception =>
+                  logger.error("Exception adding file to archive", e)
+                  throw e
+              }
             }
-          }
-        case file: ZipFileItem =>
-          // do nothing
-          progressCallback(index, items.size)
-        case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
-      }
+          case _: ZipFileItem =>
+            // do nothing
+            progressCallback(index, items.size)
+          case folder: ZipFolderItem => writeFolder(basePath + trunc(folder.name, MaxFolderLength) + "/", folder.items)
+        }
       }
     }
 
@@ -180,7 +185,7 @@ trait ZipCreator extends Logging with TaskBenchmarking {
     * The output stream is always closed, and if anything bad happens the file
     * is deleted.
     */
-  private def openZipStream(file: File)(fn: (ZipArchiveOutputStream) => Unit) {
+  private def openZipStream(file: File)(fn: ZipArchiveOutputStream => Unit) {
     var zip: ZipArchiveOutputStream = null
     var thrownException: Exception = null
     try {

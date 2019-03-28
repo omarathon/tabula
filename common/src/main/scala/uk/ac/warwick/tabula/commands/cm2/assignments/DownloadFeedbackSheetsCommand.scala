@@ -10,6 +10,9 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 /**
   * Downloads a feedback sheet per student in the assignment member list
   */
@@ -63,7 +66,7 @@ class DownloadFeedbackSheetsCommandInternal(val assignment: Assignment)
   override def applyInternal(): RenderableFile = {
     if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)
 
-    zipService.getMemberFeedbackTemplates(members, assignment)
+    Await.result(zipService.getMemberFeedbackTemplates(members, assignment), Duration.Inf)
   }
 
 }

@@ -14,6 +14,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -78,7 +79,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-  with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with Logging {
+  with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with TaskBenchmarking {
 
   override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
@@ -160,7 +161,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
   }
 
-  override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = {
+  override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = benchmarkTask(s"Finalise $markerFeedback") {
     val parent = markerFeedback.feedback
 
     parent.clearCustomFormValues()

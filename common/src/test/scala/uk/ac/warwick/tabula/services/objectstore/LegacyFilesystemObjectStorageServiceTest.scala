@@ -35,9 +35,9 @@ class LegacyFilesystemObjectStorageServiceTest extends TestBase with Mockito {
       Files.asByteSink(file).asCharSink(StandardCharsets.UTF_8).write("content") // just to make isEmpty return false
     }
 
-    service.fetch("aaaabbbbccccdddd").isEmpty should be(false)
-    service.fetch("aaaabbbbddddeeee").isEmpty should be(false)
-    service.fetch("aaaabbbbccccefef").isEmpty should be(false)
+    service.fetch("aaaabbbbccccdddd").futureValue.isEmpty should be(false)
+    service.fetch("aaaabbbbddddeeee").futureValue.isEmpty should be(false)
+    service.fetch("aaaabbbbccccefef").futureValue.isEmpty should be(false)
   }
 
 }

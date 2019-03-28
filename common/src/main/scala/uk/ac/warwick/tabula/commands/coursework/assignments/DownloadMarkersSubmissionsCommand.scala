@@ -10,6 +10,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 
 /**
   * Download one or more submissions from an assignment, as a Zip, for you as a marker.
@@ -43,7 +46,7 @@ class DownloadMarkersSubmissionsCommand(val module: Module, val assignment: Assi
       assignment.getAllMarkerFeedbacks(submission.usercode, marker).headOption.exists(mf => mf.state != MarkingCompleted)
     }
 
-    zipService.getSomeSubmissionsZip(filteredSubmissions)
+    Await.result(zipService.getSomeSubmissionsZip(filteredSubmissions), Duration.Inf)
   }
 
 }

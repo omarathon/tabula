@@ -66,7 +66,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       fileHash = None
     ))
 
-    val fetchedByteSource: RichByteSource = encryptedObjectStorageService.fetch("encrypted")
+    val fetchedByteSource: RichByteSource = encryptedObjectStorageService.fetch("encrypted").futureValue
     fetchedByteSource.isEmpty should be (false)
 
     fetchedByteSource.hash(Hashing.sha256()).toString should be (sha256)
@@ -85,7 +85,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       fileHash = None
     ))
 
-    encryptedObjectStorageService.fetch("encrypted").metadata should be (Some(ObjectStorageService.Metadata(
+    encryptedObjectStorageService.fetch("encrypted").futureValue.metadata should be (Some(ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None,
@@ -93,7 +93,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
     )))
 
     // Directly on the encrypted metadata
-    val metadata: Option[ObjectStorageService.Metadata] = objectStorageService.fetch("encrypted").metadata
+    val metadata: Option[ObjectStorageService.Metadata] = objectStorageService.fetch("encrypted").futureValue.metadata
     metadata should be ('defined)
     metadata.get.contentLength should be (14960)
     metadata.get.contentType should be ("application/octet-stream")

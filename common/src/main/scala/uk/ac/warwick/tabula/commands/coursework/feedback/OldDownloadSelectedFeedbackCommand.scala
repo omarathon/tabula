@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services.{AssessmentService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 /**
   * Download one or more submissions from an assignment, as a Zip.
@@ -48,7 +50,7 @@ class OldDownloadSelectedFeedbackCommand(val module: Module, val assignment: Ass
     }
 
     if (feedbacks.size() < FeedbackZipFileJob.minimumFeedbacks) {
-      val zip = zipService.getSomeFeedbacksZip(feedbacks.asScala)
+      val zip = Await.result(zipService.getSomeFeedbacksZip(feedbacks.asScala), Duration.Inf)
       Left(zip)
     } else {
       Right(jobService.add(Option(user), FeedbackZipFileJob(feedbacks.asScala.map(_.id))))

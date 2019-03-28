@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
@@ -262,8 +263,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
       val backingFile: File = createTemporaryFile()
       attachment.objectStorageService = smartMock[ObjectStorageService]
-      attachment.objectStorageService.keyExists(attachment.id) returns true
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
       val file = new UploadedFile
       file.maintenanceMode = smartMock[MaintenanceModeService]
@@ -292,8 +293,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
       val backingFile: File = createTemporaryFile()
       attachment.objectStorageService = smartMock[ObjectStorageService]
-      attachment.objectStorageService.keyExists(attachment.id) returns true
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
       val file = new UploadedFile
       file.attached.add(attachment)
@@ -314,8 +315,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 
       val backingFile: File = createTemporaryFile()
       attachment.objectStorageService = smartMock[ObjectStorageService]
-      attachment.objectStorageService.keyExists(attachment.id) returns true
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
       val file = new UploadedFile
       file.attached.add(attachment)

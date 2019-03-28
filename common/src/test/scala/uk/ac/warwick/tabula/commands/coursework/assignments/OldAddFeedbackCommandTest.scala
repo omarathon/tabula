@@ -12,13 +12,15 @@ import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.Mockito
 
+import scala.concurrent.Future
+
 // scalastyle:off magic.number
 class OldAddFeedbackCommandTest extends TestBase with Mockito {
 
   var objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
   // Start from the basis that the store is empty
-  objectStorageService.fetch(any[String]) returns RichByteSource.empty
+  objectStorageService.fetch(any[String]) returns Future.successful(RichByteSource.empty)
 
   val module: Module = Fixtures.module("cs118")
   val assignment: Assignment = Fixtures.assignment("my assignment")
