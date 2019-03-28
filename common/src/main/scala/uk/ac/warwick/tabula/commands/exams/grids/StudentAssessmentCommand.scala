@@ -76,7 +76,8 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
     val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
       val normalLoad: BigDecimal =
         normalCATSLoadService.find(studentCourseYearDetails.route, academicYear, studentCourseYearDetails.yearOfStudy).map(_.normalLoad)
-          .getOrElse(studentCourseYearDetails.route.degreeType.normalCATSLoad)
+          .orElse(Option(studentCourseYearDetails.route).flatMap { r => Option(r.degreeType) }.map(_.normalCATSLoad))
+          .getOrElse(DegreeType.Undergraduate.normalCATSLoad)
 
       val routeRules: Seq[UpstreamRouteRule] =
         studentCourseYearDetails.level.map { l =>
