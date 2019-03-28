@@ -4,13 +4,14 @@ import org.joda.time.DateTime
 import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.coursework.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -67,7 +68,7 @@ class OldAdminAddMarksCommandInternal(val module: Module, val assessment: Assess
         case false => None
       }
 
-      feedback.actualGrade = Option(actualGrade)
+      feedback.actualGrade = actualGrade.maybeText
 
       feedback.updatedDate = DateTime.now
 

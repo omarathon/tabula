@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
 import java.util
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.joda.time.DateTime
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.{MappingSqlQueryWithParameters, SqlUpdate}
@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.scheduling.ExportFeedbackToSitsService.{CountQuery, ExportFeedbackToSitsQuery, PartialMatchQuery, SasRow}
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 trait ExportFeedbackToSitsServiceComponent {
   def exportFeedbackToSitsService: ExportFeedbackToSitsService
@@ -37,8 +36,8 @@ trait ExportFeedbackToSitsService {
 }
 
 class ParameterGetter(feedback: Feedback) {
-  val assessGroups: mutable.Buffer[AssessmentGroup] = feedback.assessmentGroups.asScala
-  val possibleOccurrenceSequencePairs: mutable.Buffer[(String, String)] = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
+  val assessGroups: Seq[AssessmentGroup] = feedback.assessmentGroups
+  val possibleOccurrenceSequencePairs: Seq[(String, String)] = assessGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence))
 
   def getQueryParams: Option[util.HashMap[String, Object]] = possibleOccurrenceSequencePairs match {
     case pairs if pairs.isEmpty => None

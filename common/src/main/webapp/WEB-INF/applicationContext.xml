@@ -201,6 +201,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.SyllabusPlusLocationConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkPointConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkingDescriptorConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeConverter"/>
   </util:list>
 
   <bean id="typeConverter"
@@ -390,13 +391,21 @@
       <filter ref="postDataLoggingFilter" />
       <url-pattern>/*</url-pattern>
     </mapping>-->
+    <mapping>
+      <filter ref="xfoFilter"/>
+      <url-pattern>/*</url-pattern>
+    </mapping>
+    <mapping>
+      <filter ref="staticContentHeadersFilter"/>
+      <url-pattern>/static/*</url-pattern>
+    </mapping>
   </filter-stack>
 
   <import resource="filters-context.xml"/>
 
-
   <bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter"/>
   <bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter"/>
+  <bean id="staticContentHeadersFilter" class="uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter"/>
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter"/>
 

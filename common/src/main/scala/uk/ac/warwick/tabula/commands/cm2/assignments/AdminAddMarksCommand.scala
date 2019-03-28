@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import org.joda.time.DateTime
-import org.springframework.util.StringUtils
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{AddMarksCommandBindListener, AddMarksState}
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackChangeNotification
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Notification}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarksExtractorComponent, MarkItem}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
@@ -52,8 +52,8 @@ abstract class AdminAddMarksCommandInternal(val assignment: Assignment, val subm
           newFeedback.createdDate = DateTime.now
           newFeedback
         }
-        feedback.actualMark = if (StringUtils.hasText(markItem.actualMark)) Some(markItem.actualMark.toInt) else None
-        feedback.actualGrade = Some(markItem.actualGrade).filter(StringUtils.hasText)
+        feedback.actualMark = markItem.actualMark.maybeText.map(_.toInt)
+        feedback.actualGrade = markItem.actualGrade.maybeText
         markItem.fieldValues.asScala.foreach { case (fieldName, value) =>
           feedback.setFieldValue(fieldName, value)
         }

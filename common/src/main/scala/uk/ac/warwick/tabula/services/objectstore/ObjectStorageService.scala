@@ -51,6 +51,7 @@ object ObjectStorageService {
 
 trait RichByteSource extends ByteSource {
   def metadata: Option[ObjectStorageService.Metadata]
+  def encrypted: Boolean
 }
 
 object RichByteSource {
@@ -63,6 +64,7 @@ object RichByteSource {
 
     override lazy val size: Long = source.size()
     override lazy val isEmpty: Boolean = source.isEmpty
+    override val encrypted: Boolean = false
 
     override def read(): Array[Byte] = source.read()
   }
@@ -80,6 +82,7 @@ class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blob
   override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
   override lazy val isEmpty: Boolean = metadata.isEmpty
   override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override val encrypted: Boolean = false
 
   override def openStream(): InputStream = try byteSource.openStream() catch {
     // BlobBackedByteSource::openStream doesn't check whether a Blob's Payload is non-null
@@ -97,6 +100,7 @@ private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob], fetc
 
   override lazy val isEmpty: Boolean = metadata.isEmpty
   override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override val encrypted: Boolean = false
 }
 
 trait ObjectStorageService extends InitializingBean {

@@ -3,19 +3,20 @@ package uk.ac.warwick.tabula.commands.exams.grids
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions.Profiles
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.exams.grids.{AutowiringNormalCATSLoadServiceComponent, AutowiringUpstreamRouteRuleServiceComponent, NormalCATSLoadServiceComponent, UpstreamRouteRuleServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object StudentAssessmentCommand {
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
     new StudentAssessmentCommandInternal(studentCourseDetails, academicYear)
-      with AutowiringStudentCourseYearDetailsDaoComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringCourseAndRouteServiceComponent
+      with AutowiringNormalCATSLoadServiceComponent
+      with AutowiringUpstreamRouteRuleServiceComponent
       with ComposableCommand[StudentMarksBreakdown]
       with StudentAssessmentPermissions
       with StudentAssessmentCommandState
@@ -27,10 +28,11 @@ object StudentAssessmentProfileCommand {
   def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
     new StudentAssessmentCommandInternal(studentCourseDetails, academicYear)
       with ComposableCommand[StudentMarksBreakdown]
-      with AutowiringStudentCourseYearDetailsDaoComponent
       with AutowiringAssessmentMembershipServiceComponent
       with AutowiringModuleRegistrationServiceComponent
       with AutowiringCourseAndRouteServiceComponent
+      with AutowiringNormalCATSLoadServiceComponent
+      with AutowiringUpstreamRouteRuleServiceComponent
       with StudentAssessmentProfilePermissions
       with StudentAssessmentCommandState
       with ReadOnly with Unaudited
@@ -38,6 +40,7 @@ object StudentAssessmentProfileCommand {
 
 case class StudentMarksBreakdown(
   yearMark: Option[BigDecimal],
+  weightedMeanYearMark: Option[BigDecimal],
   yearWeighting: Option[CourseYearWeighting],
   modules: Seq[ModuleRegistrationAndComponents]
 )
@@ -51,9 +54,12 @@ case class Component(upstreamGroup: UpstreamGroup, member: UpstreamAssessmentGro
 
 class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
   extends CommandInternal[StudentMarksBreakdown] with TaskBenchmarking {
-
-  self: StudentAssessmentCommandState with StudentCourseYearDetailsDaoComponent with AssessmentMembershipServiceComponent
-    with ModuleRegistrationServiceComponent with CourseAndRouteServiceComponent =>
+  self: StudentAssessmentCommandState
+    with AssessmentMembershipServiceComponent
+    with ModuleRegistrationServiceComponent
+    with CourseAndRouteServiceComponent
+    with NormalCATSLoadServiceComponent
+    with UpstreamRouteRuleServiceComponent =>
 
   override def applyInternal(): StudentMarksBreakdown = {
     val modules = studentCourseYearDetails.moduleRegistrations.map { mr =>
@@ -64,14 +70,45 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
       ModuleRegistrationAndComponents(mr, components)
     }
 
-    val yearMark = moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
+    val weightedMeanYearMark: Option[BigDecimal] =
+      moduleRegistrationService.agreedWeightedMeanYearMark(studentCourseYearDetails.moduleRegistrations, Map(), allowEmpty = false).toOption
+
+    val yearMark: Option[BigDecimal] = Option(studentCourseYearDetails.agreedMark).map(BigDecimal.apply).orElse {
+      val normalLoad: BigDecimal =
+        normalCATSLoadService.find(studentCourseYearDetails.route, academicYear, studentCourseYearDetails.yearOfStudy).map(_.normalLoad)
+          .getOrElse(studentCourseYearDetails.route.degreeType.normalCATSLoad)
+
+      val routeRules: Seq[UpstreamRouteRule] =
+        studentCourseYearDetails.level.map { l =>
+          upstreamRouteRuleService.list(studentCourseYearDetails.route, academicYear, l)
+        }.getOrElse(Nil)
+
+      val overcatSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] =
+        moduleRegistrationService.overcattedModuleSubsets(studentCourseYearDetails.moduleRegistrations, Map(), normalLoad, routeRules)
+
+      if (overcatSubsets.size <= 1) {
+        // If the there's only one valid subset, just choose the mean mark
+        weightedMeanYearMark
+      } else studentCourseYearDetails.overcattingModules.flatMap { overcattingModules =>
+        // If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
+        // find the subset that matches those modules, and show that mark if found
+        overcatSubsets.find { case (_, subset) => subset.size == overcattingModules.size && subset.map(_.module).forall(overcattingModules.contains) }
+          .flatMap { case (overcatMark, _) =>
+            weightedMeanYearMark match {
+              case Some(mark) => Some(Seq(mark, overcatMark).max)
+              case _ => None
+            }
+          }
+      }
+    }
+
     val yearWeighting = courseAndRouteService.getCourseYearWeighting(
       studentCourseYearDetails.studentCourseDetails.course.code,
       studentCourseYearDetails.academicYear,
       studentCourseYearDetails.yearOfStudy
     )
 
-    StudentMarksBreakdown(yearMark, yearWeighting, modules)
+    StudentMarksBreakdown(yearMark, weightedMeanYearMark, yearWeighting, modules)
   }
 }
 

@@ -163,7 +163,7 @@ abstract class AbstractProgressionService extends ProgressionService {
     val possibleWeightedMeanMark = moduleRegistrationService.weightedMeanYearMark(entityYear.moduleRegistrations, Map(), allowEmpty = ProgressionService.allowEmptyYearMarks(yearWeightings, entityYear))
       .left.map(msg => s"$msg for year ${entityYear.yearOfStudy}")
 
-    val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear, Map(), normalLoad, routeRules)
+    val overcatSubsets = moduleRegistrationService.overcattedModuleSubsets(entityYear.moduleRegistrations, Map(), normalLoad, routeRules)
     if (overcatSubsets.size <= 1) {
       // If the there's only one valid subset, just choose the mean mark
       possibleWeightedMeanMark
@@ -171,10 +171,11 @@ abstract class AbstractProgressionService extends ProgressionService {
       // If the student has overcatted and a subset of modules has been chosen for the overcatted mark,
       // find the subset that matches those modules, and show that mark if found
       overcatSubsets.find { case (_, subset) => subset.size == entityYear.overcattingModules.get.size && subset.map(_.module).forall(entityYear.overcattingModules.get.contains) }
-        .map { case (overcatMark, _) => possibleWeightedMeanMark match {
-          case Right(mark) => Right(Seq(mark, overcatMark).max)
-          case Left(message) => Left(message)
-        }
+        .map { case (overcatMark, _) =>
+          possibleWeightedMeanMark match {
+            case Right(mark) => Right(Seq(mark, overcatMark).max)
+            case Left(message) => Left(message)
+          }
         }.getOrElse(Left("Could not find valid module registration subset matching chosen subset"))
     } else {
       Left("The overcat adjusted mark subset has not been chosen")

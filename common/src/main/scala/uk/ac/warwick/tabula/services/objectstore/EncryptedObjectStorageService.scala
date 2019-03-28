@@ -31,6 +31,7 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
     override lazy val metadata: Option[ObjectStorageService.Metadata] = delegate.metadata.map(unwrapMetadata)
     override lazy val isEmpty: Boolean = metadata.isEmpty
     override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+    override val encrypted: Boolean = true
 
     override def openStream(): InputStream = delegate.metadata.map { md =>
       val iv = Base64.getDecoder.decode(md.userMetadata(metadataIVKey).getBytes(StandardCharsets.UTF_8))

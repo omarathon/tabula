@@ -168,25 +168,26 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 
   def getGrantedRolesForUser[A <: PermissionsTarget : ClassTag](user: User): Seq[GrantedRole[A]] = {
     val scopeType = GrantedPermission.scopeType[A]
+
+    def joinRestriction(alias: String): String =
+      s"""on (
+        (ug.universityIds = false and $alias = :userId) or
+        (ug.universityIds = true and $alias = :universityId)
+      )"""
+
     val q =
       session.newQuery[GrantedRole[A]](
-        s"""
-				select distinct r
-				from GrantedRole r
-				where
-					${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
-					(
-						r._users.universityIds = false and
-						((:userId in elements(r._users.staticIncludeUsers)
-						or :userId in elements(r._users.includeUsers))
-						and :userId not in elements(r._users.excludeUsers))
-					) or (
-						r._users.universityIds = true and
-						((:universityId in elements(r._users.staticIncludeUsers)
-						or :universityId in elements(r._users.includeUsers))
-						and :universityId not in elements(r._users.excludeUsers))
-					)
-		""")
+    s"""
+          select distinct r
+          from GrantedRole r
+            inner join r._users ug
+            left join ug.staticIncludeUsers static ${joinRestriction("static")}
+            left join ug.includeUsers include ${joinRestriction("include")}
+            left join ug.excludeUsers exclude ${joinRestriction("exclude")}
+          where
+					  ${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
+            (static is not null or include is not null) and exclude is null
+        """)
         .setString("universityId", user.getWarwickId)
         .setString("userId", user.getUserId)
 
@@ -205,25 +206,26 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 
   def getGrantedPermissionsForUser[A <: PermissionsTarget : ClassTag](user: User): Seq[GrantedPermission[A]] = {
     val scopeType = GrantedPermission.scopeType[A]
+
+    def joinRestriction(alias: String): String =
+      s"""on (
+        (ug.universityIds = false and $alias = :userId) or
+        (ug.universityIds = true and $alias = :universityId)
+      )"""
+
     val q =
       session.newQuery[GrantedPermission[A]](
         s"""
-				select distinct r
-				from GrantedPermission r
-				where
-					${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
-					(
-						r._users.universityIds = false and
-						((:userId in elements(r._users.staticIncludeUsers)
-						or :userId in elements(r._users.includeUsers))
-						and :userId not in elements(r._users.excludeUsers))
-					) or (
-						r._users.universityIds = true and
-						((:universityId in elements(r._users.staticIncludeUsers)
-						or :universityId in elements(r._users.includeUsers))
-						and :universityId not in elements(r._users.excludeUsers))
-					)
-		""")
+          select distinct r
+          from GrantedPermission r
+            inner join r._users ug
+            left join ug.staticIncludeUsers static ${joinRestriction("static")}
+            left join ug.includeUsers include ${joinRestriction("include")}
+            left join ug.excludeUsers exclude ${joinRestriction("exclude")}
+          where
+					  ${if (scopeType.nonEmpty) "r.scopeType = :scopeType and " else ""}
+            (static is not null or include is not null) and exclude is null
+        """)
         .setString("universityId", user.getWarwickId)
         .setString("userId", user.getUserId)
 

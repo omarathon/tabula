@@ -88,7 +88,7 @@ trait StreamsFiles {
     val builder = new StringBuilder
     builder.append(if (FileServer.isServeInline(mimeType)) "inline" else "attachment")
 
-    file.suggestedFilename.orElse(fileName).foreach { filename =>
+    file.suggestedFilename.orElse(fileName).orElse(Option(file.filename).filter(_.hasText)).foreach { filename =>
       builder.append("; ")
       HttpHeaderParameterEncoding.encodeToBuilder("filename", filename, builder)
     }

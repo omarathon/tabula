@@ -96,16 +96,6 @@ trait UserGroupMembershipHelperLookup {
 
   lazy val groupsByUserHql: String = {
     // skip the university IDs check if we know we only ever use usercodes
-    val universityIdsClause =
-      if (checkUniversityIds)
-        """ or (
-          ug.universityIds = true and
-          ((:universityId in elements(ug.staticIncludeUsers)
-          or :universityId in elements(ug.includeUsers))
-          and :universityId not in elements(ug.excludeUsers))
-        )"""
-      else ""
-
     def joinRestriction(alias: String): String =
       if (checkUniversityIds)
         s"""on (

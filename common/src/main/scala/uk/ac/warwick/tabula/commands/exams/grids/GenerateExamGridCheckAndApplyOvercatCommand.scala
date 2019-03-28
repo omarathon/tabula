@@ -4,7 +4,6 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOvercatCommand.{Result, SelectCourseCommand}
-import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRuleLookup}
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
@@ -151,7 +150,7 @@ trait GenerateExamGridCheckAndApplyOvercatCommandState {
       val subsets = entity.validYears
         .filter { case (year, entityYear) => routeRulesLookup(entityYear.route, entityYear.level).nonEmpty }
         .mapValues(entityYear => moduleRegistrationService.overcattedModuleSubsets(
-          entityYear,
+          entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
           normalLoadLookup(entityYear.route),
           routeRulesLookup(entityYear.route, entityYear.level)

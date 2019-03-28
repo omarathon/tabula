@@ -57,7 +57,11 @@ object DurationFormatter {
     val duration = new Duration(start, end)
     var period = new Period(start, end, periodType)
 
-    if (roundUp && duration.getStandardDays >= 1 && (duration.getStandardHours > 0 || duration.getStandardMinutes > 0 || duration.getStandardSeconds > 0)) {
+    if (roundUp && (
+        (duration.getStandardDays >= 7 && (period.getHours > 0 || period.getMinutes > 0 || period.getSeconds > 0)) ||
+        (duration.getStandardDays >= 1 && period.getHours == 0 && (period.getMinutes > 0 || period.getSeconds > 0))
+      )
+    ) {
       period = period.plusDays(1)
     }
 

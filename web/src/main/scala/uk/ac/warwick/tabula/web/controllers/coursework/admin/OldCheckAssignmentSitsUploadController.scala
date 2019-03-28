@@ -39,7 +39,7 @@ class OldCheckAssignmentSitsUploadController extends OldCourseworkController wit
     } else {
       Mav("coursework/admin/assignments/publish/check_sits",
         "result" -> cmd.apply(),
-        "assessmentGroupPairs" -> feedback.assessmentGroups.asScala.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
+        "assessmentGroupPairs" -> feedback.assessmentGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
         "sprCodes" -> sprCodes
       )
     }

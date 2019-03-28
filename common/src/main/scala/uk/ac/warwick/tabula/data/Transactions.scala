@@ -5,6 +5,7 @@ import org.springframework.transaction.support._
 import org.springframework.transaction.annotation._
 import org.springframework.transaction.interceptor._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.exceptions.UserError
 
 trait TransactionalComponent {
   def transactional[A](
@@ -80,6 +81,10 @@ object Transactions extends TransactionAspectSupport {
       try {
         f
       } catch {
+        case ue: UserError =>
+          completeTransactionAfterThrowing(info, ue)
+          throw ue
+
         case t: Throwable =>
           logger.error("Exception thrown within transaction", t)
           completeTransactionAfterThrowing(info, t)

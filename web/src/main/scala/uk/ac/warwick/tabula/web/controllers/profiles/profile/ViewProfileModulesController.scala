@@ -47,6 +47,7 @@ class ViewProfileModulesController extends AbstractViewProfileController {
       "hasPermission" -> command.nonEmpty,
       "command" -> command,
       "yearMark" -> studentBreakdown.map(_.yearMark),
+      "weightedMeanYearMark" -> studentBreakdown.map(_.weightedMeanYearMark),
       "yearWeighting" -> studentBreakdown.flatMap(_.yearWeighting),
       "moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq()),
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),

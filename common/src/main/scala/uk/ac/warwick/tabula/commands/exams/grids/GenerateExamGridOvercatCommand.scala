@@ -150,7 +150,7 @@ trait GenerateExamGridOvercatCommandState {
   }
 
   lazy val overcattedModuleSubsets: Seq[(BigDecimal, Seq[ModuleRegistration])] = moduleRegistrationService.overcattedModuleSubsets(
-    examGridEntityYear,
+    examGridEntityYear.moduleRegistrations,
     overwrittenMarks,
     normalLoadLookup(examGridEntityYear.studentCourseYearDetails.get.studentCourseDetails.currentRoute),
     routeRules

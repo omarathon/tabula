@@ -86,7 +86,7 @@ class UrlMethodModelTest extends TestBase with Mockito {
 
     model.execute(env, params, null, body)
 
-    writer.getBuffer().toString() should be("https://courses.warwick.ac.uk/static/css/main.css.1234567890")
+    writer.getBuffer().toString() should be("https://courses.warwick.ac.uk/static/css/main.1234567890.css")
   }
 
 }

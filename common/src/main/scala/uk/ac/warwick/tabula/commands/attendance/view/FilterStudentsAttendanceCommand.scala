@@ -123,10 +123,12 @@ trait AttendanceFilterExtras extends FiltersStudents {
 
   // For Attendance Monitoring, we shouldn't consider sub-departments
   // but we will use the root department if the current dept has no routes at all
-  override lazy val allRoutes: mutable.Buffer[Route] =
-  if (department.routes.isEmpty) {
-    department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
-  } else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+  // TAB-6907 but only active ones
+  override lazy val allRoutes: Seq[Route] = {
+    if (department.routes.isEmpty) {
+      department.rootDepartment.routes.asScala.sorted(Route.DegreeTypeOrdering)
+    } else department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+  }.filter(_.active)
 
   override lazy val allOtherCriteria: Seq[String] = Seq(
     "Tier 4 only",

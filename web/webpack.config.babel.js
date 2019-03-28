@@ -107,6 +107,7 @@ const commonConfig = merge([
       },
     },
     externals: {
+      // Provided by ID7
       jquery: 'jQuery',
     },
   },

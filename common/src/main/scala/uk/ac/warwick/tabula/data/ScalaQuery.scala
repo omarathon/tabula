@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.ScrollableResults
+import org.hibernate.`type`.{BooleanType, IntegerType, LongType, StringType}
 import org.hibernate.transform.DistinctRootEntityResultTransformer
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -17,12 +18,20 @@ class ScalaQuery[A](c: org.hibernate.query.Query[A]) {
     c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE)
   }
 
+  def setInt(name: String, value: Int): ScalaQuery[A] = chainable {
+    c.setParameter(name, value, IntegerType.INSTANCE)
+  }
+
+  def setLong(name: String, value: Long): ScalaQuery[A] = chainable {
+    c.setParameter(name, value, LongType.INSTANCE)
+  }
+
   def setString(name: String, value: String): ScalaQuery[A] = chainable {
-    c.setString(name, value)
+    c.setParameter(name, value, StringType.INSTANCE)
   }
 
   def setBoolean(name: String, value: Boolean): ScalaQuery[A] = chainable {
-    c.setBoolean(name, value)
+    c.setParameter(name, value, BooleanType.INSTANCE)
   }
 
   def setEntity(name: String, entity: Any): ScalaQuery[A] = chainable {
@@ -70,7 +79,7 @@ class ScalaQuery[A](c: org.hibernate.query.Query[A]) {
 
 class ScalaUpdateQuery(c: org.hibernate.query.Query[_]) {
   def setString(name: String, value: String): ScalaUpdateQuery = chainable {
-    c.setString(name, value)
+    c.setParameter(name, value, StringType.INSTANCE)
   }
 
   def setEntity(name: String, entity: Any): ScalaUpdateQuery = chainable {

@@ -21,6 +21,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
     ReplicaSyncing,
     ViewAuditLog,
     ManageSyllabusPlusLocations,
+    ViewObjectStorage,
 
     StudentRelationshipType.Read,
     StudentRelationshipType.Manage,

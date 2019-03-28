@@ -43,7 +43,7 @@ trait GeneratesExamGridData extends CourseAndRouteServiceComponent with Maintena
       })
       .map { case (entity, entityYear) =>
         entityYear -> moduleRegistrationService.overcattedModuleSubsets(
-          entityYear,
+          entityYear.moduleRegistrations,
           entityYear.markOverrides.getOrElse(Map()),
           normalLoadLookup(entityYear.route),
           routeRulesLookup(entityYear.route, entityYear.level)
