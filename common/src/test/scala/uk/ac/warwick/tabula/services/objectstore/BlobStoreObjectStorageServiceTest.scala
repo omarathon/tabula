@@ -85,7 +85,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
     val fetchedFile: RichByteSource = service.fetch(key).futureValue
     fetchedFile.isEmpty should be(false)
@@ -102,7 +102,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
-    ))
+    )).futureValue
 
     service.fetch(key).futureValue.metadata should be(Some(ObjectStorageService.Metadata(
       contentLength = 14949,
@@ -119,19 +119,19 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
     service.keyExists(key).futureValue should be(true)
   }
 
   @Test def listKeysTransient(): Unit = new TransientBlobStoreFixture {
     val key = "my-lovely-file"
 
-    service.listKeys() should be('empty)
+    service.listKeys().futureValue should be('empty)
     service.push(key, byteSource, ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
     service.listKeys().futureValue.toList should be(List(key))
   }
 

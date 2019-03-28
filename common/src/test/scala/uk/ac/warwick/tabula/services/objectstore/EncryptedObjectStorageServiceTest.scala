@@ -64,7 +64,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
     val fetchedByteSource: RichByteSource = encryptedObjectStorageService.fetch("encrypted").futureValue
     fetchedByteSource.isEmpty should be (false)
@@ -83,7 +83,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
     encryptedObjectStorageService.fetch("encrypted").futureValue.metadata should be (Some(ObjectStorageService.Metadata(
       contentLength = 14949,

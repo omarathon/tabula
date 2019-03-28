@@ -116,6 +116,7 @@ trait ObjectStorageService extends InitializingBean {
   def renderable(key: String, fileName: Option[String]): Future[Option[RenderableFile]] =
     fetch(key).map {
       case null => None
+      case source if source.isEmpty => None
       case source => Some(new RenderableFile {
         override val filename: String = fileName.getOrElse(key)
 

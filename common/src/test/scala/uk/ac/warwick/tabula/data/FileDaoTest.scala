@@ -23,6 +23,8 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
 
   @Before def setup(): Unit = {
     dao.objectStorageService = objectStorageService
+    objectStorageService.keyExists(any[String]) returns Future.successful(false)
+    objectStorageService.push(any[String], any[ByteSource], any[ObjectStorageService.Metadata]) returns Future.successful(())
     dao.sessionFactory = sessionFactory
   }
 
@@ -37,7 +39,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
         dao.saveTemporary(attachment)
       }
     }
-    transactional { transactionStatus =>
+    transactional { _ =>
       dao.deleteOldTemporaryFiles should be(36) // 50 files, 14 days of leeway
     }
   }

@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import java.io.{InputStream, InputStreamReader}
-import java.nio.charset.StandardCharsets
+import java.io.InputStream
 
-import com.google.common.io.{ByteSource, CharStreams}
-import org.mockito.ArgumentMatcher
+import com.google.common.io.ByteSource
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent, FileHasherComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.services.objectstore.{LegacyAwareObjectStorageService, ObjectStorageService, ObjectStorageServiceComponent, RichByteSource}
@@ -78,6 +76,8 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
     when(command.fileHasher.hash(blob6is)) thenReturn "hash6"
     when(command.fileHasher.hash(blob8is)) thenReturn "hash8"
     when(command.fileHasher.hash(blob9is)) thenReturn "hash9"
+
+    when(command.defaultStoreService.push(any[String], any[RichByteSource], any[ObjectStorageService.Metadata])) thenReturn Future.successful(())
 
     command.applyInternal() should be(Set("3", "5", "6", "8", "9"))
 
