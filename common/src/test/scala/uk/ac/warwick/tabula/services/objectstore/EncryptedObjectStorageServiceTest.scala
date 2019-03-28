@@ -12,11 +12,15 @@ import javax.crypto.{KeyGenerator, SecretKey}
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.{BlobStoreContext, TransientApiMetadata}
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 import scala.collection.JavaConverters._
 
 class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   private[this] trait SecretKeyFixture {
     val secretKey: SecretKey
