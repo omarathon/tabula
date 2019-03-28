@@ -346,16 +346,16 @@ trait SubmissionAndFeedbackExport {
   }
 
   protected def feedbackData(student: WorkflowItems): Map[String, Any] = student.enhancedFeedback match {
-    case Some(item) if item.feedback.id.hasText =>
+    case Some(item) if item.feedback.id.hasText && !item.feedback.isPlaceholder =>
       Map(
         "id" -> item.feedback.id,
-        "uploaded" -> item.feedback.createdDate,
+        "uploaded" -> item.feedback.updatedDate,
         "released" -> item.feedback.released
       ) ++
         item.feedback.actualMark.map { mark => "mark" -> mark }.toMap ++
         item.feedback.actualGrade.map { grade => "grade" -> grade }.toMap ++
         Map("downloaded" -> (item.downloaded || (item.feedback.released && !item.feedback.hasAttachments && item.onlineViewed)))
-    case None => Map()
+    case _ => Map()
   }
 
   protected def adjustmentData(student: WorkflowItems): Map[String, Any] = {
