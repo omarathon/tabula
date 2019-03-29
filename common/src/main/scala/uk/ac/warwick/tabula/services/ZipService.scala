@@ -120,20 +120,20 @@ class ZipService
     * for a user, the zip _might_ work but look weird.
     */
   def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] = benchmarkTask("Create zip") {
-    createUnnamedZip(submissions.flatMap(getSubmissionZipItems), progressCallback)
+    createUnnamedZip(submissions.flatMap(getSubmissionZipItems), progressCallback).map(_.withSuggestedFilename("submissions.zip"))
   }
 
   /**
     * Get a zip containing these feedbacks.
     */
   def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] =
-    createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback)
+    createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback).map(_.withSuggestedFilename("feedback.zip"))
 
   /**
     * Get a zip containing these marker feedbacks.
     */
   def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): Future[RenderableFile] =
-    createUnnamedZip(markerFeedbacks.flatMap(getMarkerFeedbackZipItems))
+    createUnnamedZip(markerFeedbacks.flatMap(getMarkerFeedbackZipItems)).map(_.withSuggestedFilename("marker-feedback.zip"))
 
   /**
     * A zip of submissions with a folder for each student.
@@ -152,7 +152,7 @@ class ZipService
       val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
       ZipFileItem(filename, templateFile.asByteSource, templateFile.actualDataLength)
     }
-    createUnnamedZip(zipItems)
+    createUnnamedZip(zipItems).map(_.withSuggestedFilename("feedback-templates.zip"))
   }
 
   /**
@@ -168,7 +168,7 @@ class ZipService
   }
 
   def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): Future[RenderableFile] =
-    createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
+    createUnnamedZip(getMeetingRecordZipItems(meetingRecord)).map(_.withSuggestedFilename("meeting.zip"))
 
   private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
     meetingRecord.attachments.asScala.map { attachment =>
@@ -176,7 +176,7 @@ class ZipService
     }
 
   def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): Future[RenderableFile] =
-    createUnnamedZip(getMemberNoteZipItems(memberNote))
+    createUnnamedZip(getMemberNoteZipItems(memberNote)).map(_.withSuggestedFilename("note.zip"))
 
   private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
     memberNote.attachments.asScala.map { attachment =>
@@ -191,7 +191,7 @@ class ZipService
         else
           ZipFileItem(file.id + "-" + file.name, file.asByteSource, file.actualDataLength)
       })
-    }.toSeq)
+    }.toSeq).map(_.withSuggestedFilename("profiles.zip"))
   }
 }
 
