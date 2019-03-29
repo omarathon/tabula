@@ -10,12 +10,16 @@ import org.jclouds.blobstore.domain.{PageSet, StorageMetadata, StorageType}
 import org.jclouds.blobstore.options.ListContainerOptions
 import org.jclouds.blobstore.{BlobStore, BlobStoreContext}
 import org.mockito.Mockito._
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
 import scala.collection.JavaConverters._
 
 class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   private trait ListKeysFixture {
     val containerName = "tabula"
