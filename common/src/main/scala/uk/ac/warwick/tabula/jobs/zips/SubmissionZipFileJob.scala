@@ -4,8 +4,12 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
+
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.Transactions._
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object SubmissionZipFileJob {
   val identifier = "submission-zip-file"
@@ -37,7 +41,7 @@ class SubmissionZipFileJob extends ZipFileJob with AutowiringZipServiceComponent
         updateProgress(0)
         updateStatus("Initialising")
 
-        val zipFile = zipService.getSomeSubmissionsZip(submissions, updateZipProgress)
+        val zipFile = Await.result(zipService.getSomeSubmissionsZip(submissions, updateZipProgress), Duration.Inf)
         job.setString(ZipFileJob.ZipFilePathKey, zipFile.filename)
 
         updateProgress(100)

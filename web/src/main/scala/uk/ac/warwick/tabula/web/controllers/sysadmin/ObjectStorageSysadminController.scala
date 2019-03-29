@@ -14,6 +14,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.sysadmin.ObjectStorageSysadminCommand.ResolvedFile
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 @Controller
 @RequestMapping(value = Array("/sysadmin/objectstorage"))
 class ObjectStorageSysadminController extends BaseSysadminController {
@@ -83,7 +86,7 @@ trait ObjectStorageSysadminCommandFileResolver {
 
   def resolve(id: String): Option[ResolvedFile] =
     fileDao.getFileById(id).map { a => ResolvedFile(id, Some(a)) }.orElse {
-      if (objectStorageService.keyExists(id)) Some(ResolvedFile(id, None))
+      if (Await.result(objectStorageService.keyExists(id), Duration.Inf)) Some(ResolvedFile(id, None))
       else None
     }
 }
@@ -115,7 +118,7 @@ abstract class ObjectStorageSysadminDownloadCommandInternal(id: String) extends 
   override protected def applyInternal(): ObjectStorageSysadminDownloadCommand.Result =
     resolve(id) match {
       case Some(ResolvedFile(_, Some(attachment))) => new RenderableAttachment(attachment)
-      case Some(ResolvedFile(key, _)) => objectStorageService.renderable(key, None).getOrElse(throw new ItemNotFoundException)
+      case Some(ResolvedFile(key, _)) => Await.result(objectStorageService.renderable(key, None), Duration.Inf).getOrElse(throw new ItemNotFoundException)
       case _ => throw new ItemNotFoundException
     }
 

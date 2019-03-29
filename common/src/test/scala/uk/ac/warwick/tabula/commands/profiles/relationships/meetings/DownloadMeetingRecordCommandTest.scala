@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
+import scala.concurrent.Future
+
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
@@ -37,7 +39,7 @@ class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
       val fileAttach = new FileAttachment
       fileAttach.name = "Beltane.txt"
       fileAttach.objectStorageService = smartMock[ObjectStorageService]
-      fileAttach.objectStorageService.fetch(any[String]) returns RichByteSource.empty
+      fileAttach.objectStorageService.fetch(any[String]) returns Future.successful(RichByteSource.empty)
       fileAttach.fileDao = smartMock[FileDao]
       uploadedFile.attached.add(fileAttach)
 

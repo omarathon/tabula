@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 /**
@@ -35,7 +37,7 @@ class DownloadMarkersSubmissionsCommand(val assignment: Assignment, val marker: 
   self: ZipServiceComponent with AssessmentServiceComponent with StateServiceComponent =>
 
   override def applyInternal(): RenderableFile = {
-    zipService.getSomeSubmissionsZip(submissions)
+    Await.result(zipService.getSomeSubmissionsZip(submissions), Duration.Inf)
   }
 }
 

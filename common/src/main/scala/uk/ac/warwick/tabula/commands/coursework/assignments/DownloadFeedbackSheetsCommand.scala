@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AssessmentService, ZipService}
 import uk.ac.warwick.userlookup.User
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 
 /**
   * Downloads a feedback sheet per student in the assignment member list
@@ -30,7 +33,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
     if (members == null)
       members = assignmentMembershipService.determineMembershipUsers(assignment)
 
-    zipService.getMemberFeedbackTemplates(members, assignment)
+    Await.result(zipService.getMemberFeedbackTemplates(members, assignment), Duration.Inf)
   }
 
   override def describe(d: Description): Unit = {

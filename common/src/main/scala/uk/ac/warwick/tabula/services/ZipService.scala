@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGenerat
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFileDaoComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.helpers.Closeables._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorWithFileStorageComponent
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
@@ -20,6 +21,7 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, AutowiringTopLevelUrlC
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 @Service
 class ZipService
@@ -50,22 +52,23 @@ class ZipService
 
   private def resolvePathForSubmission(assignment: Assignment) = "all-submissions/" + partition(assignment.id)
 
-  def invalidateSubmissionZip(assignment: Assignment): Unit = invalidate(resolvePathForSubmission(assignment))
+  def invalidateSubmissionZip(assignment: Assignment): Future[Unit] = invalidate(resolvePathForSubmission(assignment))
 
-  def invalidateIndividualFeedbackZip(feedback: Feedback): Unit = {
-    invalidate(resolvePath(feedback))
-    invalidate(resolvePathForStudent(feedback))
+  def invalidateIndividualFeedbackZip(feedback: Feedback): Future[Unit] = {
+    Future.sequence(Seq(
+      invalidate(resolvePath(feedback)),
+      invalidate(resolvePathForStudent(feedback))
+    )).map(_ => ())
   }
 
-
-  def getFeedbackZip(feedback: Feedback): RenderableFile =
+  def getFeedbackZip(feedback: Feedback): Future[RenderableFile] =
     getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
 
-  def getSubmissionZip(submission: Submission): RenderableFile =
+  def getSubmissionZip(submission: Submission): Future[RenderableFile] =
     getZip(resolvePath(submission), getSubmissionZipItems(submission))
 
   private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] = {
-    (Seq(getOnlineFeedbackPdf(feedback)) ++ feedback.attachments.asScala).map { (attachment) =>
+    (Seq(getOnlineFeedbackPdf(feedback)) ++ feedback.attachments.asScala).map { attachment =>
       ZipFileItem(feedback.studentIdentifier + " - " + attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
   }
@@ -116,26 +119,26 @@ class ZipService
     * Get a zip containing these submissions. If there is more than one submission
     * for a user, the zip _might_ work but look weird.
     */
-  def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = { (_, _) => }): RenderableFile = benchmarkTask("Create zip") {
+  def getSomeSubmissionsZip(submissions: Seq[Submission], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] = benchmarkTask("Create zip") {
     createUnnamedZip(submissions.flatMap(getSubmissionZipItems), progressCallback)
   }
 
   /**
     * Get a zip containing these feedbacks.
     */
-  def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = { (_, _) => }): RenderableFile =
+  def getSomeFeedbacksZip(feedbacks: Seq[Feedback], progressCallback: (Int, Int) => Unit = { (_, _) => }): Future[RenderableFile] =
     createUnnamedZip(feedbacks.flatMap(getFeedbackZipItems), progressCallback)
 
   /**
     * Get a zip containing these marker feedbacks.
     */
-  def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): RenderableFile =
+  def getSomeMarkerFeedbacksZip(markerFeedbacks: Seq[MarkerFeedback]): Future[RenderableFile] =
     createUnnamedZip(markerFeedbacks.flatMap(getMarkerFeedbackZipItems))
 
   /**
     * A zip of submissions with a folder for each student.
     */
-  def getAllSubmissionsZip(assignment: Assignment): RenderableFile =
+  def getAllSubmissionsZip(assignment: Assignment): Future[RenderableFile] =
     getZip(resolvePathForSubmission(assignment),
       assignment.submissions.asScala.flatMap(getSubmissionZipItems))
 
@@ -143,7 +146,7 @@ class ZipService
     * A zip of feedback templates for each student registered on the assignment
     * assumes a feedback template exists
     */
-  def getMemberFeedbackTemplates(users: Seq[User], assignment: Assignment): RenderableFile = {
+  def getMemberFeedbackTemplates(users: Seq[User], assignment: Assignment): Future[RenderableFile] = {
     val templateFile = assignment.feedbackTemplate.attachment
     val zipItems: Seq[ZipItem] = for (user <- users) yield {
       val filename = assignment.module.code + " - " + user.getWarwickId + " - " + templateFile.name
@@ -164,23 +167,23 @@ class ZipService
     }
   }
 
-  def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): RenderableFile =
+  def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): Future[RenderableFile] =
     createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
 
   private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
-    meetingRecord.attachments.asScala.map { (attachment) =>
+    meetingRecord.attachments.asScala.map { attachment =>
       ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
 
-  def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): RenderableFile =
+  def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): Future[RenderableFile] =
     createUnnamedZip(getMemberNoteZipItems(memberNote))
 
   private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
-    memberNote.attachments.asScala.map { (attachment) =>
+    memberNote.attachments.asScala.map { attachment =>
       ZipFileItem(attachment.name, attachment.asByteSource, attachment.actualDataLength)
     }
 
-  def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): RenderableFile = {
+  def getProfileExportZip(results: Map[String, Seq[FileAttachment]]): Future[RenderableFile] = {
     createUnnamedZip(results.map { case (uniId, files) =>
       ZipFolderItem(uniId, files.zipWithIndex.map { case (file, index) =>
         if (index == 0)
@@ -206,7 +209,7 @@ object Zips {
     * Provides an iterator for ZipEntry items which will be closed when you're done with them.
     * The object returned from the function is converted to a list to guarantee that it's evaluated before closing.
     */
-  def iterator[A](zip: ZipArchiveInputStream)(fn: (Iterator[ZipArchiveEntry]) => Iterator[A]): List[A] = ensureClose(zip) {
+  def iterator[A](zip: ZipArchiveInputStream)(fn: Iterator[ZipArchiveEntry] => Iterator[A]): List[A] = ensureClose(zip) {
     fn(Iterator.continually {
       zip.getNextZipEntry
     }.takeWhile {
@@ -214,12 +217,12 @@ object Zips {
     }).toList
   }
 
-  def map[A](zip: ZipInputStream)(fn: (ZipEntry) => A): Seq[A] = ensureClose(zip) {
+  def map[A](zip: ZipInputStream)(fn: ZipEntry => A): Seq[A] = ensureClose(zip) {
     Iterator.continually {
       zip.getNextEntry
     }.takeWhile {
       _ != null
-    }.map { (item) =>
+    }.map { item =>
       val t = fn(item)
       zip.closeEntry()
       t

@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceC
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object DownloadAllSubmissionsCommand {
   type Result = RenderableFile
@@ -35,7 +37,7 @@ class DownloadAllSubmissionsCommandInternal(val assignment: Assignment, val file
   extends CommandInternal[Result] with DownloadAllSubmissionsCommandState {
   self: ZipServiceComponent =>
 
-  override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getAllSubmissionsZip(assignment), Duration.Inf)
 }
 
 trait DownloadAllSubmissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

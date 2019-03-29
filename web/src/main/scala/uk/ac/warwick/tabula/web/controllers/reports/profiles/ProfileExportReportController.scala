@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.web.controllers.reports.profiles
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
@@ -19,6 +18,9 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, ReportsController}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 @Controller
 @RequestMapping(Array("/reports/{department}/{academicYear}/profiles/export/report"))
@@ -73,7 +75,7 @@ class ProfileExportReportController extends ReportsController with AutowiringJob
       case Some(job: JobInstance) =>
         val objectStoreKey = ZipCreator.objectKey(job.getString(ProfileExportJob.ZipFilePathKey))
 
-        objectStorageService.renderable(objectStoreKey, Some("tabula-profile-export.zip")) match {
+        Await.result(objectStorageService.renderable(objectStoreKey, Some("tabula-profile-export.zip")), Duration.Inf) match {
           case Some(f) => fileServer.serve(f, "tabula-profile-export.zip")
           case _ => throw new ItemNotFoundException()
         }

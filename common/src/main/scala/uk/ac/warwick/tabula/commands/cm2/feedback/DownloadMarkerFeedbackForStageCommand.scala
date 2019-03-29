@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object DownloadMarkerFeedbackForStageCommand {
   type Result = RenderableFile
@@ -74,7 +76,7 @@ class DownloadMarkerFeedbackForStageCommandInternal(val assignment: Assignment, 
   self: ZipServiceComponent =>
 
   override def applyInternal(): Result =
-    zipService.getSomeMarkerFeedbacksZip(previousFeedback)
+    Await.result(zipService.getSomeMarkerFeedbacksZip(previousFeedback), Duration.Inf)
 }
 
 trait DownloadMarkerFeedbackForStagePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

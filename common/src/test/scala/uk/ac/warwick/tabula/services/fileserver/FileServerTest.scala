@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{FeaturesImpl, Mockito, TestBase}
 
+import scala.concurrent.Future
+
 class FileServerTest extends TestBase with Mockito {
 
   val server = new FileServer
@@ -29,7 +31,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns RichByteSource.empty
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.empty)
 
     val file = new RenderableAttachment(a)
 
@@ -48,7 +50,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))))
 
     val file = new RenderableAttachment(a)
 
@@ -69,7 +71,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None)))
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))))
 
     val file = new RenderableAttachment(a)
 
@@ -92,7 +94,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))))
 
     val file = new RenderableAttachment(a)
 
@@ -115,7 +117,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None)))
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))))
 
     val file = new RenderableAttachment(a)
 

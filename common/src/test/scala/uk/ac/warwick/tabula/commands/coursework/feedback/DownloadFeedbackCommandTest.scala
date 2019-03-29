@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByte
 import uk.ac.warwick.tabula.services.{UserLookupService, ZipService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
+import scala.concurrent.Future
+
 class DownloadFeedbackCommandTest extends TestBase with Mockito {
 
   trait Fixture {
@@ -42,7 +44,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
     val attachment = new FileAttachment
     attachment.id = "123"
     attachment.objectStorageService = mockObjectStorageService
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None)))
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))))
     attachment.name = "0123456-feedback.doc"
     feedback.attachments.add(attachment)
 
@@ -51,7 +53,7 @@ class DownloadFeedbackCommandTest extends TestBase with Mockito {
       val attachment = new FileAttachment
       attachment.id = "234"
       attachment.objectStorageService = mockObjectStorageService
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None)))
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(createTemporaryFile()), Some(ObjectStorageService.Metadata(contentLength = 0, contentType = "application/doc", fileHash = None))))
       attachment.name = "feedback.pdf"
       attachment
     })

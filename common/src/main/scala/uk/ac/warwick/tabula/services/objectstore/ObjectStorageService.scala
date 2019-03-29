@@ -26,8 +26,10 @@ import uk.ac.warwick.util.files.FileReferenceCreationStrategy.Target
 import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
 import uk.ac.warwick.util.files.hash.FileHashResolver
 import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 object ObjectStorageService {
 
@@ -104,16 +106,18 @@ private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob], fetc
 }
 
 trait ObjectStorageService extends InitializingBean {
-  def keyExists(key: String): Boolean
+  def keyExists(key: String): Future[Boolean]
 
-  def fetch(key: String): RichByteSource
+  def fetch(key: String): Future[RichByteSource]
 
   /**
     * Combines calls to fetch() and metadata()
     */
-  def renderable(key: String, fileName: Option[String]): Option[RenderableFile] =
-    Option(fetch(key)).filterNot(_.isEmpty).map { source =>
-      new RenderableFile {
+  def renderable(key: String, fileName: Option[String]): Future[Option[RenderableFile]] =
+    fetch(key).map {
+      case null => None
+      case source if source.isEmpty => None
+      case source => Some(new RenderableFile {
         override val filename: String = fileName.getOrElse(key)
 
         private lazy val fileMetadata = source.metadata
@@ -123,14 +127,14 @@ trait ObjectStorageService extends InitializingBean {
         override lazy val contentType: String = fileMetadata.map(_.contentType).getOrElse(MediaType.OCTET_STREAM.toString)
 
         override val byteSource: ByteSource = source
-      }
+      })
     }
 
-  def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit
+  def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Future[Unit]
 
-  def delete(key: String): Unit
+  def delete(key: String): Future[Unit]
 
-  def listKeys(): Stream[String]
+  def listKeys(): Future[Stream[String]]
 }
 
 @Service

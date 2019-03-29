@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object DownloadMarkersFeedbackForPositionCommand {
 
@@ -42,7 +44,7 @@ class DownloadMarkersFeedbackForPositionCommand(
       case SecondFeedback => Option(f.secondMarkerFeedback)
       case ThirdFeedback => Option(f.thirdMarkerFeedback)
     }).filter(_.state == MarkingState.MarkingCompleted)
-    zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks)
+    Await.result(zipService.getSomeMarkerFeedbacksZip(releasedMarkerFeedbacks), Duration.Inf)
   }
 }
 
