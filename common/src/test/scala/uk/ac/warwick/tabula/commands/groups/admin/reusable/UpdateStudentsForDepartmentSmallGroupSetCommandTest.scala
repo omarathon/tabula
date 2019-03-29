@@ -125,7 +125,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
     new CommandFixture {
       department.autoGroupDeregistration = true
 
-      set.members.knownType.includedUserIds = Seq("0000001", "0000002", "0000003", "0000004")
+      set.members.knownType.includedUserIds = Set("0000001", "0000002", "0000003", "0000004")
       command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
 
       command.linkToSits = false
@@ -134,13 +134,13 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       groupA.groupSet = set
       set.groups.add(groupA)
       wireUserLookup(groupA.students)
-      groupA.students.knownType.includedUserIds = Seq("0000001", "0000002")
+      groupA.students.knownType.includedUserIds = Set("0000001", "0000002")
 
       val groupB: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group B")
       groupB.groupSet = set
       set.groups.add(groupB)
       wireUserLookup(groupB.students)
-      groupB.students.knownType.includedUserIds = Seq("0000003", "0000004")
+      groupB.students.knownType.includedUserIds = Set("0000003", "0000004")
 
       command.applyInternal() should be(set)
 

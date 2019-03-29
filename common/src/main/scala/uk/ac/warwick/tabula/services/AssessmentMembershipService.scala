@@ -322,8 +322,8 @@ trait AssessmentMembershipMethods extends Logging {
         }.distinct
       ).toSeq
 
-    val includes = others.map(_.users.map(u => u.getUserId -> u)).getOrElse(Nil)
-    val excludes = others.map(_.excludes.map(u => u.getUserId -> u)).getOrElse(Nil)
+    val includes = others.map(_.users.map(u => u.getUserId -> u).toSeq).getOrElse(Nil)
+    val excludes = others.map(_.excludes.map(u => u.getUserId -> u).toSeq).getOrElse(Nil)
 
     // convert lists of Users to lists of MembershipItems that we can render neatly together.
 
@@ -372,7 +372,7 @@ trait AssessmentMembershipMethods extends Logging {
         if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
       }.distinct.sortBy(_.position)
     val sitsUniIds = sitsMembers.map(_.universityId)
-    val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains)).getOrElse(Nil)
+    val includesUniIds = Option(exam.members).map(_.users.map(_.getWarwickId).filterNot(sitsUniIds.contains).toSeq).getOrElse(Nil)
     sitsMembers.map(m => userLookup.getUserByWarwickUniId(m.universityId) -> m.position) ++
       includesUniIds.map(u => userLookup.getUserByWarwickUniId(u)).sortBy(u => (u.getLastName, u.getFirstName)).map(u => u -> None)
   }
@@ -393,8 +393,8 @@ trait AssessmentMembershipMethods extends Logging {
 
     val sitsUsers = upstream.flatMap(_.currentMembers.map(_.universityId)).distinct
 
-    val includes = others.map(_.knownType.members).getOrElse(Nil)
-    val excludes = others.map(_.knownType.excludedUserIds).getOrElse(Nil)
+    val includes = others.map(_.knownType.members.toSeq).getOrElse(Nil)
+    val excludes = others.map(_.knownType.excludedUserIds.toSeq).getOrElse(Nil)
 
     deceasedUniIdsFilter((sitsUsers ++ includes).distinct.diff(excludes.distinct))
   }
@@ -407,8 +407,8 @@ trait AssessmentMembershipMethods extends Logging {
       case _ =>
         val sitsUsers = upstream.flatMap(_.currentMembers.map(_.universityId))
 
-        val includes = others.map(_.knownType.allIncludedIds) getOrElse Nil
-        val excludes = others.map(_.knownType.allExcludedIds) getOrElse Nil
+        val includes = others.map(_.knownType.allIncludedIds.toSeq) getOrElse Nil
+        val excludes = others.map(_.knownType.allExcludedIds.toSeq) getOrElse Nil
 
         deceasedUniIdsFilter((sitsUsers ++ includes).distinct.diff(excludes)).size
     }

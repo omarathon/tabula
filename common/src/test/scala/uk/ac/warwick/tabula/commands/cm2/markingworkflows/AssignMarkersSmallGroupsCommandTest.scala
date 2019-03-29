@@ -67,7 +67,7 @@ class AssignMarkersSmallGroupsCommandTest extends TestBase with Mockito {
       userGroup.userLookup = mockUserLookup
       val map = usercodes.map(u => u -> users(u)).toMap.asJava
       when(mockUserLookup.getUsersByUserIds(usercodes.asJava)) thenReturn map
-      userGroup.includedUserIds = usercodes
+      userGroup.includedUserIds = usercodes.toSet
       userGroup
     }
 
@@ -85,7 +85,7 @@ class AssignMarkersSmallGroupsCommandTest extends TestBase with Mockito {
     assignment.module = module
     assignment.academicYear = AcademicYear(2014)
 
-    val workflow = DoubleWorkflow("Test workflow", module.adminDepartment, ug1.users, ug2.users)
+    val workflow = DoubleWorkflow("Test workflow", module.adminDepartment, ug1.users.toSeq, ug2.users.toSeq)
     workflow.stageMarkers.asScala.foreach(_.markers.asInstanceOf[UserGroup].userLookup = mockUserLookup)
     assignment.cm2MarkingWorkflow = workflow
 

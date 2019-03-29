@@ -57,7 +57,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
       event.startTime = startTime
       event.endTime = endTime
       location.foreach { location => event.location = location }
-      event.tutors.knownType.includedUserIds = tutorUsercodes
+      event.tutors.knownType.includedUserIds = tutorUsercodes.toSet
 
       event
     }

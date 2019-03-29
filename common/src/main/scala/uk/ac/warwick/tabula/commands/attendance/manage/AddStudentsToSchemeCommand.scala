@@ -39,22 +39,22 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
     val previousUniversityIds = scheme.members.members
 
     if (linkToSits && !scheme.academicYear.isSITSInFlux(LocalDate.now)) {
-      scheme.members.staticUserIds = staticStudentIds.asScala
-      scheme.members.includedUserIds = includedStudentIds.asScala
-      scheme.members.excludedUserIds = excludedStudentIds.asScala
+      scheme.members.staticUserIds = staticStudentIds.asScala.toSet
+      scheme.members.includedUserIds = includedStudentIds.asScala.toSet
+      scheme.members.excludedUserIds = excludedStudentIds.asScala.toSet
       scheme.memberQuery = filterQueryString
     } else {
-      scheme.members.staticUserIds = Seq()
-      scheme.members.includedUserIds = Seq()
-      scheme.members.excludedUserIds = Seq()
+      scheme.members.staticUserIds = Set.empty
+      scheme.members.includedUserIds = Set.empty
+      scheme.members.excludedUserIds = Set.empty
       scheme.memberQuery = ""
-      scheme.members.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).distinct
+      scheme.members.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).toSet
     }
 
     scheme.updatedDate = DateTime.now
     attendanceMonitoringService.saveOrUpdate(scheme)
 
-    updateCheckpointTotals((previousUniversityIds ++ scheme.members.members).distinct, scheme.department, scheme.academicYear)
+    updateCheckpointTotals((previousUniversityIds ++ scheme.members.members).toSeq, scheme.department, scheme.academicYear)
 
     scheme
   }
@@ -114,7 +114,7 @@ trait AddStudentsToSchemeDescription extends Describable[AttendanceMonitoringSch
 
   override def describe(d: Description) {
     d.attendanceMonitoringScheme(scheme)
-      .property("membershipCount" -> ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).distinct.size)
+      .property("membershipCount" -> ((scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds).size)
   }
 
   override def describeResult(d: Description) {

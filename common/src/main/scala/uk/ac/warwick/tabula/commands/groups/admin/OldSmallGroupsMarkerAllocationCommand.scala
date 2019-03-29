@@ -46,13 +46,13 @@ class OldSmallGroupsMarkerAllocationCommandInternal(val assessment: Assessment)
           .distinct
 
         val students = group.students.users.filter(validStudents.contains)
-        GroupAllocation(group.name, validMarkers, students)
+        GroupAllocation(group.name, validMarkers, students.toSeq)
       })
 
       SetAllocation(
         set,
-        getGroupAllocations(assessment.markingWorkflow.firstMarkers.users),
-        getGroupAllocations(assessment.markingWorkflow.secondMarkers.users)
+        getGroupAllocations(assessment.markingWorkflow.firstMarkers.users.toSeq),
+        getGroupAllocations(assessment.markingWorkflow.secondMarkers.users.toSeq)
       )
     })
 

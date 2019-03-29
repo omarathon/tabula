@@ -62,7 +62,7 @@ class OldAssignMarkersTemplateCommandInternal(val assessment: Assessment) extend
     val firstMarkerAllocation = {
       val roleName = WorkbookUtil.createSafeSheetName(workflow.firstMarkerRoleName)
       AllocationInfo(
-        workflow.firstMarkers.users,
+        workflow.firstMarkers.users.toSeq,
         roleName,
         {
           val sheet = workbook.createSheet(roleName)
@@ -75,7 +75,7 @@ class OldAssignMarkersTemplateCommandInternal(val assessment: Assessment) extend
     val secondMarkerAllocation = workflow.secondMarkerRoleName.map(name => {
       val roleName = WorkbookUtil.createSafeSheetName(name)
       AllocationInfo(
-        workflow.secondMarkers.users,
+        workflow.secondMarkers.users.toSeq,
         roleName,
         {
           val sheet = workbook.createSheet(roleName)

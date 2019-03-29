@@ -34,7 +34,7 @@ class DeleteSchemeCommandInternal(val scheme: AttendanceMonitoringScheme)
     attendanceMonitoringService.deleteScheme(scheme)
 
     generateNotifications(Seq(scheme))
-    updateCheckpointTotals(previousUniversityIds, scheme.department, scheme.academicYear)
+    updateCheckpointTotals(previousUniversityIds.toSeq, scheme.department, scheme.academicYear)
 
     scheme
   }

@@ -59,15 +59,15 @@ class UpdateAttendanceMonitoringSchemeMembershipCommandInternal extends CommandI
             )
           }
 
-          scheme.members.staticUserIds = staticStudentIds
+          scheme.members.staticUserIds = staticStudentIds.toSet
           attendanceMonitoringService.saveOrUpdate(scheme)
 
-          val added = scheme.members.members.toSet -- previousUniversityIds.toSet
+          val added = scheme.members.members -- previousUniversityIds
           if (added.nonEmpty) logger.info(s"Added to scheme ${scheme.id} - ${added.mkString(", ")}")
-          val removed = previousUniversityIds.toSet -- scheme.members.members.toSet
+          val removed = previousUniversityIds -- scheme.members.members
           if (removed.nonEmpty) logger.info(s"Removed from scheme ${scheme.id} - ${removed.mkString(", ")}")
 
-          (previousUniversityIds ++ scheme.members.members).distinct.map((_, scheme.department, scheme.academicYear))
+          (previousUniversityIds ++ scheme.members.members).toSeq.map((_, scheme.department, scheme.academicYear))
 
         }
     }.distinct

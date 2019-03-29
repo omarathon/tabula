@@ -43,7 +43,7 @@ object OldAssignMarkersController {
   ): Seq[Marker] = {
     markers.map { markerId =>
       val assignedStudents: Seq[AssignmentStudent] = markerMap.get(markerId) match {
-        case Some(usergroup: UserGroup) => usergroup.users.map {
+        case Some(usergroup: UserGroup) => usergroup.users.toSeq.map {
           AssignmentStudent(_, module)
         }
         case None => Seq()
@@ -82,12 +82,12 @@ class OldAssignmentAssignMarkersController extends OldCourseworkController {
 
   @ModelAttribute("firstMarkers")
   def firstMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
-    retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).firstMarkers.knownType.members, assignment.firstMarkerMap, userLookup)
+    retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).firstMarkers.knownType.members.toSeq, assignment.firstMarkerMap, userLookup)
 
   @ModelAttribute("secondMarkers")
   def secondMarkers(@PathVariable module: Module, @PathVariable assignment: Assignment): Seq[Marker] =
     mandatory(assignment.markingWorkflow).hasSecondMarker match {
-      case true => retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).secondMarkers.knownType.members, assignment.secondMarkerMap, userLookup)
+      case true => retrieveMarkers(module, assignment, mandatory(assignment.markingWorkflow).secondMarkers.knownType.members.toSeq, assignment.secondMarkerMap, userLookup)
       case false => Seq()
     }
 

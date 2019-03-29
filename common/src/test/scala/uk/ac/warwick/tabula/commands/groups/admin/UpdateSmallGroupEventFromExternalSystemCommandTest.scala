@@ -48,7 +48,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
       event.startTime = startTime
       event.endTime = endTime
       location.foreach { location => event.location = location }
-      event.tutors.knownType.includedUserIds = tutorUsercodes
+      event.tutors.knownType.includedUserIds = tutorUsercodes.toSet
 
       event
     }

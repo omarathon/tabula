@@ -151,24 +151,24 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
       val set1 = new SmallGroupSet()
       set1.smallGroupService = None
 
-      set1.members.knownType.includedUserIds = Seq(student1.getWarwickId, student2.getWarwickId)
+      set1.members.knownType.includedUserIds = Set(student1.getWarwickId, student2.getWarwickId)
       wireUserLookup(set1.members)
 
       set1.membershipService = membershipService
-      membershipService.determineMembershipUsers(set1.upstreamAssessmentGroupInfos, Some(set1.members)) returns (set1.members.users)
+      membershipService.determineMembershipUsers(set1.upstreamAssessmentGroupInfos, Some(set1.members)) returns (set1.members.users.toSeq)
 
-      val s1: Seq[User] = set1.members.users
+      val s1: Seq[User] = set1.members.users.toSeq
 
       val set2 = new SmallGroupSet()
       set2.smallGroupService = None
 
-      set2.members.knownType.includedUserIds = Seq(student2.getWarwickId, student3.getWarwickId)
+      set2.members.knownType.includedUserIds = Set(student2.getWarwickId, student3.getWarwickId)
       wireUserLookup(set2.members)
 
       set2.membershipService = membershipService
-      membershipService.determineMembershipUsers(set2.upstreamAssessmentGroupInfos, Some(set2.members)) returns (set2.members.users)
+      membershipService.determineMembershipUsers(set2.upstreamAssessmentGroupInfos, Some(set2.members)) returns (set2.members.users.toSeq)
 
-      val s2: Seq[User] = set2.members.users
+      val s2: Seq[User] = set2.members.users.toSeq
 
       val notifier = new OpenSmallGroupSetNotifier with OpenSmallGroupSetState with UserAware {
         val department: Department = dept

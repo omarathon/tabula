@@ -55,7 +55,7 @@ class CreatePremarkedAssignmentFixtureCommand extends CommandInternal[Assignment
 
       val workflow = new FirstMarkerOnlyWorkflow(module.adminDepartment)
       workflow.name = "First marker only workflow"
-      workflow.firstMarkers.knownType.includedUserIds = CreatePremarkedAssignmentFixtureCommand.firstMarkers
+      workflow.firstMarkers.knownType.includedUserIds = CreatePremarkedAssignmentFixtureCommand.firstMarkers.toSet
       markingWorkflowService.save(workflow)
       assignment.markingWorkflow = workflow
 

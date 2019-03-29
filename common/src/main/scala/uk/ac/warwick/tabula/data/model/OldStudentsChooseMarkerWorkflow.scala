@@ -31,9 +31,9 @@ class OldStudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarke
     }
   }
 
-  def getMarkersStudents(assessment: Assessment, user: User): Seq[User] = assessment match {
-    case assignment: Assignment => getSubmissions(assignment, user).map(s => userLookupService.getUserByUserId(s.usercode))
-    case _ => Nil
+  def getMarkersStudents(assessment: Assessment, user: User): Set[User] = assessment match {
+    case assignment: Assignment => getSubmissions(assignment, user).map(_.usercode).toSet.map(userLookupService.getUserByUserId)
+    case _ => Set.empty
   }
 
 

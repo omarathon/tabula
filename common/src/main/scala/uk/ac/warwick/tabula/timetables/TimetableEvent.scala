@@ -92,8 +92,8 @@ object TimetableEvent {
       location = Option(sge.location),
       parent = TimetableEvent.Parent(Option(sge.group.groupSet.module)),
       comments = None,
-      staff = sge.tutors.users,
-      students = sge.group.students.users,
+      staff = sge.tutors.users.toSeq,
+      students = sge.group.students.users.toSeq,
       year = sge.group.groupSet.academicYear,
       relatedUrl = Option(RelatedUrl(sge.relatedUrl, Option(sge.relatedUrlTitle))),
       attendance = attendance

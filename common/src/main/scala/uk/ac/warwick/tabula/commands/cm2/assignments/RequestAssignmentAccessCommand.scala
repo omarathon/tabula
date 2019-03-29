@@ -32,7 +32,7 @@ trait RequestAssignmentAccessCommandState {
   def user: CurrentUser
 
   // lookup the admin users - used to determine the recipients  for notifications
-  lazy val admins: Seq[User] = assignment.module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
+  lazy val admins: Seq[User] = assignment.module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 }
 
 class RequestAssignmentAccessCommandInternal(val assignment: Assignment, val user: CurrentUser) extends CommandInternal[Result]

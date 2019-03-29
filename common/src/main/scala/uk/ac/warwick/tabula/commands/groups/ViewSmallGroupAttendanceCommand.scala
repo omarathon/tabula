@@ -145,25 +145,25 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
     val allStudents = benchmarkTask("Get a list of all registered or attended users") {
       (group.students.users ++
         userLookup.getUsersByWarwickUniIds(occurrences.flatMap(_.attendance.asScala).map(_.universityId)).values.toSeq)
-        .distinct
+        .toSeq
     }
 
     val attendance = benchmarkTask("For each student, build an attended list for each instance") {
       val attendance = allStudents.map { user => user -> attendanceForStudent(instances, isLate(user))(user) }
 
-      SortedMap(attendance.toSeq: _*)
+      SortedMap(attendance: _*)
     }
 
     val existingAttendanceNotes = benchmarkTask("Get attendance notes") {
       smallGroupService.findAttendanceNotes(allStudents.map(_.getWarwickId), occurrences).groupBy(_.student).map {
         case (student, notes) =>
           MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
-      }.toMap.withDefaultValue(Map())
+      }.withDefaultValue(Map())
     }
     val attendanceNotes = allStudents.map { student => student -> existingAttendanceNotes.getOrElse(student, Map()) }.toMap
 
     SmallGroupAttendanceInformation(
-      instances = instances.map { case ((event, week), occurrence) => (event, week) }.sorted,
+      instances = instances.map { case ((event, week), _) => (event, week) }.sorted,
       attendance = attendance,
       attendanceNotes
     )

@@ -161,7 +161,7 @@ trait ReplaceMarkerInMarkingWorkflowCommandState {
     } else {
       Seq()
     }
-    )).distinct.sortBy(u => (u.getLastName, u.getFirstName))
+    )).toSeq.sortBy(u => (u.getLastName, u.getFirstName))
 
   lazy val affectedAssignments: Seq[Assignment] = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow)
 }

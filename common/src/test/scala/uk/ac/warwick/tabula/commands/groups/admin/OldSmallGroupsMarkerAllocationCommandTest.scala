@@ -58,7 +58,7 @@ class OldSmallGroupsMarkerAllocationCommandTest extends TestBase with Mockito {
       userGroup.userLookup = mockUserLookup
       val map = usercodes.map(u => u -> users(u)).toMap.asJava
       when(mockUserLookup.getUsersByUserIds(usercodes.asJava)) thenReturn map
-      userGroup.includedUserIds = usercodes
+      userGroup.includedUserIds = usercodes.toSet
       userGroup
     }
 

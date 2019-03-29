@@ -90,8 +90,8 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     val notInGroup = smartMock[UnspecifiedTypeUserGroup]
     notInGroup.excludesUser(user) returns false
     notInGroup.includesUser(user) returns false
-    notInGroup.users returns Nil
-    notInGroup.excludes returns Nil
+    notInGroup.users returns Set.empty
+    notInGroup.excludes returns Set.empty
 
     service.isStudentCurrentMember(user, Nil, Some(notInGroup)) should be(false)
 

@@ -20,7 +20,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
       var group = UserGroup.ofUsercodes
       group.sessionFactory = mockSessionFactory
       // users that can't be changed (i.e. as imported from upstream)
-      group.staticUserIds = Seq("exoman", "eggdog")
+      group.staticUserIds = Set("exoman", "eggdog")
       // users added manually
       group.addUserId("superhat")
       group.addUserId("menace")
@@ -64,7 +64,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.addUserId("cuscav")
     group.addUserId("curef")
     group.excludeUserId("cusmab") // we don't like Steve
-    group.staticUserIds = Seq("sb_systemtest")
+    group.staticUserIds = Set("sb_systemtest")
     group.baseWebgroup = "in-elab"
 
     val webgroup = new GroupImpl
@@ -81,7 +81,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.addUserId("cuscav")
     group.addUserId("curef")
     group.excludeUserId("cusmab") // we don't like Steve
-    group.staticUserIds = Seq("sb_systemtest")
+    group.staticUserIds = Set("sb_systemtest")
     group.baseWebgroup = "in-elab"
 
     val group2 = UserGroup.ofUsercodes

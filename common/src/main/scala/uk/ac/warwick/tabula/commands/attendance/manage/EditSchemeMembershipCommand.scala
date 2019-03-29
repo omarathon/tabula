@@ -89,8 +89,8 @@ trait PopulateEditSchemeMembershipCommand extends PopulateOnForm {
   self: EditSchemeMembershipCommandState =>
 
   override def populate(): Unit = {
-    includedStudentIds = scheme.members.includedUserIds.asJava
-    excludedStudentIds = scheme.members.excludedUserIds.asJava
+    includedStudentIds = scheme.members.includedUserIds.toSeq.asJava
+    excludedStudentIds = scheme.members.excludedUserIds.toSeq.asJava
   }
 
 }
