@@ -179,7 +179,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
       group1event.startTime should be(new LocalTime(12, 0))
       group1event.endTime should be(new LocalTime(13, 0))
       group1event.location should be(NamedLocation("CS1.04"))
-      group1event.tutors.knownType.includedUserIds should be(Seq("abcdef"))
+      group1event.tutors.knownType.includedUserIds should be(Set("abcdef"))
 
       val group2event: SmallGroupEvent = group2.events.head
       group2event.weekRanges should be(Seq(WeekRange(6, 10)))
@@ -187,7 +187,7 @@ class ImportSmallGroupEventsFromExternalSystemCommandTest extends TestBase with 
       group2event.startTime should be(new LocalTime(12, 0))
       group2event.endTime should be(new LocalTime(13, 0))
       group2event.location should be(NamedLocation("CS1.04"))
-      group2event.tutors.knownType.includedUserIds should be(Seq("abcdef"))
+      group2event.tutors.knownType.includedUserIds should be(Set("abcdef"))
     }
   }
 

@@ -83,7 +83,7 @@ class DepartmentTest extends TestBase with Mockito {
     department.isOwnedBy("curef") should be (true)
     department.isOwnedBy("cusebr") should be (false)
 
-    ownersGroup.members should be(Seq("cuscav", "curef"))
+    ownersGroup.members should be(Set("cuscav", "curef"))
 
     department.isExtensionManager("cuscav") should be (false)
     extmanGroup.addUserId("cuscav")

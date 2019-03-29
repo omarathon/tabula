@@ -72,7 +72,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
 
     userLookup.groupService.groupMap += ("in-elab" -> webgroup)
 
-    group.members should be(Seq("sb_systemtest", "cuscav", "curef", "cusebr"))
+    group.members should be(Set("sb_systemtest", "cuscav", "curef", "cusebr"))
   }
 
   @Test def copy() {
@@ -112,7 +112,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.userLookup = mock[UserLookupService]
     group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
-    group.users should be(Seq(test))
+    group.users should be(Set(test))
     verify(group.userLookup, times(1)).getUsersByUserIds(any[JList[String]])
   }
 
@@ -124,7 +124,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.userLookup = mock[UserLookupService]
     group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
-    group.users should be(Seq(test))
+    group.users should be(Set(test))
     verify(group.userLookup, times(1)).getUsersByWarwickUniIds(any[Seq[String]])
   }
 
@@ -136,7 +136,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.userLookup = mock[UserLookupService]
     group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
-    group.excludes should be(Seq(test))
+    group.excludes should be(Set(test))
     verify(group.userLookup, times(1)).getUsersByUserIds(any[JList[String]])
   }
 
@@ -148,7 +148,7 @@ class UserGroupTest extends PersistenceTestBase with Mockito {
     group.userLookup = mock[UserLookupService]
     group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
-    group.excludes should be(Seq(test))
+    group.excludes should be(Set(test))
     verify(group.userLookup, times(1)).getUsersByWarwickUniIds(any[Seq[String]])
   }
 }

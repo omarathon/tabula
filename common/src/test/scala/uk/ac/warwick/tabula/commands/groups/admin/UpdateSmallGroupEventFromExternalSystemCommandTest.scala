@@ -166,7 +166,7 @@ class UpdateSmallGroupEventFromExternalSystemCommandTest extends TestBase with M
       event.startTime should be(new LocalTime(12, 0))
       event.endTime should be(new LocalTime(13, 0))
       event.location should be(NamedLocation("CS1.04"))
-      event.tutors.knownType.includedUserIds should be(Seq("abcdef"))
+      event.tutors.knownType.includedUserIds should be(Set("abcdef"))
     }
   }
 

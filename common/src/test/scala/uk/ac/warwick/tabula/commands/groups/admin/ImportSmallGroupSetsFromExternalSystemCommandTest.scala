@@ -212,7 +212,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
 
       val group1: SmallGroup = set.groups.get(1) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
       group1.name = "Group 1"
-      group1.students.knownType.includedUserIds should be(Seq("0000001", "0000002", "0000003"))
+      group1.students.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       group1.events.size should be(1)
 
       val group1event: SmallGroupEvent = group1.events.head
@@ -221,11 +221,11 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
       group1event.startTime should be(new LocalTime(12, 0))
       group1event.endTime should be(new LocalTime(13, 0))
       group1event.location should be(NamedLocation("CS1.04"))
-      group1event.tutors.knownType.includedUserIds should be(Seq("abcdef"))
+      group1event.tutors.knownType.includedUserIds should be(Set("abcdef"))
 
       val group2: SmallGroup = set.groups.get(0) // Order intentionally reversed; the events are re-ordered because Thursday is before Friday
       group2.name = "Group 2"
-      group2.students.knownType.includedUserIds should be(Seq("0000004", "0000005", "0000006"))
+      group2.students.knownType.includedUserIds should be(Set("0000004", "0000005", "0000006"))
 
       val group2event: SmallGroupEvent = group2.events.head
       group2event.weekRanges should be(Seq(WeekRange(6, 10)))
@@ -233,7 +233,7 @@ class ImportSmallGroupSetsFromExternalSystemCommandTest extends TestBase with Mo
       group2event.startTime should be(new LocalTime(12, 0))
       group2event.endTime should be(new LocalTime(13, 0))
       group2event.location should be(NamedLocation("CS1.04"))
-      group2event.tutors.knownType.includedUserIds should be(Seq("abcdef"))
+      group2event.tutors.knownType.includedUserIds should be(Set("abcdef"))
     }
   }
 

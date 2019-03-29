@@ -90,9 +90,9 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 
       command.applyInternal() should be(set)
 
-      set.members.knownType.staticUserIds should be(Seq("0000001", "0000002", "0000004"))
-      set.members.knownType.includedUserIds should be(Seq("0000003"))
-      set.members.knownType.excludedUserIds should be(Seq("0000004"))
+      set.members.knownType.staticUserIds should be(Set("0000001", "0000002", "0000004"))
+      set.members.knownType.includedUserIds should be(Set("0000003"))
+      set.members.knownType.excludedUserIds should be(Set("0000004"))
       set.memberQuery should be("sprStatuses=C")
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
@@ -113,7 +113,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
-      set.members.knownType.includedUserIds should be(Seq("0000001", "0000002", "0000003"))
+      set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery should be('empty)
 
@@ -145,12 +145,12 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
-      set.members.knownType.includedUserIds should be(Seq("0000001", "0000002", "0000003"))
+      set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery should be('empty)
 
-      groupA.students.knownType.includedUserIds should be(Seq("0000001", "0000002"))
-      groupB.students.knownType.includedUserIds should be(Seq("0000003")) // 4 has been removed
+      groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
+      groupB.students.knownType.includedUserIds should be(Set("0000003")) // 4 has been removed
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
