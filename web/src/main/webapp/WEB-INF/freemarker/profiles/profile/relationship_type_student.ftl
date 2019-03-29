@@ -346,7 +346,7 @@
         </table>
       </#if>
 
-      <#if relationshipsToDisplay?has_content>
+      <#if relationshipsToDisplay?has_content && manageableRelationships?has_content>
         <p>
           <#if canCreateScheduledMeetings && features.scheduledMeetings>
             <a class="btn btn-default new-meeting-record"
