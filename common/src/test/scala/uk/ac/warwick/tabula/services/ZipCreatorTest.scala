@@ -1,11 +1,15 @@
 package uk.ac.warwick.tabula.services
 
 import com.google.common.io.ByteSource
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
 
 class ZipCreatorTest extends TestBase {
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   val transientObjectStore: ObjectStorageService = createTransientObjectStore()
 
