@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.http.HttpStatus
 import org.apache.http.client.{HttpResponseException, ResponseHandler}
 import org.apache.http.client.methods.RequestBuilder
+import org.apache.http.util.EntityUtils
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, PeriodFormatter, PeriodFormatterBuilder}
 import org.joda.time.{DateTime, Period}
 import org.springframework.stereotype.Service
@@ -55,8 +57,16 @@ private class ExamTimetableHttpTimetableFetchingService(examTimetableConfigurati
 
   // an HTTPClient response handler which reads XML from the response and parses it into a list of TimetableEvents
   def handler(uniId: String): ResponseHandler[Seq[TimetableEvent]] =
-    ApacheHttpClientUtils.xmlResponseHandler { node =>
-      ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, toplevelUrl)
+    ApacheHttpClientUtils.handler {
+      // Catch 404s and handle them quietly
+      case response if response.getStatusLine.getStatusCode == HttpStatus.SC_NOT_FOUND =>
+        EntityUtils.consumeQuietly(response.getEntity)
+        Nil
+
+      case response =>
+        ApacheHttpClientUtils.xmlResponseHandler { node =>
+          ExamTimetableHttpTimetableFetchingService.parseXml(node, uniId, toplevelUrl)
+        }.handleResponse(response)
     }
 
   private def featureProtected(arg: String)(f: String => Future[EventList]): Future[EventList] = {
@@ -255,6 +265,8 @@ abstract class AbstractExamTimetableFetchingService extends ExamTimetableFetchin
       httpClient.execute(req, handler)
     }
     result.onComplete {
+      case Failure(e: HttpResponseException) =>
+        logger.warn(s"Request for $endpoint failed: HTTP ${e.getStatusCode}", e)
       case Failure(e) =>
         logger.warn(s"Request for $endpoint failed", e)
       case _ =>

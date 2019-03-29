@@ -53,8 +53,7 @@ trait ApacheHttpClientUtils {
     new AbstractResponseHandler[A] {
       override def handleEntity(entity: HttpEntity): A = {
         val in = (entity.getContent, entity.getContentEncoding) match {
-          case (stm, null) => stm
-          case (stm, enc) if enc.getValue == "gzip" => new GZIPInputStream(stm)
+          case (stm, enc) if enc != null && enc.getValue == "gzip" => new GZIPInputStream(stm)
           case (stm, _) => stm
         }
 
