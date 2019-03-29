@@ -19,6 +19,8 @@ import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 trait FileDaoComponent {
   def fileDao: FileDao
@@ -59,7 +61,7 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
         fileHash = Some(file.hash)
       )
 
-      objectStorageService.push(file.id, file.uploadedData, metadata)
+      Await.result(objectStorageService.push(file.id, file.uploadedData, metadata), Duration.Inf)
     }
 
     file

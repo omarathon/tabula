@@ -22,7 +22,7 @@ class ViewSmallGroupController extends ProfilesController with AutowiringProfile
 
   @RequestMapping(method = Array(GET, HEAD))
   def show(@PathVariable smallGroup: SmallGroup): Mav = {
-    val members = profileService.getAllMembersWithUniversityIds(smallGroup.students.users.map(_.getWarwickId))
+    val members = profileService.getAllMembersWithUniversityIds(smallGroup.students.users.map(_.getWarwickId).toSeq)
     Mav("profiles/groups/view",
       "smallGroup" -> smallGroup,
       "tutees" -> members.sortBy { student => (student.lastName, student.firstName) }

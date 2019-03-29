@@ -84,9 +84,9 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
       val currentStatus: SitsStatus = Fixtures.sitsStatus("C")
       val withdrawnStatus: SitsStatus = Fixtures.sitsStatus("P")
 
-      set.members.knownType.staticUserIds = Seq("0000001", "0000002", "0000004")
-      set.members.knownType.includedUserIds = Seq("0000003")
-      set.members.knownType.excludedUserIds = Seq("0000004")
+      set.members.knownType.staticUserIds = Set("0000001", "0000002", "0000004")
+      set.members.knownType.includedUserIds = Set("0000003")
+      set.members.knownType.excludedUserIds = Set("0000004")
       set.memberQuery = "sprStatuses=C"
 
       command.profileService.allSprStatuses(department) returns (Seq(currentStatus, withdrawnStatus))

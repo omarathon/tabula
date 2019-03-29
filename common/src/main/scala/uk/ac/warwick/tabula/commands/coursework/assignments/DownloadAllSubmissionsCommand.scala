@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class DownloadAllSubmissionsCommand(
   val module: Module,
@@ -20,7 +22,7 @@ class DownloadAllSubmissionsCommand(
 
   var zipService: ZipService = Wire.auto[ZipService]
 
-  override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getAllSubmissionsZip(assignment), Duration.Inf)
 
   override def describe(d: Description): Unit = d
     .assignment(assignment)

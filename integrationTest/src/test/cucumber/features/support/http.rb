@@ -9,7 +9,7 @@ module HttpHelper
   end
 
   def request(uri)
-    if uri.query then
+    if uri.query
       p = "#{uri.path}?#{uri.query}"
     else
       p = uri.path
@@ -56,8 +56,8 @@ module HttpHelper
               res.code.should == @expected_responses[@url].to_s
             end
 
-            if @follow_redirects && res.key?("location") then
-              @url = res["location"]
+            if @follow_redirects && res.key?("location")
+              @url = URI.join(@url, res["location"]).to_s
               uri = URI.parse(@url)
               redirect_count += 1
             else

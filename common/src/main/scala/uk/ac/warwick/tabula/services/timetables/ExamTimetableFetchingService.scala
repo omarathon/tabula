@@ -130,7 +130,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
     val timetable = ExamTimetableFetchingService.examTimetableFromXml(xml)
     val examProfile = (xml \\ "exam-profile" \\ "profile").text
 
-    timetable.exams.map(timetableExam => {
+    timetable.exams.map { timetableExam =>
       val uid = DigestUtils.md5Hex(Seq(examProfile, timetableExam.paper).mkString)
       TimetableEvent(
         uid = uid,
@@ -151,7 +151,7 @@ object ExamTimetableHttpTimetableFetchingService extends Logging {
         relatedUrl = None,
         attendance = Map()
       )
-    })
+    }
   }
 }
 
@@ -173,7 +173,8 @@ object ExamTimetableFetchingService {
     startDateTime: DateTime,
     endDateTime: DateTime,
     extraTimePerHour: Option[Int],
-    room: String
+    room: String,
+    seat: Option[String]
   )
 
   case class ExamTimetable(
@@ -211,6 +212,7 @@ object ExamTimetableFetchingService {
         val endDateTime = Seq(Some(length), readingTime, extraTime).flatten.foldLeft(startDateTime)((dt, period) => dt.plus(period))
 
         val room = (examNode \\ "room").text
+        val seat = (examNode \\ "seat").text.maybeText
 
         ExamTimetableExam(
           academicYear,
@@ -224,7 +226,8 @@ object ExamTimetableFetchingService {
           startDateTime,
           endDateTime,
           extraTimePerHour,
-          room
+          room,
+          seat
         )
       })
       ExamTimetable(header, instructions, exams)

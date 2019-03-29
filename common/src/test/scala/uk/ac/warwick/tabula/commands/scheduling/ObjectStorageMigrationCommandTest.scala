@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
-import java.io.{InputStream, InputStreamReader}
-import java.nio.charset.StandardCharsets
+import java.io.InputStream
 
-import com.google.common.io.{ByteSource, CharStreams}
-import org.mockito.ArgumentMatcher
+import com.google.common.io.ByteSource
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.{FileDao, FileDaoComponent, FileHasherComponent, SHAFileHasherComponent}
 import uk.ac.warwick.tabula.services.objectstore.{LegacyAwareObjectStorageService, ObjectStorageService, ObjectStorageServiceComponent, RichByteSource}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.util.files.hash.FileHasher
+
+import scala.concurrent.Future
 
 class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
 
@@ -39,7 +39,7 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
     val command = new ObjectStorageMigrationCommandInternal with CommandTestSupport
 
     when(command.fileDao.getAllFileIds(None)) thenReturn Set("1", "2", "3", "4", "5", "6", "7", "8", "9")
-    when(command.defaultStoreService.listKeys()) thenReturn Set("1", "2", "13", "4", "15", "16", "7", "18", "19").toStream
+    when(command.defaultStoreService.listKeys()) thenReturn Future.successful(Set("1", "2", "13", "4", "15", "16", "7", "18", "19").toStream)
 
     val blob3is = smartMock[InputStream]
     val blob5is = smartMock[InputStream]
@@ -65,17 +65,19 @@ class ObjectStorageMigrationCommandTest extends TestBase with Mockito {
     val metadata8 = ObjectStorageService.Metadata(8, "application/custom-8", None)
     val metadata9 = ObjectStorageService.Metadata(9, "application/custom-9", None)
 
-    when(command.legacyStoreService.fetch("3")) thenReturn RichByteSource.wrap(blob3data, Some(metadata3))
-    when(command.legacyStoreService.fetch("5")) thenReturn RichByteSource.wrap(blob5data, Some(metadata5))
-    when(command.legacyStoreService.fetch("6")) thenReturn RichByteSource.wrap(blob6data, Some(metadata6))
-    when(command.legacyStoreService.fetch("8")) thenReturn RichByteSource.wrap(blob8data, Some(metadata8))
-    when(command.legacyStoreService.fetch("9")) thenReturn RichByteSource.wrap(blob9data, Some(metadata9))
+    when(command.legacyStoreService.fetch("3")) thenReturn Future.successful(RichByteSource.wrap(blob3data, Some(metadata3)))
+    when(command.legacyStoreService.fetch("5")) thenReturn Future.successful(RichByteSource.wrap(blob5data, Some(metadata5)))
+    when(command.legacyStoreService.fetch("6")) thenReturn Future.successful(RichByteSource.wrap(blob6data, Some(metadata6)))
+    when(command.legacyStoreService.fetch("8")) thenReturn Future.successful(RichByteSource.wrap(blob8data, Some(metadata8)))
+    when(command.legacyStoreService.fetch("9")) thenReturn Future.successful(RichByteSource.wrap(blob9data, Some(metadata9)))
 
     when(command.fileHasher.hash(blob3is)) thenReturn "hash3"
     when(command.fileHasher.hash(blob5is)) thenReturn "hash5"
     when(command.fileHasher.hash(blob6is)) thenReturn "hash6"
     when(command.fileHasher.hash(blob8is)) thenReturn "hash8"
     when(command.fileHasher.hash(blob9is)) thenReturn "hash9"
+
+    when(command.defaultStoreService.push(any[String], any[RichByteSource], any[ObjectStorageService.Metadata])) thenReturn Future.successful(())
 
     command.applyInternal() should be(Set("3", "5", "6", "8", "9"))
 

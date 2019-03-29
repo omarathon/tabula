@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.{FeedbackService, GeneratesGradesFromMarks,
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 class BulkAdjustmentCommandTest extends TestBase with Mockito {
 
@@ -20,7 +21,7 @@ class BulkAdjustmentCommandTest extends TestBase with Mockito {
     val objectStorageService: ObjectStorageService = smartMock[ObjectStorageService]
 
     // Start from the basis that the store is empty
-    objectStorageService.fetch(any[String]) returns RichByteSource.empty
+    objectStorageService.fetch(any[String]) returns Future.successful(RichByteSource.empty)
 
     val mockSpreadsheetHelper: SpreadsheetHelpers = smartMock[SpreadsheetHelpers]
     val thisAssessment = new Assignment

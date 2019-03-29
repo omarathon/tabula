@@ -48,6 +48,14 @@ Then /^the (.+?) response header should start with "([^\"]*)"$/ do |header, valu
   response[header.downcase].should =~ Regexp::new("^" + value, "i")
 end
 
+Then /^the (.+?) response header should end with "([^\"]*)"$/ do |header, value|
+  response[header.downcase].should =~ Regexp::new(value + "$", "i")
+end
+
+Then /^the (.+?) response header should match "([^\"]*)"$/ do |header, value|
+  response[header.downcase].should =~ Regexp::new(value, "i")
+end
+
 Then /^the (.+?) response header should not exist$/ do |header|
   response.key?(header.downcase).should == false
 end

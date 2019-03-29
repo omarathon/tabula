@@ -45,8 +45,8 @@ class OldMarkerAllocationExtractor() {
 
   def extractMarkersFromSpreadsheet(file: InputStream, workflow: MarkingWorkflow): Map[MarkerPosition, Seq[ParsedRow]] = {
 
-    val firstMarkers = workflow.firstMarkers.users
-    val secondMarkers = workflow.secondMarkers.users
+    val firstMarkers = workflow.firstMarkers.users.toSeq
+    val secondMarkers = workflow.secondMarkers.users.toSeq
 
     val rowData = SpreadsheetHelpers.parseXSSFExcelFile(file)
     rowData

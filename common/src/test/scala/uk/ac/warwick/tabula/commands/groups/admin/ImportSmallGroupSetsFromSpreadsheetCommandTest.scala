@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mockito {
 
@@ -44,8 +45,8 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
     attachment.id = UUID.randomUUID().toString
     attachment.name = "file2.xlsx"
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None))))
     binding.file.attached.add(attachment)
 
     binding.smallGroupSetSpreadsheetHandler.readXSSFExcelFile(isEq(binding.department), isEq(binding.academicYear), isAn[InputStream], isA[BindException]) returns Nil
@@ -62,8 +63,8 @@ class ImportSmallGroupSetsFromSpreadsheetCommandTest extends TestBase with Mocki
     attachment.id = UUID.randomUUID().toString
     attachment.name = "file2.xlsx"
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(ByteSource.wrap("one".getBytes), Some(ObjectStorageService.Metadata(3, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", None))))
     binding.file.attached.add(attachment)
 
     val extracted = Seq(ExtractedSmallGroupSet(

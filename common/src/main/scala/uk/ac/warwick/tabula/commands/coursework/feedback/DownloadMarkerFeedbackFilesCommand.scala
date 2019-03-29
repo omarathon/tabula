@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula.commands.coursework.feedback
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.fileserver._
 import uk.ac.warwick.tabula.services.{FeedbackService, ZipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class DownloadMarkerFeedbackFilesCommand(val module: Module, val assignment: Assignment, val markerFeedbackId: String)
   extends Command[Option[RenderableFile]] with ReadOnly {
@@ -46,7 +48,7 @@ class DownloadMarkerFeedbackFilesCommand(val module: Module, val assignment: Ass
     result
   }
 
-  private def zipped(markerFeedback: MarkerFeedback) = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
+  private def zipped(markerFeedback: MarkerFeedback) = Await.result(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)), Duration.Inf)
 
   override def describe(d: Description): Unit = {
     d.property("filename", filename)

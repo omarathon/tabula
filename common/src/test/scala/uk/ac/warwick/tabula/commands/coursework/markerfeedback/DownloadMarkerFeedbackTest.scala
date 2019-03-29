@@ -21,7 +21,7 @@ class DownloadMarkerFeedbackTest extends TestBase with MarkingWorkflowWorld with
     attachment.id = "123"
 
     attachment.objectStorageService = zipService.objectStorageService
-    attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
+    attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None)).futureValue
 
     assignment.feedbacks.asScala.foreach { feedback =>
       feedback.firstMarkerFeedback.attachments = Set(attachment).asJava

@@ -21,7 +21,7 @@ class DownloadMarkerSubmissionTest extends TestBase with MarkingWorkflowWorld wi
     attachment.id = "123"
 
     attachment.objectStorageService = zipService.objectStorageService
-    attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None))
+    attachment.objectStorageService.push(attachment.id, ByteSource.wrap("yes".getBytes), ObjectStorageService.Metadata(3, "application/octet-stream", None)).futureValue
 
     assignment.submissions.asScala.foreach {
       submission =>

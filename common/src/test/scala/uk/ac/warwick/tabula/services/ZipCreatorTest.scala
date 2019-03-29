@@ -1,11 +1,15 @@
 package uk.ac.warwick.tabula.services
 
 import com.google.common.io.ByteSource
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectStorageServiceComponent}
 
 class ZipCreatorTest extends TestBase {
+
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   val transientObjectStore: ObjectStorageService = createTransientObjectStore()
 
@@ -23,23 +27,23 @@ class ZipCreatorTest extends TestBase {
       ))
     )
 
-    val zip = creator.createUnnamedZip(items)
+    val zip = creator.createUnnamedZip(items).futureValue
     zip.byteSource.openStream() should not be null
     zip.contentType should be("application/zip")
 
-    creator.invalidate(zip.filename)
-    transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).openStream() should be(null)
+    creator.invalidate(zip.filename).futureValue
+    transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).futureValue.openStream() should be(null)
 
     val name = "myzip/under/a/folder"
-    val namedZip = creator.getZip(name, items)
+    val namedZip = creator.getZip(name, items).futureValue
     namedZip.byteSource.openStream() should not be null
     namedZip.contentType should be("application/zip")
 
     // getting zip without any items should effectively be a no-op
-    creator.getZip(name, Seq()).contentLength should be(namedZip.contentLength)
+    creator.getZip(name, Seq()).futureValue.contentLength should be(namedZip.contentLength)
 
-    creator.invalidate(name)
-    transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).openStream() should be(null)
+    creator.invalidate(name).futureValue
+    transientObjectStore.fetch(ZipCreator.objectKey(zip.filename)).futureValue.openStream() should be(null)
   }
 
   @Test def trunc {

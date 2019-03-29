@@ -197,7 +197,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Nil)
     service.addMarkersForStage(workflow, SingleMarker, Seq(marker1))
     verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
-    workflow.stageMarkers.asScala.head.markers.knownType.members should be(Seq("cuslaj"))
+    workflow.stageMarkers.asScala.head.markers.knownType.members should be(Set("cuslaj"))
   }
 
   @Test
@@ -205,7 +205,7 @@ class CM2MarkingWorkflowServiceTest extends TestBase with Mockito {
     val workflow = SingleMarkerWorkflow("testAssignment", dept, Seq(marker1, marker2))
     service.removeMarkersForStage(workflow, SingleMarker, Seq(marker1))
     verify(mwd, times(1)).saveOrUpdate(workflow.stageMarkers.asScala.head)
-    workflow.stageMarkers.asScala.head.markers.knownType.members should be(Seq("cuslak"))
+    workflow.stageMarkers.asScala.head.markers.knownType.members should be(Set("cuslak"))
   }
 
   @Test(expected = classOf[IllegalArgumentException])

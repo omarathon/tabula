@@ -11,6 +11,9 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.jobs.{AutowiringJobServiceComponent, JobInstance, JobServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 /**
   * Download one or more submissions from an assignment, as a Zip.
   */
@@ -59,7 +62,7 @@ class DownloadSubmissionsCommandInternal(val assignment: Assignment, val user: C
 
     val output =
       if (submissions.size < SubmissionZipFileJob.minimumSubmissions) {
-        val zip = zipService.getSomeSubmissionsZip(submissions)
+        val zip = Await.result(zipService.getSomeSubmissionsZip(submissions), Duration.Inf)
         Left(zip)
       } else {
         Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.map(_.id))))

@@ -106,9 +106,9 @@ class AddStudentsToSchemeCommandTest extends TestBase with Mockito {
         val profileService: ProfileService = thisProfileService
       }
 
-      thisScheme.members.staticUserIds = Seq(staticStudent.universityId)
-      thisScheme.members.includedUserIds = Seq(includeStudent.universityId)
-      thisScheme.members.excludedUserIds = Seq(excludeStudent.universityId)
+      thisScheme.members.staticUserIds = Set(staticStudent.universityId)
+      thisScheme.members.includedUserIds = Set(includeStudent.universityId)
+      thisScheme.members.excludedUserIds = Set(excludeStudent.universityId)
 
       cmd.staticStudentIds.add(updatedStaticStudent.universityId)
       cmd.includedStudentIds.add(updatedIncludeStudent.universityId)

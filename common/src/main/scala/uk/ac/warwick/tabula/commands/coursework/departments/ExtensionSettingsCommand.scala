@@ -45,7 +45,7 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
         department.extensionGuidelineSummary = extensionGuidelineSummary
         department.extensionGuidelineLink = extensionGuidelineLink
 
-        department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala
+        department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala.toSet
       }
     }
   }

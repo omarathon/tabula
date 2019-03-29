@@ -6,6 +6,7 @@ import com.google.common.io.Files
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
 import org.junit.Before
 import org.springframework.core.io.ClassPathResource
+import scala.concurrent.Future
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.IDOnly
 import uk.ac.warwick.tabula.data.model._
@@ -73,8 +74,8 @@ class ZipServiceTest extends TestBase with Mockito {
 
     val backingFile = createTemporaryFile()
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
     submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
     assignment.module = module
@@ -107,8 +108,8 @@ class ZipServiceTest extends TestBase with Mockito {
 
     val backingFile = createTemporaryFile()
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
     submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
     assignment.module = module
@@ -141,8 +142,8 @@ class ZipServiceTest extends TestBase with Mockito {
 
     val backingFile = createTemporaryFile()
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
     submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
     assignment.module = module
@@ -178,8 +179,8 @@ class ZipServiceTest extends TestBase with Mockito {
 
     val backingFile = createTemporaryFile()
     attachment.objectStorageService = smartMock[ObjectStorageService]
-    attachment.objectStorageService.keyExists(attachment.id) returns true
-    attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+    attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+    attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
     submission.values = Set(SavedFormValue.withAttachments(submission, "files", Set(attachment))).asJava
     assignment.module = module

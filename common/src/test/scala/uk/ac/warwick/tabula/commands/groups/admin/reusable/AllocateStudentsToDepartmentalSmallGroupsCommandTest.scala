@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with Mockito {
 
@@ -165,8 +166,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
       verify(command.smallGroupService, times(1)).saveOrUpdate(group1)
       verify(command.smallGroupService, times(1)).saveOrUpdate(group2)
 
-      group1.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("0200202", "0672088"))
-      group2.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("8888888", "0672089"))
+      group1.students.asInstanceOf[UserGroup].includedUserIds should be(Set("0200202", "0672088"))
+      group2.students.asInstanceOf[UserGroup].includedUserIds should be(Set("8888888", "0672089"))
     }
   }
 
@@ -236,8 +237,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 
       val backingFile: File = createTemporaryFile()
       attachment.objectStorageService = smartMock[ObjectStorageService]
-      attachment.objectStorageService.keyExists(attachment.id) returns true
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
       val file = new UploadedFile
       file.attached.add(attachment)
@@ -266,8 +267,8 @@ class AllocateStudentsToDepartmentalSmallGroupsCommandTest extends TestBase with
 
       val backingFile: File = createTemporaryFile()
       attachment.objectStorageService = smartMock[ObjectStorageService]
-      attachment.objectStorageService.keyExists(attachment.id) returns true
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None)))
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), Some(ObjectStorageService.Metadata(backingFile.length(), "application/octet-stream", None))))
 
       val file = new UploadedFile
       file.attached.add(attachment)

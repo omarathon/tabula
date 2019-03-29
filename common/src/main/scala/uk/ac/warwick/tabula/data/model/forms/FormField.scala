@@ -268,7 +268,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 
   def markers: Seq[User] = {
     if (assignment.markingWorkflow == null) Seq()
-    else assignment.markingWorkflow.firstMarkers.users
+    else assignment.markingWorkflow.firstMarkers.users.toSeq
   }
 
   override def validate(value: FormValue, errors: Errors) {

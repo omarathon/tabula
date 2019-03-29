@@ -20,7 +20,7 @@ class ListSmallGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[M
     group.students.users.map { user =>
       val member = profileService.getMemberByUniversityId(user.getWarwickId)
       MemberOrUser(member, user)
-    }.sortBy { s => (s.lastName, s.firstName) }
+    }.toSeq.sortBy { s => (s.lastName, s.firstName) }
   }
 
 }

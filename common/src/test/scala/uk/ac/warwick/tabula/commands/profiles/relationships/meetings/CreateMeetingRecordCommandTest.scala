@@ -12,9 +12,10 @@ import uk.ac.warwick.tabula.data.model.{ExternalStudentRelationship, _}
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, MeetingRecordService, MeetingRecordServiceComponent}
-
 import JavaImports._
+
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 // scalastyle:off magic.number
 class CreateMeetingRecordCommandTest extends TestBase with Mockito {
@@ -252,7 +253,7 @@ class CreateMeetingRecordCommandTest extends TestBase with Mockito {
       val fileAttach = new FileAttachment
       fileAttach.name = "Beltane.txt"
       fileAttach.objectStorageService = smartMock[ObjectStorageService]
-      fileAttach.objectStorageService.fetch(any[String]) returns RichByteSource.empty
+      fileAttach.objectStorageService.fetch(any[String]) returns Future.successful(RichByteSource.empty)
       fileAttach.fileDao = smartMock[FileDao]
       uploadedFile.attached.add(fileAttach)
       cmd.file = uploadedFile

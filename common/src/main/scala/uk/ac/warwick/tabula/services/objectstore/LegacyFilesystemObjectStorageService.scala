@@ -6,6 +6,9 @@ import com.google.common.io._
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.data.SHAFileHasherComponent
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
+
+import scala.concurrent.Future
 
 class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDirectories: Boolean = true)
   extends ObjectStorageService with SHAFileHasherComponent {
@@ -28,9 +31,9 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
     else targetFile
   }
 
-  override def keyExists(key: String): Boolean = targetFile(key).exists()
+  override def keyExists(key: String): Future[Boolean] = Future.successful(targetFile(key).exists())
 
-  override def fetch(key: String): RichByteSource = {
+  override def fetch(key: String): Future[RichByteSource] = Future.successful {
     val source = Files.asByteSource(targetFile(key))
 
     val metadata =
@@ -44,7 +47,7 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
     RichByteSource.wrap(source, metadata)
   }
 
-  override def push(key: String, in: ByteSource, /* ignored */ metadata: ObjectStorageService.Metadata): Unit = {
+  override def push(key: String, in: ByteSource, /* ignored */ metadata: ObjectStorageService.Metadata): Future[Unit] = Future {
     val target = targetFile(key)
     val directory = target.getParentFile
 
@@ -52,13 +55,12 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
     if (!directory.exists) throw new IllegalStateException(s"Couldn't create directory to store file: $directory")
 
     FileCopyUtils.copy(in.openStream(), new FileOutputStream(target))
-  }
+  }.map(_ => ())
 
-  override def delete(key: String): Unit = {
-    targetFile(key).delete()
-  }
+  override def delete(key: String): Future[Unit] =
+    Future.successful(targetFile(key).delete())
 
-  override def listKeys(): Stream[String] = {
+  override def listKeys(): Future[Stream[String]] = Future {
     def toKey(file: File): String = {
       val stripped =
         file.getAbsolutePath.substring(attachmentDir.getAbsolutePath.length)

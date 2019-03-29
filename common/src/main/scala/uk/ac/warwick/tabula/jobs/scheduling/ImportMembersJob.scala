@@ -34,7 +34,7 @@ class ImportMembersJob extends Job {
 
     def run(): Unit = {
       val memberIds = job.getStrings(ImportMembersJob.MembersKey)
-      val yearsToImport = job.getStrings(ImportMembersJob.YearsKey).map(AcademicYear.parse)
+      val yearsToImport = job.getStrings(ImportMembersJob.YearsKey).map { s => AcademicYear.starting(s.toInt) }
 
       updateProgress(0)
 

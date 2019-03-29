@@ -506,7 +506,7 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
       // Map schemes to student lists
       val studentsForScheme: Map[AttendanceMonitoringScheme, Seq[AttendanceMonitoringStudentData]] =
         points.map(_.scheme).distinct.map { scheme =>
-          scheme -> scheme.members.members.filter(allStudents.contains).map(allStudents.apply)
+          scheme -> scheme.members.members.toSeq.filter(allStudents.contains).map(allStudents.apply)
         }.toMap
 
       points.map { point =>
