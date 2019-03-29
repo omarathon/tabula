@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.exams.grids
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.{NormalCATSLoad, Route}
+import uk.ac.warwick.tabula.data.model.{DegreeType, NormalCATSLoad, Route}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.{AutowiringNormalCATSLoadDaoComponent, NormalCATSLoadDaoComponent}
 
@@ -20,7 +20,8 @@ case class NormalLoadLookup(academicYear: AcademicYear, yearOfStudy: YearOfStudy
       cache(route)
   }
 
-  def apply(route: Route): BigDecimal = withoutDefault(route).getOrElse(route.degreeType.normalCATSLoad)
+  def apply(route: Route): BigDecimal =
+    Option(route).flatMap(withoutDefault).getOrElse(Option(route).map(_.degreeType).getOrElse(DegreeType.Undergraduate).normalCATSLoad)
 
   def routes: Seq[Route] = cache.keys.toSeq
 }

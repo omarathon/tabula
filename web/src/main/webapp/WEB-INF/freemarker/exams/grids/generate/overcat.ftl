@@ -43,6 +43,7 @@
             <thead>
             <#-- Year row -->
             <tr class="year">
+              <td class="borderless">&nbsp;</td> <#-- University ID column -->
               <th colspan="3">Options</th>
               <td class="spacer">&nbsp;</td>
               <#list overcatView.perYearColumns?keys?sort?reverse as year>
