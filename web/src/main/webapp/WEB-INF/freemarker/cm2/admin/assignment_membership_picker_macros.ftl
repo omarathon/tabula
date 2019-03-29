@@ -2,7 +2,7 @@
 <#escape x as x?html>
 
   <#macro upstream_group ug isLinked isInUse>
-    <tr<#if !isInUse> class="text-muted" style="display: none"</#if> data-in-use="${isInUse?string('true','false')}">
+    <tr<#if !isInUse> class="text-muted" <#if !isLinked>style="display: none"</#if></#if> data-in-use="${isInUse?string('true','false')}">
       <td>
         <input
                 type="checkbox"
@@ -10,7 +10,7 @@
                 <#if isLinked>
                   checked
                 </#if>
-                <#if isInUse>
+                <#if isInUse || isLinked>
                   value="${ug.id}"
                 <#else>
                   disabled
