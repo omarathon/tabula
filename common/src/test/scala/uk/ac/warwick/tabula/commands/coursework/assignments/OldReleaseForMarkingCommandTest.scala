@@ -14,11 +14,11 @@ class OldReleaseForMarkingCommandTest extends TestBase with Mockito {
   }
 
   val ug1: UserGroup = UserGroup.ofUniversityIds.tap(g => {
-    g.includedUserIds = Seq("1", "2", "4")
+    g.includedUserIds = Set("1", "2", "4")
     g.userLookup = new MockUserLookup(true)
   })
   val ug2: UserGroup = UserGroup.ofUniversityIds.tap(g => {
-    g.includedUserIds = Seq("1", "2", "3")
+    g.includedUserIds = Set("1", "2", "3")
     g.userLookup = new MockUserLookup(true)
   })
 

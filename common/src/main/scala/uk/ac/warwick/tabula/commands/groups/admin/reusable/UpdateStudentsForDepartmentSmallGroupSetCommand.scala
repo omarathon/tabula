@@ -45,19 +45,19 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
       else Set[User]()
 
     if (linkToSits) {
-      set.members.knownType.staticUserIds = staticStudentIds.asScala
-      set.members.knownType.includedUserIds = includedStudentIds.asScala
-      set.members.knownType.excludedUserIds = excludedStudentIds.asScala
+      set.members.knownType.staticUserIds = staticStudentIds.asScala.toSet
+      set.members.knownType.includedUserIds = includedStudentIds.asScala.toSet
+      set.members.knownType.excludedUserIds = excludedStudentIds.asScala.toSet
       set.memberQuery = filterQueryString
     } else {
-      set.members.knownType.staticUserIds = Seq()
-      set.members.knownType.excludedUserIds = Seq()
+      set.members.knownType.staticUserIds = Set.empty
+      set.members.knownType.excludedUserIds = Set.empty
       set.memberQuery = ""
-      set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).distinct
+      set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).toSet
     }
 
     val newUsers =
-      if (autoDeregister) set.members.users.toSet
+      if (autoDeregister) set.members.users
       else Set[User]()
 
     // TAB-1561

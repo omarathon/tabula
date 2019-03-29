@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceUserGroupHelpers, UserGroupCacheManager, UserLookupService}
 import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AssessmentServiceUserGroupHelpers, AssessmentService, UserGroupCacheManager, UserLookupService}
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.web.Routes
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /** A MarkingWorkflow defines how an assessment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -133,7 +133,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget with S
   // get's the submissions for the given marker this must be an assignment as exams have no submission
   def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
 
-  def getMarkersStudents(assessment: Assessment, user: User): Seq[User]
+  def getMarkersStudents(assessment: Assessment, user: User): Set[User]
 
   // get's this workflows role name for the specified position in the workflow
   def getRoleNameForPosition(position: FeedbackPosition): String = {
@@ -207,8 +207,8 @@ trait AssessmentMarkerMap {
 
     def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
       val studentIds =
-        assignment.firstMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Seq()) ++
-          assignment.secondMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Seq())
+        assignment.firstMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty) ++
+          assignment.secondMarkerMap.get(marker.getUserId).map(_.knownType.allIncludedIds).getOrElse(Set.empty)
 
       assignment.submissions.asScala.filter(s => studentIds.contains(s.usercode))
     }
@@ -233,9 +233,9 @@ trait AssessmentMarkerMap {
     })
   }
 
-  def getMarkersStudents(assessment: Assessment, marker: User): Seq[User] = {
-    assessment.firstMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Seq()) ++
-      assessment.secondMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Seq())
+  def getMarkersStudents(assessment: Assessment, marker: User): Set[User] = {
+    assessment.firstMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Set.empty) ++
+      assessment.secondMarkerMap.get(marker.getUserId).map(_.knownType.users).getOrElse(Set.empty)
   }
 
 }

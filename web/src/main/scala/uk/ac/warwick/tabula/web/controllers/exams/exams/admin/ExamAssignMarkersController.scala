@@ -44,9 +44,9 @@ class ExamAssignMarkersController extends ExamsController {
   @ModelAttribute("firstMarkers")
   def firstMarkers(@PathVariable module: Module, @PathVariable exam: Exam): Seq[Marker] = {
     val allMembersMap = assessmentMembershipService.determineMembershipUsersWithOrder(exam).toMap
-    exam.markingWorkflow.firstMarkers.knownType.members.map { markerId =>
+    exam.markingWorkflow.firstMarkers.knownType.members.toSeq.map { markerId =>
       val assignedStudents: Seq[ExamStudent] = exam.firstMarkerMap.get(markerId).map(group =>
-        group.users.map(student => ExamStudent(student, allMembersMap.get(student).flatten, module))
+        group.users.toSeq.map(student => ExamStudent(student, allMembersMap.get(student).flatten, module))
       ).getOrElse(Seq())
       val user = Option(userLookup.getUserByUserId(markerId))
       val fullName = user match {

@@ -207,7 +207,7 @@ abstract class ModifySmallGroupEventCommandInternal
     event.relatedUrlTitle = relatedUrlTitle
 
     if (event.tutors == null) event.tutors = UserGroup.ofUsercodes
-    event.tutors.knownType.includedUserIds = tutors.asScala
+    event.tutors.knownType.includedUserIds = tutors.asScala.toSet
   }
 }
 

@@ -113,7 +113,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
     set.members.add(user5)
 
     set.membershipService = smartMock[AssessmentMembershipService]
-    set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users
+    set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users.toSeq
     set.membershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
 
     val department: Department = Fixtures.department("CE")
@@ -176,8 +176,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
       verify(command.smallGroupService, times(1)).saveOrUpdate(group1)
       verify(command.smallGroupService, times(1)).saveOrUpdate(group2)
 
-      group1.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("0200202", "0672088"))
-      group2.students.asInstanceOf[UserGroup].includedUserIds should be(Seq("8888888", "0672089"))
+      group1.students.asInstanceOf[UserGroup].includedUserIds should be(Set("0200202", "0672088"))
+      group2.students.asInstanceOf[UserGroup].includedUserIds should be(Set("8888888", "0672089"))
     }
   }
 

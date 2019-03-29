@@ -101,9 +101,9 @@ trait PopulateFindStudentsForDepartmentSmallGroupSetCommand extends PopulateOnFo
   self: FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilter =>
 
   override def populate(): Unit = {
-    staticStudentIds = set.members.knownType.staticUserIds.asJava
-    includedStudentIds = set.members.knownType.includedUserIds.asJava
-    excludedStudentIds = set.members.knownType.excludedUserIds.asJava
+    staticStudentIds = set.members.knownType.staticUserIds.toSeq.asJava
+    includedStudentIds = set.members.knownType.includedUserIds.toSeq.asJava
+    excludedStudentIds = set.members.knownType.excludedUserIds.toSeq.asJava
     filterQueryString = Option(set.memberQuery).getOrElse("")
     linkToSits = set.members.isEmpty || (set.memberQuery != null && set.memberQuery.nonEmpty)
 

@@ -68,8 +68,8 @@ trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnFor
   self: EditDepartmentSmallGroupSetMembershipCommandState =>
 
   override def populate(): Unit = {
-    includedStudentIds = set.members.knownType.includedUserIds.asJava
-    excludedStudentIds = set.members.knownType.excludedUserIds.asJava
+    includedStudentIds = set.members.knownType.includedUserIds.toSeq.asJava
+    excludedStudentIds = set.members.knownType.excludedUserIds.toSeq.asJava
   }
 
 }

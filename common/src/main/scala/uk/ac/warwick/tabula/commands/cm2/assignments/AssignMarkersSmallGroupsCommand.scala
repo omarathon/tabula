@@ -105,7 +105,7 @@ trait AssignMarkersSmallGroupsCommandPopulate extends PopulateOnForm {
         } yield user).distinct
 
         val groupAllocations = set.groups.asScala.map(group => {
-          val students = group.students.users.filter(validStudents.contains).sortBy { u => (u.getLastName, u.getFirstName) }
+          val students = group.students.users.filter(validStudents.contains).toSeq.sortBy { u => (u.getLastName, u.getFirstName) }
           val markers = group.events.flatMap(_.tutors.users).filter(validMarkers.contains)
           val otherMarkers = validMarkers.diff(markers)
           GroupAllocation(group, group.name, markers, students, otherMarkers)

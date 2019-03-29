@@ -58,6 +58,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
         // Where there is more than one tutor, sort them by name and pick the first one, then sort all the occurrences by first tutor name
         // If there are no tutors but the occurrence last
         o.event.tutors.users
+          .toSeq
           .sortBy(u => (u.getLastName, u.getFirstName))
           .headOption
           .map(u => (u.getLastName, u.getFirstName))
@@ -98,7 +99,7 @@ class DownloadRegistersAsPdfCommandInternal(val department: Department, val acad
       val members: Seq[MemberOrUser] = (
         occurrence.event.group.students.users.map(u => memberOrUserMap.getOrElse(u.getWarwickId, MemberOrUser(None, new AnonymousUser))) ++
           occurrence.attendance.asScala.toSeq.map(a => memberOrUserMap.getOrElse(a.universityId, MemberOrUser(None, new AnonymousUser)))
-        ).distinct.sorted(memberOrdering)
+        ).toSeq.sorted(memberOrdering)
 
       benchmarkTask("renderTemplateAndStore") {
         pdfGenerator.renderTemplateAndStore(

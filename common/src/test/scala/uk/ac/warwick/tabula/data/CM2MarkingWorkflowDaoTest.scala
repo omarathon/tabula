@@ -37,7 +37,7 @@ class CM2MarkingWorkflowDaoTest extends PersistenceTestBase {
     val stageMarker = workflow.stageMarkers.asScala.head
     stageMarker.stage should be(SingleMarker)
     stageMarker.workflow should be(workflow)
-    stageMarker.markers.knownType.members should be(Seq("cuslaj"))
+    stageMarker.markers.knownType.members should be(Set("cuslaj"))
 
     val stage = workflow.initialStages.head
     stage.nextStages should be (Seq(SingleMarkingCompleted))

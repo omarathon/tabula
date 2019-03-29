@@ -122,7 +122,7 @@ trait SmallGroupFixture extends Mockito {
   def createUserGroup(userIds: Seq[String], identifierIsUniNumber: Boolean = true): UserGroup = {
     val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
-    ug.includedUserIds = userIds
+    ug.includedUserIds = userIds.toSet
     ug
   }
 }

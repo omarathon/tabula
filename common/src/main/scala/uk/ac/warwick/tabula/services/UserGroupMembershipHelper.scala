@@ -300,7 +300,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
     } else false
   }
 
-  def staticUserIds_=(newIds: Seq[String]): Unit = {
+  def staticUserIds_=(newIds: Set[String]): Unit = {
     val existingIds = underlying.knownType.staticUserIds
     val addedIds = newIds.diff(existingIds)
     val removedIds = existingIds.diff(newIds)
@@ -313,7 +313,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
       cacheService.invalidate(helper, user)
   }
 
-  def includedUserIds_=(newIds: Seq[String]): Unit = {
+  def includedUserIds_=(newIds: Set[String]): Unit = {
     val existingIds = underlying.knownType.includedUserIds
     val addedIds = newIds.diff(existingIds)
     val removedIds = existingIds.diff(newIds)
@@ -326,7 +326,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
       cacheService.invalidate(helper, user)
   }
 
-  def excludedUserIds_=(newIds: Seq[String]): Unit = {
+  def excludedUserIds_=(newIds: Set[String]): Unit = {
     val existingIds = underlying.knownType.excludedUserIds
     val addedIds = newIds.diff(existingIds)
     val removedIds = existingIds.diff(newIds)
@@ -354,11 +354,11 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
       cacheService.invalidate(helper, user)
   }
 
-  def users: Seq[User] = underlying.users
+  def users: Set[User] = underlying.users
 
   def baseWebgroup: String = underlying.baseWebgroup
 
-  def excludes: Seq[User] = underlying.excludes
+  def excludes: Set[User] = underlying.excludes
 
   def size: Int = underlying.size
 
@@ -375,17 +375,17 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 
   def knownType: UserGroupCacheManager = this
 
-  def allIncludedIds: Seq[String] = underlying.knownType.allIncludedIds
+  def allIncludedIds: Set[String] = underlying.knownType.allIncludedIds
 
-  def allExcludedIds: Seq[String] = underlying.knownType.allExcludedIds
+  def allExcludedIds: Set[String] = underlying.knownType.allExcludedIds
 
-  def members: Seq[String] = underlying.knownType.members
+  def members: Set[String] = underlying.knownType.members
 
-  def includedUserIds: Seq[String] = underlying.knownType.includedUserIds
+  def includedUserIds: Set[String] = underlying.knownType.includedUserIds
 
-  def excludedUserIds: Seq[String] = underlying.knownType.excludedUserIds
+  def excludedUserIds: Set[String] = underlying.knownType.excludedUserIds
 
-  def staticUserIds: Seq[String] = underlying.knownType.staticUserIds
+  def staticUserIds: Set[String] = underlying.knownType.staticUserIds
 
   def includesUserId(userId: String): Boolean = underlying.knownType.includesUserId(userId)
 

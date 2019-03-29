@@ -30,7 +30,7 @@ class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, A
     val moduleManagers = module.managers
     val departmentAdmins = module.adminDepartment.owners
 
-    moduleManagers.users ++ departmentAdmins.users
+    moduleManagers.users.toSeq ++ departmentAdmins.users.toSeq
   }
 
   def url: String = Routes.admin.assignment.submissionsandfeedback(assignment)

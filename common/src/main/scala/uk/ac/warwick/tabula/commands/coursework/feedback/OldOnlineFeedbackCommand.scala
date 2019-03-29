@@ -84,7 +84,7 @@ abstract class OnlineMarkerFeedbackCommand(
 
   def applyInternal(): Seq[StudentFeedbackGraph] = {
 
-    val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker)).getOrElse(Nil)
+    val students = Option(assignment.markingWorkflow).map(_.getMarkersStudents(assignment, marker).toSeq).getOrElse(Nil)
 
     students.filter(s => assignment.isReleasedForMarking(s.getUserId)).map { student =>
 

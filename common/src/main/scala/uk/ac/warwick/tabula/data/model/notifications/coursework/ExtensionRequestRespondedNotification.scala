@@ -25,7 +25,7 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
     "path" -> url
   ))
 
-  def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent)
+  def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.filterNot(_ == agent).toSeq
 
 }
 

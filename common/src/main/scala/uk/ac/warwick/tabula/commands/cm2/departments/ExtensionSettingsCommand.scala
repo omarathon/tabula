@@ -54,7 +54,7 @@ class ExtensionSettingsCommandInternal(val department: Department)
       department.allowExtensionRequests = allowExtensionRequests
       department.extensionGuidelineSummary = extensionGuidelineSummary
       department.extensionGuidelineLink = extensionGuidelineLink
-      department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala
+      department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala.toSet
 
       moduleAndDepartmentService.saveOrUpdate(department)
     }

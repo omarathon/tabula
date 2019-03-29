@@ -27,7 +27,7 @@ trait RequiresCheckpointTotalUpdate {
     * as the previous students won't be updated
     */
   def updateCheckpointTotals(scheme: AttendanceMonitoringScheme): Unit = {
-    updateCheckpointTotals(scheme.members.members, scheme.department, scheme.academicYear)
+    updateCheckpointTotals(scheme.members.members.toSeq, scheme.department, scheme.academicYear)
   }
 
   /**
