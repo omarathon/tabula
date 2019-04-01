@@ -428,15 +428,10 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
     val points = benchmarkTask("listStudentsPoints") {
       listStudentsPoints(student, Option(department), academicYear)
     }
-    val checkpointMap = getCheckpoints(points, student, withFlush = true)
-    val allCheckpoints = checkpointMap.values
 
-    val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.endDate.isBefore(DateTime.now.toLocalDate))
-    val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
-    val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
-    val attended = allCheckpoints.count(_.state == AttendanceState.Attended)
+    val existingTotals = attendanceMonitoringDao.getCheckpointTotal(student, Option(department), academicYear)
 
-    val totals = attendanceMonitoringDao.getCheckpointTotal(student, Option(department), academicYear).getOrElse {
+    def newTotal: AttendanceMonitoringCheckpointTotal = {
       val total = new AttendanceMonitoringCheckpointTotal
       total.student = student
       total.department = department
@@ -444,13 +439,44 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
       total
     }
 
-    totals.unrecorded = unrecorded
-    totals.unauthorised = missedUnauthorised
-    totals.authorised = missedAuthorised
-    totals.attended = attended
-    totals.updatedDate = DateTime.now
-    attendanceMonitoringDao.saveOrUpdate(totals)
-    totals
+    if (points.nonEmpty) {
+      val checkpointMap = getCheckpoints(points, student, withFlush = true)
+      val allCheckpoints = checkpointMap.values
+
+      val unrecorded = points.diff(checkpointMap.keys.toSeq).count(_.endDate.isBefore(DateTime.now.toLocalDate))
+      val missedUnauthorised = allCheckpoints.count(_.state == AttendanceState.MissedUnauthorised)
+      val missedAuthorised = allCheckpoints.count(_.state == AttendanceState.MissedAuthorised)
+      val attended = allCheckpoints.count(_.state == AttendanceState.Attended)
+
+      val totals = existingTotals.getOrElse(newTotal)
+
+      totals.unrecorded = unrecorded
+      totals.unauthorised = missedUnauthorised
+      totals.authorised = missedAuthorised
+      totals.attended = attended
+      totals.updatedDate = DateTime.now
+      attendanceMonitoringDao.saveOrUpdate(totals)
+      totals
+    } else if (existingTotals.nonEmpty) {
+      val totals = existingTotals.get
+
+      if (totals.unauthorisedLowLevelNotified != null || totals.unauthorisedMediumLevelNotified != null || totals.unauthorisedHighLevelNotified != null) {
+        // Retain this as there's information there, to prevent double-notifying
+        totals.unrecorded = 0
+        totals.unauthorised = 0
+        totals.authorised = 0
+        totals.attended = 0
+        totals.updatedDate = DateTime.now
+        attendanceMonitoringDao.saveOrUpdate(totals)
+        totals
+      } else {
+        // Delete this row to prevent it being updated in future
+        attendanceMonitoringDao.delete(totals)
+        totals
+      }
+    } else {
+      newTotal // Transient empty instance
+    }
   }
 
   def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear): AttendanceMonitoringCheckpointTotal = {

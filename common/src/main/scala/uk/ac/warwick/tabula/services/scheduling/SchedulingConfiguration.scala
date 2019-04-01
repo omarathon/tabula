@@ -130,7 +130,7 @@ object SchedulingConfiguration {
 
     SimpleTriggerJob[ProcessJobQueueJob](repeatInterval = 10.seconds),
 
-    SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 10.seconds),
+    SimpleTriggerJob[UpdateCheckpointTotalsJob](repeatInterval = 1.minute),
 
     SimpleTriggerJob[ProcessTurnitinLtiQueueJob](repeatInterval = 20.seconds),
     SimpleTriggerJob[ProcessUrkundQueueJob](repeatInterval = 10.seconds)
