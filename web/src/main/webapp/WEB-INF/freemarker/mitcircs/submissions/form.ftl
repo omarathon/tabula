@@ -5,9 +5,8 @@
 
   <div class="fix-area">
     <@f.form
-      id="editMitCircsCommand"
       method="POST"
-      modelAttribute="editMitCircsCommand"
+      modelAttribute="command"
       class="dirty-check double-submit-protection"
       enctype="multipart/form-data">
 
@@ -16,7 +15,7 @@
       <div class="fix-footer">
         <input type="submit" class="btn btn-primary" value="Submit">
         <a class="btn btn-default dirty-check-ignore"
-           href="<@routes.mitcircs.studenthome submission.student />">Cancel</a>
+           href="<@routes.mitcircs.studenthome student />">Cancel</a>
       </div>
 
     </@f.form>

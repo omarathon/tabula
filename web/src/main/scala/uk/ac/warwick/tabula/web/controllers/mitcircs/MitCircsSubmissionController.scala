@@ -22,16 +22,16 @@ class MitCircsSubmissionController extends BaseController {
 
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
 
-  @ModelAttribute("createMitCircsCommand") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
+  @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
     CreateMitCircsSubmissionCommand(student, user.apparentUser)
 
   @RequestMapping
-  def form(@ModelAttribute("createMitCircsCommand") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
-    Mav("mitcircs/submissions/create", Map("issueTypes" -> IssueType.values))
+  def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
+    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
   }
 
   @RequestMapping(method = Array(POST))
-  def save(@Valid @ModelAttribute("createMitCircsCommand") cmd: CreateCommand, errors: Errors, @PathVariable student: StudentMember): Mav = {
+  def save(@Valid @ModelAttribute("command") cmd: CreateCommand, errors: Errors, @PathVariable student: StudentMember): Mav = {
     if (errors.hasErrors) form(cmd, student)
     else {
       val submission = cmd.apply()
@@ -47,16 +47,16 @@ class MitCircsEditController extends BaseController {
   validatesSelf[SelfValidating]
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
 
-  @ModelAttribute("editMitCircsCommand") def edit(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): EditCommand =
+  @ModelAttribute("command") def edit(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): EditCommand =
     EditMitCircsSubmissionCommand(mandatory(submission), user.apparentUser)
 
   @RequestMapping
-  def form(@ModelAttribute("editMitCircsCommand") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    Mav("mitcircs/submissions/edit", Map("issueTypes" -> IssueType.values))
+  def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
   }
 
   @RequestMapping(method = Array(POST))
-  def save(@Valid @ModelAttribute("editMitCircsCommand") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+  def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     if (errors.hasErrors) form(cmd, submission)
     else {
       val submission = cmd.apply()

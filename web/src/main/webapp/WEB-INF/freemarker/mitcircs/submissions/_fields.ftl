@@ -38,10 +38,10 @@
 </@bs3form.labelled_form_group>
 
 
-<#if editMitCircsCommand.attachedFiles?has_content >
+<#if command.attachedFiles?has_content >
   <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
     <ul class="unstyled">
-      <#list editMitCircsCommand.attachedFiles as attachment>
+      <#list command.attachedFiles as attachment>
         <#assign url></#assign>
         <li id="attachment-${attachment.id}" class="attachment">
           <i class="fa fa-file-o"></i>
