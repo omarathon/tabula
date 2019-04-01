@@ -23,7 +23,7 @@ class MitCircsSubmissionController extends BaseController {
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
 
   @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
-    CreateMitCircsSubmissionCommand(student, user.apparentUser)
+    CreateMitCircsSubmissionCommand(mandatory(student), user.apparentUser)
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
@@ -47,8 +47,14 @@ class MitCircsEditController extends BaseController {
   validatesSelf[SelfValidating]
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
 
-  @ModelAttribute("command") def edit(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): EditCommand =
+  @ModelAttribute("command") def edit(
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    @PathVariable student: StudentMember,
+    user: CurrentUser
+  ): EditCommand = {
+    mustBeLinked(submission, student)
     EditMitCircsSubmissionCommand(mandatory(submission), user.apparentUser)
+  }
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
@@ -73,8 +79,14 @@ class MitCircsAttachmentController extends BaseController {
   type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]
 
   @ModelAttribute("renderAttachmentCommand")
-  def attachmentCommand(@PathVariable submission: MitigatingCircumstancesSubmission, @PathVariable filename: String) =
+  def attachmentCommand(
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    @PathVariable student: StudentMember,
+    @PathVariable filename: String
+  ): RenderAttachmentCommand = {
+    mustBeLinked(submission, student)
     RenderMitCircsAttachmentCommand(mandatory(submission), mandatory(filename))
+  }
 
   @RequestMapping(method = Array(GET))
   def supportingFile(@ModelAttribute("renderAttachmentCommand") attachmentCommand: RenderAttachmentCommand, @PathVariable filename: String): RenderableFile =
