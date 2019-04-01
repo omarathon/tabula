@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
+import javax.persistence.CascadeType.ALL
 import javax.persistence._
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
@@ -55,6 +56,18 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
   var reason: String = _
+
+  @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @BatchSize(size = 200)
+  @Fetch(FetchMode.JOIN)
+  var attachments: JSet[FileAttachment] = JHashSet()
+
+  def addAttachment(attachment: FileAttachment) {
+    if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+    attachment.temporary = false
+    attachment.mitigatingCircumstancesSubmission = this
+    attachments.add(attachment)
+  }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
