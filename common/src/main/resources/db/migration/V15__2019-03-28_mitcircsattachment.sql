@@ -5,7 +5,9 @@ create index idx_mitcircssub_student on MitigatingCircumstancesSubmission (unive
 create table mitcircssubmissionattachment (
   submission_id varchar(255) not null,
   file_attachment_id varchar(255) not null,
-  constraint pk_mitcircssubmissionattachment primary key (submission_id, file_attachment_id)
+  constraint pk_mitcircssubmissionattachment primary key (submission_id, file_attachment_id),
+  constraint fk_mitcircssubmissionattachment_submission foreign key (submission_id) references mitigatingcircumstancessubmission (id),
+  constraint fk_mitcircssubmissionattachment_file foreign key (file_attachment_id) references fileattachment (id)
 );
 
 create index idx_mitcircssubmission_attachment on mitcircssubmissionattachment (file_attachment_id);

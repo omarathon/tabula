@@ -105,7 +105,7 @@ class FileAttachment extends GeneratedId {
     * attachment table. It won't check mappings where the foreign key is on the other side,
     * which is the case for things like member photos.
     */
-  def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport).exists(_ != null)
+  def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport, mitigatingCircumstancesSubmission).exists(_ != null)
 
   var temporary: JBoolean = true
 
