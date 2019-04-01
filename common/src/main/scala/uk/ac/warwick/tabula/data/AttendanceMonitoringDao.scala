@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FetchMode
+import org.hibernate.criterion.Order._
+import org.hibernate.criterion.ProjectionList
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Restrictions._
-import org.hibernate.criterion.{Order, ProjectionList, Projections, Restrictions}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBoolean
@@ -75,13 +76,15 @@ trait AttendanceMonitoringDao {
 
   def saveOrUpdate(report: MonitoringPointReport): Unit
 
-  def delete(scheme: AttendanceMonitoringScheme)
+  def delete(scheme: AttendanceMonitoringScheme): Unit
 
-  def delete(point: AttendanceMonitoringPoint)
+  def delete(point: AttendanceMonitoringPoint): Unit
 
-  def delete(template: AttendanceMonitoringTemplate)
+  def delete(template: AttendanceMonitoringTemplate): Unit
 
-  def delete(templatePoint: AttendanceMonitoringTemplatePoint)
+  def delete(templatePoint: AttendanceMonitoringTemplatePoint): Unit
+
+  def delete(total: AttendanceMonitoringCheckpointTotal): Unit
 
   def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 
@@ -212,6 +215,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
   def delete(templatePoint: AttendanceMonitoringTemplatePoint): Unit =
     session.delete(templatePoint)
 
+  def delete(total: AttendanceMonitoringCheckpointTotal): Unit =
+    session.delete(total)
+
   def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
     getById[AttendanceMonitoringTemplate](id)
 
@@ -233,14 +239,14 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 
   def listAllTemplateSchemes: Seq[AttendanceMonitoringTemplate] = {
     session.newCriteria[AttendanceMonitoringTemplate]
-      .addOrder(Order.asc("position"))
+      .addOrder(asc("position"))
       .seq
   }
 
   def listTemplateSchemesByStyle(style: AttendanceMonitoringPointStyle): Seq[AttendanceMonitoringTemplate] = {
     session.newCriteria[AttendanceMonitoringTemplate]
       .add(is("pointStyle", style))
-      .addOrder(Order.asc("position"))
+      .addOrder(asc("position"))
       .seq
   }
 
@@ -261,9 +267,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
             session.newCriteria[MonitoringPointReport]
               .add(is("academicYear", academicYear))
           },
-          Projections.projectionList()
-            .add(Projections.groupProperty("monitoringPeriod"))
-            .add(Projections.count("monitoringPeriod")),
+          projectionList()
+            .add(groupProperty("monitoringPeriod"))
+            .add(count("monitoringPeriod")),
           "student.universityId",
           students.map(_.universityId)
         ).map { objArray =>
@@ -306,11 +312,11 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
         () => {
           session.newCriteria[StudentMember]
         },
-        Projections.projectionList()
-          .add(Projections.property("firstName"))
-          .add(Projections.property("lastName"))
-          .add(Projections.property("universityId"))
-          .add(Projections.property("userId")),
+        projectionList()
+          .add(property("firstName"))
+          .add(property("lastName"))
+          .add(property("universityId"))
+          .add(property("userId")),
         "universityId",
         universityIds
       ).seq.map { objArray =>
@@ -361,7 +367,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       () => {
         session.newCriteria[AttendanceMonitoringCheckpoint]
       },
-      Projections.projectionList()
+      projectionList()
         .add(property("point"))
         .add(property("_state"))
         .add(property("student.universityId")),
@@ -426,8 +432,8 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       .add(is("student", student))
       .add(is("scheme.academicYear", academicYear))
     if (activeCheckpoints.nonEmpty)
-    // TODO Is there a way to do not-in with multiple queries?
-      c.add(Restrictions.not(safeIn("id", activeCheckpoints.map(_.id))))
+      // TODO Is there a way to do not-in with multiple queries?
+      c.add(not(safeIn("id", activeCheckpoints.map(_.id))))
     departmentOption match {
       case Some(department: Department) => c.add(is("scheme.department", department))
       case _ =>
@@ -444,7 +450,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
     else {
       safeInSeqWithProjection[AttendanceMonitoringCheckpoint, Number](() => {
         session.newCriteria[AttendanceMonitoringCheckpoint]
-      }, Projections.rowCount(), "point", points).headOption.exists(_.intValue() > 0)
+      }, rowCount(), "point", points).headOption.exists(_.intValue() > 0)
     }
   }
 
@@ -494,7 +500,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 
   def getCheckpointTotal(student: StudentMember, departmentOption: Option[Department], academicYear: AcademicYear, withFlush: Boolean = false): Option[AttendanceMonitoringCheckpointTotal] = {
     if (withFlush)
-    // make sure totals are up-to-date
+      // make sure totals are up-to-date
       session.flush()
 
     departmentOption match {
@@ -518,8 +524,8 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
           result.authorised = totals.map(_.authorised).sum
           result.unauthorised = totals.map(_.unauthorised).sum
           result.attended = totals.map(_.attended).sum
-          result.updatedDate = DateTime.now
-          Option(result)
+          result.updatedDate = totals.map(_.updatedDate).maxBy(_.getMillis)
+          Some(result)
         }
     }
 
@@ -557,9 +563,9 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
       () => {
         session.newCriteria[AttendanceMonitoringCheckpoint]
       },
-      Projections.projectionList()
-        .add(Projections.groupProperty("point"))
-        .add(Projections.count("point")),
+      projectionList()
+        .add(groupProperty("point"))
+        .add(count("point")),
       "point",
       relevantPoints
     ).map { objArray =>
@@ -590,10 +596,22 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
   }
 
   def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal] = {
+    val month = DateTime.now.getMonthOfYear
+    val academicYear = AcademicYear.now()
+
+    val yearsToUpdate: Seq[AcademicYear] =
+      if (month >= DateTimeConstants.AUGUST && month < DateTimeConstants.OCTOBER) {
+        // Include the previous academic year as we're in the awkward period at the start
+        Seq(academicYear.previous, academicYear)
+      } else {
+        Seq(academicYear)
+      }
+
     session.newCriteria[AttendanceMonitoringCheckpointTotal]
       .add(lt("updatedDate", DateTime.now.minusHours(6)))
-      .addOrder(Order.asc("updatedDate"))
-      .setMaxResults(20)
+      .add(in("academicYear", yearsToUpdate))
+      .addOrder(asc("updatedDate"))
+      .setMaxResults(200)
       .setFetchMode("department", FetchMode.JOIN)
       .setFetchMode("student", FetchMode.JOIN)
       .seq
@@ -750,7 +768,7 @@ trait AttendanceMonitoringStudentDataFetcher extends TaskBenchmarking {
   def getAttendanceMonitoringDataForStudents(universityIds: Seq[String], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData] = {
     def setupProjection(withEndDate: Boolean = false): ProjectionList = {
       val projections =
-        Projections.projectionList()
+        projectionList()
           .add(max("firstName"))
           .add(max("lastName"))
           .add(groupProperty("universityId"))
