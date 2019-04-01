@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
-import uk.ac.warwick.tabula.commands.{CommandInternal, Appliable}
+import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal}
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryService, AuditEventQueryServiceComponent}
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands.coursework.assignments.{ListSubmissionsRequest, ListSubmissionsCommandInternal}
+import org.joda.time.{DateTime, DateTimeConstants, DateTimeZone}
+import uk.ac.warwick.tabula.commands.coursework.assignments.{ListSubmissionsCommandInternal, ListSubmissionsRequest}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.SecurityService
-import org.joda.time.DateTimeConstants
 
 // scalastyle:off magic.number
 class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
@@ -45,8 +44,8 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
       * If we wanted to be all snazzy we could explicitly pass a timezone
       * to DateTimeZone.setDefault() when starting the app.
       */
-    val summerDate = DateTime.parse("2012-08-15T11:20")
-    val winterDate = DateTime.parse("2012-11-15T11:20")
+    val summerDate = DateTime.parse("2012-08-15T11:20").withZoneRetainFields(DateTimeZone.forID("Europe/London"))
+    val winterDate = DateTime.parse("2012-11-15T11:20").withZoneRetainFields(DateTimeZone.forID("Europe/London"))
     controller.isoFormat(summerDate) should be("2012-08-15T11:20:00+01:00")
     controller.isoFormat(winterDate) should be("2012-11-15T11:20:00Z")
   }

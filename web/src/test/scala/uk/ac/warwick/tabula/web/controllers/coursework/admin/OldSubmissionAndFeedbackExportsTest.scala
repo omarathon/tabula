@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.coursework.admin
 
+import org.joda.time.DateTimeZone
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand.SubmissionListItem
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand._
@@ -15,8 +16,8 @@ class OldSubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
   val assignment: Assignment = newDeepAssignment()
   assignment.id = "123"
-  assignment.openDate = dateTime(2012, 4)
-  assignment.closeDate = dateTime(2012, 6)
+  assignment.openDate = dateTime(2012, 4).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
+  assignment.closeDate = dateTime(2012, 6).withZoneRetainFields(DateTimeZone.forID("Europe/London"))
   assignment.feedbackService = smartMock[FeedbackService]
   assignment.feedbackService.loadFeedbackForAssignment(assignment) returns Nil
 
