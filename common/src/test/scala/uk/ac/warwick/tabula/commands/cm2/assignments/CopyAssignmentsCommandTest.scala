@@ -4,13 +4,11 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.cm2.markingworkflows.CopyMarkingWorkflowComponent
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.WordCountField
+import uk.ac.warwick.tabula.data.model.forms.{TextField, WordCountField}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.services._
 
 import scala.collection.JavaConverters._
-
-// TODO TAB-3521 - cm1 command test had functionality for OldStudentsChooseMarkerWorkflow (copyMarkerField). Once we implement marking workflows might need similar test here
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
@@ -161,6 +159,10 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
       findFileField(newAssignment).get.attachmentLimit should be(1)
       findFileField(newAssignment).get.attachmentTypes should be(Nil)
       findWordCountField(newAssignment).isEmpty should be (true)
+
+      // TAB-7026 make sure the labels have been set for default fields
+      newAssignment.feedbackCommentsField.get.label should be ("Feedback")
+      newAssignment.findFieldOfType[TextField](Assignment.defaultNotesFieldName).get.label should be ("Notes")
     }
   }
 

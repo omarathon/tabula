@@ -577,9 +577,7 @@ class Assignment
   /**
     * Find a FormField on the Assignment with the given name.
     */
-  def findField(name: String): Option[FormField] = fields.asScala.find {
-    _.name == name
-  }
+  def findField(name: String): Option[FormField] = fields.asScala.find(_.name == name)
 
   /**
     * Find a FormField on the Assignment with the given name and type.
