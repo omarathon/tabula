@@ -90,7 +90,7 @@ class EmailNotificationListener extends RecipientNotificationListener with Unico
       })
     } catch {
       // referenced entity probably missing, oh well.
-      case e: ObjectNotFoundException => None
+      case _: ObjectNotFoundException => None
     }
   }
 

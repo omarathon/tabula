@@ -54,7 +54,7 @@ class CelcatTimetableFetchingServiceTest extends TestBase with Mockito {
 
     // Check that the first few events are as expected
     combined.head should be(TimetableEvent(
-      uid = "11f5b425def797632aee566bb27a8e7a",
+      uid = "c16d591a7430197b4a47bea06275b85e",
       name = "IB1210",
       "",
       "",

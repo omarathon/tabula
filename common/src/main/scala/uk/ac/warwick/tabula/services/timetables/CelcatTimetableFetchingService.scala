@@ -336,11 +336,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
             DigestUtils.md5Hex(
               Seq(
                 module,
-                start.toString,
-                end.toString,
-                location.fold("") {
-                  _.name
-                },
+                start.withZone(DateTimeZone.forID("Europe/London")).toString,
+                end.withZone(DateTimeZone.forID("Europe/London")).toString,
+                location.fold("")(_.name),
                 parent.shortName.getOrElse("")
               ).mkString
             )
