@@ -28,7 +28,7 @@ class MitCircsSubmissionReceiptNotification
     recipientUserId = submission.student.userId
   }
 
-  def verb = "released"
+  def verb = "received"
 
   def submission: MitigatingCircumstancesSubmission = target.entity
 

@@ -69,6 +69,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     attachments.add(attachment)
   }
 
+  def removeAttachment(attachment: FileAttachment): Boolean = {
+    attachment.mitigatingCircumstancesSubmission = null
+    attachments.remove(attachment)
+  }
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
     "student" -> student.universityId

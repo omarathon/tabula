@@ -9,7 +9,8 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
   */
 trait HibernateExtensionPersistenceComponent extends ExtensionPersistenceComponent with Daoisms {
   def delete(attachment: FileAttachment): Unit = {
-    attachment.extension.removeAttachment(attachment)
+    Option(attachment.extension).foreach(_.removeAttachment(attachment))
+    Option(attachment.mitigatingCircumstancesSubmission).foreach(_.removeAttachment(attachment))
     session.delete(attachment)
   }
 
