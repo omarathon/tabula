@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, UserAccessMgrRoleDefinition}
 import uk.ac.warwick.tabula.services._
@@ -146,8 +147,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
         def invalidateAndDeletePermissions[A <: PermissionsTarget : ClassTag](scope: A) {
           // Invalidate any permissions or roles set
           val usersToInvalidate =
-            permissionsService.getAllGrantedRolesFor(scope).toSet.flatMap { role => role.users.users } ++
-            permissionsService.getAllGrantedPermissionsFor(scope).toSet.flatMap { perm => perm.users.users }
+            permissionsService.getAllGrantedRolesFor[A](scope).toSet.flatMap { role: GrantedRole[A] => role.users.users } ++
+            permissionsService.getAllGrantedPermissionsFor[A](scope).toSet.flatMap { perm: GrantedPermission[A] => perm.users.users }
 
           usersToInvalidate.foreach { user =>
             permissionsService.clearCachesForUser((user.getUserId, classTag[A]))
