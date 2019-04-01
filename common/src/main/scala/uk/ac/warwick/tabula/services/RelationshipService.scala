@@ -154,7 +154,7 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
 
   def delete(relationshipType: StudentRelationshipType): Unit = relationshipDao.delete(relationshipType)
 
-  def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional() {
+  def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(readOnly = true) {
     relationshipDao.getCurrentRelationships(relationshipType, scd)
   }
 
@@ -162,19 +162,19 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     relationshipDao.getCurrentRelationships(scd)
   }
 
-  def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional() {
+  def findFutureRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional(readOnly = true) {
     relationshipDao.getFutureRelationships(relationshipType, scd)
   }
 
-  def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
+  def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
     relationshipDao.getCurrentRelationships(relationshipType, student)
   }
 
-  def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship] = transactional() {
+  def getCurrentRelationship(relationshipType: StudentRelationshipType, studentCourse: StudentCourseDetails, agent: Member): Option[StudentRelationship] = transactional(readOnly = true) {
     relationshipDao.getCurrentRelationship(relationshipType, studentCourse, agent)
   }
 
-  def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = transactional() {
+  def getCurrentRelationships(student: StudentMember, agentId: String): Seq[StudentRelationship] = transactional(readOnly = true) {
     relationshipDao.getCurrentRelationships(student, agentId).filter(relationshipNotPermanentlyWithdrawn)
   }
 

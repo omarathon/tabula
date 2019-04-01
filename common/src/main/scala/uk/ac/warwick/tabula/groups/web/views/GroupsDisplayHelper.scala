@@ -22,7 +22,7 @@ object GroupsDisplayHelper {
 
   def getGroupsToDisplay(set: SmallGroupSet, user: User, isTutor: Boolean = false): (Seq[SmallGroup], ViewerRole) = {
     val allGroupsInSet = set.groups.asScala
-    val groupsStudentHasJoined = allGroupsInSet.filter(_.students.users.contains(user))
+    val groupsStudentHasJoined = allGroupsInSet.filter(_.students.includesUser(user))
 
     def viewerRoleOrTutor(role: ViewerRole) =
       if (isTutor) Tutor
