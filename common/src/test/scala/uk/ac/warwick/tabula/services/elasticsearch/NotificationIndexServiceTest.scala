@@ -119,7 +119,7 @@ class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
         "notificationType" -> "HeronDefeat",
         "priority" -> 0.25,
         "dismissed" -> false,
-        "created" -> "2000-06-01T00:00:00+01:00"
+        "created" -> DateFormats.IsoDateTime.print(DateTime.now)
       ))
     }
   }

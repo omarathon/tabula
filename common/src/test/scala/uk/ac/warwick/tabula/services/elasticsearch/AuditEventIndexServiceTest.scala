@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.AuditEventServiceImpl
 import uk.ac.warwick.tabula.system.PostgreSQL10Dialect
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, TestElasticsearchClient}
+import uk.ac.warwick.tabula.{DateFormats, Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StopWatch
 
@@ -74,7 +74,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
       doc.source should be(Map(
         "eventId" -> "eventId",
         "eventType" -> "MyEventType",
-        "eventDate" -> "2000-06-01T00:00:00+01:00",
+        "eventDate" -> DateFormats.IsoDateTime.print(DateTime.now),
         "userId" -> "cuscav",
         "assignment" -> "12345"
       ))

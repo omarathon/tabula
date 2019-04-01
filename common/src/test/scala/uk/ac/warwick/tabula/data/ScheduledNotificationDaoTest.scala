@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 import org.junit.Before
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model._
@@ -59,7 +59,7 @@ class ScheduledNotificationDaoTest extends PersistenceTestBase with Mockito {
 
     val retrievedNotification = dao.getById(notification.id).get.asInstanceOf[ScheduledNotification[MeetingRecord]]
     retrievedNotification.completed should be(false)
-    retrievedNotification.scheduledDate should be(tomorrow)
+    retrievedNotification.scheduledDate.withZone(DateTimeZone.getDefault) should be(tomorrow)
     retrievedNotification.target should not be null
     retrievedNotification.target.entity should be(meeting1)
 
