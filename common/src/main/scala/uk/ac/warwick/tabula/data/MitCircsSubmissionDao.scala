@@ -37,6 +37,8 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       // set the flush mode to commit to avoid TransientObjectExceptions when fetching the next key
       session.setHibernateFlushMode(FlushMode.COMMIT)
       submission.key = session.createNativeQuery("select nextval('mit_circ_sequence')").getSingleResult.asInstanceOf[java.math.BigInteger].longValue
+      // set the flush mode back
+      session.setHibernateFlushMode(FlushMode.AUTO)
     }
     session.saveOrUpdate(submission)
     submission
