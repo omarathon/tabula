@@ -4,7 +4,12 @@
   <p>You can find more information about the universities mitigating circumstances policies on the <a href="https://warwick.ac.uk/services/aro/dar/quality/categories/examinations/policies/u_mitigatingcircumstances/">Teaching Quality</a> website.</p>
 
   <div class="fix-area">
-    <@f.form id="newMitCircStudent" method="POST" modelAttribute="createMitCircsCommand" class="dirty-check">
+    <@f.form
+      id="newMitCircStudent"
+      method="POST"
+      modelAttribute="createMitCircsCommand"
+      class="dirty-check double-submit-protection"
+      enctype="multipart/form-data">
 
       <div class="row">
         <div class="col col-md-6">
@@ -44,6 +49,14 @@
         <@f.textarea path="reason" cssClass="form-control" rows="5" />
         <div class="help-block">Please provide further details of the mitigating circumstances and how they have affected your assessments</div>
       </@bs3form.labelled_form_group>
+
+      <@bs3form.filewidget
+        basename="file"
+        labelText="Upload supporting documentation relevant to your submission"
+        types=[]
+        multiple=true
+        required=false
+      />
 
       <div class="fix-footer">
         <input type="submit" class="btn btn-primary" value="Submit">

@@ -3,8 +3,9 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Notification, StudentMember}
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports.JSet
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
@@ -13,9 +14,10 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
-
+import uk.ac.warwick.tabula.system.BindListener
 
 import scala.beans.BeanProperty
+import scala.collection.JavaConverters._
 
 
 object CreateMitCircsSubmissionCommand {
@@ -29,9 +31,13 @@ object CreateMitCircsSubmissionCommand {
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val creator: User) extends CommandInternal[MitigatingCircumstancesSubmission]
-  with CreateMitCircsSubmissionState {
+  with CreateMitCircsSubmissionState with BindListener {
 
   self: MitCircsSubmissionServiceComponent  =>
+
+  override def onBind(result: BindingResult): Unit = transactional() {
+    file.onBind(result)
+  }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     val submission = new MitigatingCircumstancesSubmission(student, creator)
@@ -40,6 +46,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cr
     submission.issueType = issueType
     if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+    file.attached.asScala.foreach(submission.addAttachment)
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
@@ -92,6 +99,9 @@ trait CreateMitCircsSubmissionState {
   @BeanProperty var issueTypeDetails: String = _
 
   var reason: String = _
+
+  var file: UploadedFile = new UploadedFile
+  var attachedFiles: JSet[FileAttachment] = JSet()
 }
 
 trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
