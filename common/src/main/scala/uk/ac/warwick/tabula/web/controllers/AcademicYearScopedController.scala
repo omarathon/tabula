@@ -36,7 +36,7 @@ trait AcademicYearScopedController extends TaskBenchmarking {
       case Some(academicYear) if maintenanceModeService.enabled =>
         // Don't store if maintenance mode is enabled
         Some(academicYear)
-      case Some(academicYear) if user.apparentUser.isFoundUser =>
+      case Some(academicYear) if user.apparentUser.isFoundUser && !ajax =>
         // Store the new active academic year and return it
         val settings = new UserSettings(user.apparentId)
         settings.activeAcademicYear = academicYear

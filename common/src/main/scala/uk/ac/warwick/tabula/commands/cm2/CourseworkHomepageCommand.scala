@@ -58,7 +58,7 @@ object CourseworkHomepageCommand {
   case class CourseworkHomepageInformation(
     homeDepartment: Option[Department],
     studentInformation: CourseworkHomepageStudentInformation,
-    isMarker: Boolean,
+    markingAcademicYears: Seq[AcademicYear],
     adminInformation: CourseworkHomepageAdminInformation
   )
 
@@ -94,13 +94,13 @@ class CourseworkHomepageCommandInternal(val user: CurrentUser) extends CommandIn
     with AssessmentMembershipServiceComponent
     with CM2MarkingWorkflowServiceComponent =>
 
-  val target: MarkingSummaryCommandTarget = MarkingSummaryCurrentUserCommandTarget(user)
+  val target: MarkingSummaryCommandTarget = MarkingSummaryCurrentUserCommandTarget(user, None)
 
   override def applyInternal(): Result =
     CourseworkHomepageInformation(
       homeDepartment,
       studentInformation,
-      isMarker,
+      (allCM1MarkerAssignments.map(_.academicYear) ++ allCM2MarkerAssignments.map(_.academicYear)).distinct.sorted,
       adminInformation
     )
 

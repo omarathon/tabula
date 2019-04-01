@@ -4,7 +4,7 @@
 <#-- Do we expect this user to submit assignments, and therefore show them some text even if there aren't any? -->
   <#assign expect_assignments = user.student || user.PGR || user.alumni />
   <#assign is_student = expect_assignments || !studentInformation.empty />
-  <#assign is_marker = isMarker />
+  <#assign is_marker = markingAcademicYears?has_content />
   <#assign is_admin = !adminInformation.empty />
 
   <#if is_student>
@@ -12,7 +12,31 @@
   </#if>
 
   <#if is_marker>
-    <#include "_marker.ftl" />
+    <h1>Assignments for marking</h1>
+
+    <#if markingAcademicYears?size gt 1>
+      <ul class="nav nav-tabs" role="tablist">
+        <#list markingAcademicYears as academicYear>
+          <li role="presentation"<#if academicYear.startYear = (activeAcademicYear.startYear)!0> class="active"</#if>><a href="#marking-${academicYear.startYear?c}" aria-controls="marking-${academicYear.startYear?c}" data-toggle="tab">${academicYear.toString}</a></li>
+        </#list>
+      </ul>
+    </#if>
+
+    <div class="tab-content">
+      <#list markingAcademicYears as academicYear>
+        <div role="tabpanel" class="tab-pane<#if academicYear.startYear = (activeAcademicYear.startYear)!0> active</#if>" id="marking-${academicYear.startYear?c}">
+          <p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
+        </div>
+      </#list>
+
+      <script type="text/javascript">
+        (function ($) {
+          <#list markingAcademicYears as academicYear>
+            $('#marking-${academicYear.startYear?c}').load('<@routes.cm2.markerHomeForYear academicYear />');
+          </#list>
+        })(jQuery);
+      </script>
+    </div>
   </#if>
 
   <#if is_admin || is_marker> <#-- Markers get the activity stream -->
