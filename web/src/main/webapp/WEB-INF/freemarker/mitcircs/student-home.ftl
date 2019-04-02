@@ -15,15 +15,17 @@
           <th>Last modified</th>
         </tr>
       </thead>
-      <#list submissions as submission>
-        <tr>
-          <td><a href="<@routes.mitcircs.editsubmission submission />">${submission.key}</a></td>
-          <td>${submission.issueType.description}</td>
-          <td><@fmt.date date=submission.startDate includeTime=false /></td>
-          <td><@fmt.date date=submission.endDate includeTime=false /></td>
-          <td><@fmt.date date=submission.lastModified /></td>
-        </tr>
-      </#list>
+      <tbody>
+        <#list submissions as submission>
+          <tr>
+            <td><a href="<@routes.mitcircs.editsubmission submission />">${submission.key}</a></td>
+            <td>${submission.issueType.description}</td>
+            <td><@fmt.date date=submission.startDate includeTime=false /></td>
+            <td><@fmt.date date=submission.endDate includeTime=false /></td>
+            <td><@fmt.date date=submission.lastModified /></td>
+          </tr>
+        </#list>
+      <tbody>
     </table>
   </#if>
 
