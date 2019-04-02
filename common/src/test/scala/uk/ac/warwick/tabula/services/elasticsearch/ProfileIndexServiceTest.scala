@@ -23,9 +23,6 @@ import scala.concurrent.Future
 
 class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val index = Index("profile")
   val indexType: String = new ProfileIndexType {}.indexType
 

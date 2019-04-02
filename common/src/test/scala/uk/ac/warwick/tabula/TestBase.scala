@@ -41,6 +41,7 @@ import freemarker.core.Environment
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.data.Transactions
 import uk.ac.warwick.tabula.web.Routes
 
@@ -63,6 +64,10 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
   def tearDownTestLoggers: Unit = {
     TestLoggerFactory.tearDown()
   }
+
+  // Give Scala Futures time to run
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   Transactions.enabled = false
   EventHandling.enabled = false

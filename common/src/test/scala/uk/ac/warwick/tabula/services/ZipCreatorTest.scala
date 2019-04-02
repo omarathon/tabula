@@ -8,9 +8,6 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, ObjectSt
 
 class ZipCreatorTest extends TestBase {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val transientObjectStore: ObjectStorageService = createTransientObjectStore()
 
   val creator = new ZipCreator() with SHAFileHasherComponent with ObjectStorageServiceComponent {

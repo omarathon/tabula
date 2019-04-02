@@ -12,9 +12,6 @@ import uk.ac.warwick.tabula.services.ProfileService
 
 class ProfileQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val index = Index("profiles")
   val indexType: String = new ProfileIndexType {}.indexType
 

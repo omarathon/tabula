@@ -7,9 +7,6 @@ import uk.ac.warwick.tabula.ElasticsearchTestBase
 
 class ElasticsearchIndexInitialisationTest extends ElasticsearchTestBase {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   private trait ElasticsearchIndexSupport extends ElasticsearchClientComponent {
     override val client: ElasticClient = ElasticsearchIndexInitialisationTest.this.client
   }

@@ -25,9 +25,6 @@ import scala.concurrent.Future
 
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient with IndexMatchers {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val index = Index("audit")
   val indexType = "auditEvent"
 

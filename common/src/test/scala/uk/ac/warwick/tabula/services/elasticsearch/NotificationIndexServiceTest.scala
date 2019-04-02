@@ -18,9 +18,6 @@ import scala.collection.immutable.IndexedSeq
 
 class NotificationIndexServiceTest extends ElasticsearchTestBase with Mockito {
 
-  override implicit val patienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val index = Index("notification")
   val indexType: String = new NotificationIndexType {}.indexType
 

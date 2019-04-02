@@ -19,9 +19,6 @@ import scala.collection.JavaConverters._
 
 class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   private[this] trait SecretKeyFixture {
     val secretKey: SecretKey
   }

@@ -19,9 +19,6 @@ import scala.collection.immutable.IndexedSeq
 
 class AuditEventQueryServiceTest extends ElasticsearchTestBase with Mockito {
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
-
   val index = Index("audit")
   val indexType: String = new AuditEventIndexType {}.indexType
 
