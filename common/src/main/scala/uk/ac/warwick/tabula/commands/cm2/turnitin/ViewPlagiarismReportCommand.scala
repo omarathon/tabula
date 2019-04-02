@@ -133,7 +133,9 @@ trait ViewPlagiarismReportPermissions extends RequiresPermissionsChecking with P
   self: ViewPlagiarismReportState =>
 
   override def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, assignment)
+    mandatory(attachment)
+    mandatory(attachment.originalityReport)
+    p.PermissionCheck(Permissions.Submission.ViewPlagiarismStatus, mandatory(assignment))
   }
 }
 
