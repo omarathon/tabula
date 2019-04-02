@@ -70,8 +70,8 @@ object MarkingSummaryCommand {
 
   type Command = Appliable[MarkingSummaryMarkerInformation]
 
-  def apply(marker: Member): Command with PermissionsChecking =
-    new MarkingSummaryCommandInternal(MarkingSummaryMemberCommandTarget(marker))
+  def apply(marker: Member, academicYear: AcademicYear): Command with PermissionsChecking =
+    new MarkingSummaryCommandInternal(MarkingSummaryMemberCommandTarget(marker, Some(academicYear)))
       with ComposableCommand[MarkingSummaryMarkerInformation]
       with AutowiringModuleAndDepartmentServiceComponent
       with MarkingSummaryCommandStateMarkerMember
@@ -85,8 +85,8 @@ object MarkingSummaryCommand {
       with AutowiringCM2WorkflowProgressServiceComponent
       with MarkingSummaryPermissions with Unaudited with ReadOnly
 
-  def apply(currentUser: CurrentUser): Command =
-    new MarkingSummaryCommandInternal(MarkingSummaryCurrentUserCommandTarget(currentUser))
+  def apply(currentUser: CurrentUser, academicYear: AcademicYear): Command =
+    new MarkingSummaryCommandInternal(MarkingSummaryCurrentUserCommandTarget(currentUser, Some(academicYear)))
       with ComposableCommand[MarkingSummaryMarkerInformation]
       with AutowiringModuleAndDepartmentServiceComponent
       with MarkingSummaryCommandStateMarkerUser
@@ -104,13 +104,14 @@ object MarkingSummaryCommand {
 
 sealed trait MarkingSummaryCommandTarget {
   def markerUser: User
+  def academicYear: Option[AcademicYear]
 }
 
-case class MarkingSummaryMemberCommandTarget(marker: Member) extends MarkingSummaryCommandTarget {
+case class MarkingSummaryMemberCommandTarget(marker: Member, academicYear: Option[AcademicYear]) extends MarkingSummaryCommandTarget {
   override def markerUser: User = marker.asSsoUser
 }
 
-case class MarkingSummaryCurrentUserCommandTarget(currentUser: CurrentUser) extends MarkingSummaryCommandTarget {
+case class MarkingSummaryCurrentUserCommandTarget(currentUser: CurrentUser, academicYear: Option[AcademicYear]) extends MarkingSummaryCommandTarget {
   override def markerUser: User = currentUser.apparentUser
 }
 
@@ -118,6 +119,7 @@ trait MarkingSummaryCommandState {
   def target: MarkingSummaryCommandTarget
 
   def markerUser: User = target.markerUser
+  def academicYear: Option[AcademicYear] = target.academicYear
 }
 
 trait MarkingSummaryCommandStateMarkerUser extends MarkingSummaryCommandState {
@@ -153,15 +155,13 @@ trait MarkingSummaryMarkerAssignmentList extends TaskBenchmarking {
   self: MarkingSummaryCommandState with AssessmentServiceComponent with CM2MarkingWorkflowServiceComponent =>
 
   protected lazy val allCM1MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM1 assignments for marking") {
-    assessmentService.getAssignmentWhereMarker(markerUser, None) // Any academic year
+    assessmentService.getAssignmentWhereMarker(markerUser, academicYear) // Any academic year
   }
 
   protected lazy val allCM2MarkerAssignments: Seq[Assignment] = benchmarkTask("Get CM2 assignments for marking") {
-    assessmentService.getCM2AssignmentsWhereMarker(markerUser, None) // Any academic year
+    assessmentService.getCM2AssignmentsWhereMarker(markerUser, academicYear) // Any academic year
       .filter { assignment => cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, markerUser).nonEmpty }
   }
-
-  lazy val isMarker: Boolean = allCM1MarkerAssignments.nonEmpty || allCM2MarkerAssignments.nonEmpty
 }
 
 trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList {
@@ -217,7 +217,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
   private lazy val allEnhancedCM1MarkerAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Enhance CM1 assignments for marking") {
     allCM1MarkerAssignments.map { assignment =>
       val markingWorkflow = assignment.markingWorkflow
-      val students = markingWorkflow.getMarkersStudents(assignment, markerUser).toSet
+      val students = markingWorkflow.getMarkersStudents(assignment, markerUser)
 
       enhance(assignment, students)
     }

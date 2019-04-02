@@ -30,6 +30,11 @@ object Routes {
 
   def home: String = context + "/"
 
+  object marker {
+    def apply(): String = s"$context/marker"
+    def forYear(academicYear: AcademicYear): String = s"$context/marker/${encoded(academicYear.startYear.toString)}"
+  }
+
   object assignment {
     def apply(assignment: Assignment): String = context + s"/submission/${encoded(assignment.id)}/"
 

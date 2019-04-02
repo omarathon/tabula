@@ -82,7 +82,7 @@ class MarkerFeedback extends GeneratedId
         "urn:websignon:timestamp" -> DateTime.now.toString,
         "urn:websignon:usersource" -> "Tabula"
       ))
-      dummyUser.setVerified(true)
+      dummyUser.setVerified(false)
       dummyUser.setFoundUser(true)
       dummyUser
     } else {
