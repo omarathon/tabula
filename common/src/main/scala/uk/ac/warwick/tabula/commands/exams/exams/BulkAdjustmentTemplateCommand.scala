@@ -4,7 +4,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Exam, Feedback}
-import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -35,8 +34,9 @@ class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends 
     sheet.trackAllColumnsForAutoSizing()
 
     val markerFields: Seq[String] = assessment match {
+
+      case a: Assignment if a.cm2Assignment && a.cm2MarkingWorkflow != null => a.cm2MarkingWorkflow.allocationOrder
       case a: Assignment if a.markingWorkflow != null => Seq("first-marker", "second-marker")
-      case a: Assignment if a.cm2MarkingWorkflow != null => a.cm2MarkingWorkflow.allocationOrder
       case _ => Seq()
     }
 
@@ -57,13 +57,13 @@ class BulkAdjustmentTemplateCommandInternal(val assessment: Assessment) extends 
       .zipWithIndex.toMap.map { case (user, order) => user.getWarwickId -> order }
 
     def markerData(feedback: Feedback): Seq[String] = assessment match {
+      case a: Assignment if a.cm2Assignment && a.cm2MarkingWorkflow != null => a.cm2MarkingWorkflow.allocationOrder.map(role => {
+        feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
+      })
       case a: Assignment if a.markingWorkflow != null => Seq(
         a.getStudentsFirstMarker(feedback.studentIdentifier).map(_.getFullName).getOrElse(""),
         a.getStudentsSecondMarker(feedback.studentIdentifier).map(_.getFullName).getOrElse("")
       )
-      case a: Assignment if a.cm2MarkingWorkflow != null => a.cm2MarkingWorkflow.allocationOrder.map(role => {
-        feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
-      })
       case _ => Seq()
     }
 
