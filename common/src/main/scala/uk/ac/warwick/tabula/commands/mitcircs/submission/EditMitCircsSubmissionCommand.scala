@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
@@ -57,6 +58,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+    submission.lastModified = DateTime.now()
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }

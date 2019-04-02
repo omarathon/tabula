@@ -34,6 +34,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var createdDate: DateTime = DateTime.now()
 
   @Column(nullable = false)
+  var lastModified: DateTime = DateTime.now()
+
+  @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
@@ -59,7 +62,6 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  @Fetch(FetchMode.JOIN)
   var attachments: JSet[FileAttachment] = JHashSet()
 
   def addAttachment(attachment: FileAttachment) {
@@ -76,7 +78,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
-    "student" -> student.universityId
+    "student" -> student.universityId,
+    "creator" -> creator.getWarwickId
   )
 
   // Don't use the student as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments

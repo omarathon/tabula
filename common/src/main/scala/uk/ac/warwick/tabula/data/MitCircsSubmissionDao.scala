@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FlushMode
+import org.hibernate.criterion.Order
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
@@ -20,6 +22,7 @@ trait MitCircsSubmissionDao {
   def getById(id: String): Option[MitigatingCircumstancesSubmission]
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
+  def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
 }
 
 @Repository
@@ -42,5 +45,12 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     }
     session.saveOrUpdate(submission)
     submission
+  }
+
+  def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] = {
+    session.newCriteria[MitigatingCircumstancesSubmission]
+      .add(is("student", studentMember))
+      .addOrder(Order.desc("lastModified"))
+      .seq
   }
 }

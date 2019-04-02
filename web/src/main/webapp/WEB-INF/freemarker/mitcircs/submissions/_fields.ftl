@@ -1,3 +1,5 @@
+<#import "*/modal_macros.ftl" as modal />
+
 <div class="row">
   <div class="col col-md-6">
     <@bs3form.labelled_form_group "startDate" "Start Date">
@@ -47,7 +49,16 @@
           <i class="fa fa-file-o"></i>
           <a target="_blank" href="<@routes.mitcircs.renderAttachment submission attachment />"><#compress> ${attachment.name} </#compress></a>&nbsp;
           <@f.hidden path="attachedFiles" value="${attachment.id}" />
-          <i class="fa fa-times-circle remove-attachment"></i>
+          <a href="" data-toggle="modal" data-target="#confirm-delete-${attachment.id}"><i class="fa fa-times-circle"></i></a>
+          <div class="modal fade" id="confirm-delete-${attachment.id}" tabindex="-1" role="dialog" aria-hidden="true">
+            <@modal.wrapper>
+              <@modal.body>Are you sure that you want to delete ${attachment.name}?</@modal.body>
+              <@modal.footer>
+                <a class="btn btn-danger remove-attachment" data-dismiss="modal">Delete</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </@modal.footer>
+            </@modal.wrapper>
+          </div>
         </li>
       </#list>
     </ul>
@@ -55,7 +66,10 @@
       jQuery(function ($) {
         $(".remove-attachment").on("click", function (e) {
           e.preventDefault();
-          $(this).closest("li.attachment").remove();
+          const $attachmentContainer = $(this).closest("li.attachment");
+          $(this).closest(".modal").on("hidden.bs.modal", function(e){
+            $attachmentContainer.remove();
+          });
         });
       });
     </script>

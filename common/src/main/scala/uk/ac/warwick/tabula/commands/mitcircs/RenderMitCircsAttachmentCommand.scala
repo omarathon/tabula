@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.commands.mitcircs.submission
+package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
