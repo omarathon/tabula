@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.triggers.Trigger
 import uk.ac.warwick.tabula.events._
@@ -530,6 +531,10 @@ abstract class Description {
 
   def markingDescriptor(markingDescriptor: MarkingDescriptor): Description = {
     property("markingDescriptor", markingDescriptor.id)
+  }
+
+  def mitigatingCircumstancesSubmission(submission: MitigatingCircumstancesSubmission): Description = {
+    property("mitCircsSubmission", submission.id)
   }
 
   // delegate equality to the underlying map

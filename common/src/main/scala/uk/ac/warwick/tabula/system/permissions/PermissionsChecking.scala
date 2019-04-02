@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.system.permissions
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupEvent, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, RoleOverride}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.{Permission, _}
@@ -143,6 +144,12 @@ trait PermissionsCheckingMethods extends Logging {
     if (mandatory(studentCourseDetails).student.id != mandatory(member).id) {
       logger.info("Not displaying student course details as it doesn't belong to specified member")
       throw new ItemNotFoundException(studentCourseDetails, "Not displaying student course details as it doesn't belong to specified member")
+    }
+
+  def mustBeLinked(submission: MitigatingCircumstancesSubmission, student: StudentMember): Unit =
+    if (mandatory(submission).student.id != mandatory(student).id) {
+      logger.info("Not displaying mitigating circumstances submission as it doesn't belong to specified student")
+      throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it doesn't belong to specified student")
     }
 
   /**

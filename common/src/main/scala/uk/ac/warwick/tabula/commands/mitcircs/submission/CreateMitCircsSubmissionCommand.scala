@@ -23,14 +23,14 @@ import scala.collection.JavaConverters._
 object CreateMitCircsSubmissionCommand {
   def apply(student: StudentMember, creator: User) = new CreateMitCircsSubmissionCommandInternal(student, creator)
     with ComposableCommand[MitigatingCircumstancesSubmission]
-    with CreateMitCircsSubmissionValidation
-    with CreateMitCircsSubmissionPermissions
+    with MitCircsSubmissionValidation
+    with MitCircsSubmissionPermissions
     with CreateMitCircsSubmissionDescription
     with NewMitCircsSubmissionNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
-class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val creator: User) extends CommandInternal[MitigatingCircumstancesSubmission]
+class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User) extends CommandInternal[MitigatingCircumstancesSubmission]
   with CreateMitCircsSubmissionState with BindListener {
 
   self: MitCircsSubmissionServiceComponent  =>
@@ -40,7 +40,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cr
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
-    val submission = new MitigatingCircumstancesSubmission(student, creator)
+    val submission = new MitigatingCircumstancesSubmission(student, currentUser)
     submission.startDate = startDate
     submission.endDate = endDate
     submission.issueType = issueType
@@ -52,15 +52,15 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cr
   }
 }
 
-trait CreateMitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: CreateMitCircsSubmissionState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Create, student)
+    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, student)
   }
 }
 
-trait CreateMitCircsSubmissionValidation extends SelfValidating {
+trait MitCircsSubmissionValidation extends SelfValidating {
   self: CreateMitCircsSubmissionState =>
 
   override def validate(errors: Errors) {
@@ -90,7 +90,7 @@ trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumst
 trait CreateMitCircsSubmissionState {
 
   val student: StudentMember
-  val creator: User
+  val currentUser: User
 
   var startDate: DateTime = _
   var endDate: DateTime = _
@@ -109,6 +109,6 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   self: CreateMitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(Notification.init(new MitCircsSubmissionReceiptNotification, creator, submission, submission))
+    Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
   }
 }

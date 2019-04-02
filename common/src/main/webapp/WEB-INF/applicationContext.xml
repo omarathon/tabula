@@ -202,6 +202,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.MarkPointConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MarkingDescriptorConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
   </util:list>
 
   <bean id="typeConverter"
@@ -229,6 +230,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordApprovalTypeConverter"/>
+        <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
       </list>
     </property>
   </bean>
