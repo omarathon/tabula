@@ -609,7 +609,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
 
     session.newCriteria[AttendanceMonitoringCheckpointTotal]
       .add(lt("updatedDate", DateTime.now.minusHours(6)))
-      .add(in("academicYear", yearsToUpdate))
+      .add(safeIn("academicYear", yearsToUpdate))
       .addOrder(asc("updatedDate"))
       .setMaxResults(200)
       .setFetchMode("department", FetchMode.JOIN)
