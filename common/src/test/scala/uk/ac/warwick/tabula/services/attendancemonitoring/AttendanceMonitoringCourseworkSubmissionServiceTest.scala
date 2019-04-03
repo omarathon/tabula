@@ -34,6 +34,9 @@ class AttendanceMonitoringCourseworkSubmissionServiceTest extends TestBase with 
     mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)
 
     val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     assignment.openDate = new DateTime().minusDays(1)
     assignment.closeDate = new DateTime().plusMonths(1)
     assignment.openEnded = false

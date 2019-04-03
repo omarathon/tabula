@@ -27,11 +27,17 @@ trait ReportWorld extends TestBase with Mockito {
     users
   }
 
-  val extensionService: ExtensionService = mock[ExtensionService]
-  extensionService.hasExtensions(any[Assignment]) answers (assignmentObj => {
+  val extensionService: ExtensionService = smartMock[ExtensionService]
+  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
     !assignment._extensions.isEmpty
-  })
+  }
+  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj =>
+    val assignment = assignmentObj.asInstanceOf[Assignment]
+    assignment._extensions.asScala.filter(_.approved)
+      .groupBy(_.usercode)
+      .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+  }
 
   val department = new Department
   department.code = "IN"

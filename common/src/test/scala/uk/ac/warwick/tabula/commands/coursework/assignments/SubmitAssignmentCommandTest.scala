@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, AutowiringZipServiceComponent, ExtensionService}
 
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
@@ -157,6 +157,9 @@ class SubmitAssignmentCommandTest extends TestBase with Mockito {
 
   private def newActiveAssignment = {
     val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     assignment.setDefaultBooleanProperties()
     assignment.openDate = new DateTime().minusWeeks(1)
     assignment.closeDate = new DateTime().plusWeeks(1)
