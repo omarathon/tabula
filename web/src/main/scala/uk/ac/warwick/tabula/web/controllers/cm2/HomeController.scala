@@ -30,7 +30,7 @@ class HomeController extends CourseworkController with AutowiringUserSettingsSer
       "homeDepartment" -> info.homeDepartment,
       "studentInformation" -> info.studentInformation,
       "markingAcademicYears" -> info.markingAcademicYears,
-      "activeAcademicYear" -> userSettingsService.getByUserId(user.apparentId).flatMap(_.activeAcademicYear).getOrElse(info.markingAcademicYears.last),
+      "activeAcademicYear" -> userSettingsService.getByUserId(user.apparentId).flatMap(_.activeAcademicYear).orElse(info.markingAcademicYears.lastOption).getOrElse(AcademicYear.now()),
       "adminInformation" -> info.adminInformation,
       "embedded" -> false
     )
