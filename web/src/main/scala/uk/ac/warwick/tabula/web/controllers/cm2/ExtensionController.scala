@@ -230,7 +230,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
       case Some(s: StudentMember) =>
         val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
           (relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, s))
-        }.toMap.filter({ case (relationshipType, relations) => relations.nonEmpty })
+        }.toMap.filter({ case (_, relations) => relations.nonEmpty })
         Map(
           "relationships" -> relationships,
           "course" -> s.mostSignificantCourseDetails

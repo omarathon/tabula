@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.Mav
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension"))
-class ExtensionRequestController extends CourseworkController {
+class RequestExtensionController extends CourseworkController {
 
   type ExtensionRequestCommand = Appliable[Extension] with RequestExtensionCommandState
 
@@ -47,7 +47,7 @@ class ExtensionRequestController extends CourseworkController {
       val existingExtension = assignment.approvedExtensions.get(user.userId)
 
       val existingRequest = assignment.currentExtensionRequests.get(user.userId)
-      existingRequest.foreach(cmd.presetValues)
+      existingRequest.orElse(existingExtension).foreach(cmd.presetValues)
 
       val profile = profileService.getMemberByUser(user.apparentUser)
 
