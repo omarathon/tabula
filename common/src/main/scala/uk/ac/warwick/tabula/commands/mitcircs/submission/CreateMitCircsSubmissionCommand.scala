@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports.JSet
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
@@ -40,7 +40,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
-    val submission = new MitigatingCircumstancesSubmission(student, currentUser)
+    val submission = new MitigatingCircumstancesSubmission(student, currentUser, department)
     submission.startDate = startDate
     submission.endDate = endDate
     submission.issueType = issueType
@@ -91,6 +91,9 @@ trait CreateMitCircsSubmissionState {
 
   val student: StudentMember
   val currentUser: User
+  val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
+    throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
+  )
 
   var startDate: DateTime = _
   var endDate: DateTime = _

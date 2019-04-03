@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import javax.persistence.CascadeType.ALL
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
+import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
@@ -21,10 +21,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToEntityReference {
     type Entity = MitigatingCircumstancesSubmission
 
-  def this(student:StudentMember, creator:User) {
+  def this(student:StudentMember, creator:User, department: Department) {
     this()
     this.creator = creator
     this.student = student
+    this.department = department
   }
 
   @Column(nullable = false, unique = true)
@@ -40,9 +41,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
-  @OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
+
+  @ManyToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.EAGER)
+  @JoinColumn(name = "department_id")
+  var department: Department = _
 
   @Column(nullable = false)
   var startDate: DateTime = _
