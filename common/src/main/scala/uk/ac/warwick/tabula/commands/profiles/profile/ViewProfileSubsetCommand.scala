@@ -50,7 +50,9 @@ trait ViewProfileSubsetCommandPermissions extends RequiresPermissionsChecking wi
 
   override def permissionsCheck(p: PermissionsChecking) {
     studentMember.foreach(p.PermissionCheck(Permissions.Profiles.Read.Core, _))
-    if (user.isDefined) p.PermissionCheck(UserPicker)
+    user.foreach(_ => p.PermissionCheck(UserPicker))
+
+    if (studentMember.isEmpty && user.isEmpty) throw new ItemNotFoundException()
   }
 }
 
