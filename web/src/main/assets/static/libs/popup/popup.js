@@ -22,20 +22,20 @@ if (typeof WPopupBox === 'undefined') {
       var imageroot = this.imageroot = (config || WPopupBox.defaultConfig).imageroot || '/static_war/popup/';
       config = {
         images: {
-          tl: jsLoadImage(imageroot + 'tl.png'),
-          tr: jsLoadImage(imageroot + 'tr.png'),
-          bl: jsLoadImage(imageroot + 'bl.png'),
-          br: jsLoadImage(imageroot + 'br.png'),
-          t: jsLoadImage(imageroot + 't.png'),
-          r: jsLoadImage(imageroot + 'r.png'),
-          b: jsLoadImage(imageroot + 'b.png'),
-          l: jsLoadImage(imageroot + 'l.png'),
-          c: jsLoadImage(imageroot + 'c.png'),
-          topArr: jsLoadImage(imageroot + 'toparr.png'),
-          bottArr: jsLoadImage(imageroot + 'bottarr.png'),
-          leftArr: jsLoadImage(imageroot + 'leftarr.png'),
-          rightArr: jsLoadImage(imageroot + 'rightarr.png'),
-          transparent: jsLoadImage(imageroot + 'shim.gif')
+          tl: jsLoadImage(imageroot + 'tl.936706523242.png'),
+          tr: jsLoadImage(imageroot + 'tr.217148523112.png'),
+          bl: jsLoadImage(imageroot + 'bl.145841513781.png'),
+          br: jsLoadImage(imageroot + 'br.251716980164.png'),
+          t: jsLoadImage(imageroot + 't.225888986651.png'),
+          r: jsLoadImage(imageroot + 'r.310683074519.png'),
+          b: jsLoadImage(imageroot + 'b.124791436051.png'),
+          l: jsLoadImage(imageroot + 'l.298335405735.png'),
+          c: jsLoadImage(imageroot + 'c.260763225927.png'),
+          topArr: jsLoadImage(imageroot + 'toparr.223137061597.png'),
+          bottArr: jsLoadImage(imageroot + 'bottarr.642926278749.png'),
+          leftArr: jsLoadImage(imageroot + 'leftarr.379746526664.png'),
+          rightArr: jsLoadImage(imageroot + 'rightarr.280327856432.png'),
+          transparent: jsLoadImage(imageroot + 'shim.245174474943.gif')
         },
         margin: [10, 13, 20, 16], //top right bottom left
         padding: [20, 24, 0, 24],
@@ -480,7 +480,7 @@ if (typeof WPopupBox === 'undefined') {
     }
 
     closeImg = document.createElement('img');
-    closeImg.src = this.imageroot + 'close.png';
+    closeImg.src = this.imageroot + 'close.178361071766.png';
     closeImg.title = 'Close this popup';
     closeImg.border = 0;
 

@@ -53,6 +53,11 @@
         <option name="TAB_SIZE" value="2" />
       </indentOptions>
     </codeStyleSettings>
+    <codeStyleSettings language="SQL">
+      <indentOptions>
+        <option name="CONTINUATION_INDENT_SIZE" value="2" />
+      </indentOptions>
+    </codeStyleSettings>
     <codeStyleSettings language="Scala">
       <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
     </codeStyleSettings>

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import org.joda.time.{DateTime, DateTimeConstants}
+import org.joda.time.{DateTime, DateTimeConstants, DateTimeZone}
 import uk.ac.warwick.tabula.TestBase
 
 // scalastyle:off magic.number
@@ -72,7 +72,10 @@ class DurationFormatterTest extends TestBase {
   @Test def daylightSavingOverlap(): Unit = {
     // 1am - 2am doesn't exist due to going an hour ahead, so midnight-4am is 3 hours long
     val start = new DateTime(2012, 3, 25, 0, 0, 0)
+      .withZoneRetainFields(DateTimeZone.forID("Europe/London"))
     val end = new DateTime(2012, 3, 25, 4, 0, 0)
+      .withZoneRetainFields(DateTimeZone.forID("Europe/London"))
+
     check(start, end, "3 hours")
   }
 

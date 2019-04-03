@@ -69,9 +69,9 @@ class SearchStudentsInSmallGroupSetCommandInternal(val module: Module, val set: 
   }
 
   def members: Seq[Member] = {
-    val allUniversityIds = allUniversityIdsInSet
-    val excludedUniversityIds = excludedEventOccurrence.map { occurrence =>
-      occurrence.event.group.students.users.map(_.getWarwickId) ++ occurrence.attendance.asScala.toSeq.map(_.universityId)
+    val allUniversityIds: Seq[String] = allUniversityIdsInSet
+    val excludedUniversityIds: Seq[String] = excludedEventOccurrence.map { occurrence =>
+      occurrence.event.group.students.users.toSeq.map(_.getWarwickId) ++ occurrence.attendance.asScala.toSeq.map(_.universityId)
     }.getOrElse(Nil)
 
     profileService.getAllMembersWithUniversityIds(allUniversityIds diff excludedUniversityIds)

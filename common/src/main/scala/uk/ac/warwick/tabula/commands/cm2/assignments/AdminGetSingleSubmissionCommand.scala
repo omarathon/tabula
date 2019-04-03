@@ -10,6 +10,9 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringZ
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.AnonymousUser
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 object AdminGetSingleSubmissionCommand {
   type Result = RenderableFile
   type Command = Appliable[Result] with AdminGetSingleSubmissionCommandState
@@ -70,7 +73,7 @@ class AdminGetSingleSubmissionAsZipCommandInternal(val assignment: Assignment, v
   extends CommandInternal[Result] with AdminGetSingleSubmissionCommandState {
   self: ZipServiceComponent =>
 
-  override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getSubmissionZip(submission), Duration.Inf)
 }
 
 trait AdminGetSingleSubmissionCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

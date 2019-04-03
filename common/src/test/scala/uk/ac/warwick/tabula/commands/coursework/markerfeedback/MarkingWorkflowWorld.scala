@@ -135,7 +135,7 @@ trait MarkingWorkflowWorld extends TestHelpers with Mockito {
 
   def makeUserGroup(users: String*): UserGroup = {
     val ug = UserGroup.ofUsercodes
-    ug.includedUserIds = users
+    ug.includedUserIds = users.toSet
     ug.userLookup = mockUserLookup
     ug
   }

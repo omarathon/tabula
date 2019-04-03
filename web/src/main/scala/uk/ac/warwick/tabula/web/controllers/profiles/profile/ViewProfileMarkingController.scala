@@ -25,7 +25,7 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
       case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
         viewByCourse(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
       case _ =>
-        commonView(member).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.MarkingIdentifier): _*)
+        commonView(member, activeAcademicYear).crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.MarkingIdentifier): _*)
     }
   }
 
@@ -42,13 +42,13 @@ class ViewProfileMarkingController extends AbstractViewProfileController {
     studentCourseDetails: StudentCourseDetails,
     activeAcademicYear: Option[AcademicYear]
   ): Mav = {
-    commonView(studentCourseDetails.student)
+    commonView(studentCourseDetails.student, activeAcademicYear)
       .crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.MarkingIdentifier): _*)
       .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.marking(scyd)): _*)
   }
 
-  private def commonView(member: Member): Mav = {
-    val command = restricted(MarkingSummaryCommand(member))
+  private def commonView(member: Member, activeAcademicYear: Option[AcademicYear]): Mav = {
+    val command = restricted(MarkingSummaryCommand(member, activeAcademicYear.getOrElse(AcademicYear.now())))
 
     val isSelf = user.universityId.maybeText.getOrElse("") == member.universityId
 

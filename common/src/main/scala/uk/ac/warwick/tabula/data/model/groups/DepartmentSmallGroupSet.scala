@@ -101,9 +101,9 @@ class DepartmentSmallGroupSet
 
   def isStudentMember(user: User): Boolean = members.includesUser(user)
 
-  def allStudents: Seq[User] = members.users
+  def allStudents: Seq[User] = members.users.toSeq
 
-  def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members else allStudents.map(_.getWarwickId)
+  def allStudentIds: Seq[String] = if (members.universityIds) members.knownType.members.toSeq else allStudents.map(_.getWarwickId)
 
   def allStudentsCount: Int = members.size
 

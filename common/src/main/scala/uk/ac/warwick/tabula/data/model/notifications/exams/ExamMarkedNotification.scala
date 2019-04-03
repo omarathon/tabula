@@ -66,6 +66,6 @@ class ExamMarkedNotification extends Notification[Exam, Unit]
   def urlTitle = "view the exam"
 
   def recipients: Seq[User] = exam.module.adminDepartment.owners.users
-    .filter(admin => admin.isFoundUser && admin.getEmail.hasText)
+    .filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 
 }

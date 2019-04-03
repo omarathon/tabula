@@ -53,7 +53,7 @@ abstract class MissedAttendanceMonitoringCheckpointsNotification
   @transient
   override def recipients: Seq[User] =
   // department.owners is not populated correctly if department not fetched directly
-    moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+    moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users.toSeq
 }
 
 @Entity

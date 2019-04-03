@@ -9,10 +9,12 @@ import org.jclouds.io.internal.BasePayloadSlicer
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Future
 
 /**
   * Implementation uses the Apache jclouds library to push and pull data to the cloud store
@@ -29,11 +31,11 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
     if (!blobStore.containerExists(objectContainerName)) blobStore.createContainerInLocation(null, objectContainerName)
   }
 
-  override def keyExists(key: String): Boolean = blobStore.blobExists(objectContainerName, key)
+  override def keyExists(key: String): Future[Boolean] = Future { blobStore.blobExists(objectContainerName, key) }
 
   private def metadata(key: String) = key.maybeText.flatMap { k => Option(blobStore.blobMetadata(objectContainerName, k)) }
 
-  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = benchmark(s"Push file for key $key", level = Logging.Level.Debug) {
+  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Future[Unit] = Future {
     Assert.notNull(key, "Key must be defined")
 
     val blob = blobStore.blobBuilder(key)
@@ -57,30 +59,25 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
         blobStore.uploadMultipartPart(multipartUpload, index + 1, payload)
       }.seq
 
-      benchmarkTask(s"blobstore upload multipart $key size=${metadata.contentLength}") {
-        blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
-      }
+      blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
     } else {
-      benchmarkTask(s"blobstore upload single $key size=${metadata.contentLength}") {
-        blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
-      }
+      blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
     }
-  }
+  }.map(_ => ())
 
   /**
     * Overridden in SwiftObjectStorageService to support multipart
     */
   protected def putBlob(blob: Blob, metadata: ObjectStorageService.Metadata): String = blobStore.putBlob(objectContainerName, blob)
 
-  override def fetch(key: String): RichByteSource = benchmark(s"Fetch key $key", level = Logging.Level.Debug) {
-    new BlobBackedRichByteSource(blobStore, objectContainerName, key, metadata(key))
-  }
+  override def fetch(key: String): Future[RichByteSource] =
+    Future.successful(new BlobBackedRichByteSource(blobStore, objectContainerName, key, metadata(key)))
 
-  def delete(key: String): Unit = benchmark(s"Deleting key $key", level = Logging.Level.Debug) {
+  def delete(key: String): Future[Unit] = Future {
     blobStore.removeBlob(objectContainerName, key)
   }
 
-  override def listKeys(): Stream[String] = benchmark("List keys", level = Logging.Level.Debug) {
+  override def listKeys(): Future[Stream[String]] = Future {
     def list(nextMarker: Option[String], accumulator: Stream[_ <: StorageMetadata]): Stream[_ <: StorageMetadata] = nextMarker match {
       case None => // No more results
         accumulator

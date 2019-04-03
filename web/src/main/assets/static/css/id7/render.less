@@ -10,6 +10,44 @@
 @import "id7-fixes.css";
 @import "id7-theme.less";
 @import "main.less";
+
+// Generated static hashes for these resources to prevent a 302
+.id7-masthead {
+  background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-xs.447711750975.svg")';
+
+  html.no-svgfilters &, html.ie-or-edge &, html.safari & {
+    background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-xs.587394364361.png")';
+  }
+
+  html.safari & {
+    @media (-webkit-min-device-pixel-ratio: 2) {
+      background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-xs@2x.207203260974.png")';
+    }
+
+    @media (-webkit-min-device-pixel-ratio: 3) {
+      background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-xs@3x.973225990310.png")';
+    }
+  }
+
+  @media (min-width: @grid-float-breakpoint) {
+    background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-sm.802076466057.svg")';
+
+    html.no-svgfilters &, html.ie-or-edge &, html.safari & {
+      background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-sm.256103976145.png")';
+    }
+
+    html.safari & {
+      @media (-webkit-min-device-pixel-ratio: 2) {
+        background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-sm@2x.336160993278.png")';
+      }
+
+      @media (-webkit-min-device-pixel-ratio: 3) {
+        background-image: ~'url("@{id7-image-root-dir}/masthead-logo-bleed-sm@3x.122513476089.png")';
+      }
+    }
+  }
+}
+
 @import (inline) "../../libs/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css";
 @import (inline) "../../libs/popup/popup.css";
 @import (inline) "fixed-header-table/css/defaultTheme.css";

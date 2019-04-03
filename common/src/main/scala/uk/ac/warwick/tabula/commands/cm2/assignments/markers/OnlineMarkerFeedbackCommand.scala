@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.commands.cm2.assignments.markers
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.JavaImports.{JList, _}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.feedback._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
@@ -52,8 +53,7 @@ class OnlineMarkerFeedbackCommandInternal(
 
   currentMarkerFeedback.foreach(copyFrom)
 
-  def applyInternal(): MarkerFeedback = {
-
+  def applyInternal(): MarkerFeedback = transactional() {
     val markerFeedback = currentMarkerFeedback.getOrElse(
       throw new IllegalMarkingStateException("There is no outstanding feedback for this marker and stage")
     )
@@ -77,8 +77,7 @@ class OnlineMarkerFeedbackCommandInternal(
     attachedFiles = JArrayList[FileAttachment](markerFeedback.attachments.asScala)
   }
 
-  def copyTo(markerFeedback: MarkerFeedback) {
-
+  def copyTo(markerFeedback: MarkerFeedback): Unit = {
     saveFormFields(markerFeedback)
 
     // save mark and grade
@@ -93,11 +92,16 @@ class OnlineMarkerFeedbackCommandInternal(
       val existingFiles = Option(markerFeedback.attachments).getOrElse(JHashSet()).asScala.toBuffer
       val filesToRemove = existingFiles -- filesToKeep
       val filesToReplicate = filesToKeep -- existingFiles
+      filesToRemove.foreach { f =>
+        f.markerFeedback = null
+        Option(f.feedback).foreach(_.removeAttachment(f))
+      }
       fileAttachmentService.deleteAttachments(filesToRemove)
       markerFeedback.attachments = JHashSet[FileAttachment](filesToKeep: _*)
       val replicatedFiles = filesToReplicate.map(_.duplicate())
       replicatedFiles.foreach(markerFeedback.addAttachment)
     }
+
     markerFeedback.addAttachments(file.attached.asScala)
   }
 }

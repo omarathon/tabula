@@ -65,7 +65,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 
     assessment.firstMarkers.addAll(firstMarkerMapping.asScala.map { case (markerId, studentIds) =>
       val group = UserGroup.ofUsercodes
-      group.includedUserIds = studentIds.asScala
+      group.includedUserIds = studentIds.asScala.toSet
       userGroupDao.saveOrUpdate(group)
       FirstMarkersMap(assessment, markerId, group)
     }.toSeq.asJava)
@@ -78,7 +78,7 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 
     assessment.secondMarkers.addAll(secondMarkerMapping.asScala.map { case (markerId, studentIds) =>
       val group = UserGroup.ofUsercodes
-      group.includedUserIds = studentIds.asScala
+      group.includedUserIds = studentIds.asScala.toSet
       userGroupDao.saveOrUpdate(group)
       SecondMarkersMap(assessment, markerId, group)
     }.toSeq.asJava)

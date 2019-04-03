@@ -128,7 +128,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
       val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
       command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
       command.smallGroupService.findAttendanceNotes(
-        Seq(user1, user2, user3, user4, user5).map(_.getWarwickId),
+        Set(user1, user2, user3, user4, user5).toSeq.map(_.getWarwickId),
         Seq(occurrence1, occurrence2, occurrence3)
       ) returns Seq()
 

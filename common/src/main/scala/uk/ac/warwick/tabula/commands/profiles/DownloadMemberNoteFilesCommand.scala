@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 class DownloadMemberNoteFilesCommand(val memberNote: MemberNote) extends Command[Option[RenderableFile]] with ReadOnly {
@@ -39,7 +41,7 @@ class DownloadMemberNoteFilesCommand(val memberNote: MemberNote) extends Command
     result
   }
 
-  private def zipped(memberNote: MemberNote) = zipService.getSomeMemberNoteAttachmentsZip(memberNote)
+  private def zipped(memberNote: MemberNote) = Await.result(zipService.getSomeMemberNoteAttachmentsZip(memberNote), Duration.Inf)
 
   override def describe(d: Description): Unit = {
     d.property("filename", filename)

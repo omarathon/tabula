@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.data.{UrkundDao, UrkundDaoComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 import uk.ac.warwick.tabula.{Fixtures, JsonObjectMapperFactory, Mockito, TestBase}
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class UrkundServiceTest extends TestBase with Mockito {
@@ -38,7 +39,7 @@ class UrkundServiceTest extends TestBase with Mockito {
     val string = "Doe, a deer, a female deer"
     val bytes: Array[Byte] = string.getBytes("UTF-8")
     attachment.id = "1234"
-    mockObjectStorageService.fetch(attachment.id) returns RichByteSource.wrap(ByteSource.wrap(bytes), None)
+    mockObjectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(ByteSource.wrap(bytes), None))
 
     val submissionValue = new SavedFormValue
     val submission: Submission = Fixtures.submission("1234")

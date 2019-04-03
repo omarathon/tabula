@@ -69,23 +69,23 @@ class UserGroup private(val universityIds: Boolean)
     new JoinColumn(name = "group_id", referencedColumnName = "id")))
   private val excludeUsers: JList[String] = JArrayList()
 
-  def includedUserIds: Seq[String] = includeUsers.asScala
+  def includedUserIds: Set[String] = includeUsers.asScala.toSet
 
-  def includedUserIds_=(userIds: Seq[String]) {
+  def includedUserIds_=(userIds: Set[String]) {
     includeUsers.clear()
     includeUsers.addAll(userIds.asJava)
   }
 
-  def staticUserIds: Seq[String] = staticIncludeUsers.asScala
+  def staticUserIds: Set[String] = staticIncludeUsers.asScala.toSet
 
-  def staticUserIds_=(userIds: Seq[String]) {
+  def staticUserIds_=(userIds: Set[String]) {
     staticIncludeUsers.clear()
     staticIncludeUsers.addAll(userIds.asJava)
   }
 
-  def excludedUserIds: Seq[String] = excludeUsers.asScala
+  def excludedUserIds: Set[String] = excludeUsers.asScala.toSet
 
-  def excludedUserIds_=(userIds: Seq[String]) {
+  def excludedUserIds_=(userIds: Set[String]) {
     excludeUsers.clear()
     excludeUsers.addAll(userIds.asJava)
   }
@@ -147,11 +147,11 @@ class UserGroup private(val universityIds: Boolean)
 
   def size: Int = members.size
 
-  def members: Seq[String] = allIncludedIds diff allExcludedIds
+  def members: Set[String] = allIncludedIds diff allExcludedIds
 
-  def allIncludedIds: Seq[String] = (staticIncludeUsers.asScala ++ includeUsers.asScala ++ webgroupMembers).distinct
+  def allIncludedIds: Set[String] = staticIncludeUsers.asScala.toSet ++ includeUsers.asScala.toSet ++ webgroupMembers
 
-  def allExcludedIds: Seq[String] = excludeUsers.asScala
+  def allExcludedIds: Set[String] = excludeUsers.asScala.toSet
 
   private def getIdFromUser(user: User): String = {
     if (universityIds)
@@ -160,16 +160,16 @@ class UserGroup private(val universityIds: Boolean)
       user.getUserId
   }
 
-  private def getUsersFromIds(ids: Seq[String]): Seq[User] = ids match {
-    case Nil => Nil
-    case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSeq
-    case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSeq
+  private def getUsersFromIds(ids: Set[String]): Set[User] = ids.toSeq match {
+    case Nil => Set.empty
+    case list if universityIds => userLookup.getUsersByWarwickUniIds(list).values.toSet
+    case list => userLookup.getUsersByUserIds(list.asJava).values.asScala.toSet
   }
 
-  @transient private var _cachedUsers: Option[Seq[User]] = None
-  @transient private var _cachedUsersMembers: Option[Seq[String]] = None
+  @transient private var _cachedUsers: Option[Set[User]] = None
+  @transient private var _cachedUsersMembers: Option[Set[String]] = None
 
-  def users: Seq[User] = {
+  def users: Set[User] = {
     val resolvedMembers = members
     _cachedUsers match {
       case Some(result) if _cachedUsersMembers.contains(resolvedMembers) => result
@@ -181,11 +181,11 @@ class UserGroup private(val universityIds: Boolean)
     }
   }
 
-  def excludes: Seq[User] = getUsersFromIds(excludeUsers.asScala)
+  def excludes: Set[User] = getUsersFromIds(excludeUsers.asScala.toSet)
 
-  private def webgroupMembers: List[String] = baseWebgroup match {
-    case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
-    case _ => Nil
+  private def webgroupMembers: Set[String] = baseWebgroup match {
+    case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toSet
+    case _ => Set.empty
   }
 
   def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
@@ -236,14 +236,14 @@ trait UnspecifiedTypeUserGroup {
   /**
     * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
     */
-  def users: Seq[User]
+  def users: Set[User]
 
   def baseWebgroup: String
 
   /**
     * @return The explicitly excluded users
     */
-  def excludes: Seq[User]
+  def excludes: Set[User]
 
   def add(user: User): Boolean
 
@@ -276,11 +276,11 @@ trait UnspecifiedTypeUserGroup {
 }
 
 trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
-  def allIncludedIds: Seq[String]
+  def allIncludedIds: Set[String]
 
-  def allExcludedIds: Seq[String]
+  def allExcludedIds: Set[String]
 
-  def members: Seq[String]
+  def members: Set[String]
 
   def addUserId(userId: String): Boolean
 
@@ -290,17 +290,17 @@ trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 
   def unexcludeUserId(userId: String): Boolean
 
-  def staticUserIds: Seq[String]
+  def staticUserIds: Set[String]
 
-  def staticUserIds_=(userIds: Seq[String])
+  def staticUserIds_=(userIds: Set[String])
 
-  def includedUserIds: Seq[String]
+  def includedUserIds: Set[String]
 
-  def includedUserIds_=(userIds: Seq[String])
+  def includedUserIds_=(userIds: Set[String])
 
-  def excludedUserIds: Seq[String]
+  def excludedUserIds: Set[String]
 
-  def excludedUserIds_=(userIds: Seq[String])
+  def excludedUserIds_=(userIds: Set[String])
 
   def includesUserId(userId: String): Boolean
 

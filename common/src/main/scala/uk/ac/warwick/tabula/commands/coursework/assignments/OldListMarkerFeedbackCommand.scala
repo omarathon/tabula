@@ -43,7 +43,7 @@ class OldListMarkerFeedbackCommand(val assignment: Assignment, val module: Modul
   self: UserLookupComponent =>
 
   def applyInternal(): Seq[MarkerFeedbackStage] = {
-    val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker).distinct
+    val students = assignment.markingWorkflow.getMarkersStudents(assignment, marker).toSeq
     val workflow = assignment.markingWorkflow
 
     val feedbackItems = students.map(student => {

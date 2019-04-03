@@ -86,6 +86,7 @@ class Exam
   override def addDefaultFeedbackFields() {
     val feedback = new ExamTextField
     feedback.name = Exam.defaultFeedbackTextFieldName
+    feedback.label = "Feedback"
     feedback.value = ""
     feedback.context = FormFieldContext.Feedback
 

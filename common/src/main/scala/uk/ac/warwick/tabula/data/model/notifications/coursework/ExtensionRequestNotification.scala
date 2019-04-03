@@ -50,7 +50,7 @@ abstract class ExtensionRequestNotification
     "moduleManagers" -> assignment.module.managers.users
   ) ++ profileInfo)
 
-  def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users
+  def recipients: Seq[User] = assignment.module.adminDepartment.extensionManagers.users.toSeq
 }
 
 @Entity

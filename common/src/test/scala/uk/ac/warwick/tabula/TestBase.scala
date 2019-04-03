@@ -12,9 +12,7 @@ import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService,
 
 import scala.collection.JavaConverters._
 import org.apache.commons.configuration.PropertiesConfiguration
-import org.joda.time.DateTime
-import org.joda.time.DateTimeUtils
-import org.joda.time.ReadableInstant
+import org.joda.time.{DateTime, DateTimeUtils, DateTimeZone, ReadableInstant}
 import org.junit.After
 import org.junit.Before
 import org.scalatest.junit.{AssertionsForJUnit, JUnitSuite}
@@ -43,6 +41,7 @@ import freemarker.core.Environment
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.data.Transactions
 import uk.ac.warwick.tabula.web.Routes
 
@@ -66,12 +65,12 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
     TestLoggerFactory.tearDown()
   }
 
+  // Give Scala Futures time to run
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
+
   Transactions.enabled = false
   EventHandling.enabled = false
-
-  System.setProperty("user.country", "GB")
-  System.setProperty("user.language", "en")
-  System.setProperty("user.timezone", "Europe/London")
 
   // IntelliJ tests via JUnit only half-fill this property, so set it here.
   if (System.getProperty("TestProcessId") == "F${surefire.forkNumber}") {

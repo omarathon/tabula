@@ -74,7 +74,7 @@ object Futures extends Futures {
 object ExecutionContexts {
   implicit lazy val global: ExecutionContext = new SessionAwareExecutionContext(parallelism = 100)
 
-  implicit lazy val email: ExecutionContext = new SessionAwareExecutionContext(50)
+  implicit lazy val email: ExecutionContext = new SessionAwareExecutionContext(parallelism = 50)
 
-  implicit lazy val timetable: ExecutionContext = new SessionAwareExecutionContext(200)
+  implicit lazy val timetable: ExecutionContext = new SessionAwareExecutionContext(parallelism = 200)
 }

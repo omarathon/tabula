@@ -141,7 +141,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
       val member = profileService.getMemberByUniversityId(a.universityId)
       val user = userLookup.getUserByWarwickUniId(a.universityId)
       (a.addedManually, MemberOrUser(member, user))
-    }).distinct.sortBy { case (addedManually, mou) => (!addedManually, mou.lastName, mou.firstName, mou.universityId) }
+    }).toSeq.distinct.sortBy { case (addedManually, mou) => (!addedManually, mou.lastName, mou.firstName, mou.universityId) }
       .map { case (_, mou) => mou }
   }
 

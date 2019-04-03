@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.services.{SubmissionService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 /**
@@ -45,7 +47,7 @@ class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment,
     }
 
     if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
-      val zip = zipService.getSomeSubmissionsZip(submissions.asScala)
+      val zip = Await.result(zipService.getSomeSubmissionsZip(submissions.asScala), Duration.Inf)
       Left(zip)
     } else {
       Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))

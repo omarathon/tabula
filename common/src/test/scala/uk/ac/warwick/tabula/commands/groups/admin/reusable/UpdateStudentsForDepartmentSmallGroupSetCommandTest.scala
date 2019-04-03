@@ -90,9 +90,9 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 
       command.applyInternal() should be(set)
 
-      set.members.knownType.staticUserIds should be(Seq("0000001", "0000002", "0000004"))
-      set.members.knownType.includedUserIds should be(Seq("0000003"))
-      set.members.knownType.excludedUserIds should be(Seq("0000004"))
+      set.members.knownType.staticUserIds should be(Set("0000001", "0000002", "0000004"))
+      set.members.knownType.includedUserIds should be(Set("0000003"))
+      set.members.knownType.excludedUserIds should be(Set("0000004"))
       set.memberQuery should be("sprStatuses=C")
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
@@ -113,7 +113,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
-      set.members.knownType.includedUserIds should be(Seq("0000001", "0000002", "0000003"))
+      set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery should be('empty)
 
@@ -125,7 +125,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
     new CommandFixture {
       department.autoGroupDeregistration = true
 
-      set.members.knownType.includedUserIds = Seq("0000001", "0000002", "0000003", "0000004")
+      set.members.knownType.includedUserIds = Set("0000001", "0000002", "0000003", "0000004")
       command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
 
       command.linkToSits = false
@@ -134,23 +134,23 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       groupA.groupSet = set
       set.groups.add(groupA)
       wireUserLookup(groupA.students)
-      groupA.students.knownType.includedUserIds = Seq("0000001", "0000002")
+      groupA.students.knownType.includedUserIds = Set("0000001", "0000002")
 
       val groupB: DepartmentSmallGroup = Fixtures.departmentSmallGroup("Group B")
       groupB.groupSet = set
       set.groups.add(groupB)
       wireUserLookup(groupB.students)
-      groupB.students.knownType.includedUserIds = Seq("0000003", "0000004")
+      groupB.students.knownType.includedUserIds = Set("0000003", "0000004")
 
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
-      set.members.knownType.includedUserIds should be(Seq("0000001", "0000002", "0000003"))
+      set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery should be('empty)
 
-      groupA.students.knownType.includedUserIds should be(Seq("0000001", "0000002"))
-      groupB.students.knownType.includedUserIds should be(Seq("0000003")) // 4 has been removed
+      groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
+      groupB.students.knownType.includedUserIds should be(Set("0000003")) // 4 has been removed
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }

@@ -167,6 +167,7 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
     val newField = new CommentField
     newField.assignment = newAssignment
     newField.name = Assignment.defaultCommentFieldName
+    newField.label = this.label
     newField.context = this.context
     newField.value = this.value
     newField
@@ -182,6 +183,7 @@ class TextField extends AssignmentFormField with SimpleValue[String] {
     newField.assignment = newAssignment
     newField.context = this.context
     newField.name = this.name
+    newField.label = this.label
     newField
   }
 
@@ -225,6 +227,7 @@ class WordCountField extends AssignmentFormField {
     val newField = new WordCountField
     newField.assignment = newAssignment
     newField.name = Assignment.defaultWordCountName
+    newField.label = this.label
     newField.max = this.max
     newField.min = this.min
     newField.conventions = this.conventions
@@ -242,6 +245,7 @@ class TextareaField extends AssignmentFormField with SimpleValue[String] {
     newField.assignment = newAssignment
     newField.context = this.context
     newField.name = this.name
+    newField.label = this.label
     newField
   }
 
@@ -268,7 +272,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 
   def markers: Seq[User] = {
     if (assignment.markingWorkflow == null) Seq()
-    else assignment.markingWorkflow.firstMarkers.users
+    else assignment.markingWorkflow.firstMarkers.users.toSeq
   }
 
   override def validate(value: FormValue, errors: Errors) {
@@ -290,6 +294,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
     val newField = new MarkerSelectField
     newField.assignment = newAssignment
     newField.name = Assignment.defaultMarkerSelectorName
+    newField.label = this.label
     newField
   }
 }
@@ -363,6 +368,7 @@ class FileField extends AssignmentFormField {
     val newField = new FileField
     newField.assignment = newAssignment
     newField.name = Assignment.defaultUploadName
+    newField.label = this.label
     newField.context = this.context
     newField.attachmentLimit = this.attachmentLimit
     newField.attachmentTypes = this.attachmentTypes

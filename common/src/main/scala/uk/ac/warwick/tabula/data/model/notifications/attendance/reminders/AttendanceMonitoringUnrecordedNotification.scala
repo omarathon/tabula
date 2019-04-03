@@ -68,7 +68,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
   override final def recipients: Seq[User] = {
     if (unrecordedPoints.nonEmpty) {
       // department.owners is not populated correctly if department not fetched directly
-      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users.toSeq
     } else {
       Seq()
     }
@@ -110,7 +110,7 @@ class AttendanceMonitoringUnrecordedStudentsNotification
   override def recipients: Seq[User] =
     if (unrecordedStudents.nonEmpty) {
       // department.owners is not populated correctly if department not fetched directly
-      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users
+      moduleAndDepartmentService.getDepartmentById(department.id).get.owners.users.toSeq
     } else {
       Seq()
     }

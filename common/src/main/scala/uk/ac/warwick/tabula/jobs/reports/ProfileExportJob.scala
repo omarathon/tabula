@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, 
 import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object ProfileExportJob {
   val identifier = "profile-export"
@@ -62,7 +64,7 @@ class ProfileExportJob extends Job with AutowiringZipServiceComponent
 
         updateStatus(ProfileExportJob.BuildingZip)
 
-        val zipFile = zipService.getProfileExportZip(results)
+        val zipFile = Await.result(zipService.getProfileExportZip(results), Duration.Inf)
         job.setString(ProfileExportJob.ZipFilePathKey, zipFile.filename)
 
         job.succeeded = true

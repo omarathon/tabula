@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceC
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 object DownloadMarkerFeedbackCommand {
@@ -29,7 +31,7 @@ class DownloadMarkerFeedbackCommandInternal(val assignment: Assignment, val mark
       markerFeedback.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_) {
         override val filename = s"${markerFeedback.feedback.studentIdentifier}-$name"
       })
-    case _ => Some(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)))
+    case _ => Some(Await.result(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)), Duration.Inf))
   }
 
 }

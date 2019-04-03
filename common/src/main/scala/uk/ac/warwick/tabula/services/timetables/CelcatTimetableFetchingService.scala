@@ -336,11 +336,9 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
             DigestUtils.md5Hex(
               Seq(
                 module,
-                start.toString,
-                end.toString,
-                location.fold("") {
-                  _.name
-                },
+                start.withZone(DateTimeZone.forID("Europe/London")).toString,
+                end.withZone(DateTimeZone.forID("Europe/London")).toString,
+                location.fold("")(_.name),
                 parent.shortName.getOrElse("")
               ).mkString
             )
@@ -353,8 +351,8 @@ class CelcatHttpTimetableFetchingService(celcatConfiguration: CelcatConfiguratio
             eventType = eventType,
             weekRanges = Seq(WeekRange(year.weekForDate(start.toLocalDate).weekNumber)),
             day = DayOfWeek(start.getDayOfWeek),
-            startTime = start.toLocalTime,
-            endTime = end.toLocalTime,
+            startTime = start.withZone(DateTimeZone.forID("Europe/London")).toLocalTime,
+            endTime = end.withZone(DateTimeZone.forID("Europe/London")).toLocalTime,
             location = location,
             comments = None,
             parent = parent,

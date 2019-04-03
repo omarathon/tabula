@@ -90,9 +90,9 @@ trait PopulateFindStudentsForSchemeCommand extends PopulateOnForm {
   self: FindStudentsForSchemeCommandState =>
 
   override def populate(): Unit = {
-    staticStudentIds = scheme.members.staticUserIds.asJava
-    includedStudentIds = scheme.members.includedUserIds.asJava
-    excludedStudentIds = scheme.members.excludedUserIds.asJava
+    staticStudentIds = scheme.members.staticUserIds.toSeq.asJava
+    includedStudentIds = scheme.members.includedUserIds.toSeq.asJava
+    excludedStudentIds = scheme.members.excludedUserIds.toSeq.asJava
     filterQueryString = scheme.memberQuery
     linkToSits = scheme.memberQuery != null && scheme.memberQuery.nonEmpty || scheme.members.members.isEmpty
     // Should only be true when editing

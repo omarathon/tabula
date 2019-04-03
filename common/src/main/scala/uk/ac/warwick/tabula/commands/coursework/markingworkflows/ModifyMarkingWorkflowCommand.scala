@@ -34,8 +34,8 @@ abstract class ModifyMarkingWorkflowCommand(val department: Department)
 
   def copyTo(scheme: MarkingWorkflow) {
     scheme.name = name
-    scheme.firstMarkers.knownType.includedUserIds = firstMarkers.asScala
-    scheme.secondMarkers.knownType.includedUserIds = secondMarkers.asScala
+    scheme.firstMarkers.knownType.includedUserIds = firstMarkers.asScala.toSet
+    scheme.secondMarkers.knownType.includedUserIds = secondMarkers.asScala.toSet
   }
 
   def addFirstMarkers(markers: Seq[String]) {

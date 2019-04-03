@@ -15,7 +15,7 @@ class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User,
     if (assignment.cm2Assignment) {
       cm2MarkingWorkflowService.getAllStudentsForMarker(assignment, recipient).toSet
     } else {
-      assignment.markingWorkflow.getMarkersStudents(assignment, recipient).distinct.toSet
+      assignment.markingWorkflow.getMarkersStudents(assignment, recipient)
     }
 
   // students at each stage that's assigned to the recipient for this assignment

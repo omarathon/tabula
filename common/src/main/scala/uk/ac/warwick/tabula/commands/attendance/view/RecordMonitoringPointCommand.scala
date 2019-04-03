@@ -150,6 +150,7 @@ trait RecordMonitoringPointCommandState {
       point -> profileService.getAllMembersWithUniversityIds(
         point.scheme.members.members
           .filter(universityId => studentDatas.exists(universityId == _.universityId))
+          .toSeq
       ).flatMap {
         case student: StudentMember => Option(student)
         case _ => None

@@ -68,6 +68,11 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
     val isSelf = user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId
     val studentCourseYearDetails = scydToSelect(studentCourseDetails, activeAcademicYear)
     val relationshipsToDisplay = studentCourseYearDetails.toSeq.flatMap(_.relationships(relationshipType))
+
+    val manageableRelationships =
+      relationshipService.findCurrentRelationships(studentCourseDetails)
+        .filter(r => securityService.can(user, Permissions.Profiles.MeetingRecord.Manage(r.relationshipType), studentCourseDetails.student))
+
     val pastAndPresentRelationships = relationshipService.getAllPastAndPresentRelationships(relationshipType, studentCourseDetails)
       .sortBy(r => Option(r.endDate).getOrElse(new DateTime(Integer.MAX_VALUE))).reverse
     val futureRelationships = relationshipService.findFutureRelationships(relationshipType, studentCourseDetails)
@@ -94,6 +99,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
         "isSelf" -> isSelf,
         "relationshipsToDisplay" -> relationshipsToDisplay,
         "pastAndPresentRelationships" -> pastAndPresentRelationships,
+        "manageableRelationships" -> manageableRelationships,
         "scheduledRelationshipChanges" -> scheduledRelationshipChanges,
         "canReadMeetings" -> false,
         "canEditRelationship" -> canEditRelationship,
@@ -122,6 +128,7 @@ class ViewProfileRelationshipTypeController extends AbstractViewProfileControlle
         "thisAcademicYear" -> thisAcademicYear,
         "relationshipsToDisplay" -> relationshipsToDisplay,
         "pastAndPresentRelationships" -> pastAndPresentRelationships,
+        "manageableRelationships" -> manageableRelationships,
         "scheduledRelationshipChanges" -> scheduledRelationshipChanges,
         "meetings" -> meetings,
         "meetingApprovalWillCreateCheckpoint" -> meetings.map {

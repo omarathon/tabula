@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.services.objectstore
 
 import java.io.InputStream
-import java.security.{DigestInputStream, MessageDigest}
 
 import com.google.common.hash.Hashing
 import com.google.common.io.ByteSource
-import org.apache.commons.io.IOUtils
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.domain.internal.{PageSetImpl, StorageMetadataImpl}
 import org.jclouds.blobstore.domain.{PageSet, StorageMetadata, StorageType}
 import org.jclouds.blobstore.options.ListContainerOptions
 import org.jclouds.blobstore.{BlobStore, BlobStoreContext}
 import org.mockito.Mockito._
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
@@ -50,7 +49,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
   }
 
   @Test def listKeys(): Unit = new ListKeysFixture {
-    service.listKeys().force.toList should be(List("1", "2", "3", "4", "5", "6", "7", "8", "9"))
+    service.listKeys().futureValue.force.toList should be(List("1", "2", "3", "4", "5", "6", "7", "8", "9"))
 
     verify(blobStore, times(1)).list(containerName)
     verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
@@ -58,7 +57,7 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
   }
 
   @Test def listKeysLazy(): Unit = new ListKeysFixture {
-    service.listKeys().take(5).force.toList should be(List("1", "2", "3", "4", "5"))
+    service.listKeys().futureValue.take(5).force.toList should be(List("1", "2", "3", "4", "5"))
 
     verify(blobStore, times(1)).list(containerName)
     verify(blobStore, times(1)).list(containerName, ListContainerOptions.Builder.afterMarker("after1"))
@@ -87,9 +86,9 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
-    val fetchedFile: RichByteSource = service.fetch(key)
+    val fetchedFile: RichByteSource = service.fetch(key).futureValue
     fetchedFile.isEmpty should be(false)
 
     val fetchedMd5: Array[Byte] = fetchedFile.hash(hashingFunction).asBytes()
@@ -99,14 +98,14 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
   @Test def metadata(): Unit = new TransientBlobStoreFixture {
     val key = "my-lovely-file"
 
-    service.fetch(key).metadata should be(None)
+    service.fetch(key).futureValue.metadata should be(None)
     service.push(key, byteSource, ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = Some(new SHAFileHasher().hash(byteSource.openStream()))
-    ))
+    )).futureValue
 
-    service.fetch(key).metadata should be(Some(ObjectStorageService.Metadata(
+    service.fetch(key).futureValue.metadata should be(Some(ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = Some("f992551ba3325d20a529f0821375ca0b544a4598")
@@ -116,25 +115,25 @@ class BlobStoreObjectStorageServiceTest extends TestBase with Mockito {
   @Test def exists(): Unit = new TransientBlobStoreFixture {
     val key = "my-lovely-file"
 
-    service.keyExists(key) should be(false)
+    service.keyExists(key).futureValue should be(false)
     service.push(key, byteSource, ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
-    service.keyExists(key) should be(true)
+    )).futureValue
+    service.keyExists(key).futureValue should be(true)
   }
 
   @Test def listKeysTransient(): Unit = new TransientBlobStoreFixture {
     val key = "my-lovely-file"
 
-    service.listKeys() should be('empty)
+    service.listKeys().futureValue should be('empty)
     service.push(key, byteSource, ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
-    service.listKeys().toList should be(List(key))
+    )).futureValue
+    service.listKeys().futureValue.toList should be(List(key))
   }
 
 }

@@ -1,5 +1,4 @@
 <#if nonempty(assignmentsForMarking)>
-
   <#macro marker_info info>
     <#local assignment = info.assignment />
     <#local marker = info.marker />

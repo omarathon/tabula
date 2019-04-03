@@ -14,6 +14,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.helpers.Logging
 
@@ -78,7 +79,7 @@ trait CM2MarkingWorkflowService extends WorkflowUserGroupHelpers {
 
 @Service
 class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with AutowiringFeedbackServiceComponent
-  with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with Logging {
+  with WorkflowUserGroupHelpersImpl with AutowiringCM2MarkingWorkflowDaoComponent with AutowiringZipServiceComponent with AutowiringUserLookupComponent with TaskBenchmarking {
 
   override def save(workflow: CM2MarkingWorkflow): Unit = markingWorkflowDao.saveOrUpdate(workflow)
 
@@ -160,7 +161,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
   }
 
-  override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = {
+  override def finaliseFeedback(markerFeedback: MarkerFeedback): Feedback = benchmarkTask(s"Finalise $markerFeedback") {
     val parent = markerFeedback.feedback
 
     parent.clearCustomFormValues()
@@ -298,8 +299,15 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
     TreeMap(unsortedMap.toSeq: _*)
   }
 
-  override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] =
-    getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.student).toSeq.distinct
+  override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] = {
+    val usercodes = getAllFeedbackForMarker(assignment: Assignment, marker: User).values.flatten.map(_.feedback.usercode).toSet
+    val students: Map[String, User] = {
+      if (usercodes.isEmpty) Map.empty[String, User]
+      else usercodes.toSeq.grouped(100).map(userLookup.getUsersByUserIds).reduce(_ ++ _)
+    }.withDefault(new AnonymousUser(_))
+
+    usercodes.map(students).toSeq
+  }
 
   override def getReusableWorkflows(department: Department, academicYear: AcademicYear): Seq[CM2MarkingWorkflow] = {
     markingWorkflowDao.getReusableWorkflows(department, academicYear)

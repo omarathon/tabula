@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping}
 import uk.ac.warwick.spring.Wire
@@ -15,6 +14,9 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.{ItemNotFoundException, PermissionDeniedException}
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 @Controller
 @RequestMapping(Array("/zips/{jobId}"))
@@ -60,7 +62,7 @@ class ZipFileJobController extends BaseController with AutowiringJobServiceCompo
     val (job, jobInstance) = jobAndInstance(jobId)
     val objectStoreKey = ZipCreator.objectKey(jobInstance.getString(ZipFileJob.ZipFilePathKey))
 
-    objectStorageService.renderable(objectStoreKey, Some(job.zipFileName)) match {
+    Await.result(objectStorageService.renderable(objectStoreKey, Some(job.zipFileName)), Duration.Inf) match {
       case Some(f) => fileServer.serve(f, job.zipFileName)
       case _ => throw new ItemNotFoundException()
     }

@@ -12,6 +12,7 @@ import javax.crypto.{KeyGenerator, SecretKey}
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.{BlobStoreContext, TransientApiMetadata}
 import org.jclouds.logging.slf4j.config.SLF4JLoggingModule
+import org.scalatest.time.{Millis, Seconds, Span}
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 
 import scala.collection.JavaConverters._
@@ -64,9 +65,9 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
-    val fetchedByteSource: RichByteSource = encryptedObjectStorageService.fetch("encrypted")
+    val fetchedByteSource: RichByteSource = encryptedObjectStorageService.fetch("encrypted").futureValue
     fetchedByteSource.isEmpty should be (false)
 
     fetchedByteSource.hash(Hashing.sha256()).toString should be (sha256)
@@ -83,9 +84,9 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None
-    ))
+    )).futureValue
 
-    encryptedObjectStorageService.fetch("encrypted").metadata should be (Some(ObjectStorageService.Metadata(
+    encryptedObjectStorageService.fetch("encrypted").futureValue.metadata should be (Some(ObjectStorageService.Metadata(
       contentLength = 14949,
       contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       fileHash = None,
@@ -93,7 +94,7 @@ class EncryptedObjectStorageServiceTest extends TestBase with Mockito {
     )))
 
     // Directly on the encrypted metadata
-    val metadata: Option[ObjectStorageService.Metadata] = objectStorageService.fetch("encrypted").metadata
+    val metadata: Option[ObjectStorageService.Metadata] = objectStorageService.fetch("encrypted").futureValue.metadata
     metadata should be ('defined)
     metadata.get.contentLength should be (14960)
     metadata.get.contentType should be ("application/octet-stream")

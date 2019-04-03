@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.AuditEventServiceImpl
 import uk.ac.warwick.tabula.system.PostgreSQL10Dialect
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, TestElasticsearchClient}
+import uk.ac.warwick.tabula.{DateFormats, Mockito, PersistenceTestBase, TestElasticsearchClient}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.core.StopWatch
 
@@ -24,9 +24,6 @@ import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with TestElasticsearchClient with IndexMatchers {
-
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(50, Millis))
 
   val index = Index("audit")
   val indexType = "auditEvent"
@@ -74,7 +71,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with T
       doc.source should be(Map(
         "eventId" -> "eventId",
         "eventType" -> "MyEventType",
-        "eventDate" -> "2000-06-01T00:00:00+01:00",
+        "eventDate" -> DateFormats.IsoDateTime.print(DateTime.now),
         "userId" -> "cuscav",
         "assignment" -> "12345"
       ))

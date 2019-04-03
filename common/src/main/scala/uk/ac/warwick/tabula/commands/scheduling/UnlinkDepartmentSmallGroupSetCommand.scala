@@ -33,7 +33,7 @@ class UnlinkDepartmentSmallGroupSetCommandInternal extends CommandInternal[Map[D
     setMap.map { case (department, sets) => department -> sets.map { set =>
       transactional() {
         set.memberQuery = ""
-        set.members.knownType.includedUserIds = ((set.members.knownType.staticUserIds diff set.members.knownType.excludedUserIds) ++ set.members.knownType.includedUserIds).distinct
+        set.members.knownType.includedUserIds = (set.members.knownType.staticUserIds diff set.members.knownType.excludedUserIds) ++ set.members.knownType.includedUserIds
         smallGroupService.saveOrUpdate(set)
         set
       }

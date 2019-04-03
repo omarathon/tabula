@@ -7,13 +7,16 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 class OldAdminGetSingleFeedbackCommand(module: Module, assignment: Assignment, feedback: Feedback) extends Command[RenderableFile] with ReadOnly {
   mustBeLinked(assignment, module)
   PermissionCheck(Permissions.AssignmentFeedback.Read, feedback)
 
   var zipService: ZipService = Wire.auto[ZipService]
 
-  override def applyInternal(): RenderableFile = zipService.getFeedbackZip(feedback)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getFeedbackZip(feedback), Duration.Inf)
 
   override def describe(d: Description): Unit = d.feedback(feedback).properties(
     "studentId" -> feedback.studentIdentifier,
@@ -53,7 +56,7 @@ class AdminGetSingleMarkerFeedbackCommand(module: Module, assignment: Assignment
 
   var zipService: ZipService = Wire.auto[ZipService]
 
-  override def applyInternal(): RenderableFile = zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback))
+  override def applyInternal(): RenderableFile = Await.result(zipService.getSomeMarkerFeedbacksZip(Seq(markerFeedback)), Duration.Inf)
 
   override def describe(d: Description): Unit = d.feedback(markerFeedback.feedback).properties(
     "studentId" -> markerFeedback.feedback.studentIdentifier,

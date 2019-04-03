@@ -128,7 +128,7 @@ class EditSmallGroupSetDefaultPropertiesCommandInternal(val module: Module, val 
     set.defaultEndTime = defaultEndTime
 
     if (set.defaultTutors == null) set.defaultTutors = UserGroup.ofUsercodes
-    set.defaultTutors.knownType.includedUserIds = defaultTutors.asScala
+    set.defaultTutors.knownType.includedUserIds = defaultTutors.asScala.toSet
   }
 }
 

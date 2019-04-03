@@ -8,8 +8,11 @@ import com.google.common.io.ByteSource
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import uk.ac.warwick.tabula.helpers.AESEncryption._
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.objectstore.EncryptedObjectStorageService._
+
+import scala.concurrent.Future
 
 object EncryptedObjectStorageService {
   val metadataContentLengthKey: String = "realcontentlength"
@@ -39,29 +42,30 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
     }.orNull
   }
 
-  override def fetch(key: String): RichByteSource = new EncryptedRichByteSource(delegate.fetch(key))
+  override def fetch(key: String): Future[RichByteSource] = delegate.fetch(key).map(new EncryptedRichByteSource(_))
 
-  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Unit = {
-    val iv = randomIv
+  override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Future[Unit] =
+    Future {
+      val iv = randomIv
 
-    val encrypted = new EncryptingByteSource(in, secretKey, new IvParameterSpec(iv))
-    val encryptedMetadata = ObjectStorageService.Metadata(
-      contentLength = encrypted.size(),
-      contentType = "application/octet-stream",
-      fileHash = metadata.fileHash,
-      userMetadata = Map(
-        metadataContentLengthKey -> metadata.contentLength.toString,
-        metadataContentTypeKey -> metadata.contentType,
-        metadataIVKey -> new String(Base64.getEncoder.encode(iv), StandardCharsets.UTF_8)
-      ) ++ metadata.userMetadata
-    )
+      val encrypted = new EncryptingByteSource(in, secretKey, new IvParameterSpec(iv))
+      val encryptedMetadata = ObjectStorageService.Metadata(
+        contentLength = encrypted.size(),
+        contentType = "application/octet-stream",
+        fileHash = metadata.fileHash,
+        userMetadata = Map(
+          metadataContentLengthKey -> metadata.contentLength.toString,
+          metadataContentTypeKey -> metadata.contentType,
+          metadataIVKey -> new String(Base64.getEncoder.encode(iv), StandardCharsets.UTF_8)
+        ) ++ metadata.userMetadata
+      )
 
-    delegate.push(key, encrypted, encryptedMetadata)
-  }
+      (encrypted, encryptedMetadata)
+    }.flatMap { case (encrypted, encryptedMetadata) => delegate.push(key, encrypted, encryptedMetadata) }
 
-  override def keyExists(key: String): Boolean = delegate.keyExists(key)
-  override def delete(key: String): Unit = delegate.delete(key)
-  override def listKeys(): Stream[String] = delegate.listKeys()
+  override def keyExists(key: String): Future[Boolean] = delegate.keyExists(key)
+  override def delete(key: String): Future[Unit] = delegate.delete(key)
+  override def listKeys(): Future[Stream[String]] = delegate.listKeys()
 
   override def afterPropertiesSet(): Unit = delegate.afterPropertiesSet()
 }

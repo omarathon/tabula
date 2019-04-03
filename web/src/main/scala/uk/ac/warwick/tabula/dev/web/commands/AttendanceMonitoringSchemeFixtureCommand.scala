@@ -64,7 +64,7 @@ class AttendanceMonitoringSchemeFixtureCommand extends CommandInternal[Attendanc
     scheme.pointStyle = AttendanceMonitoringPointStyle.Week
     scheme.members = UserGroup.ofUniversityIds
     scheme.members.addUserId(warwickId)
-    scheme.members.staticUserIds = Seq(warwickId)
+    scheme.members.staticUserIds = Set(warwickId)
 
     scheme.points = {
       for (count <- 0 until pointCount) yield {

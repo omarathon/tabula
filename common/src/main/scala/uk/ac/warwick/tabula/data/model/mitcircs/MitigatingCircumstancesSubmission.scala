@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
+import javax.persistence.CascadeType.ALL
 import javax.persistence._
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
@@ -33,6 +34,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var createdDate: DateTime = DateTime.now()
 
   @Column(nullable = false)
+  var lastModified: DateTime = DateTime.now()
+
+  @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
@@ -56,9 +60,26 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var reason: String = _
 
+  @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @BatchSize(size = 200)
+  var attachments: JSet[FileAttachment] = JHashSet()
+
+  def addAttachment(attachment: FileAttachment) {
+    if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+    attachment.temporary = false
+    attachment.mitigatingCircumstancesSubmission = this
+    attachments.add(attachment)
+  }
+
+  def removeAttachment(attachment: FileAttachment): Boolean = {
+    attachment.mitigatingCircumstancesSubmission = null
+    attachments.remove(attachment)
+  }
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
-    "student" -> student.universityId
+    "student" -> student.universityId,
+    "creator" -> creator.getWarwickId
   )
 
   // Don't use the student as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments

@@ -16,6 +16,7 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
     withFakeTime(new DateTime(2012, 4, 12, 13, 36, 0)) {
 
       val anotherDay = new DateTime(2012, 3, 10, 12, 13, 14)
+        .withZoneRetainFields(DateTimeZone.forID("Europe/London"))
 
       val yesterday = new DateTime().minusDays(1)
       val tomorrow = new DateTime().plusDays(1)

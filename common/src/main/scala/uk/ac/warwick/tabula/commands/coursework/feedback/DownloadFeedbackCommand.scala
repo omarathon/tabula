@@ -8,7 +8,10 @@ import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
+
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback, val student: Option[Member])
   extends Command[Option[RenderableFile]] with ReadOnly {
@@ -43,10 +46,7 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
     }
   }
 
-  private def zipped(feedback: Feedback) = student match {
-    case Some(student: StudentMember) => zip.getFeedbackZip(feedback)
-    case _ => zip.getFeedbackZip(feedback)
-  }
+  private def zipped(feedback: Feedback) = Await.result(zip.getFeedbackZip(feedback), Duration.Inf)
 
   override def describe(d: Description): Unit = {
     d.assignment(assignment)

@@ -66,7 +66,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
     new Fixture {
       testGroup.students.add(user)
       deallocateCommand.applyInternal()
-      testGroup.students.users should be(Nil)
+      testGroup.students.users should be(Set.empty)
     }
   }
 
@@ -74,7 +74,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito {
   def deallocateDoesNothingIfStudentNotAlreadyAssigned() {
     new Fixture {
       deallocateCommand.applyInternal()
-      testGroup.students.users should be(Nil)
+      testGroup.students.users should be(Set.empty)
     }
   }
 

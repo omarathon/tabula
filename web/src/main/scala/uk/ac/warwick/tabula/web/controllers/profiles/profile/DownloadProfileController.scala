@@ -12,6 +12,9 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipFileItem
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 @Controller
 @RequestMapping(Array("/profiles/view"))
 class DownloadProfileController extends AbstractViewProfileController with AutowiringZipServiceComponent {
@@ -40,8 +43,8 @@ class DownloadProfileController extends AbstractViewProfileController with Autow
   def download(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear): RenderableFile = {
     val fileAttachments = mandatory(command(studentCourseDetails, academicYear)).apply()
 
-    zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
+    Await.result(zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
       ZipFileItem.apply(if (index == 0) a.name else s"${a.id}-${a.name}", a.asByteSource, a.actualDataLength)
-    })
+    }), Duration.Inf)
   }
 }

@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByte
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
+import scala.concurrent.Future
+
 class UploadYearMarksCommandTest extends TestBase with Mockito {
 
   val maintenanceMode: MaintenanceModeService = smartMock[MaintenanceModeService]
@@ -62,11 +64,9 @@ class UploadYearMarksCommandTest extends TestBase with Mockito {
       attachment.id = "1234"
       attachment.name = "file.xlsx"
       attachment.objectStorageService = objectStorageService
-      attachment.objectStorageService.keyExists(attachment.id) returns {
-        true
-      }
+      attachment.objectStorageService.keyExists(attachment.id) returns Future.successful(true)
       val backingFile: File = createTemporaryFile()
-      attachment.objectStorageService.fetch(attachment.id) returns RichByteSource.wrap(Files.asByteSource(backingFile), None)
+      attachment.objectStorageService.fetch(attachment.id) returns Future.successful(RichByteSource.wrap(Files.asByteSource(backingFile), None))
       file.attached.add(attachment)
       command.file = file
 

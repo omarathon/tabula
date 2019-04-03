@@ -82,7 +82,7 @@ class MarkerFeedback extends GeneratedId
         "urn:websignon:timestamp" -> DateTime.now.toString,
         "urn:websignon:usersource" -> "Tabula"
       ))
-      dummyUser.setVerified(true)
+      dummyUser.setVerified(false)
       dummyUser.setFoundUser(true)
       dummyUser
     } else {
@@ -126,7 +126,6 @@ class MarkerFeedback extends GeneratedId
 
   @OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  @Fetch(FetchMode.JOIN)
   var attachments: JSet[FileAttachment] = JHashSet()
 
   def addAttachment(attachment: FileAttachment) {

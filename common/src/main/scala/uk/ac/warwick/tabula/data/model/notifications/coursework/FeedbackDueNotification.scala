@@ -69,7 +69,7 @@ class FeedbackDueGeneralNotification
       val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
       moduleAndDepartmentService.getModuleByCode(assignment.module.code)
         .getOrElse(throw new IllegalStateException("No such module"))
-        .managers.users
+        .managers.users.toSeq
     } else {
       Seq()
     }
@@ -105,7 +105,7 @@ class FeedbackDueExtensionNotification
       val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
       moduleAndDepartmentService.getModuleByCode(assignment.module.code)
         .getOrElse(throw new IllegalStateException("No such module"))
-        .managers.users
+        .managers.users.toSeq
     } else {
       Seq()
     }
