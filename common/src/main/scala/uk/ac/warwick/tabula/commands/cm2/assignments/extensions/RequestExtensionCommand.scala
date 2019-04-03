@@ -1,26 +1,25 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments.extensions
 
+import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.ExtensionState.{MoreInformationReceived, Unreviewed}
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.Transactions._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import org.springframework.format.annotation.DateTimeFormat
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.permissions._
-import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
-import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.ExtensionState.{MoreInformationReceived, Unreviewed}
-
 import scala.collection.mutable
 
 object RequestExtensionCommand {
@@ -51,7 +50,7 @@ class RequestExtensionCommandInternal(val assignment: Assignment, val submitter:
   override def applyInternal(): Extension = transactional() {
     val universityId = submitter.apparentUser.getWarwickId
     val usercode = submitter.apparentUser.getUserId
-    val extension = assignment.findExtension(usercode).getOrElse({
+    val extension = assignment.currentExtensionRequests.getOrElse(usercode, {
       val newExtension = new Extension
       newExtension._universityId = universityId
       newExtension.usercode = usercode
@@ -103,9 +102,9 @@ trait RequestExtensionCommandValidation extends SelfValidating {
     if (!reason.hasText) {
       errors.rejectValue("reason", "extension.reason.provideReasons")
     }
+
     val hasValidExtension = assignment
-      .findExtension(submitter.apparentUser.getWarwickId)
-      .filter(_.approved)
+      .approvedExtensions.get(submitter.apparentUser.getUserId)
       .flatMap(_.expiryDate)
       .exists(_.isAfterNow)
 
@@ -150,7 +149,7 @@ trait RequestExtensionCommandDescription extends Describable[Extension] {
 trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
   self: RequestExtensionCommandState with RelationshipServiceComponent =>
 
-  val basicInfo = Map("moduleManagers" -> assignment.module.managers.users)
+  val basicInfo: Map[String, Set[User]] = Map("moduleManagers" -> assignment.module.managers.users)
   val studentRelationships: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
   val relationshipAndCourseInfo: Option[Map[String, Object]] = for {
@@ -188,7 +187,7 @@ trait RequestExtensionCommandState {
 
   def presetValues(extension: Extension) {
     reason = extension.reason
-    requestedExpiryDate = extension.requestedExpiryDate.orNull
+    requestedExpiryDate = extension.expiryDate.orElse(extension.requestedExpiryDate).orNull
     attachedFiles = extension.attachments
     modified = true
     disabilityAdjustment = extension.disabilityAdjustment
@@ -202,7 +201,7 @@ trait RequestExtensionCommandState {
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
-  @beans.BeanProperty var readGuidelines: JBoolean = false
+  var readGuidelines: JBoolean = false
   // true if this command is modifying an existing extension. False otherwise
   var modified: JBoolean = false
   var disabilityAdjustment: JBoolean = false

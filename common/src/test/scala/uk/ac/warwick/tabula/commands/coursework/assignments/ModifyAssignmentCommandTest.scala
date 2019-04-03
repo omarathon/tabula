@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import javax.sql.DataSource
-
-import org.hamcrest.Matchers._
 import org.hibernate.{Session, SessionFactory}
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
@@ -11,14 +9,12 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.CurrentAcademicYear
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Unreviewed
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.util.queue.Queue
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
@@ -265,7 +261,7 @@ class ModifyAssignmentCommandTest extends TestBase with Mockito with FunctionalC
 
   @Test def purgeExtensionRequests(): Unit = inContext[MinimalCommandContext] {
     new Fixture {
-      assignment.extensions.size should be(2)
+      assignment.allExtensions.values.flatten.size should be(2)
       assignment.countUnapprovedExtensions should be(1)
 
       val cmd = new EditAssignmentCommand(module, assignment, currentUser)

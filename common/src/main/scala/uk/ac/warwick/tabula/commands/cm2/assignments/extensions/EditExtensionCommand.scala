@@ -36,7 +36,7 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
 
   self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-  val e: Option[Extension] = assignment.findExtension(student.getUserId)
+  val e: Option[Extension] = assignment.requestedOrApprovedExtensions.get(student.getUserId)
   e match {
     case Some(ext) =>
       copyFrom(ext)

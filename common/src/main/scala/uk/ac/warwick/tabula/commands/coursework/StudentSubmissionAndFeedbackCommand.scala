@@ -6,14 +6,12 @@ import uk.ac.warwick.tabula.commands.coursework.StudentSubmissionAndFeedbackComm
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, FeedbackChangeNotification}
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackChangeNotification, FeedbackPublishedNotification}
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
-
-import scala.collection.JavaConverters._
 
 object StudentSubmissionAndFeedbackCommand {
 
@@ -100,7 +98,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
   self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
   def applyInternal(): StudentSubmissionInformation = {
-    val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
+    val extension = assignment.approvedExtensions.get(studentUser.getUserId)
 
     // Log a ViewOnlineFeedback event if the student itself is viewing
     feedback.filter(_.usercode == viewer.getUserId).foreach { feedback =>
@@ -113,7 +111,7 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val module: Module, v
       extension = extension,
 
       isExtended = assignment.isWithinExtension(studentUser),
-      extensionRequested = extension.isDefined && !extension.get.isManual,
+      extensionRequested = assignment.allExtensions.get(studentUser.getUserId).exists(_.exists(!_.isManual)),
 
       canSubmit = assignment.submittable(studentUser),
       canReSubmit = assignment.resubmittable(studentUser),

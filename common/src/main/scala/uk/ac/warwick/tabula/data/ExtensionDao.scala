@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data
 
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Assignment
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.Projections._
+import org.hibernate.criterion.Order._
+import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.forms.{Extension, ExtensionState}
 import uk.ac.warwick.userlookup.User
 
 trait ExtensionDaoComponent {
@@ -26,6 +27,12 @@ trait ExtensionDao {
   def countUnapprovedExtensions(assignment: Assignment): Int
 
   def getUnapprovedExtensions(assignment: Assignment): Seq[Extension]
+
+  def getApprovedExtensions(assignment: Assignment): Seq[Extension]
+
+  def getAllExtensions(assignment: Assignment): Seq[Extension]
+
+  def countExtensionsByState(assignment: Assignment): Map[ExtensionState, Int]
 
   def getAllExtensionRequests(user: User): Seq[Extension]
 
@@ -48,12 +55,8 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 
   private def unapprovedExtensionsCriteria(assignment: Assignment) = session.newCriteria[Extension]
     .add(is("assignment", assignment))
-    .add(
-      and(
-        isNotNull("requestedOn"),
-        is("_state", ExtensionState.Unreviewed)
-      )
-    )
+    .add(isNotNull("requestedOn"))
+    .add(is("_state", ExtensionState.Unreviewed))
 
   def countUnapprovedExtensions(assignment: Assignment): Int = {
     unapprovedExtensionsCriteria(assignment)
@@ -63,6 +66,33 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
   def getUnapprovedExtensions(assignment: Assignment): Seq[Extension] = {
     unapprovedExtensionsCriteria(assignment).seq
   }
+
+  def getApprovedExtensions(assignment: Assignment): Seq[Extension] =
+    session.newCriteria[Extension]
+      .add(is("assignment", assignment))
+      .add(is("_state", ExtensionState.Approved))
+      .seq
+
+  def getAllExtensions(assignment: Assignment): Seq[Extension] =
+    session.newCriteria[Extension]
+      .add(is("assignment", assignment))
+      .addOrder(asc("requestedOn"))
+      .addOrder(asc("_requestedExpiryDate"))
+      .addOrder(asc("_expiryDate"))
+      .seq
+
+  def countExtensionsByState(assignment: Assignment): Map[ExtensionState, Int] =
+    session.newCriteria[Extension]
+      .add(is("assignment", assignment))
+      .project[Array[Object]](
+        projectionList()
+          .add(groupProperty("_state"))
+          .add(rowCount())
+      )
+      .seq.collect {
+        case Array(state: ExtensionState, count: Number) => state -> count.intValue()
+      }
+      .toMap
 
   def getAllExtensionRequests(user: User): Seq[Extension] = {
     session.newCriteria[Extension]

@@ -8,15 +8,74 @@
 
     <@cm2.assignmentHeader title assignment "for" />
 
+    <#macro existingExtensionDetails extension isModification>
+      <#if extension.approved>
+        <div class="alert alert-info">
+          <#assign approved_ago=durationFormatter(extension.reviewedOn) />
+          Your extension request was approved - <@fmt.date date=extension.reviewedOn /> (${approved_ago}).
+        </div>
+      <#elseif extension.rejected>
+        <div class="alert alert-danger">
+          Your extension request has been rejected.
+        </div>
+      <#elseif extension.moreInfoRequired>
+        <div class="alert alert-info">
+          <div class="control-group">
+            <label class="control-label">Request for more information</label>
+            <div class="controls"><p>${extension.reviewerComments}</p></div>
+          </div>
+        </div>
+      <#elseif isModification>
+        <div class="alert alert-info">Your extension request is being reviewed.</div>
+      </#if>
+
+      <#if extension.expiryDate?? && extension.approved>
+        <div class="control-group">
+          <label class="control-label">New submission deadline</label>
+          <div class="controls">
+            <p>
+              Your new submission deadline is <@fmt.date date=extension.expiryDate at=true/>
+            </p>
+          </div>
+        </div>
+      </#if>
+    </#macro>
+
+    <#if existingExtension?? && (!existingRequest?? || existingRequest.id != existingExtension.id)>
+      <@existingExtensionDetails existingExtension false />
+    </#if>
+
+    <#if existingRequest??>
+      <@existingExtensionDetails existingRequest isModification />
+    </#if>
+
+    <#if isModification>
+      <#if existingRequest.reviewerComments?? && !existingRequest.moreInfoRequired>
+        <div class="control-group">
+          <label class="control-label">Review comments</label>
+          <div class="controls"><p>${existingRequest.reviewerComments}</p></div>
+        </div>
+      </#if>
+      <#if existingRequest.expiryDate?? || existingRequest.reviewerComments??>
+        <hr />
+      </#if>
+
+      <#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
+      <p>
+        You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
+        Use the form below to update the details of your extension request or to request a further extension.
+      </p>
+    </#if>
+
     <#if !assignment.newExtensionsCanBeRequested>
       <#if assignment.extensionsPossible>
         <p>
           This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
-          You cannot request an extension after the close date has passed.
+          You cannot request <#if isModification>or modify </#if>an extension after the close date has passed.
         </p>
       <#else>
         <p>
-          You cannot request an extension for this assignment.
+          You cannot request <#if isModification>or modify </#if>an extension for this assignment.
         </p>
       </#if>
     <#else>
@@ -28,51 +87,7 @@
       class="double-submit-protection"
       action="${formAction}"
       modelAttribute="command">
-        <#if isModification>
-          <#if existingRequest.approved>
-            <div class="alert alert-info">
-              <#assign approved_ago=durationFormatter(existingRequest.reviewedOn) />
-              Your extension request was approved - <@fmt.date date=existingRequest.reviewedOn /> (${approved_ago}).
-            </div>
-          <#elseif existingRequest.rejected>
-            <div class="alert alert-danger">
-              Your extension request has been rejected.
-            </div>
-          <#elseif existingRequest.moreInfoRequired>
-            <div class="alert alert-info">
-              <div class="control-group">
-                <label class="control-label">Request for more information</label>
-                <div class="controls"><p>${existingRequest.reviewerComments}</p></div>
-              </div>
-            </div>
-          <#else>
-            <div class="alert alert-info">Your extension request is being reviewed.</div>
-          </#if>
-          <#if existingRequest.expiryDate?? && existingRequest.approved>
-            <div class="control-group">
-              <label class="control-label">New submission deadline</label>
-              <div class="controls">
-                <p>
-                  Your new submission deadline is <@fmt.date date=existingRequest.expiryDate at=true/>
-                </p>
-              </div>
-            </div>
-          </#if>
-          <#if existingRequest.reviewerComments?? && !existingRequest.moreInfoRequired>
-            <div class="control-group">
-              <label class="control-label">Review comments</label>
-              <div class="controls"><p>${existingRequest.reviewerComments}</p></div>
-            </div>
-          </#if>
-          <#if existingRequest.expiryDate?? || existingRequest.reviewerComments??>
-            <hr />
-          </#if>
-          <#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
-          <p>
-            You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
-            Use the form below to update the details of your extension request.
-          </p>
-        <#else>
+        <#if !isModification>
           <p>
             <#if assignment.closed>
               This assignment closed <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)}).
@@ -80,26 +95,26 @@
               This assignment closes at <@fmt.date date=assignment.closeDate /> (${durationFormatter(assignment.closeDate)} remaining).
             </#if>
           </p>
+        </#if>
 
-          <div id="extensionGuidelines">
-            <@bs3form.labelled_form_group "" "Extension guidelines">
-              <#if department.extensionGuidelineSummary??>
-                <#include "/WEB-INF/freemarker/cm2/submit/formfields/guideline.ftl" >
+        <div id="extensionGuidelines">
+          <@bs3form.labelled_form_group "" "Extension guidelines">
+            <#if department.extensionGuidelineSummary??>
+              <#include "/WEB-INF/freemarker/cm2/submit/formfields/guideline.ftl" >
+            </#if>
+
+            <p>
+              <#if department.extensionGuidelineLink?has_content>
+                Please read the full <a href="${department.extensionGuidelineLink}" target="_blank">extension
+                guidelines</a> before submitting your request below.
+              <#elseif department.extensionGuidelineSummary??>
+                Please read the extension guidelines before submitting your request below.
               </#if>
 
-              <p>
-                <#if department.extensionGuidelineLink?has_content>
-                  Please read the full <a href="${department.extensionGuidelineLink}" target="_blank">extension
-                  guidelines</a> before submitting your request below.
-                <#elseif department.extensionGuidelineSummary??>
-                  Please read the extension guidelines before submitting your request below.
-                </#if>
-
-                You will receive a notification when your request has been reviewed.
-              </p>
-            </@bs3form.labelled_form_group>
-          </div>
-        </#if>
+              You will receive a notification when your request has been reviewed.
+            </p>
+          </@bs3form.labelled_form_group>
+        </div>
 
         <@bs3form.labelled_form_group "" "Your University ID">
           <div class="uneditable-input">${user.studentIdentifier}</div>
@@ -115,7 +130,7 @@
           </@bs3form.checkbox>
         </#if>
 
-        <span id="assignmentCloseDate" data-close-date="${assignment.closeDate}" />
+        <span id="assignmentCloseDate" data-close-date="${assignment.closeDate}"></span>
 
         <@bs3form.labelled_form_group "requestedExpiryDate" "Requested extension date">
           <div class="input-group">
@@ -125,14 +140,14 @@
         </@bs3form.labelled_form_group>
 
         <@bs3form.filewidget
-        basename="file"
-        labelText="Upload supporting documentation relevant to your request"
-        types=[]
-        multiple=true
-        required=assignment.extensionAttachmentMandatory
+          basename="file"
+          labelText="Upload supporting documentation relevant to your request"
+          types=[]
+          multiple=true
+          required=assignment.extensionAttachmentMandatory
         />
 
-        <#if command.attachedFiles?has_content >
+        <#if command.attachedFiles?has_content>
           <@bs3form.labelled_form_group path="attachedFiles" labelText="Attached files">
             <ul class="unstyled">
               <#list command.attachedFiles as attachment>
