@@ -8,6 +8,6 @@
       </#list>
     </ul>
   <#else>
-    You do not currently have permission to view or manage any monitoring points. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
+    You do not currently have permission to view or manage mitigating circumstances. If you think this is incorrect or you need assistance, please visit our <a href="/help">help page</a>.
   </#if>
 </#escape>
