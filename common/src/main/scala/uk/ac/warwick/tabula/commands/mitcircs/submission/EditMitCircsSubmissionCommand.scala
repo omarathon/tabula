@@ -75,7 +75,7 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
 
 trait EditMitCircsSubmissionState extends CreateMitCircsSubmissionState {
   val submission: MitigatingCircumstancesSubmission
-  val student: StudentMember = submission.student
+  lazy val student: StudentMember = submission.student
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {

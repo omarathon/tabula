@@ -57,11 +57,11 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
             .nodeExecutable("Node 8")
             .command("ci"),
           new ScriptTask()
-            .description("gradlew check war")
+            .description("gradlew clean check war")
             .interpreter(ScriptTaskProperties.Interpreter.BINSH_OR_CMDEXE)
             .location(ScriptTaskProperties.Location.FILE)
             .fileFromPath("gradlew")
-            .argument("check war")
+            .argument("clean check war --no-daemon")
             .environmentVariables("PATH=/usr/nodejs/8/bin JAVA_OPTS=\"-Xmx256m -Xms128m\""),
           new NpmTask()
             .description("JS tests")

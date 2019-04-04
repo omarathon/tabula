@@ -2,6 +2,21 @@
 
 <div class="row">
   <div class="col col-md-6">
+    <@bs3form.labelled_form_group labelText="University ID">
+      <p class="very-subtle">${student.universityId}</p>
+    </@bs3form.labelled_form_group>
+  </div>
+  <div class="col col-md-6">
+    <#if submission??>
+      <@bs3form.labelled_form_group labelText="Reference">
+        <p class="very-subtle">MIT-${submission.key}</p>
+      </@bs3form.labelled_form_group>
+    </#if>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col col-md-6">
     <@bs3form.labelled_form_group "startDate" "Start Date">
       <div class="input-group">
         <@f.input path="startDate" cssClass="form-control date-time-picker" />

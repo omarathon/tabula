@@ -51,7 +51,7 @@ class AttendanceMonitoringCheckpointTotal extends GeneratedId with ToEntityRefer
 
   @NotNull
   @Column(name = "updated_date")
-  var updatedDate: DateTime = _
+  var updatedDate: DateTime = new DateTime(0)
 
   @Column(name = "low_level_notified")
   var unauthorisedLowLevelNotified: DateTime = _
