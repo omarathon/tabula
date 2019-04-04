@@ -348,7 +348,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
               Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
 
             case Some(assignment) =>
-              val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+              val futureExtensionDate = assignment.approvedExtensions.values.flatMap(_.expiryDate).toSeq.sorted.find(_.isAfterNow)
 
               futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
                 .getOrElse(CacheExpiryTime.getSeconds)

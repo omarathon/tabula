@@ -96,12 +96,12 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
       Nil
     else {
       val submissions = assignment.submissions.asScala
-      val extensions = assignment.extensions.asScala.filter(_.approved) // TAB-2303
+      val extensions = assignment.approvedExtensions // TAB-2303
       val allStudents = membershipService.determineMembershipUsers(assignment)
       // first filter out students that have submitted already
       val withoutSubmission = allStudents.filterNot(user => submissions.exists(_.isForUser(user)))
       // finally filter students that have an approved extension
-      withoutSubmission.filterNot(user => extensions.exists(_.isForUser(user)))
+      withoutSubmission.filterNot(user => extensions.contains(user.getUserId))
     }
   }
 }

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.web.Mav
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/assignment/{assignment}/extension"))
-class ExtensionRequestController extends CourseworkController {
+class RequestExtensionController extends CourseworkController {
 
   type ExtensionRequestCommand = Appliable[Extension] with RequestExtensionCommandState
 
@@ -38,29 +38,33 @@ class ExtensionRequestController extends CourseworkController {
 
   @RequestMapping(method = Array(HEAD, GET))
   def showForm(@ModelAttribute("command") cmd: ExtensionRequestCommand): Mav = {
-
     val assignment = cmd.assignment
 
     if (!assignment.module.adminDepartment.allowExtensionRequests) {
       logger.info("Rejecting access to extension request screen as department does not allow extension requests")
       throw PermissionDeniedException(user, Permissions.Extension.MakeRequest, assignment)
     } else {
-      val existingRequest = assignment.findExtension(user.userId)
-      existingRequest.foreach(cmd.presetValues)
+      val existingExtension = assignment.approvedExtensions.get(user.userId)
+
+      val existingRequest = assignment.currentExtensionRequests.get(user.userId)
+      existingRequest.orElse(existingExtension).foreach(cmd.presetValues)
+
       val profile = profileService.getMemberByUser(user.apparentUser)
+
       // is this an edit of an existing request
-      val isModification = existingRequest.isDefined && !existingRequest.get.isManual
+      val isModification = existingRequest.exists(!_.isManual)
+
       Mav("cm2/submit/extension_request",
         "profile" -> profile,
         "module" -> assignment.module,
         "assignment" -> assignment,
         "department" -> assignment.module.adminDepartment,
         "isModification" -> isModification,
-        "existingRequest" -> existingRequest.orNull,
+        "existingExtension" -> existingExtension,
+        "existingRequest" -> existingRequest,
         "command" -> cmd,
         "returnTo" -> getReturnTo(Routes.cm2.assignment(assignment))
       )
-
     }
   }
 

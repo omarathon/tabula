@@ -33,8 +33,6 @@ import uk.ac.warwick.tabula.services.AutowiringOriginalityReportServiceComponent
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import uk.ac.warwick.util.core.StringUtils
 
-import scala.collection.JavaConverters._
-
 object TurnitinLtiService {
 
   val AssignmentPrefix = "Assignment-"
@@ -96,7 +94,7 @@ object TurnitinLtiService {
   def assignmentEndDate(assignment: Assignment): DateTime = {
     Seq(
       Seq(assignment.closeDate),
-      assignment.extensions.asScala.flatMap(_.expiryDate),
+      assignment.approvedExtensions.values.toSeq.flatMap(_.expiryDate),
       Seq(DateTime.now)
     ).flatten.filter(Option(_).nonEmpty).max.plusMonths(1)
   }

@@ -6,19 +6,19 @@ import org.joda.time.DateTime
 import org.springframework.util.Assert
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
-import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{BooleanFormValue, FormValue, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.notifications.coursework._
 import uk.ac.warwick.tabula.data.model.triggers.{SubmissionAfterCloseDateTrigger, Trigger}
+import uk.ac.warwick.tabula.events.{NotificationHandling, TriggerHandling}
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringCourseworkSubmissionServiceComponent, AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringCourseworkSubmissionServiceComponent, AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, CurrentUser, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 
@@ -272,9 +272,9 @@ trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] wit
   override def notificationsToComplete(commandResult: Submission): CompletesNotificationsResult = {
     CompletesNotificationsResult(
       notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueGeneralNotification](assignment) ++
-        assignment.findExtension(user.universityId).map(
+        assignment.allExtensions.getOrElse(user.usercode, Nil).flatMap(
           notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueWithExtensionNotification]
-        ).getOrElse(Seq()),
+        ),
       user.asUser
     )
   }

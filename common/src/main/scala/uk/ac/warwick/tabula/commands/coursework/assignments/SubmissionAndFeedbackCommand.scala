@@ -187,11 +187,11 @@ abstract class SubmissionAndFeedbackCommandInternal(val module: Module, val assi
 
     val unsubmitted = benchmarkTask("Get unsubmitted users") {
       for (user <- unsubmittedMembers) yield {
-        val usersExtension = assignment.extensions.asScala.filter(_.usercode == user.getUserId)
+        val usersExtension = assignment.approvedExtensions.get(user.getUserId)
         if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getUserId)
 
-        val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
-          new ExtensionListItem(
+        val enhancedExtensionForUniId = usersExtension.map { extension =>
+          ExtensionListItem(
             extension = extension,
             within = assignment.isWithinExtension(user)
           )
@@ -221,7 +221,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val module: Module, val assi
     val submitted = benchmarkTask("Get submitted users") {
       for (usercode <- usercodesWithSubmissionOrFeedback) yield {
         val usersSubmissions = enhancedSubmissions.filter(_.submission.usercode == usercode)
-        val usersExtension = assignment.extensions.asScala.filter(extension => extension.usercode == usercode)
+        val usersExtension = assignment.approvedExtensions.get(usercode)
 
         val userFilter = moduleMembers.filter(u => u.getUserId == usercode)
         val user = if (userFilter.isEmpty) {
@@ -235,8 +235,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val module: Module, val assi
 
         val enhancedSubmissionForUniId = usersSubmissions.headOption
 
-        val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
-          new ExtensionListItem(
+        val enhancedExtensionForUniId = usersExtension.map { extension =>
+          ExtensionListItem(
             extension = extension,
             within = assignment.isWithinExtension(user)
           )

@@ -280,9 +280,9 @@ trait SubmitAssignmentNotifications extends Notifies[Submission, Submission] wit
   override def notificationsToComplete(commandResult: Submission): CompletesNotificationsResult = {
     CompletesNotificationsResult(
       notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueGeneralNotification](assignment) ++
-        assignment.findExtension(user.usercode).map(
+        assignment.allExtensions.getOrElse(user.usercode, Nil).flatMap(
           notificationService.findActionRequiredNotificationsByEntityAndType[SubmissionDueWithExtensionNotification]
-        ).getOrElse(Seq()),
+        ),
       user.asUser
     )
   }

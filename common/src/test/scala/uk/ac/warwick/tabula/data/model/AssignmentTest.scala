@@ -219,6 +219,9 @@ class AssignmentTest extends TestBase with Mockito {
 
   @Test def assignmentIsLate() {
     val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
     assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 0, 0, 0, 0)
     assignment.openEnded = false
@@ -248,6 +251,9 @@ class AssignmentTest extends TestBase with Mockito {
 
     assignment.addExtension(extension)
 
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
+
     assignment.isLate(submission) should be (false)
     assignment.isAuthorisedLate(submission) should be (true)
 
@@ -275,6 +281,9 @@ class AssignmentTest extends TestBase with Mockito {
 
   @Test def workingDaysLate() {
     val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
     assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 12, 0, 0, 0) // Wednesday, 12pm
     assignment.openEnded = false
@@ -317,6 +326,9 @@ class AssignmentTest extends TestBase with Mockito {
 
     assignment.addExtension(extension)
 
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
+
     submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
     assignment.workingDaysLate(submission) should be(0)
 
@@ -346,11 +358,17 @@ class AssignmentTest extends TestBase with Mockito {
 
 
     val assignment2 = new Assignment
+    assignment2.extensionService = smartMock[ExtensionService]
+    assignment2.extensionService.getApprovedExtensionsByUserId(assignment2) returns Map.empty
+
     assignment2.openDate = new DateTime(2016, DateTimeConstants.SEPTEMBER, 13, 23, 59, 59, 0)
     assignment2.closeDate = new DateTime(2017, DateTimeConstants.SEPTEMBER, 13, 23, 59, 59, 0)
     assignment2.openEnded = false
 
     val assignment3 = new Assignment
+    assignment3.extensionService = smartMock[ExtensionService]
+    assignment3.extensionService.getApprovedExtensionsByUserId(assignment3) returns Map.empty
+
     assignment3.openDate = new DateTime(2016, DateTimeConstants.SEPTEMBER, 14, 0, 0, 0, 0)
     assignment3.closeDate = new DateTime(2017, DateTimeConstants.SEPTEMBER, 14, 0, 0, 0, 0)
     assignment3.openEnded = false
@@ -391,6 +409,7 @@ class AssignmentTest extends TestBase with Mockito {
     assignment.extensionService = smartMock[ExtensionService]
 
     assignment.extensionService.hasExtensions(assignment) returns false
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
     assignment.submissionService.getSubmissionsByAssignment(assignment) returns Nil
 

@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{Extension, MarkerSelectField, SavedFormValue, WordCountField}
-import uk.ac.warwick.tabula.services.{FeedbackService, SubmissionService}
+import uk.ac.warwick.tabula.services.{ExtensionService, FeedbackService, SubmissionService}
 import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -33,10 +33,13 @@ class CourseworkFiltersTest extends TestBase with Mockito {
   val mockUserLookup = new MockUserLookup
   mockUserLookup.registerUserObjects(
     new User("cuscav") {
-      setWarwickId("0672089"); setFoundUser(true); setVerified(true);
+      setWarwickId("0672089"); setFoundUser(true); setVerified(true)
     }
   )
   assignment.userLookup = mockUserLookup
+
+  assignment.extensionService = smartMock[ExtensionService]
+  assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
   @Test def of() {
     CourseworkFilters.of("NotReleasedForMarking") match {
@@ -231,6 +234,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     extension.expiryDate = DateTime.now.plusDays(1)
     assignment.addExtension(extension)
 
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
+
     submission.isLate should be (false)
     submission.isAuthorisedLate should be (true)
     filter.predicate(student(submission = Option(submission), extension = Option(extension), withinExtension = true)) should be (false)
@@ -271,6 +277,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     extension.approve()
     extension.expiryDate = DateTime.now.plusDays(1)
     assignment.addExtension(extension)
+
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
 
     submission.isLate should be (false)
     submission.isAuthorisedLate should be (true)
@@ -347,6 +356,9 @@ class CourseworkFiltersTest extends TestBase with Mockito {
     extension.approve()
     extension.expiryDate = DateTime.now.plusDays(1)
     assignment.addExtension(extension)
+
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
 
     submission.isLate should be (false)
     submission.isAuthorisedLate should be (true)

@@ -82,8 +82,8 @@ trait SubmissionState {
       case Some(s) if s.isLate => "workflow.Submission.late"
       case Some(_) => "workflow.Submission.onTime"
       case None if !assignment.isClosed => "workflow.Submission.unsubmitted.withinDeadline"
-      case None if assignment.extensions.asScala.exists(e => e.usercode == student.getUserId && e.expiryDate.exists(_.isBeforeNow))
-      => "workflow.Submission.unsubmitted.withinExtension"
+      case None if assignment.approvedExtensions.get(student.getUserId).exists(_.expiryDate.exists(_.isBeforeNow)) =>
+        "workflow.Submission.unsubmitted.withinExtension"
       case None => "workflow.Submission.unsubmitted.late"
     }
   }

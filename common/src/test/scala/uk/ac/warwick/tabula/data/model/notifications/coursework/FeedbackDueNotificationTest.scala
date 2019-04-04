@@ -239,6 +239,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
 
     assignment.needsFeedbackPublishing should be (true)
 
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     val notification = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment)
     notification.recipients should not be 'empty
 

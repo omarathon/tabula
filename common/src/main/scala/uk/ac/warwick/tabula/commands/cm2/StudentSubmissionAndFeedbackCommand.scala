@@ -13,8 +13,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConverters._
-
 object StudentSubmissionAndFeedbackCommand {
 
   case class StudentSubmissionInformation(
@@ -98,8 +96,6 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assig
   self: FeedbackServiceComponent with SubmissionServiceComponent with ProfileServiceComponent =>
 
   def applyInternal(): StudentSubmissionInformation = {
-    val extension = assignment.extensions.asScala.find(_.isForUser(studentUser))
-
     // Log a ViewOnlineFeedback event if the student itself is viewing
     feedback.filter(_.usercode == viewer.getUserId).foreach { feedback =>
       ViewOnlineFeedbackCommand(feedback).apply()
@@ -108,10 +104,10 @@ abstract class StudentSubmissionAndFeedbackCommandInternal(val assignment: Assig
     StudentSubmissionInformation(
       submission = submission,
       feedback = HibernateHelpers.initialiseAndUnproxy(feedback),
-      extension = extension,
+      extension = assignment.approvedExtensions.get(studentUser.getUserId),
 
       isExtended = assignment.isWithinExtension(studentUser),
-      extensionRequested = extension.isDefined && !extension.get.isManual,
+      extensionRequested = assignment.allExtensions.get(studentUser.getUserId).exists(_.exists(!_.isManual)),
 
       canSubmit = assignment.submittable(studentUser),
       canReSubmit = assignment.resubmittable(studentUser),

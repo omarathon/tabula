@@ -32,7 +32,7 @@ class ModifyExtensionCommandInternal(val extension: Extension, val submitter: Cu
 
   this: ExtensionPersistenceComponent =>
 
-  expiryDate = extension.expiryDate.orNull
+  expiryDate = extension.expiryDate.orElse(extension.requestedExpiryDate).orNull
   reviewerComments = extension.reviewerComments
   state = extension.state
 
