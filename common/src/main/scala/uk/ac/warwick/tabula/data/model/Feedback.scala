@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormattedHtml, SavedFormValue}
-import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
@@ -221,6 +221,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   @BatchSize(size = 200)
   private val _marks: JList[Mark] = JArrayList()
 
+  // if this feedback was finalised by a marking workflow this stores the stage of the last marker that contributed to the feedback
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
+  var finalStage: MarkingWorkflowStage = _
+
+  def wasModerated: Boolean = finalStage.isInstanceOf[ModerationStage]
+
+  def moderatorMadeChanges: Boolean = wasModerated && allMarkerFeedback.find(_.stage == finalStage).exists(_.updatedOn != null)
+
   def marks: _root_.uk.ac.warwick.tabula.JavaImports.JList[Mark] = _marks
 
   def addMark(uploaderId: String, markType: MarkType, mark: Int, grade: Option[String], reason: String, comments: String = null): Mark = {
@@ -404,12 +412,14 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
     attachments.add(attachment)
   }
 
-  def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = {
-    val currentStages = outstandingStages.asScala
-    val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
+  def isMarkedByStage(stage: MarkingWorkflowStage): Boolean = stage match {
+    case _ : ModerationStage => wasModerated
+    case _ =>
+      val currentStages = outstandingStages.asScala
+      val currentPosition = currentStages.headOption.map(_.order).getOrElse(0)
 
-    if (stage.order == currentPosition) !currentStages.contains(stage)
-    else stage.order < currentPosition
+      if (stage.order == currentPosition) !currentStages.contains(stage)
+      else stage.order < currentPosition
   }
 
   def hasBeenModified: Boolean = hasContent || allMarkerFeedback.exists(_.hasBeenModified)

@@ -28,7 +28,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
       radioButtonGroup("restrictSubmissions").value = "true"
     }
 
-    withAssignment("xxx02", "Double marking-1C", submissionSettings = withWorkflowSubmissionSettings) { _ =>
+    withAssignment("xxx02", "Double marking-1C", submissionSettings = () => withWorkflowSubmissionSettings()) { _ =>
       editAssignment(doubleWorkflowId)
       val checkboxFeedbackFieldDetails: Seq[(String, Boolean)] = Seq(("automaticallyReleaseToMarkers", false), ("collectMarks", true), ("dissertation", true))
 

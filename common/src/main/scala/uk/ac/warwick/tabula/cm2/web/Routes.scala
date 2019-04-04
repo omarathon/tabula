@@ -193,6 +193,10 @@ object Routes {
           def apply(assignment: Assignment, stagePosition: Int, marker: User): String = markerroot(assignment, marker) + s"/$stagePosition/finish-marking"
         }
 
+        object skip {
+          def apply(assignment: Assignment, stagePosition: Int, marker: User): String = markerroot(assignment, marker) + s"/$stagePosition/skip-marking"
+        }
+
         object uncomplete {
           def apply(assignment: Assignment, marker: User): String = markerroot(assignment, marker) + "/marking-uncompleted"
 

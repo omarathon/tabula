@@ -124,7 +124,7 @@ class MarkerFeedback extends GeneratedId
   @Deprecated
   var rejectionComments: String = _
 
-  @OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @OneToMany(mappedBy = "markerFeedback", fetch = FetchType.EAGER, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
 
