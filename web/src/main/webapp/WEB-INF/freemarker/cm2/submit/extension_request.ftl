@@ -12,7 +12,7 @@
       <#if extension.approved>
         <div class="alert alert-info">
           <#assign approved_ago=durationFormatter(extension.reviewedOn) />
-          Your extension request was approved - <@fmt.date date=extension.reviewedOn /> (${approved_ago}).
+          Your extension request was approved at <@fmt.date date=extension.reviewedOn /> (${approved_ago}).
         </div>
       <#elseif extension.rejected>
         <div class="alert alert-danger">
