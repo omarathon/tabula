@@ -62,7 +62,7 @@
 
       <#assign time_since_request=durationFormatter(existingRequest.requestedOn) />
       <p>
-        You requested an extension for this assignment <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
+        You requested an extension for this assignment at <@fmt.date date=existingRequest.requestedOn /> (${time_since_request}).
         Use the form below to update the details of your extension request or to request a further extension.
       </p>
     </#if>
@@ -194,7 +194,7 @@
           <#if isModification && existingRequest.moreInfoRequired>
             <input type="submit" class="btn btn-primary" value="Send reply" />
           <#else>
-            <input type="submit" class="btn btn-primary" value="Submit" />
+            <input type="submit" class="btn btn-primary" value="Request extension" />
           </#if>
           <a class="btn" href="${returnTo}">Cancel</a>
         </div>
