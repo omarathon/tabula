@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services.mitcircs
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent}
 
@@ -11,6 +11,7 @@ trait MitCircsSubmissionService {
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
+  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
 }
 
 abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionService {
@@ -21,6 +22,7 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
+  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
 }
 
 @Service("mitCircsSubmissionService")
@@ -29,6 +31,7 @@ class MitCircsSubmissionServiceImpl extends AbstractMitCircsSubmissionService wi
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission] = mitCircsSubmissionDao.getByKey(key)
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission = mitCircsSubmissionDao.saveOrUpdate(submission)
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] = mitCircsSubmissionDao.submissionsForStudent(studentMember)
+  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission] = mitCircsSubmissionDao.submissionsForDepartment(department)
 }
 
 trait MitCircsSubmissionServiceComponent {

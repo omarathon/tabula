@@ -2,35 +2,17 @@ package uk.ac.warwick.tabula.web.controllers.groups
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 import uk.ac.warwick.tabula.groups.web.views.{GroupsDisplayHelper, GroupsViewModel}
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentsAndModulesWithPermission}
+import uk.ac.warwick.tabula.AcademicYear
 
-trait GroupsDepartmentsAndModulesWithPermission {
 
-  self: ModuleAndDepartmentServiceComponent =>
-
-  case class Result(departments: Set[Department], modules: Set[Module])
-
-  def departmentsAndModulesForPermission(user: CurrentUser, permission: Permission): Result = {
-    val departments = moduleAndDepartmentService.departmentsWithPermission(user, permission)
-    val modules = moduleAndDepartmentService.modulesWithPermission(user, permission)
-    Result(departments, modules)
-  }
-
-  def allDepartmentsForPermission(user: CurrentUser, permission: Permission): Set[Department] = {
-    val result = departmentsAndModulesForPermission(user, permission)
-    result.departments ++ result.modules.map(_.adminDepartment)
-  }
-}
-
-abstract class AbstractGroupsHomeController extends GroupsController with GroupsDepartmentsAndModulesWithPermission
+abstract class AbstractGroupsHomeController extends GroupsController with DepartmentsAndModulesWithPermission
   with AutowiringModuleAndDepartmentServiceComponent with AutowiringSmallGroupServiceComponent
   with AcademicYearScopedController with AutowiringMaintenanceModeServiceComponent with AutowiringUserSettingsServiceComponent {
 

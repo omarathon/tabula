@@ -63,9 +63,11 @@ class ZipService
 
   def getFeedbackZip(feedback: Feedback): Future[RenderableFile] =
     getZip(resolvePath(feedback), getFeedbackZipItems(feedback))
+      .map(_.withSuggestedFilename(s"feedback-${feedback.studentIdentifier}.zip"))
 
   def getSubmissionZip(submission: Submission): Future[RenderableFile] =
     getZip(resolvePath(submission), getSubmissionZipItems(submission))
+      .map(_.withSuggestedFilename(s"submission-${submission.studentIdentifier}.zip"))
 
   private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] = {
     (Seq(getOnlineFeedbackPdf(feedback)) ++ feedback.attachments.asScala).map { attachment =>
