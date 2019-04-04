@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.mitcircs.web
 
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.web.Routes.context
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -19,6 +17,9 @@ object Routes {
 
   def home: String = context + "/"
 
+  object Admin {
+    def home(department: Department): String = context + "/admin/%s" format encoded(department.code)
+  }
 
   object Student {
     def home: String = context + "/profile"

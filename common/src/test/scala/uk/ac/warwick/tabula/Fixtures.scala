@@ -520,6 +520,7 @@ object Fixtures extends Mockito {
     s.student = member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember]
     s.startDate = DateTime.now()
     s.endDate = DateTime.now().plusWeeks(2)
+    s.department = department("xxx")
     s
   }
 

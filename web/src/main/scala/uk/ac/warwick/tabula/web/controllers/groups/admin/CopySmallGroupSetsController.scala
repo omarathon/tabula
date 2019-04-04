@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
@@ -12,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
-import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
-import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
+import uk.ac.warwick.tabula.web.controllers.{DepartmentScopedController, DepartmentsAndModulesWithPermission}
+import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import uk.ac.warwick.tabula.web.{BreadCrumb, Mav, Routes}
 
 import scala.collection.JavaConverters._
@@ -67,7 +66,7 @@ class CopyModuleSmallGroupSetsController extends CopySmallGroupSetsController {
 @RequestMapping(value = Array("/groups/admin/department/{department}/groups/copy"))
 class CopyDepartmentSmallGroupSetsController extends CopySmallGroupSetsController
   with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-  with GroupsDepartmentsAndModulesWithPermission with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentsAndModulesWithPermission with AutowiringMaintenanceModeServiceComponent {
 
   override val departmentPermission: Permission = CopySmallGroupSetsCommand.RequiredPermission
 

@@ -10,13 +10,13 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.groups.{GroupsController, GroupsDepartmentsAndModulesWithPermission}
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController}
+import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, DepartmentScopedController, DepartmentsAndModulesWithPermission}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 abstract class AbstractGroupsAdminDepartmentHomeController extends GroupsController
   with DepartmentScopedController with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent with AutowiringMaintenanceModeServiceComponent
-  with GroupsDepartmentsAndModulesWithPermission {
+  with DepartmentsAndModulesWithPermission {
 
   type AdminSmallGroupsHomeCommand = Appliable[AdminSmallGroupsHomeInformation] with AdminSmallGroupsHomeCommandState
 
