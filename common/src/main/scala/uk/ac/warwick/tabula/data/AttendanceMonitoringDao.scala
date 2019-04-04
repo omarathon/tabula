@@ -589,10 +589,7 @@ class AttendanceMonitoringDaoImpl extends AttendanceMonitoringDao with Attendanc
     val totals = students.map(student => dbTotals.find(_.student == student).getOrElse(
       new AttendanceMonitoringCheckpointTotal(student, department, academicYear)
     ))
-    totals.foreach(total => {
-      total.updatedDate = new DateTime(0)
-      session.saveOrUpdate(total)
-    })
+    totals.foreach(session.saveOrUpdate)
   }
 
   def listCheckpointTotalsForUpdate: Seq[AttendanceMonitoringCheckpointTotal] = {
