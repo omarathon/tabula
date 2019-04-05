@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.jobs.zips
 
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.services.{AutowiringFeedbackServiceComponent, AutowiringZipServiceComponent}
 
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.Transactions._
-
+import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -23,7 +23,7 @@ object FeedbackZipFileJob {
 }
 
 @Component
-class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent with AutowiringFeedbackServiceComponent {
+class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent with AutowiringFeedbackServiceComponent with Daoisms {
 
   override val identifier: String = FeedbackZipFileJob.identifier
   override val zipFileName: String = FeedbackZipFileJob.zipFileName
@@ -32,19 +32,24 @@ class FeedbackZipFileJob extends ZipFileJob with AutowiringZipServiceComponent w
   override def run(implicit job: JobInstance): Unit = new Runner(job).run()
 
   class Runner(job: JobInstance) {
-    implicit private val _job: JobInstance = job
-
     def run(): Unit = {
       transactional() {
         val feedbacks = job.getStrings(FeedbackZipFileJob.FeedbacksKey).flatMap(feedbackService.getAssignmentFeedbackById)
 
-        updateProgress(0)
-        updateStatus("Initialising")
+        updateProgress(0)(job)
+        updateStatus("Initialising")(job)
 
-        val zipFile = Await.result(zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress), Duration.Inf)
+        session.detach(job)
+
+        val zipFile = Await.result(zipService.getSomeFeedbacksZip(feedbacks, updateZipProgress(_, _) {
+          session.refresh(job)
+          job
+        }), Duration.Inf)
+
+        session.refresh(job)
         job.setString(ZipFileJob.ZipFilePathKey, zipFile.filename)
 
-        updateProgress(100)
+        updateProgress(100)(job)
         job.succeeded = true
       }
     }
