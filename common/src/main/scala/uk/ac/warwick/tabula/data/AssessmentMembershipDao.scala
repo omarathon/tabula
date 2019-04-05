@@ -148,7 +148,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
 
   def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
     session.newQuery[SmallGroupSet](
-      """select distinct sgs
+      """select sgs
 			from SmallGroupSet sgs
         join sgs.assessmentGroups ag
         join ag.assessmentComponent ac
@@ -163,7 +163,7 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
         uagms.universityId = :universityId and
 				sgs.deleted = false and sgs.archived = false""")
       .setString("universityId", user.getWarwickId)
-      .seq
+      .distinct.seq
 
   /**
     * Tries to find an identical AssessmentComponent in the database, based on the
