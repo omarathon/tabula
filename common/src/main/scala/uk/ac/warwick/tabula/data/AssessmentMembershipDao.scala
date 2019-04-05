@@ -119,39 +119,48 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   def getSITSEnrolledAssignments(user: User, academicYear: Option[AcademicYear]): Seq[Assignment] = {
     val query =
       session.newQuery[Assignment](
-        s"""select a
-			from
-				Assignment a, UpstreamAssessmentGroup uag, StudentCourseDetails scd
-					join a.assessmentGroups ag
-					join uag.members uagms with uagms.universityId = :universityId
-		 			join scd.studentCourseYearDetails scyd with scyd.academicYear = a.academicYear
-			where
-	 				scd.student.universityId = :universityId and
-					scd.statusOnCourse.code not like 'P%' and
-	 				ag.assessmentComponent.moduleCode = uag.moduleCode and
-					ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
-					uag.academicYear = a.academicYear and
-					uag.occurrence = ag.occurrence and
-					${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
-					a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
+        s"""select distinct a
+        from Assignment a
+          join a.assessmentGroups ag
+          join ag.assessmentComponent ac
+          join UpstreamAssessmentGroup uag
+            on ac.assessmentGroup = uag.assessmentGroup and
+               ac.moduleCode = uag.moduleCode and
+               ac.sequence = uag.sequence and
+               uag.occurrence = ag.occurrence and
+               uag.academicYear = a.academicYear
+          join uag.members uagms
+          join StudentMember sm
+            on sm.universityId = uagms.universityId
+          join sm.studentCourseDetails scd
+          join scd.studentCourseYearDetails scyd with scyd.academicYear = a.academicYear
+        where
+          scd.student.universityId = :universityId and
+          scd.statusOnCourse.code not like 'P%' and
+          ${if (academicYear.nonEmpty) "a.academicYear = :academicYear and" else ""}
+          a.deleted = false and a._archived = false and a._hiddenFromStudents = false""")
         .setString("universityId", user.getWarwickId)
 
     academicYear.foreach { year => query.setParameter("academicYear", year) }
 
-    query.distinct.seq
+    query.seq
   }
 
   def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
     session.newQuery[SmallGroupSet](
       """select sgs
-			from SmallGroupSet sgs, UpstreamAssessmentGroup uag
-				join sgs.assessmentGroups ag
-				join uag.members uagms with uagms.universityId = :universityId
+			from SmallGroupSet sgs
+        join sgs.assessmentGroups ag
+        join ag.assessmentComponent ac
+        join UpstreamAssessmentGroup uag
+          on ac.assessmentGroup = uag.assessmentGroup and
+             ac.moduleCode = uag.moduleCode and
+             ac.sequence = uag.sequence and
+             uag.occurrence = ag.occurrence and
+             uag.academicYear = sgs.academicYear
+        join uag.members uagms
 			where
-	 			ag.assessmentComponent.moduleCode = uag.moduleCode and
-				ag.assessmentComponent.assessmentGroup = uag.assessmentGroup and
-				uag.academicYear = sgs.academicYear and
-				uag.occurrence = ag.occurrence and
+        uagms.universityId = :universityId and
 				sgs.deleted = false and sgs.archived = false""")
       .setString("universityId", user.getWarwickId)
       .distinct.seq

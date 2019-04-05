@@ -186,7 +186,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
     relationshipDao.getStudentsWithoutCurrentRelationshipByDepartment(null, dept1) should be(Seq())
   }
 
-  @Test def studentRelationshipsByStaffDepartments(): Unit = transactional { tx =>
+  @Test def studentRelationshipsByStudentOrStaffDepartments(): Unit = transactional { tx =>
     sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
     val dept1 = Fixtures.department("hm", "History of Music")
@@ -215,7 +215,7 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
     ret.head.studentMember.get.mostSignificantCourseDetails.get.department.code should be("hm")
 
     // staff department
-    relationshipDao.getCurrentRelationshipsByStaffDepartment(relationshipType, dept2) should be(Seq(relBetweenStaff1AndStu2))
+    relationshipDao.getCurrentRelationshipsByStudentOrStaffDepartment(relationshipType, dept2) should be(Seq(relBetweenStaff1AndStu2))
 
   }
 
