@@ -133,7 +133,7 @@ abstract class ProcessTurnitinLtiQueueCommandInternal extends CommandInternal[Pr
       report.turnitinId = response.turnitinSubmissionId()
     } else {
       report.lastTurnitinError = response.statusMessage.getOrElse("Failed to upload")
-      logger.warn(s"Failed to submit paper for report ${report.id}: ${response.statusMessage.getOrElse("Failed to upload")}")
+      logger.warn(s"Failed to submit paper for report ${report.id}: ${response.statusMessage.getOrElse("Failed to upload")}. ${response.json.orElse(response.html).orElse(response.xml).getOrElse("")}")
       report.submitToTurnitinRetries += 1
     }
 

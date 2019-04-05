@@ -17,9 +17,8 @@ case class TurnitinLtiResponse(
   xml: Option[Elem] = None,
   responseCode: Option[Int] = None) extends Logging {
 
-  def turnitinSubmissionId(): String = {
+  def turnitinSubmissionId(): String =
     (xml.get \\ "lis_result_sourcedid").text
-  }
 
   /**
     * Submission details is expected in the following format:
@@ -172,8 +171,7 @@ object TurnitinLtiResponse extends Logging {
     new TurnitinLtiResponse(success, html = Some(html))
   }
 
-  def fromXml(xml: Elem): TurnitinLtiResponse = {
+  def fromXml(xml: Elem): TurnitinLtiResponse =
     new TurnitinLtiResponse((xml \\ "status").text.equals("fullsuccess"), statusMessage = Some((xml \\ "message").text), xml = Some(xml))
-  }
 
 }
