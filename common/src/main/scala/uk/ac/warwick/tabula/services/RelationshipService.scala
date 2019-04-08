@@ -95,7 +95,7 @@ trait RelationshipService {
 
   def listCurrentStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 
-  def listCurrentStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+  def listCurrentStudentRelationshipsByStudentOrStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 
   def listCurrentStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
 
@@ -130,10 +130,6 @@ trait RelationshipService {
   def getStudentAssociationEntityData(department: Department, relationshipType: StudentRelationshipType, additionalEntityIds: Seq[String]): Seq[StudentAssociationEntityData]
 
   def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-
-  def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course]
-
-  def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int]
 
   def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]]
 }
@@ -374,10 +370,12 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     }
   }
 
-  def listCurrentStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
-    relationshipDao.getCurrentRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
-      .filter(relationshipDepartmentFilterMatches(department))
-      .filter(relationshipNotPermanentlyWithdrawn)
+  def listCurrentStudentRelationshipsByStudentOrStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = transactional(readOnly = true) {
+    benchmarkTask("listStudentRelationshipsByStudentOrStaffDepartment") {
+      relationshipDao.getCurrentRelationshipsByStudentOrStaffDepartment(relationshipType, department.rootDepartment)
+        .filter(relationshipDepartmentFilterMatches(department))
+        .filter(relationshipNotPermanentlyWithdrawn)
+    }
   }
 
   def listCurrentStudentRelationshipsWithMember(agent: Member): Seq[MemberStudentRelationship] = transactional(readOnly = true) {
@@ -487,23 +485,12 @@ abstract class AbstractRelationshipService extends RelationshipService with Logg
     }
   }
 
-  def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course] = {
-    relationshipDao.coursesForStudentCourseDetails(scds)
-  }
-
-  def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
-    relationshipDao.latestYearsOfStudyForStudentCourseDetails(scds)
-  }
-
   def listAgentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]] = {
-    // all students in department X
-    val unsortedAgentRelationshipsByStudentDept = listCurrentStudentRelationshipsByDepartment(relationshipType, department)
+    // all students with a department X or a relationship agent in department X
+    val unsortedRelationships = listCurrentStudentRelationshipsByStudentOrStaffDepartment(relationshipType, department)
 
-    // all students with a tutor in department X
-    val unsortedAgentRelationshipsByStaffDept = listCurrentStudentRelationshipsByStaffDepartment(relationshipType, department)
-
-    // combine the two and remove the dups
-    val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++ unsortedAgentRelationshipsByStaffDept)
+    // remove the dups
+    val unsortedAgentRelationships = unsortedRelationships
       // TAB-2750 treat relationships between the same agent and student COURSE as identical
       .groupBy { rel => (rel.agent, rel.studentCourseDetails) }
       .map { case (_, rels) => rels.maxBy { rel => rel.startDate.getMillis } }

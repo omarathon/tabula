@@ -2,18 +2,20 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Submission}
-import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
+import uk.ac.warwick.tabula.services.ExtensionService
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
 
-class ExtensionTest extends PersistenceTestBase {
+class ExtensionTest extends PersistenceTestBase with Mockito {
 
   @Test def testExtension() {
-
     val assignment = new Assignment
+    assignment.extensionService = smartMock[ExtensionService]
+
     assignment.setDefaultBooleanProperties()
     assignment.closeDate = new DateTime(2012, 7, 12, 12, 0)
     assignment.openEnded = false
@@ -27,6 +29,8 @@ class ExtensionTest extends PersistenceTestBase {
       extension.approve("That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea.")
 
       assignment.addExtension(extension)
+
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuslaj" -> extension)
     }
 
     val cuslaj = new User("cuslaj")

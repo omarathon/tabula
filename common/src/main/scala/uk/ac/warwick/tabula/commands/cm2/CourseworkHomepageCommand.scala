@@ -174,12 +174,12 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
   // Public for testing
   def enhance(assignment: Assignment): StudentAssignmentInformation = {
-    val extension = assignment.extensions.asScala.find(e => e.isForUser(user.apparentUser) && e.expiryDate.nonEmpty)
+    val extension = assignment.approvedExtensions.get(user.userId)
     // isExtended: is within an approved extension
     val isExtended = assignment.isWithinExtension(user.apparentUser)
     // hasActiveExtension: active = approved
-    val hasActiveExtension = extension.exists(_.approved)
-    val extensionRequested = extension.isDefined && !extension.get.isManual
+    val hasActiveExtension = extension.nonEmpty
+    val extensionRequested = assignment.allExtensions.get(user.userId).exists(_.exists(!_.isManual))
     val submission = assignment.submissions.asScala.find(_.isForUser(user.apparentUser))
     val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user.apparentUser))
     val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission)
@@ -208,7 +208,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
     else if (ass1.openEnded && !ass2.openEnded) false
     else {
       def timeToDeadline(ass: Assignment) = {
-        val extension = ass.extensions.asScala.find(e => e.isForUser(user.apparentUser))
+        val extension = ass.approvedExtensions.get(user.userId)
         val isExtended = ass.isWithinExtension(user.apparentUser)
 
         if (ass.openEnded) ass.openDate

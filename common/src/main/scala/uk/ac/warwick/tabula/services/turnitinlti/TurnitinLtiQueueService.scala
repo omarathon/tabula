@@ -6,6 +6,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.data.{AutowriringTurnitinLtiQueueDaoComponent, TurnitinLtiQueueDaoComponent}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.urkund.UrkundService
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
@@ -117,7 +118,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
 
   def getAssignmentStatus(assignment: Assignment): TurnitinLtiQueueService.AssignmentStatus = {
     if (!assignment.submitToTurnitin) {
-      if (assignment.turnitinId == null) {
+      if (!assignment.turnitinId.hasText) {
         TurnitinLtiQueueService.AssignmentStatus(
           status = "Assignment has not been submitted to Turnitin",
           progress = 100,
@@ -141,7 +142,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
         )
       }
     } else {
-      if (assignment.turnitinId == null) {
+      if (!assignment.turnitinId.hasText) {
         TurnitinLtiQueueService.AssignmentStatus(
           status = "Submitting assignment to Turnitin...",
           progress = 0,
@@ -160,7 +161,7 @@ abstract class AbstractTurnitinLtiQueueService extends TurnitinLtiQueueService w
             ("reportReceived", report)
           } else if (report.fileRequested != null) {
             ("reportRequested", report)
-          } else if (report.turnitinId != null) {
+          } else if (report.turnitinId.hasText) {
             ("fileSubmitted", report)
           } else {
             ("awaitingSubmission", report)

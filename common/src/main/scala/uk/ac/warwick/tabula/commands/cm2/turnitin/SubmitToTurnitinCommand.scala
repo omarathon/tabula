@@ -4,6 +4,7 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiQueueServiceComponent, TurnitinLtiQueueServiceComponent}
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
@@ -67,7 +68,7 @@ abstract class SubmitToTurnitinCommandInternal(val assignment: Assignment)
       assignment.submitToTurnitin = true
     }
 
-    if (assignment.turnitinId != null) {
+    if (assignment.turnitinId.hasText) {
       // Assignment won't be re-submitted, so create empty reports now
       turnitinLtiQueueService.createEmptyOriginalityReports(assignment)
     } else {

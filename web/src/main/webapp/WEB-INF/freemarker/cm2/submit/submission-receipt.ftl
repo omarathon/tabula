@@ -6,8 +6,8 @@
 <#import "*/coursework_components.ftl" as components />
 <#assign assignment=submission.assignment />
 <#assign module=assignment.module />
-<#if assignment.findExtension(submission.universityId)??>
-  <#assign extension=assignment.findExtension(submission.universityId) />
+<#if assignment.approvedExtensions[submission.usercode]??>
+  <#assign extension=assignment.approvedExtensions[submission.usercode] />
 </#if>
 
 <head>

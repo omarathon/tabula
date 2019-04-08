@@ -23,5 +23,6 @@ object ExtensionGraph {
     extension.rejected,
     extension.duration,
     extension.requestedExtraDuration,
-    Some(extension))
+    Some(extension)
+  )
 }

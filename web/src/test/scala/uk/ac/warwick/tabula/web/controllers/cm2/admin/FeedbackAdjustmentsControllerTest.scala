@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.feedback.{FeedbackAdjustmentCommandState, FeedbackAdjustmentGradeValidation}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Tap._
-import uk.ac.warwick.tabula.services.{GeneratesGradesFromMarks, ProfileService, ValidateAndPopulateFeedbackResult}
+import uk.ac.warwick.tabula.services.{ExtensionService, GeneratesGradesFromMarks, ProfileService, ValidateAndPopulateFeedbackResult}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.userlookup.User
 
@@ -19,6 +19,9 @@ class FeedbackAdjustmentsControllerTest extends TestBase with Mockito {
 
   private trait CommandFixture {
     val assignment: Assignment = Fixtures.assignment("5,000 word essay")
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
     assignment.module = Fixtures.module("cs118")
     assignment.module.adminDepartment = Fixtures.department("cs")
 

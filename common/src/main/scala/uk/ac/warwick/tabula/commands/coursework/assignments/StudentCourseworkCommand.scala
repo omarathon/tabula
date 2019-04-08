@@ -80,8 +80,8 @@ trait StudentCourseworkCommandHelper
         else if (ass1.openEnded && !ass2.openEnded) false
         else {
           def timeToDeadline(ass: Assignment) = {
-            val extension = ass.extensions.asScala.find(e => e.usercode == usercode || e.usercode == user.getUserId)
-            val isExtended = ass.isWithinExtension(user)
+            val extension = ass.approvedExtensions.get(usercode).orElse(ass.approvedExtensions.get(user.getUserId))
+            val isExtended = ass.isWithinExtension(usercode) || ass.isWithinExtension(user.getUserId)
 
             if (ass.openEnded) ass.openDate
             else if (isExtended) extension.flatMap(_.expiryDate).getOrElse(ass.closeDate)
@@ -93,12 +93,12 @@ trait StudentCourseworkCommandHelper
       }
 
   private def enhanced(assignment: Assignment, user: User, usercode: String) = {
-    val extension = assignment.extensions.asScala.find(e => e.isForUser(user))
+    val extension = assignment.approvedExtensions.get(usercode).orElse(assignment.approvedExtensions.get(user.getUserId))
     // isExtended: is within an approved extension
-    val isExtended = assignment.isWithinExtension(user)
+    val isExtended = assignment.isWithinExtension(usercode) || assignment.isWithinExtension(user.getUserId)
     // hasActiveExtension: active = approved
-    val hasActiveExtension = extension.exists(_.approved)
-    val extensionRequested = extension.isDefined && !extension.get.isManual
+    val hasActiveExtension = extension.nonEmpty
+    val extensionRequested = assignment.allExtensions.get(usercode).exists(_.exists(!_.isManual)) || assignment.allExtensions.get(user.getUserId).exists(_.exists(!_.isManual))
     val submission = assignment.submissions.asScala.find(_.usercode == usercode)
     val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.usercode == usercode)
     Map(

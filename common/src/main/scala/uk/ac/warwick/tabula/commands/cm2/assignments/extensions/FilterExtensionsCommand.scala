@@ -125,6 +125,6 @@ trait FilterExtensionsState extends FiltersExtensions {
 
   def allDepartments: Seq[Department]
 
-  lazy val allStates: Seq[ExtensionState with Product with Serializable] = ExtensionState.all
-  lazy val allTimes: Seq[TimeFilter with Product with Serializable] = TimeFilter.all
+  lazy val allStates: Seq[ExtensionState] = ExtensionState.all
+  lazy val allTimes: Seq[TimeFilter] = TimeFilter.all
 }

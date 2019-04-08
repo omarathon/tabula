@@ -50,7 +50,6 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
       unapprovedExtensions = assignment.getUnapprovedExtensions
       val admin = user.apparentUser
 
-
       unapprovedExtensions.foreach { extension =>
         extension.reject()
 

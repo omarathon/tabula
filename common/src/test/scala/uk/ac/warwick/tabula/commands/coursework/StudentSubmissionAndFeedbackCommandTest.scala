@@ -22,6 +22,7 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
   private trait Fixture {
     val module: Module = Fixtures.module("in101")
     val assignment: Assignment = Fixtures.assignment("Writing test")
+    assignment.extensionService = smartMock[ExtensionService]
     assignment.allowResubmission = false
     assignment.openEnded = true
     assignment.openDate = DateTime.now.minusDays(1)
@@ -57,6 +58,9 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
       assignment.closeDate = DateTime.now.plusDays(1)
       assignment.addExtension(extension)
 
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
+      assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map("cuscav" -> Seq(extension))
+
       command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
       command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)
       command.profileService.getMemberByUser(user, disableFilter = false, eagerLoad = false) returns None
@@ -88,6 +92,9 @@ class StudentSubmissionAndFeedbackCommandTest extends TestBase with Mockito {
       assignment.openEnded = false
       assignment.closeDate = DateTime.now.plusDays(1)
       assignment.addExtension(extension)
+
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
+      assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map("cuscav" -> Seq(extension))
 
       command.submissionService.getSubmissionByUsercode(assignment, "cuscav") returns Some(submission)
       command.feedbackService.getAssignmentFeedbackByUsercode(assignment, "cuscav") returns Some(feedback)

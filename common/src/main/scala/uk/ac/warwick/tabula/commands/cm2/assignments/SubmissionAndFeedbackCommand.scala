@@ -116,7 +116,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
     val unsubmittedMembers = moduleMembers.filterNot(m => usercodesWithSubmissionOrFeedback.contains(m.getUserId))
 
     val allFeedback = assignment.allFeedback
-    val allExtensions = assignment.extensions.asScala
+    val allExtensions = assignment.approvedExtensions
 
     val allFeedbackForSits: Map[Feedback, FeedbackForSits] =
       feedbackForSitsService.getByFeedbacks(allFeedback.filter(_.hasContent))
@@ -152,12 +152,11 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
     val unsubmitted: Seq[AssignmentSubmissionStudentInfo] = benchmarkTask("Get unsubmitted users") {
       for (user <- unsubmittedMembers) yield benchmarkTask(s"Inflate information for ${user.getFullName} (${user.getUserId})") {
         val usersExtension = benchmarkTask("Find extension") {
-          allExtensions.filter(_.usercode == user.getUserId)
+          allExtensions.get(user.getUserId)
         }
-        if (usersExtension.size > 1) throw new IllegalStateException("More than one Extension for " + user.getUserId)
 
         val enhancedExtensionForUniId = benchmarkTask("Enhance extension") {
-          usersExtension.headOption map { extension =>
+          usersExtension.map { extension =>
             ExtensionListItem(
               extension = extension,
               within = assignment.isWithinExtension(user)
@@ -219,7 +218,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
 
       for (usercode <- usercodesWithSubmissionOrFeedback) yield {
         val usersSubmissions = enhancedSubmissions.filter(_.submission.usercode == usercode)
-        val usersExtension = allExtensions.filter(extension => extension.usercode == usercode)
+        val usersExtension = allExtensions.get(usercode)
 
         val userFilter = moduleMembers.filter(u => u.getUserId == usercode)
         val user = if (userFilter.isEmpty) {
@@ -238,7 +237,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
           user.setWarwickId(enhancedSubmissionForUniId.head.submission._universityId)
         }
 
-        val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
+        val enhancedExtensionForUniId = usersExtension.map { extension =>
           ExtensionListItem(
             extension = extension,
             within = assignment.isWithinExtension(user)

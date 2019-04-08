@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications.coursework
 import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Notification, Submission}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, IncludeType, MembershipItem, UserLookupService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ExtensionService, IncludeType, MembershipItem, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
@@ -15,6 +15,9 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
   )
 
   val assignment = new Assignment
+  assignment.extensionService = smartMock[ExtensionService]
+  assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
   assignment.collectSubmissions = true
   assignment.openEnded = false
   assignment.closeDate = DateTime.now.plusDays(1)
@@ -46,6 +49,10 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
       extension.usercode = "0123456"
       extension.approve()
       assignment.addExtension(extension)
+
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("0123456" -> extension)
+
       notification.recipients should be(Seq())
     }
   }
@@ -69,6 +76,9 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
 
     anExtension.approve()
     anExtension.expiryDate = DateTime.now.plusWeeks(1)
+
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(anExtension.usercode -> anExtension)
 
     withClue("Should only be sent to the one user who has an extension") {
       notification.recipients should be(Seq(users(1)))

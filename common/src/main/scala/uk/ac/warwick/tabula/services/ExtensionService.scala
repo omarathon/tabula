@@ -35,6 +35,18 @@ trait ExtensionService {
 
   def getUnapprovedExtensions(assignment: Assignment): Seq[Extension]
 
+  /**
+    * Get all approved extensions for this assignment, using the latest extended deadline for where a student has multiple.
+    */
+  def getApprovedExtensionsByUserId(assignment: Assignment): Map[String, Extension]
+
+  /**
+    * Get all extensions for this assignment, mapped by usercode
+    */
+  def getAllExtensionsByUserId(assignment: Assignment): Map[String, Seq[Extension]]
+
+  def countExtensionsByState(assignment: Assignment): Map[ExtensionState, Int]
+
   def getAllExtensionRequests(user: User): Seq[Extension]
 
   def filterExtensions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder], maxResults: Int, startResult: Int): Seq[Extension]
@@ -66,6 +78,21 @@ abstract class AbstractExtensionService extends ExtensionService {
   def hasExtensions(assignment: Assignment): Boolean = countExtensions(assignment) > 0
 
   def hasUnapprovedExtensions(assignment: Assignment): Boolean = countUnapprovedExtensions(assignment) > 0
+
+  def getApprovedExtensionsByUserId(assignment: Assignment): Map[String, Extension] = transactional(readOnly = true) {
+    extensionDao.getApprovedExtensions(assignment)
+      .groupBy(_.usercode)
+      .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+  }
+
+  def getAllExtensionsByUserId(assignment: Assignment): Map[String, Seq[Extension]] = transactional(readOnly = true) {
+    extensionDao.getAllExtensions(assignment)
+      .groupBy(_.usercode)
+  }
+
+  def countExtensionsByState(assignment: Assignment): Map[ExtensionState, Int] = transactional(readOnly = true) {
+    extensionDao.countExtensionsByState(assignment)
+  }
 
   def getAllExtensionRequests(user: User): Seq[Extension] = transactional(readOnly = true) {
     extensionDao.getAllExtensionRequests(user)

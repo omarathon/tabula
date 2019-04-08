@@ -4,8 +4,10 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+
 import scala.xml.Elem
 
 object TurnitinLtiConformanceOutcomesServiceCommand {
@@ -88,7 +90,7 @@ abstract class TurnitinLtiConformanceOutcomesServiceCommandInternal(val assignme
 
     val assignment = assessmentService.getAssignmentById(sourcedId).get
     val score = {
-      if (assignment.turnitinId != null && assignment.turnitinId.nonEmpty) assignment.turnitinId
+      if (assignment.turnitinId.hasText) assignment.turnitinId
       else ""
     }
 

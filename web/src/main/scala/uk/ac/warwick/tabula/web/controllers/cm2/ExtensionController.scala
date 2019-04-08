@@ -230,7 +230,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
       case Some(s: StudentMember) =>
         val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
           (relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, s))
-        }.toMap.filter({ case (relationshipType, relations) => relations.nonEmpty })
+        }.toMap.filter({ case (_, relations) => relations.nonEmpty })
         Map(
           "relationships" -> relationships,
           "course" -> s.mostSignificantCourseDetails
@@ -280,7 +280,7 @@ class EditExtensionController extends CourseworkController with ExtensionService
       case Some(student: StudentMember) =>
         val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
           (relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
-        }.toMap.filter({ case (relationshipType, relations) => relations.nonEmpty })
+        }.toMap.filter({ case (_, relations) => relations.nonEmpty })
         Map(
           "relationships" -> relationships,
           "course" -> student.mostSignificantCourseDetails
@@ -327,7 +327,7 @@ class RedirectExtensionManagementController extends CourseworkController with Ac
     retrieveActiveAcademicYear(None)
 
   @RequestMapping
-  def redirect(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]) =
+  def redirect(@PathVariable department: Department, @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav =
     Redirect(s"${Routes.admin.extensions(activeAcademicYear.getOrElse(AcademicYear.now()))}?departments=${mandatory(department).code}")
 }
 
@@ -335,6 +335,6 @@ class RedirectExtensionManagementController extends CourseworkController with Ac
 @Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear:\\d{4}}/manage/extensions"))
 class RedirectExtensionManagementForYearController extends CourseworkController {
-  @RequestMapping def redirect(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+  @RequestMapping def redirect(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav =
     Redirect(s"${Routes.admin.extensions(academicYear)}?departments=${mandatory(department).code}")
 }
