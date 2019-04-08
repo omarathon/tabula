@@ -9,8 +9,10 @@ import org.joda.time.ReadableInstant
 import org.joda.time.format.DateTimeFormatter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
+import uk.ac.warwick.tabula.data.model.markingworkflow.ModeratedWorkflow
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.XmlUtils._
 import uk.ac.warwick.tabula.helpers.cm2.{SubmissionListItem, WorkflowItems}
@@ -222,26 +224,31 @@ trait SubmissionAndFeedbackExport {
   val assignment: Assignment
   val module: Module = assignment.module
 
+  def wasModerated: Boolean = Option(HibernateHelpers.initialiseAndUnproxy(assignment.cm2MarkingWorkflow)).exists(_.isInstanceOf[ModeratedWorkflow])
+
   def topLevelUrl: String
 
   val isoFormatter: DateTimeFormatter = DateFormats.IsoDateTime
   def isoFormat(i: ReadableInstant): String = isoFormatter print i
 
   // This Seq specifies the core field order
-  val baseFields = Seq("module-code", "id", "open-date", "open-ended", "close-date")
+  val baseFields: Seq[String] = Seq("module-code", "id", "open-date", "open-ended", "close-date")
   val identityFields: Seq[String] = Seq("university-id") ++
     (if (module.adminDepartment.showStudentName) Seq("name") else Seq()) ++
     (if (assignment.showSeatNumbers) Seq("seat-number") else Seq())
 
-  val submissionFields = Seq("id", "time", "downloaded")
-  val submissionStatusFields = Seq("late", "within-extension", "markable")
+  val submissionFields: Seq[String] = Seq("id", "time", "downloaded")
+  val submissionStatusFields: Seq[String] = Seq("late", "within-extension", "markable")
   val markerFields: Seq[String] =
     if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
-    else if (assignment.cm2MarkingWorkflow != null) assignment.cm2MarkingWorkflow.allocationOrder
+    else if (assignment.cm2MarkingWorkflow != null) {
+      val markerRoles = assignment.cm2MarkingWorkflow.allocationOrder
+      if(wasModerated) markerRoles :+ "was-moderated" else markerRoles
+    }
     else Seq()
-  val plagiarismFields = Seq("suspected-plagiarised", "similarity-percentage")
-  val feedbackFields = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
-  val adjustmentFields = Seq("mark", "grade", "reason")
+  val plagiarismFields: Seq[String] = Seq("suspected-plagiarised", "similarity-percentage")
+  val feedbackFields: Seq[String] = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
+  val adjustmentFields: Seq[String] = Seq("mark", "grade", "reason")
 
   protected def assignmentData: Map[String, Any] = Map(
     "module-code" -> module.code,
@@ -296,11 +303,12 @@ trait SubmissionAndFeedbackExport {
         "second-marker" -> assignment.getStudentsSecondMarker(student.student.getUserId).map(_.getFullName).getOrElse("")
       )
     } else if (assignment.cm2MarkingWorkflow != null) {
-      student.enhancedFeedback.map(ef => {
+      val markerNames = student.enhancedFeedback.map(ef => {
         assignment.cm2MarkingWorkflow.allocationOrder.map(role => {
           role -> ef.feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
         })
       }.toMap).getOrElse(Map())
+      markerNames ++ (if(wasModerated) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
     } else {
       Map()
     }

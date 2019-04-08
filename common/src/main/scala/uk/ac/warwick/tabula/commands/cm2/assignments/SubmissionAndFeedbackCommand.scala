@@ -6,7 +6,9 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.SubmissionAndFeedbackCommand._
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand
 import uk.ac.warwick.tabula.commands.cm2.feedback.ListFeedbackCommand._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.markingworkflow.ModeratedWorkflow
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.OverlapPlagiarismFilter
 import uk.ac.warwick.tabula.helpers.cm2._
@@ -40,7 +42,8 @@ object SubmissionAndFeedbackCommand {
     stillToDownload: Seq[AssignmentSubmissionStudentInfo],
     hasPublishedFeedback: Boolean,
     hasOriginalityReport: Boolean,
-    workflowMarkers: Seq[String]
+    workflowMarkers: Seq[String],
+    moderatedWorkflow: Boolean
   )
 
 }
@@ -304,7 +307,8 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
       stillToDownload = stillToDownload,
       hasPublishedFeedback = hasPublishedFeedback,
       hasOriginalityReport = hasOriginalityReport,
-      workflowMarkers = workflowMarkers
+      workflowMarkers = workflowMarkers,
+      moderatedWorkflow = Option(HibernateHelpers.initialiseAndUnproxy(assignment.cm2MarkingWorkflow)).exists(_.isInstanceOf[ModeratedWorkflow])
     )
   }
 }

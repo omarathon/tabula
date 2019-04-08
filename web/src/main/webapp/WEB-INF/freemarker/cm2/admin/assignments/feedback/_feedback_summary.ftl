@@ -15,7 +15,7 @@
 
       <#if markerFeedback.hasContent && !markerFeedback.hasBeenModified>
         Approved by the moderator
-      <#elseif !markerFeedback.hasContent>
+      <#elseif markerFeedback.moderationSkipped>
         Not moderated
       <#else>
         <div class="feedback-details">

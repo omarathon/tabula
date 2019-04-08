@@ -11,7 +11,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
+import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
 
 import scala.collection.JavaConverters._
@@ -178,6 +178,8 @@ class MarkerFeedback extends GeneratedId
     }
 
   def hasBeenModified: Boolean = updatedOn != null
+
+  def moderationSkipped: Boolean = stage.isInstanceOf[ModerationStage] && !feedback.wasModerated
 
   def hasContent: Boolean = hasMarkOrGrade || hasFeedbackOrComments
 
