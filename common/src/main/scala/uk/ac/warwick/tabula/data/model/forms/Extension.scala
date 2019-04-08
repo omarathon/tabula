@@ -10,12 +10,14 @@ import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, Days}
 import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
@@ -32,7 +34,11 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   @JoinColumn(name = "assignment_id")
   var assignment: Assignment = _
 
-  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  @transient
+  var profileService: ProfileService = Wire[ProfileService]
+
+  def permissionsParents: Stream[PermissionsTarget] =
+    Option(assignment).toStream #::: profileService.getAllMembersWithUserId(usercode).toStream
 
   @NotNull
   @Column(name = "userId")
