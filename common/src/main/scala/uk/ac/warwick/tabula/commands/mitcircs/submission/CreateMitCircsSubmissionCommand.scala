@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import org.joda.time.LocalDate
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports.JSet
-import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
-import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
@@ -95,8 +95,8 @@ trait CreateMitCircsSubmissionState {
     throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
   )
 
-  var startDate: DateTime = _
-  var endDate: DateTime = _
+  var startDate: LocalDate = _
+  var endDate: LocalDate = _
 
   @BeanProperty var issueType: IssueType = _
   @BeanProperty var issueTypeDetails: String = _

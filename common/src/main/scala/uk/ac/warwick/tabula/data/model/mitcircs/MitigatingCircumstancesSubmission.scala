@@ -5,7 +5,7 @@ import java.io.Serializable
 import javax.persistence.CascadeType.ALL
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -50,10 +50,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var department: Department = _
 
   @Column(nullable = false)
-  var startDate: DateTime = _
+  var startDate: LocalDate = _
 
   @Column(nullable = false)
-  var endDate: DateTime = _
+  var endDate: LocalDate = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeUserType")
   var issueType: IssueType = _

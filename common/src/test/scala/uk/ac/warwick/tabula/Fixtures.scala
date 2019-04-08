@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
+import uk.ac.warwick.tabula.services.{LevelService, UserLookupService}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 import scala.collection.JavaConverters._
@@ -518,8 +518,8 @@ object Fixtures extends Mockito {
     val s = new MitigatingCircumstancesSubmission
     s.creator = user(creator, creator)
     s.student = member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember]
-    s.startDate = DateTime.now()
-    s.endDate = DateTime.now().plusWeeks(2)
+    s.startDate = LocalDate.now()
+    s.endDate = LocalDate.now().plusWeeks(2)
     s.department = department("xxx")
     s
   }
