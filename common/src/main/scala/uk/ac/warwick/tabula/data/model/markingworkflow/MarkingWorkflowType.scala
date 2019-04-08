@@ -84,7 +84,7 @@ object MarkingWorkflowType {
   // Don't include - SelectedModeratedMarking in this list (It's not to be selected directly)
   def values: Seq[MarkingWorkflowType] = allValues.filterNot(_ == SelectedModeratedMarking)
 
-  def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = values.map(t => t -> t.allStages).toMap
+  def allPossibleStages: Map[MarkingWorkflowType, Seq[MarkingWorkflowStage]] = allValues.map(t => t -> t.allStages).toMap
 
   def fromCode(code: String): MarkingWorkflowType =
     if (code == null) null
