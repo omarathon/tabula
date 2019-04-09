@@ -78,7 +78,7 @@
                       <a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=${cm1Context}" class="btn btn-block">
                         <i class="icon-calendar"></i> Review extension request
                       </a>
-                    <#elseif !isExtended && assignment.newExtensionsCanBeRequested>
+                    <#elseif assignment.newExtensionsCanBeRequested>
                       <a href="<@routes.coursework.extensionRequest assignment=assignment />?returnTo=${cm1Context}" class="btn btn-block">
                         <i class="icon-calendar"></i> Request extension
                       </a>

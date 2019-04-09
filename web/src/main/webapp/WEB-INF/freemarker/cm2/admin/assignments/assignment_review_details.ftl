@@ -118,10 +118,11 @@
         <@review_details 'Submission scope' sharedPropertiesForm.restrictSubmissions?string('Only students enrolled on this assignment can submit coursework','Anyone with a link to the assignment can submit coursework') />
         <@review_details 'Allow students to resubmit work' sharedPropertiesForm.allowResubmission?string('Yes','No') />
         <@review_details 'Allow new submissions after close date' sharedPropertiesForm.allowLateSubmissions?string('Yes','No') />
-        <@review_details 'Allow extensions' sharedPropertiesForm.allowExtensions?string('Yes','No') />
-        <@review_details 'Students must attach at least one file to an extension request' sharedPropertiesForm.extensionAttachmentMandatory?string('Yes','No') />
-        <@review_details 'Allow extensions after close date' sharedPropertiesForm.allowExtensionsAfterCloseDate?string('Yes','No') />
       </#if>
+
+      <@review_details 'Allow extensions' sharedPropertiesForm.allowExtensions?string('Yes','No') />
+      <@review_details 'Students must attach at least one file to an extension request' sharedPropertiesForm.extensionAttachmentMandatory?string('Yes','No') />
+      <@review_details 'Allow extensions after close date' sharedPropertiesForm.allowExtensionsAfterCloseDate?string('Yes','No') />
     </div>
 
     <div class="form-group">
