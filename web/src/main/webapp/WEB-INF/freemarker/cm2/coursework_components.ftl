@@ -138,6 +138,32 @@
         Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
       </#local>
     </#if>
+  <#elseif !assignment.collectSubmissions>
+    <#local extension = info.extension! />
+
+    <#local time_remaining = durationFormatter(info.studentDeadline) />
+    <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
+    <#if info.hasActiveExtension>
+      <#local extension_time_remaining = durationFormatter(extension.expiryDate) />
+    </#if>
+
+    <#if info.extended>
+      <#local state = "info" />
+      <#local tooltip>
+        ${extension_time_remaining} until extended deadline (<@fmt.date date=extension.expiryDate />)
+      </#local>
+    <#elseif assignment.closed>
+      <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
+      <#local state = "info" />
+      <#local tooltip>
+        Assignment close ${durationFormatter(info.studentDeadline)} (<@fmt.date date=info.studentDeadline />)
+      </#local>
+    <#else>
+      <#local state = "success" />
+      <#local tooltip>
+        Due in ${time_remaining} (<@fmt.date date=info.studentDeadline />)
+      </#local>
+    </#if>
   <#else>
     <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
     <#local state = "info" />
@@ -205,23 +231,21 @@
     <div class="col-md-6">
       <#local submissionStatus = "" />
 
-      <#if !assignment.collectSubmissions>
-        <#local submissionStatus = "" />
-      <#elseif info.submission??>
+      <#if info.submission??>
         <#local submission = info.submission />
         <#local submissionStatus>
           <strong>Submitted:</strong> <@fmt.date date=submission.submittedDate />
         </#local>
-      <#elseif !assignment.opened>
+      <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
           <strong>Assignment open:</strong>
           <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
         </#local>
-      <#elseif assignment.openEnded>
+      <#elseif assignment.collectSubmissions && assignment.openEnded>
         <#local submissionStatus>
           <strong>Not submitted</strong>
         </#local>
-      <#elseif info.submittable>
+      <#elseif info.submittable || !assignment.collectSubmissions>
         <#local extension = info.extension! />
 
         <#local time_remaining = durationFormatter(info.studentDeadline) />
@@ -230,15 +254,17 @@
           <#local extension_time_remaining = durationFormatter(extension.expiryDate) />
         </#if>
 
-        <#local submissionStatus>
-          <strong>Not submitted</strong>
-        </#local>
+        <#if assignment.collectSubmissions>
+          <#local submissionStatus>
+            <strong>Not submitted</strong>
+          </#local>
+        </#if>
 
         <#if info.extended>
           <#local submissionStatus>
             <strong>Extension granted</strong>
           </#local>
-        <#elseif assignment.closed>
+        <#elseif assignment.collectSubmissions && assignment.closed>
           <#local submissionStatus>
             <strong>Late</strong>
           </#local>
@@ -260,8 +286,8 @@
             <strong>Feedback received</strong>
           </#local>
         </#if>
-      <#elseif assignment.collectSubmissions>
-        <#if info.submission?? && info.feedbackDeadline??>
+      <#else>
+        <#if (info.submission?? || !assignment.collectSubmissions) && info.feedbackDeadline??>
           <#local feedbackStatus>
             <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                                                                                   data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
@@ -287,12 +313,12 @@
     </div>
     <div class="col-md-3">
       <#if info.feedback??>
-      <#-- View feedback -->
+        <#-- View feedback -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View feedback
         </a>
       <#elseif info.submission?? && info.resubmittable>
-      <#-- Resubmission allowed -->
+        <#-- Resubmission allowed -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View receipt
         </a>
@@ -301,16 +327,22 @@
           Resubmit assignment
         </a>
       <#elseif info.submission??>
-      <#-- View receipt -->
+        <#-- View receipt -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View receipt
         </a>
-      <#elseif info.submittable>
-      <#-- First submission allowed -->
+      <#elseif info.submittable || (!assignment.collectSubmissions && assignment.extensionsPossible)>
         <p>
-          <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
-            Submit assignment
-          </a>
+          <#if info.submittable>
+            <#-- First submission allowed -->
+            <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
+              Submit assignment
+            </a>
+          <#else>
+            <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
+              View details
+            </a>
+          </#if>
         </p>
 
         <#if assignment.extensionsPossible>
@@ -329,7 +361,7 @@
           </#if>
         </#if>
       <#else>
-      <#-- Assume formative, so just show info -->
+        <#-- Assume formative, so just show info -->
         <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
           View details
         </a>
@@ -347,7 +379,7 @@
 <#macro extension_button extensionRequested isExtended assignment>
   <#if extensionRequested>
     <@extension_button_contents "Review extension request" assignment />
-  <#elseif !isExtended && assignment.newExtensionsCanBeRequested>
+  <#elseif assignment.newExtensionsCanBeRequested>
     <@extension_button_contents "Request an extension" assignment />
   </#if>
 </#macro>

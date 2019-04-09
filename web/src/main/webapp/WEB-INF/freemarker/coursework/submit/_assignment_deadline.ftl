@@ -15,7 +15,7 @@
     <p class="extension-button">
       <#if extensionRequested>
         <@extensionButtonContents "Review extension request" assignment />
-      <#elseif !isExtended && assignment.newExtensionsCanBeRequested>
+      <#elseif assignment.newExtensionsCanBeRequested>
         <@extensionButtonContents "Request an extension" assignment />
       </#if>
     </p>
@@ -27,7 +27,7 @@
     <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
   </#if>
 
-  <#if isExtended>
+  <#if extension??>
     <p class="extended deadline">
       <#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
       <span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
