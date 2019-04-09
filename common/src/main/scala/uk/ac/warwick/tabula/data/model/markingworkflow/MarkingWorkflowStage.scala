@@ -13,8 +13,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
-
-
 sealed abstract class MarkingWorkflowStage(val name: String, val order: Int) extends CaseObjectEqualityFixes[MarkingWorkflowStage] {
   override def getName: String = name
 

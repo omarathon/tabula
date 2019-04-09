@@ -43,7 +43,7 @@ class SkipAndFinishMarkingController extends CourseworkController {
     @ModelAttribute("command") command: Command,
     errors: Errors
   ): Mav = {
-    Mav("cm2/admin/assignments/markers/marking_complete_confirmation",
+    Mav("cm2/admin/assignments/markers/skip_moderation",
       "formAction" -> Routes.admin.assignment.markerFeedback.skip(assignment, stagePosition, marker),
       "department" -> command.assignment.module.adminDepartment,
       "isProxying" -> command.isProxying,
