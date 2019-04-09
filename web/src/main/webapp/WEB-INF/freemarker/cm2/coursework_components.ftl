@@ -493,9 +493,8 @@
       <#if progress.completed>
         <#local state = 'success' />
         <#local icon = 'fa-check-circle-o' />
-<#--      <#elseif progress.messageCode == "workflow.cm2.moderation-moderator.notModerated">-->
       <#elseif progress.skipped>
-        <#local state = 'info' />
+        <#local state = 'primary' />
         <#local icon = 'fa-arrow-circle-o-right' />
       <#elseif progress.started>
         <#local state = 'warning' />
@@ -960,7 +959,7 @@
         <#local icon = 'fa-check-circle-o' />
         <#local title = 'Completed' />
       <#elseif stage.skipped>
-        <#local state = 'info' />
+        <#local state = 'primary' />
         <#local icon = 'fa-arrow-circle-o-down' />
         <#local title = 'Skipped' />
       <#elseif stage.started>
