@@ -525,6 +525,9 @@
       <#if progress.completed>
         <#local state = 'success' />
         <#local icon = 'fa-check-circle-o' />
+      <#elseif progress.skipped>
+        <#local state = 'primary' />
+        <#local icon = 'fa-arrow-circle-o-right' />
       <#elseif progress.started>
         <#local state = 'warning' />
         <#local icon = 'fa-dot-circle-o' />
@@ -987,6 +990,10 @@
         <#local state = 'success' />
         <#local icon = 'fa-check-circle-o' />
         <#local title = 'Completed' />
+      <#elseif stage.skipped>
+        <#local state = 'primary' />
+        <#local icon = 'fa-arrow-circle-o-down' />
+        <#local title = 'Skipped' />
       <#elseif stage.started>
         <#local state = 'warning' />
         <#local icon = 'fa-dot-circle-o' />

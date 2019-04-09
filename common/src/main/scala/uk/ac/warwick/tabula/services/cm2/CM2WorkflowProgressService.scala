@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
 import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
-import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage}
+import uk.ac.warwick.tabula.data.model.markingworkflow.{FinalStage, MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.data.model.{Assignment, FeedbackForSits, FeedbackForSitsStatus}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.helpers.cm2.WorkflowItems
@@ -446,14 +446,18 @@ object CM2WorkflowStages {
           )
         }
       } else {
-        val completedKey = markingStage.actionCompletedKey(coursework.enhancedFeedback.map(_.feedback))
-        // This is a past stage
+        val feedback = coursework.enhancedFeedback.map(_.feedback)
+        val completedKey = markingStage.actionCompletedKey(feedback)
+
+        // This is a past stage - if the moderation stage is in the past wasModerated tells us if it was skipped
+        val skipped = markingStage.isInstanceOf[ModerationStage] && !feedback.exists(_.wasModerated)
         StageProgress(
           workflowStage,
           started = true,
           messageCode = s"workflow.cm2.${markingStage.name}.$completedKey",
           health = Good,
-          completed = true
+          completed = !skipped,
+          skipped = skipped
         )
       }
     }

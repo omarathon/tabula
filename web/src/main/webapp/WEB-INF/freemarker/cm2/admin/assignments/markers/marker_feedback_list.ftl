@@ -13,6 +13,9 @@
           <#if order.headerStage.canFinish(assignment.cm2MarkingWorkflow)>
             <a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${finishMarking}">Confirm selected and send to admin</a>
           </#if>
+          <#if order.headerStage.canSkipAndFinish>
+            <a class="btn btn-primary must-have-selected must-have-ready-next-stage form-post" href="${skipAndFinishMarking}">Skip moderation and send to admin</a>
+          </#if>
           <#if features.bulkModeration && order.headerStage.allowsBulkAdjustments && assignment.module.adminDepartment.assignmentGradeValidation>
             <a class="btn btn-primary" data-toggle="modal" data-target="#bulk-adjustment-modal"
                href="<@routes.cm2.bulkModeration assignment order.headerStage marker />">Bulk moderate submissions</a>
@@ -189,11 +192,10 @@
     <div class="tab-content" id="markingTabContent">
       <#list feedbackByOrderAndStage as order>
         <div class="tab-pane<#if activeWorkflowPosition == order.headerStage.order> active</#if>" role="tabpanel" id="${order.headerStage.name}">
-          <#assign markingCompleted><@routes.cm2.markingCompleted assignment order.headerStage.order marker /></#assign>
-          <#assign finishMarking><@routes.cm2.finishMarking assignment order.headerStage.order marker /></#assign>
-
           <#assign headerStage = order.headerStage />
-
+          <#assign markingCompleted><@routes.cm2.markingCompleted assignment headerStage.order marker /></#assign>
+          <#assign finishMarking><@routes.cm2.finishMarking assignment headerStage.order marker /></#assign>
+          <#assign skipAndFinishMarking><@routes.cm2.skipAndFinishMarking assignment headerStage.order marker /></#assign>
           <#assign moderator = headerStage.roleName == "Moderator" />
           <#assign actionPresent = moderator?string("moderate feedback", "add marks and feedback") />
           <#assign actionPast = moderator?string("moderating feedback", "adding marks and feedback") />

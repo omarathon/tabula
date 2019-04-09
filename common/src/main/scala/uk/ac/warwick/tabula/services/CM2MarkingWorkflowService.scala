@@ -16,7 +16,6 @@ import scala.collection.immutable.{SortedMap, TreeMap}
 import CM2MarkingWorkflowService._
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-import uk.ac.warwick.tabula.helpers.Logging
 
 object CM2MarkingWorkflowService {
   type Marker = User
@@ -178,6 +177,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
     parent.actualGrade = markerFeedback.grade
     parent.actualMark = markerFeedback.mark
 
+    parent.finalStage = markerFeedback.stage
     parent.updatedDate = DateTime.now
 
     // erase any existing attachments - these will be replaced

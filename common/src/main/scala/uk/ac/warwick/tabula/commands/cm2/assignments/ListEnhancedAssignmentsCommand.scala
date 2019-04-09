@@ -388,7 +388,8 @@ trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgres
                     messageCode = progress("messageCode").asInstanceOf[String],
                     health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
                     completed = progress("completed").asInstanceOf[Boolean],
-                    preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean]
+                    preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean],
+                    skipped = progress("skipped").asInstanceOf[Boolean]
                   ),
                   count = p("count").asInstanceOf[Int]
                 )
