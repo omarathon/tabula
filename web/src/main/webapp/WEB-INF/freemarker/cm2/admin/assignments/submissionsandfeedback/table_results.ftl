@@ -229,7 +229,7 @@
                         </#if>
                       </td>
                     </#list>
-                    <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("True", "False")}</td></#if>
+                    <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("Yes", "No")}</td></#if>
                   <#else>
                     <#list results.workflowMarkers as markerRole>
                       <td></td>

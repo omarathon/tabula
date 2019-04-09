@@ -13,8 +13,8 @@
 
     <p>
       Feedback for <strong><@fmt.p (command.feedbackForRelease?size) "student" /></strong> will be listed as completed.
-      Note that you will not be able to make any further changes to the marks or feedback associated with these students after this point.
-      If there are still changes that have to be made for these students then click cancel to return to the feedback list.
+      Note that you will not be able to make any further changes to the marks or feedback associated with <@fmt.p (command.feedbackForRelease?size) "this student" "these students" "1" "0" false /> after this point.
+      If there are still changes that have to be made for <@fmt.p (command.feedbackForRelease?size) "this student" "these students" "1" "0" false /> then click cancel to return to the feedback list.
     </p>
 
     <@bs3form.form_group>
