@@ -42,8 +42,7 @@ object SubmissionAndFeedbackCommand {
     stillToDownload: Seq[AssignmentSubmissionStudentInfo],
     hasPublishedFeedback: Boolean,
     hasOriginalityReport: Boolean,
-    workflowMarkers: Seq[String],
-    moderatedWorkflow: Boolean
+    workflowMarkers: Seq[String]
   )
 
 }
@@ -307,8 +306,7 @@ abstract class SubmissionAndFeedbackCommandInternal(val assignment: Assignment)
       stillToDownload = stillToDownload,
       hasPublishedFeedback = hasPublishedFeedback,
       hasOriginalityReport = hasOriginalityReport,
-      workflowMarkers = workflowMarkers,
-      moderatedWorkflow = Option(HibernateHelpers.initialiseAndUnproxy(assignment.cm2MarkingWorkflow)).exists(_.isInstanceOf[ModeratedWorkflow])
+      workflowMarkers = workflowMarkers
     )
   }
 }

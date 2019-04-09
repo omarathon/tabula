@@ -446,16 +446,18 @@ object CM2WorkflowStages {
           )
         }
       } else {
-        val completedKey = markingStage.actionCompletedKey(coursework.enhancedFeedback.map(_.feedback))
+        val feedback = coursework.enhancedFeedback.map(_.feedback)
+        val completedKey = markingStage.actionCompletedKey(feedback)
 
-        // This is a past stage
+        // This is a past stage - if the moderation stage is in the past wasModerated tells us if it was skipped
+        val skipped = markingStage.isInstanceOf[ModerationStage] && !feedback.exists(_.wasModerated)
         StageProgress(
           workflowStage,
           started = true,
           messageCode = s"workflow.cm2.${markingStage.name}.$completedKey",
           health = Good,
-          completed = completedKey != ModerationStage.NotModeratedKey,
-          skipped = completedKey == ModerationStage.NotModeratedKey
+          completed = !skipped,
+          skipped = skipped
         )
       }
     }

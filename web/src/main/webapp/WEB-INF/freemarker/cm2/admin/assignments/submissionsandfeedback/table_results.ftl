@@ -48,7 +48,7 @@
                 <#list results.workflowMarkers as marker_col>
                   <col class="${marker_col}" />
                 </#list>
-                <#if results.moderatedWorkflow>
+                <#if assignment.hasModeration>
                   <col class="wasModerated" />
                 </#if>
               <#else>
@@ -129,7 +129,7 @@
                 <#list results.workflowMarkers as marker_col>
                   <th class="submission sortable">${marker_col}</th>
                 </#list>
-                <#if results.moderatedWorkflow>
+                <#if assignment.hasModeration>
                   <th class="wasModerated sortable">Was moderated</th>
                 </#if>
               <#else>
@@ -229,7 +229,7 @@
                         </#if>
                       </td>
                     </#list>
-                    <#if results.moderatedWorkflow><td class="wasModerated">${feedback.wasModerated?then("True", "False")}</td></#if>
+                    <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("True", "False")}</td></#if>
                   <#else>
                     <#list results.workflowMarkers as markerRole>
                       <td></td>

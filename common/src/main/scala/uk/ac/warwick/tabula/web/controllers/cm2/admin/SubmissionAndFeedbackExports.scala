@@ -224,8 +224,6 @@ trait SubmissionAndFeedbackExport {
   val assignment: Assignment
   val module: Module = assignment.module
 
-  def wasModeration: Boolean = Option(HibernateHelpers.initialiseAndUnproxy(assignment.cm2MarkingWorkflow)).exists(_.isInstanceOf[ModeratedWorkflow])
-
   def topLevelUrl: String
 
   val isoFormatter: DateTimeFormatter = DateFormats.IsoDateTime
@@ -243,7 +241,7 @@ trait SubmissionAndFeedbackExport {
     if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
     else if (assignment.cm2MarkingWorkflow != null) {
       val markerRoles = assignment.cm2MarkingWorkflow.allocationOrder
-      if(wasModeration) markerRoles :+ "was-moderated" else markerRoles
+      if(assignment.hasModeration) markerRoles :+ "was-moderated" else markerRoles
     }
     else Seq()
   val plagiarismFields: Seq[String] = Seq("suspected-plagiarised", "similarity-percentage")
@@ -308,7 +306,7 @@ trait SubmissionAndFeedbackExport {
           role -> ef.feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
         })
       }.toMap).getOrElse(Map())
-      markerNames ++ (if(wasModeration) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
+      markerNames ++ (if(assignment.hasModeration) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
     } else {
       Map()
     }
