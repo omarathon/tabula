@@ -199,7 +199,7 @@ class MarkerFeedback extends GeneratedId
 
   def outstanding: Boolean = feedback.outstandingStages.contains(stage)
 
-  def finalised: Boolean = hasContent && !outstanding
+  def finalised: Boolean = hasContent && feedback.currentStageIndex > stage.order
 }
 
 trait CM1MarkerFeedbackSupport {
