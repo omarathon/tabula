@@ -89,7 +89,7 @@ trait StudentAssignmentsSummaryPermissions extends RequiresPermissionsChecking w
   self: StudentAssignmentsSummaryCommandState =>
 
   override def permissionsCheck(p: PermissionsChecking) {
-    val member = student.asMember.getOrElse(throw new ItemNotFoundException())
+    val member = mandatory(student.asMember)
     p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
     p.PermissionCheck(Permissions.Submission.Read, member)
     p.PermissionCheck(Permissions.AssignmentFeedback.Read, member)
