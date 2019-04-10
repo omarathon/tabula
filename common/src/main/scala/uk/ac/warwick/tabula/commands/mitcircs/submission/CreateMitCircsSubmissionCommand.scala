@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification}
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -112,6 +112,9 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   self: CreateMitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    Seq(
+      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
+      Notification.init(new NewMitCircsSubmissionNotification, currentUser, submission, submission)
+    )
   }
 }

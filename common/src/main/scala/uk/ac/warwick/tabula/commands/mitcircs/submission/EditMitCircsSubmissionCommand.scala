@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMem
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -83,6 +83,9 @@ trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstanc
   self: CreateMitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    Seq(
+      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
+      Notification.init(new MitCircsSubmissionUpdatedNotification, currentUser, submission, submission)
+    )
   }
 }

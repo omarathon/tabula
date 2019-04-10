@@ -13,6 +13,8 @@
       <tr>
         <th>Reference</th>
         <th>University Id</th>
+        <th>First name</th>
+        <th>Last name</th>
         <th>Issue type</th>
         <th>Start date</th>
         <th>End date</th>
@@ -24,6 +26,8 @@
         <tr>
           <td><a href="">MIT-${submission.key}</a></td>
           <td>${submission.student.universityId} <@pl.profile_link submission.student.universityId /></td>
+          <td>${submission.student.firstName}</td>
+          <td>${submission.student.lastName}</td>
           <td>${submission.issueType.description}</td>
           <td><@fmt.date date=submission.startDate includeTime=false /></td>
           <td><@fmt.date date=submission.endDate includeTime=false /></td>
