@@ -46,6 +46,10 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     val c = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779")
     mitCircsSubmissionDao.saveOrUpdate(c)
 
+    a.key should not be null
+    b.key should not be null
+    c.key should not be null
+
     b.key != a.key && c.key != b.key should be (true)
   }
 }
