@@ -46,6 +46,6 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     val c = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779")
     mitCircsSubmissionDao.saveOrUpdate(c)
 
-    b.key == a.key + 1 && c.key == b.key +1 should be (true)
+    b.key > a.key && c.key > b.key should be (true)
   }
 }
