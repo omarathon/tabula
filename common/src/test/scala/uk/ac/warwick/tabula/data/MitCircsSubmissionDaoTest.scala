@@ -38,7 +38,7 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     byKey.get.reason should be (heronReason)
   }
 
-  @Test def keysAreSequential(): Unit = transactional { tx =>
+  @Test def keysAreUnique(): Unit = transactional { tx =>
     val a = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777")
     mitCircsSubmissionDao.saveOrUpdate(a)
     val b = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778")
@@ -46,6 +46,6 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     val c = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779")
     mitCircsSubmissionDao.saveOrUpdate(c)
 
-    b.key > a.key && c.key > b.key should be (true)
+    b.key != a.key && c.key != b.key should be (true)
   }
 }
