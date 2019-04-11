@@ -1,0 +1,73 @@
+@import (reference) "bootstrap/less/variables";
+@import (reference) "bootstrap/less/mixins/alerts";
+@import (reference) "bootstrap/less/alerts";
+@import (reference) "@universityofwarwick/id7/less/variables";
+
+@accent-blue: #e8f4f1;
+@accent-yellow: #f9f5eb;
+
+@accent-blue-bg: @accent-blue;
+@accent-blue-border: darken(spin(@accent-blue-bg, -10), 5%);
+@accent-blue-text: @text-color;
+
+@accent-yellow-bg: @accent-yellow;
+@accent-yellow-border: darken(spin(@accent-yellow-bg, -10), 5%);
+@accent-yellow-text: @text-color;
+
+.mitcircs-form {
+  &__guidance {
+    .alert;
+    .alert-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+  }
+
+  &__fields {
+    &__section {
+      margin-bottom: @line-height-computed;
+
+      &--identity {
+        color: inherit;
+        background: none;
+        border: 0;
+
+        .form-horizontal {
+          .control-label {
+            font-weight: normal;
+            color: @gray-light;
+          }
+
+          // Tighter spacing between fields
+          .control-label, .form-control-static {
+            padding: 0;
+            min-height: 0;
+          }
+        }
+      }
+
+      &--boxed {
+        .alert;
+        .alert-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
+
+        &:nth-of-type(odd) {
+          .alert-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+        }
+      }
+
+      legend {
+        // Stop the legend from flowing through the top "border" of the fieldset
+        float: left;
+
+        // Reset Bootstrap's styling of <legend>
+        font-size: @main-font-size;
+        font-weight: normal;
+        color: @text-color;
+        border: 0;
+        margin-bottom: 0;
+      }
+
+      &__hint {
+        color: @very-subtle-text-color;
+        font-size: @very-subtle-font-size;
+      }
+    }
+  }
+}
