@@ -13,6 +13,7 @@
 @accent-yellow-text: @text-color;
 
 @hint-colour: #666666;
+@hint-font-size: (@main-font-size - 1px);
 
 .make-coloured-box() {
   padding: @alert-padding;
@@ -82,6 +83,7 @@
 
       &__hint {
         color: @hint-colour;
+        font-size: @hint-font-size;
       }
     }
   }
