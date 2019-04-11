@@ -1,6 +1,4 @@
 @import (reference) "bootstrap/less/variables";
-@import (reference) "bootstrap/less/mixins/alerts";
-@import (reference) "bootstrap/less/alerts";
 @import (reference) "@universityofwarwick/id7/less/variables";
 
 @accent-blue: #e8f4f1;
@@ -14,10 +12,28 @@
 @accent-yellow-border: darken(spin(@accent-yellow-bg, -10), 5%);
 @accent-yellow-text: @text-color;
 
+@hint-colour: #666666;
+
+.make-coloured-box() {
+  padding: @alert-padding;
+  margin-bottom: @line-height-computed;
+  border: 1px solid transparent;
+}
+
+.coloured-box-variant(@background; @border; @text-color) {
+  color: @text-color;
+  background-color: @background;
+  border-color: @border;
+
+  hr {
+    border-top-color: darken(@border, 5%);
+  }
+}
+
 .mitcircs-form {
   &__guidance {
-    .alert;
-    .alert-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+    .make-coloured-box();
+    .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
   }
 
   &__fields {
@@ -44,11 +60,11 @@
       }
 
       &--boxed {
-        .alert;
-        .alert-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
+        .make-coloured-box();
+        .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
 
         &:nth-of-type(odd) {
-          .alert-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+          .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
         }
       }
 
@@ -65,8 +81,7 @@
       }
 
       &__hint {
-        color: @very-subtle-text-color;
-        font-size: @very-subtle-font-size;
+        color: @hint-colour;
       }
     }
   }
