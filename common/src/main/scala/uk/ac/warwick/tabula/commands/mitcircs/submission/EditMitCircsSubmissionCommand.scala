@@ -36,6 +36,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   startDate = submission.startDate
   endDate = submission.endDate
+  noEndDate = Option(endDate).isEmpty
   issueType = submission.issueType
   issueTypeDetails = submission.issueTypeDetails
   reason = submission.reason
@@ -47,7 +48,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     submission.startDate = startDate
-    submission.endDate = endDate
+    submission.endDate = if (noEndDate) null else endDate
     submission.issueType = issueType
     if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
