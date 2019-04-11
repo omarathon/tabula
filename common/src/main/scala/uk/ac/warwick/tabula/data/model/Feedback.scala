@@ -299,7 +299,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 
   def feedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {
     val unsortedMap = allMarkerFeedback.groupBy(_.stage).mapValues(_.head)
-    TreeMap(unsortedMap.toSeq: _*)
+    TreeMap(unsortedMap.toSeq.sortBy { case (stage, _) => stage.order }: _*)
   }
 
   def completedFeedbackByStage: SortedMap[MarkingWorkflowStage, MarkerFeedback] = {

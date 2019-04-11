@@ -296,7 +296,7 @@ class CM2MarkingWorkflowServiceImpl extends CM2MarkingWorkflowService with Autow
 
   override def getAllFeedbackForMarker(assignment: Assignment, marker: User): SortedMap[MarkingWorkflowStage, Seq[MarkerFeedback]] = {
     val unsortedMap = markingWorkflowDao.markerFeedbackForMarker(assignment, marker).groupBy(_.stage)
-    TreeMap(unsortedMap.toSeq: _*)
+    TreeMap(unsortedMap.toSeq.sortBy { case (stage, _) => stage.order }: _*)
   }
 
   override def getAllStudentsForMarker(assignment: Assignment, marker: User): Seq[User] = {
