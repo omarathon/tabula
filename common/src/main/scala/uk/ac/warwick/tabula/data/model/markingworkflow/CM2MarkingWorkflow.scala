@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.services.{CM2MarkingWorkflowService, UserGroupCacheM
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.{ListMap, SortedSet, TreeMap}
+import scala.collection.immutable.{ListMap, SortedSet}
 
 
 object CM2MarkingWorkflow {
@@ -64,9 +64,8 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
     val unsorted = markers.foldLeft(Map.empty[MarkingWorkflowStage, Seq[Marker]]) { case (acc, (s, m)) =>
       if (acc.keys.exists(stage => stage.roleName == s.roleName)) acc else acc + (s -> m)
     }
-    val sortedByStage = TreeMap(unsorted.toSeq: _*)
-    // now that we have sorted by stage insert into a list map to preserve the order
-    ListMap(sortedByStage.toSeq: _*).map { case (k, v) => k.roleName -> v }
+    // sort by stage and insert into a list map to preserve the order
+    ListMap(unsorted.toSeq.sortBy { case (stage, _) => stage.order }: _*).map { case (k, v) => k.roleName -> v }
   }
 
   @Column(name = "is_reusable", nullable = false)
