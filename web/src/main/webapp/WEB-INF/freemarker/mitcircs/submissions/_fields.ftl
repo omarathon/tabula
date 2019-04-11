@@ -70,30 +70,55 @@
   </script>
 </fieldset>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed form-horizontal">
   <legend>2. What period do your mitigating circumstances cover?</legend>
 
   <p class="mitcircs-form__fields__section__hint">(If you're claiming for a period in the past, include a start and end date. If you're claiming for
     something that's ongoing, you may not know the end date at this point.)</p>
 
-  <div class="row">
-    <div class="col col-md-6">
-      <@bs3form.labelled_form_group "startDate" "Start Date">
+  <@bs3form.form_group "startDate">
+    <@bs3form.label path="startDate" cssClass="col-xs-4 col-sm-2">Start date</@bs3form.label>
+
+    <div class="col-xs-8 col-sm-4">
+      <@spring.bind path="startDate">
         <div class="input-group">
           <@f.input path="startDate" cssClass="form-control date-picker" />
           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
         </div>
-      </@bs3form.labelled_form_group>
+      </@spring.bind>
+
+      <@bs3form.errors path="startDate" />
     </div>
-    <div class="col col-md-6">
-      <@bs3form.labelled_form_group "endDate" "End Date">
+  </@bs3form.form_group>
+
+  <@bs3form.form_group "endDate">
+    <@bs3form.label path="endDate" cssClass="col-xs-4 col-sm-2">End date</@bs3form.label>
+
+    <div class="col-xs-8 col-sm-4">
+      <@spring.bind path="endDate">
         <div class="input-group">
           <@f.input path="endDate" cssClass="form-control date-picker" />
           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
         </div>
-      </@bs3form.labelled_form_group>
+      </@spring.bind>
+
+      <div class="checkbox">
+        <label>
+          <@f.checkbox path="noEndDate" /> <span class="hint">Or,</span> <strong>ongoing</strong>
+        </label>
+      </div>
+
+      <@bs3form.errors path="endDate" />
     </div>
-  </div>
+  </@bs3form.form_group>
+
+  <script type="text/javascript">
+    (function ($) {
+      $('input[name="noEndDate"]').on('input change', function () {
+        $('input[name="endDate"]').prop('disabled', $(this).is(':checked'));
+      }).trigger('change');
+    })(jQuery);
+  </script>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">

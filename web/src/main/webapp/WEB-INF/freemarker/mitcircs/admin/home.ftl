@@ -26,7 +26,13 @@
           <td>${submission.student.universityId} <@pl.profile_link submission.student.universityId /></td>
           <td>${submission.issueType.description}</td>
           <td><@fmt.date date=submission.startDate includeTime=false /></td>
-          <td><@fmt.date date=submission.endDate includeTime=false /></td>
+          <td>
+            <#if submission.endDate??>
+              <@fmt.date date=submission.endDate includeTime=false />
+            <#else>
+              <span class="very-subtle">(not set)</span>
+            </#if>
+          </td>
           <td><@fmt.date date=submission.lastModified /></td>
         </tr>
       </#list>
