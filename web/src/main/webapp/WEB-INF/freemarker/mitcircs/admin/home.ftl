@@ -24,7 +24,7 @@
         <tr>
           <td><a href="">MIT-${submission.key}</a></td>
           <td>${submission.student.universityId} <@pl.profile_link submission.student.universityId /></td>
-          <td>${submission.issueType.description}</td>
+          <td><#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></td>
           <td><@fmt.date date=submission.startDate includeTime=false /></td>
           <td>
             <#if submission.endDate??>

@@ -140,6 +140,8 @@ dependencies {
 
   compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20181114.1'
 
+  compile 'com.beachape:enumeratum_2.12:1.5.13'
+
   // Test dependencies
   testCompile "org.springframework:spring-test:${springVersion}"
 
