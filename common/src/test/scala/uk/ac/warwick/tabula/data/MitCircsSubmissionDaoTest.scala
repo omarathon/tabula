@@ -12,7 +12,6 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
   @Before
   def setup() {
     mitCircsSubmissionDao.sessionFactory = sessionFactory
-    session.createSQLQuery("select setval('mit_circ_sequence', 1000, false);").executeUpdate()
   }
 
   val mockUserLookup = new MockUserLookup
