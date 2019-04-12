@@ -9,15 +9,22 @@ import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
+object MitCircsSubmissionController {
+  def validIssueTypes(student: StudentMember): Seq[IssueType] =
+    if(student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") IssueType.values
+    else IssueType.values.filter(_ != Employment)
+}
+
 @Controller
 @RequestMapping(value = Array("/mitcircs/profile/{student}/new"))
-class MitCircsSubmissionController extends BaseController {
+class CreateMitCircsController extends BaseController {
 
   validatesSelf[SelfValidating]
 
@@ -28,7 +35,7 @@ class MitCircsSubmissionController extends BaseController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
+    Mav("mitcircs/submissions/form", Map("issueTypes" -> MitCircsSubmissionController.validIssueTypes(student)))
   }
 
   @RequestMapping(method = Array(POST))
@@ -43,7 +50,7 @@ class MitCircsSubmissionController extends BaseController {
 
 @Controller
 @RequestMapping(value = Array("/mitcircs/profile/{student}/edit/{submission}"))
-class MitCircsEditController extends BaseController {
+class EditMitCircsController extends BaseController {
 
   validatesSelf[SelfValidating]
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
@@ -59,7 +66,7 @@ class MitCircsEditController extends BaseController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
+    Mav("mitcircs/submissions/form", Map("issueTypes" -> MitCircsSubmissionController.validIssueTypes(submission.student)))
   }
 
   @RequestMapping(method = Array(POST))
