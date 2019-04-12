@@ -50,6 +50,11 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     b.key should not be null
     c.key should not be null
 
+    // put this here to find out why this fails on bamboo
+    a.key should be (1000)
+    b.key should be (1001)
+    c.key should be (1002)
+
     b.key != a.key && c.key != b.key should be (true)
   }
 }
