@@ -10,6 +10,10 @@ class MarkingWorkflowDaoTest extends PersistenceTestBase {
   @Before
   def setup(): Unit = {
     dao.sessionFactory = sessionFactory
+    session.beginTransaction()
+    session.createSQLQuery("select setval('mit_circ_sequence', 1000, false);").executeUpdate()
+    session.getTransaction.commit()
+    session.close()
   }
 
   @Test def crud(): Unit = transactional { tx =>

@@ -48,18 +48,17 @@
   <p class="mitcircs-form__fields__section__hint">(Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and upload some supporting evidence for each item.)</p>
 
-  <@bs3form.labelled_form_group path="issueType" labelText="Type">
-    <@f.select path="issueType" cssClass="form-control">
-      <option value="" style="display: none;">Please select one&hellip;</option>
-      <#list issueTypes as type>
-        <@f.option value="${type.code}" label="${type.description}" />
-      </#list>
-    </@f.select>
-  </@bs3form.labelled_form_group>
-
-  <@bs3form.labelled_form_group path="issueTypeDetails" labelText="Other" cssClass="issueTypeDetails">
-    <@f.input path="issueTypeDetails" cssClass="form-control" />
-  </@bs3form.labelled_form_group>
+    <#list issueTypes as type>
+      <div class="checkbox <#if type.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
+        <label>
+          <@f.checkbox path="issueTypes" value="${type.entryName}" /> ${type.description}
+          <#if type.entryName == "Other">
+            <@f.input path="issueTypeDetails" cssClass="form-control" />
+          </#if>
+        </label>
+      </div>
+      <#if type.entryName == "Other"><@bs3form.errors path="issueTypeDetails" /></#if>
+    </#list>
 
   <script type="text/javascript">
     (function ($) {
