@@ -62,6 +62,12 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
           Stream(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
         else Stream.empty
 
+      case student: StudentMember =>
+        if (user.apparentId == student.userId && student.homeDepartment.subDepartmentsContaining(student).exists(_.enableMitCircs))
+          Stream(MitigatingCircumstancesSubmitter(student))
+        else
+          Stream.empty
+
       case _ => Stream.empty
     }
   }

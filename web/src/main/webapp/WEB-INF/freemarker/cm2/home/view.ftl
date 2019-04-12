@@ -14,6 +14,10 @@
   <#if is_marker>
     <h1>Assignments for marking</h1>
 
+    <#if !activeAcademicYear?? || !markingAcademicYears?seq_contains(activeAcademicYear)>
+      <#assign activeAcademicYear = markingAcademicYears?last />
+    </#if>
+
     <#if markingAcademicYears?size gt 1>
       <ul class="nav nav-tabs" role="tablist">
         <#list markingAcademicYears as academicYear>

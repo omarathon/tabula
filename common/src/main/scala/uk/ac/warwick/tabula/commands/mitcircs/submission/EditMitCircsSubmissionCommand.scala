@@ -36,7 +36,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   startDate = submission.startDate
   endDate = submission.endDate
-  issueType = submission.issueType
+  noEndDate = Option(endDate).isEmpty
+  issueTypes = submission.issueTypes.asJava
   issueTypeDetails = submission.issueTypeDetails
   reason = submission.reason
   attachedFiles = submission.attachments
@@ -47,9 +48,10 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     submission.startDate = startDate
+    submission.endDate = if (noEndDate) null else endDate
     submission.endDate = endDate
-    submission.issueType = issueType
-    if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
+    submission.issueTypes = issueTypes.asScala
+    if (issueTypes.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
 
     if (submission.attachments != null) {

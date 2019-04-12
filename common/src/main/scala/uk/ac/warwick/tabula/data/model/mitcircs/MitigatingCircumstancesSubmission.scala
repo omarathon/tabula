@@ -52,11 +52,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var startDate: LocalDate = _
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   var endDate: LocalDate = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeUserType")
-  var issueType: IssueType = _
+  var issueTypes: Seq[IssueType] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   var issueTypeDetails: String = _ // free text for use when the issue type is Other

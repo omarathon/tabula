@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstan
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification}
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -42,9 +43,9 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     val submission = new MitigatingCircumstancesSubmission(student, currentUser, department)
     submission.startDate = startDate
-    submission.endDate = endDate
-    submission.issueType = issueType
-    if (issueType == Other && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
+    submission.endDate = if (noEndDate) null else endDate
+    submission.issueTypes = issueTypes.asScala
+    if (issueTypes.asScala.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
     file.attached.asScala.foreach(submission.addAttachment)
     mitCircsSubmissionService.saveOrUpdate(submission)
@@ -66,12 +67,12 @@ trait MitCircsSubmissionValidation extends SelfValidating {
   override def validate(errors: Errors) {
     // validate dates
     if(startDate == null) errors.rejectValue("startDate", "mitigatingCircumstances.startDate.required")
-    else if(endDate == null) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
-    else if(endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
+    else if(endDate == null && !noEndDate) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
+    else if(!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
 
     // validate issue types
-    if(issueType == null) errors.rejectValue("issueType", "mitigatingCircumstances.issueType.required")
-    else if(issueType == Other && !issueTypeDetails.hasText)
+    if(issueTypes.isEmpty) errors.rejectValue("issueType", "mitigatingCircumstances.issueType.required")
+    else if(issueTypes.contains(Other) && !issueTypeDetails.hasText)
       errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
 
     // validate reason
@@ -97,8 +98,10 @@ trait CreateMitCircsSubmissionState {
 
   var startDate: LocalDate = _
   var endDate: LocalDate = _
+  var noEndDate: Boolean = _
 
-  @BeanProperty var issueType: IssueType = _
+  @BeanProperty var issueTypes: JList[IssueType] = JArrayList()
+
   @BeanProperty var issueTypeDetails: String = _
 
   var reason: String = _
