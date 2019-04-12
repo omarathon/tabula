@@ -58,7 +58,16 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
     assert(yearsAfter >= 0)
     val length = 1 + yearsBefore + yearsAfter
     val first = this - yearsBefore
-    Iterable.iterate(first, length) { y => y.next }.toSeq
+    Iterable.iterate(first, length)(_.next).toSeq
+  }
+
+  /**
+    * An inclusive range of this year to endYear
+    */
+  def to(endYear: AcademicYear): Seq[AcademicYear] = {
+    assert(endYear.startYear >= startYear)
+    val length = 1 + (endYear.startYear - startYear)
+    Iterable.iterate(this, length)(_.next).toSeq
   }
 
   override def equals(that: Any): Boolean = that match {

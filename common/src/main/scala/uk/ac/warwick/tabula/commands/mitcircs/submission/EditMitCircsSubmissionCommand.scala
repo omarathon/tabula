@@ -17,16 +17,16 @@ import uk.ac.warwick.tabula.system.BindListener
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-
 object EditMitCircsSubmissionCommand {
-  def apply(submission: MitigatingCircumstancesSubmission, creator: User) = new EditMitCircsSubmissionCommandInternal(submission, creator)
-    with ComposableCommand[MitigatingCircumstancesSubmission]
-    with MitCircsSubmissionValidation
-    with MitCircsSubmissionPermissions
-    with EditMitCircsSubmissionDescription
-    with EditMitCircsSubmissionNotifications
-    with AutowiringMitCircsSubmissionServiceComponent
-    with HibernateExtensionPersistenceComponent
+  def apply(submission: MitigatingCircumstancesSubmission, creator: User) =
+    new EditMitCircsSubmissionCommandInternal(submission, creator)
+      with ComposableCommand[MitigatingCircumstancesSubmission]
+      with MitCircsSubmissionValidation
+      with MitCircsSubmissionPermissions
+      with EditMitCircsSubmissionDescription
+      with EditMitCircsSubmissionNotifications
+      with AutowiringMitCircsSubmissionServiceComponent
+      with HibernateExtensionPersistenceComponent
 }
 
 class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)

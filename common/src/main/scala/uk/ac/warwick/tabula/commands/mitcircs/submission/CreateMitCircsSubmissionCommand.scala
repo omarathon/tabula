@@ -19,15 +19,15 @@ import uk.ac.warwick.userlookup.User
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
 
-
 object CreateMitCircsSubmissionCommand {
-  def apply(student: StudentMember, creator: User) = new CreateMitCircsSubmissionCommandInternal(student, creator)
-    with ComposableCommand[MitigatingCircumstancesSubmission]
-    with MitCircsSubmissionValidation
-    with MitCircsSubmissionPermissions
-    with CreateMitCircsSubmissionDescription
-    with NewMitCircsSubmissionNotifications
-    with AutowiringMitCircsSubmissionServiceComponent
+  def apply(student: StudentMember, creator: User) =
+    new CreateMitCircsSubmissionCommandInternal(student, creator)
+      with ComposableCommand[MitigatingCircumstancesSubmission]
+      with MitCircsSubmissionValidation
+      with MitCircsSubmissionPermissions
+      with CreateMitCircsSubmissionDescription
+      with NewMitCircsSubmissionNotifications
+      with AutowiringMitCircsSubmissionServiceComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User) extends CommandInternal[MitigatingCircumstancesSubmission]
@@ -88,7 +88,6 @@ trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumst
 }
 
 trait CreateMitCircsSubmissionState {
-
   val student: StudentMember
   val currentUser: User
   val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
