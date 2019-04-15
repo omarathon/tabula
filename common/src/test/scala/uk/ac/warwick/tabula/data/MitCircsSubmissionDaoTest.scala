@@ -41,16 +41,13 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
   @Test def keysAreUnique(): Unit = {
 
     val a = transactional { tx =>
-      Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777")
-      mitCircsSubmissionDao.saveOrUpdate(a)
+      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777"))
     }
     val b = transactional { tx =>
-      Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778")
-      mitCircsSubmissionDao.saveOrUpdate(b)
+      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778"))
     }
     val c = transactional { tx =>
-      Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779")
-      mitCircsSubmissionDao.saveOrUpdate(c)
+      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779"))
     }
 
     a.key should not be null
