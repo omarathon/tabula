@@ -5,8 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
@@ -40,6 +39,10 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   issueTypes = submission.issueTypes.asJava
   issueTypeDetails = submission.issueTypeDetails
   reason = submission.reason
+  contacted = submission.contacted
+  contacts = submission.contacts.asJava
+  contactOther = submission.contactOther
+  noContactReason = submission.noContactReason
   attachedFiles = submission.attachments
 
   override def onBind(result: BindingResult): Unit = transactional() {
@@ -51,8 +54,18 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     submission.endDate = if (noEndDate) null else endDate
     submission.endDate = endDate
     submission.issueTypes = issueTypes.asScala
-    if (issueTypes.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
+    if (issueTypes.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+    submission.contacted = contacted
+    if (contacted) {
+      submission.noContactReason = null
+      submission.contacts = contacts.asScala
+      if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
+    } else {
+      submission.noContactReason = noContactReason
+      submission.contacts = Seq()
+      submission.contactOther = null
+    }
 
     if (submission.attachments != null) {
       // delete attachments that have been removed
