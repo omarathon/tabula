@@ -38,27 +38,14 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
     byKey.get.reason should be (heronReason)
   }
 
-  @Test def keysAreUnique(): Unit = {
+  @Test def keysAreSequential(): Unit = transactional { tx =>
+    val a = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777")
+    mitCircsSubmissionDao.saveOrUpdate(a)
+    val b = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778")
+    mitCircsSubmissionDao.saveOrUpdate(b)
+    val c = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779")
+    mitCircsSubmissionDao.saveOrUpdate(c)
 
-    val a = transactional { tx =>
-      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777"))
-    }
-    val b = transactional { tx =>
-      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778"))
-    }
-    val c = transactional { tx =>
-      mitCircsSubmissionDao.saveOrUpdate(Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431779"))
-    }
-
-    a.key should not be null
-    b.key should not be null
-    c.key should not be null
-
-    // put this here to find out why this fails on bamboo
-    a.key should be (1000)
-    b.key should be (1001)
-    c.key should be (1002)
-
-    b.key != a.key && c.key != b.key should be (true)
+    b.key == a.key + 1 && c.key == b.key +1 should be (true)
   }
 }
