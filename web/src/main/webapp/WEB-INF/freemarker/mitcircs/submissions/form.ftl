@@ -26,7 +26,7 @@
     </div>
 
     <article class="col-md-8 col-md-pull-4 mitcircs-form__fields">
-      <@f.form method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
+      <@f.form id="mitigatingCircumstancesForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
         <#include "_fields.ftl" />
 
         <div class="fix-footer">

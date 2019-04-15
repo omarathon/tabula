@@ -5,33 +5,37 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
+import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-
 object EditMitCircsSubmissionCommand {
-  def apply(submission: MitigatingCircumstancesSubmission, creator: User) = new EditMitCircsSubmissionCommandInternal(submission, creator)
-    with ComposableCommand[MitigatingCircumstancesSubmission]
-    with MitCircsSubmissionValidation
-    with MitCircsSubmissionPermissions
-    with EditMitCircsSubmissionDescription
-    with EditMitCircsSubmissionNotifications
-    with AutowiringMitCircsSubmissionServiceComponent
-    with HibernateExtensionPersistenceComponent
+  def apply(submission: MitigatingCircumstancesSubmission, creator: User) =
+    new EditMitCircsSubmissionCommandInternal(submission, creator)
+      with ComposableCommand[MitigatingCircumstancesSubmission]
+      with MitCircsSubmissionValidation
+      with MitCircsSubmissionPermissions
+      with EditMitCircsSubmissionDescription
+      with EditMitCircsSubmissionNotifications
+      with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with HibernateExtensionPersistenceComponent
 }
 
 class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with BindListener {
 
-  self: MitCircsSubmissionServiceComponent with ExtensionPersistenceComponent =>
+  self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
 
   startDate = submission.startDate
   endDate = submission.endDate
@@ -39,6 +43,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   issueTypes = submission.issueTypes.asJava
   issueTypeDetails = submission.issueTypeDetails
   reason = submission.reason
+  affectedAssessments.addAll(submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava)
   contacted = submission.contacted
   contacts = submission.contacts.asJava
   contactOther = submission.contactOther
@@ -47,6 +52,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
+    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
@@ -65,6 +71,13 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       submission.noContactReason = noContactReason
       submission.contacts = Seq()
       submission.contactOther = null
+    }
+
+    // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
+    submission.affectedAssessments.clear()
+    affectedAssessments.asScala.foreach { item =>
+      val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
+      submission.affectedAssessments.add(affected)
     }
 
     if (submission.attachments != null) {
