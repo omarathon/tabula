@@ -6,9 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -63,6 +61,8 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
       submission.contacts = Seq()
       submission.contactOther = null
     }
+    submission.stepsSoFar = stepsSoFar
+    submission.changeOrResolve = changeOrResolve
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
@@ -159,6 +159,9 @@ trait CreateMitCircsSubmissionState {
   var contacts: JList[MitCircsContact] = JArrayList()
   var contactOther: String = _
   var noContactReason: String = _
+
+  var stepsSoFar: String = _
+  var changeOrResolve: String = _
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()

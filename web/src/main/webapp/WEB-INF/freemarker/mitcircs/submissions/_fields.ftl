@@ -242,6 +242,20 @@
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>7. What steps have been taken so far in relation to your issues?</legend>
+  <@bs3form.form_group "stepsSoFar">
+    <@f.textarea path="stepsSoFar" cssClass="form-control" rows="5" />
+  </@bs3form.form_group>
+</fieldset>
+
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>8. Tell us how your circumstances are likely to change or resolve?</legend>
+  <@bs3form.form_group "changeOrResolve">
+    <@f.textarea path="changeOrResolve" cssClass="form-control" rows="5" />
+  </@bs3form.form_group>
+</fieldset>
+
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
