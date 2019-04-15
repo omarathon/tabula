@@ -68,6 +68,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
       submission.affectedAssessments.add(affected)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+    submission.relatedSubmission = relatedSubmission
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
@@ -165,6 +166,8 @@ trait CreateMitCircsSubmissionState {
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
+
+  var relatedSubmission: MitigatingCircumstancesSubmission = _
 }
 
 class AffectedAssessmentItem {

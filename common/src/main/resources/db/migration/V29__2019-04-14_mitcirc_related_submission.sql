@@ -1,0 +1,2 @@
+alter table mitigatingcircumstancessubmission add column relatedSubmission varchar(255);
+alter table mitigatingcircumstancessubmission add constraint fk_related_submission foreign key (relatedSubmission) references mitigatingcircumstancessubmission (id);
