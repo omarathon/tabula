@@ -6,10 +6,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
@@ -195,6 +193,9 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   self: CreateMitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    Seq(
+      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
+      Notification.init(new NewMitCircsSubmissionNotification, currentUser, submission, submission)
+    )
   }
 }
