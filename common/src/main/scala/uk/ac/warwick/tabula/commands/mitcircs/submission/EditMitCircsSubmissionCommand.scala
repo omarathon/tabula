@@ -5,9 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
@@ -48,6 +46,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   contacts = submission.contacts.asJava
   contactOther = submission.contactOther
   noContactReason = submission.noContactReason
+  stepsSoFar = submission.stepsSoFar
+  changeOrResolve = submission.changeOrResolve
   attachedFiles = submission.attachments
 
   override def onBind(result: BindingResult): Unit = transactional() {
@@ -80,6 +80,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       submission.affectedAssessments.add(affected)
     }
 
+    submission.stepsSoFar = stepsSoFar
+    submission.changeOrResolve = changeOrResolve
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: mutable.Set[FileAttachment] = submission.attachments.asScala -- attachedFiles.asScala

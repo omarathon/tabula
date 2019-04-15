@@ -61,6 +61,8 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
       submission.contacts = Seq()
       submission.contactOther = null
     }
+    submission.stepsSoFar = stepsSoFar
+    submission.changeOrResolve = changeOrResolve
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
@@ -157,6 +159,9 @@ trait CreateMitCircsSubmissionState {
   var contacts: JList[MitCircsContact] = JArrayList()
   var contactOther: String = _
   var noContactReason: String = _
+
+  var stepsSoFar: String = _
+  var changeOrResolve: String = _
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
