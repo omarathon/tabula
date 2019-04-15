@@ -5,8 +5,7 @@ import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -45,8 +44,18 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
     submission.issueTypes = issueTypes.asScala
-    if (issueTypes.asScala.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
+    if (issueTypes.asScala.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+    submission.contacted = contacted
+    if (contacted) {
+      submission.noContactReason = null
+      submission.contacts = contacts.asScala
+      if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
+    } else {
+      submission.noContactReason = noContactReason
+      submission.contacts = Seq()
+      submission.contactOther = null
+    }
     file.attached.asScala.foreach(submission.addAttachment)
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
@@ -71,9 +80,20 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     else if(!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
 
     // validate issue types
-    if(issueTypes.isEmpty) errors.rejectValue("issueType", "mitigatingCircumstances.issueType.required")
-    else if(issueTypes.contains(Other) && !issueTypeDetails.hasText)
+    if(issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
+    else if(issueTypes.contains(IssueType.Other) && !issueTypeDetails.hasText)
       errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
+
+    // validate contact
+    if(contacted) {
+      if (contacts.isEmpty)
+        errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
+      else if(contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
+        errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
+    } else {
+      if(!noContactReason.hasText)
+        errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
+    }
 
     // validate reason
     if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
@@ -101,10 +121,14 @@ trait CreateMitCircsSubmissionState {
   var noEndDate: Boolean = _
 
   @BeanProperty var issueTypes: JList[IssueType] = JArrayList()
-
   @BeanProperty var issueTypeDetails: String = _
 
   var reason: String = _
+
+  var contacted: JBoolean = _
+  var contacts: JList[MitCircsContact] = JArrayList()
+  var contactOther: String = _
+  var noContactReason: String = _
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()

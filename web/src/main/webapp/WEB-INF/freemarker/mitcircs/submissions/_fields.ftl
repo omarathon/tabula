@@ -40,6 +40,21 @@
   </fieldset>
 </#macro>
 
+<#macro checkboxesWithOther enumValues enumField otherField>
+  <#list enumValues as value>
+    <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
+      <label>
+        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
+        <#if value.entryName == "Other">
+          <@f.input path="${otherField}" cssClass="form-control" />
+        </#if>
+      </label>
+    </div>
+    <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
+  </#list>
+  <@bs3form.errors path="${enumField}" />
+</#macro>
+
 <@identity student />
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
@@ -48,25 +63,8 @@
   <p class="mitcircs-form__fields__section__hint">(Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and upload some supporting evidence for each item.)</p>
 
-    <#list issueTypes as type>
-      <div class="checkbox <#if type.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
-        <label>
-          <@f.checkbox path="issueTypes" value="${type.entryName}" /> ${type.description}
-          <#if type.entryName == "Other">
-            <@f.input path="issueTypeDetails" cssClass="form-control" />
-          </#if>
-        </label>
-      </div>
-      <#if type.entryName == "Other"><@bs3form.errors path="issueTypeDetails" /></#if>
-    </#list>
+  <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 
-  <script type="text/javascript">
-    (function ($) {
-      $('select[name="issueType"]').on('input change', function () {
-        $('.issueTypeDetails').toggle($(this).val() === "Other");
-      }).trigger('change');
-    })(jQuery);
-  </script>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed form-horizontal">
@@ -121,10 +119,44 @@
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <@bs3form.labelled_form_group "reason" "Details">
+  <legend>4. Details</legend>
+  <@bs3form.form_group "reason">
     <@f.textarea path="reason" cssClass="form-control" rows="5" />
     <div class="help-block">Please provide further details of the mitigating circumstances and how they have affected your assessments</div>
-  </@bs3form.labelled_form_group>
+  </@bs3form.form_group>
+</fieldset>
+
+
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>6. Have you contacted anyone about your mitigating circumstances?</legend>
+  <div class="radio">
+    <@bs3form.radio_inline>
+      <@f.radiobutton path="contacted" value="true" /> Yes
+    </@bs3form.radio_inline>
+    <@bs3form.radio_inline>
+      <@f.radiobutton path="contacted" value="false" /> No
+    </@bs3form.radio_inline>
+  </div>
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
+    <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
+  </div>
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
+    <@bs3form.form_group "noContactReason">
+      <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
+      <div class="help-block">Please tell us why you haven't yet contacted anyone about your mitigating circumstances</div>
+    </@bs3form.form_group>
+  </div>
+  <script type="text/javascript">
+    (function ($) {
+      $('input[name="contacted"]').on('input change', function () {
+        const val = $('input[name="contacted"]:checked').val();
+        if(val) {
+          $('.mitcircs-form__fields__contact-subfield--yes').toggle(val === 'true');
+          $('.mitcircs-form__fields__contact-subfield--no').toggle(val !== 'true');
+        }
+      }).trigger('change');
+    })(jQuery);
+  </script>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">

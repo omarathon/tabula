@@ -59,7 +59,17 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var issueTypes: Seq[IssueType] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var issueTypeDetails: String = _ // free text for use when the issue type is Other
+  var issueTypeDetails: String = _ // free text for use when the issue type includes Other
+
+  var contacted: JBoolean = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsContactUserType")
+  var contacts: Seq[MitCircsContact] = _
+
+  var contactOther: String = _ // free text for use when the contacts includes Other
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  var noContactReason: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
