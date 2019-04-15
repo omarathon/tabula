@@ -124,6 +124,7 @@
           <@f.option value="${submission.key}" label="${label}" />
         </#list>
       </@f.select>
+      <@bs3form.errors path="relatedSubmission" />
     </@bs3form.form_group>
   </fieldset>
   <#assign questionNumber = questionNumber + 1 />

@@ -110,6 +110,9 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     // validate reason
     if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
 
+    if(Option(relatedSubmission).exists(_.student != student))
+      errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
+
     // validate affected issue types
     affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
       errors.pushNestedPath(s"affectedAssessments[$index]")
