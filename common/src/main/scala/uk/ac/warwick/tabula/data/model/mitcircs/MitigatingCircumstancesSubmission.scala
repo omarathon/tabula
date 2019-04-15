@@ -41,11 +41,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
-  @ManyToOne(cascade = Array(PERSIST), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
-  @ManyToOne(cascade = Array(PERSIST), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "department_id")
   var department: Department = _
 
@@ -75,7 +75,6 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var reason: String = _
 
-  // No orphanRemoval as it makes it difficult to move modules between Departments.
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @JoinColumn(name = "submission_id")
   @BatchSize(size = 200)
