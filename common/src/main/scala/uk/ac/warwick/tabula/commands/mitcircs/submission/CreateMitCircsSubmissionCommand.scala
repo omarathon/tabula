@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -50,8 +51,18 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
     submission.issueTypes = issueTypes.asScala
-    if (issueTypes.asScala.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
+    if (issueTypes.asScala.contains(IssueType.Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+    submission.contacted = contacted
+    if (contacted) {
+      submission.noContactReason = null
+      submission.contacts = contacts.asScala
+      if (contacts.asScala.contains(MitCircsContact.Other) && contactOther.hasText) submission.contactOther = contactOther else submission.contactOther = null
+    } else {
+      submission.noContactReason = noContactReason
+      submission.contacts = Seq()
+      submission.contactOther = null
+    }
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
@@ -81,8 +92,19 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
     // validate issue types
     if(issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
-    else if(issueTypes.contains(Other) && !issueTypeDetails.hasText)
+    else if(issueTypes.contains(IssueType.Other) && !issueTypeDetails.hasText)
       errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
+
+    // validate contact
+    if(contacted) {
+      if (contacts.isEmpty)
+        errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
+      else if(contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
+        errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
+    } else {
+      if(!noContactReason.hasText)
+        errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
+    }
 
     // validate reason
     if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
@@ -132,6 +154,11 @@ trait CreateMitCircsSubmissionState {
   var reason: String = _
 
   var affectedAssessments: JList[AffectedAssessmentItem] = LazyLists.create[AffectedAssessmentItem]()
+
+  var contacted: JBoolean = _
+  var contacts: JList[MitCircsContact] = JArrayList()
+  var contactOther: String = _
+  var noContactReason: String = _
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()

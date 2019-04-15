@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
@@ -56,7 +56,10 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> MitCircsSubmissionController.validIssueTypes(student)))
+    Mav("mitcircs/submissions/form", Map(
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
+      "possibleContacts" -> MitCircsContact.values
+    ))
   }
 
   @RequestMapping(method = Array(POST))
@@ -86,7 +89,10 @@ class EditMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> MitCircsSubmissionController.validIssueTypes(submission.student)))
+    Mav("mitcircs/submissions/form", Map(
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(submission.student),
+      "possibleContacts" -> MitCircsContact.values
+    ))
   }
 
   @RequestMapping(method = Array(POST))
