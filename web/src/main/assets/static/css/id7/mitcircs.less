@@ -85,6 +85,16 @@
         color: @hint-colour;
         font-size: @hint-font-size;
       }
+
+      &__assessments-table {
+        &.tab-content {
+          background: @nav-tabs-active-bg;
+
+          > .active {
+            display: table-row-group;
+          }
+        }
+      }
     }
 
     &__checkbox-with-other {

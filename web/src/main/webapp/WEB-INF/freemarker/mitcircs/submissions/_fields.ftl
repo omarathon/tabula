@@ -64,7 +64,6 @@
     and upload some supporting evidence for each item.)</p>
 
   <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
-
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed form-horizontal">
@@ -108,14 +107,6 @@
       <@bs3form.errors path="endDate" />
     </div>
   </@bs3form.form_group>
-
-  <script type="text/javascript">
-    (function ($) {
-      $('input[name="noEndDate"]').on('input change', function () {
-        $('input[name="endDate"]').prop('disabled', $(this).is(':checked'));
-      }).trigger('change');
-    })(jQuery);
-  </script>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
@@ -126,6 +117,108 @@
   </@bs3form.form_group>
 </fieldset>
 
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>5. Which assessments have been affected?</legend>
+
+  <p class="mitcircs-form__fields__section__hint">(Blah blah some hint text here)</p>
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
+    <li role="presentation"><a href="#assessment-table-exams" aria-controls="assessment-table-exams" role="tab" data-toggle="tab">Exams</a></li>
+  </ul>
+
+  <table class="table table-striped table-condensed table-hover table-checkable mitcircs-form__fields__section__assessments-table tab-content" data-endpoint="<@routes.mitcircs.affectedAssessments student />">
+    <colgroup>
+      <col class="col-sm-1">
+      <col class="col-sm-3">
+      <col class="col-sm-5">
+      <col class="col-sm-3">
+    </colgroup>
+    <thead>
+      <tr>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__checkbox"></th>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__module">Module</th>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__name">Title</th>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__deadline">Deadline / exam date</th>
+      </tr>
+    </thead>
+    <tfoot>
+      <tr>
+        <td><button type="button" class="btn btn-default btn-sm">Add</button></td>
+        <td>
+          <label class="control-label sr-only" for="new-assessment-module">Module</label>
+          <select id="new-assessment-module" class="form-control input-sm">
+            <option></option>
+            <#list registeredModules?keys as year>
+              <optgroup label="${year.toString}">
+                <#list mapGet(registeredModules, year) as module>
+                  <option value="${module.code}" data-name="${module.name}"><@fmt.module_name module=module withFormatting=false /></option>
+                </#list>
+              </optgroup>
+            </#list>
+          </select>
+        </td>
+        <td>
+          <label class="control-label sr-only" for="new-assessment-name">Title</label>
+          <input id="new-assessment-name" type="text" class="form-control input-sm">
+        </td>
+        <td>
+          <label class="control-label sr-only" for="new-assessment-deadline">Deadline or examination date</label>
+          <div class="input-group">
+            <input id="new-assessment-deadline" type="text" class="form-control input-sm date-picker">
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+          </div>
+        </td>
+      </tr>
+    </tfoot>
+
+    <#macro affectedAssessment item index>
+      <@spring.nestedPath path="affectedAssessments[${index}]">
+        <tr>
+          <td class="mitcircs-form__fields__section__assessments-table__checkbox">
+            <@f.hidden path="moduleCode" />
+            <@f.hidden path="sequence" />
+            <@f.hidden path="academicYear" />
+            <@f.hidden path="assessmentType" />
+            <input type="checkbox" checked>
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__module">
+            <span class="mod-code">${item.module.code?upper_case}</span> <span class="mod-name">${item.module.name} (${item.academicYear.toString})</span>
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__name">
+            <@f.hidden path="name" />
+            ${item.name}
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__deadline">
+            <div class="input-group">
+              <@f.input path="deadline" cssClass="form-control input-sm date-picker" />
+              <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            </div>
+          </td>
+        </tr>
+      </@spring.nestedPath>
+    </#macro>
+
+    <tbody id="assessment-table-assignments" role="tabpanel" class="tab-pane active">
+      <#if command.affectedAssessments?has_content>
+        <#list command.affectedAssessments as item>
+          <#if item.assessmentType?? && item.assessmentType.code == 'A'>
+            <@affectedAssessment item item_index />
+          </#if>
+        </#list>
+      </#if>
+    </tbody>
+    <tbody id="assessment-table-exams" role="tabpanel" class="tab-pane">
+      <#if command.affectedAssessments?has_content>
+        <#list command.affectedAssessments as item>
+          <#if item.assessmentType?? && item.assessmentType.code == 'E'>
+            <@affectedAssessment item item_index />
+          </#if>
+        </#list>
+      </#if>
+    </tbody>
+  </table>
+</fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
   <legend>6. Have you contacted anyone about your mitigating circumstances?</legend>
@@ -146,17 +239,6 @@
       <div class="help-block">Please tell us why you haven't yet contacted anyone about your mitigating circumstances</div>
     </@bs3form.form_group>
   </div>
-  <script type="text/javascript">
-    (function ($) {
-      $('input[name="contacted"]').on('input change', function () {
-        const val = $('input[name="contacted"]:checked').val();
-        if(val) {
-          $('.mitcircs-form__fields__contact-subfield--yes').toggle(val === 'true');
-          $('.mitcircs-form__fields__contact-subfield--no').toggle(val !== 'true');
-        }
-      }).trigger('change');
-    })(jQuery);
-  </script>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
@@ -182,17 +264,6 @@
           </li>
         </#list>
       </ul>
-      <script>
-        jQuery(function ($) {
-          $(".remove-attachment").on("click", function (e) {
-            e.preventDefault();
-            const $attachmentContainer = $(this).closest("li.attachment");
-            $(this).closest(".modal").on("hidden.bs.modal", function (e) {
-              $attachmentContainer.remove();
-            });
-          });
-        });
-      </script>
       <div class="help-block">
         This is a list of all supporting documents that have been attached to this mitigating circumstances submission.
         Click the remove link next to a document to delete it.
