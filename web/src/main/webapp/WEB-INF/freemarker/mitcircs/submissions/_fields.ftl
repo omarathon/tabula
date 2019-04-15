@@ -117,39 +117,6 @@
   </@bs3form.form_group>
 </fieldset>
 
-
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>6. Have you contacted anyone about your mitigating circumstances?</legend>
-  <div class="radio">
-    <@bs3form.radio_inline>
-      <@f.radiobutton path="contacted" value="true" /> Yes
-    </@bs3form.radio_inline>
-    <@bs3form.radio_inline>
-      <@f.radiobutton path="contacted" value="false" /> No
-    </@bs3form.radio_inline>
-  </div>
-  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
-    <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
-  </div>
-  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <@bs3form.form_group "noContactReason">
-      <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
-      <div class="help-block">Please tell us why you haven't yet contacted anyone about your mitigating circumstances</div>
-    </@bs3form.form_group>
-  </div>
-  <script type="text/javascript">
-    (function ($) {
-      $('input[name="contacted"]').on('input change', function () {
-        const val = $('input[name="contacted"]:checked').val();
-        if(val) {
-          $('.mitcircs-form__fields__contact-subfield--yes').toggle(val === 'true');
-          $('.mitcircs-form__fields__contact-subfield--no').toggle(val !== 'true');
-        }
-      }).trigger('change');
-    })(jQuery);
-  </script>
-</fieldset>
-
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
   <legend>5. Which assessments have been affected?</legend>
 
@@ -216,7 +183,7 @@
             <input type="checkbox" checked>
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__module">
-            <@fmt.module_name item.module />
+            <span class="mod-code">${item.module.code?upper_case}</span> <span class="mod-name">${item.module.name} (${item.academicYear.toString})</span>
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__name">
             <@f.hidden path="name" />
@@ -251,6 +218,27 @@
       </#if>
     </tbody>
   </table>
+</fieldset>
+
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>6. Have you contacted anyone about your mitigating circumstances?</legend>
+  <div class="radio">
+    <@bs3form.radio_inline>
+      <@f.radiobutton path="contacted" value="true" /> Yes
+    </@bs3form.radio_inline>
+    <@bs3form.radio_inline>
+      <@f.radiobutton path="contacted" value="false" /> No
+    </@bs3form.radio_inline>
+  </div>
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
+    <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
+  </div>
+  <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
+    <@bs3form.form_group "noContactReason">
+      <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
+      <div class="help-block">Please tell us why you haven't yet contacted anyone about your mitigating circumstances</div>
+    </@bs3form.form_group>
+  </div>
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">

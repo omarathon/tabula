@@ -21,7 +21,19 @@ class MitCircsForm {
     // End date or ongoing
     $form
       .find('input[name="noEndDate"]')
-      .on('input change', e => $('input[name="endDate"]').prop('disabled', $(e.target).is(':checked')))
+      .on('input change', e => $form.find('input[name="endDate"]').prop('disabled', $(e.target).is(':checked')))
+      .trigger('change');
+
+    // Contacted fields
+    $form
+      .find('input[name="contacted"]')
+      .on('input change', () => {
+        const val = $form.find('input[name="contacted"]:checked').val();
+        if (val) {
+          $form.find('.mitcircs-form__fields__contact-subfield--yes').toggle(val === 'true');
+          $form.find('.mitcircs-form__fields__contact-subfield--no').toggle(val !== 'true');
+        }
+      })
       .trigger('change');
 
     // Removing attachments
@@ -127,6 +139,20 @@ class MitCircsForm {
     }
   }
 
+  static parseAcademicYear(academicYear) {
+    const m = academicYear.match(/^\d{2}(\d{2})$/);
+    if (m) {
+      const startYear = parseInt(m[1], 10);
+      const endYear = (startYear + 1) % 100;
+
+      const padded = i => (i < 10 ? `0${i}` : i.toString());
+
+      return `${padded(startYear)}/${padded(endYear)}`;
+    }
+
+    return m;
+  }
+
   updateAssessmentsTable(results, removeExisting = true) {
     const { $assessmentsTable } = this;
     const $tbody = $assessmentsTable.children('tbody');
@@ -138,13 +164,12 @@ class MitCircsForm {
       $rows.each((i, tr) => {
         const $tr = $(tr);
         const isChecked = $tr.children('td').first().find('input[type="checkbox"]').is(':checked');
-        if (isChecked) return; // Checked rows are ignored
 
         const moduleCode = $tr.find('input[name$="moduleCode"]').val();
         if (!moduleCode) return; // A custom added row, not removed
 
         const sequence = $tr.find('input[name$="sequence"]').val();
-        const academicYear = $tr.find('input[name$="academicYear"]').val();
+        const academicYear = MitCircsForm.parseAcademicYear($tr.find('input[name$="academicYear"]').val());
 
         const matching = results.find((item) => {
           const matchingUag = item.upstreamAssessmentGroups
@@ -155,20 +180,24 @@ class MitCircsForm {
         });
 
         if (matching === undefined) {
-          $tr.remove();
+          if (!isChecked) {
+            $tr.remove();
+          }
         } else {
-          // Update the name
-          $tr.find('.mitcircs-form__fields__section__assessments-table__name')
-            .text(matching.name)
-            .prepend($('<input />').attr({
-              type: 'hidden',
-              name: 'name',
-              value: matching.name,
-            }));
+          if (!isChecked) {
+            // Update the name
+            $tr.find('.mitcircs-form__fields__section__assessments-table__name')
+              .text(matching.name)
+              .prepend($('<input />').attr({
+                type: 'hidden',
+                name: 'name',
+                value: matching.name,
+              }));
 
-          // Update the deadline
-          if (matching.deadline) {
-            $tr.find('input[name$="deadline"]').attr('value', moment(matching.deadline, 'YYYY-MM-DD').format('DD-MMM-YYYY'));
+            // Update the deadline
+            if (matching.deadline) {
+              $tr.find('input[name$="deadline"]').attr('value', moment(matching.deadline, 'YYYY-MM-DD').format('DD-MMM-YYYY'));
+            }
           }
 
           results.splice(results.indexOf(matching), 1);

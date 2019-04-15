@@ -7,7 +7,7 @@ create table mitigatingcircumstancesaffectedassessment (
   academicyear smallint not null,
   assessmenttype varchar(32) not null,
   deadline date,
-  submission_id varchar(255) not null,
+  submission_id varchar(255), -- Can't be not null because Hibernate
   constraint pk_mitigatingcircumstancesaffectedassessment primary key (id),
   constraint fk_mitigatingcircumstancesaffectedassessment_module foreign key (module_id) references module (id) on delete restrict,
   constraint fk_mitigatingcircumstancesaffectedassessment_submission foreign key (submission_id) references mitigatingcircumstancessubmission (id) on delete restrict
