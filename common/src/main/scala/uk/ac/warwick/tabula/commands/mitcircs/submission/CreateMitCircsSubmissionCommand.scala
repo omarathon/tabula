@@ -2,16 +2,19 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.LocalDate
 import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
-import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, Notification, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -29,15 +32,17 @@ object CreateMitCircsSubmissionCommand {
       with CreateMitCircsSubmissionDescription
       with NewMitCircsSubmissionNotifications
       with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User) extends CommandInternal[MitigatingCircumstancesSubmission]
   with CreateMitCircsSubmissionState with BindListener {
 
-  self: MitCircsSubmissionServiceComponent  =>
+  self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
+    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
@@ -47,6 +52,10 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     submission.issueTypes = issueTypes.asScala
     if (issueTypes.asScala.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+    affectedAssessments.asScala.foreach { item =>
+      val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
+      submission.affectedAssessments.add(affected)
+    }
     file.attached.asScala.foreach(submission.addAttachment)
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
@@ -62,7 +71,7 @@ trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with Per
 }
 
 trait MitCircsSubmissionValidation extends SelfValidating {
-  self: CreateMitCircsSubmissionState =>
+  self: CreateMitCircsSubmissionState with ModuleAndDepartmentServiceComponent =>
 
   override def validate(errors: Errors) {
     // validate dates
@@ -71,12 +80,30 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     else if(!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
 
     // validate issue types
-    if(issueTypes.isEmpty) errors.rejectValue("issueType", "mitigatingCircumstances.issueType.required")
+    if(issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
     else if(issueTypes.contains(Other) && !issueTypeDetails.hasText)
       errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
 
     // validate reason
     if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
+
+    // validate affected issue types
+    affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+      errors.pushNestedPath(s"affectedAssessments[$index]")
+
+      if (!item.moduleCode.hasText)
+        errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
+      else if (moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty)
+        errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
+
+      if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
+
+      if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.notFound")
+
+      if (item.assessmentType == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
+
+      errors.popNestedPath()
+    }
   }
 }
 
@@ -100,13 +127,40 @@ trait CreateMitCircsSubmissionState {
   var noEndDate: Boolean = _
 
   @BeanProperty var issueTypes: JList[IssueType] = JArrayList()
-
   @BeanProperty var issueTypeDetails: String = _
 
   var reason: String = _
 
+  var affectedAssessments: JList[AffectedAssessmentItem] = LazyLists.create[AffectedAssessmentItem]()
+
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
+}
+
+class AffectedAssessmentItem {
+  def this(assessment: MitigatingCircumstancesAffectedAssessment) {
+    this()
+    this.moduleCode = assessment.moduleCode
+    this.module = assessment.module
+    this.sequence = assessment.sequence
+    this.academicYear = assessment.academicYear
+    this.name = assessment.name
+    this.assessmentType = assessment.assessmentType
+    this.deadline = assessment.deadline
+  }
+
+  var moduleCode: String = _
+  var module: Module = _
+  var sequence: String = _
+  var academicYear: AcademicYear = _
+  var name: String = _
+  var assessmentType: AssessmentType = _
+  var deadline: LocalDate = _
+
+  def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
+    this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))
+      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module with code $moduleCode"))
+  }
 }
 
 trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {

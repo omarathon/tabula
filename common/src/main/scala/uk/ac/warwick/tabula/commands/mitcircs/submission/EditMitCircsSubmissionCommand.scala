@@ -6,12 +6,13 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Other
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionReceiptNotification
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
 import scala.collection.JavaConverters._
@@ -26,13 +27,14 @@ object EditMitCircsSubmissionCommand {
       with EditMitCircsSubmissionDescription
       with EditMitCircsSubmissionNotifications
       with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
       with HibernateExtensionPersistenceComponent
 }
 
 class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with BindListener {
 
-  self: MitCircsSubmissionServiceComponent with ExtensionPersistenceComponent =>
+  self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
 
   startDate = submission.startDate
   endDate = submission.endDate
@@ -40,10 +42,12 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   issueTypes = submission.issueTypes.asJava
   issueTypeDetails = submission.issueTypeDetails
   reason = submission.reason
+  affectedAssessments.addAll(submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava)
   attachedFiles = submission.attachments
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
+    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
@@ -53,6 +57,13 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     submission.issueTypes = issueTypes.asScala
     if (issueTypes.contains(Other) && issueTypeDetails.hasText) submission.issueTypeDetails = issueTypeDetails else submission.issueTypeDetails = null
     submission.reason = reason
+
+    // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
+    submission.affectedAssessments.clear()
+    affectedAssessments.asScala.foreach { item =>
+      val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
+      submission.affectedAssessments.add(affected)
+    }
 
     if (submission.attachments != null) {
       // delete attachments that have been removed

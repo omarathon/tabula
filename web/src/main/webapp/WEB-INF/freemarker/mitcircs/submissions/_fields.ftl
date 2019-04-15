@@ -165,8 +165,52 @@
         </td>
       </tr>
     </tfoot>
-    <tbody id="assessment-table-assignments" role="tabpanel" class="tab-pane active"></tbody>
-    <tbody id="assessment-table-exams" role="tabpanel" class="tab-pane"></tbody>
+
+    <#macro affectedAssessment item index>
+      <@spring.nestedPath path="affectedAssessments[${index}]">
+        <tr>
+          <td class="mitcircs-form__fields__section__assessments-table__checkbox">
+            <@f.hidden path="moduleCode" />
+            <@f.hidden path="sequence" />
+            <@f.hidden path="academicYear" />
+            <@f.hidden path="assessmentType" />
+            <input type="checkbox" checked>
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__module">
+            <@fmt.module_name item.module />
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__name">
+            <@f.hidden path="name" />
+            ${item.name}
+          </td>
+          <td class="mitcircs-form__fields__section__assessments-table__deadline">
+            <div class="input-group">
+              <@f.input path="deadline" cssClass="form-control input-sm date-picker" />
+              <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            </div>
+          </td>
+        </tr>
+      </@spring.nestedPath>
+    </#macro>
+
+    <tbody id="assessment-table-assignments" role="tabpanel" class="tab-pane active">
+      <#if command.affectedAssessments?has_content>
+        <#list command.affectedAssessments as item>
+          <#if item.assessmentType?? && item.assessmentType.code == 'A'>
+            <@affectedAssessment item item_index />
+          </#if>
+        </#list>
+      </#if>
+    </tbody>
+    <tbody id="assessment-table-exams" role="tabpanel" class="tab-pane">
+      <#if command.affectedAssessments?has_content>
+        <#list command.affectedAssessments as item>
+          <#if item.assessmentType?? && item.assessmentType.code == 'E'>
+            <@affectedAssessment item item_index />
+          </#if>
+        </#list>
+      </#if>
+    </tbody>
   </table>
 </fieldset>
 

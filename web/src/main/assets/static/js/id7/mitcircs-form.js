@@ -14,8 +14,8 @@ class MitCircsForm {
 
     // Issue type with other
     $form
-      .find('select[name="issueType"]')
-      .on('input change', e => $form.find('.issueTypeDetails').toggle($(e.target).val() === 'Other'))
+      .find(':input[name="issueTypes"][value="Other"]')
+      .on('input change', e => $form.find(':input[name="issueTypeDetails"]').prop('disabled', !$(e.target).is(':checked')))
       .trigger('change');
 
     // End date or ongoing
@@ -206,6 +206,11 @@ class MitCircsForm {
           }))
           .append($('<input />').attr({
             type: 'hidden',
+            name: 'assessmentType',
+            value: assessmentComponent.assessmentType,
+          }))
+          .append($('<input />').attr({
+            type: 'hidden',
             name: 'academicYear',
             value: academicYear,
           }));
@@ -215,6 +220,11 @@ class MitCircsForm {
             type: 'hidden',
             name: 'moduleCode',
             value: module.code,
+          }))
+          .append($('<input />').attr({
+            type: 'hidden',
+            name: 'assessmentType',
+            value: assessmentComponent.assessmentType,
           }))
           .append($('<input />').attr({
             type: 'hidden',
@@ -283,6 +293,7 @@ class MitCircsForm {
 
       $tr.find('input[name$="moduleCode"]').attr('name', `affectedAssessments[${count}].moduleCode`);
       $tr.find('input[name$="sequence"]').attr('name', `affectedAssessments[${count}].sequence`);
+      $tr.find('input[name$="assessmentType"]').attr('name', `affectedAssessments[${count}].assessmentType`);
       $tr.find('input[name$="academicYear"]').attr('name', `affectedAssessments[${count}].academicYear`);
       $tr.find('input[name$="name"]').attr('name', `affectedAssessments[${count}].name`);
       $tr.find('input[name$="deadline"]').attr('name', `affectedAssessments[${count}].deadline`);

@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
-import javax.persistence.{Access, AccessType, Basic, Column, Entity, FetchType, JoinColumn, ManyToOne}
+import javax.persistence._
 import org.hibernate.annotations.Type
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import uk.ac.warwick.tabula.commands.mitcircs.submission.AffectedAssessmentItem
 import uk.ac.warwick.tabula.data.model.{AssessmentType, GeneratedId, Module}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 @Entity
 @Access(AccessType.FIELD)
@@ -15,6 +16,18 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   with ToString
   with PermissionsTarget
   with Serializable {
+
+  def this(_submission: MitigatingCircumstancesSubmission, item: AffectedAssessmentItem) {
+    this()
+    this.mitigatingCircumstancesSubmission = _submission
+    this.moduleCode = item.moduleCode
+    this.sequence = item.sequence
+    this.module = item.module
+    this.academicYear = item.academicYear
+    this.name = item.name
+    this.assessmentType = item.assessmentType
+    this.deadline = item.deadline
+  }
 
   /**
     * Uppercase module code, optionally with CATS. e.g. IN304-15 or IN304.

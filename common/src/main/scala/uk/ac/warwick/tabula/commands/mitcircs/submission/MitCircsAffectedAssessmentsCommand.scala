@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 import scala.collection.JavaConverters._
 
-case class AffectedAssessment(module: Module, academicYear: AcademicYear, name: String, deadline: Option[LocalDate], assessmentComponent: AssessmentComponent, upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup], tabulaAssignments: Seq[Assignment])
-object AffectedAssessment {
+case class UpstreamAffectedAssessment(module: Module, academicYear: AcademicYear, name: String, deadline: Option[LocalDate], assessmentComponent: AssessmentComponent, upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup], tabulaAssignments: Seq[Assignment])
+object UpstreamAffectedAssessment {
   import JodaWrites._
 
   implicit val writesAcademicYear: Writes[AcademicYear] = o => JsString(o.toString)
@@ -56,11 +56,11 @@ object AffectedAssessment {
     "closeDate" -> o.closeDate,
   )
 
-  val writesAffectedAssessment: Writes[AffectedAssessment] = Json.writes[AffectedAssessment]
+  val writesUpstreamAffectedAssessment: Writes[UpstreamAffectedAssessment] = Json.writes[UpstreamAffectedAssessment]
 }
 
 object MitCircsAffectedAssessmentsCommand {
-  type Result = Seq[AffectedAssessment]
+  type Result = Seq[UpstreamAffectedAssessment]
   type Command = Appliable[Result] with MitCircsAffectedAssessmentsState with SelfValidating
 
   def apply(student: StudentMember): Command =
@@ -100,12 +100,12 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
       upstreamAssessmentGroups
         .flatMap { uag =>
           assessmentMembershipService.getAssessmentComponent(uag).map { component =>
-            AffectedAssessment(component.module, uag.academicYear, component.name, None, component, Seq(uag), Nil)
+            UpstreamAffectedAssessment(component.module, uag.academicYear, component.name, None, component, Seq(uag), Nil)
           }
         }
         .groupBy { a => (a.assessmentComponent, a.academicYear) }
         .map { case (_, c) =>
-          c.reduce[AffectedAssessment] { case (a1, a2) =>
+          c.reduce[UpstreamAffectedAssessment] { case (a1, a2) =>
             a1.copy(upstreamAssessmentGroups = a1.upstreamAssessmentGroups ++ a2.upstreamAssessmentGroups)
           }
         }
@@ -125,7 +125,7 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
         }
         .sortBy { a => (a.submissionDeadline(student.asSsoUser), a.openDate, a.name) }
 
-    def matches(assignment: Assignment, component: AffectedAssessment): Boolean = {
+    def matches(assignment: Assignment, component: UpstreamAffectedAssessment): Boolean = {
       val assessmentComponent = component.assessmentComponent
       val upstreamAssessmentGroups = component.upstreamAssessmentGroups
 

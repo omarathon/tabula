@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
-import javax.persistence.CascadeType.ALL
+import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 @Access(AccessType.FIELD)
@@ -41,11 +41,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(PERSIST), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(PERSIST), fetch = FetchType.EAGER)
   @JoinColumn(name = "department_id")
   var department: Department = _
 
@@ -69,7 +69,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @JoinColumn(name = "submission_id")
   @BatchSize(size = 200)
-  var affectedAssessments: JSet[MitigatingCircumstancesAffectedAssessment] = JHashSet()
+  @OrderBy("academicYear, moduleCode, sequence")
+  var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)

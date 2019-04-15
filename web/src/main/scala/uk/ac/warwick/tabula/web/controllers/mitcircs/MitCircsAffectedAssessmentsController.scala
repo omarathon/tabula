@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import org.springframework.web.servlet.View
 import play.api.libs.json.{Json, Writes}
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.mitcircs.submission.{AffectedAssessment, MitCircsAffectedAssessmentsCommand}
+import uk.ac.warwick.tabula.commands.mitcircs.submission.{UpstreamAffectedAssessment, MitCircsAffectedAssessmentsCommand}
 import uk.ac.warwick.tabula.commands.mitcircs.submission.MitCircsAffectedAssessmentsCommand._
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.web.Mav
@@ -35,7 +35,7 @@ class MitCircsAffectedAssessmentsController extends BaseController {
         override def render(model: util.Map[String, _], request: HttpServletRequest, response: HttpServletResponse): Unit = {
           response.setContentType(getContentType)
           val out = response.getWriter
-          out.write(Json.stringify(Json.toJson(command.apply())(Writes.seq(AffectedAssessment.writesAffectedAssessment))))
+          out.write(Json.stringify(Json.toJson(command.apply())(Writes.seq(UpstreamAffectedAssessment.writesUpstreamAffectedAssessment))))
         }
         override def getContentType: String = "application/json"
       })
