@@ -150,27 +150,43 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
     for {
       (moduleCode, ranges) <- moduleCodesToIds
+      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
       range <- ranges
       uniId <- range
-    } callback(
-      UpstreamModuleRegistration(
-        year = AcademicYear.now().toString,
-        sprCode = "%d/1".format(uniId),
-        seatNumber = "0",
-        occurrence = "A",
-        sequence = "A01",
-        moduleCode = "%s-15".format(moduleCode.toUpperCase),
-        assessmentGroup = "A",
-        actualMark = null,
-        actualGrade = null,
-        agreedMark = null,
-        agreedGrade = null,
-        resitActualMark = null,
-        resitActualGrade = null,
-        resitAgreedMark = null,
-        resitAgreedGrade = null
-      )
-    )
+      if moduleCode.substring(3, 4).toInt <= ((uniId % 3) + 1)
+    } {
+      val yearOfStudy = (uniId % 3) + 1
+      val level = moduleCode.substring(3, 4).toInt
+
+      if (level <= yearOfStudy && academicYear == (AcademicYear.now - (yearOfStudy - level))) {
+        callback(
+          UpstreamModuleRegistration(
+            year = academicYear.toString,
+            sprCode = "%d/1".format(uniId),
+            seatNumber = assessmentType match {
+              case AssessmentType.Assignment => null
+              case AssessmentType.Exam => ((uniId % 300) + 1).toString
+            },
+            occurrence = "A",
+            sequence = assessmentType match {
+              case AssessmentType.Assignment => "A01"
+              case AssessmentType.Exam => "E01"
+            },
+            moduleCode = "%s-15".format(moduleCode.toUpperCase),
+            assessmentGroup = "A",
+            actualMark = null,
+            actualGrade = null,
+            agreedMark = null,
+            agreedGrade = null,
+            resitActualMark = null,
+            resitActualGrade = null,
+            resitAgreedMark = null,
+            resitAgreedGrade = null
+          )
+        )
+      }
+    }
 
   }
 
@@ -180,10 +196,11 @@ class SandboxAssignmentImporter extends AssignmentImporter {
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
       assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+      academicYear <- AcademicYear.now().yearsSurrounding(2, 0)
     } yield {
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-      ag.academicYear = AcademicYear.now()
+      ag.academicYear = academicYear
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
       ag.sequence = assessmentType match {
