@@ -131,11 +131,6 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       val level = moduleCode.substring(3, 4).toInt
       val academicYear = AcademicYear.now - (yearOfStudy - level)
 
-      println(universityId)
-      println(yearOfStudy)
-      println(level)
-      println(academicYear)
-
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
         sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
