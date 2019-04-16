@@ -64,7 +64,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
     }
 
     // persist valid marks
-    marks.asScala.filter(m.isValid).flatMap(saveFeedback)
+    marks.asScala.filter(_.isValid).flatMap(saveFeedback)
   }
 }
 
