@@ -11,7 +11,7 @@
       <thead>
         <tr>
           <th>Reference</th>
-          <th>Issue type</th>
+          <th>Issue types</th>
           <th>Start date</th>
           <th>End date</th>
           <th>Last modified</th>
@@ -21,9 +21,15 @@
         <#list submissions as submission>
           <tr>
             <td><a href="<@routes.mitcircs.editsubmission submission />">MIT-${submission.key}</a></td>
-            <td>${submission.issueType.description}</td>
+            <td><#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></td>
             <td><@fmt.date date=submission.startDate includeTime=false /></td>
-            <td><@fmt.date date=submission.endDate includeTime=false /></td>
+            <td>
+              <#if submission.endDate??>
+                <@fmt.date date=submission.endDate includeTime=false />
+              <#else>
+                <span class="very-subtle">(not set)</span>
+              </#if>
+            </td>
             <td><@fmt.date date=submission.lastModified /></td>
           </tr>
         </#list>

@@ -4,22 +4,63 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
-import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
+import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
+
+import scala.collection.immutable.ListMap
+
+object MitCircsSubmissionController {
+  def validIssueTypes(student: StudentMember): Seq[IssueType] =
+    if(student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") IssueType.values
+    else IssueType.values.filter(_ != Employment)
+}
+
+abstract class AbstractMitCircsFormController extends BaseController {
+
+  validatesSelf[SelfValidating]
+
+  var mitCircsSubmissionService: MitCircsSubmissionService = Wire[MitCircsSubmissionService]
+
+  @ModelAttribute("registeredModules")
+  def registeredModules(@PathVariable student: StudentMember): ListMap[AcademicYear, Seq[Module]] = {
+    val builder = ListMap.newBuilder[AcademicYear, Seq[Module]]
+
+    student.moduleRegistrationsByYear(None)
+      .filter { mr => Option(mr.agreedMark).isEmpty && Option(mr.agreedGrade).isEmpty }
+      .groupBy(_.academicYear)
+      .mapValues(_.map(_.module).toSeq.sorted)
+      .toSeq
+      .sortBy { case (year, _) => -year.startYear }
+      .foreach { case (year, modules) => builder += year -> modules }
+
+    builder.result()
+  }
+
+  @ModelAttribute("previousSubmissions")
+  def previousSubmissions(
+    @PathVariable student: StudentMember,
+    @PathVariable(required=false) submission: MitigatingCircumstancesSubmission
+  ): Set[MitigatingCircumstancesSubmission] = {
+    val allSubmissions = mitCircsSubmissionService.submissionsForStudent(student)
+    allSubmissions.toSet -- Option(submission).toSet
+  }
+
+}
 
 @Controller
 @RequestMapping(value = Array("/mitcircs/profile/{student}/new"))
-class MitCircsSubmissionController extends BaseController {
-
-  validatesSelf[SelfValidating]
+class CreateMitCircsController extends AbstractMitCircsFormController {
 
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
 
@@ -28,7 +69,10 @@ class MitCircsSubmissionController extends BaseController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
+    Mav("mitcircs/submissions/form", Map(
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
+      "possibleContacts" -> MitCircsContact.values
+    ))
   }
 
   @RequestMapping(method = Array(POST))
@@ -43,9 +87,8 @@ class MitCircsSubmissionController extends BaseController {
 
 @Controller
 @RequestMapping(value = Array("/mitcircs/profile/{student}/edit/{submission}"))
-class MitCircsEditController extends BaseController {
+class EditMitCircsController extends AbstractMitCircsFormController {
 
-  validatesSelf[SelfValidating]
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
 
   @ModelAttribute("command") def edit(
@@ -59,7 +102,10 @@ class MitCircsEditController extends BaseController {
 
   @RequestMapping
   def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    Mav("mitcircs/submissions/form", Map("issueTypes" -> IssueType.values))
+    Mav("mitcircs/submissions/form", Map(
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(submission.student),
+      "possibleContacts" -> MitCircsContact.values
+    ))
   }
 
   @RequestMapping(method = Array(POST))

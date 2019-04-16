@@ -17,28 +17,27 @@ class MitCircsSubmissionDaoTest extends PersistenceTestBase {
   val mockUserLookup = new MockUserLookup
   mockUserLookup.registerUserObjects(new User("cusfal"), new User("cuscao"))
 
-
-  @Test def fetchByIdAndKey(): Unit = transactional { tx =>
+  @Test def fetchByIdAndKey(): Unit = transactional { _ =>
     val heronReason = """My hatred of herons is consuming me.
       I spend all my waking moments obsessing over their cold reptilian eyes and foul dank plumage instead of focusing on my studies."""
     val s = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777")
-    s.issueType = IssueType.Deterioration
+    s.issueTypes = Seq(IssueType.Deterioration, IssueType.AbruptChange)
     s.reason = heronReason
 
     mitCircsSubmissionDao.saveOrUpdate(s)
 
     val byId = mitCircsSubmissionDao.getById(s.id)
     byId.isDefined should be (true)
-    byId.get.issueType should be (IssueType.Deterioration)
+    byId.get.issueTypes should be (Seq(IssueType.Deterioration, IssueType.AbruptChange))
     byId.get.reason should be (heronReason)
 
     val byKey = mitCircsSubmissionDao.getByKey(s.key)
     byKey.isDefined should be (true)
-    byKey.get.issueType should be (IssueType.Deterioration)
+    byKey.get.issueTypes should be (Seq(IssueType.Deterioration, IssueType.AbruptChange))
     byKey.get.reason should be (heronReason)
   }
 
-  @Test def keysAreSequential(): Unit = transactional { tx =>
+  @Test def keysAreSequential(): Unit = transactional { _ =>
     val a = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431777")
     mitCircsSubmissionDao.saveOrUpdate(a)
     val b = Fixtures.mitigatingCircumstancesSubmission("cuslaj", "1431778")

@@ -14,7 +14,7 @@ case class AssessmentType(code: String) extends Convertible[String] {
 }
 
 object AssessmentType {
-  implicit val factory: (String) => AssessmentType = { code: String => AssessmentType(code) }
+  implicit val factory: String => AssessmentType = { code: String => AssessmentType(code) }
 
   // For convenience we have a value for the code for assignments and exams,
   // but we don't have an exhaustive/unchanging list of possible codes
