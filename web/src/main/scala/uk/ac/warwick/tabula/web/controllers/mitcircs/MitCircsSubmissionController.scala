@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -12,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
+import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
@@ -28,6 +30,8 @@ abstract class AbstractMitCircsFormController extends BaseController {
 
   validatesSelf[SelfValidating]
 
+  var mitCircsSubmissionService: MitCircsSubmissionService = Wire[MitCircsSubmissionService]
+
   @ModelAttribute("registeredModules")
   def registeredModules(@PathVariable student: StudentMember): ListMap[AcademicYear, Seq[Module]] = {
     val builder = ListMap.newBuilder[AcademicYear, Seq[Module]]
@@ -41,6 +45,15 @@ abstract class AbstractMitCircsFormController extends BaseController {
       .foreach { case (year, modules) => builder += year -> modules }
 
     builder.result()
+  }
+
+  @ModelAttribute("previousSubmissions")
+  def previousSubmissions(
+    @PathVariable student: StudentMember,
+    @PathVariable(required=false) submission: MitigatingCircumstancesSubmission
+  ): Set[MitigatingCircumstancesSubmission] = {
+    val allSubmissions = mitCircsSubmissionService.submissionsForStudent(student)
+    allSubmissions.toSet -- Option(submission).toSet
   }
 
 }

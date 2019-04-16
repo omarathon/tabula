@@ -49,6 +49,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   stepsSoFar = submission.stepsSoFar
   changeOrResolve = submission.changeOrResolve
   attachedFiles = submission.attachments
+  relatedSubmission = submission.relatedSubmission
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
@@ -88,6 +89,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+    submission.relatedSubmission = relatedSubmission
     submission.lastModified = DateTime.now()
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission

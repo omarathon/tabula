@@ -68,6 +68,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
       submission.affectedAssessments.add(affected)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+    submission.relatedSubmission = relatedSubmission
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
@@ -108,6 +109,9 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
     // validate reason
     if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
+
+    if(Option(relatedSubmission).exists(_.student != student))
+      errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
 
     // validate affected issue types
     affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
@@ -165,6 +169,8 @@ trait CreateMitCircsSubmissionState {
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
+
+  var relatedSubmission: MitigatingCircumstancesSubmission = _
 }
 
 class AffectedAssessmentItem {
