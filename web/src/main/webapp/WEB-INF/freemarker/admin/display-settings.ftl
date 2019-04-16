@@ -253,10 +253,38 @@
       <#if features.mitCircs>
         <fieldset id="mitcircs-options">
           <h2>Mitigating circumstances options</h2>
+
           <@bs3form.checkbox path="enableMitCircs">
             <@f.checkbox path="enableMitCircs" id="enableMitCircs" />
             Enable mitigating circumstances
           </@bs3form.checkbox>
+
+          <div class="row">
+            <div class="col-md-8">
+              <@bs3form.labelled_form_group "mitCircsGuidance" "Mitigating circumstances guidance">
+                <@f.textarea path="mitCircsGuidance" cssClass="form-control" rows="5" data\-preview="#mitCircsGuidance-preview" />
+
+                <div class="help-block">
+                  <p>
+                    Provide your department's mitigating circumstances guidelines, which will be shown alongside the form
+                    to make a mitigating circumstances declaration. You can make a new paragraph by leaving a blank line
+                    (i.e. press Enter twice).
+                  </p>
+
+                  <p>
+                    You can use simple syntax to format the guidance, such as using <code>**asterixes**</code> around words to make them
+                    <strong>bold</strong>, <code>_underscores_</code> to make them <em>italic</em>. To make a link, use syntax like
+                    <code>[text to link](https://warwick.ac.uk/your/link)</code>.
+                  </p>
+                </div>
+              </@bs3form.labelled_form_group>
+            </div>
+
+            <div class="col-md-4">
+              <div id="mitCircsGuidance-preview" class="well" style="display: none;">
+              </div>
+            </div>
+          </div>
         </fieldset>
       </#if>
 

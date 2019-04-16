@@ -57,6 +57,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   var autoMarkMissedMonitoringPoints: Boolean = department.autoMarkMissedMonitoringPoints
   var meetingRecordApprovalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
   var enableMitCircs: Boolean = department.enableMitCircs
+  var mitCircsGuidance: String = department.mitCircsGuidance
 
   def populate() {
     relationshipService.allStudentRelationshipTypes.foreach { relationshipType => {
@@ -97,6 +98,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
     department.autoMarkMissedMonitoringPoints = autoMarkMissedMonitoringPoints
     department.meetingRecordApprovalType = meetingRecordApprovalType
     department.enableMitCircs = enableMitCircs
+    department.mitCircsGuidance = mitCircsGuidance
 
     moduleAndDepartmentService.saveOrUpdate(department)
     department
