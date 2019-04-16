@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.data.model.Department.Settings.ExamGridOptions
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -29,7 +30,14 @@ case class DepartmentWithManualUsers(department: String, assignments: Int, small
 @Entity
 @Access(AccessType.FIELD)
 class Department extends GeneratedId
-  with PostLoadBehaviour with HasSettings with HasNotificationSettings with PermissionsTarget with Serializable with ToEntityReference with Logging {
+  with PostLoadBehaviour
+  with HasSettings
+  with HasNotificationSettings
+  with PermissionsTarget
+  with Serializable
+  with ToEntityReference
+  with Logging
+  with FormattedHtml {
 
   import Department._
 
@@ -299,6 +307,10 @@ class Department extends GeneratedId
 
   def enableMitCircs: Boolean = getBooleanSetting(Settings.EnableMitCircs, default = false)
   def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
+
+  def mitCircsGuidance: String = getStringSetting(Settings.MitCircsGuidance).orNull
+  def formattedMitCircsGuidance: String = formattedHtml(mitCircsGuidance.maybeText)
+  def mitCircsGuidance_=(guidelines: String): Unit = settings += (Settings.MitCircsGuidance -> guidelines)
 
   def nameToShow: ExamGridStudentIdentificationColumnValue =
     getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
@@ -603,6 +615,7 @@ object Department {
     val MissedMonitoringPointsNotificationLevelHigh = "missedMonitoringPointsNotificationLevelHigh"
 
     val EnableMitCircs = "enableMitCircs"
+    val MitCircsGuidance = "mitCircsGuidance"
 
     object MissedMonitoringPointsNotificationLevels {
 

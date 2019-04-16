@@ -196,8 +196,9 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
   def duration: Int = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
-  def requestedExtraDuration: Int = requestedExpiryDate
-    .map(Days.daysBetween(expiryDate.getOrElse(assignment.closeDate), _).getDays).getOrElse(0)
+  def requestedExtraDuration: Int =
+    requestedExpiryDate.orElse(expiryDate)
+      .map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
   // An extension is relevant if the expiry date is after the assignment close date.
   // Extensions can become irrelevant if the assignment close date is moved back

@@ -56,6 +56,15 @@ abstract class AbstractMitCircsFormController extends BaseController {
     allSubmissions.toSet -- Option(submission).toSet
   }
 
+  @RequestMapping
+  def form(@ModelAttribute("student") student: StudentMember): Mav = {
+    Mav("mitcircs/submissions/form", Map(
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
+      "possibleContacts" -> MitCircsContact.values,
+      "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
+    ))
+  }
+
 }
 
 @Controller
@@ -67,17 +76,11 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
   @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
     CreateMitCircsSubmissionCommand(mandatory(student), user.apparentUser)
 
-  @RequestMapping
-  def form(@ModelAttribute("command") cmd: CreateCommand, @PathVariable student: StudentMember): Mav = {
-    Mav("mitcircs/submissions/form", Map(
-      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
-      "possibleContacts" -> MitCircsContact.values
-    ))
-  }
+  @ModelAttribute("student") def student(@PathVariable student: StudentMember): StudentMember = student
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: CreateCommand, errors: Errors, @PathVariable student: StudentMember): Mav = {
-    if (errors.hasErrors) form(cmd, student)
+    if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Student.home(student))
@@ -100,17 +103,12 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     EditMitCircsSubmissionCommand(mandatory(submission), user.apparentUser)
   }
 
-  @RequestMapping
-  def form(@ModelAttribute("command") cmd: EditCommand, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    Mav("mitcircs/submissions/form", Map(
-      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(submission.student),
-      "possibleContacts" -> MitCircsContact.values
-    ))
-  }
+  @ModelAttribute("student") def student(@PathVariable submission: MitigatingCircumstancesSubmission): StudentMember =
+    submission.student
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    if (errors.hasErrors) form(cmd, submission)
+    if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Student.home(submission.student))

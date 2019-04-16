@@ -94,7 +94,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
   var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
   def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
-    membersAndCategories flatMap { mac =>
+    membersAndCategories.flatMap { mac =>
       val universityId = mac.member.universityId
       val ssoUser = users(universityId)
 
@@ -105,26 +105,37 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
     }
 
   def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
+    val yearOfStudy = ((universityId.toLong % 3) + 1).toInt
+
     val rows = (for {
       (_, d) <- SandboxData.Departments
       route <- d.routes.values.toSeq
       if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
-      moduleCode <- route.moduleCodes
+      moduleCode <- route.moduleCodes if moduleCode.substring(3, 4).toInt <= yearOfStudy
     } yield {
       val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
       val markScheme = if (isPassFail) "PF" else "WAR"
 
-      val mark = if (isPassFail) {
-        if (math.random < 0.25) 0 else 100
-      } else {
-        (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-          Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-        ).sum % 100
-      }
+      val level = moduleCode.substring(3, 4).toInt
+      val academicYear = AcademicYear.now - (yearOfStudy - level)
 
-      val grade =
-        if (isPassFail) if (mark == 100) "P" else "F"
-        else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
+      val (mark, grade, result) =
+        if (academicYear < AcademicYear.now()) {
+          val m =
+            if (isPassFail) {
+              if (math.random < 0.25) 0 else 100
+            } else {
+              (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+              ).sum % 100
+            }
+
+          val g =
+            if (isPassFail) if (m == 100) "P" else "F"
+            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= m && gb.maximumMark >= m).map(_.grade).getOrElse("F")
+
+          (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
+        } else (None: Option[JBigDecimal], null: String, null: String)
 
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
@@ -136,13 +147,13 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
           case _ => "O"
         },
         occurrence = "A",
-        academicYear = AcademicYear.now().toString,
-        actualMark = Some(new JBigDecimal(mark)),
+        academicYear = academicYear.toString,
+        actualMark = mark,
         actualGrade = grade,
-        agreedMark = Some(new JBigDecimal(mark)),
+        agreedMark = mark,
         agreedGrade = grade,
         markScheme = markScheme,
-        moduleResult = if (mark < 40) "F" else "P"
+        moduleResult = result
       )
     }).toSeq
 
