@@ -274,7 +274,7 @@
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. Tell us how your circumstances are likely to change or resolve?</legend>
+  <legend>${questionNumber}. Tell us how your circumstances are likely to change or resolve</legend>
   <@bs3form.form_group "changeOrResolve">
     <@f.textarea path="changeOrResolve" cssClass="form-control" rows="5" />
   </@bs3form.form_group>
@@ -282,6 +282,7 @@
 </fieldset>
 
 <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>${questionNumber}. Please provide any evidence relevant to your submission</legend>
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
@@ -312,10 +313,19 @@
   </#if>
 
   <@bs3form.filewidget
-  basename="file"
-  labelText="Upload new supporting documentation relevant to your submission"
-  types=[]
-  multiple=true
-  required=false
+    basename="file"
+    labelText="Upload new supporting documentation relevant to your submission"
+    types=[]
+    multiple=true
+    required=false
   />
+  <#assign questionNumber = questionNumber + 1 />
+</fieldset>
+
+<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+  <legend>${questionNumber}. Tell us about evidence you’re going to upload in the future</legend>
+  <@bs3form.form_group "pendingEvidence">
+    <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+  </@bs3form.form_group>
+  <#assign questionNumber = questionNumber + 1 />
 </fieldset>
