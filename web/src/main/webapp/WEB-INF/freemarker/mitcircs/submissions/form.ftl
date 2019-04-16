@@ -21,7 +21,7 @@
           deciding final year degree classifications in borderlines cases, but it does not automatically result in a higher degree classification.
         </p>
 
-        <#-- TODO: Departmental-level guidance -->
+        <#noescape>${department.formattedMitCircsGuidance!''}</#noescape>
       </header>
     </div>
 
