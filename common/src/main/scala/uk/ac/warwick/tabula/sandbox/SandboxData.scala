@@ -111,7 +111,41 @@ object SandboxData {
         Route("Training Methods (Research)", "tr3p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4500201, 4500300),
       "tr3p1" ->
         Route("Training Methods (Taught)", "tr3p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false, Seq(), 4500301, 4500350)
-    ), 5500001, 5500030)
+    ), 5500001, 5500030),
+    "tss" -> Department("School of Tabula Sandbox Studies", "tss", "T", Map(
+      "tss101" -> Module("Introduction to Permissions", "TSS101", "tss101"),
+      "tss102" -> Module("Coursework Management 1", "TSS102", "tss102"),
+      "tss103" -> Module("Introduction to Student Profiles", "TSS103", "tss103"),
+      "tss106" -> Module("Small Group Teaching 1", "TSS106", "tss106"),
+      "tss115" -> Module("Timetabling Students", "TSS115", "tss115"),
+      "tss129" -> Module("Exam Management and Grids", "TSS129", "tss129"),
+      "tss201" -> Module("Coursework Management 2", "TSS201", "tss201"),
+      "tss203" -> Module("Management of Monitoring Point Schemes and Points", "TSS203", "tss203"),
+      "tss204" -> Module("Principles of Student Relationships", "TSS204", "tss204"),
+      "tss210" -> Module("Advanced Marks Management", "TSS210", "tss210"),
+      "tss219" -> Module("Marking Descriptors", "TSS219", "tss219"),
+      "tss222" -> Module("Sustainable Reports", "TSS222", "tss222"),
+      "tss3a1" -> Module("Departmental Small Group Sets", "TSS3A1", "tss3a1"),
+      "tss330" -> Module("History of Tabula Development", "TSS330", "tss330"),
+      "tss339" -> Module("Dissertation (Sandbox Studies)", "TSS339", "tss339")
+    ), Map(
+      "ts801" ->
+        Route("Sandbox Studies", "ts801", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
+          Seq("tss101", "tss102", "tss103", "tss106", "tss115", "tss129", "tss201",
+            "tss203", "tss204", "tss210", "tss219", "tss222", "tss3a1", "tss330", "tss339"),
+          4600001, 4600100),
+      "ts802" ->
+        Route("Sandbox Studies with Intercalated Year", "ts802", DegreeType.Undergraduate, CourseType.UG, isResearch = false,
+          Seq("tss101", "tss102", "tss103", "tss106", "tss115", "tss129", "tss201",
+            "tss203", "tss204", "tss210", "tss219", "tss222", "tss3a1", "tss330", "tss339"),
+          4600101, 4600130),
+      "ts8p0" ->
+        Route("Sandbox Studies (Research)", "ts8p0", DegreeType.Postgraduate, CourseType.PGR, isResearch = true, Seq(), 4600201, 4600300),
+      "ts8p1" ->
+        Route("Sandbox Studies (Taught)", "ts8p1", DegreeType.Postgraduate, CourseType.PGT, isResearch = false,
+          Seq("tss222", "tss3a1", "tss330"),
+          4600301, 4600350)
+    ), 5600001, 5600030),
   )
 
   final val GradeBoundaries = Seq(
@@ -141,9 +175,9 @@ object SandboxData {
 
   def route(id: Long): Route =
     Departments
-      .flatMap { case (code, d) => d.routes }
-      .find { case (code, r) => r.studentsStartId <= id && r.studentsEndId >= id }
-      .map { case (code, r) => r }
+      .flatMap { case (_, d) => d.routes }
+      .find { case (_, r) => r.studentsStartId <= id && r.studentsEndId >= id }
+      .map { case (_, r) => r }
       .get
 
   case class Department(

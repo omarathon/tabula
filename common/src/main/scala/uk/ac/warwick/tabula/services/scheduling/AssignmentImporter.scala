@@ -137,7 +137,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
     var moduleCodesToIds = Map[String, Seq[Range]]()
 
     for {
-      (code, d) <- SandboxData.Departments
+      (_, d) <- SandboxData.Departments
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
     } {
@@ -145,7 +145,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
       moduleCodesToIds = moduleCodesToIds + (
         moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
-        )
+      )
     }
 
     for {
@@ -161,14 +161,14 @@ class SandboxAssignmentImporter extends AssignmentImporter {
         sequence = "A01",
         moduleCode = "%s-15".format(moduleCode.toUpperCase),
         assessmentGroup = "A",
-        actualMark = "",
-        actualGrade = "",
-        agreedMark = "",
-        agreedGrade = "",
-        resitActualMark = "",
-        resitActualGrade = "",
-        resitAgreedMark = "",
-        resitAgreedGrade = ""
+        actualMark = null,
+        actualGrade = null,
+        agreedMark = null,
+        agreedGrade = null,
+        resitActualMark = null,
+        resitActualGrade = null,
+        resitAgreedMark = null,
+        resitAgreedGrade = null
       )
     )
 
@@ -176,34 +176,53 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
   def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
     for {
-      (code, d) <- SandboxData.Departments.toSeq
+      (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
+      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
     } yield {
       val ag = new UpstreamAssessmentGroup()
       ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
       ag.academicYear = AcademicYear.now()
       ag.assessmentGroup = "A"
       ag.occurrence = "A"
-      ag.sequence = "A01"
+      ag.sequence = assessmentType match {
+        case AssessmentType.Assignment => "A01"
+        case AssessmentType.Exam => "E01"
+      }
       ag
     }
 
   def getAllAssessmentComponents: Seq[AssessmentComponent] =
     for {
-      (code, d) <- SandboxData.Departments.toSeq
+      (_, d) <- SandboxData.Departments.toSeq
       route <- d.routes.values.toSeq
       moduleCode <- route.moduleCodes
-    } yield {
-      val a = new AssessmentComponent
-      a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-      a.sequence = "A01"
-      a.name = "Coursework"
-      a.assessmentGroup = "A"
-      a.assessmentType = AssessmentType.Assignment
-      a.inUse = true
-      a.marksCode = "TABULA-UG"
-      a
+      assessmentType <- Seq(AssessmentType.Assignment, AssessmentType.Exam)
+    } yield assessmentType match {
+      case AssessmentType.Assignment =>
+        val a = new AssessmentComponent
+        a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        a.sequence = "A01"
+        a.name = "Report (2,000 words)"
+        a.assessmentGroup = "A"
+        a.assessmentType = AssessmentType.Assignment
+        a.inUse = true
+        a.weighting = 30
+        a.marksCode = "TABULA-UG"
+        a
+
+      case AssessmentType.Exam =>
+        val e = new AssessmentComponent
+        e.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+        e.sequence = "E01"
+        e.name = "2 hour examination (Summer)"
+        e.assessmentGroup = "A"
+        e.assessmentType = AssessmentType.Exam
+        e.inUse = true
+        e.weighting = 70
+        e.marksCode = "TABULA-UG"
+        e
     }
 
   def getAllGradeBoundaries: Seq[GradeBoundary] = SandboxData.GradeBoundaries
