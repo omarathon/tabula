@@ -116,20 +116,26 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
       val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
       val markScheme = if (isPassFail) "PF" else "WAR"
 
-      val mark = if (isPassFail) {
-        if (math.random < 0.25) 0 else 100
-      } else {
-        (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
-          Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
-        ).sum % 100
-      }
-
-      val grade =
-        if (isPassFail) if (mark == 100) "P" else "F"
-        else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
-
       val level = moduleCode.substring(3, 4).toInt
       val academicYear = AcademicYear.now - (yearOfStudy - level)
+
+      val (mark, grade, result) =
+        if (academicYear < AcademicYear.now()) {
+          val m =
+            if (isPassFail) {
+              if (math.random < 0.25) 0 else 100
+            } else {
+              (universityId ++ universityId ++ moduleCode.substring(3)).toCharArray.map(char =>
+                Try(char.toString.toInt).toOption.getOrElse(0) * universityId.toCharArray.apply(0).toString.toInt
+              ).sum % 100
+            }
+
+          val g =
+            if (isPassFail) if (m == 100) "P" else "F"
+            else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= m && gb.maximumMark >= m).map(_.grade).getOrElse("F")
+
+          (Some(new JBigDecimal(m)), g, if (m < 40) "F" else "P")
+        } else (None: Option[JBigDecimal], null: String, null: String)
 
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
@@ -142,12 +148,12 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         },
         occurrence = "A",
         academicYear = academicYear.toString,
-        actualMark = Some(new JBigDecimal(mark)),
+        actualMark = mark,
         actualGrade = grade,
-        agreedMark = Some(new JBigDecimal(mark)),
+        agreedMark = mark,
         agreedGrade = grade,
         markScheme = markScheme,
-        moduleResult = if (mark < 40) "F" else "P"
+        moduleResult = result
       )
     }).toSeq
 
