@@ -49,7 +49,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
 
     def saveFeedback(markItem: MarkItem) = {
       val currentMarkerFeedback = markItem.currentMarkerFeedback(assignment, marker)
-      currentMarkerFeedback.foreach(mf => {
+      currentMarkerFeedback.filterNot(markItem.unchanged).foreach(mf => {
         mf.mark = if (StringUtils.hasText(markItem.actualMark)) Some(markItem.actualMark.toInt) else None
         mf.grade = Option(markItem.actualGrade)
         markItem.fieldValues.asScala.foreach { case (fieldName, value) =>
@@ -64,7 +64,7 @@ class MarkerAddMarksCommandInternal(val assignment: Assignment, val marker: User
     }
 
     // persist valid marks
-    marks.asScala.filter(_.isValid).flatMap(saveFeedback)
+    marks.asScala.filter(m.isValid).flatMap(saveFeedback)
   }
 }
 
