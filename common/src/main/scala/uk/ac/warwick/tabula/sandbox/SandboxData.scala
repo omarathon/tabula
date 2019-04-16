@@ -175,9 +175,9 @@ object SandboxData {
 
   def route(id: Long): Route =
     Departments
-      .flatMap { case (code, d) => d.routes }
-      .find { case (code, r) => r.studentsStartId <= id && r.studentsEndId >= id }
-      .map { case (code, r) => r }
+      .flatMap { case (_, d) => d.routes }
+      .find { case (_, r) => r.studentsStartId <= id && r.studentsEndId >= id }
+      .map { case (_, r) => r }
       .get
 
   case class Department(

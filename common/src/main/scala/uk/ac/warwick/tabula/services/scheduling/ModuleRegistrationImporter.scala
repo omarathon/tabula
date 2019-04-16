@@ -94,7 +94,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
   var memberDao: MemberDaoImpl = Wire.auto[MemberDaoImpl]
 
   def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
-    membersAndCategories flatMap { mac =>
+    membersAndCategories.flatMap { mac =>
       val universityId = mac.member.universityId
       val ssoUser = users(universityId)
 
@@ -105,11 +105,13 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
     }
 
   def studentModuleRegistrationDetails(universityId: String, ssoUser: User): Iterable[ImportModuleRegistrationsCommand] = {
+    val yearOfStudy = ((universityId.toLong % 3) + 1).toInt
+
     val rows = (for {
       (_, d) <- SandboxData.Departments
       route <- d.routes.values.toSeq
       if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
-      moduleCode <- route.moduleCodes
+      moduleCode <- route.moduleCodes if moduleCode.substring(3, 4).toInt <= yearOfStudy
     } yield {
       val isPassFail = moduleCode.takeRight(1) == "9" // modules with a code ending in 9 are pass/fails
       val markScheme = if (isPassFail) "PF" else "WAR"
@@ -126,6 +128,14 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
         if (isPassFail) if (mark == 100) "P" else "F"
         else SandboxData.GradeBoundaries.find(gb => gb.marksCode == "TABULA-UG" && gb.minimumMark <= mark && gb.maximumMark >= mark).map(_.grade).getOrElse("F")
 
+      val level = moduleCode.substring(3, 4).toInt
+      val academicYear = AcademicYear.now - (yearOfStudy - level)
+
+      println(universityId)
+      println(yearOfStudy)
+      println(level)
+      println(academicYear)
+
       new ModuleRegistrationRow(
         scjCode = "%s/1".format(universityId),
         sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
@@ -136,7 +146,7 @@ class SandboxModuleRegistrationImporter extends AbstractModuleRegistrationImport
           case _ => "O"
         },
         occurrence = "A",
-        academicYear = AcademicYear.now().toString,
+        academicYear = academicYear.toString,
         actualMark = Some(new JBigDecimal(mark)),
         actualGrade = grade,
         agreedMark = Some(new JBigDecimal(mark)),
