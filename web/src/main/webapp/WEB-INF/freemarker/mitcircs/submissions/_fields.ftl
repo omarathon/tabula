@@ -11,7 +11,7 @@
   </#if>
 </#macro>
 
-<#macro identity student>
+<#macro identity_section student>
   <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--identity">
     <@identity_info "Name" student.fullName />
     <@identity_info "University ID" student.universityId />
@@ -40,6 +40,26 @@
   </fieldset>
 </#macro>
 
+<#assign questionNumber = 1 />
+<#macro question_section question="" hint="" cssClass="">
+  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}">
+    <#if question?has_content>
+      <legend>${questionNumber}. ${question}</legend>
+      <#assign questionNumber = questionNumber + 1 />
+    </#if>
+
+    <#if hint?has_content>
+      <@question_hint hint />
+    </#if>
+
+    <#nested />
+  </fieldset>
+</#macro>
+
+<#macro question_hint hint>
+  <p class="mitcircs-form__fields__section__hint">(${hint})</p>
+</#macro>
+
 <#macro checkboxesWithOther enumValues enumField otherField>
   <#list enumValues as value>
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
@@ -55,26 +75,22 @@
   <@bs3form.errors path="${enumField}" />
 </#macro>
 
-<@identity student />
+<@identity_section student />
 
-<#assign questionNumber = 1 />
-
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. What kind of mitigating circumstances are you presenting?</legend>
-
-  <p class="mitcircs-form__fields__section__hint">(Tick all that apply, but remember that you'll need to tell us something about each item you tick,
-    and upload some supporting evidence for each item.)</p>
-
+<@question_section
+  question = "What kind of mitigating circumstances are you presenting?"
+  hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
+    and to upload some supporting evidence for each item."
+>
   <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed form-horizontal">
-  <legend>${questionNumber}. What period do your mitigating circumstances cover?</legend>
-
-  <p class="mitcircs-form__fields__section__hint">(If you're claiming for a period in the past, include a start and end date. If you're claiming for
-    something that's ongoing, you may not know the end date at this point.)</p>
-
+<@question_section
+  question = "What period do your mitigating circumstances cover?"
+  hint = "If you're claiming for a period in the past, include a start and end date. If you're claiming for
+    something that's ongoing, you may not know the end date at this point."
+  cssClass = "form-horizontal"
+>
   <@bs3form.form_group "startDate">
     <@bs3form.label path="startDate" cssClass="col-xs-4 col-sm-2">Start date</@bs3form.label>
 
@@ -110,12 +126,12 @@
       <@bs3form.errors path="endDate" />
     </div>
   </@bs3form.form_group>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
 <#if previousSubmissions?has_content>
-  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-    <legend>${questionNumber}. Does this relate to a previous mitigating circumstances claim of yours?</legend>
+  <@question_section
+    question = "Does this relate to a previous mitigating circumstances claim of yours?"
+  >
     <@bs3form.form_group path="relatedSubmission">
       <@f.select path="relatedSubmission" cssClass="form-control">
         <option value="">Select a previous submission&hellip;</option>
@@ -126,24 +142,24 @@
       </@f.select>
       <@bs3form.errors path="relatedSubmission" />
     </@bs3form.form_group>
-  </fieldset>
-  <#assign questionNumber = questionNumber + 1 />
+  </@question_section>
 </#if>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. Details</legend>
+<@question_section
+  question = "Details"
+  hint = "Please provide further details of the mitigating circumstances and how they have affected your assessments"
+>
   <@bs3form.form_group "reason">
     <@f.textarea path="reason" cssClass="form-control" rows="5" />
-    <div class="help-block">Please provide further details of the mitigating circumstances and how they have affected your assessments</div>
   </@bs3form.form_group>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. Which assessments have been affected?</legend>
-
-  <p class="mitcircs-form__fields__section__hint">(Blah blah some hint text here)</p>
-
+<@question_section
+  question = "Which assessments have been affected?"
+  hint = "If there are particular coursework submissions or exams that you believe have been affected, please
+    list them here. To make this easier, we've listed the assignments and exams that we think fall within the
+    period you've selected."
+>
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
     <li role="presentation"><a href="#assessment-table-exams" aria-controls="assessment-table-exams" role="tab" data-toggle="tab">Exams</a></li>
@@ -240,11 +256,11 @@
       </#if>
     </tbody>
   </table>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. Have you contacted anyone about your mitigating circumstances?</legend>
+<@question_section
+  question = "Have you contacted anyone about your mitigating circumstances?"
+>
   <div class="radio">
     <@bs3form.radio_inline>
       <@f.radiobutton path="contacted" value="true" /> Yes
@@ -257,31 +273,34 @@
     <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
+    <@question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
+
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
-      <div class="help-block">Please tell us why you haven't yet contacted anyone about your mitigating circumstances</div>
     </@bs3form.form_group>
   </div>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. What steps have been taken so far in relation to your issues?</legend>
+<@question_section
+  question = "What steps have been taken so far in relation to your issues?"
+  hint = "Please tell us about anything that you've done, or that's being done by other people, to help with your issues"
+>
   <@bs3form.form_group "stepsSoFar">
     <@f.textarea path="stepsSoFar" cssClass="form-control" rows="5" />
   </@bs3form.form_group>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
-  <legend>${questionNumber}. Tell us how your circumstances are likely to change or resolve?</legend>
+<@question_section
+  question = "Tell us how your circumstances are likely to change or resolve?"
+  hint = "If you're getting treatment or other support which will eventually resolve your issues, please tell us something
+    about how and when you expect this to take place"
+>
   <@bs3form.form_group "changeOrResolve">
     <@f.textarea path="changeOrResolve" cssClass="form-control" rows="5" />
   </@bs3form.form_group>
-  <#assign questionNumber = questionNumber + 1 />
-</fieldset>
+</@question_section>
 
-<fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed">
+<@question_section>
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
@@ -312,10 +331,10 @@
   </#if>
 
   <@bs3form.filewidget
-  basename="file"
-  labelText="Upload new supporting documentation relevant to your submission"
-  types=[]
-  multiple=true
-  required=false
+    basename="file"
+    labelText="Upload new supporting documentation relevant to your submission"
+    types=[]
+    multiple=true
+    required=false
   />
-</fieldset>
+</@question_section>
