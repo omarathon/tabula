@@ -48,6 +48,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   noContactReason = submission.noContactReason
   stepsSoFar = submission.stepsSoFar
   changeOrResolve = submission.changeOrResolve
+  pendingEvidence = submission.pendingEvidence
   attachedFiles = submission.attachments
   relatedSubmission = submission.relatedSubmission
 
@@ -83,6 +84,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
     submission.stepsSoFar = stepsSoFar
     submission.changeOrResolve = changeOrResolve
+    submission.pendingEvidence = pendingEvidence
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: mutable.Set[FileAttachment] = submission.attachments.asScala -- attachedFiles.asScala

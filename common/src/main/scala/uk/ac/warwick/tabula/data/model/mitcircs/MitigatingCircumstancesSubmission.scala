@@ -93,6 +93,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var changeOrResolve: String = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(nullable = false)
+  var pendingEvidence: String = _
+
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()

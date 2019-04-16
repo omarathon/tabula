@@ -291,7 +291,7 @@
 </@question_section>
 
 <@question_section
-  question = "Tell us how your circumstances are likely to change or resolve?"
+  question = "Tell us how your circumstances are likely to change or resolve"
   hint = "If you're getting treatment or other support which will eventually resolve your issues, please tell us something
     about how and when you expect this to take place"
 >
@@ -337,4 +337,12 @@
     multiple=true
     required=false
   />
+</@question_section>
+
+<@question_section
+  question = "Tell us about evidence you’re going to upload in the future"
+>
+  <@bs3form.form_group "pendingEvidence">
+    <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+  </@bs3form.form_group>
 </@question_section>

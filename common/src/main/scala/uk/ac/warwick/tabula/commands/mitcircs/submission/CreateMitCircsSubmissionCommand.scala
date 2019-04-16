@@ -63,6 +63,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     }
     submission.stepsSoFar = stepsSoFar
     submission.changeOrResolve = changeOrResolve
+    submission.pendingEvidence = pendingEvidence
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
@@ -166,6 +167,7 @@ trait CreateMitCircsSubmissionState {
 
   var stepsSoFar: String = _
   var changeOrResolve: String = _
+  var pendingEvidence: String = _
 
   var file: UploadedFile = new UploadedFile
   var attachedFiles: JSet[FileAttachment] = JSet()
