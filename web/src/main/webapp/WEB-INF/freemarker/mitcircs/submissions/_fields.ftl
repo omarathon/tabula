@@ -49,11 +49,15 @@
     </#if>
 
     <#if hint?has_content>
-      <p class="mitcircs-form__fields__section__hint">(${hint})</p>
+      <@question_hint hint />
     </#if>
 
     <#nested />
   </fieldset>
+</#macro>
+
+<#macro question_hint hint>
+  <p class="mitcircs-form__fields__section__hint">(${hint})</p>
 </#macro>
 
 <#macro checkboxesWithOther enumValues enumField otherField>
@@ -269,9 +273,7 @@
     <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <p class="mitcircs-form__fields__section__hint">
-      (Please tell us why you haven't yet contacted anyone about your mitigating circumstances)
-    </p>
+    <@question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
 
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
