@@ -274,7 +274,7 @@
                   <p>
                     You can use simple syntax to format the guidance, such as using <code>**asterixes**</code> around words to make them
                     <strong>bold</strong>, <code>_underscores_</code> to make them <em>italic</em>. To make a link, use syntax like
-                    <code>[text to link](https://warwick.ac.uk/your/link)</code>.
+                    <code style="white-space: nowrap;">[text to link](https://warwick.ac.uk/your/link)</code>.
                   </p>
                 </div>
               </@bs3form.labelled_form_group>
