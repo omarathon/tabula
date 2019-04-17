@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.mitcircs.web.Routes
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
 import uk.ac.warwick.tabula.web.Mav
@@ -83,7 +83,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Student.home(student))
+      RedirectForce(Routes.Profile.personalCircumstances(student))
     }
   }
 }
@@ -117,7 +117,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Student.home(submission.student))
+      RedirectForce(Routes.Profile.personalCircumstances(submission.student))
     }
   }
 
