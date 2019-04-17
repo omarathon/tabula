@@ -1,3 +1,62 @@
+<#macro extensionButtonContents label assignment>
+  <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />"
+     class="btn btn-default btn-xs">
+    ${label}
+  </a>
+</#macro>
+
+<#macro extensionButton extensionRequested isExtended>
+  <#if extensionRequested>
+    <@extensionButtonContents "Review extension request" assignment />
+  <#elseif assignment.newExtensionsCanBeRequested>
+    <@extensionButtonContents "Request an extension" assignment />
+  </#if>
+</#macro>
+
+<#macro assignmentInformation>
+  <div>
+    <#if !assignment.openEnded>
+      <#assign time_remaining = durationFormatter(assignment.closeDate) />
+      <p>
+        <#if extension??>
+          <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
+
+          <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
+          <span class="very-subtle">${extension_time_remaining}</span>.
+          <@extensionButton extensionRequested isExtended />
+        <#else>
+          <span>Assignment due:</span> <@fmt.date date=assignment.closeDate /> -
+          <span class="very-subtle">${time_remaining}</span>.
+          <@extensionButton extensionRequested isExtended />
+        </#if>
+      </p>
+
+      <#if assignment.collectSubmissions && assignment.allowResubmission && (!assignment.closed || isExtended)>
+        <p class="very-subtle">
+          You can resubmit your assignment multiple times until the deadline.
+          We only accept your latest submission.
+          You cannot resubmit work after the deadline.
+        </p>
+      </#if>
+
+      <#if assignment.collectSubmissions && assignment.allowLateSubmissions>
+        <p class="very-subtle">
+          If you do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
+        </p>
+      </#if>
+    <#else>
+      <p class="very-subtle">
+        This assignment does not have a deadline.
+
+        <#if assignment.collectSubmissions && assignment.allowResubmission>
+          You can submit to this assignment multiple times, but only
+          the latest submission of your work will be kept.
+        </#if>
+      </p>
+    </#if>
+  </div>
+</#macro>
+
 <#if ((canSubmit && !submission??) || canReSubmit) && submitAssignmentCommand??>
   <#if submission??>
     <hr>
@@ -58,62 +117,7 @@
     </@bs3form.labelled_form_group>
 
     <@bs3form.labelled_form_group path="" labelText="Assignment information">
-      <div>
-        <#if !assignment.openEnded>
-          <#macro extensionButtonContents label assignment>
-            <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />"
-               class="btn btn-default btn-xs">
-              ${label}
-            </a>
-          </#macro>
-
-          <#macro extensionButton extensionRequested isExtended>
-            <#if extensionRequested>
-              <@extensionButtonContents "Review extension request" assignment />
-            <#elseif !isExtended && assignment.newExtensionsCanBeRequested>
-              <@extensionButtonContents "Request an extension" assignment />
-            </#if>
-          </#macro>
-
-          <#assign time_remaining = durationFormatter(assignment.closeDate) />
-          <p>
-            <#if isExtended>
-              <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
-
-              <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
-              <span class="very-subtle">${extension_time_remaining}</span>.
-              <@extensionButton extensionRequested isExtended />
-            <#else>
-              <span>Assignment due:</span> <@fmt.date date=assignment.closeDate /> -
-              <span class="very-subtle">${time_remaining}</span>.
-              <@extensionButton extensionRequested isExtended />
-            </#if>
-          </p>
-
-          <#if assignment.allowResubmission && (!assignment.closed || isExtended)>
-            <p class="very-subtle">
-              You can resubmit your assignment multiple times until the deadline.
-              We only accept your latest submission.
-              You cannot resubmit work after the deadline.
-            </p>
-          </#if>
-
-          <#if assignment.allowLateSubmissions>
-            <p class="very-subtle">
-              If you do not submit your assignment before the deadline, you can submit late work only once. Your mark may be affected.
-            </p>
-          </#if>
-        <#else>
-          <p class="very-subtle">
-            This assignment does not have a deadline.
-
-            <#if assignment.allowResubmission>
-              You can submit to this assignment multiple times, but only
-              the latest submission of your work will be kept.
-            </#if>
-          </p>
-        </#if>
-      </div>
+      <@assignmentInformation />
     </@bs3form.labelled_form_group>
 
     <div>
@@ -217,6 +221,8 @@
       This assignment isn't collecting submissions through this system, but you may get
       an email to retrieve your feedback from here.
     </p>
+
+    <@assignmentInformation />
 
     <h3>Expecting your feedback?</h3>
 

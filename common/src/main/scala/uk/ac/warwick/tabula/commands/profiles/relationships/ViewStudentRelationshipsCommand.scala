@@ -43,11 +43,15 @@ class ViewStudentRelationshipsCommandInternal(val department: Department, val re
       .distinct.count(_.replacedBy == null)
 
     val courseMap: Map[StudentCourseDetails, Course] = benchmarkTask("courseDetails") {
-      relationshipService.coursesForStudentCourseDetails(sortedAgentRelationships.values.flatten.map(_.studentCourseDetails).toSeq)
+      sortedAgentRelationships.values.flatten.map { relationship =>
+        relationship.studentCourseDetails -> relationship.studentCourseDetails.course
+      }.toMap
     }
 
     val yearOfStudyMap: Map[StudentCourseDetails, Int] = benchmarkTask("yearsOfStudy") {
-      relationshipService.latestYearsOfStudyForStudentCourseDetails(sortedAgentRelationships.values.flatten.map(_.studentCourseDetails).toSeq)
+      sortedAgentRelationships.values.flatten.map { relationship =>
+        relationship.studentCourseDetails -> relationship.studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy.toInt
+      }.toMap
     }
 
     ViewStudentRelationshipsCommand.Result(

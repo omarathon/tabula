@@ -38,15 +38,11 @@ class DisplayExtensionCommandInternal(val student: User, val assignment: Assignm
   this: ExtensionServiceComponent with SubmissionServiceComponent =>
 
   def applyInternal(): DisplayExtensionDetail = {
-
-    val extension: Option[Extension] = assignment.findExtension(student.getUserId)
-
+    val extension: Option[Extension] = assignment.requestedOrApprovedExtensions.get(student.getUserId)
     val previousExtensions = extensionService.getAllExtensionRequests(student)
-
     val previousSubmissions = submissionService.getAllSubmissions(student)
 
     DisplayExtensionDetail(extension, student, previousExtensions, previousSubmissions)
-
   }
 }
 

@@ -6,8 +6,8 @@
 <#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
 <#assign assignment=submission.assignment />
 <#assign module=assignment.module />
-<#if assignment.findExtension(submission.usercode)??>
-  <#assign extension=assignment.findExtension(submission.usercode) />
+<#if assignment.approvedExtensions[submission.usercode]??>
+  <#assign extension=assignment.approvedExtensions[submission.usercode] />
 </#if>
 
 <head>

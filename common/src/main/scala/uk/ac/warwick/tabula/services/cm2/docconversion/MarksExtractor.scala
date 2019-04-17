@@ -16,6 +16,7 @@ import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
 import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
+import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkerFeedback}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -50,6 +51,18 @@ class MarkItem extends AutowiringUserLookupComponent {
     f <- currentFeedback(assignment)
     cmf <- f.markerFeedback.asScala.find(mf => marker == mf.marker && f.outstandingStages.asScala.contains(mf.stage))
   } yield cmf
+
+  // true if none of the fields of this MarkItem differ from the values found in the marker feedback
+  def unchanged(mf: MarkerFeedback): Boolean = {
+    val markUnchanged = if(StringUtils.hasText(actualMark)) mf.mark.contains(actualMark.toInt) else mf.mark.isEmpty
+    val gradeUnchanged = if(StringUtils.hasText(actualGrade)) mf.grade.contains(actualGrade) else mf.grade.isEmpty
+    val fieldValuesUnchanged = fieldValues.asScala.forall { case (fieldName, value) =>
+      val mfFieldValue = mf.fieldValue(fieldName)
+      if(StringUtils.hasText(value)) mfFieldValue.contains(value) else mfFieldValue.isEmpty || mfFieldValue.forall(s => !StringUtils.hasText(s))
+    }
+
+    markUnchanged && gradeUnchanged && fieldValuesUnchanged
+  }
 
 }
 

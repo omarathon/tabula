@@ -59,7 +59,7 @@ trait RelationshipDao {
 
   def getCurrentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 
-  def getCurrentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+  def getCurrentRelationshipsByStudentOrStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 
   def getCurrentRelationshipsForAgent(agentId: String): Seq[MemberStudentRelationship]
 
@@ -89,10 +89,6 @@ trait RelationshipDao {
   ): Seq[StudentAssociationEntityData]
 
   def listCurrentRelationshipsWithAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-
-  def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course]
-
-  def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int]
 }
 
 @Repository
@@ -290,47 +286,40 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
       .add(or(isNull("startDate"), le("startDate", DateTime.now)))
       .addOrder(asc("_agentMember"))
       .addOrder(asc("studentCourseDetails"))
+      .setFetchMode("studentCourseDetails", FetchMode.JOIN)
       .setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
       .setFetchMode("studentCourseDetails.route", FetchMode.JOIN)
-      .setFetchMode("studentCourseDetails.latestYearDetails", FetchMode.JOIN)
-      .setFetchMode("studentCourseDetails.latestYearDetails.enrolmentStatus", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.course", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.latestStudentCourseYearDetails", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.latestStudentCourseYearDetails.enrolmentStatus", FetchMode.JOIN)
       .setFetchMode("_agentMember", FetchMode.JOIN)
-      .seq
+      .distinct.seq
   }
 
-  def getCurrentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
-    session.newQuery[StudentRelationship](
-      """
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				StudentCourseDetails scd,
-				Member staff
-			where
-				sr.studentCourseDetails = scd
-      and
-        staff = sr._agentMember
-			and
-				sr.relationshipType = :relationshipType
-			and
-				staff.homeDepartment = :department
-			and
-				scd.statusOnRoute.code not like 'P%'
-			and
-				scd.mostSignificant = true
-			and
-				(sr.endDate is null or sr.endDate >= :now)
-			and
-				(sr.startDate is null or sr.startDate <= :now)
-			order by
-				sr._agentMember, sr.studentCourseDetails
-																					""")
-      .setEntity("department", department)
-      .setEntity("relationshipType", relationshipType)
-      .setParameter("now", DateTime.now())
-      .seq
-  }
+  def getCurrentRelationshipsByStudentOrStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] =
+    session.newCriteria[StudentRelationship]
+      .createAlias("studentCourseDetails", "studentCourseDetails")
+      .createAlias("studentCourseDetails.student", "student")
+      .createAlias("_agentMember", "staff")
+      .add(is("relationshipType", relationshipType))
+      .add(or(
+        is("studentCourseDetails.department", department),
+        is("staff.homeDepartment", department)
+      ))
+      .add(is("studentCourseDetails.mostSignificant", true))
+      .add(not(like("studentCourseDetails.statusOnRoute.code", "P%")))
+      .add(or(isNull("endDate"), ge("endDate", DateTime.now)))
+      .add(or(isNull("startDate"), le("startDate", DateTime.now)))
+      .addOrder(asc("_agentMember"))
+      .addOrder(asc("studentCourseDetails"))
+      .setFetchMode("studentCourseDetails", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.route", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.course", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.latestStudentCourseYearDetails", FetchMode.JOIN)
+      .setFetchMode("studentCourseDetails.latestStudentCourseYearDetails.enrolmentStatus", FetchMode.JOIN)
+      .setFetchMode("_agentMember", FetchMode.JOIN)
+      .distinct.seq
 
   def getCurrentRelationshipsForAgent(agentId: String): Seq[MemberStudentRelationship] =
     currentRelationsipBaseCriteria(agentId).seq
@@ -630,55 +619,5 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
       .seq
 
     memberRelationships ++ externalRelationships
-  }
-
-  def coursesForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Course] = {
-    if (scds.isEmpty) {
-      Map()
-    } else {
-      val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
-      val queryString =
-        """
-				select studentCourseDetails.scjCode, course
-				from StudentCourseDetails studentCourseDetails, Course course
-				where studentCourseDetails.course = course
-				and (
-			""" + scjCodes.map {
-          case (_, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
-        }.mkString(" or ") + ")"
-      val query = session.newQuery[Array[java.lang.Object]](queryString)
-      scjCodes.foreach {
-        case (ids, index) =>
-          query.setParameterList("scjCodes" + index.toString, ids)
-      }
-      query.seq.distinct.map { objArray =>
-        scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Course]
-      }.toMap
-    }
-  }
-
-  def latestYearsOfStudyForStudentCourseDetails(scds: Seq[StudentCourseDetails]): Map[StudentCourseDetails, Int] = {
-    if (scds.isEmpty) {
-      Map()
-    } else {
-      val scjCodes = scds.map(_.scjCode).grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
-      val queryString =
-        """
-				select studentCourseDetails.scjCode, studentCourseYearDetails.yearOfStudy
-				from StudentCourseDetails studentCourseDetails, StudentCourseYearDetails studentCourseYearDetails
-				where studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
-				and (
-				""" + scjCodes.map {
-          case (_, index) => "studentCourseDetails.scjCode in (:scjCodes" + index.toString + ") "
-        }.mkString(" or ") + ")"
-      val query = session.newQuery[Array[java.lang.Object]](queryString)
-      scjCodes.foreach {
-        case (ids, index) =>
-          query.setParameterList("scjCodes" + index.toString, ids)
-      }
-      query.seq.distinct.map { objArray =>
-        scds.find(_.scjCode == objArray(0).asInstanceOf[String]).get -> objArray(1).asInstanceOf[Int]
-      }.toMap
-    }
   }
 }

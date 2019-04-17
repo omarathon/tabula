@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.commands.coursework.departments
 
-import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryMethods
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{TestBase, Mockito}
+import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 // scalastyle:off magic.number
@@ -27,11 +27,17 @@ trait ReportWorld extends TestBase with Mockito {
     users
   }
 
-  val extensionService: ExtensionService = mock[ExtensionService]
-  extensionService.hasExtensions(any[Assignment]) answers (assignmentObj => {
+  val extensionService: ExtensionService = smartMock[ExtensionService]
+  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj =>
     val assignment = assignmentObj.asInstanceOf[Assignment]
-    !assignment.extensions.isEmpty
-  })
+    !assignment._extensions.isEmpty
+  }
+  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj =>
+    val assignment = assignmentObj.asInstanceOf[Assignment]
+    assignment._extensions.asScala.filter(_.approved)
+      .groupBy(_.usercode)
+      .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+  }
 
   val department = new Department
   department.code = "IN"
@@ -131,7 +137,8 @@ trait ReportWorld extends TestBase with Mockito {
   extension.approve()
   extension.expiryDate = assignmentSix.closeDate.plusDays(2)
   extension.assignment = assignmentSix
-  assignmentSix.extensions = Seq(extension).asJava
+  assignmentSix._extensions.clear()
+  assignmentSix._extensions.addAll(Seq(extension).asJava)
 
   def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module): Assignment = {
     val assignment = new Assignment(module)

@@ -290,7 +290,7 @@ trait MarkingSummaryMarkerProgress extends TaskBenchmarking {
     MarkerAssignmentInfo(
       assignment,
       assignment.feedbackDeadline,
-      extensionCount = assignment.extensions.asScala.count { e => students.exists(e.isForUser) },
+      extensionCount = assignment.approvedExtensions.keys.count(students.map(_.getUserId).contains),
       unsubmittedCount = students.count { u => !assignment.submissions.asScala.exists(_.isForUser(u)) },
       lateSubmissionsCount = assignment.submissions.asScala.count { s => s.isLate && students.exists(s.isForUser) },
       currentStages,
@@ -396,7 +396,7 @@ trait MarkerWorkflowCache {
               Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
 
             case Some(assignment) =>
-              val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+              val futureExtensionDate = assignment.approvedExtensions.values.flatMap(_.expiryDate).toSeq.sorted.find(_.isAfterNow)
 
               futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
                 .getOrElse(CacheExpiryTime.getSeconds)
@@ -426,7 +426,8 @@ trait CachedMarkerWorkflowInformation extends MarkerWorkflowInformation with Mar
             messageCode = progress("messageCode").asInstanceOf[String],
             health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
             completed = progress("completed").asInstanceOf[Boolean],
-            preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean]
+            preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean],
+            skipped = progress("skipped").asInstanceOf[Boolean]
           )
         },
         nextStage = progressInfo.get("nextStage") match {

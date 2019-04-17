@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import com.google.common.annotations.VisibleForTesting
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
@@ -7,10 +8,11 @@ import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
+import uk.ac.warwick.tabula.data.{HibernateHelpers, PostLoadBehaviour}
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
-import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
+import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, ModeratedWorkflow}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
@@ -21,7 +23,6 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.reflect._
 
 object Assignment {
@@ -207,7 +208,8 @@ class Assignment
 
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  var extensions: JList[Extension] = JArrayList()
+  @VisibleForTesting
+  val _extensions: JList[Extension] = JArrayList()
 
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
@@ -249,25 +251,24 @@ class Assignment
     * deadline based on extension expiry date logic if none of the above AND (there are submissions within extension deadline OR if there are approved extensions  for all students)
     *
     */
-  def feedbackDeadline: Option[LocalDate] = if (openEnded || dissertation || !publishFeedback) {
-    None
-  } else if (!hasExtensions || !extensions.asScala.exists(_.approved) || submissions.asScala.exists(s => !extensions.asScala.exists(e => e.isForUser(s.usercode))) || !doesAllMembersHaveApprovedExtensions) {
-    Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
-  } else if (extensions.asScala.exists(_.feedbackDeadline.isDefined)) {
-    Option(extensions.asScala.filter(_.approved).flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
-  } else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
-    Option(workingDaysHelper.datePlusWorkingDays(extensions.asScala.filter(_.expiryDate.nonEmpty).map(_.expiryDate).min.get.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
-  } else None
-
+  def feedbackDeadline: Option[LocalDate] =
+    if (openEnded || dissertation || !publishFeedback) {
+      None
+    } else if (!hasExtensions || approvedExtensions.isEmpty || submissions.asScala.exists(s => !approvedExtensions.contains(s.usercode)) || !doesAllMembersHaveApprovedExtensions) {
+      Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
+    } else if (approvedExtensions.values.exists(_.feedbackDeadline.nonEmpty)) {
+      Option(approvedExtensions.values.flatMap(_.feedbackDeadline).map(_.toLocalDate).min)
+    } else if (submissions.size() == 0 && doesAllMembersHaveApprovedExtensions) {
+      Option(workingDaysHelper.datePlusWorkingDays(approvedExtensions.values.flatMap(_.expiryDate).min.toLocalDate.asJava, Feedback.PublishDeadlineInWorkingDays)).map(_.asJoda)
+    } else None
 
   private def doesAllMembersHaveApprovedExtensions: Boolean =
     assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Option(members))
-      .forall(user => extensions.asScala.exists(e => e.expiryDate.isDefined && e.approved && e.isForUser(user)))
-
+      .forall(user => approvedExtensions.contains(user.getUserId))
 
   def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
     // If we have an extension, use the extension's expiry date
-    val extension = extensions.asScala.find { e => e.isForUser(submission.usercode) && e.approved }
+    val extension = approvedExtensions.get(submission.usercode)
 
     val baseFeedbackDeadline =
       extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).getOrElse(wholeAssignmentDeadline)
@@ -363,6 +364,8 @@ class Assignment
 
   def hasCM2Workflow: Boolean = cm2MarkingWorkflow != null
 
+  def hasModeration: Boolean = Option(HibernateHelpers.initialiseAndUnproxy(cm2MarkingWorkflow)).exists(_.isInstanceOf[ModeratedWorkflow])
+
   @OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL), orphanRemoval = true)
   @BatchSize(size = 200)
   var firstMarkers: JList[FirstMarkersMap] = JArrayList()
@@ -447,7 +450,7 @@ class Assignment
   def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getUserId, time)
 
   def isWithinExtension(usercode: String, time: DateTime): Boolean =
-    extensions.asScala.exists(e => e.isForUser(usercode) && e.approved && e.expiryDate.exists(_.isAfter(time)))
+    approvedExtensions.get(usercode).exists(_.expiryDate.exists(_.isAfter(time)))
 
   /**
     * True if the specified user has been granted an extension and that extension has not expired now
@@ -469,8 +472,7 @@ class Assignment
     */
   def submissionDeadline(usercode: String): DateTime =
     if (openEnded) null
-    else
-      extensions.asScala.find(e => e.isForUser(usercode) && e.approved).flatMap(_.expiryDate).getOrElse(closeDate)
+    else approvedExtensions.get(usercode).flatMap(_.expiryDate).getOrElse(closeDate)
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
@@ -511,9 +513,6 @@ class Assignment
     */
   def isAuthorisedLate(submission: Submission): Boolean =
     !openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.usercode, submission.submittedDate)
-
-  // returns extension for a specified student
-  def findExtension(usercode: String): Option[Extension] = extensions.asScala.find(_.usercode == usercode)
 
   /**
     * Whether the assignment is not archived or deleted.
@@ -611,19 +610,53 @@ class Assignment
 
   def hasUnreleasedFeedback: Boolean = countReleasedFeedback < countFullFeedback
 
-  def countExtensions: Int = extensionService.countExtensions(this)
-
-  def hasExtensions: Boolean = extensionService.hasExtensions(this)
-
-  def countUnapprovedExtensions: Int = extensionService.countUnapprovedExtensions(this)
-
-  def hasUnapprovedExtensions: Boolean = extensionService.hasUnapprovedExtensions(this)
-
-  def getUnapprovedExtensions: Seq[Extension] = extensionService.getUnapprovedExtensions(this)
-
-  def extensionCountByStatus: Map[ExtensionState, Int] = {
-    extensions.asScala.groupBy(_._state).map { case (state, extensionList) => (state, extensionList.size) }
+  private class ExtensionInfo {
+    lazy val all: Map[String, Seq[Extension]] = extensionService.getAllExtensionsByUserId(Assignment.this)
+    lazy val approved: Map[String, Extension] = extensionService.getApprovedExtensionsByUserId(Assignment.this)
+    lazy val count: Int = extensionService.countExtensions(Assignment.this)
+    lazy val has: Boolean = extensionService.hasExtensions(Assignment.this)
+    lazy val countUnapproved: Int = extensionService.countUnapprovedExtensions(Assignment.this)
+    lazy val hasUnapproved: Boolean = extensionService.hasUnapprovedExtensions(Assignment.this)
+    lazy val getUnapproved: Seq[Extension] = extensionService.getUnapprovedExtensions(Assignment.this)
+    lazy val countByStatus: Map[ExtensionState, Int] = extensionService.countExtensionsByState(Assignment.this)
   }
+  @transient private var extensionInfo = new ExtensionInfo
+
+  def allExtensions: Map[String, Seq[Extension]] = extensionInfo.all
+
+  /**
+    * Get all approved extensions for this assignment, using the latest extended deadline for where a student has multiple.
+    */
+  def approvedExtensions: Map[String, Extension] = extensionInfo.approved
+
+  /**
+    * Get the latest requested extension, if there is one, per-user, falling back to an approved extension if there isn't one
+    */
+  def requestedOrApprovedExtensions: Map[String, Extension] =
+    allExtensions.mapValues { extensions =>
+      if (extensions.size == 1) extensions.head
+      else extensions.find(_.awaitingReview).getOrElse(extensions.maxBy(_.requestedOn))
+    }
+
+  /**
+    * Gets the currently in-review request
+    */
+  def currentExtensionRequests: Map[String, Extension] =
+    allExtensions.toSeq.flatMap { case (usercode, extensions) =>
+      val extension = extensions.find { e =>
+        e.state == ExtensionState.Unreviewed ||
+        e.state == ExtensionState.MoreInformationReceived ||
+        e.state == ExtensionState.MoreInformationRequired
+      }
+      extension.map(usercode -> _)
+    }.toMap
+
+  def countExtensions: Int = extensionInfo.count
+  def hasExtensions: Boolean = extensionInfo.has
+  def countUnapprovedExtensions: Int = extensionInfo.countUnapproved
+  def hasUnapprovedExtensions: Boolean = extensionInfo.hasUnapproved
+  def getUnapprovedExtensions: Seq[Extension] = extensionInfo.getUnapproved
+  def extensionCountByStatus: Map[ExtensionState, Int] = extensionInfo.countByStatus
 
   def addFields(fieldz: AssignmentFormField*): Unit = for (field <- fieldz) addField(field)
 
@@ -638,8 +671,25 @@ class Assignment
   }
 
   def addExtension(extension: Extension): Unit = {
-    extensions.add(extension)
+    _extensions.add(extension)
+    extensionInfo = new ExtensionInfo
     extension.assignment = this
+  }
+
+  /**
+    * TAB-6028 - When we make an assignment open-ended, remove rejected extension requests (as they no longer make sense)
+    */
+  def removeRejectedExtensions(persistence: ExtensionPersistenceComponent): Unit = {
+    _extensions.asScala
+      .filterNot(e => e.awaitingReview || e.approved)
+      .foreach { extension =>
+        extension.attachments.asScala.foreach(persistence.delete)
+        _extensions.remove(extension)
+        extension.assignment = null
+        persistence.delete(extension)
+      }
+
+    extensionInfo = new ExtensionInfo
   }
 
   // returns the submission for a specified student
@@ -833,7 +883,7 @@ class Assignment
     if (openEnded || dissertation || !publishFeedback || !collectSubmissions || _archived) {
       false
     } else {
-      !submissions.asScala.forall(s => findExtension(s.usercode).exists(_.approved) || fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
+      !submissions.asScala.forall(s => approvedExtensions.contains(s.usercode) || fullFeedback.exists(f => f.usercode == s.usercode && f.checkedReleased) || s.hasPlagiarismInvestigation)
     }
   }
 
@@ -940,7 +990,6 @@ class Assignment
   def turnitinLtiClassWithAcademicYear_=(withAcademicYear: Boolean): Unit = settings += (Settings.TurnitinLtiClassWithAcademicYear -> withAcademicYear)
 
   def enhance(user: User): EnhancedAssignment = {
-    val extension = extensions.asScala.find(e => e.isForUser(user))
     val submission = submissions.asScala.find(_.usercode == user.getUserId)
     val feedbackDeadline = submission.flatMap(feedbackDeadlineForSubmission)
     val feedbackDeadlineWorkingDaysAway = feedbackDeadline.map(workingDaysAway)
@@ -951,9 +1000,9 @@ class Assignment
       submission = submission,
       feedbackDeadlineWorkingDaysAway = feedbackDeadlineWorkingDaysAway,
       feedback = feedbacks.asScala.filter(_.released).find(_.usercode == user.getUserId),
-      extension = extension,
+      extension = approvedExtensions.get(user.getUserId),
       withinExtension = isWithinExtension(user),
-      extensionRequested = extension.isDefined && !extension.get.isManual
+      extensionRequested = allExtensions.get(user.getUserId).exists(_.exists(!_.isManual))
     )
   }
 
@@ -1064,7 +1113,6 @@ case class EnhancedAssignment(
   extension: Option[Extension],
   withinExtension: Boolean,
   extensionRequested: Boolean
-
 )
 
 trait HasAssignment {

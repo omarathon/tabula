@@ -348,7 +348,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
               Seconds.secondsBetween(DateTime.now, assignment.closeDate).getSeconds
 
             case Some(assignment) =>
-              val futureExtensionDate = assignment.extensions.asScala.flatMap(_.expiryDate).sorted.find(_.isAfterNow)
+              val futureExtensionDate = assignment.approvedExtensions.values.flatMap(_.expiryDate).toSeq.sorted.find(_.isAfterNow)
 
               futureExtensionDate.map[Number] { dt => Seconds.secondsBetween(DateTime.now, dt).getSeconds }
                 .getOrElse(CacheExpiryTime.getSeconds)
@@ -388,7 +388,8 @@ trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgres
                     messageCode = progress("messageCode").asInstanceOf[String],
                     health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
                     completed = progress("completed").asInstanceOf[Boolean],
-                    preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean]
+                    preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean],
+                    skipped = progress("skipped").asInstanceOf[Boolean]
                   ),
                   count = p("count").asInstanceOf[Int]
                 )

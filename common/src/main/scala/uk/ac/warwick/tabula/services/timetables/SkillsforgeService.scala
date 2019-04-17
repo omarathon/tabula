@@ -111,7 +111,6 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
 
 
 case class SkillsforgeConfiguration(
-  enabled: Boolean,
   baseUri: String,
   authToken: String,
   hardcodedUserId: Option[String],
@@ -124,7 +123,6 @@ trait SkillsForgeConfigurationComponent {
 
 trait AutowiringSkillsforgeConfigurationComponent extends SkillsForgeConfigurationComponent {
   lazy val config = SkillsforgeConfiguration(
-    enabled = Wire.property("${skillsforge.enabled}").toBoolean,
     baseUri = Wire.property("${skillsforge.base.url}"),
     authToken = Wire.property("${skillsforge.authToken}"),
     hardcodedUserId = Wire.optionProperty("${skillsforge.hardcodedUserId}").filter(_.hasText),

@@ -48,6 +48,9 @@
                 <#list results.workflowMarkers as marker_col>
                   <col class="${marker_col}" />
                 </#list>
+                <#if assignment.hasModeration>
+                  <col class="wasModerated" />
+                </#if>
               <#else>
                 <#assign submissionColspan=submissionColspan+2 />
                 <col class="first-marker" />
@@ -126,6 +129,9 @@
                 <#list results.workflowMarkers as marker_col>
                   <th class="submission sortable">${marker_col}</th>
                 </#list>
+                <#if assignment.hasModeration>
+                  <th class="wasModerated sortable">Was moderated</th>
+                </#if>
               <#else>
                 <th class="submission sortable">First Marker</th>
                 <th class="submission sortable">Second Marker</th>
@@ -223,6 +229,7 @@
                         </#if>
                       </td>
                     </#list>
+                    <#if assignment.hasModeration><td class="wasModerated">${feedback.wasModerated?then("Yes", "No")}</td></#if>
                   <#else>
                     <#list results.workflowMarkers as markerRole>
                       <td></td>

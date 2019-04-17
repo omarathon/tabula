@@ -403,8 +403,7 @@ object SubmissionAndFeedbackInfoFilters {
 
         override def getName: String = stage.name
 
-        //FIXME - need stage description. Currently even though we have First and final marker but both have same role and we can see 2 same entries in filter (Marker)
-        override def description: String = s"Marked by ${stage.roleName.toLowerCase}"
+        override def description: String = s"${stage.pastVerb.capitalize} by ${stage.description.toLowerCase}"
 
         override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.isDefined &&
           item.coursework.enhancedFeedback.get.feedback.isMarkedByStage(stage)

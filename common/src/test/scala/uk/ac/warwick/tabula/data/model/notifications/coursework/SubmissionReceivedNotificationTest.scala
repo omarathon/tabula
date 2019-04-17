@@ -53,6 +53,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       extension.approve()
       assignment.addExtension(extension)
 
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
+
       assignment.isLate(submission) should be(false)
       assignment.isAuthorisedLate(submission) should be(false)
 
@@ -64,6 +67,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
   @Test def titleLate() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
       assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
@@ -82,6 +88,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
   @Test def titleLateWithinExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
       assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
@@ -94,6 +103,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
       extension.approve()
       assignment.addExtension(extension)
+
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
 
       assignment.isLate(submission) should be(false)
       assignment.isAuthorisedLate(submission) should be(true)
@@ -106,6 +118,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
   @Test def titleLateAfterExtension() = withFakeTime(new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 39, 0, 0)) {
     withUser("cuscav", "0672089") {
       val assignment = Fixtures.assignment("5,000 word essay")
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
       assignment.module = Fixtures.module("cs118", "Programming for Computer Scientists")
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)
 
@@ -118,6 +133,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       extension.expiryDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 17, 9, 0, 0, 0)
       extension.approve()
       assignment.addExtension(extension)
+
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(extension.usercode -> extension)
 
       assignment.isLate(submission) should be(true)
       assignment.isAuthorisedLate(submission) should be(false)
@@ -139,6 +157,9 @@ class SubmissionReceivedNotificationTest extends TestBase with Mockito {
       subDepartment.parent = department
 
       val assignment = Fixtures.assignment("5,000 word essay")
+      assignment.extensionService = smartMock[ExtensionService]
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+
       val module = Fixtures.module("cs118", "Programming for Computer Scientists")
       assignment.module = module
       assignment.closeDate = new DateTime(2014, DateTimeConstants.SEPTEMBER, 16, 9, 0, 0, 0)

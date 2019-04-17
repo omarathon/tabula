@@ -174,15 +174,20 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
 
   // Public for testing
   def enhance(assignment: Assignment): StudentAssignmentInformation = {
-    val extension = assignment.extensions.asScala.find(e => e.isForUser(user.apparentUser) && e.expiryDate.nonEmpty)
+    val extension = assignment.approvedExtensions.get(user.userId)
     // isExtended: is within an approved extension
     val isExtended = assignment.isWithinExtension(user.apparentUser)
     // hasActiveExtension: active = approved
-    val hasActiveExtension = extension.exists(_.approved)
-    val extensionRequested = extension.isDefined && !extension.get.isManual
+    val hasActiveExtension = extension.nonEmpty
+    val extensionRequested = assignment.allExtensions.get(user.userId).exists(_.exists(!_.isManual))
     val submission = assignment.submissions.asScala.find(_.isForUser(user.apparentUser))
     val feedback = assignment.feedbacks.asScala.filter(_.released).find(_.isForUser(user.apparentUser))
-    val feedbackDeadline = submission.flatMap(assignment.feedbackDeadlineForSubmission)
+    val feedbackDeadline =
+      if (assignment.collectSubmissions) submission.flatMap(assignment.feedbackDeadlineForSubmission)
+      else assignment.feedbackDeadline.flatMap { wholeAssignmentDeadline =>
+        // If we have an extension, use the extension's expiry date
+        extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).orElse(Some(wholeAssignmentDeadline))
+      }
 
     StudentAssignmentInformation(
       assignment = assignment,
@@ -208,7 +213,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
     else if (ass1.openEnded && !ass2.openEnded) false
     else {
       def timeToDeadline(ass: Assignment) = {
-        val extension = ass.extensions.asScala.find(e => e.isForUser(user.apparentUser))
+        val extension = ass.approvedExtensions.get(user.userId)
         val isExtended = ass.isWithinExtension(user.apparentUser)
 
         if (ass.openEnded) ass.openDate
@@ -224,13 +229,16 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
     enrolledAssignments
       .diff(assignmentsWithFeedback)
       .diff(assignmentsWithSubmission)
-      .filter(_.collectSubmissions) // TAB-475
       .sortWith(hasEarlierPersonalDeadline)
       .map(enhance)
   }
 
   private lazy val studentUpcomingAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get upcoming assignments") {
-    allUnsubmittedAssignments.filterNot(i => i.assignment.isOpened || i.lateFormative)
+    allUnsubmittedAssignments
+      .filter {
+        case i if i.assignment.collectSubmissions => !i.assignment.isOpened && !i.lateFormative
+        case _ => true
+      }
   }
 
   private lazy val studentActionRequiredAssignments: Seq[StudentAssignmentInformation] = benchmarkTask("Get action required assignments") {
@@ -258,7 +266,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
         .map(enhance)
 
     val unsubmittedAndUnsubmittable =
-      allUnsubmittedAssignments.filterNot(_.lateFormative)
+      allUnsubmittedAssignments.filterNot(_.lateFormative).filter(_.assignment.collectSubmissions)
         .diff(studentUpcomingAssignments)
         .diff(studentActionRequiredAssignments)
         .filterNot(_.lateFormative)

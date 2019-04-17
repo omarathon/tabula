@@ -35,6 +35,7 @@
   <tbody>
   <#list results.extensions as graph>
     <tr class="itemContainer"
+        
         data-contentid="extension${graph.extension.id}"
         data-detailurl="<@routes.cm2.extensionDetail graph.extension />"
     >

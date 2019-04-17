@@ -49,7 +49,8 @@ object WorkflowStages {
     messageCode: String,
     health: WorkflowStageHealth = WorkflowStageHealth.Good,
     completed: Boolean = false,
-    preconditionsMet: Boolean = false
+    preconditionsMet: Boolean = false,
+    skipped: Boolean = false
   )
 
   def toMap(progresses: Seq[StageProgress]): ListMap[String, StageProgress] = {
@@ -75,7 +76,8 @@ object WorkflowStages {
         messageCode = p.messageCode,
         health = p.health,
         completed = p.completed,
-        preconditionsMet = preconditionsMet(p)
+        preconditionsMet = preconditionsMet(p),
+        skipped = p.skipped
       )
     })
 

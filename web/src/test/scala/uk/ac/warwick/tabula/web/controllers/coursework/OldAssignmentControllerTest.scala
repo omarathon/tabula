@@ -19,6 +19,10 @@ class OldAssignmentControllerTest extends TestBase with Mockito {
     val user: CurrentUser
     val controller = new OldAssignmentController with TestControllerOverrides
     val assignment: Assignment = newDeepAssignment("CS101")
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
+    assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map.empty
+
     val module: Module = assignment.module
     val form: SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentAsSelfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent = SubmitAssignmentCommand.self(module, assignment, currentUser)
     val errors = new BindException(form, "command")

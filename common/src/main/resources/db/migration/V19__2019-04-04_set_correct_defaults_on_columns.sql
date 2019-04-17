@@ -1,0 +1,2 @@
+alter table monitoringcheckpoint alter column updateddate set default current_timestamp at time zone 'Europe/London';
+alter table smallgroupeventattendance alter column updateddate set default current_timestamp at time zone 'Europe/London';

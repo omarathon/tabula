@@ -2,15 +2,15 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
-import javax.persistence.CascadeType.ALL
+import javax.persistence.CascadeType._
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
-import org.joda.time.DateTime
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 @Access(AccessType.FIELD)
@@ -21,10 +21,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToEntityReference {
     type Entity = MitigatingCircumstancesSubmission
 
-  def this(student:StudentMember, creator:User) {
+  def this(student:StudentMember, creator:User, department: Department) {
     this()
     this.creator = creator
     this.student = student
+    this.department = department
   }
 
   @Column(nullable = false, unique = true)
@@ -40,25 +41,61 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
 
-  @OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
-  @Column(nullable = false)
-  var startDate: DateTime = _
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @JoinColumn(name = "department_id")
+  var department: Department = _
+
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @JoinColumn(name = "relatedSubmission")
+  var relatedSubmission: MitigatingCircumstancesSubmission = _
 
   @Column(nullable = false)
-  var endDate: DateTime = _
+  var startDate: LocalDate = _
+
+  @Column(nullable = true)
+  var endDate: LocalDate = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.IssueTypeUserType")
-  var issueType: IssueType = _
+  var issueTypes: Seq[IssueType] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var issueTypeDetails: String = _ // free text for use when the issue type is Other
+  var issueTypeDetails: String = _ // free text for use when the issue type includes Other
+
+  var contacted: JBoolean = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsContactUserType")
+  var contacts: Seq[MitCircsContact] = _
+
+  var contactOther: String = _ // free text for use when the contacts includes Other
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  var noContactReason: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
   var reason: String = _
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @JoinColumn(name = "submission_id")
+  @BatchSize(size = 200)
+  @OrderBy("academicYear, moduleCode, sequence")
+  var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(nullable = false)
+  var stepsSoFar: String = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(nullable = false)
+  var changeOrResolve: String = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(nullable = false)
+  var pendingEvidence: String = _
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)

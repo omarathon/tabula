@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
 
 import scala.collection.JavaConverters._
 
-
 /**
   * Represents an upstream assessment component as found in the central
   * University systems. An component is timeless - it doesn't
@@ -47,6 +46,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Seriali
     * to the same group.
     */
   var assessmentGroup: String = _
+
   /**
     * Identifier for the assignment, unique within a given moduleCode.
     */

@@ -57,6 +57,9 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
       command.assessmentService.getAssignmentsWithFeedback("cuscav", None) returns Seq(feedback1, feedback2)
       command.assessmentService.getAssignmentsWithSubmission("cuscav", None) returns Seq(submitted1, submitted2)
 
+      extensionService.getApprovedExtensionsByUserId(any[Assignment]) returns Map.empty
+      extensionService.getAllExtensionsByUserId(any[Assignment]) returns Map.empty
+
       val info: CourseworkHomepageCommand.CourseworkHomepageStudentInformation = command.studentInformation
       info.actionRequiredAssignments should have size 2
       info.noActionRequiredAssignments should have size 2
@@ -84,6 +87,8 @@ class CourseworkHomepageCommandTest extends TestBase with Mockito {
         extension.approve()
         extension.expiryDate = new DateTime(2016, DateTimeConstants.JULY, 25, 10, 0, 0, 0)
         assignment.addExtension(extension)
+        assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map("cuscav" -> extension)
+        assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map("cuscav" -> Seq(extension))
 
         val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0672089", "cuscav")
         feedback.released = true

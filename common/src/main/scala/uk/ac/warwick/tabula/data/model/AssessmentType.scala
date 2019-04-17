@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
   * While 'A' appears to be the only kind of assignment,
   * 'E' is not the only kind of exam.
   */
-case class AssessmentType(code: String) extends Convertible[String] {
+sealed case class AssessmentType(code: String) extends Convertible[String] {
   def value: String = code
 }
 
 object AssessmentType {
-  implicit val factory: (String) => AssessmentType = { code: String => AssessmentType(code) }
+  implicit val factory: String => AssessmentType = { code: String => AssessmentType(code) }
 
   // For convenience we have a value for the code for assignments and exams,
   // but we don't have an exhaustive/unchanging list of possible codes

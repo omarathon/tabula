@@ -58,9 +58,6 @@ trait AssignmentToJsonConverter {
           "restrictSubmissions" -> assignment.restrictSubmissions,
           "allowLateSubmissions" -> assignment.allowLateSubmissions,
           "allowResubmission" -> assignment.allowResubmission,
-          "allowExtensions" -> assignment.allowExtensions,
-          "extensionAttachmentMandatory" -> assignment.extensionAttachmentMandatory,
-          "allowExtensionsAfterCloseDate" -> assignment.allowExtensionsAfterCloseDate,
           "fileAttachmentLimit" -> assignment.attachmentLimit,
           "fileAttachmentTypes" -> assignment.fileExtensions,
           "individualFileSizeLimit" -> assignment.attachmentField.map(_.individualFileSizeLimit).orNull,
@@ -69,13 +66,20 @@ trait AssignmentToJsonConverter {
           "wordCountMax" -> assignment.wordCountField.map(_.max).orNull,
           "wordCountConventions" -> assignment.wordCountField.map(_.conventions).getOrElse(""),
           "submissions" -> assignment.submissions.size(),
-          "unapprovedExtensions" -> assignment.countUnapprovedExtensions
         )
       } else {
         Map(
-          "collectSubmissions" -> false
+          "collectSubmissions" -> false,
         )
       }
+
+    val extensionInfo =
+      Map(
+        "allowExtensions" -> assignment.allowExtensions,
+        "extensionAttachmentMandatory" -> assignment.extensionAttachmentMandatory,
+        "allowExtensionsAfterCloseDate" -> assignment.allowExtensionsAfterCloseDate,
+        "unapprovedExtensions" -> assignment.countUnapprovedExtensions,
+      )
 
     val membershipInfo = assignment.membershipInfo
     val studentMembershipInfo = jsonAssessmentMembershipInfoObject(membershipInfo, assignment.upstreamAssessmentGroupInfos.groupBy(_.upstreamAssessmentGroup).keys.toSeq)
@@ -104,6 +108,6 @@ trait AssignmentToJsonConverter {
       "unpublishedFeedback" -> assignment.countUnreleasedFeedback
     )
 
-    basicInfo ++ submissionsInfo ++ studentMembershipInfo ++ datesInfo ++ countsInfo
+    basicInfo ++ submissionsInfo ++ extensionInfo ++ studentMembershipInfo ++ datesInfo ++ countsInfo
   }
 }

@@ -58,6 +58,7 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     applicationContext.getBeansOfType(classOf[NotificationService]) returns JMap("notificationService" -> smartMock[NotificationService])
     applicationContext.getBeansOfType(classOf[ModuleAndDepartmentService]) returns JMap("moduleAndDepartmentService" -> moduleAndDepartmentService)
     applicationContext.getBeansOfType(classOf[Features]) returns JMap("features" -> smartMock[Features])
+    applicationContext.getBeansOfType(classOf[ProfileService]) returns JMap("profileService" -> smartMock[ProfileService])
 
     SpringConfigurer.applicationContext = applicationContext
   }
@@ -238,6 +239,8 @@ class FeedbackDueNotificationTest extends TestBase with Mockito with FreemarkerR
     assignment.submissions.add(Fixtures.submission("0000002", "0000002"))
 
     assignment.needsFeedbackPublishing should be (true)
+
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map.empty
 
     val notification = Notification.init(new FeedbackDueGeneralNotification, new AnonymousUser, assignment)
     notification.recipients should not be 'empty

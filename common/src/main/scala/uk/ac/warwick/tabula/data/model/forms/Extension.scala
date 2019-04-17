@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import java.sql.Types
+
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.`type`.StandardBasicTypes
+import org.hibernate.`type`.{StandardBasicTypes, StringType}
 import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, Days}
 import org.springframework.format.annotation.DateTimeFormat
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState.Approved
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
@@ -32,7 +34,11 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   @JoinColumn(name = "assignment_id")
   var assignment: Assignment = _
 
-  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  @transient
+  var profileService: ProfileService = Wire[ProfileService]
+
+  def permissionsParents: Stream[PermissionsTarget] =
+    Option(assignment).toStream #::: profileService.getAllMembersWithUserId(usercode).toStream
 
   @NotNull
   @Column(name = "userId")
@@ -45,7 +51,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
   def universityId = Option(_universityId)
 
-  def studentIdentifier = universityId.getOrElse(usercode)
+  def studentIdentifier: String = universityId.getOrElse(usercode)
 
   def isForUser(user: User): Boolean = isForUser(user.getUserId)
 
@@ -166,7 +172,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
     val reviewDate = Option(reviewedOn)
 
     (requestDate, reviewDate) match {
-      case (Some(request), None) => true
+      case (Some(_), None) => true
       case (Some(latestRequest), Some(lastReview)) if latestRequest.isAfter(lastReview) => true
       case _ => false
     }
@@ -180,7 +186,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
     .findSubmission(usercode)
     .flatMap(s => expiryDate.map(_.isAfter(s.submittedDate)))
     .collect {
-      case (true) => feedbackDueDate
+      case true => feedbackDueDate
     }.flatten
 
   // the feedback deadline if an expry date exists for this extension
@@ -190,8 +196,9 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
   def duration: Int = expiryDate.map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
-  def requestedExtraDuration: Int = requestedExpiryDate
-    .map(Days.daysBetween(expiryDate.getOrElse(assignment.closeDate), _).getDays).getOrElse(0)
+  def requestedExtraDuration: Int =
+    requestedExpiryDate.orElse(expiryDate)
+      .map(Days.daysBetween(assignment.closeDate, _).getDays).getOrElse(0)
 
   // An extension is relevant if the expiry date is after the assignment close date.
   // Extensions can become irrelevant if the assignment close date is moved back
@@ -235,16 +242,16 @@ object ExtensionState {
     case _ => throw new IllegalArgumentException()
   }
 
-  def all = Seq(Unreviewed, Approved, Rejected, Revoked, MoreInformationRequired, MoreInformationReceived)
+  def all: Seq[ExtensionState] = Seq(Unreviewed, Approved, Rejected, Revoked, MoreInformationRequired, MoreInformationReceived)
 }
 
 class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, String] {
-  val basicType = StandardBasicTypes.STRING
+  val basicType: StringType = StandardBasicTypes.STRING
 
   override def sqlTypes = Array(Types.VARCHAR)
 
-  val nullValue = null
-  val nullObject = null
+  override val nullValue: String = null
+  override val nullObject: ExtensionState = null
 
   override def convertToObject(string: String): ExtensionState = ExtensionState.fromCode(string)
 
@@ -254,5 +261,5 @@ class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, Strin
 class ExtensionStateConverter extends TwoWayConverter[String, ExtensionState] {
   override def convertRight(code: String): ExtensionState = ExtensionState.fromCode(code)
 
-  override def convertLeft(state: ExtensionState): String = (Option(state).map(_.dbValue)).orNull
+  override def convertLeft(state: ExtensionState): String = Option(state).map(_.dbValue).orNull
 }

@@ -6,8 +6,8 @@
 <#macro row graph>
   <#local state = (graph.extension.state.description)!"No extension" />
   <tr class="itemContainer"
-      data-contentid="${assignment.id}__${graph.user.userId}"
-      data-detailurl="<@routes.cm2.extensiondetail assignment graph.user.userId />"
+      data-contentid="${assignment.id}__${(graph.extension.id)!graph.user.userId}"
+      data-detailurl="<#if graph.extension??><@routes.cm2.extensionDetail graph.extension /><#else><@routes.cm2.extensiondetail assignment graph.user.userId /></#if>"
   >
 
     <#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
@@ -23,8 +23,8 @@
         <dt>
           ${state}
         </dt>
-        <dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${graph.user.userId}">
-          <div id="content-${assignment.id}__${graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${graph.user.userId}">
+        <dd style="display: none;" class="table-content-container" data-contentid="${assignment.id}__${(graph.extension.id)!graph.user.userId}">
+          <div id="content-${assignment.id}__${(graph.extension.id)!graph.user.userId}" class="content-container" data-contentid="${assignment.id}__${(graph.extension.id)!graph.user.userId}">
             <p>No extension data is currently available.</p>
           </div>
         </dd>

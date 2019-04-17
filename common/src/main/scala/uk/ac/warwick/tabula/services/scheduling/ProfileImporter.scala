@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services.scheduling
 
 import java.sql.{ResultSet, Types}
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.context.annotation.Profile
@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileService}
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.util.termdates.AcademicYearPeriod
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
@@ -341,6 +342,10 @@ class SandboxProfileImporter extends ProfileImporter {
             else if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
         }
 
+        val yearOfStudy = (uniId % 3) + 1
+        val startDate = (AcademicYear.now - (yearOfStudy - 1)).termOrVacation(AcademicYearPeriod.PeriodType.autumnTerm).firstDay
+        val endDate = (AcademicYear.now + (3 - yearOfStudy)).termOrVacation(AcademicYearPeriod.PeriodType.summerTerm).lastDay
+
         MembershipInformation(
           MembershipMember(
             uniId.toString,
@@ -351,10 +356,10 @@ class SandboxProfileImporter extends ProfileImporter {
             name.givenName,
             name.familyName,
             groupName,
-            DateTime.now.minusYears(19).toLocalDate.withDayOfYear((uniId % 364) + 1),
+            dateOfBirth = DateTime.now.minusYears(19).toLocalDate.withDayOfYear((uniId % 364) + 1),
             department.code + uniId.toString.takeRight(4),
-            DateTime.now.minusYears(1).toLocalDate,
-            DateTime.now.plusYears(2).toLocalDate,
+            startDate,
+            endDate,
             DateTime.now,
             null,
             gender,

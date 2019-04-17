@@ -5,7 +5,7 @@ import org.hibernate.criterion.Order
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
@@ -23,6 +23,7 @@ trait MitCircsSubmissionDao {
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
+  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
 }
 
 @Repository
@@ -50,6 +51,13 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] = {
     session.newCriteria[MitigatingCircumstancesSubmission]
       .add(is("student", studentMember))
+      .addOrder(Order.desc("lastModified"))
+      .seq
+  }
+
+  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission] = {
+    session.newCriteria[MitigatingCircumstancesSubmission]
+      .add(is("department", department))
       .addOrder(Order.desc("lastModified"))
       .seq
   }
