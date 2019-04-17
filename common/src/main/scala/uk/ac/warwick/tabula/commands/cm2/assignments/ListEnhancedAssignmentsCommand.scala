@@ -389,7 +389,7 @@ trait CachedAssignmentProgress extends AssignmentProgress with AssignmentProgres
                     health = WorkflowStageHealth.fromCssClass(progress("health").asInstanceOf[Map[String, Any]]("cssClass").asInstanceOf[String]),
                     completed = progress("completed").asInstanceOf[Boolean],
                     preconditionsMet = progress("preconditionsMet").asInstanceOf[Boolean],
-                    skipped = progress("skipped").asInstanceOf[Boolean]
+                    skipped = progress.getOrElse("skipped", false).asInstanceOf[Boolean]
                   ),
                   count = p("count").asInstanceOf[Int]
                 )
