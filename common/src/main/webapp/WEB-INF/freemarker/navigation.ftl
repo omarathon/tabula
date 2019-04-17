@@ -29,8 +29,6 @@
     <#if features.mitCircs>
       <#if canManageMitigatingCircumstances>
         <li class="mitcircs-active"><a href="<@url page="/" context="/mitcircs" />">Mitigating Circumstances</a></li>
-      <#elseif canViewMitigatingCircumstances >
-        <li class="mitcircs-active"><a href="<@url page="/profile" context="/mitcircs" />">Personal Circumstances</a></li>
       </#if>
     </#if>
 
@@ -116,11 +114,6 @@
         <li class="mitcircs-active">
           <h2><a href="<@url page="/" context="/mitcircs" />">Mitigating Circumstances</a></h2>
           <span class="hint">View and review mitigating circumstances submissions</span>
-        </li>
-      <#elseif canViewMitigatingCircumstances >
-        <li class="mitcircs-active">
-          <h2><a href="<@url page="/profile" context="/mitcircs" />">My Mitigating Circumstances</a></h2>
-          <span class="hint">View your mitigating circumstances submissions</span>
         </li>
       </#if>
     </#if>

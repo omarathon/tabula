@@ -106,6 +106,12 @@ class EditMitCircsController extends AbstractMitCircsFormController {
   @ModelAttribute("student") def student(@PathVariable submission: MitigatingCircumstancesSubmission): StudentMember =
     submission.student
 
+  @ModelAttribute("lastUpdatedByOther") def lastUpdatedByOther(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): Boolean = {
+    val studentUser = submission.student.asSsoUser
+    user.apparentUser == studentUser && submission.lastModifiedBy != studentUser
+  }
+
+
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     if (errors.hasErrors) form(submission.student)

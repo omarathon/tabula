@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
 
@@ -29,7 +29,7 @@ trait RenderMitCircsAttachmentPermissions extends RequiresPermissionsChecking wi
   self: RenderMitCircsAttachmentState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, submission.student)
+    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(submission.student))
   }
 }
 

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -33,7 +33,7 @@ trait StudentHomePermissions extends RequiresPermissionsChecking with Permission
   self: StudentHomeCommandState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, student)
+    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student))
   }
 }
 

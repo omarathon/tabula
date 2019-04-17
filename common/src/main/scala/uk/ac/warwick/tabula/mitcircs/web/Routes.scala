@@ -24,8 +24,7 @@ object Routes {
   }
 
   object Student {
-    def home: String = context + "/profile"
-    def home(student: StudentMember): String = home + "/%s" format encoded(student.universityId)
+    def home(student: StudentMember): String = "/profiles/view/%s/personalcircs" format encoded(student.universityId)
   }
 
 }
