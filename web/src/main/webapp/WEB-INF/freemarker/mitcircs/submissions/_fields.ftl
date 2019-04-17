@@ -300,7 +300,9 @@
   </@bs3form.form_group>
 </@question_section>
 
-<@question_section>
+<@question_section
+  question = "Please provide any evidence relevant to your submission"
+>
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
       <ul class="unstyled">
