@@ -56,7 +56,10 @@ class MarkItem extends AutowiringUserLookupComponent {
   def unchanged(mf: MarkerFeedback): Boolean = {
     val markUnchanged = if(StringUtils.hasText(actualMark)) mf.mark.contains(actualMark.toInt) else mf.mark.isEmpty
     val gradeUnchanged = if(StringUtils.hasText(actualGrade)) mf.grade.contains(actualGrade) else mf.grade.isEmpty
-    val fieldValuesUnchanged = fieldValues.asScala.forall { case (fieldName, value) => mf.fieldValue(fieldName).contains(value) }
+    val fieldValuesUnchanged = fieldValues.asScala.forall { case (fieldName, value) =>
+      val mfFieldValue = mf.fieldValue(fieldName)
+      if(StringUtils.hasText(value)) mfFieldValue.contains(value) else mfFieldValue.isEmpty || mfFieldValue.forall(s => !StringUtils.hasText(s))
+    }
 
     markUnchanged && gradeUnchanged && fieldValuesUnchanged
   }
