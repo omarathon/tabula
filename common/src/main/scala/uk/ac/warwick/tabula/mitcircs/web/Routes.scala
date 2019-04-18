@@ -23,9 +23,4 @@ object Routes {
     def review(submission: MitigatingCircumstancesSubmission): String = context + "/admin/review/%s" format encoded(submission.key.toString)
   }
 
-  object Student {
-    def home: String = context + "/profile"
-    def home(student: StudentMember): String = home + "/%s" format encoded(student.universityId)
-  }
-
 }

@@ -92,7 +92,10 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     }
     file.attached.asScala.foreach(submission.addAttachment)
     submission.relatedSubmission = relatedSubmission
+    // reset approvedOn when changes are made by others or drafts are saved
+    if(isSelf && approve) submission.approvedOn = DateTime.now() else submission.approvedOn = null
     submission.lastModified = DateTime.now()
+    submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }

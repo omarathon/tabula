@@ -95,7 +95,12 @@ abstract class AbstractViewProfileController extends ProfilesController
             Seq(ProfileBreadcrumbs.Profile.DownloadForScyd(scyd).setActive(activeIdentifier))
           else
             Nil
-            )
+          ) ++
+          (if (scd.student.homeDepartment.subDepartmentsContaining(scd.student).exists(_.enableMitCircs))
+            Seq(ProfileBreadcrumbs.Profile.PersonalCircumstances(scd.student).setActive(activeIdentifier))
+          else
+            Nil
+          )
     }
 
   }
@@ -107,7 +112,7 @@ abstract class AbstractViewProfileController extends ProfilesController
     ProfileBreadcrumbs.Profile.Students(member).setActive(activeIdentifier)
   )
 
-  protected def secondBreadcrumbs(activeAcademicYear: Option[AcademicYear], scd: StudentCourseDetails)(urlGenerator: (StudentCourseYearDetails) => String): Seq[BreadCrumb] = {
+  protected def secondBreadcrumbs(activeAcademicYear: Option[AcademicYear], scd: StudentCourseDetails)(urlGenerator: StudentCourseYearDetails => String): Seq[BreadCrumb] = {
     scydToSelect(scd, activeAcademicYear).map(chooseScyd => {
       val scyds = scd.student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails) match {
         case Nil =>

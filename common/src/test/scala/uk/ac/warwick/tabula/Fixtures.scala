@@ -515,12 +515,13 @@ object Fixtures extends Mockito {
   }
 
   def mitigatingCircumstancesSubmission(creator: String, student: String): MitigatingCircumstancesSubmission = {
-    val s = new MitigatingCircumstancesSubmission
-    s.creator = user(creator, creator)
-    s.student = member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember]
+    val s = new MitigatingCircumstancesSubmission(
+      member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember],
+      user(creator, creator),
+      department("HPS", "Heron Purging Services")
+    )
     s.startDate = LocalDate.now()
     s.endDate = LocalDate.now().plusWeeks(2)
-    s.department = department("HPS", "Heron Purging Services")
     s
   }
 

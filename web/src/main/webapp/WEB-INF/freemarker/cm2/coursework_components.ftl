@@ -114,7 +114,7 @@
 
     <#local time_remaining = durationFormatter(info.studentDeadline) />
     <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
-    <#if info.hasActiveExtension>
+    <#if info.hasActiveExtension && extension.expiryDate??>
       <#local extension_time_remaining = durationFormatter(extension.expiryDate) />
     </#if>
 
@@ -141,8 +141,11 @@
   <#elseif !assignment.collectSubmissions>
     <#local extension = info.extension! />
 
-    <#local time_remaining = durationFormatter(info.studentDeadline) />
-    <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
+    <#if info.studentDeadline??>
+      <#local time_remaining = durationFormatter(info.studentDeadline) />
+      <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
+    </#if>
+
     <#if info.hasActiveExtension>
       <#local extension_time_remaining = durationFormatter(extension.expiryDate) />
     </#if>
@@ -248,9 +251,12 @@
       <#elseif info.submittable || !assignment.collectSubmissions>
         <#local extension = info.extension! />
 
-        <#local time_remaining = durationFormatter(info.studentDeadline) />
-        <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
-        <#if info.hasActiveExtension>
+        <#if info.studentDeadline??>
+          <#local time_remaining = durationFormatter(info.studentDeadline) />
+          <#local percentage = durationPercentage(assignment.openDate, info.studentDeadline) />
+        </#if>
+
+        <#if info.hasActiveExtension && extension.expiryDate??>
           <#local extension_time_remaining = durationFormatter(extension.expiryDate) />
         </#if>
 

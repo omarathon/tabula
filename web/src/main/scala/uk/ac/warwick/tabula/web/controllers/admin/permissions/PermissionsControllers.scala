@@ -36,13 +36,13 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
   type GrantPermissionsCommand = Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A]
   type RevokePermissionsCommand = Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A]
 
-  @ModelAttribute("addCommand") def addCommandModel(@PathVariable target: A): GrantRoleCommand = GrantRoleCommand(target)
+  @ModelAttribute("addCommand") def addCommandModel(@PathVariable target: A): GrantRoleCommand = GrantRoleCommand(mandatory(target))
 
-  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable target: A): RevokeRoleCommand = RevokeRoleCommand(target)
+  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable target: A): RevokeRoleCommand = RevokeRoleCommand(mandatory(target))
 
-  @ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand = GrantPermissionsCommand(target)
+  @ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand = GrantPermissionsCommand(mandatory(target))
 
-  @ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand = RevokePermissionsCommand(target)
+  @ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand = RevokePermissionsCommand(mandatory(target))
 
   var userLookup: UserLookupService = Wire[UserLookupService]
   var permissionsService: PermissionsService = Wire[PermissionsService]
@@ -235,7 +235,7 @@ case class AdminLink(title: String, href: String)
 @RequestMapping(value = Array("/admin/permissions/member/{target}"))
 class MemberPermissionsController extends PermissionsControllerMethods[Member] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member) = Seq(
-    AdminLink("View profile", Routes.profiles.Profile.identity(member))
+    AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
   )
 }
 
@@ -243,11 +243,11 @@ class MemberPermissionsController extends PermissionsControllerMethods[Member] {
 @RequestMapping(value = Array("/admin/permissions/department/{target}"))
 class DepartmentPermissionsController extends PermissionsControllerMethods[Department] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
-    AdminLink("Coursework Management", Routes.cm2.admin.department(department, AcademicYear.now())),
-    AdminLink("Small Group Teaching", Routes.groups.admin(department, AcademicYear.now())),
-    AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(department, AcademicYear.now())),
-    AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(department, AcademicYear.now())),
-    AdminLink("Administration & Permissions", Routes.admin.department(department))
+    AdminLink("Coursework Management", Routes.cm2.admin.department(mandatory(department), AcademicYear.now())),
+    AdminLink("Small Group Teaching", Routes.groups.admin(mandatory(department), AcademicYear.now())),
+    AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(mandatory(department), AcademicYear.now())),
+    AdminLink("Monitoring Points - Create and edit", Routes.attendance.Manage.departmentForYear(mandatory(department), AcademicYear.now())),
+    AdminLink("Administration & Permissions", Routes.admin.department(mandatory(department)))
   )
 }
 
@@ -255,9 +255,9 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 @RequestMapping(value = Array("/admin/permissions/module/{target}"))
 class ModulePermissionsController extends PermissionsControllerMethods[Module] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
-    AdminLink("Coursework Management", Routes.cm2.admin.department(module.adminDepartment, AcademicYear.now())),
-    AdminLink("Small Group Teaching", Routes.groups.admin(module.adminDepartment, AcademicYear.now())),
-    AdminLink("Administration & Permissions", Routes.admin.module(module))
+    AdminLink("Coursework Management", Routes.cm2.admin.department(mandatory(module).adminDepartment, AcademicYear.now())),
+    AdminLink("Small Group Teaching", Routes.groups.admin(mandatory(module).adminDepartment, AcademicYear.now())),
+    AdminLink("Administration & Permissions", Routes.admin.module(mandatory(module)))
   )
 }
 
@@ -265,7 +265,7 @@ class ModulePermissionsController extends PermissionsControllerMethods[Module] {
 @RequestMapping(value = Array("/admin/permissions/route/{target}"))
 class RoutePermissionsController extends PermissionsControllerMethods[Route] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") route: Route) = Seq(
-    AdminLink("Administration & Permissions", Routes.admin.route(route))
+    AdminLink("Administration & Permissions", Routes.admin.route(mandatory(route)))
   )
 }
 
@@ -273,7 +273,7 @@ class RoutePermissionsController extends PermissionsControllerMethods[Route] {
 @RequestMapping(value = Array("/admin/permissions/assignment/{target}"))
 class AssignmentPermissionsController extends PermissionsControllerMethods[Assignment] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") assignment: Assignment) = Seq(
-    AdminLink("Manage", Routes.cm2.admin.assignment.submissionsandfeedback(assignment))
+    AdminLink("Manage", Routes.cm2.admin.assignment.submissionsandfeedback(mandatory(assignment)))
   )
 }
 
@@ -281,7 +281,7 @@ class AssignmentPermissionsController extends PermissionsControllerMethods[Assig
 @RequestMapping(value = Array("/admin/permissions/smallgroupset/{target}"))
 class SmallGroupSetPermissionsController extends PermissionsControllerMethods[SmallGroupSet] {
   @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") set: SmallGroupSet) = Seq(
-    AdminLink("Manage", Routes.groups.admin.module(set.module, set.academicYear))
+    AdminLink("Manage", Routes.groups.admin.module(mandatory(set).module, mandatory(set).academicYear))
   )
 }
 

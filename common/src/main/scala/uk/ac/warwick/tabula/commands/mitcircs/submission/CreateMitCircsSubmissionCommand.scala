@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -70,6 +70,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     }
     file.attached.asScala.foreach(submission.addAttachment)
     submission.relatedSubmission = relatedSubmission
+    if(isSelf && approve) submission.approvedOn = DateTime.now()
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
@@ -79,7 +80,7 @@ trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with Per
   self: CreateMitCircsSubmissionState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, student)
+    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student))
   }
 }
 
@@ -145,6 +146,7 @@ trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumst
 trait CreateMitCircsSubmissionState {
   val student: StudentMember
   val currentUser: User
+  lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
   val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
     throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
   )
@@ -173,6 +175,7 @@ trait CreateMitCircsSubmissionState {
   var attachedFiles: JSet[FileAttachment] = JSet()
 
   var relatedSubmission: MitigatingCircumstancesSubmission = _
+  var approve: Boolean = _ // set this to true when a user is approving a draft submission or one made on their behalf
 }
 
 class AffectedAssessmentItem {

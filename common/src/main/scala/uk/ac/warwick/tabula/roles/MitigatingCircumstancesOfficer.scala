@@ -13,7 +13,10 @@ case object MitigatingCircumstancesOfficerRoleDefinition extends BuiltInRoleDefi
   GrantsScopedPermission(
     MitigatingCircumstancesSubmission.Manage,
     MitigatingCircumstancesSubmission.Read,
-    MitigatingCircumstancesSubmission.ViewGrading
+    MitigatingCircumstancesSubmission.ViewGrading,
+
+    // commands checking this check against MitigatingCircumstancesStudent so we don't propagate permissions outside of the students home department
+    MitigatingCircumstancesSubmission.Modify
   )
 
   def canDelegateThisRolesPermissions: JBoolean = true

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.profiles
 
-import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.web.Breadcrumbs.Active
@@ -35,6 +35,8 @@ object ProfileBreadcrumbs {
     case object AttendanceIdentifier extends ProfileBreadcrumbIdentifier("attendance")
 
     case object DownloadIdentifier extends ProfileBreadcrumbIdentifier("download")
+
+    case object PersonalCircumstances extends ProfileBreadcrumbIdentifier("personal")
 
 
     abstract class ProfileBreadcrumb extends BreadCrumb {
@@ -139,6 +141,12 @@ object ProfileBreadcrumbs {
       val identifier = DownloadIdentifier
       val title = "Download my info"
       val url = Some(Routes.Profile.download(scyd))
+    }
+
+    case class PersonalCircumstances(student: StudentMember) extends ProfileBreadcrumb {
+      val identifier = PersonalCircumstances
+      val title = "Personal Circumstances"
+      val url = Some(Routes.Profile.personalCircumstances(student))
     }
 
   }

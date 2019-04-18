@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.Employment
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.mitcircs.web.Routes
+import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.{Employment, IndustrialAction}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission, SeriousMedicalIssue}
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
 import uk.ac.warwick.tabula.web.Mav
@@ -21,9 +21,19 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 import scala.collection.immutable.ListMap
 
 object MitCircsSubmissionController {
-  def validIssueTypes(student: StudentMember): Seq[IssueType] =
-    if(student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") IssueType.values
-    else IssueType.values.filter(_ != Employment)
+
+  def validIssueTypes(student: StudentMember): (Seq[SeriousMedicalIssue], Seq[IssueType]) = {
+    val seriousMedicalIssues = IssueType.values.collect{ case i: SeriousMedicalIssue => i }
+    val otherIssues = IssueType.values.diff(seriousMedicalIssues)
+
+    // TODO - Make it possible for TQ to enable this (we could also just manage this in code)
+    val invalidTypes =
+      if (student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") Seq(IndustrialAction)
+      else Seq(Employment, IndustrialAction)
+
+    (seriousMedicalIssues, otherIssues.filterNot(invalidTypes.contains))
+  }
+
 }
 
 abstract class AbstractMitCircsFormController extends BaseController {
@@ -58,8 +68,12 @@ abstract class AbstractMitCircsFormController extends BaseController {
 
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember): Mav = {
+
+    val (seriousMedicalIssues, otherIssues) = MitCircsSubmissionController.validIssueTypes(student)
+
     Mav("mitcircs/submissions/form", Map(
-      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
+      "seriousMedicalIssues" -> seriousMedicalIssues,
+      "issueTypes" -> otherIssues,
       "possibleContacts" -> MitCircsContact.values,
       "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
     ))
@@ -83,7 +97,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Student.home(student))
+      RedirectForce(Routes.Profile.personalCircumstances(student))
     }
   }
 }
@@ -106,12 +120,20 @@ class EditMitCircsController extends AbstractMitCircsFormController {
   @ModelAttribute("student") def student(@PathVariable submission: MitigatingCircumstancesSubmission): StudentMember =
     submission.student
 
+  @ModelAttribute("lastUpdatedByOther") def lastUpdatedByOther(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): Boolean = {
+    val studentUser = submission.student.asSsoUser
+    user.apparentUser == studentUser && submission.lastModifiedBy != studentUser
+  }
+
+  @ModelAttribute("isSeriousMedicalIssue") def isSeriousMedicalIssue(@PathVariable submission: MitigatingCircumstancesSubmission): Boolean =
+    submission.issueTypes.collect{ case i: SeriousMedicalIssue => i }.nonEmpty
+
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Student.home(submission.student))
+      RedirectForce(Routes.Profile.personalCircumstances(submission.student))
     }
   }
 

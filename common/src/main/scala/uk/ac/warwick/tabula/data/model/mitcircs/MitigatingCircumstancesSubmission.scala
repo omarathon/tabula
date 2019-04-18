@@ -24,6 +24,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def this(student:StudentMember, creator:User, department: Department) {
     this()
     this.creator = creator
+    this.lastModifiedBy = creator
     this.student = student
     this.department = department
   }
@@ -40,6 +41,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var creator: User = _ // the user that created this
+
+  @Column(nullable = false)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  final var lastModifiedBy: User = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
@@ -97,6 +102,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var pendingEvidence: String = _
 
+  var approvedOn: DateTime = _
+
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
@@ -112,6 +119,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     attachment.mitigatingCircumstancesSubmission = null
     attachments.remove(attachment)
   }
+
+  def isDraft: Boolean = approvedOn == null
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

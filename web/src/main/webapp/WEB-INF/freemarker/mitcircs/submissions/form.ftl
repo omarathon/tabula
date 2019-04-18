@@ -1,5 +1,17 @@
+<#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
-  <h1>Declare mitigating circumstances</h1>
+  <h1>Declare mitigating circumstances<#if !command.self> on behalf of ${student.fullName}</#if></h1>
+
+  <#if lastUpdatedByOther?? && lastUpdatedByOther>
+    <div class="alert alert-info">
+      Information was added to this mitigating circumstances submission by ${submission.lastModifiedBy.fullName} at <@fmt.date date=submission.lastModified capitalise=false at=true />.
+      You can review the submission and make any necessary changes. In order for this submission to be considered you must first submit it.
+    </div>
+  <#elseif command.self && submission?? && submission.draft>
+    <div class="alert alert-info">
+      This is a draft submission. You can review the submission and make any necessary changes. In order for this submission to be considered you must first submit it.
+    </div>
+  </#if>
 
   <section class="row mitcircs-form fix-area">
     <div class="col-md-4 col-md-push-8">
@@ -30,8 +42,24 @@
         <#include "_fields.ftl" />
 
         <div class="fix-footer">
-          <#assign submitLabel><#if submission??>Update<#else>Submit</#if></#assign>
-          <input type="submit" class="btn btn-primary" value="${submitLabel}">
+          <button type="submit" class="btn btn-primary" name="approve" value="false">Save draft</button>
+          <#if command.self>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#approve-modal">Submit</button>
+            <div id="approve-modal" class="modal fade">
+              <@modal.wrapper>
+                <@modal.header>
+                  <h6 class="modal-title">Submit mitigating circumstances</h6>
+                </@modal.header>
+                <@modal.body>
+                  I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.
+                </@modal.body>
+                <@modal.footer>
+                  <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </@modal.footer>
+              </@modal.wrapper>
+            </div>
+          </#if>
           <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.studenthome command.student />">Cancel</a>
         </div>
       </@f.form>

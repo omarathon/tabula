@@ -12,16 +12,34 @@ class MitCircsForm {
     const { form } = this;
     const $form = $(form);
 
-    // Issue type with other
+    // Issue type fields
+    $form
+      .find(':input[name="seriousMedical"]')
+      .on('input change', (e) => {
+        const checked = $(e.target).is(':checked');
+        const subCategoryContainer = $(e.target).closest('.checkbox').find('.indent');
+        subCategoryContainer.toggle(checked);
+        if (!checked) {
+          subCategoryContainer.find('input[type="checkbox"]').prop('checked', false);
+        }
+      })
+      .trigger('change');
+
     $form
       .find(':input[name="issueTypes"][value="Other"]')
-      .on('input change', e => $form.find(':input[name="issueTypeDetails"]').prop('disabled', !$(e.target).is(':checked')))
-      .trigger('change');
+      .on('input change', e => $form.find(':input[name="issueTypeDetails"]').prop('disabled', !$(e.target).is(':checked')));
 
     // End date or ongoing
     $form
       .find('input[name="noEndDate"]')
-      .on('input change', e => $form.find('input[name="endDate"]').prop('disabled', $(e.target).is(':checked')))
+      .on('input change', (e) => {
+        // This will get fired twice as there are two radio buttons, so filter it to only
+        // be the currently selected one
+        const $radio = $(e.target);
+        if ($radio.is(':checked')) {
+          $form.find('input[name="endDate"]').prop('disabled', $radio.val() === 'true');
+        }
+      })
       .trigger('change');
 
     // Contacted fields
@@ -34,6 +52,11 @@ class MitCircsForm {
           $form.find('.mitcircs-form__fields__contact-subfield--no').toggle(val !== 'true');
         }
       })
+      .trigger('change');
+
+    $form
+      .find(':input[name="contacted"][value="Other"]')
+      .on('input change', e => $form.find(':input[name="contactOther"]').prop('disabled', !$(e.target).is(':checked')))
       .trigger('change');
 
     // Removing attachments

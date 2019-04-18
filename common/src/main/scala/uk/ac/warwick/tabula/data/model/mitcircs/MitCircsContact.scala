@@ -15,13 +15,13 @@ object MitCircsContact extends Enum[MitCircsContact] {
 
   case object PersonalTutor extends MitCircsContact(description = "Personal tutor")
   case object SeniorTutor extends MitCircsContact(description = "Departmental senior tutor")
-  case object DeanOfStudents extends MitCircsContact(description = "Dean of Students")
+  case object FacultySeniorTutor extends MitCircsContact(description = "Faculty senior tutor")
   case object WSS extends MitCircsContact(description = "Wellbeing support services")
-  case object DirectorOfStudentSupport extends MitCircsContact(description = "Departmental director of student support")
+  case object DirectorOfStudies extends MitCircsContact(description = "Director of UG or PG studies / Course leader")
   case object StudentsUnion extends MitCircsContact(description = "Students’ Union advice centre")
   case object ResidentialSupport extends MitCircsContact(description = "Residential support")
   case object UniversityCounsellingService extends MitCircsContact(description = "University counselling service")
-  case object Doctor extends MitCircsContact(description = "Doctor")
+  case object Doctor extends MitCircsContact(description = "Doctor / NHS services")
   case object Other extends MitCircsContact(description = "Other")
 }
 
