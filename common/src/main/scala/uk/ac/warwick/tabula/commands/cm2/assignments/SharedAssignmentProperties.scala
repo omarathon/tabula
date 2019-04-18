@@ -154,11 +154,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     }
 
     if (wordCountMin == null && wordCountMax == null) {
-      findWordCountField(assignment).foreach { wordCountField =>
-        wordCountField.max = null
-        wordCountField.min = null
-        wordCountField.conventions = wordCountConventions
-      }
+      findWordCountField(assignment).foreach(assignment.removeField)
     } else {
       val wordCount = findWordCountField(assignment).getOrElse {
         val newField = new WordCountField()
