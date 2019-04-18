@@ -163,6 +163,9 @@ class TurnitinLtiService extends Logging with DisposableBean
         "context_title" -> removeAccent(classNameFor(assignment).value),
         "custom_duedate" -> isoFormatter.print(customDueDate),
         "custom_late_accept_flag" -> "1",
+        "custom_submit_papers_to" -> (if (assignment.turnitinStoreInRepository) "1" else "0"),
+        "custom_use_biblio_exclusion" -> (if (assignment.turnitinExcludeBibliography) "1" else "0"),
+        "custom_use_quoted_exclusion" -> (if (assignment.turnitinExcludeQuoted) "1" else "0"),
         "ext_resource_tool_placement_url" -> s"$topLevelUrl${Routes.turnitin.submitAssignmentCallback(assignment)}"
       ) ++ userParams(user.userId, user.email, user.firstName, user.lastName),
       Some(HttpStatus.SC_OK)

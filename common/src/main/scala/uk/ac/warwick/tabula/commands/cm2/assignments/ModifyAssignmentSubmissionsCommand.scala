@@ -70,6 +70,9 @@ trait ModifyAssignmentSubmissionsDescription extends Describable[Assignment] {
     d.properties(
       "collectSubmissions" -> collectSubmissions,
       "automaticallySubmitToTurnitin" -> automaticallySubmitToTurnitin,
+      "turnitinStoreInRepository" -> turnitinStoreInRepository,
+      "turnitinExcludeBibliography" -> turnitinExcludeBibliography,
+      "turnitinExcludeQuoted" -> turnitinExcludeQuoted,
       "displayPlagiarismNotice" -> displayPlagiarismNotice,
       "restrictSubmissions" -> restrictSubmissions,
       "allowResubmission" -> allowResubmission,

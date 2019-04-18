@@ -114,6 +114,9 @@
 
       <#if sharedPropertiesForm.collectSubmissions>
         <@review_details 'Automatically check submissions for plagiarism' sharedPropertiesForm.automaticallySubmitToTurnitin?string('Yes','No') />
+        <@review_details 'Submit submissions to the Turnitin repository' sharedPropertiesForm.turnitinStoreInRepository?string('Yes','No') />
+        <@review_details 'Exclude bibliographies from similarity reports' sharedPropertiesForm.turnitinExcludeBibliography?string('Yes','No') />
+        <@review_details 'Exclude quoted material from similarity reports' sharedPropertiesForm.turnitinExcludeQuoted?string('Yes','No') />
         <@review_details 'Show plagiarism declaration' sharedPropertiesForm.displayPlagiarismNotice?string('Yes','No') />
         <@review_details 'Submission scope' sharedPropertiesForm.restrictSubmissions?string('Only students enrolled on this assignment can submit coursework','Anyone with a link to the assignment can submit coursework') />
         <@review_details 'Allow students to resubmit work' sharedPropertiesForm.allowResubmission?string('Yes','No') />

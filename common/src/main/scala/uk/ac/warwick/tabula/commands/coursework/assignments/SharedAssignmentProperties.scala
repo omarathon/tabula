@@ -134,6 +134,9 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
     includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
     automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
     automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
+    turnitinStoreInRepository = assignment.turnitinStoreInRepository
+    turnitinExcludeBibliography = assignment.turnitinExcludeBibliography
+    turnitinExcludeQuoted = assignment.turnitinExcludeQuoted
 
     for (field <- findCommentField(assignment)) comment = field.value
     for (file <- findFileField(assignment)) {

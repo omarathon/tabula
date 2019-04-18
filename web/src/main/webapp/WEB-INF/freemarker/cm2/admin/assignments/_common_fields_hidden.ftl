@@ -31,6 +31,9 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@hiddenorfalse path="includeInFeedbackReportWithoutSubmissions" />
 <@hiddenorfalse path="automaticallyReleaseToMarkers" />
 <@hiddenorfalse path="automaticallySubmitToTurnitin" />
+<@hiddenorfalse path="turnitinStoreInRepository" />
+<@hiddenorfalse path="turnitinExcludeBibliography" />
+<@hiddenorfalse path="turnitinExcludeQuoted" />
 <@f.hidden path="displayPlagiarismNotice" />
 <@f.hidden path="wordCountMin" />
 <@f.hidden path="wordCountMax" />
