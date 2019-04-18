@@ -10,13 +10,18 @@ import uk.ac.warwick.tabula.system.EnumSeqTwoWayConverter
 
 sealed abstract class IssueType(val description: String) extends EnumEntry
 
+sealed abstract class SeriousMedicalIssue(description: String) extends IssueType(description)
+
 object IssueType extends Enum[IssueType] {
 
   val values: immutable.IndexedSeq[IssueType] = findValues
 
-  case object SeriousMedical extends IssueType(description = "Serious accident or illness")
+  case object Accident extends SeriousMedicalIssue(description = "Accident")
+  case object PhysicalInjury extends SeriousMedicalIssue(description = "Physical injury")
+  case object MentalHealth extends SeriousMedicalIssue(description = "Mental health issue")
+
   case object SeriousMedicalOther extends IssueType(description = "Serious accident or illness of someone close")
-  case object Employment extends IssueType(description = "Significant changes in employment circumstances") // TODO - only shown to part-time students
+  case object Employment extends IssueType(description = "Significant changes in employment circumstances")
   case object Deterioration extends IssueType(description = "Deterioration of a permanent condition")
   case object Bereavement extends IssueType(description = "Bereavement")
   case object AbruptChange extends IssueType(description = "Abrupt change in personal circumstances")

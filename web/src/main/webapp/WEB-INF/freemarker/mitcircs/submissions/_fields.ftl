@@ -60,6 +60,16 @@
   <p class="mitcircs-form__fields__section__hint">(${hint})</p>
 </#macro>
 
+<#macro checkboxes enumValues enumField>
+  <#list enumValues as value>
+    <div class="checkbox">
+      <label>
+        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
+      </label>
+    </div>
+  </#list>
+</#macro>
+
 <#macro checkboxesWithOther enumValues enumField otherField>
   <#list enumValues as value>
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
@@ -82,6 +92,15 @@
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
 >
+
+  <div class="checkbox mitcircs-form__fields__checkbox-subgroup">
+    <label>
+      <input name="seriousMedical" type="checkbox" value="" <#if isSeriousMedicalIssue!false>checked="checked"</#if>> Serious accident or illness
+    </label>
+    <div class="indent">
+      <@checkboxes seriousMedicalIssues "issueTypes" />
+    </div>
+  </div>
   <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 </@question_section>
 
@@ -144,15 +163,6 @@
     </@bs3form.form_group>
   </@question_section>
 </#if>
-
-<@question_section
-  question = "Details"
-  hint = "Please provide further details of the mitigating circumstances and how they have affected your assessments"
->
-  <@bs3form.form_group "reason">
-    <@f.textarea path="reason" cssClass="form-control" rows="5" />
-  </@bs3form.form_group>
-</@question_section>
 
 <@question_section
   question = "Which assessments have been affected?"
@@ -282,21 +292,13 @@
 </@question_section>
 
 <@question_section
-  question = "What steps have been taken so far in relation to your issues?"
-  hint = "Please tell us about anything that you've done, or that's being done by other people, to help with your issues"
+  question = "Details"
+  hint = "Please provide further details of the mitigating circumstances and how they have affected your assessments. Please include anything that you've done,
+    or that's being done by other people, to help with your issues. If you're getting treatment or other support which will eventually resolve your issues,
+    please tell us something about how and when you expect this to take place."
 >
-  <@bs3form.form_group "stepsSoFar">
-    <@f.textarea path="stepsSoFar" cssClass="form-control" rows="5" />
-  </@bs3form.form_group>
-</@question_section>
-
-<@question_section
-  question = "Tell us how your circumstances are likely to change or resolve"
-  hint = "If you're getting treatment or other support which will eventually resolve your issues, please tell us something
-    about how and when you expect this to take place"
->
-  <@bs3form.form_group "changeOrResolve">
-    <@f.textarea path="changeOrResolve" cssClass="form-control" rows="5" />
+  <@bs3form.form_group "reason">
+    <@f.textarea path="reason" cssClass="form-control" rows="5" />
   </@bs3form.form_group>
 </@question_section>
 

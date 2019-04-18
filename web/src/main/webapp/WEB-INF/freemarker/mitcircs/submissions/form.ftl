@@ -7,7 +7,7 @@
       Information was added to this mitigating circumstances submission by ${submission.lastModifiedBy.fullName} at <@fmt.date date=submission.lastModified capitalise=false at=true />.
       You can review the submission and make any necessary changes. In order for this submission to be considered you must first submit it.
     </div>
-  <#elseif command.self && submission.draft>
+  <#elseif command.self && submission?? && submission.draft>
     <div class="alert alert-info">
       This is a draft submission. You can review the submission and make any necessary changes. In order for this submission to be considered you must first submit it.
     </div>
