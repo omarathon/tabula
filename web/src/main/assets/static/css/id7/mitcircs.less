@@ -64,8 +64,16 @@
         .make-coloured-box();
         .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
 
+        .checkbox:nth-of-type(odd) {
+          background: darken(@accent-yellow-bg, 5%);
+        }
+
         &:nth-of-type(odd) {
           .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+
+          .checkbox:nth-of-type(odd), .indent > .checkbox:nth-of-type(even) {
+            background: darken(@accent-blue-bg, 5%);
+          }
         }
 
         &.form-horizontal {
@@ -89,6 +97,11 @@
         color: @text-color;
         border: 0;
         margin-bottom: 0;
+      }
+
+      .checkbox .help-popover {
+        float: right;
+        margin-right: 5px;
       }
 
       &__hint {

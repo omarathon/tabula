@@ -10,10 +10,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro home><@_u page="/" /></#macro>
 <#macro adminhome department><@_u page="/admin/${department.code}" /></#macro>
 
-<#macro studenthome><@_u page="/profile" /></#macro>
-<#macro studenthome student><@_u page="/profile/${student.universityId}" /></#macro>
-<#macro newsubmission student><@_u page="/profile/${student.universityId}/new" /></#macro>
-<#macro editsubmission submission><@_u page="/profile/${submission.student.universityId}/edit/${submission.key}" /></#macro>
-<#macro renderAttachment submission file><@_u page="/profile/${submission.student.universityId}/${submission.key}/supporting-file/${file.name}" /></#macro>
+<#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 
-<#macro affectedAssessments student><@_u page="/profile/${student.universityId}/affected-assessments" /></#macro>
+<#macro newsubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/new" /></#macro>
+<#macro editsubmission submission><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/edit/${submission.key}" /></#macro>
+<#macro renderAttachment submission file><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/${submission.key}/supporting-file/${file.name}" /></#macro>
+
+<#macro affectedAssessments student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/affected-assessments" /></#macro>

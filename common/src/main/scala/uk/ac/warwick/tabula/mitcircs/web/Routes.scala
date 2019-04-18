@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.mitcircs.web
 
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**

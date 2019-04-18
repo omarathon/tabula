@@ -491,10 +491,11 @@ preposition: Text to relate the title to the department name in the second line,
 	<@bulk_email emails title subject />
 </#macro>
 
-<#macro help_popover id title="" content="" html=false cssClass="">
+<#macro help_popover id title="" content="" html=false cssClass="" placement="">
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
-	   <#if title?has_content> datcommon/src/main/webapp/WEB-INF/freemarker/formatters.ftla-title="${title}"</#if>
+	   <#if title?has_content> data-title="${title}"</#if>
+		 <#if placement?has_content> data-placement="${placement}"</#if>
 	   data-content="${content}" data-container="body" aria-label="Help"
 	   <#if html>data-html="true"</#if>
 	><i class="icon-question-sign fa fa-question-circle"></i></a>
