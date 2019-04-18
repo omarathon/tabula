@@ -125,9 +125,6 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     user.apparentUser == studentUser && submission.lastModifiedBy != studentUser
   }
 
-  @ModelAttribute("isSeriousMedicalIssue") def isSeriousMedicalIssue(@PathVariable submission: MitigatingCircumstancesSubmission): Boolean =
-    submission.issueTypes.collect{ case i: SeriousMedicalIssue => i }.nonEmpty
-
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     if (errors.hasErrors) form(submission.student)

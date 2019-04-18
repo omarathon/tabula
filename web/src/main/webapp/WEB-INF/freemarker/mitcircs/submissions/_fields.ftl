@@ -79,6 +79,7 @@
           <@f.input path="${otherField}" cssClass="form-control" />
         </#if>
       </label>
+      <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
     </div>
     <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
   </#list>
@@ -95,7 +96,7 @@
 
   <div class="checkbox mitcircs-form__fields__checkbox-subgroup">
     <label>
-      <input name="seriousMedical" type="checkbox" value="" <#if isSeriousMedicalIssue!false>checked="checked"</#if>> Serious accident or illness
+      <input name="seriousMedical" type="checkbox" value="" <#if command.seriousMedicalIssue>checked="checked"</#if>> Serious accident or illness
     </label>
     <div class="indent">
       <@checkboxes seriousMedicalIssues "issueTypes" />
@@ -271,7 +272,7 @@
 </@question_section>
 
 <@question_section
-  question = "Have you contacted anyone about your mitigating circumstances?"
+  question = "Have you discussed your mitigating circumstances with anyone?"
 >
   <div class="radio">
     <@bs3form.radio_inline>
@@ -289,6 +290,7 @@
 
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
+      <@bs3form.errors path="noContactReason" />
     </@bs3form.form_group>
   </div>
 </@question_section>
@@ -301,6 +303,7 @@
 >
   <@bs3form.form_group "reason">
     <@f.textarea path="reason" cssClass="form-control" rows="5" />
+    <@bs3form.errors path="reason" />
   </@bs3form.form_group>
 </@question_section>
 
