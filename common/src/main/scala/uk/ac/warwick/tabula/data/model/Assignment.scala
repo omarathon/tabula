@@ -181,7 +181,7 @@ class Assignment
   def genericFeedbackFormattedHtml: String = formattedHtml(genericFeedback)
 
   @Column(name = "turnitin_id")
-  var turnitinId: String = ""
+  var turnitinId: String = _
   var submitToTurnitin: JBoolean = false
   var lastSubmittedToTurnitin: DateTime = _
   var submitToTurnitinRetries: JInteger = 0
