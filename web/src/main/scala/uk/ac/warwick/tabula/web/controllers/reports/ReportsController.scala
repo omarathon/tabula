@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.web.controllers.{CurrentMemberComponent, BaseControl
   */
 abstract class ReportsController extends BaseController with ReportsBreadcrumbs with CurrentMemberComponent {
 
+  hideDeletedItems
+
   final def optionalCurrentMember: Option[Member] = user.profile
 
   final def currentMember: Member = optionalCurrentMember getOrElse new RuntimeMember(user)
