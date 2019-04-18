@@ -129,18 +129,20 @@
     <@bs3form.label path="endDate" cssClass="col-xs-4 col-sm-2">End date</@bs3form.label>
 
     <div class="col-xs-8 col-sm-4">
-      <@spring.bind path="endDate">
-        <div class="input-group">
-          <@f.input path="endDate" cssClass="form-control date-picker" />
-          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-        </div>
-      </@spring.bind>
+      <@bs3form.radio>
+        <@f.radiobutton path="noEndDate" value="false" cssClass="radio-with-field" />
 
-      <div class="checkbox">
-        <label>
-          <@f.checkbox path="noEndDate" /> <span class="hint">Or,</span> <strong>ongoing</strong>
-        </label>
-      </div>
+        <@spring.bind path="endDate">
+          <div class="input-group">
+            <@f.input path="endDate" cssClass="form-control date-picker" />
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+          </div>
+        </@spring.bind>
+      </@bs3form.radio>
+
+      <@bs3form.radio>
+        <@f.radiobutton path="noEndDate" value="true" /> Ongoing
+      </@bs3form.radio>
 
       <@bs3form.errors path="endDate" />
     </div>
