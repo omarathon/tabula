@@ -135,13 +135,15 @@
     function once(func) {
       var result;
       var n = 2;
-      if (--n > 0) {
-        result = func.apply(this, arguments);
-      }
-      if (n <= 1) {
-        func = undefined;
-      }
-      return result;
+      return function() {
+        if (--n > 0) {
+          result = func.apply(this, arguments);
+        }
+        if (n <= 1) {
+          func = undefined;
+        }
+        return result;
+      };
     }
 
     jQuery(function ($) {
