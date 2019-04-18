@@ -76,6 +76,8 @@ object Routes {
     def download(member: Member): String = s"$context/view/${member.universityId}/download"
 
     def download(scyd: StudentCourseYearDetails): String = s"$context/view/${scyd.studentCourseDetails.urlSafeId}/${scyd.academicYear.value.toString}/download"
+
+    def personalCircumstances(student: StudentMember) = context + "/view/%s/personalcircs" format encoded(student.universityId)
   }
 
   def students(relationshipType: StudentRelationshipType): String = context + "/%s/students" format encoded(relationshipType.urlPart)

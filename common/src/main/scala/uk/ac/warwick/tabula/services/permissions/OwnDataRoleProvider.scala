@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesStudent
 import uk.ac.warwick.tabula.helpers.MutablePromise
 
 /**
@@ -62,9 +63,10 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
           Stream(customRoleFor(department)(MemberNoteCreatorRoleDefinition, note).getOrElse(MemberNoteCreator(note)))
         else Stream.empty
 
-      case student: StudentMember =>
+      case mitCircsStudent: MitigatingCircumstancesStudent =>
+        val student = mitCircsStudent.student
         if (user.apparentId == student.userId && student.homeDepartment.subDepartmentsContaining(student).exists(_.enableMitCircs))
-          Stream(MitigatingCircumstancesSubmitter(student))
+          Stream(MitigatingCircumstancesSubmitter(mitCircsStudent))
         else
           Stream.empty
 
