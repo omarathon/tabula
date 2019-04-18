@@ -32,7 +32,14 @@ class MitCircsForm {
     // End date or ongoing
     $form
       .find('input[name="noEndDate"]')
-      .on('input change', e => $form.find('input[name="endDate"]').prop('disabled', $(e.target).is(':checked')))
+      .on('input change', (e) => {
+        // This will get fired twice as there are two radio buttons, so filter it to only
+        // be the currently selected one
+        const $radio = $(e.target);
+        if ($radio.is(':checked')) {
+          $form.find('input[name="endDate"]').prop('disabled', $radio.val() === 'true');
+        }
+      })
       .trigger('change');
 
     // Contacted fields

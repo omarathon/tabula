@@ -67,6 +67,16 @@
         &:nth-of-type(odd) {
           .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
         }
+
+        &.form-horizontal {
+          .radio {
+            padding-top: 0;
+
+            input[type="radio"].radio-with-field {
+              margin-top: 12px;
+            }
+          }
+        }
       }
 
       legend {
