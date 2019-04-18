@@ -1085,7 +1085,7 @@ trait BooleanAssignmentSubmissionProperties {
   @BeanProperty var extensionAttachmentMandatory: JBoolean = false
   @BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
   @BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
-  @BeanProperty var turnitinStoreInRepository: JBoolean = false
+  @BeanProperty var turnitinStoreInRepository: JBoolean = true
   @BeanProperty var turnitinExcludeBibliography: JBoolean = false
   @BeanProperty var turnitinExcludeQuoted: JBoolean = false
 
