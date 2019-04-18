@@ -38,7 +38,7 @@ class TurnitinLtiQueueDaoImpl extends TurnitinLtiQueueDao with Daoisms {
     session.newCriteria[Assignment]
       .add(is("submitToTurnitin", true))
       .add(Restrictions.lt("lastSubmittedToTurnitin", DateTime.now.minusSeconds(TurnitinLtiService.SubmitAssignmentWaitInSeconds)))
-      .add(Restrictions.isNull("turnitinId"))
+      .add(Restrictions.or(Restrictions.eq("turnitinId", ""), Restrictions.isNull("turnitinId")))
       .add(Restrictions.lt("submitToTurnitinRetries", TurnitinLtiService.SubmitAssignmentMaxRetries))
       .addOrder(Order.asc("lastSubmittedToTurnitin"))
       .setMaxResults(1)
