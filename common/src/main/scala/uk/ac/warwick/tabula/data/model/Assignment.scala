@@ -54,6 +54,9 @@ object Assignment {
     val AllowExtensionsAfterCloseDate = "allowExtensionsAfterCloseDate"
     val TurnitinLtiNotifyUsers = "turnitinLtiNotifyUsers"
     val TurnitinLtiClassWithAcademicYear = "turnitinLtiClassWithAcademicYear"
+    val TurnitinStoreInRepository = "turnitinStoreInRepository"
+    val TurnitinExcludeBibliography = "turnitinExcludeBibliography"
+    val TurnitinExcludeQuoted = "turnitinExcludeQuoted"
     val PublishFeedback = "publishFeedback"
     val UseMarkPoints = "useMarkPoints"
   }
@@ -964,30 +967,41 @@ class Assignment
   }
 
   def automaticallyReleaseToMarkers: Boolean = getBooleanSetting(Settings.AutomaticallyReleaseToMarkers, default = false)
-
   def automaticallyReleaseToMarkers_=(include: Boolean): Unit = settings += (Settings.AutomaticallyReleaseToMarkers -> include)
 
   def automaticallySubmitToTurnitin: Boolean = getBooleanSetting(Settings.AutomaticallySubmitToTurnitin, default = false)
-
   def automaticallySubmitToTurnitin_=(include: Boolean): Unit = settings += (Settings.AutomaticallySubmitToTurnitin -> include)
 
   def extensionAttachmentMandatory: Boolean = getBooleanSetting(Settings.ExtensionAttachmentMandatory, default = false)
-
   def extensionAttachmentMandatory_=(mandatory: Boolean): Unit = settings += (Settings.ExtensionAttachmentMandatory -> mandatory)
 
   def allowExtensionsAfterCloseDate: Boolean = getBooleanSetting(Settings.AllowExtensionsAfterCloseDate, default = false)
-
   def allowExtensionsAfterCloseDate_=(allow: Boolean): Unit = settings += (Settings.AllowExtensionsAfterCloseDate -> allow)
 
   def turnitinLtiNotifyUsers: Seq[User] = UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value
-
-  def turnitinLtiNotifyUsers_=(users: Seq[User]): Unit = {
-    UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
-  }
+  def turnitinLtiNotifyUsers_=(users: Seq[User]): Unit = UserSeqSetting(Settings.TurnitinLtiNotifyUsers, Seq(), userLookup).value = users
 
   def turnitinLtiClassWithAcademicYear: Boolean = getBooleanSetting(Settings.TurnitinLtiClassWithAcademicYear, default = false)
-
   def turnitinLtiClassWithAcademicYear_=(withAcademicYear: Boolean): Unit = settings += (Settings.TurnitinLtiClassWithAcademicYear -> withAcademicYear)
+
+  /**
+    * Determines which repository the student is going to submit their paper to.
+    * It will be stored in the standard repository if true.
+    */
+  def turnitinStoreInRepository: Boolean = getBooleanSetting(Settings.TurnitinStoreInRepository, default = true)
+  def turnitinStoreInRepository_=(storeInRepository: Boolean): Unit = settings += (Settings.TurnitinStoreInRepository -> storeInRepository)
+
+  /**
+    * Determines whether the bibliography is excluded from the originality score
+    */
+  def turnitinExcludeBibliography: Boolean = getBooleanSetting(Settings.TurnitinExcludeBibliography, default = false)
+  def turnitinExcludeBibliography_=(excludeBibliography: Boolean): Unit = settings += (Settings.TurnitinExcludeBibliography -> excludeBibliography)
+
+  /**
+    * Determines whether quoted material is excluded from the originality score
+    */
+  def turnitinExcludeQuoted: Boolean = getBooleanSetting(Settings.TurnitinExcludeQuoted, default = false)
+  def turnitinExcludeQuoted_=(excludeQuoted: Boolean): Unit = settings += (Settings.TurnitinExcludeQuoted -> excludeQuoted)
 
   def enhance(user: User): EnhancedAssignment = {
     val submission = submissions.asScala.find(_.usercode == user.getUserId)
@@ -1071,6 +1085,9 @@ trait BooleanAssignmentSubmissionProperties {
   @BeanProperty var extensionAttachmentMandatory: JBoolean = false
   @BeanProperty var allowExtensionsAfterCloseDate: JBoolean = false
   @BeanProperty var automaticallySubmitToTurnitin: JBoolean = false
+  @BeanProperty var turnitinStoreInRepository: JBoolean = false
+  @BeanProperty var turnitinExcludeBibliography: JBoolean = false
+  @BeanProperty var turnitinExcludeQuoted: JBoolean = false
 
   def copySubmissionBooleansTo(assignment: Assignment) {
     assignment.collectSubmissions = collectSubmissions
@@ -1082,6 +1099,9 @@ trait BooleanAssignmentSubmissionProperties {
     assignment.extensionAttachmentMandatory = extensionAttachmentMandatory
     assignment.allowExtensionsAfterCloseDate = allowExtensionsAfterCloseDate
     assignment.automaticallySubmitToTurnitin = automaticallySubmitToTurnitin
+    assignment.turnitinStoreInRepository = turnitinStoreInRepository
+    assignment.turnitinExcludeBibliography = turnitinExcludeBibliography
+    assignment.turnitinExcludeQuoted = turnitinExcludeQuoted
   }
 }
 

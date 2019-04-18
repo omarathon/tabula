@@ -87,6 +87,9 @@ trait SharedAssignmentSubmissionProperties extends BooleanAssignmentSubmissionPr
     extensionAttachmentMandatory = assignment.extensionAttachmentMandatory
     allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
     automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
+    turnitinStoreInRepository = assignment.turnitinStoreInRepository
+    turnitinExcludeBibliography = assignment.turnitinExcludeBibliography
+    turnitinExcludeQuoted = assignment.turnitinExcludeQuoted
   }
 
   def copySharedSubmissionTo(assignment: Assignment): Unit = {

@@ -180,6 +180,9 @@ class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCo
   includeInFeedbackReportWithoutSubmissions = null
   automaticallyReleaseToMarkers = null
   automaticallySubmitToTurnitin = null
+  turnitinStoreInRepository = null
+  turnitinExcludeBibliography = null
+  turnitinExcludeQuoted = null
 
 }
 
