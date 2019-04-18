@@ -22,7 +22,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
     "user" -> recipient,
     "extension" -> extension,
     "newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate.orNull),
-    "originalAssignmentDate" -> Option(assignment.closeDate).map(dateTimeFormatter.print).orNull
+    "originalAssignmentDate" -> Option(assignment.submissionDeadline(recipient)).map(dateTimeFormatter.print).orNull
   ))
 }
 
