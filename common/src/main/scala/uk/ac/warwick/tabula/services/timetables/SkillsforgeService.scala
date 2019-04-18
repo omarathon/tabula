@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import com.google.common.base.Charsets
-import org.apache.http.HttpResponse
+import org.apache.http.{HttpResponse, StatusLine}
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.util.EntityUtils
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
 import org.joda.time.{DateTime, LocalDate}
+import org.springframework.http.HttpStatus
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation, StudentMember}
@@ -33,14 +34,15 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
     extends EventOccurrenceSource
       with Logging {
 
-    val dateParameterFormatter: DateTimeFormatter = DateTimeFormat.forPattern("dd-MMM-yyyy")
-
     // TAB-6942
     private def shouldQuerySkillsforge(member: Member): Boolean = features.skillsforge && existsInSkillsforge(member)
 
     private def existsInSkillsforge(member: Member): Boolean = member match {
       case s: StudentMember => s.isPGR || (s.homeDepartment.code == "ec" && s.isPGT)
-      case _ => false
+      case _ => {
+        if (logger.isDebugEnabled) logger.debug(s"Not querying Skillsforge for user ${member.userId} as they are not the right type of user.")
+        false
+      }
     }
 
     override def occurrencesFor(
@@ -51,51 +53,63 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
       endInclusive: LocalDate): Future[EventOccurrenceList] =
       if (shouldQuerySkillsforge(member)) {
         Future {
-
           // For testing
           config.hardcodedUserId.foreach { id =>
-            logger.info(s"Fetching skillsforge data for hardcoded ID $id")
+            logger.info(s"Fetching Skillsforge data for hardcoded ID $id (ignoring current user ${member.userId})")
           }
           val userId = config.hardcodedUserId.getOrElse(member.userId)
           val end = endInclusive.plusDays(1) // Skillsforge is exclusive, we're inclusive
 
-          val req = RequestBuilder.post(s"${config.baseUri}/$userId")
+          if (logger.isDebugEnabled) {
+            logger.debug(s"Fetching new Skillsforge data for $userId - $start to $end inclusive")
+          }
+
+          val req = RequestBuilder.get(s"${config.baseUri}/$userId")
             .addHeader("X-Auth-Token", config.authToken)
-            .addParameter("start", dateParameterFormatter.print(start))
-            .addParameter("end", dateParameterFormatter.print(end))
+            .addParameter("bookingsAfter", ISODateTimeFormat.date().print(start))
+            .addParameter("bookingsBefore", ISODateTimeFormat.date().print(end))
             .build()
 
           try {
-            val data: JsObject = httpClient.execute(req, (res: HttpResponse) => {
-              Json.parse(EntityUtils.toString(res.getEntity, Charsets.UTF_8)).as[JsObject]
+
+            val (statusLine: StatusLine, bodyString: String) = httpClient.execute(req, (res: HttpResponse) => {
+              (res.getStatusLine, EntityUtils.toString(res.getEntity, Charsets.UTF_8))
             })
 
-            val occurrences: Seq[EventOccurrence] = if ((data \ "success").as[Boolean]) {
-              (data \ "data").as[Seq[JsObject]].map(Skillsforge.toEventOccurrence)
+            if (statusLine.getStatusCode == HttpStatus.UNAUTHORIZED.value) {
+              // This seems more like we definitely got the token wrong, so always throw here
+              throw new RuntimeException(s"Unauthorized response: ${statusLine.getReasonPhrase}\n$bodyString")
             } else {
-              val errorMessage = (data \ "errorMessage").asOpt[String].getOrElse(s"Unknown error from Skillsforge: $data")
-              /*
-                The API will return this error if a user doesn't exist:
+              val data: JsObject = Json.parse(bodyString).as[JsObject]
 
-                  {"success":false,"data":null,"errorMessage":"Could not retrieve users bookings - EMBD.GBRFU:1.3: Could not complete operation: Insufficient privileges."}
-
-                 However, it will also return this exact same error if you don't have permission (such as when the auth token is incorrect).
-                 I did query this but the developers said this is just how it works.
-
-                 I've made a flag which will be set true on one of the instances, so hopefully if there are problems with the auth token we will
-                 see them there without bogging down the logs elsewhere.
-              */
-              if (errorMessage.contains("Insufficient privileges") && !config.reportAuthErrors) {
-                // Now that we are limiting this request just to users we actually expect to be in Skillsforge, we are
-                // logging at WARN level so it's more visible.
-                logger.warn(s"Ignoring error for Usercode($userId) because it is probably just a nonexistent user: $errorMessage")
-                Nil
+              val occurrences: Seq[EventOccurrence] = if ((data \ "success").as[Boolean]) {
+                (data \ "data").as[Seq[JsObject]].map(Skillsforge.toEventOccurrence)
               } else {
-                throw new RuntimeException(s"Skillsforge error: $errorMessage")
-              }
-            }
+                val errorMessage = (data \ "errorMessage").asOpt[String].getOrElse(s"Unknown error from Skillsforge: $data")
+                /*
+                  The API will return this error if a user doesn't exist:
 
-            EventOccurrenceList(occurrences, Some(new DateTime()))
+                    {"success":false,"data":null,"errorMessage":"Could not retrieve users bookings - EMBD.GBRFU:1.3: Could not complete operation: Insufficient privileges."}
+
+                   However, it will also return this exact same error if you don't have permission (such as when the auth token is incorrect).
+                   I did query this but the developers said this is just how it works. (Though I've also seen it return an HTML page and a 401
+                   with this same error, which is now also handled above.)
+
+                   I've made a flag which will be set true on one of the instances, so hopefully if there are problems with the auth token we will
+                   see them there without bogging down the logs elsewhere.
+                */
+                if (errorMessage.contains("Insufficient privileges") && !config.reportAuthErrors) {
+                  // Now that we are limiting this request just to users we actually expect to be in Skillsforge, we are
+                  // logging at WARN level so it's more visible.
+                  logger.warn(s"Ignoring error for Usercode($userId) because it is probably just a nonexistent user: $errorMessage")
+                  Nil
+                } else {
+                  throw new RuntimeException(s"Skillsforge error: $errorMessage")
+                }
+              }
+
+              EventOccurrenceList(occurrences, Some(new DateTime()))
+            }
           } catch {
             case NonFatal(e) =>
               throw new RequestFailedException("The Skillsforge service could not be reached", e)
