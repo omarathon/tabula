@@ -12,11 +12,10 @@
     </div>
 
     <div class="${stage.name} feedback-summary">
-
-      <#if markerFeedback.hasContent && !markerFeedback.hasBeenModified>
-        Approved by the moderator
-      <#elseif markerFeedback.moderationSkipped>
+      <#if markerFeedback.moderationSkipped>
         Not moderated
+      <#elseif markerFeedback.hasContent && !markerFeedback.hasBeenModified>
+        Approved by the moderator
       <#else>
         <div class="feedback-details">
           <#if markerFeedback.mark?has_content || markerFeedback.grade?has_content>
