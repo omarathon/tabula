@@ -34,6 +34,8 @@ class ExtensionRevokedNotificationTest extends TestBase with Mockito with Extens
 
   @Test
   def shouldCallTextRendererWithCorrectModel(): Unit = new ExtensionFixture {
+    extension.revoke()
+
     val n: ExtensionRevokedNotification = createNotification(assignment, student, admin)
     n.content.model("originalAssignmentDate") should be("1 August 2013 at 12:00:00")
     n.content.model("assignment") should be(assignment)

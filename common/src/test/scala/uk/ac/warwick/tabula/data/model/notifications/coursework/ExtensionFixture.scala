@@ -5,9 +5,12 @@ import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
+import uk.ac.warwick.tabula.services.ExtensionService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{MockUserLookup, Mockito}
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 trait ExtensionFixture extends Mockito {
 
@@ -49,7 +52,22 @@ trait ExtensionFixture extends Mockito {
   }
   module.adminDepartment = department
   module.code = "xxx"
+
   val assignment = new Assignment
+  val extensionService: ExtensionService = smartMock[ExtensionService]
+  assignment.extensionService = extensionService
+
+  extensionService.hasExtensions(any[Assignment]) answers { assignmentObj =>
+    val assignment = assignmentObj.asInstanceOf[Assignment]
+    !assignment._extensions.isEmpty
+  }
+  extensionService.getApprovedExtensionsByUserId(any[Assignment]) answers { assignmentObj =>
+    val assignment = assignmentObj.asInstanceOf[Assignment]
+    assignment._extensions.asScala.filter(_.approved)
+      .groupBy(_.usercode)
+      .mapValues(_.maxBy(_.expiryDate.map(_.getMillis).getOrElse(0L)))
+  }
+
   assignment.name = "Essay"
   assignment.id = "123"
   assignment.openEnded = false
