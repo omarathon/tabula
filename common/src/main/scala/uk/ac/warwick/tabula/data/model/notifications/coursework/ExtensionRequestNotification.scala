@@ -28,22 +28,21 @@ abstract class ExtensionRequestNotification
   def studentRelationships: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
   def profileInfo: Map[String, Object] = studentMember.collect { case student: StudentMember => student }.flatMap(_.mostSignificantCourseDetails).map(scd => {
-    val relationships = studentRelationships.map(x => (
-      x.description,
-      relationshipService.findCurrentRelationships(x, scd)
-    )).filter { case (relationshipType, relations) => relations.nonEmpty }.toMap
+      val relationships = studentRelationships.map(x => (
+        x.description,
+        relationshipService.findCurrentRelationships(x, scd)
+      )).filter { case (_, relations) => relations.nonEmpty }.toMap
 
-    Map(
-      "relationships" -> relationships,
-      "scdCourse" -> scd.course,
-      "scdRoute" -> scd.currentRoute,
-      "scdAward" -> scd.award
-    )
-  }).getOrElse(Map())
+      Map(
+        "relationships" -> relationships,
+        "scdCourse" -> scd.course,
+        "scdRoute" -> scd.currentRoute,
+        "scdAward" -> scd.award
+      )
+    }).getOrElse(Map())
 
   def content = FreemarkerModel(template, Map(
     "requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate.orNull),
-    "reasonForRequest" -> extension.reason,
     "attachments" -> extension.attachments,
     "assignment" -> assignment,
     "student" -> student,
