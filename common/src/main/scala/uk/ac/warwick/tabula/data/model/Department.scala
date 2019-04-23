@@ -142,22 +142,6 @@ class Department extends GeneratedId
 
   def plagiarismDetectionEnabled_=(enabled: Boolean): Unit = settings += (Settings.PlagiarismDetection -> enabled)
 
-  def turnitinExcludeBibliography: Boolean = getBooleanSetting(Settings.TurnitinExcludeBibliography, default = true)
-
-  def turnitinExcludeBibliography_=(exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeBibliography -> exclude)
-
-  def turnitinExcludeQuotations: Boolean = getBooleanSetting(Settings.TurnitinExcludeQuotations, default = true)
-
-  def turnitinExcludeQuotations_=(exclude: Boolean): Unit = settings += (Settings.TurnitinExcludeQuotations -> exclude)
-
-  def turnitinSmallMatchWordLimit: Int = getIntSetting(Settings.TurnitinSmallMatchWordLimit, 0)
-
-  def turnitinSmallMatchWordLimit_=(limit: Int): Unit = settings += (Settings.TurnitinSmallMatchWordLimit -> limit)
-
-  def turnitinSmallMatchPercentageLimit: Int = getIntSetting(Settings.TurnitinSmallMatchPercentageLimit, 0)
-
-  def turnitinSmallMatchPercentageLimit_=(limit: Int): Unit = settings += (Settings.TurnitinSmallMatchPercentageLimit -> limit)
-
   def assignmentInfoView: String = getStringSetting(Settings.AssignmentInfoView) getOrElse Assignment.Settings.InfoViewType.Default
 
   def assignmentInfoView_=(setting: String): Unit = settings += (Settings.AssignmentInfoView -> setting)
@@ -582,10 +566,6 @@ object Department {
     val AssignmentInfoView = "assignmentInfoView"
 
     val PlagiarismDetection = "plagiarismDetection"
-    val TurnitinExcludeBibliography = "turnitinExcludeBibliography"
-    val TurnitinExcludeQuotations = "turnitinExcludeQuotations"
-    val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
-    val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
 
     val StudentRelationshipSource = "studentRelationshipSource"
     val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
