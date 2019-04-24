@@ -99,7 +99,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.personalCircumstances(student))
+      RedirectForce(Routes.Profile.PersonalCircumstances(student))
     }
   }
 }
@@ -132,7 +132,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.personalCircumstances(submission.student))
+      RedirectForce(Routes.Profile.PersonalCircumstances(submission.student))
     }
   }
 

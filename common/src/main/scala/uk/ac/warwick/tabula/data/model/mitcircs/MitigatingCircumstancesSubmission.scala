@@ -92,15 +92,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
-  var stepsSoFar: String = _
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var changeOrResolve: String = _
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
   var pendingEvidence: String = _
+
+  var pendingEvidenceDue: LocalDate = _
 
   var approvedOn: DateTime = _
 
@@ -121,6 +115,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def isDraft: Boolean = approvedOn == null
+
+  def hasEvidence: Boolean = !attachments.isEmpty
+
+  def isEvidencePending: Boolean = pendingEvidenceDue != null
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

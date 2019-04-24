@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.profiles.web
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
@@ -77,7 +78,15 @@ object Routes {
 
     def download(scyd: StudentCourseYearDetails): String = s"$context/view/${scyd.studentCourseDetails.urlSafeId}/${scyd.academicYear.value.toString}/download"
 
-    def personalCircumstances(student: StudentMember) = context + "/view/%s/personalcircs" format encoded(student.universityId)
+    object PersonalCircumstances {
+
+      def apply(student: StudentMember): String = context + "/view/%s/personalcircs" format encoded(student.universityId)
+
+      def create(student: StudentMember): String = apply(student) + "/new"
+
+      def edit(submission: MitigatingCircumstancesSubmission): String = apply(submission.student) + "/edit/%s" format encoded(submission.key.toString)
+
+    }
   }
 
   def students(relationshipType: StudentRelationshipType): String = context + "/%s/students" format encoded(relationshipType.urlPart)
