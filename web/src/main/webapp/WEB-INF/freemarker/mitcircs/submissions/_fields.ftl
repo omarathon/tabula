@@ -70,11 +70,14 @@
   </#list>
 </#macro>
 
-<#macro checkboxesWithOther enumValues enumField otherField>
+<#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
   <#list enumValues as value>
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
       <label>
         <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
+        <#if additionalDescriptions[value.entryName]??>
+          - ${additionalDescriptions[value.entryName]}
+        </#if>
         <#if value.entryName == "Other">
           <@f.input path="${otherField}" cssClass="form-control" />
         </#if>
@@ -283,7 +286,9 @@
     </@bs3form.radio_inline>
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
-    <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
+    <#assign tutorNames><#list personalTutors as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list></#assign>
+    <#assign personalTutors = { "PersonalTutor": tutorNames } />
+    <@checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
     <@question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
