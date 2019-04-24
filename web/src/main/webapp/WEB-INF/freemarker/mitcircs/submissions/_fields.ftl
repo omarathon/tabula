@@ -70,13 +70,13 @@
   </#list>
 </#macro>
 
-<#macro checkboxesWithOther enumValues enumField otherField additonalDescriptions = {}>
+<#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
   <#list enumValues as value>
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
       <label>
         <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
-        <#if additonalDescriptions[value.entryName]??>
-          - ${additonalDescriptions[value.entryName]}
+        <#if additionalDescriptions[value.entryName]??>
+          - ${additionalDescriptions[value.entryName]}
         </#if>
         <#if value.entryName == "Other">
           <@f.input path="${otherField}" cssClass="form-control" />
