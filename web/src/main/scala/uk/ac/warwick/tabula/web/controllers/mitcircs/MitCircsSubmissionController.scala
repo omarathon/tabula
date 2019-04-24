@@ -96,7 +96,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 @RequestMapping(value = Array("/profiles/view/{student}/personalcircs/new"))
 class CreateMitCircsController extends AbstractMitCircsFormController {
 
-  type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
+  type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with MitCircsSubmissionState with SelfValidating
 
   @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
     CreateMitCircsSubmissionCommand(mandatory(student), user.apparentUser)

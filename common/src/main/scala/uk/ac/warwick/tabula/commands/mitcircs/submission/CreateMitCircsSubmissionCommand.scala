@@ -38,7 +38,7 @@ object CreateMitCircsSubmissionCommand {
 }
 
 class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User) extends CommandInternal[MitigatingCircumstancesSubmission]
-  with CreateMitCircsSubmissionState with BindListener {
+  with MitCircsSubmissionState with BindListener {
 
   self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
@@ -79,7 +79,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 }
 
 trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student))
@@ -87,7 +87,7 @@ trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with Per
 }
 
 trait MitCircsSubmissionValidation extends SelfValidating {
-  self: CreateMitCircsSubmissionState with ModuleAndDepartmentServiceComponent =>
+  self: MitCircsSubmissionState with ModuleAndDepartmentServiceComponent =>
 
   override def validate(errors: Errors) {
     // validate dates
@@ -156,14 +156,14 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 }
 
 trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumstancesSubmission] {
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def describe(d: Description) {
     d.member(student)
   }
 }
 
-trait CreateMitCircsSubmissionState {
+trait MitCircsSubmissionState {
   val student: StudentMember
   val currentUser: User
   lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
@@ -226,7 +226,7 @@ class AffectedAssessmentItem {
 
 trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
 
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
     Seq(
@@ -237,7 +237,7 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
 }
 
 trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   override def transformResult(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
@@ -256,7 +256,7 @@ trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Mi
 
 trait MitCircsSubmissionNotificationCompletion extends CompletesNotifications[MitigatingCircumstancesSubmission] {
 
-  self: NotificationHandling with CreateMitCircsSubmissionState =>
+  self: NotificationHandling with MitCircsSubmissionState =>
 
   def notificationsToComplete(submission: MitigatingCircumstancesSubmission): CompletesNotificationsResult = {
     if (submission.hasEvidence) {
