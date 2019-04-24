@@ -75,6 +75,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsContactUserType")
   var contacts: Seq[MitCircsContact] = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   var contactOther: String = _ // free text for use when the contacts includes Other
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
