@@ -31,6 +31,8 @@ object CreateMitCircsSubmissionCommand {
       with MitCircsSubmissionPermissions
       with CreateMitCircsSubmissionDescription
       with NewMitCircsSubmissionNotifications
+      with MitCircsSubmissionSchedulesNotifications
+      with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
 }
@@ -234,10 +236,10 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   }
 }
 
-trait MitCircsSubmissionScheduledNotification extends SchedulesNotifications[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
+trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
   self: CreateMitCircsSubmissionState =>
 
-  override def transformResult(submission: MitigatingCircumstancesSubmission) = Seq(submission)
+  override def transformResult(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
   override def scheduledNotifications(submission: MitigatingCircumstancesSubmission): Seq[ScheduledNotification[MitigatingCircumstancesSubmission]] = {
     if (submission.isEvidencePending) {

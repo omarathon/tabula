@@ -25,6 +25,8 @@ object EditMitCircsSubmissionCommand {
       with MitCircsSubmissionPermissions
       with EditMitCircsSubmissionDescription
       with EditMitCircsSubmissionNotifications
+      with MitCircsSubmissionSchedulesNotifications
+      with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with HibernateExtensionPersistenceComponent

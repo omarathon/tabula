@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.commands.mitcircs.submission.{CreateMitCircsSubmissionState, MitCircsSubmissionScheduledNotification}
+import uk.ac.warwick.tabula.commands.mitcircs.submission.{CreateMitCircsSubmissionState, MitCircsSubmissionSchedulesNotifications}
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
-class MitCircsSubmissionScheduledNotificationTest extends TestBase with Mockito with MitCircsNotificationFixture {
+class MitCircsSubmissionSchedulesNotificationsTest extends TestBase with Mockito with MitCircsNotificationFixture {
 
   @Test
   def scheduledNotifications(): Unit = {
@@ -15,7 +15,7 @@ class MitCircsSubmissionScheduledNotificationTest extends TestBase with Mockito 
     submission.pendingEvidenceDue = LocalDate.now.plusDays(1)
     submission.pendingEvidence = "Doctors note"
 
-    val scheduler = new MitCircsSubmissionScheduledNotification with CreateMitCircsSubmissionState {
+    val scheduler = new MitCircsSubmissionSchedulesNotifications with CreateMitCircsSubmissionState {
       override lazy val department: Department = submission.department
       override val student: StudentMember = submission.student
       override val currentUser: User = student.asSsoUser
