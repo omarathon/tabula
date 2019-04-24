@@ -8,7 +8,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.{Employment, IndustrialAction}
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission, SeriousMedicalIssue}
 import uk.ac.warwick.tabula.profiles.web.Routes
@@ -66,6 +66,15 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
   ): Set[MitigatingCircumstancesSubmission] = {
     val allSubmissions = mitCircsSubmissionService.submissionsForStudent(student)
     allSubmissions.toSet -- Option(submission).toSet
+  }
+
+  @ModelAttribute("personalTutors")
+  def personalTutors(@PathVariable student: StudentMember): Set[Member] = {
+    relationshipService.getStudentRelationshipTypeByUrlPart("tutor")
+      .map(tutor => relationshipService.findCurrentRelationships(tutor, student))
+      .getOrElse(Nil)
+      .flatMap(_.agentMember)
+      .toSet
   }
 
   @RequestMapping
