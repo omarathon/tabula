@@ -349,9 +349,29 @@
 </@question_section>
 
 <@question_section
-  question = "Tell us about evidence you’re going to upload in the future"
+  question = "If you're unable to provide evidence now please tell us about evidence you’re going to upload in the future"
+  hint = "Please give a brief description of this outstanding evidence and tell us when you expect to be able to provide it"
+  cssClass = "form-horizontal"
 >
+  <@bs3form.form_group "pendingEvidenceDue">
+    <@bs3form.label path="pendingEvidenceDue" cssClass="col-xs-4 col-sm-2">Due date</@bs3form.label>
+    <div class="col-xs-8 col-sm-4">
+      <@spring.bind path="pendingEvidenceDue">
+        <div class="input-group">
+          <@f.input path="pendingEvidenceDue" cssClass="form-control date-picker" />
+          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+        </div>
+      </@spring.bind>
+
+      <@bs3form.errors path="pendingEvidenceDue" />
+    </div>
+  </@bs3form.form_group>
+
   <@bs3form.form_group "pendingEvidence">
-    <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+    <@bs3form.label path="pendingEvidence" cssClass="col-xs-4 col-sm-2">Description</@bs3form.label>
+    <div class="col-xs-8 col-sm-10">
+      <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+      <@bs3form.errors path="pendingEvidence" />
+    </div>
   </@bs3form.form_group>
 </@question_section>
