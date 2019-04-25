@@ -86,6 +86,9 @@ abstract class AbstractCopyAssignmentsCommandInternal
     newAssignment.includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
     newAssignment.automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
     newAssignment.automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
+    newAssignment.turnitinStoreInRepository = assignment.turnitinStoreInRepository
+    newAssignment.turnitinExcludeBibliography = assignment.turnitinExcludeBibliography
+    newAssignment.turnitinExcludeQuoted = assignment.turnitinExcludeQuoted
     newAssignment.anonymity = assignment._anonymity
     // all new assignments are now cm2 based
     newAssignment.cm2Assignment = true

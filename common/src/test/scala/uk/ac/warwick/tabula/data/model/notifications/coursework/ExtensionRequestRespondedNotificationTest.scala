@@ -22,14 +22,14 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
   @Test
   def urlIsAssignmentExtensionsPage(): Unit = new ExtensionFixture {
     val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=student")
+    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=u1234567")
   }
 
   @Test
   def titleShouldContainMessage(): Unit = new ExtensionFixture {
     extension.reject()
     val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
-    n.title.contains("XXX: Extension request by [Unknown user] for \"Essay\" was rejected") should be (true)
+    n.title should include("XXX: Extension request by John Smith for \"Essay\" was rejected")
   }
 
   @Test
@@ -48,11 +48,11 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
   def shouldCallTextRendererWithCorrectModel(): Unit = new ExtensionFixture {
     extension.reject()
     val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
-    n.content.model.get("studentName").get should be("[Unknown user]")
+    n.content.model.get("studentName").get should be("John Smith")
     n.content.model.get("agentName").get should be("[Unknown user]")
     n.content.model.get("assignment").get should be(assignment)
     n.content.model.get("verbed").get should be("rejected")
-    n.content.model.get("path").get should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=student")
+    n.content.model.get("path").get should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=u1234567")
   }
 
   @Test

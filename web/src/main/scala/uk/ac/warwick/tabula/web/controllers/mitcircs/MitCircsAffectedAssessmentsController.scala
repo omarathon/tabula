@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONErrorView
 
 @Controller
-@RequestMapping(Array("/mitcircs/profile/{student}/affected-assessments"))
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/affected-assessments"))
 class MitCircsAffectedAssessmentsController extends BaseController {
 
   validatesSelf[SelfValidating]

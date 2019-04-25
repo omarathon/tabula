@@ -215,6 +215,9 @@ class SmallGroupDaoImpl extends SmallGroupDao
     session.newCriteria[SmallGroupSet]
       .createAlias("module", "module")
       .add(is("module.adminDepartment", department))
+      .add(is("deleted", false))
+      .addOrder(asc("archived"))
+      .addOrder(asc("name"))
       .seq
 
   def countAllSetsByYear(year: AcademicYear): Int =

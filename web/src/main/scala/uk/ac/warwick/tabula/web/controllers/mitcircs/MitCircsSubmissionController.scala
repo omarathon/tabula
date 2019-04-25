@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, Renderabl
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
 import scala.collection.immutable.ListMap
@@ -36,7 +38,7 @@ object MitCircsSubmissionController {
 
 }
 
-abstract class AbstractMitCircsFormController extends BaseController {
+abstract class AbstractMitCircsFormController extends AbstractViewProfileController {
 
   validatesSelf[SelfValidating]
 
@@ -76,13 +78,13 @@ abstract class AbstractMitCircsFormController extends BaseController {
       "issueTypes" -> otherIssues,
       "possibleContacts" -> MitCircsContact.values,
       "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
-    ))
+    )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
 
 }
 
 @Controller
-@RequestMapping(value = Array("/mitcircs/profile/{student}/new"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/new"))
 class CreateMitCircsController extends AbstractMitCircsFormController {
 
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
@@ -103,7 +105,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
 }
 
 @Controller
-@RequestMapping(value = Array("/mitcircs/profile/{student}/edit/{submission}"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/edit/{submission}"))
 class EditMitCircsController extends AbstractMitCircsFormController {
 
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
@@ -125,9 +127,6 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     user.apparentUser == studentUser && submission.lastModifiedBy != studentUser
   }
 
-  @ModelAttribute("isSeriousMedicalIssue") def isSeriousMedicalIssue(@PathVariable submission: MitigatingCircumstancesSubmission): Boolean =
-    submission.issueTypes.collect{ case i: SeriousMedicalIssue => i }.nonEmpty
-
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     if (errors.hasErrors) form(submission.student)
@@ -140,7 +139,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
 }
 
 @Controller
-@RequestMapping(Array("/mitcircs/profile/{student}/{submission}/supporting-file/{filename}"))
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/{submission}/supporting-file/{filename}"))
 class MitCircsAttachmentController extends BaseController {
 
   type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]

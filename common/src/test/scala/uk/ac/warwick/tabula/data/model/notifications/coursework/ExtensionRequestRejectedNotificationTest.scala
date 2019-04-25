@@ -40,6 +40,8 @@ class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito wit
 
   @Test
   def shouldCallTextRendererWithCorrectModel(): Unit = new ExtensionFixture {
+    extension.reject()
+
     val n: ExtensionRequestRejectedNotification = createNotification(extension, student, admin)
     n.content.model.get("extension").get should be(extension)
     n.content.model.get("originalAssignmentDate").get should be("1 August 2013 at 12:00:00")

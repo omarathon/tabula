@@ -174,6 +174,9 @@ trait AssignmentPropertiesRequest[A <: ModifyAssignmentCommand] extends JsonApiR
     Option(includeInFeedbackReportWithoutSubmissions).foreach(state.includeInFeedbackReportWithoutSubmissions = _)
     Option(automaticallyReleaseToMarkers).foreach(state.automaticallyReleaseToMarkers = _)
     Option(automaticallySubmitToTurnitin).foreach(state.automaticallySubmitToTurnitin = _)
+    Option(turnitinStoreInRepository).foreach(state.turnitinStoreInRepository = _)
+    Option(turnitinExcludeBibliography).foreach(state.turnitinExcludeBibliography = _)
+    Option(turnitinExcludeQuoted).foreach(state.turnitinExcludeQuoted = _)
     Option(hiddenFromStudents).foreach(state.hiddenFromStudents = _)
   }
 

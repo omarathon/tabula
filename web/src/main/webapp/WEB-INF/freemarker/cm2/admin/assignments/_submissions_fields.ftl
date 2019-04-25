@@ -11,11 +11,54 @@
       <@f.checkbox path="automaticallySubmitToTurnitin" id="automaticallySubmitToTurnitin" /> Automatically check submissions for plagiarism
     </@bs3form.checkbox>
     <span class="help-block">
-		Select this option to check all submissions for plagiarism when the assignment closes.
-		Late submissions, or submissions within an extension, are checked for plagiarism when the submission is received.
-	</span>
+      Select this option to check all submissions for plagiarism when the assignment closes.
+      Late submissions, or submissions within an extension, are checked for plagiarism when the submission is received.
+	  </span>
     <@f.hidden path="displayPlagiarismNotice" value="true" />
+  </@bs3form.labelled_form_group>
 
+  <@bs3form.labelled_form_group path="" labelText="Turnitin options">
+    <#if assignment?? && assignment.turnitinId?has_content>
+      <p>It isn't possible to edit these options because the assignment has already been submitted to Turnitin.</p>
+
+      <@f.hidden path="turnitinStoreInRepository" />
+      <@f.hidden path="turnitinExcludeBibliography" />
+      <@f.hidden path="turnitinExcludeQuoted" />
+
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fal fa-${assignment.turnitinStoreInRepository?string('check', 'times')}"></i></span> Submit submissions to the Turnitin repository</li>
+        <li><span class="fa-li"><i class="fal fa-${assignment.turnitinExcludeBibliography?string('check', 'times')}"></i></span> Exclude bibliographies from similarity reports</li>
+        <li><span class="fa-li"><i class="fal fa-${assignment.turnitinExcludeQuoted?string('check', 'times')}"></i></span> Exclude quoted material from similarity reports</li>
+      </ul>
+    <#else>
+      <@bs3form.checkbox path="turnitinStoreInRepository">
+        <@f.checkbox path="turnitinStoreInRepository" /> Submit submissions to the Turnitin repository
+      </@bs3form.checkbox>
+      <span class="help-block">
+        Select this option to store submissions in the standard Turnitin repository. Note that if you uncheck
+        this option, submissions won't be stored by Turnitin and won't be available for plagiarism checking
+        against any other assignments, whether at Warwick or otherwise.
+      </span>
+
+      <@bs3form.checkbox path="turnitinExcludeBibliography">
+        <@f.checkbox path="turnitinExcludeBibliography" /> Exclude bibliographies from similarity reports
+      </@bs3form.checkbox>
+      <span class="help-block">
+        If this option is selected, any content appearing after the following keywords or phrases on a line on its own
+        will be ignored: "references", "references cited", "references and notes", "resources", "bibliography", "works cited".
+        If this option isn't selected, it's still possible to exclude bibliographies from the "Filters and Settings" settings
+        in the report viewer.
+      </span>
+
+      <@bs3form.checkbox path="turnitinExcludeQuoted">
+        <@f.checkbox path="turnitinExcludeQuoted" /> Exclude quoted material from similarity reports
+      </@bs3form.checkbox>
+      <span class="help-block">
+        If this option is selected, any content appearing between double quotation marks or indented will be ignored.
+        If this option isn't selected, it's still possible to exclude quoted material from the "Filters and Settings" settings
+        in the report viewer.
+      </span>
+    </#if>
   </@bs3form.labelled_form_group>
 
   <@bs3form.labelled_form_group path="restrictSubmissions" labelText="Submission scope">
