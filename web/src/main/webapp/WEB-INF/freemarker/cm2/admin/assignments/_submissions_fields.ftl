@@ -18,7 +18,7 @@
   </@bs3form.labelled_form_group>
 
   <@bs3form.labelled_form_group path="" labelText="Turnitin options">
-    <#if assignment.turnitinId?has_content>
+    <#if assignment?? && assignment.turnitinId?has_content>
       <p>It isn't possible to edit these options because the assignment has already been submitted to Turnitin.</p>
 
       <@f.hidden path="turnitinStoreInRepository" />
