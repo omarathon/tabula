@@ -19,10 +19,10 @@
         <#if additionalDescriptions[value.entryName]??>
           - ${additionalDescriptions[value.entryName]}
         </#if>
-        <#if value.entryName == "Other">
-          <@f.input path="${otherField}" cssClass="form-control" />
-        </#if>
       </label>
+      <#if value.entryName == "Other">
+        <@f.input path="${otherField}" cssClass="form-control other-input" />
+      </#if>
       <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
     </div>
     <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
@@ -37,15 +37,6 @@
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
 >
-
-  <div class="checkbox mitcircs-form__fields__checkbox-subgroup">
-    <label>
-      <input name="seriousMedical" type="checkbox" value="" <#if command.seriousMedicalIssue>checked="checked"</#if>> Serious accident or illness
-    </label>
-    <div class="indent">
-      <@checkboxes seriousMedicalIssues "issueTypes" />
-    </div>
-  </div>
   <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 </@mitcirc.question_section>
 
