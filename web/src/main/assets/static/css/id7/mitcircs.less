@@ -64,6 +64,15 @@
         .make-coloured-box();
         .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
 
+        .checkbox {
+          margin-bottom: 0;
+          padding: 5px 0 5px 5px;
+        }
+
+        .checkbox+.checkbox {
+          margin-top: 0;
+        }
+
         .checkbox:nth-of-type(odd) {
           background: darken(@accent-yellow-bg, 5%);
         }
@@ -102,6 +111,10 @@
       .checkbox .help-popover {
         float: right;
         margin-right: 5px;
+        i {
+          font-weight: lighter;
+          cursor: pointer;
+        }
       }
 
       &__hint {
@@ -121,13 +134,12 @@
     }
 
     &__checkbox-with-other {
-      label {
-        display: flex;
-      }
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      .form-control {
-        margin-left: 5px;
-        width: 75%;
+      .other-input {
+        margin: 0 10px 0 5px;
       }
     }
 
