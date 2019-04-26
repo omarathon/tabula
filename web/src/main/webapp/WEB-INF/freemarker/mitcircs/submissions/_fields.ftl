@@ -254,7 +254,8 @@
 </@mitcirc.question_section>
 
 <@mitcirc.question_section
-  question = "Please provide any evidence relevant to your submission"
+  question = "Please upload any supporting evidence relevant to your submission"
+  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
 >
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
@@ -287,10 +288,11 @@
 
   <@bs3form.filewidget
     basename="file"
-    labelText="Upload new supporting documentation relevant to your submission"
+    labelText=""
     types=[]
     multiple=true
     required=false
+    customHelp=" "
   />
 </@mitcirc.question_section>
 
