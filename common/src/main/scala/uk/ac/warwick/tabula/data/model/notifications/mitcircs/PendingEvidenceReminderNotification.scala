@@ -30,7 +30,7 @@ class PendingEvidenceReminderNotification
 
   def content: FreemarkerModel = FreemarkerModel(PendingEvidenceReminderNotification.templateLocation, Map("submission" -> submission))
 
-  def url: String = Routes.Profile.PersonalCircumstances.edit(submission)
+  def url: String = Routes.Profile.PersonalCircumstances.pendingEvidence(submission)
 
   def urlTitle = s"upload your pending evidence"
 

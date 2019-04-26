@@ -13,7 +13,7 @@ class PendingEvidenceReminderNotificationTest extends TestBase with Mockito with
 
   @Test
   def urlIsReviewPage(): Unit = {
-    n.url should be(s"/profiles/view/student/personalcircs/edit/${submission.key}")
+    n.url should be(s"/profiles/view/student/personalcircs/mitcircs/pendingevidence/${submission.key}")
   }
 
   @Test
