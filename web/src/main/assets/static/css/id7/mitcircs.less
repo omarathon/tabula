@@ -64,6 +64,15 @@
         .make-coloured-box();
         .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
 
+        .checkbox {
+          margin-bottom: 0;
+          padding: 5px 0 5px 5px;
+        }
+
+        .checkbox+.checkbox {
+          margin-top: 0;
+        }
+
         .checkbox:nth-of-type(odd) {
           background: darken(@accent-yellow-bg, 5%);
         }
@@ -102,6 +111,10 @@
       .checkbox .help-popover {
         float: right;
         margin-right: 5px;
+        i {
+          font-weight: lighter;
+          cursor: pointer;
+        }
       }
 
       &__hint {
@@ -121,13 +134,12 @@
     }
 
     &__checkbox-with-other {
-      label {
-        display: flex;
-      }
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      .form-control {
-        margin-left: 5px;
-        width: 75%;
+      .other-input {
+        margin: 0 10px 0 5px;
       }
     }
 
@@ -147,6 +159,41 @@
           }
 
         }
+      }
+    }
+  }
+}
+
+.details {
+  &--section {
+    div.control-label, summary.control-label, .content {
+      position: relative;
+      min-height: 1px;
+      padding-right: @grid-gutter-width / 2;
+      float: left;
+
+      &.control-label {
+
+        @media (min-width: @screen-xs-min) {
+          width: percentage(2/12);
+        }
+        @media (min-width: @screen-md-min) {
+          // need to keep the labels in line with the labels in the left column of .case-details--actions
+          // the left column is col-7 with a nested row containing col-3 for the label
+          // this means the label is 7/12 * 3/12 of a page wide = 21/144 = 7/48
+          width: percentage(7/48);
+        }
+        padding-left: @grid-gutter-width;
+      }
+
+      &.content {
+        @media (min-width: @screen-xs) {
+          width: percentage(10/12);
+        }
+        @media (min-width: @screen-md) {
+          width: percentage(41/48);
+        }
+        padding-left: @grid-gutter-width / 2;
       }
     }
   }

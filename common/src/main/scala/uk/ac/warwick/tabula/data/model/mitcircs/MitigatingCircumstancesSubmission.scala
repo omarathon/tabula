@@ -9,6 +9,7 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
@@ -18,7 +19,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
   with PermissionsTarget
   with Serializable
-  with ToEntityReference {
+  with ToEntityReference
+  with FormattedHtml {
     type Entity = MitigatingCircumstancesSubmission
 
   def this(student:StudentMember, creator:User, department: Department) {
@@ -85,6 +87,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var reason: String = _
 
+  def formattedReason: String = formattedHtml(reason)
+
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @JoinColumn(name = "submission_id")
   @BatchSize(size = 200)
@@ -94,6 +98,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
   var pendingEvidence: String = _
+
+  def formattedPendingEvidence: String = formattedHtml(pendingEvidence)
 
   var pendingEvidenceDue: LocalDate = _
 
@@ -127,8 +133,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     "creator" -> creator.getWarwickId
   )
 
-  // Don't use the student as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(student.homeDepartment)
+  // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
+  override def permissionsParents: Stream[PermissionsTarget] = Stream(MitigatingCircumstancesStudent(student))
 }
 
 

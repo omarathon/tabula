@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.{Employment, IndustrialAction}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission, SeriousMedicalIssue}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
@@ -24,16 +24,13 @@ import scala.collection.immutable.ListMap
 
 object MitCircsSubmissionController {
 
-  def validIssueTypes(student: StudentMember): (Seq[SeriousMedicalIssue], Seq[IssueType]) = {
-    val seriousMedicalIssues = IssueType.values.collect{ case i: SeriousMedicalIssue => i }
-    val otherIssues = IssueType.values.diff(seriousMedicalIssues)
-
+  def validIssueTypes(student: StudentMember): Seq[IssueType] = {
     // TODO - Make it possible for TQ to enable this (we could also just manage this in code)
     val invalidTypes =
       if (student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") Seq(IndustrialAction)
       else Seq(Employment, IndustrialAction)
 
-    (seriousMedicalIssues, otherIssues.filterNot(invalidTypes.contains))
+    IssueType.values.filterNot(invalidTypes.contains)
   }
 
 }
@@ -79,12 +76,8 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember): Mav = {
-
-    val (seriousMedicalIssues, otherIssues) = MitCircsSubmissionController.validIssueTypes(student)
-
     Mav("mitcircs/submissions/form", Map(
-      "seriousMedicalIssues" -> seriousMedicalIssues,
-      "issueTypes" -> otherIssues,
+      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
       "possibleContacts" -> MitCircsContact.values,
       "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
     )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
@@ -93,10 +86,10 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 }
 
 @Controller
-@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/new"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/new"))
 class CreateMitCircsController extends AbstractMitCircsFormController {
 
-  type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with CreateMitCircsSubmissionState with SelfValidating
+  type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with MitCircsSubmissionState with SelfValidating
 
   @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
     CreateMitCircsSubmissionCommand(mandatory(student), user.apparentUser)
@@ -108,13 +101,13 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.PersonalCircumstances(student))
+      RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
     }
   }
 }
 
 @Controller
-@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/edit/{submission}"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/edit/{submission}"))
 class EditMitCircsController extends AbstractMitCircsFormController {
 
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
@@ -141,14 +134,14 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.PersonalCircumstances(submission.student))
+      RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
     }
   }
 
 }
 
 @Controller
-@RequestMapping(Array("/profiles/view/{student}/personalcircs/{submission}/supporting-file/{filename}"))
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/{submission}/supporting-file/{filename}"))
 class MitCircsAttachmentController extends BaseController {
 
   type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]

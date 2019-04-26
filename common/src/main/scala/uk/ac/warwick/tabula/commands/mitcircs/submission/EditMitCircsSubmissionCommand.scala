@@ -91,6 +91,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+
     submission.relatedSubmission = relatedSubmission
     // reset approvedOn when changes are made by others or drafts are saved
     if(isSelf && approve) submission.approvedOn = DateTime.now() else submission.approvedOn = null
@@ -110,14 +111,14 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
   }
 }
 
-trait EditMitCircsSubmissionState extends CreateMitCircsSubmissionState {
+trait EditMitCircsSubmissionState extends MitCircsSubmissionState {
   val submission: MitigatingCircumstancesSubmission
   lazy val student: StudentMember = submission.student
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
 
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
     Seq(
