@@ -60,7 +60,7 @@
               </@modal.wrapper>
             </div>
           </#if>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.studenthome command.student />">Cancel</a>
+          <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewsubmission submission />">Cancel</a>
         </div>
       </@f.form>
     </article>
