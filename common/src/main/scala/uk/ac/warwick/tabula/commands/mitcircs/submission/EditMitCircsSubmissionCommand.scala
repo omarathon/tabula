@@ -91,11 +91,6 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
-    // if new files have been added reset pending evidence
-    if(!file.attached.isEmpty && submission.isEvidencePending) {
-      submission.pendingEvidenceDue = null
-      submission.pendingEvidence = null
-    }
 
     submission.relatedSubmission = relatedSubmission
     // reset approvedOn when changes are made by others or drafts are saved

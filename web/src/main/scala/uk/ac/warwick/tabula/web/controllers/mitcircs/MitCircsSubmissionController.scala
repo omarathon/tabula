@@ -93,7 +93,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 }
 
 @Controller
-@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/new"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/new"))
 class CreateMitCircsController extends AbstractMitCircsFormController {
 
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with MitCircsSubmissionState with SelfValidating
@@ -108,13 +108,13 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.PersonalCircumstances(student))
+      RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
     }
   }
 }
 
 @Controller
-@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/edit/{submission}"))
+@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/edit/{submission}"))
 class EditMitCircsController extends AbstractMitCircsFormController {
 
   type EditCommand = Appliable[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with SelfValidating
@@ -141,14 +141,14 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     if (errors.hasErrors) form(submission.student)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Profile.PersonalCircumstances(submission.student))
+      RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
     }
   }
 
 }
 
 @Controller
-@RequestMapping(Array("/profiles/view/{student}/personalcircs/{submission}/supporting-file/{filename}"))
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/{submission}/supporting-file/{filename}"))
 class MitCircsAttachmentController extends BaseController {
 
   type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]

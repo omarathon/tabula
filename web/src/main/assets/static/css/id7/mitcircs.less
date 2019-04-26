@@ -151,3 +151,38 @@
     }
   }
 }
+
+.details {
+  &--section {
+    div.control-label, summary.control-label, .content {
+      position: relative;
+      min-height: 1px;
+      padding-right: @grid-gutter-width / 2;
+      float: left;
+
+      &.control-label {
+
+        @media (min-width: @screen-xs-min) {
+          width: percentage(2/12);
+        }
+        @media (min-width: @screen-md-min) {
+          // need to keep the labels in line with the labels in the left column of .case-details--actions
+          // the left column is col-7 with a nested row containing col-3 for the label
+          // this means the label is 7/12 * 3/12 of a page wide = 21/144 = 7/48
+          width: percentage(7/48);
+        }
+        padding-left: @grid-gutter-width;
+      }
+
+      &.content {
+        @media (min-width: @screen-xs) {
+          width: percentage(10/12);
+        }
+        @media (min-width: @screen-md) {
+          width: percentage(41/48);
+        }
+        padding-left: @grid-gutter-width / 2;
+      }
+    }
+  }
+}

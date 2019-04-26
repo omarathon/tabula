@@ -142,13 +142,13 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     }
 
     // validate pending evidence
-    if(!pendingEvidence.hasText && pendingEvidenceDue != null){
+    if(!pendingEvidence.hasText && pendingEvidenceDue != null) {
       errors.rejectValue("pendingEvidence", "mitigatingCircumstances.pendingEvidence.required")
     } else if (pendingEvidence.hasText && pendingEvidenceDue == null) {
       errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.required")
     }
 
-    if(!pendingEvidenceDue.isAfter(LocalDate.now)) {
+    if(pendingEvidenceDue != null && !pendingEvidenceDue.isAfter(LocalDate.now)) {
       errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.future")
     }
 
