@@ -332,13 +332,13 @@ class AssessmentMembershipDaoImpl extends AssessmentMembershipDao with Daoisms w
   }
 
   def countFullFeedback(assignment: Assignment): Int = { //join f.attachments a
-    session.createQuery(
+    session.newQuery[Number](
       """select count(*) from Feedback f
 			where f.assignment = :assignment
 			and not (actualMark is null and actualGrade is null and f.attachments is empty)""")
       .setEntity("assignment", assignment)
       .uniqueResult
-      .asInstanceOf[Number].intValue
+      .get.intValue
   }
 
   def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {

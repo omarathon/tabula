@@ -124,10 +124,10 @@ trait UserGroupMembershipHelperLookup {
   }.getOrElse(Nil)
 
   protected def findByInternal(user: User): Seq[String] = {
-    val groupsByUser = session.createQuery(groupsByUserHql)
+    val groupsByUser = session.createQuery(groupsByUserHql, classOf[String])
       .setString("universityId", user.getWarwickId)
       .setString("userId", user.getUserId)
-      .list.asInstanceOf[JList[String]]
+      .list
       .asScala
 
     val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
