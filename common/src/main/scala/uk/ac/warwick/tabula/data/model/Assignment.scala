@@ -179,7 +179,7 @@ class Assignment
 
   var cm2Assignment: JBoolean = false
 
-  var genericFeedback: String = ""
+  var genericFeedback: String = _
 
   def genericFeedbackFormattedHtml: String = formattedHtml(genericFeedback)
 
