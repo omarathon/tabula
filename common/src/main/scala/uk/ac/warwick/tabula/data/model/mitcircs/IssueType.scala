@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.data.model.mitcircs
 
-
 import enumeratum.EnumEntry
 import enumeratum._
 import uk.ac.warwick.tabula.data.model.EnumSeqUserType
 
 import scala.collection.immutable
-import uk.ac.warwick.tabula.system.EnumSeqTwoWayConverter
+import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 sealed abstract class IssueType(val description: String, val helpText: Option[String] = None) extends EnumEntry
 
@@ -68,5 +67,5 @@ object IssueType extends Enum[IssueType] {
   )
 }
 
-class IssueTypeUserType extends EnumSeqUserType[IssueType]
-class IssueTypeConverter extends EnumSeqTwoWayConverter[IssueType]
+class IssueTypeUserType extends EnumSeqUserType(IssueType)
+class IssueTypeConverter extends EnumTwoWayConverter(IssueType)

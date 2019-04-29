@@ -118,7 +118,8 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     user: CurrentUser
   ): EditCommand = {
     mustBeLinked(submission, student)
-    EditMitCircsSubmissionCommand(mandatory(submission), user.apparentUser)
+    if (!submission.isEditable) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it is not currently editable")
+    EditMitCircsSubmissionCommand(submission, user.apparentUser)
   }
 
   @ModelAttribute("student") def student(@PathVariable submission: MitigatingCircumstancesSubmission): StudentMember =

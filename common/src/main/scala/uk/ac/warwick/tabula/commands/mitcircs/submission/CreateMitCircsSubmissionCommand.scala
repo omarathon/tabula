@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -72,7 +72,13 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     }
     file.attached.asScala.foreach(submission.addAttachment)
     submission.relatedSubmission = relatedSubmission
-    if(isSelf && approve) submission.approvedOn = DateTime.now()
+
+    if(isSelf && approve) {
+      submission.approveAndSubmit()
+    } else {
+      submission.saveAsDraft()
+    }
+
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
