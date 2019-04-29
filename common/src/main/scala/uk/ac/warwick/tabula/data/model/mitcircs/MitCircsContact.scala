@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import enumeratum.{EnumEntry, _}
 import uk.ac.warwick.tabula.data.model.EnumSeqUserType
-import uk.ac.warwick.tabula.system.EnumSeqTwoWayConverter
+import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 import scala.collection.immutable
 
@@ -25,6 +25,5 @@ object MitCircsContact extends Enum[MitCircsContact] {
   case object Other extends MitCircsContact(description = "Other")
 }
 
-class MitCircsContactUserType extends EnumSeqUserType[MitCircsContact]
-
-class MitCircsContactConverter extends EnumSeqTwoWayConverter[MitCircsContact]
+class MitCircsContactUserType extends EnumSeqUserType(MitCircsContact)
+class MitCircsContactConverter extends EnumTwoWayConverter(MitCircsContact)

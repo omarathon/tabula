@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
-import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -36,6 +36,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   extends CommandInternal[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with BindListener {
 
   self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
+
+  require(submission.isEditable) // Guarded at controller
 
   startDate = submission.startDate
   endDate = submission.endDate
@@ -93,8 +95,14 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     file.attached.asScala.foreach(submission.addAttachment)
 
     submission.relatedSubmission = relatedSubmission
+
     // reset approvedOn when changes are made by others or drafts are saved
-    if(isSelf && approve) submission.approvedOn = DateTime.now() else submission.approvedOn = null
+    if(isSelf && approve) {
+      submission.approveAndSubmit()
+    } else {
+      submission.saveAsDraft()
+    }
+
     submission.lastModified = DateTime.now()
     submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)

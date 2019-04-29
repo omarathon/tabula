@@ -29,6 +29,7 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
+        <@detail "State">${submission.state.toString}</@detail>
         <@detail "Issue type"><@enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@detail>
         <@detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@detail>
         <@detail "End date">
@@ -56,7 +57,9 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
-            <p><a href="<@routes.mitcircs.editsubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+            <#if submission.editable>
+              <p><a href="<@routes.mitcircs.editsubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+            </#if>
             <#if submission.evidencePending>
               <p><a href="<@routes.mitcircs.pendingevidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
             </#if>

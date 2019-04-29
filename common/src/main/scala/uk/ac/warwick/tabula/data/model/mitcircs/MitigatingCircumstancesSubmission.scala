@@ -103,7 +103,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   var pendingEvidenceDue: LocalDate = _
 
-  var approvedOn: DateTime = _
+  @Column(name = "approvedOn")
+  private var _approvedOn: DateTime = _
+
+  // Guarded against being set directly; use .approveAndSubmit() below
+  def approvedOn: Option[DateTime] = Option(_approvedOn)
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
@@ -121,10 +125,33 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     attachments.remove(attachment)
   }
 
-  def isDraft: Boolean = approvedOn == null
+  // Intentionally no default here, rely on a state being set explicitly
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
+  @Column(name = "state", nullable = false)
+  private var _state: MitigatingCircumstancesSubmissionState = _
+
+  // Can get but not set state directly, use the methods below to transition
+  def state: MitigatingCircumstancesSubmissionState = _state
+
+  // State transitions
+  def saveAsDraft(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.Draft
+    _approvedOn = null
+  }
+
+  def approveAndSubmit(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.Submitted
+    _approvedOn = DateTime.now()
+  }
+
+  def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
+  def isEditable: Boolean = state == MitigatingCircumstancesSubmissionState.Draft || state == MitigatingCircumstancesSubmissionState.Submitted
 
   def hasEvidence: Boolean = !attachments.isEmpty
-
   def isEvidencePending: Boolean = pendingEvidenceDue != null
 
   override def toStringProps: Seq[(String, Any)] = Seq(
