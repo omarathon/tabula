@@ -252,7 +252,7 @@
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
-  cssClass="evidence-upload"
+  cssClass="mitcircs-form__fields__section__evidence-upload"
 >
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">

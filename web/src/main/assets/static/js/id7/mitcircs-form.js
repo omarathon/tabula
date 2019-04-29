@@ -23,7 +23,7 @@ class MitCircsForm {
           $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
           $dl.append($('<dd></dd>').text($issueType.data('evidenceguidance')));
         });
-        $('.evidence-upload .mitcircs-form__fields__section__hint').empty().append($dl);
+        $('.mitcircs-form__fields__section__evidence-upload .mitcircs-form__fields__section__hint').empty().append($dl);
       })
       .trigger('change');
 
