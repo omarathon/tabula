@@ -4,7 +4,6 @@
   <h1>Supply pending evidence for MIT-${submission.key}</h1>
   <p>You stated that you will supply the following evidence on <@fmt.date date=submission.pendingEvidenceDue includeTime = false /></p>
   <#noescape>${submission.formattedPendingEvidence}</#noescape>
-  <hr>
 
   <@f.form id="pendingEvidenceForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
     <@mitcirc.question_section
@@ -15,7 +14,8 @@
         labelText=""
         types=[]
         multiple=true
-        required=true
+        required=false
+        customHelp=" "
       />
     </@mitcirc.question_section>
 
