@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.services
 
 import java.util.concurrent.Future
+
 import javax.mail.Message.RecipientType
 import javax.mail.internet.{MimeMessage, MimeMultipart}
-
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.mail.SimpleMailMessage
 import org.springframework.mail.javamail.MimeMessagePreparator
@@ -26,7 +26,7 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
 
   override def createMimeMessage(): MimeMessage = delegate.createMimeMessage()
 
-  override def send(message: MimeMessage): Future[JBoolean] = {
+  override def send(message: MimeMessage, logBody: Boolean): Future[JBoolean] = {
     val messageToSend = if (!features.emailStudents) {
       prepareMessage(message) { helper =>
         val oldTo = message.getRecipients(RecipientType.TO).map({
@@ -49,38 +49,28 @@ final class RedirectingMailSender(delegate: WarwickMailSender) extends WarwickMa
       }
     } else message
 
-    delegate.send(messageToSend)
+    delegate.send(messageToSend, logBody)
   }
 
-  implicit def ArrayOrEmpty[A: ClassTag](a: Array[A]) = new {
+  implicit class ArrayOrEmpty[A: ClassTag](a: Array[A]) {
     def orEmpty: Array[A] = Option(a).getOrElse(Array.empty)
   }
 
   override def send(simpleMessage: SimpleMailMessage): Future[JBoolean] = send(createMessage(delegate) { message =>
-    Option(simpleMessage.getFrom) foreach {
-      message.setFrom
-    }
-    Option(simpleMessage.getReplyTo) foreach {
-      message.setReplyTo
-    }
+    Option(simpleMessage.getFrom).foreach(message.setFrom)
+    Option(simpleMessage.getReplyTo).foreach(message.setReplyTo)
 
-    Option(simpleMessage.getTo) foreach {
-      message.setTo
-    }
-    message.setCc(Option(simpleMessage.getCc).getOrElse(Array(): Array[String]))
-    message.setBcc(Option(simpleMessage.getBcc).getOrElse(Array(): Array[String]))
+    Option(simpleMessage.getTo).foreach(message.setTo)
+    message.setCc(simpleMessage.getCc.orEmpty)
+    message.setBcc(simpleMessage.getBcc.orEmpty)
 
-    Option(simpleMessage.getSubject) foreach {
-      message.setSubject
-    }
-    Option(simpleMessage.getText) foreach {
-      message.setText
-    }
+    Option(simpleMessage.getSubject).foreach(message.setSubject)
+    Option(simpleMessage.getText).foreach(message.setText)
   })
 
-  override def send(preparator: MimeMessagePreparator): Future[JBoolean] = {
+  override def send(preparator: MimeMessagePreparator, logBody: Boolean): Future[JBoolean] = {
     val message = createMimeMessage()
     preparator.prepare(message)
-    send(message)
+    send(message, logBody)
   }
 }

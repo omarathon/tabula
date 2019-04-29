@@ -140,7 +140,7 @@ object Daoisms {
       )
 
     def newUpdateQuery(hql: String) =
-      new ScalaUpdateQuery(session.createQuery(hql))
+      new ScalaUpdateQuery(session.createQuery(hql).asInstanceOf[org.hibernate.query.Query[_]])
   }
 
   // The maximum number of clauses supported in an IN(..) before it will
