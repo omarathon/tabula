@@ -71,21 +71,23 @@
       <table class="table table-default">
         <thead>
         <tr>
+          <th class="col-sm-2">Type</th>
           <th class="col-sm-3">Module</th>
-          <th class="col-sm-6">Name</th>
-          <th class="col-sm-3">Deadline / exam date</th>
+          <th class="col-sm-5">Name</th>
+          <th class="col-sm-2">Deadline / exam date</th>
         </tr>
         </thead>
         <tbody>
         <#list submission.affectedAssessments as assessment>
           <tr>
+            <td><#if assessment.assessmentType.code == "A">Assignment<#else>Exam</#if></td>
             <td>
               <span class="mod-code">
                 ${assessment.module.code?upper_case}</span> <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})
               </span>
             </td>
             <td>${assessment.name}</td>
-            <td><#if assessment.deadline??><@fmt.date date=assessment.deadline  /><#else><span class="very-subtle">Unknown</span></#if></td>
+            <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
           </tr>
         </#list>
         </tbody>

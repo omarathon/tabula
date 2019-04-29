@@ -16,9 +16,7 @@
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
       <label>
         <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
-        <#if additionalDescriptions[value.entryName]??>
-          - ${additionalDescriptions[value.entryName]}
-        </#if>
+        <#if additionalDescriptions[value.entryName]?? >- ${additionalDescriptions[value.entryName]}</#if>
       </label>
       <#if value.entryName == "Other">
         <@f.input path="${otherField}" cssClass="form-control other-input" />
@@ -52,7 +50,7 @@
     <div class="col-xs-8 col-sm-4">
       <@spring.bind path="startDate">
         <div class="input-group">
-          <@f.input path="startDate" cssClass="form-control date-picker" />
+          <@f.input path="startDate" autocomplete="off" cssClass="form-control date-picker" />
           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
         </div>
       </@spring.bind>
@@ -70,7 +68,7 @@
 
         <@spring.bind path="endDate">
           <div class="input-group">
-            <@f.input path="endDate" cssClass="form-control date-picker" />
+            <@f.input path="endDate" autocomplete="off" cssClass="form-control date-picker" />
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
           </div>
         </@spring.bind>
@@ -151,7 +149,7 @@
         <td>
           <label class="control-label sr-only" for="new-assessment-deadline">Deadline or examination date</label>
           <div class="input-group">
-            <input id="new-assessment-deadline" type="text" class="form-control input-sm date-picker">
+            <input id="new-assessment-deadline" type="text" autocomplete="off" class="form-control input-sm date-picker">
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
           </div>
         </td>
@@ -177,7 +175,7 @@
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__deadline">
             <div class="input-group">
-              <@f.input path="deadline" cssClass="form-control input-sm date-picker" />
+              <@f.input path="deadline" autocomplete="off" cssClass="form-control input-sm date-picker" />
               <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
             </div>
           </td>
@@ -218,12 +216,16 @@
     </@bs3form.radio_inline>
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
-    <#assign tutorNames><#list personalTutors as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list></#assign>
-    <#assign personalTutors = { "PersonalTutor": tutorNames } />
+    <#if personalTutors?has_content>
+      <#assign tutorNames><#list personalTutors as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list></#assign>
+      <#assign personalTutors = { "PersonalTutor": tutorNames } />
+    <#else>
+      <#assign personalTutors = {} />
+    </#if>
     <@checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <@mitcirc.question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
+    <@mitcirc.question_hint "Please tell us why you haven't yet discussed your mitigating circumstances with anyone" />
 
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
@@ -297,7 +299,7 @@
     <div class="col-xs-8 col-sm-4">
       <@spring.bind path="pendingEvidenceDue">
         <div class="input-group">
-          <@f.input path="pendingEvidenceDue" cssClass="form-control date-picker" />
+          <@f.input path="pendingEvidenceDue" autocomplete="off" cssClass="form-control date-picker" />
           <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
         </div>
       </@spring.bind>
