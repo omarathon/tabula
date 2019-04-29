@@ -16,7 +16,7 @@
   <section class="row mitcircs-form fix-area">
     <div class="col-md-4 col-md-push-8">
       <header>
-        <section class="mitcircs-form__guidance">
+        <div class="mitcircs-form__guidance">
           <h2>Guidance</h2>
 
           <p>
@@ -33,12 +33,12 @@
             as a first attempt, or to have an extension for a deadline, or to have a late penalty removed. Mitigation may also be considered when
             deciding final year degree classifications in borderlines cases, but it does not automatically result in a higher degree classification.
           </p>
-        </section>
+        </div>
 
         <#if department.formattedMitCircsGuidance?has_content>
-          <section class="mitcircs-form__guidance mitcircs-form__guidance--departmental">
+          <div class="mitcircs-form__guidance mitcircs-form__guidance--departmental">
             <#noescape>${department.formattedMitCircsGuidance!''}</#noescape>
-          </section>
+          </div>
         </#if>
       </header>
     </div>
