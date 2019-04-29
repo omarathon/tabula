@@ -15,6 +15,8 @@
 @hint-colour: #666666;
 @hint-font-size: (@main-font-size - 1px);
 
+@gray-light: lighten(@gray-base, 45%); // #737373, ARIA
+
 .make-coloured-box() {
   padding: @alert-padding;
   margin-bottom: @line-height-computed;
@@ -168,36 +170,46 @@
   }
 }
 
-.details {
-  &--section {
+.mitcircs-details {
+  .form-horizontal .control-label {
+    font-weight: normal;
+    color: @gray-light;
+  }
+
+  &__section {
     div.control-label, summary.control-label, .content {
-      position: relative;
-      min-height: 1px;
-      padding-right: @grid-gutter-width / 2;
-      float: left;
+      padding-left: @grid-gutter-width / 2;
+    }
 
-      &.control-label {
-
-        @media (min-width: @screen-xs-min) {
-          width: percentage(2/12);
-        }
-        @media (min-width: @screen-md-min) {
-          // need to keep the labels in line with the labels in the left column of .case-details--actions
-          // the left column is col-7 with a nested row containing col-3 for the label
-          // this means the label is 7/12 * 3/12 of a page wide = 21/144 = 7/48
-          width: percentage(7/48);
-        }
-        padding-left: @grid-gutter-width;
+    // act like a col-sm-*
+    @media (min-width: @grid-float-breakpoint) {
+      div.control-label, summary.control-label, .content {
+        position: relative;
+        min-height: 1px;
+        padding-right: @grid-gutter-width / 2;
+        float: left;
       }
 
-      &.content {
-        @media (min-width: @screen-xs) {
-          width: percentage(10/12);
-        }
-        @media (min-width: @screen-md) {
-          width: percentage(41/48);
-        }
-        padding-left: @grid-gutter-width / 2;
+      div.control-label, summary.control-label {
+        // need to keep the labels in line with the labels in the left column of the actions
+        // the left column is col-sm-6 col-md-7 with a nested row containing col-3 for the label
+        // this means the label is (sm) 6/12 * 3/12 of a page wide = 18/144 = 1/8
+        width: percentage(1/8);
+      }
+
+      .content {
+        width: percentage(7/8);
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      div.control-label, summary.control-label {
+        // this means the label is (md) 7/12 * 3/12 of a page wide = 21/144 = 7/48
+        width: percentage(7/48);
+      }
+
+      .content {
+        width: percentage(41/48);
       }
     }
   }

@@ -1,5 +1,4 @@
 <#escape x as x?html>
-
   <#if !isSelf>
     <details class="indent">
       <summary>${student.fullName}</summary>
