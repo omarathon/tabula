@@ -17,25 +17,25 @@ class MitCircsMessageController extends BaseController {
     ListMessagesCommand(mandatory(submission))
   }
 
-  @ModelAttribute("messageCommand")
-  def messageCommand(@PathVariable submission: MitigatingCircumstancesSubmission): Appliable[MitigatingCircumstancesMessage] = {
-    ??? //CreateMessageCommand(mandatory(submission))
-  }
+//  @ModelAttribute("messageCommand")
+//  def messageCommand(@PathVariable submission: MitigatingCircumstancesSubmission): Appliable[MitigatingCircumstancesMessage] = {
+//    ??? //CreateMessageCommand(mandatory(submission))
+//  }
 
   @RequestMapping
   def render(
     @ModelAttribute("listCommand") cmd: Appliable[Seq[MitigatingCircumstancesMessage]],
     @PathVariable submission: MitigatingCircumstancesSubmission
   ): Mav = {
-    Mav("mitcircs/admin/home", "messages" -> cmd.apply())
+    Mav("mitcircs/messages", "messages" -> cmd.apply())
   }
 
-  @RequestMapping(method = Array(POST))
-  def message(
-    @ModelAttribute("messageCommand") cmd: Appliable[MitigatingCircumstancesMessage],
-    @PathVariable submission: MitigatingCircumstancesSubmission
-  ): Mav = {
-    ???
-  }
+//  @RequestMapping(method = Array(POST))
+//  def message(
+//    @ModelAttribute("messageCommand") cmd: Appliable[MitigatingCircumstancesMessage],
+//    @PathVariable submission: MitigatingCircumstancesSubmission
+//  ): Mav = {
+//    ???
+//  }
 
 }

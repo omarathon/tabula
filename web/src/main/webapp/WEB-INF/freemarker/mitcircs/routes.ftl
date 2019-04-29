@@ -9,6 +9,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro home><@_u page="/" /></#macro>
 <#macro adminhome department><@_u page="/admin/${department.code}" /></#macro>
+<#macro messages submission><@_u page="/admin/${department.code}/view/${submission.key}/messages" /></#macro>
 
 <#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 

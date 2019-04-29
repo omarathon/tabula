@@ -198,3 +198,76 @@
     }
   }
 }
+
+.message-thread {
+
+  &__message {
+    .clearfix();
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.3);
+    padding: @panel-heading-padding;
+    margin-bottom: @panel-body-padding;
+    word-break: break-word;
+    .date {
+      color: #5e5e5f;
+    }
+
+    &__author {
+      font-weight: bold;
+    }
+
+    &__content {
+
+    }
+
+    &--student {
+      background-color: #E5F6CF;
+      border: 1px solid #919191;
+      margin-right: 20%;
+    }
+
+    &--mco {
+      background-color: #CFEFFB;
+      border: 1px solid #c0c0c0;
+      margin-left: 20%;
+    }
+  }
+
+}
+
+/*.message {
+  .clearfix();
+  border-radius: 10px;
+  box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.3);
+  padding: @panel-heading-padding;
+  margin-bottom: @panel-body-padding;
+  word-break: break-word;
+  .date {
+    color: #5e5e5f;
+  }
+  .message--author {
+    font-weight: bold;
+  }
+  .message--attachment {
+    font-weight: bold;
+    margin-top: (@line-height-computed / 2);
+    padding-top: (@line-height-computed / 4);
+    border-top: 1px solid @gray-light;
+  }
+  &.message-client {
+    background-color: #E5F6CF;
+    border: 1px solid #919191;
+    margin-right: 20%;
+  }
+  &.message-team {
+    background-color: #CFEFFB;
+    border: 1px solid #c0c0c0;
+    margin-left: 20%;
+  }
+  .message--read-indicator {
+    font-size: @font-size-h5;
+    color: #3E8C27;
+  }
+
+}
+ */

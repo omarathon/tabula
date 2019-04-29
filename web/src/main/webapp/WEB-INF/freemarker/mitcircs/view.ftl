@@ -24,6 +24,15 @@
   </div>
 </#macro>
 
+<#macro asyncSection label url>
+  <div class="details--section async row form-horizontal">
+    <div class="control-label">${label}</div>
+    <div class="content form-control-static">
+      <i class="fas fa-spinner fa-pulse"></i> Loading&hellip;
+    </div>
+  </div>
+</#macro>
+
 <#escape x as x?html>
     <h1>MIT-${submission.key}</h1>
     <div class="row">
@@ -113,4 +122,7 @@
       <#noescape>${submission.formattedPendingEvidence}</#noescape>
     </@section>
   </#if>
+  <@asyncSection "Messages" "">
+
+  </@asyncSection>
 </#escape>
