@@ -13,7 +13,10 @@
 
 <#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
   <#list enumValues as value>
-    <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
+    <div
+      class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>"
+      <#if value.evidenceGuidance??>data-evidenceguidance="${value.evidenceGuidance}"</#if>
+    >
       <label>
         <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
         <#if additionalDescriptions[value.entryName]?? >- ${additionalDescriptions[value.entryName]}</#if>
@@ -249,6 +252,7 @@
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
+  cssClass="mitcircs-form__fields__section__evidence-upload"
 >
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
