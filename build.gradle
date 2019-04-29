@@ -27,12 +27,12 @@ ext {
   hibernateVersion = "5.4.2.Final"
   jacksonVersion = "2.9.8"
   jacksonScalaModuleVersion = "2.9.8"
-  elasticsearchVersion = "6.7.1"
+  elasticsearchVersion = "6.5.2"
   elastic4sVersion = "6.5.1"
   poiVersion = "4.1.0"
   tilesVersion = "3.0.8"
   jcloudsVersion = "2.1.2"
-  warwickUtilsVersion = "20190426"
+  warwickUtilsVersion = "20190429"
   surefireVersion = "2.19.1"
 }
 
