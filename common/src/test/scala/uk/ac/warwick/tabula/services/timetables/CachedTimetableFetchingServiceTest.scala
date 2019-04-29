@@ -28,6 +28,7 @@ class CachedTimetableFetchingServiceTest extends TestBase with Mockito {
 
   @Before def clearCaches() {
     Caches.builder("cacheName", Caches.CacheStrategy.CaffeineRequired)
+      .maximumSize(10000) // y tho
       .buildStore()
       .clear()
   }

@@ -339,6 +339,7 @@ trait GrantedRolesForUserCache {
   final lazy val GrantedRolesForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] =
     Caches.builder(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, cacheStrategy)
       .expireAfterWrite(GrantedRolesForUserCacheMaxAge)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   class GrantedRolesForUserCacheFactory extends CacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -365,6 +366,7 @@ trait GrantedRolesForGroupCache {
   final lazy val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] =
     Caches.builder(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, cacheStrategy)
       .expireAfterWrite(GrantedRolesForGroupCacheMaxAge)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   class GrantedRolesForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -385,6 +387,7 @@ trait GrantedPermissionsForUserCache {
   final lazy val GrantedPermissionsForUserCache: Cache[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] =
     Caches.builder(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, cacheStrategy)
       .expireAfterWrite(GrantedPermissionsForUserCacheMaxAge)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   class GrantedPermissionsForUserCacheFactory extends SingularCacheEntryFactory[(String, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -405,6 +408,7 @@ trait GrantedPermissionsForGroupCache {
   final lazy val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] =
     Caches.builder(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, cacheStrategy)
       .expireAfterWrite(GrantedPermissionsForGroupCacheMaxAge)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   class GrantedPermissionsForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {

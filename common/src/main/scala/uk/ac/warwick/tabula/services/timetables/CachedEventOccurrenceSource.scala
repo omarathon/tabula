@@ -46,6 +46,7 @@ trait CachedEventOccurrenceSourceComponent {
 
     private val cache = Caches.builderWithDataInitialisation(cacheName, factory, cacheStrategy)
       .expireAfterWrite(ttl.toJava)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build
 
     /*

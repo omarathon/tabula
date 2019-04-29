@@ -64,6 +64,7 @@ class CachedLocationFetchingService(delegate: LocationFetchingService) extends L
   lazy val cache: Cache[String, CacheEntry] =
     Caches.builder("WAI2GoLocationCache", cacheEntryFactory, cacheStrategy)
       .expireAfterWrite(CacheExpiryTime)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   override def mapLocationsFor(name: String): Try[Seq[WAI2GoLocation]] = cache.get(name)
