@@ -14,14 +14,16 @@ class MitCircsForm {
 
     // Issue type fields
     $form
-      .find(':input[name="seriousMedical"]')
-      .on('input change', (e) => {
-        const checked = $(e.target).is(':checked');
-        const subCategoryContainer = $(e.target).closest('.checkbox').find('.indent');
-        subCategoryContainer.toggle(checked);
-        if (!checked) {
-          subCategoryContainer.find('input[type="checkbox"]').prop('checked', false);
-        }
+      .find(':input[name="issueTypes"]')
+      .on('input change', () => {
+        const checked = $(':input[name="issueTypes"]:checked').closest('.checkbox');
+        const $dl = $('<dl></dl>');
+        checked.each((i, issueType) => {
+          const $issueType = $(issueType);
+          $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
+          $dl.append($('<dd></dd>').text($issueType.data('evidenceguidance')));
+        });
+        $('.evidence-upload .mitcircs-form__fields__section__hint').empty().append($dl);
       })
       .trigger('change');
 
