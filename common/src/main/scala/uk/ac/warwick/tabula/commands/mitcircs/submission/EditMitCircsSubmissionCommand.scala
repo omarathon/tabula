@@ -25,6 +25,8 @@ object EditMitCircsSubmissionCommand {
       with MitCircsSubmissionPermissions
       with EditMitCircsSubmissionDescription
       with EditMitCircsSubmissionNotifications
+      with MitCircsSubmissionSchedulesNotifications
+      with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with HibernateExtensionPersistenceComponent
@@ -46,9 +48,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   contacts = submission.contacts.asJava
   contactOther = submission.contactOther
   noContactReason = submission.noContactReason
-  stepsSoFar = submission.stepsSoFar
-  changeOrResolve = submission.changeOrResolve
   pendingEvidence = submission.pendingEvidence
+  pendingEvidenceDue = submission.pendingEvidenceDue
   attachedFiles = submission.attachments
   relatedSubmission = submission.relatedSubmission
 
@@ -82,15 +83,15 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       submission.affectedAssessments.add(affected)
     }
 
-    submission.stepsSoFar = stepsSoFar
-    submission.changeOrResolve = changeOrResolve
     submission.pendingEvidence = pendingEvidence
+    submission.pendingEvidenceDue = pendingEvidenceDue
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: mutable.Set[FileAttachment] = submission.attachments.asScala -- attachedFiles.asScala
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+
     submission.relatedSubmission = relatedSubmission
     // reset approvedOn when changes are made by others or drafts are saved
     if(isSelf && approve) submission.approvedOn = DateTime.now() else submission.approvedOn = null
@@ -110,14 +111,14 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
   }
 }
 
-trait EditMitCircsSubmissionState extends CreateMitCircsSubmissionState {
+trait EditMitCircsSubmissionState extends MitCircsSubmissionState {
   val submission: MitigatingCircumstancesSubmission
   lazy val student: StudentMember = submission.student
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
 
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
     Seq(

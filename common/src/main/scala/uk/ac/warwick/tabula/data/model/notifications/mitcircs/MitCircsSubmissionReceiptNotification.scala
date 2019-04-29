@@ -36,7 +36,7 @@ class MitCircsSubmissionReceiptNotification
 
   def content: FreemarkerModel = MitCircsSubmissionReceiptNotification.render()
 
-  def url: String = Routes.Profile.personalCircumstances(submission.student)
+  def url: String = Routes.Profile.PersonalCircumstances(submission.student)
 
   def urlTitle = s"view your mitigating circumstances submissions"
 

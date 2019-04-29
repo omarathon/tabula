@@ -514,11 +514,15 @@ object Fixtures extends Mockito {
     userLookup
   }
 
-  def mitigatingCircumstancesSubmission(creator: String, student: String): MitigatingCircumstancesSubmission = {
+  def mitigatingCircumstancesSubmission(creator: String, studentId: String): MitigatingCircumstancesSubmission = {
+    val dept = department("HPS", "Heron Purging Services")
+    val st = student(studentId, courseDepartment = dept)
+
+    //val sprFullyEnrolledStatus: SitsStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
     val s = new MitigatingCircumstancesSubmission(
-      member(MemberUserType.Student, universityId = student).asInstanceOf[StudentMember],
+      st,
       user(creator, creator),
-      department("HPS", "Heron Purging Services")
+      dept
     )
     s.startDate = LocalDate.now()
     s.endDate = LocalDate.now().plusWeeks(2)

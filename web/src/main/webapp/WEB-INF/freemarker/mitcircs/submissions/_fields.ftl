@@ -1,64 +1,5 @@
 <#import "*/modal_macros.ftl" as modal />
-
-<#macro identity_info key value>
-  <#if value?has_content>
-    <div class="row form-horizontal">
-      <div class="col-sm-3 control-label">${key}</div>
-      <div class="col-sm-9">
-        <div class="form-control-static">${value}</div>
-      </div>
-    </div>
-  </#if>
-</#macro>
-
-<#macro identity_section student>
-  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--identity">
-    <@identity_info "Name" student.fullName />
-    <@identity_info "University ID" student.universityId />
-    <#if student.email??><@identity_info "Email" student.email /></#if>
-
-    <#if student.mostSignificantCourseDetails??>
-      <#local studentCourseDetails = student.mostSignificantCourseDetails />
-      <@identity_info "Course" studentCourseDetails.course.name />
-
-      <#if studentCourseDetails.latestStudentCourseYearDetails??>
-        <#local studentCourseYearDetails = studentCourseDetails.latestStudentCourseYearDetails />
-
-        <#if studentCourseYearDetails.yearOfStudy??>
-          <@identity_info "Year of study" studentCourseYearDetails.yearOfStudy />
-        </#if>
-
-        <#if studentCourseYearDetails.modeOfAttendance??>
-          <@identity_info "Mode of study" studentCourseYearDetails.modeOfAttendance.fullNameAliased />
-        </#if>
-      </#if>
-    </#if>
-
-    <#if submission??>
-      <@identity_info "Reference" "MIT-${submission.key}" />
-    </#if>
-  </fieldset>
-</#macro>
-
-<#assign questionNumber = 1 />
-<#macro question_section question="" hint="" cssClass="">
-  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}">
-    <#if question?has_content>
-      <legend>${questionNumber}. ${question}</legend>
-      <#assign questionNumber = questionNumber + 1 />
-    </#if>
-
-    <#if hint?has_content>
-      <@question_hint hint />
-    </#if>
-
-    <#nested />
-  </fieldset>
-</#macro>
-
-<#macro question_hint hint>
-  <p class="mitcircs-form__fields__section__hint">(${hint})</p>
-</#macro>
+<#import "mitcirc_form_macros.ftl" as mitcirc />
 
 <#macro checkboxes enumValues enumField>
   <#list enumValues as value>
@@ -70,15 +11,18 @@
   </#list>
 </#macro>
 
-<#macro checkboxesWithOther enumValues enumField otherField>
+<#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
   <#list enumValues as value>
     <div class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>">
       <label>
         <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
-        <#if value.entryName == "Other">
-          <@f.input path="${otherField}" cssClass="form-control" />
+        <#if additionalDescriptions[value.entryName]??>
+          - ${additionalDescriptions[value.entryName]}
         </#if>
       </label>
+      <#if value.entryName == "Other">
+        <@f.input path="${otherField}" cssClass="form-control other-input" />
+      </#if>
       <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
     </div>
     <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
@@ -86,26 +30,17 @@
   <@bs3form.errors path="${enumField}" />
 </#macro>
 
-<@identity_section student />
+<@mitcirc.identity_section student />
 
-<@question_section
+<@mitcirc.question_section
   question = "What kind of mitigating circumstances are you presenting?"
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
 >
-
-  <div class="checkbox mitcircs-form__fields__checkbox-subgroup">
-    <label>
-      <input name="seriousMedical" type="checkbox" value="" <#if command.seriousMedicalIssue>checked="checked"</#if>> Serious accident or illness
-    </label>
-    <div class="indent">
-      <@checkboxes seriousMedicalIssues "issueTypes" />
-    </div>
-  </div>
   <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
-</@question_section>
+</@mitcirc.question_section>
 
-<@question_section
+<@mitcirc.question_section
   question = "What period do your mitigating circumstances cover?"
   hint = "If you're claiming for a period in the past, include a start and end date. If you're claiming for
     something that's ongoing, you may not know the end date at this point."
@@ -148,10 +83,10 @@
       <@bs3form.errors path="endDate" />
     </div>
   </@bs3form.form_group>
-</@question_section>
+</@mitcirc.question_section>
 
 <#if previousSubmissions?has_content>
-  <@question_section
+  <@mitcirc.question_section
     question = "Does this relate to a previous mitigating circumstances claim of yours?"
   >
     <@bs3form.form_group path="relatedSubmission">
@@ -164,10 +99,10 @@
       </@f.select>
       <@bs3form.errors path="relatedSubmission" />
     </@bs3form.form_group>
-  </@question_section>
+  </@mitcirc.question_section>
 </#if>
 
-<@question_section
+<@mitcirc.question_section
   question = "Which assessments have been affected?"
   hint = "If there are particular coursework submissions or exams that you believe have been affected, please
     list them here. To make this easier, we've listed the assignments and exams that we think fall within the
@@ -269,9 +204,9 @@
       </#if>
     </tbody>
   </table>
-</@question_section>
+</@mitcirc.question_section>
 
-<@question_section
+<@mitcirc.question_section
   question = "Have you discussed your mitigating circumstances with anyone?"
 >
   <div class="radio">
@@ -283,19 +218,21 @@
     </@bs3form.radio_inline>
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
-    <@checkboxesWithOther possibleContacts "contacts" "contactOther" />
+    <#assign tutorNames><#list personalTutors as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list></#assign>
+    <#assign personalTutors = { "PersonalTutor": tutorNames } />
+    <@checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
-    <@question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
+    <@mitcirc.question_hint "Please tell us why you haven't yet contacted anyone about your mitigating circumstances" />
 
     <@bs3form.form_group "noContactReason">
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
       <@bs3form.errors path="noContactReason" />
     </@bs3form.form_group>
   </div>
-</@question_section>
+</@mitcirc.question_section>
 
-<@question_section
+<@mitcirc.question_section
   question = "Details"
   hint = "Please provide further details of the mitigating circumstances and how they have affected your assessments. Please include anything that you've done,
     or that's being done by other people, to help with your issues. If you're getting treatment or other support which will eventually resolve your issues,
@@ -305,10 +242,11 @@
     <@f.textarea path="reason" cssClass="form-control" rows="5" />
     <@bs3form.errors path="reason" />
   </@bs3form.form_group>
-</@question_section>
+</@mitcirc.question_section>
 
-<@question_section
-  question = "Please provide any evidence relevant to your submission"
+<@mitcirc.question_section
+  question = "Please upload any supporting evidence relevant to your submission"
+  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
 >
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
@@ -341,17 +279,38 @@
 
   <@bs3form.filewidget
     basename="file"
-    labelText="Upload new supporting documentation relevant to your submission"
+    labelText=""
     types=[]
     multiple=true
     required=false
+    customHelp=" "
   />
-</@question_section>
+</@mitcirc.question_section>
 
-<@question_section
-  question = "Tell us about evidence you’re going to upload in the future"
+<@mitcirc.question_section
+  question = "If you're unable to provide evidence now please tell us about evidence you’re going to upload in the future"
+  hint = "Please give a brief description of this outstanding evidence and tell us when you expect to be able to provide it"
+  cssClass = "form-horizontal"
 >
-  <@bs3form.form_group "pendingEvidence">
-    <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+  <@bs3form.form_group "pendingEvidenceDue">
+    <@bs3form.label path="pendingEvidenceDue" cssClass="col-xs-4 col-sm-2">Due date</@bs3form.label>
+    <div class="col-xs-8 col-sm-4">
+      <@spring.bind path="pendingEvidenceDue">
+        <div class="input-group">
+          <@f.input path="pendingEvidenceDue" cssClass="form-control date-picker" />
+          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+        </div>
+      </@spring.bind>
+
+      <@bs3form.errors path="pendingEvidenceDue" />
+    </div>
   </@bs3form.form_group>
-</@question_section>
+
+  <@bs3form.form_group "pendingEvidence">
+    <@bs3form.label path="pendingEvidence" cssClass="col-xs-4 col-sm-2">Description</@bs3form.label>
+    <div class="col-xs-8 col-sm-10">
+      <@f.textarea path="pendingEvidence" cssClass="form-control" rows="5" />
+      <@bs3form.errors path="pendingEvidence" />
+    </div>
+  </@bs3form.form_group>
+</@mitcirc.question_section>

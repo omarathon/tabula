@@ -146,7 +146,7 @@ object ProfileBreadcrumbs {
     case class PersonalCircumstances(student: StudentMember) extends ProfileBreadcrumb {
       val identifier = PersonalCircumstances
       val title = "Personal Circumstances"
-      val url = Some(Routes.Profile.personalCircumstances(student))
+      val url = Some(Routes.Profile.PersonalCircumstances(student))
     }
 
   }
