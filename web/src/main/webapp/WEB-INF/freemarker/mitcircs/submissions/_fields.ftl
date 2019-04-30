@@ -249,10 +249,21 @@
   </@bs3form.form_group>
 </@mitcirc.question_section>
 
+<#assign evidenceGeneralHelp>
+  <p>Evidence is a vital part of a mitigating circumstances submission. Without it your claim will be rejected. It must be:</p>
+  <ul>
+    <li>Written by an independent qualified practitioner (letters from relatives are not acceptable); dated and written on headed or official notepaper and in English. If the letter is in another language you must provide both a copy of the original note and a certified translation into English. The University may seek to verify the accuracy of the translation provided.</li>
+    <li>Photocopy or scanned evidence is acceptable.</li>
+    <li>Written around the time you were experiencing your claim in order for an assessment to be made on the impact of your claim. Evidence written sometime after the event will not normally be accepted as it is not possible to evidence the impact of the claim on the individual during the period affected.</li>
+    <li>If you are waiting for evidence and are worried it will not arrive in time before the mitigating circumstances deadline you should still submit your case BUT use the next section of the form to tell us about evidence that you'll provide later.</li>
+    <li>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then the student may be investigated under Regulation 23, Student Disciplinary Offences.</li>
+  </ul>
+</#assign>
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
   hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
-  cssClass="mitcircs-form__fields__section__evidence-upload"
+  cssClass = "mitcircs-form__fields__section__evidence-upload"
+  helpPopover = evidenceGeneralHelp
 >
   <#if command.attachedFiles?has_content >
     <@bs3form.labelled_form_group path="attachedFiles" labelText="Supporting documentation">
