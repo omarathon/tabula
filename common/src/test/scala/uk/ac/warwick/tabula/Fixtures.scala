@@ -526,6 +526,7 @@ object Fixtures extends Mockito {
     )
     s.startDate = LocalDate.now()
     s.endDate = LocalDate.now().plusWeeks(2)
+    s.saveAsDraft()
     s
   }
 

@@ -129,6 +129,7 @@ trait TestFixtures {
     config.addProperty("origin.login.location", "https://xebsignon.warwick.ac.uk/origin/hs")
     config.addProperty("shire.location", "https://xabula.warwick.ac.uk/tabula/shire")
     config.addProperty("shire.providerid", "tabula:service")
+    config.addProperty("ssoclient.cache.strategy", "InMemoryOnly")
 
     new SSOConfiguration(config)
   }

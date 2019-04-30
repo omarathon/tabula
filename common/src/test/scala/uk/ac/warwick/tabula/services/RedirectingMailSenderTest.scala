@@ -42,6 +42,6 @@ class RedirectingMailSenderTest extends TestBase with Mockito {
 
     // This passes because the sender changes the mime message object.
     // It should probably make a copy.
-    verify(delegate, times(1)).send(mimeMessage)
+    verify(delegate, times(1)).send(mimeMessage, false)
   }
 }

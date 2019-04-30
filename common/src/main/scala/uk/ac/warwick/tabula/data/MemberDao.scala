@@ -6,7 +6,6 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms._
 import uk.ac.warwick.tabula.data.HibernateHelpers._
 import uk.ac.warwick.tabula.data.model.{MemberStudentRelationship, _}
@@ -138,8 +137,8 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
 
   def deleteByUniversityIds(universityIdsToDelete: Seq[String]): Unit = {
     universityIdsToDelete.grouped(Daoisms.MaxInClauseCount).foreach { universityIds =>
-      val query = sessionWithoutFreshFilters.createQuery("delete Member where universityId in (:universityIds)")
-      query.setParameterList("universityIds", universityIds.asJava)
+      val query = sessionWithoutFreshFilters.newUpdateQuery("delete Member where universityId in (:universityIds)")
+      query.setParameterList("universityIds", universityIds)
       query.executeUpdate()
     }
   }
@@ -533,7 +532,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
   }
 
   def setTimetableHash(member: Member, timetableHash: String): Unit = member match {
-    case ignore: RuntimeMember => // shouldn't ever get here, but making sure
+    case _: RuntimeMember => // shouldn't ever get here, but making sure
     case _ =>
       session.newUpdateQuery("update Member set timetableHash = :timetableHash where universityId = :universityId")
         .setParameter("timetableHash", timetableHash)
@@ -574,39 +573,27 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
     }
   }
 
-  override def findUndergraduateUsercodesByLevel(levelCode: String): Seq[String] = {
-    session.createQuery("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
+  override def findUndergraduateUsercodesByLevel(levelCode: String): Seq[String] =
+    session.newQuery[String]("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
       .setParameter("groupName", "Undergraduate%")
       .setParameter("levelCode", levelCode)
-      .list
-      .asInstanceOf[JList[String]]
-      .asScala
-  }
+      .seq
 
-  def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String] = {
-    session.createQuery("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
+  def findUndergraduateUsercodesByHomeDepartmentAndLevel(department: Department, levelCode: String): Seq[String] =
+    session.newQuery[String]("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode = :levelCode")
       .setEntity("department", department)
       .setParameter("groupName", "Undergraduate%")
       .setParameter("levelCode", levelCode)
-      .list
-      .asInstanceOf[JList[String]]
-      .asScala
-  }
+      .seq
 
-  override def findFinalistUndergraduateUsercodes(): Seq[String] = {
-    session.createQuery("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
+  override def findFinalistUndergraduateUsercodes(): Seq[String] =
+    session.newQuery[String]("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
       .setParameter("groupName", "Undergraduate%")
-      .list
-      .asInstanceOf[JList[String]]
-      .asScala
-  }
+      .seq
 
-  def findFinalistUndergraduateUsercodesByHomeDepartment(department: Department): Seq[String] = {
-    session.createQuery("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
+  def findFinalistUndergraduateUsercodesByHomeDepartment(department: Department): Seq[String] =
+    session.newQuery[String]("select userId from StudentMember where homeDepartment = :department and groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
       .setEntity("department", department)
       .setParameter("groupName", "Undergraduate%")
-      .list
-      .asInstanceOf[JList[String]]
-      .asScala
-  }
+      .seq
 }

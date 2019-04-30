@@ -78,7 +78,10 @@ class JobDaoImpl extends JobDao with Daoisms {
 
   def update(instance: JobInstance): Unit = transactional() {
     instance match {
-      case instance: JobInstanceImpl => session.update(instance)
+      case instance: JobInstanceImpl =>
+        session.update(instance)
+        session.flush()
+
       case _ => throw new IllegalArgumentException("JobDaoImpl only accepts JobInstanceImpls")
     }
   }

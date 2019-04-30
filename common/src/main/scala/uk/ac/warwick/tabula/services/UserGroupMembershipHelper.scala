@@ -124,10 +124,10 @@ trait UserGroupMembershipHelperLookup {
   }.getOrElse(Nil)
 
   protected def findByInternal(user: User): Seq[String] = {
-    val groupsByUser = session.createQuery(groupsByUserHql)
+    val groupsByUser = session.createQuery(groupsByUserHql, classOf[String])
       .setString("universityId", user.getWarwickId)
       .setString("userId", user.getUserId)
-      .list.asInstanceOf[JList[String]]
+      .list
       .asScala
 
     val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
@@ -169,11 +169,10 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
   def cacheName: String = runtimeClass.getSimpleName + "-" + path.replace(".", "-")
 
   def createInstance: Cache[String, Array[String]] =
-    Caches.builder(
-      cacheName,
-      new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds),
-      cacheStrategy
-    ).expireAfterWrite(Duration.ofDays(1)).build()
+    Caches.builder(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), cacheStrategy)
+      .expireAfterWrite(Duration.ofDays(1))
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
+      .build()
 
   override def afterPropertiesSet() {
     Assert.notNull(runtimeClass, "Must set runtime class")
