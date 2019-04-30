@@ -45,7 +45,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   @Column(nullable = false)
   var createdDate: DateTime = DateTime.now()
 
-  @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @OneToMany(mappedBy = "mitigatingCircumstancesMessage", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
 

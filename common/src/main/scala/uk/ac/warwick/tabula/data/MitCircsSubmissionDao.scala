@@ -24,6 +24,7 @@ trait MitCircsSubmissionDao {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
@@ -63,10 +64,15 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       .seq
   }
 
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
+    session.saveOrUpdate(message)
+    message
+  }
+
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] = {
     session.newCriteria[MitigatingCircumstancesMessage]
       .add(is("submission", submission))
-      .addOrder(Order.desc("createdDate"))
+      .addOrder(Order.asc("createdDate"))
       .seq
   }
 }

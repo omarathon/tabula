@@ -13,6 +13,7 @@ trait MitCircsSubmissionService {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
@@ -25,6 +26,7 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
@@ -48,6 +50,10 @@ class MitCircsSubmissionServiceImpl extends AbstractMitCircsSubmissionService wi
 
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.submissionsForDepartment(department)
+  }
+
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
+    mitCircsSubmissionDao.create(message)
   }
 
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] = transactional(readOnly = true) {

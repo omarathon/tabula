@@ -25,7 +25,7 @@
 </#macro>
 
 <#macro asyncSection label url>
-  <div class="details--section async row form-horizontal">
+  <div class="mitcircs-details__section async row form-vertical" data-href="${url}">
     <div class="control-label">${label}</div>
     <div class="content form-control-static">
       <i class="fas fa-spinner fa-pulse"></i> Loading&hellip;
@@ -128,8 +128,7 @@
         <#noescape>${submission.formattedPendingEvidence}</#noescape>
       </@section>
     </#if>
+    <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
+    <@asyncSection "Messages" messageUrl />
   </section>
-  <@asyncSection "Messages" "">
-
-  </@asyncSection>
 </#escape>

@@ -2,3 +2,4 @@
 require('./mitcircs-form');
 require('./mitcircs-settings');
 require('./mitcircs-pending-evidence');
+require('./mitcircs-details');
