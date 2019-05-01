@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
@@ -39,8 +40,21 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var createdDate: DateTime = DateTime.now()
 
-  @Column(nullable = false)
-  var lastModified: DateTime = DateTime.now()
+  @Column(name = "lastModified", nullable = false)
+  private var _lastModified: DateTime = DateTime.now()
+
+  /**
+    * This will return the latest of:
+    * - the submission's last modified date
+    * - the latest message that was sent
+    */
+  def lastModified: DateTime =
+    Seq(
+      Option(_lastModified),
+      messages.sortBy(_.createdDate).lastOption.map(_.createdDate)
+    ).flatten.max
+
+  def lastModified_=(lastModified: DateTime): Unit = _lastModified = lastModified
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -48,7 +62,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  final var lastModifiedBy: User = _
+  var lastModifiedBy: User = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")

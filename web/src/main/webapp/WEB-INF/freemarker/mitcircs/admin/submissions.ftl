@@ -10,7 +10,7 @@
           <th>Student</th>
           <th>Affected dates</th>
           <th>Progress</th>
-          <th>Last modified</th>
+          <th>Last updated</th>
         </tr>
       </thead>
       <tbody>
