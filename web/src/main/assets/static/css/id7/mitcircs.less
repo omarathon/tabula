@@ -257,6 +257,106 @@
   }
 }
 
+.message-thread {
+
+  border: 1px solid transparent;
+  border-color: #ddd;
+
+  &__header {
+    padding: @panel-heading-padding;
+    background-color: #f0f0f0;
+  }
+
+  &__body {
+    padding: @panel-body-padding;
+    max-height: calc(75vh - 300px);
+    overflow-y: auto;
+
+    &__message {
+      .clearfix();
+      border-radius: 10px;
+      box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.3);
+      padding: @panel-heading-padding;
+      margin-bottom: @panel-body-padding;
+      word-break: break-word;
+      .date {
+        color: #5e5e5f;
+      }
+
+      &__author {
+        font-weight: bold;
+      }
+
+      &__content__attachments {
+        font-weight: 700;
+        margin-top: 11px;
+        padding-top: 5.5px;
+        border-top: 1px solid #737373;
+      }
+
+      &--student {
+        background-color: #E5F6CF;
+        border: 1px solid #919191;
+        margin-right: 20%;
+      }
+
+      &--mco {
+        background-color: #CFEFFB;
+        border: 1px solid #c0c0c0;
+        margin-left: 20%;
+      }
+    }
+  }
+
+  &__footer {
+    background: rgba(191, 192, 191, 0.8);
+    padding: @panel-heading-padding;
+
+    &__fields {
+      display: flex;
+
+      textarea {
+        width: 100%;
+        border-radius: 10px;
+      }
+
+      button, label.btn {
+        margin-left: 20px;
+        padding: 0;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 50%;
+        position: relative;
+
+        i {
+          line-height: 36px;
+          width: 36px;
+          height: 36px;
+          margin-left: -2px;
+        }
+
+        .badge {
+          position: absolute;
+          top: auto;
+          bottom: -7px;
+          right: -7px;
+        }
+      }
+
+      input[type=file] {
+        width: .1px;
+        height: .1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+      }
+
+    }
+  }
+}
+
 .mitcircs-submission-filters {
   &__student, &__submission {
     margin-bottom: (@line-height-computed / 2);

@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.FlushMode
-import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
 import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-
 
 trait MitCircsSubmissionDaoComponent {
   val mitCircsSubmissionDao: MitCircsSubmissionDao
@@ -26,15 +25,17 @@ trait MitCircsSubmissionDao {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
 @Repository
 class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
   with Daoisms with TaskBenchmarking with AutowiringUserLookupComponent {
 
-  def getById(id: String): Option[MitigatingCircumstancesSubmission] = getById[MitigatingCircumstancesSubmission](id)
+  override def getById(id: String): Option[MitigatingCircumstancesSubmission] = getById[MitigatingCircumstancesSubmission](id)
 
-  def getByKey(key: Long): Option[MitigatingCircumstancesSubmission] =
+  override def getByKey(key: Long): Option[MitigatingCircumstancesSubmission] =
     session.newQuery[MitigatingCircumstancesSubmission]("from MitigatingCircumstancesSubmission where key = :key").setLong("key", key).uniqueResult
 
   override def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission = {
@@ -50,13 +51,13 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     submission
   }
 
-  def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] =
+  override def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] =
     session.newCriteria[MitigatingCircumstancesSubmission]
       .add(is("student", studentMember))
       .addOrder(Order.desc("lastModified"))
       .seq
 
-  def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
+  override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =
       session.newCriteria[MitigatingCircumstancesSubmission]
         .add(is("department", department))
@@ -123,6 +124,17 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
 
     c.distinct.seq
   }
+
+  override def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
+    session.saveOrUpdate(message)
+    message
+  }
+
+  override def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] =
+    session.newCriteria[MitigatingCircumstancesMessage]
+      .add(is("submission", submission))
+      .addOrder(Order.asc("createdDate"))
+      .seq
 }
 
 case class MitigatingCircumstancesSubmissionFilter(
