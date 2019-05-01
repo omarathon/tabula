@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 object ListMessagesCommand {
   def apply(submission: MitigatingCircumstancesSubmission) = new ListMessagesCommandInternal(submission)
     with ComposableCommand[Seq[MitigatingCircumstancesMessage]]
-    with ListMessagesPermissions with Unaudited
+    with ListMessagesPermissions
+    with Unaudited with ReadOnly
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
@@ -26,7 +27,7 @@ trait ListMessagesPermissions extends RequiresPermissionsChecking with Permissio
   self: ListMessagesState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Read, MitigatingCircumstancesStudent(submission.student))
+    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Read, submission)
   }
 }
 
