@@ -6,6 +6,30 @@
     <div class="row">
       <div class="col-sm-6 col-md-7">
         <@components.detail "State">${submission.state.description}</@components.detail>
+
+        <#-- Identity information about the student -->
+        <#assign student = submission.student />
+        <@components.detail "Name">${student.fullName}</@components.detail>
+        <@components.detail "University ID">${student.universityId}</@components.detail>
+        <#if student.email??><@components.detail "Email">${student.email}</@components.detail></#if>
+
+        <#if student.mostSignificantCourseDetails??>
+          <#assign studentCourseDetails = student.mostSignificantCourseDetails />
+          <@components.detail "Course">${studentCourseDetails.course.name}</@components.detail>
+
+          <#if studentCourseDetails.latestStudentCourseYearDetails??>
+            <#assign studentCourseYearDetails = studentCourseDetails.latestStudentCourseYearDetails />
+
+            <#if studentCourseYearDetails.yearOfStudy??>
+              <@components.detail "Year of study">${studentCourseYearDetails.yearOfStudy}</@components.detail>
+            </#if>
+
+            <#if studentCourseYearDetails.modeOfAttendance??>
+              <@components.detail "Mode of study">${studentCourseYearDetails.modeOfAttendance.fullNameAliased}</@components.detail>
+            </#if>
+          </#if>
+        </#if>
+
         <@components.detail "Issue type"><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail "End date">
