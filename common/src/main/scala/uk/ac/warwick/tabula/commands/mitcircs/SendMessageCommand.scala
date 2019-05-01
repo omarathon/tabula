@@ -3,13 +3,16 @@ package uk.ac.warwick.tabula.commands.mitcircs
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsMessageFromStudentNotification, MitCircsMessageToStudentNotification}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.helpers.StringUtils._
+
 import scala.collection.JavaConverters._
 
 
@@ -19,6 +22,7 @@ object SendMessageCommand {
     with SendMessageValidation
     with SendMessagePermissions
     with SendMessageDescription
+    with SendMessageNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
@@ -68,4 +72,14 @@ trait SendMessageState {
   val currentUser: User
   var message: String = _
   var file: UploadedFile = new UploadedFile
+}
+
+trait SendMessageNotifications extends Notifies[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission] {
+
+  self: SendMessageState =>
+
+  def emit(message: MitigatingCircumstancesMessage): Seq[Notification[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission]] = {
+    if(currentUser == submission.student.asSsoUser) Seq(Notification.init(new MitCircsMessageFromStudentNotification, currentUser, message, submission))
+    else Seq(Notification.init(new MitCircsMessageToStudentNotification, currentUser, message, submission))
+  }
 }

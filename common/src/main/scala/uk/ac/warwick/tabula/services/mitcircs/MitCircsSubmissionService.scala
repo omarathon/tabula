@@ -52,7 +52,7 @@ class MitCircsSubmissionServiceImpl extends AbstractMitCircsSubmissionService wi
     mitCircsSubmissionDao.submissionsForDepartment(department)
   }
 
-  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = transactional() {
     mitCircsSubmissionDao.create(message)
   }
 

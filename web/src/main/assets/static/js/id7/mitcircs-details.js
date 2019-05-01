@@ -57,8 +57,8 @@ class MitCircsDetails {
     $details.on('submit', (e) => {
       e.preventDefault();
       const $form = $(e.target);
-      const $thread = $details.closest('.message-thread').data('sending', true);
-      const $section = $thread.closest('.mitcircs-details__section');
+      const $thread = $form.closest('.message-thread');
+      const $content = $thread.closest('.mitcircs-details__section .content');
       $form.find(':input').prop('readonly', true);
       $form.find('button').prop('disabled', true);
 
@@ -68,11 +68,8 @@ class MitCircsDetails {
         type: 'POST',
         data: formData,
         success: (data) => {
-          $section.html(data);
+          $content.html(data);
           bind();
-        },
-        complete: function() {
-          $thread.data('sending', false);
         },
         cache: false,
         contentType: false,
@@ -89,8 +86,8 @@ class MitCircsDetails {
     // Disable send button when the textarea is empty
     function checkAndUpdateSendButton(e) {
       const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
-      const $textarea = $thread.find('.message-thread__footer__form textarea');
-      const $button = $thread.find('.message-thread__footer__form button[type=submit]');
+      const $textarea = $thread.find('.message-thread__footer__fields textarea');
+      const $button = $thread.find('.message-thread__footer__fields button[type=submit]');
       if (_.trim($textarea.val()).length === 0) {
         $button.prop('disabled', true);
       } else {
