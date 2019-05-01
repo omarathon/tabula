@@ -1,5 +1,4 @@
 /* eslint-env browser */
-require('./mitcircs-form');
-require('./mitcircs-settings');
-require('./mitcircs-pending-evidence');
+require('./scripts');
+require('../filters');
 require('./mitcircs-details');

@@ -8,7 +8,7 @@
   </#function>
   <@cm2.departmentHeader "Assignments" department route_function academicYear "in" />
 
-<#-- Filtering -->
+  <#-- Filtering -->
   <div class="fix-area">
     <div class="fix-header pad-when-fixed">
       <div class="filters admin-assignment-filters btn-group-group well well-sm" data-lazy="true">

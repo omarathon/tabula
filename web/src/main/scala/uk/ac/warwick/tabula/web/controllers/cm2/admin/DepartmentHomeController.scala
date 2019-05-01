@@ -50,8 +50,7 @@ abstract class AbstractDepartmentHomeController
       "modules" -> command.allModulesWithPermission,
       "allModuleFilters" -> AssignmentInfoFilters.allModuleFilters(command.allModulesWithPermission.sortBy(_.code)),
       "allWorkflowTypeFilters" -> AssignmentInfoFilters.allWorkflowTypeFilters,
-      "allStatusFilters" -> AssignmentInfoFilters.Status.all,
-      "academicYear" -> command.academicYear)
+      "allStatusFilters" -> AssignmentInfoFilters.Status.all)
       .crumbsList(Breadcrumbs.department(department, Some(command.academicYear), active = true))
       .secondCrumbs(academicYearBreadcrumbs(command.academicYear)(Routes.cm2.admin.department(department, _)): _*)
 

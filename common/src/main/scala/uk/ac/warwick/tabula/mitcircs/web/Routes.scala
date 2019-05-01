@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.mitcircs.web
 
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.RoutesUtils
@@ -19,8 +20,9 @@ object Routes {
   def home: String = context + "/"
 
   object Admin {
-    def home(department: Department): String = context + "/admin/%s" format encoded(department.code)
-    def review(submission: MitigatingCircumstancesSubmission): String = context + "/admin/review/%s" format encoded(submission.key.toString)
+    def home(department: Department): String = s"$context/admin/${encoded(department.code)}"
+    def home(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
+    def review(submission: MitigatingCircumstancesSubmission): String = s"$context/admin/review/${encoded(submission.key.toString)}"
   }
 
 }

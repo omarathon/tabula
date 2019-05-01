@@ -23,7 +23,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with FormattedHtml {
     type Entity = MitigatingCircumstancesSubmission
 
-  def this(student:StudentMember, creator:User, department: Department) {
+  def this(student: StudentMember, creator: User, department: Department) {
     this()
     this.creator = creator
     this.lastModifiedBy = creator

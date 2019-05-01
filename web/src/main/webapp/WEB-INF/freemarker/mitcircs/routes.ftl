@@ -8,7 +8,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro _u page context='/mitcircs'><@url context=context page=page /></#macro>
 
 <#macro home><@_u page="/" /></#macro>
-<#macro adminhome department><@_u page="/admin/${department.code}" /></#macro>
+<#macro adminhome department academicYear="">
+  <#if academicYear?has_content>
+    <@_u page="/admin/${department.code}/${academicYear.startYear?c}" />
+  <#else>
+    <@_u page="/admin/${department.code}" />
+  </#if>
+</#macro>
 <#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 
 <#macro viewsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key}" /></#macro>

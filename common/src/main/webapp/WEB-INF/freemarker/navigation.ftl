@@ -111,7 +111,7 @@
 
     <#if features.mitCircs>
       <#if canManageMitigatingCircumstances>
-        <li class="mitcircs-active">
+        <li>
           <h2><a href="<@url page="/" context="/mitcircs" />">Mitigating Circumstances</a></h2>
           <span class="hint">View and review mitigating circumstances submissions</span>
         </li>
