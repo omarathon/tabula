@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* eslint-disable no-use-before-define */
 import $ from 'jquery';
 import _ from 'lodash-es';
 
@@ -73,7 +75,7 @@ class MitCircsDetails {
         },
         cache: false,
         contentType: false,
-        processData: false
+        processData: false,
       });
     });
 
@@ -101,7 +103,6 @@ class MitCircsDetails {
       messageScroll();
       $('.use-tooltip').tooltip();
     }
-
   }
 }
 
