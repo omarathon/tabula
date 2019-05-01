@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
+
 @Entity
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesSubmission extends GeneratedId
@@ -124,6 +126,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     attachment.mitigatingCircumstancesSubmission = null
     attachments.remove(attachment)
   }
+
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  @OrderBy("createdDate")
+  private var _messages: JList[MitigatingCircumstancesMessage] = JArrayList()
+  def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")

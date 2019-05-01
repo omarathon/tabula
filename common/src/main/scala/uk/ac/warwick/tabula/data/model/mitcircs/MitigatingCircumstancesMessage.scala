@@ -40,7 +40,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   final var sender: User = _
 
-  def studentSent: Boolean = sender == submission.student.asSsoUser
+  def studentSent: Boolean = sender.getUserId == submission.student.userId
 
   @Column(nullable = false)
   var createdDate: DateTime = DateTime.now()

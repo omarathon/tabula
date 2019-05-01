@@ -5,7 +5,7 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail "State">${submission.state.entryName}</@components.detail>
+        <@components.detail "State">${submission.state.description}</@components.detail>
         <@components.detail "Issue type"><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail "End date">

@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.system.EnumTwoWayConverter
 
 import scala.collection.immutable
 
-sealed trait MitigatingCircumstancesSubmissionState extends EnumEntry with CapitalWords
+sealed abstract class MitigatingCircumstancesSubmissionState(val description: String) extends EnumEntry with CapitalWords
 object MitigatingCircumstancesSubmissionState extends Enum[MitigatingCircumstancesSubmissionState] {
-  case object Draft extends MitigatingCircumstancesSubmissionState
-  case object CreatedOnBehalfOfStudent extends MitigatingCircumstancesSubmissionState
-  case object Submitted extends MitigatingCircumstancesSubmissionState
+  case object Draft extends MitigatingCircumstancesSubmissionState("Draft")
+  case object CreatedOnBehalfOfStudent extends MitigatingCircumstancesSubmissionState("Awaiting student sign-off")
+  case object Submitted extends MitigatingCircumstancesSubmissionState("Submitted")
 
   override val values: immutable.IndexedSeq[MitigatingCircumstancesSubmissionState] = findValues
 }

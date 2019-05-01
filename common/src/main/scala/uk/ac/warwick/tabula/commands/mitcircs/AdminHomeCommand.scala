@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import org.hibernate.criterion.Order
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.{MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
@@ -10,14 +10,23 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmissi
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
-import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, AutowiringMitCircsWorkflowProgressServiceComponent, MitCircsSubmissionServiceComponent, MitCircsWorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.ListMap
 
-// TODO - pointless as is but I imagine that we may want to split submissions into a few lists later so plumbing this in now
+case class MitigatingCircumstancesWorkflowProgress(percentage: Int, t: String, messageCode: String)
+
+case class MitigatingCircumstancesSubmissionInfo(
+  submission: MitigatingCircumstancesSubmission,
+  progress: MitigatingCircumstancesWorkflowProgress,
+  nextStage: Option[WorkflowStage],
+  stages: ListMap[String, WorkflowStages.StageProgress],
+)
+
 case class AdminHomeInformation(
-  submissions: Seq[MitigatingCircumstancesSubmission],
+  submissions: Seq[MitigatingCircumstancesSubmissionInfo],
 )
 
 object AdminHomeCommand {
@@ -29,6 +38,7 @@ object AdminHomeCommand {
       with ComposableCommand[AdminHomeInformation]
       with AdminHomeCommandRequest
       with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringMitCircsWorkflowProgressServiceComponent
       with AutowiringProfileServiceComponent
       with AdminHomePermissions
       with ReadOnly with Unaudited
@@ -36,7 +46,8 @@ object AdminHomeCommand {
 
 abstract class AdminHomeCommandInternal(val department: Department, val year: AcademicYear) extends CommandInternal[AdminHomeInformation] with AdminHomeCommandState {
   self: AdminHomeCommandRequest
-    with MitCircsSubmissionServiceComponent =>
+    with MitCircsSubmissionServiceComponent
+    with MitCircsWorkflowProgressServiceComponent =>
 
   override def applyInternal(): AdminHomeInformation =
     AdminHomeInformation(
@@ -51,7 +62,16 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
           approvedEndDate = Option(approvedEndDate),
           state = state.asScala.toSet,
         )
-      ),
+      ).map { submission =>
+        val progress = workflowProgressService.progress(department)(submission)
+
+        MitigatingCircumstancesSubmissionInfo(
+          submission = submission,
+          progress = MitigatingCircumstancesWorkflowProgress(progress.percentage, progress.cssClass, progress.messageCode),
+          nextStage = progress.nextStage,
+          stages = progress.stages,
+        )
+      },
     )
 }
 
@@ -87,7 +107,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var includesEndDate: LocalDate = _
   var approvedStartDate: LocalDate = _
   var approvedEndDate: LocalDate = _
-  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList(MitigatingCircumstancesSubmissionState.Submitted, MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent)
+  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList(MitigatingCircumstancesSubmissionState.Submitted)
 
   override val defaultOrder: Seq[Order] = Seq(Order.desc("lastModified"))
   override val sortOrder: JList[Order] = JArrayList() // Not used
