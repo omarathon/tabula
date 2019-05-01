@@ -81,4 +81,13 @@
     <#return false />
   </#function>
 
+  <#function contains_by_enum collection item>
+    <#list collection as c>
+      <#if c.entryName == item.entryName>
+        <#return true />
+      </#if>
+    </#list>
+    <#return false />
+  </#function>
+
 </#escape>

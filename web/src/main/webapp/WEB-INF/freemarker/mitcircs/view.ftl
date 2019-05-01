@@ -38,7 +38,7 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@detail "State">${submission.state.toString}</@detail>
+        <@detail "State">${submission.state.entryName}</@detail>
         <@detail "Issue type"><@enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@detail>
         <@detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@detail>
         <@detail "End date">

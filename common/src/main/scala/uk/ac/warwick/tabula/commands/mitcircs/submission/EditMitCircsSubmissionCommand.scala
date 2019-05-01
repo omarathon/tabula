@@ -99,8 +99,10 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     // reset approvedOn when changes are made by others or drafts are saved
     if(isSelf && approve) {
       submission.approveAndSubmit()
-    } else {
+    } else if (isSelf) {
       submission.saveAsDraft()
+    } else {
+      submission.saveOnBehalfOfStudent()
     }
 
     submission.lastModified = DateTime.now()

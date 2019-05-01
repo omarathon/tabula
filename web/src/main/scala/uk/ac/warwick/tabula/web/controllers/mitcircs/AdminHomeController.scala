@@ -49,7 +49,7 @@ abstract class AbstractAdminDeptController
     AdminHomeCommand(mandatory(department), activeAcademicYear.getOrElse(AcademicYear.now()))
 
   @ModelAttribute("allSubmissionStates")
-  def allSubmissionStates: Seq[MitigatingCircumstancesSubmissionState] = MitigatingCircumstancesSubmissionState.values
+  def allSubmissionStates: Seq[MitigatingCircumstancesSubmissionState] = MitigatingCircumstancesSubmissionState.values.filterNot(_ == MitigatingCircumstancesSubmissionState.Draft)
 
   @RequestMapping(params = Array("!ajax"), headers = Array("!X-Requested-With"))
   def home(@ModelAttribute("command") command: AdminHomeCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
