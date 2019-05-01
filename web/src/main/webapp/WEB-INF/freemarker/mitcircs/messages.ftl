@@ -1,3 +1,5 @@
+<#import "*/modal_macros.ftl" as modal />
+
 <#escape x as x?html>
   <div class="message-thread">
     <div class="message-thread__header">
@@ -48,10 +50,26 @@
               <i class="fal fa-fw fa-paperclip fa-lg use-tooltip" title="Attach files" data-original-title="Attach files"></i>
             </label>
 
+            <label class="btn btn-primary">
+              <i class="fal fa-fw fa-paste fa-lg use-tooltip" data-toggle="modal" data-target="#messageTemplates" title="Message templates"></i>
+            </label>
           </div>
           <@bs3form.errors path="message" />
         </@bs3form.form_group>
       </@f.form>
+      <div id="messageTemplates" class="modal fade message-thread__footer__message-templates">
+        <@modal.wrapper>
+          <@modal.header><h6 class="modal-title">Choose a template</h6></@modal.header>
+          <@modal.body>
+            <dl>
+              <dt><a role="button" tabindex="0">Evidence in English</a></dt>
+              <dd>Some of the evidence that you have provided is not in English. For evidence to be considered it must be legible and in English. Evidence obtained overseas which is written in another language must be accompanied by a certified translation.</dd>
+              <dt><a role="button" tabindex="0">Impact not described</a></dt>
+              <dd>The evidence that you provide must state how the reported circumstances have impacted on your ability to study and/or complete assessments.</dd>
+            </dl>
+          </@modal.body>
+        </@modal.wrapper>
+      </div>
     </div>
   </div>
 </#escape>

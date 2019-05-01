@@ -313,6 +313,11 @@
     background: rgba(191, 192, 191, 0.8);
     padding: @panel-heading-padding;
 
+    .form-group {
+      margin-right: 0;
+      margin-left: 0;
+    }
+
     &__fields {
       display: flex;
 
@@ -354,6 +359,10 @@
         z-index: -1;
       }
 
+    }
+
+    dt + dd {
+      margin-bottom: 15px;
     }
   }
 }

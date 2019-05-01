@@ -13,6 +13,31 @@ class MitCircsDetails {
     const { details } = this;
     const $details = $(details);
 
+    // scroll to the end of the message container
+    function messageScroll() {
+      const $body = $details.find('.message-thread__body');
+      $body.scrollTop($body.prop('scrollHeight'));
+    }
+
+    // Disable send button when the textarea is empty
+    function checkAndUpdateSendButton(e) {
+      const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
+      const $textarea = $thread.find('.message-thread__footer__fields textarea');
+      const $button = $thread.find('.message-thread__footer__fields button[type=submit]');
+      if (_.trim($textarea.val()).length === 0) {
+        $button.prop('disabled', true);
+      } else {
+        $button.prop('disabled', false);
+      }
+    }
+    $details.on('keyup', checkAndUpdateSendButton);
+
+    function bind() {
+      checkAndUpdateSendButton();
+      messageScroll();
+      $('.use-tooltip').tooltip();
+    }
+
     $details
       .find('.mitcircs-details__section.async')
       .each((i, el) => {
@@ -56,6 +81,18 @@ class MitCircsDetails {
       }
     });
 
+    $details.on('click', '.message-thread__footer__message-templates a', (e) => {
+      const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
+      const $textarea = $thread.find('.message-thread__footer__fields textarea');
+      const $modal = $('.message-thread__footer__message-templates');
+      const $templateName = $(e.target).closest('dt');
+      const templateText = $templateName.next('dd').text();
+      $textarea.val(templateText);
+      $modal.modal('toggle');
+      $textarea.height($textarea.get(0).scrollHeight);
+      checkAndUpdateSendButton();
+    });
+
     $details.on('submit', (e) => {
       e.preventDefault();
       const $form = $(e.target);
@@ -78,31 +115,6 @@ class MitCircsDetails {
         processData: false,
       });
     });
-
-    // scroll to the end of the message container
-    function messageScroll() {
-      const $body = $details.find('.message-thread__body');
-      $body.scrollTop($body.prop('scrollHeight'));
-    }
-
-    // Disable send button when the textarea is empty
-    function checkAndUpdateSendButton(e) {
-      const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
-      const $textarea = $thread.find('.message-thread__footer__fields textarea');
-      const $button = $thread.find('.message-thread__footer__fields button[type=submit]');
-      if (_.trim($textarea.val()).length === 0) {
-        $button.prop('disabled', true);
-      } else {
-        $button.prop('disabled', false);
-      }
-    }
-    $details.on('keyup', checkAndUpdateSendButton);
-
-    function bind() {
-      checkAndUpdateSendButton();
-      messageScroll();
-      $('.use-tooltip').tooltip();
-    }
   }
 }
 
