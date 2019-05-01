@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.forms.{Extension, SavedFormValue}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
@@ -71,6 +71,13 @@ class FileAttachment extends GeneratedId {
     joinColumns = Array(new JoinColumn(name = "file_attachment_id")),
     inverseJoinColumns = Array(new JoinColumn(name = "submission_id")))
   var mitigatingCircumstancesSubmission: MitigatingCircumstancesSubmission = _
+
+  // optional link to MitigatingCircumstancesMessage via MitCircsMessageAttachment
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "mitcircsmessageattachment",
+    joinColumns = Array(new JoinColumn(name = "file_attachment_id")),
+    inverseJoinColumns = Array(new JoinColumn(name = "message_id")))
+  var mitigatingCircumstancesMessage: MitigatingCircumstancesMessage = _
 
   /*
    * Both of these are really One-to-One relationships (and are @OneToOne on the other side)

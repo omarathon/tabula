@@ -9,12 +9,12 @@ import uk.ac.warwick.userlookup.User
 
 trait NotifiesMitCircsOfficers {
 
-  self: NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] =>
+  self: NotificationWithTarget[_, MitigatingCircumstancesSubmission] =>
 
   @transient
   var permissionsService: PermissionsService = Wire.auto[PermissionsService]
 
-  override def recipients: Seq[User] = permissionsService.getGrantedRole(target.entity.department, MitigatingCircumstancesOfficerRoleDefinition)
+  def recipients: Seq[User] = permissionsService.getGrantedRole(target.entity.department, MitigatingCircumstancesOfficerRoleDefinition)
     .map(_.users.users.toSeq).getOrElse(Seq())
 
 }
