@@ -4,50 +4,45 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
-import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent, MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
 
 trait MitCircsSubmissionService {
   def getById(id: String): Option[MitigatingCircumstancesSubmission]
   def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
-  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
 }
 
 abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionService {
-
   self: MitCircsSubmissionDaoComponent =>
 
-  def getById(id: String): Option[MitigatingCircumstancesSubmission]
-  def getByKey(key: Long): Option[MitigatingCircumstancesSubmission]
-  def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
-  def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
-  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
-}
-
-@Service("mitCircsSubmissionService")
-class MitCircsSubmissionServiceImpl extends AbstractMitCircsSubmissionService with AutowiringMitCircsSubmissionDaoComponent {
-  def getById(id: String): Option[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
+  override def getById(id: String): Option[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.getById(id)
   }
 
-  def getByKey(key: Long): Option[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
+  override def getByKey(key: Long): Option[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.getByKey(key)
   }
 
-  def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission = transactional() {
+  override def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission = transactional() {
     mitCircsSubmissionDao.saveOrUpdate(submission)
   }
 
-  def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
+  override def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.submissionsForStudent(studentMember)
   }
 
-  def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
-    mitCircsSubmissionDao.submissionsForDepartment(department)
+  override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
+    mitCircsSubmissionDao.submissionsForDepartment(department, studentRestrictions, filter)
   }
 }
+
+@Service("mitCircsSubmissionService")
+class AutowiredMitCircsSubmissionService
+  extends AbstractMitCircsSubmissionService
+    with AutowiringMitCircsSubmissionDaoComponent
 
 trait MitCircsSubmissionServiceComponent {
   def mitCircsSubmissionService: MitCircsSubmissionService
