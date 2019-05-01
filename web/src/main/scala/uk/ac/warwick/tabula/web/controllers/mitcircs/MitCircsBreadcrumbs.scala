@@ -13,6 +13,11 @@ object MitCircsBreadcrumbs {
       val title: String = department.name
       val url = Some(Routes.mitcircs.Admin.home(department))
     }
+
+    case class Review(submission: model.mitcircs.MitigatingCircumstancesSubmission, override val active: Boolean = false) extends BreadCrumb {
+      val title: String = s"MIT-${submission.key}"
+      val url = Some(Routes.mitcircs.Admin.review(submission))
+    }
   }
 
 }

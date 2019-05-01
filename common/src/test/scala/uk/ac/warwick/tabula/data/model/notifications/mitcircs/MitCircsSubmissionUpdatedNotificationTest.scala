@@ -14,7 +14,7 @@ class MitCircsSubmissionUpdatedNotificationTest extends TestBase with Mockito wi
 
   @Test
   def urlIsReviewPage(): Unit = {
-    n.url should be(s"/mitcircs/admin/review/${submission.key}")
+    n.url should be(s"/mitcircs/submission/${submission.key}")
   }
 
   @Test

@@ -33,12 +33,7 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
-            <#if submission.editable>
-              <p><a href="<@routes.mitcircs.editsubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
-            </#if>
-            <#if submission.evidencePending>
-              <p><a href="<@routes.mitcircs.pendingevidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
-            </#if>
+            <#-- Nothing yet -->
           </div>
         </div>
       </div>

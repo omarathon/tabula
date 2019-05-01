@@ -5,16 +5,15 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.mitcircs.{ListMessagesCommand, SendMessageCommand, SendMessageState}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
-@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/view/{submission}/messages"))
+@RequestMapping(Array("/mitcircs/submission/{submission}/messages"))
 class MitCircsMessageController extends BaseController {
 
   validatesSelf[SelfValidating]
@@ -23,13 +22,8 @@ class MitCircsMessageController extends BaseController {
   type MessageCommand = Appliable[MitigatingCircumstancesMessage] with SendMessageState with SelfValidating
 
   @ModelAttribute("listCommand")
-  def listCommand(
-    @PathVariable student: StudentMember,
-    @PathVariable submission: MitigatingCircumstancesSubmission
-  ): Appliable[Seq[MitigatingCircumstancesMessage]] = {
-    mustBeLinked(mandatory(submission), mandatory(student))
+  def listCommand(@PathVariable submission: MitigatingCircumstancesSubmission): Appliable[Seq[MitigatingCircumstancesMessage]] =
     ListMessagesCommand(mandatory(submission))
-  }
 
   @ModelAttribute("messageCommand")
   def messageCommand(@PathVariable submission: MitigatingCircumstancesSubmission): MessageCommand = {
@@ -45,7 +39,7 @@ class MitCircsMessageController extends BaseController {
     val messages = listCmd.apply()
     Mav("mitcircs/messages",
       "messages" -> messages,
-      "latestMessage" -> messages.map(_.createdDate).max
+      "latestMessage" -> messages.sortBy(_.createdDate).lastOption.map(_.createdDate)
     ).noLayout()
   }
 
@@ -59,7 +53,7 @@ class MitCircsMessageController extends BaseController {
     if (errors.hasErrors) form(cmd, listCmd, submission)
     else {
       cmd.apply()
-      RedirectForce(Routes.Profile.PersonalCircumstances.messages(submission))
+      RedirectForce(Routes.Messages(submission))
     }
   }
 
