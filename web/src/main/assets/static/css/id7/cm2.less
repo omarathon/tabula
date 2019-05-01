@@ -1,5 +1,5 @@
 @import (reference) "@fortawesome/fontawesome-pro/less/_variables.less";
-@import (reference) "../bootstrap/variables.less";
+@import (reference) "bootstrap/less/variables.less";
 @import (reference) "colours.less";
 @import "embeddable";
 
@@ -326,51 +326,7 @@ table.expanding-row-pairs {
   }
 }
 
-@progress-bar-default-bg: #999999;
-@stage-progress-bar-vertical-padding: 5px;
-.stage-progress-bar {
-  height: @line-height-computed;
-  line-height: @line-height-computed;
-  display: flex;
-
-  &.time-progress-bar .bar {
-    background-color: @progress-bar-default-bg;
-  }
-
-  .bar {
-    flex: 1;
-    margin: @stage-progress-bar-vertical-padding -(@line-height-computed / 2);
-
-    &.bar-default {
-      background-color: @progress-bar-default-bg;
-    }
-
-    &.bar-primary {
-      background-color: @progress-bar-bg;
-    }
-
-    &.bar-success {
-      background-color: @progress-bar-success-bg;
-    }
-
-    &.bar-warning {
-      background-color: @progress-bar-warning-bg;
-    }
-  }
-
-  > .fa-stack {
-    flex: 0;
-    flex-basis: @line-height-computed;
-    z-index: 1;
-    font-size: @line-height-computed;
-    height: auto;
-    line-height: inherit;
-
-    .text-default {
-      color: @progress-bar-default-bg;
-    }
-  }
-}
+@import "stage-progress-bar";
 
 .originality-reports {
   margin-top: 5px;
@@ -434,12 +390,12 @@ table.expanding-row-pairs {
 
 .upload-marks-preview {
   .error {
-    color: @errorText;
+    color: @state-danger-text;
     display: block;
   }
 
   .warning {
-    color: @warningText;
+    color: @state-warning-text;
     display: block;
   }
 }
@@ -447,7 +403,7 @@ table.expanding-row-pairs {
 //Grey out links to actions that are not permitted and remove state changes
 .dropdown-menu > li > a.disabled {
 
-  color: @grayLight;
+  color: @gray-light;
   text-decoration: none;
   cursor: not-allowed;
 

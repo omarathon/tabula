@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.FlushMode
+import org.hibernate.{FetchMode, FlushMode}
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
 import org.joda.time.LocalDate
@@ -54,14 +54,15 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
   override def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission] =
     session.newCriteria[MitigatingCircumstancesSubmission]
       .add(is("student", studentMember))
-      .addOrder(Order.desc("lastModified"))
+      .addOrder(Order.desc("_lastModified"))
       .seq
 
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =
       session.newCriteria[MitigatingCircumstancesSubmission]
+        // Eagerly fetch any associations that would affect the "last modified" date
+        .setFetchMode("_messages", FetchMode.JOIN)
         .add(is("department", department))
-        .addOrder(Order.desc("lastModified"))
 
     if (studentRestrictions.nonEmpty) {
       val students =

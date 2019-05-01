@@ -1,3 +1,4 @@
+<#import "*/mitcircs_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#escape x as x?html>
@@ -6,33 +7,32 @@
       <thead>
         <tr>
           <th>Reference</th>
-          <th>University ID</th>
-          <th>First name</th>
-          <th>Last name</th>
-          <th>Issue type</th>
-          <th>Start date</th>
-          <th>End date</th>
-          <th>State</th>
-          <th>Last modified</th>
+          <th>Student</th>
+          <th>Affected dates</th>
+          <th>Progress</th>
+          <th>Last updated</th>
         </tr>
       </thead>
       <tbody>
-      <#list submissions as submission>
+      <#list submissions as info>
+        <#assign submission = info.submission />
         <tr>
           <td><a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a></td>
-          <td>${submission.student.universityId} <@pl.profile_link submission.student.universityId /></td>
-          <td>${submission.student.firstName}</td>
-          <td>${submission.student.lastName}</td>
-          <td><#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></td>
-          <td><@fmt.date date=submission.startDate includeTime=false /></td>
           <td>
+            ${submission.student.universityId} <@pl.profile_link submission.student.universityId />
+            ${submission.student.firstName}
+            ${submission.student.lastName}
+          </td>
+          <td>
+            <@fmt.date date=submission.startDate includeTime=false relative=false />
+            &mdash;
             <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false />
+              <@fmt.date date=submission.endDate includeTime=false relative=false />
             <#else>
-              <span class="very-subtle">(not set)</span>
+              <span class="very-subtle">(ongoing)</span>
             </#if>
           </td>
-          <td>${submission.state.entryName}</td>
+          <td><@components.stage_progress_bar info.stages?values /></td>
           <td><@fmt.date date=submission.lastModified /></td>
         </tr>
       </#list>

@@ -1,6 +1,7 @@
 @import (reference) "bootstrap/less/variables";
 @import (reference) "bootstrap/less/mixins/clearfix";
 @import (reference) "@universityofwarwick/id7/less/variables";
+@import (reference) "colours";
 
 @accent-blue: #e8f4f1;
 @accent-yellow: #f9f5eb;
@@ -368,8 +369,92 @@
 }
 
 .mitcircs-submission-filters {
-  &__student, &__submission {
-    margin-bottom: (@line-height-computed / 2);
+  // For browsers that don't support CSS grid
+  &__icon, &__label, &__button {
+    display: block;
+  }
+
+  @media (min-width: @screen-md-min) {
+    @supports (display: grid) {
+      // Every day we stray further from the light
+      display: grid;
+      grid-template-areas: "icon--student    filter--course-types               . filter--route               .                        filter--mode-of-attendance . filter--year-of-study . filter--spr-status"
+                           "icon--submission filter--affected-assessment-module . filter--state               .                        .                          . .                     . ."
+                           ".                label--includes-start-date         . filter--includes-start-date label--includes-end-date filter--includes-end-date  . .                     . ."
+                           ".                label--approved-start-date         . filter--approved-start-date label--approved-end-date filter--approved-end-date  . .                     . button--clear";
+      grid-template-rows: repeat(4, min-content);
+      grid-template-columns: min-content 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr;
+      grid-gap: (@line-height-computed / 2) (@grid-gutter-width / 4);
+      gap: (@line-height-computed / 2) (@grid-gutter-width / 4);
+
+      &__icon--student { grid-area: icon--student; }
+      &__icon--submission { grid-area: icon--submission; }
+      &__filter--course-types { grid-area: filter--course-types; }
+      &__filter--route { grid-area: filter--route; }
+      &__filter--mode-of-attendance { grid-area: filter--mode-of-attendance; }
+      &__filter--year-of-study { grid-area: filter--year-of-study; }
+      &__filter--spr-status { grid-area: filter--spr-status; }
+      &__filter--affected-assessment-module { grid-area: filter--affected-assessment-module; }
+      &__filter--state { grid-area: filter--state; }
+      &__label--includes-start-date { grid-area: label--includes-start-date; }
+      &__filter--includes-start-date { grid-area: filter--includes-start-date; }
+      &__label--includes-end-date { grid-area: label--includes-end-date; }
+      &__filter--includes-end-date { grid-area: filter--includes-end-date; }
+      &__label--approved-start-date { grid-area: label--approved-start-date; }
+      &__filter--approved-start-date { grid-area: filter--approved-start-date; }
+      &__label--approved-end-date { grid-area: label--approved-end-date; }
+      &__filter--approved-end-date { grid-area: filter--approved-end-date; }
+      &__button--clear { grid-area: button--clear; }
+
+      &__filter .btn-group {
+        display: flex;
+        > .btn {
+          display: inline-flex;
+          align-items: center;
+          text-align: left;
+          width: 100%;
+
+          > .filter-short-values {
+            flex: 1 1 auto;
+          }
+
+          > .caret {
+            flex: 0 1 auto;
+          }
+        }
+      }
+
+      .btn-sm {
+        font-size: 13px;
+      }
+
+      &__label {
+        color: #666666;
+        font-size: 15px;
+        font-weight: normal;
+      }
+
+      &__label--includes-start-date,
+      &__label--approved-start-date {
+        text-align: right;
+      }
+
+      &__label--includes-end-date,
+      &__label--approved-end-date {
+        text-align: center;
+      }
+
+      &__button--clear {
+        width: auto;
+        justify-self: end;
+      }
+
+      &__icon {
+        > .fa, > .fas, > .fab, > .far, > .fal {
+          vertical-align: middle;
+        }
+      }
+    }
   }
 }
 
@@ -378,3 +463,5 @@
     max-width: 35%;
   }
 }
+
+@import "stage-progress-bar";
