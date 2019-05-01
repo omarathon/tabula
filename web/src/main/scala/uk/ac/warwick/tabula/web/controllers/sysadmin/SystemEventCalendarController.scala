@@ -65,7 +65,7 @@ class SystemEventCalendarController extends BaseSysadminController {
 
   def colourEvents(uncoloured: Seq[FullCalendarEvent]): Seq[FullCalendarEvent] = {
     val colours = Seq(
-      "#239b92", "#a3b139", "#ec8d22", "#ef3e36", "#df4094", "#4daacc", "#167ec2", "#f1592a", "#818285",
+      "#1c827d", "#a3b139", "#ec8d22", "#ef3e36", "#df4094", "#4daacc", "#167ec2", "#f1592a", "#818285",
       "#bacecc", "#f5c6df", "#dae0b0", "#f9ddbd", "#fffa99", "#cae6f0", "#d8d8d8", "#ecf7f7",
       "#8bada9", "#ef9fc9", "#d1d89c", "#f5c690", "#fff87f", "#a6d4e5", "#c4c4c5", "#d2e7e3"
     )
