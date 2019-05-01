@@ -2,7 +2,7 @@
   <div class="message-thread">
     <div class="message-thread__header">
       <h5 class="message-thread__header__title">
-        <div class="pull-right"><@fmt.date date=latestMessage /></div>
+        <#if latestMessage??><div class="pull-right"><@fmt.date date=latestMessage /></div></#if>
         <span><@fmt.p number=messages?size singular="message" /></span>
       </h5>
     </div>

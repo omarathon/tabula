@@ -19,7 +19,7 @@
       <tbody>
       <#list submissions as submission>
         <tr>
-          <td><a href="">MIT-${submission.key}</a></td>
+          <td><a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a></td>
           <td>${submission.student.universityId} <@pl.profile_link submission.student.universityId /></td>
           <td>${submission.student.firstName}</td>
           <td>${submission.student.lastName}</td>
@@ -43,8 +43,10 @@
   </#if>
 
   <script type="text/javascript">
-    // We probably just grew a scrollbar, so let's trigger a window resize
     (function ($) {
+      $('a.ajax-modal').ajaxModalLink();
+
+      // We probably just grew a scrollbar, so let's trigger a window resize
       $(window).trigger('resize.ScrollToFixed');
     })(jQuery);
   </script>

@@ -22,7 +22,11 @@ object Routes {
   object Admin {
     def home(department: Department): String = s"$context/admin/${encoded(department.code)}"
     def home(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}"
-    def review(submission: MitigatingCircumstancesSubmission): String = s"$context/admin/review/${encoded(submission.key.toString)}"
+    def review(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}"
+  }
+
+  object Messages {
+    def apply(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/messages"
   }
 
 }

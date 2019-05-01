@@ -10,11 +10,9 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
 
-
 @Controller
 @RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/view/{submission}"))
 class MitCircsViewController extends AbstractViewProfileController {
-
 
   @ModelAttribute("command")
   def getCommand(

@@ -5,3 +5,4 @@ require('../profiles-render');
 require('./allocate-associations');
 require('./mitcircs-form');
 require('./mitcircs-pending-evidence');
+require('./mitcircs-details');

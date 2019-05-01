@@ -142,7 +142,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
 }
 
 @Controller
-@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/{submission}/supporting-file/{filename}"))
+@RequestMapping(Array("/mitcircs/submission/{submission}/supporting-file/{filename}"))
 class MitCircsAttachmentController extends BaseController {
 
   type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]
@@ -150,12 +150,9 @@ class MitCircsAttachmentController extends BaseController {
   @ModelAttribute("renderAttachmentCommand")
   def attachmentCommand(
     @PathVariable submission: MitigatingCircumstancesSubmission,
-    @PathVariable student: StudentMember,
     @PathVariable filename: String
-  ): RenderAttachmentCommand = {
-    mustBeLinked(submission, student)
+  ): RenderAttachmentCommand =
     RenderMitCircsAttachmentCommand(mandatory(submission), mandatory(filename))
-  }
 
   @RequestMapping(method = Array(GET))
   def supportingFile(@ModelAttribute("renderAttachmentCommand") attachmentCommand: RenderAttachmentCommand, @PathVariable filename: String): RenderableFile =
