@@ -90,6 +90,10 @@ object Routes {
 
       def view(submission: MitigatingCircumstancesSubmission): String = apply(submission.student) + "/mitcircs/view/%s" format encoded(submission.key.toString)
 
+      def viewMessages(submission: MitigatingCircumstancesSubmission): String = view(submission) + "#messages"
+
+      def messages(submission: MitigatingCircumstancesSubmission): String = view(submission) + "/messages"
+
     }
   }
 

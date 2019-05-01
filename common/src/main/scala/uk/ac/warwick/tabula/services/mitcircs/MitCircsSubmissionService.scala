@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent}
 
 trait MitCircsSubmissionService {
@@ -13,6 +13,8 @@ trait MitCircsSubmissionService {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
 abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionService {
@@ -24,6 +26,8 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
 @Service("mitCircsSubmissionService")
@@ -46,6 +50,14 @@ class MitCircsSubmissionServiceImpl extends AbstractMitCircsSubmissionService wi
 
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.submissionsForDepartment(department)
+  }
+
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = transactional() {
+    mitCircsSubmissionDao.create(message)
+  }
+
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] = transactional(readOnly = true) {
+    mitCircsSubmissionDao.messagesForSubmission(submission)
   }
 }
 

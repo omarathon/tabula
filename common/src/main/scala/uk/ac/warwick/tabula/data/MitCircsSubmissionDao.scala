@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 
@@ -24,6 +24,8 @@ trait MitCircsSubmissionDao {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department): Seq[MitigatingCircumstancesSubmission]
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
 }
 
 @Repository
@@ -59,6 +61,18 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     session.newCriteria[MitigatingCircumstancesSubmission]
       .add(is("department", department))
       .addOrder(Order.desc("lastModified"))
+      .seq
+  }
+
+  def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
+    session.saveOrUpdate(message)
+    message
+  }
+
+  def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] = {
+    session.newCriteria[MitigatingCircumstancesMessage]
+      .add(is("submission", submission))
+      .addOrder(Order.asc("createdDate"))
       .seq
   }
 }

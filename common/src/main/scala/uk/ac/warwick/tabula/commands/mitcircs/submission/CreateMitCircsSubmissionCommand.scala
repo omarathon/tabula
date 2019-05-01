@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.LocalDate
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._

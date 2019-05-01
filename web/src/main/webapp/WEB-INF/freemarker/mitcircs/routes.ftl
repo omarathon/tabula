@@ -9,10 +9,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro home><@_u page="/" /></#macro>
 <#macro adminhome department><@_u page="/admin/${department.code}" /></#macro>
-
 <#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 
 <#macro viewsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key}" /></#macro>
+<#macro messages submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key}/messages" /></#macro>
 <#macro newsubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
 <#macro editsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key}" /></#macro>
 <#macro pendingevidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key}" /></#macro>
