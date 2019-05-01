@@ -18,10 +18,10 @@
 <link rel="icon" type="image/png" href="<@url resource="/static/images/id7/favicons/favicon-16x16.png" />" sizes="16x16">
 <link rel="manifest" href="<@url resource="/static/images/id7/favicons/manifest.json" />">
 <link rel="shortcut icon" href="<@url resource="/static/images/id7/favicons/favicon.ico" />">
-<meta name="msapplication-TileColor" content="#239b92">
+<meta name="msapplication-TileColor" content="#1c827d">
 <meta name="msapplication-TileImage" content="<@url resource="/static/images/id7/favicons/mstile-144x144.png" />">
 <meta name="msapplication-config" content="<@url resource="/static/images/id7/favicons/browserconfig.xml" />">
-<meta name="theme-color" content="#239b92">
+<meta name="theme-color" content="#1c827d">
 <!-- Use the brand colour of the site -->
 
 <title><#compress>
