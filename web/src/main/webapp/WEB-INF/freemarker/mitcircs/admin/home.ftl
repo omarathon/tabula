@@ -87,11 +87,11 @@
             </@filters.filter>
 
             <#assign placeholder = "All states" />
-            <#assign currentfilter><@filters.current_filter_value "state" placeholder; state>${state.toString}</@filters.current_filter_value></#assign>
+            <#assign currentfilter><@filters.current_filter_value "state" placeholder; state>${state.entryName}</@filters.current_filter_value></#assign>
             <@filters.filter "state" "command.state" placeholder currentfilter allSubmissionStates; state>
               <input type="checkbox" name="${status.expression}" value="${state.entryName}" data-short-value="${state.entryName}"
-                      ${command.state?seq_contains(state)?string('checked','')}>
-              ${state.toString}
+                      ${filters.contains_by_enum(command.state, state)?string('checked','')}>
+              ${state.entryName}
             </@filters.filter>
 
             <br>

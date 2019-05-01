@@ -32,7 +32,7 @@
               <span class="very-subtle">(not set)</span>
             </#if>
           </td>
-          <td>${submission.state.toString}</td>
+          <td>${submission.state.entryName}</td>
           <td><@fmt.date date=submission.lastModified /></td>
         </tr>
       </#list>

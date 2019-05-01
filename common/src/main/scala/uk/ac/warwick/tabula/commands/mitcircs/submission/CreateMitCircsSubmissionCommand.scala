@@ -75,8 +75,10 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
 
     if(isSelf && approve) {
       submission.approveAndSubmit()
-    } else {
+    } else if (isSelf) {
       submission.saveAsDraft()
+    } else {
+      submission.saveOnBehalfOfStudent()
     }
 
     mitCircsSubmissionService.saveOrUpdate(submission)

@@ -141,6 +141,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _approvedOn = null
   }
 
+  def saveOnBehalfOfStudent(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
+    _approvedOn = null
+  }
+
   def approveAndSubmit(): Unit = {
     // TODO guard against doing this from invalid states
 
@@ -149,7 +156,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
-  def isEditable: Boolean = state == MitigatingCircumstancesSubmissionState.Draft || state == MitigatingCircumstancesSubmissionState.Submitted
+  def isEditable: Boolean =
+    state == MitigatingCircumstancesSubmissionState.Draft ||
+    state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
+    state == MitigatingCircumstancesSubmissionState.Submitted
 
   def hasEvidence: Boolean = !attachments.isEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null

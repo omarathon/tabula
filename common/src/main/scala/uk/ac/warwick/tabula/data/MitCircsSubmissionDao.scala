@@ -122,6 +122,9 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       c.add(safeIn("_state", filter.state.toSeq))
     }
 
+    // MCOs can never see drafts
+    c.add(isNot("_state", MitigatingCircumstancesSubmissionState.Draft))
+
     c.distinct.seq
   }
 

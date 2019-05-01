@@ -87,7 +87,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var includesEndDate: LocalDate = _
   var approvedStartDate: LocalDate = _
   var approvedEndDate: LocalDate = _
-  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList(MitigatingCircumstancesSubmissionState.Submitted)
+  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList(MitigatingCircumstancesSubmissionState.Submitted, MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent)
 
   override val defaultOrder: Seq[Order] = Seq(Order.desc("lastModified"))
   override val sortOrder: JList[Order] = JArrayList() // Not used
