@@ -62,7 +62,7 @@
           <@modal.header><h6 class="modal-title">Choose a template</h6></@modal.header>
           <@modal.body>
             <dl>
-              <dt><a role="button" tabindex="0">Evidence in english</a></dt>
+              <dt><a role="button" tabindex="0">Evidence in English</a></dt>
               <dd>Some of the evidence that you have provided is not in English. For evidence to be considered it must be legible and in English. Evidence obtained overseas which is written in another language must be accompanied by a certified translation.</dd>
               <dt><a role="button" tabindex="0">Impact not described</a></dt>
               <dd>The evidence that you provide must state how the reported circumstances have impacted on your ability to study and/or complete assessments.</dd>
