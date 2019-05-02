@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionOnBehalfNotification, MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
@@ -236,10 +236,22 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(
-      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
-      Notification.init(new NewMitCircsSubmissionNotification, currentUser, submission, submission)
-    )
+
+    val notificationsForStudent = if (!isSelf)  {
+      Seq(Notification.init(new MitCircsSubmissionOnBehalfNotification, currentUser, submission, submission))
+    } else if (approve) {
+      Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    val notificationsForStaff = if (approve) {
+      Seq(Notification.init(new NewMitCircsSubmissionNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    notificationsForStudent ++ notificationsForStaff
   }
 }
 

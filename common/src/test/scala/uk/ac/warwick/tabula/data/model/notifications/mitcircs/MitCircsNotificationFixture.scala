@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.{Department, UserGroup}
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.roles.MitigatingCircumstancesOfficerRoleDefinition
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.{Fixtures, Mockito}
 import uk.ac.warwick.userlookup.User
@@ -23,5 +24,5 @@ trait MitCircsNotificationFixture {
   mcoRole.users.asInstanceOf[UserGroup].userLookup = Fixtures.userLookupService(admin)
   lazy val mockPermissionsService: PermissionsService = smartMock[PermissionsService]
   when(mockPermissionsService.getGrantedRole(submission.department, MitigatingCircumstancesOfficerRoleDefinition)).thenReturn(Some(mcoRole))
-
+  val userLookup: UserLookupService = Fixtures.userLookupService(student, admin)
 }
