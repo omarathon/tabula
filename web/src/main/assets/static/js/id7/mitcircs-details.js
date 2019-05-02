@@ -30,7 +30,7 @@ class MitCircsDetails {
         $button.prop('disabled', false);
       }
     }
-    $details.on('keyup', checkAndUpdateSendButton);
+    $details.on('keyup', '#messages', checkAndUpdateSendButton);
 
     function bind() {
       checkAndUpdateSendButton();
@@ -53,7 +53,7 @@ class MitCircsDetails {
       });
 
     // Grow textarea when typing
-    $details.on('keydown', 'textarea', (e) => {
+    $details.on('keydown', '#messages textarea', (e) => {
       const $target = $(e.target);
       // For some reason carriage returns don't update the height until the methods returns,
       // so just wait a tick before checking the height
@@ -65,7 +65,7 @@ class MitCircsDetails {
     });
 
     // Add file number badge and update tooltip when files are selected
-    $details.on('change', 'input[type=file]', (e) => {
+    $details.on('change', '#messages input[type=file]', (e) => {
       const $input = $(e.target);
       const $label = $input.closest('label');
       const $tooltip = $label.find('.use-tooltip');
@@ -81,7 +81,7 @@ class MitCircsDetails {
       }
     });
 
-    $details.on('click', '.message-thread__footer__message-templates a', (e) => {
+    $details.on('click', '#messages .message-thread__footer__message-templates a', (e) => {
       const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
       const $textarea = $thread.find('.message-thread__footer__fields textarea');
       const $modal = $('.message-thread__footer__message-templates');
@@ -93,7 +93,7 @@ class MitCircsDetails {
       checkAndUpdateSendButton();
     });
 
-    $details.on('submit', (e) => {
+    $details.on('submit', '#messages', (e) => {
       e.preventDefault();
       const $form = $(e.target);
       const $thread = $form.closest('.message-thread');

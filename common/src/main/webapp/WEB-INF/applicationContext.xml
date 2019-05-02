@@ -205,6 +205,7 @@
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitCircsContactConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesNoteIdConverter" />
   </util:list>
 
   <bean id="typeConverter"

@@ -1,5 +1,8 @@
 @import (reference) "bootstrap/less/variables";
 @import (reference) "bootstrap/less/mixins/clearfix";
+@import (reference) "bootstrap/less/mixins/center-block";
+@import (reference) "bootstrap/less/mixins/hide-text";
+@import (reference) "bootstrap/less/utilities";
 @import (reference) "@universityofwarwick/id7/less/variables";
 @import (reference) "colours";
 
@@ -465,3 +468,50 @@
 }
 
 @import "stage-progress-bar";
+
+.panel {
+  .panel-heading {
+    background-color: #f0f0f0;
+    .btn-link {
+      border: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1.1;
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+  .panel-body {
+    background-color: #fffef8;
+  }
+}
+
+.panel.panel-default.panel-form {
+  border: 0;
+
+  .panel-heading, .panel-body {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    .clearfix();
+  }
+
+  .panel-heading {
+    .btn {
+      .pull-right();
+    }
+    label.control-label {
+      padding-top: 0;
+    }
+  }
+
+  .panel-body {
+    .form-group {
+      margin-bottom: 0;
+    }
+    textarea {
+      background-color: #fffef8;
+    }
+  }
+}
