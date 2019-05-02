@@ -23,7 +23,7 @@ abstract class MitCircsOnBehalfNotification
     recipientUserId = submission.student.userId
   }
 
-  val action: String
+  def action: String
 
   def verb = "received"
 
@@ -42,11 +42,11 @@ abstract class MitCircsOnBehalfNotification
 @Entity
 @DiscriminatorValue("MitCircsSubmissionOnBehalf")
 class MitCircsSubmissionOnBehalfNotification extends MitCircsOnBehalfNotification {
-  val action: String = "created"
+  def action: String = "created"
 }
 
 @Entity
 @DiscriminatorValue("MitCircsUpdateOnBehalf")
 class MitCircsUpdateOnBehalfNotification extends MitCircsOnBehalfNotification {
-  val action: String = "updated"
+  def action: String = "updated"
 }
