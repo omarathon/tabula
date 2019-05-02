@@ -47,11 +47,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     * This will return the latest of:
     * - the submission's last modified date
     * - the latest message that was sent
+    * - the latest modified date of any notes
     */
   def lastModified: DateTime =
     Seq(
       Option(_lastModified),
-      messages.sortBy(_.createdDate).lastOption.map(_.createdDate)
+      messages.sortBy(_.createdDate).lastOption.map(_.createdDate),
+      notes.sortBy(_.lastModified).lastOption.map(_.lastModified),
     ).flatten.max
 
   def lastModified_=(lastModified: DateTime): Unit = _lastModified = lastModified
@@ -143,9 +145,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @BatchSize(size = 200)
-  @OrderBy("createdDate")
-  private var _messages: JList[MitigatingCircumstancesMessage] = JArrayList()
-  def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala
+  private var _messages: JSet[MitigatingCircumstancesMessage] = JHashSet()
+  def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala.toSeq.sortBy(_.createdDate)
+
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  private var _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
+  def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")

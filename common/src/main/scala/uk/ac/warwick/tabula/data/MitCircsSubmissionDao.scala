@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.{FetchMode, FlushMode}
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
+import org.hibernate.{FetchMode, FlushMode}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 trait MitCircsSubmissionDaoComponent {
@@ -27,6 +28,10 @@ trait MitCircsSubmissionDao {
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
+  def getNoteById(id: String): Option[MitigatingCircumstancesNote]
+  def create(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote
+  def delete(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote
+  def notesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesNote]
 }
 
 @Repository
@@ -62,6 +67,7 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
       session.newCriteria[MitigatingCircumstancesSubmission]
         // Eagerly fetch any associations that would affect the "last modified" date
         .setFetchMode("_messages", FetchMode.JOIN)
+        .setFetchMode("_notes", FetchMode.JOIN)
         .add(is("department", department))
 
     if (studentRestrictions.nonEmpty) {
@@ -126,7 +132,7 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     // MCOs can never see drafts
     c.add(isNot("_state", MitigatingCircumstancesSubmissionState.Draft))
 
-    c.distinct.seq
+    c.distinct.seq.sortBy(_.lastModified).reverse
   }
 
   override def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
@@ -138,6 +144,24 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     session.newCriteria[MitigatingCircumstancesMessage]
       .add(is("submission", submission))
       .addOrder(Order.asc("createdDate"))
+      .seq
+
+  override def getNoteById(id: String): Option[MitigatingCircumstancesNote] = getById[MitigatingCircumstancesNote](id)
+
+  override def create(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote = {
+    session.saveOrUpdate(note)
+    note
+  }
+
+  override def delete(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote = {
+    session.delete(note)
+    note
+  }
+
+  override def notesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesNote] =
+    session.newCriteria[MitigatingCircumstancesNote]
+      .add(is("submission", submission))
+      .addOrder(Order.asc("_createdDate"))
       .seq
 }
 

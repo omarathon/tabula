@@ -21,7 +21,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   with FormattedHtml {
     type Entity = MitigatingCircumstancesMessage
 
-  def this(submission:MitigatingCircumstancesSubmission, sender:User) {
+  def this(submission: MitigatingCircumstancesSubmission, sender: User) {
     this()
     this.sender = sender
     this.submission = submission

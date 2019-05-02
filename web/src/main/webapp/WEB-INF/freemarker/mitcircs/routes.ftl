@@ -18,18 +18,20 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 
 <#macro newsubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
-<#macro editsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key}" /></#macro>
-<#macro pendingevidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key}" /></#macro>
+<#macro editsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}" /></#macro>
+<#macro pendingevidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
 
 <#-- Helper for new/edit -->
 <#macro affectedAssessments student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/affected-assessments" /></#macro>
 
 <#-- View submission (as the student) -->
-<#macro viewsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key}" /></#macro>
+<#macro viewsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key?c}" /></#macro>
 
 <#-- Review submission (as the MCO) -->
-<#macro reviewSubmission submission><@_u page = "/submission/${submission.key}" /></#macro>
+<#macro reviewSubmission submission><@_u page = "/submission/${submission.key?c}" /></#macro>
+<#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
+<#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>
 
 <#-- These get posted to from both the view (as the student) and the review (as the MCO) -->
-<#macro messages submission><@_u page="/submission/${submission.key}/messages" /></#macro>
-<#macro renderAttachment submission file><@_u page="/submission/${submission.key}/supporting-file/${file.name}" /></#macro>
+<#macro messages submission><@_u page="/submission/${submission.key?c}/messages" /></#macro>
+<#macro renderAttachment submission file><@_u page="/submission/${submission.key?c}/supporting-file/${file.name}" /></#macro>

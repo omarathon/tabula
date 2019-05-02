@@ -114,6 +114,8 @@
         <#noescape>${submission.formattedPendingEvidence}</#noescape>
       </@components.section>
     </#if>
+    <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
+    <@components.asyncSection "notes" "Notes" notesUrl />
     <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
     <@components.asyncSection "messages" "Messages" messageUrl />
   </section>

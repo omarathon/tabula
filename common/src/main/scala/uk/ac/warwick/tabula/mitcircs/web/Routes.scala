@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.mitcircs.web
 
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.RoutesUtils
 
@@ -27,6 +27,11 @@ object Routes {
 
   object Messages {
     def apply(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/messages"
+  }
+
+  object Notes {
+    def apply(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/notes"
+    def delete(note: MitigatingCircumstancesNote): String = s"$context/submission/${encoded(note.submission.key.toString)}/notes/${encoded(note.id)}/delete"
   }
 
 }

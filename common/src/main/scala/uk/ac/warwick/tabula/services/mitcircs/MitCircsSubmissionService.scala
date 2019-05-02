@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.mitcircs
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.data.{AutowiringMitCircsSubmissionDaoComponent, MitCircsSubmissionDaoComponent, MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
 
@@ -15,6 +15,10 @@ trait MitCircsSubmissionService {
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
+  def getNoteById(id: String): Option[MitigatingCircumstancesNote]
+  def create(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote
+  def delete(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote
+  def notesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesNote]
 }
 
 abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionService {
@@ -46,6 +50,22 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
 
   override def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage] = transactional(readOnly = true) {
     mitCircsSubmissionDao.messagesForSubmission(submission)
+  }
+
+  override def getNoteById(id: String): Option[MitigatingCircumstancesNote] = transactional(readOnly = true) {
+    mitCircsSubmissionDao.getNoteById(id)
+  }
+
+  override def create(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote = transactional() {
+    mitCircsSubmissionDao.create(note)
+  }
+
+  override def delete(note: MitigatingCircumstancesNote): MitigatingCircumstancesNote = transactional() {
+    mitCircsSubmissionDao.delete(note)
+  }
+
+  override def notesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesNote] = transactional(readOnly = true) {
+    mitCircsSubmissionDao.notesForSubmission(submission)
   }
 }
 

@@ -1,0 +1,79 @@
+package uk.ac.warwick.tabula.data.model.mitcircs
+
+import java.io.Serializable
+
+import javax.persistence.CascadeType.ALL
+import javax.persistence._
+import org.hibernate.annotations.{BatchSize, Type}
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.data.model.{FileAttachment, GeneratedId}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
+
+@Entity
+@Access(AccessType.FIELD)
+class MitigatingCircumstancesNote extends GeneratedId
+  with ToString
+  with Serializable
+  with FormattedHtml {
+
+  def this(submission: MitigatingCircumstancesSubmission, creator: User) {
+    this()
+    this._creator = creator
+    this.lastModifiedBy = creator
+    this.submission = submission
+  }
+
+  @ManyToOne
+  @JoinColumn(name = "submission_id")
+  var submission: MitigatingCircumstancesSubmission = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  var text: String = _
+
+  def formattedText: String = formattedHtml(text)
+
+  @Column(name = "creator", nullable = false)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  private var _creator: User = _
+  def creator: User = _creator
+
+  @Column(name = "createdDate", nullable = false)
+  private val _createdDate: DateTime = DateTime.now()
+  def createdDate: DateTime = _createdDate
+
+  @Column(name = "lastModifiedDate", nullable = false)
+  var lastModified: DateTime = DateTime.now()
+
+  @Column(nullable = false)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var lastModifiedBy: User = _
+
+  @OneToMany(mappedBy = "mitigatingCircumstancesNote", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @BatchSize(size = 200)
+  private val _attachments: JSet[FileAttachment] = JHashSet()
+  def attachments: Set[FileAttachment] = _attachments.asScala.toSet
+
+  def addAttachment(attachment: FileAttachment) {
+    if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+    attachment.temporary = false
+    attachment.mitigatingCircumstancesNote = this
+    _attachments.add(attachment)
+  }
+
+  def removeAttachment(attachment: FileAttachment): Boolean = {
+    attachment.mitigatingCircumstancesNote = null
+    _attachments.remove(attachment)
+  }
+
+  override def toStringProps: Seq[(String, Any)] = Seq(
+    "id" -> id,
+    "submission" -> submission.key,
+    "creator" -> creator.getWarwickId
+  )
+
+}
