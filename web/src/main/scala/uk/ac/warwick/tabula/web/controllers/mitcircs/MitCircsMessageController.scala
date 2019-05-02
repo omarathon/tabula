@@ -4,6 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.mitcircs.{ListMessagesCommand, SendMessageCommand, SendMessageState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
@@ -33,11 +34,13 @@ class MitCircsMessageController extends BaseController {
   def form(
     @ModelAttribute("messageCommand") cmd: MessageCommand,
     @ModelAttribute("listCommand") listCmd: Appliable[Seq[MitigatingCircumstancesMessage]],
-    @PathVariable submission: MitigatingCircumstancesSubmission
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    user: CurrentUser
   ): Mav = {
     val messages = listCmd.apply()
     Mav("mitcircs/messages",
       "messages" -> messages,
+      "studentView" -> (user.apparentUser.getWarwickId == submission.student.universityId),
       "latestMessage" -> messages.sortBy(_.createdDate).lastOption.map(_.createdDate)
     ).noLayout()
   }
@@ -47,9 +50,10 @@ class MitCircsMessageController extends BaseController {
     @Valid @ModelAttribute("messageCommand") cmd: MessageCommand,
     errors: Errors,
     @ModelAttribute("listCommand") listCmd: Appliable[Seq[MitigatingCircumstancesMessage]],
-    @PathVariable submission: MitigatingCircumstancesSubmission
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    user: CurrentUser
   ): Mav = {
-    if (errors.hasErrors) form(cmd, listCmd, submission)
+    if (errors.hasErrors) form(cmd, listCmd, submission, user)
     else {
       cmd.apply()
       RedirectForce(Routes.Messages(submission))
