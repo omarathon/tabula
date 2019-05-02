@@ -141,6 +141,7 @@ case class LoginDetails(usercode: String, password: String, description: String,
 object FunctionalTestProperties {
   private val properties = loadOptionalProps()
 
+  System.setProperty("ssoclient.cache.strategy", "InMemoryOnly")
   private val userLookup = new UserLookup
   // hardcode the service URLs; if they ever change, it's as
   // easy to change them here as it is in a properties file.
