@@ -13,7 +13,7 @@
         </@components.detail>
         <#if submission.relatedSubmission??>
           <@components.detail "Related submission">
-            <a href="<@routes.mitcircs.viewsubmission submission.relatedSubmission />">
+            <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
               MIT-${submission.relatedSubmission.key}
               <@components.enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
             </a>
@@ -33,11 +33,11 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
-            <#if submission.editable>
-              <p><a href="<@routes.mitcircs.editsubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+            <#if submission.isEditable(user.apparentUser)>
+              <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
             </#if>
-            <#if submission.evidencePending>
-              <p><a href="<@routes.mitcircs.pendingevidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
+            <#if isSelf && submission.evidencePending>
+              <p><a href="<@routes.mitcircs.pendingEvidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
             </#if>
           </div>
         </div>

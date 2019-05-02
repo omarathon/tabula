@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.{Employment, IndustrialAction}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
@@ -118,7 +119,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     user: CurrentUser
   ): EditCommand = {
     mustBeLinked(submission, student)
-    if (!submission.isEditable) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it is not currently editable")
+    if (!submission.isEditable(user.apparentUser)) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it is not currently editable")
     EditMitCircsSubmissionCommand(submission, user.apparentUser)
   }
 

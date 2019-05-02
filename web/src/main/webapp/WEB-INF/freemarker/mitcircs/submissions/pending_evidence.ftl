@@ -63,7 +63,7 @@
 
     <div class="fix-footer">
       <button type="submit" class="btn btn-primary">Confirm</button>
-      <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewsubmission submission />">Cancel</a>
+      <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewSubmission submission />">Cancel</a>
     </div>
 
   </@f.form>

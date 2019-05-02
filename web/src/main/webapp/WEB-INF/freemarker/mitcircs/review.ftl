@@ -37,7 +37,7 @@
         </@components.detail>
         <#if submission.relatedSubmission??>
           <@components.detail "Related submission">
-            <a href="<@routes.mitcircs.viewsubmission submission.relatedSubmission />">
+            <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
               MIT-${submission.relatedSubmission.key}
               <@components.enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
             </a>
@@ -57,7 +57,7 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
-            <#-- Nothing yet -->
+            <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
           </div>
         </div>
       </div>
@@ -112,6 +112,12 @@
       <@components.section "Pending evidence">
         <p>Due date: <@fmt.date date=submission.pendingEvidenceDue includeTime = false /></p>
         <#noescape>${submission.formattedPendingEvidence}</#noescape>
+      </@components.section>
+    </#if>
+    <#if submission.sensitiveEvidenceComments?has_content>
+      <@components.section "Sensitive evidence">
+        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName}</p>
+        <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>
     <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
