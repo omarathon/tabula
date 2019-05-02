@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification, MitCircsUpdateOnBehalfNotification}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
@@ -131,9 +131,21 @@ trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstanc
   self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(
-      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
-      Notification.init(new MitCircsSubmissionUpdatedNotification, currentUser, submission, submission)
-    )
+
+    val notificationsForStudent = if (!isSelf)  {
+      Seq(Notification.init(new MitCircsUpdateOnBehalfNotification, currentUser, submission, submission))
+    } else if (approve) {
+      Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    val notificationsForStaff = if (approve) {
+      Seq(Notification.init(new MitCircsSubmissionUpdatedNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    notificationsForStudent ++ notificationsForStaff
   }
 }

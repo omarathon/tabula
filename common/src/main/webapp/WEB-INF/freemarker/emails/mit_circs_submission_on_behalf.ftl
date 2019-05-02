@@ -1,0 +1,1 @@
+A mitigating circumstances submission had been ${action} on your behalf. This submission won't be considered until you sign it off.
