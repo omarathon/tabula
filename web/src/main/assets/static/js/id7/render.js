@@ -85,6 +85,3 @@ require('./jquery-expandingTable');
 require('../jquery.form');
 require('./jquery-tableform');
 require('../select-deselect-checkboxes');
-
-// TODO should this be its own component script? Currently /mitcircs is getting home.js/home.css
-require('./mitcircs.js');

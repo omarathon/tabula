@@ -87,6 +87,7 @@ class CachedPartialTimetableFetchingService(
 
         override def isStale(entry: CacheEntry[TimetableCacheKey, EventList]): Boolean = (entry.getTimestamp + cacheExpiryTime * 1000) <= DateTime.now.getMillis
       })
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .asynchronous()
       .build()
 

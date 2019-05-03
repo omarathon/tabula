@@ -69,6 +69,14 @@
   <#assign name="profiles" />
   <#assign nonav=false />
   <#assign homeUrl><@routes.profiles.home /></#assign>
+<#elseif requestPath == '/mitcircs' || requestPath?starts_with('/mitcircs/')>
+  <#assign bodyClass="mitcircs-page" />
+  <#assign siteHeader="Mitigating Circumstances" />
+  <#assign subsite=true />
+  <#assign title="Mitigating Circumstances" />
+  <#assign name="mitcircs" />
+  <#assign nonav=false />
+  <#assign homeUrl><@routes.mitcircs.home /></#assign>
 <#else>
   <#assign bodyClass="tabula-page" />
   <#assign siteHeader="Tabula" />

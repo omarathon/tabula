@@ -1,5 +1,10 @@
 @import (reference) "bootstrap/less/variables";
+@import (reference) "bootstrap/less/mixins/clearfix";
+@import (reference) "bootstrap/less/mixins/center-block";
+@import (reference) "bootstrap/less/mixins/hide-text";
+@import (reference) "bootstrap/less/utilities";
 @import (reference) "@universityofwarwick/id7/less/variables";
+@import (reference) "colours";
 
 @accent-blue: #e8f4f1;
 @accent-yellow: #f9f5eb;
@@ -14,6 +19,8 @@
 
 @hint-colour: #666666;
 @hint-font-size: (@main-font-size - 1px);
+
+@gray-light: lighten(@gray-base, 45%); // #737373, ARIA
 
 .make-coloured-box() {
   padding: @alert-padding;
@@ -35,6 +42,10 @@
   &__guidance {
     .make-coloured-box();
     .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
+
+    &--departmental {
+      .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
+    }
   }
 
   &__fields {
@@ -63,6 +74,15 @@
       &--boxed {
         .make-coloured-box();
         .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
+
+        .checkbox {
+          margin-bottom: 0;
+          padding: 5px 0 5px 5px;
+        }
+
+        .checkbox+.checkbox {
+          margin-top: 0;
+        }
 
         .checkbox:nth-of-type(odd) {
           background: darken(@accent-yellow-bg, 5%);
@@ -99,9 +119,13 @@
         margin-bottom: 0;
       }
 
-      .checkbox .help-popover {
+      .help-popover {
         float: right;
         margin-right: 5px;
+        i {
+          font-weight: lighter;
+          cursor: pointer;
+        }
       }
 
       &__hint {
@@ -118,16 +142,53 @@
           }
         }
       }
+
+      &__evidence-upload {
+
+        dt + dd {
+          margin-bottom: 10px;
+        }
+
+        @media (min-width: @screen-md-min) {
+          dl {
+            padding-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            width: 100%;
+          }
+
+          dt {
+            flex: 0 0 15%;
+            overflow: hidden; /* Prevents long words in labels from causing layout to break */
+          }
+
+          dd {
+            padding: 2px 0 20px 0;
+            margin-left: 0;
+            flex: 85% 0 0;
+            padding-left: 20px;
+            max-width: 85%;
+          }
+
+          dt + dd {
+            margin-bottom: 0;
+          }
+
+          dd + dd {
+            margin-left: 15%;
+          }
+        }
+      }
     }
 
     &__checkbox-with-other {
-      label {
-        display: flex;
-      }
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
 
-      .form-control {
-        margin-left: 5px;
-        width: 75%;
+      .other-input {
+        margin: 0 10px 0 5px;
       }
     }
 
@@ -148,6 +209,309 @@
 
         }
       }
+    }
+
+    &__morepending-subfield {
+      padding-top: 10px;
+    }
+  }
+}
+
+.mitcircs-details {
+  .form-horizontal .control-label {
+    font-weight: normal;
+    color: @gray-light;
+  }
+
+  &__section {
+    div.control-label, summary.control-label, .content {
+      padding-left: @grid-gutter-width / 2;
+    }
+
+    // act like a col-sm-*
+    @media (min-width: @grid-float-breakpoint) {
+      div.control-label, summary.control-label, .content {
+        position: relative;
+        min-height: 1px;
+        padding-right: @grid-gutter-width / 2;
+        float: left;
+      }
+
+      div.control-label, summary.control-label {
+        // need to keep the labels in line with the labels in the left column of the actions
+        // the left column is col-sm-6 col-md-7 with a nested row containing col-3 for the label
+        // this means the label is (sm) 6/12 * 3/12 of a page wide = 18/144 = 1/8
+        width: percentage(1/8);
+      }
+
+      .content {
+        width: percentage(7/8);
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      div.control-label, summary.control-label {
+        // this means the label is (md) 7/12 * 3/12 of a page wide = 21/144 = 7/48
+        width: percentage(7/48);
+      }
+
+      .content {
+        width: percentage(41/48);
+      }
+    }
+  }
+}
+
+.message-thread {
+
+  border: 1px solid transparent;
+  border-color: #ddd;
+
+  &__header {
+    padding: @panel-heading-padding;
+    background-color: #f0f0f0;
+  }
+
+  &__body {
+    padding: @panel-body-padding;
+    max-height: calc(75vh - 300px);
+    overflow-y: auto;
+
+    &__message {
+      .clearfix();
+      border-radius: 10px;
+      box-shadow: 5px 5px 10px 0 rgba(0,0,0,0.3);
+      padding: @panel-heading-padding;
+      margin-bottom: @panel-body-padding;
+      word-break: break-word;
+      .date {
+        color: #5e5e5f;
+      }
+
+      &__author {
+        font-weight: bold;
+      }
+
+      &__content__attachments {
+        font-weight: 700;
+        margin-top: 11px;
+        padding-top: 5.5px;
+        border-top: 1px solid #737373;
+      }
+
+      &--student {
+        background-color: #E5F6CF;
+        border: 1px solid #919191;
+        margin-right: 20%;
+      }
+
+      &--mco {
+        background-color: #CFEFFB;
+        border: 1px solid #c0c0c0;
+        margin-left: 20%;
+      }
+    }
+  }
+
+  &__footer {
+    background: rgba(191, 192, 191, 0.8);
+    padding: @panel-heading-padding;
+
+    .form-group {
+      margin-right: 0;
+      margin-left: 0;
+    }
+
+    &__fields {
+      display: flex;
+
+      textarea {
+        width: 100%;
+        border-radius: 10px;
+      }
+
+      button, label.btn {
+        margin-left: 20px;
+        padding: 0;
+        width: 36px;
+        height: 36px;
+        border: 0;
+        border-radius: 50%;
+        position: relative;
+
+        i {
+          line-height: 36px;
+          width: 36px;
+          height: 36px;
+          margin-left: -2px;
+        }
+
+        .badge {
+          position: absolute;
+          top: auto;
+          bottom: -7px;
+          right: -7px;
+        }
+      }
+
+      input[type=file] {
+        width: .1px;
+        height: .1px;
+        opacity: 0;
+        overflow: hidden;
+        position: absolute;
+        z-index: -1;
+      }
+
+    }
+
+    dt + dd {
+      margin-bottom: 15px;
+    }
+  }
+}
+
+.mitcircs-submission-filters {
+  // For browsers that don't support CSS grid
+  &__icon, &__label, &__button {
+    display: block;
+  }
+
+  @media (min-width: @screen-md-min) {
+    @supports (display: grid) {
+      // Every day we stray further from the light
+      display: grid;
+      grid-template-areas: "icon--student    filter--course-types               . filter--route               .                        filter--mode-of-attendance . filter--year-of-study . filter--spr-status"
+                           "icon--submission filter--affected-assessment-module . filter--state               .                        .                          . .                     . ."
+                           ".                label--includes-start-date         . filter--includes-start-date label--includes-end-date filter--includes-end-date  . .                     . ."
+                           ".                label--approved-start-date         . filter--approved-start-date label--approved-end-date filter--approved-end-date  . .                     . button--clear";
+      grid-template-rows: repeat(4, min-content);
+      grid-template-columns: min-content 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr minmax(@grid-gutter-width * 1.5, min-content) 1fr;
+      grid-gap: (@line-height-computed / 2) (@grid-gutter-width / 4);
+      gap: (@line-height-computed / 2) (@grid-gutter-width / 4);
+
+      &__icon--student { grid-area: icon--student; }
+      &__icon--submission { grid-area: icon--submission; }
+      &__filter--course-types { grid-area: filter--course-types; }
+      &__filter--route { grid-area: filter--route; }
+      &__filter--mode-of-attendance { grid-area: filter--mode-of-attendance; }
+      &__filter--year-of-study { grid-area: filter--year-of-study; }
+      &__filter--spr-status { grid-area: filter--spr-status; }
+      &__filter--affected-assessment-module { grid-area: filter--affected-assessment-module; }
+      &__filter--state { grid-area: filter--state; }
+      &__label--includes-start-date { grid-area: label--includes-start-date; }
+      &__filter--includes-start-date { grid-area: filter--includes-start-date; }
+      &__label--includes-end-date { grid-area: label--includes-end-date; }
+      &__filter--includes-end-date { grid-area: filter--includes-end-date; }
+      &__label--approved-start-date { grid-area: label--approved-start-date; }
+      &__filter--approved-start-date { grid-area: filter--approved-start-date; }
+      &__label--approved-end-date { grid-area: label--approved-end-date; }
+      &__filter--approved-end-date { grid-area: filter--approved-end-date; }
+      &__button--clear { grid-area: button--clear; }
+
+      &__filter .btn-group {
+        display: flex;
+        > .btn {
+          display: inline-flex;
+          align-items: center;
+          text-align: left;
+          width: 100%;
+
+          > .filter-short-values {
+            flex: 1 1 auto;
+          }
+
+          > .caret {
+            flex: 0 1 auto;
+          }
+        }
+      }
+
+      .btn-sm {
+        font-size: 13px;
+      }
+
+      &__label {
+        color: #666666;
+        font-size: 15px;
+        font-weight: normal;
+      }
+
+      &__label--includes-start-date,
+      &__label--approved-start-date {
+        text-align: right;
+      }
+
+      &__label--includes-end-date,
+      &__label--approved-end-date {
+        text-align: center;
+      }
+
+      &__button--clear {
+        width: auto;
+        justify-self: end;
+      }
+
+      &__icon {
+        > .fa, > .fas, > .fab, > .far, > .fal {
+          vertical-align: middle;
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: @screen-md-min) {
+  .popover {
+    max-width: 35%;
+  }
+}
+
+@import "stage-progress-bar";
+
+.panel {
+  .panel-heading {
+    background-color: #f0f0f0;
+    .btn-link {
+      border: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1.1;
+      i {
+        font-size: 16px;
+      }
+    }
+  }
+  .panel-body {
+    background-color: #fffef8;
+  }
+}
+
+.panel.panel-default.panel-form {
+  border: 0;
+
+  .panel-heading, .panel-body {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    .clearfix();
+  }
+
+  .panel-heading {
+    .btn {
+      .pull-right();
+    }
+    label.control-label {
+      padding-top: 0;
+    }
+  }
+
+  .panel-body {
+    .form-group {
+      margin-bottom: 0;
+    }
+    textarea {
+      background-color: #fffef8;
     }
   }
 }

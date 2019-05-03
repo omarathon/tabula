@@ -46,6 +46,7 @@ $.fn.enableFilters = function (options) {
         updateFilterText($checkbox);
         updateRelatedFilters($checkbox);
       });
+      $this.find('input[type="text"]').val('');
       doRequest(true);
     });
     toggleClearAll();

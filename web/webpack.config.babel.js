@@ -29,6 +29,7 @@ const paths = {
     'static/js/id7/profiles': './src/main/assets/static/js/id7/profiles.js',
     'static/js/id7/cm2': './src/main/assets/static/js/id7/cm2.js',
     'static/js/id7/attendance': './src/main/assets/static/js/id7/attendance.js',
+    'static/js/id7/mitcircs': './src/main/assets/static/js/id7/mitcircs.js',
 
     // Old ID6 junk
     'static/js/render': './src/main/assets/static/js/render.js',
@@ -48,6 +49,7 @@ const paths = {
     'static/css/id7/profiles': './src/main/assets/static/css/id7/profiles.less',
     'static/css/id7/cm2': './src/main/assets/static/css/id7/cm2.less',
     'static/css/id7/attendance': './src/main/assets/static/css/id7/attendance.less',
+    'static/css/id7/mitcircs': './src/main/assets/static/css/id7/mitcircs.less',
 
     // Old ID6 junk
     'static/css/bootstrap': './src/main/assets/static/css/bootstrap.less',

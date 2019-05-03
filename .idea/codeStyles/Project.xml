@@ -84,6 +84,13 @@
     <codeStyleSettings language="Scala">
       <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
     </codeStyleSettings>
+    <codeStyleSettings language="Sybase">
+      <indentOptions>
+        <option name="INDENT_SIZE" value="2" />
+        <option name="CONTINUATION_INDENT_SIZE" value="2" />
+        <option name="TAB_SIZE" value="2" />
+      </indentOptions>
+    </codeStyleSettings>
     <codeStyleSettings language="TSQL">
       <indentOptions>
         <option name="INDENT_SIZE" value="2" />

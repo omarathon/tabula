@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.forms.{Extension, SavedFormValue}
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.helpers.DetectMimeType._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
@@ -72,6 +72,20 @@ class FileAttachment extends GeneratedId {
     inverseJoinColumns = Array(new JoinColumn(name = "submission_id")))
   var mitigatingCircumstancesSubmission: MitigatingCircumstancesSubmission = _
 
+  // optional link to MitigatingCircumstancesMessage via MitCircsMessageAttachment
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "mitcircsmessageattachment",
+    joinColumns = Array(new JoinColumn(name = "file_attachment_id")),
+    inverseJoinColumns = Array(new JoinColumn(name = "message_id")))
+  var mitigatingCircumstancesMessage: MitigatingCircumstancesMessage = _
+
+  // optional link to MitigatingCircumstancesNote via MitCircsMessageAttachment
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "mitcircsnoteattachment",
+    joinColumns = Array(new JoinColumn(name = "file_attachment_id")),
+    inverseJoinColumns = Array(new JoinColumn(name = "note_id")))
+  var mitigatingCircumstancesNote: MitigatingCircumstancesNote = _
+
   /*
    * Both of these are really One-to-One relationships (and are @OneToOne on the other side)
    * but Hibernate can't lazy-load a One-to-One because it doesn't know whether to set the
@@ -105,7 +119,7 @@ class FileAttachment extends GeneratedId {
     * attachment table. It won't check mappings where the foreign key is on the other side,
     * which is the case for things like member photos.
     */
-  def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport, mitigatingCircumstancesSubmission).exists(_ != null)
+  def isAttached: JBoolean = Seq(feedback, submissionValue, extension, originalityReport, mitigatingCircumstancesSubmission, mitigatingCircumstancesMessage, mitigatingCircumstancesNote).exists(_ != null)
 
   var temporary: JBoolean = true
 

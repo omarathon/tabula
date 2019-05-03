@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services.{AssessmentService, AssessmentServiceComponent}
 import uk.ac.warwick.tabula.data.model.Assignment
 
-
 class GenericFeedbackCommandTest extends TestBase with Mockito {
 
   trait Fixture {
@@ -18,10 +17,10 @@ class GenericFeedbackCommandTest extends TestBase with Mockito {
   @Test
   def commandApply() {
     new Fixture {
-      assignment.genericFeedback should be("")
+      assignment.genericFeedback should be (null)
       val result: Assignment = command.applyInternal()
       verify(command.assessmentService, times(1)).save(assignment)
-      assignment.genericFeedback should be(heronRant)
+      assignment.genericFeedback should be (heronRant)
     }
   }
 }

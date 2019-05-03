@@ -134,7 +134,7 @@ tabula/
 │   ├── postgresql-42.2.5.jar
 │   ├── tabula.properties
 │   ├── tabula-sso-config.xml
-│   └── warwick-logging-1.1-all.xml
+│   └── warwick-logging-1.1-all.jar
 ├── logs/
 ├── temp/
 ├── webapps/

@@ -359,6 +359,7 @@ trait AssignmentProgressCache extends TaskBenchmarking {
           Pair.of(seconds, TimeUnit.SECONDS)
         }
       })
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 }
 

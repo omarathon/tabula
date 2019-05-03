@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.criterion.{Restrictions, Criterion}
+import org.hibernate.criterion.{Criterion, DetachedCriteria, Restrictions}
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.sql.JoinType
+
 import scala.collection.mutable
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.apache.commons.lang3.builder.HashCodeBuilder
@@ -135,6 +136,25 @@ object ScalaRestriction {
 
       Some(addAliases(new ScalaRestriction(Restrictions.conjunction(criterion: _*)), aliases: _*))
   }
+
+  def applyToDetached(restrictions: Seq[ScalaRestriction], c: DetachedCriteria): DetachedCriteria = {
+    val aliases: mutable.Map[String, String] = mutable.Map()
+    def createAlias(property: String, alias: String, joinType: JoinType = JoinType.INNER_JOIN, withClause: Option[Criterion] = None): Unit = {
+      aliases.put(property, alias) match {
+        case None => c.createAlias(property, alias, joinType, withClause.orNull)
+        case Some(existing) if existing == alias => // duplicate
+        case Some(other) => throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
+      }
+    }
+
+    restrictions.foreach { restriction =>
+      restriction.aliases.foreach { case (property, aliasAndJoinType) => createAlias(property, aliasAndJoinType.alias, aliasAndJoinType.joinType, aliasAndJoinType.withClause) }
+      c.add(restriction.underlying)
+    }
+
+    c
+  }
+
 }
 
 trait Aliasable {

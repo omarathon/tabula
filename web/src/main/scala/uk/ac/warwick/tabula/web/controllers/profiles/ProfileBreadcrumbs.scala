@@ -131,6 +131,12 @@ object ProfileBreadcrumbs {
       val url = Some(Routes.Profile.attendance(scyd))
     }
 
+    case class PersonalCircumstances(student: StudentMember) extends ProfileBreadcrumb {
+      val identifier = PersonalCircumstances
+      val title = "Personal circumstances"
+      val url = Some(Routes.Profile.PersonalCircumstances(student))
+    }
+
     case class Download(member: Member) extends ProfileBreadcrumb {
       val identifier = DownloadIdentifier
       val title = "Download my info"
@@ -141,12 +147,6 @@ object ProfileBreadcrumbs {
       val identifier = DownloadIdentifier
       val title = "Download my info"
       val url = Some(Routes.Profile.download(scyd))
-    }
-
-    case class PersonalCircumstances(student: StudentMember) extends ProfileBreadcrumb {
-      val identifier = PersonalCircumstances
-      val title = "Personal Circumstances"
-      val url = Some(Routes.Profile.personalCircumstances(student))
     }
 
   }

@@ -102,6 +102,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
   private lazy val navigationCache =
     Caches.builder(CacheName, cacheEntryFactory, cacheStrategy)
       .expireAfterWrite(CacheExpiryTime)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .build()
 
   def apply(user: User, forceUpdate: Boolean = false): UserNavigation = {

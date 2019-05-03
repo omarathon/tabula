@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification}
-import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionReceiptNotification, MitCircsSubmissionUpdatedNotification, MitCircsUpdateOnBehalfNotification}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Notification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -25,6 +25,8 @@ object EditMitCircsSubmissionCommand {
       with MitCircsSubmissionPermissions
       with EditMitCircsSubmissionDescription
       with EditMitCircsSubmissionNotifications
+      with MitCircsSubmissionSchedulesNotifications
+      with MitCircsSubmissionNotificationCompletion
       with AutowiringMitCircsSubmissionServiceComponent
       with AutowiringModuleAndDepartmentServiceComponent
       with HibernateExtensionPersistenceComponent
@@ -34,6 +36,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   extends CommandInternal[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with BindListener {
 
   self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
+
+  require(submission.isEditable) // Guarded at controller
 
   startDate = submission.startDate
   endDate = submission.endDate
@@ -46,9 +50,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   contacts = submission.contacts.asJava
   contactOther = submission.contactOther
   noContactReason = submission.noContactReason
-  stepsSoFar = submission.stepsSoFar
-  changeOrResolve = submission.changeOrResolve
   pendingEvidence = submission.pendingEvidence
+  pendingEvidenceDue = submission.pendingEvidenceDue
   attachedFiles = submission.attachments
   relatedSubmission = submission.relatedSubmission
 
@@ -82,18 +85,26 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       submission.affectedAssessments.add(affected)
     }
 
-    submission.stepsSoFar = stepsSoFar
-    submission.changeOrResolve = changeOrResolve
     submission.pendingEvidence = pendingEvidence
+    submission.pendingEvidenceDue = pendingEvidenceDue
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: mutable.Set[FileAttachment] = submission.attachments.asScala -- attachedFiles.asScala
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
+
     submission.relatedSubmission = relatedSubmission
+
     // reset approvedOn when changes are made by others or drafts are saved
-    if(isSelf && approve) submission.approvedOn = DateTime.now() else submission.approvedOn = null
+    if(isSelf && approve) {
+      submission.approveAndSubmit()
+    } else if (isSelf) {
+      submission.saveAsDraft()
+    } else {
+      submission.saveOnBehalfOfStudent()
+    }
+
     submission.lastModified = DateTime.now()
     submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)
@@ -110,19 +121,31 @@ trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstan
   }
 }
 
-trait EditMitCircsSubmissionState extends CreateMitCircsSubmissionState {
+trait EditMitCircsSubmissionState extends MitCircsSubmissionState {
   val submission: MitigatingCircumstancesSubmission
   lazy val student: StudentMember = submission.student
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
 
-  self: CreateMitCircsSubmissionState =>
+  self: MitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
-    Seq(
-      Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission),
-      Notification.init(new MitCircsSubmissionUpdatedNotification, currentUser, submission, submission)
-    )
+
+    val notificationsForStudent = if (!isSelf)  {
+      Seq(Notification.init(new MitCircsUpdateOnBehalfNotification, currentUser, submission, submission))
+    } else if (approve) {
+      Seq(Notification.init(new MitCircsSubmissionReceiptNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    val notificationsForStaff = if (approve) {
+      Seq(Notification.init(new MitCircsSubmissionUpdatedNotification, currentUser, submission, submission))
+    } else {
+      Nil
+    }
+
+    notificationsForStudent ++ notificationsForStaff
   }
 }

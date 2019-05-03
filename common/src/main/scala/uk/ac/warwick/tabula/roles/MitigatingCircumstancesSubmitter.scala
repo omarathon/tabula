@@ -9,6 +9,7 @@ case object MitigatingCircumstancesSubmitterRoleDefinition extends UnassignableB
   override def description = "In a department that manages mitigating circumstances in Tabula"
 
   GrantsScopedPermission(
+    MitigatingCircumstancesSubmission.Read,
     MitigatingCircumstancesSubmission.Modify
   )
 }

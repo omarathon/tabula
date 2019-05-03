@@ -9,8 +9,12 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 @Entity
 @Access(AccessType.FIELD)
@@ -18,10 +22,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
   with PermissionsTarget
   with Serializable
-  with ToEntityReference {
+  with ToEntityReference
+  with FormattedHtml {
     type Entity = MitigatingCircumstancesSubmission
 
-  def this(student:StudentMember, creator:User, department: Department) {
+  def this(student: StudentMember, creator: User, department: Department) {
     this()
     this.creator = creator
     this.lastModifiedBy = creator
@@ -35,8 +40,23 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var createdDate: DateTime = DateTime.now()
 
-  @Column(nullable = false)
-  var lastModified: DateTime = DateTime.now()
+  @Column(name = "lastModified", nullable = false)
+  private var _lastModified: DateTime = DateTime.now()
+
+  /**
+    * This will return the latest of:
+    * - the submission's last modified date
+    * - the latest message that was sent
+    * - the latest modified date of any notes
+    */
+  def lastModified: DateTime =
+    Seq(
+      Option(_lastModified),
+      messages.sortBy(_.createdDate).lastOption.map(_.createdDate),
+      notes.sortBy(_.lastModified).lastOption.map(_.lastModified),
+    ).flatten.max
+
+  def lastModified_=(lastModified: DateTime): Unit = _lastModified = lastModified
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -44,7 +64,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  final var lastModifiedBy: User = _
+  var lastModifiedBy: User = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
@@ -75,6 +95,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsContactUserType")
   var contacts: Seq[MitCircsContact] = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   var contactOther: String = _ // free text for use when the contacts includes Other
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
@@ -84,6 +105,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = false)
   var reason: String = _
 
+  def formattedReason: String = formattedHtml(reason)
+
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @JoinColumn(name = "submission_id")
   @BatchSize(size = 200)
@@ -92,17 +115,17 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(nullable = false)
-  var stepsSoFar: String = _
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var changeOrResolve: String = _
-
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
   var pendingEvidence: String = _
 
-  var approvedOn: DateTime = _
+  def formattedPendingEvidence: String = formattedHtml(pendingEvidence)
+
+  var pendingEvidenceDue: LocalDate = _
+
+  @Column(name = "approvedOn")
+  private var _approvedOn: DateTime = _
+
+  // Guarded against being set directly; use .approveAndSubmit() below
+  def approvedOn: Option[DateTime] = Option(_approvedOn)
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
@@ -120,7 +143,54 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     attachments.remove(attachment)
   }
 
-  def isDraft: Boolean = approvedOn == null
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  private var _messages: JSet[MitigatingCircumstancesMessage] = JHashSet()
+  def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala.toSeq.sortBy(_.createdDate)
+
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  private var _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
+  def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
+
+  // Intentionally no default here, rely on a state being set explicitly
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
+  @Column(name = "state", nullable = false)
+  private var _state: MitigatingCircumstancesSubmissionState = _
+
+  // Can get but not set state directly, use the methods below to transition
+  def state: MitigatingCircumstancesSubmissionState = _state
+
+  // State transitions
+  def saveAsDraft(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.Draft
+    _approvedOn = null
+  }
+
+  def saveOnBehalfOfStudent(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
+    _approvedOn = null
+  }
+
+  def approveAndSubmit(): Unit = {
+    // TODO guard against doing this from invalid states
+
+    _state = MitigatingCircumstancesSubmissionState.Submitted
+    _approvedOn = DateTime.now()
+  }
+
+  def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
+  def isEditable: Boolean =
+    state == MitigatingCircumstancesSubmissionState.Draft ||
+    state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
+    state == MitigatingCircumstancesSubmissionState.Submitted
+
+  def hasEvidence: Boolean = !attachments.isEmpty
+  def isEvidencePending: Boolean = pendingEvidenceDue != null
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
@@ -128,8 +198,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     "creator" -> creator.getWarwickId
   )
 
-  // Don't use the student as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
-  override def permissionsParents: Stream[PermissionsTarget] = Stream(student.homeDepartment)
+  // Don't use the student directly as the permission parent here. We don't want permissions to bubble up to all the students touchedDepartments
+  override def permissionsParents: Stream[PermissionsTarget] = Stream(MitigatingCircumstancesStudent(student))
 }
 
 

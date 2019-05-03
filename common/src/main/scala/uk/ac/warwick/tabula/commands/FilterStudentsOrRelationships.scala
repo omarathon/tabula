@@ -112,9 +112,7 @@ trait FilterStudentsOrRelationships extends FiltersStudentsBase with Permissions
       hallOfResidenceRestriction
     ).flatten
 
-    if (restrictions.exists {
-      _.aliases.keys.exists(key => key.contains("studentCourseYearDetails"))
-    }) {
+    if (restrictions.exists(_.aliases.keys.exists(key => key.contains("studentCourseYearDetails")))) {
       // We need to restrict the studentCourseYearDetails to the latest one by year
       restrictions ++ latestStudentCourseYearDetailsForYearRestrictions(year)
     } else restrictions

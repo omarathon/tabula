@@ -157,6 +157,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] {
 
         override def isStale(entry: CacheEntry[UniversityId, User]): Boolean = (entry.getTimestamp + UserByWarwickIdCacheMaxAge.getSeconds * 1000) <= DateTime.now.getMillis
       })
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
       .asynchronous()
       .build()
 

@@ -2,11 +2,12 @@
 @import (reference) "bootstrap/less/mixins.less";
 @import (reference) "@universityofwarwick/id7/less/variables.less";
 @import (reference) "@universityofwarwick/id7/less/mixins.less";
+@import (reference) "colours.less";
 
-.apply-brand(#333333);
+.apply-brand(@tabulaGrayDark);
 // These are the generated static hashes to prevent an un-necessary redirect
 .apply-site-imagery('../../images/id7', 'masthead-image.100085870775.png', 'border-image-left.180501879004.png', 'border-image-right.286007907560.png');
-.link-colour(#3C5E7F);
+.link-colour(@tabula-link-colour);
 .btn-brand {
   .button-variant(contrast(#666, @text-color, white, 50%); #666; darken(#666, 5%));
 }
@@ -28,14 +29,27 @@
 }
 
 .id7-navigation .navbar-primary {
-  .tabula-apply-navbar-brand(#239B92, #ffffff);
+  .tabula-apply-navbar-brand(#3e7a73, #ffffff);
 }
 
 .id7-navigation .navbar-secondary {
-  .tabula-apply-navbar-brand(#90C0BD, #222222);
+  .tabula-apply-navbar-brand(#6ab4ae, #222222);
 }
 
-.apply-footer-brand(#6B695D);
+.id7-navigation .navbar-tertiary {
+  .tabula-apply-navbar-brand(#f1f0f1, #222222);
+}
+
+.apply-footer-brand(#6b695d);
+.id7-page-footer {
+  .id7-app-footer {
+    .id7-footer-utility {
+      .subtle {
+        color: white;
+      }
+    }
+  }
+}
 
 /** This needs to be sent to the compile server as it won't compile with the Ant plugin **/
 .cog {

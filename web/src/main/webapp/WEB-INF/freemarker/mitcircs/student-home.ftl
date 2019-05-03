@@ -1,5 +1,4 @@
 <#escape x as x?html>
-
   <#if !isSelf>
     <details class="indent">
       <summary>${student.fullName}</summary>
@@ -40,7 +39,7 @@
         <tbody>
           <#list submissions as submission>
             <tr>
-              <td><a href="<@routes.mitcircs.editsubmission submission />">MIT-${submission.key}</a></td>
+              <td><a href="<@routes.mitcircs.viewsubmission submission />">MIT-${submission.key}</a></td>
               <td><#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></td>
               <td><@fmt.date date=submission.startDate includeTime=false /></td>
               <td>

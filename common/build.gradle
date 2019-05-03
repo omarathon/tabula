@@ -29,7 +29,7 @@ dependencies {
   compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
 
-  compile 'uk.ac.warwick.sso:sso-client:2.64'
+  compile 'uk.ac.warwick.sso:sso-client:2.69.1'
 
   compile 'org.apache.httpcomponents:httpclient:4.5.6'
   compile 'org.apache.httpcomponents:httpcore:4.4.10'

@@ -1,0 +1,1 @@
+The student has sent a message regarding their mitigating circumstances submission MIT-${submission.key}.
