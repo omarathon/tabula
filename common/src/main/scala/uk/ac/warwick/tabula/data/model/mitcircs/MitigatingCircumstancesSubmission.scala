@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -49,12 +50,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     * - the latest message that was sent
     * - the latest modified date of any notes
     */
-  def lastModified: DateTime =
+  def lastModified: DateTime = transactional(readOnly = true) {
     Seq(
       Option(_lastModified),
       messages.sortBy(_.createdDate).lastOption.map(_.createdDate),
       notes.sortBy(_.lastModified).lastOption.map(_.lastModified),
     ).flatten.max
+  }
 
   def lastModified_=(lastModified: DateTime): Unit = _lastModified = lastModified
 
@@ -145,12 +147,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @BatchSize(size = 200)
-  private var _messages: JSet[MitigatingCircumstancesMessage] = JHashSet()
+  private val _messages: JSet[MitigatingCircumstancesMessage] = JHashSet()
   def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala.toSeq.sortBy(_.createdDate)
 
   @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @BatchSize(size = 200)
-  private var _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
+  private val _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
   def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
 
   // Intentionally no default here, rely on a state being set explicitly
