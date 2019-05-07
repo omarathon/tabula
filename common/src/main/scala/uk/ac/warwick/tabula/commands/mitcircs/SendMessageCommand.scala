@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 
 import scala.collection.JavaConverters._
 
-
 object SendMessageCommand {
   def apply(submission: MitigatingCircumstancesSubmission, currentUser: User) = new SendMessageCommandInternal(submission, currentUser)
     with ComposableCommand[MitigatingCircumstancesMessage]
