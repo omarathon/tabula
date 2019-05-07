@@ -18,13 +18,15 @@ class ViewExamTimetableController extends ProfilesController {
   def command(@PathVariable member: Member) = ViewExamTimetableCommand(mandatory(member), user)
 
   @RequestMapping
-  def home(@ModelAttribute("command") cmd: Appliable[Try[ExamTimetableFetchingService.ExamTimetable]]): Mav = {
+  def home(@ModelAttribute("command") cmd: Appliable[Try[ExamTimetableFetchingService.ExamTimetable]], @PathVariable member: Member): Mav = {
     cmd.apply() match {
       case Success(examTimetable) => Mav("profiles/timetables/exams",
-        "timetable" -> examTimetable
+        "timetable" -> examTimetable,
+        "isSelf" -> (user.universityId == member.universityId),
       )
       case Failure(t) => Mav("profiles/timetables/exams",
-        "error" -> t.getMessage
+        "error" -> t.getMessage,
+        "isSelf" -> (user.universityId == member.universityId),
       )
     }
 
