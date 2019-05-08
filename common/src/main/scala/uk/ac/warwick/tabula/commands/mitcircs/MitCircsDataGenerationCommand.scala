@@ -74,7 +74,7 @@ abstract class MitCircsDataGenerationCommandInternal(val department: Department)
   private def dummyParagraphs(paragraphs: Int): String =
     (1 to paragraphs).map(_ => dummyText).mkString("\n\n")
 
-  private def randomPastDateTime(maximumDaysInPast: Int = maximumDaysInPast, base: DateTime = new DateTime, workingHoursOnly: Boolean = false): DateTime = {
+  private def randomPastDateTime(maximumDaysInPast: Int = maximumDaysInPast, base: DateTime = DateTime.now, workingHoursOnly: Boolean = false): DateTime = {
     var dt =
       base.minusDays(random.nextInt(maximumDaysInPast + 1))
         .withMinuteOfHour(random.nextInt(60))
@@ -95,7 +95,7 @@ abstract class MitCircsDataGenerationCommandInternal(val department: Department)
     }
   }
 
-  private def randomFutureDateTime(maximumDaysInFuture: Int = maximumDaysInFuture, base: DateTime = new DateTime, workingHoursOnly: Boolean = false): DateTime = {
+  private def randomFutureDateTime(maximumDaysInFuture: Int = maximumDaysInFuture, base: DateTime = DateTime.now, workingHoursOnly: Boolean = false): DateTime = {
     var dt =
       base.plusDays(random.nextInt(maximumDaysInFuture + 1))
         .withMinuteOfHour(random.nextInt(60))
@@ -224,7 +224,7 @@ abstract class MitCircsDataGenerationCommandInternal(val department: Department)
 
     if (withinRate(pendingEvidenceRate) || command.file.upload.isEmpty) {
       command.pendingEvidence = dummyWords(random.nextInt(200) + 100)
-      command.pendingEvidenceDue = randomFutureDateTime(base = new DateTime().plusDays(1)).toLocalDate
+      command.pendingEvidenceDue = randomFutureDateTime(base = DateTime.now().plusDays(1)).toLocalDate
     }
 
     val bindingResult = new BeanPropertyBindingResult(command, "command")
