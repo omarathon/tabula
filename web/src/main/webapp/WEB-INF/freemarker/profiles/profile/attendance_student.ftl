@@ -89,15 +89,19 @@
                         <td class="state">
                           <#if pointPair._2()??>
                             <@attendance_macros.checkpointLabel
-                            department=point.scheme.department
-                            checkpoint=pointPair._2()
-                            urlProfile=true/>
+                              department=point.scheme.department
+                              checkpoint=pointPair._2()
+                              urlProfile=true/>
+
+                            <#if !nonReportedTerms?seq_contains(term) && can.do("MonitoringPoints.OverwriteReported", student)>
+                              <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point />"><span class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
+                            </#if>
                           <#else>
                             <@attendance_macros.checkpointLabel
-                            department=point.scheme.department
-                            point=pointPair._1()
-                            student=student
-                            urlProfile=true/>
+                              department=point.scheme.department
+                              point=pointPair._1()
+                              student=student
+                              urlProfile=true/>
                           </#if>
                         </td>
                       </tr>

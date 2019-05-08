@@ -28,7 +28,7 @@
                 title="This scheme cannot be removed as it has attendance marks against some of its points."
               </#if>
       />
-      <a class="btn" href="<@routes.attendance.manageHomeForYear command.scheme.department command.scheme.academicYear />">Cancel</a>
+      <a class="btn btn-default" href="<@routes.attendance.manageHomeForYear command.scheme.department command.scheme.academicYear />">Cancel</a>
     </p>
 
   </@f.form>

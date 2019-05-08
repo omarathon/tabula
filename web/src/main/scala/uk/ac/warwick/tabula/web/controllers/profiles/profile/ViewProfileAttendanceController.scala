@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.web.controllers.profiles.profile
 
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.attendance.profile.AttendanceProfileCommand
 import uk.ac.warwick.tabula.commands.groups.ListStudentGroupAttendanceCommand
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringPoint, AttendanceState}
 import uk.ac.warwick.tabula.profiles.web.Routes
+import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.attendance.MonthNames
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.{AcademicPeriod, AcademicYear, ItemNotFoundException}
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
-class ViewProfileAttendanceController extends AbstractViewProfileController {
+class ViewProfileAttendanceController
+  extends AbstractViewProfileController
+    with AutowiringAttendanceMonitoringServiceComponent {
 
   @RequestMapping(Array("/{member}/attendance"))
   def viewByMemberMapping(
@@ -63,7 +65,8 @@ class ViewProfileAttendanceController extends AbstractViewProfileController {
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == student.universityId),
       "allCheckpointStates" -> AttendanceState.values.sortBy(state => state.description),
       "monthNames" -> MonthNames(activeAcademicYear.get),
-      "academicYear" -> activeAcademicYear
+      "academicYear" -> activeAcademicYear,
+      "nonReportedTerms" -> attendanceMonitoringService.findNonReportedTerms(Seq(mandatory(student)), mandatory(activeAcademicYear)),
     ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.AttendanceIdentifier): _*)
       .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.attendance(scyd)): _*)
 
