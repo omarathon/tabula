@@ -65,9 +65,6 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = {
     val c =
       session.newCriteria[MitigatingCircumstancesSubmission]
-        // Eagerly fetch any associations that would affect the "last modified" date
-        .setFetchMode("_messages", FetchMode.JOIN)
-        .setFetchMode("_notes", FetchMode.JOIN)
         .add(is("department", department))
 
     if (studentRestrictions.nonEmpty) {

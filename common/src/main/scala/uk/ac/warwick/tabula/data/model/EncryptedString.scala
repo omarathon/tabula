@@ -21,27 +21,40 @@ object EncryptedString {
   }
 }
 
-class EncryptedStringUserType extends AbstractBasicUserType[String, Array[Byte]] {
+class EncryptedString(encrypted: Array[Byte]) extends CharSequence {
+  override def length(): Int = toString.length
+  override def charAt(index: Int): Char = toString.charAt(index)
+  override def subSequence(start: Int, end: Int): CharSequence = toString.subSequence(start, end)
+
+  override def equals(other: Any): Boolean = other match {
+    case that: CharSequence => toString == that.toString
+    case _ => false
+  }
+
+  override def hashCode(): Int = toString.hashCode()
+
+  override lazy val toString: String = {
+    // Read the IV from the first 16 bytes
+    val iv = new IvParameterSpec(encrypted.slice(0, 16))
+    val data = ByteSource.wrap(encrypted.slice(16, encrypted.length))
+
+    new DecryptingByteSource(data, EncryptedString.secretKey, iv).asCharSource(StandardCharsets.UTF_8).read()
+  }
+}
+
+class EncryptedStringUserType extends AbstractBasicUserType[CharSequence, Array[Byte]] {
   override val basicType: BinaryType = StandardBasicTypes.BINARY
 
   override def sqlTypes(): Array[Int] = Array(Types.VARBINARY)
 
-  override val nullObject: String = null
+  override val nullObject: CharSequence = null
   override val nullValue: Array[Byte] = Array()
 
-  override def convertToObject(input: Array[Byte]): String = {
-    if (input.length == 0) {
-      nullObject
-    } else {
-      // Read the IV from the first 16 bytes
-      val iv = new IvParameterSpec(input.slice(0, 16))
-      val data = ByteSource.wrap(input.slice(16, input.length))
+  override def convertToObject(input: Array[Byte]): CharSequence =
+    if (input.length == 0) nullObject
+    else new EncryptedString(input)
 
-      new DecryptingByteSource(data, EncryptedString.secretKey, iv).asCharSource(StandardCharsets.UTF_8).read()
-    }
-  }
-
-  override def convertToValue(obj: String): Array[Byte] = {
+  override def convertToValue(obj: CharSequence): Array[Byte] = {
     val iv = randomIv
     val data = CharSource.wrap(obj).asByteSource(StandardCharsets.UTF_8)
 

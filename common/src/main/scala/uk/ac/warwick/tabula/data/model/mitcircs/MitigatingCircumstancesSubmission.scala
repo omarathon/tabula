@@ -72,11 +72,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
   var department: Department = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "relatedSubmission")
   var relatedSubmission: MitigatingCircumstancesSubmission = _
 
@@ -90,7 +90,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var issueTypes: Seq[IssueType] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var issueTypeDetails: String = _ // free text for use when the issue type includes Other
+  @Column(name = "issueTypeDetails")
+  private var encryptedIssueTypeDetails: CharSequence = _
+
+  // free text for use when the issue type includes Other
+  def issueTypeDetails: String = Option(encryptedIssueTypeDetails).map(_.toString).orNull
+  def issueTypeDetails_=(issueTypeDetails: String): Unit = encryptedIssueTypeDetails = issueTypeDetails
 
   var contacted: JBoolean = _
 
@@ -98,14 +103,24 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var contacts: Seq[MitCircsContact] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var contactOther: String = _ // free text for use when the contacts includes Other
+  @Column(name = "contactOther")
+  private var encryptedContactOther: CharSequence = _
+
+  // free text for use when the contacts includes Other
+  def contactOther: String = Option(encryptedContactOther).map(_.toString).orNull
+  def contactOther_=(contactOther: String): Unit = encryptedContactOther = contactOther
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var noContactReason: String = _
+  @Column(name = "noContactReason")
+  private var encryptedNoContactReason: CharSequence = _
+  def noContactReason: String = Option(encryptedNoContactReason).map(_.toString).orNull
+  def noContactReason_=(noContactReason: String): Unit = encryptedNoContactReason = noContactReason
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var reason: String = _
+  @Column(name = "reason", nullable = false)
+  private var encryptedReason: CharSequence = _
+  def reason: String = Option(encryptedReason).map(_.toString).orNull
+  def reason_=(reason: String): Unit = encryptedReason = reason
 
   def formattedReason: String = formattedHtml(reason)
 
@@ -116,8 +131,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var pendingEvidence: String = _
+  @Column(name = "pendingEvidence", nullable = false)
+  private var encryptedPendingEvidence: CharSequence = _
+  def pendingEvidence: String = Option(encryptedPendingEvidence).map(_.toString).orNull
+  def pendingEvidence_=(pendingEvidence: String): Unit = encryptedPendingEvidence = pendingEvidence
 
   def formattedPendingEvidence: String = formattedHtml(pendingEvidence)
 

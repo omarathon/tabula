@@ -33,7 +33,10 @@ class MitigatingCircumstancesNote extends GeneratedId
   var submission: MitigatingCircumstancesSubmission = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var text: String = _
+  @Column(name = "text")
+  private var encryptedText: CharSequence = _
+  def text: String = Option(encryptedText).map(_.toString).orNull
+  def text_=(text: String): Unit = encryptedText = text
 
   def formattedText: String = formattedHtml(text)
 

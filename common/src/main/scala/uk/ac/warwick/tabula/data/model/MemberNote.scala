@@ -30,9 +30,8 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   private var legacyNote: String = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  private var encryptedNote: String = _
-
-  def note: String = encryptedNote.maybeText.getOrElse(legacyNote)
+  private var encryptedNote: CharSequence = _
+  def note: String = Option(encryptedNote).flatMap(_.toString.maybeText).getOrElse(legacyNote)
   def note_=(note: String): Unit = encryptedNote = note
 
   def escapedNote: String = formattedHtml(note)

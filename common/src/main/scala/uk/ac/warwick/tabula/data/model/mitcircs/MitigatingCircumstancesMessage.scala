@@ -32,9 +32,12 @@ class MitigatingCircumstancesMessage extends GeneratedId
   var submission: MitigatingCircumstancesSubmission = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var message: String = _
+  @Column(name = "message")
+  private var encryptedMessage: CharSequence = _
+  def message: String = Option(encryptedMessage).map(_.toString).orNull
+  def message_=(message: String): Unit = encryptedMessage = message
 
-  def formattedMessage: String = formattedHtml(message)
+  def formattedMessage: String = formattedHtml(message.toString)
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")

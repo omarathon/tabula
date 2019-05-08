@@ -10,7 +10,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.core.OnCampusService
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.services.UserLookupService._
@@ -183,7 +183,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] {
     }
   }
 
-  override def isSupportsMultiLookups() = true
+  override def isSupportsMultiLookups: Boolean = true
 
   @PreDestroy
   def shutdownCache() {
@@ -198,7 +198,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] {
 class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
   var profileService: ProfileService = Wire[ProfileService]
 
-  private def sandboxUser(member: Member) = {
+  private def sandboxUser(member: Member): User = {
     val ssoUser = new User(member.userId)
     ssoUser.setFoundUser(true)
     ssoUser.setVerified(true)
@@ -219,49 +219,43 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
   }
 
   override def getUsersInDepartment(d: String): JList[User] =
-    SandboxData.Departments.find { case (code, department) => department.name == d } match {
-      case Some((code, department)) => getUsersInDepartmentCode(code)
+    SandboxData.Departments.find { case (_, department) => department.name == d } match {
+      case Some((code, _)) => getUsersInDepartmentCode(code)
       case _ => super.getUsersInDepartment(d)
     }
 
   override def getUsersInDepartmentCode(c: String): JList[User] =
     SandboxData.Departments.get(c) match {
-      case Some(department) => {
+      case Some(department) =>
         val students = department.routes.values.flatMap { route =>
           (route.studentsStartId to route.studentsEndId).flatMap { uniId =>
-            profileService.getMemberByUniversityId(uniId.toString) map {
-              sandboxUser(_)
-            }
+            profileService.getMemberByUniversityId(uniId.toString).map(sandboxUser)
           }
         }
 
         val staff = (department.staffStartId to department.staffEndId).flatMap { uniId =>
-          profileService.getMemberByUniversityId(uniId.toString) map {
-            sandboxUser(_)
-          }
+          profileService.getMemberByUniversityId(uniId.toString).map(sandboxUser)
         }
 
         (students ++ staff).toSeq.asJava
-      }
+
       case _ => super.getUsersInDepartmentCode(c)
     }
 
   override def getUsersByUserIds(ids: JList[String]): JMap[String, User] =
     ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
 
-  override def getUserByUserId(id: String): User =
-    profileService.getAllMembersWithUserId(id, true).headOption.map {
-      sandboxUser(_)
-    }.getOrElse {
-      super.getUserByUserId(id)
-    }
+  override def getUserByUserId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByUserId", id) {
+    profileService.getAllMembersWithUserId(id, disableFilter = true).headOption
+      .map(sandboxUser)
+      .getOrElse(super.getUserByUserId(id))
+  }
 
-  override def getUserByWarwickUniId(id: String): User =
-    profileService.getMemberByUniversityId(id).map {
-      sandboxUser(_)
-    }.getOrElse {
-      super.getUserByUserId(id)
-    }
+  override def getUserByWarwickUniId(id: String): User = RequestLevelCache.cachedBy("SandboxUserLookup.getUserByWarwickUniId", id) {
+    profileService.getMemberByUniversityId(id)
+      .map(sandboxUser)
+      .getOrElse(super.getUserByUserId(id))
+  }
 
   override def getUserByWarwickUniId(id: String, ignored: Boolean): User = getUserByWarwickUniId(id)
 
