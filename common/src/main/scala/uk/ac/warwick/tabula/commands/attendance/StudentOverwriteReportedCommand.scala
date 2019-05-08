@@ -35,22 +35,33 @@ abstract class StudentOverwriteReportedCommandInternal(val student: StudentMembe
     with AttendanceMonitoringServiceComponent =>
 
   override def applyInternal(): (AttendanceMonitoringCheckpoint, AttendanceMonitoringCheckpointTotal) = transactional() {
-    val cp: AttendanceMonitoringCheckpoint = checkpoint.getOrElse {
-      val newCheckpoint = new AttendanceMonitoringCheckpoint
-      newCheckpoint.student = student
-      newCheckpoint.point = point
-      newCheckpoint.autoCreated = false
-      newCheckpoint
-    }
+    val updatedCheckpointOrNull: AttendanceMonitoringCheckpoint =
+      if (state == null) {
+        // Remove any existing checkpoint
+        checkpoint.foreach(attendanceMonitoringService.deleteCheckpointDangerously)
 
-    cp.setStateDangerously(state)
-    cp.updatedBy = user.apparentId
-    cp.updatedDate = DateTime.now
+        null
+      } else {
+        val cp: AttendanceMonitoringCheckpoint = checkpoint.getOrElse {
+          val newCheckpoint = new AttendanceMonitoringCheckpoint
+          newCheckpoint.student = student
+          newCheckpoint.point = point
+          newCheckpoint.autoCreated = false
+          newCheckpoint
+        }
 
-    attendanceMonitoringService.saveOrUpdateDangerously(cp)
+        cp.setStateDangerously(state)
+        cp.updatedBy = user.apparentId
+        cp.updatedDate = DateTime.now
+
+        attendanceMonitoringService.saveOrUpdateDangerously(cp)
+
+        cp
+      }
+
     val total = attendanceMonitoringService.updateCheckpointTotal(student, point.scheme.department, point.scheme.academicYear)
 
-    (cp, total)
+    (updatedCheckpointOrNull, total)
   }
 
 }
