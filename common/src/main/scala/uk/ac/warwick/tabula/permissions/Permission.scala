@@ -140,296 +140,179 @@ object Permissions {
 
   /* ScopelessPermissions are Permissions that can be resolved without having to worry about scope */
   case object UserPicker extends ScopelessPermission("Use the user picker")
-
   case object GodMode extends ScopelessPermission("Enable god mode")
-
   case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
-
   case object ManageEmergencyMessage extends ScopelessPermission("Manage emergency message")
-
   case object ImportSystemData extends ScopelessPermission("Import data from other systems")
-
   case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
-
   case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
-
   case object ViewObjectStorage extends ScopelessPermission("View and search object storage")
-
   case object DownloadZipFromJob extends ScopelessPermission("Download ZIP file from Job")
-
   case object ManageSyllabusPlusLocations extends ScopelessPermission("Manage Syllabus+ location mappings")
 
   // Masquerade no longer scopeless, can only masquerade as users who have a Member record against scope
   case object Masquerade extends Permission("Masquerade as other users")
 
   object RolesAndPermissions {
-
     case object Create extends Permission("Add roles and permissions")
-
     case object Read extends Permission("View roles and permissions")
-
     case object Update extends Permission("Edit roles and permissions")
-
     case object Delete extends Permission("Remove roles and permissions")
-
   }
 
   object Department {
-
     case object ArrangeRoutesAndModules extends Permission("Sort routes and modules into sub-departments")
-
     case object ViewManualMembershipSummary extends Permission("View all assignments and small group sets with manually added students")
-
     case object ManageExtensionSettings extends Permission("Manage extension settings")
-
     case object ManageDisplaySettings extends Permission("Manage display settings")
-
     case object ManageNotificationSettings extends Permission("Manage notification settings")
-
     case object ManageMarkingDescriptors extends Permission("Manage marking descriptors")
-
     case object DownloadFeedbackReport extends Permission("Generate a feedback report")
-
     case object ManageProfiles extends Permission("Manage student profiles")
-
     case object Manage extends Permission("Manage sub-departments")
-
     case object Reports extends Permission("Generate reports")
-
     case object ExamGrids extends Permission("Generate exam grids")
-
   }
 
   object Module {
-
     // We don't Read a module, we ManageAssignments on it
     case object Administer extends Permission("Administer")
-
     case object ManageAssignments extends Permission("Manage assignments")
-
     case object ManageSmallGroups extends Permission("Manage small groups")
-
     case object Create extends Permission("Add a module")
-
     case object Update extends Permission("Edit a module")
-
     case object Delete extends Permission("Remove a module")
-
     case object ViewTimetable extends Permission("View a module's timetable")
-
   }
 
   object Route {
-
     case object Administer extends Permission("Administer")
-
     case object Manage extends Permission("Manage routes")
-
   }
 
   object Assignment {
-
     case object ImportFromExternalSystem extends Permission("Import assignments from SITS")
-
     case object Archive extends Permission("Archive an assignment")
-
     case object MarkOnBehalf extends Permission("Mark submissions on behalf of a marker")
-
     case object Create extends Permission("Add an assignment")
-
     case object Read extends Permission("View an assignment's settings")
-
     case object Update extends Permission("Edit an assignment")
-
     case object Delete extends Permission("Delete an assignment")
-
   }
 
   object Submission {
-
     case object ViewPlagiarismStatus extends Permission("View plagiarism status for a coursework submission")
-
     case object ManagePlagiarismStatus extends Permission("Manage a coursework submission's plagiarism status")
-
     case object CheckForPlagiarism extends Permission("Check a coursework submission for plagiarism")
-
     case object SendReceipt extends Permission("Send a receipt for a coursework submission")
-
     case object ReleaseForMarking extends Permission("Release a coursework submission for marking")
-
     case object ViewUrkundPlagiarismStatus extends Permission("View Urkund plagiarism status for a coursework submission")
-
     case object Create extends Permission("Add a coursework submission")
-
     case object Read extends Permission("View a coursework submission")
-
     case object Update extends Permission("Edit a coursework submission")
-
     case object Delete extends Permission("Remove a coursework submission")
-
     case object CreateOnBehalfOf extends Permission("Add a coursework submission on behalf of another member")
-
   }
 
   object AssignmentFeedback {
-
     case object Publish extends Permission("Release feedback to a student")
-
     case object UnPublish extends Permission("Unpublish a students feedback")
-
     case object Rate extends Permission("Rate feedback received")
-
     case object Manage extends Permission("Manage feedback")
-
     case object Read extends Permission("View feedback")
-
     case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
-
   }
 
   object AssignmentMarkerFeedback {
-
     case object Manage extends Permission("Manage marker feedback")
-
     case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
-
   }
 
   object ExamFeedback {
-
     case object Manage extends Permission("Manage feedback")
-
     case object Read extends Permission("View feedback")
-
     case object DownloadMarksTemplate extends Permission("Download a marks template for all marks")
-
   }
 
   object ExamMarkerFeedback {
-
     case object Manage extends Permission("Manage marker feedback")
-
     case object DownloadMarksTemplate extends Permission("Download a marks template for own marks")
-
   }
 
   object Marks {
-
     case object MarksManagement extends ScopelessPermission("Marks management across all departments")
-
     case object UploadToSits extends ScopelessPermission("Upload marks to SITS")
-
   }
 
   object Extension {
-
     case object MakeRequest extends Permission("Make an extension request")
-
     case object Create extends Permission("Create an extension for a student")
-
     case object Read extends Permission("View extensions and extension requests")
-
     case object Update extends Permission("Edit an extension")
-
     case object Delete extends Permission("Remove an extension")
-
   }
 
   object FeedbackTemplate {
-
     case object Read extends Permission("View a feedback template")
-
     case object Manage extends Permission("Manage feedback templates")
-
   }
 
   object MarkingWorkflow {
-
     case object Read extends Permission("View a marking workflow")
-
     case object Manage extends Permission("Manage marking workflows")
-
   }
 
   object Profiles {
-
     case object Search extends ScopelessPermission("Search student profiles")
-
     case object ViewSearchResults extends Permission("View profile search results")
 
     object Read {
-
       case object Core extends Permission("View a member's name, Warwick email, job title and University ID")
 
       // a hardcoded check in ViewProfileCommand stops users seeing staff profiles for different departments - this allows us to bypass that check
       case object CoreCrossDepartment extends Permission("View staff profiles for any department")
-
       case object CoreStale extends Permission("View profiles of stale members")
-
       case object Photo extends Permission("View a member's photo")
 
       /* We can split these back into DateOfBirth, Nationality and HomeEmail if any role requires a subset */
       case object PrivateDetails extends Permission("View a member's date of birth, nationality, and alternative email address")
-
       case object NextOfKin extends Permission("View a member's next of kin")
-
       case object HomeAndTermTimeAddresses extends Permission("View a member's home and term-time addresses")
-
       case object TelephoneNumber extends Permission("View a member's telephone number")
-
       case object MobileNumber extends Permission("View a member's mobile number")
-
       case object Usercode extends Permission("View a member's usercode")
-
       case object SmallGroups extends Permission("View a member's small groups")
-
       case object Coursework extends Permission("View a member's coursework")
-
       case object Timetable extends Permission("View a member's personal timetable")
-
       case object TimetablePrivateFeed extends Permission("View a member's private timetable feed")
-
       case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
-
       case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
-
       case object Disability extends Permission("View a member's reported disability")
-
       case object AccreditedPriorLearning extends Permission("View a student's accredited prior learning")
 
       object StudentCourseDetails {
-
         case object Core extends Permission("View a student's basic course, route and department details")
-
         case object Status extends Permission("View a student's enrolment and study status")
-
       }
 
       case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType])
         extends SelectorPermission(relationshipType, "View a member's students")
 
       object ModuleRegistration {
-
         case object Core extends Permission("View a student's module registrations")
-
         case object Results extends Permission("View a student's module results")
-
       }
-
     }
 
     object StudentRelationship {
-
       case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
         extends SelectorPermission(relationshipType, "View a student relationship")
 
       case class Manage(relationshipType: PermissionsSelector[StudentRelationshipType])
         extends SelectorPermission(relationshipType, "Manage student relationships")
-
     }
 
     object MeetingRecord {
-
       case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
         extends SelectorPermission(relationshipType, "View a meeting record")
 
@@ -440,128 +323,80 @@ object Permissions {
         extends SelectorPermission(relationshipType, "Manage meeting records")
 
       case object Approve extends Permission("Approve a meeting record")
-
     }
 
     object ScheduledMeetingRecord {
-
       case class Manage(relationshipType: PermissionsSelector[StudentRelationshipType])
         extends SelectorPermission(relationshipType, "Manage scheduled meeting records")
 
       case object Confirm extends Permission("Confirm whether a scheduled meeting record took place")
-
     }
 
   }
 
   object SmallGroups {
-
     case object Archive extends Permission("Archive small groups")
-
     case object Create extends Permission("Create small groups")
-
     case object Read extends Permission("View small groups")
-
     case object ReadMembership extends Permission("View small group membership")
-
     case object Update extends Permission("Edit small groups")
-
     case object Delete extends Permission("Delete small groups")
-
     case object Allocate extends Permission("Allocate students to small groups")
-
     case object AllocateSelf extends Permission("Allocate the current user to a small group")
-
     case object ImportFromExternalSystem extends Permission("Import small groups from Syllabus+")
-
     case object UpdateMembership extends ScopelessPermission("Update department small group membership")
-
   }
 
   object SmallGroupEvents {
-
     case object Register extends Permission("Record attendance on small group events")
-
     case object ViewRegister extends Permission("View attendance at small group events")
-
   }
 
   object UserSettings {
-
     case object Update extends Permission("Edit user settings")
-
   }
 
   object MonitoringPoints {
-
     case object Manage extends Permission("Manage monitoring points")
-
     case object View extends Permission("View monitoring points")
-
     case object Record extends Permission("Record monitoring points")
-
+    case object OverwriteReported extends Permission("Overwrite monitoring points that have been reported")
     case object Report extends Permission("Report monitoring points")
-
     case object Export extends ScopelessPermission("Export monitoring points to SITS")
-
     case object UpdateMembership extends ScopelessPermission("Update attendance monitoring scheme membership")
-
   }
 
   object MonitoringPointTemplates {
-
     case object View extends ScopelessPermission("View monitoring point templates")
-
     case object Manage extends ScopelessPermission("Manage monitoring point templates")
-
   }
 
   object StudentRelationshipType {
-
     case object Read extends ScopelessPermission("View student relationship types")
-
     case object Manage extends ScopelessPermission("Manage student relationship types")
-
   }
 
   object MemberNotes {
-
     case object Read extends Permission("View member notes")
-
     case object ReadMetadata extends Permission("View metadata on member notes")
-
     case object Create extends Permission("Create member notes")
-
     case object Update extends Permission("Edit member notes")
-
     case object Delete extends Permission("Delete member notes")
-
   }
 
   object Notification {
-
     case object Dismiss extends Permission("Dismiss and restore notifications")
-
   }
 
   object Timetabling {
-
     case object ViewDraft extends Permission("View draft releases of the timetable")
-
     case object Checker extends ScopelessPermission("View timetable feeds for students")
-
   }
 
   object MitigatingCircumstancesSubmission {
-
     case object Modify extends Permission("Create and modify mitigating circumstances submissions")
-
     case object Manage extends Permission("List, create, update and delete mitigating circumstances submissions and associated messages.")
-
     case object Read extends Permission("View the details and messages associated with a mitigating circumstances submission")
-
     case object ViewGrading extends Permission("View the grading of an existing mitigating circumstances submission")
-
   }
-
 }

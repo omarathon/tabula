@@ -8,9 +8,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.IssueType.{Employment, IndustrialAction}
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
@@ -21,19 +20,6 @@ import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfile
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, ItemNotFoundException}
 
 import scala.collection.immutable.ListMap
-
-object MitCircsSubmissionController {
-
-  def validIssueTypes(student: StudentMember): Seq[IssueType] = {
-    // TODO - Make it possible for TQ to enable this (we could also just manage this in code)
-    val invalidTypes =
-      if (student.mostSignificantCourse.latestStudentCourseYearDetails.modeOfAttendance.code == "P") Seq(IndustrialAction)
-      else Seq(Employment, IndustrialAction)
-
-    IssueType.values.filterNot(invalidTypes.contains)
-  }
-
-}
 
 abstract class AbstractMitCircsFormController extends AbstractViewProfileController {
 
@@ -77,7 +63,7 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember): Mav = {
     Mav("mitcircs/submissions/form", Map(
-      "issueTypes" -> MitCircsSubmissionController.validIssueTypes(student),
+      "issueTypes" -> IssueType.validIssueTypes(student),
       "possibleContacts" -> MitCircsContact.values,
       "department" -> student.homeDepartment.subDepartmentsContaining(student).find(_.enableMitCircs),
     )).crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)

@@ -61,7 +61,7 @@ object UpstreamAffectedAssessment {
 
 object MitCircsAffectedAssessmentsCommand {
   type Result = Seq[UpstreamAffectedAssessment]
-  type Command = Appliable[Result] with MitCircsAffectedAssessmentsState with SelfValidating
+  type Command = Appliable[Result] with MitCircsAffectedAssessmentsState with MitCircsAffectedAssessmentsRequest with SelfValidating
 
   def apply(student: StudentMember): Command =
     new MitCircsAffectedAssessmentsCommandInternal(student)

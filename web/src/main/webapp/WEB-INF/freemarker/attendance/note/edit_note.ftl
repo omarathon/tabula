@@ -88,7 +88,7 @@
           <div class="form-actions">
             <div class="pull-right">
               <input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-              <a class="btn" href="${returnTo}">Cancel</a>
+              <a class="btn btn-default" href="${returnTo}">Cancel</a>
             </div>
           </div>
 
