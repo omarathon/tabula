@@ -46,10 +46,10 @@ abstract class StudentOverwriteReportedCommandInternal(val student: StudentMembe
           val newCheckpoint = new AttendanceMonitoringCheckpoint
           newCheckpoint.student = student
           newCheckpoint.point = point
-          newCheckpoint.autoCreated = false
           newCheckpoint
         }
 
+        cp.autoCreated = false
         cp.setStateDangerously(state)
         cp.updatedBy = user.apparentId
         cp.updatedDate = DateTime.now
