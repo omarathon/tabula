@@ -121,6 +121,7 @@ class MitCircsDetails {
       // Inject a modal into the body that will hold the content
       const $modalTitle = $('<h4 />').addClass('modal-title').attr('id', 'mitcircs-details-attachment-modal-label');
       const $modalBody = $('<div />').addClass('modal-body');
+      const $newTabLink = $('<a />').addClass('btn btn-default').attr('target', '_blank').text('Open in new tab');
 
       const $modal = $('<div />').addClass('modal fade').attr({
         id: 'mitcircs-details-attachment-modal',
@@ -143,10 +144,13 @@ class MitCircsDetails {
                   ),
                 $modalBody,
                 $('<div />').addClass('modal-footer')
-                  .append($('<button />').addClass('btn btn-default').attr({
-                    type: 'button',
-                    'data-dismiss': 'modal',
-                  }).text('Close')),
+                  .append(
+                    $newTabLink,
+                    $('<button />').addClass('btn btn-default').attr({
+                      type: 'button',
+                      'data-dismiss': 'modal',
+                    }).text('Close'),
+                  ),
               ),
           ),
       );
@@ -155,6 +159,7 @@ class MitCircsDetails {
       this.$attachmentsModal = $modal;
       this.$attachmentsModalTitle = $modalTitle;
       this.$attachmentsModalBody = $modalBody;
+      this.$attachmentsModalNewTabLink = $newTabLink;
       return $modal;
     };
 
@@ -165,10 +170,11 @@ class MitCircsDetails {
       const $modal = this.$attachmentsModal || injectModal();
       const $modalTitle = this.$attachmentsModalTitle;
       const $modalBody = this.$attachmentsModalBody;
+      const $newTabLink = this.$attachmentsModalNewTabLink;
 
       const $a = $(e.target);
-      $modalTitle.text($a.text());
 
+      $modalTitle.text($a.text());
       $modalBody.empty().append(
         $('<iframe />').attr({
           src: $a.attr('href'),
@@ -178,6 +184,7 @@ class MitCircsDetails {
           seamless: 'seamless',
         }),
       );
+      $newTabLink.attr('href', $a.attr('href'));
 
       $modal.modal().modal('show');
     });
