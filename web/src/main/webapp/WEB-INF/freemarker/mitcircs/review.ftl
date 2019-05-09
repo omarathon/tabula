@@ -116,7 +116,7 @@
     </#if>
     <#if submission.sensitiveEvidenceComments?has_content>
       <@components.section "Sensitive evidence">
-        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName}</p>
+        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.pendingEvidenceDue includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>
