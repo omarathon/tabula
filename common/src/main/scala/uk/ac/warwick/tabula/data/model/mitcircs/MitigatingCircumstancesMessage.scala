@@ -10,7 +10,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 @Entity
 @Access(AccessType.FIELD)
@@ -50,18 +53,19 @@ class MitigatingCircumstancesMessage extends GeneratedId
 
   @OneToMany(mappedBy = "mitigatingCircumstancesMessage", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  var attachments: JSet[FileAttachment] = JHashSet()
+  private val _attachments: JSet[FileAttachment] = JHashSet()
+  def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
 
   def addAttachment(attachment: FileAttachment) {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.mitigatingCircumstancesMessage = this
-    attachments.add(attachment)
+    _attachments.add(attachment)
   }
 
   def removeAttachment(attachment: FileAttachment): Boolean = {
     attachment.mitigatingCircumstancesMessage = null
-    attachments.remove(attachment)
+    _attachments.remove(attachment)
   }
 
   override def toStringProps: Seq[(String, Any)] = Seq(

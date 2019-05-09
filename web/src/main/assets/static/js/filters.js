@@ -101,7 +101,7 @@ $.fn.enableFilters = function (options) {
       }
 
       // grey out results while loading
-      $results.addClass('loading');
+      $results.addClass('loading').html('<i class="fal fa-spinner fa-spin"></i> Loading&hellip;');
 
       $form.data('request', $.get(url + '&_ts=' + new Date().getTime(), function (data) {
         $(document).trigger('tabula.beforeFilterResultsChanged');

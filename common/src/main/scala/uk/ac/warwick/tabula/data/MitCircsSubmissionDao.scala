@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.data
 
+import org.hibernate.FlushMode
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
-import org.hibernate.{FetchMode, FlushMode}
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -26,6 +26,7 @@ trait MitCircsSubmissionDao {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
+  def getMessageById(id: String): Option[MitigatingCircumstancesMessage]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
   def getNoteById(id: String): Option[MitigatingCircumstancesNote]
@@ -131,6 +132,8 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
 
     c.distinct.seq.sortBy(_.lastModified).reverse
   }
+
+  override def getMessageById(id: String): Option[MitigatingCircumstancesMessage] = getById[MitigatingCircumstancesMessage](id)
 
   override def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = {
     session.saveOrUpdate(message)
