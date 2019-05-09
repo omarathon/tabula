@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
@@ -26,9 +26,11 @@ class MitCircsSensitiveEvidenceCommandInternal(val submission: MitigatingCircums
   self: MitCircsSubmissionServiceComponent =>
 
   sensitiveEvidenceComments = submission.sensitiveEvidenceComments
+  sensitiveEvidenceSeenOn = Option(submission.sensitiveEvidenceSeenOn).getOrElse(LocalDate.now)
 
   def applyInternal(): MitigatingCircumstancesSubmission = {
     submission.sensitiveEvidenceComments = sensitiveEvidenceComments
+    submission.sensitiveEvidenceSeenOn = sensitiveEvidenceSeenOn
     submission.sensitiveEvidenceSeenBy = currentUser
     submission.lastModifiedBy = currentUser
     submission.lastModified = DateTime.now()
@@ -51,6 +53,9 @@ trait MitCircsSensitiveEvidenceValidation extends SelfValidating {
     if(!sensitiveEvidenceComments.hasText) {
       errors.rejectValue("sensitiveEvidenceComments", "mitigatingCircumstances.sensitiveEvidenceComments.required")
     }
+    if(sensitiveEvidenceSeenOn == null) {
+      errors.rejectValue("sensitiveEvidenceSeenOn", "mitigatingCircumstances.sensitiveEvidenceSeenOn.required")
+    }
   }
 }
 
@@ -66,4 +71,5 @@ trait MitCircsSensitiveEvidenceState {
   val submission: MitigatingCircumstancesSubmission
   val currentUser: User
   var sensitiveEvidenceComments: String = _
+  var sensitiveEvidenceSeenOn: LocalDate = _
 }
