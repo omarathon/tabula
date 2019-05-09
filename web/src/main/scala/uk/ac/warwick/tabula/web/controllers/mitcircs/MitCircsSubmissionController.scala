@@ -104,7 +104,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
     user: CurrentUser
   ): EditCommand = {
     mustBeLinked(submission, student)
-    if (!submission.isEditable) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it is not currently editable")
+    if (!submission.isEditable(user.apparentUser)) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as it is not currently editable")
     EditMitCircsSubmissionCommand(submission, user.apparentUser)
   }
 

@@ -140,6 +140,19 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   var pendingEvidenceDue: LocalDate = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "sensitiveEvidenceComments")
+  private var encryptedSensitiveEvidenceComments: CharSequence = _
+  def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
+  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
+
+  def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var sensitiveEvidenceSeenBy: User = _
+
+  var sensitiveEvidenceSeenOn: LocalDate = _
+
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
 
@@ -204,10 +217,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
-  def isEditable: Boolean =
-    state == MitigatingCircumstancesSubmissionState.Draft ||
+  def isEditable(user: User): Boolean = {
     state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
-    state == MitigatingCircumstancesSubmissionState.Submitted
+    (user.getWarwickId == student.universityId && (
+      state == MitigatingCircumstancesSubmissionState.Draft ||
+      state == MitigatingCircumstancesSubmissionState.Submitted
+    ))
+  }
 
   def hasEvidence: Boolean = attachments.nonEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null

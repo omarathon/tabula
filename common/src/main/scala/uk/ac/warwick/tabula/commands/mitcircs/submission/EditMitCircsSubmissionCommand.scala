@@ -37,7 +37,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
 
-  require(submission.isEditable) // Guarded at controller
+  require(submission.isEditable(currentUser)) // Guarded at controller
 
   startDate = submission.startDate
   endDate = submission.endDate

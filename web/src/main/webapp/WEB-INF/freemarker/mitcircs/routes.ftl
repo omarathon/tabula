@@ -17,18 +17,19 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 <#macro studenthome student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs"/></#macro>
 
-<#macro newsubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
-<#macro editsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}" /></#macro>
-<#macro pendingevidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
+<#macro newSubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
+<#macro editSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}" /></#macro>
+<#macro pendingEvidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
 
 <#-- Helper for new/edit -->
 <#macro affectedAssessments student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/affected-assessments" /></#macro>
 
 <#-- View submission (as the student) -->
-<#macro viewsubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key?c}" /></#macro>
+<#macro viewSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/view/${submission.key?c}" /></#macro>
 
 <#-- Review submission (as the MCO) -->
 <#macro reviewSubmission submission><@_u page = "/submission/${submission.key?c}" /></#macro>
+<#macro sensitiveEvidence submission><@_u page="/submission/${submission.key?c}/sensitiveevidence" /></#macro>
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
 <#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>

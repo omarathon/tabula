@@ -68,7 +68,7 @@
           </#if>
 
           <#if submission??>
-            <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewsubmission submission />">Cancel</a>
+            <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewSubmission submission />">Cancel</a>
           <#else>
             <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.studenthome student />">Cancel</a>
           </#if>
