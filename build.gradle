@@ -202,6 +202,6 @@ task generateEncryptionKey() {
 }
 
 wrapper {
-  gradleVersion = '5.2'
+  gradleVersion = '5.4.1'
   distributionType = 'ALL'
 }
