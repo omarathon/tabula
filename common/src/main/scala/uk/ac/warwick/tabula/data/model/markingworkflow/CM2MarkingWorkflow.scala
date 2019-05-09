@@ -52,20 +52,20 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
   @BatchSize(size = 200)
   var stageMarkers: JList[StageMarkers] = JArrayList()
 
-  def markers: Map[MarkingWorkflowStage, Seq[Marker]] =
-    stageMarkers.asScala.map(sm => sm.stage -> sm.markers.users.toSeq.sorted).toMap
+  def markers: ListMap[MarkingWorkflowStage, Seq[Marker]] =
+    ListMap(stageMarkers.asScala.map(sm => sm.stage -> sm.markers.users.toSeq.sorted).sortBy { case (stage, _) => stage.order }: _*)
 
   def allMarkers: SortedSet[Marker] = SortedSet(markers.values.flatten.toSeq.distinct: _ *)
 
   // If two stages have the same roleName only keep the earliest stage.
-  def markersByRole: Map[String, Seq[Marker]] = {
-    // filter out stages that share markers - we only want each set of markers once
+  def markersByRole: ListMap[String, Seq[Marker]] = {
+    // filter out stages that share markers do avoid dupe marker lists - stages with the same roleName share markers
     // using foldLeft is important here. we want to keep the earliest of the stages that shares a marker
-    val unsorted = markers.foldLeft(Map.empty[MarkingWorkflowStage, Seq[Marker]]) { case (acc, (s, m)) =>
+    val filtered = markers.foldLeft(ListMap.empty[MarkingWorkflowStage, Seq[Marker]]) { case (acc, (s, m)) =>
       if (acc.keys.exists(stage => stage.roleName == s.roleName)) acc else acc + (s -> m)
     }
-    // sort by stage and insert into a list map to preserve the order
-    ListMap(unsorted.toSeq.sortBy { case (stage, _) => stage.order }: _*).map { case (k, v) => k.roleName -> v }
+
+    filtered.map { case (k, v) => k.roleName -> v }
   }
 
   @Column(name = "is_reusable", nullable = false)
