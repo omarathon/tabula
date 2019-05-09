@@ -39,7 +39,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var key: JLong = _
 
   @Column(nullable = false)
-  var createdDate: DateTime = DateTime.now()
+  val createdDate: DateTime = DateTime.now()
 
   @Column(name = "lastModified", nullable = false)
   private var _lastModified: DateTime = DateTime.now()
@@ -172,6 +172,27 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @BatchSize(size = 200)
   private val _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
   def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
+
+  @Column(name = "lastViewedByStudent")
+  private var _lastViewedByStudent: DateTime = _
+  def lastViewedByStudent: Option[DateTime] = Option(_lastViewedByStudent)
+  def lastViewedByStudent_=(dt: DateTime): Unit = _lastViewedByStudent = dt
+
+  @Column(name = "lastViewedByOfficer")
+  private var _lastViewedByOfficer: DateTime = _
+  def lastViewedByOfficer: Option[DateTime] = Option(_lastViewedByOfficer)
+  def lastViewedByOfficer_=(dt: DateTime): Unit = _lastViewedByOfficer = dt
+
+  def isUnreadByOfficer: Boolean = transactional(readOnly = true) {
+    // Doesn't include notes, whereas normally lastModified does, and only includes student-sent messages
+    val lastModified =
+      Seq(
+        Option(_lastModified),
+        messages.filter(_.studentSent).sortBy(_.createdDate).lastOption.map(_.createdDate),
+      ).flatten.max
+
+    lastViewedByOfficer.forall(_.isBefore(lastModified))
+  }
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")

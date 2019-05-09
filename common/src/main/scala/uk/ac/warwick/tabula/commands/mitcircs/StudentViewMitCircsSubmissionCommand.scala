@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.commands.mitcircs
 
-import uk.ac.warwick.tabula.commands.mitcircs.StudentViewMitCircsSubmissionCommand._
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.StudentViewMitCircsSubmissionCommand._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object StudentViewMitCircsSubmissionCommand {
@@ -16,13 +19,18 @@ object StudentViewMitCircsSubmissionCommand {
       with ComposableCommand[Result]
       with StudentViewMitCircsSubmissionPermissions
       with StudentViewMitCircsSubmissionDescription
+      with AutowiringMitCircsSubmissionServiceComponent
 }
 
 abstract class StudentViewMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission)
   extends CommandInternal[Result]
     with StudentViewMitCircsSubmissionState {
+  self: MitCircsSubmissionServiceComponent =>
 
-  override def applyInternal(): MitigatingCircumstancesSubmission = submission
+  override def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
+    submission.lastViewedByStudent = DateTime.now
+    submission
+  }
 }
 
 trait StudentViewMitCircsSubmissionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
