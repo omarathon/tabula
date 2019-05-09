@@ -33,7 +33,12 @@
             </#if>
           </td>
           <td><@components.stage_progress_bar info.stages?values /></td>
-          <td><@fmt.date date=submission.lastModified /></td>
+          <td>
+            <@fmt.date date=submission.lastModified />
+            <#if submission.unreadByOfficer>
+              <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
+            </#if>
+          </td>
         </tr>
       </#list>
       <tbody>

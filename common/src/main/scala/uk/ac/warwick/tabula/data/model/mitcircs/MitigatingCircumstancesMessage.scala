@@ -68,6 +68,8 @@ class MitigatingCircumstancesMessage extends GeneratedId
     _attachments.remove(attachment)
   }
 
+  def isUnreadByStudent: Boolean = !studentSent && submission.lastViewedByStudent.forall(_.isBefore(createdDate))
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
     "submission" -> submission.key,

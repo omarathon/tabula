@@ -166,6 +166,8 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: MitCircsSubmissionState =>
 
+  override lazy val eventName: String = "CreateMitCircsSubmission"
+
   def describe(d: Description) {
     d.member(student)
   }

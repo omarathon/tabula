@@ -61,6 +61,8 @@ trait SendMessagePermissions extends RequiresPermissionsChecking with Permission
 trait SendMessageDescription extends Describable[MitigatingCircumstancesMessage] {
   self: SendMessageState =>
 
+  override lazy val eventName: String = "SendMessage"
+
   def describe(d: Description) {
     d.mitigatingCircumstancesSubmission(submission)
   }

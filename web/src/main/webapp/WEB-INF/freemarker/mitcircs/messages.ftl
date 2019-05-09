@@ -37,6 +37,17 @@
                 </div>
               </#if>
             </div>
+            <#if !studentView && !message.studentSent>
+              <#if message.unreadByStudent>
+                <div class="message-thread__body__message__read-indicator message-thread__body__message__read-indicator--unread">
+                  <i title="Message sent" class="fal fa-check use-tooltip"></i>
+                </div>
+              <#else>
+                <div class="message-thread__body__message__read-indicator message-thread__body__message__read-indicator--read">
+                  <i title="Message read" class="fal fa-check-double use-tooltip"></i>
+                </div>
+              </#if>
+            </#if>
           </div>
         </#list>
       </div>

@@ -65,6 +65,8 @@ trait AddMitCircsSubmissionNotePermissions extends RequiresPermissionsChecking w
 trait AddMitCircsSubmissionNoteDescription extends Describable[Result] {
   self: AddMitCircsSubmissionNoteState =>
 
+  override lazy val eventName: String = "AddMitCircsSubmissionNote"
+
   override def describe(d: Description): Unit =
     d.mitigatingCircumstancesSubmission(submission)
 }

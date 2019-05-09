@@ -115,6 +115,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: EditMitCircsSubmissionState =>
 
+  override lazy val eventName: String = "EditMitCircsSubmission"
+
   def describe(d: Description) {
     d.member(student)
     d.mitigatingCircumstancesSubmission(submission)
