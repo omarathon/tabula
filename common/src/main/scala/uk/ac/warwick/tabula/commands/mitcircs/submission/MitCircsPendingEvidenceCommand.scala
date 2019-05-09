@@ -81,6 +81,8 @@ trait MitCircsPendingEvidenceValidation extends SelfValidating {
 trait MitCircsPendingEvidenceDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: MitCircsPendingEvidenceState =>
 
+  override lazy val eventName: String = "MitCircsPendingEvidence"
+
   def describe(d: Description) {
     d.mitigatingCircumstancesSubmission(submission)
   }

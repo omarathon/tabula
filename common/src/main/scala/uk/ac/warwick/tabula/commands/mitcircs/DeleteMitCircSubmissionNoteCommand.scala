@@ -54,6 +54,8 @@ trait DeleteMitCircsSubmissionNotePermissions extends RequiresPermissionsCheckin
 trait DeleteMitCircsSubmissionNoteDescription extends Describable[Result] {
   self: DeleteMitCircsSubmissionNoteState =>
 
+  override lazy val eventName: String = "DeleteMitCircsSubmissionNote"
+
   override def describe(d: Description): Unit =
     d.mitigatingCircumstancesSubmission(submission)
 }
