@@ -7,7 +7,7 @@
 
     <@mitcirc.question_section
       question = "Provide additional information where the student does not want to submit highly sensitive information."
-      hint="Confirm that you have seen supporting evidence relivent to this mitigating circumstances submission that was too sensitive to be submitted by the student."
+      hint="Confirm that you have seen supporting evidence relevant to this mitigating circumstances submission that was too sensitive to be submitted by the student."
       cssClass = "form-horizontal"
       showNumber = false
     >
