@@ -132,30 +132,32 @@ Macros for customised form elements, containers and more complex pickers.
             </#if>
           </div>
 
-          <small class="very-subtle help-block">
-            <#if customHelp?has_content>
-              ${customHelp}
-            <#else>
-              <#if required>
-                <#if !multiple || max=1>
-                  You must attach one file.
-                <#else>
-                  You must attach at least one file. Up to <@fmt.p max "attachment" /> allowed.
-                </#if>
+          <#if !(customHelp?has_content && !customHelp?trim?has_content)>
+            <small class="very-subtle help-block">
+              <#if customHelp?has_content>
+                ${customHelp}
               <#else>
-                <#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+                <#if required>
+                  <#if !multiple || max=1>
+                    You must attach one file.
+                  <#else>
+                    You must attach at least one file. Up to <@fmt.p max "attachment" /> allowed.
+                  </#if>
+                <#else>
+                  <#if !multiple || max=1>One attachment allowed.<#else>Up to <@fmt.p max "attachment" /> allowed.</#if>
+                </#if>
+                <#if types?size gt 0>
+                  File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
+                </#if>
+                <#if maxFileSize?has_content>
+                  Maximum file size per file: ${maxFileSize}MB
+                </#if>
+                <#if multiple && max!=1>
+                  <span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
+                </#if>
               </#if>
-              <#if types?size &gt; 0>
-                File types allowed: <#list types as type>${type}<#if type_has_next>, </#if></#list>.
-              </#if>
-              <#if maxFileSize?has_content>
-                Maximum file size per file: ${maxFileSize}MB
-              </#if>
-              <#if multiple && max!=1>
-                <span id="multifile-column-description" class="muted"><#include "/WEB-INF/freemarker/multiple_upload_help.ftl" /></span>
-              </#if>
-            </#if>
-          </small>
+            </small>
+          </#if>
 
           <@errors path="${basename}.upload" />
           <@errors path="${basename}.attached" />

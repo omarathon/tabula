@@ -31,10 +31,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#-- Review submission (as the MCO) -->
 <#macro reviewSubmission submission><@_u page = "/submission/${submission.key?c}" /></#macro>
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
+<#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>
 
 <#-- These get posted to from both the view (as the student) and the review (as the MCO) -->
 <#macro messages submission><@_u page="/submission/${submission.key?c}/messages" /></#macro>
+<#macro renderMessageAttachment message file><@_u page="/submission/${message.submission.key?c}/messages/${message.id}/supporting-file/${file.name}" /></#macro>
 <#macro renderAttachment submission file><@_u page="/submission/${submission.key?c}/supporting-file/${file.name}" /></#macro>
 
 <#macro dummyDataGeneration department><@_u page="/admin/${department.code}/data-generation" /></#macro>

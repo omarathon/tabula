@@ -5,14 +5,14 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail "State">${submission.state.description}</@components.detail>
-        <@components.detail "Issue type"><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
-        <@components.detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
-        <@components.detail "End date">
+        <@components.detail label="State" condensed=true>${submission.state.description}</@components.detail>
+        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
+        <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
+        <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
         </@components.detail>
         <#if submission.relatedSubmission??>
-          <@components.detail "Related submission">
+          <@components.detail label="Related submission" condensed=true>
             <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
               MIT-${submission.relatedSubmission.key}
               <@components.enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
@@ -78,15 +78,7 @@
     </@components.section>
     <#if submission.attachments?has_content>
       <@components.section "Evidence">
-        <ul class="unstyled">
-          <#list submission.attachments as attachment>
-            <#assign url></#assign>
-            <li id="attachment-${attachment.id}" class="attachment">
-              <i class="fa fa-file-o"></i>
-              <a target="_blank" href="<@routes.mitcircs.renderAttachment submission attachment />"><#compress> ${attachment.name} </#compress></a>&nbsp;
-            </li>
-          </#list>
-        </ul>
+        <@components.attachments submission />
       </@components.section>
     </#if>
     <#if submission.evidencePending>

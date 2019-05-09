@@ -8,12 +8,12 @@ import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -161,18 +161,19 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  var attachments: JSet[FileAttachment] = JHashSet()
+  private val _attachments: JSet[FileAttachment] = JHashSet()
+  def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
 
   def addAttachment(attachment: FileAttachment) {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.mitigatingCircumstancesSubmission = this
-    attachments.add(attachment)
+    _attachments.add(attachment)
   }
 
   def removeAttachment(attachment: FileAttachment): Boolean = {
     attachment.mitigatingCircumstancesSubmission = null
-    attachments.remove(attachment)
+    _attachments.remove(attachment)
   }
 
   @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
@@ -224,7 +225,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     ))
   }
 
-  def hasEvidence: Boolean = !attachments.isEmpty
+  def hasEvidence: Boolean = attachments.nonEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null
 
   override def toStringProps: Seq[(String, Any)] = Seq(

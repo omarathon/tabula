@@ -3,7 +3,18 @@
   <@f.form id="mitCircsNoteForm" method="POST" modelAttribute="addCommand" class="dirty-check double-submit-protection" enctype="multipart/form-data">
     <div class="panel panel-default panel-form">
       <div class="panel-heading">
-        <button type="submit" class="btn btn-primary">Save</button>
+        <div class="pull-right form-inline">
+          <@bs3form.filewidget
+            basename="file"
+            labelText=""
+            types=[]
+            multiple=true
+            required=false
+            customHelp=" "
+          />
+
+          <button type="submit" class="btn btn-sm btn-primary">Save</button>
+        </div>
         <label class="control-label" for="text">Add a note</label>
       </div>
       <div class="panel-body">
@@ -38,6 +49,17 @@
       <div class="panel-body">
         <#noescape>${note.formattedText}</#noescape>
       </div>
+      <#if note.attachments?has_content>
+        <ul class="list-group">
+          <#list note.attachments as attachment>
+            <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+            <li id="attachment-${attachment.id}" class="list-group-item attachment">
+              <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+              <a href="<@routes.mitcircs.renderNoteAttachment note attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
+            </li>
+          </#list>
+        </ul>
+      </#if>
     </div>
   </#macro>
 
@@ -46,4 +68,18 @@
       <@render_note note />
     </#list>
   </div>
+
+  <script type="text/javascript">
+    jQuery(function($) {
+      // be sure to bind the confirm-submit handler before other handlers on submit buttons
+      $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message]', '.panel').on('click', function confirmBeforeSubmit(event) {
+        var $button = $(this);
+        // eslint-disable-next-line no-alert
+        if (!window.confirm($button.data('message'))) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      });
+    });
+  </script>
 </#escape>

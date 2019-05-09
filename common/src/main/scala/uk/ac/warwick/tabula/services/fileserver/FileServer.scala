@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.services.fileserver
 
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.apache.tika.detect.DefaultDetector
-import org.apache.tika.io.{IOUtils, TikaInputStream}
-import org.apache.tika.metadata.{HttpHeaders, Metadata, TikaMetadataKeys}
 import org.apache.tika.mime.{MediaType, MimeTypes}
 import org.joda.time.DateTime
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import uk.ac.warwick.tabula.helpers.MimeTypeDetector
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
@@ -20,33 +19,6 @@ class FileServer extends StreamsFiles with AutowiringFeaturesComponent {
     stream(file, Some(fileName))
 }
 
-private[fileserver] object FileServer {
-  private lazy val serveInlineMimeTypes: Set[MediaType] = Set(
-    "text/plain",
-    "application/pdf",
-    "application/postscript",
-    "image/*",
-    "audio/*",
-    "video/*",
-    "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-powerpoint",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "application/vnd.openxmlformats-officedocument.presentationml.slideshow",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/zip",
-    "application/rtf",
-    "text/calendar",
-    "message/rfc822"
-  ).map(MediaType.parse)
-
-  def isServeInline(mediaType: MediaType): Boolean =
-    serveInlineMimeTypes.exists { serveInline =>
-      serveInline == mediaType || (serveInline.getSubtype == "*" && serveInline.getType == mediaType.getType)
-    }
-}
-
 /**
   * Sets up the appropriate response headers and streams a renderable file
   *
@@ -55,38 +27,18 @@ private[fileserver] object FileServer {
 trait StreamsFiles {
   self: FeaturesComponent =>
 
-  /**
-    * Uses the magic bytes at the start of the file first, then the filename, then the supplied content type.
-    */
-  private val mimeTypeDetector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
-
   def stream(file: RenderableFile, fileName: Option[String] = None)(implicit request: HttpServletRequest, out: HttpServletResponse) {
-    val mimeType: MediaType = file.contentType match {
-      case "application/octet-stream" =>
-        // We store files in the object store as application/octet-stream but we can just infer from the filename
-        Option(file.byteSource).flatMap(bs => Option(bs.openStream())).map { inputStream =>
-          val is = TikaInputStream.get(inputStream)
-          try {
-            val metadata = new Metadata
-            metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, file.filename)
-            metadata.set(HttpHeaders.CONTENT_TYPE, file.contentType)
-
-            mimeTypeDetector.detect(is, metadata)
-          } finally {
-            IOUtils.closeQuietly(is)
-
-            // If we've detected a mime type, add XCTO so it's used
-            out.setHeader("X-Content-Type-Options", "nosniff")
-          }
-        }.getOrElse(MediaType.parse(file.contentType))
-
-      case _ => MediaType.parse(file.contentType)
+    val detectedMimeType = MimeTypeDetector.detect(file)
+    if (detectedMimeType.detected) {
+      // If we've detected a mime type, add XCTO so it's used
+      out.setHeader("X-Content-Type-Options", "nosniff")
     }
 
+    val mimeType: MediaType = detectedMimeType.mediaType
     out.setHeader("Content-Type", mimeType.toString)
 
     val builder = new StringBuilder
-    builder.append(if (FileServer.isServeInline(mimeType)) "inline" else "attachment")
+    builder.append(if (detectedMimeType.serveInline) "inline" else "attachment")
 
     file.suggestedFilename.orElse(fileName).orElse(Option(file.filename).filter(_.hasText)).foreach { filename =>
       builder.append("; ")

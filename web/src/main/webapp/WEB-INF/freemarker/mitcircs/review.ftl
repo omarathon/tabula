@@ -5,38 +5,38 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail "State">${submission.state.description}</@components.detail>
+        <@components.detail label="State" condensed=true>${submission.state.description}</@components.detail>
 
         <#-- Identity information about the student -->
         <#assign student = submission.student />
-        <@components.detail "Name">${student.fullName}</@components.detail>
-        <@components.detail "University ID">${student.universityId}</@components.detail>
-        <#if student.email??><@components.detail "Email">${student.email}</@components.detail></#if>
+        <@components.detail label="Name" condensed=true>${student.fullName}</@components.detail>
+        <@components.detail label="University ID" condensed=true>${student.universityId}</@components.detail>
+        <#if student.email??><@components.detail label="Email" condensed=true>${student.email}</@components.detail></#if>
 
         <#if student.mostSignificantCourseDetails??>
           <#assign studentCourseDetails = student.mostSignificantCourseDetails />
-          <@components.detail "Course">${studentCourseDetails.course.name}</@components.detail>
+          <@components.detail label="Course" condensed=true>${studentCourseDetails.course.name}</@components.detail>
 
           <#if studentCourseDetails.latestStudentCourseYearDetails??>
             <#assign studentCourseYearDetails = studentCourseDetails.latestStudentCourseYearDetails />
 
             <#if studentCourseYearDetails.yearOfStudy??>
-              <@components.detail "Year of study">${studentCourseYearDetails.yearOfStudy}</@components.detail>
+              <@components.detail label="Year of study" condensed=true>${studentCourseYearDetails.yearOfStudy}</@components.detail>
             </#if>
 
             <#if studentCourseYearDetails.modeOfAttendance??>
-              <@components.detail "Mode of study">${studentCourseYearDetails.modeOfAttendance.fullNameAliased}</@components.detail>
+              <@components.detail label="Mode of study" condensed=true>${studentCourseYearDetails.modeOfAttendance.fullNameAliased}</@components.detail>
             </#if>
           </#if>
         </#if>
 
-        <@components.detail "Issue type"><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
-        <@components.detail "Start date"><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
-        <@components.detail "End date">
+        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
+        <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
+        <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
         </@components.detail>
         <#if submission.relatedSubmission??>
-          <@components.detail "Related submission">
+          <@components.detail label="Related submission" condensed=true>
             <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
               MIT-${submission.relatedSubmission.key}
               <@components.enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
@@ -57,6 +57,7 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
+            <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
             <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
           </div>
         </div>
@@ -97,15 +98,7 @@
     </@components.section>
     <#if submission.attachments?has_content>
       <@components.section "Evidence">
-        <ul class="unstyled">
-          <#list submission.attachments as attachment>
-            <#assign url></#assign>
-            <li id="attachment-${attachment.id}" class="attachment">
-              <i class="fa fa-file-o"></i>
-              <a target="_blank" href="<@routes.mitcircs.renderAttachment submission attachment />"><#compress> ${attachment.name} </#compress></a>&nbsp;
-            </li>
-          </#list>
-        </ul>
+        <@components.attachments submission />
       </@components.section>
     </#if>
     <#if submission.evidencePending>
