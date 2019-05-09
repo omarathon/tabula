@@ -144,7 +144,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(name = "sensitiveEvidenceComments")
   private var encryptedSensitiveEvidenceComments: CharSequence = _
   def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
-  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = pendingEvidence
+  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
 
   def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
 
