@@ -94,7 +94,7 @@ class FileServerTest extends TestBase with Mockito {
     a.id = "123"
     a.objectStorageService = smartMock[ObjectStorageService]
 
-    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = "application/zip", fileHash = None))))
+    a.objectStorageService.fetch("123") returns Future.successful(RichByteSource.wrap(Files.asByteSource(tmpFile), Some(ObjectStorageService.Metadata(contentLength = content.length, contentType = MediaType.OCTET_STREAM.toString, fileHash = None))))
 
     val file = new RenderableAttachment(a)
 
@@ -102,7 +102,7 @@ class FileServerTest extends TestBase with Mockito {
 
     res.getContentLength() should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
-    res.getContentType() should be("application/zip")
+    res.getContentType() should be("text/plain")
     res.getHeader("Content-Disposition") should be("inline")
     res.getContentAsByteArray().length should be(0)
   }
@@ -126,7 +126,7 @@ class FileServerTest extends TestBase with Mockito {
     res.getContentLength() should be(content.length)
     res.getHeader("Content-Length") should be(content.length.toString)
     res.getContentType() should be("application/zip")
-    res.getHeader("Content-Disposition") should be("inline; filename=\"steven.zip\"") // zips are inline
+    res.getHeader("Content-Disposition") should be("attachment; filename=\"steven.zip\"")
     res.getContentAsByteArray().length should be(0)
   }
 
