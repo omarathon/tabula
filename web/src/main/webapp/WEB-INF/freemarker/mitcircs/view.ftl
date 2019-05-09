@@ -24,7 +24,7 @@
             <@components.enumListWithOther submission.contacts submission.contactOther!"" />
           </@components.detail>
         <#else>
-          <@components.detail "Reason for not disussing submission">
+          <@components.detail "Reason for not discussing submission">
             ${submission.noContactReason}
           </@components.detail>
         </#if>

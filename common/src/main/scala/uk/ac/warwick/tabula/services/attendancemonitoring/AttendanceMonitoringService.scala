@@ -56,6 +56,8 @@ trait AttendanceMonitoringService {
 
   def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint)
 
+  def deleteCheckpointDangerously(checkpoint: AttendanceMonitoringCheckpoint)
+
   def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate]
 
   def getTemplatePointById(id: String): Option[AttendanceMonitoringTemplatePoint]
@@ -216,6 +218,9 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
   def deleteTemplatePoint(point: AttendanceMonitoringTemplatePoint): Unit =
     attendanceMonitoringDao.delete(point)
+
+  def deleteCheckpointDangerously(checkpoint: AttendanceMonitoringCheckpoint): Unit =
+    attendanceMonitoringDao.removeCheckpoints(Seq(checkpoint))
 
   def getTemplateSchemeById(id: String): Option[AttendanceMonitoringTemplate] =
     attendanceMonitoringDao.getTemplateSchemeById(id)

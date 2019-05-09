@@ -1,7 +1,11 @@
 <#escape x as x?html>
 
   <div class="pull-right">
-    <a class="btn btn-default" href="https://exams.warwick.ac.uk/timetable/${member.universityId}.pdf">Download PDF</a>
+    <#if isSelf>
+      <a class="btn btn-default" href="https://exams.warwick.ac.uk/timetable/timetable.pdf">Download PDF</a>
+    <#else>
+      <a class="btn btn-default" href="https://exams.warwick.ac.uk/timetable/${member.universityId}.pdf">Download PDF</a>
+    </#if>
   </div>
 
   <h1 class="with-settings">Student examination timetable</h1>
@@ -27,15 +31,17 @@
           <tr>
             <th>Module</th>
             <th>Examination paper code and title</th>
-            <th>Sct</th>
+            <th>Section</th>
             <th>Length</th>
-            <th>RdTime</th>
-            <th>OpBook</th>
+            <th>Reading time</th>
+            <th>Open book</th>
             <th>Date</th>
             <th>Time</th>
             <#if showExtraTime>
-              <th>Extra time per hr</th></#if>
+              <th>Extra time per hr</th>
+            </#if>
             <th>Room</th>
+            <th>Seat</th>
           </tr>
           </thead>
           <tbody>
@@ -50,8 +56,10 @@
               <td><@fmt.date date=exam.startDateTime relative=false includeTime=false /></td>
               <td><@fmt.time exam.startDateTime.toLocalDateTime() /></td>
               <#if showExtraTime>
-                <td>${exam.extraTimePerHour!}</td></#if>
+                <td>${exam.extraTimePerHour!}</td>
+              </#if>
               <td>${exam.room}</td>
+              <td>${exam.seat!""}</td>
             </tr>
           </#list>
           </tbody>

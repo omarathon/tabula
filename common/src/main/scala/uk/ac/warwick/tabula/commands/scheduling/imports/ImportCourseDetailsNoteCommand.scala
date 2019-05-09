@@ -43,7 +43,7 @@ class ImportCourseDetailsNoteCommand(row: StudentCourseDetailsNoteRow) extends C
         studentCourseDetailsDao.getByScjCodeStaleOrFresh(scj)
       case SprMatch(spr) =>
         logger.debug(s"Found note for SPR - $spr")
-        studentCourseDetailsDao.getBySprCodeStaleOrFresh(spr).lastOption
+        studentCourseDetailsDao.getBySprCodeStaleOrFresh(spr).find(_.mostSignificant)
       case _ => None
     }
 

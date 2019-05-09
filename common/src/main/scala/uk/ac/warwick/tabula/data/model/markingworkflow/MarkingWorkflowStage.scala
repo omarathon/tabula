@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model.markingworkflow
 import java.sql.Types
 
 import org.hibernate.`type`.{StandardBasicTypes, StringType}
-import uk.ac.warwick.tabula.{CaseObjectEqualityFixes, WorkflowStageHealth}
-import uk.ac.warwick.tabula.WorkflowStageHealth._
+import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Marker
