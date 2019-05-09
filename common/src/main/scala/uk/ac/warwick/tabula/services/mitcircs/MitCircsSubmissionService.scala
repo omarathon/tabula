@@ -13,6 +13,7 @@ trait MitCircsSubmissionService {
   def saveOrUpdate(submission: MitigatingCircumstancesSubmission): MitigatingCircumstancesSubmission
   def submissionsForStudent(studentMember: StudentMember): Seq[MitigatingCircumstancesSubmission]
   def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission]
+  def getMessageById(id: String): Option[MitigatingCircumstancesMessage]
   def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage
   def messagesForSubmission(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesMessage]
   def getNoteById(id: String): Option[MitigatingCircumstancesNote]
@@ -42,6 +43,10 @@ abstract class AbstractMitCircsSubmissionService extends MitCircsSubmissionServi
 
   override def submissionsForDepartment(department: Department, studentRestrictions: Seq[ScalaRestriction], filter: MitigatingCircumstancesSubmissionFilter): Seq[MitigatingCircumstancesSubmission] = transactional(readOnly = true) {
     mitCircsSubmissionDao.submissionsForDepartment(department, studentRestrictions, filter)
+  }
+
+  override def getMessageById(id: String): Option[MitigatingCircumstancesMessage] = transactional(readOnly = true) {
+    mitCircsSubmissionDao.getMessageById(id)
   }
 
   override def create(message: MitigatingCircumstancesMessage): MitigatingCircumstancesMessage = transactional() {

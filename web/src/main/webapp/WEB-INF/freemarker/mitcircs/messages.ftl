@@ -27,9 +27,10 @@
                 <div class="message-thread__body__message__content__attachments">
                   <ul class="list-unstyled">
                     <#list message.attachments as attachment>
-                      <li>
-                        <i class="fal fa-paperclip"></i>
-                        <a href="">${attachment.name}</a>
+                      <#assign mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+                      <li class="attachment">
+                        <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+                        <a href="<@routes.mitcircs.renderMessageAttachment message attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>>${attachment.name}</a>
                       </li>
                     </#list>
                   </ul>

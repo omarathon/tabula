@@ -115,6 +115,72 @@ class MitCircsDetails {
         processData: false,
       });
     });
+
+    // Open attachments in a modal if they are serve-inline
+    const injectModal = () => {
+      // Inject a modal into the body that will hold the content
+      const $modalTitle = $('<h4 />').addClass('modal-title').attr('id', 'mitcircs-details-attachment-modal-label');
+      const $modalBody = $('<div />').addClass('modal-body');
+
+      const $modal = $('<div />').addClass('modal fade').attr({
+        id: 'mitcircs-details-attachment-modal',
+        tabindex: -1,
+        role: 'dialog',
+        'aria-labelledby': 'mitcircs-details-attachment-modal-label',
+      }).append(
+        $('<div />').addClass('modal-dialog modal-lg').attr('role', 'document')
+          .append(
+            $('<div />').addClass('modal-content')
+              .append(
+                $('<div />').addClass('modal-header')
+                  .append(
+                    $('<button />').addClass('close').attr({
+                      type: 'button',
+                      'data-dismiss': 'modal',
+                      'aria-label': 'Close',
+                    }).html('<span aria-hidden="true">&times;</span>'),
+                    $modalTitle,
+                  ),
+                $modalBody,
+                $('<div />').addClass('modal-footer')
+                  .append($('<button />').addClass('btn btn-default').attr({
+                    type: 'button',
+                    'data-dismiss': 'modal',
+                  }).text('Close')),
+              ),
+          ),
+      );
+
+      $modal.appendTo($('body'));
+      this.$attachmentsModal = $modal;
+      this.$attachmentsModalTitle = $modalTitle;
+      this.$attachmentsModalBody = $modalBody;
+      return $modal;
+    };
+
+    $details.on('click', '.attachment a[data-inline="true"]', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const $modal = this.$attachmentsModal || injectModal();
+      const $modalTitle = this.$attachmentsModalTitle;
+      const $modalBody = this.$attachmentsModalBody;
+
+      const $a = $(e.target);
+      $modalTitle.text($a.text());
+
+      $modalBody.empty().append(
+        $('<iframe />').attr({
+          src: $a.attr('href'),
+          scrolling: 'auto',
+          frameborder: 0,
+          allowtransparency: true,
+          seamless: 'seamless',
+        }),
+      );
+
+      $modal.modal().modal('show');
+    });
   }
 }
 
