@@ -11,30 +11,26 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
-import uk.ac.warwick.tabula.web.controllers.profiles.profile.AbstractViewProfileController
+import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
-@RequestMapping(value = Array("/profiles/view/{student}/personalcircs/mitcircs/sensitiveevidence/{submission}"))
-class MitCircsSensitiveEvidenceController extends AbstractViewProfileController {
+@RequestMapping(value = Array("/mitcircs/submission/{submission}/sensitiveevidence"))
+class MitCircsSensitiveEvidenceController extends BaseController {
 
   validatesSelf[SelfValidating]
   type Command = Appliable[MitigatingCircumstancesSubmission] with MitCircsSensitiveEvidenceState with SelfValidating
 
-  @ModelAttribute("command") def command(
-    @PathVariable submission: MitigatingCircumstancesSubmission,
-    @PathVariable student: StudentMember,
-    user: CurrentUser
-  ): Command = {
-    mustBeLinked(submission, student)
+  @ModelAttribute("command") def command(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): Command =
     MitCircsSensitiveEvidenceCommand(mandatory(submission), user.apparentUser)
-  }
 
   @RequestMapping
   def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    mustBeLinked(mandatory(submission), mandatory(student))
     Mav("mitcircs/submissions/sensitive_evidence")
-      .crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
+      .crumbs(
+        MitCircsBreadcrumbs.Admin.Home(submission.department),
+        MitCircsBreadcrumbs.Admin.Review(submission),
+        MitCircsBreadcrumbs.Admin.SensitiveEvidence(submission, active = true),
+      )
   }
 
   @RequestMapping(method = Array(POST))

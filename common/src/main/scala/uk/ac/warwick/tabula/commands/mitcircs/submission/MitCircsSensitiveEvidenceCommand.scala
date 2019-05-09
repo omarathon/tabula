@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-
 object MitCircsSensitiveEvidenceCommand {
   def apply(submission: MitigatingCircumstancesSubmission, currentUser: User) = new MitCircsSensitiveEvidenceCommandInternal(submission, currentUser)
     with ComposableCommand[MitigatingCircumstancesSubmission]

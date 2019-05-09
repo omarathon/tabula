@@ -20,7 +20,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro newSubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
 <#macro editSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}" /></#macro>
 <#macro pendingEvidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
-<#macro sensitiveEvidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/sensitiveevidence/${submission.key?c}" /></#macro>
 
 <#-- Helper for new/edit -->
 <#macro affectedAssessments student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/affected-assessments" /></#macro>
@@ -30,6 +29,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#-- Review submission (as the MCO) -->
 <#macro reviewSubmission submission><@_u page = "/submission/${submission.key?c}" /></#macro>
+<#macro sensitiveEvidence submission><@_u page="/submission/${submission.key?c}/sensitiveevidence" /></#macro>
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
 <#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>
