@@ -59,13 +59,16 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 
   // If two stages have the same roleName only keep the earliest stage.
   def markersByRole: Map[String, Seq[Marker]] = {
-    // filter out stages that share markers - we only want each set of markers once
+    // sort by stage and insert into a list map to preserve the order
+    val sorted = ListMap(markers.toSeq.sortBy { case (stage, _) => stage.order }: _*)
+
+    // filter out stages that share markers do avoid dupe marker lists - stages with the same roleName share markers
     // using foldLeft is important here. we want to keep the earliest of the stages that shares a marker
-    val unsorted = markers.foldLeft(Map.empty[MarkingWorkflowStage, Seq[Marker]]) { case (acc, (s, m)) =>
+    val filtered = sorted.foldLeft(Map.empty[MarkingWorkflowStage, Seq[Marker]]) { case (acc, (s, m)) =>
       if (acc.keys.exists(stage => stage.roleName == s.roleName)) acc else acc + (s -> m)
     }
-    // sort by stage and insert into a list map to preserve the order
-    ListMap(unsorted.toSeq.sortBy { case (stage, _) => stage.order }: _*).map { case (k, v) => k.roleName -> v }
+
+    filtered.map { case (k, v) => k.roleName -> v }
   }
 
   @Column(name = "is_reusable", nullable = false)
