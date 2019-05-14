@@ -32,7 +32,7 @@ ext {
   poiVersion = "4.1.0"
   tilesVersion = "3.0.8"
   jcloudsVersion = "2.1.2"
-  warwickUtilsVersion = "20190429"
+  warwickUtilsVersion = "20190503"
   surefireVersion = "2.19.1"
 }
 
