@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{CanBeDeleted, Notification, ScheduledNotification, ToEntityReference}
 import uk.ac.warwick.tabula.data.{Daoisms, HibernateHelpers, ScheduledNotificationDao}
 import uk.ac.warwick.tabula.helpers.{Logging, ReflectionHelper}
+import uk.ac.warwick.tabula.services.elasticsearch.{IndexedNotification, NotificationIndexService}
 import uk.ac.warwick.userlookup.AnonymousUser
 
 trait ScheduledNotificationService {
@@ -24,8 +25,9 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
 
   val RunBatchSize = 100
 
-  var dao: ScheduledNotificationDao = Wire.auto[ScheduledNotificationDao]
-  var notificationService: NotificationService = Wire.auto[NotificationService]
+  var dao: ScheduledNotificationDao = Wire[ScheduledNotificationDao]
+  var notificationService: NotificationService = Wire[NotificationService]
+  var indexService: NotificationIndexService = Wire[NotificationIndexService]
 
   // a map of DiscriminatorValue -> Notification
   lazy val notificationMap: Map[String, Class[_ <: Notification[ToEntityReference, Unit]]] = ReflectionHelper.allNotifications
@@ -59,9 +61,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
     */
   override def processNotifications(): Unit = {
     val ids = transactional(readOnly = true) {
-      dao.notificationsToComplete.take(RunBatchSize).map[String] {
-        _.id
-      }.toList
+      dao.notificationsToComplete.take(RunBatchSize).map[String](_.id).toList
     }
 
     // FIXME we are doing this manually (TAB-2221) because Hibernate keeps failing to do this properly. Importantly, we're not
@@ -82,6 +82,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
                   logger.info("Notification pushed - " + notification)
                   notification.preSave(newRecord = true)
                   session.saveOrUpdate(notification)
+                  indexService.indexItems(notification.recipients.toList.map { user => IndexedNotification(notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
                 } catch {
                   case _: ObjectNotFoundException =>
                     debug("Skipping scheduled notification %s as a referenced object was not found", sn)

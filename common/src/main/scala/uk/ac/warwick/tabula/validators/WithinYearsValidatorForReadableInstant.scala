@@ -16,13 +16,13 @@ class WithinYearsValidatorForReadableInstant extends ConstraintValidator[WithinY
     maxFuture = annotation.maxFuture()
   }
 
-  override def isValid(value: ReadableInstant, context: ConstraintValidatorContext): Boolean = {
+  override def isValid(v: ReadableInstant, context: ConstraintValidatorContext): Boolean = {
     val now = DateTime.now
 
-    Option(value) match {
+    Option(v) match {
       case Some(value) if value.isAfter(now) => Years.yearsBetween(now, value).getYears <= maxFuture
       case Some(value) if value.isBefore(now) => Years.yearsBetween(value, now).getYears <= maxPast
-      case Some(value) => true // exactly equal to current datetime
+      case Some(_) => true // exactly equal to current datetime
       case _ => true // null values are allowed
     }
   }

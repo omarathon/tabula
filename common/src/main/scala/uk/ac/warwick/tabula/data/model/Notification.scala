@@ -234,11 +234,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 
   def onPreSave(newRecord: Boolean): Unit = {}
 
-  override def toString = s"Notification[${if (id != null) id else "transient " + hashCode}]{${
-    Option(agent).fold("(no agent)") {
-      _.getFullName
-    }
-  }, $verb, ${items.getClass.getSimpleName}}"
+  override def toString = s"Notification[${if (id != null) id else "transient " + hashCode}]{${Option(agent).fold("(no agent)")(_.getFullName)}, $verb, ${items.getClass.getSimpleName}}"
 }
 
 /**

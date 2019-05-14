@@ -15,14 +15,15 @@ object PendingEvidenceReminderNotification {
 @Entity
 @DiscriminatorValue("PendingEvidenceReminder")
 class PendingEvidenceReminderNotification
-  extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]
+  extends Notification[MitigatingCircumstancesSubmission, Unit]
+    with SingleItemNotification[MitigatingCircumstancesSubmission]
     with AllCompletedActionRequiredNotification
     with SingleRecipientNotification
     with Logging {
 
   def verb = "upload"
 
-  def submission: MitigatingCircumstancesSubmission = target.entity
+  def submission: MitigatingCircumstancesSubmission = item.entity
 
   override def recipient: User = submission.student.asSsoUser
 

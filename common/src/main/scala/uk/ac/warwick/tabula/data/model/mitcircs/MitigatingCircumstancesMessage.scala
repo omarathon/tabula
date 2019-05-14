@@ -68,6 +68,11 @@ class MitigatingCircumstancesMessage extends GeneratedId
     _attachments.remove(attachment)
   }
 
+  @Column(name = "replyByDate")
+  private var _replyByDate: DateTime = _
+  def replyByDate: Option[DateTime] = Option(_replyByDate)
+  def replyByDate_=(dt: DateTime): Unit = _replyByDate = dt
+
   def isUnreadByStudent: Boolean = !studentSent && submission.lastViewedByStudent.forall(_.isBefore(createdDate))
 
   override def toStringProps: Seq[(String, Any)] = Seq(
