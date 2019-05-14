@@ -82,7 +82,7 @@ class ScheduledNotificationServiceImpl extends ScheduledNotificationService with
                   logger.info("Notification pushed - " + notification)
                   notification.preSave(newRecord = true)
                   session.saveOrUpdate(notification)
-                  indexService.indexItems(notification.recipients.toList.map { user => IndexedNotification(notification.asInstanceOf[Notification[_ >: Null <: ToEntityReference, _]], user) })
+                  indexService.indexItems(notification.recipients.toList.map { user => IndexedNotification(notification, user) })
                 } catch {
                   case _: ObjectNotFoundException =>
                     debug("Skipping scheduled notification %s as a referenced object was not found", sn)
