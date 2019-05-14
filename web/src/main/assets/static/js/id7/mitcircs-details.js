@@ -32,8 +32,15 @@ class MitCircsDetails {
     }
     $details.on('keyup', '#messages', checkAndUpdateSendButton);
 
+    function showErrorsInModals(e) {
+      const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
+      const $modalsWithErrors = $thread.find('.form-group.has-error').closest('.modal');
+      $modalsWithErrors.modal().modal('show');
+    }
+
     function bind() {
       checkAndUpdateSendButton();
+      showErrorsInModals();
       messageScroll();
       $('.use-tooltip').tooltip();
     }
@@ -91,6 +98,23 @@ class MitCircsDetails {
       $modal.modal('toggle');
       $textarea.height($textarea.get(0).scrollHeight);
       checkAndUpdateSendButton();
+    });
+
+    // Add badge and update tooltip when respond by date
+    $details.on('change', '#replyByDateModal :input', (e) => {
+      const $input = $(e.target);
+      const $label = $input.closest('.modal').prev('label');
+      const $tooltip = $label.find('.use-tooltip');
+      const originalText = $tooltip.attr('title') || $tooltip.data('original-title');
+      const date = $input.val();
+      const newText = (date) ? `Respond by ${date}` : $input.val().split('\\').pop();
+      if (newText) {
+        $tooltip.attr('data-original-title', newText);
+        $label.append($('<span/>').addClass('badge').html('<i class="fal fa-check"></i>'));
+      } else {
+        $tooltip.attr('data-original-title', originalText);
+        $label.find('.badge').remove();
+      }
     });
 
     $details.on('submit', '#messages', (e) => {

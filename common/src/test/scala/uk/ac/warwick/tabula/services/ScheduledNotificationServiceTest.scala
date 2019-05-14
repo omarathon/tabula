@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{MockScrollableResults, ScheduledNotificationDao, Scrollable}
+import uk.ac.warwick.tabula.services.elasticsearch.NotificationIndexService
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
 class ScheduledNotificationServiceTest extends TestBase with Mockito {
@@ -12,8 +13,10 @@ class ScheduledNotificationServiceTest extends TestBase with Mockito {
   val service = new ScheduledNotificationServiceImpl
   val dao: ScheduledNotificationDao = mock[ScheduledNotificationDao]
   val notificationService: NotificationService = mock[NotificationService]
+  val indexService: NotificationIndexService = mock[NotificationIndexService]
   service.dao = dao
   service.notificationService = notificationService
+  service.indexService = indexService
 
   val sessionFactory: SessionFactory = mock[SessionFactory]
   val session: Session = mock[Session]

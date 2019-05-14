@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 class PendingEvidenceReminderNotificationTest extends TestBase with Mockito with MitCircsNotificationFixture {
 
   val n: PendingEvidenceReminderNotification = {
-    val n = Notification.init(new PendingEvidenceReminderNotification, student, submission, submission)
+    val n = Notification.init(new PendingEvidenceReminderNotification, student, submission)
     n
   }
 

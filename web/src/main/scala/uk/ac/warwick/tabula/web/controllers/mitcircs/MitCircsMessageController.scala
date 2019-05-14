@@ -4,7 +4,7 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{GetMapping, ModelAttribute, PathVariable, RequestMapping}
-import uk.ac.warwick.tabula.commands.mitcircs.{ListMessagesCommand, RenderMitCircsMessageAttachmentCommand, SendMessageCommand, SendMessageState}
+import uk.ac.warwick.tabula.commands.mitcircs.{ListMessagesCommand, RenderMitCircsMessageAttachmentCommand, SendMessageCommand}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -20,7 +20,7 @@ class MitCircsMessageController extends BaseController {
 
   validatesSelf[SelfValidating]
 
-  type MessageCommand = Appliable[MitigatingCircumstancesMessage] with SendMessageState with SelfValidating
+  type MessageCommand = SendMessageCommand.Command
 
   @ModelAttribute("listCommand")
   def listCommand(@PathVariable submission: MitigatingCircumstancesSubmission): Appliable[Seq[MitigatingCircumstancesMessage]] =

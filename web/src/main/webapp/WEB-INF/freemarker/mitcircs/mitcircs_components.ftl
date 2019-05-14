@@ -7,7 +7,7 @@
 </#if>
 
 <#macro enumListWithOther enumValues otherValue>
-  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue})</#if><#if value_has_next>, </#if></#list>
+  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
 </#macro>
 
 <#macro detail label condensed=false>

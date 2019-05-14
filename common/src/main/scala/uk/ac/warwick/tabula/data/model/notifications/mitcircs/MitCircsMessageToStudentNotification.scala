@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsMessageToStudentNotification.templateLocation
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsMessageToStudentNotification._
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-
 
 object MitCircsMessageToStudentNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/mit_circs_message_student.ftl"
@@ -15,7 +14,20 @@ object MitCircsMessageToStudentNotification {
 
 @Entity
 @DiscriminatorValue("MitCircsMessageToStudent")
-class MitCircsMessageToStudentNotification
+class MitCircsMessageToStudentNotification extends AbstractMitCircsMessageToStudentNotification
+
+@Entity
+@DiscriminatorValue("MitCircsMessageToStudentWithReminder")
+class MitCircsMessageToStudentWithReminderNotification extends AbstractMitCircsMessageToStudentNotification
+  with RecipientCompletedActionRequiredNotification {
+
+  override def onPreSave(isNew: Boolean): Unit = {
+    super.onPreSave(isNew)
+    priority = NotificationPriority.Warning
+  }
+}
+
+abstract class AbstractMitCircsMessageToStudentNotification
   extends NotificationWithTarget[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission]
     with SingleItemNotification[MitigatingCircumstancesMessage]
     with SingleRecipientNotification
@@ -32,9 +44,11 @@ class MitCircsMessageToStudentNotification
 
   def submission: MitigatingCircumstancesSubmission = target.entity
 
+  def replyByDate: Option[String] = item.entity.replyByDate.map(dateTimeFormatter.print)
+
   def title: String = s"Mitigating circumstances submission MIT-${submission.key} - message received"
 
-  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("submission" -> submission))
+  def content: FreemarkerModel = FreemarkerModel(templateLocation, Map("submission" -> submission, "replyByDate" -> replyByDate))
 
   def url: String = Routes.Profile.PersonalCircumstances.viewMessages(submission)
 
