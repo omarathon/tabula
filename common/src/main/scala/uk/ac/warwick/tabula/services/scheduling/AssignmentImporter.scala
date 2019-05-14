@@ -395,6 +395,18 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = sms.ayr_code and wss.wss_modc = sms.mod_code
 							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
+              and not ( -- TAB-7153
+                $dialectRegexpLike(wss.wss_wspc, '^EXAA[A-Z]19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXB[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXC[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXD[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXE[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXF[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXJ[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXK[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXO[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXP[A-Z]{2}19$$')
+              )
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = sms.spr_code and sas.ayr_code = sms.ayr_code and sas.mod_code = sms.mod_code
@@ -444,6 +456,18 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
 							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
+              and not ( -- TAB-7153
+                $dialectRegexpLike(wss.wss_wspc, '^EXAA[A-Z]19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXB[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXC[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXD[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXE[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXF[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXJ[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXK[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXO[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXP[A-Z]{2}19$$')
+              )
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
@@ -492,6 +516,18 @@ object AssignmentImporter {
 					left join $sitsSchema.cam_wss wss -- WSS is "Slot Student"
 						on wss.wss_sprc = spr.spr_code and wss.wss_ayrc = smo.ayr_code and wss.wss_modc = smo.mod_code
 							and wss.wss_mabs = mab.mab_seq and ($dialectRegexpLike(wss.wss_wspc, '^EX[A-Z]{3}[0-9]{2}$$') or wss.wss_wspc = 'EXJAN19V2') --dirty way of doing but here we go...TAB-6840
+              and not ( -- TAB-7153
+                $dialectRegexpLike(wss.wss_wspc, '^EXAA[A-Z]19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXB[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXC[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXD[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXE[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXJ[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXF[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXK[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXO[A-Z]{2}19$$') or
+                $dialectRegexpLike(wss.wss_wspc, '^EXP[A-Z]{2}19$$')
+              )
 
 					left join $sitsSchema.cam_sas sas -- Where component marks go
 						on sas.spr_code = smo.spr_code and sas.ayr_code = smo.ayr_code and sas.mod_code = smo.mod_code
