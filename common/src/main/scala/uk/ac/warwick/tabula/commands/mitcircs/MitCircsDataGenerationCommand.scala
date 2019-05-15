@@ -360,6 +360,8 @@ trait MitCircsDataGenerationPermissions extends RequiresPermissionsChecking with
 trait MitCircsDataGenerationDescription extends Describable[Result] {
   self: MitCircsDataGenerationState =>
 
+  override lazy val eventName: String = "MitCircsDataGeneration"
+
   override def describe(d: Description): Unit =
     d.department(department)
 }

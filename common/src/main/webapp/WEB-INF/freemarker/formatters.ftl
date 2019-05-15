@@ -526,5 +526,31 @@ preposition: Text to relate the title to the department name in the second line,
   <#return input?replace('<[^>]+>','','r') />
 </#function>
 
+<#macro file_type_icon mediaType><#compress>
+	<#if mediaType.toString() == 'application/msword' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mediaType.toString() == 'application/x-tika-ooxml-protected'>
+		<i class="fal fa-fw fa-file-word"></i>
+	<#elseif mediaType.toString() == 'application/vnd.ms-powerpoint' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.presentationml.slideshow'>
+		<i class="fal fa-fw fa-file-powerpoint"></i>
+	<#elseif mediaType.toString() == 'application/vnd.ms-excel' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>
+		<i class="fal fa-fw fa-file-spreadsheet"></i>
+	<#elseif mediaType.toString() == 'application/pdf'>
+		<i class="fal fa-fw fa-file-pdf"></i>
+	<#elseif mediaType.toString() == 'application/zip'>
+		<i class="fal fa-fw fa-file-archive"></i>
+	<#elseif mediaType.toString() == 'text/csv'>
+		<i class="fal fa-fw fa-file-csv"></i>
+	<#elseif mediaType.type == 'text' || mediaType.toString() == 'application/rtf' || mediaType.toString() == 'message/rfc822'>
+		<i class="fal fa-fw fa-file-alt"></i>
+	<#elseif mediaType.type == 'video'>
+		<i class="fal fa-fw fa-file-video"></i>
+	<#elseif mediaType.type == 'audio'>
+		<i class="fal fa-fw fa-file-audio"></i>
+	<#elseif mediaType.type == 'image'>
+		<i class="fal fa-fw fa-file-image"></i>
+	<#else>
+		<i class="fal fa-fw fa-file"></i>
+	</#if>
+</#compress></#macro>
+
 </#escape>
 

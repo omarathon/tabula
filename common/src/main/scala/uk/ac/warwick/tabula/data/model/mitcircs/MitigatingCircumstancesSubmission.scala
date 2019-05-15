@@ -8,12 +8,12 @@ import org.hibernate.annotations.{BatchSize, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.Transactions._
 
 import scala.collection.JavaConverters._
 
@@ -39,7 +39,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var key: JLong = _
 
   @Column(nullable = false)
-  var createdDate: DateTime = DateTime.now()
+  val createdDate: DateTime = DateTime.now()
 
   @Column(name = "lastModified", nullable = false)
   private var _lastModified: DateTime = DateTime.now()
@@ -72,11 +72,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")
   var department: Department = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "relatedSubmission")
   var relatedSubmission: MitigatingCircumstancesSubmission = _
 
@@ -90,7 +90,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var issueTypes: Seq[IssueType] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var issueTypeDetails: String = _ // free text for use when the issue type includes Other
+  @Column(name = "issueTypeDetails")
+  private var encryptedIssueTypeDetails: CharSequence = _
+
+  // free text for use when the issue type includes Other
+  def issueTypeDetails: String = Option(encryptedIssueTypeDetails).map(_.toString).orNull
+  def issueTypeDetails_=(issueTypeDetails: String): Unit = encryptedIssueTypeDetails = issueTypeDetails
 
   var contacted: JBoolean = _
 
@@ -98,14 +103,24 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var contacts: Seq[MitCircsContact] = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var contactOther: String = _ // free text for use when the contacts includes Other
+  @Column(name = "contactOther")
+  private var encryptedContactOther: CharSequence = _
+
+  // free text for use when the contacts includes Other
+  def contactOther: String = Option(encryptedContactOther).map(_.toString).orNull
+  def contactOther_=(contactOther: String): Unit = encryptedContactOther = contactOther
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var noContactReason: String = _
+  @Column(name = "noContactReason")
+  private var encryptedNoContactReason: CharSequence = _
+  def noContactReason: String = Option(encryptedNoContactReason).map(_.toString).orNull
+  def noContactReason_=(noContactReason: String): Unit = encryptedNoContactReason = noContactReason
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var reason: String = _
+  @Column(name = "reason", nullable = false)
+  private var encryptedReason: CharSequence = _
+  def reason: String = Option(encryptedReason).map(_.toString).orNull
+  def reason_=(reason: String): Unit = encryptedReason = reason
 
   def formattedReason: String = formattedHtml(reason)
 
@@ -116,12 +131,27 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(nullable = false)
-  var pendingEvidence: String = _
+  @Column(name = "pendingEvidence", nullable = false)
+  private var encryptedPendingEvidence: CharSequence = _
+  def pendingEvidence: String = Option(encryptedPendingEvidence).map(_.toString).orNull
+  def pendingEvidence_=(pendingEvidence: String): Unit = encryptedPendingEvidence = pendingEvidence
 
   def formattedPendingEvidence: String = formattedHtml(pendingEvidence)
 
   var pendingEvidenceDue: LocalDate = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "sensitiveEvidenceComments")
+  private var encryptedSensitiveEvidenceComments: CharSequence = _
+  def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
+  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
+
+  def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var sensitiveEvidenceSeenBy: User = _
+
+  var sensitiveEvidenceSeenOn: LocalDate = _
 
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
@@ -131,18 +161,19 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
-  var attachments: JSet[FileAttachment] = JHashSet()
+  private val _attachments: JSet[FileAttachment] = JHashSet()
+  def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
 
   def addAttachment(attachment: FileAttachment) {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
     attachment.temporary = false
     attachment.mitigatingCircumstancesSubmission = this
-    attachments.add(attachment)
+    _attachments.add(attachment)
   }
 
   def removeAttachment(attachment: FileAttachment): Boolean = {
     attachment.mitigatingCircumstancesSubmission = null
-    attachments.remove(attachment)
+    _attachments.remove(attachment)
   }
 
   @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
@@ -154,6 +185,27 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @BatchSize(size = 200)
   private val _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
   def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
+
+  @Column(name = "lastViewedByStudent")
+  private var _lastViewedByStudent: DateTime = _
+  def lastViewedByStudent: Option[DateTime] = Option(_lastViewedByStudent)
+  def lastViewedByStudent_=(dt: DateTime): Unit = _lastViewedByStudent = dt
+
+  @Column(name = "lastViewedByOfficer")
+  private var _lastViewedByOfficer: DateTime = _
+  def lastViewedByOfficer: Option[DateTime] = Option(_lastViewedByOfficer)
+  def lastViewedByOfficer_=(dt: DateTime): Unit = _lastViewedByOfficer = dt
+
+  def isUnreadByOfficer: Boolean = transactional(readOnly = true) {
+    // Doesn't include notes, whereas normally lastModified does, and only includes student-sent messages
+    val lastModified =
+      Seq(
+        Option(_lastModified),
+        messages.filter(_.studentSent).sortBy(_.createdDate).lastOption.map(_.createdDate),
+      ).flatten.max
+
+    lastViewedByOfficer.forall(_.isBefore(lastModified))
+  }
 
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
@@ -186,12 +238,15 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
-  def isEditable: Boolean =
-    state == MitigatingCircumstancesSubmissionState.Draft ||
+  def isEditable(user: User): Boolean = {
     state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
-    state == MitigatingCircumstancesSubmissionState.Submitted
+    (user.getWarwickId == student.universityId && (
+      state == MitigatingCircumstancesSubmissionState.Draft ||
+      state == MitigatingCircumstancesSubmissionState.Submitted
+    ))
+  }
 
-  def hasEvidence: Boolean = !attachments.isEmpty
+  def hasEvidence: Boolean = attachments.nonEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null
 
   override def toStringProps: Seq[(String, Any)] = Seq(

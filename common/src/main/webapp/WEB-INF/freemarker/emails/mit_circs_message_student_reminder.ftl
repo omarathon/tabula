@@ -1,0 +1,1 @@
+A response is required to the message regarding your mitigating circumstances submission MIT-${submission.key}.

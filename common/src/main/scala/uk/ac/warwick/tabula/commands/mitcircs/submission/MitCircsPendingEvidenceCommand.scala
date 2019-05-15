@@ -14,8 +14,6 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
-
-
 object MitCircsPendingEvidenceCommand {
   def apply(submission: MitigatingCircumstancesSubmission, currentUser: User) = new MitCircsPendingEvidenceCommandInternal(submission, currentUser)
     with ComposableCommand[MitigatingCircumstancesSubmission]
@@ -82,6 +80,8 @@ trait MitCircsPendingEvidenceValidation extends SelfValidating {
 
 trait MitCircsPendingEvidenceDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: MitCircsPendingEvidenceState =>
+
+  override lazy val eventName: String = "MitCircsPendingEvidence"
 
   def describe(d: Description) {
     d.mitigatingCircumstancesSubmission(submission)

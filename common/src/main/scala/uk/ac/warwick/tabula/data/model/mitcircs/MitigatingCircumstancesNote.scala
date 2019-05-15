@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.data.model.{FileAttachment, GeneratedId}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
@@ -33,7 +34,10 @@ class MitigatingCircumstancesNote extends GeneratedId
   var submission: MitigatingCircumstancesSubmission = _
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  var text: String = _
+  @Column(name = "text")
+  private var encryptedText: CharSequence = _
+  def text: String = Option(encryptedText).map(_.toString).orNull
+  def text_=(text: String): Unit = encryptedText = text
 
   def formattedText: String = formattedHtml(text)
 
@@ -56,7 +60,7 @@ class MitigatingCircumstancesNote extends GeneratedId
   @OneToMany(mappedBy = "mitigatingCircumstancesNote", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   private val _attachments: JSet[FileAttachment] = JHashSet()
-  def attachments: Set[FileAttachment] = _attachments.asScala.toSet
+  def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
 
   def addAttachment(attachment: FileAttachment) {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.{ExtensionPersistenceComponent, HibernateExtensionPersistenceComponent}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -15,7 +16,6 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 
 object EditMitCircsSubmissionCommand {
   def apply(submission: MitigatingCircumstancesSubmission, creator: User) =
@@ -37,7 +37,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
   self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
 
-  require(submission.isEditable) // Guarded at controller
+  require(submission.isEditable(currentUser)) // Guarded at controller
 
   startDate = submission.startDate
   endDate = submission.endDate
@@ -52,7 +52,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
   noContactReason = submission.noContactReason
   pendingEvidence = submission.pendingEvidence
   pendingEvidenceDue = submission.pendingEvidenceDue
-  attachedFiles = submission.attachments
+  attachedFiles = JHashSet(submission.attachments.toSet)
   relatedSubmission = submission.relatedSubmission
 
   override def onBind(result: BindingResult): Unit = transactional() {
@@ -89,7 +89,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     submission.pendingEvidenceDue = pendingEvidenceDue
     if (submission.attachments != null) {
       // delete attachments that have been removed
-      val matchingAttachments: mutable.Set[FileAttachment] = submission.attachments.asScala -- attachedFiles.asScala
+      val matchingAttachments: Set[FileAttachment] = submission.attachments.toSet -- attachedFiles.asScala
       matchingAttachments.foreach(delete)
     }
     file.attached.asScala.foreach(submission.addAttachment)
@@ -114,6 +114,8 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
 trait EditMitCircsSubmissionDescription extends Describable[MitigatingCircumstancesSubmission] {
   self: EditMitCircsSubmissionState =>
+
+  override lazy val eventName: String = "EditMitCircsSubmission"
 
   def describe(d: Description) {
     d.member(student)

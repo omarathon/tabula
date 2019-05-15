@@ -7,11 +7,11 @@
 </#if>
 
 <#macro enumListWithOther enumValues otherValue>
-  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue})</#if><#if value_has_next>, </#if></#list>
+  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
 </#macro>
 
-<#macro detail label>
-  <div class="row form-horizontal">
+<#macro detail label condensed=false>
+  <div class="row form-horizontal mitcircs-details__detail <#if condensed>mitcircs-details__detail--condensed</#if>">
     <div class="col-sm-3 control-label">
       ${label}
     </div>
@@ -71,4 +71,18 @@
 			</span>
     </#list>
   </div>
+</#macro>
+
+<#macro attachments submission>
+  <#if submission.attachments?has_content>
+    <ul class="unstyled">
+      <#list submission.attachments as attachment>
+        <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+        <li id="attachment-${attachment.id}" class="attachment">
+          <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+          <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
+        </li>
+      </#list>
+    </ul>
+  </#if>
 </#macro>

@@ -4,13 +4,14 @@ import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.mitcircs.{AddMitCircSubmissionNoteCommand, DeleteMitCircSubmissionNoteCommand, ListMitCircSubmissionNotesCommand}
+import uk.ac.warwick.tabula.commands.mitcircs.{AddMitCircSubmissionNoteCommand, DeleteMitCircSubmissionNoteCommand, ListMitCircSubmissionNotesCommand, RenderMitCircsNoteAttachmentCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesNote, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.mitcircs.web.Routes
+import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
 @Controller
 @RequestMapping(Array("/mitcircs/submission/{submission}/notes"))
@@ -66,5 +67,27 @@ class DeleteMitCircsNoteController extends BaseController {
       command.apply()
       RedirectForce(Routes.Admin.review(submission))
     }
+
+}
+
+@Controller
+@RequestMapping(Array("/mitcircs/submission/{submission}/notes/{note}/supporting-file/{filename}"))
+class MitCircsNoteAttachmentController extends BaseController {
+
+  type RenderAttachmentCommand = Appliable[Option[RenderableAttachment]]
+
+  @ModelAttribute("renderAttachmentCommand")
+  def attachmentCommand(
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    @PathVariable note: MitigatingCircumstancesNote,
+    @PathVariable filename: String
+  ): RenderAttachmentCommand = {
+    mustBeLinked(note, submission)
+    RenderMitCircsNoteAttachmentCommand(mandatory(note), mandatory(filename))
+  }
+
+  @RequestMapping(method = Array(GET))
+  def supportingFile(@ModelAttribute("renderAttachmentCommand") attachmentCommand: RenderAttachmentCommand, @PathVariable filename: String): RenderableFile =
+    attachmentCommand.apply().getOrElse(throw new ItemNotFoundException())
 
 }

@@ -1,51 +1,54 @@
 package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.fileserver.RenderableAttachment
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object RenderMitCircsAttachmentCommand {
-  def apply(submission: MitigatingCircumstancesSubmission, filename: String) = new RenderMitCircsAttachmentCommandInternal(submission, filename)
-    with ComposableCommand[Option[RenderableAttachment]]
-    with RenderMitCircsAttachmentPermissions
-    with RenderMitCircsAttachmentDescription
+  type Result = Option[RenderableAttachment]
+  type Command = Appliable[Result] with RenderMitCircsAttachmentState
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Read
+
+  def apply(submission: MitigatingCircumstancesSubmission, filename: String): Command =
+    new RenderMitCircsAttachmentCommandInternal(submission, filename)
+      with ComposableCommand[Result]
+      with RenderMitCircsAttachmentPermissions
+      with RenderMitCircsAttachmentDescription
 }
 
-class RenderMitCircsAttachmentCommandInternal(val submission: MitigatingCircumstancesSubmission, val filename: String)
-  extends CommandInternal[Option[RenderableAttachment]] with RenderMitCircsAttachmentState {
+abstract class RenderMitCircsAttachmentCommandInternal(val submission: MitigatingCircumstancesSubmission, val filename: String)
+  extends CommandInternal[Result]
+    with RenderMitCircsAttachmentState {
 
-  def applyInternal(): Option[RenderableAttachment] = submission.attachments.asScala
-    .filter(_.hasData)
-    .find(_.name == filename)
-    .map(a => new RenderableAttachment(a))
+  override def applyInternal(): Option[RenderableAttachment] =
+    submission.attachments
+      .filter(_.hasData)
+      .find(_.name == filename)
+      .map(a => new RenderableAttachment(a))
 
 }
 
 trait RenderMitCircsAttachmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: RenderMitCircsAttachmentState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(submission.student))
-  }
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(RequiredPermission, mandatory(submission))
 }
 
-trait RenderMitCircsAttachmentDescription extends Describable[Option[RenderableAttachment]] {
+trait RenderMitCircsAttachmentDescription extends Describable[Result] {
   self: RenderMitCircsAttachmentState =>
 
   override lazy val eventName: String = "RenderMitCircsAttachment"
 
-  override def describe(d: Description) {
+  override def describe(d: Description): Unit =
     d.mitigatingCircumstancesSubmission(submission)
-    d.property("filename", filename)
-  }
+     .property("filename", filename)
 
-  override def describeResult(d: Description, result: Option[RenderableAttachment]) {
-    d.property("fileFound", result.isDefined)
-  }
+  override def describeResult(d: Description, result: Option[RenderableAttachment]): Unit =
+    d.property("fileFound", result.nonEmpty)
 }
 
 trait RenderMitCircsAttachmentState {

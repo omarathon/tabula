@@ -32,8 +32,15 @@ class MitCircsDetails {
     }
     $details.on('keyup', '#messages', checkAndUpdateSendButton);
 
+    function showErrorsInModals(e) {
+      const $thread = (e !== undefined) ? $(e.target).closest('.message-thread') : $details;
+      const $modalsWithErrors = $thread.find('.form-group.has-error').closest('.modal');
+      $modalsWithErrors.modal().modal('show');
+    }
+
     function bind() {
       checkAndUpdateSendButton();
+      showErrorsInModals();
       messageScroll();
       $('.use-tooltip').tooltip();
     }
@@ -93,6 +100,23 @@ class MitCircsDetails {
       checkAndUpdateSendButton();
     });
 
+    // Add badge and update tooltip when respond by date
+    $details.on('change', '#replyByDateModal :input', (e) => {
+      const $input = $(e.target);
+      const $label = $input.closest('.modal').prev('label');
+      const $tooltip = $label.find('.use-tooltip');
+      const originalText = $tooltip.attr('title') || $tooltip.data('original-title');
+      const date = $input.val();
+      const newText = (date) ? `Respond by ${date}` : $input.val().split('\\').pop();
+      if (newText) {
+        $tooltip.attr('data-original-title', newText);
+        $label.append($('<span/>').addClass('badge').html('<i class="fal fa-check"></i>'));
+      } else {
+        $tooltip.attr('data-original-title', originalText);
+        $label.find('.badge').remove();
+      }
+    });
+
     $details.on('submit', '#messages', (e) => {
       e.preventDefault();
       const $form = $(e.target);
@@ -114,6 +138,79 @@ class MitCircsDetails {
         contentType: false,
         processData: false,
       });
+    });
+
+    // Open attachments in a modal if they are serve-inline
+    const injectModal = () => {
+      // Inject a modal into the body that will hold the content
+      const $modalTitle = $('<h4 />').addClass('modal-title').attr('id', 'mitcircs-details-attachment-modal-label');
+      const $modalBody = $('<div />').addClass('modal-body');
+      const $newTabLink = $('<a />').addClass('btn btn-default').attr('target', '_blank').text('Open in new tab');
+
+      const $modal = $('<div />').addClass('modal fade').attr({
+        id: 'mitcircs-details-attachment-modal',
+        tabindex: -1,
+        role: 'dialog',
+        'aria-labelledby': 'mitcircs-details-attachment-modal-label',
+      }).append(
+        $('<div />').addClass('modal-dialog modal-lg').attr('role', 'document')
+          .append(
+            $('<div />').addClass('modal-content')
+              .append(
+                $('<div />').addClass('modal-header')
+                  .append(
+                    $('<button />').addClass('close').attr({
+                      type: 'button',
+                      'data-dismiss': 'modal',
+                      'aria-label': 'Close',
+                    }).html('<span aria-hidden="true">&times;</span>'),
+                    $modalTitle,
+                  ),
+                $modalBody,
+                $('<div />').addClass('modal-footer')
+                  .append(
+                    $newTabLink,
+                    $('<button />').addClass('btn btn-default').attr({
+                      type: 'button',
+                      'data-dismiss': 'modal',
+                    }).text('Close'),
+                  ),
+              ),
+          ),
+      );
+
+      $modal.appendTo($('body'));
+      this.$attachmentsModal = $modal;
+      this.$attachmentsModalTitle = $modalTitle;
+      this.$attachmentsModalBody = $modalBody;
+      this.$attachmentsModalNewTabLink = $newTabLink;
+      return $modal;
+    };
+
+    $details.on('click', '.attachment a[data-inline="true"]', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+
+      const $modal = this.$attachmentsModal || injectModal();
+      const $modalTitle = this.$attachmentsModalTitle;
+      const $modalBody = this.$attachmentsModalBody;
+      const $newTabLink = this.$attachmentsModalNewTabLink;
+
+      const $a = $(e.target);
+
+      $modalTitle.text($a.text());
+      $modalBody.empty().append(
+        $('<iframe />').attr({
+          src: $a.attr('href'),
+          scrolling: 'auto',
+          frameborder: 0,
+          allowtransparency: true,
+          seamless: 'seamless',
+        }),
+      );
+      $newTabLink.attr('href', $a.attr('href'));
+
+      $modal.modal().modal('show');
     });
   }
 }

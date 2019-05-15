@@ -39,18 +39,18 @@
 </#macro>
 
 <#assign questionNumber = 1 />
-<#macro question_section question="" hint="" cssClass="" helpPopover="">
+<#macro question_section question="" hint="" cssClass="" helpPopover="" showNumber=true>
   <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}">
     <#if question?has_content>
       <legend>
-        ${questionNumber}. ${question}
+        <#if showNumber>${questionNumber}.</#if> ${question}
         <#if helpPopover?has_content>
           <a class="help-popover use-popover tabulaPopover-init" id="popover-evidence" data-html="true" data-placement="left" data-content="${helpPopover}" data-container="body" aria-label="Help" data-original-title="" title="">
             <i class="icon-question-sign fa fa-question-circle"></i>
           </a>
         </#if>
       </legend>
-      <#assign questionNumber = questionNumber + 1 />
+      <#if showNumber><#assign questionNumber = questionNumber + 1 /></#if>
     </#if>
 
     <#if hint?has_content>
