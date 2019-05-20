@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 import org.joda.time.DateTime
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
@@ -23,7 +24,7 @@ class MitCircsReadyForPanelCommandInternal(val submission: MitigatingCircumstanc
 
   self: MitCircsSubmissionServiceComponent =>
 
-  def applyInternal(): MitigatingCircumstancesSubmission = {
+  def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     submission.lastModifiedBy = currentUser
     submission.lastModified = DateTime.now()
     if(ready) submission.readyForPanel()

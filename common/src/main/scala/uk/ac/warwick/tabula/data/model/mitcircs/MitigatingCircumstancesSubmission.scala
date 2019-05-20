@@ -225,7 +225,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def saveOnBehalfOfStudent(): Unit = {
-    assert(_state != Submitted, "Cannot save on behalf of a student if they have already submitted")
+    require(_state != Submitted, "Cannot save on behalf of a student if they have already submitted")
     _state = MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
     _approvedOn = null
   }
@@ -238,12 +238,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   }
 
   def readyForPanel(): Unit = {
-    assert(_state == Submitted, "Cannot set as ready for review until this has been submitted by the student")
+    require(_state == Submitted, "Cannot set as ready for review until this has been submitted by the student")
     _state = MitigatingCircumstancesSubmissionState.ReadyForPanel
   }
 
   def notReadyForPanel(): Unit = {
-    assert(_state == ReadyForPanel, "Cannot set as not ready for panel")
+    require(_state == ReadyForPanel, "Cannot set as not ready for panel")
     _state = MitigatingCircumstancesSubmissionState.Submitted
   }
 
