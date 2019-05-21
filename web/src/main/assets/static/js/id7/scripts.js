@@ -666,6 +666,11 @@ exports.initCollapsible = function ($el) {
       else $icon.addClass('fa fa-fw fa-chevron-right');
 
       var $title = $section.find('.section-title');
+
+      $title.keyup(function (e) {
+        if (e.keyCode === 13) $(e.target).click();
+      });
+
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend(' ').prepend($icon);
       } else {
