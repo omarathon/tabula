@@ -49,21 +49,22 @@
             <div class="col-md-2">
               <label>University ID</label>
             </div>
-            <#assign feedbackColumnWidth=6/>
+            <#assign feedbackColumnsWidth=7/>
             <#if assignment.showSeatNumbers>
-              <#assign feedbackColumnWidth=5/>
+              <#assign feedbackColumnsWidth=6/>
               <div class="col-md-1">
                 <label>Seat</label>
               </div>
             </#if>
+            <#assign feedbackFieldColumnWidth=(feedbackColumnsWidth / assignment.feedbackFields?size)?floor />
             <div class="col-md-2">
               <label>Mark</label>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
               <label>Grade</label>
             </div>
             <#list assignment.feedbackFields as field>
-              <div class="col-md-${feedbackColumnWidth / assignment.feedbackFields?size}">
+              <div class="col-md-${feedbackFieldColumnWidth}">
                 <label>${field.label}</label>
               </div>
             </#list>
@@ -86,12 +87,12 @@
                 <div class="form-group">
                   <div class="input-group">
                     <input class="form-control" name="marks[${markItem_index}].actualMark" value="<#if markItem.actualMark??>${markItem.actualMark}</#if>"
-                           type="number" />
+                           placeholder="Mark" type="number" />
                     <div class="input-group-addon">%</div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-2">
+              <div class="col-md-1">
                 <div class="form-group">
                   <#if isGradeValidation>
                     <#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
@@ -112,7 +113,7 @@
                 </div>
               </div>
               <#list assignment.feedbackFields as field>
-                <div class="col-md-${feedbackColumnWidth / assignment.feedbackFields?size}">
+                <div class="col-md-${feedbackFieldColumnWidth}">
                   <div class="form-group">
                   <textarea class="small-textarea form-control" name="marks[${markItem_index}].fieldValues[${field.name}]"
                             placeholder="${field.label}"><#if markItem.fieldValues[field.name]??>${markItem.fieldValues[field.name]}</#if></textarea>
@@ -137,6 +138,11 @@
                 <input name="id" class="form-control" type="text" placeholder="ID">
               </div>
             </div>
+            <#if assignment.showSeatNumbers>
+              <div class="col-md-1">
+                <input type="text" class="form-control" disabled>
+              </div>
+            </#if>
             <div class="col-md-2">
               <div class="form-group">
                 <div class="input-group">
@@ -145,16 +151,19 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
               <div class="form-group">
                 <input name="actualGrade" class="form-control" type="text" placeholder="Grade">
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="form-group">
-                <textarea class="small-textarea form-control" name="feedbackComment" placeholder="Feedback"></textarea>
+            <#list assignment.feedbackFields as field>
+              <div class="col-md-${feedbackFieldColumnWidth}">
+                <div class="form-group">
+                  <textarea class="small-textarea form-control" name="${field.name}"
+                            placeholder="${field.label}"></textarea>
+                </div>
               </div>
-            </div>
+            </#list>
           </div>
         </div>
       </div>
