@@ -99,7 +99,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
       header.createCell(3 + index).setCellValue(field.label)
     }
 
-    val baseRows = if (assignment.showSeatNumbers) {
+    val baseColumns = if (assignment.showSeatNumbers) {
       header.createCell(3 + textFields.length).setCellValue("Seat number")
       3 + textFields.length
     } else 2 + textFields.length
@@ -107,7 +107,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
     val maxCurrentStage = markerFeedbackToDo.map(_.feedback.currentStageIndex).reduceOption(_ max _).getOrElse(0)
     val stages = assignment.cm2MarkingWorkflow.allStages.filter(_.order < maxCurrentStage)
     for ((stage, i) <- stages.zipWithIndex) {
-      val cell = baseRows + ((i + 1) * 2)
+      val cell = baseColumns + ((i + 1) * 2)
       header.createCell(cell - 1).setCellValue(stage.description)
       header.createCell(cell).setCellValue(s"${stage.description} mark")
     }
@@ -133,7 +133,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
       }
 
       if (assignment.showSeatNumbers) {
-        assignment.getSeatNumber(currentMarkerFeedback.student).foreach(row.createCell(4).setCellValue(_))
+        assignment.getSeatNumber(currentMarkerFeedback.student).foreach(row.createCell(baseColumns).setCellValue(_))
       }
 
       for (mark <- currentMarkerFeedback.mark) markCell.setCellValue(mark)
@@ -143,7 +143,7 @@ class GenerateOwnMarksTemplateCommandInternal(val assignment: Assignment, val ma
       }
 
       for ((stage, i) <- stages.zipWithIndex) {
-        val cell = baseRows + ((i + 1) * 2)
+        val cell = baseColumns + ((i + 1) * 2)
         val pmf = previousMarkerFeedback.find(_.stage == stage)
         row.createCell(cell - 1).setCellValue(pmf.map(_.marker).map(_.getFullName).getOrElse(""))
         row.createCell(cell).setCellValue(pmf.flatMap(_.mark).map(_.toString).getOrElse(""))
