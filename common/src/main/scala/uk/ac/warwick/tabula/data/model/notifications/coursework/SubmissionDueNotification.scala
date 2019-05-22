@@ -121,10 +121,14 @@ class SubmissionDueWithExtensionNotification extends Notification[Extension, Uni
 
   def recipients: Seq[User] = {
     val hasSubmitted = assignment.submissions.asScala.exists(_.usercode == extension.usercode)
-    val hasAMoreRecentApprovedExtension = assignment.allExtensions.get(extension.usercode).exists(_.exists(otherExtension => otherExtension.approved && otherExtension.requestedOn.isAfter(extension.requestedOn)))
+//    val hasAMoreRecentApprovedExtension = assignment.allExtensions.get(extension.usercode).exists(_.exists(otherExtension => otherExtension.approved && otherExtension.requestedOn.isAfter(extension.requestedOn)))
+
+
+    // Get all approved extensions for this assignment, using the latest extended deadline for where a student has multiple.
+    val isTheLatestApprovedExtension = assignment.approvedExtensions.get(extension.usercode).contains(extension)
 
     // Don't send if the user has submitted or if there's no expiry date on the extension (i.e. it's been rejected) or if there is a more recent approved extension for this user
-    if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || hasAMoreRecentApprovedExtension) {
+    if (hasSubmitted || !extension.approved || extension.expiryDate.isEmpty || !shouldSend || !isTheLatestApprovedExtension) {
       Nil
     } else {
       Seq(userLookup.getUserByUserId(extension.usercode))

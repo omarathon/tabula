@@ -62,7 +62,6 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     val anExtension = new Extension
     anExtension._universityId = "0133454"
     anExtension.usercode = "u0133454"
-    anExtension.requestedOn = DateTime.now.minusDays(1)
 
     val notification = new SubmissionDueWithExtensionNotification {
       override def extension: Extension = anExtension
@@ -90,10 +89,9 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
       val laterExtension = new Extension
       laterExtension._universityId = "0133454"
       laterExtension.usercode = "u0133454"
-      laterExtension.requestedOn = DateTime.now
       assignment.addExtension(laterExtension)
       laterExtension.approve()
-      assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map(anExtension.usercode -> Seq(anExtension, laterExtension))
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(laterExtension.usercode -> laterExtension)
       notification.recipients should be(Seq())
     }
 
@@ -101,10 +99,10 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
       val earlierExtension = new Extension
       earlierExtension._universityId = "0133454"
       earlierExtension.usercode = "u0133454"
-      earlierExtension.requestedOn = DateTime.now.minusDays(2)
       assignment.addExtension(earlierExtension)
       earlierExtension.approve()
       assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map(anExtension.usercode -> Seq(anExtension, earlierExtension))
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(earlierExtension.usercode -> earlierExtension, anExtension.usercode -> anExtension)
       notification.recipients should be(Seq(users(1)))
     }
 
