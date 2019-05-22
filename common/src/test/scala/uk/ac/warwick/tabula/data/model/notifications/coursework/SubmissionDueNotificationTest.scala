@@ -70,6 +70,10 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     notification.userLookup.getUserByUserId("u0133454") returns users(1)
     assignment.addExtension(anExtension)
 
+    assignment.extensionService = smartMock[ExtensionService]
+    assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map(anExtension.usercode -> Seq(anExtension))
+    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(anExtension.usercode -> anExtension)
+
     withClue("Shouldn't send if the extension hasn't been approved") {
       notification.recipients should be('empty)
     }
@@ -77,10 +81,28 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
     anExtension.approve()
     anExtension.expiryDate = DateTime.now.plusWeeks(1)
 
-    assignment.extensionService = smartMock[ExtensionService]
-    assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(anExtension.usercode -> anExtension)
-
     withClue("Should only be sent to the one user who has an extension") {
+      notification.recipients should be(Seq(users(1)))
+    }
+
+    withClue("Shouldn't be sent if there is a more recent, approved extension") {
+      val laterExtension = new Extension
+      laterExtension._universityId = "0133454"
+      laterExtension.usercode = "u0133454"
+      assignment.addExtension(laterExtension)
+      laterExtension.approve()
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(laterExtension.usercode -> laterExtension)
+      notification.recipients should be(Seq())
+    }
+
+    withClue("Should be sent if there is another approved extension, but that one is less recent") {
+      val earlierExtension = new Extension
+      earlierExtension._universityId = "0133454"
+      earlierExtension.usercode = "u0133454"
+      assignment.addExtension(earlierExtension)
+      earlierExtension.approve()
+      assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map(anExtension.usercode -> Seq(anExtension, earlierExtension))
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(earlierExtension.usercode -> earlierExtension, anExtension.usercode -> anExtension)
       notification.recipients should be(Seq(users(1)))
     }
 
