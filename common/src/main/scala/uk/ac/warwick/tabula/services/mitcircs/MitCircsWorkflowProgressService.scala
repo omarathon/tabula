@@ -104,7 +104,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   case object InitialAssessment extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
       submission.state match {
-        case MitigatingCircumstancesSubmissionState.Submitted =>
+        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel =>
           if (submission.messages.isEmpty) {
             StageProgress(
               stage = InitialAssessment,
