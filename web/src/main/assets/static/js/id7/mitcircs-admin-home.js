@@ -1,0 +1,30 @@
+/* eslint-env browser */
+/* eslint-disable no-use-before-define */
+import $ from 'jquery';
+
+class MitCircsAdminHome {
+
+  constructor(form) {
+    this.form = form;
+    this.init();
+  }
+
+  init() {
+    const {form} = this;
+    const $form = $(form);
+
+    $form.on('change', 'input[name=submissions]', () => {
+      const $checkboxes = $form.find('input[name=submissions]');
+      $form.find('.requires-selected').prop('disabled', !$checkboxes.is(":checked"));
+    });
+  }
+
+}
+
+function init() {
+  $('.mitcircs-submission-actions').each((i, el) => {
+    $(el).data('tabula.mitCircsAdminHome', new MitCircsAdminHome(el));
+  });
+}
+
+$(() => init());
