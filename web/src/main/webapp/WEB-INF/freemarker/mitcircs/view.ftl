@@ -33,6 +33,7 @@
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
+            <p><a href="<@routes.mitcircs.studenthome submission.student />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
             <#if submission.isEditable(user.apparentUser)>
               <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
             </#if>
@@ -89,7 +90,7 @@
     </#if>
     <#if submission.sensitiveEvidenceComments?has_content>
       <@components.section "Sensitive evidence">
-        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.pendingEvidenceDue includeTime = false /></p>
+        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.sensitiveEvidenceSeenOn includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>

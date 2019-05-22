@@ -9,9 +9,11 @@ import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissio
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.ReadyForPanel
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
 
 object MitCircsPendingEvidenceCommand {
@@ -66,6 +68,10 @@ trait MitCircsPendingEvidenceValidation extends SelfValidating {
       errors.rejectValue("file.upload", "file.missing")
 
     if(morePending) {
+      if(!submission.isEditable(currentUser)) {
+        errors.rejectValue("pendingEvidence", "mitigatingCircumstances.pendingEvidence.notAllowed")
+      }
+
       if(!pendingEvidence.hasText) {
         errors.rejectValue("pendingEvidence", "mitigatingCircumstances.pendingEvidence.required")
       }
