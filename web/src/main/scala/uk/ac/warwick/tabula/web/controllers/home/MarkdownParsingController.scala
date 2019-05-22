@@ -12,7 +12,7 @@ class MarkdownParsingController extends BaseController with MarkdownRendererImpl
 
   self: MarkdownRenderer =>
 
-  @RequestMapping(value = Array("/markdown/toHtml"), method = Array(POST), produces = Array("text/html"))
+  @RequestMapping(value = Array("/markdown/toHtml"), method = Array(POST), produces = Array("text/html; charset=utf-8"))
   @ResponseBody
   def toHtml(@RequestParam markdownString: String, user: CurrentUser): String = {
     if (user.exists) renderMarkdown(markdownString) else ""

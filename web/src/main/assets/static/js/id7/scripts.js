@@ -666,6 +666,11 @@ exports.initCollapsible = function ($el) {
       else $icon.addClass('fa fa-fw fa-chevron-right');
 
       var $title = $section.find('.section-title');
+
+      $title.keyup(function (e) {
+        if (e.keyCode === 13) $(e.target).click();
+      });
+
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend(' ').prepend($icon);
       } else {
@@ -852,8 +857,8 @@ $(function () {
   $body.tabulaPrepareSpinners();
 
   // repeat these hooks for modals when shown
-  $body.on('shown.bs.modal', function () {
-    var $m = $(this);
+  $body.on('shown.bs.modal', function (e) {
+    var $m = $(e.target);
     $m.find('input.date-time-picker').tabulaDateTimePicker();
     $m.find('input.date-picker').tabulaDatePicker();
     $m.find('input.time-picker').tabulaTimePicker();

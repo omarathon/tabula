@@ -10,51 +10,50 @@
 
 <#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
   <span id="${id}-container">
-		<#local has_late_formative = false />
+    <#local has_late_formative = false />
     <#if hide_late_formative><#list assignments as info><#if info.lateFormative><#local has_late_formative = true /><#break></#if></#list></#if>
     <#local has_assignments = (assignments!?size gt 0) />
-		<div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
-			<div class="clearfix">
-				<h4 class="section-title">${title}</h4>
-
-				<#if hide_late_formative && has_late_formative>
+    <div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
+      <div class="clearfix">
+        <h4 class="section-title" tabindex="0">${title}</h4>
+        <#if hide_late_formative && has_late_formative>
           <div class="checkbox">
-						<label>
-							<input type="checkbox" name="lateFormative" /> Show late formative assignments
-							<@fmt.help_popover id="route" content="Formative assignments do not count towards the final module mark." />
-						</label>
-					</div>
+            <label>
+              <input type="checkbox" name="lateFormative" /> Show late formative assignments
+              <@fmt.help_popover id="route" content="Formative assignments do not count towards the final module mark." />
+            </label>
+          </div>
           <script type="text/javascript">
-						jQuery(function ($) {
+            jQuery(function ($) {
               $('input[name=lateFormative]:checkbox').on('change', function () {
                 $('span.late_formative').toggleClass('hidden', !this.checked);
               });
             });
-					</script>
+          </script>
         </#if>
 
-				<div class="striped-section-contents">
-					<#if has_assignments || has_late_formative>
+        <div class="striped-section-contents">
+          <#if has_assignments || has_late_formative>
             <div class="row">
-							<div class="col-md-3">Details</div>
-							<div class="col-md-4 col-lg-5">Progress</div>
-							<div class="col-md-5 col-lg-4">Actions</div>
-						</div>
+              <div class="col-md-3">Details</div>
+              <div class="col-md-4 col-lg-5">Progress</div>
+              <div class="col-md-5 col-lg-4">Actions</div>
+            </div>
           </#if>
           <#if !has_assignments>
             <div class="item-info empty-message">
-							${empty_message}
-						</div>
+              ${empty_message}
+            </div>
           </#if>
           <#list assignments as info>
             <span id="assignment-container-${info.assignment.id}" class="<#if hide_late_formative && info.lateFormative>late_formative hidden</#if>">
-							<@student_assignment_info info show_submission_progress />
-						</span>
+              <@student_assignment_info info show_submission_progress />
+            </span>
           </#list>
-				</div>
-			</div>
-		</div>
-	</span>
+        </div>
+      </div>
+    </div>
+  </span>
 
   <#if !expand_by_default>
   <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
@@ -242,7 +241,8 @@
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
           <strong>Assignment open:</strong>
-          <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
+          <span class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+                data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
         </#local>
       <#elseif assignment.collectSubmissions && assignment.openEnded>
         <#local submissionStatus>
@@ -309,7 +309,8 @@
         <#elseif !(info.submission??) && info.studentDeadline??>
           <#local feedbackStatus>
             <strong>Assignment due:</strong>
-            <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />" data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
+            <span class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
+                  data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
           </#local>
         </#if>
       </#if>
@@ -319,12 +320,12 @@
     </div>
     <div class="col-md-3">
       <#if info.feedback??>
-        <#-- View feedback -->
+      <#-- View feedback -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View feedback
         </a>
       <#elseif info.submission?? && info.resubmittable>
-        <#-- Resubmission allowed -->
+      <#-- Resubmission allowed -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View receipt
         </a>
@@ -333,14 +334,14 @@
           Resubmit assignment
         </a>
       <#elseif info.submission??>
-        <#-- View receipt -->
+      <#-- View receipt -->
         <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
           View receipt
         </a>
       <#elseif info.submittable || (!assignment.collectSubmissions && assignment.extensionsPossible)>
         <p>
           <#if info.submittable>
-            <#-- First submission allowed -->
+          <#-- First submission allowed -->
             <a class="btn btn-block btn-primary" href="<@routes.cm2.assignment assignment />">
               Submit assignment
             </a>
@@ -367,7 +368,7 @@
           </#if>
         </#if>
       <#else>
-        <#-- Assume formative, so just show info -->
+      <#-- Assume formative, so just show info -->
         <a class="btn btn-block btn-default" href="<@routes.cm2.assignment assignment />">
           View details
         </a>
@@ -1237,7 +1238,8 @@
         <@bs3form.form_group>
           <label for="form-value-${formValue.id}">${field.label}</label>
           <#if formValue?? && formValue.value?has_content>
-            <textarea id="form-value-${formValue.id}" class="form-control feedback-comments" readonly="readonly" data-form-value-name="${formValue.name}">${formValue.value!""}</textarea>
+            <textarea id="form-value-${formValue.id}" class="form-control feedback-comments" readonly="readonly"
+                      data-form-value-name="${formValue.name}">${formValue.value!""}</textarea>
           <#else>
             <p>No comments added.</p>
           </#if>
