@@ -302,6 +302,10 @@
               Please contact your Departmental Administrator with any queries
             </#if>
           </#local>
+        <#elseif info.submission?? && !info.feedbackDeadline?? && info.submission.late>
+          <#local feedbackStatus>
+            There is no specific feedback due date as the submission was late.
+          </#local>
         <#elseif info.submission?? && !assignment.publishFeedback>
           <#local feedbackStatus>
             Feedback for this assignment is provided outside Tabula
