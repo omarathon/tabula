@@ -101,8 +101,10 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 
   @Min(0)
   var wordCountMin: JInteger = _
+
   @Max(Assignment.MaximumWordCount)
   var wordCountMax: JInteger = _
+
   @Length(max = 600)
   var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
 
@@ -117,6 +119,8 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   val maxFileAttachments: Int = 20
 
   val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
+
+  val defaultWordCountMax: JInteger = Assignment.MaximumWordCount
 
   var fileAttachmentTypes: JList[String] = JArrayList()
 
@@ -181,7 +185,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
       case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
       case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
       case (None, Some(max)) => wordCountMin = 0
-      case _ => // It's All Good
+      case _ => wordCountMax = Assignment.MaximumWordCount
     }
 
     if (fileAttachmentLimit < minimumFileAttachmentLimit) errors.rejectValue("fileAttachmentLimit", "assignment.attachments.outOfRange")
