@@ -1,5 +1,4 @@
 /* eslint-env browser */
-/* eslint-disable no-use-before-define */
 import $ from 'jquery';
 
 class MitCircsAdminHome {

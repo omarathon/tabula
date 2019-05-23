@@ -8,11 +8,12 @@ import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
-import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, Location, StringId, ToEntityReference, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, Location, StringId, ToEntityReference, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.UserGroupCacheManager
+import uk.ac.warwick.tabula.roles.MitigatingCircumstancesPanelMemberRoleDefinition
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsPanelService
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 import scala.collection.JavaConverters._
 
@@ -72,23 +73,13 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
   var lastModified: DateTime = DateTime.now()
 
   @transient
+  var permissionsService: PermissionsService = Wire[PermissionsService]
+
+  @transient
+  lazy val members: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(scope = this, MitigatingCircumstancesPanelMemberRoleDefinition)
+
+  @transient
   var mitCircsPanelService: Option[MitCircsPanelService] = Wire.option[MitCircsPanelService]
-
-  /** The members of the mitigating circumstances panel*/
-  @OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
-  @JoinColumn(name = "members")
-  private var _members = UserGroup.ofUsercodes
-
-  def members: UnspecifiedTypeUserGroup = {
-    mitCircsPanelService match {
-      case Some(service) => new UserGroupCacheManager(_members, service.memberHelper)
-      case _ => _members
-    }
-  }
-
-  def members_=(group: UserGroup) {
-    _members = group
-  }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id

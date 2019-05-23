@@ -50,7 +50,6 @@ abstract class AbstractCreateMitCircsPanelController extends BaseController
      .secondCrumbs(academicYearBreadcrumbs(createCommand.year)(Routes.Admin.home(department, _)): _*)
   }
 
-
   @PostMapping(params = Array("submit"))
   def create(
     @Valid @ModelAttribute("createCommand") createCommand: CreateMitCircsPanelCommand.Command,

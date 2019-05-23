@@ -1,12 +1,11 @@
 create table mitigatingcircumstancespanel(
-  id varchar(255),
+  id varchar(255) not null,
   name varchar not null,
   department_id varchar(255) not null,
   academicyear smallint not null,
   date timestamp(6),
   endDate timestamp(6),
   location varchar(255),
-  members varchar(255),
   lastmodified timestamp(6) not null,
   constraint pk_mitigatingcircumstancespanel primary key (id),
   constraint fk_mitigatingcircumstancespanel_department foreign key (department_id) references department(id)

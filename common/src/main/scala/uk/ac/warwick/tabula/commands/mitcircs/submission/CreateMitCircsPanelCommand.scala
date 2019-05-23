@@ -40,19 +40,20 @@ class CreateMitCircsPanelCommandInternal(val department: Department, val year: A
   self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent =>
 
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
-    val panel = new MitigatingCircumstancesPanel(department, year)
-    panel.name = name
-    panel.date = date.toDateTime(start)
-    panel.endDate = date.toDateTime(end)
+    val transientPanel = new MitigatingCircumstancesPanel(department, year)
+    transientPanel.name = name
+    transientPanel.date = date.toDateTime(start)
+    transientPanel.endDate = date.toDateTime(end)
     if (locationId.hasText) {
-      panel.location = MapLocation(location, locationId)
+      transientPanel.location = MapLocation(location, locationId)
     } else if (location.hasText) {
-      panel.location = NamedLocation(location)
+      transientPanel.location = NamedLocation(location)
     }
-    submissions.asScala.foreach(panel.addSubmission)
-    userLookup.getUsersByUserIds(members.asScala).values.filter(_.isFoundUser).foreach(panel.members.add)
-    mitCircsPanelService.saveOrUpdate(panel)
-    panel
+    submissions.asScala.foreach(transientPanel.addSubmission)
+
+    val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
+    panel.members.knownType.includedUserIds = members.asScala.toSet
+    mitCircsPanelService.saveOrUpdate(transientPanel)
   }
 }
 
@@ -78,6 +79,10 @@ trait CreateMitCircsPanelDescription extends Describable[MitigatingCircumstances
 
   def describe(d: Description) {
     d.properties("department" -> department)
+  }
+
+  override def describeResult(d: Description, result: Result): Unit = {
+    d.properties("mitigatingCircumstancesSubmissions" -> result.submissions.map(_.key.toString))
   }
 }
 
