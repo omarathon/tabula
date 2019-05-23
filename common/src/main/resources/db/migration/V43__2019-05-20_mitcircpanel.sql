@@ -4,6 +4,8 @@ create table mitigatingcircumstancespanel(
   department_id varchar(255) not null,
   academicyear smallint not null,
   date timestamp(6),
+  endDate timestamp(6),
+  location varchar(255),
   members varchar(255),
   lastmodified timestamp(6) not null,
   constraint pk_mitigatingcircumstancespanel primary key (id),

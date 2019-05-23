@@ -13,6 +13,11 @@ class MitCircsAdminHome {
     const {form} = this;
     const $form = $(form);
 
+    $form.on('change', '.check-all', (e) => {
+      const $checkAll = $(e.target);
+      $form.find('input[name=submissions]').prop('checked', $checkAll.is(':checked')).last().trigger('change');
+    });
+
     $form.on('change', 'input[name=submissions]', () => {
       const $checkboxes = $form.find('input[name=submissions]');
       $form.find('.requires-selected').prop('disabled', !$checkboxes.is(":checked"));

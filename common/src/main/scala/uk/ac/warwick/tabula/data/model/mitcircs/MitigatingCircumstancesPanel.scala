@@ -3,11 +3,12 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 import javax.persistence.CascadeType.ALL
 import javax.persistence.{Access, AccessType, Basic, CascadeType, Column, Entity, FetchType, JoinColumn, ManyToOne, OneToMany, OneToOne}
 import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.DateTime
+import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
-import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, StringId, ToEntityReference, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats, ToString}
+import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, Location, StringId, ToEntityReference, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.UserGroupCacheManager
@@ -29,11 +30,19 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
     this.academicYear = academicYear
   }
 
-  @Column(nullable = true)
+  @Column(nullable = false)
   var name: String = _
 
   @Column(nullable = true)
-  var date: LocalDate = _
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var date: DateTime = _
+
+  @Column(nullable = true)
+  @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
+  var endDate: DateTime = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
+  var location: Location = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
   @JoinColumn(name = "department_id")

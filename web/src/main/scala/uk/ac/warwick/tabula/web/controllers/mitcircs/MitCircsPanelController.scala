@@ -14,6 +14,8 @@ import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent,
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController, DepartmentScopedController}
 
+import scala.collection.JavaConverters._
+
 abstract class AbstractCreateMitCircsPanelController extends BaseController
   with DepartmentScopedController
   with AcademicYearScopedController
@@ -34,13 +36,20 @@ abstract class AbstractCreateMitCircsPanelController extends BaseController
     @PathVariable department: Department,
     @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear],
     user: CurrentUser
-  ): CreateMitCircsPanelCommand.Command = CreateMitCircsPanelCommand(department, activeAcademicYear.getOrElse(AcademicYear.now()))
+  ): CreateMitCircsPanelCommand.Command = CreateMitCircsPanelCommand(department, activeAcademicYear.getOrElse(AcademicYear.now()), user.apparentUser)
 
   @RequestMapping(params = Array("!submit"))
-  def form(@ModelAttribute("createCommand") createCommand: CreateMitCircsPanelCommand.Command, @PathVariable department: Department): Mav =
-    Mav("mitcircs/panel/form", "academicYear" -> createCommand.year)
-      .crumbs(MitCircsBreadcrumbs.Admin.Home(department, active = true))
-      .secondCrumbs(academicYearBreadcrumbs(createCommand.year)(Routes.Admin.home(department, _)): _*)
+  def form(@ModelAttribute("createCommand") createCommand: CreateMitCircsPanelCommand.Command, @PathVariable department: Department): Mav = {
+    val (hasPanel, noPanel) = createCommand.submissions.asScala.partition(_.panel.isDefined)
+
+    Mav("mitcircs/panel/form",
+      "hasPanel" -> hasPanel,
+      "noPanel" -> noPanel,
+      "academicYear" -> createCommand.year
+    ).crumbs(MitCircsBreadcrumbs.Admin.Home(department, active = true))
+     .secondCrumbs(academicYearBreadcrumbs(createCommand.year)(Routes.Admin.home(department, _)): _*)
+  }
+
 
   @PostMapping(params = Array("submit"))
   def create(

@@ -19,7 +19,7 @@ class MitCircsPanelForm {
       $target.remove();
 
       if ($table.find('tbody tr').length === 0) {
-        $table.replaceWith('<div class="form-control-static">No submissions have been added to this panel</div>');
+        $table.replaceWith('<div class="form-control-static">No submissions</div>');
       }
     });
   }

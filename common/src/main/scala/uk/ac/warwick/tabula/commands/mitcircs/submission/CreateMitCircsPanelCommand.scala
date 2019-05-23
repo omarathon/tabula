@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.LocalDate
+import org.joda.time.{LocalDate, LocalTime}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Department, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import CreateMitCircsPanelCommand._
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 
 import scala.collection.JavaConverters._
@@ -23,26 +24,33 @@ object CreateMitCircsPanelCommand {
   type Command = Appliable[Result] with CreateMitCircsPanelState with CreateMitCircsPanelRequest with SelfValidating
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Modify
 
-  def apply(department: Department, year: AcademicYear) = new CreateMitCircsPanelCommandInternal(department, year)
+  def apply(department: Department, year: AcademicYear, currentUser: User) = new CreateMitCircsPanelCommandInternal(department, year, currentUser)
     with ComposableCommand[MitigatingCircumstancesPanel]
     with CreateMitCircsPanelRequest
     with CreateMitCircsPanelValidation
     with CreateMitCircsPanelPermissions
     with CreateMitCircsPanelDescription
     with AutowiringMitCircsPanelServiceComponent
+    with AutowiringUserLookupComponent
 }
 
-class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear)
+class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesPanel] with CreateMitCircsPanelState with CreateMitCircsPanelValidation {
 
-  self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent =>
+  self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent =>
 
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val panel = new MitigatingCircumstancesPanel(department, year)
     panel.name = name
-    panel.date = date
+    panel.date = date.toDateTime(start)
+    panel.endDate = date.toDateTime(end)
+    if (locationId.hasText) {
+      panel.location = MapLocation(location, locationId)
+    } else if (location.hasText) {
+      panel.location = NamedLocation(location)
+    }
     submissions.asScala.foreach(panel.addSubmission)
-    members.asScala.foreach(panel.members.add)
+    userLookup.getUsersByUserIds(members.asScala).values.filter(_.isFoundUser).foreach(panel.members.add)
     mitCircsPanelService.saveOrUpdate(panel)
     panel
   }
@@ -76,11 +84,18 @@ trait CreateMitCircsPanelDescription extends Describable[MitigatingCircumstances
 trait CreateMitCircsPanelState {
   val department: Department
   val year: AcademicYear
+  val currentUser: User
 }
 
 trait CreateMitCircsPanelRequest {
+  self: CreateMitCircsPanelState =>
+
   var name: String = _
   var date: LocalDate = _
+  var start: LocalTime = _
+  var end: LocalTime =_
+  var location: String = _
+  var locationId: String = _
   var submissions: JList[MitigatingCircumstancesSubmission] = JArrayList()
-  var members: JList[User] = JArrayList()
+  var members: JList[String] = JArrayList(currentUser.getUserId)
 }

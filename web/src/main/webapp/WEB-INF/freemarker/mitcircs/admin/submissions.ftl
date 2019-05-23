@@ -6,7 +6,7 @@
     <table class="table table-condensed">
       <thead>
         <tr>
-          <th></th>
+          <th><input type="checkbox" class="check-all" title="Select all/none"></th>
           <th>Reference</th>
           <th>Student</th>
           <th>Affected dates</th>
@@ -21,7 +21,8 @@
           <td><input type="checkbox" name="submissions" value="${submission.key}"></td>
           <td><a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a></td>
           <td>
-            ${submission.student.universityId} <@pl.profile_link submission.student.universityId />
+            <@pl.profile_link submission.student.universityId />
+            ${submission.student.universityId}
             ${submission.student.firstName}
             ${submission.student.lastName}
           </td>
