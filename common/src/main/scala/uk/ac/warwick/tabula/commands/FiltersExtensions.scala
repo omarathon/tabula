@@ -40,6 +40,10 @@ object FiltersExtensions {
       "assignment" -> AliasAndJoinType("assignment"),
       "assignment.module" -> AliasAndJoinType("module"),
       "module.adminDepartment" -> AliasAndJoinType("department")
+    ),
+
+    "member" -> Seq(
+      "member" -> AliasAndJoinType("member")
     )
   ).toMap
 
