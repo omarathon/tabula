@@ -40,7 +40,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   def permissionsParents: Stream[PermissionsTarget] =
     Option(assignment).toStream #::: profileService.getAllMembersWithUserId(usercode).toStream
 
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @ManyToOne(optional = true, fetch = FetchType.LAZY)
   @JoinColumn(name = "universityid", insertable = false, updatable = false)
   var member: Member = _
 
@@ -54,8 +54,8 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
   @Formula("(select coalesce(expiryDate, assignment.closeDate) from assignment where assignment.id = assignment_id and assignment.openEnded = false)")
   var expiryDateOrAssignmentCloseDate: DateTime = _
 
-  @Formula("(select date_part('day', coalesce(expiryDate, requestedExpiryDate, assignment.closeDate) - assignment.closeDate) from assignment where assignment.id = assignment_id)")
-  var lengthDays: Int = _
+  @Formula("(select date_part('day', coalesce(expiryDate, requestedExpiryDate, assignment.closeDate) - assignment.closeDate) from assignment where assignment.id = assignment_id and assignment.openEnded = false)")
+  var lengthDays: JInteger = _
 
   override def humanReadableId: String = s"Extension for $usercode for ${assignment.humanReadableId}"
 
