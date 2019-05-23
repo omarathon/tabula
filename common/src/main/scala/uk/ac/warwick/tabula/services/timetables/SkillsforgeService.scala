@@ -37,8 +37,12 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
     // TAB-6942
     private def shouldQuerySkillsforge(member: Member): Boolean = features.skillsforge && existsInSkillsforge(member)
 
+    private val appropriateEconomicsCourses = Set("TECA-L1PL", "TECA-L1PJ")
+
     private def existsInSkillsforge(member: Member): Boolean = member match {
-      case s: StudentMember => s.isPGR || (s.homeDepartment.code == "ec" && s.isPGT)
+      case s: StudentMember => s.activeNow && s.freshOrStaleStudentCourseDetails.exists(scd => {
+        scd.course.code.startsWith("R") || appropriateEconomicsCourses(scd.course.code)
+      })
       case _ => {
         if (logger.isDebugEnabled) logger.debug(s"Not querying Skillsforge for user ${member.userId} as they are not the right type of user.")
         false
