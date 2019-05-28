@@ -67,14 +67,24 @@
           <#list result.todo as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
+                <#assign assignment = enhancedAssignment.assignment />
                 <h4>
-                  <#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
-                    <@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
+                  <#if can.do_as_real_user('Submission.Read', assignment.module)>
+                    <#assign module_url><@routes.cm2.depthome assignment.module /></#assign>
+                    <@fmt.module_name_with_link assignment.module module_url />
                   <#else>
-                    <@fmt.module_name enhancedAssignment.assignment.module />
+                    <@fmt.module_name assignment.module />
                   </#if>
                 </h4>
-                <h4>${enhancedAssignment.assignment.name!}</h4>
+                <h4>
+                  <#if can.do_as_real_user('Submission.Read', assignment.module)>
+                    <a href="<@routes.cm2.assignmentSubmissionSummary assignment />">
+                      <span class="ass-name">${assignment.name}</span>
+                    </a>
+                  <#else>
+                    <span class="ass-name">${assignment.name}</span>
+                  </#if>
+                </h4>
               </div>
               <#if enhancedAssignment.submissionDeadline?has_content>
                 <div class="col-md-4">

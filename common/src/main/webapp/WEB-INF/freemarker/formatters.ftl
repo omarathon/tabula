@@ -141,9 +141,12 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro module_name_with_link module link withFormatting=true><#compress>
 	<#if withFormatting>
-		<a href=${link}><span class="mod-code">${module.code?upper_case}</span></a> <span class="mod-name">${module.name}</span>
+		<a href="${link}" class="tabula-tooltip" data-title="Return to module management for <@fmt.module_name module false />">
+			<span class="mod-code">${module.code?upper_case}</span>
+		</a>
+		<span class="mod-name">${module.name}</span>
 	<#else>
-		<a href=${link}>${module.code?upper_case}</a> ${module.name}
+		<a href="${link}">${module.code?upper_case}</a> ${module.name}
 	</#if>
 </#compress></#macro>
 
