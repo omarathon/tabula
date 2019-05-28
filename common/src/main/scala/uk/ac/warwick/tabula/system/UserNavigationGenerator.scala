@@ -62,7 +62,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
       (canDeptAdmin || moduleService.departmentsWithPermission(user, Permissions.Department.ExamGrids).nonEmpty)
 
     val canManageMitigatingCircumstances = user.isStaff &&
-      permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Manage).nonEmpty
+      permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Read).nonEmpty
 
     val modelMap = Map(
       "user" -> user,

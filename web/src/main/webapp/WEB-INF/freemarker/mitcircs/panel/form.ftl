@@ -103,8 +103,16 @@
       <@f.input path="location" cssClass="form-control location-picker" />
     </@bs3form.labelled_form_group>
 
+    <@bs3form.labelled_form_group path="chair" labelText="Panel chair">
+      <@bs3form.flexipicker path="chair" placeholder="User name" list=false object=false multiple=false />
+    </@bs3form.labelled_form_group>
+
+    <@bs3form.labelled_form_group path="secretary" labelText="Panel secretary">
+      <@bs3form.flexipicker path="secretary" placeholder="User name" list=false object=false multiple=false />
+    </@bs3form.labelled_form_group>
+
     <@bs3form.labelled_form_group path="members" labelText="Panel members">
-      <@bs3form.flexipicker path="members" placeholder="User name" list=true object=true multiple=true auto_multiple=false />
+      <@bs3form.flexipicker path="members" placeholder="User name" list=true object=false multiple=true auto_multiple=false />
     </@bs3form.labelled_form_group>
 
     <#if hasPanel?has_content>
