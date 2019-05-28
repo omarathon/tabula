@@ -1,61 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "*/mitcircs_components.ftl" as components />
 
 <#escape x as x?html>
-
-  <#macro submissionTable submissions panel=false>
-    <#if submissions?has_content>
-      <table class="mitcircs-panel-form__submissions table table-condensed">
-        <thead>
-        <tr>
-          <th>Reference</th>
-          <th>Student</th>
-          <th>Affected dates</th>
-          <th>Last updated</th>
-          <#if panel><th>Current panel</th></#if>
-          <th></th>
-        </tr>
-        </thead>
-        <tbody>
-        <#list submissions as submission>
-          <tr>
-            <td>
-              <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
-              <@f.hidden path="submissions" value="${submission.key}" />
-            </td>
-            <td>
-              <@pl.profile_link submission.student.universityId />
-              ${submission.student.universityId}
-              ${submission.student.firstName}
-              ${submission.student.lastName}
-            </td>
-            <td>
-              <@fmt.date date=submission.startDate includeTime=false relative=false />
-              &mdash;
-              <#if submission.endDate??>
-                <@fmt.date date=submission.endDate includeTime=false relative=false />
-              <#else>
-                <span class="very-subtle">(ongoing)</span>
-              </#if>
-            </td>
-            <td>
-              <@fmt.date date=submission.lastModified />
-              <#if submission.unreadByOfficer>
-                <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
-              </#if>
-            </td>
-            <#if panel><td>${submission.panel.name}</td></#if>
-            <td>
-              <button class="remove btn btn-sm">Remove</button>
-            </td>
-          </tr>
-        </#list>
-        </tbody>
-      </table>
-    <#else>
-      <div class="form-control-static">No submissions</div>
-    </#if>
-  </#macro>
-
 
   <div id="profile-modal" class="modal fade profile-subset"></div>
 
@@ -118,12 +64,12 @@
     <#if hasPanel?has_content>
       <@bs3form.labelled_form_group path="" labelText="Submissions being moved to this panel">
         <p>The following submissions have already been added to another panel. They will be moved to this panel.</p>
-        <@submissionTable submissions=hasPanel panel=true />
+        <@components.submissionTable submissions=hasPanel panel=true />
       </@bs3form.labelled_form_group>
     </#if>
 
     <@bs3form.labelled_form_group path="submissions" labelText="Submissions being added to this panel">
-      <@submissionTable noPanel />
+      <@components.submissionTable noPanel />
     </@bs3form.labelled_form_group>
 
     <div class="fix-footer">
