@@ -19,13 +19,17 @@
             <tr>
               <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
               <td>
-                <@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
+                <#if panel.date??>
+                  <@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
+                <#else>
+                    <span class="very-subtle">TBC</span>
+                </#if>
               </td>
               <td><#if panel.location??><@fmt.location panel.location /></#if></td>
-              <td><#if panel.chair??>${panel.chair.fullName}</#if></td>
-              <td><#if panel.secretary??>${panel.secretary.fullName}</#if></td>
+              <td><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
+              <td><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
               <td><#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list></td>
-              <td>${panel.submissions?size}</td>
+              <td><#if panel.submissions??>${panel.submissions?size}<#else>0</#if></td>
             </tr>
           </tbody>
         </#list>

@@ -208,6 +208,8 @@
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesNoteIdConverter" />
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesMessageIdConverter" />
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
+    <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationConverter"/>
   </util:list>
 
   <bean id="typeConverter"

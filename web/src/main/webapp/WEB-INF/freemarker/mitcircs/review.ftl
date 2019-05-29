@@ -66,6 +66,7 @@
               <#elseif submission.state.entryName == "Ready For Panel">
                 <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
               </#if>
+              <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
               <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
             <#elseif submission.panel??>
               <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>

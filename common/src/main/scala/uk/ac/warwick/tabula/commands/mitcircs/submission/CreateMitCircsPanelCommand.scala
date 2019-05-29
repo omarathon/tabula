@@ -42,8 +42,10 @@ class CreateMitCircsPanelCommandInternal(val department: Department, val year: A
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val transientPanel = new MitigatingCircumstancesPanel(department, year)
     transientPanel.name = name
-    transientPanel.date = date.toDateTime(start)
-    transientPanel.endDate = date.toDateTime(end)
+    if(date != null) {
+      if(start != null) transientPanel.date = date.toDateTime(start)
+      if(end != null) transientPanel.endDate = date.toDateTime(end)
+    }
     if (locationId.hasText) {
       transientPanel.location = MapLocation(location, locationId)
     } else if (location.hasText) {
