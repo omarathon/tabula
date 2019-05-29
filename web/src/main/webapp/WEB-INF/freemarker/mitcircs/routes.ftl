@@ -44,6 +44,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
   </#if>
 </#macro>
 
+<#-- View panels -->
+<#macro viewPanel panel><@_u page = "/panel/${panel.id}" /></#macro>
+
 <#-- These get posted to from both the view (as the student) and the review (as the MCO) -->
 <#macro messages submission><@_u page="/submission/${submission.key?c}/messages" /></#macro>
 <#macro renderMessageAttachment message file><@_u page="/submission/${message.submission.key?c}/messages/${message.id}/supporting-file/${file.name}" /></#macro>

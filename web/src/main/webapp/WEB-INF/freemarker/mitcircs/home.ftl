@@ -17,7 +17,7 @@
         <#list panels as panel>
           <tbody>
             <tr>
-              <td>${panel.name}</td>
+              <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
               <td>
                 <@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
               </td>

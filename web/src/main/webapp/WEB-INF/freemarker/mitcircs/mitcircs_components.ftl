@@ -86,3 +86,59 @@
     </ul>
   </#if>
 </#macro>
+
+<#macro submissionTable submissions actions=true panel=false>
+  <#if submissions?has_content>
+    <table class="mitcircs-panel-form__submissions table table-condensed">
+      <thead>
+      <tr>
+        <th>Reference</th>
+        <th>Student</th>
+        <th>Affected dates</th>
+        <th>Last updated</th>
+        <#if panel><th>Current panel</th></#if>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <#list submissions as submission>
+        <tr>
+          <td>
+            <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+            <#if actions><@f.hidden path="submissions" value="${submission.key}" /></#if>
+          </td>
+          <td>
+            <@pl.profile_link submission.student.universityId />
+            ${submission.student.universityId}
+            ${submission.student.firstName}
+            ${submission.student.lastName}
+          </td>
+          <td>
+            <@fmt.date date=submission.startDate includeTime=false relative=false />
+            &mdash;
+            <#if submission.endDate??>
+              <@fmt.date date=submission.endDate includeTime=false relative=false />
+            <#else>
+              <span class="very-subtle">(ongoing)</span>
+            </#if>
+          </td>
+          <td>
+            <@fmt.date date=submission.lastModified />
+            <#if submission.unreadByOfficer>
+              <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
+            </#if>
+          </td>
+          <#if panel><td>${submission.panel.name}</td></#if>
+          <#if actions>
+            <td>
+              <button class="remove btn btn-sm">Remove</button>
+            </td>
+          </#if>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+  <#else>
+    <div class="form-control-static">No submissions</div>
+  </#if>
+</#macro>

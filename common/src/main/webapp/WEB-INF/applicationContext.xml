@@ -207,6 +207,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesNoteIdConverter" />
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesMessageIdConverter" />
+    <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
   </util:list>
 
   <bean id="typeConverter"
@@ -235,6 +236,7 @@
         <bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordApprovalTypeConverter"/>
         <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesKeyConverter"/>
+        <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
       </list>
     </property>
   </bean>
