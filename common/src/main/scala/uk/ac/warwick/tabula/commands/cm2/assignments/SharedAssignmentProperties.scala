@@ -185,7 +185,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
       case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
       case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
       case (None, Some(max)) => wordCountMin = 0
-      case _ => wordCountMax = Assignment.MaximumWordCount
+      case _ => // It's All Good
     }
 
     if (fileAttachmentLimit < minimumFileAttachmentLimit) errors.rejectValue("fileAttachmentLimit", "assignment.attachments.outOfRange")
