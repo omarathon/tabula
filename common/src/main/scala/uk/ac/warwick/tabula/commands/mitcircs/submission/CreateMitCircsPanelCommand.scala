@@ -50,9 +50,10 @@ class CreateMitCircsPanelCommandInternal(val department: Department, val year: A
       transientPanel.location = NamedLocation(location)
     }
     submissions.asScala.foreach(transientPanel.addSubmission)
-
+    if(chair.hasText) transientPanel.chair = userLookup.getUserByUserId(chair)
+    if(secretary.hasText) transientPanel.secretary = userLookup.getUserByUserId(secretary)
     val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
-    panel.members.knownType.includedUserIds = members.asScala.toSet
+    panel.viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
     mitCircsPanelService.saveOrUpdate(transientPanel)
   }
 }
@@ -102,5 +103,7 @@ trait CreateMitCircsPanelRequest {
   var location: String = _
   var locationId: String = _
   var submissions: JList[MitigatingCircumstancesSubmission] = JArrayList()
-  var members: JList[String] = JArrayList(currentUser.getUserId)
+  var chair: String = currentUser.getUserId
+  var secretary: String = _
+  var members: JList[String] = JArrayList()
 }
