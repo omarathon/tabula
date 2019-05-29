@@ -18,7 +18,7 @@
     <#if !assignment.openEnded>
       <#assign time_remaining = durationFormatter(assignment.closeDate) />
       <p>
-        <#if extension??>
+        <#if extension?? && extension.relevant>
           <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 
           <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
