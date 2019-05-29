@@ -95,7 +95,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
   def expiryDate: Option[DateTime] = {
     if (_expiryDate == null || state != Approved || assignment.openEnded || assignment.closeDate == null) None
-    else Option(_expiryDate).filter(assignment.closeDate.isBefore)
+    else Option(_expiryDate)
   }
 
   @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
