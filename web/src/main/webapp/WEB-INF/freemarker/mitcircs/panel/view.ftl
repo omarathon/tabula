@@ -7,7 +7,7 @@
     <div class="row">
       <div class="col-sm-6 col-md-7">
         <@components.detail label="Date" condensed=true>
-          <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime /></#if>
+          <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime /><#else><span class="very-subtle">TBC</span></#if>
         </@components.detail>
           <#if panel.location??><@components.detail label="Location" condensed=true><@fmt.location panel.location /></@components.detail></#if>
         <@components.detail label="Panel chair" condensed=true>

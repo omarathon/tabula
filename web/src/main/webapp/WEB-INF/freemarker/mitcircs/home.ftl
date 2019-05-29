@@ -25,7 +25,7 @@
                     <span class="very-subtle">TBC</span>
                 </#if>
               </td>
-              <td><#if panel.location??><@fmt.location panel.location /><#else><span class="very-subtle">TBC</span></#if></td>
+              <td><#if panel.location??><@fmt.location panel.location /></#if></td>
               <td><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
               <td><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
               <td><#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list></td>

@@ -5,7 +5,7 @@
   <section class="mitcircs-form ">
 
     <article class="mitcircs-form__fields">
-      <@f.form id="recordOutcomesForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
+      <@f.form id="recordOutcomesForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection">
 
         <@mitcirc.question_section
           question = "Mitigation grade"
