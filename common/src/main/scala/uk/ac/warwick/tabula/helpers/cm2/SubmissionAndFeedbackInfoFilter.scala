@@ -467,7 +467,7 @@ object SubmissionAndFeedbackInfoFilters {
     case object SelectedForModeration extends SubmissionAndFeedbackInfoFilter {
       override def description: String = "Selected for moderation"
 
-      override def apply(assignment: Assignment): Boolean = assignment.cm2MarkingWorkflow.workflowType == SelectedModeratedMarking
+      override def apply(assignment: Assignment): Boolean = Option(assignment.cm2MarkingWorkflow).exists(_.workflowType == SelectedModeratedMarking)
 
       override def predicate(item: AssignmentSubmissionStudentInfo): Boolean = item.coursework.enhancedFeedback.exists(ef => ef.feedback.outstandingStages.asScala.contains(SelectedModerationModerator) || ef.feedback.wasModerated)
     }
