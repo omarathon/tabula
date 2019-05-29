@@ -214,6 +214,34 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     lastViewedByOfficer.forall(_.isBefore(lastModified))
   }
 
+  // Outcomes
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingUserType")
+  var outcomeGrading: MitigatingCircumstancesGrading = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "outcomeReasons")
+  private var encryptedOutcomeReasons: CharSequence = _
+  def outcomeReasons: String = Option(encryptedOutcomeReasons).map(_.toString).orNull
+  def outcomeReasons_=(outcomeReasons: String): Unit = encryptedOutcomeReasons = outcomeReasons
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
+  var boardRecommendations: Seq[MitCircsExamBoardRecommendation] = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "boardRecommendationOther")
+  private var encryptedBoardRecommendationOther: CharSequence = _
+  // free text for use when the boardRecommendations type includes Other
+  def boardRecommendationOther: String = Option(encryptedBoardRecommendationOther).map(_.toString).orNull
+  def boardRecommendationOther_=(boardRecommendationOther: String): Unit = encryptedBoardRecommendationOther = boardRecommendationOther
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "boardRecommendationComments")
+  private var encryptedBoardRecommendationComments: CharSequence = _
+  // free text for use when the boardRecommendations type includes Other
+  def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
+  def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
+
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
   @Column(name = "state", nullable = false)
@@ -251,6 +279,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def notReadyForPanel(): Unit = {
     require(_state == ReadyForPanel, "Cannot set as not ready for panel")
     _state = MitigatingCircumstancesSubmissionState.Submitted
+  }
+
+  def outcomesRecorded(): Unit = {
+    require(Seq(Submitted, ReadyForPanel, OutcomesRecorded).contains(_state), "Cannot record outcomes until this has been submitted by the student")
+    _state = MitigatingCircumstancesSubmissionState.OutcomesRecorded
   }
 
   def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft

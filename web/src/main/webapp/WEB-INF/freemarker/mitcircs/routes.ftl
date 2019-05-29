@@ -34,6 +34,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
 <#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>
+<#macro recordOutcomes submission><@_u page = "/submission/${submission.key?c}/outcomes" /></#macro>
 
 <#-- Manage panels (as the MCO) -->
 <#macro createPanel department academicYear="">
