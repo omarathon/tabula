@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data.model.mitcircs
 
 import javax.persistence.CascadeType.ALL
-import javax.persistence.{Access, AccessType, Basic, CascadeType, Column, Entity, FetchType, JoinColumn, ManyToOne, OneToMany, OneToOne}
+import javax.persistence.{Access, AccessType, Basic, Column, Entity, FetchType, JoinColumn, ManyToOne, OneToMany}
 import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalTime}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.MitigatingCircumstancesPanelMemberRoleDefinition
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsPanelService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -41,6 +42,9 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
   @Column(nullable = true)
   @DateTimeFormat(pattern = DateFormats.DateTimePickerPattern)
   var endDate: DateTime = _
+
+  def startTime: LocalTime = date.toLocalTime
+  def endTime: LocalTime = endDate.toLocalTime
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.LocationUserType")
   var location: Location = _
@@ -75,8 +79,18 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
   @transient
   var permissionsService: PermissionsService = Wire[PermissionsService]
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var chair: User = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var secretary: User = _
+
   @transient
-  lazy val members: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(scope = this, MitigatingCircumstancesPanelMemberRoleDefinition)
+  private lazy val _viewers: UnspecifiedTypeUserGroup = permissionsService.ensureUserGroupFor(scope = this, MitigatingCircumstancesPanelMemberRoleDefinition)
+  def viewers: Set[User] = _viewers.users
+  def viewers_=(userIds: Set[String]): Unit = _viewers.knownType.includedUserIds = userIds
+
+  def members: Set[User] = viewers -- Set(chair, secretary)
 
   @transient
   var mitCircsPanelService: Option[MitCircsPanelService] = Wire.option[MitCircsPanelService]

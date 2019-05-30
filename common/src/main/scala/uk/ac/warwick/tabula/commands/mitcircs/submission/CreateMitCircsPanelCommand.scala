@@ -42,17 +42,20 @@ class CreateMitCircsPanelCommandInternal(val department: Department, val year: A
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val transientPanel = new MitigatingCircumstancesPanel(department, year)
     transientPanel.name = name
-    transientPanel.date = date.toDateTime(start)
-    transientPanel.endDate = date.toDateTime(end)
+    if(date != null) {
+      if(start != null) transientPanel.date = date.toDateTime(start)
+      if(end != null) transientPanel.endDate = date.toDateTime(end)
+    }
     if (locationId.hasText) {
       transientPanel.location = MapLocation(location, locationId)
     } else if (location.hasText) {
       transientPanel.location = NamedLocation(location)
     }
     submissions.asScala.foreach(transientPanel.addSubmission)
-
+    if(chair.hasText) transientPanel.chair = userLookup.getUserByUserId(chair)
+    if(secretary.hasText) transientPanel.secretary = userLookup.getUserByUserId(secretary)
     val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
-    panel.members.knownType.includedUserIds = members.asScala.toSet
+    panel.viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
     mitCircsPanelService.saveOrUpdate(transientPanel)
   }
 }
@@ -102,5 +105,7 @@ trait CreateMitCircsPanelRequest {
   var location: String = _
   var locationId: String = _
   var submissions: JList[MitigatingCircumstancesSubmission] = JArrayList()
-  var members: JList[String] = JArrayList(currentUser.getUserId)
+  var chair: String = currentUser.getUserId
+  var secretary: String = _
+  var members: JList[String] = JArrayList()
 }

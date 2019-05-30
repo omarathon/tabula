@@ -8,25 +8,10 @@ import uk.ac.warwick.tabula.commands.mitcircs.AdminHomeCommand
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState
 import uk.ac.warwick.tabula.mitcircs.web.Routes
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController, DepartmentScopedController, DepartmentsAndModulesWithPermission}
-
-@Controller
-@RequestMapping(value = Array("/mitcircs"))
-class AdminDeptListController extends BaseController with DepartmentsAndModulesWithPermission with AutowiringModuleAndDepartmentServiceComponent {
-
-  @RequestMapping
-  def render: Mav = {
-    val departments = allDepartmentsForPermission(user, Permissions.MitigatingCircumstancesSubmission.Manage)
-    if (departments.size == 1) Redirect(Routes.Admin.home(departments.head))
-    else {
-      Mav("mitcircs/admin/department-list", "departments" -> departments)
-    }
-  }
-
-}
+import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, BaseController, DepartmentScopedController}
 
 abstract class AbstractAdminDeptController
   extends BaseController
@@ -53,7 +38,7 @@ abstract class AbstractAdminDeptController
 
   @RequestMapping(params = Array("!ajax"), headers = Array("!X-Requested-With"))
   def home(@ModelAttribute("command") command: AdminHomeCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
-    Mav("mitcircs/admin/home",
+    Mav("mitcircs/admin/admin-home",
       "academicYear" -> command.year)
       .crumbs(MitCircsBreadcrumbs.Admin.Home(department, active = true))
       .secondCrumbs(academicYearBreadcrumbs(command.year)(Routes.Admin.home(department, _)): _*)

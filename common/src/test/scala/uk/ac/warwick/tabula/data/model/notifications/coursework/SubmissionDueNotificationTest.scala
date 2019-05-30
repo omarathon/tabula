@@ -85,6 +85,15 @@ class SubmissionDueNotificationTest extends TestBase with Mockito {
       notification.recipients should be(Seq(users(1)))
     }
 
+    withClue("Shouldn't be sent if the extension's expiry date is before the assignment close date") {
+      assignment.extensionService.getAllExtensionsByUserId(assignment) returns Map(anExtension.usercode -> Seq(anExtension))
+      assignment.extensionService.getApprovedExtensionsByUserId(assignment) returns Map(anExtension.usercode -> anExtension)
+      assignment.closeDate = DateTime.now.plusWeeks(3)
+      notification.recipients should be(Seq())
+    }
+
+    assignment.closeDate = DateTime.now.plusDays(1)
+
     withClue("Shouldn't be sent if there is a more recent, approved extension") {
       val laterExtension = new Extension
       laterExtension._universityId = "0133454"

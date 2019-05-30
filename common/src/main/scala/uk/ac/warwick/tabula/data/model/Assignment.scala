@@ -475,7 +475,10 @@ class Assignment
     */
   def submissionDeadline(usercode: String): DateTime =
     if (openEnded) null
-    else approvedExtensions.get(usercode).flatMap(_.expiryDate).getOrElse(closeDate)
+    else approvedExtensions.get(usercode) match {
+      case (Some(extension)) if extension.relevant => extension.expiryDate.getOrElse(closeDate)
+      case _ => closeDate
+  }
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 

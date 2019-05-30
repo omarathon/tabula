@@ -186,7 +186,7 @@ trait CourseworkHomepageStudentAssignments extends TaskBenchmarking {
       if (assignment.collectSubmissions) submission.flatMap(assignment.feedbackDeadlineForSubmission)
       else assignment.feedbackDeadline.flatMap { wholeAssignmentDeadline =>
         // If we have an extension, use the extension's expiry date
-        extension.flatMap(_.feedbackDeadline).map(_.toLocalDate).orElse(Some(wholeAssignmentDeadline))
+        extension.filter(_.relevant).flatMap(_.feedbackDeadline).map(_.toLocalDate).orElse(Some(wholeAssignmentDeadline))
       }
 
     StudentAssignmentInformation(

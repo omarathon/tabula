@@ -1,3 +1,5 @@
+<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+
 <#macro identity_info key value>
   <#if value?has_content>
     <div class="row form-horizontal">
@@ -63,4 +65,47 @@
 
 <#macro question_hint hint>
   <p class="mitcircs-form__fields__section__hint">(${hint})</p>
+</#macro>
+
+<#macro checkboxes enumValues enumField>
+  <#list enumValues as value>
+    <div class="checkbox">
+      <label>
+        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
+      </label>
+    </div>
+  </#list>
+</#macro>
+
+<#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
+  <#list enumValues as value>
+    <div
+      class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>"
+      <#if value.evidenceGuidance??>data-evidenceguidance="${value.evidenceGuidance}"</#if>
+    >
+      <label>
+        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
+        <#if additionalDescriptions[value.entryName]?? >- ${additionalDescriptions[value.entryName]}</#if>
+      </label>
+      <#if value.entryName == "Other">
+        <@f.input path="${otherField}" cssClass="form-control other-input" />
+      </#if>
+      <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
+    </div>
+    <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
+  </#list>
+  <@bs3form.errors path="${enumField}" />
+</#macro>
+
+<#macro radios enumValues enumField>
+  <div class="enum-radios">
+    <#list enumValues as value>
+      <div class="radio">
+        <label>
+          <@f.radiobutton path="${enumField}" value="${value.entryName}" /> ${value.description}
+        </label>
+        <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
+      </div>
+    </#list>
+  </div>
 </#macro>

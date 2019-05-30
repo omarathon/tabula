@@ -75,23 +75,23 @@
         .make-coloured-box();
         .coloured-box-variant(@accent-yellow-bg; @accent-yellow-border; @accent-yellow-text);
 
-        .checkbox {
+        .checkbox, .enum-radios .radio {
           margin-bottom: 0;
           padding: 5px 0 5px 5px;
         }
 
-        .checkbox+.checkbox {
+        .checkbox+.checkbox, .enum-radios .radio+.radio {
           margin-top: 0;
         }
 
-        .checkbox:nth-of-type(odd) {
+        .checkbox:nth-of-type(odd), .enum-radios .radio:nth-of-type(odd) {
           background: darken(@accent-yellow-bg, 5%);
         }
 
         &:nth-of-type(odd) {
           .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
 
-          .checkbox:nth-of-type(odd), .indent > .checkbox:nth-of-type(even) {
+          .checkbox:nth-of-type(odd), .indent > .checkbox:nth-of-type(even), .enum-radios .radio:nth-of-type(odd), .indent > .enum-radios .radio:nth-of-type(even) {
             background: darken(@accent-blue-bg, 5%);
           }
         }

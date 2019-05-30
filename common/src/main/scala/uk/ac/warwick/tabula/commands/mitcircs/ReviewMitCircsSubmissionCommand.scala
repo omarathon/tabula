@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 object ReviewMitCircsSubmissionCommand {
   type Result = MitigatingCircumstancesSubmission
   type Command = Appliable[Result]
-  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Manage
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Read
 
   def apply(submission: MitigatingCircumstancesSubmission): Command =
     new ReviewMitCircsSubmissionCommandInternal(submission)
