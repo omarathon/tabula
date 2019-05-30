@@ -25,7 +25,7 @@ object MarkdownRenderer {
     Try {
       val uri: URI = new URI(input)
       val host: String = uri.getHost
-      (uri.isAbsolute && (host.endsWith(".warwick.ac.uk") || host == "warwick.ac.uk")) || !uri.isAbsolute
+      !uri.isAbsolute || host.endsWith(".warwick.ac.uk") || host == "warwick.ac.uk"
     }.getOrElse(false)
   }
 

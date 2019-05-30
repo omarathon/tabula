@@ -80,13 +80,11 @@ trait CreateMitCircsPanelDescription extends Describable[MitigatingCircumstances
 
   override lazy val eventName: String =  "CreateMitCircsPanel"
 
-  def describe(d: Description) {
-    d.properties("department" -> department)
-  }
+  def describe(d: Description): Unit =
+    d.department(department)
 
-  override def describeResult(d: Description, result: Result): Unit = {
+  override def describeResult(d: Description, result: Result): Unit =
     d.properties("mitigatingCircumstancesSubmissions" -> result.submissions.map(_.key.toString))
-  }
 }
 
 trait CreateMitCircsPanelState {
