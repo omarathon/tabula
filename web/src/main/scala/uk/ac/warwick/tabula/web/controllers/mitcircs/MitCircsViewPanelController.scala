@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
-
 @Controller
 @RequestMapping(value = Array("/mitcircs/panel/{panel}"))
 class MitCircsViewPanelController extends BaseController {
