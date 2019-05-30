@@ -15,9 +15,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro depthome module academicYear="">
   <#if academicYear?has_content>
-    <@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear?c}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+    <@_u page="/admin/department/${module.adminDepartment.code}/${academicYear.startYear?c}/?moduleFilters=Module(${module.code})#module-${module.id}" />
   <#else>
-    <@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.code}" />
+    <@_u page="/admin/department/${module.adminDepartment.code}/?moduleFilters=Module(${module.code})#module-${module.id}" />
   </#if>
 </#macro>
 <#macro departmenthome department academicYear="">

@@ -5,7 +5,7 @@ import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 import freemarker.template.TemplateMethodModelEx
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget, ScopelessPermission, SelectorPermission}
 import uk.ac.warwick.tabula.JavaImports._
@@ -27,6 +27,11 @@ class PermissionFunction extends TemplateMethodModelEx with Logging {
     arguments match {
       case Seq(actionName: String, item: PermissionsTarget) => RequestLevelCache.cachedBy("PermissionFunction.exec", s"$actionName-${item.id}") {
         securityService.can(currentUser, Permissions.of(actionName), item): JBoolean
+      }
+
+      case Seq(as: String, actionName: String, item: PermissionsTarget) if as == "real" => RequestLevelCache.cachedBy("PermissionFunction.exec", s"$as-$actionName-${item.id}") {
+        val realUser = new CurrentUser(currentUser.realUser, currentUser.realUser)
+        securityService.can(realUser, Permissions.of(actionName), item): JBoolean
       }
 
       // FIXME hard-coded

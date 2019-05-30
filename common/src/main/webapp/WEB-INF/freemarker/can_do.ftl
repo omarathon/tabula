@@ -4,6 +4,10 @@
   <#return permissions(permission, item) />
 </#function>
 
+<#function do_as_real_user permission item>
+  <#return permissions("real", permission, item) />
+</#function>
+
 <#function do_scopeless permission>
   <#return permissions(permission) />
 </#function>
