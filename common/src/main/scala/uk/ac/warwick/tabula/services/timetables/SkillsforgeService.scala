@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import com.google.common.base.Charsets
-import org.apache.http.{HttpResponse, StatusLine}
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.util.EntityUtils
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
+import org.apache.http.{HttpResponse, StatusLine}
+import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.http.HttpStatus
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -38,10 +38,19 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
     private def shouldQuerySkillsforge(member: Member): Boolean = features.skillsforge && existsInSkillsforge(member)
 
     private val appropriateEconomicsCourses = Set("TECA-L1PL", "TECA-L1PJ")
+    private val appropriateEnrolmentStatusCodes = Set("1", "1P", "1PV", "1U", "1V", "2", "2V", "AA", "E", "F", "FP", "FPV", "FV", "L", "LN", "S", "T", "TI", "TL")
+
+    private def doesMatchRelevantCourse(scd: StudentCourseDetails): Boolean =
+      scd.course.code.startsWith("R") || appropriateEconomicsCourses(scd.course.code)
+
+    //If student enrolment status as Permanently withdrawn with transfer code as Successfully completed or enrolment status within one of those specified in appropriateEnrolmentStatusCodes then valid mamber for Skillsforge
+    private def doesMatchRelevantEnrolmentStatus(scd: StudentCourseDetails): Boolean =
+      appropriateEnrolmentStatusCodes(scd.latestStudentCourseYearDetails.enrolmentStatus.code) || (scd.latestStudentCourseYearDetails.enrolmentStatus.code == "P" && scd.reasonForTransferCode == "SC")
+
 
     private def existsInSkillsforge(member: Member): Boolean = member match {
       case s: StudentMember => s.activeNow && s.freshOrStaleStudentCourseDetails.exists(scd => {
-        scd.course.code.startsWith("R") || appropriateEconomicsCourses(scd.course.code)
+        doesMatchRelevantCourse(scd) && doesMatchRelevantEnrolmentStatus(scd)
       })
       case _ => {
         if (logger.isDebugEnabled) logger.debug(s"Not querying Skillsforge for user ${member.userId} as they are not the right type of user.")
