@@ -31,15 +31,15 @@ class MitCircsPendingEvidenceController extends AbstractViewProfileController {
   }
 
   @RequestMapping
-  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {
     mustBeLinked(mandatory(submission), mandatory(student))
-    Mav("mitcircs/submissions/pending_evidence")
+    Mav("mitcircs/submissions/pending_evidence", "allowMorePendingEvidence" -> submission.isEditable(currentUser.apparentUser))
       .crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
   }
 
   @RequestMapping(method = Array(POST))
-  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    if (errors.hasErrors) form(submission.student, submission)
+  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {
+    if (errors.hasErrors) form(submission.student, submission, currentUser)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
