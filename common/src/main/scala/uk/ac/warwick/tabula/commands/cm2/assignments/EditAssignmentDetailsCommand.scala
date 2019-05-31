@@ -59,9 +59,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
             //user has changed workflow category so remove all previous feedbacks
             assignment.resetMarkerFeedback()
           } else {
-            if (w.canDeleteMarkers) {
-              w.replaceMarkers(markersAUsers, markersBUsers)
-            }
+            w.replaceMarkers(markersAUsers, markersBUsers)
             moderatedWorkflow.filter(_ => features.moderationSelector).foreach(w => w.moderationSampler = sampler)
             cm2MarkingWorkflowService.save(w)
           }
@@ -159,12 +157,12 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
     if (assignment.hasCM2Workflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
       val (existingMarkersA, existingMarkersB) = extractMarkers
 
-      if (existingMarkersA != markersA.asScala) {
-        errors.rejectValue("markersA", "workflow.cannotChangeMarkers")
+      if (!existingMarkersA.forall(markersA.asScala.contains)) {
+        errors.rejectValue("markersA", "workflow.cannotRemoveMarkers")
       }
 
-      if (existingMarkersB != markersB.asScala) {
-        errors.rejectValue("markersB", "workflow.cannotChangeMarkers")
+      if (!existingMarkersB.forall(markersB.asScala.contains)) {
+        errors.rejectValue("markersB", "workflow.cannotRemoveMarkers")
       }
     }
   }
