@@ -57,7 +57,9 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
             //user has changed workflow category so remove all previous feedbacks
             assignment.resetMarkerFeedback()
           } else {
-            w.replaceMarkers(markersAUsers, markersBUsers)
+            if (w.canDeleteMarkers) {
+              w.replaceMarkers(markersAUsers, markersBUsers)
+            }
             moderatedWorkflow.filter(_ => features.moderationSelector).foreach(w => w.moderationSampler = sampler)
             cm2MarkingWorkflowService.save(w)
           }
