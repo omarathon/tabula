@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, UserLookupComp
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, AutowiringFeaturesComponent, FeaturesComponent}
 
+import scala.collection.JavaConverters._
+
 object EditAssignmentDetailsCommand {
   def apply(assignment: Assignment) =
     new EditAssignmentDetailsCommandInternal(assignment)
@@ -150,6 +152,18 @@ trait EditAssignmentDetailsValidation extends ModifyAssignmentDetailsValidation 
 
     if (openEnded && (assignment.countUnapprovedExtensions > 0 || assignment.approvedExtensions.nonEmpty)) {
       errors.rejectValue("openEnded", "assignment.openEnded.hasExtensions")
+    }
+
+    if (assignment.hasCM2Workflow && !assignment.cm2MarkingWorkflow.canDeleteMarkers) {
+      val (existingMarkersA, existingMarkersB) = extractMarkers
+
+      if (!existingMarkersA.forall(markersA.asScala.contains)) {
+        errors.rejectValue("markersA", "workflow.cannotRemoveMarkers")
+      }
+
+      if (!existingMarkersB.forall(markersB.asScala.contains)) {
+        errors.rejectValue("markersB", "workflow.cannotRemoveMarkers")
+      }
     }
   }
 }
