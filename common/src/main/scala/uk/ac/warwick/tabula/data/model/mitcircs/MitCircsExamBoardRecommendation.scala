@@ -10,11 +10,6 @@ sealed abstract class MitCircsExamBoardRecommendation(val description: String, v
 
 object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendation] {
 
-  case object Rejected extends MitCircsExamBoardRecommendation(
-    description = "Rejected",
-    helpText = "The claim was rejected."
-  )
-
   case object Mild extends MitCircsExamBoardRecommendation(
     description = "Mild",
     helpText = "The mitigating circumstances were considered mild, and/or had little material effect on the student’s academic performance. For example, the circumstances fall within the normal level of everyday life that a person with normal emotional resilience would be expected to cope with."
