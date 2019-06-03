@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipFileItem}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -45,6 +46,6 @@ class DownloadProfileController extends AbstractViewProfileController with Autow
 
     Await.result(zipService.createUnnamedZip(fileAttachments.zipWithIndex.map { case (a, index) =>
       ZipFileItem.apply(if (index == 0) a.name else s"${a.id}-${a.name}", a.asByteSource, a.actualDataLength)
-    }), Duration.Inf)
+    }).map(_.withSuggestedFilename(s"$academicYear.zip")), Duration.Inf)
   }
 }
