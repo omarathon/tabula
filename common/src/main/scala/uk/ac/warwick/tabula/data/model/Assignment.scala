@@ -908,6 +908,12 @@ class Assignment
       f.clearAttachments()
       f.outstandingStages.clear()
       f.markerFeedback.clear()
+      // TAB-7190 clear marks and grade as part for "resetting" marker feedback
+      f.marks.clear()
+      f.actualMark = None
+      f.agreedMark = None
+      f.agreedGrade = None
+      f.actualGrade = None
       feedbackService.saveOrUpdate(f)
     })
   }
