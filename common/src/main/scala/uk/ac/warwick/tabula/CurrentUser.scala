@@ -115,7 +115,7 @@ object CurrentUser {
   val masqueradeCookie = "tabulaMasqueradeAs"
   val godModeCookie = "tabulaGodMode"
 
-  def studentIdentifier(user: User) = Option(user.getWarwickId).getOrElse(user.getUserId)
+  def studentIdentifier(user: User): String = Option(user.getWarwickId).getOrElse(user.getUserId)
 }
 
 object NoCurrentUser {
