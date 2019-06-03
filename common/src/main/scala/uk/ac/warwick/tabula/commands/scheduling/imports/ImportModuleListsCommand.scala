@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.scheduling.ModuleListImporter
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
@@ -51,10 +50,10 @@ trait ImportModuleListsCommand extends CommandInternal[Unit]
     }
   }
 
-  private def saveLists(lists: Seq[UpstreamModuleList]) = transactional() {
+  private def saveLists(lists: Seq[UpstreamModuleList]): Unit = transactional() {
     logger.debug(s"Importing ${lists.size} upstream module lists")
     for (list <- lists) {
-      upstreamModuleListService.save(list)
+      upstreamModuleListService.saveOrUpdate(list)
     }
   }
 

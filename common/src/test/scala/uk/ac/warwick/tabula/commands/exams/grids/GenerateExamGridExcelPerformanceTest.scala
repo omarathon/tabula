@@ -239,9 +239,9 @@ class GenerateExamGridExcelPerformanceTest extends TestBase with Mockito {
 
   val perYearColumns: Map[StudentCourseYearDetails.YearOfStudy, Seq[PerYearExamGridColumn]] = Map(1 ->
     (coreModules.map { case (module, cats) =>
-      new CoreModulesColumnOption().Column(examGridColumnState, module, isDuplicate = false, cats.underlying())
+      new CoreModulesColumnOption().Column(examGridColumnState, module, None, isDuplicate = false, cats.underlying())
     } ++ optionalModules.map { case (module, cats) =>
-      new OptionalModulesColumnOption().Column(examGridColumnState, module, isDuplicate = false, cats.underlying())
+      new OptionalModulesColumnOption().Column(examGridColumnState, module, None, isDuplicate = false, cats.underlying())
     })
   )
 
