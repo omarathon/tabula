@@ -15,7 +15,7 @@ abstract class MitCircsOnBehalfNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]
     with SingleRecipientNotification
     with UserIdRecipientNotification
-    with MyWarwickActivity
+    with MyWarwickNotification
     with AutowiringUserLookupComponent
     with Logging {
 

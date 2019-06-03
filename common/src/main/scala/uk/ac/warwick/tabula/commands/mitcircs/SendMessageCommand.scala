@@ -27,9 +27,9 @@ object SendMessageCommand {
     Appliable[Result]
       with SendMessageState
       with SelfValidating
-      with Notifies[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission]
-      with SchedulesNotifications[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission]
-      with CompletesNotifications[MitigatingCircumstancesMessage]
+      with Notifies[Result, MitigatingCircumstancesSubmission]
+      with SchedulesNotifications[Result, MitigatingCircumstancesSubmission]
+      with CompletesNotifications[Result]
       with BindListener
 
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Modify

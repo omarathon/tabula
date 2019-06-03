@@ -1,28 +1,45 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
 import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.ReadyForPanel
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsPendingEvidenceReceivedNotification
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 object MitCircsPendingEvidenceCommand {
-  def apply(submission: MitigatingCircumstancesSubmission, currentUser: User) = new MitCircsPendingEvidenceCommandInternal(submission, currentUser)
-    with ComposableCommand[MitigatingCircumstancesSubmission]
-    with MitCircsPendingEvidenceValidation
-    with MitCircsPendingEvidencePermissions
-    with MitCircsPendingEvidenceDescription
-    with AutowiringMitCircsSubmissionServiceComponent
+  type Result = MitigatingCircumstancesSubmission
+  type Command =
+    Appliable[Result]
+      with MitCircsPendingEvidenceState
+      with SelfValidating
+      with Notifies[Result, MitigatingCircumstancesSubmission]
+      with SchedulesNotifications[Result, MitigatingCircumstancesSubmission]
+      with CompletesNotifications[Result]
+      with BindListener
+
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Modify
+
+  def apply(submission: MitigatingCircumstancesSubmission, currentUser: User): Command =
+    new MitCircsPendingEvidenceCommandInternal(submission, currentUser)
+      with ComposableCommand[MitigatingCircumstancesSubmission]
+      with MitCircsPendingEvidenceValidation
+      with MitCircsPendingEvidencePermissions
+      with MitCircsPendingEvidenceDescription
+      with MitCircsPendingEvidenceNotifications
+      with MitCircsSubmissionSchedulesNotifications
+      with MitCircsSubmissionNotificationCompletion
+      with AutowiringMitCircsSubmissionServiceComponent
 }
 
 class MitCircsPendingEvidenceCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
@@ -102,4 +119,12 @@ trait MitCircsPendingEvidenceState {
   var morePending: JBoolean = _
   var pendingEvidence: String = _
   var pendingEvidenceDue: LocalDate = _
+}
+
+trait MitCircsPendingEvidenceNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
+  self: MitCircsPendingEvidenceState =>
+
+  def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
+    Seq(Notification.init(new MitCircsPendingEvidenceReceivedNotification, currentUser, submission, submission))
+  }
 }
