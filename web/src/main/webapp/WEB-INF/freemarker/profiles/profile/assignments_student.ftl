@@ -23,7 +23,7 @@
   <#if hasPermission>
 
     <div class="striped-section collapsible upcoming">
-      <h3 class="section-title">Upcoming assignments</h3>
+      <h3 class="section-title" tabindex="0">Upcoming assignments</h3>
       <div class="striped-section-contents">
         <#if result.upcoming?has_content>
           <#list result.upcoming as enhancedAssignment>
@@ -60,7 +60,7 @@
     </div>
 
     <div class="striped-section collapsible expanded todo">
-      <h3 class="section-title">To do</h3>
+      <h3 class="section-title" tabindex="0">To do</h3>
       <div class="striped-section-contents">
         <#if result.todo?has_content>
 
@@ -147,7 +147,7 @@
     <#if result.doing?has_content>
 
       <div class="striped-section collapsible expanded doing">
-        <h3 class="section-title">Doing</h3>
+        <h3 class="section-title" tabindex="0">Doing</h3>
         <div class="striped-section-contents">
           <#list result.doing as enhancedAssignment>
             <div class="row item-info">
@@ -213,7 +213,7 @@
     <#if result.done?has_content>
 
       <div class="striped-section collapsible done">
-        <h3 class="section-title">Done</h3>
+        <h3 class="section-title" tabindex="0">Done</h3>
         <div class="striped-section-contents">
           <#list result.done as enhancedAssignment>
             <div class="row item-info">
