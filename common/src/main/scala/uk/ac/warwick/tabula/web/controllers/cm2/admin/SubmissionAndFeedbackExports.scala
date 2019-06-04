@@ -241,7 +241,7 @@ trait SubmissionAndFeedbackExport {
       val markerRoles = assignment.cm2MarkingWorkflow.allocationOrder
       val markerMarks = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-mark"))
       val markerGrades = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-grade"))
-      if(assignment.hasModeration) markerRoles ++ markerMarks ++ markerGrades :+ "was-moderated" else markerRoles
+      markerRoles ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Seq("Was-moderated") else Seq())
     }
     else Seq()
   val plagiarismFields: Seq[String] = Seq("suspected-plagiarised", "similarity-percentage")
