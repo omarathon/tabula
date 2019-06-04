@@ -71,8 +71,8 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
                 response.addCookie(c.cookie)
               }
               () => Some(cmd.usercode)
-            } else extractMasqueradeUsercodeFromCookie
-          } else extractMasqueradeUsercodeFromCookie
+            } else () => extractMasqueradeUsercodeFromCookie()
+          } else () => extractMasqueradeUsercodeFromCookie()
 
         resolveCurrentUser(user, apparentUser(extractionMethod), godCookieExists(request))
 
