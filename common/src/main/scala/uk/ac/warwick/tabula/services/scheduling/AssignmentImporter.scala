@@ -85,10 +85,9 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
   }
 
   def specificMembers(members: Seq[MembershipMember], yearsToImport: Seq[AcademicYear])(callback: UpstreamModuleRegistration => Unit): Unit = {
-    val likeClause = if (members.size == 1) "%" else ""
     val params: JMap[String, Object] = JMap(
       "academic_year_code" -> yearsToImport.map(_.toString).asJava,
-      "universityIds" -> members.map(_.universityId ++ likeClause).asJava
+      "universityIds" -> members.map(_.universityId).asJava
     )
     jdbc.query(AssignmentImporter.GetModuleRegistrationsByUniversityId(members.size > 1), params, new UpstreamModuleRegistrationRowCallbackHandler(callback))
   }
@@ -519,10 +518,10 @@ object AssignmentImporter {
 
   /** Looks like we are always using this for single uni Id but leaving the prior condition in case something is still using it and we don't break that **/
   def GetModuleRegistrationsByUniversityId(multipleUniIds: Boolean) = {
-    val sprClause = if (multipleUniIds) {
+    val sprClause = if (multipleUniIds)  {
       s" and SUBSTR(spr.spr_code, 0, 7) in (:universityIds)"
     } else {
-      s" and spr.spr_code like (:universityIds)"
+      s" and spr.spr_code like :universityIds || '%'"
     }
     s"""
       $GetUnconfirmedModuleRegistrations
