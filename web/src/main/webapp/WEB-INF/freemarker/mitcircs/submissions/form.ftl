@@ -16,6 +16,14 @@
   <section class="row mitcircs-form fix-area">
     <div class="col-md-4 col-md-push-8">
       <header>
+        <#if department.formattedMitCircsGuidance?has_content>
+          <div class="mitcircs-form__guidance mitcircs-form__guidance--departmental">
+            <h2>Departmental guidance</h2>
+
+            <#noescape>${department.formattedMitCircsGuidance!''}</#noescape>
+          </div>
+        </#if>
+
         <div class="mitcircs-form__guidance">
           <h2>Guidance</h2>
 
@@ -34,12 +42,6 @@
             deciding final year degree classifications in borderlines cases, but it does not automatically result in a higher degree classification.
           </p>
         </div>
-
-        <#if department.formattedMitCircsGuidance?has_content>
-          <div class="mitcircs-form__guidance mitcircs-form__guidance--departmental">
-            <#noescape>${department.formattedMitCircsGuidance!''}</#noescape>
-          </div>
-        </#if>
       </header>
     </div>
 
