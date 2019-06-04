@@ -2,17 +2,19 @@
 <#escape x as x?html>
   <h1>Record outcomes for MIT-${submission.key}</h1>
 
-  <section class="mitcircs-form ">
+  <section class="mitcircs-form">
 
     <article class="mitcircs-form__fields">
-      <@f.form id="recordOutcomesForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection">
+      <@f.form id="recordOutcomesForm" method="POST" modelAttribute="command" class="mitcircs-outcomes-form dirty-check double-submit-protection">
 
         <@mitcirc.question_section
           question = "Mitigation grade"
           hint = "This grading will be shared with exam boards."
         >
           <@mitcirc.radios outcomeGrading "outcomeGrading" />
-          <@bs3form.errors path="outcomeGrading" />
+          <div class="mitcircs-outcomes-form__rejection-reasons collapse">
+            <@mitcirc.checkboxesWithOther rejectionReasons "rejectionReasons" "rejectionReasonsOther"/>
+          </div>
         </@mitcirc.question_section>
 
         <@mitcirc.question_section

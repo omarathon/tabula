@@ -75,6 +75,7 @@
       </label>
     </div>
   </#list>
+  <@bs3form.errors path="${enumField}" />
 </#macro>
 
 <#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
@@ -108,4 +109,5 @@
       </div>
     </#list>
   </div>
+  <@bs3form.errors path="${enumField}" />
 </#macro>

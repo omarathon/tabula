@@ -242,6 +242,16 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonUserType")
+  var rejectionReasons: Seq[MitigatingCircumstancesRejectionReason] = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "rejectionReasonsOther")
+  private var encryptedRejectionReasonsOther: CharSequence = _
+  // free text for use when the rejectionReasons type includes Other
+  def rejectionReasonsOther: String = Option(encryptedRejectionReasonsOther).map(_.toString).orNull
+  def rejectionReasonsOther_=(rejectionReasonOther: String): Unit = encryptedRejectionReasonsOther = rejectionReasonOther
+
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
   @Column(name = "state", nullable = false)

@@ -4,3 +4,4 @@ require('../filters');
 require('./mitcircs-details');
 require('./mitcircs-admin-home');
 require('./mitcircs-panel-form');
+require('./mitcircs-outcomes-form');

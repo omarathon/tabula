@@ -210,6 +210,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.MitigatingCircumstancesPanelConverter" />
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonConverter"/>
   </util:list>
 
   <bean id="typeConverter"
