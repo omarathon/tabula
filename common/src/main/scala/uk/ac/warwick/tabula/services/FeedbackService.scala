@@ -125,6 +125,8 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
     else if (markerFeedback == parentFeedback.thirdMarkerFeedback) parentFeedback.thirdMarkerFeedback = null
     parentFeedback.markerFeedback.remove(markerFeedback)
     saveOrUpdate(parentFeedback)
+    markerFeedback.clearCustomFormValues()
+    markerFeedback.clearAttachments()
     dao.delete(markerFeedback)
   }
 

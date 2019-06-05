@@ -906,6 +906,7 @@ class Assignment
     markerFeedbacks.foreach(feedbackService.delete)
     feedbacks.asScala.foreach(f => {
       f.clearAttachments()
+      f.clearCustomFormValues()
       f.outstandingStages.clear()
       f.markerFeedback.clear()
       // TAB-7190 clear marks and grade as part for "resetting" marker feedback
