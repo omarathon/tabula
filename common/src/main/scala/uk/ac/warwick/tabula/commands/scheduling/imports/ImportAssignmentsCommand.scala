@@ -113,33 +113,39 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
   }
 
   def doAssignments() {
-    val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
-    val modules = transactional(readOnly = true) {
-      moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
-        .groupBy(_.code).mapValues(_.head)
-    }
-    for (assignments <- assessmentComponents.grouped(ImportGroupSize)) {
-      transactional() {
-        for (assignment <- assignments) {
-          if (assignment.name == null) {
-            // Some SITS data is bad, but try to carry on.
-            assignment.name = "Assessment Component"
-          }
+    benchmark("Process Assessment components") {
+      val assessmentComponents = logSize(assignmentImporter.getAllAssessmentComponents)
+      val modules = transactional(readOnly = true) {
+        moduleAndDepartmentService.getModulesByCodes(assessmentComponents.map(_.moduleCodeBasic).distinct)
+          .groupBy(_.code).mapValues(_.head)
+      }
+      for (assignments <- assessmentComponents.grouped(ImportGroupSize)) {
+        benchmark("Save assessment component related assignments") {
+          transactional() {
+            for (assignment <- assignments) {
+              if (assignment.name == null) {
+                // Some SITS data is bad, but try to carry on.
+                assignment.name = "Assessment Component"
+              }
 
-          modules.get(assignment.moduleCodeBasic.toLowerCase).foreach(module => assignment.module = module)
-          assessmentMembershipService.save(assignment)
+              modules.get(assignment.moduleCodeBasic.toLowerCase).foreach(module => assignment.module = module)
+              assessmentMembershipService.save(assignment)
+            }
+          }
         }
       }
     }
   }
 
   def doGroups() {
-    // Split into chunks so we commit transactions periodically.
-    for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
-      saveGroups(groups)
-      transactional() {
-        session.flush()
-        groups foreach session.evict
+    benchmark("Import assessment groups") {
+      // Split into chunks so we commit transactions periodically.
+      for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
+        saveGroups(groups)
+        transactional() {
+          session.flush()
+          groups foreach session.evict
+        }
       }
     }
   }
@@ -157,29 +163,33 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
       var notEmptyGroupIds = Set[String]()
 
       var count = 0
-      membersToImport { r =>
-        if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
-          // This element r is for a new group, so save this group and start afresh
-          transactional() {
-            save(registrations)
-              .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+      benchmark("Process group members") {
+        membersToImport { r =>
+          if (registrations.nonEmpty && r.differentGroup(registrations.head)) {
+            // This element r is for a new group, so save this group and start afresh
+
+            transactional() {
+              save(registrations)
+                .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+            }
+            registrations = Nil
           }
-          registrations = Nil
-        }
-        registrations = registrations :+ r
+          registrations = registrations :+ r
 
-        count += 1
-        if (count % 1000 == 0) {
-          logger.info("Processed " + count + " group members")
+          count += 1
+          if (count % 1000 == 0) {
+            logger.info("Processed " + count + " group members")
+          }
         }
-
       }
 
       // TAB-1265 Don't forget the very last bunch.
       if (registrations.nonEmpty) {
-        transactional() {
-          save(registrations)
-            .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+        benchmark("Save registrations") {
+          transactional() {
+            save(registrations)
+              .foreach { uag => notEmptyGroupIds = notEmptyGroupIds + uag.id }
+          }
         }
       }
 

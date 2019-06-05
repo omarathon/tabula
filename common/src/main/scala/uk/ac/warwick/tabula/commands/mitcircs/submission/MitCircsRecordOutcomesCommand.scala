@@ -9,7 +9,8 @@ import MitCircsRecordOutcomesCommand._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesGrading, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 
@@ -41,6 +42,8 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
   boardRecommendations = submission.boardRecommendations.asJava
   boardRecommendationOther = submission.boardRecommendationOther
   boardRecommendationComments = submission.boardRecommendationComments
+  rejectionReasons = submission.rejectionReasons.asJava
+  rejectionReasonsOther = submission.rejectionReasonsOther
 
   def applyInternal(): Result = transactional() {
     submission.outcomeGrading = outcomeGrading
@@ -52,6 +55,7 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
       submission.boardRecommendationOther = null
     }
     submission.boardRecommendationComments = boardRecommendationComments
+    submission.rejectionReasons = rejectionReasons.asScala
     submission.outcomesRecorded()
     submission.lastModifiedBy = user
     submission.lastModified = DateTime.now
@@ -74,9 +78,13 @@ trait MitCircsRecordOutcomesValidation extends SelfValidating {
   def validate(errors: Errors) {
     if(outcomeGrading == null) errors.rejectValue("outcomeGrading", "mitigatingCircumstances.outcomes.outcomeGrading.required")
     if(!outcomeReasons.hasText) errors.rejectValue("outcomeReasons", "mitigatingCircumstances.outcomes.outcomeReasons.required")
-    if(boardRecommendations.isEmpty) errors.rejectValue("boardRecommendations", "mitigatingCircumstances.outcomes.boardRecommendations.required")
-    else if(boardRecommendations.contains(MitCircsExamBoardRecommendation.Other) && !boardRecommendationOther.hasText)
+
+    if(boardRecommendations.contains(MitCircsExamBoardRecommendation.Other) && !boardRecommendationOther.hasText)
       errors.rejectValue("boardRecommendationOther", "mitigatingCircumstances.outcomes.boardRecommendationsOther.required")
+
+    if(outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
+    else if(outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
+      errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
   }
 }
 
@@ -99,4 +107,6 @@ trait MitCircsRecordOutcomesRequest {
   @BeanProperty var boardRecommendations: JList[MitCircsExamBoardRecommendation] = JArrayList()
   var boardRecommendationOther: String = _
   var boardRecommendationComments: String = _
+  var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = JArrayList()
+  var rejectionReasonsOther: String = _
 }

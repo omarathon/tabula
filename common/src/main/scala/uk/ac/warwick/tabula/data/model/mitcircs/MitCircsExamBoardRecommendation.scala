@@ -10,19 +10,19 @@ sealed abstract class MitCircsExamBoardRecommendation(val description: String, v
 
 object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendation] {
 
-  case object Rejected extends MitCircsExamBoardRecommendation(
-    description = "Rejected",
-    helpText = "The claim was rejected."
+  case object Mild extends MitCircsExamBoardRecommendation(
+    description = "Mild and/or little material effect on performance",
+    helpText = "For example, the circumstances fall within the normal level of everyday life that a person with normal emotional resilience would be expected to cope with"
   )
 
-  case object Mild extends MitCircsExamBoardRecommendation(
-    description = "Mild",
-    helpText = "The mitigating circumstances were considered mild, and/or had little material effect on the student’s academic performance. For example, the circumstances fall within the normal level of everyday life that a person with normal emotional resilience would be expected to cope with."
+  case object ReducePenalties extends MitCircsExamBoardRecommendation(
+    description = "Reduce penalties",
+    helpText = "Reduce penalties for late submission of assessed work."
   )
 
   case object WaivePenalties extends MitCircsExamBoardRecommendation(
     description = "Waive penalties",
-    helpText = "Waive or reduce penalties for late submission of assessed work."
+    helpText = "Waive penalties for late submission of assessed work."
   )
 
   case object WaiveAssessment extends MitCircsExamBoardRecommendation(
@@ -31,13 +31,18 @@ object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendat
   )
 
   case object FurtherResit extends MitCircsExamBoardRecommendation(
-    description = "Further resit",
+    description = "Allow resit or resubmission as a final attempt",
     helpText = "Allow further re-sit (examination)/re-submit (assessed work) opportunity. This would be as a final attempt so the marks will be capped at the pass mark and there will be no further opportunity to remedy failure."
   )
 
   case object FurtherSit extends MitCircsExamBoardRecommendation(
-    description = "Further first sit",
+    description = "Allow resit or resubmission as a first attempt",
     helpText = "Allow a further sit (examination)/submit (assessed work) opportunity. This would be as a first attempt so marks will not be capped and there will be a further opportunity to remedy failure. Any marks achieved in the subsequent attempt will count as the original mark."
+  )
+
+  case object DeferExams extends MitCircsExamBoardRecommendation(
+    description = "Defer exams to the next available opportunity",
+    helpText = "Allow the student to defer all the exams within a given examination period to the next available opportunity."
   )
 
   case object ProceedWithLowCredit extends MitCircsExamBoardRecommendation(

@@ -52,6 +52,6 @@ class ExtensionSettingsCommand(val department: Department) extends Command[Unit]
 
   // describe the thing that's happening.
   override def describe(d: Description) {
-    d.properties("department" -> department.code)
+    d.department(department)
   }
 }

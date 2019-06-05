@@ -258,7 +258,6 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
 }
 
 trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
-  self: MitCircsSubmissionState =>
 
   override def transformResult(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
@@ -272,12 +271,11 @@ trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Mi
       Nil
     }
   }
-
 }
 
 trait MitCircsSubmissionNotificationCompletion extends CompletesNotifications[MitigatingCircumstancesSubmission] {
-
-  self: NotificationHandling with MitCircsSubmissionState =>
+  self: NotificationHandling =>
+  def currentUser: User
 
   def notificationsToComplete(submission: MitigatingCircumstancesSubmission): CompletesNotificationsResult = {
     if (submission.hasEvidence) {

@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.userlookup.User
 
-
 object PendingEvidenceReminderNotification {
   val templateLocation: String = "/WEB-INF/freemarker/emails/pending_evidence_reminder.ftl"
 }
