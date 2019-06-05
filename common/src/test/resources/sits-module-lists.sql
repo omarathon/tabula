@@ -23,13 +23,13 @@ CREATE TABLE CAM_FME
 );
 
 INSERT INTO CAM_FMC
-VALUES ('A100-1-14-CAA', null, null, 'Y');
+VALUES ('A100-1-14-CAA', 'A100 CA A', 'A100 year 1 options list A', 'Y');
 INSERT INTO CAM_FMC
-VALUES ('B100-1-14-CAA', null, null, 'Y');
+VALUES ('B100-1-14-CAA', 'B100 CA A', 'B100 year 1 options list A', 'Y');
 INSERT INTO CAM_FMC
-VALUES ('A100-A-14-CAA', null, null, 'Y');
+VALUES ('A100-A-14-CAA', 'A100 CA A', 'A100 year A options list A', 'Y');
 INSERT INTO CAM_FMC
-VALUES ('A100-1-AA-CAA', null, null, 'Y');
+VALUES ('A100-1-AA-CAA', 'A100 CA A', 'A100 year 1 options list A', 'Y');
 
 INSERT INTO CAM_FME
 VALUES ('A100-1-14-CAA', '01', '*', null, null, null);

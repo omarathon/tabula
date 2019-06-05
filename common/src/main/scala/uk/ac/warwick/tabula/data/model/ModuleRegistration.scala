@@ -126,6 +126,9 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
 
   def toSITSCode: String = "%s-%s".format(module.code.toUpperCase, cats.stripTrailingZeros().toPlainString)
 
+  def moduleList(route: Route): Option[UpstreamModuleList] = route.upstreamModuleLists.asScala
+    .filter(_.academicYear == academicYear)
+    .find(_.matches(toSITSCode))
 }
 
 /**

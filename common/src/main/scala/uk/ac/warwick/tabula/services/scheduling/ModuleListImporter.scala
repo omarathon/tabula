@@ -55,6 +55,8 @@ class ModuleListImporterImpl extends ModuleListImporter with InitializingBean
     validRows.groupBy(_.routeCode).flatMap { case (routeCode, groupedRows) => routes.find(_.code == routeCode) match {
       case Some(route) => groupedRows.map(row => new UpstreamModuleList(
         row.code,
+        row.name,
+        row.shortName,
         row.academicYear.get,
         route,
         row.yearOfStudy.get
@@ -98,16 +100,20 @@ object ModuleListImporter {
 
   def GetModuleLists: String =
     """
-		select
-			fmc.fmc_code as code
-		from %s.cam_fmc fmc
-		where
-			fmc.fmc_iuse = 'Y'
-			and %s(fmc.fmc_code, '\w{4}-\d-\d{2}-\w\w\w')
-	""".format(sitsSchema, dialectRegexpLike)
+    select
+      fmc.fmc_code as code,
+      fmc.fmc_name as name,
+      fmc.fmc_snam as short_name
+    from %s.cam_fmc fmc
+    where
+      fmc.fmc_iuse = 'Y'
+      and %s(fmc.fmc_code, '\w{4}-\d-\d{2}-\w\w\w')
+  """.format(sitsSchema, dialectRegexpLike)
 
   case class UpstreamModuleListRow(
     code: String,
+    name: String,
+    shortName: String,
     routeCode: String,
     yearOfStudy: Option[Int],
     academicYear: Option[AcademicYear]
@@ -121,12 +127,14 @@ object ModuleListImporter {
       if (codeParts.length == 4) {
         UpstreamModuleListRow(
           rs.getString("code"),
+          rs.getString("name"),
+          rs.getString("short_name"),
           codeParts(0).toLowerCase,
           Try(codeParts(1).toInt).toOption,
           Try(codeParts(2).toInt).toOption.map(yy => AcademicYear(2000 + yy))
         )
       } else {
-        UpstreamModuleListRow(rs.getString("code"), "", None, None)
+        UpstreamModuleListRow(rs.getString("code"), rs.getString("name"), rs.getString("short_name"), "", None, None)
       }
 
     }
