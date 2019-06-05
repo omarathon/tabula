@@ -31,12 +31,22 @@
 
       <#if extension.expiryDate?? && extension.approved>
         <div class="control-group">
-          <label class="control-label">New submission deadline</label>
-          <div class="controls">
-            <p>
-              Your new submission deadline is <@fmt.date date=extension.expiryDate at=true/>
-            </p>
-          </div>
+          <#if extension.relevant>
+            <label class="control-label">New submission deadline</label>
+            <div class="controls">
+              <p>
+                Your new submission deadline is <@fmt.date date=extension.expiryDate at=true/>
+              </p>
+            </div>
+          <#else>
+              <label class="control-label">Extension deadline is before the assignment close date</label>
+              <div class="controls">
+                <p>
+                  Your extension deadline date is <@fmt.date date=extension.expiryDate at=true/>
+                  but your submission deadline is when the assignment closes at  <@fmt.date date=assignment.closeDate />.
+                </p>
+              </div>
+          </#if>
         </div>
       </#if>
     </#macro>
