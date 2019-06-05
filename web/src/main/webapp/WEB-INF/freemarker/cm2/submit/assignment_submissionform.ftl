@@ -65,7 +65,7 @@
       <p>You can still resubmit your work.</p>
     <#else>
       <p>You can resubmit your work
-        <#if isExtended>
+        <#if isExtended && extension?? && extension.relevant>
           until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
         <#else>
           until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).
