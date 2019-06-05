@@ -14,9 +14,11 @@ import collection.JavaConverters._
 @Entity
 class UpstreamModuleList {
 
-  def this(code: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
+  def this(code: String, name:String, shortName: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
     this()
     this.code = code
+    this.name = name
+    this.shortName = shortName
     this.academicYear = academicYear
     this.route = route
     this.yearOfStudy = yearOfStudy
@@ -24,6 +26,10 @@ class UpstreamModuleList {
 
   @Id
   var code: String = _
+
+  var name: String = _
+
+  var shortName: String = _
 
   def id: String = code
 
@@ -37,8 +43,8 @@ class UpstreamModuleList {
 
   var yearOfStudy: JInteger = _
 
-  // Where the last letter of the FMC_CODE is U
-  def unusualOptions: Boolean = code.takeRight(1) == "U"
+  // Where the last 3 letters of the FMC_CODE are OXU or OXX
+  def genericAndUnusualOptions: Boolean = Seq("OXU", "OXX").contains(code.takeRight(3))
 
   @OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
   @BatchSize(size = 200)

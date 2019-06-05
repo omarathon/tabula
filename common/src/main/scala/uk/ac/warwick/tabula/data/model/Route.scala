@@ -49,9 +49,9 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
   @BatchSize(size = 200)
   var upstreamModuleLists: JSet[UpstreamModuleList] = JHashSet()
 
-  def filterUnusualOptions(yearOfStudy: YearOfStudy, academicYear: AcademicYear, moduleRegistrations: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
-    val moduleLists = upstreamModuleLists.asScala.filter(uml => !uml.unusualOptions && uml.academicYear == academicYear && uml.yearOfStudy == yearOfStudy)
-    moduleRegistrations.filter(mr => moduleLists.exists(_.matches(mr.toSITSCode)))
+  def namedOptions(yearOfStudy: YearOfStudy, academicYear: AcademicYear, moduleRegistrations: Seq[ModuleRegistration]): Seq[ModuleRegistration] = {
+    val namedModuleLists = upstreamModuleLists.asScala.filter(uml => !uml.genericAndUnusualOptions && uml.academicYear == academicYear && uml.yearOfStudy == yearOfStudy)
+    moduleRegistrations.filter(mr => namedModuleLists.exists(_.matches(mr.toSITSCode)))
   }
 
   def teachingDepartments: mutable.Set[Department] =

@@ -30,7 +30,7 @@ class RouteRuleImporterTest extends TestBase with Mockito {
   val route4: Route = Fixtures.route("d100")
   val allRoutes = Seq(route1, route2, route3, route4)
 
-  val moduleList = new UpstreamModuleList("A100-1-14-CAA", academicYear, route1, 1)
+  val moduleList = new UpstreamModuleList("A100-1-14-CAA", "A100 year 1 options list A", "A100 CA A", academicYear, route1, 1)
   val allLevels = Seq(new Level("1", "level 1"), new Level("2", "level 2"))
 
   @Test
