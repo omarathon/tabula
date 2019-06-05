@@ -56,13 +56,13 @@ object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendat
   )
 
   case object RepeatYearAsFinalAttempt extends MitCircsExamBoardRecommendation(
-    description = "Repeat year as final attempt",
-    helpText = "Recommend to the to the Academic Registrar that the student should be granted a repeat of the year in full as a final attempt so that the marks are capped at the pass mark and there will be no further attempt to remedy failure. Note this will incur another set of fees."
+    description = "Recommend to Academic Registrar to repeat year as final attempt",
+    helpText = "Recommend to the Academic Registrar that the student should be granted a repeat of the year in full as a final attempt so that the marks are capped at the pass mark and there will be no further attempt to remedy failure. Note that this will incur another set of fees. The department must apply to the Academic Registrar on the student's behalf."
   )
 
   case object RepeatYearAsFirstAttempt extends MitCircsExamBoardRecommendation(
-    description = "Repeat year as first attempt",
-    helpText = "Recommend to the Academic Registrar that the student should be granted a repeat of the year in full as a first attempt so that marks will not be capped (except for the MBChB programme) and there will be a further attempt to remedy failure. All previous marks achieved will be discounted. Note this will incur another set of fees."
+    description = "Recommend to Academic Registrar to repeat year as first attempt",
+    helpText = "Recommend to the Academic Registrar that the student should be granted a repeat of the year in full as a first attempt so that marks will not be capped (except for the MBChB programme) and there will be a further attempt to remedy failure. All previous marks achieved will be discounted. Note that this will incur another set of fees. The department must apply to the Academic Registrar on the student's behalf."
   )
 
   case object CarryMitigationForward extends MitCircsExamBoardRecommendation(
