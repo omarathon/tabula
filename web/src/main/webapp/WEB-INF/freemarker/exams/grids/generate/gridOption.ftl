@@ -344,7 +344,7 @@
 
     <hr />
 
-    <#if department.code == "st"> <#-- The change to only show modules in collections ending in A or B makes this super stats specific so hide this stuff for everyone else -->
+    <#if department.rootDepartment.code == "st"> <#-- The change to only show modules in collections ending in A or B makes this super stats specific so hide this stuff for everyone else -->
       <h3>Listed CATS
         breakdowns <@fmt.help_popover id="listedcatsbreakdowns" content="CATS totals across all modules that scored above / below given thresholds. Only core modules and listed options will be included." /></h3>
 
