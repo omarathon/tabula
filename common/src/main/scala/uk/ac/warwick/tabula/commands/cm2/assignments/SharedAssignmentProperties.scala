@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import javax.validation.constraints.{Max, Min}
-
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
@@ -181,7 +180,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 
     // implicitly fix missing bounds
     (Option(wordCountMin), Option(wordCountMax)) match {
-      case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
+      case (Some(min), Some(max)) if (max < min || (max == min && max != 0)) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
       case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
       case (None, Some(max)) => wordCountMin = 0
       case _ => // It's All Good
