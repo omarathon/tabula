@@ -9,7 +9,6 @@ Feature: Standard server headers
     Examples:
       | url                        |
       | https://@HOST@/            |
-      | https://@HOST@/coursework/ |
 
   Scenario: Request file from static
     Given there is a file at https://@HOST@/static/js/id7/home.js
