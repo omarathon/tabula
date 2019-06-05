@@ -344,49 +344,50 @@
 
     <hr />
 
-    <h3>Listed CATS
-      breakdowns <@fmt.help_popover id="listedcatsbreakdowns" content="CATS totals across all modules that scored above / below given thresholds. Only modules listed in the diet are included. Unusual options are ignored." /></h3>
+    <#if department.rootDepartment.code == "st"> <#-- The change to only show modules in collections ending in A or B makes this super stats specific so hide this stuff for everyone else -->
+      <h3>Listed CATS
+        breakdowns <@fmt.help_popover id="listedcatsbreakdowns" content="CATS totals across all modules that scored above / below given thresholds. Only core modules and listed options will be included." /></h3>
 
-    <div class="row">
-      <div class="col-md-1">
-        <div class="checkbox">
-          <label><input type="checkbox" name="predefinedColumnIdentifiers" value="30catsNoUnusual"
-                        <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("30catsNoUnusual")>checked</#if>
-            /> <=30</label>
+      <div class="row">
+        <div class="col-md-1">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="30catsNoUnusual"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("30catsNoUnusual")>checked</#if>
+              /> <=30</label>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="40catsNoUnusual"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("40catsNoUnusual")>checked</#if>
+              /> >=40</label>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="50catsNoUnusual"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("50catsNoUnusual")>checked</#if>
+              /> >=50</label>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="60catsNoUnusual"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("60catsNoUnusual")>checked</#if>
+              /> >=60</label>
+          </div>
+        </div>
+        <div class="col-md-1">
+          <div class="checkbox">
+            <label><input type="checkbox" name="predefinedColumnIdentifiers" value="70catsNoUnusual"
+                          <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("70catsNoUnusual")>checked</#if>
+              /> >=70</label>
+          </div>
         </div>
       </div>
-      <div class="col-md-1">
-        <div class="checkbox">
-          <label><input type="checkbox" name="predefinedColumnIdentifiers" value="40catsNoUnusual"
-                        <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("40catsNoUnusual")>checked</#if>
-            /> >=40</label>
-        </div>
-      </div>
-      <div class="col-md-1">
-        <div class="checkbox">
-          <label><input type="checkbox" name="predefinedColumnIdentifiers" value="50catsNoUnusual"
-                        <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("50catsNoUnusual")>checked</#if>
-            /> >=50</label>
-        </div>
-      </div>
-      <div class="col-md-1">
-        <div class="checkbox">
-          <label><input type="checkbox" name="predefinedColumnIdentifiers" value="60catsNoUnusual"
-                        <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("60catsNoUnusual")>checked</#if>
-            /> >=60</label>
-        </div>
-      </div>
-      <div class="col-md-1">
-        <div class="checkbox">
-          <label><input type="checkbox" name="predefinedColumnIdentifiers" value="70catsNoUnusual"
-                        <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("70catsNoUnusual")>checked</#if>
-            /> >=70</label>
-        </div>
-      </div>
-    </div>
 
-    <hr />
-
+      <hr />
+    </#if>
     <h3>Marking</h3>
 
     <#assign uploadedYearMarksPopoverContent>

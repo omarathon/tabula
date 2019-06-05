@@ -34,6 +34,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
 <#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>
+<#macro recordOutcomes submission><@_u page = "/submission/${submission.key?c}/outcomes" /></#macro>
 
 <#-- Manage panels (as the MCO) -->
 <#macro createPanel department academicYear="">
@@ -43,6 +44,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
     <@_u page="/admin/${department.code}/panel/create" />
   </#if>
 </#macro>
+
+<#-- View panels -->
+<#macro viewPanel panel><@_u page = "/panel/${panel.id}" /></#macro>
 
 <#-- These get posted to from both the view (as the student) and the review (as the MCO) -->
 <#macro messages submission><@_u page="/submission/${submission.key?c}/messages" /></#macro>

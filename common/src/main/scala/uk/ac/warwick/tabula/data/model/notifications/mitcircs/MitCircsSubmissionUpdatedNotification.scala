@@ -17,7 +17,7 @@ object MitCircsSubmissionUpdatedNotification {
 class MitCircsSubmissionUpdatedNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]
     with NotifiesMitCircsOfficers
-    with MyWarwickActivity
+    with MyWarwickNotification
     with AutowiringUserLookupComponent
     with Logging {
 

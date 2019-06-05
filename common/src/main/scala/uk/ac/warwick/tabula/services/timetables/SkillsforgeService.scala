@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.services.timetables
 
 import com.google.common.base.Charsets
-import org.apache.http.{HttpResponse, StatusLine}
 import org.apache.http.client.methods.RequestBuilder
 import org.apache.http.util.EntityUtils
-import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, ISODateTimeFormat}
+import org.apache.http.{HttpResponse, StatusLine}
+import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.http.HttpStatus
 import play.api.libs.json._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Location, Member, NamedLocation, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.timetable
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.ApacheHttpClientComponent
 import uk.ac.warwick.tabula.services.timetables.TimetableFetchingService.EventOccurrenceList
 import uk.ac.warwick.tabula.timetables.TimetableEvent.Parent
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent, TimetableEventType}
-import uk.ac.warwick.tabula.{CurrentUser, FeaturesComponent, RequestFailedException}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, FeaturesComponent, RequestFailedException}
 
 import scala.collection.Seq
 import scala.concurrent.Future
@@ -37,8 +37,20 @@ trait SkillsforgeServiceComponent extends EventOccurrenceSourceComponent {
     // TAB-6942
     private def shouldQuerySkillsforge(member: Member): Boolean = features.skillsforge && existsInSkillsforge(member)
 
+    private val appropriateEconomicsCourses = Set("TECA-L1PL", "TECA-L1PJ")
+    private val appropriateEnrolmentStatusCodes = Set("1", "1P", "1PV", "1U", "1V", "2", "2V", "AA", "E", "F", "FP", "FPV", "FV", "L", "LN", "S", "T", "TI", "TL")
+
+    private def doesMatchRelevantCourse(scyd: StudentCourseYearDetails): Boolean =
+      scyd.studentCourseDetails.course.code.startsWith("R") || appropriateEconomicsCourses(scyd.studentCourseDetails.course.code)
+
+    //If student enrolment status as Permanently withdrawn with transfer code as Successfully completed or enrolment status within one of those specified in appropriateEnrolmentStatusCodes then valid mamber for Skillsforge
+    private def doesMatchRelevantEnrolmentStatus(scyd: StudentCourseYearDetails): Boolean =
+      appropriateEnrolmentStatusCodes(scyd.enrolmentStatus.code) || (scyd.enrolmentStatus.code == "P" && scyd.studentCourseDetails.reasonForTransferCode == "SC")
+
     private def existsInSkillsforge(member: Member): Boolean = member match {
-      case s: StudentMember => s.isPGR || (s.homeDepartment.code == "ec" && s.isPGT)
+      case s: StudentMember => s.activeNow && s.freshOrStaleStudentCourseYearDetails(AcademicYear.now()).exists(scyd => {
+        doesMatchRelevantCourse(scyd) && doesMatchRelevantEnrolmentStatus(scyd)
+      })
       case _ => {
         if (logger.isDebugEnabled) logger.debug(s"Not querying Skillsforge for user ${member.userId} as they are not the right type of user.")
         false

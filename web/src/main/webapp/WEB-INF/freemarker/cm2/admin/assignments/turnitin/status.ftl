@@ -25,8 +25,9 @@
       }
 
       var updateStatus = function () {
+        var $progress = $('#job-progress').find('.progress-bar');
         $.get('<@routes.cm2.submitToTurnitinStatus assignment />', function (data) {
-          var $progress = $('#job-progress').find('.progress-bar').width(data.progress + '%');
+          $progress.width(data.progress + '%');
           if (data.finished) {
             $progress.removeClass('active');
             if (!data.succeeded) {
@@ -50,8 +51,12 @@
               statuses.push(buildStatus(data.awaitingSubmission, "file", " awaiting submission"))
             }
             $('#job-status-value').find('p').empty().html(data.status + statuses.join(", "));
-            setTimeout(updateStatus, 5000);
+            setTimeout(updateStatus, 2000);
           }
+        }).fail(function(){
+          $progress.width('100%');
+          $progress.addClass('progress-bar-warning');
+          $('#job-status-value').find('p').empty().html("Unable to retrieve progress, please try again later.");
         });
       };
       updateStatus();

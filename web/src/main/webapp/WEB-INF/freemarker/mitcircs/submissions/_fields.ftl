@@ -1,36 +1,6 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
 
-<#macro checkboxes enumValues enumField>
-  <#list enumValues as value>
-    <div class="checkbox">
-      <label>
-        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
-      </label>
-    </div>
-  </#list>
-</#macro>
-
-<#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
-  <#list enumValues as value>
-    <div
-      class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>"
-      <#if value.evidenceGuidance??>data-evidenceguidance="${value.evidenceGuidance}"</#if>
-    >
-      <label>
-        <@f.checkbox path="${enumField}" value="${value.entryName}" /> ${value.description}
-        <#if additionalDescriptions[value.entryName]?? >- ${additionalDescriptions[value.entryName]}</#if>
-      </label>
-      <#if value.entryName == "Other">
-        <@f.input path="${otherField}" cssClass="form-control other-input" />
-      </#if>
-      <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
-    </div>
-    <#if value.entryName == "Other"><@bs3form.errors path="${otherField}" /></#if>
-  </#list>
-  <@bs3form.errors path="${enumField}" />
-</#macro>
-
 <@mitcirc.identity_section student />
 
 <@mitcirc.question_section
@@ -38,7 +8,7 @@
   hint = "Tick all that apply, but remember that you'll need to tell us something about each item you tick,
     and to upload some supporting evidence for each item."
 >
-  <@checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
+  <@mitcirc.checkboxesWithOther issueTypes "issueTypes" "issueTypeDetails" />
 </@mitcirc.question_section>
 
 <@mitcirc.question_section
@@ -225,7 +195,7 @@
     <#else>
       <#assign personalTutors = {} />
     </#if>
-    <@checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
+    <@mitcirc.checkboxesWithOther possibleContacts "contacts" "contactOther" personalTutors />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--no" style="display: none;">
     <@mitcirc.question_hint "Please tell us why you haven't yet discussed your mitigating circumstances with anyone" />

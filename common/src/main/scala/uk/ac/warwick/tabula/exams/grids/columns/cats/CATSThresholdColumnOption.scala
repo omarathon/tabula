@@ -39,7 +39,7 @@ abstract class CATSThresholdColumnOption(bound: BigDecimal, isUpperBound: Boolea
         val academicYear = entityYear.studentCourseYearDetails.map(_.academicYear).getOrElse(
           throw new IllegalArgumentException(s"academicYear missing for entity ${entity.universityId}")
         )
-        entityYear.route.filterUnusualOptions(entityYear.yearOfStudy, academicYear, modulesWithMarks)
+        entityYear.route.namedOptions(entityYear.yearOfStudy, academicYear, modulesWithMarks)
       }
 
       if (modules.exists(_.firstDefinedMark.isEmpty)) {

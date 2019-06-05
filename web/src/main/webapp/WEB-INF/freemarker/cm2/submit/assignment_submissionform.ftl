@@ -18,7 +18,7 @@
     <#if !assignment.openEnded>
       <#assign time_remaining = durationFormatter(assignment.closeDate) />
       <p>
-        <#if extension??>
+        <#if extension?? && extension.relevant>
           <#assign extension_time_remaining = durationFormatter(extension.expiryDate) />
 
           <span>Assignment due:</span> You have an extension until <@fmt.date date=extension.expiryDate />,
@@ -65,7 +65,7 @@
       <p>You can still resubmit your work.</p>
     <#else>
       <p>You can resubmit your work
-        <#if isExtended>
+        <#if isExtended && extension?? && extension.relevant>
           until the end of your extension, <@fmt.date date=extension.expiryDate /> (in ${durationFormatter(extension.expiryDate)}).
         <#else>
           until the deadline, <@fmt.date date=assignment.closeDate /> (in ${durationFormatter(assignment.closeDate)}).

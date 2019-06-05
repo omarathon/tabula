@@ -49,7 +49,7 @@ trait GenerateExamGridAuditDescription extends Describable[Unit] {
 
   override def describe(d: Description) {
     d.department(department)
-      .property("academicYear", academicYear)
+      .property("academicYear", academicYear.toString)
       .property("courses", courses.asScala.map(_.code).mkString(", "))
       .property("routes", routes.asScala.map(_.code).mkString(", "))
       .property("yearOfStudy", yearOfStudy)

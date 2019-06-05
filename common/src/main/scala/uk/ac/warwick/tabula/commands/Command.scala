@@ -497,12 +497,12 @@ abstract class Description {
       property("attendanceMonitoringPoint", points.map(point => Map(
         "id" -> point.id,
         "name" -> point.name,
-        "startDate" -> DateFormats.IsoDateTime.print(point.startDate),
-        "endDate" -> DateFormats.IsoDateTime.print(point.endDate),
+        "startDate" -> DateFormats.IsoDate.print(point.startDate),
+        "endDate" -> DateFormats.IsoDate.print(point.endDate),
         "type" -> point.pointType.dbValue
       )))
     } else {
-      property("attendanceMonitoringPoint", points.map(_.id))
+      property("attendanceMonitoringPoints", points.map(_.id))
     }
     attendanceMonitoringSchemes(points.map(_.scheme))
   }

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.OutcomesRecorded
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.{WorkflowProgress, WorkflowStage, WorkflowStageHealth, WorkflowStages}
@@ -90,7 +91,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
             health = WorkflowStageHealth.Warning,
           )
 
-        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel =>
+        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
           StageProgress(
             stage = Submission,
             started = true,
@@ -104,7 +105,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   case object InitialAssessment extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
       submission.state match {
-        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel =>
+        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
           if (submission.messages.isEmpty) {
             StageProgress(
               stage = InitialAssessment,
@@ -142,7 +143,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   case object ReadyForPanel extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = submission.state match {
 
-      case MitigatingCircumstancesSubmissionState.ReadyForPanel => StageProgress(
+      case MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded => StageProgress(
         stage = ReadyForPanel,
         started = true,
         messageCode = "workflow.mitCircs.ReadyForPanel.readyForReview",
@@ -161,24 +162,42 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
 
   // MCO presents cases to MC panel
   case object SelectedForPanel extends MitCircsWorkflowStage {
-    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
+    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = if (submission.panel.isDefined) {
+      StageProgress(
+        stage = SelectedForPanel,
+        started = true,
+        messageCode = "workflow.mitCircs.SelectedForPanel.selected",
+        completed = true
+      )
+    } else {
       StageProgress(
         stage = SelectedForPanel,
         started = false,
         messageCode = "workflow.mitCircs.SelectedForPanel.notSelected",
       )
+    }
 
     override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(ReadyForPanel))
   }
 
   // Panel agrees reject / mild / moderate / severe outcome and duration
   case object Outcomes extends MitCircsWorkflowStage {
-    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
-      StageProgress(
+    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = submission.state match {
+
+      case OutcomesRecorded => StageProgress(
+        stage = Outcomes,
+        started = true,
+        messageCode = "workflow.mitCircs.Outcomes.recorded",
+        completed = true
+      )
+
+      case _ => StageProgress(
         stage = Outcomes,
         started = false,
         messageCode = "workflow.mitCircs.Outcomes.notRecorded",
       )
+    }
+
 
     override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Submission))
   }

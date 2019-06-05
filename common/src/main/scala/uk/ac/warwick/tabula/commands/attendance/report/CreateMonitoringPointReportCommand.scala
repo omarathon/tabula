@@ -111,7 +111,7 @@ trait CreateMonitoringPointReportCommandDescription extends Describable[Seq[Moni
 
     d.department(department)
     d.property("monitoringPeriod", period)
-    d.property("academicYear", academicYear)
+    d.property("academicYear", academicYear.toString)
     d.property("missedPoints", students)
   }
 }

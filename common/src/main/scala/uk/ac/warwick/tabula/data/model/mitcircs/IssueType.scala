@@ -75,7 +75,7 @@ object IssueType extends Enum[IssueType] {
   )
   case object Other extends IssueType(
     description = "Other",
-    helpText = "This list is not exhaustive and if you want to report a claim for mitigating circumstances which is not listed above, but does in in your opinion represent a mitigating circumstance, you should list it here.",
+    helpText = "This may include trans and gender reassignment, maternity, paternity or adoption leave, or caring responsibilities. However, this list is not exhaustive. If you want to report a claim for mitigating circumstances which is not shown on this form, but does in your opinion represent a mitigating circumstance, you should enter it here.",
     evidenceGuidance = "Please supply independent evidence from a relevant professional person or body that explains what happened (including dates) and the effect it had on you."
   )
 

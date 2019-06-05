@@ -402,7 +402,7 @@ class CreateMonitoringPointReportCommandTest extends TestBase with Mockito {
     d.allProperties should be(Map(
       "department" -> "in",
       "monitoringPeriod" -> "Autumn",
-      "academicYear" -> command.academicYear,
+      "academicYear" -> command.academicYear.toString,
       "missedPoints" -> Map("1234567" -> 3, "9283845" -> 2)
     ))
   }

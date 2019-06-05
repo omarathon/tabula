@@ -475,7 +475,10 @@ class Assignment
     */
   def submissionDeadline(usercode: String): DateTime =
     if (openEnded) null
-    else approvedExtensions.get(usercode).flatMap(_.expiryDate).getOrElse(closeDate)
+    else approvedExtensions.get(usercode) match {
+      case (Some(extension)) if extension.relevant => extension.expiryDate.getOrElse(closeDate)
+      case _ => closeDate
+  }
 
   def submissionDeadline(user: User): DateTime = submissionDeadline(user.getUserId)
 
@@ -903,8 +906,15 @@ class Assignment
     markerFeedbacks.foreach(feedbackService.delete)
     feedbacks.asScala.foreach(f => {
       f.clearAttachments()
+      f.clearCustomFormValues()
       f.outstandingStages.clear()
       f.markerFeedback.clear()
+      // TAB-7190 clear marks and grade as part for "resetting" marker feedback
+      f.marks.clear()
+      f.actualMark = None
+      f.agreedMark = None
+      f.agreedGrade = None
+      f.actualGrade = None
       feedbackService.saveOrUpdate(f)
     })
   }

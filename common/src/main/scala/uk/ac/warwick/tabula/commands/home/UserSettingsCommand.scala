@@ -81,7 +81,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
       "weekNumberingSystem" -> result.weekNumberingSystem,
       "bulkEmailSeparator" -> result.bulkEmailSeparator,
       "profilesDefaultView" -> result.profilesDefaultView,
-      "activeAcademicYear" -> result.activeAcademicYear
+      "activeAcademicYear" -> result.activeAcademicYear.toString
     )
   }
 }

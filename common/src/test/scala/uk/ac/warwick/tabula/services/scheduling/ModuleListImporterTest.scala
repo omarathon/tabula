@@ -33,7 +33,7 @@ class ModuleListImporterTest extends TestBase with Mockito {
 
   @Test
   def moduleListEntities(): Unit = {
-    val list1 = new UpstreamModuleList("A100-1-14-CAA", AcademicYear(2014), route, 1)
+    val list1 = new UpstreamModuleList("A100-1-14-CAA", "A100 year 1 options list A", "A100 CA A", AcademicYear(2014), route, 1)
     val result = moduleListImporter.getModuleListEntries(Seq(list1))
     result.size should be(3)
     result.forall(entry => entry.pattern.matcher("CH100-7.5").matches()) should be (true)

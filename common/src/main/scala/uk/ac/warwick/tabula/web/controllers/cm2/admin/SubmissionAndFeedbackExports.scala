@@ -9,10 +9,8 @@ import org.joda.time.ReadableInstant
 import org.joda.time.format.DateTimeFormatter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
-import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
-import uk.ac.warwick.tabula.data.model.markingworkflow.ModeratedWorkflow
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.XmlUtils._
 import uk.ac.warwick.tabula.helpers.cm2.{SubmissionListItem, WorkflowItems}
@@ -241,7 +239,9 @@ trait SubmissionAndFeedbackExport {
     if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
     else if (assignment.cm2MarkingWorkflow != null) {
       val markerRoles = assignment.cm2MarkingWorkflow.allocationOrder
-      if(assignment.hasModeration) markerRoles :+ "was-moderated" else markerRoles
+      val markerMarks = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-mark"))
+      val markerGrades = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-grade"))
+      markerRoles ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Seq("Was-moderated") else Seq())
     }
     else Seq()
   val plagiarismFields: Seq[String] = Seq("suspected-plagiarised", "similarity-percentage")
@@ -306,7 +306,16 @@ trait SubmissionAndFeedbackExport {
           role -> ef.feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
         })
       }.toMap).getOrElse(Map())
-      markerNames ++ (if(assignment.hasModeration) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
+
+      val markerMarks = student.enhancedFeedback.map(ef => {
+        ef.feedback.feedbackByStage.map(fbs => fbs._1.roleName.concat("-mark") -> fbs._2.mark.getOrElse(""))
+      }).getOrElse(Map())
+
+      val markerGrades = student.enhancedFeedback.map(ef => {
+          ef.feedback.feedbackByStage.map(fbs => fbs._1.roleName.concat("-grade") -> fbs._2.grade.getOrElse(""))
+      }).getOrElse(Map())
+
+      markerNames ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
     } else {
       Map()
     }

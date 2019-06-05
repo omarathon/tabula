@@ -159,8 +159,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
       file.attachmentTypes = fileAttachmentTypes.asScala
       file.individualFileSizeLimit = individualFileSizeLimit
     }
-
-    if (wordCountMin == null && wordCountMax == null) {
+    if ((wordCountMin == null && wordCountMax == null) || (wordCountMin == 0 && (wordCountMax == 0 || wordCountMax == Assignment.MaximumWordCount))) {
       findWordCountField(assignment).foreach(assignment.removeField)
     } else {
       val wordCount = findWordCountField(assignment).getOrElse {
