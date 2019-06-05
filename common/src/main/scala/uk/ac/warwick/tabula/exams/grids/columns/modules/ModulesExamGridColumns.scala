@@ -219,7 +219,7 @@ abstract class OptionalModuleExamGridColumn(state: ExamGridColumnState, module: 
   extends ModuleExamGridColumn(state, module, moduleList, isDuplicate, cats) {
 
   // TAB-6883 - show the FMC that this module belongs to for stats
-  override val secondaryValue: String = if(state.department.code == "st") {
+  override val secondaryValue: String = if(state.department.rootDepartment.code == "st") {
     cats.toPlainString + moduleList.map(ml => s" - ${ml.shortName}").getOrElse("")
   } else {
     cats.toPlainString
