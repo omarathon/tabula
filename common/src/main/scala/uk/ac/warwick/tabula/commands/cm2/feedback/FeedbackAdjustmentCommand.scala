@@ -239,7 +239,7 @@ trait FeedbackAdjustmentSitsGradeValidation extends FeedbackAdjustmentGradeValid
   lazy val gradeValidation: Option[ValidateAndPopulateFeedbackResult] = {
     try {
       copyTo(feedback)
-      val result = feedbackForSitsService.validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
+      val result = feedbackForSitsService.validateAndPopulateFeedback(Seq(feedback), assessment, gradeGenerator)
       removeMark()
       Some(result)
     } catch {
