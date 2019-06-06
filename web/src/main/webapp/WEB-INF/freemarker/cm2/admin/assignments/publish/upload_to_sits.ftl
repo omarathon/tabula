@@ -160,12 +160,12 @@
       <#if command.gradeValidation.notOnScheme?has_content >
         <div class="alert alert-danger">
           <p>
-              <#assign total = command.gradeValidation.notOnScheme?keys?size + command.gradeValidation.populated?keys?size />
+              <#assign total = command.gradeValidation.notOnScheme?keys?size />
               <@fmt.p total "student" />
               <#if total==1>
                 has feedback that cannot be uploaded because the student is not present on a linked assessment component.
               <#else>
-                have feedback that cannot be uploaded because the student is not present on a linked assessment component.
+                have feedback that cannot be uploaded because the students are not present on a linked assessment component.
               </#if>
           </p>
         </div>
@@ -186,14 +186,6 @@
               <td>${feedback.latestMark!}</td>
               <td>${feedback.latestGrade!}</td>
               <td>${mapGet(command.gradeValidation.notOnScheme, feedback)}</td>
-            </tr>
-          </#list>
-          <#list command.gradeValidation.populated?keys as feedback>
-            <tr>
-              <td>${feedback.studentIdentifier}</td>
-              <td>${feedback.latestMark!}</td>
-              <td>${feedback.latestGrade!}</td>
-              <td></td>
             </tr>
           </#list>
           </tbody>
