@@ -163,9 +163,9 @@
             <#assign total = command.gradeValidation.notOnScheme?keys?size />
             <@fmt.p total "student" />
             <#if total==1>
-              has feedback that cannot be uploaded because the student is not present on a linked assessment component.
+              has feedback that cannot be uploaded because the student is manually-added and therefore not present on a linked assessment component.
             <#else>
-              have feedback that cannot be uploaded because the students are not present on a linked assessment component.
+              have feedback that cannot be uploaded because the students are manually-added and therefore not present on a linked assessment component.
             </#if>
         </p>
       </div>
