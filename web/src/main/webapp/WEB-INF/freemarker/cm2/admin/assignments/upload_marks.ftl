@@ -179,7 +179,14 @@
         var numExistingRows = $('.marks-web-form .mark-row').length;
         var $newRow = $rowTemplate.clone();
         $newRow.find('input,textarea').each(function (i, field) {
-          var newName = 'marks[' + numExistingRows + '].' + $(field).attr('name');
+          var fieldName = $(field).attr('name');
+          var fixedFields = ['id', 'actualMark', 'actualGrade'];
+          var newName = function () {
+            if (fixedFields.indexOf(fieldName) !== -1) {
+              return 'marks[' + numExistingRows + '].' + $(field).attr('name');
+            }
+            return 'marks[' + numExistingRows + '].' + 'fieldValues' + '[' + $(field).attr('name') + ']';
+          }();
           $(field).attr('name', newName);
         });
         $(this).before($newRow);
