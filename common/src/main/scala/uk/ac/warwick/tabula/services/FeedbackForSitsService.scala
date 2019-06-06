@@ -12,7 +12,8 @@ case class ValidateAndPopulateFeedbackResult(
   valid: Seq[Feedback],
   populated: Map[Feedback, String],
   zero: Map[Feedback, String],
-  invalid: Map[Feedback, String]
+  invalid: Map[Feedback, String],
+  notOnScheme: Map[Feedback, String]
 )
 
 trait FeedbackForSitsService {
@@ -26,7 +27,7 @@ trait FeedbackForSitsService {
 
   def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits]
 
-  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
+  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult
 }
 
 trait FeedbackForSitsServiceComponent {
@@ -41,6 +42,8 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
   self: FeedbackForSitsDaoComponent =>
 
+  var assessmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+
   def saveOrUpdate(feedbackForSits: FeedbackForSits): Unit =
     feedbackForSitsDao.saveOrUpdate(feedbackForSits)
 
@@ -54,7 +57,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
     feedbackForSitsDao.getByFeedbacks(feedbacks)
 
   def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = {
-    val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), gradeGenerator)
+    val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), feedback.assessment, gradeGenerator)
     if (validatedFeedback.valid.nonEmpty || feedback.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
       val feedbackForSits = getByFeedback(feedback).getOrElse {
         // create a new object for this feedback in the queue
@@ -83,7 +86,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
     }
   }
 
-  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult = {
+  def validateAndPopulateFeedback(feedbacks: Seq[Feedback], assessment: Assessment, gradeGenerator: GeneratesGradesFromMarks): ValidateAndPopulateFeedbackResult = {
 
     val studentsMarks = (for (f <- feedbacks; mark <- f.latestMark; uniId <- f.universityId) yield {
       uniId -> mark
@@ -91,9 +94,12 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
     val validGrades = gradeGenerator.applyForMarks(studentsMarks)
 
+    val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment).map(user => user.getUserId)
+
     val parsedFeedbacks = feedbacks.filter(_.universityId.isDefined).groupBy(f => {
       f.latestGrade match {
         case Some(grade) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
+        case Some(grade) if !membership.contains(f._universityId) => "notOnScheme"
         case Some(grade) =>
           if (validGrades(f._universityId).isEmpty || !validGrades(f._universityId).exists(_.grade == grade))
             "invalid"
@@ -123,7 +129,10 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
       ).getOrElse(Map()),
       parsedFeedbacks.get("invalid").map(feedbacksToPopulate =>
         feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
-      ).getOrElse(Map())
+      ).getOrElse(Map()),
+      parsedFeedbacks.get("notOnScheme").map(feedbacksToPopulate =>
+      feedbacksToPopulate.map(f => f -> validGrades.get(f._universityId).map(_.map(_.grade).mkString(", ")).getOrElse("")).toMap
+    ).getOrElse(Map()),
     )
   }
 

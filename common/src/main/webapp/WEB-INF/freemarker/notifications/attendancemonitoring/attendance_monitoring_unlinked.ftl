@@ -1,4 +1,7 @@
-There are <@fmt.p schemes?size "monitoring scheme" /> in ${department.name} which automatically update their membership based on changes in SITS.
+There <@fmt.p schemes?size singular="is" plural="are" shownumber=false />
+<@fmt.p schemes?size "monitoring scheme" /> in ${department.name} which automatically
+<@fmt.p schemes?size singular="updates its" plural="update their" shownumber=false />
+membership based on changes in SITS.
 
 Soon SITS will be updated for the next academic year (${academicYear.next.toString}). This means that the students in each of these schemes could change in ways that you did not intend.
 

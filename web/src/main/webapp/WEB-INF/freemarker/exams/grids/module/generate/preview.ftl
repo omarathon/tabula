@@ -135,84 +135,86 @@
               <#list entities as entity>
                 <#assign assessmentComponentMap = entity.componentInfo />
                 <#assign mr = entity.moduleRegistration />
-                <#assign scd = mr.studentCourseDetails />
-                <tr class="student <#if entity_index%2 == 1>odd</#if>">
-                  <td>${entity.name}</td>
-                  <td>${entity.universityId} </td>
-                  <td> ${scd.scjCode}</td>
-                  <td><span class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
-                  <td><span class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
-                  <td>${mr.academicYear.startYear?c}</td>
-                  <td>${mr.cats}</td>
-                  <#list componentInfo as component>
-                    <#assign groupAndSequenceAndOccurrence = component._1() />
-                    <#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
-                      <#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
-                      <#assign componentResitDetails = componentDetails.resitInfo />
-                      <td>
-                        <#if componentResitDetails.resitMark??>
-                          <#assign resitmark_class>
-                            <#compress>
-                              <#if componentResitDetails.resitMark?number lt passMark>exam-grid-fail</#if>
-                              <#if componentResitDetails.actualResitMark>exam-grid-actual-mark</#if>
-                            </#compress>
-                          </#assign>
-                          <#if componentDetails.mark??>
-                            <span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark} (${componentDetails.mark})</span>
+                <#if mr.studentCourseDetails??>
+                  <#assign scd = mr.studentCourseDetails />
+                  <tr class="student <#if entity_index%2 == 1>odd</#if>">
+                    <td>${entity.name}</td>
+                    <td>${entity.universityId} </td>
+                    <td> ${scd.scjCode}</td>
+                    <td><span class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
+                    <td><span class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
+                    <td>${mr.academicYear.startYear?c}</td>
+                    <td>${mr.cats}</td>
+                    <#list componentInfo as component>
+                      <#assign groupAndSequenceAndOccurrence = component._1() />
+                      <#if mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence)??>
+                        <#assign componentDetails = mapGet(assessmentComponentMap, groupAndSequenceAndOccurrence) />
+                        <#assign componentResitDetails = componentDetails.resitInfo />
+                        <td>
+                          <#if componentResitDetails.resitMark??>
+                            <#assign resitmark_class>
+                              <#compress>
+                                <#if componentResitDetails.resitMark?number lt passMark>exam-grid-fail</#if>
+                                <#if componentResitDetails.actualResitMark>exam-grid-actual-mark</#if>
+                              </#compress>
+                            </#assign>
+                            <#if componentDetails.mark??>
+                              <span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark} (${componentDetails.mark})</span>
+                            <#else>
+                              <span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark}</span>
+                            </#if>
+                          <#elseif componentDetails.mark??>
+                            <#assign componentmark_class>
+                              <#compress>
+                                <#if componentDetails.mark?number lt passMark>exam-grid-fail</#if>
+                                <#if componentDetails.actualMark>exam-grid-actual-mark</#if>
+                              </#compress>
+                            </#assign>
+                            <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
                           <#else>
-                            <span class="exam-grid-resit ${resitmark_class}">${componentResitDetails.resitMark}</span>
+                            <span class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
                           </#if>
-                        <#elseif componentDetails.mark??>
-                          <#assign componentmark_class>
-                            <#compress>
-                              <#if componentDetails.mark?number lt passMark>exam-grid-fail</#if>
-                              <#if componentDetails.actualMark>exam-grid-actual-mark</#if>
-                            </#compress>
-                          </#assign>
-                          <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
-                        <#else>
-                          <span class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
-                        </#if>
-                      </td>
-                      <td>
-                        <#if componentResitDetails.resitGrade??>
-                          <#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
-                          <#if componentDetails.grade??>
-                            <span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade} (${componentDetails.grade})</span>
+                        </td>
+                        <td>
+                          <#if componentResitDetails.resitGrade??>
+                            <#assign resitgrade_class><#if componentResitDetails.actualResitGrade>exam-grid-actual-mark</#if></#assign>
+                            <#if componentDetails.grade??>
+                              <span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade} (${componentDetails.grade})</span>
+                            <#else>
+                              <span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade}</span>
+                            </#if>
+                          <#elseif componentDetails.grade??>
+                            <#assign componentgrade_class><#if componentDetails.actualGrade>exam-grid-actual-mark</#if></#assign>
+                            <span <#if componentgrade_class?length gt 0>class="${componentgrade_class}"</#if>>${componentDetails.grade}</span>
                           <#else>
-                            <span class="exam-grid-resit ${resitgrade_class}">${componentResitDetails.resitGrade}</span>
+                            <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
                           </#if>
-                        <#elseif componentDetails.grade??>
-                          <#assign componentgrade_class><#if componentDetails.actualGrade>exam-grid-actual-mark</#if></#assign>
-                          <span <#if componentgrade_class?length gt 0>class="${componentgrade_class}"</#if>>${componentDetails.grade}</span>
-                        <#else>
-                          <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
-                        </#if>
-                      </td>
-                    <#else>
-                      <td></td>
-                      <td></td>
-                    </#if>
-                  </#list>
-                  <td>
-                    <#if mr.agreedMark??>
-                      <span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
-                    <#elseif mr.actualMark??>
-                      <span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
-                    <#else>
-                      <span class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
-                    </#if>
-                  </td>
-                  <td>
-                    <#if mr.agreedGrade??>
-                      <span>${mr.agreedGrade}</span>
-                    <#elseif mr.actualGrade??>
-                      <span class="exam-grid-actual-mark">${mr.actualGrade}</span>
-                    <#else>
-                      <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
-                    </#if>
-                  </td>
-                </tr>
+                        </td>
+                      <#else>
+                        <td></td>
+                        <td></td>
+                      </#if>
+                    </#list>
+                    <td>
+                      <#if mr.agreedMark??>
+                        <span <#if mr.agreedMark?number lt passMark>class="exam-grid-fail"</#if>>${mr.agreedMark}</span>
+                      <#elseif mr.actualMark??>
+                        <span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
+                      <#else>
+                        <span class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
+                      </#if>
+                    </td>
+                    <td>
+                      <#if mr.agreedGrade??>
+                        <span>${mr.agreedGrade}</span>
+                      <#elseif mr.actualGrade??>
+                        <span class="exam-grid-actual-mark">${mr.actualGrade}</span>
+                      <#else>
+                        <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
+                      </#if>
+                    </td>
+                  </tr>
+                </#if>
               </#list>
               </tbody>
             </table>

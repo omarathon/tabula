@@ -14,12 +14,15 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
   trait Fixture {
     val service = new AbstractFeedbackForSitsService with ServiceTestSupport
+    val assessmentMembershipService = smartMock[AssessmentMembershipService]
+    service.assessmentMembershipService = assessmentMembershipService
     val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("someFeedback")
     feedback.assignment = new Assignment
     feedback.assignment.module = new Module
     feedback.assignment.module.adminDepartment = new Department
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
+    assessmentMembershipService.determineMembershipUsersIncludingPWD(feedback.assignment) returns Seq(currentUser.apparentUser)
     val submitter: CurrentUser = currentUser
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
     gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, "A", 0, 100, "N")))
