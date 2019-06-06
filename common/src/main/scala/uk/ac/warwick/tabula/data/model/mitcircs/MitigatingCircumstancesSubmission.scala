@@ -252,6 +252,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def rejectionReasonsOther: String = Option(encryptedRejectionReasonsOther).map(_.toString).orNull
   def rejectionReasonsOther_=(rejectionReasonOther: String): Unit = encryptedRejectionReasonsOther = rejectionReasonOther
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
+  var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
   @Column(name = "state", nullable = false)
@@ -296,7 +299,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _state = MitigatingCircumstancesSubmissionState.OutcomesRecorded
   }
 
-  def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
+  def isDraft: Boolean = Seq(Draft, CreatedOnBehalfOfStudent).contains(state)
   def isEditable(user: User): Boolean = {
     state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
     (user.getWarwickId == student.universityId && (
@@ -307,6 +310,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def hasEvidence: Boolean = attachments.nonEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null
+  def isAcute: Boolean = Option(acuteOutcome).isDefined
+
+  def canRecordOutcomes: Boolean = !isDraft && (state != OutcomesRecorded || !isAcute)
+  def canRecordAcuteOutcomes = !isDraft && (state != OutcomesRecorded || isAcute)
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
