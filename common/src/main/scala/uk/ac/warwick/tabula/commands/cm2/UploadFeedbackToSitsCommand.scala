@@ -27,7 +27,7 @@ class UploadFeedbackToSitsCommandInternal(val assessment: Assessment, currentUse
 
   self: FeedbackServiceComponent with FeedbackForSitsServiceComponent with UploadFeedbackToSitsCommandState =>
 
-  lazy val gradeValidation: ValidateAndPopulateFeedbackResult = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, gradeGenerator)
+  lazy val gradeValidation: ValidateAndPopulateFeedbackResult = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, assessment, gradeGenerator)
 
   override def applyInternal(): Seq[Feedback] = {
     feedbacks.flatMap(f => feedbackForSitsService.queueFeedback(f, currentUser, gradeGenerator)).map(_.feedback)

@@ -145,7 +145,7 @@ trait PublishFeedbackCommandState {
   }
 
   def validateGrades: ValidateAndPopulateFeedbackResult = {
-    feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease.map(_._3), gradeGenerator)
+    feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease.map(_._3), assignment, gradeGenerator)
   }
 }
 
