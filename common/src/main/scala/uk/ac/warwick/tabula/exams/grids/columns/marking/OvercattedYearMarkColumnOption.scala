@@ -50,6 +50,9 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
         } else {
           Left("The overcat adjusted mark subset has not been chosen")
         }
+      } match {
+        case Right(m) => if (m == null) Left("The overcat mark is not available") else Right(m)
+        case v: Either[_, _] => v
       }
     }
 

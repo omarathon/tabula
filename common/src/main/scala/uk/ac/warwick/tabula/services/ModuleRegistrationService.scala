@@ -119,7 +119,7 @@ abstract class AbstractModuleRegistrationService extends ModuleRegistrationServi
   ): Seq[(BigDecimal, Seq[ModuleRegistration])] = {
     val validRecords = moduleRegistrations.filterNot(_.deleted)
     if (validRecords.exists(_.firstDefinedMark.isEmpty)) {
-        Seq((BigDecimal(-1), validRecords))
+        Seq((null, validRecords))
     } else {
       // TAB-6331 - Overcat subsets don't _have_ to contain all optional core modules. If a minimum number of optional core modules must be passed that should
       // be handled by pathway rules instead (which means as far as grids are concerned there is no difference between Optional and OptionalCore modules)
