@@ -13,7 +13,7 @@ class MitCircsReviewSubmissionController extends BaseController {
 
   @ModelAttribute("command")
   def command(@PathVariable submission: MitigatingCircumstancesSubmission): ReviewMitCircsSubmissionCommand.Command =
-    ReviewMitCircsSubmissionCommand(mandatory(submission))
+    ReviewMitCircsSubmissionCommand(mandatory(Option(submission).filterNot(_.isDraft).orNull))
 
   @RequestMapping
   def render(@ModelAttribute("command") cmd: ReviewMitCircsSubmissionCommand.Command, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
