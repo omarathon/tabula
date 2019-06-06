@@ -157,40 +157,40 @@
       </table>
     </#if>
 
-      <#if command.gradeValidation.notOnScheme?has_content >
-        <div class="alert alert-danger">
-          <p>
-              <#assign total = command.gradeValidation.notOnScheme?keys?size />
-              <@fmt.p total "student" />
-              <#if total==1>
-                has feedback that cannot be uploaded because the student is not present on a linked assessment component.
-              <#else>
-                have feedback that cannot be uploaded because the students are not present on a linked assessment component.
-              </#if>
-          </p>
-        </div>
+    <#if command.gradeValidation.notOnScheme?has_content >
+      <div class="alert alert-danger">
+        <p>
+            <#assign total = command.gradeValidation.notOnScheme?keys?size />
+            <@fmt.p total "student" />
+            <#if total==1>
+              has feedback that cannot be uploaded because the student is not present on a linked assessment component.
+            <#else>
+              have feedback that cannot be uploaded because the students are not present on a linked assessment component.
+            </#if>
+        </p>
+      </div>
 
-        <table class="table table-bordered table-condensed table-striped table-hover">
-          <thead>
+      <table class="table table-bordered table-condensed table-striped table-hover">
+        <thead>
+        <tr>
+          <th>University ID</th>
+          <th>Mark</th>
+          <th>Grade</th>
+          <th>Valid grades</th>
+        </tr>
+        </thead>
+        <tbody>
+        <#list command.gradeValidation.notOnScheme?keys as feedback>
           <tr>
-            <th>University ID</th>
-            <th>Mark</th>
-            <th>Grade</th>
-            <th>Valid grades</th>
+            <td>${feedback.studentIdentifier}</td>
+            <td>${feedback.latestMark!}</td>
+            <td>${feedback.latestGrade!}</td>
+            <td>${mapGet(command.gradeValidation.notOnScheme, feedback)}</td>
           </tr>
-          </thead>
-          <tbody>
-          <#list command.gradeValidation.notOnScheme?keys as feedback>
-            <tr>
-              <td>${feedback.studentIdentifier}</td>
-              <td>${feedback.latestMark!}</td>
-              <td>${feedback.latestGrade!}</td>
-              <td>${mapGet(command.gradeValidation.notOnScheme, feedback)}</td>
-            </tr>
-          </#list>
-          </tbody>
-        </table>
-      </#if>
+        </#list>
+        </tbody>
+      </table>
+    </#if>
 
   </#if>
 
