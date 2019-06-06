@@ -22,6 +22,14 @@
       </div>
       <p class="job-status">${jobStatus!"Waiting for job to start"}</p>
     </div>
+    <#if oldestImport??>
+      <div class="alert alert-info">
+        <p>
+          This grid has been generated from the data available in SITS at
+            <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+        </p>
+      </div>
+    </#if>
     <p>
       Tabula is currently importing fresh data for the students you selected from SITS.
       You can <a href="#" data-toggle="modal" data-target="#student-import-dates">view the last import date for each student</a>.
