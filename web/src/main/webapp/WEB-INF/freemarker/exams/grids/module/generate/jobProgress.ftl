@@ -27,6 +27,12 @@
       You can <a href="#" data-toggle="modal" data-target="#student-import-dates">view the last import date for each student</a>.
       If you wish you can skip this import and proceed to generate the grid.
     </p>
+    <#if oldestImport??>
+      <p>
+        If you skip the import, the grid will be generated from data available in SITS at
+        <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
+      </p>
+    </#if>
     <div class="modal fade" id="student-import-dates">
       <@modal.wrapper>
         <@modal.body>

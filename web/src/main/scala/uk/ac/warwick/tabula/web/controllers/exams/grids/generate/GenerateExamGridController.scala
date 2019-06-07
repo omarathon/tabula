@@ -10,7 +10,6 @@ import org.springframework.web.util.UriComponentsBuilder
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.grids.columns.modules.{CoreRequiredModulesColumnOption, ModuleExamGridColumn, ModuleReportsColumn, ModuleReportsColumnOption}
 import uk.ac.warwick.tabula.exams.grids.columns.{ExamGridColumnValueType, _}
@@ -20,7 +19,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.jobs.scheduling.ImportMembersJob
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.exams.grids.NormalLoadLookup
 import uk.ac.warwick.tabula.services.jobs.AutowiringJobServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
@@ -344,14 +342,18 @@ class GenerateExamGridController extends ExamsController
     @RequestParam allRequestParams: MultiValueMap[String, String]
   ): Mav = {
     Option(jobId).flatMap(jobService.getInstance).filterNot(_.finished).map { jobInstance =>
-      val studentLastImportDates = selectCourseCommand.apply().map(e =>
-        (Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
-      ).sortBy(_._2)
+
+      val studentLastImportDates = benchmarkTask("lastImportDateExamGridData") {
+        selectCourseCommand.apply().map(e =>
+          (Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
+        ).sortBy(_._2)
+      }
       commonCrumbs(
         Mav("exams/grids/generate/jobProgress",
           "jobId" -> jobId,
           "jobProgress" -> jobInstance.progress,
           "jobStatus" -> jobInstance.status,
+          "oldestImport" -> studentLastImportDates.headOption.map { case (_, datetime) => datetime },
           "studentLastImportDates" -> studentLastImportDates
         ),
         department,
