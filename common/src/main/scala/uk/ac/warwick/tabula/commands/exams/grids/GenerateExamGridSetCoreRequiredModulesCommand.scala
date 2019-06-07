@@ -101,7 +101,7 @@ trait GenerateExamGridSetCoreRequiredModulesDescription extends Describable[Map[
         "academicYear" -> academicYear.toString,
         "courses" -> courses.asScala.map(_.code),
         "yearOfStudy" -> yearOfStudy,
-        "modules" -> modules.asScala.map { case (route, crModules) => route.code -> crModules.asScala.map(_.code) }
+        "routeModules" -> modules.asScala.map { case (route, crModules) => route.code -> crModules.asScala.map(_.code) }
       )
   }
 }
