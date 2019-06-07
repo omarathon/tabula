@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "TurnitinJobError")
 class TurnitinJobErrorNotification
   extends TurnitinReportNotification

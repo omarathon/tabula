@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.attendance.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -38,6 +38,7 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "AttendanceMonitoringUnrecordedPoints")
 class AttendanceMonitoringUnrecordedPointsNotification
   extends AbstractAttendanceMonitoringUnrecordedNotification {
@@ -77,6 +78,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "AttendanceMonitoringUnrecordedStudents")
 class AttendanceMonitoringUnrecordedStudentsNotification
   extends AbstractAttendanceMonitoringUnrecordedNotification {

@@ -1,15 +1,10 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.MarkerFeedback
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
-import uk.ac.warwick.tabula.data.model.NotificationWithTarget
-import uk.ac.warwick.tabula.data.model.SingleRecipientNotification
-import uk.ac.warwick.tabula.data.model.UserIdRecipientNotification
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, NotificationWithTarget, SingleRecipientNotification, UserIdRecipientNotification, _}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
@@ -18,6 +13,7 @@ object OldReturnToMarkerNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ReturnToMarker")
 class OldReturnToMarkerNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

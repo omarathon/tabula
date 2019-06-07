@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{CascadeType, Entity, _}
-import org.hibernate.annotations.{NamedQueries => _, NamedQuery => _, _}
+import org.hibernate.annotations.{Proxy, NamedQueries => _, NamedQuery => _, _}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-
 @Entity
+@Proxy(`lazy` = false)
 @NamedQueries(Array(
   new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
   new NamedQuery(name = "route.adminDepartment", query = "select r from Route r where adminDepartment = :adminDepartment")))

@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{Type, BatchSize}
-import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.GeneratedId
 
-
 @Entity
+@Proxy(`lazy` = false)
 @Table(name = "attendancetemplate")
 class AttendanceMonitoringTemplate extends GeneratedId {
 

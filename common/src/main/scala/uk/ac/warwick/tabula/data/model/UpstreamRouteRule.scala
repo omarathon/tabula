@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.LevelService
 import uk.ac.warwick.tabula.services.exams.grids.UpstreamRouteRuleService
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -17,6 +16,7 @@ import scala.collection.mutable
   * Pathways and Routes are synonymous.
   */
 @Entity
+@Proxy(`lazy` = false)
 class UpstreamRouteRule extends GeneratedId {
 
   def this(academicYear: Option[AcademicYear], route: Route, levelCode: String) {

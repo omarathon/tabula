@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.{DiscriminatorValue, Entity, ManyToOne}
-
-import org.hibernate.annotations.Type
+import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.userlookup.User
 
 object HeronWarningNotification {
@@ -11,6 +10,7 @@ object HeronWarningNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "HeronWarning")
 class HeronWarningNotification extends Notification[MeetingRecord, Unit]
   with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
@@ -33,6 +33,7 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "HeronDefeat")
 class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
   with SingleItemNotification[MeetingRecord] with SingleRecipientNotification

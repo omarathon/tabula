@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.triggers
 
 import javax.persistence.{DiscriminatorValue, Entity, Inheritance, InheritanceType}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, ToEntityReference}
@@ -18,6 +18,7 @@ object AssignmentClosedTrigger {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "AssignmentClosed")
 class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {

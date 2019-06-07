@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
@@ -12,6 +12,7 @@ object ExtensionRevokedNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ExtensionRevoked")
 class ExtensionRevokedNotification extends Notification[Assignment, Unit]
   with SingleItemNotification[Assignment]

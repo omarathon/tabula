@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
 import javax.persistence._
-import uk.ac.warwick.tabula.{AcademicYear, SprCode}
-import uk.ac.warwick.tabula.system.permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.lang3.builder.CompareToBuilder
+import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.system.permissions._
+import uk.ac.warwick.tabula.{AcademicYear, SprCode}
 
 import scala.collection.JavaConverters._
 
@@ -19,9 +19,8 @@ import scala.collection.JavaConverters._
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */
-
-
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 

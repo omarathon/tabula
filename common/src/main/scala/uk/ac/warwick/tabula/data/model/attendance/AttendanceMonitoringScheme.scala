@@ -1,21 +1,23 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.AcademicYear
-import javax.validation.constraints.NotNull
-import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService}
-import uk.ac.warwick.tabula.services.UserGroupCacheManager
-import uk.ac.warwick.spring.Wire
-import org.hibernate.annotations.{Type, BatchSize}
-import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence._
+import javax.validation.constraints.NotNull
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.services.UserGroupCacheManager
+import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMembershipHelpers, AttendanceMonitoringService}
+
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy(`lazy` = false)
 class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
 
   override type Entity = AttendanceMonitoringScheme

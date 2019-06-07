@@ -1,17 +1,19 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import org.joda.time.{LocalDate, DateTime}
+import javax.persistence._
+import javax.validation.constraints.NotNull
+import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentService, RelationshipService}
-import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
-import javax.validation.constraints.NotNull
-import javax.persistence.{Entity, JoinColumn, FetchType, ManyToOne, Column}
-import org.hibernate.annotations.Type
+
+import scala.collection.JavaConverters._
 
 @Entity
+@Proxy(`lazy` = false)
 class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPointSettings {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

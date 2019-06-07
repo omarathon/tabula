@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import javax.persistence.{Column, JoinColumn, FetchType, ManyToOne, Entity, ForeignKey}
-import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
-import uk.ac.warwick.spring.Wire
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
+import javax.persistence._
 import javax.validation.constraints.NotNull
-
+import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Entity
+@Proxy(`lazy` = false)
 class AttendanceMonitoringCheckpoint extends GeneratedId {
 
   @transient var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]

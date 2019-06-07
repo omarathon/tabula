@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -12,6 +13,7 @@ object PendingEvidenceReminderNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("PendingEvidenceReminder")
 class PendingEvidenceReminderNotification
   extends Notification[MitigatingCircumstancesSubmission, Unit]

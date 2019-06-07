@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
 import javax.validation.constraints.{Min, NotNull}
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
 @Entity
+@Proxy(`lazy` = false)
 class MonitoringPointReport extends GeneratedId with ToEntityReference {
 
   @ManyToOne(fetch = FetchType.LAZY)

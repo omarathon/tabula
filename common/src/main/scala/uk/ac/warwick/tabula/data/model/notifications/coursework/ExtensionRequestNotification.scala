@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
@@ -53,6 +53,7 @@ abstract class ExtensionRequestNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ExtensionRequestCreated")
 class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
   priority = Warning
@@ -65,6 +66,7 @@ class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ExtensionRequestModified")
 class ExtensionRequestModifiedNotification extends ExtensionRequestNotification {
   priority = Warning
@@ -77,6 +79,7 @@ class ExtensionRequestModifiedNotification extends ExtensionRequestNotification 
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ExtensionMoreInfoReceived")
 class ExtensionInfoReceivedNotification extends ExtensionRequestNotification {
   priority = Warning

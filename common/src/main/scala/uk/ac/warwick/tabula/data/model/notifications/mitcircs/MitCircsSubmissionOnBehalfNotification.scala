@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -40,12 +41,14 @@ abstract class MitCircsOnBehalfNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("MitCircsSubmissionOnBehalf")
 class MitCircsSubmissionOnBehalfNotification extends MitCircsOnBehalfNotification {
   def action: String = "created"
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("MitCircsUpdateOnBehalf")
 class MitCircsUpdateOnBehalfNotification extends MitCircsOnBehalfNotification {
   def action: String = "updated"

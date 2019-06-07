@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "membernote")
 abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
@@ -66,6 +67,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("note")
 class MemberNote extends AbstractMemberNote {
@@ -77,6 +79,7 @@ class MemberNote extends AbstractMemberNote {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("circumstances")
 class ExtenuatingCircumstances extends AbstractMemberNote {

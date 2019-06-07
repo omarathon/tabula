@@ -4,6 +4,7 @@ import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
 import javax.persistence.CascadeType._
 import javax.persistence._
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -21,6 +22,7 @@ import scala.language.postfixOps
 import scala.util.matching.Regex
 
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class FileAttachment extends GeneratedId {
 

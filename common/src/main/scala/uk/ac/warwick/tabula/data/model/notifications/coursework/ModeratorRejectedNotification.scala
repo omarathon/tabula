@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
@@ -17,6 +17,7 @@ object ModeratorRejectedNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "ModeratorRejected")
 class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
   with SingleItemNotification[MarkerFeedback]

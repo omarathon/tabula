@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import scala.collection.JavaConverters._
-import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
-import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.data.model.HibernateVersioned
-import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.data.model.{Department, GeneratedId, HibernateVersioned}
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
+import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
+
+import scala.collection.JavaConverters._
 
 @Entity
+@Proxy(`lazy` = false)
 class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
 
   // The department which owns this definition - probably want to expand this to include sub-departments later

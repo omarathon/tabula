@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification, NotificationWithTarget}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -12,6 +13,7 @@ object MitCircsPendingEvidenceReceivedNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("MitCircsPendingEvidenceReceived")
 class MitCircsPendingEvidenceReceivedNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]

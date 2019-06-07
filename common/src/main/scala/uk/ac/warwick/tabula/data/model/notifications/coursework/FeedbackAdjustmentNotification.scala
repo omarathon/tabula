@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Info
 import uk.ac.warwick.tabula.data.model._
@@ -13,6 +13,7 @@ object FeedbackAdjustmentNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("FeedbackAdjustment")
 class FeedbackAdjustmentNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]

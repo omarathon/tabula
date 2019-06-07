@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
-
-import javax.persistence._
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence._
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.ToString
 
 @Entity
+@Proxy(`lazy` = false)
 class NextOfKin extends GeneratedId with ToString {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")

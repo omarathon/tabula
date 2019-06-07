@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JBigDecimal, JInteger}
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
@@ -15,6 +14,7 @@ object NormalCATSLoad {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 class NormalCATSLoad extends GeneratedId {
 
   def this(academicYear: AcademicYear, route: Route, yearOfStudy: YearOfStudy, normalLoad: BigDecimal) {

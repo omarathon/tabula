@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -19,6 +20,7 @@ import scala.collection.JavaConverters._
   * many Assessments within that Department.
   */
 @Entity
+@Proxy(`lazy` = false)
 @Table(name = "MarkScheme")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "MarkingMethod", discriminatorType = DiscriminatorType.STRING, length = 255)

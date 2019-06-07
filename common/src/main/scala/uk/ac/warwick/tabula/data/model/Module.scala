@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -17,6 +17,7 @@ import scala.collection.mutable
 import scala.util.matching.Regex
 
 @Entity
+@Proxy(`lazy` = false)
 @NamedQueries(Array(
   new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
   new NamedQuery(name = "module.adminDepartment", query = "select m from Module m where adminDepartment = :adminDepartment")))

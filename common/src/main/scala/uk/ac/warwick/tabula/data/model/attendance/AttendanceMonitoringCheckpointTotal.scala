@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
-
-import uk.ac.warwick.tabula.data.model._
 import javax.validation.constraints.NotNull
-
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
-import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.data.model._
 
 @Entity
+@Proxy(`lazy` = false)
 @Table(name = "ATTENDANCEMONITORINGTOTAL")
 class AttendanceMonitoringCheckpointTotal extends GeneratedId with ToEntityReference {
 

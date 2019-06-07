@@ -5,7 +5,7 @@ import java.sql.Types
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.JavaImports._
@@ -38,6 +38,7 @@ object AbstractMeetingRecord {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted

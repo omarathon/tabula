@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Type}
-import org.joda.time.DateTime
 import javax.validation.constraints._
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Access(AccessType.FIELD)
 @Entity
+@Proxy(`lazy` = false)
 @Table(uniqueConstraints = Array(
   new UniqueConstraint(columnNames = Array("occurrence_id", "universityId"))
 ))

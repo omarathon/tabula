@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
+
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class Mark extends GeneratedId {
 

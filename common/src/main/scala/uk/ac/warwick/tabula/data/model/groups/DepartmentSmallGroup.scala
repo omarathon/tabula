@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -26,6 +25,7 @@ object DepartmentSmallGroup {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class DepartmentSmallGroup
   extends GeneratedId
@@ -34,8 +34,6 @@ class DepartmentSmallGroup
     with Serializable
     with ToEntityReference {
   type Entity = DepartmentSmallGroup
-
-  import DepartmentSmallGroup._
 
   // FIXME this isn't really optional, but testing is a pain unless it's made so
   @transient var smallGroupService: Option[SmallGroupService with SmallGroupMembershipHelpers] = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsMessageFromStudentNotification.templateLocation
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
@@ -14,6 +15,7 @@ object MitCircsMessageFromStudentNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("MitCircsMessageFromStudent")
 class MitCircsMessageFromStudentNotification
   extends NotificationWithTarget[MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission]

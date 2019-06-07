@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -20,6 +20,7 @@ import scala.collection.JavaConverters._
   * AssessmentComponent in line with what it's called in SITS.
   */
 @Entity
+@Proxy(`lazy` = false)
 @Table(name = "UPSTREAMASSIGNMENT")
 class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
 

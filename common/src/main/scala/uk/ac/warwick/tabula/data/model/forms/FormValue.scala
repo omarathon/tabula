@@ -3,20 +3,18 @@ package uk.ac.warwick.tabula.data.model.forms
 /**
   * represents a submitted value.
   */
-
-import org.hibernate.annotations.Cascade
-import org.hibernate.annotations.CascadeType
-
-import scala.collection.JavaConverters._
+import javax.persistence.FetchType._
+import javax.persistence._
+import org.hibernate.annotations.{Cascade, CascadeType, Proxy}
+import org.springframework.validation.BindingResult
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
-import org.springframework.validation.BindingResult
-import javax.persistence._
-import javax.persistence.FetchType._
+
+import scala.collection.JavaConverters._
 
 /**
   * Base object for binding an individual submitted field from an assignment
@@ -87,6 +85,7 @@ class FileFormValue(val field: FormField) extends FormValue {
   * is left as an exercise for the Hibernate fanbois.
   */
 @Entity(name = "SubmissionValue")
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class SavedFormValue extends GeneratedId with FormattedHtml {
 

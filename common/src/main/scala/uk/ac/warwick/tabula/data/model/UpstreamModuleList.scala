@@ -1,17 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 /**
   * Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
   */
 @Entity
+@Proxy(`lazy` = false)
 class UpstreamModuleList {
 
   def this(code: String, name:String, shortName: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {

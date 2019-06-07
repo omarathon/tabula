@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification, SingleRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.userlookup.User
 
@@ -48,6 +48,7 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "ScheduledMeetingRecordReminderStudent")
 class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeetingRecordReminderNotification {
 
@@ -58,6 +59,7 @@ class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeeting
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "ScheduledMeetingRecordReminderAgent")
 class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRecordReminderNotification {
 

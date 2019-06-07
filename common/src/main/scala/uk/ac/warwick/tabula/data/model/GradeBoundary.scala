@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.Entity
 import javax.validation.constraints.NotNull
+import org.hibernate.annotations.Proxy
 
 object GradeBoundary {
   def apply(marksCode: String, grade: String, minimumMark: Int, maximumMark: Int, signalStatus: String): GradeBoundary = {
@@ -27,6 +28,7 @@ object GradeBoundary {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 class GradeBoundary extends GeneratedId {
 
   @NotNull

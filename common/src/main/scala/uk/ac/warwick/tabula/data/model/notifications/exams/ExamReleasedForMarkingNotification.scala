@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.exams
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.exams.web
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "ExamReleased")
 class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
   with SingleItemNotification[Exam]

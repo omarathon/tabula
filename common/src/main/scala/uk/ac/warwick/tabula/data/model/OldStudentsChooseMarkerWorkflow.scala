@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
-import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
-import uk.ac.warwick.tabula.services.{UserLookupService, SubmissionService}
+import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
+import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
+import uk.ac.warwick.userlookup.User
+
+import scala.collection.JavaConverters._
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "StudentsChooseMarker")
 class OldStudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 

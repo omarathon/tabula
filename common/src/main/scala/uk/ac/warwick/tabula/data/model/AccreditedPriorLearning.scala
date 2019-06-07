@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
-
 import javax.persistence._
-import uk.ac.warwick.tabula.{ToString, AcademicYear}
-import uk.ac.warwick.tabula.system.permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.JavaImports._
 import org.apache.commons.lang3.builder.CompareToBuilder
+import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.system.permissions._
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 /*
  * scj code, award code and sequence number together make up the key in SITS, and form a unique index in Tabula.
  */
 
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class AccreditedPriorLearning() extends GeneratedId with PermissionsTarget with ToString with Ordered[AccreditedPriorLearning] {
   def this(studentCourseDetails: StudentCourseDetails,

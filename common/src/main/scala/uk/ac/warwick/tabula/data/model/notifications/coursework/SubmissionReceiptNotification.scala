@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, UniversityIdOrUserIdRecipientNotification}
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("SubmissionReceipt")
 class SubmissionReceiptNotification extends SubmissionNotification
   with SingleRecipientNotification

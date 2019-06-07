@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "Cm2MarkedPlagiarised")
 class Cm2MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
   with SingleItemNotification[Submission] with AutowiringUserLookupComponent

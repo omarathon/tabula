@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
@@ -14,6 +14,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "UnlinkedDepartmentSmallGroupSet")
 class UnlinkedDepartmentSmallGroupSetNotification extends NotificationWithTarget[DepartmentSmallGroupSet, Department]
   with MyWarwickActivity {

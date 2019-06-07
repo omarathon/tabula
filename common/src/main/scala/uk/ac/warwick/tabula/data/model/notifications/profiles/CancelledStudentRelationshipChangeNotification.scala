@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
@@ -62,6 +62,7 @@ abstract class CancelledStudentRelationshipChangeNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("CancelledStudentRelationshipChangeToStudent")
 class CancelledStudentRelationshipChangeToStudentNotification extends CancelledStudentRelationshipChangeNotification {
   def title: String = s"Scheduled ${relationshipType.get.agentRole} allocation change cancelled"
@@ -74,6 +75,7 @@ class CancelledStudentRelationshipChangeToStudentNotification extends CancelledS
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("CancelledStudentRelationshipChangeToOldAgent")
 class CancelledStudentRelationshipChangeToOldAgentNotification extends CancelledStudentRelationshipChangeNotification {
 
@@ -92,6 +94,7 @@ class CancelledStudentRelationshipChangeToOldAgentNotification extends Cancelled
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("CancelledStudentRelationshipChangeToNewAgent")
 class CancelledStudentRelationshipChangeToNewAgentNotification extends CancelledStudentRelationshipChangeNotification {
 

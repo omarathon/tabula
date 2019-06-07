@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
 
-import org.joda.time.DateTime
 import javax.persistence.{Entity, Id}
 import org.hibernate.`type`.{StandardBasicTypes, StringType}
+import org.hibernate.annotations.Proxy
+import org.joda.time.DateTime
 
 sealed abstract class DisabilityFundingStatus(val code: String, val description: String)
 
@@ -45,6 +46,7 @@ class DisabilityFundingStatusUserType extends AbstractBasicUserType[DisabilityFu
 }
 
 @Entity
+@Proxy(`lazy` = false)
 class Disability {
   def this(code: String = null, definition: String = null) {
     this()

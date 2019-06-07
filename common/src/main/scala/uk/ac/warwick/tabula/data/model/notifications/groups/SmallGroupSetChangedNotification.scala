@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity, NotificationWithTarget, UserIdRecipientNotification}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
@@ -36,6 +36,7 @@ trait SmallGroupSetChangedUserIdRecipientNotification
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "SmallGroupSetChangedStudent")
 class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedUserIdRecipientNotification {
 
@@ -44,6 +45,7 @@ class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedUserId
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "SmallGroupSetChangedTutor")
 class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedUserIdRecipientNotification {
 

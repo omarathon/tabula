@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
-
-import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
@@ -22,6 +21,7 @@ object Exam {
 @FilterDef(name = Exam.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Exam.NotDeletedFilter)
 @Entity
+@Proxy(`lazy` = false)
 @Access(AccessType.FIELD)
 class Exam
   extends Assessment

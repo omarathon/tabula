@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.Type
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
+import org.hibernate.annotations.{Proxy, Type}
 import uk.ac.warwick.tabula.JavaImports.JBigDecimal
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 object CourseYearWeighting {
   def find(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy)(weighting: CourseYearWeighting): Boolean = {
@@ -27,6 +27,7 @@ object CourseYearWeighting {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 class CourseYearWeighting extends GeneratedId with ToString {
 
   def this(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy, weightingAsPercentage: BigDecimal) {

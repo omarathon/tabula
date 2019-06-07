@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity, Notification, UserIdRecipientNotification}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
@@ -12,6 +12,7 @@ object ReleaseSmallGroupSetsNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("ReleaseSmallGroupSets")
 class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
   with UserIdRecipientNotification

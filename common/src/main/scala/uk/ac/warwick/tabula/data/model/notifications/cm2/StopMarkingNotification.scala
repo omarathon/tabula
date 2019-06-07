@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
@@ -13,6 +13,7 @@ object StopMarkingNotification {
 }
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue("CM2StopMarking")
 class StopMarkingNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

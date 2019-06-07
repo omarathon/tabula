@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.data.model.notifications.attendance
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickActivity, NotificationWithTarget}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickActivity, NotificationWithTarget}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
+@Proxy(`lazy` = false)
 @DiscriminatorValue(value = "UnlinkedAttendanceMonitoringScheme")
 class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTarget[AttendanceMonitoringScheme, Department]
   with MyWarwickActivity {
