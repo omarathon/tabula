@@ -11,8 +11,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.MitigatingCircumstancesPanelMemberRoleDefinition
-import uk.ac.warwick.tabula.services.mitcircs.MitCircsPanelService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, RelatedUrl, TimetableEvent, TimetableEventType}
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.userlookup.User
 
@@ -94,8 +95,28 @@ class MitigatingCircumstancesPanel extends GeneratedId with StringId with Serial
 
   def members: Set[User] = viewers -- Set(chair, secretary)
 
-  @transient
-  var mitCircsPanelService: Option[MitCircsPanelService] = Wire.option[MitCircsPanelService]
+  def toEventOccurrence(context: TimetableEvent.Context): Option[EventOccurrence] =
+    if (Option(date).isEmpty || Option(endDate).isEmpty) None
+    else Some(
+      EventOccurrence(
+        uid = id,
+        name = name,
+        title = name,
+        description = s"${submissions.size} submission${if (submissions.size != 1) "s" else ""}",
+        eventType = TimetableEventType.Other("Panel"),
+        start = date.toLocalDateTime,
+        end = endDate.toLocalDateTime,
+        location = Option(location),
+        parent = TimetableEvent.Parent(department),
+        comments = None,
+        staff = viewers.toSeq,
+        relatedUrl = Some(RelatedUrl(
+          urlString = Routes.mitcircs.Admin.Panels.view(this),
+          title = Some("Panel information")
+        )),
+        attendance = None
+      )
+    )
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id
