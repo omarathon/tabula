@@ -343,20 +343,17 @@ class GenerateExamGridController extends ExamsController
   ): Mav = {
     Option(jobId).flatMap(jobService.getInstance).filterNot(_.finished).map { jobInstance =>
 
-      val (oldestImport, studentLastImportDates) = benchmarkTask("gatherLastImportDateExamGridData") {
-        val studentLastImportDates = selectCourseCommand.apply().map(e =>
+      val studentLastImportDates = benchmarkTask("lastImportDateExamGridData") {
+        selectCourseCommand.apply().map(e =>
           (Seq(e.firstName, e.lastName).mkString(" "), e.lastImportDate.getOrElse(new DateTime(0)))
         ).sortBy(_._2)
-
-        val oldestImport = studentLastImportDates.map { case (_, datetime) => datetime }.reduceOption((a, b) => if (a.isBefore(b)) a else b)
-        (oldestImport, studentLastImportDates)
       }
       commonCrumbs(
         Mav("exams/grids/generate/jobProgress",
           "jobId" -> jobId,
           "jobProgress" -> jobInstance.progress,
           "jobStatus" -> jobInstance.status,
-          "oldestImport" -> oldestImport,
+          "oldestImport" -> studentLastImportDates.headOption.map { case (_, datetime) => datetime },
           "studentLastImportDates" -> studentLastImportDates
         ),
         department,
