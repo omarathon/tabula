@@ -16,7 +16,7 @@ import scala.collection.mutable
   * Pathways and Routes are synonymous.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamRouteRule extends GeneratedId {
 
   def this(academicYear: Option[AcademicYear], route: Route, levelCode: String) {

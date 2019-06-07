@@ -62,7 +62,7 @@ abstract class CancelledStudentRelationshipChangeNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CancelledStudentRelationshipChangeToStudent")
 class CancelledStudentRelationshipChangeToStudentNotification extends CancelledStudentRelationshipChangeNotification {
   def title: String = s"Scheduled ${relationshipType.get.agentRole} allocation change cancelled"
@@ -75,7 +75,7 @@ class CancelledStudentRelationshipChangeToStudentNotification extends CancelledS
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CancelledStudentRelationshipChangeToOldAgent")
 class CancelledStudentRelationshipChangeToOldAgentNotification extends CancelledStudentRelationshipChangeNotification {
 
@@ -94,7 +94,7 @@ class CancelledStudentRelationshipChangeToOldAgentNotification extends Cancelled
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CancelledStudentRelationshipChangeToNewAgent")
 class CancelledStudentRelationshipChangeToNewAgentNotification extends CancelledStudentRelationshipChangeNotification {
 

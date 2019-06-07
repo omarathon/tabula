@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{SprCode, ToString}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "agent_type")
@@ -89,7 +89,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("member")
 class MemberStudentRelationship extends StudentRelationship {
   def isAgentMember = true
@@ -112,7 +112,7 @@ class MemberStudentRelationship extends StudentRelationship {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("external")
 class ExternalStudentRelationship extends StudentRelationship {
   def isAgentMember = false

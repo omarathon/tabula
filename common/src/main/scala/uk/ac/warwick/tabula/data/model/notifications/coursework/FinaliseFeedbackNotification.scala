@@ -14,7 +14,7 @@ object FinaliseFeedbackNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("FinaliseFeedback")
 class FinaliseFeedbackNotification
   extends NotificationWithTarget[Feedback, Assignment]

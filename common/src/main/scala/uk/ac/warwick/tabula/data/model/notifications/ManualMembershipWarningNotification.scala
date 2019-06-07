@@ -14,7 +14,7 @@ object ManualMembershipWarningNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ManualMembershipWarning")
 class ManualMembershipWarningNotification extends Notification[Department, Unit]
   with SingleItemNotification[Department]

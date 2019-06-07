@@ -17,7 +17,7 @@ object ModeratorRejectedNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ModeratorRejected")
 class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
   with SingleItemNotification[MarkerFeedback]

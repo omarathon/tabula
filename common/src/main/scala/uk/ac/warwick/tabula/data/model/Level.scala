@@ -12,7 +12,7 @@ object Level {
 }
 
 @Entity(name = "StudyLevel") // Level is a reserved word in Oracle so the table is called StudyLevel
-@Proxy(`lazy` = false)
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "level.code", query = "select level from StudyLevel level where code = :code")))
 class Level {

@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class FeedbackForSits extends GeneratedId {
 
   @OneToOne(fetch = FetchType.LAZY)

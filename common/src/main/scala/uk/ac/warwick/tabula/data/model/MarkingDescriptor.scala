@@ -4,7 +4,7 @@ import javax.persistence._
 import org.hibernate.annotations.Proxy
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorColumn(name = "discriminator")
 sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
   @Column(name = "min_mark")
@@ -44,13 +44,13 @@ sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "U")
 class UniversityMarkingDescriptor extends MarkingDescriptor {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "D")
 class DepartmentMarkingDescriptor extends MarkingDescriptor {
   @ManyToOne(fetch = FetchType.LAZY)

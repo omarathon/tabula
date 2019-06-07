@@ -13,7 +13,7 @@ object MitCircsPendingEvidenceReceivedNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsPendingEvidenceReceived")
 class MitCircsPendingEvidenceReceivedNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]

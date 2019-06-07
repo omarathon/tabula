@@ -28,7 +28,7 @@ object GradeBoundary {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class GradeBoundary extends GeneratedId {
 
   @NotNull

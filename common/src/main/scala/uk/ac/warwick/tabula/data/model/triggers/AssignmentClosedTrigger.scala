@@ -18,7 +18,7 @@ object AssignmentClosedTrigger {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "AssignmentClosed")
 class AssignmentClosedTrigger extends Trigger[Assignment, Unit] with HandlesAssignmentTrigger {

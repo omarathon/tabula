@@ -13,7 +13,7 @@ object OldReturnToMarkerNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ReturnToMarker")
 class OldReturnToMarkerNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

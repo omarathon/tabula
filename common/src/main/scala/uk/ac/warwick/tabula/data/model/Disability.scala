@@ -46,7 +46,7 @@ class DisabilityFundingStatusUserType extends AbstractBasicUserType[DisabilityFu
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class Disability {
   def this(code: String = null, definition: String = null) {
     this()

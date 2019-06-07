@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with GeneratedId with PermissionsTarget {
 
   // The department which owns this definition - probably want to expand this to include sub-departments later

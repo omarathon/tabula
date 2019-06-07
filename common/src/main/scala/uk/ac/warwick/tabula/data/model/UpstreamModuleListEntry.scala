@@ -9,7 +9,7 @@ import org.hibernate.annotations.Proxy
   * Tabula store for a Formed Module Entity (CAM_FME) from SITS.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamModuleListEntry extends GeneratedId {
 
   def this(list: UpstreamModuleList, globString: String) {

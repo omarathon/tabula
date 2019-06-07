@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordInvitee")
 class ScheduledMeetingRecordInviteeNotification extends ScheduledMeetingRecordNotification
   with AddsIcalAttachmentToScheduledMeetingNotification

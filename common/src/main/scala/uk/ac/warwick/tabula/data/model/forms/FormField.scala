@@ -38,7 +38,7 @@ object FormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
@@ -149,7 +149,7 @@ trait SimpleValue[A] {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 abstract class AssignmentFormField extends FormField {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "assignment_id")
@@ -159,7 +159,7 @@ abstract class AssignmentFormField extends FormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("comment")
 class CommentField extends AssignmentFormField with SimpleValue[String] with FormattedHtml {
   override def isReadOnly = true
@@ -178,7 +178,7 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("text")
 class TextField extends AssignmentFormField with SimpleValue[String] {
 
@@ -194,7 +194,7 @@ class TextField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("wordcount")
 class WordCountField extends AssignmentFormField {
   context = FormFieldContext.Submission
@@ -242,7 +242,7 @@ class WordCountField extends AssignmentFormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("textarea")
 class TextareaField extends AssignmentFormField with SimpleValue[String] {
 
@@ -258,7 +258,7 @@ class TextareaField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
   def blankFormValue = new BooleanFormValue(this)
@@ -273,7 +273,7 @@ class CheckboxField extends FormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("marker")
 class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
   context = FormFieldContext.Submission
@@ -308,7 +308,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("file")
 class FileField extends AssignmentFormField {
   def blankFormValue = new FileFormValue(this)
@@ -387,7 +387,7 @@ class FileField extends AssignmentFormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 abstract class ExamFormField extends FormField {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "exam_id")
@@ -395,7 +395,7 @@ abstract class ExamFormField extends FormField {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("examText")
 class ExamTextField extends ExamFormField with SimpleValue[String] {
   context = FormFieldContext.Feedback

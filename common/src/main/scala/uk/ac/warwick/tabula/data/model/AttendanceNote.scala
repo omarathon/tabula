@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, 
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordConfirm")
 class ScheduledMeetingRecordConfirmNotification
   extends ScheduledMeetingRecordNotification

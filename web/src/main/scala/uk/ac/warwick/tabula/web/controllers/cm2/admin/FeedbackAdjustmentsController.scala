@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.cm2.feedback._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.web.Mav
@@ -76,7 +76,7 @@ class FeedbackAdjustmentsController extends CourseworkController with Autowiring
 
     val courseType = submission.flatMap { submission =>
       submission.universityId
-        .flatMap(uid => profileService.getMemberByUniversityId(uid))
+        .flatMap(uid => profileService.getMemberByUniversityId(uid).map(HibernateHelpers.initialiseAndUnproxy))
         .collect { case stu: StudentMember => stu }
         .flatMap(_.mostSignificantCourseDetails)
         .flatMap(_.courseType)

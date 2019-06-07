@@ -36,7 +36,7 @@ trait SmallGroupSetChangedUserIdRecipientNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "SmallGroupSetChangedStudent")
 class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedUserIdRecipientNotification {
 
@@ -45,7 +45,7 @@ class SmallGroupSetChangedStudentNotification extends SmallGroupSetChangedUserId
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "SmallGroupSetChangedTutor")
 class SmallGroupSetChangedTutorNotification extends SmallGroupSetChangedUserIdRecipientNotification {
 

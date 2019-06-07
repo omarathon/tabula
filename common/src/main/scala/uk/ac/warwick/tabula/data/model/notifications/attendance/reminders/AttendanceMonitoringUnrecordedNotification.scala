@@ -38,7 +38,7 @@ abstract class AbstractAttendanceMonitoringUnrecordedNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "AttendanceMonitoringUnrecordedPoints")
 class AttendanceMonitoringUnrecordedPointsNotification
   extends AbstractAttendanceMonitoringUnrecordedNotification {
@@ -78,7 +78,7 @@ class AttendanceMonitoringUnrecordedPointsNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "AttendanceMonitoringUnrecordedStudents")
 class AttendanceMonitoringUnrecordedStudentsNotification
   extends AbstractAttendanceMonitoringUnrecordedNotification {

@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
   extends Notification[MeetingRecordApproval, Unit]

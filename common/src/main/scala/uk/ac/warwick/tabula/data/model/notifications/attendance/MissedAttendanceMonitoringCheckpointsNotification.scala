@@ -57,7 +57,7 @@ abstract class MissedAttendanceMonitoringCheckpointsNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsLow")
 class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
@@ -67,7 +67,7 @@ class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttenda
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsMedium")
 class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
@@ -77,7 +77,7 @@ class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAtte
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsHigh")
 class MissedAttendanceMonitoringCheckpointsHighNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 

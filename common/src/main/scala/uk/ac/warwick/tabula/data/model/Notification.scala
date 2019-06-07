@@ -103,7 +103,7 @@ object Notification {
   * recipients = who is interested in this notification
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
@@ -245,7 +245,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   * So for those types the target parameter is not defined.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference] extends Notification[A, B] {
 
   self: MyWarwickDiscriminator =>

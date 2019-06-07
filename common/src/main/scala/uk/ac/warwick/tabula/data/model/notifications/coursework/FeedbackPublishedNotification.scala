@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "FeedbackPublished")
 class FeedbackPublishedNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]

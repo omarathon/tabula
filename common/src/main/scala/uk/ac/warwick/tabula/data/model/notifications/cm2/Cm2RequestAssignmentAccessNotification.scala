@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("Cm2RequestAssignmentAccess")
 class Cm2RequestAssignmentAccessNotification
   extends Notification[Assignment, Unit]

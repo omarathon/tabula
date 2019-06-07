@@ -39,7 +39,7 @@ object SmallGroupEvent {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
 

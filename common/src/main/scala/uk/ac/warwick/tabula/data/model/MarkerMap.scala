@@ -5,7 +5,7 @@ import javax.persistence._
 import org.hibernate.annotations.{DiscriminatorOptions, Proxy}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "marker_usergroup")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorOptions(force = true)
@@ -21,7 +21,7 @@ abstract class MarkerMap extends GeneratedId {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("first")
 class FirstMarkersMap extends MarkerMap {
@@ -52,7 +52,7 @@ object FirstMarkersMap {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("second")
 class SecondMarkersMap extends MarkerMap {

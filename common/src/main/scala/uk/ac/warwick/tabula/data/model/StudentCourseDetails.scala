@@ -26,7 +26,7 @@ object StudentCourseDetails {
   new Filter(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 ))
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class StudentCourseDetails
   extends StudentCourseProperties
     with ToString

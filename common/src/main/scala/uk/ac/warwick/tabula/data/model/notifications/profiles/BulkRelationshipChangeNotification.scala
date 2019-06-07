@@ -60,7 +60,7 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
   * e.g. drag and drop tutor allocation
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "BulkStudentRelationship")
 class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotification {
   @transient val templateLocation = BulkRelationshipChangeNotification.StudentTemplate
@@ -93,7 +93,7 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
   * notification to a new tutor letting them know all their new tutees
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "BulkNewAgentRelationship")
 class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotification {
   @transient val templateLocation = BulkRelationshipChangeNotification.NewAgentTemplate
@@ -121,7 +121,7 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
  * notification to an old tutor letting them know which tutees they have been unassigned
  */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "BulkOldAgentRelationship")
 class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotification {
   @transient val templateLocation = BulkRelationshipChangeNotification.OldAgentTemplate

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{EntityReference, GeneratedId, ToEntityReference}
 
 @Entity(name = "ScheduledTrigger")
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorColumn(name = "TRIGGER_TYPE", discriminatorType = DiscriminatorType.STRING)
 abstract class Trigger[A >: Null <: ToEntityReference, B] extends GeneratedId with Serializable with Appliable[B] {
 

@@ -9,7 +9,7 @@ object FileAttachmentToken {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class FileAttachmentToken extends GeneratedId {
 
   @Column(name = "fileattachment_id")

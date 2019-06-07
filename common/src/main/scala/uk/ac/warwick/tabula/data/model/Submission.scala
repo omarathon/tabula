@@ -20,7 +20,7 @@ object Submission {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 

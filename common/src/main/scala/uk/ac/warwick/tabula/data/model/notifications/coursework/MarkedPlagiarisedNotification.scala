@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "MarkedPlagarised")
 class MarkedPlagiarisedNotification extends NotificationWithTarget[Submission, Assignment]
   with SingleItemNotification[Submission] with AutowiringUserLookupComponent

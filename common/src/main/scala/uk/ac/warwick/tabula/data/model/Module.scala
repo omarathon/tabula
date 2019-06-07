@@ -17,7 +17,7 @@ import scala.collection.mutable
 import scala.util.matching.Regex
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
   new NamedQuery(name = "module.adminDepartment", query = "select m from Module m where adminDepartment = :adminDepartment")))

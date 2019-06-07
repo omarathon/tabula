@@ -10,7 +10,7 @@ object HeronWarningNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "HeronWarning")
 class HeronWarningNotification extends Notification[MeetingRecord, Unit]
   with SingleItemNotification[MeetingRecord] with SingleRecipientNotification
@@ -33,7 +33,7 @@ class HeronWarningNotification extends Notification[MeetingRecord, Unit]
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "HeronDefeat")
 class HeronDefeatedNotification extends Notification[MeetingRecord, Unit]
   with SingleItemNotification[MeetingRecord] with SingleRecipientNotification

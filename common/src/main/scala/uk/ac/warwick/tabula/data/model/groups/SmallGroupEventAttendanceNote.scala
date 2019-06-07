@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.AttendanceNote
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("smallGroup")
 class SmallGroupEventAttendanceNote extends AttendanceNote {

@@ -16,7 +16,7 @@ object MitCircsSubmissionReceiptNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsSubmissionReceipt")
 class MitCircsSubmissionReceiptNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]

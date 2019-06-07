@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, Role, RoleBuilder, Rol
 import scala.reflect._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 

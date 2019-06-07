@@ -24,7 +24,7 @@ object CM2MarkingWorkflow {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "MarkingWorkflow")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "WorkflowType", discriminatorType = DiscriminatorType.STRING, length = 255)
@@ -125,7 +125,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "StageMarkers")
 @Access(AccessType.FIELD)
 class StageMarkers extends GeneratedId with Serializable {

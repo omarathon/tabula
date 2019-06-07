@@ -8,7 +8,7 @@ import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Mark extends GeneratedId {
 

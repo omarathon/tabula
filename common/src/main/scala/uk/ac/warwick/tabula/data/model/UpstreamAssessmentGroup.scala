@@ -21,7 +21,7 @@ import scala.collection.JavaConverters._
   * there's only one value but sometimes can be 2 or even 26 in one case)
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamAssessmentGroup extends GeneratedId {
 
   // Long-form module code with hyphen and CATS value
@@ -62,7 +62,7 @@ class UpstreamAssessmentGroup extends GeneratedId {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAssessmentGroupMember]
   with UpstreamAssessmentGroupMemberProperties {
 

@@ -27,7 +27,7 @@ abstract class ExtensionStudentNotification extends ExtensionNotification with S
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionChanged")
 class ExtensionChangedNotification extends ExtensionStudentNotification with MyWarwickActivity {
   def verb = "updated"
@@ -40,7 +40,7 @@ class ExtensionChangedNotification extends ExtensionStudentNotification with MyW
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionGranted")
 class ExtensionGrantedNotification extends ExtensionStudentNotification with MyWarwickActivity {
   def verb = "grant"
@@ -53,7 +53,7 @@ class ExtensionGrantedNotification extends ExtensionStudentNotification with MyW
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestApproved")
 class ExtensionRequestApprovedNotification extends ExtensionStudentNotification with MyWarwickActivity {
   def verb = "approve"
@@ -70,7 +70,7 @@ class ExtensionRequestApprovedNotification extends ExtensionStudentNotification 
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestRejected")
 class ExtensionRequestRejectedNotification extends ExtensionStudentNotification with MyWarwickNotification {
   def verb = "reject"
@@ -85,7 +85,7 @@ class ExtensionRequestRejectedNotification extends ExtensionStudentNotification 
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestMoreInfo")
 class ExtensionRequestMoreInfo extends ExtensionStudentNotification with MyWarwickNotification {
   def verb = "request"

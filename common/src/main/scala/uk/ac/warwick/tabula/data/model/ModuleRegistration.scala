@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
  * a unique constraint on the combination of those three.
  */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBeDeleted with Ordered[ModuleRegistration] {
 

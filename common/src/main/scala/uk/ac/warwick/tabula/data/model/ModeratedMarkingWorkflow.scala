@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ModeratedMarking")
 class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with AssessmentMarkerMap {
 

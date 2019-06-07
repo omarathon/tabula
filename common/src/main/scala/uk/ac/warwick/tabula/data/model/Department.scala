@@ -28,7 +28,7 @@ import scala.xml.NodeSeq
 case class DepartmentWithManualUsers(department: String, assignments: Int, smallGroupSets: Int)
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Department extends GeneratedId
   with PostLoadBehaviour

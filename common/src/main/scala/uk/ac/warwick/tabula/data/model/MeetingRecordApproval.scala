@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, NotRequir
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class MeetingRecordApproval extends GeneratedId with ToEntityReference with PermissionsTarget {
   type Entity = MeetingRecordApproval
 

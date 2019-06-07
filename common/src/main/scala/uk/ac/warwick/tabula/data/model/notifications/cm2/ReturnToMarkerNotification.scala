@@ -14,7 +14,7 @@ object ReturnToMarkerNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CM2ReturnToMarker")
 class ReturnToMarkerNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

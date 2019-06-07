@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("meetingRecordApproved")
 class MeetingRecordApprovedNotification
   extends Notification[MeetingRecordApproval, Unit]

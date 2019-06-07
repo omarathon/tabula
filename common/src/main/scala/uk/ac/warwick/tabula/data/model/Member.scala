@@ -46,7 +46,7 @@ object Member {
   new Filter(name = Member.FreshOnlyFilter)
 ))
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
@@ -223,7 +223,7 @@ abstract class Member
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("S")
 class StudentMember extends Member with StudentProperties {
   this.userType = MemberUserType.Student
@@ -461,7 +461,7 @@ class StudentMember extends Member with StudentProperties {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("N")
 class StaffMember extends Member with StaffProperties {
   this.userType = MemberUserType.Staff
@@ -483,7 +483,7 @@ class StaffMember extends Member with StaffProperties {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("A")
 class EmeritusMember extends Member with StaffProperties {
   this.userType = MemberUserType.Emeritus
@@ -495,7 +495,7 @@ class EmeritusMember extends Member with StaffProperties {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("P")
 class ApplicantMember extends Member with ApplicantProperties with RestrictedPhoneNumber {
   this.userType = MemberUserType.Applicant
@@ -507,7 +507,7 @@ class ApplicantMember extends Member with ApplicantProperties with RestrictedPho
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("O")
 class OtherMember extends Member with RestrictedPhoneNumber {
   this.userType = MemberUserType.Other

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotifica
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "TurnitinJobError")
 class TurnitinJobErrorNotification
   extends TurnitinReportNotification

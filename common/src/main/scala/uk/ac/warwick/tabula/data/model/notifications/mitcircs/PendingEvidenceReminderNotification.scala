@@ -13,7 +13,7 @@ object PendingEvidenceReminderNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("PendingEvidenceReminder")
 class PendingEvidenceReminderNotification
   extends Notification[MitigatingCircumstancesSubmission, Unit]

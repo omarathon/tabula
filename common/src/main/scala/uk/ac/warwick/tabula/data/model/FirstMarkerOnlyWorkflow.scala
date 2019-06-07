@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod.FirstMarkerOnly
 import uk.ac.warwick.tabula.services.SubmissionService
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "FirstMarkerOnly")
 class FirstMarkerOnlyWorkflow extends MarkingWorkflow with NoSecondMarker with AssessmentMarkerMap {
 

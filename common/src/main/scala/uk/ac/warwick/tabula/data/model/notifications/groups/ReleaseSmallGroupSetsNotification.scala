@@ -12,7 +12,7 @@ object ReleaseSmallGroupSetsNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ReleaseSmallGroupSets")
 class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
   with UserIdRecipientNotification

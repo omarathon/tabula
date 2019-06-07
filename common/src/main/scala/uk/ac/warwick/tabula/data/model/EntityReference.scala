@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage,
   * Notification.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
   // Maps to Notification.items
   @ManyToOne

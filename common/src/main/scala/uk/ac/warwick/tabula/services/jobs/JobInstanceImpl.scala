@@ -29,7 +29,7 @@ object JobInstanceImpl {
   * does not need subclassing.
   */
 @Entity(name = "Job")
-@Proxy(`lazy` = false)
+@Proxy
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
   @transient var jsonMapper: ObjectMapper = Wire.auto[ObjectMapper]

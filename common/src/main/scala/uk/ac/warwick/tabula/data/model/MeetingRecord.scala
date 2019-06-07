@@ -24,7 +24,7 @@ object MeetingRecord {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("standard")
 class MeetingRecord extends AbstractMeetingRecord {

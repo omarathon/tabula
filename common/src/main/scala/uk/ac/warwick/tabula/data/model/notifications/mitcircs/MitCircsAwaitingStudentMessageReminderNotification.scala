@@ -13,7 +13,7 @@ object MitCircsAwaitingStudentMessageReminderNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsAwaitingStudentMessageReminder")
 class MitCircsAwaitingStudentMessageReminderNotification
   extends Notification[MitigatingCircumstancesSubmission, Unit]

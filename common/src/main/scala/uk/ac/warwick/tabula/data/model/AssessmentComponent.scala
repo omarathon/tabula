@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
   * AssessmentComponent in line with what it's called in SITS.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "UPSTREAMASSIGNMENT")
 class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
 

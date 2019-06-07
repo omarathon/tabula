@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.GeneratedId
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "attendancetemplate")
 class AttendanceMonitoringTemplate extends GeneratedId {
 

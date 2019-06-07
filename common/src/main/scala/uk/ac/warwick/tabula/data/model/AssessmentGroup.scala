@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
   * as the name might suggest - it is a confusing name.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class AssessmentGroup extends GeneratedId {
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]

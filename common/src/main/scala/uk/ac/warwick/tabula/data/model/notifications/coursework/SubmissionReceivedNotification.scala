@@ -17,7 +17,7 @@ import scala.collection.immutable.Seq
 import scala.reflect.ClassTag
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("SubmissionReceived")
 class SubmissionReceivedNotification extends SubmissionNotification {
 

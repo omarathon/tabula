@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
  */
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class AccreditedPriorLearning() extends GeneratedId with PermissionsTarget with ToString with Ordered[AccreditedPriorLearning] {
   def this(studentCourseDetails: StudentCourseDetails,

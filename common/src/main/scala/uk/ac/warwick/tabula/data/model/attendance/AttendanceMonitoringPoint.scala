@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.services.{AssessmentService, ModuleAndDepartmentServ
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPointSettings {
 
   @ManyToOne(fetch = FetchType.LAZY, optional = false)

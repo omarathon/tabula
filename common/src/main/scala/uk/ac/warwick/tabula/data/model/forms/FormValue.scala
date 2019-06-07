@@ -85,7 +85,7 @@ class FileFormValue(val field: FormField) extends FormValue {
   * is left as an exercise for the Hibernate fanbois.
   */
 @Entity(name = "SubmissionValue")
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class SavedFormValue extends GeneratedId with FormattedHtml {
 

@@ -25,7 +25,7 @@ object DepartmentSmallGroup {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class DepartmentSmallGroup
   extends GeneratedId

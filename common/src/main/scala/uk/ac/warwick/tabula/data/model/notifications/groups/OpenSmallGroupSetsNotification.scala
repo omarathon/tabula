@@ -55,7 +55,7 @@ abstract class AbstractOpenSmallGroupSetsNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "OpenSmallGroupSets")
 class OpenSmallGroupSetsStudentSignUpNotification
   extends AbstractOpenSmallGroupSetsNotification with AllCompletedActionRequiredNotification {
@@ -65,6 +65,6 @@ class OpenSmallGroupSetsStudentSignUpNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "OpenSmallGroupSetsOtherSignUp")
 class OpenSmallGroupSetsOtherSignUpNotification extends AbstractOpenSmallGroupSetsNotification

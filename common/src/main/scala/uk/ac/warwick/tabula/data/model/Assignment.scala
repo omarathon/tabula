@@ -75,7 +75,7 @@ object Assignment {
 @FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Assignment
   extends Assessment

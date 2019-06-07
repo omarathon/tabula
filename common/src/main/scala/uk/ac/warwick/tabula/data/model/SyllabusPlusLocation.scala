@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.ToString
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class SyllabusPlusLocation extends GeneratedId with ToString {
   @Column(name = "upstream_name")
   var upstreamName: String = _

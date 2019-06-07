@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackServi
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ExamMarked")
 class ExamMarkedNotification extends Notification[Exam, Unit]
   with SingleItemNotification[Exam]

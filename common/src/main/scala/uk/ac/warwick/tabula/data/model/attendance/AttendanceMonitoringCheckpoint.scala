@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{GeneratedId, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AttendanceMonitoringService
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class AttendanceMonitoringCheckpoint extends GeneratedId {
 
   @transient var attendanceMonitoringService: AttendanceMonitoringService = Wire[AttendanceMonitoringService]

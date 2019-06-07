@@ -7,7 +7,7 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.data.model.GeneratedId
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "attendancetemplatepoint")
 class AttendanceMonitoringTemplatePoint extends GeneratedId {
 

@@ -11,7 +11,7 @@ import scala.collection.JavaConverters._
   * Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamModuleList {
 
   def this(code: String, name:String, shortName: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {

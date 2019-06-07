@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringM
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class AttendanceMonitoringScheme extends GeneratedId with PermissionsTarget with Serializable with ToEntityReference {
 
   override type Entity = AttendanceMonitoringScheme

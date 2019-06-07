@@ -13,7 +13,7 @@ object OldReleaseToMarkerNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ReleaseToMarker")
 class OldReleaseToMarkerNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

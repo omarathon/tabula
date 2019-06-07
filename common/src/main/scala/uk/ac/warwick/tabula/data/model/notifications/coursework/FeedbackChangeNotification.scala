@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "FeedbackChange")
 class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
   with SingleItemNotification[AssignmentFeedback]

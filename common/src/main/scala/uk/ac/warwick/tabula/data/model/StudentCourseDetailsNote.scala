@@ -4,7 +4,7 @@ import javax.persistence.{Entity, Id}
 import org.hibernate.annotations.Proxy
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class StudentCourseDetailsNote {
 
   def this(code: String, scjCode: String, note: String) = {

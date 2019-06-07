@@ -38,7 +38,7 @@ object AbstractMeetingRecord {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted

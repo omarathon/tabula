@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarkingLegacy
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "SeenSecondMarking")
 class SeenSecondMarkingLegacyWorkflow extends MarkingWorkflow with NoThirdMarker with AssessmentMarkerMap {
 

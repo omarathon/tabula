@@ -27,7 +27,7 @@ object CourseYearWeighting {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class CourseYearWeighting extends GeneratedId with ToString {
 
   def this(course: Course, academicYear: AcademicYear, yearOfStudy: YearOfStudy, weightingAsPercentage: BigDecimal) {

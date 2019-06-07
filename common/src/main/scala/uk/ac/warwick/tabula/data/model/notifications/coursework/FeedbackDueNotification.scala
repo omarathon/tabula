@@ -56,7 +56,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("FeedbackDueGeneral")
 class FeedbackDueGeneralNotification
   extends Notification[Assignment, Unit] with SingleItemNotification[Assignment] with FeedbackDueNotification {
@@ -88,7 +88,7 @@ class FeedbackDueGeneralNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("FeedbackDueExtension")
 class FeedbackDueExtensionNotification
   extends Notification[Extension, Unit] with SingleItemNotification[Extension] with FeedbackDueNotification {

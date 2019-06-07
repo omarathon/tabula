@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import scala.reflect._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class GrantedPermission[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 

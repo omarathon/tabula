@@ -26,7 +26,7 @@ object AddressType {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class Address extends GeneratedId with ToString {
   var line1: String = _
   var line2: String = _

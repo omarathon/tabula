@@ -30,16 +30,16 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedApprove")
 class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespondedNotification("approved") {}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedReject")
 class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedMoreInfo")
 class ExtensionRequestRespondedMoreInfoNotification extends ExtensionRequestRespondedNotification("returned for more information") {}

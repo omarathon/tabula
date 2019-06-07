@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class MonitoringPointReport extends GeneratedId with ToEntityReference {
 
   @ManyToOne(fetch = FetchType.LAZY)

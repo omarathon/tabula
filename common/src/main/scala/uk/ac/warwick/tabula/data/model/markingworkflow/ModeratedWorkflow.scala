@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("Moderated")
 class ModeratedWorkflow extends CM2MarkingWorkflow {
   def workflowType: MarkingWorkflowType = ModeratedMarking
@@ -66,7 +66,7 @@ object ModeratedWorkflow {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("SelectedModerated")
 class SelectedModeratedWorkflow extends ModeratedWorkflow {
   override def workflowType: MarkingWorkflowType = SelectedModeratedMarking

@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class RouteTeachingInformation extends GeneratedId with Serializable {
 

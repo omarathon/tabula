@@ -46,7 +46,7 @@ object SmallGroupSet {
 @FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class SmallGroupSet
   extends GeneratedId

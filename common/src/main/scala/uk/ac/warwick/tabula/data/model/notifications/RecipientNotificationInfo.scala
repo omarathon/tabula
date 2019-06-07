@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
   * the recipient or if the recipient has chosen to dismiss the notification from their streams.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class RecipientNotificationInfo extends GeneratedId {
 
   def this(notification: Notification[_, _], recipient: User) {

@@ -48,7 +48,7 @@ abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeeti
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordReminderStudent")
 class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeetingRecordReminderNotification {
 
@@ -59,7 +59,7 @@ class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeeting
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordReminderAgent")
 class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRecordReminderNotification {
 

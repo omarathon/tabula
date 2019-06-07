@@ -21,7 +21,7 @@ object Exam {
 @FilterDef(name = Exam.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Exam.NotDeletedFilter)
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Exam
   extends Assessment

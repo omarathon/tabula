@@ -53,7 +53,7 @@ abstract class ExtensionRequestNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestCreated")
 class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
   priority = Warning
@@ -66,7 +66,7 @@ class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRequestModified")
 class ExtensionRequestModifiedNotification extends ExtensionRequestNotification {
   priority = Warning
@@ -79,7 +79,7 @@ class ExtensionRequestModifiedNotification extends ExtensionRequestNotification 
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionMoreInfoReceived")
 class ExtensionInfoReceivedNotification extends ExtensionRequestNotification {
   priority = Warning

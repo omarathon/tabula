@@ -13,7 +13,7 @@ object Cm2FeedbackAdjustmentNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("Cm2FeedbackAdjustment")
 class Cm2FeedbackAdjustmentNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]

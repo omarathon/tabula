@@ -38,7 +38,7 @@ trait MissedMeetingRecordNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("missedMeetingRecordStudent")
 class MissedMeetingRecordStudentNotification
   extends MissedMeetingRecordNotification with MyWarwickNotification {
@@ -49,7 +49,7 @@ class MissedMeetingRecordStudentNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("missedMeetingRecordAgent")
 class MissedMeetingRecordAgentNotification
   extends MissedMeetingRecordNotification

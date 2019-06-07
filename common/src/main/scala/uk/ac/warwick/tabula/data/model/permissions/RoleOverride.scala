@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.{GeneratedId, HibernateVersioned}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsTarget {
 
   import RoleOverride._

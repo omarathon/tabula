@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "UnlinkedDepartmentSmallGroupSet")
 class UnlinkedDepartmentSmallGroupSetNotification extends NotificationWithTarget[DepartmentSmallGroupSet, Department]
   with MyWarwickActivity {

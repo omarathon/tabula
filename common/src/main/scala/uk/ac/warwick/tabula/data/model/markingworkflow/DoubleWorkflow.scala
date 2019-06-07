@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.Doubl
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("Double")
 class DoubleWorkflow extends CM2MarkingWorkflow {
   def workflowType = DoubleMarking

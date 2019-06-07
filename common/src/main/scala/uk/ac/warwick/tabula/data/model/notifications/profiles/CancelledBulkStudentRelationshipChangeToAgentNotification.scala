@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, ProfileServ
 import scala.util.Try
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CancelledBulkStudentRelationshipChangeToAgent")
 class CancelledBulkStudentRelationshipChangeToAgentNotification extends Notification[StudentRelationship, Unit]
   with SingleRecipientNotification with UniversityIdRecipientNotification with AutowiringUserLookupComponent

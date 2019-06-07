@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import scala.annotation.meta.field
 
 @Entity(name = "Scheduled_Notification")
-@Proxy(`lazy` = false)
+@Proxy
 class ScheduledNotification[A >: Null <: ToEntityReference](
   // holds the discriminator value for the notification that will be spawned when this is completed
   @(Column@field)(name = "notification_type")

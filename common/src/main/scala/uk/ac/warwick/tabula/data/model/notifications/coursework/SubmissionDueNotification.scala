@@ -81,7 +81,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("SubmissionDueGeneral")
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
   with SubmissionReminder {
@@ -108,7 +108,7 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("SubmissionDueExtension")
 class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
   with SubmissionReminder with AutowiringUserLookupComponent {

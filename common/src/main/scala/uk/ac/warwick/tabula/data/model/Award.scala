@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class Award {
 
   def this(code: String = null, name: String = null) {

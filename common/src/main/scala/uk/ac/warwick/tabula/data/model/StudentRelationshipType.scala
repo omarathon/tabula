@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.permissions.{PermissionsSelector, PermissionsTarget}
 import uk.ac.warwick.tabula.services.RelationshipService
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] with IdEquality {
 

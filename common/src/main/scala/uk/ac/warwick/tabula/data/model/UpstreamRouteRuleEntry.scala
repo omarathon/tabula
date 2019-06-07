@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.JavaImports._
   * Tabula store for a Pathway Module Rule Entry (CAM_PMB) from SITS.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class UpstreamRouteRuleEntry extends GeneratedId {
 
   def this(

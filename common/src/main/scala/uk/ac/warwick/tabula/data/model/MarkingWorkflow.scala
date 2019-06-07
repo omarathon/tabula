@@ -20,7 +20,7 @@ import scala.collection.JavaConverters._
   * many Assessments within that Department.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(name = "MarkScheme")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "MarkingMethod", discriminatorType = DiscriminatorType.STRING, length = 255)

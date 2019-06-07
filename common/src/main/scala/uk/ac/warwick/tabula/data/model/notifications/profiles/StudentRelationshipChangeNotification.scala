@@ -68,7 +68,7 @@ trait RelationshipChangeAgent {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("StudentRelationshipChangeToStudent")
 class StudentRelationshipChangeToStudentNotification extends StudentRelationshipChangeNotification {
   def title: String = s"${relationshipType.agentRole.capitalize} allocation change"
@@ -81,7 +81,7 @@ class StudentRelationshipChangeToStudentNotification extends StudentRelationship
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("StudentRelationshipChangeToOldAgent")
 class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshipChangeNotification
   with RelationshipChangeAgent {
@@ -94,7 +94,7 @@ class StudentRelationshipChangeToOldAgentNotification extends StudentRelationshi
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("StudentRelationshipChangeToNewAgent")
 class StudentRelationshipChangeToNewAgentNotification extends StudentRelationshipChangeNotification
   with RelationshipChangeAgent {

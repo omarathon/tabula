@@ -42,7 +42,7 @@ object SmallGroup {
   * Represents a single small teaching group within a group set.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class SmallGroup
   extends GeneratedId

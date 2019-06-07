@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "TurnitinJobSuccess")
 class TurnitinJobSuccessNotification
   extends TurnitinReportNotification

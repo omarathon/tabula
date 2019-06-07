@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 @Table(name = "membernote")
 abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
@@ -67,7 +67,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("note")
 class MemberNote extends AbstractMemberNote {
@@ -79,7 +79,7 @@ class MemberNote extends AbstractMemberNote {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("circumstances")
 class ExtenuatingCircumstances extends AbstractMemberNote {

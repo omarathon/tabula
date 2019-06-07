@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.Singl
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("Single")
 class SingleMarkerWorkflow extends CM2MarkingWorkflow {
   def workflowType = SingleMarking

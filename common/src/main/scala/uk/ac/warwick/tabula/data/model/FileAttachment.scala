@@ -22,7 +22,7 @@ import scala.language.postfixOps
 import scala.util.matching.Regex
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class FileAttachment extends GeneratedId {
 

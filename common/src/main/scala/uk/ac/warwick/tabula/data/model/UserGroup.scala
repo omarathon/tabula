@@ -31,7 +31,7 @@ import scala.collection.JavaConverters._
   * Depending on context, the usercodes may be university IDs.
   */
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class UserGroup private(val universityIds: Boolean)
   extends UnspecifiedTypeUserGroup

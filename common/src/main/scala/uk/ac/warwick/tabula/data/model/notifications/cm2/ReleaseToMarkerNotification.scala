@@ -48,7 +48,7 @@ object ReleaseToMarkerNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CM2ReleaseToMarker")
 class ReleaseToMarkerNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

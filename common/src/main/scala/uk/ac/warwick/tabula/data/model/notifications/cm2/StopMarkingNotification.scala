@@ -13,7 +13,7 @@ object StopMarkingNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("CM2StopMarking")
 class StopMarkingNotification
   extends NotificationWithTarget[MarkerFeedback, Assignment]

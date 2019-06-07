@@ -41,11 +41,11 @@ abstract class MeetingRecordApprovalNotification(@transient val verb: String)
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("newMeetingRecordApproval")
 class NewMeetingRecordApprovalNotification extends MeetingRecordApprovalNotification("create")
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("editedMeetingRecordApproval")
 class EditedMeetingRecordApprovalNotification extends MeetingRecordApprovalNotification("edit")

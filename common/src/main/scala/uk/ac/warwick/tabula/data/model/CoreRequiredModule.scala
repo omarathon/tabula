@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.ModuleRegistrationService
 import scala.collection.mutable
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class CoreRequiredModule extends GeneratedId {
 
   def this(route: Route, academicYear: AcademicYear, yearOfStudy: Int, module: Module) {

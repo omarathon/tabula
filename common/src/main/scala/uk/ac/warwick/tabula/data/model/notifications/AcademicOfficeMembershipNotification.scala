@@ -14,7 +14,7 @@ object AcademicOfficeMembershipNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExamsOfficeManualMembershipSummary")
 class AcademicOfficeMembershipNotification extends Notification[Department, Unit]
   with AutowiringUserLookupComponent

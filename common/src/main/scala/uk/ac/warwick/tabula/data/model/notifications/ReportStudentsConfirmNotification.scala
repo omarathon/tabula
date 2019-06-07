@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ReportStudentsConfirmCommandNotification")
 class ReportStudentsConfirmNotification extends Notification[MonitoringPointReport, Unit]
   with SingleRecipientNotification

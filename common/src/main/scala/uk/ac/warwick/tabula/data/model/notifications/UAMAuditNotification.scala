@@ -20,7 +20,7 @@ object DeptNameWithPermissionTreeUrl {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("UAMAuditFirstNotification")
 class UAMAuditFirstNotification extends UAMAuditNotification {
 
@@ -67,7 +67,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("UAMAuditChaserNotification")
 class UAMAuditSecondNotification extends UAMAuditFirstNotification {
   @transient

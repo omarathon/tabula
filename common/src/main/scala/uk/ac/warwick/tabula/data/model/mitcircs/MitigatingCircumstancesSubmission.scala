@@ -19,7 +19,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString

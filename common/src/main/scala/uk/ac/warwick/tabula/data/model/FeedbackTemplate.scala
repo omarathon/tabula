@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 

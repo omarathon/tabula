@@ -5,7 +5,7 @@ import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "course.code", query = "select course from Course course where code = :code")))
 class Course {

@@ -14,12 +14,12 @@ object MitCircsMessageToStudentNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsMessageToStudent")
 class MitCircsMessageToStudentNotification extends AbstractMitCircsMessageToStudentNotification
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsMessageToStudentWithReminder")
 class MitCircsMessageToStudentWithReminderNotification extends AbstractMitCircsMessageToStudentNotification
   with RecipientCompletedActionRequiredNotification {

@@ -36,7 +36,7 @@ object DepartmentSmallGroupSet {
 @FilterDef(name = DepartmentSmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = DepartmentSmallGroupSet.NotDeletedFilter)
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class DepartmentSmallGroupSet
   extends GeneratedId

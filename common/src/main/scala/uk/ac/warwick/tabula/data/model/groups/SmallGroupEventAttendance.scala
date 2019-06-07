@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Access(AccessType.FIELD)
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Table(uniqueConstraints = Array(
   new UniqueConstraint(columnNames = Array("occurrence_id", "universityId"))
 ))

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, UniversityIdOrUserIdRecipientNotification}
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("SubmissionReceipt")
 class SubmissionReceiptNotification extends SubmissionNotification
   with SingleRecipientNotification

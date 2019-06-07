@@ -170,7 +170,7 @@ trait CM1WorkflowSupport {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
@@ -427,7 +427,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("assignment")
 class AssignmentFeedback extends Feedback {
 
@@ -472,7 +472,7 @@ class AssignmentFeedback extends Feedback {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("exam")
 class ExamFeedback extends Feedback {
 

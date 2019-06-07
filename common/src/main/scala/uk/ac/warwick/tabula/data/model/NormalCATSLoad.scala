@@ -14,7 +14,7 @@ object NormalCATSLoad {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class NormalCATSLoad extends GeneratedId {
 
   def this(academicYear: AcademicYear, route: Route, yearOfStudy: YearOfStudy, normalLoad: BigDecimal) {

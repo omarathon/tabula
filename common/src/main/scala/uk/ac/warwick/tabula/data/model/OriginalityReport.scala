@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class OriginalityReport extends GeneratedId with ToEntityReference {
   type Entity = OriginalityReport
 

@@ -41,14 +41,14 @@ abstract class MitCircsOnBehalfNotification
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsSubmissionOnBehalf")
 class MitCircsSubmissionOnBehalfNotification extends MitCircsOnBehalfNotification {
   def action: String = "created"
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("MitCircsUpdateOnBehalf")
 class MitCircsUpdateOnBehalfNotification extends MitCircsOnBehalfNotification {
   def action: String = "updated"

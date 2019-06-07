@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
   new NamedQuery(name = "route.adminDepartment", query = "select r from Route r where adminDepartment = :adminDepartment")))

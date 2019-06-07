@@ -12,7 +12,7 @@ object ExtensionRevokedNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("ExtensionRevoked")
 class ExtensionRevokedNotification extends Notification[Assignment, Unit]
   with SingleItemNotification[Assignment]

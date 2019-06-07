@@ -6,7 +6,7 @@ import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.ToString
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 class NextOfKin extends GeneratedId with ToString {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")

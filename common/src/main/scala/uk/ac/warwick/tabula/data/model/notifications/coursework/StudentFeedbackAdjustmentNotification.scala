@@ -13,7 +13,7 @@ object StudentFeedbackAdjustmentNotification {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue("StudentFeedbackAdjustment")
 class StudentFeedbackAdjustmentNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]

@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.exams.web
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "ExamReleased")
 class ExamReleasedForMarkingNotification extends Notification[Exam, Unit]
   with SingleItemNotification[Exam]

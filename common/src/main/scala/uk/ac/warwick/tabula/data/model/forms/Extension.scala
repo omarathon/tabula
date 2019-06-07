@@ -25,7 +25,7 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
 

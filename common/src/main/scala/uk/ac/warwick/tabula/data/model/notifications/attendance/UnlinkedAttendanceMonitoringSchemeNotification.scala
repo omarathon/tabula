@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "UnlinkedAttendanceMonitoringScheme")
 class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTarget[AttendanceMonitoringScheme, Department]
   with MyWarwickActivity {

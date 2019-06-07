@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @DiscriminatorValue(value = "StudentsChooseMarker")
 class OldStudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 

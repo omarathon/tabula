@@ -16,7 +16,7 @@ object SubmissionAfterCloseDateTrigger {
 }
 
 @Entity
-@Proxy(`lazy` = false)
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "SubmissionAfterCloseDate")
 class SubmissionAfterCloseDateTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {
