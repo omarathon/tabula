@@ -1,22 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConverters._
-import org.joda.time.DateTime
-import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Fetch, FetchMode, Type}
 import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import javax.persistence.Entity
-import uk.ac.warwick.userlookup.User
+import javax.persistence.{Entity, _}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.HibernateHelpers
+import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{MarkingWorkflowStage, ModerationStage}
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class MarkerFeedback extends GeneratedId
   with FeedbackAttachments

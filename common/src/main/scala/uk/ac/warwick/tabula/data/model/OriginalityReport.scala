@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
-import javax.persistence._
+import javax.persistence.{Column, _}
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
-import javax.persistence.Column
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
+@Proxy
 class OriginalityReport extends GeneratedId with ToEntityReference {
   type Entity = OriginalityReport
 

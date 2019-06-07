@@ -2,12 +2,13 @@ package uk.ac.warwick.tabula.data.model.triggers
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.{EntityReference, GeneratedId, ToEntityReference}
 
 @Entity(name = "ScheduledTrigger")
+@Proxy
 @DiscriminatorColumn(name = "TRIGGER_TYPE", discriminatorType = DiscriminatorType.STRING)
 abstract class Trigger[A >: Null <: ToEntityReference, B] extends GeneratedId with Serializable with Appliable[B] {
 

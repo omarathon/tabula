@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
@@ -55,6 +55,7 @@ abstract class AbstractOpenSmallGroupSetsNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "OpenSmallGroupSets")
 class OpenSmallGroupSetsStudentSignUpNotification
   extends AbstractOpenSmallGroupSetsNotification with AllCompletedActionRequiredNotification {
@@ -64,5 +65,6 @@ class OpenSmallGroupSetsStudentSignUpNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "OpenSmallGroupSetsOtherSignUp")
 class OpenSmallGroupSetsOtherSignUpNotification extends AbstractOpenSmallGroupSetsNotification

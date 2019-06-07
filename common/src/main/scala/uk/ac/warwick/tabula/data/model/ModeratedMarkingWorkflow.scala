@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "ModeratedMarking")
 class ModeratedMarkingWorkflow extends MarkingWorkflow with NoThirdMarker with AssessmentMarkerMap {
 

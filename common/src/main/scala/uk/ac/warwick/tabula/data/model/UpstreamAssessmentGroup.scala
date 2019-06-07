@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
 import org.apache.commons.lang3.builder.EqualsBuilder
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-
 
 /**
   * An assessment group is basically the smallest group of people
@@ -23,6 +21,7 @@ import scala.collection.JavaConverters._
   * there's only one value but sometimes can be 2 or even 26 in one case)
   */
 @Entity
+@Proxy
 class UpstreamAssessmentGroup extends GeneratedId {
 
   // Long-form module code with hyphen and CATS value
@@ -63,6 +62,7 @@ class UpstreamAssessmentGroup extends GeneratedId {
 }
 
 @Entity
+@Proxy
 class UpstreamAssessmentGroupMember extends GeneratedId with Ordered[UpstreamAssessmentGroupMember]
   with UpstreamAssessmentGroupMemberProperties {
 

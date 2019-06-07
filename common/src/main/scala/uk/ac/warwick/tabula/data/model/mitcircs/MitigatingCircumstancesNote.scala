@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import javax.persistence.CascadeType.ALL
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -16,6 +16,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesNote extends GeneratedId
   with ToString

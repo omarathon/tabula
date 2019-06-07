@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConverters._
-import javax.persistence._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.BatchSize
+import javax.persistence._
+import org.hibernate.annotations.{BatchSize, Proxy}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
+import scala.collection.JavaConverters._
+
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 

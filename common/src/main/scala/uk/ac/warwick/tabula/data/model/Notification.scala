@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
 import org.hibernate.ObjectNotFoundException
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.util.Assert
@@ -103,6 +103,7 @@ object Notification {
   * recipients = who is interested in this notification
   */
 @Entity
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "notification_type")
 abstract class Notification[A >: Null <: ToEntityReference, B]
@@ -244,6 +245,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
   * So for those types the target parameter is not defined.
   */
 @Entity
+@Proxy
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference] extends Notification[A, B] {
 
   self: MyWarwickDiscriminator =>

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
 
@@ -37,6 +38,7 @@ trait MissedMeetingRecordNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("missedMeetingRecordStudent")
 class MissedMeetingRecordStudentNotification
   extends MissedMeetingRecordNotification with MyWarwickNotification {
@@ -47,6 +49,7 @@ class MissedMeetingRecordStudentNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("missedMeetingRecordAgent")
 class MissedMeetingRecordAgentNotification
   extends MissedMeetingRecordNotification

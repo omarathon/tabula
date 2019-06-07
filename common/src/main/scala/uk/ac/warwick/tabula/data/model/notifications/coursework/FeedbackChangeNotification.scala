@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "FeedbackChange")
 class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
   with SingleItemNotification[AssignmentFeedback]

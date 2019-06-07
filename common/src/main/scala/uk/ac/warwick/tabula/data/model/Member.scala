@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import javax.persistence.CascadeType._
 import javax.persistence.{CascadeType, Entity, _}
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
-import org.hibernate.annotations.{AccessType => _, Any => _, ForeignKey => _, _}
+import org.hibernate.annotations.{Proxy, AccessType => _, Any => _, ForeignKey => _, _}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -46,6 +46,7 @@ object Member {
   new Filter(name = Member.FreshOnlyFilter)
 ))
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(
@@ -222,6 +223,7 @@ abstract class Member
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("S")
 class StudentMember extends Member with StudentProperties {
   this.userType = MemberUserType.Student
@@ -459,6 +461,7 @@ class StudentMember extends Member with StudentProperties {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("N")
 class StaffMember extends Member with StaffProperties {
   this.userType = MemberUserType.Staff
@@ -480,6 +483,7 @@ class StaffMember extends Member with StaffProperties {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("A")
 class EmeritusMember extends Member with StaffProperties {
   this.userType = MemberUserType.Emeritus
@@ -491,6 +495,7 @@ class EmeritusMember extends Member with StaffProperties {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("P")
 class ApplicantMember extends Member with ApplicantProperties with RestrictedPhoneNumber {
   this.userType = MemberUserType.Applicant
@@ -502,6 +507,7 @@ class ApplicantMember extends Member with ApplicantProperties with RestrictedPho
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("O")
 class OtherMember extends Member with RestrictedPhoneNumber {
   this.userType = MemberUserType.Other

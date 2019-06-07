@@ -1,8 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import org.hibernate.annotations.Proxy
 
 @Entity
+@Proxy
 @DiscriminatorColumn(name = "discriminator")
 sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
   @Column(name = "min_mark")
@@ -42,11 +44,13 @@ sealed abstract class MarkingDescriptor extends GeneratedId with Serializable {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "U")
 class UniversityMarkingDescriptor extends MarkingDescriptor {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "D")
 class DepartmentMarkingDescriptor extends MarkingDescriptor {
   @ManyToOne(fetch = FetchType.LAZY)

@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
   extends Notification[MeetingRecordApproval, Unit]

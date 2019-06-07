@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -10,6 +9,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.{SprCode, ToString}
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "agent_type")
@@ -89,6 +89,7 @@ abstract class StudentRelationship extends GeneratedId with Serializable with To
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("member")
 class MemberStudentRelationship extends StudentRelationship {
   def isAgentMember = true
@@ -111,6 +112,7 @@ class MemberStudentRelationship extends StudentRelationship {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("external")
 class ExternalStudentRelationship extends StudentRelationship {
   def isAgentMember = false

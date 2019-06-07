@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.services.AssessmentMembershipService
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 /**
   * This entity is basically a many-to-many mapper between
@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.AssessmentMembershipService
   * as the name might suggest - it is a confusing name.
   */
 @Entity
+@Proxy
 class AssessmentGroup extends GeneratedId {
 
   @transient var membershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]

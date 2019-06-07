@@ -52,7 +52,7 @@
     <prop key="hibernate.dialect">uk.ac.warwick.tabula.system.PostgreSQL10Dialect</prop>
     <prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
     <prop key="defaultNChar">true</prop>
-    <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
+    <prop key="hibernate.enable_lazy_load_no_trans">false</prop>
     <prop key="hibernate.batch_fetch_style">dynamic</prop>
   </util:properties>
 

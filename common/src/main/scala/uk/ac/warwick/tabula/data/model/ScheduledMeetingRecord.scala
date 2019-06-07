@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.timetables.{TimetableEvent, EventOccurrence}
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
 @Entity
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("scheduled")
 class ScheduledMeetingRecord extends AbstractMeetingRecord {

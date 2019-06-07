@@ -4,7 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -170,6 +170,7 @@ trait CM1WorkflowSupport {
 }
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
@@ -426,6 +427,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("assignment")
 class AssignmentFeedback extends Feedback {
 
@@ -470,6 +472,7 @@ class AssignmentFeedback extends Feedback {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("exam")
 class ExamFeedback extends Feedback {
 

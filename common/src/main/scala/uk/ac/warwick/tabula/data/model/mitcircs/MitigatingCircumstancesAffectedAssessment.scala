@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 import java.io.Serializable
 
 import javax.persistence._
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.commands.mitcircs.submission.AffectedAssessmentItem
 import uk.ac.warwick.tabula.data.model.{AssessmentType, GeneratedId, Module}
@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   with ToString

@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
+import javax.persistence.{Entity, Id, NamedQueries, NamedQuery}
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
 
 @Entity
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "modeofattendance.code", query = "select modeOfAttendance from ModeOfAttendance modeOfAttendance where code = :code")))
 class ModeOfAttendance {

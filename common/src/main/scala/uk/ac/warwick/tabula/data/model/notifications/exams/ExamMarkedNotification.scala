@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.exams
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.exams.web
@@ -9,6 +10,7 @@ import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackServi
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "ExamMarked")
 class ExamMarkedNotification extends Notification[Exam, Unit]
   with SingleItemNotification[Exam]

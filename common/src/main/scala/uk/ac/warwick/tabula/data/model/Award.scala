@@ -1,12 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
+import javax.persistence.{Entity, Id}
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.NamedQueries
-import javax.persistence.NamedQuery
 
 @Entity
+@Proxy
 class Award {
 
   def this(code: String = null, name: String = null) {

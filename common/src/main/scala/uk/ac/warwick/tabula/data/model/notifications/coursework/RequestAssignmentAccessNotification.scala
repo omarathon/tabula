@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue("RequestAssignmentAccess")
 class RequestAssignmentAccessNotification
   extends Notification[Assignment, Unit]

@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
-import org.hibernate.annotations.Type
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 class FeedbackForSits extends GeneratedId {
 
   @OneToOne(fetch = FetchType.LAZY)

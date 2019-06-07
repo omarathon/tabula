@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.JavaImports._
 
 /**
   * Tabula store for a Pathway Module Rule Entry (CAM_PMB) from SITS.
   */
 @Entity
+@Proxy
 class UpstreamRouteRuleEntry extends GeneratedId {
 
   def this(

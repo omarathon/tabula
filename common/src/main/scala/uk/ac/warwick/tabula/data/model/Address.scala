@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.springframework.util.StringUtils
 import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.annotations.Proxy
+import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.ToString
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
 
 sealed abstract class AddressType(val dbValue: String) extends Convertible[String] {
   def value: String = dbValue
@@ -28,6 +26,7 @@ object AddressType {
 }
 
 @Entity
+@Proxy
 class Address extends GeneratedId with ToString {
   var line1: String = _
   var line2: String = _

@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.services.jobs
 
-import javax.persistence.{Column, Entity}
-
 import com.fasterxml.jackson.databind.ObjectMapper
+import javax.persistence.{Column, Entity}
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{CurrentUser, ToString}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.jobs.JobPrototype
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
+import uk.ac.warwick.tabula.{CurrentUser, ToString}
 import uk.ac.warwick.userlookup.{AnonymousUser, UserLookupInterface}
 
 object JobInstanceImpl {
@@ -29,6 +29,7 @@ object JobInstanceImpl {
   * does not need subclassing.
   */
 @Entity(name = "Job")
+@Proxy
 class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehaviour with Logging with ToString {
 
   @transient var jsonMapper: ObjectMapper = Wire.auto[ObjectMapper]

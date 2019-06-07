@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
-import uk.ac.warwick.tabula.profiles.web.Routes
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, _}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 
@@ -15,6 +16,7 @@ object MitCircsSubmissionReceiptNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("MitCircsSubmissionReceipt")
 class MitCircsSubmissionReceiptNotification
   extends NotificationWithTarget[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]

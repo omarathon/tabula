@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence._
-import org.joda.time.DateTime
-
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import java.text.BreakIterator
-import org.hibernate.annotations.Type
+
+import javax.persistence._
+import javax.validation.constraints.NotNull
+import org.hibernate.annotations.{Proxy, Type}
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
+@Proxy
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 

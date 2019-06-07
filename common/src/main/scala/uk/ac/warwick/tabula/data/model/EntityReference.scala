@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue}
+import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Proxy}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, MonitoringPointReport}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage,
   * Notification.
   */
 @Entity
+@Proxy
 class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
   // Maps to Notification.items
   @ManyToOne

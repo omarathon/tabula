@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.admin.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, LenientGroupService}
 import uk.ac.warwick.userlookup.User
 
-
 object AcademicOfficeMembershipNotification {
   val templateLocation = "/WEB-INF/freemarker/emails/manual_membership_eo.ftl"
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("ExamsOfficeManualMembershipSummary")
 class AcademicOfficeMembershipNotification extends Notification[Department, Unit]
   with AutowiringUserLookupComponent

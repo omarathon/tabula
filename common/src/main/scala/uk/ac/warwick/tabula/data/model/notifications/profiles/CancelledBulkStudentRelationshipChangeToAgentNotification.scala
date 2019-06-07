@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, ProfileServ
 import scala.util.Try
 
 @Entity
+@Proxy
 @DiscriminatorValue("CancelledBulkStudentRelationshipChangeToAgent")
 class CancelledBulkStudentRelationshipChangeToAgentNotification extends Notification[StudentRelationship, Unit]
   with SingleRecipientNotification with UniversityIdRecipientNotification with AutowiringUserLookupComponent
