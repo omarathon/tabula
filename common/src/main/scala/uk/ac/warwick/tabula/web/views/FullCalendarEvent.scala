@@ -92,6 +92,7 @@ object FullCalendarEvent {
       tutorNames = source.staff.map(_.getFullName).mkString(", "),
       parentType = source.parent match {
         case TimetableEvent.Empty(_, _) => "Empty"
+        case TimetableEvent.Department(_, _) => "Department"
         case TimetableEvent.Module(_, _) => "Module"
         case TimetableEvent.Relationship(_, _) => "Relationship"
       },

@@ -35,7 +35,7 @@ class MitCircsHomeCommandInternal(val currentUser: CurrentUser) extends CommandI
 
   def applyInternal(): Result = {
     val departments = moduleAndDepartmentService.departmentsWithPermission(currentUser, Permissions.MitigatingCircumstancesSubmission.Manage)
-    val panels = mitCircsPanelService.getPanels(currentUser)
+    val panels = mitCircsPanelService.getPanels(MemberOrUser(currentUser.apparentUser))
     // TODO - model permissions granted to individual mitcircs submissions and show them here
     val submissions = Set[MitigatingCircumstancesSubmission]()
     MitCircsHomeInfo(departments, panels, submissions)
