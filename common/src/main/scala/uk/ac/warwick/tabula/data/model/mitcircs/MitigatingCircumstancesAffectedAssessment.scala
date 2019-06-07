@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.data.model.{AssessmentType, GeneratedId, Module}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
+import scala.collection.JavaConverters._
+
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
@@ -28,6 +30,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.name = item.name
     this.assessmentType = item.assessmentType
     this.deadline = item.deadline
+    this.boardRecommendations = item.boardRecommendations.asScala
   }
 
   /**
@@ -75,6 +78,9 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "submission_id", insertable = false, updatable = false)
   var mitigatingCircumstancesSubmission: MitigatingCircumstancesSubmission = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
+  var boardRecommendations: Seq[AssessmentSpecificRecommendation] = _
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

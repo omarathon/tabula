@@ -20,7 +20,7 @@
           hint = "This grading will be shared with exam boards."
         >
           <@mitcirc.radios outcomeGrading "outcomeGrading" />
-          <div class="mitcircs-outcomes-form__rejection-reasons collapse">
+          <div class="mitcircs-outcomes-form__nested-checkboxes collapse">
             <@mitcirc.checkboxesWithOther rejectionReasons "rejectionReasons" "rejectionReasonsOther"/>
           </div>
         </@mitcirc.question_section>

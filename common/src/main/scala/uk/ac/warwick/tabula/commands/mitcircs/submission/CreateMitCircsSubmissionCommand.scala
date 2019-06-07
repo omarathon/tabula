@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{AssessmentSpecificRecommendation, IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionOnBehalfNotification, MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -217,6 +217,7 @@ class AffectedAssessmentItem {
     this.name = assessment.name
     this.assessmentType = assessment.assessmentType
     this.deadline = assessment.deadline
+    this.boardRecommendations = assessment.boardRecommendations.asJava
   }
 
   var moduleCode: String = _
@@ -226,6 +227,7 @@ class AffectedAssessmentItem {
   var name: String = _
   var assessmentType: AssessmentType = _
   var deadline: LocalDate = _
+  var boardRecommendations: JList[AssessmentSpecificRecommendation] = JArrayList()
 
   def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
     this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))
