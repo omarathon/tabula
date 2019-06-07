@@ -54,8 +54,12 @@ object StudentCourseDetailsNoteImporter {
   val sitsSchema: String = Wire.property("${schema.sits}")
 
   def NotesQuery =
-    s"""select doc_code, doc_note
-										  from $sitsSchema.men_doc where doc_dtyc in ('GRID_RECOMM', 'GRID_COMM', 'GRID_MEDNOTE')"""
+    s"""select doc.doc_code, doc.doc_note
+          from $sitsSchema.men_doc doc
+            join $sitsSchema.men_drr drr
+              on doc.doc_code = drr.drr_docc
+          where
+            doc.doc_dtyc in ('GRID_RECOMM', 'GRID_COMM', 'GRID_MEDNOTE')"""
 
   def mapResultSet(resultSet: ResultSet): StudentCourseDetailsNoteRow = {
     StudentCourseDetailsNoteRow(
