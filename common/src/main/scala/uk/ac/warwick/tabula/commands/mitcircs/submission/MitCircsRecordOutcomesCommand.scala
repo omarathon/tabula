@@ -29,6 +29,7 @@ object MitCircsRecordOutcomesCommand {
     with MitCircsRecordOutcomesValidation
     with MitCircsRecordOutcomesPermissions
     with MitCircsRecordOutcomesDescription
+    with MitCircsSubmissionSchedulesNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 

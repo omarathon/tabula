@@ -6,8 +6,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.JSet
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{MitCircsSubmissionOnBehalfNotification, MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
+import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{DraftSubmissionReminderNotification, MitCircsSubmissionOnBehalfNotification, MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
@@ -262,14 +262,29 @@ trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Mi
   override def transformResult(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
   override def scheduledNotifications(submission: MitigatingCircumstancesSubmission): Seq[ScheduledNotification[MitigatingCircumstancesSubmission]] = {
-    if (submission.isEvidencePending) {
-      Seq(-1, 0, 1)
-        .map(day => submission.pendingEvidenceDue.plusDays(day).toDateTimeAtStartOfDay)
-        .filter(_.isAfterNow)
-        .map(when => new ScheduledNotification[MitigatingCircumstancesSubmission]("PendingEvidenceReminder", submission, when))
-    } else {
-      Nil
-    }
+    // TODO is it always valid to send these? Might depend on state
+    // (i.e. should we remind the student about pending evidence if the outcomes have been recorded?)
+    val pendingEvidenceReminders =
+      if (submission.isEvidencePending) {
+        Seq(-1, 0, 1)
+          .map(day => submission.pendingEvidenceDue.plusDays(day).toDateTimeAtStartOfDay)
+          .filter(_.isAfterNow)
+          .map(when => new ScheduledNotification[MitigatingCircumstancesSubmission]("PendingEvidenceReminder", submission, when))
+      } else {
+        Nil
+      }
+
+    val draftReminders =
+      if (submission.state == MitigatingCircumstancesSubmissionState.Draft || submission.state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent) {
+        (1 to 12)
+          .map(week => submission.lastModified.plusDays(week * 7))
+          .filter(_.isAfterNow)
+          .map(when => new ScheduledNotification[MitigatingCircumstancesSubmission]("DraftSubmissionReminder", submission, when))
+      } else {
+        Nil
+      }
+
+    pendingEvidenceReminders ++ draftReminders
   }
 }
 
@@ -280,7 +295,8 @@ trait MitCircsSubmissionNotificationCompletion extends CompletesNotifications[Mi
   def notificationsToComplete(submission: MitigatingCircumstancesSubmission): CompletesNotificationsResult = {
     if (submission.hasEvidence) {
       CompletesNotificationsResult(
-        notificationService.findActionRequiredNotificationsByEntityAndType[PendingEvidenceReminderNotification](submission),
+        notificationService.findActionRequiredNotificationsByEntityAndType[PendingEvidenceReminderNotification](submission) ++
+        notificationService.findActionRequiredNotificationsByEntityAndType[DraftSubmissionReminderNotification](submission),
         currentUser
       )
     } else {

@@ -105,7 +105,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
       submission.saveOnBehalfOfStudent()
     }
 
-    submission.lastModified = DateTime.now()
+    submission.lastModified = DateTime.now
     submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
