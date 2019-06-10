@@ -4,14 +4,16 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import MitCircsRecordOutcomesCommand._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
@@ -31,20 +33,17 @@ object MitCircsRecordOutcomesCommand {
     with MitCircsRecordOutcomesDescription
     with MitCircsSubmissionSchedulesNotifications
     with AutowiringMitCircsSubmissionServiceComponent
+    with AutowiringModuleAndDepartmentServiceComponent
 }
 
 class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstancesSubmission, val user: User) extends CommandInternal[Result]
-  with MitCircsRecordOutcomesState with MitCircsRecordOutcomesValidation {
+  with MitCircsRecordOutcomesState with MitCircsRecordOutcomesValidation with BindListener {
 
-  self: MitCircsRecordOutcomesRequest with MitCircsSubmissionServiceComponent =>
+  self: MitCircsRecordOutcomesRequest with MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-  outcomeGrading = submission.outcomeGrading
-  outcomeReasons = submission.outcomeReasons
-  boardRecommendations = submission.boardRecommendations.asJava
-  boardRecommendationOther = submission.boardRecommendationOther
-  boardRecommendationComments = submission.boardRecommendationComments
-  rejectionReasons = submission.rejectionReasons.asJava
-  rejectionReasonsOther = submission.rejectionReasonsOther
+  override def onBind(result: BindingResult): Unit = transactional() {
+    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
+  }
 
   def applyInternal(): Result = transactional() {
     require(submission.canRecordOutcomes, "Cannot record outcomes for this submission")
@@ -63,6 +62,13 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
       submission.rejectionReasonsOther = rejectionReasonsOther
     } else {
       submission.rejectionReasonsOther = null
+    }
+
+    // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
+    submission.affectedAssessments.clear()
+    affectedAssessments.asScala.foreach { item =>
+      val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
+      submission.affectedAssessments.add(affected)
     }
 
     submission.outcomesRecorded()
@@ -111,11 +117,15 @@ trait MitCircsRecordOutcomesState {
 }
 
 trait MitCircsRecordOutcomesRequest {
-  var outcomeGrading: MitigatingCircumstancesGrading = _
-  var outcomeReasons: String = _
-  @BeanProperty var boardRecommendations: JList[MitCircsExamBoardRecommendation] = JArrayList()
-  var boardRecommendationOther: String = _
-  var boardRecommendationComments: String = _
-  var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = JArrayList()
-  var rejectionReasonsOther: String = _
+
+  self : MitCircsRecordOutcomesState =>
+
+  var affectedAssessments: JList[AffectedAssessmentItem] = submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava
+  var outcomeGrading: MitigatingCircumstancesGrading = submission.outcomeGrading
+  var outcomeReasons: String = submission.outcomeReasons
+  @BeanProperty var boardRecommendations: JList[MitCircsExamBoardRecommendation] = submission.boardRecommendations.asJava
+  var boardRecommendationOther: String = submission.boardRecommendationOther
+  var boardRecommendationComments: String = submission.boardRecommendationComments
+  var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = submission.rejectionReasons.asJava
+  var rejectionReasonsOther: String = submission.rejectionReasonsOther
 }

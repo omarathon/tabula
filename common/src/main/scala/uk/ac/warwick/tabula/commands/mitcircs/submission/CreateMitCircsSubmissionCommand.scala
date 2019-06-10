@@ -3,19 +3,18 @@ package uk.ac.warwick.tabula.commands.mitcircs.submission
 import org.joda.time.LocalDate
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JSet
+import uk.ac.warwick.tabula.JavaImports.{JSet, _}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
-import uk.ac.warwick.tabula.data.model.notifications.mitcircs.{DraftSubmissionReminderNotification, MitCircsSubmissionOnBehalfNotification, MitCircsSubmissionReceiptNotification, NewMitCircsSubmissionNotification, PendingEvidenceReminderNotification}
-import uk.ac.warwick.tabula.data.model.{AssessmentType, Department, FileAttachment, Module, Notification, ScheduledNotification, StudentMember}
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.mitcircs._
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
@@ -217,6 +216,7 @@ class AffectedAssessmentItem {
     this.name = assessment.name
     this.assessmentType = assessment.assessmentType
     this.deadline = assessment.deadline
+    this.boardRecommendations = assessment.boardRecommendations.asJava
   }
 
   var moduleCode: String = _
@@ -226,6 +226,7 @@ class AffectedAssessmentItem {
   var name: String = _
   var assessmentType: AssessmentType = _
   var deadline: LocalDate = _
+  var boardRecommendations: JList[AssessmentSpecificRecommendation] = JArrayList()
 
   def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
     this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))

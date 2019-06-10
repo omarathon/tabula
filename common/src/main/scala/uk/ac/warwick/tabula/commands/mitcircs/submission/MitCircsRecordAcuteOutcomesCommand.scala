@@ -37,12 +37,6 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
 
   self: MitCircsRecordAcuteOutcomesRequest with MitCircsSubmissionServiceComponent =>
 
-  outcomeGrading = submission.outcomeGrading
-  outcomeReasons = submission.outcomeReasons
-  acuteOutcome = submission.acuteOutcome
-  rejectionReasons = submission.rejectionReasons.asJava
-  rejectionReasonsOther = submission.rejectionReasonsOther
-
   def applyInternal(): Result = transactional() {
     require(submission.canRecordAcuteOutcomes, "Cannot record acute outcomes for this submission")
 
@@ -100,9 +94,12 @@ trait MitCircsRecordAcuteOutcomesState {
 }
 
 trait MitCircsRecordAcuteOutcomesRequest {
-  var outcomeGrading: MitigatingCircumstancesGrading = _
-  var outcomeReasons: String = _
-  var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = JArrayList()
-  var rejectionReasonsOther: String = _
-  var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
+  self: MitCircsRecordAcuteOutcomesState =>
+
+  var outcomeGrading: MitigatingCircumstancesGrading = submission.outcomeGrading
+  var outcomeReasons: String = submission.outcomeReasons
+  var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = submission.rejectionReasons.asJava
+  var rejectionReasonsOther: String = submission.rejectionReasonsOther
+  var acuteOutcome: MitigatingCircumstancesAcuteOutcome = submission.acuteOutcome
 }
