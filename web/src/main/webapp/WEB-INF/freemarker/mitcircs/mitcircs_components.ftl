@@ -142,3 +142,28 @@
     <div class="form-control-static">No submissions</div>
   </#if>
 </#macro>
+
+<#macro panel_details panel show_name=false>
+    <#if show_name>
+      <@detail label="Name" condensed=true>
+        <a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a>
+      </@detail>
+    </#if>
+    <@detail label="Date" condensed=true>
+        <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime /><#else><span class="very-subtle">TBC</span></#if>
+    </@detail>
+    <#if panel.location??><@detail label="Location" condensed=true><@fmt.location panel.location /></@detail></#if>
+    <@detail label="Panel chair" condensed=true>
+        <#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if>
+    </@detail>
+    <@detail label="Panel secretary" condensed=true>
+        <#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if>
+    </@detail>
+    <@detail label="Panel members" condensed=true>
+        <#if panel.members?has_content>
+            <#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list>
+        <#else>
+          <span class="very-subtle">TBC</span>
+        </#if>
+    </@detail>
+</#macro>

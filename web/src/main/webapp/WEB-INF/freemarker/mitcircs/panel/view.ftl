@@ -6,23 +6,7 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail label="Date" condensed=true>
-          <#if panel.date??><@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime /><#else><span class="very-subtle">TBC</span></#if>
-        </@components.detail>
-          <#if panel.location??><@components.detail label="Location" condensed=true><@fmt.location panel.location /></@components.detail></#if>
-        <@components.detail label="Panel chair" condensed=true>
-          <#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if>
-        </@components.detail>
-        <@components.detail label="Panel secretary" condensed=true>
-          <#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if>
-        </@components.detail>
-        <@components.detail label="Panel members" condensed=true>
-          <#if panel.members?has_content>
-            <#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list>
-          <#else>
-            <span class="very-subtle">TBC</span>
-          </#if>
-        </@components.detail>
+        <@components.panel_details panel />
       </div>
       <div class="col-sm-6 col-md-4">
         <div class="row form-horizontal">
