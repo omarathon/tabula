@@ -22,6 +22,7 @@ class MitCircsViewPanelController extends BaseController {
     Mav("mitcircs/panel/view", "panel" -> panel)
       .crumbs(
         MitCircsBreadcrumbs.Admin.HomeForYear(panel.department, panel.academicYear),
+        MitCircsBreadcrumbs.Admin.ListPanels(panel.department, panel.academicYear),
         MitCircsBreadcrumbs.Admin.Panel(panel, active = true),
       )
   }

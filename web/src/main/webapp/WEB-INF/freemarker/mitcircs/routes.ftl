@@ -46,8 +46,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
   </#if>
 </#macro>
 
-<#-- View panels -->
-<#macro viewPanel panel><@_u page = "/panel/${panel.id}" /></#macro>
+<#-- Panels -->
 <#macro listPanels department academicYear="">
   <#if academicYear?has_content>
     <@_u page="/admin/${department.code}/${academicYear.startYear?c}/panels" />
@@ -55,6 +54,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
     <@_u page="/admin/${department.code}/panels" />
   </#if>
 </#macro>
+<#macro viewPanel panel><@_u page = "/panel/${panel.id}" /></#macro>
+<#macro editPanel panel><@_u page = "/panel/${panel.id}/edit" /></#macro>
 
 <#-- These get posted to from both the view (as the student) and the review (as the MCO) -->
 <#macro messages submission><@_u page="/submission/${submission.key?c}/messages" /></#macro>

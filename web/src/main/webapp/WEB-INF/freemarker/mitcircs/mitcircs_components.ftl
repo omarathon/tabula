@@ -143,7 +143,7 @@
   </#if>
 </#macro>
 
-<#macro panel_details panel show_name=false>
+<#macro panelDetails panel show_name=false>
     <#if show_name>
       <@detail label="Name" condensed=true>
         <a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a>
@@ -168,7 +168,7 @@
     </@detail>
 </#macro>
 
-<#macro panels_table panels>
+<#macro panelsTable panels>
   <table class="table table-condensed">
     <thead>
       <tr>

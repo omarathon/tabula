@@ -5,7 +5,7 @@
   <#if panels?has_content>
     <h2>My mitigating circumstances panels</h2>
 
-    <@components.panels_table panels />
+    <@components.panelsTable panels />
   </#if>
   <h2>My department-wide responsibility</h2>
   <#if departments?has_content>

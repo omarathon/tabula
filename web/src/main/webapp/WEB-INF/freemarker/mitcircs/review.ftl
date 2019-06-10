@@ -133,7 +133,7 @@
 
     <#if submission.panel??>
       <@components.section "Panel">
-        <@components.panel_details panel=submission.panel show_name=true />
+        <@components.panelDetails panel=submission.panel show_name=true />
       </@components.section>
     </#if>
 

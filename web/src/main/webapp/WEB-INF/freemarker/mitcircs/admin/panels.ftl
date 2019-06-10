@@ -16,7 +16,7 @@
   <@fmt.id7_deptheader "Mitigating Circumstances Panels" route_function "in" />
 
   <#if panels?has_content>
-    <@components.panels_table panels />
+    <@components.panelsTable panels />
   <#else>
     <p>There are currently no mitigating circumstances panels for ${academicYear.toString}.</p>
   </#if>
