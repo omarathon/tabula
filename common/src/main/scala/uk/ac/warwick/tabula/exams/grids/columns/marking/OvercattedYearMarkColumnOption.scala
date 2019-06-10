@@ -36,7 +36,9 @@ class OvercattedYearMarkColumnOption extends ChosenYearExamGridColumnOption with
       if (entity.studentCourseYearDetails.isEmpty) {
         moduleRegistrationService.weightedMeanYearMark(entity.moduleRegistrations, entity.markOverrides.getOrElse(Map()), allowEmpty = false)
       } else {
-        val overcatSubsets = state.overcatSubsets(entity)
+        val overcatSubsets = state.overcatSubsets(entity).flatMap {
+          case (nullableMark, sets) => Option(nullableMark).map(_ -> sets)
+        }
         if (overcatSubsets.size == 1) {
           // If the student only has one valid subset, just show the mark for that subset
           Right(overcatSubsets.head._1)
