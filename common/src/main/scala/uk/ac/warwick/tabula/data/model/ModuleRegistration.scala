@@ -75,6 +75,8 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
 
   def firstDefinedGrade: Option[String] = Option(agreedGrade).orElse(Option(actualGrade))
 
+  def hasAgreedMarkOrGrade: Boolean = Option(agreedMark).isDefined || Option(agreedGrade).isDefined
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
   @Column(name = "selectionstatuscode")
   @Restricted(Array("Profiles.Read.ModuleRegistration.Core"))
@@ -91,8 +93,8 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
   var moduleResult: ModuleResult = _
 
   def passedCats: Option[Boolean] = moduleResult match {
-    case _: ModuleResult.Pass.type => Some(true)
-    case _: ModuleResult.Fail.type => Some(false)
+    case _: ModuleResult.Pass.type if hasAgreedMarkOrGrade => Some(true)
+    case _: ModuleResult.Fail.type if hasAgreedMarkOrGrade => Some(false)
     case _ => None
   }
 
