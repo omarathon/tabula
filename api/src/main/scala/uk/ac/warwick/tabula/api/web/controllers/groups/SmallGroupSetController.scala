@@ -41,6 +41,14 @@ abstract class SmallGroupSetController extends ModuleSmallGroupSetsController wi
     ) ++ outputJson(smallGroupSet)))
   }
 
+  def getSmallGroupAllocationsMav(smallGroupSet: SmallGroupSet): Mav = {
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "allocations" -> smallGroupSet.groups.asScala.map(smallGroup => smallGroup.id -> smallGroup.students.users.map(_.getUserId)).toMap.asJava
+    )))
+  }
+
 }
 
 trait GetSmallGroupSetApiOutput {
@@ -146,6 +154,29 @@ trait DeleteSmallGroupSetApi {
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/groups/{smallGroupSet}/allocations"))
+class GetSmallGroupAllocationsControllerForApi extends SmallGroupSetController with GetSmallGroupAllocationsApi
+
+trait GetSmallGroupAllocationsApi {
+  self: SmallGroupSetController =>
+
+  @ModelAttribute("getCommand")
+  def getCommand(@PathVariable smallGroupSet: SmallGroupSet): ViewViewableCommand[SmallGroupSet] = {
+    new ViewViewableCommand(Permissions.SmallGroups.ReadMembership, mandatory(smallGroupSet))
+  }
+
+  @GetMapping(produces = Array(APPLICATION_JSON_VALUE))
+  def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SmallGroupSet], errors: Errors, @PathVariable smallGroupSet: SmallGroupSet): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val result = command.apply()
+      getSmallGroupAllocationsMav(result)
+    }
+  }
+}
+
+@Controller
+@RequestMapping(Array("/v1/module/{module}/groups/{smallGroupSet}/allocations"))
 class AllocateStudentsToSmallGroupsControllerForApi extends SmallGroupSetController with AllocateStudentsToSmallGroupsApi
 
 trait AllocateStudentsToSmallGroupsApi {
@@ -170,11 +201,7 @@ trait AllocateStudentsToSmallGroupsApi {
       Mav(new JSONErrorView(errors))
     } else {
       val result = command.apply()
-      Mav(new JSONView(Map(
-        "success" -> true,
-        "status" -> "ok",
-        "allocations" -> result.groups.asScala.map(smallGroup => smallGroup.id -> smallGroup.students.users.map(_.getUserId)).toMap.asJava
-      )))
+      getSmallGroupAllocationsMav(result)
     }
   }
 }
