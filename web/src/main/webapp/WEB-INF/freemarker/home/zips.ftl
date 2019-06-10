@@ -21,19 +21,36 @@
 
   <script>
     jQuery(function ($) {
+      var $refreshBtn = $('<button />')
+        .addClass('btn btn-default btn-sm zip-progress')
+        .attr({type: 'button'})
+        .text('refresh the page')
+        .on('click', function () {
+          window.location.reload();
+        });
+      var $errorMessage = $('<p />')
+        .append("We couldn't get the status of the zip file automatically. Please ")
+        .append($refreshBtn)
+        .append(" to see the latest status.");
+
       var updateProgress = function () {
+        var $zipProgress = $('.zip-progress');
+        var $progressBar = $('.progress .progress-bar');
         $.get('<@routes.zipProgress jobId />' + '?dt=' + new Date().valueOf(), function (data) {
           if (data.succeeded) {
-            $('.progress .progress-bar').width("100%").removeClass('active progress-bar-striped');
-            $('.zip-progress').empty();
-            $('.zip-complete').show();
+            $progressBar.width("100%").removeClass('active progress-bar-striped');
+            $zipProgress.empty();
+            $zipProgress.show();
           } else {
-            $('.progress .progress-bar').width(data.progress + "%");
+            $progressBar.width(data.progress + "%");
             if (data.status) {
-              $('.zip-progress').html(data.status);
+              $zipProgress.html(data.status);
             }
-            setTimeout(updateProgress, 5 * 1000);
+            setTimeout(updateProgress, 2 * 1000);
           }
+        }).fail(function () {
+          $progressBar.width("100%").addClass('progress-bar-danger').removeClass('active');
+          $zipProgress.replaceWith($errorMessage);
         });
       };
       updateProgress();
