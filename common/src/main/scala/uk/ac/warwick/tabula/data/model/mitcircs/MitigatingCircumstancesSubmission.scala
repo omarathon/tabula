@@ -138,6 +138,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @OrderBy("academicYear, moduleCode, sequence")
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
+  def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
+    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
+      .map(r => r -> affectedAssessments.asScala.filter(_.boardRecommendations.contains(r)))
+      .toMap
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "pendingEvidence", nullable = false)
   private var encryptedPendingEvidence: CharSequence = _

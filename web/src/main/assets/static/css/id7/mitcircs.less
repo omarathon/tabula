@@ -80,19 +80,38 @@
           padding: 5px 0 5px 5px;
         }
 
-        .checkbox+.checkbox, .enum-radios .radio+.radio {
+        .checkbox+.checkbox,
+        .checkbox.nested,
+        .enum-radios .radio+.radio,
+        section.mitcircs-outcomes-form__nested-checkboxes+.checkbox
+        {
           margin-top: 0;
+        }
+
+        .checkbox.nested:nth-of-type(n) {
+          background: @accent-yellow-bg;
         }
 
         .checkbox:nth-of-type(odd), .enum-radios .radio:nth-of-type(odd) {
           background: darken(@accent-yellow-bg, 5%);
+          .checkbox.nested{
+            background: darken(@accent-yellow-bg, 5%);
+          }
         }
 
         &:nth-of-type(odd) {
+
           .coloured-box-variant(@accent-blue-bg; @accent-blue-border; @accent-blue-text);
 
-          .checkbox:nth-of-type(odd), .indent > .checkbox:nth-of-type(even), .enum-radios .radio:nth-of-type(odd), .indent > .enum-radios .radio:nth-of-type(even) {
+          .checkbox.nested:nth-of-type(n) {
+            background: @accent-blue-bg;
+          }
+
+          .checkbox:nth-of-type(odd), .enum-radios .radio:nth-of-type(odd) {
             background: darken(@accent-blue-bg, 5%);
+            .checkbox.nested{
+              background: darken(@accent-blue-bg, 5%);
+            }
           }
         }
 
@@ -194,21 +213,6 @@
 
     &__contact-subfield {
       margin-left: 20px;
-    }
-
-    &__checkbox-subgroup {
-      .indent {
-        margin-left: 15px;
-
-        .checkbox {
-          margin-top: 5px;
-
-          & + .checkbox {
-            margin-top: -5px;
-          }
-
-        }
-      }
     }
 
     &__morepending-subfield {
@@ -508,7 +512,7 @@
   margin: 10px 0;
 }
 
-.mitcircs-outcomes-form__rejection-reasons {
+.mitcircs-outcomes-form__nested-checkboxes {
   margin-left: 10px;
 }
 

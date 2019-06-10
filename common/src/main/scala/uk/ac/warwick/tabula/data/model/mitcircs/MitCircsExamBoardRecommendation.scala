@@ -8,6 +8,11 @@ import scala.collection.immutable
 
 sealed abstract class MitCircsExamBoardRecommendation(val description: String, val helpText: String) extends EnumEntry
 
+sealed abstract class AssessmentSpecificRecommendation(description: String, helpText: String) extends MitCircsExamBoardRecommendation(description, helpText) {
+  // lame boolean to make filtering for AssessmentSpecificRecommendations easier in freemarker
+  def assessmentSpecific: Boolean = true
+}
+
 object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendation] {
 
   case object Mild extends MitCircsExamBoardRecommendation(
@@ -15,27 +20,27 @@ object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendat
     helpText = "For example, the circumstances fall within the normal level of everyday life that a person with normal emotional resilience would be expected to cope with"
   )
 
-  case object ReducePenalties extends MitCircsExamBoardRecommendation(
+  case object ReducePenalties extends AssessmentSpecificRecommendation(
     description = "Reduce penalties",
     helpText = "Reduce penalties for late submission of assessed work."
   )
 
-  case object WaivePenalties extends MitCircsExamBoardRecommendation(
+  case object WaivePenalties extends AssessmentSpecificRecommendation(
     description = "Waive penalties",
     helpText = "Waive penalties for late submission of assessed work."
   )
 
-  case object WaiveAssessment extends MitCircsExamBoardRecommendation(
+  case object WaiveAssessment extends AssessmentSpecificRecommendation(
     description = "Waive assessment",
     helpText = "A student who has failed to submit a piece of work for assessment with a credit weighting of 3 credits or less may have that piece of assessment waived if the Board of Examiners concludes it is not in the student’s interest (or it is not possible) to reschedule it. The unreliable component will be disregarded and the module mark will be recalculated."
   )
 
-  case object FurtherResit extends MitCircsExamBoardRecommendation(
+  case object FurtherResit extends AssessmentSpecificRecommendation(
     description = "Allow resit or resubmission as a final attempt",
     helpText = "Allow further re-sit (examination)/re-submit (assessed work) opportunity. This would be as a final attempt so the marks will be capped at the pass mark and there will be no further opportunity to remedy failure."
   )
 
-  case object FurtherSit extends MitCircsExamBoardRecommendation(
+  case object FurtherSit extends AssessmentSpecificRecommendation(
     description = "Allow resit or resubmission as a first attempt",
     helpText = "Allow a further sit (examination)/submit (assessed work) opportunity. This would be as a first attempt so marks will not be capped and there will be a further opportunity to remedy failure. Any marks achieved in the subsequent attempt will count as the original mark."
   )
