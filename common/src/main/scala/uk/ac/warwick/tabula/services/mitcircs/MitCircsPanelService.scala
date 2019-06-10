@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.services.mitcircs
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
 import uk.ac.warwick.tabula.data.{AutowiringMitCircsPanelDaoComponent, HibernateHelpers, MitCircsPanelDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -14,6 +15,7 @@ import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, Securi
 trait MitCircsPanelService {
   def get(id: String): Option[MitigatingCircumstancesPanel]
   def saveOrUpdate(panel: MitigatingCircumstancesPanel): MitigatingCircumstancesPanel
+  def list(department: Department, academicYear: AcademicYear): Seq[MitigatingCircumstancesPanel]
   def panels(user: CurrentUser): Set[MitigatingCircumstancesPanel]
   def getPanels(user: MemberOrUser): Set[MitigatingCircumstancesPanel]
 }
@@ -27,6 +29,10 @@ abstract class AbstractMitCircsPanelService extends MitCircsPanelService {
 
   override def saveOrUpdate(panel: MitigatingCircumstancesPanel): MitigatingCircumstancesPanel = transactional() {
     mitCircsPanelDao.saveOrUpdate(panel)
+  }
+
+  override def list(department: Department, academicYear: AcademicYear): Seq[MitigatingCircumstancesPanel] = transactional(readOnly = true) {
+    mitCircsPanelDao.list(department, academicYear)
   }
 
   // TODO - nuke this if we are happy with getPanels instead - caching means that this won't show new panels if the panel list was fetched recently (but changes to an existing panels usergroup do bust the cache)

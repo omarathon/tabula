@@ -27,6 +27,8 @@ object Routes {
     def readyForPanel(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/ready"
 
     object Panels {
+      def apply(department: Department): String = s"$context/admin/${encoded(department.code)}/panels"
+      def apply(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/panels"
       def view(panel: MitigatingCircumstancesPanel) = s"$context/panel/${encoded(panel.id)}"
     }
   }

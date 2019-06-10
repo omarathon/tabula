@@ -3,6 +3,14 @@
 <#escape x as x?html>
   <div id="profile-modal" class="modal fade profile-subset"></div>
 
+  <div class="btn-toolbar dept-toolbar">
+    <div class="btn-group">
+      <a class="btn btn-default" href="<@routes.mitcircs.listPanels department academicYear />">
+        Panels
+      </a>
+    </div>
+  </div>
+
   <#function route_function dept>
     <#local result><@routes.mitcircs.adminhome dept academicYear /></#local>
     <#return result />

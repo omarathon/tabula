@@ -130,6 +130,13 @@
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>
+
+    <#if submission.panel??>
+      <@components.section "Panel">
+        <@components.panelDetails panel=submission.panel show_name=true />
+      </@components.section>
+    </#if>
+
     <#if canManage>
       <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
       <@components.asyncSection "notes" "Notes" notesUrl />
