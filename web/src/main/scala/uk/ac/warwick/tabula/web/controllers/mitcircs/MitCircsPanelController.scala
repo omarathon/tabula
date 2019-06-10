@@ -46,7 +46,7 @@ abstract class AbstractCreateMitCircsPanelController extends BaseController
       "hasPanel" -> hasPanel,
       "noPanel" -> noPanel,
       "academicYear" -> createCommand.year
-    ).crumbs(MitCircsBreadcrumbs.Admin.Home(department, active = true))
+    ).crumbs(MitCircsBreadcrumbs.Admin.HomeForYear(department, createCommand.year, active = true))
      .secondCrumbs(academicYearBreadcrumbs(createCommand.year)(Routes.Admin.home(department, _)): _*)
   }
 

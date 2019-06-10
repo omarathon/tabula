@@ -40,7 +40,7 @@ abstract class AbstractAdminDeptController
   def home(@ModelAttribute("command") command: AdminHomeCommand.Command, errors: Errors, @PathVariable department: Department): Mav =
     Mav("mitcircs/admin/admin-home",
       "academicYear" -> command.year)
-      .crumbs(MitCircsBreadcrumbs.Admin.Home(department, active = true))
+      .crumbs(MitCircsBreadcrumbs.Admin.HomeForYear(department, command.year, active = true))
       .secondCrumbs(academicYearBreadcrumbs(command.year)(Routes.Admin.home(department, _)): _*)
 
   @RequestMapping

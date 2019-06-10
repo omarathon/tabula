@@ -21,7 +21,7 @@ class MitCircsViewPanelController extends BaseController {
     val panel = command.apply()
     Mav("mitcircs/panel/view", "panel" -> panel)
       .crumbs(
-        MitCircsBreadcrumbs.Admin.Home(panel.department),
+        MitCircsBreadcrumbs.Admin.HomeForYear(panel.department, panel.academicYear),
         MitCircsBreadcrumbs.Admin.Panel(panel, active = true),
       )
   }

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.mitcircs.ListMitCircsPanelsCommand._
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, ReadOnly, Unaudited}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object ListMitCircsPanelsCommand {
   type Result = Seq[MitigatingCircumstancesPanel]
-  type Command = Appliable[Result]
+  type Command = Appliable[Result] with ListMitCircsPanelsState
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Read
 
   def apply(department: Department, year: AcademicYear): Command =
