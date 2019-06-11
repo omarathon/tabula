@@ -82,6 +82,9 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
   var boardRecommendations: Seq[AssessmentSpecificRecommendation] = _
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
+  var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
     "moduleCode" -> moduleCode,

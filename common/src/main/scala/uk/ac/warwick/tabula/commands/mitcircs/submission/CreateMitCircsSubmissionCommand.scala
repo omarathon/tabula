@@ -217,6 +217,7 @@ class AffectedAssessmentItem {
     this.assessmentType = assessment.assessmentType
     this.deadline = assessment.deadline
     this.boardRecommendations = assessment.boardRecommendations.asJava
+    this.acuteOutcomeApplies = Option(assessment.acuteOutcome).isDefined
   }
 
   var moduleCode: String = _
@@ -227,6 +228,7 @@ class AffectedAssessmentItem {
   var assessmentType: AssessmentType = _
   var deadline: LocalDate = _
   var boardRecommendations: JList[AssessmentSpecificRecommendation] = JArrayList()
+  var acuteOutcomeApplies: Boolean = _
 
   def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
     this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))
