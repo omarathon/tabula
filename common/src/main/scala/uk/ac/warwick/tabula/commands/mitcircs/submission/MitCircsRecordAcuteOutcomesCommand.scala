@@ -8,9 +8,10 @@ import org.springframework.validation.Errors
 import MitCircsRecordAcuteOutcomesCommand._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.AssessmentType
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAcuteOutcome, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAcuteOutcome, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 
@@ -43,11 +44,25 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     submission.outcomeGrading = outcomeGrading
     submission.outcomeReasons = outcomeReasons
     submission.acuteOutcome = acuteOutcome
-    submission.rejectionReasons = rejectionReasons.asScala
-    if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
-      submission.rejectionReasonsOther = rejectionReasonsOther
+
+    if(outcomeGrading == Rejected) {
+      submission.rejectionReasons = rejectionReasons.asScala
+      if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
+        submission.rejectionReasonsOther = rejectionReasonsOther
+      } else {
+        submission.rejectionReasonsOther = null
+      }
     } else {
+      submission.rejectionReasons = Seq()
       submission.rejectionReasonsOther = null
+    }
+
+    // TODO dumping the existing ones is a bit wasteful and might cause issues later if we add other props
+    submission.affectedAssessments.clear()
+    affectedAssessments.asScala.foreach { item =>
+      val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
+      if(item.acuteOutcomeApplies && item.assessmentType == AssessmentType.Assignment) affected.acuteOutcome = acuteOutcome
+      submission.affectedAssessments.add(affected)
     }
 
     submission.outcomesRecorded()
@@ -97,6 +112,7 @@ trait MitCircsRecordAcuteOutcomesRequest {
 
   self: MitCircsRecordAcuteOutcomesState =>
 
+  var affectedAssessments: JList[AffectedAssessmentItem] = submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava
   var outcomeGrading: MitigatingCircumstancesGrading = submission.outcomeGrading
   var outcomeReasons: String = submission.outcomeReasons
   var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = submission.rejectionReasons.asJava

@@ -12,7 +12,7 @@
           hint = "This grading will be shared with exam boards."
         >
           <@mitcirc.radios outcomeGrading "outcomeGrading" />
-          <div class="mitcircs-outcomes-form__nested-checkboxes collapse" data-target=":input[name=outcomeGrading]" data-target-value="Rejected">
+          <div class="mitcircs-form__fields__section__nested-checkboxes collapse" data-target=":input[name=outcomeGrading]" data-target-value="Rejected">
             <@mitcirc.checkboxesWithOther rejectionReasons "rejectionReasons" "rejectionReasonsOther"/>
           </div>
         </@mitcirc.question_section>
@@ -54,7 +54,7 @@
               </#if>
               <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
               <#if value.assessmentSpecific!false && command.affectedAssessments?has_content>
-                <section class="mitcircs-outcomes-form__nested-checkboxes collapse" data-target=":input[name=boardRecommendations][value=${value.entryName}]">
+                <section class="mitcircs-form__fields__section__nested-checkboxes collapse" data-target=":input[name=boardRecommendations][value=${value.entryName}]">
                     <#list command.affectedAssessments as assessment>
                         <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
                           <div class="checkbox nested">
