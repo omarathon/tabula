@@ -21,11 +21,11 @@ class MitCircsSubmissionSchedulesNotificationsTest extends TestBase with Mockito
       override val currentUser: User = student.asSsoUser
     }
 
-    val notifications  = scheduler.scheduledNotifications(submission)
-    notifications.size should be (2)
-    notifications.head.notificationType should be ("PendingEvidenceReminder")
-    notifications.head.scheduledDate should be (LocalDate.now.plusDays(1).toDateTimeAtStartOfDay)
-    notifications.tail.head.scheduledDate should be (LocalDate.now.plusDays(2).toDateTimeAtStartOfDay)
+    val notifications  = scheduler.scheduledNotifications(submission).groupBy(_.notificationType)
+    notifications("PendingEvidenceReminder").size should be (2)
+    notifications("PendingEvidenceReminder").head.scheduledDate should be (LocalDate.now.plusDays(1).toDateTimeAtStartOfDay)
+    notifications("PendingEvidenceReminder").tail.head.scheduledDate should be (LocalDate.now.plusDays(2).toDateTimeAtStartOfDay)
+    notifications("DraftSubmissionReminder").size should be (12)
   }
 
 }

@@ -62,7 +62,7 @@ class MitCircsPendingEvidenceCommandInternal(val submission: MitigatingCircumsta
     }
 
     file.attached.asScala.foreach(submission.addAttachment)
-    submission.lastModified = DateTime.now()
+    submission.lastModified = DateTime.now
     submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission

@@ -28,6 +28,7 @@ object MitCircsRecordAcuteOutcomesCommand {
     with MitCircsRecordAcuteOutcomesValidation
     with MitCircsRecordAcuteOutcomesPermissions
     with MitCircsRecordAcuteOutcomesDescription
+    with MitCircsSubmissionSchedulesNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
@@ -48,7 +49,6 @@ class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircu
     } else {
       submission.rejectionReasonsOther = null
     }
-
 
     submission.outcomesRecorded()
     submission.lastModifiedBy = user
