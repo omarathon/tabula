@@ -57,16 +57,10 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
       submission.boardRecommendationOther = null
     }
     submission.boardRecommendationComments = boardRecommendationComments
-
-    if(outcomeGrading == Rejected) {
-      submission.rejectionReasons = rejectionReasons.asScala
-      if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
-        submission.rejectionReasonsOther = rejectionReasonsOther
-      } else {
-        submission.rejectionReasonsOther = null
-      }
+    submission.rejectionReasons = rejectionReasons.asScala
+    if (rejectionReasons.asScala.contains(MitigatingCircumstancesRejectionReason.Other) && rejectionReasonsOther.hasText) {
+      submission.rejectionReasonsOther = rejectionReasonsOther
     } else {
-      submission.rejectionReasons = Seq()
       submission.rejectionReasonsOther = null
     }
 
