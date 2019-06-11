@@ -40,10 +40,10 @@ class UnlinkedDepartmentSmallGroupSetNotification extends NotificationWithTarget
   override def url: String = Routes.admin.reusable.apply(target.entity, items.get(0).entity.academicYear)
 
   @transient
-  override def title: String = "%s: %d reusable small group set%s have been unlinked from SITS".format(
+  override def title: String = "%s: %d reusable small group %s been unlinked from SITS".format(
     department.name,
     sets.size,
-    if (sets.size != 1) "s" else ""
+    if (sets.size != 1) "sets have" else "set has"
   )
 
   @transient

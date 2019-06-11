@@ -40,10 +40,10 @@ class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTar
   override def url: String = Routes.Manage.departmentForYear(target.entity, items.get(0).entity.academicYear)
 
   @transient
-  override def title: String = "%s: %d monitoring scheme%s have been unlinked from SITS".format(
+  override def title: String = "%s: %d monitoring %s been unlinked from SITS".format(
     department.name,
     schemes.size,
-    if (schemes.size != 1) "s" else ""
+    if (schemes.size != 1) "schemes have" else "scheme has"
   )
 
   @transient
