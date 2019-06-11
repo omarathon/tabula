@@ -125,6 +125,8 @@ object MarkingWorkflowStage {
 
   // double marker workflow
   case object DblFirstMarker extends MarkingWorkflowStage("dbl-first-marker", 1) {
+    override def roleName:String = "First marker"
+
     override def description: String = "First marker"
 
     override def nextStages: Seq[MarkingWorkflowStage] = Seq(DblSecondMarker)
@@ -143,6 +145,8 @@ object MarkingWorkflowStage {
   }
 
   case object DblFinalMarker extends MarkingWorkflowStage("dbl-final-marker", 3) {
+    override def roleName: String = "Final marker"
+
     override def description: String = "Final marker"
 
     override def verb: String = "finalise"
