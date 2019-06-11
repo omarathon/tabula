@@ -6,7 +6,10 @@
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail label="State" condensed=true>${submission.state.description}</@components.detail>
+        <@components.detail label="State" condensed=true>
+            ${submission.state.description}
+            <#if submission.state.entryName == "Outcomes Recorded"> by ${submission.outcomesLastRecordedBy.fullName} at <@fmt.date date=submission.outcomesLastRecordedOn /></#if>
+        </@components.detail>
 
         <#-- Identity information about the student -->
         <#assign student = submission.student />

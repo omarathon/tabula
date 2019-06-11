@@ -70,6 +70,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   var lastModifiedBy: User = _
 
+  @Column(nullable = false)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var outcomesLastRecordedBy: User = _
+
+  @Column(name = "outcomesLastRecordedOn", nullable = false)
+  var outcomesLastRecordedOn: DateTime = DateTime.now()
+
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
