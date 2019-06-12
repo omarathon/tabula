@@ -1,17 +1,24 @@
 
-
-Note:
 <#if assignment.collectSubmissions>
-- <@fmt.p number=numAllocated!0 singular="student" plural="students" /> <@fmt.p number=numAllocated!0 singular="is" plural="are" shownumber=false /> allocated to you for marking
+<@fmt.p number=numAllocated!0 singular="student" plural="students" /> <@fmt.p number=numAllocated!0 singular="is" plural="are" shownumber=false /> allocated to you for marking
   <#list studentsAtStagesCount as info>
     <#if info.count gt 0>
- -- ${info.stageName}: <@fmt.p number=info.count!0 singular="student" plural="students" />
+- ${info.stageName}: <@fmt.p number=info.count!0 singular="student" plural="students" />
      </#if>
   </#list>
-- <@fmt.p number=numReleasedFeedbacks!0 singular="student" plural="students" /> allocated to you <@fmt.p number=numReleasedFeedbacks!0 singular="has" plural="have" shownumber=false /> been released for marking
- -- <@fmt.p number=numReleasedSubmissionsFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedSubmissionsFeedbacks!0 singular="has" plural="have" shownumber=false /> submitted work
- -- <@fmt.p number=numReleasedNoSubmissionsFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedNoSubmissionsFeedbacks!0 singular="has" plural="have" shownumber=false /> not submitted work
+
+  <#if numReleasedFeedbacks! gt 0>
+<@fmt.p number=numReleasedFeedbacks!0 singular="student" plural="students" /> allocated to you <@fmt.p number=numReleasedFeedbacks!0 singular="has" plural="have" shownumber=false /> been released for marking<#if assignment.automaticallyReleaseToMarkers!false> as the assignment has been set to automatically release when the end date and time have been reached</#if>
+- <@fmt.p number=numReleasedSubmissionsFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedSubmissionsFeedbacks!0 singular="has" plural="have" shownumber=false /> submitted work
+- <@fmt.p number=numReleasedNoSubmissionsFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedNoSubmissionsFeedbacks!0 singular="has" plural="have" shownumber=false /> not submitted work
+  <#else>
+      <#if assignment.automaticallyReleaseToMarkers!false>
+No students allocated to you have been released for marking as the assignment has been set to automatically release when the end date and time have been reached but no students have yet submitted.
+
+Please check the assignment regularly as students with extensions may submit at any time.
+      </#if>
+  </#if>
 <#else>
-- <@fmt.p number=numReleasedFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedFeedbacks!0 singular="is" plural="are" shownumber=false /> allocated to you for marking
+<@fmt.p number=numReleasedFeedbacks!0 singular="student" plural="students" /> <@fmt.p number=numReleasedFeedbacks!0 singular="is" plural="are" shownumber=false /> allocated to you for marking
 - This assignment does not require students to submit work to Tabula
 </#if>
