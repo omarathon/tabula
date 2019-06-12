@@ -80,6 +80,8 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
     submission.outcomesRecorded()
     submission.lastModifiedBy = user
     submission.lastModified = DateTime.now
+    submission.outcomesLastRecordedBy = user
+    submission.outcomesLastRecordedOn = DateTime.now
     mitCircsSubmissionService.saveOrUpdate(submission)
     submission
   }
