@@ -102,7 +102,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
     val parsedFeedbacks = feedbacks.filter(_.universityId.isDefined).groupBy(f => {
       f.latestGrade match {
-        case Some(grade) if !assignmentUpstreamAssessmentGroupInfos.exists(_.upstreamAssessmentGroup.membersIncludes(f._universityId)) => "notOnScheme"
+        case _ if !assignmentUpstreamAssessmentGroupInfos.exists(_.upstreamAssessmentGroup.membersIncludes(f._universityId)) => "notOnScheme"
         case Some(grade) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
         case Some(grade) =>
           if (validGrades(f._universityId).isEmpty || !validGrades(f._universityId).exists(_.grade == grade))
