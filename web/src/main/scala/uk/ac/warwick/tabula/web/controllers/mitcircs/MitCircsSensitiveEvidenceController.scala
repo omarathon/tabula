@@ -24,22 +24,20 @@ class MitCircsSensitiveEvidenceController extends BaseController {
     MitCircsSensitiveEvidenceCommand(mandatory(submission), user.apparentUser)
 
   @RequestMapping
-  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
     Mav("mitcircs/submissions/sensitive_evidence")
       .crumbs(
         MitCircsBreadcrumbs.Admin.Home(submission.department),
         MitCircsBreadcrumbs.Admin.Review(submission),
         MitCircsBreadcrumbs.Admin.SensitiveEvidence(submission, active = true),
       )
-  }
 
   @RequestMapping(method = Array(POST))
-  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
     if (errors.hasErrors) form(submission.student, submission)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Admin.review(submission))
     }
-  }
 
 }

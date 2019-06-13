@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentService, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -21,11 +21,27 @@ import uk.ac.warwick.userlookup.User
 
 import scala.beans.BeanProperty
 import scala.collection.JavaConverters._
+import CreateMitCircsSubmissionCommand._
 
 object CreateMitCircsSubmissionCommand {
-  def apply(student: StudentMember, creator: User) =
+  type Result = MitigatingCircumstancesSubmission
+  type Command =
+    Appliable[Result]
+      with MitCircsSubmissionState
+      with MitCircsSubmissionRequest
+      with SelfValidating
+      with BindListener
+      with Notifies[Result, MitigatingCircumstancesSubmission]
+      with SchedulesNotifications[Result, MitigatingCircumstancesSubmission]
+      with CompletesNotifications[MitigatingCircumstancesSubmission]
+
+  // Scoped to self
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Modify
+
+  def apply(student: StudentMember, creator: User): Command =
     new CreateMitCircsSubmissionCommandInternal(student, creator)
-      with ComposableCommand[MitigatingCircumstancesSubmission]
+      with ComposableCommand[Result]
+      with MitCircsSubmissionRequest
       with MitCircsSubmissionValidation
       with MitCircsSubmissionPermissions
       with CreateMitCircsSubmissionDescription
@@ -36,17 +52,21 @@ object CreateMitCircsSubmissionCommand {
       with AutowiringModuleAndDepartmentServiceComponent
 }
 
-class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User) extends CommandInternal[MitigatingCircumstancesSubmission]
-  with MitCircsSubmissionState with BindListener {
+class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val currentUser: User)
+  extends CommandInternal[Result]
+    with MitCircsSubmissionState
+    with BindListener {
 
-  self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent =>
+  self: MitCircsSubmissionRequest
+    with MitCircsSubmissionServiceComponent
+    with ModuleAndDepartmentServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
     affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
   }
 
-  def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
+  def applyInternal(): Result = transactional() {
     val submission = new MitigatingCircumstancesSubmission(student, currentUser, department)
     submission.startDate = startDate
     submission.endDate = if (noEndDate) null else endDate
@@ -89,12 +109,14 @@ trait MitCircsSubmissionPermissions extends RequiresPermissionsChecking with Per
   self: MitCircsSubmissionState =>
 
   def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student))
+    p.PermissionCheck(RequiredPermission, MitigatingCircumstancesStudent(student))
   }
 }
 
 trait MitCircsSubmissionValidation extends SelfValidating {
-  self: MitCircsSubmissionState with ModuleAndDepartmentServiceComponent =>
+  self: MitCircsSubmissionRequest
+    with MitCircsSubmissionState
+    with ModuleAndDepartmentServiceComponent =>
 
   override def validate(errors: Errors) {
     // validate dates
@@ -162,7 +184,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
   }
 }
 
-trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumstancesSubmission] {
+trait CreateMitCircsSubmissionDescription extends Describable[Result] {
   self: MitCircsSubmissionState =>
 
   override lazy val eventName: String = "CreateMitCircsSubmission"
@@ -172,13 +194,8 @@ trait CreateMitCircsSubmissionDescription extends Describable[MitigatingCircumst
   }
 }
 
-trait MitCircsSubmissionState {
-  val student: StudentMember
-  val currentUser: User
-  lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
-  lazy val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
-    throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
-  )
+trait MitCircsSubmissionRequest {
+  self: MitCircsSubmissionState =>
 
   var startDate: LocalDate = _
   var endDate: LocalDate = _
@@ -204,6 +221,15 @@ trait MitCircsSubmissionState {
 
   var relatedSubmission: MitigatingCircumstancesSubmission = _
   var approve: Boolean = _ // set this to true when a user is approving a draft submission or one made on their behalf
+}
+
+trait MitCircsSubmissionState {
+  val student: StudentMember
+  val currentUser: User
+  lazy val isSelf: Boolean = currentUser.getWarwickId.maybeText.contains(student.universityId)
+  lazy val department: Department = student.mostSignificantCourse.department.subDepartmentsContaining(student).filter(_.enableMitCircs).lastOption.getOrElse(
+    throw new IllegalArgumentException("Unable to create a mit circs submission for a student who's department doesn't have mit circs enabled")
+  )
 }
 
 class AffectedAssessmentItem {
@@ -236,11 +262,11 @@ class AffectedAssessmentItem {
   }
 }
 
-trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
+trait NewMitCircsSubmissionNotifications extends Notifies[Result, MitigatingCircumstancesSubmission] {
 
-  self: MitCircsSubmissionState =>
+  self: MitCircsSubmissionRequest with MitCircsSubmissionState =>
 
-  def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
+  def emit(submission: Result): Seq[Notification[Result, MitigatingCircumstancesSubmission]] = {
 
     val notificationsForStudent = if (!isSelf)  {
       Seq(Notification.init(new MitCircsSubmissionOnBehalfNotification, currentUser, submission, submission))
@@ -260,9 +286,9 @@ trait NewMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstance
   }
 }
 
-trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
+trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Result, MitigatingCircumstancesSubmission] {
 
-  override def transformResult(submission: MitigatingCircumstancesSubmission): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
+  override def transformResult(submission: Result): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
   override def scheduledNotifications(submission: MitigatingCircumstancesSubmission): Seq[ScheduledNotification[MitigatingCircumstancesSubmission]] = {
     // TODO is it always valid to send these? Might depend on state
@@ -291,11 +317,11 @@ trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Mi
   }
 }
 
-trait MitCircsSubmissionNotificationCompletion extends CompletesNotifications[MitigatingCircumstancesSubmission] {
+trait MitCircsSubmissionNotificationCompletion extends CompletesNotifications[Result] {
   self: NotificationHandling =>
   def currentUser: User
 
-  def notificationsToComplete(submission: MitigatingCircumstancesSubmission): CompletesNotificationsResult = {
+  def notificationsToComplete(submission: Result): CompletesNotificationsResult = {
     if (submission.hasEvidence) {
       CompletesNotificationsResult(
         notificationService.findActionRequiredNotificationsByEntityAndType[PendingEvidenceReminderNotification](submission) ++

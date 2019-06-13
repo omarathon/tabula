@@ -56,7 +56,9 @@ abstract class SendMessageCommandInternal(val submission: MitigatingCircumstance
     file.onBind(result)
   }
 
-  override def applyInternal(): MitigatingCircumstancesMessage = {
+  override def applyInternal(): MitigatingCircumstancesMessage = transactional() {
+    require(submission.canAddMessage, "Can't add a message to this submission")
+
     val newMessage = new MitigatingCircumstancesMessage(submission, currentUser)
     newMessage.message = message
     file.attached.asScala.foreach(newMessage.addAttachment)

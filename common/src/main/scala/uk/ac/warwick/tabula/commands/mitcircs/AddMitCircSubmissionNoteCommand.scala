@@ -37,6 +37,8 @@ abstract class AddMitCircSubmissionNoteCommandInternal(val submission: Mitigatin
     with MitCircsSubmissionServiceComponent =>
 
   override def applyInternal(): Result = transactional() {
+    require(submission.canAddNote, "Can't add notes to this submission")
+
     val note = new MitigatingCircumstancesNote(submission, currentUser)
     note.text = text
     file.attached.asScala.foreach(note.addAttachment)

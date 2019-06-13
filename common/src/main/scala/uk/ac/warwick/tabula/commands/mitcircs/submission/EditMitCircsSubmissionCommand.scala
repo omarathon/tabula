@@ -21,6 +21,7 @@ object EditMitCircsSubmissionCommand {
   def apply(submission: MitigatingCircumstancesSubmission, creator: User) =
     new EditMitCircsSubmissionCommandInternal(submission, creator)
       with ComposableCommand[MitigatingCircumstancesSubmission]
+      with EditMitCircsSubmissionRequest
       with MitCircsSubmissionValidation
       with MitCircsSubmissionPermissions
       with EditMitCircsSubmissionDescription
@@ -33,27 +34,13 @@ object EditMitCircsSubmissionCommand {
 }
 
 class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstancesSubmission, val currentUser: User)
-  extends CommandInternal[MitigatingCircumstancesSubmission] with EditMitCircsSubmissionState with BindListener {
-
-  self: MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent with ExtensionPersistenceComponent =>
-
-  require(submission.isEditable(currentUser)) // Guarded at controller
-
-  startDate = submission.startDate
-  endDate = submission.endDate
-  noEndDate = Option(endDate).isEmpty
-  issueTypes = submission.issueTypes.asJava
-  issueTypeDetails = submission.issueTypeDetails
-  reason = submission.reason
-  affectedAssessments.addAll(submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava)
-  contacted = submission.contacted
-  contacts = submission.contacts.asJava
-  contactOther = submission.contactOther
-  noContactReason = submission.noContactReason
-  pendingEvidence = submission.pendingEvidence
-  pendingEvidenceDue = submission.pendingEvidenceDue
-  attachedFiles = JHashSet(submission.attachments.toSet)
-  relatedSubmission = submission.relatedSubmission
+  extends CommandInternal[MitigatingCircumstancesSubmission]
+    with EditMitCircsSubmissionState
+    with BindListener {
+  self: EditMitCircsSubmissionRequest
+    with MitCircsSubmissionServiceComponent
+    with ModuleAndDepartmentServiceComponent
+    with ExtensionPersistenceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
     file.onBind(result)
@@ -128,9 +115,31 @@ trait EditMitCircsSubmissionState extends MitCircsSubmissionState {
   lazy val student: StudentMember = submission.student
 }
 
+trait EditMitCircsSubmissionRequest extends MitCircsSubmissionRequest {
+  self: EditMitCircsSubmissionState =>
+
+  require(submission.isEditable(currentUser)) // Guarded at controller
+
+  startDate = submission.startDate
+  endDate = submission.endDate
+  noEndDate = Option(endDate).isEmpty
+  issueTypes = submission.issueTypes.asJava
+  issueTypeDetails = submission.issueTypeDetails
+  reason = submission.reason
+  affectedAssessments.addAll(submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava)
+  contacted = submission.contacted
+  contacts = submission.contacts.asJava
+  contactOther = submission.contactOther
+  noContactReason = submission.noContactReason
+  pendingEvidence = submission.pendingEvidence
+  pendingEvidenceDue = submission.pendingEvidenceDue
+  attachedFiles = JHashSet(submission.attachments.toSet)
+  relatedSubmission = submission.relatedSubmission
+}
+
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {
 
-  self: MitCircsSubmissionState =>
+  self: EditMitCircsSubmissionRequest with EditMitCircsSubmissionState =>
 
   def emit(submission: MitigatingCircumstancesSubmission): Seq[Notification[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission]] = {
 

@@ -53,7 +53,9 @@
                 <@fmt.date date=submission.lastModified /> by <#if submission.lastModifiedBy == user.apparentUser>you<#else>${submission.lastModifiedBy.fullName}</#if>
               </td>
               <td>
-                <#if submission.approvedOn??>
+                <#if submission.withdrawn>
+                  <span class="very-subtle">(withdrawn)</span>
+                <#elseif submission.approvedOn??>
                   <@fmt.date date=submission.approvedOn />
                 <#else>
                   <span class="very-subtle">(draft)</span>

@@ -25,6 +25,8 @@ object Routes {
     def review(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}"
     def sensitiveEvidence(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/sensitiveevidence"
     def readyForPanel(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/ready"
+    def acuteOutcomes(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/acuteoutcomes"
+    def panelOutcomes(submission: MitigatingCircumstancesSubmission): String = s"$context/submission/${encoded(submission.key.toString)}/outcomes"
 
     object Panels {
       def apply(department: Department): String = s"$context/admin/${encoded(department.code)}/panels"

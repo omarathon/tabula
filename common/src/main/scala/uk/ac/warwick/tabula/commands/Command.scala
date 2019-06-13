@@ -535,6 +535,7 @@ abstract class Description {
 
   def mitigatingCircumstancesSubmission(submission: MitigatingCircumstancesSubmission): Description = {
     department(submission.department)
+    member(submission.student)
     property("mitCircsSubmission", submission.id)
   }
 

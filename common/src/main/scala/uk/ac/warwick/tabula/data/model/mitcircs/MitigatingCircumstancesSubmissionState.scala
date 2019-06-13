@@ -14,6 +14,7 @@ object MitigatingCircumstancesSubmissionState extends Enum[MitigatingCircumstanc
   case object Submitted extends MitigatingCircumstancesSubmissionState("Submitted")
   case object ReadyForPanel extends MitigatingCircumstancesSubmissionState("Ready for panel")
   case object OutcomesRecorded extends MitigatingCircumstancesSubmissionState("Outcomes recorded")
+  case object Withdrawn extends MitigatingCircumstancesSubmissionState("Withdrawn by student")
 
   override val values: immutable.IndexedSeq[MitigatingCircumstancesSubmissionState] = findValues
 }

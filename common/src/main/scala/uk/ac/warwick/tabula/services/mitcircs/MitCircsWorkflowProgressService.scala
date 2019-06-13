@@ -76,7 +76,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   case object Submission extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
       submission.state match {
-        case MitigatingCircumstancesSubmissionState.Draft =>
+        case MitigatingCircumstancesSubmissionState.Draft | MitigatingCircumstancesSubmissionState.Withdrawn =>
           StageProgress(
             stage = Submission,
             started = true,
@@ -91,7 +91,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
             health = WorkflowStageHealth.Warning,
           )
 
-        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
+        case _ =>
           StageProgress(
             stage = Submission,
             started = true,
