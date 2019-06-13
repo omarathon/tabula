@@ -289,7 +289,7 @@
         </#if>
       </#compress></#local>
 
-    <#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content>
+    <#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content || gradeValidation.notOnScheme?has_content>
     <#if isGradeValidation>
       <div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
         <#if gradeValidation.notOnScheme?has_content >
