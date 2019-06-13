@@ -3,6 +3,41 @@
 
   <@cm2.assignmentHeader "Upload feedback to SITS" assignment "for" />
 
+  <#if command.gradeValidation.notOnScheme?has_content >
+    <div class="alert alert-danger">
+      <p>
+          <#assign total = command.gradeValidation.notOnScheme?keys?size />
+          <@fmt.p total "student" />
+          <#if total==1>
+            has feedback that cannot be uploaded because the student is manually-added and therefore not present on a linked assessment component.
+          <#else>
+            have feedback that cannot be uploaded because the students are manually-added and therefore not present on a linked assessment component.
+          </#if>
+      </p>
+    </div>
+
+    <table class="table table-bordered table-condensed table-striped table-hover">
+      <thead>
+      <tr>
+        <th>University ID</th>
+        <th>Mark</th>
+        <th>Grade</th>
+        <th>Valid grades</th>
+      </tr>
+      </thead>
+      <tbody>
+      <#list command.gradeValidation.notOnScheme?keys as feedback>
+        <tr>
+          <td>${feedback.studentIdentifier}</td>
+          <td>${feedback.latestMark!}</td>
+          <td>${feedback.latestGrade!}</td>
+          <td>${mapGet(command.gradeValidation.notOnScheme, feedback)}</td>
+        </tr>
+      </#list>
+      </tbody>
+    </table>
+  </#if>
+
   <#if isGradeValidation>
 
     <#if command.gradeValidation.invalid?keys?has_content>
@@ -109,7 +144,6 @@
     </#if>
 
   <#else>
-
     <#if command.gradeValidation.invalid?has_content || command.gradeValidation.populated?has_content>
       <div class="alert alert-danger">
         <p>
@@ -156,42 +190,6 @@
         </tbody>
       </table>
     </#if>
-
-    <#if command.gradeValidation.notOnScheme?has_content >
-      <div class="alert alert-danger">
-        <p>
-            <#assign total = command.gradeValidation.notOnScheme?keys?size />
-            <@fmt.p total "student" />
-            <#if total==1>
-              has feedback that cannot be uploaded because the student is manually-added and therefore not present on a linked assessment component.
-            <#else>
-              have feedback that cannot be uploaded because the students are manually-added and therefore not present on a linked assessment component.
-            </#if>
-        </p>
-      </div>
-
-      <table class="table table-bordered table-condensed table-striped table-hover">
-        <thead>
-        <tr>
-          <th>University ID</th>
-          <th>Mark</th>
-          <th>Grade</th>
-          <th>Valid grades</th>
-        </tr>
-        </thead>
-        <tbody>
-        <#list command.gradeValidation.notOnScheme?keys as feedback>
-          <tr>
-            <td>${feedback.studentIdentifier}</td>
-            <td>${feedback.latestMark!}</td>
-            <td>${feedback.latestGrade!}</td>
-            <td>${mapGet(command.gradeValidation.notOnScheme, feedback)}</td>
-          </tr>
-        </#list>
-        </tbody>
-      </table>
-    </#if>
-
   </#if>
 
   <#if command.gradeValidation.valid?has_content || isGradeValidation && command.gradeValidation.populated?has_content>
@@ -262,5 +260,4 @@
   <#else>
     <em>There is no feedback to upload.</em>
   </#if>
-
 </#escape>

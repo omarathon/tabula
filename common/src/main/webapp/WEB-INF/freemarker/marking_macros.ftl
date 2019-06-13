@@ -292,6 +292,17 @@
     <#if gradeValidation.populated?has_content || gradeValidation.invalid?has_content || gradeValidation.zero?has_content>
     <#if isGradeValidation>
       <div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
+        <#if gradeValidation.notOnScheme?has_content >
+          <#local notOnSchemeTotal = gradeValidation.notOnScheme?keys?size />
+            <p>
+              <a href="#grade-validation-not-on-scheme-modal" data-toggle="modal"><@fmt.p notOnSchemeTotal "student" /></a>
+              <#if notOnSchemeTotal==1>
+                has feedback that cannot be uploaded because the student is manually-added and therefore not present on a linked assessment component.
+              <#else>
+                have feedback that cannot be uploaded because the students are manually-added and therefore not present on a linked assessment component.
+              </#if>
+            </p>
+        </#if>
         <#if gradeValidation.invalid?has_content>
           <#local total = gradeValidation.invalid?keys?size />
           <p>
@@ -411,13 +422,26 @@
       </div>
     <#else>
       <div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
-        <#local total = gradeValidation.populated?keys?size + gradeValidation.invalid?keys?size />
-        <a href="#grade-validation-modal" data-toggle="modal"><@fmt.p total "student" /></a>
-        <#if total==1>
-          has feedback with a grade that is empty or invalid. It will not be uploaded.
-        <#else>
-          have feedback with grades that are empty or invalid. They will not be uploaded.
+        <#if gradeValidation.notOnScheme?has_content >
+          <p>
+            <#local notOnSchemeTotal = gradeValidation.notOnScheme?keys?size />
+            <a href="#grade-validation-not-on-scheme-modal" data-toggle="modal"><@fmt.p notOnSchemeTotal "student" /></a>
+            <#if notOnSchemeTotal==1>
+              has feedback that cannot be uploaded because the student is manually-added and therefore not present on a linked assessment component.
+            <#else>
+              have feedback that cannot be uploaded because the students are manually-added and therefore not present on a linked assessment component.
+            </#if>
+          </p>
         </#if>
+        <#local total = gradeValidation.populated?keys?size + gradeValidation.invalid?keys?size />
+        <p>
+          <a href="#grade-validation-modal" data-toggle="modal"><@fmt.p total "student" /></a>
+          <#if total==1>
+            has feedback with a grade that is empty or invalid. It will not be uploaded.
+          <#else>
+            have feedback with grades that are empty or invalid. They will not be uploaded.
+          </#if>
+        </p>
       </div>
       <div id="grade-validation-modal" class="modal fade">
         <@modal.wrapper>
@@ -457,6 +481,33 @@
         </@modal.wrapper>
       </div>
     </#if>
+    <div id="grade-validation-not-on-scheme-modal" class="modal fade">
+      <@modal.wrapper>
+          <@modal.header>
+            <h3 class="modal-title">Manually-added students</h3>
+          </@modal.header>
+          <@modal.body>
+            <table class="table table-condensed table-bordered table-striped table-hover">
+              <thead>
+              <tr>
+                <th>University ID</th>
+                <th>Mark</th>
+                <th>Grade</th>
+              </tr>
+              </thead>
+              <tbody>
+              <#list gradeValidation.notOnScheme?keys as feedback>
+                <tr>
+                  <td>${feedback.studentIdentifier}</td>
+                  <td>${(feedback.latestMark)!}</td>
+                  <td>${(feedback.latestGrade)!}</td>
+                </tr>
+              </#list>
+              </tbody>
+            </table>
+          </@modal.body>
+      </@modal.wrapper>
+    </div>
     </#if>
       <script>
         jQuery(function ($) {
