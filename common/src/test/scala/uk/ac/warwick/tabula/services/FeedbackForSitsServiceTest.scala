@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{CurrentUser, Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{FeedbackForSitsDao, FeedbackForSitsDaoComponent}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.userlookup.User
@@ -14,15 +14,19 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
 
   trait Fixture {
     val service = new AbstractFeedbackForSitsService with ServiceTestSupport
-    val assessmentMembershipService = smartMock[AssessmentMembershipService]
+    val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
     service.assessmentMembershipService = assessmentMembershipService
+    val module = new Module
     val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("someFeedback")
     feedback.assignment = new Assignment
-    feedback.assignment.module = new Module
+    feedback.assignment.module = module
     feedback.assignment.module.adminDepartment = new Department
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
-    assessmentMembershipService.determineMembershipUsersIncludingPWD(feedback.assignment) returns Seq(currentUser.apparentUser)
+
+    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, null)
+    assessmentMembershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
+
     val submitter: CurrentUser = currentUser
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
     gradeGenerator.applyForMarks(Map(feedback._universityId -> feedback.actualMark.get)) returns Map(feedback._universityId -> Seq(GradeBoundary(null, "A", 0, 100, "N")))
