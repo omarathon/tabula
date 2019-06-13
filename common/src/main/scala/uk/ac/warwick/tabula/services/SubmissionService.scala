@@ -82,6 +82,7 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
       .seq
   }
 
+  // FIXME endInclusive parameter is called endExclusive at the interface
   def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endInclusive: DateTime): Seq[Submission] =
     session.newCriteria[Submission]
       .add(is("usercode", usercode))

@@ -39,11 +39,19 @@ class EditAttendancePointCommandInternal(
   self: EditAttendancePointCommandState with AttendanceMonitoringServiceComponent with ProfileServiceComponent =>
 
   override def applyInternal(): Seq[AttendanceMonitoringPoint] = {
-    val editedPoints = pointsToEdit.map(point => {
+    val editedPoints = pointsToEdit.flatMap(point => {
+      val clonedBefore = point.cloneTo(None)
       copyTo(point)
+      val clonedAfter = point.cloneTo(None)
+
       point.updatedDate = DateTime.now
       attendanceMonitoringService.saveOrUpdate(point)
-      point
+
+      if (!autoRecordConditionsIdentical(clonedBefore, clonedAfter)) {
+        Some(point)
+      } else {
+        None
+      }
     })
 
     generateNotifications(schemesToEdit)
@@ -52,6 +60,9 @@ class EditAttendancePointCommandInternal(
     editedPoints
   }
 
+  private def autoRecordConditionsIdentical(a: AttendanceMonitoringPoint, b: AttendanceMonitoringPoint) = {
+    a.startDate == b.startDate && a.endDate == b.endDate && a.pointType == b.pointType && a.settingsIterator.sameElements(b.settingsIterator)
+  }
 }
 
 trait PopulatesEditAttendancePointCommand extends PopulateOnForm {

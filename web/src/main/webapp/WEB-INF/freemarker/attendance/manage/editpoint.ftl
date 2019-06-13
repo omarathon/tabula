@@ -25,7 +25,7 @@
     <#return result />
   </#function>
 
-  <@f.form action="" method="POST" modelAttribute="command">
+  <@f.form action="" method="POST" modelAttribute="command" id="edit-monitoring-point-form">
 
     <#assign hasOverlap = false />
 
@@ -42,5 +42,16 @@
     </div>
   </@f.form>
 
+  <script>
+    jQuery(function ($) {
+      $('#edit-monitoring-point-form').on('dirty.areYouSure', function () {
+        $('#point-conditions-changed-alert').removeClass('hidden');
+      }).on('clean.areYouSure', function () {
+        $('#point-conditions-changed-alert').addClass('hidden');
+      }).areYouSure({
+        silent: true
+      });
+    });
+  </script>
 
 </#escape>
