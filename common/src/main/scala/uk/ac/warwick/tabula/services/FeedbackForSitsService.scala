@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFeedbackForSitsDaoComponent, FeedbackForSitsDaoComponent}
 
+import scala.collection.JavaConverters._
+
 case class ValidateAndPopulateFeedbackResult(
   valid: Seq[Feedback],
   populated: Map[Feedback, String],
@@ -94,12 +96,14 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
 
     val validGrades = gradeGenerator.applyForMarks(studentsMarks)
 
-    val membership = assessmentMembershipService.determineMembershipUsersIncludingPWD(assessment).map(user => user.getUserId)
+    lazy val assignmentUpstreamAssessmentGroupInfos = assessment.assessmentGroups.asScala.map { group =>
+      group -> group.toUpstreamAssessmentGroupInfo(assessment.academicYear)
+    }.flatMap(groupInfo => groupInfo._2)
 
     val parsedFeedbacks = feedbacks.filter(_.universityId.isDefined).groupBy(f => {
       f.latestGrade match {
+        case Some(grade) if !assignmentUpstreamAssessmentGroupInfos.exists(_.upstreamAssessmentGroup.membersIncludes(f._universityId)) => "notOnScheme"
         case Some(grade) if f.latestMark.isEmpty => "invalid" // a grade without a mark is invalid
-        case Some(grade) if !membership.contains(f._universityId) => "notOnScheme"
         case Some(grade) =>
           if (validGrades(f._universityId).isEmpty || !validGrades(f._universityId).exists(_.grade == grade))
             "invalid"
