@@ -6,8 +6,11 @@
     <#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
   </#compress></#macro>
 
-  <#function stage_incomplete markingStage enhancedFeedback>
-    <#return enhancedFeedback?? && (enhancedFeedback.notReleasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage)) />
+  <#function stage_incomplete markingStage enhancedFeedback="">
+      <#if enhancedFeedback?has_content>
+          <#return enhancedFeedback.notReleasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
+      </#if>
+      <#return false />
   </#function>
 
   <div id="profile-modal" class="modal fade profile-subset"></div>
