@@ -17,15 +17,31 @@ class FeedbackForSitsServiceTest extends TestBase with Mockito {
     val assessmentMembershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
     service.assessmentMembershipService = assessmentMembershipService
     val module = new Module
-    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("someFeedback")
+    val feedback: AssignmentFeedback = Fixtures.assignmentFeedback("0123456") // matches a member in Fixtures.assessmentGroup
     feedback.assignment = new Assignment
     feedback.assignment.module = module
     feedback.assignment.module.adminDepartment = new Department
     feedback.assignment.module.adminDepartment.assignmentGradeValidation = true
     feedback.actualMark = Some(100)
 
-    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, null)
+    val upstreamAssesmentGroupInfo: UpstreamAssessmentGroupInfo = Fixtures.upstreamAssessmentGroupInfo(AcademicYear(2010), "A", module.code, "A01")
     assessmentMembershipService.getUpstreamAssessmentGroupInfo(any[UpstreamAssessmentGroup]) returns Option(upstreamAssesmentGroupInfo)
+
+    val upstream = new AssessmentComponent
+    upstream.module = module
+    upstream.moduleCode = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.moduleCode
+    upstream.sequence = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.sequence
+    upstream.assessmentGroup = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.assessmentGroup
+    upstream.assessmentType = AssessmentType.Assignment
+    upstream.name = "Egg plants"
+    upstream.inUse = true
+
+    val ag = new AssessmentGroup
+    ag.membershipService = assessmentMembershipService
+    ag.assessmentComponent = upstream
+    ag.occurrence = upstreamAssesmentGroupInfo.upstreamAssessmentGroup.occurrence
+    ag.assignment = feedback.assignment
+    feedback.assignment.assessmentGroups.add(ag)
 
     val submitter: CurrentUser = currentUser
     val gradeGenerator: GeneratesGradesFromMarks = smartMock[GeneratesGradesFromMarks]
