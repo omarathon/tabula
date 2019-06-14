@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.hibernate.FetchMode
-import org.hibernate.criterion.Restrictions.{ge, le}
+import org.hibernate.criterion.Restrictions.{ge, lt}
 import org.hibernate.criterion.Order._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
@@ -82,12 +82,11 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
       .seq
   }
 
-  // FIXME endInclusive parameter is called endExclusive at the interface
-  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endInclusive: DateTime): Seq[Submission] =
+  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
     session.newCriteria[Submission]
       .add(is("usercode", usercode))
       .add(ge("submittedDate", startInclusive))
-      .add(le("submittedDate", endInclusive))
+      .add(lt("submittedDate", endExclusive))
       .seq
 
   def delete(submission: Submission) {

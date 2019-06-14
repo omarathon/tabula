@@ -20,7 +20,7 @@ object RecheckAttendanceCommand {
       with AutowiringSubmissionServiceComponent
       with AutowiringMeetingRecordServiceComponent
       with AutowiringSmallGroupServiceComponent
-      with Unaudited // TODO
+      with RecheckAttendanceCommandDescription
       with EditAttendancePointPermissions
       with RecheckAttendanceCommandState
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
@@ -126,4 +126,18 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
   lazy val otherToAttended: Seq[AttendanceChange] = proposedChanges.filter(c => c.currentState != Attended && c.proposedState == Attended)
 
   lazy val attendedToOther: Seq[AttendanceChange] = proposedChanges.filter(c => c.currentState == Attended && c.proposedState != Attended)
+}
+
+trait RecheckAttendanceCommandDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
+  self: RecheckAttendanceCommandState =>
+
+  override lazy val eventName = "RecheckAttendance"
+
+  override def describe(d: Description) {
+    d.property("checkpoints", proposedChanges.map(change => change.student.universityId -> change.currentState.dbValue))
+  }
+
+  override def describeResult(d: Description, result: Seq[AttendanceMonitoringCheckpoint]): Unit = {
+    d.property("checkpoints", result.map(checkpoint => checkpoint.student.universityId -> checkpoint.state.dbValue))
+  }
 }
