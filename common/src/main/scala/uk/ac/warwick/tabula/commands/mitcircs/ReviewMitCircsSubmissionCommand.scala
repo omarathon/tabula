@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.ReviewMitCircsSubmissionCommand._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -29,7 +30,10 @@ abstract class ReviewMitCircsSubmissionCommandInternal(val submission: Mitigatin
 
   override def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     submission.lastViewedByOfficer = DateTime.now
-    submission
+    mitCircsSubmissionService.saveOrUpdate(submission)
+    // TODO find out why this is necessary for related submissions which themselves are linked to a related submission
+    Option(submission.relatedSubmission).foreach(HibernateHelpers.initialiseAndUnproxy)
+    HibernateHelpers.initialiseAndUnproxy(submission)
   }
 }
 
