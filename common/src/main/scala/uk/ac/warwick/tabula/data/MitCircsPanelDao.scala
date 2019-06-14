@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
+import org.hibernate.criterion.Order._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{MemberOrUser, TaskBenchmarking}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
@@ -19,7 +21,8 @@ trait AutowiringMitCircsPanelDaoComponent extends MitCircsPanelDaoComponent {
 trait MitCircsPanelDao {
   def get(id: String): Option[MitigatingCircumstancesPanel]
   def saveOrUpdate(submission: MitigatingCircumstancesPanel): MitigatingCircumstancesPanel
-  def getPanels(user: CurrentUser): Set[MitigatingCircumstancesPanel]
+  def list(department: Department, academicYear: AcademicYear): Seq[MitigatingCircumstancesPanel]
+  def getPanels(user: MemberOrUser): Set[MitigatingCircumstancesPanel]
 }
 
 @Repository
@@ -33,7 +36,16 @@ class MitCircsPanelDaoImpl extends MitCircsPanelDao
     panel
   }
 
-  override def getPanels(user: CurrentUser): Set[MitigatingCircumstancesPanel] = {
+  override def list(department: Department, academicYear: AcademicYear): Seq[MitigatingCircumstancesPanel] =
+    session.newCriteria[MitigatingCircumstancesPanel]
+      .add(is("department", department))
+      .add(is("academicYear", academicYear))
+      .addOrder(asc("date"))
+      .addOrder(asc("endDate"))
+      .addOrder(asc("lastModified"))
+      .seq
+
+  override def getPanels(user: MemberOrUser): Set[MitigatingCircumstancesPanel] = {
     // TODO - would be more efficient to return panels from the query directly but I have no idea what the spell for joins on @Any relationships looks like
     // select distinct p from MitigatingCircumstancesPanel p join GrantedRole r on r.scope = p // <- blows up
     session.newQuery[GrantedRole[MitigatingCircumstancesPanel]](s"""
@@ -45,7 +57,7 @@ class MitCircsPanelDaoImpl extends MitCircsPanelDao
       where
         r.scopeType = 'MitigatingCircumstancesPanel' and (static is not null or include is not null) and exclude is null
       """)
-      .setString("userId", user.apparentId)
+      .setString("userId", user.usercode)
       .seq.map(_.scope).toSet
   }
 

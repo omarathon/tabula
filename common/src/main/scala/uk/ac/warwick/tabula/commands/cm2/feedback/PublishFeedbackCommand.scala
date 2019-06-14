@@ -178,7 +178,7 @@ trait PublishFeedbackGradeValidationResults extends GradeValidationResults {
   self: PublishFeedbackCommandRequest with FeedbackForSitsServiceComponent =>
 
   lazy val validateGrades: ValidateAndPopulateFeedbackResult =
-    feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease, gradeGenerator)
+    feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease, assignment, gradeGenerator)
 }
 
 trait QueuesFeedbackForSits {

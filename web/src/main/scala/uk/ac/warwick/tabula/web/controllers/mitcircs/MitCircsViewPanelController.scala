@@ -18,7 +18,13 @@ class MitCircsViewPanelController extends BaseController {
 
   @RequestMapping(method = Array(GET, HEAD))
   def view(@ModelAttribute("command") command: ViewViewableCommandAudited[MitigatingCircumstancesPanel]): Mav = {
-    Mav("mitcircs/panel/view", "panel" -> command.apply())
+    val panel = command.apply()
+    Mav("mitcircs/panel/view", "panel" -> panel)
+      .crumbs(
+        MitCircsBreadcrumbs.Admin.HomeForYear(panel.department, panel.academicYear),
+        MitCircsBreadcrumbs.Admin.ListPanels(panel.department, panel.academicYear),
+        MitCircsBreadcrumbs.Admin.Panel(panel, active = true),
+      )
   }
 
 }

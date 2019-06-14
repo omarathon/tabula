@@ -27,17 +27,18 @@ object CreateMitCircsPanelCommand {
   def apply(department: Department, year: AcademicYear, currentUser: User) = new CreateMitCircsPanelCommandInternal(department, year, currentUser)
     with ComposableCommand[MitigatingCircumstancesPanel]
     with CreateMitCircsPanelRequest
-    with CreateMitCircsPanelValidation
+    with ModifyMitCircsPanelValidation
     with CreateMitCircsPanelPermissions
     with CreateMitCircsPanelDescription
     with AutowiringMitCircsPanelServiceComponent
     with AutowiringUserLookupComponent
 }
 
-class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear, val currentUser: User)
-  extends CommandInternal[MitigatingCircumstancesPanel] with CreateMitCircsPanelState with CreateMitCircsPanelValidation {
-
-  self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent =>
+abstract class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear, val currentUser: User)
+  extends CommandInternal[MitigatingCircumstancesPanel] with CreateMitCircsPanelState {
+  self: CreateMitCircsPanelRequest
+    with MitCircsPanelServiceComponent
+    with UserLookupComponent =>
 
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val transientPanel = new MitigatingCircumstancesPanel(department, year)
@@ -68,8 +69,9 @@ trait CreateMitCircsPanelPermissions extends RequiresPermissionsChecking with Pe
   }
 }
 
-trait CreateMitCircsPanelValidation extends SelfValidating {
-  self: CreateMitCircsPanelRequest =>
+trait ModifyMitCircsPanelValidation extends SelfValidating {
+  self: ModifyMitCircsPanelRequest =>
+
   def validate(errors: Errors) {
     if(!name.hasText) errors.rejectValue("name", "mitigatingCircumstances.panel.name.required")
   }
@@ -93,9 +95,13 @@ trait CreateMitCircsPanelState {
   val currentUser: User
 }
 
-trait CreateMitCircsPanelRequest {
+trait CreateMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
   self: CreateMitCircsPanelState =>
 
+  chair = currentUser.getUserId
+}
+
+trait ModifyMitCircsPanelRequest {
   var name: String = _
   var date: LocalDate = _
   var start: LocalTime = _
@@ -103,7 +109,7 @@ trait CreateMitCircsPanelRequest {
   var location: String = _
   var locationId: String = _
   var submissions: JList[MitigatingCircumstancesSubmission] = JArrayList()
-  var chair: String = currentUser.getUserId
+  var chair: String = _
   var secretary: String = _
   var members: JList[String] = JArrayList()
 }

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
 import uk.ac.warwick.tabula.data.model._
@@ -14,6 +14,7 @@ object FinaliseFeedbackNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("FinaliseFeedback")
 class FinaliseFeedbackNotification
   extends NotificationWithTarget[Feedback, Assignment]

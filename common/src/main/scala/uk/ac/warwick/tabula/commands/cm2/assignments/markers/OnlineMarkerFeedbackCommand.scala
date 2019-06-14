@@ -182,7 +182,10 @@ trait OnlineMarkerFeedbackState extends OnlineFeedbackState {
   val previousMarkerFeedback: Map[MarkingWorkflowStage, MarkerFeedback] = {
     val currentStageIndex = feedback.map(_.currentStageIndex).getOrElse(0)
     if (currentStageIndex <= stage.order)
-      allMarkerFeedback.filterKeys(_.order < currentStageIndex) // show all the previous stages
+      allMarkerFeedback.filter {
+        // show all the previous stages, or this marker's completed feedback
+        case (workflowStage, markerFeedback) => workflowStage.order < currentStageIndex || (markerFeedback.marker == marker && feedback.exists(_.isMarkedByStage(workflowStage)))
+      }
     else
       allMarkerFeedback.filterKeys(_.order <= stage.order) // show all stages up to and including the current one
   }

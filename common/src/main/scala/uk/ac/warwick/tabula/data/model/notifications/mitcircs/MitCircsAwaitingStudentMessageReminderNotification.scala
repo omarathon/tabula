@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.data.model.notifications.mitcircs
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsAwaitingStudentMessageReminderNotification._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
@@ -12,6 +13,7 @@ object MitCircsAwaitingStudentMessageReminderNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("MitCircsAwaitingStudentMessageReminder")
 class MitCircsAwaitingStudentMessageReminderNotification
   extends Notification[MitigatingCircumstancesSubmission, Unit]

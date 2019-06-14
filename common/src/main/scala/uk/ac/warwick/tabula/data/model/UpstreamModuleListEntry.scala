@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
 import java.util.regex.Pattern
+
 import javax.persistence._
+import org.hibernate.annotations.Proxy
 
 /**
   * Tabula store for a Formed Module Entity (CAM_FME) from SITS.
   */
 @Entity
+@Proxy
 class UpstreamModuleListEntry extends GeneratedId {
 
   def this(list: UpstreamModuleList, globString: String) {

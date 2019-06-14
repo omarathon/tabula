@@ -16,6 +16,7 @@ object MitCircsReadyForPanelCommand {
     with MitCircsReadyForPanelValidation
     with MitCircsReadyForPanelPermissions
     with MitCircsReadyForPanelDescription
+    with MitCircsSubmissionSchedulesNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
@@ -26,7 +27,7 @@ class MitCircsReadyForPanelCommandInternal(val submission: MitigatingCircumstanc
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
     submission.lastModifiedBy = currentUser
-    submission.lastModified = DateTime.now()
+    submission.lastModified = DateTime.now
     if(ready) submission.readyForPanel()
     else submission.notReadyForPanel()
     mitCircsSubmissionService.saveOrUpdate(submission)

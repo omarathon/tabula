@@ -4,8 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
@@ -21,6 +20,7 @@ object Submission {
 }
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 

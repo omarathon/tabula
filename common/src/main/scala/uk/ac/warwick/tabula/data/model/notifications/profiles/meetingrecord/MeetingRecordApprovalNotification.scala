@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 import uk.ac.warwick.tabula.data.model._
@@ -41,9 +41,11 @@ abstract class MeetingRecordApprovalNotification(@transient val verb: String)
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("newMeetingRecordApproval")
 class NewMeetingRecordApprovalNotification extends MeetingRecordApprovalNotification("create")
 
 @Entity
+@Proxy
 @DiscriminatorValue("editedMeetingRecordApproval")
 class EditedMeetingRecordApprovalNotification extends MeetingRecordApprovalNotification("edit")

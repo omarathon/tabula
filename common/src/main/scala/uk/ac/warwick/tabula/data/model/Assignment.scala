@@ -4,15 +4,15 @@ import com.google.common.annotations.VisibleForTesting
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.cm2.assignments.extensions.ExtensionPersistenceComponent
-import uk.ac.warwick.tabula.data.{HibernateHelpers, PostLoadBehaviour}
 import uk.ac.warwick.tabula.data.model.AssignmentAnonymity.{IDOnly, NameAndID}
 import uk.ac.warwick.tabula.data.model.forms.{WordCountField, _}
 import uk.ac.warwick.tabula.data.model.markingworkflow.{CM2MarkingWorkflow, ModeratedWorkflow}
+import uk.ac.warwick.tabula.data.{HibernateHelpers, PostLoadBehaviour}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.helpers.JodaConverters._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
@@ -75,6 +75,7 @@ object Assignment {
 @FilterDef(name = Assignment.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class Assignment
   extends Assessment

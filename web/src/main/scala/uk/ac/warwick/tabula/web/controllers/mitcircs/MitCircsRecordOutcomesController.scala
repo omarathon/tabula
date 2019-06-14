@@ -20,7 +20,7 @@ class MitCircsRecordOutcomesController extends BaseController {
 
   @ModelAttribute("command")
   def command(@PathVariable submission: MitigatingCircumstancesSubmission, user: CurrentUser): MitCircsRecordOutcomesCommand.Command =
-    MitCircsRecordOutcomesCommand(mandatory(submission), user.apparentUser)
+    MitCircsRecordOutcomesCommand(mandatory(Option(submission).filter(_.canRecordOutcomes).orNull), user.apparentUser)
 
   @RequestMapping
   def form(@PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {

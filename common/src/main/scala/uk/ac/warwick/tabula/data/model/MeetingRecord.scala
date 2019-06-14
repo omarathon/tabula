@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
 import javax.persistence._
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
@@ -24,6 +24,7 @@ object MeetingRecord {
 }
 
 @Entity
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue("standard")
 class MeetingRecord extends AbstractMeetingRecord {

@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity, SingleRecipientNotification}
+import org.hibernate.annotations.Proxy
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordBehalf")
 class ScheduledMeetingRecordBehalfNotification
   extends ScheduledMeetingRecordNotification

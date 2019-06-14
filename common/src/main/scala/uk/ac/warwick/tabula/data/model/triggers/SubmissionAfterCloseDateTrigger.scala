@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.triggers
 
 import javax.persistence.{DiscriminatorValue, Entity, Inheritance, InheritanceType}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assignment, Submission, ToEntityReference}
@@ -16,6 +16,7 @@ object SubmissionAfterCloseDateTrigger {
 }
 
 @Entity
+@Proxy
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorValue(value = "SubmissionAfterCloseDate")
 class SubmissionAfterCloseDateTrigger extends Trigger[Submission, Unit] with HandlesAssignmentTrigger {

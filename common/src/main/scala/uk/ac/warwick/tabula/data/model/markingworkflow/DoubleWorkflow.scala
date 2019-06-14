@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.markingworkflow
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage._
@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.Doubl
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue("Double")
 class DoubleWorkflow extends CM2MarkingWorkflow {
   def workflowType = DoubleMarking

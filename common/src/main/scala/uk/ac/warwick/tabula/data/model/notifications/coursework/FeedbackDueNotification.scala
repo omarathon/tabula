@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.LocalDate
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
@@ -56,6 +56,7 @@ trait FeedbackDueNotification extends AllCompletedActionRequiredNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("FeedbackDueGeneral")
 class FeedbackDueGeneralNotification
   extends Notification[Assignment, Unit] with SingleItemNotification[Assignment] with FeedbackDueNotification {
@@ -87,6 +88,7 @@ class FeedbackDueGeneralNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("FeedbackDueExtension")
 class FeedbackDueExtensionNotification
   extends Notification[Extension, Unit] with SingleItemNotification[Extension] with FeedbackDueNotification {

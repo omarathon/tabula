@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import javax.persistence.CascadeType._
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
@@ -19,6 +19,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class MitigatingCircumstancesSubmission extends GeneratedId
   with ToString
@@ -137,6 +138,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @OrderBy("academicYear, moduleCode, sequence")
   var affectedAssessments: JList[MitigatingCircumstancesAffectedAssessment] = JArrayList()
 
+  def affectedAssessmentsByRecommendation: Map[AssessmentSpecificRecommendation, Seq[MitigatingCircumstancesAffectedAssessment]] =
+    MitCircsExamBoardRecommendation.values.collect{ case r: AssessmentSpecificRecommendation => r}
+      .map(r => r -> affectedAssessments.asScala.filter(_.boardRecommendations.contains(r)))
+      .toMap
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
   @Column(name = "pendingEvidence", nullable = false)
   private var encryptedPendingEvidence: CharSequence = _
@@ -252,6 +258,9 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def rejectionReasonsOther: String = Option(encryptedRejectionReasonsOther).map(_.toString).orNull
   def rejectionReasonsOther_=(rejectionReasonOther: String): Unit = encryptedRejectionReasonsOther = rejectionReasonOther
 
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
+  var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
   // Intentionally no default here, rely on a state being set explicitly
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionStateUserType")
   @Column(name = "state", nullable = false)
@@ -296,7 +305,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _state = MitigatingCircumstancesSubmissionState.OutcomesRecorded
   }
 
-  def isDraft: Boolean = state == MitigatingCircumstancesSubmissionState.Draft
+  def isDraft: Boolean = Seq(Draft, CreatedOnBehalfOfStudent).contains(state)
   def isEditable(user: User): Boolean = {
     state == MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent ||
     (user.getWarwickId == student.universityId && (
@@ -307,6 +316,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def hasEvidence: Boolean = attachments.nonEmpty
   def isEvidencePending: Boolean = pendingEvidenceDue != null
+  def isAcute: Boolean = Option(acuteOutcome).isDefined
+
+  def canRecordOutcomes: Boolean = !isDraft && (state != OutcomesRecorded || !isAcute)
+  def canRecordAcuteOutcomes = !isDraft && (state != OutcomesRecorded || isAcute)
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

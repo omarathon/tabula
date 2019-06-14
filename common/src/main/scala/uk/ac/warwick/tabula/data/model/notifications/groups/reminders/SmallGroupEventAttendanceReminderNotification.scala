@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.{DateTime, Days}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.HasSettings.BooleanSetting
@@ -16,6 +16,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "SmallGroupEventAttendanceReminder")
 class SmallGroupEventAttendanceReminderNotification
   extends Notification[SmallGroupEventOccurrence, Unit]

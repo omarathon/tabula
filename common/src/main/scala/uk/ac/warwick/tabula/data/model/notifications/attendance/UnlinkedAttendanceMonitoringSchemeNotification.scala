@@ -1,19 +1,20 @@
 package uk.ac.warwick.tabula.data.model.notifications.attendance
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickActivity, NotificationWithTarget}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
+import uk.ac.warwick.tabula.data.model.{Department, FreemarkerModel, MyWarwickActivity, NotificationWithTarget}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "UnlinkedAttendanceMonitoringScheme")
 class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTarget[AttendanceMonitoringScheme, Department]
   with MyWarwickActivity {
@@ -39,10 +40,10 @@ class UnlinkedAttendanceMonitoringSchemeNotification extends NotificationWithTar
   override def url: String = Routes.Manage.departmentForYear(target.entity, items.get(0).entity.academicYear)
 
   @transient
-  override def title: String = "%s: %d monitoring scheme%s have been unlinked from SITS".format(
+  override def title: String = "%s: %d monitoring %s been unlinked from SITS".format(
     department.name,
     schemes.size,
-    if (schemes.size != 1) "s" else ""
+    if (schemes.size != 1) "schemes have" else "scheme has"
   )
 
   @transient

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence.CascadeType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Type}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, Proxy, Type}
 import org.joda.time.LocalTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -46,6 +46,7 @@ object SmallGroupSet {
 @FilterDef(name = SmallGroupSet.NotDeletedFilter, defaultCondition = "deleted = false")
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class SmallGroupSet
   extends GeneratedId

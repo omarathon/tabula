@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model.markingworkflow
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence.{Column, DiscriminatorType, OneToMany, _}
-
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, _}
@@ -18,7 +17,6 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.collection.immutable.{ListMap, SortedSet}
 
-
 object CM2MarkingWorkflow {
   implicit val defaultOrdering: Ordering[CM2MarkingWorkflow] = Ordering.by {
     workflow: CM2MarkingWorkflow => workflow.name.toLowerCase
@@ -26,6 +24,7 @@ object CM2MarkingWorkflow {
 }
 
 @Entity
+@Proxy
 @Table(name = "MarkingWorkflow")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "WorkflowType", discriminatorType = DiscriminatorType.STRING, length = 255)
@@ -126,6 +125,7 @@ abstract class CM2MarkingWorkflow extends GeneratedId with PermissionsTarget wit
 }
 
 @Entity
+@Proxy
 @Table(name = "StageMarkers")
 @Access(AccessType.FIELD)
 class StageMarkers extends GeneratedId with Serializable {

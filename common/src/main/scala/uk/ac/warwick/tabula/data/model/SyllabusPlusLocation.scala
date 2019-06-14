@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{Column, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.ToString
 
 @Entity
+@Proxy
 class SyllabusPlusLocation extends GeneratedId with ToString {
   @Column(name = "upstream_name")
   var upstreamName: String = _

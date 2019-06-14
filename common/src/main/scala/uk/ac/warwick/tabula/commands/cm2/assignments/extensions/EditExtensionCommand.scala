@@ -45,7 +45,7 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
     case None =>
       extension = new Extension
       extension.usercode = student.getUserId
-      extension._universityId = student.getUserId
+      extension._universityId = student.getWarwickId
       isNew = true
   }
 
@@ -56,7 +56,8 @@ class EditExtensionCommandInternal(val assignment: Assignment, val student: User
   }
 
   def copyTo(extension: Extension): Unit = {
-    extension._universityId = student.getUserId
+    extension.usercode = student.getUserId
+    extension._universityId = student.getWarwickId
     extension.assignment = assignment
     extension.expiryDate = expiryDate
     extension.updateState(state, reviewerComments)

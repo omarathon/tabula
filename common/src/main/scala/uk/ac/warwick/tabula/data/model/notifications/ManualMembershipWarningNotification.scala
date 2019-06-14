@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.admin.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, ModuleAndDepartmentService}
 import uk.ac.warwick.userlookup.User
 
-
 object ManualMembershipWarningNotification {
   val templateLocation = "/WEB-INF/freemarker/emails/manual_membership_warning.ftl"
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("ManualMembershipWarning")
 class ManualMembershipWarningNotification extends Notification[Department, Unit]
   with SingleItemNotification[Department]

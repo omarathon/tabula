@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.attendance
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
@@ -57,6 +57,7 @@ abstract class MissedAttendanceMonitoringCheckpointsNotification
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsLow")
 class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
@@ -66,6 +67,7 @@ class MissedAttendanceMonitoringCheckpointsLowNotification extends MissedAttenda
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsMedium")
 class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 
@@ -75,6 +77,7 @@ class MissedAttendanceMonitoringCheckpointsMediumNotification extends MissedAtte
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "MissedAttendanceMonitoringCheckpointsHigh")
 class MissedAttendanceMonitoringCheckpointsHighNotification extends MissedAttendanceMonitoringCheckpointsNotification {
 

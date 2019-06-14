@@ -6,7 +6,7 @@ import java.sql.Types
 import com.fasterxml.jackson.databind.ObjectMapper
 import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -38,6 +38,7 @@ object FormField {
 }
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
@@ -148,6 +149,7 @@ trait SimpleValue[A] {
 }
 
 @Entity
+@Proxy
 abstract class AssignmentFormField extends FormField {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "assignment_id")
@@ -157,6 +159,7 @@ abstract class AssignmentFormField extends FormField {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("comment")
 class CommentField extends AssignmentFormField with SimpleValue[String] with FormattedHtml {
   override def isReadOnly = true
@@ -175,6 +178,7 @@ class CommentField extends AssignmentFormField with SimpleValue[String] with For
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("text")
 class TextField extends AssignmentFormField with SimpleValue[String] {
 
@@ -190,6 +194,7 @@ class TextField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("wordcount")
 class WordCountField extends AssignmentFormField {
   context = FormFieldContext.Submission
@@ -237,6 +242,7 @@ class WordCountField extends AssignmentFormField {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("textarea")
 class TextareaField extends AssignmentFormField with SimpleValue[String] {
 
@@ -252,6 +258,7 @@ class TextareaField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
   def blankFormValue = new BooleanFormValue(this)
@@ -266,6 +273,7 @@ class CheckboxField extends FormField {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("marker")
 class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
   context = FormFieldContext.Submission
@@ -300,6 +308,7 @@ class MarkerSelectField extends AssignmentFormField with SimpleValue[String] {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("file")
 class FileField extends AssignmentFormField {
   def blankFormValue = new FileFormValue(this)
@@ -378,6 +387,7 @@ class FileField extends AssignmentFormField {
 }
 
 @Entity
+@Proxy
 abstract class ExamFormField extends FormField {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "exam_id")
@@ -385,6 +395,7 @@ abstract class ExamFormField extends FormField {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("examText")
 class ExamTextField extends ExamFormField with SimpleValue[String] {
   context = FormFieldContext.Feedback

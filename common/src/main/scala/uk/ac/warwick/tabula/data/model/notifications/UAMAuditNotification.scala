@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import javax.persistence.{DiscriminatorValue, Entity}
-import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
+import org.hibernate.annotations.Proxy
+import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.{AcademicYear, DateFormats}
 import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 
 trait UAMAuditNotification extends Notification[Department, Unit] with MyWarwickNotification
 
@@ -19,6 +20,7 @@ object DeptNameWithPermissionTreeUrl {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("UAMAuditFirstNotification")
 class UAMAuditFirstNotification extends UAMAuditNotification {
 
@@ -65,6 +67,7 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("UAMAuditChaserNotification")
 class UAMAuditSecondNotification extends UAMAuditFirstNotification {
   @transient

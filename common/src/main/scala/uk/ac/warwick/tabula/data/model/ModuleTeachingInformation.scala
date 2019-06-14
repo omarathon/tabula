@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class ModuleTeachingInformation extends GeneratedId with Serializable {
 

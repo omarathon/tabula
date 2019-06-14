@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.joda.time.DateTime
 import javax.persistence._
+import org.hibernate.annotations.Proxy
+import org.joda.time.DateTime
 
 @Entity
+@Proxy
 @NamedQueries(Array(
   new NamedQuery(name = "course.code", query = "select course from Course course where code = :code")))
 class Course {

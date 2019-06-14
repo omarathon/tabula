@@ -13,12 +13,28 @@ class MitCircsOutcomesForm {
     const $form = $(form);
 
     $form
-      .find(':input[name="outcomeGrading"]')
-      .on('input change', () => {
-        const $checked = $(':input[name="outcomeGrading"]:checked');
-        $('.mitcircs-outcomes-form__rejection-reasons').collapse($checked.val() === "Rejected" ? 'show' : 'hide');
-      })
-      .trigger('change');
+      .find('.mitcircs-form__fields__section__nested-checkboxes')
+      .each((i, container) => {
+        const $container = $(container);
+        const $target = $($(container).data('target'));
+        const $targetValue = $(container).data('target-value');
+
+        $target.on('input change', () => {
+          $container.collapse( $target.filter(':checked').val() === $targetValue ? 'show' : 'hide');
+        }).trigger('change');
+      });
+
+    $form
+      .find('.mitcircs-form__fields__section__optional-question')
+      .each((i, container) => {
+        const $container = $(container);
+        const $target = $(':input[name=outcomeGrading]');
+        $target.on('input change', () => {
+          const enabled = $target.filter(':checked').val() !== 'Rejected';
+          $container.collapse(enabled ? 'show' : 'hide');
+        }).trigger('change');
+      });
+
   }
 
 }

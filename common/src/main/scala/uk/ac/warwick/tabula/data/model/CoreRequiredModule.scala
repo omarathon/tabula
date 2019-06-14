@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{Entity, FetchType, JoinColumn, ManyToOne}
-
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
@@ -11,6 +10,7 @@ import uk.ac.warwick.tabula.services.ModuleRegistrationService
 import scala.collection.mutable
 
 @Entity
+@Proxy
 class CoreRequiredModule extends GeneratedId {
 
   def this(route: Route, academicYear: AcademicYear, yearOfStudy: Int, module: Module) {

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Info
 import uk.ac.warwick.tabula.data.model._
@@ -13,6 +13,7 @@ object Cm2StudentFeedbackAdjustmentNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("Cm2StudentFeedbackAdjustment")
 class Cm2StudentFeedbackAdjustmentNotification
   extends NotificationWithTarget[AssignmentFeedback, Assignment]

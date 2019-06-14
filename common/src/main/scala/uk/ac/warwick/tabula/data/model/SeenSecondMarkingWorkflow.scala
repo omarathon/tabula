@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "SeenSecondMarkingNew")
 class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssessmentMarkerMap {
 

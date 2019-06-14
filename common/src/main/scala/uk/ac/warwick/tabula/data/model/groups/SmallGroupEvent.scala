@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence.CascadeType._
 import javax.persistence._
-
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.hibernate.validator.constraints.URL
 import org.joda.time.{LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.spring.Wire
@@ -40,10 +39,9 @@ object SmallGroupEvent {
 }
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
-
-  import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent._
 
   @transient var permissionsService: PermissionsService = Wire[PermissionsService]
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
 import uk.ac.warwick.userlookup.User
@@ -30,13 +30,16 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedApprove")
 class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespondedNotification("approved") {}
 
 @Entity
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedReject")
 class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}
 
 @Entity
+@Proxy
 @DiscriminatorValue("ExtensionRequestRespondedMoreInfo")
 class ExtensionRequestRespondedMoreInfoNotification extends ExtensionRequestRespondedNotification("returned for more information") {}

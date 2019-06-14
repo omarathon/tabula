@@ -1,18 +1,19 @@
 package uk.ac.warwick.tabula.data.model.markingworkflow
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage.{ModerationMarker, ModerationModerator, SelectedModerationMarker, SelectedModerationModerator}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowType.{ModeratedMarking, SelectedModeratedMarking}
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModeratedWorkflow.Settings
 import uk.ac.warwick.tabula.data.model.markingworkflow.ModerationSampler.Moderator
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.StringUtils._
 
 @Entity
+@Proxy
 @DiscriminatorValue("Moderated")
 class ModeratedWorkflow extends CM2MarkingWorkflow {
   def workflowType: MarkingWorkflowType = ModeratedMarking
@@ -65,6 +66,7 @@ object ModeratedWorkflow {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("SelectedModerated")
 class SelectedModeratedWorkflow extends ModeratedWorkflow {
   override def workflowType: MarkingWorkflowType = SelectedModeratedMarking

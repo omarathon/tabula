@@ -4,12 +4,13 @@ import java.sql.Types
 
 import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.{Approved, NotRequired}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity
+@Proxy
 class MeetingRecordApproval extends GeneratedId with ToEntityReference with PermissionsTarget {
   type Entity = MeetingRecordApproval
 

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Daoisms
@@ -31,6 +31,7 @@ import scala.collection.JavaConverters._
   * Depending on context, the usercodes may be university IDs.
   */
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class UserGroup private(val universityIds: Boolean)
   extends UnspecifiedTypeUserGroup

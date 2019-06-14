@@ -1,18 +1,18 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
 import org.apache.commons.codec.digest.DigestUtils
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.groups.admin.DownloadRegistersAsPdfHelper
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
-import scala.Seq
 import scala.collection._
 
 @Entity
+@Proxy
 class UserSettings extends GeneratedId with SettingsMap with HasNotificationSettings with PermissionsTarget {
 
   import UserSettings._

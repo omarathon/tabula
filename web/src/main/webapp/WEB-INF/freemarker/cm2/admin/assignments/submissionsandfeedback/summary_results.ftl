@@ -6,6 +6,13 @@
     <#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
   </#compress></#macro>
 
+  <#function stage_incomplete markingStage enhancedFeedback="">
+      <#if enhancedFeedback?has_content>
+          <#return enhancedFeedback.notReleasedToMarkers || !enhancedFeedback.isMarkedByStage(markingStage) />
+      </#if>
+      <#return false />
+  </#function>
+
   <div id="profile-modal" class="modal fade profile-subset"></div>
   <div id="feedback-modal" class="modal fade"></div>
 
@@ -60,7 +67,13 @@
               <#-- One tab for each stage in the workflow; previous stages are active, incomplete stages are not -->
               <#if assignment.cm2MarkingWorkflow??>
                 <#list assignment.cm2MarkingWorkflow.markerStages as markingStage>
-                  <#local incomplete = feedback?? && (feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage)) />
+                  <#if markingStage_index gt 0>
+                    <#local previousStageIncomplete = stage_incomplete(assignment.cm2MarkingWorkflow.markerStages[markingStage_index - 1], feedback) />
+                  <#else>
+                    <#local previousStageIncomplete = false />
+                  </#if>
+                  <#-- TAB-7183 if previous stage is incomplete, this stage should be considered incomplete -->
+                  <#local incomplete = previousStageIncomplete || stage_incomplete(markingStage, feedback) />
                   <li role="presentation"<#if incomplete> class="disabled"</#if>>
                     <a<#if !incomplete> href="#${identifier}-${markingStage.name}" aria-controls="${identifier}-${markingStage.name}" role="tab" data-toggle="tab"</#if>>
                       ${markingStage.description}
@@ -77,11 +90,20 @@
               <#-- One tab for each stage in the workflow; previous stages are active, incomplete stages are not -->
               <#if assignment.cm2MarkingWorkflow?? && feedback??>
                 <#list assignment.cm2MarkingWorkflow.markerStages as markingStage>
-                  <#local incomplete = feedback.notReleasedToMarkers || !feedback.isMarkedByStage(markingStage) />
+                  <#if markingStage_index gt 0>
+                    <#local previousStageIncomplete = stage_incomplete(assignment.cm2MarkingWorkflow.markerStages[markingStage_index - 1], feedback) />
+                  <#else>
+                    <#local previousStageIncomplete = false />
+                  </#if>
+                  <#-- TAB-7183 if previous stage is incomplete, this stage should be considered incomplete -->
+                  <#local incomplete = previousStageIncomplete || stage_incomplete(markingStage, feedback) />
                   <div role="tabpanel" class="tab-pane" id="${identifier}-${markingStage.name}">
                     <#if mapGet(feedback.feedbackByStage, markingStage)??>
                       <#local markerFeedback = mapGet(feedback.feedbackByStage, markingStage) />
-                      <@components.marker_feedback_summary markerFeedback markingStage />
+                      <@components.marker_feedback_summary
+                      feedback=markerFeedback
+                      stage=markingStage
+                      currentStageIncomplete=incomplete />
                     </#if>
                   </div>
                 </#list>

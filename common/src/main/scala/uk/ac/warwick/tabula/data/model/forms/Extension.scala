@@ -7,7 +7,7 @@ import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.hibernate.`type`.{StandardBasicTypes, StringType}
-import org.hibernate.annotations.{BatchSize, Formula, Type}
+import org.hibernate.annotations.{BatchSize, Formula, Proxy, Type}
 import org.joda.time.{DateTime, Days}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.spring.Wire
@@ -25,6 +25,7 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import scala.collection.JavaConverters._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
 

@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence._
-
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy}
 import org.joda.time.{LocalDate, LocalDateTime}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
@@ -10,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Access(AccessType.FIELD)
 @Entity
+@Proxy
 @Table(uniqueConstraints = Array(
   new UniqueConstraint(columnNames = Array("event_id", "week"))
 ))

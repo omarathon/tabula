@@ -126,9 +126,12 @@ class GenerateModuleExamGridController extends ExamsController
     val jobInstance = Option(jobId).flatMap(jobService.getInstance)
     if (jobInstance.isDefined && !jobInstance.get.finished) {
       val moduleGridResult = selectModuleExamCommand.apply()
-      val studentLastImportDates = moduleGridResult.gridStudentDetailRecords.map { e =>
-        (e.name, e.lastImportDate.getOrElse(new DateTime(0)))
-      }.sortBy(_._2)
+
+      val studentLastImportDates = benchmarkTask("lastImportDateModuleGridData") {
+         moduleGridResult.gridStudentDetailRecords.map { e =>
+          (e.name, e.lastImportDate.getOrElse(new DateTime(0)))
+        }.sortBy(_._2)
+      }
       commonCrumbs(
         Mav("exams/grids/module/generate/jobProgress",
           "jobId" -> jobId,
@@ -139,6 +142,7 @@ class GenerateModuleExamGridController extends ExamsController
           "componentInfo" -> moduleGridResult.upstreamAssessmentGroupAndSequenceAndOccurrencesWithComponentName,
           "jobProgress" -> jobInstance.get.progress,
           "jobStatus" -> jobInstance.get.status,
+          "oldestImport" -> studentLastImportDates.headOption.map { case (_, datetime) => datetime },
           "studentLastImportDates" -> studentLastImportDates
         ),
         department,

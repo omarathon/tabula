@@ -41,8 +41,8 @@
 </#macro>
 
 <#assign questionNumber = 1 />
-<#macro question_section question="" hint="" cssClass="" helpPopover="" showNumber=true>
-  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}">
+<#macro question_section question="" hint="" cssClass="" helpPopover="" showNumber=true data="">
+  <fieldset class="mitcircs-form__fields__section mitcircs-form__fields__section--boxed ${cssClass}" ${data}>
     <#if question?has_content>
       <legend>
         <#if showNumber>${questionNumber}.</#if> ${question}

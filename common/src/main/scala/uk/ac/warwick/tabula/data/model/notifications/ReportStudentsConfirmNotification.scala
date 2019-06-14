@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model._
@@ -8,8 +9,8 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.userlookup.User
 
-
 @Entity
+@Proxy
 @DiscriminatorValue("ReportStudentsConfirmCommandNotification")
 class ReportStudentsConfirmNotification extends Notification[MonitoringPointReport, Unit]
   with SingleRecipientNotification

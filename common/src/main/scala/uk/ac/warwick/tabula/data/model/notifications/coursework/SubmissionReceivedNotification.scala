@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
@@ -16,6 +17,7 @@ import scala.collection.immutable.Seq
 import scala.reflect.ClassTag
 
 @Entity
+@Proxy
 @DiscriminatorValue("SubmissionReceived")
 class SubmissionReceivedNotification extends SubmissionNotification {
 

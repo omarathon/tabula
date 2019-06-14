@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import javax.persistence._
-import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Type}
+import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Proxy, Type}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, Role, RoleBuilder, Rol
 import scala.reflect._
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 

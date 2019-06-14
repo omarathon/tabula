@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.{DateTime, Days}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority._
-import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.{AssessmentMembershipService, AutowiringUserLookupComponent}
 import uk.ac.warwick.userlookup.User
 
@@ -81,6 +81,7 @@ trait SubmissionReminder extends RecipientCompletedActionRequiredNotification {
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("SubmissionDueGeneral")
 class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] with SingleItemNotification[Assignment]
   with SubmissionReminder {
@@ -107,6 +108,7 @@ class SubmissionDueGeneralNotification extends Notification[Assignment, Unit] wi
 }
 
 @Entity
+@Proxy
 @DiscriminatorValue("SubmissionDueExtension")
 class SubmissionDueWithExtensionNotification extends Notification[Extension, Unit] with SingleItemNotification[Extension]
   with SubmissionReminder with AutowiringUserLookupComponent {

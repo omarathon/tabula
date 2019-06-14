@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.Days
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
-import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, ActionRequiredNotification, FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{AllCompletedActionRequiredNotification, FreemarkerModel, SingleRecipientNotification}
 import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "ScheduledMeetingRecordConfirm")
 class ScheduledMeetingRecordConfirmNotification
   extends ScheduledMeetingRecordNotification

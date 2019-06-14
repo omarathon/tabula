@@ -50,6 +50,8 @@ object TimetableEvent {
 
   case class Empty(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
 
+  case class Department(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
+
   case class Module(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
 
   case class Relationship(override val shortName: Option[String], override val fullName: Option[String]) extends Parent
@@ -57,6 +59,10 @@ object TimetableEvent {
   object Parent {
     def apply(): Empty = {
       Empty(None, None)
+    }
+
+    def apply(department: model.Department): Department = {
+      Department(Option(department).map(_.code.toUpperCase), Option(department).map(_.name))
     }
 
     def apply(module: Option[model.Module]): Module = {

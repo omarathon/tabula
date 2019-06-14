@@ -1,13 +1,12 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
-import org.hibernate.annotations.Type
 import javax.persistence._
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.HibernateVersioned
+import org.hibernate.annotations.{Proxy, Type}
+import uk.ac.warwick.tabula.data.model.{GeneratedId, HibernateVersioned}
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 
 @Entity
+@Proxy
 class RoleOverride extends GeneratedId with HibernateVersioned with PermissionsTarget {
 
   import RoleOverride._

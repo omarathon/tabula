@@ -66,8 +66,13 @@
               <#elseif submission.state.entryName == "Ready For Panel">
                 <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
               </#if>
-              <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
               <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+              <#if submission.canRecordAcuteOutcomes>
+                <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
+              </#if>
+              <#if submission.canRecordOutcomes>
+                <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
+              </#if>
             <#elseif submission.panel??>
               <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
             </#if>
@@ -121,10 +126,17 @@
     </#if>
     <#if submission.sensitiveEvidenceComments?has_content>
       <@components.section "Sensitive evidence">
-        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.pendingEvidenceDue includeTime = false /></p>
+        <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.sensitiveEvidenceSeenOn includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>
+
+    <#if submission.panel??>
+      <@components.section "Panel">
+        <@components.panelDetails panel=submission.panel show_name=true />
+      </@components.section>
+    </#if>
+
     <#if canManage>
       <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
       <@components.asyncSection "notes" "Notes" notesUrl />

@@ -1,23 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations._
-import org.joda.time.LocalDate
-import javax.persistence._
-
+import javax.persistence.{CascadeType, Entity, _}
+import org.hibernate.annotations.{Proxy, _}
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{LevelService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Restricted
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
-import javax.persistence.Entity
-import javax.persistence.CascadeType
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
-
 import scala.collection.mutable
 
 object StudentCourseDetails {
@@ -32,6 +26,7 @@ object StudentCourseDetails {
   new Filter(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 ))
 @Entity
+@Proxy
 class StudentCourseDetails
   extends StudentCourseProperties
     with ToString

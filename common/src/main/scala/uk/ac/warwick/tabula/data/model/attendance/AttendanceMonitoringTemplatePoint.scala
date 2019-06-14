@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import javax.persistence.{Table, Entity, JoinColumn, FetchType, ManyToOne, Column}
-import uk.ac.warwick.tabula.data.model.GeneratedId
+import javax.persistence._
 import javax.validation.constraints.NotNull
+import org.hibernate.annotations.Proxy
 import org.joda.time.{DateTime, LocalDate}
-import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.data.model.GeneratedId
 
 @Entity
+@Proxy
 @Table(name = "attendancetemplatepoint")
 class AttendanceMonitoringTemplatePoint extends GeneratedId {
 

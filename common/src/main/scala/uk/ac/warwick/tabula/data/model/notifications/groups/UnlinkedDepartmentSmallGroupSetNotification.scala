@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.groups
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
@@ -14,6 +14,7 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @Entity
+@Proxy
 @DiscriminatorValue(value = "UnlinkedDepartmentSmallGroupSet")
 class UnlinkedDepartmentSmallGroupSetNotification extends NotificationWithTarget[DepartmentSmallGroupSet, Department]
   with MyWarwickActivity {
@@ -39,10 +40,10 @@ class UnlinkedDepartmentSmallGroupSetNotification extends NotificationWithTarget
   override def url: String = Routes.admin.reusable.apply(target.entity, items.get(0).entity.academicYear)
 
   @transient
-  override def title: String = "%s: %d reusable small group set%s have been unlinked from SITS".format(
+  override def title: String = "%s: %d reusable small group %s been unlinked from SITS".format(
     department.name,
     sets.size,
-    if (sets.size != 1) "s" else ""
+    if (sets.size != 1) "sets have" else "set has"
   )
 
   @transient

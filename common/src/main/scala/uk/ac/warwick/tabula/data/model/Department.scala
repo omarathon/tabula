@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -28,6 +28,7 @@ import scala.xml.NodeSeq
 case class DepartmentWithManualUsers(department: String, assignments: Int, smallGroupSets: Int)
 
 @Entity
+@Proxy
 @Access(AccessType.FIELD)
 class Department extends GeneratedId
   with PostLoadBehaviour
