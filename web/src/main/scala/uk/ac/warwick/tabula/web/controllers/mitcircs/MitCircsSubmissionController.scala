@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.mitcircs
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, PostMapping, RequestMapping}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
@@ -146,3 +146,56 @@ class MitCircsAttachmentController extends BaseController {
 
 }
 
+@Controller
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/edit/{submission}/withdraw"))
+class WithdrawMitCircsSubmissionController extends AbstractViewProfileController {
+
+  @ModelAttribute("command")
+  def command(
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    @PathVariable student: StudentMember,
+    user: CurrentUser
+  ): WithdrawMitCircsSubmissionCommand.Command = {
+    mustBeLinked(submission, student)
+    if (!user.universityId.maybeText.contains(student.universityId)) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as can only be withdrawn by self")
+    WithdrawMitCircsSubmissionCommand(submission, user.apparentUser)
+  }
+
+  @RequestMapping
+  def form(@PathVariable student: StudentMember): Mav =
+    Mav("mitcircs/submissions/withdraw")
+      .crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
+
+  @PostMapping
+  def withdraw(@ModelAttribute("command") command: WithdrawMitCircsSubmissionCommand.Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
+    if (errors.hasErrors) form(command.student)
+    else RedirectForce(Routes.Profile.PersonalCircumstances.view(command.apply()))
+
+}
+
+@Controller
+@RequestMapping(Array("/profiles/view/{student}/personalcircs/mitcircs/edit/{submission}/reopen"))
+class ReopenMitCircsSubmissionController extends AbstractViewProfileController {
+
+  @ModelAttribute("command")
+  def command(
+    @PathVariable submission: MitigatingCircumstancesSubmission,
+    @PathVariable student: StudentMember,
+    user: CurrentUser
+  ): ReopenMitCircsSubmissionCommand.Command = {
+    mustBeLinked(submission, student)
+    if (!user.universityId.maybeText.contains(student.universityId)) throw new ItemNotFoundException(submission, "Not displaying mitigating circumstances submission as can only be reopened by self")
+    ReopenMitCircsSubmissionCommand(submission, user.apparentUser)
+  }
+
+  @RequestMapping
+  def form(@PathVariable student: StudentMember): Mav =
+    Mav("mitcircs/submissions/reopen")
+      .crumbs(breadcrumbsStudent(activeAcademicYear, student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
+
+  @PostMapping
+  def reopen(@ModelAttribute("command") command: WithdrawMitCircsSubmissionCommand.Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
+    if (errors.hasErrors) form(command.student)
+    else RedirectForce(Routes.Profile.PersonalCircumstances.edit(command.apply()))
+
+}

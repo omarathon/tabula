@@ -19,6 +19,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro newSubmission student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/mitcircs/new" /></#macro>
 <#macro editSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}" /></#macro>
+<#macro withdrawSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}/withdraw" /></#macro>
+<#macro reopenSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}/reopen" /></#macro>
 <#macro pendingEvidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
 
 <#-- Helper for new/edit -->

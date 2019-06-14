@@ -59,77 +59,79 @@
         </#list>
       </div>
     </#if>
-    <div class="message-thread__footer">
-      <@f.form id="mitCircsMessageForm" method="POST" modelAttribute="messageCommand" class="dirty-check double-submit-protection" enctype="multipart/form-data">
-        <@bs3form.form_group "message">
-          <@bs3form.label path="message">Send a message to <#if studentView>a mitigating circumstances officer<#else>${submission.student.fullName}</#if></@bs3form.label>
-          <div class="message-thread__footer__fields">
-            <@f.textarea path="message" cssClass="form-control" rows="1" required="true" />
+    <#if submission.canAddMessage>
+      <div class="message-thread__footer">
+        <@f.form id="mitCircsMessageForm" method="POST" modelAttribute="messageCommand" class="dirty-check double-submit-protection" enctype="multipart/form-data">
+          <@bs3form.form_group "message">
+            <@bs3form.label path="message">Send a message to <#if studentView>a mitigating circumstances officer<#else>${submission.student.fullName}</#if></@bs3form.label>
+            <div class="message-thread__footer__fields">
+              <@f.textarea path="message" cssClass="form-control" rows="1" required="true" />
 
-            <#if !studentView>
+              <#if !studentView>
+                <label class="btn btn-primary message-thread__footer__fields__btn">
+                  <i class="fal fa-fw fa-paste fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#messageTemplates" title="Message templates" aria-label="Message templates"></i>
+                </label>
+
+                <div id="messageTemplates" tabindex="-1" class="modal fade message-thread__footer__message-templates">
+                  <@modal.wrapper>
+                    <@modal.header><h4 class="modal-title">Choose a template</h4></@modal.header>
+                    <@modal.body>
+                      <dl>
+                        <dt><a role="button">Evidence in English</a></dt>
+                        <dd>Some of the evidence that you have provided is not in English. For evidence to be considered it must be legible and in English. Evidence obtained overseas which is written in another language must be accompanied by a certified translation.</dd>
+                        <dt><a role="button">Impact not described</a></dt>
+                        <dd>The evidence that you provide must state how the reported circumstances have impacted on your ability to study and/or complete assessments.</dd>
+                      </dl>
+                    </@modal.body>
+                  </@modal.wrapper>
+                </div>
+              </#if>
+
               <label class="btn btn-primary message-thread__footer__fields__btn">
-                <i class="fal fa-fw fa-paste fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#messageTemplates" title="Message templates" aria-label="Message templates"></i>
+                <input type="file" id="file.upload" name="file.upload" multiple>
+                <i class="fal fa-fw fa-paperclip fa-lg use-tooltip" data-container="body" title="Attach files" aria-label="Attach files"></i>
               </label>
 
-              <div id="messageTemplates" tabindex="-1" class="modal fade message-thread__footer__message-templates">
-                <@modal.wrapper>
-                  <@modal.header><h4 class="modal-title">Choose a template</h4></@modal.header>
-                  <@modal.body>
-                    <dl>
-                      <dt><a role="button">Evidence in English</a></dt>
-                      <dd>Some of the evidence that you have provided is not in English. For evidence to be considered it must be legible and in English. Evidence obtained overseas which is written in another language must be accompanied by a certified translation.</dd>
-                      <dt><a role="button">Impact not described</a></dt>
-                      <dd>The evidence that you provide must state how the reported circumstances have impacted on your ability to study and/or complete assessments.</dd>
-                    </dl>
-                  </@modal.body>
-                </@modal.wrapper>
-              </div>
-            </#if>
+              <#if !studentView>
+                <label class="btn btn-primary message-thread__footer__fields__btn">
+                  <i class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
+                </label>
 
-            <label class="btn btn-primary message-thread__footer__fields__btn">
-              <input type="file" id="file.upload" name="file.upload" multiple>
-              <i class="fal fa-fw fa-paperclip fa-lg use-tooltip" data-container="body" title="Attach files" aria-label="Attach files"></i>
-            </label>
+                <div id="replyByDateModal" tabindex="-1" class="modal fade message-thread__footer__reply-by-date">
+                  <@modal.wrapper>
+                    <@modal.header><h4 class="modal-title">Respond by date</h4></@modal.header>
+                    <@modal.body>
+                      <p>Add a date/time by which ${submission.student.fullName} needs to respond to your message.</p>
 
-            <#if !studentView>
-              <label class="btn btn-primary message-thread__footer__fields__btn">
-                <i class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
-              </label>
+                      <p>${submission.student.fullName} will receive a notification 24 hours before this date to remind
+                      them to reply to the message, if they haven't already.</p>
 
-              <div id="replyByDateModal" tabindex="-1" class="modal fade message-thread__footer__reply-by-date">
-                <@modal.wrapper>
-                  <@modal.header><h4 class="modal-title">Respond by date</h4></@modal.header>
-                  <@modal.body>
-                    <p>Add a date/time by which ${submission.student.fullName} needs to respond to your message.</p>
+                      <p>Sending another message after this one will cancel the reminder.</p>
 
-                    <p>${submission.student.fullName} will receive a notification 24 hours before this date to remind
-                    them to reply to the message, if they haven't already.</p>
+                      <@bs3form.labelled_form_group labelText="Respond by date" path="replyByDate">
+                        <div class="input-group">
+                          <@f.input path="replyByDate" autocomplete="off" cssClass="form-control date-time-picker" />
+                          <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                        </div>
+                      </@bs3form.labelled_form_group>
+                    </@modal.body>
+                    <@modal.footer>
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </@modal.footer>
+                  </@modal.wrapper>
+                </div>
+              </#if>
 
-                    <p>Sending another message after this one will cancel the reminder.</p>
-
-                    <@bs3form.labelled_form_group labelText="Respond by date" path="replyByDate">
-                      <div class="input-group">
-                        <@f.input path="replyByDate" autocomplete="off" cssClass="form-control date-time-picker" />
-                        <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                      </div>
-                    </@bs3form.labelled_form_group>
-                  </@modal.body>
-                  <@modal.footer>
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                  </@modal.footer>
-                </@modal.wrapper>
-              </div>
-            </#if>
-
-            <span class="use-tooltip" data-container="body" title="Send">
-              <button type="submit" class="btn btn-primary message-thread__footer__fields__btn" aria-label="Send">
-                <i class="fal fa-fw fa-paper-plane fa-lg"></i>
-              </button>
-            </span>
-          </div>
-          <@bs3form.errors path="message" />
-        </@bs3form.form_group>
-      </@f.form>
-    </div>
+              <span class="use-tooltip" data-container="body" title="Send">
+                <button type="submit" class="btn btn-primary message-thread__footer__fields__btn" aria-label="Send">
+                  <i class="fal fa-fw fa-paper-plane fa-lg"></i>
+                </button>
+              </span>
+            </div>
+            <@bs3form.errors path="message" />
+          </@bs3form.form_group>
+        </@f.form>
+      </div>
+    </#if>
   </div>
 </#escape>

@@ -278,38 +278,48 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   // State transitions
   def saveAsDraft(): Unit = {
-    // TODO guard against doing this from invalid states
-
-    _state = MitigatingCircumstancesSubmissionState.Draft
+    require(Option(_state).isEmpty || Seq(Draft, CreatedOnBehalfOfStudent, Submitted).contains(_state), "Cannot return a submission to draft if it has already been actioned")
+    _state = Draft
     _approvedOn = null
   }
 
   def saveOnBehalfOfStudent(): Unit = {
-    require(_state != Submitted, "Cannot save on behalf of a student if they have already submitted")
-    _state = MitigatingCircumstancesSubmissionState.CreatedOnBehalfOfStudent
+    require(Option(_state).isEmpty || Seq(Draft, CreatedOnBehalfOfStudent).contains(_state), "Cannot save on behalf of a student if they have already submitted")
+    _state = CreatedOnBehalfOfStudent
     _approvedOn = null
   }
 
   def approveAndSubmit(): Unit = {
-    // TODO guard against doing this from invalid states
-
-    _state = MitigatingCircumstancesSubmissionState.Submitted
+    require(Option(_state).isEmpty || Seq(Draft, CreatedOnBehalfOfStudent, Submitted).contains(_state), "Cannot approve and submit if it has already been actioned")
+    _state = Submitted
     _approvedOn = DateTime.now()
   }
 
   def readyForPanel(): Unit = {
     require(_state == Submitted, "Cannot set as ready for review until this has been submitted by the student")
-    _state = MitigatingCircumstancesSubmissionState.ReadyForPanel
+    _state = ReadyForPanel
   }
 
   def notReadyForPanel(): Unit = {
     require(_state == ReadyForPanel, "Cannot set as not ready for panel")
-    _state = MitigatingCircumstancesSubmissionState.Submitted
+    _state = Submitted
   }
 
   def outcomesRecorded(): Unit = {
     require(Seq(Submitted, ReadyForPanel, OutcomesRecorded).contains(_state), "Cannot record outcomes until this has been submitted by the student")
-    _state = MitigatingCircumstancesSubmissionState.OutcomesRecorded
+    _state = OutcomesRecorded
+  }
+
+  def withdraw(): Unit = {
+    // A student can withdraw a submission at any time UNLESS it's had outcomes recorded
+    require(canWithdraw, "Cannot withdraw a submission that has outcomes recorded")
+    _state = Withdrawn
+    panel = null
+  }
+
+  def reopen(): Unit = {
+    require(canReopen, "Cannot re-open a submission that hasn't been withdrawn")
+    _state = Draft
   }
 
   def isDraft: Boolean = Seq(Draft, CreatedOnBehalfOfStudent).contains(state)
@@ -321,12 +331,18 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     ))
   }
 
+  def isWithdrawn: Boolean = state == MitigatingCircumstancesSubmissionState.Withdrawn
+
   def hasEvidence: Boolean = attachments.nonEmpty
-  def isEvidencePending: Boolean = pendingEvidenceDue != null
+  def isEvidencePending: Boolean = !isWithdrawn && pendingEvidenceDue != null
   def isAcute: Boolean = Option(acuteOutcome).isDefined
 
-  def canRecordOutcomes: Boolean = !isDraft && (state != OutcomesRecorded || !isAcute)
-  def canRecordAcuteOutcomes = !isDraft && (state != OutcomesRecorded || isAcute)
+  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state != OutcomesRecorded || !isAcute)
+  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && (state != OutcomesRecorded || isAcute)
+  def canWithdraw: Boolean = state != OutcomesRecorded
+  def canReopen: Boolean = isWithdrawn
+  def canAddNote: Boolean = !isWithdrawn && !isDraft
+  def canAddMessage: Boolean = !isWithdrawn && state != Draft // Allow CreatedOnBehalfOf
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,

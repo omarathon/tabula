@@ -1,11 +1,26 @@
 <#import "*/mitcircs_components.ftl" as components />
+<#assign canModify = can.do("MitigatingCircumstancesSubmission.Modify", submission) />
+<#assign isSelf = submission.student.universityId == user.universityId />
 
 <#escape x as x?html>
   <h1>MIT-${submission.key}</h1>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail label="State" condensed=true>${submission.state.description}</@components.detail>
+        <#-- Don't show students states that they have no business seeing -->
+        <@components.detail label="State" condensed=true>
+          <#if submission.state.entryName == 'Draft'>
+            Draft
+          <#elseif submission.state.entryName == 'Created On Behalf Of Student'>
+            Needs sign-off
+          <#elseif submission.state.entryName == 'Withdrawn'>
+            Withdrawn
+          <#elseif submission.state.entryName == 'Outcomes Recorded'>
+            Decision made
+          <#else>
+            Submitted
+          </#if>
+        </@components.detail>
         <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail label="End date" condensed=true>
@@ -29,16 +44,26 @@
           </@components.detail>
         </#if>
       </div>
-      <div class="col-sm-6 col-md-4">
+      <div class="col-sm-6 col-md-5 col-lg-4">
         <div class="row form-horizontal">
           <div class="col-sm-4 control-label">Actions</div>
           <div class="col-sm-8">
             <p><a href="<@routes.mitcircs.studenthome submission.student />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
-            <#if submission.isEditable(user.apparentUser)>
-              <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
-            </#if>
-            <#if isSelf && submission.evidencePending>
-              <p><a href="<@routes.mitcircs.pendingEvidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
+
+            <#if canModify>
+              <#if submission.isEditable(user.apparentUser)>
+                <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+              </#if>
+
+              <#if isSelf && submission.canWithdraw && !submission.withdrawn>
+                <p><a href="<@routes.mitcircs.withdrawSubmission submission />" class="btn btn-default btn-block">Withdraw submission</a></p>
+              <#elseif isSelf && submission.canReopen>
+                <p><a href="<@routes.mitcircs.reopenSubmission submission />" class="btn btn-default btn-block">Re-open submission</a></p>
+              </#if>
+
+              <#if isSelf && submission.evidencePending>
+                <p><a href="<@routes.mitcircs.pendingEvidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
+              </#if>
             </#if>
           </div>
         </div>
