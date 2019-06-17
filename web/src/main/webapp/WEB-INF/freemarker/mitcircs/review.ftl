@@ -11,7 +11,14 @@
         <#if !isSelf>
           <@components.detail label="State" condensed=true>
             ${submission.state.description}
-            <#if submission.state.entryName == "Outcomes Recorded"> by ${submission.outcomesLastRecordedBy.fullName} at <@fmt.date date=submission.outcomesLastRecordedOn /></#if>
+            <#if submission.state.entryName == "Outcomes Recorded">
+              <#if submission.outcomesLastRecordedBy??>
+                by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+              </#if>
+              <#if submission.outcomesLastRecordedOn??>
+                at <@fmt.date date=submission.outcomesLastRecordedOn />
+              </#if>
+            </#if>
           </@components.detail>
         </#if>
 
