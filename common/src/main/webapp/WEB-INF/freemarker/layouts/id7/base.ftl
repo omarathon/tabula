@@ -9,6 +9,7 @@
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">
   <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
+  <a class="sr-only sr-only-focusable" href="#primary-nav" accesskey="N">Skip to navigation</a>
 
   <header class="id7-page-header">
     <#if (user.god)!false>
@@ -121,7 +122,7 @@
       </div>
     </div>
 
-    <div class="id7-navigation">
+    <div class="id7-navigation" id="primary-nav">
       <#assign navigation><#compress>
         <#if userNavigation?has_content>
           ${(userNavigation.collapsed)!""}
