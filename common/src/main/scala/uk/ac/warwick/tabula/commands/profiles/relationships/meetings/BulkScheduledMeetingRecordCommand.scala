@@ -28,7 +28,9 @@ object BulkScheduledMeetingRecordCommand {
       with AutowiringMeetingRecordServiceComponent
       with AutowiringFileAttachmentServiceComponent
       with BulkScheduledMeetingRecordCommandValidation
-      with AbstractScheduledMeetingCommandInternal
+      with AbstractScheduledMeetingCommandInternal {
+      relationships = allRelationships.asJava
+    }
 }
 
 trait BulkScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {

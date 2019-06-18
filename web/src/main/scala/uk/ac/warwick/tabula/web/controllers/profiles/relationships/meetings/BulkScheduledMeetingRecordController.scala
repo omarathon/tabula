@@ -20,8 +20,8 @@ class BulkScheduledMeetingRecordController extends ProfilesController with TaskB
 
   validatesSelf[SelfValidating]
 
-  @ModelAttribute("studentRelationships")
-  def studentRelationships(
+  @ModelAttribute("allRelationships")
+  def allRelationships(
     @PathVariable relationshipType: StudentRelationshipType,
     @RequestParam studentCourseDetails: JList[StudentCourseDetails]
   ): Seq[StudentRelationship] = {
@@ -36,9 +36,9 @@ class BulkScheduledMeetingRecordController extends ProfilesController with TaskB
   @ModelAttribute("command")
   def getCommand(
     @PathVariable relationshipType: StudentRelationshipType,
-    @ModelAttribute("studentRelationships") studentRelationships: Seq[StudentRelationship]
+    @ModelAttribute("allRelationships") allRelationships: Seq[StudentRelationship]
   ) = {
-    BulkScheduledMeetingRecordCommand(mandatory(studentRelationships), currentMember)
+    BulkScheduledMeetingRecordCommand(mandatory(allRelationships), currentMember)
   }
 
 
