@@ -238,10 +238,13 @@ trait SubmissionAndFeedbackExport {
   val markerFields: Seq[String] =
     if (assignment.markingWorkflow != null) Seq("first-marker", "second-marker")
     else if (assignment.cm2MarkingWorkflow != null) {
-      val markerRoles = assignment.cm2MarkingWorkflow.allocationOrder
-      val markerMarks = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-mark"))
-      val markerGrades = assignment.cm2MarkingWorkflow.allocationOrder.map(marker => marker.concat("-grade"))
-      markerRoles ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Seq("Was-moderated") else Seq())
+      val stagesByDescription = assignment.cm2MarkingWorkflow.markerStages.groupBy(_.description)
+
+      val markerDescriptions = stagesByDescription.keys.toList.sortBy(r => stagesByDescription(r).map(_.order).min) // sort descriptions by their earliest stages
+      val markerMarks = markerDescriptions.map(marker => marker.concat("-mark"))
+      val markerGrades = markerDescriptions.map(marker => marker.concat("-grade"))
+
+      markerDescriptions ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Seq("Was-moderated") else Seq())
     }
     else Seq()
   val plagiarismFields: Seq[String] = Seq("suspected-plagiarised", "similarity-percentage")
@@ -302,17 +305,15 @@ trait SubmissionAndFeedbackExport {
       )
     } else if (assignment.cm2MarkingWorkflow != null) {
       val markerNames = student.enhancedFeedback.map(ef => {
-        assignment.cm2MarkingWorkflow.allocationOrder.map(role => {
-          role -> ef.feedback.feedbackMarkerByAllocationName(role).map(_.getFullName).getOrElse("")
-        })
-      }.toMap).getOrElse(Map())
+        ef.feedback.feedbackByStage.map(fbs => fbs._1.description -> ef.feedback.feedbackMarkerByAllocationName(fbs._1.roleName).map(_.getFullName).getOrElse(""))
+      }).getOrElse(Map())
 
       val markerMarks = student.enhancedFeedback.map(ef => {
-        ef.feedback.feedbackByStage.map(fbs => fbs._1.roleName.concat("-mark") -> fbs._2.mark.getOrElse(""))
+        ef.feedback.feedbackByStage.map(fbs => fbs._1.description.concat("-mark") -> fbs._2.mark.getOrElse(""))
       }).getOrElse(Map())
 
       val markerGrades = student.enhancedFeedback.map(ef => {
-          ef.feedback.feedbackByStage.map(fbs => fbs._1.roleName.concat("-grade") -> fbs._2.grade.getOrElse(""))
+          ef.feedback.feedbackByStage.map(fbs => fbs._1.description.concat("-grade") -> fbs._2.grade.getOrElse(""))
       }).getOrElse(Map())
 
       markerNames ++ markerMarks ++ markerGrades ++ (if(assignment.hasModeration) Map("was-moderated" -> student.enhancedFeedback.exists(_.feedback.wasModerated)) else Map())
