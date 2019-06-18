@@ -85,37 +85,41 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
   }
 
   lazy val proposedChanges: Seq[AttendanceChange] = {
-    pointsToEdit.flatMap { point =>
-      val students = profileService.getAllMembersWithUniversityIds(point.scheme.members.members.toSeq).collect {
-        case student: StudentMember => student
-      }
-
-      val checkpoints = attendanceMonitoringService.getAllCheckpoints(point)
-
-      val proposedCheckpoints = autoRecordedCheckpoints.filter(_.point == point)
-
-      students.flatMap { student =>
-        val existingCheckpoint = checkpoints.find(_.student == student)
-        val proposedCheckpoint = proposedCheckpoints.find(_.student == student)
-
-        if (existingCheckpoint.map(_.state) == proposedCheckpoint.map(_.state)) {
-          None
-        } else if (existingCheckpoint.nonEmpty || proposedCheckpoint.nonEmpty) {
-          Some(AttendanceChange(
-            student = student,
-            point = point,
-            checkpoint = existingCheckpoint.orElse(proposedCheckpoint).get,
-            currentState = existingCheckpoint.map(_.state).getOrElse(NotRecorded),
-            proposedState = proposedCheckpoint.map(_.state).getOrElse(NotRecorded),
-            alreadyReported = attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
-          ))
-        } else {
-          None
+    if (templatePoint.pointType == Standard) {
+      Nil
+    } else {
+      pointsToEdit.flatMap { point =>
+        val students = profileService.getAllMembersWithUniversityIds(point.scheme.members.members.toSeq).collect {
+          case student: StudentMember => student
         }
+
+        val checkpoints = attendanceMonitoringService.getAllCheckpoints(point)
+
+        val proposedCheckpoints = autoRecordedCheckpoints.filter(_.point == point)
+
+        students.flatMap { student =>
+          val existingCheckpoint = checkpoints.find(_.student == student)
+          val proposedCheckpoint = proposedCheckpoints.find(_.student == student)
+
+          if (existingCheckpoint.map(_.state) == proposedCheckpoint.map(_.state)) {
+            None
+          } else if (existingCheckpoint.nonEmpty || proposedCheckpoint.nonEmpty) {
+            Some(AttendanceChange(
+              student = student,
+              point = point,
+              checkpoint = existingCheckpoint.orElse(proposedCheckpoint).get,
+              currentState = existingCheckpoint.map(_.state).getOrElse(NotRecorded),
+              proposedState = proposedCheckpoint.map(_.state).getOrElse(NotRecorded),
+              alreadyReported = attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
+            ))
+          } else {
+            None
+          }
+        }
+          // don't change from missed to not recorded
+          .filterNot(change => change.currentState != Attended && change.proposedState == NotRecorded)
+          .sortBy(_.student.userId)
       }
-        // don't change from missed to not recorded
-        .filterNot(change => change.currentState != Attended && change.proposedState == NotRecorded)
-        .sortBy(_.student.userId)
     }
   }
 
