@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.hibernate.FetchMode
-import org.hibernate.criterion.Restrictions.{ge, lt}
+import org.hibernate.criterion.Restrictions.{ge, le}
 import org.hibernate.criterion.Order._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
@@ -26,7 +26,7 @@ trait SubmissionService {
 
   def getAllSubmissions(user: User): Seq[Submission]
 
-  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
+  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endInclusive: DateTime): Seq[Submission]
 
   def delete(submission: Submission): Unit
 }
@@ -82,11 +82,11 @@ abstract class AbstractSubmissionService extends SubmissionService with Daoisms 
       .seq
   }
 
-  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endInclusive: DateTime): Seq[Submission] =
     session.newCriteria[Submission]
       .add(is("usercode", usercode))
       .add(ge("submittedDate", startInclusive))
-      .add(lt("submittedDate", endExclusive))
+      .add(le("submittedDate", endInclusive))
       .seq
 
   def delete(submission: Submission) {
