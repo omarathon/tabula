@@ -20,10 +20,12 @@ import uk.ac.warwick.userlookup.AnonymousUser
 trait ComponentMixins extends Mockito
   with ProfileServiceComponent
   with Tier4RequirementImporterComponent
-  with ModeOfAttendanceImporterComponent {
+  with ModeOfAttendanceImporterComponent
+  with ReasonableAdjustmentsImporterComponent {
   var profileService: ProfileService = smartMock[ProfileService]
   var tier4RequirementImporter: Tier4RequirementImporter = smartMock[Tier4RequirementImporter]
   var modeOfAttendanceImporter: ModeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+  var reasonableAdjustmentsImporter: ReasonableAdjustmentsImporter = smartMock[ReasonableAdjustmentsImporter]
 }
 
 trait ImportCommandFactoryForTesting extends ComponentMixins {

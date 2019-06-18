@@ -10,5 +10,8 @@ case object MitigatingCircumstancesPanelMemberRoleDefinition extends Unassignabl
 
   GrantsScopedPermission(
     MitigatingCircumstancesSubmission.Read,
+
+    Profiles.Read.ReasonableAdjustments,
+    Profiles.Read.ReasonableAdjustmentsNotes,
   )
 }

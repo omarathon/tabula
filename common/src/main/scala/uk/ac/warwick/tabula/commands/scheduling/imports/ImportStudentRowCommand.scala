@@ -4,13 +4,17 @@ import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.scheduling.{ImportCommandFactory, PropertyCopying, SitsStudentRow}
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.userlookup.User
+
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object ImportStudentRowCommand {
   def apply(
@@ -18,14 +22,13 @@ object ImportStudentRowCommand {
     ssoUser: User,
     rows: Seq[SitsStudentRow],
     importCommandFactory: ImportCommandFactory
-  ): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
+  ): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringReasonableAdjustmentsImporterComponent with Unaudited =
     new ImportStudentRowCommandInternal(member, ssoUser, rows, importCommandFactory)
       with Command[Member]
       with AutowiringProfileServiceComponent
       with AutowiringTier4RequirementImporterComponent
-      with AutowiringModeOfAttendanceImporterComponent
+      with AutowiringReasonableAdjustmentsImporterComponent
       with Unaudited
-  }
 }
 
 /*
@@ -43,7 +46,9 @@ class ImportStudentRowCommandInternal(
   with PropertyCopying
   with Logging {
 
-  self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent =>
+  self: ProfileServiceComponent
+    with Tier4RequirementImporterComponent
+    with ReasonableAdjustmentsImporterComponent =>
 
   val studentRow: Option[SitsStudentRow] = rows.headOption
 
@@ -91,7 +96,6 @@ class ImportStudentRowCommandInternal(
         member.attachStudentCourseDetails(studentCourseDetails)
       }
 
-
       member
     }
   }
@@ -102,16 +106,24 @@ class ImportStudentRowCommandInternal(
     val memberBean = new BeanWrapperImpl(member)
 
     val tier4VisaRequirement = tier4RequirementImporter.hasTier4Requirement(universityId)
+    val reasonableAdjustmentsObject = Await.result(reasonableAdjustmentsImporter.getReasonableAdjustments(universityId), Duration.Inf)
+    val reasonableAdjustments = reasonableAdjustmentsObject.map(_.reasonableAdjustments.toSet).orNull
+    val reasonableAdjustmentsNotes = reasonableAdjustmentsObject.flatMap(_.notes.maybeText).orNull
 
     // We intentionally use single pipes rather than double here - we want all statements to be evaluated
     val hasChanged = (copyMemberProperties(commandBean, memberBean)
       | copyStudentProperties(commandBean, memberBean)
       | (studentRow.isDefined && markAsSeenInSits(memberBean))
-      || (member.tier4VisaRequirement.booleanValue() != tier4VisaRequirement))
+      | member.tier4VisaRequirement.booleanValue() != tier4VisaRequirement
+      | member.reasonableAdjustments != reasonableAdjustments
+      | member.reasonableAdjustmentsNotes != reasonableAdjustmentsNotes
+    )
 
     if (isTransient || hasChanged) {
       logger.debug("Saving changes for " + member)
       member.tier4VisaRequirement = tier4VisaRequirement
+      member.reasonableAdjustments = reasonableAdjustments
+      member.reasonableAdjustmentsNotes = reasonableAdjustmentsNotes
       member.lastUpdatedDate = DateTime.now
       memberDao.saveOrUpdate(member)
     }

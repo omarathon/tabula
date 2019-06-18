@@ -45,6 +45,24 @@
           </#if>
         </#if>
 
+        <@components.detail label="Reasonable adjustments" condensed=true>
+          <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
+            <#if student.reasonableAdjustments?has_content>
+              <ul class="fa-ul">
+                <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+                  <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+                </#list>
+              </ul>
+            </#if>
+
+            <#if student.reasonableAdjustmentsNotes?has_content>
+              <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
+            </#if>
+          <#else>
+            <span class="very-subtle">None recorded</span>
+          </#if>
+        </@components.detail>
+
         <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail label="End date" condensed=true>
@@ -161,8 +179,11 @@
     <#if canManage>
       <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
       <@components.asyncSection "notes" "Notes" notesUrl />
-      <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
-      <@components.asyncSection "messages" "Messages" messageUrl />
+
+      <#if !submission.draft && !submission.withdrawn>
+        <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
+        <@components.asyncSection "messages" "Messages" messageUrl />
+      </#if>
     </#if>
   </section>
 </#escape>

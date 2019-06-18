@@ -47,7 +47,7 @@ trait ProfileImporter {
 
   def membershipInfoForIndividual(universityId: String): Option[MembershipInformation]
 
-  def multipleStudentInformationQuery: MultipleStudentInformationQuery
+  def sitsStudentRows(universityIds: Seq[String]): Seq[SitsStudentRow]
 
   def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String]
 
@@ -78,6 +78,9 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
   def studentInformationQuery: StudentInformationQuery = new StudentInformationQuery(sits)
 
   def multipleStudentInformationQuery: MultipleStudentInformationQuery = new MultipleStudentInformationQuery(sits)
+
+  override def sitsStudentRows(universityIds: Seq[String]): Seq[SitsStudentRow] =
+    multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> universityIds.asJava).asJava).asScala
 
   def membershipUniversityIdPresenceQuery: MembershipUniversityIdPresenceQuery = new MembershipUniversityIdPresenceQuery(fim)
 
@@ -178,23 +181,20 @@ class SandboxProfileImporter extends ProfileImporter {
       }
     }
 
-  def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringModeOfAttendanceImporterComponent with Unaudited = {
+  private def sitsStudentRows(universityId: String): Seq[SitsStudentRow] =
+    profileService.getMemberByUniversityIdStaleOrFresh(universityId).toSeq.flatMap { member =>
+      membershipInfoByDepartment(member.homeDepartment).find(_.member.universityId == universityId).toSeq.flatMap { mac =>
+        sitsStudentRows(mac)
+      }
+    }
+
+  private def sitsStudentRows(mac: MembershipInformation): Seq[SitsStudentRow] = {
     val member = mac.member
-    val ssoUser = new User(member.usercode)
-    ssoUser.setFoundUser(true)
-    ssoUser.setVerified(true)
-    ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
-    ssoUser.setDepartmentCode(member.departmentCode)
-    ssoUser.setEmail(member.email)
-    ssoUser.setFirstName(member.preferredForenames)
-    ssoUser.setLastName(member.preferredSurname)
-    ssoUser.setStudent(true)
-    ssoUser.setWarwickId(member.universityId)
 
     val route = SandboxData.route(member.universityId.toLong)
     val yearOfStudy = ((member.universityId.toLong % 3) + 1).toInt
 
-    val rows = (1 to yearOfStudy).map(thisYearOfStudy => {
+    (1 to yearOfStudy).map(thisYearOfStudy => {
       SitsStudentRow(new MapResultSet(Map(
         "university_id" -> member.universityId,
         "title" -> member.title,
@@ -258,6 +258,22 @@ class SandboxProfileImporter extends ProfileImporter {
         ).sum % 100)
       )))
     })
+  }
+
+  def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation): ImportStudentRowCommandInternal with Command[Member] with AutowiringProfileServiceComponent with AutowiringTier4RequirementImporterComponent with AutowiringReasonableAdjustmentsImporterComponent with Unaudited = {
+    val member = mac.member
+    val ssoUser = new User(member.usercode)
+    ssoUser.setFoundUser(true)
+    ssoUser.setVerified(true)
+    ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
+    ssoUser.setDepartmentCode(member.departmentCode)
+    ssoUser.setEmail(member.email)
+    ssoUser.setFirstName(member.preferredForenames)
+    ssoUser.setLastName(member.preferredSurname)
+    ssoUser.setStudent(true)
+    ssoUser.setWarwickId(member.universityId)
+
+    val rows = sitsStudentRows(mac)
 
     ImportStudentRowCommand(
       mac,
@@ -400,7 +416,8 @@ class SandboxProfileImporter extends ProfileImporter {
       )
     }
 
-  def multipleStudentInformationQuery = throw new UnsupportedOperationException
+  override def sitsStudentRows(universityIds: Seq[String]): Seq[SitsStudentRow] =
+    universityIds.flatMap(sitsStudentRows)
 
   def getUniversityIdsPresentInMembership(universityIds: Set[String]): Set[String] = throw new UnsupportedOperationException
 

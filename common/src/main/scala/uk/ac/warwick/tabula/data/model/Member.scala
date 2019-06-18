@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.CascadeType._
-import javax.persistence.{CascadeType, Entity, _}
+import javax.persistence._
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
-import org.hibernate.annotations.{Proxy, AccessType => _, Any => _, ForeignKey => _, _}
+import org.hibernate.annotations.{BatchSize, Filter, FilterDef, FilterDefs, Filters, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCache}
 import uk.ac.warwick.tabula.permissions._
@@ -187,7 +188,7 @@ abstract class Member
     u
   }
 
-  def toStringProps = Seq(
+  def toStringProps: Seq[(String, Any)] = Seq(
     "universityId" -> universityId
   )
 
@@ -624,7 +625,7 @@ trait ApplicantProperties {
 
 }
 
-trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {
+trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber with FormattedHtml {
 
   /**
     * The student's hall of residence. Unlike address this is data entered into SITS by an Accommodation process so it should be in a reliable format.
@@ -643,10 +644,21 @@ trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber {
   @Column(name = "tier4_visa_requirement")
   @Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
   var tier4VisaRequirement: JBoolean = _
+
+  @Column(name = "reasonable_adjustments")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.ReasonableAdjustmentsUserType")
+  @Restricted(Array("Profiles.Read.ReasonableAdjustments"))
+  var reasonableAdjustments: Set[ReasonableAdjustment] = _
+
+  @Column(name = "reasonable_adjustments_notes")
+  @Restricted(Array("Profiles.Read.ReasonableAdjustmentsNotes"))
+  var reasonableAdjustmentsNotes: String = _
+
+  def formattedReasonableAdjustmentsNotes: String = formattedHtml(reasonableAdjustmentsNotes)
 }
 
 trait RestrictedPhoneNumber {
-  def phoneNumberPermissions = Seq(Seq(Permissions.Profiles.Read.TelephoneNumber))
+  def phoneNumberPermissions: Seq[Seq[Permission]] = Seq(Seq(Permissions.Profiles.Read.TelephoneNumber))
 }
 
 trait StaffProperties {
