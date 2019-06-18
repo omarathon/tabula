@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.util.Try
 
 trait ScheduledMeetingRecordValidation {
-  self: ModifyScheduledMeetingRecordState =>
+  self: AbstractScheduledMeetingRecordCommandState =>
 
   def sharedValidation(errors: Errors, title: String, meetingDateStr: String, meetingTimeStr: String, meetingEndTimeStr: String, meetingLocation: String) {
     rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")

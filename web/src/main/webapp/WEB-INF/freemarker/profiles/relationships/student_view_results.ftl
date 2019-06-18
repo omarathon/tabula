@@ -16,6 +16,8 @@
         <section class="meetings">
           <a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for
             selected students</a>
+          <a data-href="<@routes.profiles.schedule_bulk_meeting_record relationshipType />" class="btn btn-default schedule-meeting-record disabled">Schedule meeting for
+            selected students</a>
         </section>
       </div>
     </#if>
@@ -27,25 +29,19 @@
   <script type="text/javascript">
 
     (function ($) {
+      var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');
       var generateBulkRecordLink = function () {
         var $selectedCheckBoxes = $(".collection-checkbox:checkbox:checked");
         if ($selectedCheckBoxes.length > 0) {
-          $meetingRecordLink = $('a.new-meeting-record');
-          $meetingRecordLink.removeClass('disabled');
-          var course = "";
-          $selectedCheckBoxes.each(function () {
-            var $checkbox = $(this);
-            if (course.length > 0) {
-              course = course + "," + $checkbox.data('student-course-details');
-            } else {
-              course = $checkbox.data('student-course-details');
-            }
+          $buttons.removeClass('disabled');
+          $buttons.each(function () {
+            var $button = $(this);
+            var course = $.map($selectedCheckBoxes, function (checkbox) {
+              return $(checkbox).data('student-course-details');
+            });
+            $button.attr("href", $button.data("href") + course);
           });
-          var baseLink = $meetingRecordLink.data("href");
-          $meetingRecordLink.attr("href", baseLink + course);
-        } else if (!($("a.new-meeting-record").hasClass("disabled"))) {
-          $meetingRecordLink.addClass('disabled');
-        }
+        } else $buttons.addClass('disabled');
       };
 
       $('.collection-check-all').on('change', function (e) {

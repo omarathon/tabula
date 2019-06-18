@@ -26,55 +26,26 @@ object CreateScheduledMeetingRecordCommand {
       with CreateScheduledMeetingRecordCommandValidation
       with CreateScheduledMeetingRecordNotification
       with CreateScheduledMeetingRecordScheduledNotifications
+      with AutowiringFileAttachmentServiceComponent
+      with AbstractScheduledMeetingCommandInternal
       with PopulateOnForm {
       override def populate(): Unit = {}
     }
 }
 
 class CreateScheduledMeetingRecordCommand(val creator: Member, val studentCourseDetails: StudentCourseDetails, val allRelationships: Seq[StudentRelationship])
-  extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState with BindListener {
+  extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState {
 
-  self: MeetingRecordServiceComponent =>
+  self: MeetingRecordServiceComponent with AbstractScheduledMeetingCommandInternal =>
 
   def applyInternal(): ScheduledMeetingRecord = {
     val scheduledMeeting = new ScheduledMeetingRecord(creator, relationships.asScala)
-    scheduledMeeting.title = title
-    scheduledMeeting.description = description
-
-    if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
-
-      scheduledMeeting.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-      scheduledMeeting.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr)
-
-    }
-
-    scheduledMeeting.meetingLocation = if (meetingLocation.hasText) {
-      if (meetingLocationId.hasText) {
-        MapLocation(meetingLocation.toString, meetingLocationId)
-      } else {
-        NamedLocation(meetingLocation.toString)
-      }
-    } else {
-      null
-    }
-
-    scheduledMeeting.lastUpdatedDate = DateTime.now
+    applyCommon(scheduledMeeting)
     scheduledMeeting.creationDate = DateTime.now
-    scheduledMeeting.format = format
-
-    file.attached.asScala.foreach(attachment => {
-      attachment.meetingRecord = scheduledMeeting
-      scheduledMeeting.attachments.add(attachment)
-      attachment.temporary = false
-    })
+    persistAttachments(scheduledMeeting)
     meetingRecordService.saveOrUpdate(scheduledMeeting)
     scheduledMeeting
   }
-
-  def onBind(result: BindingResult) {
-    file.onBind(result)
-  }
-
 }
 
 trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
@@ -127,30 +98,10 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
   }
 }
 
-trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
+trait CreateScheduledMeetingRecordNotification extends AbstractScheduledMeetingRecordNotifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
   def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
-    val user = meeting.creator.asSsoUser
-    val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting)
-    if (!meeting.universityIdInRelationship(user.getWarwickId)) {
-      val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification("created"), user, meeting)
-      Seq(inviteeNotification, behalfNotification)
-    } else {
-      Seq(inviteeNotification)
-    }
+    emit(meeting, meeting.creator.asSsoUser, "created")
   }
 }
 
-trait CreateScheduledMeetingRecordScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecord, ScheduledMeetingRecord] {
-
-  override def transformResult(meetingRecord: ScheduledMeetingRecord) = Seq(meetingRecord)
-
-  override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
-    Seq(
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate.plusDays(5))
-    )
-  }
-
-}
+trait CreateScheduledMeetingRecordScheduledNotifications extends AbstractScheduledMeetingRecordScheduledNotifications

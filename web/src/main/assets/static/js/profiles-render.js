@@ -744,7 +744,7 @@ $(function () {
     });
   }
 
-  $('section.meetings').on('click', '.new-meeting-record, .edit-meeting-record', function (e) {
+  $('section.meetings').on('click', '.new-meeting-record, .schedule-meeting-record, .edit-meeting-record', function (e) {
     var $this = $(this);
     prepareMeetingModal($this, $this.attr('href'));
     e.preventDefault();
