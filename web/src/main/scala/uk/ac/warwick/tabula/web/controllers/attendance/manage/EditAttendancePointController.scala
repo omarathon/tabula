@@ -62,7 +62,7 @@ class EditAttendancePointController extends AttendanceController {
     @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]]
       with SetsFindPointsResultOnCommandState with SelfValidating,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
+    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult] with FindPointsCommandState,
     @PathVariable department: Department,
     @PathVariable academicYear: AcademicYear
   ): Mav = {
@@ -72,7 +72,7 @@ class EditAttendancePointController extends AttendanceController {
     if (errors.hasErrors) {
       render(department, academicYear)
     } else {
-      doApply(cmd, department, academicYear)
+      doApply(cmd, findCommand, department, academicYear)
     }
   }
 
@@ -81,7 +81,7 @@ class EditAttendancePointController extends AttendanceController {
     @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringPoint]]
       with SetsFindPointsResultOnCommandState with SelfValidating,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
+    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult] with FindPointsCommandState,
     @PathVariable department: Department,
     @PathVariable academicYear: AcademicYear
   ): Mav = {
@@ -91,22 +91,29 @@ class EditAttendancePointController extends AttendanceController {
     if (errors.hasErrors && errors.getAllErrors.asScala.exists(_.getCode != "attendanceMonitoringPoint.overlaps")) {
       render(department, academicYear)
     } else {
-      doApply(cmd, department, academicYear)
+      doApply(cmd, findCommand, department, academicYear)
     }
   }
 
   private def doApply(
     cmd: Appliable[Seq[AttendanceMonitoringPoint]]
       with SetsFindPointsResultOnCommandState with SelfValidating,
+    findCommand: Appliable[FindPointsResult] with FindPointsCommandState,
     department: Department,
     academicYear: AcademicYear
   ) = {
     val points = cmd.apply()
-    Redirect(
-      getReturnTo(Routes.Manage.editPoints(department, academicYear)),
-      "points" -> points.size.toString,
-      "actionCompleted" -> "edited"
-    )
+    if (points.nonEmpty) {
+      RedirectForce(
+        Routes.Manage.recheckPoint(department, academicYear, points.head, findCommand.serializeFilter, getReturnTo(Routes.Manage.editPoints(department, academicYear)))
+      )
+    } else {
+      Redirect(
+        getReturnTo(Routes.Manage.editPoints(department, academicYear)),
+        "points" -> points.size.toString,
+        "actionCompleted" -> "edited"
+      )
+    }
   }
 
 }

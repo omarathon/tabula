@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.criterion.{Order, Projections, Restrictions}
+import org.hibernate.sql.JoinType
 import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -37,11 +38,13 @@ trait MeetingRecordDao {
 
   def unconfirmedScheduledCount(relationships: Seq[StudentRelationship]): Map[StudentRelationship, Int]
 
+  def listBetweenDates(student: StudentMember, startInclusive: DateTime, endExclusive: DateTime): Seq[MeetingRecord]
+
   def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord]
 }
 
 @Repository
-class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchmarking {
+class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchmarking with AutowiringRelationshipDaoComponent {
 
   def saveOrUpdate(meeting: MeetingRecord): Unit = session.saveOrUpdate(meeting)
 
@@ -112,6 +115,22 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms with TaskBenchm
       .addOrder(Order.desc("meetingDate"))
       .addOrder(Order.desc("lastUpdatedDate"))
       .seq
+  }
+
+  def listBetweenDates(student: StudentMember, startInclusive: DateTime, endExclusive: DateTime): Seq[MeetingRecord] = {
+    val relationships = relationshipDao.getAllPastAndPresentRelationships(student)
+
+    if (relationships.nonEmpty) {
+      session.newCriteria[MeetingRecord]
+        .createAlias("_relationships", "relationships")
+        .add(Restrictions.or(
+          safeIn("relationship", relationships),
+          safeIn("relationships.id", relationships.map(_.id))
+        ))
+        .add(Restrictions.ge("meetingDate", startInclusive))
+        .add(Restrictions.lt("meetingDate", endExclusive))
+        .seq
+    } else Nil
   }
 
   def listAllOnOrAfter(localDate: LocalDate): Seq[MeetingRecord] = {

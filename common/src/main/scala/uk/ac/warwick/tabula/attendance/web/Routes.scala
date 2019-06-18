@@ -57,6 +57,11 @@ object Routes {
         encoded(department.code), encoded(academicYear.startYear.toString)
       )
 
+    def recheckPoint(department: Department, academicYear: AcademicYear, point: AttendanceMonitoringPoint, serializedFilter: String, returnTo: String): String =
+      context + "/manage/%s/%s/editpoints/%s/recheck?returnTo=%s&%s" format(
+        encoded(department.code), encoded(academicYear.startYear.toString), encoded(point.id), encoded(returnTo), serializedFilter
+      )
+
     def addPointsToExistingSchemes(department: Department, academicYear: AcademicYear): String =
       context + "/manage/%s/%s/addpoints" format(
         encoded(department.code), encoded(academicYear.startYear.toString)

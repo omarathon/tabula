@@ -298,6 +298,12 @@
     </#if>
   </@spring.bind>
 
+    <div class="alert alert-info hidden" id="point-conditions-changed-alert">
+      The conditions for automatically recording this monitoring point have changed.
+      When you press Save, the students who have met the new conditions are verified.
+      You can then review any changes to attendance.
+    </div>
+
   <script>
     jQuery(function ($) {
       // Show relavant extra options when changing assignment type

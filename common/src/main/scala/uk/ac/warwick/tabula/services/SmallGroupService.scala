@@ -18,6 +18,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 import scala.util.matching.Regex
 
 trait SmallGroupServiceComponent {
@@ -142,6 +143,8 @@ trait SmallGroupService {
   def listSmallGroupSetsWithEventsWithoutMapLocation(academicYear: AcademicYear, department: Option[Department]): Map[SmallGroupSet, Seq[SmallGroupEvent]]
 
   def findSmallGroupsByNameOrModule(query: String, academicYear: AcademicYear, department: Option[String]): Seq[SmallGroup]
+
+  def findAttendanceForStudentsBetweenDates(students: Seq[StudentMember], academicYear: AcademicYear, startInclusive: LocalDateTime, endExclusive: LocalDateTime): Seq[SmallGroupEventAttendance]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -494,6 +497,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
     smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department).groupBy(_.group.groupSet)
   }
 
+  override def findAttendanceForStudentsBetweenDates(students: Seq[StudentMember], academicYear: AcademicYear, startInclusive: LocalDateTime, endExclusive: LocalDateTime): Seq[SmallGroupEventAttendance] = {
+    val startWeek = Try(academicYear.weekForDate(startInclusive.toLocalDate).weekNumber).getOrElse(academicYear.weekForDate(academicYear.firstDay).weekNumber)
+    val endWeek = Try(academicYear.weekForDate(endExclusive.toLocalDate).weekNumber).getOrElse(academicYear.weekForDate(academicYear.lastDay).weekNumber)
+
+    smallGroupDao.findAttendanceForStudentsInWeeks(students, academicYear, startWeek, endWeek)
+      .filter(_.occurrence.startDateTime.exists(!_.isBefore(startInclusive)))
+      .filter(_.occurrence.endDateTime.exists(_.isBefore(endExclusive)))
+  }
 }
 
 trait SmallGroupMembershipHelpers {
