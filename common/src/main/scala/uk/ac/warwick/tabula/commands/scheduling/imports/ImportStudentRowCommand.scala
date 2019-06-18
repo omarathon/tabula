@@ -114,7 +114,7 @@ class ImportStudentRowCommandInternal(
     val hasChanged = (copyMemberProperties(commandBean, memberBean)
       | copyStudentProperties(commandBean, memberBean)
       | (studentRow.isDefined && markAsSeenInSits(memberBean))
-      | member.tier4VisaRequirement.booleanValue() != tier4VisaRequirement
+      | member.tier4VisaRequirement != tier4VisaRequirement
       | member.reasonableAdjustments != reasonableAdjustments
       | member.reasonableAdjustmentsNotes != reasonableAdjustmentsNotes
     )

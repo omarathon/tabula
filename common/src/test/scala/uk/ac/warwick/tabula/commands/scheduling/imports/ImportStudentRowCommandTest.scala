@@ -17,6 +17,8 @@ import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.AnonymousUser
 
+import scala.concurrent.Future
+
 trait ComponentMixins extends Mockito
   with ProfileServiceComponent
   with Tier4RequirementImporterComponent
@@ -186,12 +188,14 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
     profileService.getDisability("Q") returns Some(disabilityQ)
 
     tier4RequirementImporter.hasTier4Requirement("0672089") returns false
+    reasonableAdjustmentsImporter.getReasonableAdjustments("0672089") returns Future.successful(None)
 
     val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), Seq(SitsStudentRow(rs)), importCommandFactory) with ComponentMixins
     rowCommand.memberDao = memberDao
     rowCommand.moduleAndDepartmentService = modAndDeptService
     rowCommand.profileService = profileService
     rowCommand.tier4RequirementImporter = tier4RequirementImporter
+    rowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
 
     val row = SitsStudentRow(rs)
   }
@@ -542,6 +546,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       newRowCommand.moduleAndDepartmentService = modAndDeptService
       newRowCommand.profileService = profileService
       newRowCommand.tier4RequirementImporter = tier4RequirementImporter
+      newRowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
       student = newRowCommand.applyInternal().asInstanceOf[StudentMember]
       student.disability should be(None)
     }
@@ -561,6 +566,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
       thisRowCommand.moduleAndDepartmentService = modAndDeptService
       thisRowCommand.profileService = profileService
       thisRowCommand.tier4RequirementImporter = tier4RequirementImporter
+      thisRowCommand.reasonableAdjustmentsImporter = reasonableAdjustmentsImporter
 
       val result: StudentMember = thisRowCommand.applyInternal().asInstanceOf[StudentMember]
       result.freshStudentCourseDetails.size should be(2)
