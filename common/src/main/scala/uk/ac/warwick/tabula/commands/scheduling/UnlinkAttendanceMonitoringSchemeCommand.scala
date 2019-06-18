@@ -32,7 +32,7 @@ class UnlinkAttendanceMonitoringSchemeCommandInternal extends CommandInternal[Ma
     }
     schemeMap.map { case (department, schemes) => department -> schemes.map { scheme =>
       transactional() {
-        scheme.memberQuery = ""
+        scheme.memberQuery = null
         scheme.members.includedUserIds = (scheme.members.staticUserIds diff scheme.members.excludedUserIds) ++ scheme.members.includedUserIds
         attendanceMonitoringService.saveOrUpdate(scheme)
         scheme

@@ -47,7 +47,7 @@ class AddStudentsToSchemeCommandInternal(val scheme: AttendanceMonitoringScheme,
       scheme.members.staticUserIds = Set.empty
       scheme.members.includedUserIds = Set.empty
       scheme.members.excludedUserIds = Set.empty
-      scheme.memberQuery = ""
+      scheme.memberQuery = null
       scheme.members.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).toSet
     }
 

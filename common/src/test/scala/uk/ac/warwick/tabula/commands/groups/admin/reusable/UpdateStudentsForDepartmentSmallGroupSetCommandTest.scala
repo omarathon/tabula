@@ -115,7 +115,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       set.members.knownType.staticUserIds should be('empty)
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
-      set.memberQuery should be('empty)
+      set.memberQuery shouldBe null
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
@@ -147,7 +147,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       set.members.knownType.staticUserIds should be('empty)
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
-      set.memberQuery should be('empty)
+      set.memberQuery shouldBe null
 
       groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
       groupB.students.knownType.includedUserIds should be(Set("0000003")) // 4 has been removed
