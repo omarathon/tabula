@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
 import uk.ac.warwick.tabula.commands.{CommandInternal, _}
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.{Attended, NotRecorded}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpoint, AttendanceMonitoringPoint, AttendanceState}
@@ -34,13 +35,15 @@ class RecheckAttendanceCommandInternal(val department: Department, val academicY
   self: RecheckAttendanceCommandState with AttendanceMonitoringServiceComponent =>
 
   override protected def applyInternal(): Seq[AttendanceMonitoringCheckpoint] = {
-    proposedChangesToNonReportedPoints.filter(_.proposedState == NotRecorded).foreach { change =>
-      attendanceMonitoringService.deleteCheckpointDangerously(change.checkpoint)
-    }
+    transactional() {
+      proposedChangesToNonReportedPoints.filter(_.proposedState == NotRecorded).foreach { change =>
+        attendanceMonitoringService.deleteCheckpointDangerously(change.checkpoint)
+      }
 
-    proposedChangesToNonReportedPoints.filterNot(_.proposedState == NotRecorded).map { change =>
-      attendanceMonitoringService.setAttendance(change.student, Map(change.point -> change.proposedState), user.userId, autocreated = true)
-    }.flatMap(_._1)
+      proposedChangesToNonReportedPoints.filterNot(_.proposedState == NotRecorded).map { change =>
+        attendanceMonitoringService.setAttendance(change.student, Map(change.point -> change.proposedState), user.userId, autocreated = true)
+      }.flatMap(_._1)
+    }
   }
 }
 
