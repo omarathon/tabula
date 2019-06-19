@@ -13,6 +13,7 @@ import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.XMLReader
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.collection.mutable
 
@@ -29,6 +30,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 
   def fetchSheetParser: XMLReader = {
     val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    parser.setEntityResolver(new SecureXmlEntityResolver)
     parser.setContentHandler(xssfHandler)
     parser
   }

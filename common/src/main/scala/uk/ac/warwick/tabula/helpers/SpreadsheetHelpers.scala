@@ -15,6 +15,7 @@ import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.{InputSource, XMLReader}
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.collection.mutable
 
@@ -159,6 +160,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 
   def fetchSheetParser: XMLReader = {
     val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    parser.setEntityResolver(new SecureXmlEntityResolver)
     parser.setContentHandler(xssfHandler)
     parser
   }
