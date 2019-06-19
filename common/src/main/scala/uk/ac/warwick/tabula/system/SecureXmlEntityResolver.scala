@@ -5,7 +5,6 @@ import java.io.IOException
 
 import org.xml.sax.{EntityResolver, InputSource, SAXException}
 
-
 class SecureXmlEntityResolver extends EntityResolver {
   @throws[SAXException]
   @throws[IOException]
