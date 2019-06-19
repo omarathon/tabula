@@ -1230,7 +1230,7 @@
 
 <#macro marker_feedback_summary feedback stage currentStage=[] currentFeedback=[] currentStageIncomplete=false>
   <h4>${stage.description} <#if feedback.marker??>- ${feedback.marker.fullName}</#if></h4>
-  <#if feedback.hasContent && !feedback.hasBeenModified && !currentStageIncomplete>
+  <#if feedback.hasContent && !feedback.hasBeenModified && !currentStageIncomplete && feedback.wasModerated!false>
     Approved by the moderator
   <#elseif !feedback.hasContent>
     Not moderated

@@ -226,7 +226,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
   @Type(`type` = "uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStageUserType")
   var finalStage: MarkingWorkflowStage = _
 
-  def wasModerated: Boolean = finalStage.isInstanceOf[ModerationStage]
+  def wasModerated: Boolean = isMarkingCompleted && finalStage.isInstanceOf[ModerationStage]
 
   def moderatorMadeChanges: Boolean = wasModerated && allMarkerFeedback.find(_.stage == finalStage).exists(_.updatedOn != null)
 
