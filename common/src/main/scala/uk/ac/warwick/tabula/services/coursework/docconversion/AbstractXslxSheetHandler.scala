@@ -7,6 +7,7 @@ import org.xml.sax.XMLReader
 import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.collection.mutable
 
@@ -25,6 +26,7 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
   def fetchSheetParser: XMLReader = {
     val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
     parser.setContentHandler(xssfHandler)
+    parser.setEntityResolver(new SecureXmlEntityResolver)
     parser
   }
 

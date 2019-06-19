@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services.timetables._
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
@@ -183,6 +184,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
     }
     val parser = {
       val p = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+      p.setEntityResolver(new SecureXmlEntityResolver)
       p.setContentHandler(new XSSFSheetXMLHandler(styles, sst, handler, false))
       p
     }
