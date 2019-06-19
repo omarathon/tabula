@@ -77,7 +77,10 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
       submission.affectedAssessments.add(affected)
     }
 
-    submission.outcomesRecorded()
+    if (confirm) {
+      submission.outcomesRecorded()
+    }
+
     submission.lastModifiedBy = user
     submission.lastModified = DateTime.now
     submission.outcomesLastRecordedBy = user
@@ -125,7 +128,6 @@ trait MitCircsRecordOutcomesState {
 }
 
 trait MitCircsRecordOutcomesRequest {
-
   self : MitCircsRecordOutcomesState =>
 
   var affectedAssessments: JList[AffectedAssessmentItem] = submission.affectedAssessments.asScala.map(new AffectedAssessmentItem(_)).asJava
@@ -136,4 +138,5 @@ trait MitCircsRecordOutcomesRequest {
   var boardRecommendationComments: String = submission.boardRecommendationComments
   var rejectionReasons: JList[MitigatingCircumstancesRejectionReason] = submission.rejectionReasons.asJava
   var rejectionReasonsOther: String = submission.rejectionReasonsOther
+  var confirm: Boolean = false
 }

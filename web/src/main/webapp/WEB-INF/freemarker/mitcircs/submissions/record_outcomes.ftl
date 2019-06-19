@@ -84,7 +84,10 @@
         </@mitcirc.question_section>
 
         <div class="fix-footer">
-          <button type="submit"  class="btn btn-primary">Submit</button>
+          <#if submission.state.entryName != "Outcomes Recorded">
+            <button type="submit" class="btn btn-primary" name="confirm" value="false">Save as draft</button>
+          </#if>
+          <button type="submit" class="btn btn-primary" name="confirm" value="true">Submit</button>
           <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.reviewSubmission submission />">Cancel</a>
         </div>
 
