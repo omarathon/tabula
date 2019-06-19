@@ -337,9 +337,15 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
     val schemes = benchmarkTask(s"membersHelper.findBy $universityId") {
       membersHelper.findBy(user)
     }
+    val relevantSchemes =  schemes.filter {  scheme =>
+      val members = scheme.members.members
+      //  Ensure this scheme belongs to the right student account (when multiple accounts/Uni Ids of the same student mapped to same user code. Cache returns by user id account and that could belong to different uni id(TAB-7197)
+      members.contains(universityId) || members.contains(userId)
+    }
+
     departmentOption match {
-      case Some(department) => schemes.filter(s => s.department == department && s.academicYear == academicYear)
-      case None => schemes.filter(_.academicYear == academicYear)
+      case Some(department) => relevantSchemes.filter(s => s.department == department && s.academicYear == academicYear)
+      case None => relevantSchemes.filter(_.academicYear == academicYear)
     }
   }
 

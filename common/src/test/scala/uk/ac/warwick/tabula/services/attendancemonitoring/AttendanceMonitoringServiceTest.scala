@@ -41,6 +41,11 @@ class AttendanceMonitoringServiceTest extends TestBase with Mockito {
     val point2: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "point2", 4, 4, currentAcademicYear)
     val point3: AttendanceMonitoringPoint = Fixtures.attendanceMonitoringPoint(scheme, "point3", 4, 4, currentAcademicYear)
     scheme.points = JArrayList(point1, point2, point3)
+    scheme.members.addUserId(uniId1)
+    scheme.members.addUserId(uniId2)
+
+
+
     val passedCheckpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point1, member1, AttendanceState.fromCode("attended"))
     val missedCheckpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point2, member1, AttendanceState.fromCode("unauthorised"))
     val authorisedCheckpoint: AttendanceMonitoringCheckpoint = Fixtures.attendanceMonitoringCheckpoint(point3, member1, AttendanceState.fromCode("authorised"))
