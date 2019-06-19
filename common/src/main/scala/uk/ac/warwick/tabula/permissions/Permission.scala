@@ -289,6 +289,8 @@ object Permissions {
       case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
       case object Disability extends Permission("View a member's reported disability")
       case object AccreditedPriorLearning extends Permission("View a student's accredited prior learning")
+      case object ReasonableAdjustments extends Permission("View a student's reasonable adjustments")
+      case object ReasonableAdjustmentsNotes extends Permission("View a student's reasonable adjustments notes")
 
       object StudentCourseDetails {
         case object Core extends Permission("View a student's basic course, route and department details")

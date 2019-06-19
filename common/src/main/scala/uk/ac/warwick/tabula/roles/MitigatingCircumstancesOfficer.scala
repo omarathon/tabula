@@ -17,7 +17,10 @@ case object MitigatingCircumstancesOfficerRoleDefinition extends BuiltInRoleDefi
     // commands checking this check against MitigatingCircumstancesStudent so we don't propagate permissions outside of the students home department
     MitigatingCircumstancesSubmission.Modify,
 
-    MitigatingCircumstancesPanel.Modify
+    MitigatingCircumstancesPanel.Modify,
+
+    Profiles.Read.ReasonableAdjustments,
+    Profiles.Read.ReasonableAdjustmentsNotes,
   )
 
   def canDelegateThisRolesPermissions: JBoolean = true

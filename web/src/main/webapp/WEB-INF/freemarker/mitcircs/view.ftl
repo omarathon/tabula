@@ -119,7 +119,10 @@
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
     </#if>
-    <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
-    <@components.asyncSection "messages" "Messages" messageUrl />
+
+    <#if !submission.draft && !submission.withdrawn>
+      <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
+      <@components.asyncSection "messages" "Messages" messageUrl />
+    </#if>
   </section>
 </#escape>

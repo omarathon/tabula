@@ -30,7 +30,7 @@ class Tier4RequirementImporterImpl extends Tier4RequirementImporter {
   def hasTier4Requirement(universityId: String): Boolean = {
     val numNationalitiesNotNeedingVisa =
       tier4RequirementMappingQuery.executeByNamedParam(Map("universityId" -> universityId).asJava).asScala.head
-    (numNationalitiesNotNeedingVisa.intValue() == 0)
+    numNationalitiesNotNeedingVisa.intValue() == 0
   }
 }
 
@@ -57,12 +57,12 @@ object Tier4RequirementImporter {
 		"""
 
   class Tier4RequirementMappingQuery(ds: DataSource)
-    extends MappingSqlQueryWithParameters[(Number)](ds, GetTier4RequirementSql) {
+    extends MappingSqlQueryWithParameters[Number](ds, GetTier4RequirementSql) {
     this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
     this.compile()
 
     override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]): Long = {
-      (rs.getLong("count"))
+      rs.getLong("count")
     }
   }
 

@@ -29,6 +29,7 @@ abstract class StudentViewMitCircsSubmissionCommandInternal(val submission: Miti
   self: MitCircsSubmissionServiceComponent =>
 
   override def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
+    // TODO this needs a check that it is the student currently logged in (could be the person submitting on their behalf)
     submission.lastViewedByStudent = DateTime.now
     mitCircsSubmissionService.saveOrUpdate(submission)
     // TODO find out why this is necessary for related submissions which themselves are linked to a related submission

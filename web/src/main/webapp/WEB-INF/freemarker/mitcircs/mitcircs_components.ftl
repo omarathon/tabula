@@ -104,7 +104,11 @@
       <#list submissions as submission>
         <tr>
           <td>
-            <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+            <#if !submission.draft>
+              <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+            <#else>
+              MIT-${submission.key}
+            </#if>
             <#if actions><@f.hidden path="submissions" value="${submission.key}" /></#if>
           </td>
           <td>

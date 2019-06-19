@@ -4,13 +4,11 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearKey}
+import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, MembershipInformation, ProfileImporterComponent}
+import uk.ac.warwick.tabula.services.scheduling.{AutowiringProfileImporterComponent, ProfileImporterComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-
-import scala.collection.JavaConverters._
 
 object StampMissingRowsCommand {
   def apply() =
@@ -201,9 +199,7 @@ trait ChecksStudentsInSits {
 
   def checkSitsForStudents(universityIds: Set[String]): StudentsFound = {
     val parsedSitsRows = universityIds.grouped(Daoisms.MaxInClauseCountOracle).zipWithIndex.map { case (ids, groupCount) =>
-      val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(
-        Map("universityIds" -> ids.toSeq.asJava).asJava
-      ).asScala
+      val sitsRows = profileImporter.sitsStudentRows(ids.toSeq)
 
       logger.info(s"${(groupCount + 1) * Daoisms.MaxInClauseCountOracle} students requested from SITS; ${sitsRows.size} rows found")
       (
