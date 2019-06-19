@@ -85,8 +85,9 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |- Final marker: 3 students
         |
         |12 students allocated to you have been released for marking
-        |- 13 students have submitted work
-        |- 14 students have not submitted work
+        |- 13 students have submitted work and can be marked
+        |- 4 students have not submitted work within extension
+        |- 3 students have not submitted work and have not yet requested an extension
       """.stripMargin.trim)
   }
 
@@ -122,8 +123,9 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
         |- Final marker: 3 students
         |
         |12 students allocated to you have been released for marking as the assignment has been set to automatically release when the end date and time have been reached
-        |- 13 students have submitted work
-        |- 14 students have not submitted work
+        |- 13 students have submitted work and can be marked
+        |- 4 students have not submitted work within extension
+        |- 3 students have not submitted work and have not yet requested an extension
       """.stripMargin.trim)
   }
 

@@ -30,7 +30,8 @@ object ReleaseToMarkerNotification {
       "studentsAtStagesCount" -> studentsAtStagesCount,
       "numReleasedFeedbacks" -> numReleasedFeedbacks,
       "numReleasedSubmissionsFeedbacks" -> numReleasedSubmissionsFeedbacks,
-      "numReleasedNoSubmissionsFeedbacks" -> numNoSubmissionWithoutExtension,
+      "numNoSubmissionWithinExtension" -> numNoSubmissionWithinExtension,
+      "numNoSubmissionWithoutExtension" -> numNoSubmissionWithoutExtension,
       "workflowVerb" -> workflowVerb
     )
   )
