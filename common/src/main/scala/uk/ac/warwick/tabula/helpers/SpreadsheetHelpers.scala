@@ -159,8 +159,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
   var currentRow: mutable.Map[String, String] = scala.collection.mutable.Map[String, String]()
 
   def fetchSheetParser: XMLReader = {
-    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-    parser.setEntityResolver(new SecureXmlEntityResolver)
+    val parser = XmlUtils.getXmlReader
     parser.setContentHandler(xssfHandler)
     parser
   }

@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.joda.time.ReadableInstant
+import org.xml.sax.XMLReader
+import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.xml.{Elem, Null, UnprefixedAttribute}
 
@@ -32,4 +35,10 @@ trait XmlUtils {
   def isoFormat(i: ReadableInstant): String = isoFormatter print i
 }
 
-object XmlUtils extends XmlUtils
+object XmlUtils extends XmlUtils {
+  def getXmlReader: XMLReader = {
+    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    parser.setEntityResolver(new SecureXmlEntityResolver)
+    parser
+  }
+}

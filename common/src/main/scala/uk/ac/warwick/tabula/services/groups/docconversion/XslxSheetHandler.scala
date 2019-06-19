@@ -5,7 +5,7 @@ import org.xml.sax.helpers.XMLReaderFactory
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, XmlUtils}
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
@@ -29,8 +29,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
   val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
   def fetchSheetParser: XMLReader = {
-    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-    parser.setEntityResolver(new SecureXmlEntityResolver)
+    val parser = XmlUtils.getXmlReader
     parser.setContentHandler(xssfHandler)
     parser
   }

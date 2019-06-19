@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.XmlUtils
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services.timetables._
@@ -183,8 +184,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
       override def syllabusPlusLocationService: SyllabusPlusLocationService = locationService
     }
     val parser = {
-      val p = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-      p.setEntityResolver(new SecureXmlEntityResolver)
+      val p = XmlUtils.getXmlReader
       p.setContentHandler(new XSSFSheetXMLHandler(styles, sst, handler, false))
       p
     }
