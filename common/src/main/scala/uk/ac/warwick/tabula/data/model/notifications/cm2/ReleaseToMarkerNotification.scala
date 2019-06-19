@@ -20,7 +20,8 @@ object ReleaseToMarkerNotification {
     studentsAtStagesCount: Seq[StudentAtStagesCount],
     numReleasedFeedbacks: Int,
     numReleasedSubmissionsFeedbacks: Int,
-    numReleasedNoSubmissionsFeedbacks: Int,
+    numNoSubmissionWithinExtension: Int,
+    numNoSubmissionWithoutExtension: Int,
     workflowVerb: String,
   ): FreemarkerModel = FreemarkerModel(templateLocation,
     Map(
@@ -77,7 +78,8 @@ class ReleaseToMarkerNotification
       studentsAtStagesCount = helper.studentsAtStagesCount,
       numReleasedFeedbacks = items.size,
       numReleasedSubmissionsFeedbacks = helper.submissionsCount,
-      numReleasedNoSubmissionsFeedbacks = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount,
+      numNoSubmissionWithinExtension = helper.extensionsCount - helper.submissionsWithinExtension,
+      numNoSubmissionWithoutExtension = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount - (helper.extensionsCount - helper.submissionsWithinExtension),
       workflowVerb = workflowVerb
     )
   } else {

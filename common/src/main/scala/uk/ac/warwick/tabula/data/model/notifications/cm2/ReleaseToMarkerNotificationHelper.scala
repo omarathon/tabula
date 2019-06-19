@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications.cm2
 
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Assignment, Submission}
 import uk.ac.warwick.tabula.data.model.markingworkflow.MarkingWorkflowStage
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.Student
@@ -42,4 +42,16 @@ class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User,
       assignment.cm2MarkerSubmissions(recipient).count(_.submitted)
     else
       assignment.getMarkersSubmissions(recipient).distinct.size
+
+  lazy val extensionsCount: Int = assignment.approvedExtensions.values.flatMap(_.universityId).toSet.size
+
+  lazy val submissionsWithinExtension: Int = {
+    val submissions: Seq[Submission] = if (assignment.cm2Assignment)
+      assignment.cm2MarkerSubmissions(recipient).distinct
+    else assignment.getMarkersSubmissions(recipient).distinct
+
+    submissions.filter { submission =>
+      assignment.approvedExtensions.values.flatMap(_.universityId).toSet.contains(submission._universityId)
+    }.count(_.submitted)
+  }
 }
