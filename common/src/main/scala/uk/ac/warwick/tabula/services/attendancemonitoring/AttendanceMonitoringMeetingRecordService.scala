@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services.attendancemonitoring
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
@@ -18,9 +17,9 @@ trait AutowiringAttendanceMonitoringMeetingRecordServiceComponent extends Attend
 }
 
 trait AttendanceMonitoringMeetingRecordService {
-  def getCheckpoints(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint]
+  def getCheckpoints(meeting: MeetingRecord, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint]
 
-  def getCheckpointsWhenApproved(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint]
+  def getCheckpointsWhenApproved(meeting: MeetingRecord, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint]
 
   def updateCheckpoints(meeting: MeetingRecord): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
@@ -29,21 +28,22 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
 
   self: AttendanceMonitoringServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
-  def getCheckpoints(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint] = {
+  def getCheckpoints(meeting: MeetingRecord, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint] = {
     if (!meeting.isAttendanceApproved) {
       Seq()
     } else {
-      getCheckpointsWhenApproved(meeting)
+      getCheckpointsWhenApproved(meeting, onlyRecordable)
     }
   }
 
-  def getCheckpointsWhenApproved(meeting: MeetingRecord): Seq[AttendanceMonitoringCheckpoint] = {
+  def getCheckpointsWhenApproved(meeting: MeetingRecord, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint] = {
     meeting.relationships.flatMap(_.studentMember).flatMap {
       case studentMember: StudentMember =>
         val relevantPoints = getRelevantPoints(
           attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, meeting.meetingDate),
           meeting,
-          studentMember
+          studentMember,
+          onlyRecordable
         )
 
         relevantPoints.filter(point => checkQuantity(point, meeting, studentMember)).map(point => {
@@ -74,7 +74,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
     }
   }
 
-  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], meeting: MeetingRecord, student: StudentMember): Seq[AttendanceMonitoringPoint] = {
+  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], meeting: MeetingRecord, student: StudentMember, onlyRecordable: Boolean): Seq[AttendanceMonitoringPoint] = {
     points.filter(point =>
       // Is it the correct type
       point.pointType == AttendanceMonitoringPointType.Meeting
@@ -84,10 +84,12 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
         && meeting.relationships.map(_.relationshipType).exists(point.meetingRelationships.contains)
         // Is the meeting's format valid
         && point.meetingFormats.contains(meeting.format)
+        && (!onlyRecordable || (
         // Is there no existing checkpoint
-        && attendanceMonitoringService.getCheckpoints(Seq(point), Seq(student)).isEmpty
-        // The student hasn't been sent to SITS for this point
-        && !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
+        attendanceMonitoringService.getCheckpoints(Seq(point), Seq(student)).isEmpty
+          // The student hasn't been sent to SITS for this point
+          && !attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point))
+        )
     )
   }
 

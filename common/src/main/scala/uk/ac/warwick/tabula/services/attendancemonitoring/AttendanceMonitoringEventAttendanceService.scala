@@ -22,11 +22,11 @@ trait AutowiringAttendanceMonitoringEventAttendanceServiceComponent extends Atte
 }
 
 trait AttendanceMonitoringEventAttendanceService {
-  def getCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint]
+  def getCheckpoints(attendances: Seq[SmallGroupEventAttendance], onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint]
 
   def updateCheckpoints(attendances: Seq[SmallGroupEventAttendance]): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 
-  def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])]
+  def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], onlyRecordable: Boolean = true): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])]
 
   def updateMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], user: CurrentUser): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
@@ -35,7 +35,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
 
   self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with SmallGroupServiceComponent =>
 
-  def getCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[AttendanceMonitoringCheckpoint] = {
+  def getCheckpoints(attendances: Seq[SmallGroupEventAttendance], onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint] = {
     attendances.filter(a => a.state == AttendanceState.Attended && a.occurrence.event.day != null).flatMap(attendance => {
       profileService.getMemberByUniversityId(attendance.universityId).flatMap {
         case studentMember: StudentMember =>
@@ -43,7 +43,8 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
             getRelevantPoints(
               attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, eventDate),
               attendance,
-              studentMember
+              studentMember,
+              onlyRecordable
             )).getOrElse(Seq())
           val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
             val checkpoint = new AttendanceMonitoringCheckpoint
@@ -72,7 +73,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
     case ((leftCheckpoints, leftTotals), (rightCheckpoints, rightTotals)) => (leftCheckpoints ++ rightCheckpoints, leftTotals ++ rightTotals)
   }
 
-  def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance]): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])] = {
+  def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], onlyRecordable: Boolean = true): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])] = {
     attendances.filter(a => (a.state == AttendanceState.MissedAuthorised || a.state == AttendanceState.MissedUnauthorised) && a.occurrence.event.day != null).flatMap(attendance => {
       profileService.getMemberByUniversityId(attendance.universityId).flatMap {
         case studentMember: StudentMember =>
@@ -80,7 +81,8 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
           val relevantPoints = getRelevantPoints(
             attendanceMonitoringService.listStudentsPoints(studentMember, None, attendance.occurrence.event.group.groupSet.academicYear),
             attendance,
-            studentMember
+            studentMember,
+            onlyRecordable
           )
           // check among applicable AttendanceMonitoringpoints, which ones this student can't meet if we have marked this event as missed
           val missedPoints = relevantPoints.filter(point => checkMonitoringPointRequirementsMissed(point, attendance, studentMember))
@@ -140,7 +142,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
     }
   }
 
-  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], attendance: SmallGroupEventAttendance, studentMember: StudentMember): Seq[AttendanceMonitoringPoint] = {
+  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], attendance: SmallGroupEventAttendance, studentMember: StudentMember, onlyRecordable: Boolean): Seq[AttendanceMonitoringPoint] = {
     val eventDateOption = attendance.occurrence.date
     eventDateOption.map(eventDate =>
       points.filter(point =>
@@ -150,10 +152,11 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
           && point.isDateValidForPoint(eventDate)
           // Is the group's module valid
           && (point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(attendance.occurrence.event.group.groupSet.module))
+          && (!onlyRecordable || (
           // Is there no existing checkpoint
-          && noExistingCheckpoint(point, attendance, studentMember)
-          // The student hasn't been sent to SITS for this point
-          && !attendanceMonitoringService.studentAlreadyReportedThisTerm(studentMember, point)
+          noExistingCheckpoint(point, attendance, studentMember)
+            // The student hasn't been sent to SITS for this point
+            && !attendanceMonitoringService.studentAlreadyReportedThisTerm(studentMember, point)))
       )).getOrElse(Seq())
   }
 
