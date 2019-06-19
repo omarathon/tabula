@@ -71,7 +71,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
       ),
       numReleasedFeedbacks = 12,
       numReleasedSubmissionsFeedbacks = 13,
-      numReleasedNoSubmissionsFeedbacks = 14,
+      numNoSubmissionWithinExtension = 4,
+      numNoSubmissionWithoutExtension = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()
@@ -107,7 +108,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
       ),
       numReleasedFeedbacks = 12,
       numReleasedSubmissionsFeedbacks = 13,
-      numReleasedNoSubmissionsFeedbacks = 14,
+      numNoSubmissionWithinExtension = 4,
+      numNoSubmissionWithoutExtension = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()
@@ -143,7 +145,8 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
       ),
       numReleasedFeedbacks = 0,
       numReleasedSubmissionsFeedbacks = 123123,
-      numReleasedNoSubmissionsFeedbacks = 0,
+      numNoSubmissionWithinExtension = 4,
+      numNoSubmissionWithoutExtension = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()

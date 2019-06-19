@@ -30,7 +30,7 @@ object ReleaseToMarkerNotification {
       "studentsAtStagesCount" -> studentsAtStagesCount,
       "numReleasedFeedbacks" -> numReleasedFeedbacks,
       "numReleasedSubmissionsFeedbacks" -> numReleasedSubmissionsFeedbacks,
-      "numReleasedNoSubmissionsFeedbacks" -> numReleasedNoSubmissionsFeedbacks,
+      "numReleasedNoSubmissionsFeedbacks" -> numNoSubmissionWithoutExtension,
       "workflowVerb" -> workflowVerb
     )
   )
@@ -79,7 +79,11 @@ class ReleaseToMarkerNotification
       numReleasedFeedbacks = items.size,
       numReleasedSubmissionsFeedbacks = helper.submissionsCount,
       numNoSubmissionWithinExtension = helper.extensionsCount - helper.submissionsWithinExtension,
-      numNoSubmissionWithoutExtension = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount - (helper.extensionsCount - helper.submissionsWithinExtension),
+      numNoSubmissionWithoutExtension = {
+        val totalNonSubmission = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount
+        val numNoSubmissionWithinExtension = helper.extensionsCount - helper.submissionsWithinExtension
+        totalNonSubmission - numNoSubmissionWithinExtension
+      },
       workflowVerb = workflowVerb
     )
   } else {
@@ -92,7 +96,7 @@ class ReleaseToMarkerNotification
 
   def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
 
-  def urlTitle = s"${workflowVerb} the assignment '${assignment.module.code.toUpperCase} - ${assignment.name}'"
+  def urlTitle = s"$workflowVerb the assignment '${assignment.module.code.toUpperCase} - ${assignment.name}'"
 
   priority = Warning
 
