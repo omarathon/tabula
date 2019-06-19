@@ -13,7 +13,6 @@ import org.joda.time.{DateTime, LocalTime}
 import org.springframework.stereotype.Service
 import org.springframework.validation.BindingResult
 import org.xml.sax.InputSource
-import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
@@ -24,7 +23,6 @@ import uk.ac.warwick.tabula.helpers.XmlUtils
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services.timetables._
-import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 import uk.ac.warwick.userlookup.User
 
