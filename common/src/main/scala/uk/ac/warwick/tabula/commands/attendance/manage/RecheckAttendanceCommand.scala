@@ -72,15 +72,15 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
         case AssignmentSubmission =>
           val submissions = students.flatMap(student => submissionService.getSubmissionsBetweenDates(student.userId, startDate, endDate))
 
-          submissions.flatMap(attendanceMonitoringCourseworkSubmissionService.getCheckpoints)
+          submissions.flatMap(attendanceMonitoringCourseworkSubmissionService.getCheckpoints(_, onlyRecordable = false))
         case Meeting =>
           val meetingRecords = students.flatMap(student => meetingRecordService.listBetweenDates(student, startDate, endDate))
 
-          meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints)
+          meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints(_, onlyRecordable = false))
         case SmallGroup =>
           val eventAttendance = smallGroupService.findAttendanceForStudentsBetweenDates(students, academicYear, startDate.toLocalDateTime, endDate.toLocalDateTime)
 
-          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance)
+          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance, onlyRecordable = false)
         case Standard =>
           Nil
       }
