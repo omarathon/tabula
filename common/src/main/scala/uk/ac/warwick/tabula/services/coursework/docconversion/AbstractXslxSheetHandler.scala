@@ -4,9 +4,8 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandl
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
 import org.xml.sax.XMLReader
-import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{Logging, XmlUtils}
 
 import scala.collection.mutable
 
@@ -23,7 +22,7 @@ abstract class AbstractXslxSheetHandler[A](var styles: StylesTable, var sst: Rea
   val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
   def fetchSheetParser: XMLReader = {
-    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    val parser = XmlUtils.getXmlReader
     parser.setContentHandler(xssfHandler)
     parser
   }

@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.services.groups.docconversion
 
-import org.apache.poi.xssf.model.StylesTable
-import org.xml.sax.helpers.XMLReaderFactory
-
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Logging
-import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.ss.util.CellReference
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
+import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
+import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.usermodel.XSSFComment
 import org.xml.sax.XMLReader
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{Logging, XmlUtils}
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var allocateStudentItems: JList[AllocateStudentItem])
@@ -28,7 +26,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
   val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
 
   def fetchSheetParser: XMLReader = {
-    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    val parser = XmlUtils.getXmlReader
     parser.setContentHandler(xssfHandler)
     parser
   }
