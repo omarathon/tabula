@@ -48,7 +48,7 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val renderedResult = output.toString
     renderedResult.trim should be(
       """
-        |10 students are allocated to you for marking
+        |10 students are allocated to you for marking.
         |- This assignment does not require students to submit work to Tabula
       """.stripMargin.trim
     )
@@ -79,14 +79,14 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val renderedResult = output.toString
     renderedResult.trim should be(
       """
-        |6 students are allocated to you for marking
+        |6 students are allocated to you for marking.
         |- First marker: 2 students
         |- Second marker: 1 student
         |- Final marker: 3 students
         |
         |12 students allocated to you have been released for marking
-        |- 13 students have submitted work and can be marked
-        |- 4 students have not submitted work within extension
+        |- 13 students have submitted work that can be marked
+        |- 4 students have not submitted but they have an extension
         |- 3 students have not submitted work and have not yet requested an extension
       """.stripMargin.trim)
   }
@@ -117,14 +117,14 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val renderedResult = output.toString
     renderedResult.trim should be(
       """
-        |6 students are allocated to you for marking
+        |6 students are allocated to you for marking.
         |- First marker: 2 students
         |- Second marker: 1 student
         |- Final marker: 3 students
         |
         |12 students allocated to you have been released for marking as the assignment has been set to automatically release when the end date and time have been reached
-        |- 13 students have submitted work and can be marked
-        |- 4 students have not submitted work within extension
+        |- 13 students have submitted work that can be marked
+        |- 4 students have not submitted but they have extension
         |- 3 students have not submitted work and have not yet requested an extension
       """.stripMargin.trim)
   }
@@ -155,7 +155,7 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val renderedResult = output.toString
     renderedResult.trim should be(
       """
-        |6 students are allocated to you for marking
+        |6 students are allocated to you for marking.
         |- First marker: 2 students
         |- Second marker: 1 student
         |- Final marker: 3 students
