@@ -11,11 +11,9 @@ import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFComment
 import org.joda.time.{DateTime, LocalDate}
-import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.{InputSource, XMLReader}
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.collection.mutable
 

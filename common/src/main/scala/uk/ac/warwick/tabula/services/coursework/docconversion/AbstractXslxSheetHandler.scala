@@ -4,10 +4,8 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandl
 import org.apache.poi.xssf.eventusermodel.{ReadOnlySharedStringsTable, XSSFSheetXMLHandler}
 import org.apache.poi.xssf.model.StylesTable
 import org.xml.sax.XMLReader
-import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{Logging, XmlUtils}
-import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.collection.mutable
 
