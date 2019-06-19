@@ -306,12 +306,12 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
         }
       }
       val schemes = findSchemesForStudent(student.universityId, student.userId, departmentOption, academicYear)
-      val relevantScheme =  schemes.filter {  scheme =>
+      val relevantSchemes =  schemes.filter {  scheme =>
         val members = scheme.members.members
         //  Ensure this scheme belongs to the right student account (when multiple accounts/Uni Ids of the same student mapped to same user code. Cache returns by user id account and that could belong to different uni id(TAB-7197)
         members.contains(student.universityId) || members.contains(student.userId)
       }
-      relevantScheme.flatMap(_.points.asScala).filter(p =>
+      relevantSchemes.flatMap(_.points.asScala).filter(p =>
         p.applies(beginDate, endDate)
       )
     } else {
