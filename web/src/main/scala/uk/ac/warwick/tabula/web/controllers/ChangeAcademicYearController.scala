@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.web.Mav
 @Controller
 @RequestMapping(Array("/academic_year/{academicYear:\\d{4}}"))
 class ChangeAcademicYearController extends BaseController
-	with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
-	@ModelAttribute("academicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
+  @ModelAttribute("academicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@RequestMapping
-	def change(): Mav = Redirect(getReturnTo("/"))
+  @RequestMapping
+  def change(): Mav = Redirect(getReturnTo("/"))
 }

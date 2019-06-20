@@ -50,8 +50,8 @@ trait AcademicYearScopedController extends TaskBenchmarking {
     }
   }
 
-	@ModelAttribute("academicYearNow")
-	def academicYearNow: AcademicYear = AcademicYear.now()
+  @ModelAttribute("academicYearNow")
+  def academicYearNow: AcademicYear = AcademicYear.now()
 
   @ModelAttribute("enableAcademicYearBanner")
   def enableAcademicYearBanner: Boolean = true
