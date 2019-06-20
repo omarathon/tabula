@@ -60,7 +60,7 @@ class DepartmentPermissionController extends AdminController with DepartmentPerm
   @RequestMapping
   def permissionsForm(@PathVariable department: Department, @RequestParam(defaultValue = "") usercodes: Array[String],
     @RequestParam(value = "role", required = false) role: RoleDefinition, @RequestParam(value = "action", required = false) action: String): Mav =
-    form(department, usercodes, Option(role), action)
+    form(department, usercodes, Some(role), action)
 
 
 }
