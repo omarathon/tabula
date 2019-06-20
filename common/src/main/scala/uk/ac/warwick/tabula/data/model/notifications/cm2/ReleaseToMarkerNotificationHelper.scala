@@ -45,7 +45,7 @@ class ReleaseToMarkerNotificationHelper(assignment: Assignment, recipient: User,
 
   lazy val extensionsCount: Int = assignment.approvedExtensions.values.flatMap(_.universityId).toSet.size
 
-  lazy val submissionsWithinExtension: Int = {
+  lazy val submissionsWithExtensionCount: Int = {
     val submissions: Seq[Submission] = if (assignment.cm2Assignment)
       assignment.cm2MarkerSubmissions(recipient).distinct
     else assignment.getMarkersSubmissions(recipient).distinct

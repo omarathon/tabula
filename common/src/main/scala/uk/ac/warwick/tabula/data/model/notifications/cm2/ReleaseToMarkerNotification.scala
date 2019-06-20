@@ -16,22 +16,22 @@ object ReleaseToMarkerNotification {
 
   def renderCollectSubmissions(
     assignment: Assignment,
-    numAllocated: Int,
+    allocatedStudentsCount: Int,
     studentsAtStagesCount: Seq[StudentAtStagesCount],
-    numReleasedFeedbacks: Int,
-    numReleasedSubmissionsFeedbacks: Int,
-    numNoSubmissionWithinExtension: Int,
-    numNoSubmissionWithoutExtension: Int,
+    feedbacksCount: Int,
+    submissionsCount: Int,
+    noSubmissionsWithExtensionCount: Int,
+    noSubmissionsWithoutExtensionCount: Int,
     workflowVerb: String,
   ): FreemarkerModel = FreemarkerModel(templateLocation,
     Map(
       "assignment" -> assignment,
-      "numAllocated" -> numAllocated,
+      "allocatedStudentsCount" -> allocatedStudentsCount,
       "studentsAtStagesCount" -> studentsAtStagesCount,
-      "numReleasedFeedbacks" -> numReleasedFeedbacks,
-      "numReleasedSubmissionsFeedbacks" -> numReleasedSubmissionsFeedbacks,
-      "numNoSubmissionWithinExtension" -> numNoSubmissionWithinExtension,
-      "numNoSubmissionWithoutExtension" -> numNoSubmissionWithoutExtension,
+      "feedbacksCount" -> feedbacksCount,
+      "submissionsCount" -> submissionsCount,
+      "noSubmissionsWithExtensionCount" -> noSubmissionsWithExtensionCount,
+      "noSubmissionsWithoutExtensionCount" -> noSubmissionsWithoutExtensionCount,
       "workflowVerb" -> workflowVerb
     )
   )
@@ -75,15 +75,15 @@ class ReleaseToMarkerNotification
   def content: FreemarkerModel = if (assignment.collectSubmissions) {
     ReleaseToMarkerNotification.renderCollectSubmissions(
       assignment = assignment,
-      numAllocated = helper.studentsAllocatedToThisMarker.size,
+      allocatedStudentsCount = helper.studentsAllocatedToThisMarker.size,
       studentsAtStagesCount = helper.studentsAtStagesCount,
-      numReleasedFeedbacks = items.size,
-      numReleasedSubmissionsFeedbacks = helper.submissionsCount,
-      numNoSubmissionWithinExtension = helper.extensionsCount - helper.submissionsWithinExtension,
-      numNoSubmissionWithoutExtension = {
-        val totalNonSubmission = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount
-        val numNoSubmissionWithinExtension = helper.extensionsCount - helper.submissionsWithinExtension
-        totalNonSubmission - numNoSubmissionWithinExtension
+      feedbacksCount = items.size,
+      submissionsCount = helper.submissionsCount,
+      noSubmissionsWithExtensionCount = helper.extensionsCount - helper.submissionsWithExtensionCount,
+      noSubmissionsWithoutExtensionCount = {
+        val noSumbmissionCount = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount
+        val noSubmissionWithExtension = helper.extensionsCount - helper.submissionsWithExtensionCount
+        noSumbmissionCount - noSubmissionWithExtension
       },
       workflowVerb = workflowVerb
     )

@@ -63,16 +63,16 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val template = configuration.getTemplate(ReleaseToMarkerNotification.templateLocation)
     template.process(ReleaseToMarkerNotification.renderCollectSubmissions(
       assignment = assignment,
-      numAllocated = 6,
+      allocatedStudentsCount = 6,
       studentsAtStagesCount = Seq(
         StudentAtStagesCount(DblFirstMarker.description, 2),
         StudentAtStagesCount(DblSecondMarker.description, 1),
         StudentAtStagesCount(DblFinalMarker.description, 3)
       ),
-      numReleasedFeedbacks = 12,
-      numReleasedSubmissionsFeedbacks = 13,
-      numNoSubmissionWithinExtension = 4,
-      numNoSubmissionWithoutExtension = 3,
+      feedbacksCount = 12,
+      submissionsCount = 13,
+      noSubmissionsWithExtensionCount = 4,
+      noSubmissionsWithoutExtensionCount = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()
@@ -101,16 +101,16 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val template = configuration.getTemplate(ReleaseToMarkerNotification.templateLocation)
     template.process(ReleaseToMarkerNotification.renderCollectSubmissions(
       assignment = assignment,
-      numAllocated = 6,
+      allocatedStudentsCount = 6,
       studentsAtStagesCount = Seq(
         StudentAtStagesCount(DblFirstMarker.description, 2),
         StudentAtStagesCount(DblSecondMarker.description, 1),
         StudentAtStagesCount(DblFinalMarker.description, 3)
       ),
-      numReleasedFeedbacks = 12,
-      numReleasedSubmissionsFeedbacks = 13,
-      numNoSubmissionWithinExtension = 4,
-      numNoSubmissionWithoutExtension = 3,
+      feedbacksCount = 12,
+      submissionsCount = 13,
+      noSubmissionsWithExtensionCount = 4,
+      noSubmissionsWithoutExtensionCount = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()
@@ -139,16 +139,16 @@ class ReleaseToMarkerNotificationRenderingTest extends TestBase with Mockito {
     val template = configuration.getTemplate(ReleaseToMarkerNotification.templateLocation)
     template.process(ReleaseToMarkerNotification.renderCollectSubmissions(
       assignment = assignment,
-      numAllocated = 6,
+      allocatedStudentsCount = 6,
       studentsAtStagesCount = Seq(
         StudentAtStagesCount(DblFirstMarker.description, 2),
         StudentAtStagesCount(DblSecondMarker.description, 1),
         StudentAtStagesCount(DblFinalMarker.description, 3)
       ),
-      numReleasedFeedbacks = 0,
-      numReleasedSubmissionsFeedbacks = 123123,
-      numNoSubmissionWithinExtension = 4,
-      numNoSubmissionWithoutExtension = 3,
+      feedbacksCount = 0,
+      submissionsCount = 123123,
+      noSubmissionsWithExtensionCount = 4,
+      noSubmissionsWithoutExtensionCount = 3,
       workflowVerb = "the_verb"
     ).model, writer)
     writer.flush()
