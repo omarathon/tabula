@@ -29,7 +29,7 @@ object MitigatingCircumstancesGrading extends Enum[MitigatingCircumstancesGradin
 
   case object Rejected extends MitigatingCircumstancesGrading(
     code = "R",
-    helpText = "The claim is rejected due to insufficient evidence, incomplete information, or does not meet the criteria for mitigating circumstances"
+    helpText = "The claim is rejected due to insufficient evidence, incomplete information, or does not meet the criteria for mitigating circumstances."
   )
   override val values: immutable.IndexedSeq[MitigatingCircumstancesGrading] = findValues
 }
