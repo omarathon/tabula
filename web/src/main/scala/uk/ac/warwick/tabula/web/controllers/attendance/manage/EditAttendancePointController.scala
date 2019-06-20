@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType.Standard
 import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat}
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringServiceComponent
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent}
@@ -103,7 +104,7 @@ class EditAttendancePointController extends AttendanceController {
     academicYear: AcademicYear
   ) = {
     val points = cmd.apply()
-    if (points.nonEmpty) {
+    if (points.nonEmpty && points.forall(_.pointType != Standard)) {
       RedirectForce(
         Routes.Manage.recheckPoint(department, academicYear, points.head, findCommand.serializeFilter, getReturnTo(Routes.Manage.editPoints(department, academicYear)))
       )

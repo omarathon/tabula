@@ -299,9 +299,9 @@
   </@spring.bind>
 
     <div class="alert alert-info hidden" id="point-conditions-changed-alert">
-      The conditions for automatically recording this monitoring point have changed.
-      When you press Save, the students who have met the new conditions are verified.
-      You can then review any changes to attendance.
+      The conditions for automatically marking this monitoring point as ‘attended’ have changed.
+      When you select <strong>Save</strong>, any students who will be affected are shown
+      and you can choose to apply the changes or leave the point unchanged.
     </div>
 
   <script>
