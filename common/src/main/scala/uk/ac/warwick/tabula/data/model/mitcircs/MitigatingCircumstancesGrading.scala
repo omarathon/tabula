@@ -25,12 +25,15 @@ object MitigatingCircumstancesGrading extends Enum[MitigatingCircumstancesGradin
   case object Mild extends MitigatingCircumstancesGrading(
     code = "A",
     helpText = "(a) The mitigating circumstances were considered mild, and/or had little material effect on the student’s academic performance. For example, the circumstances fall within the normal level of everyday life that a person with normal emotional resilience would be expected to cope with. OR (b) There is weak evidence (or the evidence is post-hoc in nature) detailing the level of impact on the student making it impossible to assess the impact with reasonable certainty."
-  )
+  ) {
+    override val description: String = "Weak / Mild"
+  }
 
   case object Rejected extends MitigatingCircumstancesGrading(
     code = "R",
     helpText = "The claim is rejected due to insufficient evidence, incomplete information, or does not meet the criteria for mitigating circumstances."
   )
+
   override val values: immutable.IndexedSeq[MitigatingCircumstancesGrading] = findValues
 }
 
