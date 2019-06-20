@@ -74,7 +74,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
   }
 
   def getMissedCheckpoints(attendances: Seq[SmallGroupEventAttendance], onlyRecordable: Boolean = true): Seq[(AttendanceMonitoringCheckpoint, Seq[SmallGroupEventAttendanceNote])] = {
-    attendances.filter(a => (a.state == AttendanceState.MissedAuthorised || a.state == AttendanceState.MissedUnauthorised) && a.occurrence.event.day != null).flatMap(attendance => {
+    attendances.filter(a => a.occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints && (a.state == AttendanceState.MissedAuthorised || a.state == AttendanceState.MissedUnauthorised) && a.occurrence.event.day != null).flatMap(attendance => {
       profileService.getMemberByUniversityId(attendance.universityId).flatMap {
         case studentMember: StudentMember =>
           // all AttendanceMonitoringpoints applicable for this student
