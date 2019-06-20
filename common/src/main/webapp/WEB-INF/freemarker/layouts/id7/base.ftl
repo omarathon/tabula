@@ -37,7 +37,7 @@
         Proxying as <strong>${proxyingAs.fullName}</strong>.
       </div>
     </#if>
-    <#if activeAcademicYear?? && academicYearNow?? && activeAcademicYear.toString != academicYearNow.toString>
+    <#if enableAcademicYearBanner!false && activeAcademicYear?? && academicYearNow?? && activeAcademicYear.toString != academicYearNow.toString>
       <#if (info.requestedUri!"")?contains("/" + activeAcademicYear.storeValue)>
           <#assign changeAcademicYear=info.requestedUri?replace("/" + activeAcademicYear.storeValue, "/" + academicYearNow.storeValue) />
       <#else>

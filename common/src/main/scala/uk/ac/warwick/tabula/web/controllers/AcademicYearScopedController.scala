@@ -53,6 +53,9 @@ trait AcademicYearScopedController extends TaskBenchmarking {
 	@ModelAttribute("academicYearNow")
 	def academicYearNow: AcademicYear = AcademicYear.now()
 
+  @ModelAttribute("enableAcademicYearBanner")
+  def enableAcademicYearBanner: Boolean = true
+
   /**
     * One of these should be overriden to just call retrieveActiveAcademicYear,
     * but with the PathVariable-provided academic year as an argument (or null),
