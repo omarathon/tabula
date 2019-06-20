@@ -56,10 +56,11 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
     click on linkText("Coursework Management")
     currentUrl should include("/coursework/")
 
-    eventually {
-      val cm2AssignmentLink = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Premarked assignment CM2')]")).get(0)
-      click on cm2AssignmentLink
+    val submitLink = eventually {
+      id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment CM2')]"))
+        .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Submit assignment"))
     }
+    click on submitLink
 
     When("I upload a file for submission")
     click on find(cssSelector("input[type=file]")).get
