@@ -44,12 +44,15 @@
 
   <script>
     jQuery(function ($) {
-      $('#edit-monitoring-point-form').on('dirty.areYouSure', function () {
-        $('#point-conditions-changed-alert').removeClass('hidden');
-      }).on('clean.areYouSure', function () {
-        $('#point-conditions-changed-alert').addClass('hidden');
-      }).areYouSure({
+      var $form = $('#edit-monitoring-point-form');
+      var $pointTypes = $form.find('[name=pointType]');
+
+      $form.areYouSure({
         silent: true
+      }).on('input change', function () {
+        var showConditionsChangedAlert = $form.is('.dirty') && $pointTypes.filter(':checked').val() !== 'standard';
+
+        $('#point-conditions-changed-alert').toggleClass('hidden', !showConditionsChangedAlert);
       });
     });
   </script>

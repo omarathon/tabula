@@ -16,32 +16,34 @@ object ReleaseToMarkerNotification {
 
   def renderCollectSubmissions(
     assignment: Assignment,
-    numAllocated: Int,
+    allocatedStudentsCount: Int,
     studentsAtStagesCount: Seq[StudentAtStagesCount],
-    numReleasedFeedbacks: Int,
-    numReleasedSubmissionsFeedbacks: Int,
-    numReleasedNoSubmissionsFeedbacks: Int,
+    feedbacksCount: Int,
+    submissionsCount: Int,
+    noSubmissionsWithExtensionCount: Int,
+    noSubmissionsWithoutExtensionCount: Int,
     workflowVerb: String,
   ): FreemarkerModel = FreemarkerModel(templateLocation,
     Map(
       "assignment" -> assignment,
-      "numAllocated" -> numAllocated,
+      "allocatedStudentsCount" -> allocatedStudentsCount,
       "studentsAtStagesCount" -> studentsAtStagesCount,
-      "numReleasedFeedbacks" -> numReleasedFeedbacks,
-      "numReleasedSubmissionsFeedbacks" -> numReleasedSubmissionsFeedbacks,
-      "numReleasedNoSubmissionsFeedbacks" -> numReleasedNoSubmissionsFeedbacks,
+      "feedbacksCount" -> feedbacksCount,
+      "submissionsCount" -> submissionsCount,
+      "noSubmissionsWithExtensionCount" -> noSubmissionsWithExtensionCount,
+      "noSubmissionsWithoutExtensionCount" -> noSubmissionsWithoutExtensionCount,
       "workflowVerb" -> workflowVerb
     )
   )
 
   def renderNoCollectingSubmissions(
     assignment: Assignment,
-    numReleasedFeedbacks: Int,
+    feedbacksCount: Int,
     workflowVerb: String
   ): FreemarkerModel = {
     FreemarkerModel(templateLocation, Map(
       "assignment" -> assignment,
-      "numReleasedFeedbacks" -> numReleasedFeedbacks,
+      "feedbacksCount" -> feedbacksCount,
       "workflowVerb" -> workflowVerb
     ))
   }
@@ -73,24 +75,29 @@ class ReleaseToMarkerNotification
   def content: FreemarkerModel = if (assignment.collectSubmissions) {
     ReleaseToMarkerNotification.renderCollectSubmissions(
       assignment = assignment,
-      numAllocated = helper.studentsAllocatedToThisMarker.size,
+      allocatedStudentsCount = helper.studentsAllocatedToThisMarker.size,
       studentsAtStagesCount = helper.studentsAtStagesCount,
-      numReleasedFeedbacks = items.size,
-      numReleasedSubmissionsFeedbacks = helper.submissionsCount,
-      numReleasedNoSubmissionsFeedbacks = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount,
+      feedbacksCount = items.size,
+      submissionsCount = helper.submissionsCount,
+      noSubmissionsWithExtensionCount = helper.extensionsCount - helper.submissionsWithExtensionCount,
+      noSubmissionsWithoutExtensionCount = {
+        val noSumbmissionCount = helper.studentsAllocatedToThisMarker.size - helper.submissionsCount
+        val noSubmissionWithExtension = helper.extensionsCount - helper.submissionsWithExtensionCount
+        noSumbmissionCount - noSubmissionWithExtension
+      },
       workflowVerb = workflowVerb
     )
   } else {
     ReleaseToMarkerNotification.renderNoCollectingSubmissions(
       assignment = assignment,
-      numReleasedFeedbacks = items.size,
+      feedbacksCount = items.size,
       workflowVerb = workflowVerb
     )
   }
 
   def url: String = Routes.admin.assignment.markerFeedback(assignment, recipient)
 
-  def urlTitle = s"${workflowVerb} the assignment '${assignment.module.code.toUpperCase} - ${assignment.name}'"
+  def urlTitle = s"$workflowVerb the assignment '${assignment.module.code.toUpperCase} - ${assignment.name}'"
 
   priority = Warning
 

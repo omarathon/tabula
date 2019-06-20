@@ -42,7 +42,7 @@ object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendat
 
   case object FurtherSit extends AssessmentSpecificRecommendation(
     description = "Allow resit or resubmission as a first attempt",
-    helpText = "Allow a further sit (examination)/submit (assessed work) opportunity. This would be as a first attempt so marks will not be capped and there will be a further opportunity to remedy failure. Any marks achieved in the subsequent attempt will count as the original mark."
+    helpText = "Allow a further sit (examination)/submit (assessed work) opportunity. This would be as a first attempt so marks will not be capped and there will be a further opportunity to remedy failure. Any marks achieved in the first attempt will count as the original mark."
   )
 
   case object DeferExams extends MitCircsExamBoardRecommendation(
@@ -72,7 +72,7 @@ object MitCircsExamBoardRecommendation extends Enum[MitCircsExamBoardRecommendat
 
   case object CarryMitigationForward extends MitCircsExamBoardRecommendation(
     description = "Carry mitigation forward",
-    helpText = "No action is required in terms of progress decisions, but the circumstances will be carried forward and be considered when determining the degree classification at the relevant level and at a future meeting of the Board of Examiners."
+    helpText = "No action is required in terms of progress decisions, but the circumstances will be carried forward and be considered when determining the degree classification at the relevant level and at a future meeting of the final year Board of Examiners."
   )
 
   case object Other extends MitCircsExamBoardRecommendation(

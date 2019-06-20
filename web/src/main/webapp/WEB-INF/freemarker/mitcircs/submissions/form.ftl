@@ -59,7 +59,9 @@
                   <h6 class="modal-title">Submit mitigating circumstances</h6>
                 </@modal.header>
                 <@modal.body>
-                  I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.
+                  <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
+
+                  <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
                 </@modal.body>
                 <@modal.footer>
                   <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>

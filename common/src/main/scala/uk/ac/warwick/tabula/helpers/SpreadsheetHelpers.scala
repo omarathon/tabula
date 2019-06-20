@@ -11,7 +11,6 @@ import org.apache.poi.xssf.model.StylesTable
 import org.apache.poi.xssf.streaming.SXSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFComment
 import org.joda.time.{DateTime, LocalDate}
-import org.xml.sax.helpers.XMLReaderFactory
 import org.xml.sax.{InputSource, XMLReader}
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.Department
@@ -158,7 +157,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
   var currentRow: mutable.Map[String, String] = scala.collection.mutable.Map[String, String]()
 
   def fetchSheetParser: XMLReader = {
-    val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+    val parser = XmlUtils.getXmlReader
     parser.setContentHandler(xssfHandler)
     parser
   }

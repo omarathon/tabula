@@ -29,7 +29,7 @@
         <@modal.footer>
           <form class="double-submit-protection">
             <button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-              Submit for approval
+              Schedule
             </button>
             <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
           </form>
@@ -92,7 +92,7 @@
           <#-- separate page, not modal -->
             <div class="form-actions">
               <button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-                Submit for approval
+                Schedule
               </button>
               <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
             </div>

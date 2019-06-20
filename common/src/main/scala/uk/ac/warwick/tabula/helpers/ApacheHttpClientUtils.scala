@@ -20,6 +20,7 @@ import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 import org.apache.http._
 import play.api.libs.json.{JsValue, Json}
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.xml.XML
 
@@ -69,7 +70,9 @@ trait ApacheHttpClientUtils {
     gzipResponseHandler { case (entity, in) =>
       val charset = Option(ContentType.getLenientOrDefault(entity).getCharset).getOrElse(StandardCharsets.UTF_8)
       val reader = new InputStreamReader(in, charset)
-      val xml = XML.withSAXParser(ApacheHttpClientUtils.saxParserFactory.newSAXParser).load(reader)
+      val parser = ApacheHttpClientUtils.saxParserFactory.newSAXParser
+      parser.getParser.setEntityResolver(new SecureXmlEntityResolver)
+      val xml = XML.withSAXParser(parser).load(reader)
       block(xml)
     }
 

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services.attendancemonitoring
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, Module, StudentMember}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 
@@ -26,10 +26,15 @@ class AttendanceMonitoringEventAttendanceServiceMissedPointTest extends TestBase
 
     val student: StudentMember = Fixtures.student("1234")
 
+    val department = new Department
+    department.autoMarkMissedMonitoringPoints = true
+
     val module1: Module = Fixtures.module("aa101")
     module1.id = "aa101"
+    module1.adminDepartment = department
     val module2: Module = Fixtures.module("aa202")
     module2.id = "aa202"
+    module2.adminDepartment = department
     mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
     mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)
 
