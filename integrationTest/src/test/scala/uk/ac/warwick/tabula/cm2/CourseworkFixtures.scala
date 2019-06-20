@@ -422,8 +422,12 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
   def submitAssignment(user: LoginDetails, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true): Unit = as(user) {
     if (mustBeEnrolled) {
-      linkText(assignmentName).findElement should be(defined)
-      click on linkText(assignmentName)
+      val submitLink = eventually {
+        id("main").webElement.findElement(By.xpath("//*[contains(text(),'" + assignmentName + "')]"))
+          .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Submit assignment"))
+      }
+      click on submitLink
+
       currentUrl should endWith(assignmentId)
     } else {
       // Just go straight to the submission URL
