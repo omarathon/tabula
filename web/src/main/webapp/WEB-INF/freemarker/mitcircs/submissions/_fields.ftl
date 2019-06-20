@@ -207,12 +207,13 @@
   </div>
 </@mitcirc.question_section>
 
-<@mitcirc.question_section
-  question = "Details"
-  hint = "a. Please provide further details of the mitigating circumstances and how they have affected your assessments.
-          b. Please include anything that you've done, or that's being done by other people, to help with your issues.
-          c. If you're getting treatment or other support which will eventually resolve your issues, please tell us something about how and when you expect this to take place."
->
+<@mitcirc.question_section question = "Details">
+  <ol class="mitcircs-form__fields__section__hint">
+    <li>Please provide further details of the mitigating circumstances and how they have affected your assessments.</li>
+    <li>Please include anything that you've done, or that's being done by other people, to help with your issues.</li>
+    <li>If you're getting treatment or other support which will eventually resolve your issues, please tell us something about how and when you expect this to take place.</li>
+  </ol>
+
   <@bs3form.form_group "reason">
     <@f.textarea path="reason" cssClass="form-control" rows="5" />
     <@bs3form.errors path="reason" />
