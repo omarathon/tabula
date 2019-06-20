@@ -33,7 +33,7 @@ class ManageRoleTag extends TemplateDirectiveModel {
     loopVars: Array[TemplateModel],
     body: TemplateDirectiveBody): Unit = {
 
-    val wrapper = env.getObjectWrapper()
+    val wrapper = env.getObjectWrapper
 
     val user = RequestInfo.fromThread.get.user
 
@@ -41,24 +41,29 @@ class ManageRoleTag extends TemplateDirectiveModel {
     val roleDefinition = unwrap(params.get("roleDefinition")).asInstanceOf[RoleDefinition]
     val roleName = unwrap(params.get("roleName")).asInstanceOf[String]
     val permissionName = unwrap(params.get("permissionName")).asInstanceOf[String]
+    val allowUnassignableRoles = unwrap(params.get("allowUnassignableRoles")).asInstanceOf[Boolean]
     val scope = unwrap(params.get("scope")).asInstanceOf[PermissionsTarget]
 
     if (body == null) {
-      throw new TemplateException("ManageRoleTag: must have a body", env);
+      throw new TemplateException("ManageRoleTag: must have a body", env)
     }
 
     if (permissionName != null) {
       val perm =
         if (permission != null) permission
         else permissionsConverter.convertToObject(permissionName)
-      val canDelegate = securityService.canDelegate(user, perm, scope) || user.god
+      val canDelegate =
+        (
+          (allowUnassignableRoles && securityService.can(user, perm, scope)) ||
+          (!allowUnassignableRoles && securityService.canDelegate(user, perm, scope))
+        ) || user.god
 
       val deniedPermissions =
         if (canDelegate) Seq()
         else Seq(perm)
 
-      env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
-      env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
+      env.getCurrentNamespace.put("can_delegate", wrapper.wrap(canDelegate))
+      env.getCurrentNamespace.put("denied_permissions", wrapper.wrap(deniedPermissions))
     } else if (roleDefinition != null || roleName != null) {
       val definition =
         if (roleDefinition != null) roleDefinition
@@ -71,13 +76,13 @@ class ManageRoleTag extends TemplateDirectiveModel {
 
       val canDelegate = deniedPermissions.isEmpty || user.god
 
-      env.getCurrentNamespace().put("can_delegate", wrapper.wrap(canDelegate))
-      env.getCurrentNamespace().put("denied_permissions", wrapper.wrap(deniedPermissions))
+      env.getCurrentNamespace.put("can_delegate", wrapper.wrap(canDelegate))
+      env.getCurrentNamespace.put("denied_permissions", wrapper.wrap(deniedPermissions))
     } else {
       throw new TemplateException("ManageRoleTag: Either permissionName or roleName must be specified", env)
     }
 
-    body.render(env.getOut())
+    body.render(env.getOut)
   }
 
   def unwrap(obj: Any): AnyRef = {

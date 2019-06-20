@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.sysadmin
 
-import scala.collection.JavaConverters._
+import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import javax.validation.Valid
-import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, GrantRoleCommandState, GrantRoleCommand, RevokeRoleCommand}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.roles.{RoleDefinition, DepartmentalAdministratorRoleDefinition}
+import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+
+import scala.collection.JavaConverters._
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments"))
@@ -31,13 +29,10 @@ class SysadminDeptDetailsController extends BaseSysadminController {
 
 trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 
-  type GrantRoleCommand = Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department]
-  type RevokeRoleCommand = Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department]
-
-  @ModelAttribute("addCommand") def addCommandModel(@PathVariable department: Department): GrantRoleCommand =
+  @ModelAttribute("addCommand") def addCommandModel(@PathVariable department: Department): GrantRoleCommand.Command[Department] =
     GrantRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
-  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable department: Department) =
+  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable department: Department): RevokeRoleCommand.Command[Department] =
     RevokeRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
 
   def form(@PathVariable department: Department): Mav = {
@@ -76,7 +71,7 @@ class SysadminDepartmentAddPermissionController extends BaseSysadminController w
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=add"))
-  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors): Mav = {
+  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand.Command[Department], errors: Errors): Mav = {
     val department = command.scope
     if (errors.hasErrors) {
       form(department)
@@ -95,7 +90,7 @@ class SysadminDepartmentRemovePermissionController extends BaseSysadminControlle
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=remove"))
-  def addPermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand, errors: Errors): Mav = {
+  def addPermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand.Command[Department], errors: Errors): Mav = {
     val department = command.scope
     if (errors.hasErrors) {
       form(department)

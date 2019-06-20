@@ -151,7 +151,7 @@
                 ${grantedPermission.permission.name}
               </#if>
             </#compress></#assign>
-            <@manageRole scope=target permissionName=permissionName>
+            <@manageRole scope=target permissionName=permissionName allowUnassignableRoles=false>
               <#list grantedPermission.users.users as u>
                 <tr>
                   <td class="user">

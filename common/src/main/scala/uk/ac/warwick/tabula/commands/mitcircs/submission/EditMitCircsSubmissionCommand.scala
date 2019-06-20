@@ -86,6 +86,11 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     // reset approvedOn when changes are made by others or drafts are saved
     if(isSelf && approve) {
       submission.approveAndSubmit()
+
+      // Remove any existing share permissions
+      val removeSharingCommand = MitCircsShareSubmissionCommand.remove(submission, currentUser)
+      removeSharingCommand.usercodes.addAll(removeSharingCommand.grantedRole.toSeq.flatMap(_.users.knownType.allIncludedIds).asJava)
+      removeSharingCommand.apply()
     } else if (isSelf) {
       submission.saveAsDraft()
     } else {

@@ -1,27 +1,27 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, CommandInternal, Describable}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
-import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
-import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect._
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
+import scala.collection.JavaConverters._
+import scala.reflect._
+
 object RevokePermissionsCommand {
-  def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A] =
+  type Result[A <: PermissionsTarget] = GrantedPermission[A]
+  type Command[A <: PermissionsTarget] = Appliable[Result[A]] with PermissionsCommandRequest with PermissionsCommandState[A] with SelfValidating
+
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with PermissionsCommandRequestMutablePermission =
     new RevokePermissionsCommandInternal(scope)
       with ComposableCommand[GrantedPermission[A]]
+      with PermissionsCommandRequestMutablePermission
       with RevokePermissionsCommandPermissions
       with RevokePermissionsCommandValidation
       with RevokePermissionsCommandDescription[A]
@@ -30,10 +30,11 @@ object RevokePermissionsCommand {
       with AutowiringUserLookupComponent
 }
 
-class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
-  extends CommandInternal[GrantedPermission[A]] with RevokePermissionsCommandState[A] {
-
-  self: PermissionsServiceComponent with UserLookupComponent =>
+abstract class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
+  extends CommandInternal[GrantedPermission[A]] with PermissionsCommandState[A] {
+  self: PermissionsCommandRequest
+    with PermissionsServiceComponent
+    with UserLookupComponent =>
 
   lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
@@ -55,12 +56,12 @@ class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sc
 }
 
 trait RevokePermissionsCommandValidation extends SelfValidating {
-  self: RevokePermissionsCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+  self: PermissionsCommandRequest
+    with PermissionsCommandState[_ <: PermissionsTarget]
+    with SecurityServiceComponent =>
 
   def validate(errors: Errors) {
-    if (usercodes.asScala.forall {
-      _.isEmptyOrWhitespace
-    }) {
+    if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
       grantedPermission.map(_.users).foreach { users =>
@@ -82,20 +83,8 @@ trait RevokePermissionsCommandValidation extends SelfValidating {
   }
 }
 
-trait RevokePermissionsCommandState[A <: PermissionsTarget] {
-  self: PermissionsServiceComponent =>
-
-  def scope: A
-
-  var permission: Permission = _
-  var usercodes: JList[String] = JArrayList()
-  var overrideType: Boolean = _
-
-  def grantedPermission: Option[GrantedPermission[A]]
-}
-
 trait RevokePermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: RevokePermissionsCommandState[_ <: PermissionsTarget] =>
+  self: PermissionsCommandState[_ <: PermissionsTarget] =>
 
   override def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.RolesAndPermissions.Delete, mandatory(scope))
@@ -103,13 +92,17 @@ trait RevokePermissionsCommandPermissions extends RequiresPermissionsChecking wi
 }
 
 trait RevokePermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
-  self: RevokePermissionsCommandState[A] =>
+  self: PermissionsCommandRequest
+    with PermissionsCommandState[A] =>
+
+  override lazy val eventName: String = "RevokePermissions"
 
   def describe(d: Description): Unit = d.properties(
     "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
     "usercodes" -> usercodes.asScala.mkString(","),
     "permission" -> permission.getName,
-    "overrideType" -> overrideType)
+    "overrideType" -> overrideType
+  )
 }
 
 

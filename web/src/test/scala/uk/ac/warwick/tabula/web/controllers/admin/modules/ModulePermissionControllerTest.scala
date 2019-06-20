@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.admin.modules
 
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
+import org.springframework.validation.{BindException, Errors}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand, RoleCommandRequestMutableRoleDefinition, RoleCommandState}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
@@ -33,14 +33,14 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
   @Test def createCommands {
     Seq(listController, addController, removeController).foreach { controller =>
       new Fixture {
-        val addCommand: controller.GrantRoleCommand = controller.addCommandModel(module)
-        val removeCommand: controller.RevokeRoleCommand = controller.removeCommandModel(module)
+        val addCommand: GrantRoleCommand.Command[Module] = controller.addCommandModel(module)
+        val removeCommand: RevokeRoleCommand.Command[Module] = controller.removeCommandModel(module)
 
         addCommand should be(anInstanceOf[Appliable[GrantedRole[Module]]])
-        addCommand should be(anInstanceOf[GrantRoleCommandState[Module]])
+        addCommand should be(anInstanceOf[RoleCommandState[Module]])
 
         removeCommand should be(anInstanceOf[Appliable[GrantedRole[Module]]])
-        removeCommand should be(anInstanceOf[RevokeRoleCommandState[Module]])
+        removeCommand should be(anInstanceOf[RoleCommandState[Module]])
       }
     }
   }
@@ -74,7 +74,7 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(module, ModuleManagerRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Module]] with GrantRoleCommandState[Module] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Module]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Module] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Module = module
@@ -82,6 +82,8 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(addedRole)
 
         def apply: GrantedRole[Module] = addedRole
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -104,7 +106,7 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(module, ModuleManagerRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Module]] with GrantRoleCommandState[Module] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Module]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Module] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Module = module
@@ -115,6 +117,8 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           null
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -136,7 +140,7 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(module, ModuleManagerRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Module]]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Module]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Module] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Module = module
@@ -144,6 +148,8 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(removedRole)
 
         def apply: Option[GrantedRole[Module]] = Some(removedRole)
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -166,7 +172,7 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(module, ModuleManagerRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Module]]] with RevokeRoleCommandState[Module] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Module]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Module] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Module = module
@@ -177,6 +183,8 @@ class ModulePermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           None
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")

@@ -400,6 +400,7 @@ object Permissions {
     case object Manage extends Permission("List, create, update and delete mitigating circumstances submissions and associated messages.")
     case object Read extends Permission("View the details and messages associated with a mitigating circumstances submission")
     case object ViewGrading extends Permission("View the grading of an existing mitigating circumstances submission")
+    case object Share extends Permission("Share draft mitigating circumstances submissions")
   }
 
   object MitigatingCircumstancesPanel {
