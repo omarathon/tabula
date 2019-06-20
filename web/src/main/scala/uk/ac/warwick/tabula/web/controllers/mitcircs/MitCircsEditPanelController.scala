@@ -20,7 +20,7 @@ class MitCircsEditPanelController extends BaseController {
   def command(@PathVariable panel: MitigatingCircumstancesPanel): EditMitCircsPanelCommand.Command =
     EditMitCircsPanelCommand(mandatory(panel))
 
-  @RequestMapping
+  @RequestMapping(params = Array("!submit"))
   def form(@PathVariable panel: MitigatingCircumstancesPanel): Mav =
     Mav("mitcircs/panel/edit")
       .crumbs(
@@ -29,7 +29,7 @@ class MitCircsEditPanelController extends BaseController {
         MitCircsBreadcrumbs.Admin.Panel(panel),
       )
 
-  @PostMapping
+  @PostMapping(params = Array("submit"))
   def submit(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, errors: Errors, @PathVariable panel: MitigatingCircumstancesPanel): Mav =
     if (errors.hasErrors) form(panel)
     else {

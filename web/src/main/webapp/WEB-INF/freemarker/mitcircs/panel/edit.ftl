@@ -14,7 +14,7 @@
     </@bs3form.labelled_form_group>
 
     <div class="submit-buttons">
-      <button type="submit" class="btn btn-primary">Edit panel</button>
+      <button type="submit" class="btn btn-primary" name="submit">Edit panel</button>
       <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewPanel panel/>">Cancel</a>
     </div>
   </@f.form>
