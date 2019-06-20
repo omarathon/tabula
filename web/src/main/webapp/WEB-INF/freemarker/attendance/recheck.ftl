@@ -31,22 +31,22 @@
             <#if command.otherToAttended?has_content>
               <p>
                   <#if command.otherToAttended?size == 1>
-                    1 student now meets
+                    1 more student meets
                   <#else>
-                      ${command.otherToAttended?size?c} students now meet
+                      ${command.otherToAttended?size?c} more students meet
                   </#if>
-                the conditions to be automatically marked as attended.
+                the conditions to be automatically marked as 'attended' for this monitoring point.
               </p>
             </#if>
 
             <#if command.attendedToOther?has_content>
               <p>
                   <#if command.attendedToOther?size == 1>
-                    1 student who is marked as attended no longer meets
+                    1 student no longer meets
                   <#else>
-                      ${command.attendedToOther?size?c} students who are marked as attended no longer meet
+                      ${command.attendedToOther?size?c} students no longer meet
                   </#if>
-                the conditions to be automatically marked as attended.
+                the conditions to be automatically marked as 'attended' for this monitoring point.
               </p>
             </#if>
 
