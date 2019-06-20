@@ -257,6 +257,7 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
 
     val proposedCheckpoint = buildCheckpoint(state = Attended)
     command.attendanceMonitoringEventAttendanceService.getCheckpoints(Seq(smallGroupEventAttendance)) returns Seq(proposedCheckpoint)
+    command.attendanceMonitoringEventAttendanceService.getMissedCheckpoints(Seq(smallGroupEventAttendance)) returns Nil
   }
 
   @Test def testSmallGroupEventAttendanceProposedChanges(): Unit = new SmallGroupEventFixture {
@@ -291,6 +292,7 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
 
     // The student has no small group attendance
     command.smallGroupService.findAttendanceForStudentsBetweenDates(Seq(student), academicYear, new LocalDate(2019, 1, 1).toDateTimeAtStartOfDay.toLocalDateTime, new LocalDate(2019, 1, 11).toDateTimeAtStartOfDay.toLocalDateTime) returns Nil
+    command.attendanceMonitoringEventAttendanceService.getMissedCheckpoints(Nil) returns Nil
 
     // No attendance means no checkpoints
     command.attendanceMonitoringEventAttendanceService.getCheckpoints(Nil) returns Nil

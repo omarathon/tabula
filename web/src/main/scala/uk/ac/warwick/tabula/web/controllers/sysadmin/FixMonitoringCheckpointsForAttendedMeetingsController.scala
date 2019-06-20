@@ -19,7 +19,7 @@ class FixMonitoringCheckpointsForAttendedMeetingsController extends BaseSysadmin
 
   @GetMapping
   def form: Mav = {
-    val checkpoints: Seq[AttendanceMonitoringCheckpoint] = meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints)
+    val checkpoints: Seq[AttendanceMonitoringCheckpoint] = meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints(_))
 
     Mav("sysadmin/fix-monitoring-checkpoints/form", Map(
       "checkpoints" -> checkpoints
