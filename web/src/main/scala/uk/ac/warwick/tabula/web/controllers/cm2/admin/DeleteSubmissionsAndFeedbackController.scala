@@ -13,30 +13,31 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/submissionsandfeedback/delete"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/submissionsandfeedback/delete"))
 class DeleteSubmissionsAndFeedbackController extends CourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment): DeleteSubmissionsAndFeedbackCommand.Command =
-		DeleteSubmissionsAndFeedbackCommand(assignment)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment): DeleteSubmissionsAndFeedbackCommand.Command =
+    DeleteSubmissionsAndFeedbackCommand(assignment)
 
-	@RequestMapping def redirectBackTo(@PathVariable assignment: Assignment) =
-		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+  @RequestMapping def redirectBackTo(@PathVariable assignment: Assignment) =
+    Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(@ModelAttribute("command") command: DeleteSubmissionsAndFeedbackCommand.Command, @PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/assignments/submissionsandfeedback/delete")
-			.crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
+  def showForm(@ModelAttribute("command") command: DeleteSubmissionsAndFeedbackCommand.Command, @PathVariable assignment: Assignment): Mav =
+    Mav("cm2/admin/assignments/submissionsandfeedback/delete")
+      .crumbsList(Breadcrumbs.assignment(assignment))
 
-	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@Valid @ModelAttribute("command") command: DeleteSubmissionsAndFeedbackCommand.Command, errors: Errors, @PathVariable assignment: Assignment): Mav =
-		if (errors.hasErrors) showForm(command, assignment)
-		else {
-			command.apply()
-			redirectBackTo(assignment)
-		}
+  @RequestMapping(method = Array(POST), params = Array("confirmScreen"))
+  def submit(@Valid @ModelAttribute("command") command: DeleteSubmissionsAndFeedbackCommand.Command, errors: Errors, @PathVariable assignment: Assignment): Mav =
+    if (errors.hasErrors) showForm(command, assignment)
+    else {
+      command.apply()
+      redirectBackTo(assignment)
+    }
 
 }

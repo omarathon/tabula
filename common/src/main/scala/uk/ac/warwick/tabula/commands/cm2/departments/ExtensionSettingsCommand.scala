@@ -16,86 +16,86 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import scala.collection.JavaConverters._
 
 object ExtensionSettingsCommand {
-	type Result = Department
-	type Command = Appliable[Result] with ExtensionSettingsCommandState with SelfValidating
+  type Result = Department
+  type Command = Appliable[Result] with ExtensionSettingsCommandState with SelfValidating
 
-	val AdminPermission = Permissions.Department.ManageExtensionSettings
+  val AdminPermission = Permissions.Department.ManageExtensionSettings
 
-	def apply(department: Department): Command =
-		new ExtensionSettingsCommandInternal(department)
-			with ComposableCommand[Result]
-			with ExtensionSettingsCommandPermissions
-			with ExtensionSettingsCommandValidation
-			with ExtensionSettingsCommandDescription
-			with AutowiringFeaturesComponent
-			with AutowiringModuleAndDepartmentServiceComponent
+  def apply(department: Department): Command =
+    new ExtensionSettingsCommandInternal(department)
+      with ComposableCommand[Result]
+      with ExtensionSettingsCommandPermissions
+      with ExtensionSettingsCommandValidation
+      with ExtensionSettingsCommandDescription
+      with AutowiringFeaturesComponent
+      with AutowiringModuleAndDepartmentServiceComponent
 }
 
 trait ExtensionSettingsCommandState {
-	def department: Department
+  def department: Department
 }
 
 trait ExtensionSettingsCommandRequest {
-	self: ExtensionSettingsCommandState =>
+  self: ExtensionSettingsCommandState =>
 
-	var allowExtensionRequests: Boolean = department.allowExtensionRequests
-	var extensionGuidelineSummary: String = department.extensionGuidelineSummary
-	var extensionGuidelineLink: String = department.extensionGuidelineLink
-	var extensionManagers: JList[String] = JArrayList()
-	extensionManagers.addAll(department.extensionManagers.knownType.includedUserIds.asJava)
+  var allowExtensionRequests: Boolean = department.allowExtensionRequests
+  var extensionGuidelineSummary: String = department.extensionGuidelineSummary
+  var extensionGuidelineLink: String = department.extensionGuidelineLink
+  var extensionManagers: JList[String] = JArrayList()
+  extensionManagers.addAll(department.extensionManagers.knownType.includedUserIds.asJava)
 }
 
 class ExtensionSettingsCommandInternal(val department: Department)
-	extends CommandInternal[Result] with ExtensionSettingsCommandState with ExtensionSettingsCommandRequest {
-	self: ModuleAndDepartmentServiceComponent with FeaturesComponent =>
+  extends CommandInternal[Result] with ExtensionSettingsCommandState with ExtensionSettingsCommandRequest {
+  self: ModuleAndDepartmentServiceComponent with FeaturesComponent =>
 
-	override def applyInternal(): Result = transactional() {
-		if (features.extensions) {
-			department.allowExtensionRequests = allowExtensionRequests
-			department.extensionGuidelineSummary = extensionGuidelineSummary
-			department.extensionGuidelineLink = extensionGuidelineLink
-			department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala
+  override def applyInternal(): Result = transactional() {
+    if (features.extensions) {
+      department.allowExtensionRequests = allowExtensionRequests
+      department.extensionGuidelineSummary = extensionGuidelineSummary
+      department.extensionGuidelineLink = extensionGuidelineLink
+      department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala.toSet
 
-			moduleAndDepartmentService.saveOrUpdate(department)
-		}
+      moduleAndDepartmentService.saveOrUpdate(department)
+    }
 
-		department
-	}
+    department
+  }
 }
 
 trait ExtensionSettingsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ExtensionSettingsCommandState =>
+  self: ExtensionSettingsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(AdminPermission, mandatory(department))
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(AdminPermission, mandatory(department))
 
 }
 
 trait ExtensionSettingsCommandValidation extends SelfValidating {
-	self: ExtensionSettingsCommandRequest with ExtensionSettingsCommandState =>
+  self: ExtensionSettingsCommandRequest with ExtensionSettingsCommandState =>
 
-	val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
+  val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
-	override def validate(errors: Errors): Unit = {
-		if (allowExtensionRequests) {
-			if (!(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)) {
-				errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
-			}
+  override def validate(errors: Errors): Unit = {
+    if (allowExtensionRequests) {
+      if (!(extensionGuidelineSummary.hasText || extensionGuidelineLink.hasText)) {
+        errors.rejectValue("allowExtensionRequests", "department.settings.noExtensionGuidelines")
+      }
 
-			val firstMarkersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers")
-			firstMarkersValidator.validate(errors)
-		}
+      val firstMarkersValidator = new UsercodeListValidator(extensionManagers, "extensionManagers")
+      firstMarkersValidator.validate(errors)
+    }
 
-		if (extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)) {
-			errors.rejectValue("extensionGuidelineLink", "department.settings.invalidURL")
-		}
-	}
+    if (extensionGuidelineLink.hasText && !extensionGuidelineLink.matches(validUrl)) {
+      errors.rejectValue("extensionGuidelineLink", "department.settings.invalidURL")
+    }
+  }
 }
 
 trait ExtensionSettingsCommandDescription extends Describable[Result] {
-	self: ExtensionSettingsCommandState =>
+  self: ExtensionSettingsCommandState =>
 
-	override lazy val eventName: String = "ExtensionSettings"
+  override lazy val eventName: String = "ExtensionSettings"
 
-	override def describe(d: Description): Unit = d.department(department)
+  override def describe(d: Description): Unit = d.department(department)
 }

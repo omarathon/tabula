@@ -17,39 +17,39 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/addpoints/template/{templateScheme}"))
 class ViewTemplateSchemePointsController extends AttendanceController with HasMonthNames with GroupsPoints with CourseworkPoints {
 
-	var attendanceService: AttendanceMonitoringService = Wire.auto[AttendanceMonitoringService]
+  var attendanceService: AttendanceMonitoringService = Wire.auto[AttendanceMonitoringService]
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable templateScheme: AttendanceMonitoringTemplate,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable department: Department
-	): DepartmentFindPointsResult = {
-		DepartmentFindPointsResult(mandatory(department), getGroupedPointsFromTemplate(mandatory(templateScheme), mandatory(academicYear)))
-	}
+  @ModelAttribute("command")
+  def command(
+    @PathVariable templateScheme: AttendanceMonitoringTemplate,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable department: Department
+  ): DepartmentFindPointsResult = {
+    DepartmentFindPointsResult(mandatory(department), getGroupedPointsFromTemplate(mandatory(templateScheme), mandatory(academicYear)))
+  }
 
-	@RequestMapping
-	def getTemplateSelection(
-		@ModelAttribute("command") cmd: DepartmentFindPointsResult,
-		@PathVariable templateScheme: AttendanceMonitoringTemplate,
-		@PathVariable department: Department
-	): Mav = {
-		Mav("attendance/manage/_displayfindpointresults",
-			"findResult" -> cmd.pointResult,
-			"templateScheme" -> templateScheme,
-			"command" -> cmd
-		).noLayoutIf(ajax)
-	}
+  @RequestMapping
+  def getTemplateSelection(
+    @ModelAttribute("command") cmd: DepartmentFindPointsResult,
+    @PathVariable templateScheme: AttendanceMonitoringTemplate,
+    @PathVariable department: Department
+  ): Mav = {
+    Mav("attendance/manage/_displayfindpointresults",
+      "findResult" -> cmd.pointResult,
+      "templateScheme" -> templateScheme,
+      "command" -> cmd
+    ).noLayoutIf(ajax)
+  }
 
 
-	def getGroupedPointsFromTemplate(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): FindPointsResult = {
-		val points = attendanceService.generatePointsFromTemplateScheme(templateScheme, academicYear)
-		templateScheme.pointStyle match {
-			case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map(), assignmentPoints(points))
-			case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points), assignmentPoints(points))
-			case _ => FindPointsResult(groupByTerm(points), groupByMonth(points), assignmentPoints(points))
-		}
-	}
+  def getGroupedPointsFromTemplate(templateScheme: AttendanceMonitoringTemplate, academicYear: AcademicYear): FindPointsResult = {
+    val points = attendanceService.generatePointsFromTemplateScheme(templateScheme, academicYear)
+    templateScheme.pointStyle match {
+      case AttendanceMonitoringPointStyle.Week => FindPointsResult(groupByTerm(points), Map(), assignmentPoints(points))
+      case AttendanceMonitoringPointStyle.Date => FindPointsResult(Map(), groupByMonth(points), assignmentPoints(points))
+      case _ => FindPointsResult(groupByTerm(points), groupByMonth(points), assignmentPoints(points))
+    }
+  }
 }
 
 case class DepartmentFindPointsResult(department: Department, pointResult: FindPointsResult)

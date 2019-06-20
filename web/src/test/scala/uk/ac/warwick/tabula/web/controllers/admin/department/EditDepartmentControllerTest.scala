@@ -9,45 +9,45 @@ import uk.ac.warwick.tabula.{ItemNotFoundException, Fixtures, Mockito, TestBase}
 
 class EditDepartmentControllerTest extends TestBase with Mockito {
 
-	val controller = new EditDepartmentController
+  val controller = new EditDepartmentController
 
-	@Test def createsCommand {
-		val department = Fixtures.department("in")
+  @Test def createsCommand {
+    val department = Fixtures.department("in")
 
-		val command = controller.command(department)
-		command.department should be (department)
+    val command = controller.command(department)
+    command.department should be(department)
 
-		command should be (anInstanceOf[Appliable[Department]])
-	}
+    command should be(anInstanceOf[Appliable[Department]])
+  }
 
-	@Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
-		controller.command(null)
-	}
+  @Test(expected = classOf[ItemNotFoundException]) def requiresDepartment {
+    controller.command(null)
+  }
 
-	@Test def form {
-		controller.showForm().viewName should be("admin/department/edit/form")
-	}
+  @Test def form {
+    controller.showForm().viewName should be("admin/department/edit/form")
+  }
 
-	@Test def submit {
-		val department = Fixtures.department("in-ug")
-		val command = mock[Appliable[Department] with EditDepartmentCommandState]
-		command.apply() returns (department)
+  @Test def submit {
+    val department = Fixtures.department("in-ug")
+    val command = mock[Appliable[Department] with EditDepartmentCommandState]
+    command.apply() returns (department)
 
-		val errors = new BindException(command, "command")
+    val errors = new BindException(command, "command")
 
-		controller.submit(command, errors).viewName should be (s"redirect:${Routes.admin.department(department)}")
+    controller.submit(command, errors).viewName should be(s"redirect:${Routes.admin.department(department)}")
 
-		verify(command, times(1)).apply()
-	}
+    verify(command, times(1)).apply()
+  }
 
-	@Test def validation {
-		val command = mock[Appliable[Department] with EditDepartmentCommandState]
-		val errors = new BindException(command, "command")
-		errors.reject("error")
+  @Test def validation {
+    val command = mock[Appliable[Department] with EditDepartmentCommandState]
+    val errors = new BindException(command, "command")
+    errors.reject("error")
 
-		controller.submit(command, errors).viewName should be("admin/department/edit/form")
+    controller.submit(command, errors).viewName should be("admin/department/edit/form")
 
-		verify(command, times(0)).apply()
-	}
+    verify(command, times(0)).apply()
+  }
 
 }

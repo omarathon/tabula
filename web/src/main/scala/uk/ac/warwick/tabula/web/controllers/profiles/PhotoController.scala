@@ -12,13 +12,13 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/profiles/view/photo/{member}.jpg"))
 class PhotoController extends ProfilesController {
 
-	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable member: Member) =
-		ViewProfilePhotoCommand(member)
+  @ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable member: Member) =
+    ViewProfilePhotoCommand(member)
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
-	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand): Mav = {
-		command.apply()
-	}
+  @RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand): Mav = {
+    command.apply()
+  }
 
 }
 
@@ -26,29 +26,33 @@ class PhotoController extends ProfilesController {
 @RequestMapping(value = Array("/profiles/view/photo/{member}/{relationshipType}/{agent}.jpg"))
 class StudentRelationshipPhotoController extends ProfilesController {
 
-	@ModelAttribute("viewStudentRelationshipPhotoCommand")
-	def command(
-		@PathVariable member: Member,
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable agent: String
-	): ViewStudentRelationshipPhotoCommand = {
-		mandatory(member) match {
-			case student: StudentMember =>
-				val relationships =
-					relationshipService.getAllPastAndPresentRelationships(student)
-						.filter { rel => rel.relationshipType == mandatory(relationshipType) && rel.agent == agent }
+  @ModelAttribute("viewStudentRelationshipPhotoCommand")
+  def command(
+    @PathVariable member: Member,
+    @PathVariable relationshipType: StudentRelationshipType,
+    @PathVariable agent: String
+  ): ViewStudentRelationshipPhotoCommand = {
+    mandatory(member) match {
+      case student: StudentMember =>
+        val relationships =
+          relationshipService.getAllPastAndPresentRelationships(student)
+            .filter { rel => rel.relationshipType == mandatory(relationshipType) && rel.agent == agent }
 
-				val relationship = relationships.find { _.isCurrent }.orElse(relationships.headOption)
+        val relationship = relationships.find {
+          _.isCurrent
+        }.orElse(relationships.headOption)
 
-				new ViewStudentRelationshipPhotoCommand(student, relationship.getOrElse { throw new ItemNotFoundException })
-			case _ =>
-				throw new ItemNotFoundException
-		}
-	}
+        new ViewStudentRelationshipPhotoCommand(student, relationship.getOrElse {
+          throw new ItemNotFoundException
+        })
+      case _ =>
+        throw new ItemNotFoundException
+    }
+  }
 
-	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
-	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand): Mav = {
-		command.apply()
-	}
+  @RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD), produces = Array(MediaType.IMAGE_JPEG_VALUE))
+  def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand): Mav = {
+    command.apply()
+  }
 
 }

@@ -1,0 +1,1 @@
+alter table mitigatingcircumstancessubmission add column pendingEvidence bytea;

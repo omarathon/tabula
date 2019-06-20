@@ -11,23 +11,26 @@ import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/{student}"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}"))
 class DownloadFeedbackInProfileController extends CourseworkController {
 
-	var feedbackService: FeedbackService = Wire[FeedbackService]
+  var feedbackService: FeedbackService = Wire[FeedbackService]
 
-	@ModelAttribute("downloadFeedbackCommand")
-	def command(@PathVariable assignment: Assignment,  @PathVariable student: Member) =
-		DownloadFeedbackCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
+  @ModelAttribute("downloadFeedbackCommand")
+  def command(@PathVariable assignment: Assignment, @PathVariable student: Member) =
+    DownloadFeedbackCommand(assignment, mandatory(feedbackService.getAssignmentFeedbackByUsercode(assignment, student.userId).filter(_.released)), Some(student))
 
-	@RequestMapping(value = Array("/all/feedback.zip"))
-	def getAll(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command, @PathVariable student: Member): RenderableFile =
-		getOne(command)
+  @RequestMapping(value = Array("/all/feedback.zip"))
+  def getAll(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command, @PathVariable student: Member): RenderableFile =
+    getOne(command)
 
-	@RequestMapping(value = Array("/get/{filename}"))
-	def getOne(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command): RenderableFile =
-		command.apply().getOrElse { throw new ItemNotFoundException() }
+  @RequestMapping(value = Array("/get/{filename}"))
+  def getOne(@ModelAttribute("downloadFeedbackCommand") command: DownloadFeedbackCommand.Command): RenderableFile =
+    command.apply().getOrElse {
+      throw new ItemNotFoundException()
+    }
 
 }
 

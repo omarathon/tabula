@@ -3,67 +3,75 @@
 @import "profile-attendance";
 
 .scrollable-points-table {
-	th, td {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		vertical-align: middle;
-	}
-	th.profile_link-col {
-		width: 24px;
-	}
-	th.student-col {
-		width: 110px;
-	}
-	th.id-col {
-		width: 80px;
-	}
-	th.missed-col, th.unrecorded-col {
-		width: 46px;
-	}
-	th.record-col {
-		width: 60px;
-	}
+  th, td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
 
-	td.missed, td.unrecorded {
-		text-align: center;
-	}
+  th.profile_link-col {
+    width: 24px;
+  }
 
-	.left {
-		border-right: 1px solid @table-border-color;
-	}
-	.scrollable-table(500px, 40px, 40px);
+  th.student-col {
+    width: 110px;
+  }
+
+  th.id-col {
+    width: 80px;
+  }
+
+  th.missed-col, th.unrecorded-col {
+    width: 46px;
+  }
+
+  th.record-col {
+    width: 60px;
+  }
+
+  td.missed, td.unrecorded {
+    text-align: center;
+  }
+
+  .left {
+    border-right: 1px solid @table-border-color;
+  }
+
+  .scrollable-table(500px, 40px, 40px);
 }
 
 .striped-section.spacing-only {
-	margin: 0;
+  margin: 0;
 }
 
 details.groups {
-	.irrelevant {
-		opacity: 0.5;
-		.irrelevant {
-			opacity: 1;
-		}
-	}
+  .irrelevant {
+    opacity: 0.5;
+
+    .irrelevant {
+      opacity: 1;
+    }
+  }
 }
 
 table.manage-student-table {
-	tr.exclude {
-		color: #818285;
-		text-decoration: line-through;
-	}
-	tr.include {
-		color: #185c54;
-	}
+  tr.exclude {
+    color: #818285;
+    text-decoration: line-through;
+  }
+
+  tr.include {
+    color: #185c54;
+  }
 }
 
 .table-left-bordered tr {
-	> th, > td {
-		border-left: 1px solid @table-border-color;
+  > th, > td {
+    border-left: 1px solid @table-border-color;
 
-		&:first-child {
-			border-left: 0;
-		}
-	}
+    &:first-child {
+      border-left: 0;
+    }
+  }
 }

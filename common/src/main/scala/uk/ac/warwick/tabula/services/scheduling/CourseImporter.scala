@@ -18,115 +18,119 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 trait CourseImporter extends Logging {
-	var courseDao: CourseDao = Wire[CourseDao]
+  var courseDao: CourseDao = Wire[CourseDao]
 
-	private var courseMap: Map[String, Course] = _
+  private var courseMap: Map[String, Course] = _
 
-	def getCourseByCodeCached(code: String): Option[Course] = {
-		if (courseMap == null) updateCourseMap()
+  def getCourseByCodeCached(code: String): Option[Course] = {
+    if (courseMap == null) updateCourseMap()
 
-		code.maybeText.flatMap {
-			courseCode => courseMap.get(courseCode)
-		}
-	}
+    code.maybeText.flatMap {
+      courseCode => courseMap.get(courseCode)
+    }
+  }
 
-	protected def updateCourseMap() {
-		courseMap = slurpCourses()
-	}
+  protected def updateCourseMap() {
+    courseMap = slurpCourses()
+  }
 
-	private def slurpCourses(): Map[String, Course] = {
-		transactional(readOnly = true) {
-			logger.debug("refreshing SITS course map")
+  private def slurpCourses(): Map[String, Course] = {
+    transactional(readOnly = true) {
+      logger.debug("refreshing SITS course map")
 
-			(for {
-				courseCode <- courseDao.getAllCourseCodes
-				course <- courseDao.getByCode(courseCode)
-			} yield courseCode -> course).toMap
+      (for {
+        courseCode <- courseDao.getAllCourseCodes
+        course <- courseDao.getByCode(courseCode)
+      } yield courseCode -> course).toMap
 
-		}
-	}
+    }
+  }
 
-	def importCourses(): ImportAcademicInformationCommand.ImportResult = {
-		val results = buildImportCommands().map { _.apply()._2 }
+  def importCourses(): ImportAcademicInformationCommand.ImportResult = {
+    val results = buildImportCommands().map(_.apply()._2)
 
-		updateCourseMap()
+    updateCourseMap()
 
-		ImportAcademicInformationCommand.combineResults(results)
-	}
+    ImportAcademicInformationCommand.combineResults(results)
+  }
 
-	def buildImportCommands(): Seq[ImportCourseCommand]
+  def buildImportCommands(): Seq[ImportCourseCommand]
 }
 
 @Profile(Array("dev", "test", "production"))
 @Service
 class SitsCourseImporter extends CourseImporter {
-	import SitsCourseImporter._
 
-	var sits: DataSource = Wire[DataSource]("sitsDataSource")
+  import SitsCourseImporter._
 
-	lazy val coursesQuery = new CoursesQuery(sits)
+  var sits: DataSource = Wire[DataSource]("sitsDataSource")
 
-	override def buildImportCommands(): Seq[ImportCourseCommand] = {
-		coursesQuery.execute.toSeq
-	}
+  lazy val coursesQuery = new CoursesQuery(sits)
+
+  override def buildImportCommands(): Seq[ImportCourseCommand] = {
+    coursesQuery.execute.asScala
+  }
 }
 
 object SitsCourseImporter {
-	val sitsSchema: String = Wire.property("${schema.sits}")
+  val sitsSchema: String = Wire.property("${schema.sits}")
 
-	def GetCourse = f"""
+  def GetCourse =
+    f"""
 		select crs_code, crs_snam, crs_name, crs_titl, crs_dptc, crs_iuse from $sitsSchema.srs_crs
 		"""
 
-	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
-		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
-			new ImportCourseCommand(
-				CourseInfo(
-					code=resultSet.getString("crs_code"),
-					shortName=resultSet.getString("crs_snam"),
-					fullName=resultSet.getString("crs_name"),
-					title=resultSet.getString("crs_titl"),
-					departmentCode=resultSet.getString("crs_dptc"),
-					inUse=resultSet.getString("crs_iuse").equals("Y")
-				)
-			)
-	}
+  class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
+    compile()
+
+    override def mapRow(resultSet: ResultSet, rowNumber: Int) =
+      new ImportCourseCommand(
+        CourseInfo(
+          code = resultSet.getString("crs_code"),
+          shortName = resultSet.getString("crs_snam"),
+          fullName = resultSet.getString("crs_name"),
+          title = resultSet.getString("crs_titl"),
+          departmentCode = resultSet.getString("crs_dptc"),
+          inUse = resultSet.getString("crs_iuse").equals("Y")
+        )
+      )
+  }
 
 }
 
-case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String, inUse:Boolean)
+case class CourseInfo(code: String, shortName: String, fullName: String, title: String, departmentCode: String, inUse: Boolean)
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxCourseImporter extends CourseImporter {
 
-	override def buildImportCommands(): Seq[ImportCourseCommand] =
-		SandboxData.Departments
-			.flatMap { case (departmentCode, department) =>
-				department.routes.map { case (routeCode, route) =>
-					new ImportCourseCommand(
-						CourseInfo(
-							code="%c%s-%s".format(route.courseType.courseCodeChar, departmentCode.toUpperCase, routeCode.toUpperCase),
-							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
-							fullName=route.name,
-							title="%s %s".format(route.degreeType.description, route.name),
-							departmentCode=departmentCode.toUpperCase,
-							inUse=true
-						)
-					)
-				}
-			}
-			.toSeq
+  override def buildImportCommands(): Seq[ImportCourseCommand] =
+    SandboxData.Departments
+      .flatMap { case (departmentCode, department) =>
+        department.routes.map { case (routeCode, route) =>
+          new ImportCourseCommand(
+            CourseInfo(
+              code = "%c%s-%s".format(route.courseType.courseCodeChars.head, departmentCode.toUpperCase, routeCode.toUpperCase),
+              shortName = StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
+              fullName = route.name,
+              title = "%s %s".format(route.degreeType.description, route.name),
+              departmentCode = departmentCode.toUpperCase,
+              inUse = true
+            )
+          )
+        }
+      }
+      .toSeq
 
 }
 
 trait CourseImporterComponent {
-	def courseImporter: CourseImporter
+  def courseImporter: CourseImporter
 }
 
 trait AutowiringCourseImporterComponent extends CourseImporterComponent {
-	var courseImporter: CourseImporter = Wire[CourseImporter]
+  var courseImporter: CourseImporter = Wire[CourseImporter]
 }

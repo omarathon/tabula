@@ -11,47 +11,49 @@ import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.userlookup.User
 
 /**
- * Sends a message to one or more admins to let them know that the current
- * user thinks they should have access to an assignment.
- */
+  * Sends a message to one or more admins to let them know that the current
+  * user thinks they should have access to an assignment.
+  */
 object RequestAssignmentAccessCommand {
-	type Result = Seq[User]
-	type Command = Appliable[Result] with RequestAssignmentAccessCommandState
+  type Result = Seq[User]
+  type Command = Appliable[Result] with RequestAssignmentAccessCommandState
 
-	def apply(assignment: Assignment, user: CurrentUser): Command =
-		new RequestAssignmentAccessCommandInternal(assignment, user)
-			with ComposableCommand[Result]
-			with PubliclyVisiblePermissions
-			with RequestAssignmentAccessNotifications
-			with RequestAssignmentAccessDescription
+  def apply(assignment: Assignment, user: CurrentUser): Command =
+    new RequestAssignmentAccessCommandInternal(assignment, user)
+      with ComposableCommand[Result]
+      with PubliclyVisiblePermissions
+      with RequestAssignmentAccessNotifications
+      with RequestAssignmentAccessDescription
 }
 
 trait RequestAssignmentAccessCommandState {
-	def assignment: Assignment
-	def user: CurrentUser
+  def assignment: Assignment
 
-	// lookup the admin users - used to determine the recipients  for notifications
-	lazy val admins: Seq[User] = assignment.module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText)
+  def user: CurrentUser
+
+  // lookup the admin users - used to determine the recipients  for notifications
+  lazy val admins: Seq[User] = assignment.module.adminDepartment.owners.users.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 }
 
 class RequestAssignmentAccessCommandInternal(val assignment: Assignment, val user: CurrentUser) extends CommandInternal[Result]
-	with RequestAssignmentAccessCommandState {
-	override def applyInternal(): Result = admins
+  with RequestAssignmentAccessCommandState {
+  override def applyInternal(): Result = admins
 }
 
 trait RequestAssignmentAccessNotifications extends Notifies[Result, Assignment] {
-	self: RequestAssignmentAccessCommandState with NotificationHandling =>
+  self: RequestAssignmentAccessCommandState with NotificationHandling =>
 
-	override def emit(admins: Seq[User]): Seq[Cm2RequestAssignmentAccessNotification] = {
-		Seq(Notification.init(new Cm2RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
-	}
+  override def emit(admins: Seq[User]): Seq[Cm2RequestAssignmentAccessNotification] = {
+    Seq(Notification.init(new Cm2RequestAssignmentAccessNotification, user.apparentUser, Seq(assignment)))
+  }
 }
 
 trait RequestAssignmentAccessDescription extends Describable[Result] {
-	self: RequestAssignmentAccessCommandState =>
+  self: RequestAssignmentAccessCommandState =>
 
-	override lazy val eventName: String = "RequestAssignmentAccess"
+  override lazy val eventName: String = "RequestAssignmentAccess"
 
-	override def describe(d: Description): Unit = d.assignment(assignment)
-	override def describeResult(d: Description): Unit = d.property("admins" -> admins.flatMap(_.getUserId))
+  override def describe(d: Description): Unit = d.assignment(assignment)
+
+  override def describeResult(d: Description): Unit = d.property("admins" -> admins.flatMap(_.getUserId))
 }

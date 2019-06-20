@@ -19,54 +19,55 @@ import scala.collection.JavaConverters._
 @Controller
 class ReleaseAllSmallGroupSetsController extends GroupsController {
 
-	@ModelAttribute("moduleList") def newViewModel(@PathVariable academicYear: AcademicYear):ModuleListViewModel={
-		new ModuleListViewModel(academicYear)
-	}
-
-	@RequestMapping
-	def form(
-		@ModelAttribute("moduleList") model: ModuleListViewModel,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		showFlash: Boolean=false
-	): Mav = {
-		Mav("groups/admin/groups/bulk-release",
-			"department"->department,
-			"modules"->department.modules,
-			"showFlash"->showFlash,
-			"academicYear" -> academicYear
-		).crumbs(Breadcrumbs.Department(department, academicYear))
-	}
-
-  @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel, @PathVariable department:Department, @PathVariable academicYear:AcademicYear): Mav = {
-    model.createCommand(user.apparentUser).apply()
-    Redirect(Routes.admin.release(department, academicYear), "batchReleaseSuccess"->true)
+  @ModelAttribute("moduleList") def newViewModel(@PathVariable academicYear: AcademicYear): ModuleListViewModel = {
+    new ModuleListViewModel(academicYear)
   }
 
-	class ModuleListViewModel(val academicYear: AcademicYear) {
-		var checkedModules: JList[Module] = JArrayList()
-		var notifyStudents: JBoolean = true
-		var notifyTutors: JBoolean = true
-		var sendEmail: JBoolean = true
+  @RequestMapping
+  def form(
+    @ModelAttribute("moduleList") model: ModuleListViewModel,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    showFlash: Boolean = false
+  ): Mav = {
+    Mav("groups/admin/groups/bulk-release",
+      "department" -> department,
+      "modules" -> department.modules,
+      "showFlash" -> showFlash,
+      "academicYear" -> academicYear
+    ).crumbs(Breadcrumbs.Department(department, academicYear))
+  }
 
-		def smallGroupSets(): Seq[SmallGroupSet] = {
-			if (checkedModules == null) {
-				// if  no modules are selected, spring binds null, not an empty list :-(
-				Nil
-			} else {
-				checkedModules.asScala.flatMap(mod =>
-					mod.groupSets.asScala.filter(_.academicYear == academicYear)
-				)
-			}
-		}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    model.createCommand(user.apparentUser).apply()
+    Redirect(Routes.admin.release(department, academicYear), "batchReleaseSuccess" -> true)
+  }
 
-		def createCommand(user: User): Appliable[Seq[ReleasedSmallGroupSet]] = {
-			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
-			command.notifyStudents = notifyStudents
-			command.notifyTutors = notifyTutors
-			command.sendEmail = sendEmail
-			command
-		}
-	}
+  class ModuleListViewModel(val academicYear: AcademicYear) {
+    var checkedModules: JList[Module] = JArrayList()
+    var notifyStudents: JBoolean = true
+    var notifyTutors: JBoolean = true
+    var sendEmail: JBoolean = true
+
+    def smallGroupSets(): Seq[SmallGroupSet] = {
+      if (checkedModules == null) {
+        // if  no modules are selected, spring binds null, not an empty list :-(
+        Nil
+      } else {
+        checkedModules.asScala.flatMap(mod =>
+          mod.groupSets.asScala.filter(_.academicYear == academicYear)
+        )
+      }
+    }
+
+    def createCommand(user: User): Appliable[Seq[ReleasedSmallGroupSet]] = {
+      val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
+      command.notifyStudents = notifyStudents
+      command.notifyTutors = notifyTutors
+      command.sendEmail = sendEmail
+      command
+    }
+  }
+
 }

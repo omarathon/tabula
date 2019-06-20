@@ -8,16 +8,16 @@ case class LoggedInRole(user: User) extends BuiltInRole(LoggedInRoleDefinition, 
 
 case object LoggedInRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Logged in"
+  override def description = "Logged in"
 
-	GrantsGlobalPermission(
-		Notification.Dismiss, // TAB-1959
-		Module.ViewTimetable
-	)
+  GrantsGlobalPermission(
+    Notification.Dismiss, // TAB-1959
+    Module.ViewTimetable
+  )
 
-	GrantsScopelessPermission(
-		UserPicker, // TAB-2951
-		MonitoringPointTemplates.View
-	)
+  GrantsScopelessPermission(
+    UserPicker, // TAB-2951
+    MonitoringPointTemplates.View
+  )
 
 }

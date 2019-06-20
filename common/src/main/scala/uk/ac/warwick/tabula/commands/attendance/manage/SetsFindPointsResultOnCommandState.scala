@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.commands.attendance.manage
 
 trait SetsFindPointsResultOnCommandState {
 
-	self: FindPointsResultCommandState =>
+  self: FindPointsResultCommandState =>
 
-	def setFindPointsResult(result: FindPointsResult) {
-		findPointsResult = result
-	}
+  def setFindPointsResult(result: FindPointsResult) {
+    findPointsResult = result
+  }
 
 }
 
 trait FindPointsResultCommandState {
-	var findPointsResult: FindPointsResult = _
+  var findPointsResult: FindPointsResult = _
 }

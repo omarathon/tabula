@@ -7,19 +7,19 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 trait MarkingWorkflowPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	def markingWorkflow: CM2MarkingWorkflow
+  def markingWorkflow: CM2MarkingWorkflow
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MarkingWorkflow.Manage, markingWorkflow)
+  }
 }
 
 trait MarkingWorkflowDepartmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	def department: Department
+  def department: Department
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MarkingWorkflow.Manage, department)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.MarkingWorkflow.Manage, department)
+  }
 }
 

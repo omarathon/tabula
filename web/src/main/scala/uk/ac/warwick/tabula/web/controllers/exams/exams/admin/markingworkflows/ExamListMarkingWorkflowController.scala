@@ -12,25 +12,25 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 
 @Controller
-@RequestMapping(value=Array("/exams/exams/admin/department/{department}/markingworkflows"))
+@RequestMapping(value = Array("/exams/exams/admin/department/{department}/markingworkflows"))
 class ExamListMarkingWorkflowController extends ExamsController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = true)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department) = ListMarkingWorkflowCommand(department, isExam = true)
 
-	@RequestMapping
-	def list(
-		@ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]],
-		@PathVariable department: Department
-	): Mav = {
-		Mav("exams/exams/admin/markingworkflows/list",
-			"markingWorkflowInfo" -> cmd.apply(),
-			"isExams" -> true
-		).crumbs(Breadcrumbs.Exams.Department(
-			department,
-			retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())
-		))
-	}
+  @RequestMapping
+  def list(
+    @ModelAttribute("command") cmd: Appliable[Seq[ListMarkingWorkflowCommandResult]],
+    @PathVariable department: Department
+  ): Mav = {
+    Mav("exams/exams/admin/markingworkflows/list",
+      "markingWorkflowInfo" -> cmd.apply(),
+      "isExams" -> true
+    ).crumbs(Breadcrumbs.Exams.Department(
+      department,
+      retrieveActiveAcademicYear(None).getOrElse(AcademicYear.now())
+    ))
+  }
 
 }

@@ -1,63 +1,65 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class SubmissionTest extends PersistenceTestBase {
 
-	@Test def allAttachments() {
-		val submission = new Submission
-		submission.allAttachments.size should be (0)
-	}
+  @Test def allAttachments() {
+    val submission = new Submission
+    submission.allAttachments.size should be(0)
+  }
 
-	@Test def tab3614() = transactional{tx=>
-		// TAB-667
-		val orphanAttachment = flushing(session) {
-			val attachment = new FileAttachment
+  @Test def tab3614(): Unit = transactional { tx =>
+    // TAB-667
+    val orphanAttachment = flushing(session) {
+      val attachment = new FileAttachment
 
-			session.save(attachment)
-			attachment
-		}
+      session.save(attachment)
+      attachment
+    }
 
-		val (submission, submissionAttachment) = flushing(session) {
-			val submission = new Submission
-			submission._universityId = "0000001"
-			submission.usercode = "steve"
+    val (submission, submissionAttachment) = flushing(session) {
+      val submission = new Submission
+      submission._universityId = "0000001"
+      submission.usercode = "steve"
 
-			val assignment = new Assignment
-			session.save(assignment)
+      val assignment = Fixtures.assignment("Steven")
+      session.save(assignment)
 
-			submission.assignment = assignment
+      submission.assignment = assignment
 
-			session.save(submission)
+      session.save(submission)
 
-			val attachment = new FileAttachment
-			val ssv = SavedFormValue.withAttachments(submission, "name", Set(attachment))
-			submission.values.add(ssv)
+      val attachment = new FileAttachment
+      val ssv = SavedFormValue.withAttachments(submission, "name", Set(attachment))
+      submission.values.add(ssv)
 
-			session.saveOrUpdate(submission)
-			(submission, attachment)
-		}
+      session.saveOrUpdate(submission)
+      (submission, attachment)
+    }
 
-		// Ensure everything's been persisted
-		orphanAttachment.id should not be null
-		submission.id should not be null
-		submissionAttachment.id should not be null
+    // Ensure everything's been persisted
+    orphanAttachment.id should not be null
+    submission.id should not be null
+    submissionAttachment.id should not be null
 
-		// Can fetch everything from db
-		flushing(session) {
-			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
-			session.get(classOf[Submission], submission.id) should be (submission)
-			session.get(classOf[FileAttachment], submissionAttachment.id) should be (submissionAttachment)
-		}
+    // Can fetch everything from db
+    flushing(session) {
+      session.get(classOf[FileAttachment], orphanAttachment.id) should be(orphanAttachment)
+      session.get(classOf[Submission], submission.id) should be(submission)
+      session.get(classOf[FileAttachment], submissionAttachment.id) should be(submissionAttachment)
+    }
 
-		flushing(session) { session.delete(submission) }
+    flushing(session) {
+      session.delete(submission)
+    }
 
-		// Ensure we can't fetch the submission, but all the other objects are returned
-		flushing(session) {
-			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
-			session.get(classOf[Submission], submission.id) should be (null)
-			session.get(classOf[FileAttachment], submissionAttachment.id) should be (submissionAttachment)
-		}
-	}
+    // Ensure we can't fetch the submission, but all the other objects are returned
+    flushing(session) {
+      session.get(classOf[FileAttachment], orphanAttachment.id) should be(orphanAttachment)
+      session.get(classOf[Submission], submission.id) should be(null)
+      session.get(classOf[FileAttachment], submissionAttachment.id) should be(submissionAttachment)
+    }
+  }
 }

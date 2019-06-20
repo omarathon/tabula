@@ -15,37 +15,37 @@ import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
 import scala.collection.JavaConverters._
 
 @Controller
-@RequestMapping(value=Array("/groups/admin/module/{module}/groups/{smallGroupSet}"))
+@RequestMapping(value = Array("/groups/admin/module/{module}/groups/{smallGroupSet}"))
 class AdminSmallGroupSetController extends GroupsController with AutowiringSmallGroupSetWorkflowServiceComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@ModelAttribute("adminCommand") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ViewViewableCommand[SmallGroupSet] = {
-		mustBeLinked(mandatory(set), mandatory(module))
-		new ViewViewableCommand(Permissions.Module.ManageSmallGroups, set)
-	}
+  @ModelAttribute("adminCommand") def command(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): ViewViewableCommand[SmallGroupSet] = {
+    mustBeLinked(mandatory(set), mandatory(module))
+    new ViewViewableCommand(Permissions.Module.ManageSmallGroups, set)
+  }
 
-	@RequestMapping
-	def adminSingleSet(@ModelAttribute("adminCommand") cmd: Appliable[SmallGroupSet], user: CurrentUser): Mav = {
-		val set = cmd.apply()
+  @RequestMapping
+  def adminSingleSet(@ModelAttribute("adminCommand") cmd: Appliable[SmallGroupSet], user: CurrentUser): Mav = {
+    val set = cmd.apply()
 
-		val progress = smallGroupSetWorkflowService.progress(set)
+    val progress = smallGroupSetWorkflowService.progress(set)
 
-		val setView = ViewSetWithProgress(
-			set = set,
-			groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
-			viewerRole = Tutor,
-			progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
-			nextStage = progress.nextStage,
-			stages = progress.stages
-		)
+    val setView = ViewSetWithProgress(
+      set = set,
+      groups = ViewGroup.fromGroups(set.groups.asScala.sorted),
+      viewerRole = Tutor,
+      progress = SetProgress(progress.percentage, progress.cssClass, progress.messageCode),
+      nextStage = progress.nextStage,
+      stages = progress.stages
+    )
 
-		val model = Map(
-			"set" -> setView
-		)
+    val model = Map(
+      "set" -> setView
+    )
 
-		if (ajax) Mav("groups/admin/module/single_set-noLayout", model).noLayout()
-		else Mav("groups/admin/module/single_set", model).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.Module(set.module))
-	}
+    if (ajax) Mav("groups/admin/module/single_set-noLayout", model).noLayout()
+    else Mav("groups/admin/module/single_set", model).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.Module(set.module))
+  }
 
 }

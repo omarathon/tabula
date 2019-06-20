@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.assignments
 
 import javax.validation.constraints.{Max, Min}
-
 import org.hibernate.validator.constraints.Length
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
@@ -9,231 +8,234 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FileField, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
- * Bound as the value of a Map on a parent form object, to store multiple sets of
- * assignment properties.
- *
- * Currently relies on having a default empty constructor for lazy map populating to work,
- * so if you need to add a constructor then any command that has this as a Map value will need
- * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap).
- */
+  * Bound as the value of a Map on a parent form object, to store multiple sets of
+  * assignment properties.
+  *
+  * Currently relies on having a default empty constructor for lazy map populating to work,
+  * so if you need to add a constructor then any command that has this as a Map value will need
+  * to instantiate some kind of lazy map factory that knows how to create them (see Commons Collections LazyMap).
+  */
 class SharedAssignmentPropertiesForm extends SharedAssignmentProperties with AutowiringZipServiceComponent {
-	// set this as the default for this form, because in the AddAssignmentsCommand
-	// we're linking assignments in from SITS.
-	restrictSubmissions = true
+  // set this as the default for this form, because in the AddAssignmentsCommand
+  // we're linking assignments in from SITS.
+  restrictSubmissions = true
 }
 
 trait SharedAssignmentDetailProperties extends BooleanAssignmentDetailProperties {
-	def copySharedDetailFrom(assignment: Assignment): Unit = {
-		openEnded = assignment.openEnded
-	}
+  def copySharedDetailFrom(assignment: Assignment): Unit = {
+    openEnded = assignment.openEnded
+  }
 
-	def copySharedDetailTo(assignment: Assignment): Unit = {
-		copyDetailBooleansTo(assignment)
-	}
+  def copySharedDetailTo(assignment: Assignment): Unit = {
+    copyDetailBooleansTo(assignment)
+  }
 }
 
 trait SharedAssignmentFeedbackProperties extends BooleanAssignmentFeedbackProperties {
-	self: ZipServiceComponent =>
+  self: ZipServiceComponent =>
 
-	// linked feedback template (optional)
-	var feedbackTemplate: FeedbackTemplate = _
+  // linked feedback template (optional)
+  var feedbackTemplate: FeedbackTemplate = _
 
-	def copySharedFeedbackFrom(assignment: Assignment): Unit = {
-		collectMarks = assignment.collectMarks
-		summative = assignment.summative
-		dissertation = assignment.dissertation
-		publishFeedback = assignment.publishFeedback
-		feedbackTemplate = assignment.feedbackTemplate
-		includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
-		automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
-	}
+  def copySharedFeedbackFrom(assignment: Assignment): Unit = {
+    collectMarks = assignment.collectMarks
+    useMarkPoints = assignment.useMarkPoints
+    summative = assignment.summative
+    dissertation = assignment.dissertation
+    publishFeedback = assignment.publishFeedback
+    feedbackTemplate = assignment.feedbackTemplate
+    includeInFeedbackReportWithoutSubmissions = assignment.includeInFeedbackReportWithoutSubmissions
+    automaticallyReleaseToMarkers = assignment.automaticallyReleaseToMarkers
+  }
 
-	def copySharedFeedbackTo(assignment: Assignment): Unit = {
-		assignment.feedbackTemplate = feedbackTemplate
+  def copySharedFeedbackTo(assignment: Assignment): Unit = {
+    assignment.feedbackTemplate = feedbackTemplate
 
-		// if we change a feedback template we may need to invalidate existing zips
-		if (assignment.id != null) // this is an edit
-			zipService.invalidateSubmissionZip(assignment)
+    // if we change a feedback template we may need to invalidate existing zips
+    if (assignment.id != null) // this is an edit
+      zipService.invalidateSubmissionZip(assignment)
 
-		copyFeedbackBooleansTo(assignment)
-	}
+    copyFeedbackBooleansTo(assignment)
+  }
 }
 
 trait SharedAssignmentStudentProperties extends BooleanAssignmentStudentProperties {
 
-	var anonymity: AssignmentAnonymity =_
+  var anonymity: AssignmentAnonymity = _
 
-	def copySharedStudentFrom(assignment: Assignment): Unit = {
-		anonymity = assignment._anonymity // get the underlying field in case it's null
-	}
+  def copySharedStudentFrom(assignment: Assignment): Unit = {
+    anonymity = assignment._anonymity // get the underlying field in case it's null
+  }
 
-	def copySharedStudentTo(assignment: Assignment): Unit = {
-		copyStudentBooleansTo(assignment)
-	}
+  def copySharedStudentTo(assignment: Assignment): Unit = {
+    copyStudentBooleansTo(assignment)
+  }
 }
 
 trait SharedAssignmentSubmissionProperties extends BooleanAssignmentSubmissionProperties {
-	def copySharedSubmissionFrom(assignment: Assignment): Unit = {
-		collectSubmissions = assignment.collectSubmissions
-		restrictSubmissions = assignment.restrictSubmissions
-		allowLateSubmissions = assignment.allowLateSubmissions
-		allowResubmission = assignment.allowResubmission
-		displayPlagiarismNotice = assignment.displayPlagiarismNotice
-		allowExtensions = assignment.allowExtensions
-		extensionAttachmentMandatory = assignment.extensionAttachmentMandatory
-		allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
-		automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
-	}
+  def copySharedSubmissionFrom(assignment: Assignment): Unit = {
+    collectSubmissions = assignment.collectSubmissions
+    restrictSubmissions = assignment.restrictSubmissions
+    allowLateSubmissions = assignment.allowLateSubmissions
+    allowResubmission = assignment.allowResubmission
+    displayPlagiarismNotice = assignment.displayPlagiarismNotice
+    allowExtensions = assignment.allowExtensions
+    extensionAttachmentMandatory = assignment.extensionAttachmentMandatory
+    allowExtensionsAfterCloseDate = assignment.allowExtensionsAfterCloseDate
+    automaticallySubmitToTurnitin = assignment.automaticallySubmitToTurnitin
+    turnitinStoreInRepository = assignment.turnitinStoreInRepository
+    turnitinExcludeBibliography = assignment.turnitinExcludeBibliography
+    turnitinExcludeQuoted = assignment.turnitinExcludeQuoted
+  }
 
-	def copySharedSubmissionTo(assignment: Assignment): Unit = {
-		copySubmissionBooleansTo(assignment)
-	}
+  def copySharedSubmissionTo(assignment: Assignment): Unit = {
+    copySubmissionBooleansTo(assignment)
+  }
 }
 
 trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
 
-	@Min(0)
-	var wordCountMin: JInteger = _
-	@Max(Assignment.MaximumWordCount)
-	var wordCountMax: JInteger = _
-	@Length(max = 600)
-	var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
+  @Min(0)
+  var wordCountMin: JInteger = _
 
-	@Min(1)
-	@Max(Assignment.MaximumFileAttachments)
-	var fileAttachmentLimit: Int = 1
+  @Max(Assignment.MaximumWordCount)
+  var wordCountMax: JInteger = _
 
-	@Min(1)
-	@Max(Assignment.MaximumFileAttachments)
-	var minimumFileAttachmentLimit: Int = 1
+  @Length(max = 600)
+  var wordCountConventions: String = "Exclude any bibliography or appendices from your word count."
 
-	val maxFileAttachments: Int = 20
+  @Min(1)
+  @Max(Assignment.MaximumFileAttachments)
+  var fileAttachmentLimit: Int = 1
 
-	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
+  @Min(1)
+  @Max(Assignment.MaximumFileAttachments)
+  var minimumFileAttachmentLimit: Int = 1
 
-	var fileAttachmentTypes: JList[String] = JArrayList()
+  val maxFileAttachments: Int = 20
 
-	@Min(0)
-	var individualFileSizeLimit: JInteger = _
+  val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
 
-	/**
-		* This isn't actually a property on Assignment, it's one of the default fields added
-		* to all Assignments. When the forms become customisable this will be replaced with
-		* a full blown field editor.
-		*/
-	@Length(max = 2000)
-	var comment: String = _
+  val defaultWordCountMax: JInteger = Assignment.MaximumWordCount
 
-	def copySharedOptionsFrom(assignment: Assignment): Unit = {
-		for (field <- findCommentField(assignment)) comment = field.value
-		for (file <- findFileField(assignment)) {
-			fileAttachmentLimit = file.attachmentLimit
-			minimumFileAttachmentLimit = file.minimumAttachmentLimit
-			fileAttachmentTypes = file.attachmentTypes
-			individualFileSizeLimit = file.individualFileSizeLimit
-		}
+  var fileAttachmentTypes: JList[String] = JArrayList()
 
-		for (wordCount <- findWordCountField(assignment)) {
-			wordCountMin = wordCount.min
-			wordCountMax = wordCount.max
-			wordCountConventions = wordCount.conventions
-		}
-	}
+  @Min(0)
+  var individualFileSizeLimit: JInteger = _
 
-	def copySharedOptionsTo(assignment: Assignment): Unit = {
-		for (field <- findCommentField(assignment)) field.value = comment
-		for (file <- findFileField(assignment)) {
-			file.attachmentLimit = fileAttachmentLimit
-			file.minimumAttachmentLimit = minimumFileAttachmentLimit
-			file.attachmentTypes = fileAttachmentTypes
-			file.individualFileSizeLimit = individualFileSizeLimit
-		}
+  /**
+    * This isn't actually a property on Assignment, it's one of the default fields added
+    * to all Assignments. When the forms become customisable this will be replaced with
+    * a full blown field editor.
+    */
+  @Length(max = 2000)
+  var comment: String = _
 
-		if (wordCountMin == null && wordCountMax == null) {
-			findWordCountField(assignment).foreach { wordCountField =>
-				wordCountField.max = null
-				wordCountField.min = null
-				wordCountField.conventions = wordCountConventions
-			}
-		} else {
-			val wordCount = findWordCountField(assignment).getOrElse {
-				val newField = new WordCountField()
-				newField.name = Assignment.defaultWordCountName
-				assignment.addField(newField)
-				newField
-			}
-			wordCount.min = wordCountMin
-			wordCount.max = wordCountMax
-			wordCount.conventions = wordCountConventions
-		}
-	}
+  def copySharedOptionsFrom(assignment: Assignment): Unit = {
+    for (field <- findCommentField(assignment)) comment = field.value
+    for (file <- findFileField(assignment)) {
+      fileAttachmentLimit = file.attachmentLimit
+      minimumFileAttachmentLimit = file.minimumAttachmentLimit
+      fileAttachmentTypes = file.attachmentTypes.asJava
+      individualFileSizeLimit = file.individualFileSizeLimit
+    }
 
-	def validateSharedOptions(errors: Errors): Unit = {
-		if (fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)) {
-			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
-		}
+    for (wordCount <- findWordCountField(assignment)) {
+      wordCountMin = wordCount.min
+      wordCountMax = wordCount.max
+      wordCountConventions = wordCount.conventions
+    }
+  }
 
-		// implicitly fix missing bounds
-		(Option(wordCountMin), Option(wordCountMax)) match {
-			case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
-			case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
-			case (None, Some(max)) => wordCountMin = 0
-			case _ => // It's All Good
-		}
+  def copySharedOptionsTo(assignment: Assignment): Unit = {
+    for (field <- findCommentField(assignment)) field.value = comment
+    for (file <- findFileField(assignment)) {
+      file.attachmentLimit = fileAttachmentLimit
+      file.minimumAttachmentLimit = minimumFileAttachmentLimit
+      file.attachmentTypes = fileAttachmentTypes.asScala
+      file.individualFileSizeLimit = individualFileSizeLimit
+    }
+    if ((wordCountMin == null && wordCountMax == null) || (wordCountMin == 0 && (wordCountMax == 0 || wordCountMax == Assignment.MaximumWordCount))) {
+      findWordCountField(assignment).foreach(assignment.removeField)
+    } else {
+      val wordCount = findWordCountField(assignment).getOrElse {
+        val newField = new WordCountField()
+        newField.name = Assignment.defaultWordCountName
+        assignment.addField(newField)
+        newField
+      }
+      wordCount.min = wordCountMin
+      wordCount.max = wordCountMax
+      wordCount.conventions = wordCountConventions
+    }
+  }
 
-		if (fileAttachmentLimit < minimumFileAttachmentLimit) errors.rejectValue("fileAttachmentLimit", "assignment.attachments.outOfRange")
-	}
+  def validateSharedOptions(errors: Errors): Unit = {
+    if (fileAttachmentTypes.asScala.mkString("").matches(invalidAttachmentPattern)) {
+      errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
+    }
+
+    // implicitly fix missing bounds
+    (Option(wordCountMin), Option(wordCountMax)) match {
+      case (Some(min), Some(max)) if (max < min || (max == min && max != 0)) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
+      case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
+      case (None, Some(max)) => wordCountMin = 0
+      case _ => // It's All Good
+    }
+
+    if (fileAttachmentLimit < minimumFileAttachmentLimit) errors.rejectValue("fileAttachmentLimit", "assignment.attachments.outOfRange")
+  }
 }
 
 /**
- * Contains all the fields that could be collectively assigned to a group of assignments,
- * so that we can set options in one go.
- */
+  * Contains all the fields that could be collectively assigned to a group of assignments,
+  * so that we can set options in one go.
+  */
 trait SharedAssignmentProperties
-	extends SharedAssignmentDetailProperties
-		with SharedAssignmentFeedbackProperties
-		with SharedAssignmentStudentProperties
-		with SharedAssignmentSubmissionProperties
-		with SharedAssignmentOptionsProperties {
-	self: ZipServiceComponent =>
+  extends SharedAssignmentDetailProperties
+    with SharedAssignmentFeedbackProperties
+    with SharedAssignmentStudentProperties
+    with SharedAssignmentSubmissionProperties
+    with SharedAssignmentOptionsProperties {
+  self: ZipServiceComponent =>
 
-	def validateShared(errors: Errors): Unit = {
-		validateSharedOptions(errors)
-	}
+  def validateShared(errors: Errors): Unit = {
+    validateSharedOptions(errors)
+  }
 
-	def copySharedTo(assignment: Assignment): Unit = {
-		copySharedDetailTo(assignment)
-		copySharedFeedbackTo(assignment)
-		copySharedStudentTo(assignment)
-		copySharedSubmissionTo(assignment)
-		copySharedOptionsTo(assignment)
-	}
+  def copySharedTo(assignment: Assignment): Unit = {
+    copySharedDetailTo(assignment)
+    copySharedFeedbackTo(assignment)
+    copySharedStudentTo(assignment)
+    copySharedSubmissionTo(assignment)
+    copySharedOptionsTo(assignment)
+  }
 
-	def copySharedFrom(assignment: Assignment): Unit = {
-		copySharedDetailFrom(assignment)
-		copySharedFeedbackFrom(assignment)
-		copySharedStudentFrom(assignment)
-		copySharedSubmissionFrom(assignment)
-		copySharedOptionsFrom(assignment)
-	}
+  def copySharedFrom(assignment: Assignment): Unit = {
+    copySharedDetailFrom(assignment)
+    copySharedFeedbackFrom(assignment)
+    copySharedStudentFrom(assignment)
+    copySharedSubmissionFrom(assignment)
+    copySharedOptionsFrom(assignment)
+  }
 
 }
 
 trait FindAssignmentFields {
-	protected def findFileField(assignment: Assignment): Option[FileField] =
-		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
+  protected def findFileField(assignment: Assignment): Option[FileField] =
+    assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
 
-	protected def findMarkerSelectField(assignment: Assignment): Option[MarkerSelectField] =
-		assignment.findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
+  protected def findMarkerSelectField(assignment: Assignment): Option[MarkerSelectField] =
+    assignment.findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
 
-	/**Find the standard free-text field if it exists */
-	protected def findCommentField(assignment: Assignment): Option[CommentField] =
-		assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
+  /** Find the standard free-text field if it exists */
+  protected def findCommentField(assignment: Assignment): Option[CommentField] =
+    assignment.findFieldOfType[CommentField](Assignment.defaultCommentFieldName)
 
-	protected def findWordCountField(assignment: Assignment): Option[WordCountField] = {
-		assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName)
-	}
+  protected def findWordCountField(assignment: Assignment): Option[WordCountField] = {
+    assignment.findFieldOfType[WordCountField](Assignment.defaultWordCountName)
+  }
 }

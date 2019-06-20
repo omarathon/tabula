@@ -17,154 +17,156 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 
 /**
- * Handles data about modules and departments
- */
+  * Handles data about modules and departments
+  */
 @Service
 class ModuleAndDepartmentService extends Logging {
 
-	@Autowired var moduleDao: ModuleDao = _
-	@Autowired var departmentDao: DepartmentDao = _
-	@Autowired var userLookup: UserLookupService = _
-	@Autowired var securityService: SecurityService = _
-	@Autowired var permissionsService: PermissionsService = _
-	def groupService: LenientGroupService = userLookup.getGroupService
+  @Autowired var moduleDao: ModuleDao = _
+  @Autowired var departmentDao: DepartmentDao = _
+  @Autowired var userLookup: UserLookupService = _
+  @Autowired var securityService: SecurityService = _
+  @Autowired var permissionsService: PermissionsService = _
 
-	def allDepartments: Seq[Department] = transactional(readOnly = true) {
-		departmentDao.allDepartments
-	}
+  def groupService: LenientGroupService = userLookup.getGroupService
 
-	def allRootDepartments: Seq[Department] = transactional(readOnly = true) {
-		departmentDao.allRootDepartments
-	}
+  def allDepartments: Seq[Department] = transactional(readOnly = true) {
+    departmentDao.allDepartments
+  }
 
-	def allModules: Seq[Module] = transactional(readOnly = true) {
-		moduleDao.allModules
-	}
+  def allRootDepartments: Seq[Department] = transactional(readOnly = true) {
+    departmentDao.allRootDepartments
+  }
 
-	def getDepartmentByCode(code: String): Option[Department] = transactional(readOnly = true) {
-		departmentDao.getByCode(code)
-	}
+  def allModules: Seq[Module] = transactional(readOnly = true) {
+    moduleDao.allModules
+  }
 
-	def getDepartmentById(code: String): Option[Department] = transactional(readOnly = true) {
-		departmentDao.getById(code)
-	}
+  def getDepartmentByCode(code: String): Option[Department] = transactional(readOnly = true) {
+    departmentDao.getByCode(code)
+  }
 
-	def getModuleByCode(code: String): Option[Module] = transactional(readOnly = true) {
-		moduleDao.getByCode(code.toLowerCase)
-	}
+  def getDepartmentById(code: String): Option[Department] = transactional(readOnly = true) {
+    departmentDao.getById(code)
+  }
 
-	def getModulesByCodes(codes: Seq[String]): Seq[Module] = transactional(readOnly = true) {
-		moduleDao.getAllByCodes(codes.map(_.toLowerCase))
-	}
+  def getModuleByCode(code: String): Option[Module] = transactional(readOnly = true) {
+    moduleDao.getByCode(code.toLowerCase)
+  }
 
-	def getModuleBySitsCode(sitsModuleCode: String): Option[Module] = transactional(readOnly = true) {
-		Module.stripCats(sitsModuleCode) match {
-			case Some(code) => moduleDao.getByCode(code.toLowerCase)
-			case _ => None
-		}
-	}
+  def getModulesByCodes(codes: Seq[String]): Seq[Module] = transactional(readOnly = true) {
+    moduleDao.getAllByCodes(codes.map(_.toLowerCase))
+  }
 
-	def getModuleById(id: String): Option[Module] = transactional(readOnly = true) {
-		moduleDao.getById(id)
-	}
+  def getModuleBySitsCode(sitsModuleCode: String): Option[Module] = transactional(readOnly = true) {
+    Module.stripCats(sitsModuleCode) match {
+      case Some(code) => moduleDao.getByCode(code.toLowerCase)
+      case _ => None
+    }
+  }
 
-	def getModuleTeachingInformation(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation] = transactional(readOnly = true) {
-		moduleDao.getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode, departmentCode)
-	}
+  def getModuleById(id: String): Option[Module] = transactional(readOnly = true) {
+    moduleDao.getById(id)
+  }
 
-	// We may have a granted role that's overridden later, so we also need to do a security service check as well
-	// as getting the role itself
+  def getModuleTeachingInformation(moduleCode: String, departmentCode: String): Option[ModuleTeachingInformation] = transactional(readOnly = true) {
+    moduleDao.getTeachingInformationByModuleCodeAndDepartmentCode(moduleCode, departmentCode)
+  }
 
-	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] =
-		permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
-			.filter {
-				department => securityService.can(user, permission, department)
-			}
+  // We may have a granted role that's overridden later, so we also need to do a security service check as well
+  // as getting the role itself
 
-	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] =
-		permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
-			.filter { module => securityService.can(user, permission, module) }
+  def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] =
+    permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
+      .filter {
+        department => securityService.can(user, permission, department)
+      }
 
-	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
-		modulesWithPermission(user, permission).filter { _.adminDepartment == dept }
+  def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] =
+    permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
+      .filter { module => securityService.can(user, permission, module) }
 
-	def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Module] = {
-		departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
-	}
-	def modulesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = {
-		if (departmentsWithPermission(user, permission) contains dept) dept.modules.asScala.toSet else Set()
-	}
+  def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
+    modulesWithPermission(user, permission).filter(_.adminDepartment == dept)
 
-	def addOwner(dept: Department, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.knownType.addUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Department]))
-	}
+  def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission): Set[Module] = {
+    departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
+  }
 
-	def removeOwner(dept: Department, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.knownType.removeUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Department]))
-	}
+  def modulesInDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = {
+    if (departmentsWithPermission(user, permission) contains dept) dept.modules.asScala.toSet else Set()
+  }
 
-	def addModuleManager(module: Module, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
-		role.users.knownType.addUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Module]))
-	}
+  def addOwner(dept: Department, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+    role.users.knownType.addUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Department]))
+  }
 
-	def removeModuleManager(module: Module, owner: String): Unit = transactional() {
-		val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
-		role.users.knownType.removeUserId(owner)
-		permissionsService.saveOrUpdate(role)
-		permissionsService.clearCachesForUser((owner, classTag[Module]))
-	}
+  def removeOwner(dept: Department, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+    role.users.knownType.removeUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Department]))
+  }
 
-	def saveOrUpdate(dept: Department): Unit = transactional() {
-		departmentDao.saveOrUpdate(dept)
-	}
+  def addModuleManager(module: Module, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
+    role.users.knownType.addUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Module]))
+  }
 
-	def saveOrUpdate(module: Module): Unit = transactional() {
-		moduleDao.saveOrUpdate(module)
-	}
+  def removeModuleManager(module: Module, owner: String): Unit = transactional() {
+    val role = permissionsService.getOrCreateGrantedRole(module, ModuleManagerRoleDefinition)
+    role.users.knownType.removeUserId(owner)
+    permissionsService.saveOrUpdate(role)
+    permissionsService.clearCachesForUser((owner, classTag[Module]))
+  }
 
-	def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit = transactional() {
-		moduleDao.saveOrUpdate(teachingInfo)
-	}
+  def saveOrUpdate(dept: Department): Unit = transactional() {
+    departmentDao.saveOrUpdate(dept)
+  }
 
-	def delete(teachingInfo: ModuleTeachingInformation): Unit = transactional() {
-		moduleDao.delete(teachingInfo)
-	}
+  def saveOrUpdate(module: Module): Unit = transactional() {
+    moduleDao.saveOrUpdate(module)
+  }
 
-	def stampMissingModules(seenCodes: Seq[String]): Unit = transactional() {
-		moduleDao.stampMissingFromImport(moduleDao.allModules.map(_.code) filterNot seenCodes.contains)
-	}
+  def saveOrUpdate(teachingInfo: ModuleTeachingInformation): Unit = transactional() {
+    moduleDao.saveOrUpdate(teachingInfo)
+  }
 
-	def hasAssignments(module: Module): Boolean = {
-		moduleDao.hasAssignments(module)
-	}
+  def delete(teachingInfo: ModuleTeachingInformation): Unit = transactional() {
+    moduleDao.delete(teachingInfo)
+  }
 
-	def findModulesNamedLike(query: String): Seq[Module] =
-		moduleDao.findModulesNamedLike(query)
+  def stampMissingModules(seenCodes: Seq[String]): Unit = transactional() {
+    moduleDao.stampMissingFromImport(moduleDao.allModules.map(_.code) filterNot seenCodes.contains)
+  }
 
-	def findModulesByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] =
-		moduleDao.findByRoutes(routes, academicYear)
+  def hasAssignments(module: Module): Boolean = {
+    moduleDao.hasAssignments(module)
+  }
 
-	def findModulesByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] =
-		moduleDao.findByYearOfStudy(department, yearsOfStudy, academicYear)
+  def findModulesNamedLike(query: String): Seq[Module] =
+    moduleDao.findModulesNamedLike(query)
 
-	def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] =
-		moduleDao.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
+  def findModulesByRoutes(routes: Seq[Route], academicYear: AcademicYear): Seq[Module] =
+    moduleDao.findByRoutes(routes, academicYear)
+
+  def findModulesByYearOfStudy(department: Department, yearsOfStudy: Seq[Integer], academicYear: AcademicYear): Seq[Module] =
+    moduleDao.findByYearOfStudy(department, yearsOfStudy, academicYear)
+
+  def findByRouteYearAcademicYear(route: Route, yearOfStudy: Int, academicYear: AcademicYear): Seq[Module] =
+    moduleDao.findByRouteYearAcademicYear(route, yearOfStudy, academicYear)
 }
 
 trait ModuleAndDepartmentServiceComponent {
-	def moduleAndDepartmentService: ModuleAndDepartmentService
+  def moduleAndDepartmentService: ModuleAndDepartmentService
 }
 
 trait AutowiringModuleAndDepartmentServiceComponent extends ModuleAndDepartmentServiceComponent {
-	var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
+  var moduleAndDepartmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 }

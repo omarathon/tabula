@@ -10,61 +10,61 @@ import java.util.UUID
 
 class DatabaseEventListenerTest extends TestBase with Mockito {
 
-	val listener = new DatabaseEventListener
+  val listener = new DatabaseEventListener
 
-	val auditEventService: AuditEventService = mock[AuditEventService]
-	val maintenanceModeService = new MaintenanceModeServiceImpl
+  val auditEventService: AuditEventService = mock[AuditEventService]
+  val maintenanceModeService = new MaintenanceModeServiceImpl
 
-	listener.auditEventService = auditEventService
-	listener.maintenanceModeService = maintenanceModeService
-	listener.auditDirectory = createTemporaryDirectory
-	listener.auditDirectory.deleteOnExit()
-	listener.createMissingDirs = true
+  listener.auditEventService = auditEventService
+  listener.maintenanceModeService = maintenanceModeService
+  listener.auditDirectory = createTemporaryDirectory
+  listener.auditDirectory.deleteOnExit()
+  listener.createMissingDirs = true
 
-	listener.afterPropertiesSet
+  listener.afterPropertiesSet
 
-	@Test def maintenanceModeDisabled {
-		maintenanceModeService.disable
+  @Test def maintenanceModeDisabled {
+    maintenanceModeService.disable
 
-		val event = Event(
-			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav", ipAddress="137.205.194.132", userAgent="Chrome/58", readOnly=false,
-			date=DateTime.now, extra=Map()
-		)
+    val event = Event(
+      id = "event", name = "AddAssignment", userId = "cuscav", realUserId = "cuscav", ipAddress = "137.205.194.132", userAgent = "Chrome/58", readOnly = false,
+      date = DateTime.now, extra = Map()
+    )
 
-		listener.beforeCommand(event)
-		verify(auditEventService, times(1)).save(event, "before")
+    listener.beforeCommand(event)
+    verify(auditEventService, times(1)).save(event, "before")
 
-		listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
-		verify(auditEventService, times(1)).save(event, "after")
+    listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
+    verify(auditEventService, times(1)).save(event, "after")
 
-		listener.onException(event, new ItemNotFoundException)
-		verify(auditEventService, times(1)).save(event, "error")
-	}
+    listener.onException(event, new ItemNotFoundException)
+    verify(auditEventService, times(1)).save(event, "error")
+  }
 
-	@Test def maintenanceMode {
-		maintenanceModeService.enable
+  @Test def maintenanceMode {
+    maintenanceModeService.enable
 
-		val event = Event(
-			id="event", name="AddAssignment", userId="cuscav", realUserId="cuscav", ipAddress="137.205.194.132", userAgent="Chrome/58", readOnly=true,
-			date=DateTime.now, extra=Map()
-		)
+    val event = Event(
+      id = "event", name = "AddAssignment", userId = "cuscav", realUserId = "cuscav", ipAddress = "137.205.194.132", userAgent = "Chrome/58", readOnly = true,
+      date = DateTime.now, extra = Map()
+    )
 
-		listener.beforeCommand(event)
-		verify(auditEventService, times(0)).save(event, "before")
+    listener.beforeCommand(event)
+    verify(auditEventService, times(0)).save(event, "before")
 
-		listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
-		verify(auditEventService, times(0)).save(event, "after")
+    listener.afterCommand(event, Fixtures.assignment("my assignment"), event)
+    verify(auditEventService, times(0)).save(event, "after")
 
-		listener.onException(event, new ItemNotFoundException)
-		verify(auditEventService, times(0)).save(event, "error")
+    listener.onException(event, new ItemNotFoundException)
+    verify(auditEventService, times(0)).save(event, "error")
 
-		// Ho ho ho, magic time - observation deck!
-		maintenanceModeService.disable
+    // Ho ho ho, magic time - observation deck!
+    maintenanceModeService.disable
 
-		// That should flush the 3 events to the db
-		verify(auditEventService, times(1)).save(event, "before")
-		verify(auditEventService, times(1)).save(event, "after")
-		verify(auditEventService, times(1)).save(event, "error")
-	}
+    // That should flush the 3 events to the db
+    verify(auditEventService, times(1)).save(event, "before")
+    verify(auditEventService, times(1)).save(event, "after")
+    verify(auditEventService, times(1)).save(event, "error")
+  }
 
 }

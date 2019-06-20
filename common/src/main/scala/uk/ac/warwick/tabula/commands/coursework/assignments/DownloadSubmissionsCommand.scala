@@ -11,60 +11,62 @@ import uk.ac.warwick.tabula.services.{SubmissionService, ZipService}
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
 /**
- * Download one or more submissions from an assignment, as a Zip.
- */
+  * Download one or more submissions from an assignment, as a Zip.
+  */
 class DownloadSubmissionsCommand(val module: Module, val assignment: Assignment, user: CurrentUser)
-	extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
+  extends Command[Either[RenderableFile, JobInstance]] with ReadOnly {
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read, assignment)
+  mustBeLinked(assignment, module)
+  PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var zipService: ZipService = Wire[ZipService]
-	var submissionService: SubmissionService = Wire[SubmissionService]
-	var jobService: JobService = Wire[JobService]
+  var zipService: ZipService = Wire[ZipService]
+  var submissionService: SubmissionService = Wire[SubmissionService]
+  var jobService: JobService = Wire[JobService]
 
-	var filename: String = _
-	var submissions: JList[Submission] = JArrayList()
-	var students: JList[String] = JArrayList()
+  var filename: String = _
+  var submissions: JList[Submission] = JArrayList()
+  var students: JList[String] = JArrayList()
 
-	override def applyInternal(): Either[RenderableFile, JobInstance] = {
-		if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
-		else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
-		else if (!students.isEmpty && submissions.isEmpty) {
-			submissions = (for (
-				uniId <- students.asScala;
-				submission <- submissionService.getSubmissionByUsercode(assignment, uniId)
-			) yield submission).asJava
-		}
+  override def applyInternal(): Either[RenderableFile, JobInstance] = {
+    if (submissions.isEmpty && students.isEmpty) throw new ItemNotFoundException
+    else if (!submissions.isEmpty && !students.isEmpty) throw new IllegalStateException("Only expecting one of students and submissions to be set")
+    else if (!students.isEmpty && submissions.isEmpty) {
+      submissions = (for (
+        uniId <- students.asScala;
+        submission <- submissionService.getSubmissionByUsercode(assignment, uniId)
+      ) yield submission).asJava
+    }
 
-		if (submissions.asScala.exists(_.assignment != assignment)) {
-			throw new IllegalStateException("Submissions don't match the assignment")
-		}
+    if (submissions.asScala.exists(_.assignment != assignment)) {
+      throw new IllegalStateException("Submissions don't match the assignment")
+    }
 
-		if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
-			val zip = zipService.getSomeSubmissionsZip(submissions.asScala)
-			Left(zip)
-		} else {
-			Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))
-		}
+    if (submissions.size() < SubmissionZipFileJob.minimumSubmissions) {
+      val zip = Await.result(zipService.getSomeSubmissionsZip(submissions.asScala), Duration.Inf)
+      Left(zip)
+    } else {
+      Right(jobService.add(Option(user), SubmissionZipFileJob(submissions.asScala.map(_.id))))
+    }
 
-	}
+  }
 
-	override def describe(d: Description) {
+  override def describe(d: Description) {
 
-		val downloads: Seq[Submission] = {
-			if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
-			else submissions.asScala
-		}
+    val downloads: Seq[Submission] = {
+      if (students.asScala.nonEmpty) students.asScala.flatMap(submissionService.getSubmissionByUsercode(assignment, _))
+      else submissions.asScala
+    }
 
-		d.assignment(assignment)
-		.submissions(downloads)
-		.studentIds(downloads.flatMap(_.universityId))
-		.studentUsercodes(downloads.map(_.usercode))
-		.properties("submissionCount" -> Option(downloads).map(_.size).getOrElse(0))
-	}
+    d.assignment(assignment)
+      .submissions(downloads)
+      .studentIds(downloads.flatMap(_.universityId))
+      .studentUsercodes(downloads.map(_.usercode))
+      .properties("submissionCount" -> Option(downloads).map(_.size).getOrElse(0))
+  }
 
 }

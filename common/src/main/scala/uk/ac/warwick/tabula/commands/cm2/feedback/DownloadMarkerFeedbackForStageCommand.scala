@@ -13,83 +13,93 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object DownloadMarkerFeedbackForStageCommand {
-	type Result = RenderableFile
-	type Command = Appliable[Result]
+  type Result = RenderableFile
+  type Command = Appliable[Result]
 
-	def apply(assignment: Assignment, marker: User, stage: MarkingWorkflowStage, submitter: CurrentUser): Command =
-		new DownloadMarkerFeedbackForStageCommandInternal(assignment, marker, stage, submitter)
-			with ComposableCommand[Result]
-			with AutowiringZipServiceComponent
-			with DownloadMarkerFeedbackForStagePermissions
-			with DownloadMarkerFeedbackForStageDescription
-			with ReadOnly
+  def apply(assignment: Assignment, marker: User, stage: MarkingWorkflowStage, submitter: CurrentUser): Command =
+    new DownloadMarkerFeedbackForStageCommandInternal(assignment, marker, stage, submitter)
+      with ComposableCommand[Result]
+      with AutowiringZipServiceComponent
+      with DownloadMarkerFeedbackForStagePermissions
+      with DownloadMarkerFeedbackForStageDescription
+      with ReadOnly
 }
 
 trait DownloadMarkerFeedbackForStageState {
-	def assignment: Assignment
-	def marker: User
-	def stage: MarkingWorkflowStage
-	def submitter: CurrentUser
+  def assignment: Assignment
+
+  def marker: User
+
+  def stage: MarkingWorkflowStage
+
+  def submitter: CurrentUser
 }
 
 trait DownloadMarkerFeedbackForStageRequest {
-	self: DownloadMarkerFeedbackForStageState =>
+  self: DownloadMarkerFeedbackForStageState =>
 
-	def assignment: Assignment
-	def marker: User
-	def submitter: CurrentUser
-	var markerFeedback: JList[MarkerFeedback] = JArrayList()
-	def students: Seq[User] = markerFeedback.asScala.map(_.student)
-	// can only download these students submissions or a subset
-	def markersStudents: Seq[User] = assignment.cm2MarkerAllocations.filter(_.marker == marker).flatMap(_.students).distinct
+  def assignment: Assignment
 
-	lazy val feedbacks: Seq[AssignmentFeedback] = {
-		// filter out ones we aren't the marker for
-		val studentsToDownload = students.filter(markersStudents.contains).map(_.getUserId)
-		assignment.feedbacks.asScala.filter(s => studentsToDownload.contains(s.usercode))
-	}
+  def marker: User
 
-	lazy val previousFeedback: Seq[MarkerFeedback] =
-		feedbacks.flatMap { feedback =>
-			val currentStageIndex = feedback.currentStageIndex
+  def submitter: CurrentUser
 
-			if (currentStageIndex >= stage.order) feedback.markerFeedback.asScala.find(_.stage == stage).toSeq
-			else Nil
-		}
+  var markerFeedback: JList[MarkerFeedback] = JArrayList()
+
+  def students: Seq[User] = markerFeedback.asScala.map(_.student)
+
+  // can only download these students submissions or a subset
+  def markersStudents: Seq[User] = assignment.cm2MarkerAllocations(marker).flatMap(_.students).distinct
+
+  lazy val feedbacks: Seq[AssignmentFeedback] = {
+    // filter out ones we aren't the marker for
+    val studentsToDownload = students.filter(markersStudents.contains).map(_.getUserId)
+    assignment.feedbacks.asScala.filter(s => studentsToDownload.contains(s.usercode))
+  }
+
+  lazy val previousFeedback: Seq[MarkerFeedback] =
+    feedbacks.flatMap { feedback =>
+      val currentStageIndex = feedback.currentStageIndex
+
+      if (currentStageIndex >= stage.order) feedback.markerFeedback.asScala.find(_.stage == stage).toSeq
+      else Nil
+    }
 
 }
 
 class DownloadMarkerFeedbackForStageCommandInternal(val assignment: Assignment, val marker: User, val stage: MarkingWorkflowStage, val submitter: CurrentUser)
-	extends CommandInternal[Result] with DownloadMarkerFeedbackForStageState with DownloadMarkerFeedbackForStageRequest {
-	self: ZipServiceComponent =>
+  extends CommandInternal[Result] with DownloadMarkerFeedbackForStageState with DownloadMarkerFeedbackForStageRequest {
+  self: ZipServiceComponent =>
 
-	override def applyInternal(): Result =
-		zipService.getSomeMarkerFeedbacksZip(previousFeedback)
+  override def applyInternal(): Result =
+    Await.result(zipService.getSomeMarkerFeedbacksZip(previousFeedback), Duration.Inf)
 }
 
 trait DownloadMarkerFeedbackForStagePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadMarkerFeedbackForStageState =>
+  self: DownloadMarkerFeedbackForStageState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
-		if (submitter.apparentUser != marker) {
-			p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, mandatory(assignment))
-		}
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheck(Permissions.AssignmentFeedback.Read, mandatory(assignment))
+    if (submitter.apparentUser != marker) {
+      p.PermissionCheck(Permissions.Assignment.MarkOnBehalf, mandatory(assignment))
+    }
+  }
 
 }
 
 trait DownloadMarkerFeedbackForStageDescription extends Describable[Result] {
-	self: DownloadMarkerFeedbackForStageRequest =>
+  self: DownloadMarkerFeedbackForStageRequest =>
 
-	override lazy val eventName: String = "DownloadMarkerFeedbackForStage"
+  override lazy val eventName: String = "DownloadMarkerFeedbackForStage"
 
-	override def describe(d: Description): Unit =
-		d.assignment(assignment)
-			.feedbacks(feedbacks)
-			.studentIds(feedbacks.flatMap(_.universityId))
-			.studentUsercodes(feedbacks.map(_.usercode))
-			.properties("feedbackCount" -> previousFeedback.size)
+  override def describe(d: Description): Unit =
+    d.assignment(assignment)
+      .feedbacks(feedbacks)
+      .studentIds(feedbacks.flatMap(_.universityId))
+      .studentUsercodes(feedbacks.map(_.usercode))
+      .properties("feedbackCount" -> previousFeedback.size)
 }

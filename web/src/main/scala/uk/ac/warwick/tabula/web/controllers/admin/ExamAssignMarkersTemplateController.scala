@@ -11,15 +11,15 @@ import uk.ac.warwick.tabula.web.controllers.exams.ExamsController
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 @Controller
-@RequestMapping(value=Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers/template"))
+@RequestMapping(value = Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/assign-markers/template"))
 class ExamAssignMarkersTemplateController extends ExamsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable exam: Exam) = OldAssignMarkersTemplateCommand(exam)
+  @ModelAttribute("command")
+  def command(@PathVariable exam: Exam) = OldAssignMarkersTemplateCommand(exam)
 
-	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping
+  def getTemplate(@Valid @ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
+    cmd.apply()
+  }
 
 }

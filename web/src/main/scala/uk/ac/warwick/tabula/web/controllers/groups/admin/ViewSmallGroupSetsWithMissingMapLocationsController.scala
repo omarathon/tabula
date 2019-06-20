@@ -16,33 +16,33 @@ import uk.ac.warwick.tabula.web.{Mav, Routes}
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/missing-map-locations"))
 class ViewSmallGroupSetsWithMissingMapLocationsController extends GroupsController
-	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringSmallGroupServiceComponent
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AcademicYearScopedController
+  with AutowiringSmallGroupServiceComponent
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = ViewSmallGroupSetsWithMissingMapLocationsCommand.RequiredPermission
+  override val departmentPermission: Permission = ViewSmallGroupSetsWithMissingMapLocationsCommand.RequiredPermission
 
-	@ModelAttribute("command")
-	def command(@PathVariable academicYear: AcademicYear, @PathVariable department: Department): Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]] = {
-		ViewSmallGroupSetsWithMissingMapLocationsCommand(mandatory(academicYear), mandatory(department))
-	}
+  @ModelAttribute("command")
+  def command(@PathVariable academicYear: AcademicYear, @PathVariable department: Department): Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]] = {
+    ViewSmallGroupSetsWithMissingMapLocationsCommand(mandatory(academicYear), mandatory(department))
+  }
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@RequestMapping
-	def view(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @ModelAttribute("command") command: Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]): Mav = {
-		Mav("groups/admin/groups/missing-map-locations")
-			.addObjects(
-				"smallGroupSets" -> command.apply()
-			)
-			.crumbs(Breadcrumbs.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.missingMapLocations(department, year)): _*)
-	}
+  @RequestMapping
+  def view(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @ModelAttribute("command") command: Appliable[Seq[(SmallGroupSet, Seq[SmallGroupEvent])]]): Mav = {
+    Mav("groups/admin/groups/missing-map-locations")
+      .addObjects(
+        "smallGroupSets" -> command.apply()
+      )
+      .crumbs(Breadcrumbs.Department(department, academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.missingMapLocations(department, year)): _*)
+  }
 
 }
 

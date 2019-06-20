@@ -11,28 +11,29 @@ import uk.ac.warwick.tabula.{AcademicYear, RequestInfo}
 import scala.collection.JavaConverters._
 
 class DateToWeekNumberTag extends TemplateMethodModelEx with KnowsUserNumberingSystem with AutowiringUserSettingsServiceComponent {
-	import WeekRangesFormatter.format
 
-	override def exec(list: JList[_]): String = {
-		val user = RequestInfo.fromThread.get.user
+  import WeekRangesFormatter.format
 
-		def formatDate(date: LocalDate): String = {
-			val year = AcademicYear.forDate(date)
-			if (!year.placeholder) {
-				val weekNumber = year.weekForDate(date).weekNumber
-				val day = DayOfWeek(date.getDayOfWeek)
+  override def exec(list: JList[_]): String = {
+    val user = RequestInfo.fromThread.get.user
 
-				format(Seq(WeekRange(weekNumber)), day, year, numberingSystem(user, None))
-			} else {
-				DateBuilder.format(date.toDateTimeAtStartOfDay, includeTime = false)
-			}
-		}
+    def formatDate(date: LocalDate): String = {
+      val year = AcademicYear.forDate(date)
+      if (!year.placeholder) {
+        val weekNumber = year.weekForDate(date).weekNumber
+        val day = DayOfWeek(date.getDayOfWeek)
 
-		val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-		args match {
-			case Seq(dt: DateTime) => formatDate(dt.toLocalDate)
-			case Seq(date: LocalDate) => formatDate(date)
-			case _ => throw new IllegalArgumentException("Bad args: " + args)
-		}
-	}
+        format(Seq(WeekRange(weekNumber)), day, year, numberingSystem(user, None))
+      } else {
+        DateBuilder.format(date.toDateTimeAtStartOfDay, includeTime = false)
+      }
+    }
+
+    val args = list.asScala.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+    args match {
+      case Seq(dt: DateTime) => formatDate(dt.toLocalDate)
+      case Seq(date: LocalDate) => formatDate(date)
+      case _ => throw new IllegalArgumentException("Bad args: " + args)
+    }
+  }
 }

@@ -1,22 +1,24 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence.{Entity, Id}
+import org.hibernate.annotations.Proxy
 
 @Entity
+@Proxy
 class StudentCourseDetailsNote {
 
-	def this(code: String, scjCode: String, note:String) = {
-		this()
-		this.code = code
-		this.scjCode = scjCode
-		this.note = note
-	}
+  def this(code: String, scjCode: String, note: String) = {
+    this()
+    this.code = code
+    this.scjCode = scjCode
+    this.note = note
+  }
 
-	@Id
-	var code: String = _
+  @Id
+  var code: String = _
 
-	var scjCode: String = _
+  var scjCode: String = _
 
-	var note: String = _
+  var note: String = _
 }
 

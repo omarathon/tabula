@@ -12,25 +12,25 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
- * Displays the managing home screen, allowing users to choose the department and academic year to manage.
- */
+  * Displays the managing home screen, allowing users to choose the department and academic year to manage.
+  */
 abstract class AbstractAttendanceManageHomeController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("command")
-	def createCommand(user: CurrentUser) = HomeCommand(user)
+  @ModelAttribute("command")
+  def createCommand(user: CurrentUser) = HomeCommand(user)
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val info = cmd.apply()
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    val info = cmd.apply()
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		Mav("attendance/manage/home",
-			"academicYear" -> academicYear,
-			"managePermissions" -> info.managePermissions
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.homeForYear(year)): _*)
-	}
+    Mav("attendance/manage/home",
+      "academicYear" -> academicYear,
+      "managePermissions" -> info.managePermissions
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.homeForYear(year)): _*)
+  }
 
 }
 
@@ -38,8 +38,8 @@ abstract class AbstractAttendanceManageHomeController extends AttendanceControll
 @RequestMapping(Array("/attendance/manage"))
 class AttendanceManageHomeController extends AbstractAttendanceManageHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 }
 
@@ -47,7 +47,7 @@ class AttendanceManageHomeController extends AbstractAttendanceManageHomeControl
 @RequestMapping(value = Array("/attendance/manage/{academicYear:\\d{4}}"))
 class AttendanceManageHomeForYearController extends AbstractAttendanceManageHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 }

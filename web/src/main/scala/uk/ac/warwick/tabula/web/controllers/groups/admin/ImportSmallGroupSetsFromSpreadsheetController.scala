@@ -17,91 +17,114 @@ import uk.ac.warwick.tabula.web.controllers.{AcademicYearScopedController, Depar
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
+import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedMap
+
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet"))
 class ImportSmallGroupSetsFromSpreadsheetController extends GroupsController
-	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringJobServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringJobServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = ImportSmallGroupSetsFromSpreadsheetCommand.RequiredPermission
+  override val departmentPermission: Permission = ImportSmallGroupSetsFromSpreadsheetCommand.RequiredPermission
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	type CommandType = ImportSmallGroupSetsFromSpreadsheetCommand.CommandType
+  type CommandType = ImportSmallGroupSetsFromSpreadsheetCommand.CommandType
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CommandType =
-		ImportSmallGroupSetsFromSpreadsheetCommand(mandatory(department), mandatory(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CommandType =
+    ImportSmallGroupSetsFromSpreadsheetCommand(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping
-	def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("groups/admin/groups/import-spreadsheet/form")
-			.crumbs(Breadcrumbs.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
-	}
+  @RequestMapping
+  def form(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("groups/admin/groups/import-spreadsheet/form")
+      .crumbs(Breadcrumbs.Department(department, academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+  }
 
-	@RequestMapping(method = Array(POST))
-	def processSpreadsheet(
-		@Valid @ModelAttribute("command") cmd: CommandType,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = Mav("groups/admin/groups/import-spreadsheet/preview", "errors" -> errors)
-		.crumbs(Breadcrumbs.Department(department, academicYear))
-		.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+  @RequestMapping(method = Array(POST))
+  def processSpreadsheet(
+    @Valid @ModelAttribute("command") cmd: CommandType,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (!features.smallGroupTeachingSpreadsheetImport) {
+      Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear))
+    } else {
+      Mav("groups/admin/groups/import-spreadsheet/preview",
+        "errors" -> errors,
+        "wai2GoLocations" -> cmd.locationMappings.asScala.map { case (name, _) =>
+          name -> cmd.commands.asScala
+            .flatMap(_.modifyGroupCommands.asScala)
+            .flatMap(_.modifyEventCommands.asScala)
+            .filter(_.command.location == name)
+            .flatMap(_.command.possibleMapLocations)
+            .distinct
+            .sortBy(_.locationId)
+        }
+      )
+        .crumbs(Breadcrumbs.Department(department, academicYear))
+        .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirm=true"))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: CommandType,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear
-	): Mav = {
-		if (errors.hasErrors) {
-			processSpreadsheet(cmd, errors, department, academicYear)
-		} else {
-			val job = jobService.add(user.apparentUser, ImportSmallGroupSetsFromSpreadsheetJob(
-				department = department,
-				academicYear = academicYear,
-				file = cmd.file.attached.get(0)
-			))
+  @RequestMapping(method = Array(POST), params = Array("confirm=true"))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: CommandType,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear
+  ): Mav = {
+    if (!features.smallGroupTeachingSpreadsheetImport) {
+      Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear))
+    } else if (errors.hasErrors) {
+      processSpreadsheet(cmd, errors, department, academicYear)
+    } else {
+      val job = jobService.add(user.apparentUser, ImportSmallGroupSetsFromSpreadsheetJob(
+        department = department,
+        academicYear = academicYear,
+        file = cmd.file.attached.get(0),
+        locationMappings = cmd.locationMappings.asScala.toMap
+      ))
 
-			Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear) + s"?jobId=${job.id}")
-		}
-	}
+      Redirect(Routes.groups.admin.importSpreadsheet(department, academicYear) + s"?jobId=${job.id}")
+    }
+  }
 
-	@RequestMapping(method = Array(GET), params = Array("jobId"))
-	def checkProgress(@RequestParam("jobId") jobId: String, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		val job = jobService.getInstance(jobId)
+  @RequestMapping(method = Array(GET), params = Array("jobId"))
+  def checkProgress(@RequestParam("jobId") jobId: String, @PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    val job = jobService.getInstance(jobId)
 
-		Mav("groups/admin/groups/import-spreadsheet/progress", "job" -> job)
-			.crumbs(Breadcrumbs.Department(department, academicYear))
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
-			.noLayoutIf(ajax)
-	}
+    Mav("groups/admin/groups/import-spreadsheet/progress", "job" -> job)
+      .crumbs(Breadcrumbs.Department(department, academicYear))
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.groups.admin.importSpreadsheet(department, year)): _*)
+      .noLayoutIf(ajax)
+  }
 }
 
 @Controller
 @RequestMapping(Array("/groups/admin/department/{department}/{academicYear}/import-spreadsheet/template"))
 class SmallGroupSetsSpreadsheetTemplateController extends GroupsController {
 
-	type CommandType = Appliable[ExcelView]
+  type CommandType = Appliable[ExcelView]
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CommandType =
-		SmallGroupSetsSpreadsheetTemplateCommand(mandatory(department), mandatory(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): CommandType =
+    SmallGroupSetsSpreadsheetTemplateCommand(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping
-	def getTemplate(@Valid @ModelAttribute("command") cmd: CommandType): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping
+  def getTemplate(@Valid @ModelAttribute("command") cmd: CommandType): ExcelView = {
+    cmd.apply()
+  }
 
 }

@@ -10,19 +10,19 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class ScheduledMeetingRecordCreatorRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordCreatorRoleProvider") {
-		scope match {
-			case meeting: ScheduledMeetingRecord if meeting.creator.universityId == user.universityId =>
-				Stream(
-					customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordCreatorRoleDefinition(meeting.relationship.relationshipType), meeting)
-						.getOrElse(ScheduledMeetingRecordCreator(meeting, meeting.relationship.relationshipType))
-				)
+  def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for ScheduledMeetingRecordCreatorRoleProvider") {
+    scope match {
+      case meeting: ScheduledMeetingRecord if meeting.creator.universityId == user.universityId =>
+        meeting.relationshipTypes.map { relationshipType =>
+          customRoleFor(meeting.creator.homeDepartment)(ScheduledMeetingRecordCreatorRoleDefinition(relationshipType), meeting)
+            .getOrElse(ScheduledMeetingRecordCreator(meeting, relationshipType))
+        }.toStream
 
-			// ScheduledMeetingRecordCreator is only checked at the meeting level
-			case _ => Stream.empty
-		}
-	}
+      // ScheduledMeetingRecordCreator is only checked at the meeting level
+      case _ => Stream.empty
+    }
+  }
 
-	def rolesProvided = Set(classOf[ScheduledMeetingRecordCreator])
+  def rolesProvided = Set(classOf[ScheduledMeetingRecordCreator])
 
 }

@@ -7,71 +7,70 @@ import uk.ac.warwick.tabula.data.{MarkingWorkflowDao, MarkingWorkflowDaoComponen
 
 class OldDeleteMarkingWorkflowCommandTest extends TestBase with Mockito {
 
-	val mockMarkingWorkflowDao: MarkingWorkflowDao = smartMock[MarkingWorkflowDao]
+  val mockMarkingWorkflowDao: MarkingWorkflowDao = smartMock[MarkingWorkflowDao]
 
-	trait Fixture {
+  trait Fixture {
 
-		val thisMarkingWorkflow = new FirstMarkerOnlyWorkflow
-		val dept: Department = Fixtures.department("its")
+    val thisMarkingWorkflow = new FirstMarkerOnlyWorkflow
+    val dept: Department = Fixtures.department("its")
 
-		val validator = new DeleteMarkingWorkflowCommandValidation with DeleteMarkingWorkflowCommandState with MarkingWorkflowDaoComponent
-		{
-			val markingWorkflowDao: MarkingWorkflowDao = mockMarkingWorkflowDao
-			val department: Department = dept
-			val markingWorkflow: FirstMarkerOnlyWorkflow = thisMarkingWorkflow
-		}
+    val validator = new DeleteMarkingWorkflowCommandValidation with DeleteMarkingWorkflowCommandState with MarkingWorkflowDaoComponent {
+      val markingWorkflowDao: MarkingWorkflowDao = mockMarkingWorkflowDao
+      val department: Department = dept
+      val markingWorkflow: FirstMarkerOnlyWorkflow = thisMarkingWorkflow
+    }
 
-		val command = new DeleteMarkingWorkflowCommandInternal(dept, thisMarkingWorkflow)
-		val assignment1: Assignment = Fixtures.assignment("assignment1")
-		var errors = new BindException(validator, "command")
-	}
+    val command = new DeleteMarkingWorkflowCommandInternal(dept, thisMarkingWorkflow)
+    val assignment1: Assignment = Fixtures.assignment("assignment1")
+    var errors = new BindException(validator, "command")
+  }
 
-	@Test
-	def validateInUseByAssignment(): Unit = {
-		new Fixture {
-			mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(assignment1)
-			mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
+  @Test
+  def validateInUseByAssignment(): Unit = {
+    new Fixture {
+      mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(assignment1)
+      mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
 
-			validator.validate(errors)
-			errors.hasErrors should be {true}
-			errors.getErrorCount should be (1)
-		}
-	}
+      validator.validate(errors)
+      errors.hasErrors should be (true)
+      errors.getErrorCount should be(1)
+    }
+  }
 
-	@Test
-	def validateInUseByExams(): Unit = {
-		new Fixture {
-			mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
-			mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam, new Exam)
+  @Test
+  def validateInUseByExams(): Unit = {
+    new Fixture {
+      mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
+      mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam, new Exam)
 
-			validator.validate(errors)
-			errors.hasErrors should be {true}
-			errors.getErrorCount should be (1)
-		}
-	}
+      validator.validate(errors)
+      errors.hasErrors should be (true)
+      errors.getErrorCount should be(1)
+    }
+  }
 
-	@Test
-	def validateInUseByAssignmentsAndExams(): Unit = {
-		new Fixture {
-			mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(assignment1)
-			mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam)
+  @Test
+  def validateInUseByAssignmentsAndExams(): Unit = {
+    new Fixture {
+      mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(assignment1)
+      mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq(new Exam)
 
-			validator.validate(errors)
-			errors.hasErrors should be {true}
-			errors.getErrorCount should be (2)
-		}
-	}
+      validator.validate(errors)
+      errors.hasErrors should be (true)
+      errors.getErrorCount should be(2)
+    }
+  }
 
-	@Test
-	def validateNotInUse(): Unit = {
-		new Fixture {
-			mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
-			mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
+  @Test
+  def validateNotInUse(): Unit = {
+    new Fixture {
+      mockMarkingWorkflowDao.getAssignmentsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
+      mockMarkingWorkflowDao.getExamsUsingMarkingWorkflow(thisMarkingWorkflow) returns Seq()
 
-			validator.validate(errors)
-			errors.hasFieldErrors should be {false}
-			errors.hasErrors should be {false}
-		}
-	}
+      validator.validate(errors)
+      errors.hasFieldErrors should be (false)
+      errors.hasErrors should be (false)
+    }
+  }
 
 }

@@ -9,38 +9,39 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
 object ListCustomRolesCommand {
-	case class CustomRoleInfo(customRoleDefinition: CustomRoleDefinition, grantedRoles: Int, derivedRoles: Int)
 
-	def apply(department: Department) =
-		new ListCustomRolesCommandInternal(department)
-			with ComposableCommand[Seq[CustomRoleInfo]]
-			with AutowiringPermissionsServiceComponent
-			with ListCustomRolesCommandPermissions
-			with ReadOnly with Unaudited
+  case class CustomRoleInfo(customRoleDefinition: CustomRoleDefinition, grantedRoles: Int, derivedRoles: Int)
+
+  def apply(department: Department) =
+    new ListCustomRolesCommandInternal(department)
+      with ComposableCommand[Seq[CustomRoleInfo]]
+      with AutowiringPermissionsServiceComponent
+      with ListCustomRolesCommandPermissions
+      with ReadOnly with Unaudited
 }
 
 class ListCustomRolesCommandInternal(val department: Department) extends CommandInternal[Seq[CustomRoleInfo]] with ListCustomRolesCommandState {
-	self: PermissionsServiceComponent =>
+  self: PermissionsServiceComponent =>
 
-	override def applyInternal(): Seq[CustomRoleInfo] = {
-		permissionsService.getCustomRoleDefinitionsFor(department).map { defn =>
-			val granted = permissionsService.getAllGrantedRolesForDefinition(defn)
-			val derived = permissionsService.getCustomRoleDefinitionsBasedOn(defn)
+  override def applyInternal(): Seq[CustomRoleInfo] = {
+    permissionsService.getCustomRoleDefinitionsFor(department).map { defn =>
+      val granted = permissionsService.getAllGrantedRolesForDefinition(defn)
+      val derived = permissionsService.getCustomRoleDefinitionsBasedOn(defn)
 
-			CustomRoleInfo(defn, granted.size, derived.size)
-		}
-	}
+      CustomRoleInfo(defn, granted.size, derived.size)
+    }
+  }
 
 }
 
 trait ListCustomRolesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ListCustomRolesCommandState =>
+  self: ListCustomRolesCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(department))
+  }
 }
 
 trait ListCustomRolesCommandState {
-	def department: Department
+  def department: Department
 }

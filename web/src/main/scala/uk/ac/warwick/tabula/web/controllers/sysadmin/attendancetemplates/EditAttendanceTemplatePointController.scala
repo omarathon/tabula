@@ -16,41 +16,41 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(value = Array("/sysadmin/attendancetemplates/{template}/points/{point}/edit"))
 class EditAttendanceTemplatePointController extends BaseSysadminController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable point: AttendanceMonitoringTemplatePoint) = EditAttendanceTemplatePointCommand(mandatory(point))
+  @ModelAttribute("command")
+  def command(@PathVariable point: AttendanceMonitoringTemplatePoint) = EditAttendanceTemplatePointCommand(mandatory(point))
 
-	@RequestMapping(method = Array(GET))
-	def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint] with PopulateOnForm, @PathVariable template: AttendanceMonitoringTemplate): Mav = {
-		cmd.populate()
-		render(template)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(@ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint] with PopulateOnForm, @PathVariable template: AttendanceMonitoringTemplate): Mav = {
+    cmd.populate()
+    render(template)
+  }
 
-	private def render(template: AttendanceMonitoringTemplate) = {
-		Mav("sysadmin/attendancetemplates/editpoint").crumbs(
-			SysadminBreadcrumbs.AttendanceTemplates.Home,
-			SysadminBreadcrumbs.AttendanceTemplates.Edit(template)
-		)
-	}
+  private def render(template: AttendanceMonitoringTemplate) = {
+    Mav("sysadmin/attendancetemplates/editpoint").crumbs(
+      SysadminBreadcrumbs.AttendanceTemplates.Home,
+      SysadminBreadcrumbs.AttendanceTemplates.Edit(template)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def submit(
-		@Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint],
-		errors: Errors,
-		@PathVariable template: AttendanceMonitoringTemplate
-	): Mav = {
-		if (errors.hasErrors) {
-			render(template)
-		} else {
-			cmd.apply()
-			Redirect(Routes.AttendanceTemplates.edit(template))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(
+    @Valid @ModelAttribute("command") cmd: Appliable[AttendanceMonitoringTemplatePoint],
+    errors: Errors,
+    @PathVariable template: AttendanceMonitoringTemplate
+  ): Mav = {
+    if (errors.hasErrors) {
+      render(template)
+    } else {
+      cmd.apply()
+      Redirect(Routes.AttendanceTemplates.edit(template))
+    }
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("cancel"))
-	def cancel(@PathVariable template: AttendanceMonitoringTemplate): Mav = {
-		Redirect(Routes.AttendanceTemplates.edit(template))
-	}
+  @RequestMapping(method = Array(POST), params = Array("cancel"))
+  def cancel(@PathVariable template: AttendanceMonitoringTemplate): Mav = {
+    Redirect(Routes.AttendanceTemplates.edit(template))
+  }
 
 }

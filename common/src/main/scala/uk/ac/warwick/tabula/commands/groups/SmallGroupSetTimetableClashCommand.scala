@@ -9,32 +9,32 @@ import uk.ac.warwick.userlookup.User
 
 
 object SmallGroupSetTimetableClashCommand {
-	def apply(smallGroupSet: SmallGroupSet): SmallGroupSetTimetableClashCommandInternal with ComposableCommand[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandPermissions with AutowiringSmallGroupServiceComponent with Unaudited with ReadOnly = {
-		new SmallGroupSetTimetableClashCommandInternal(smallGroupSet)
-			with ComposableCommand[Seq[(SmallGroup, Seq[User])]]
-			with SmallGroupSetTimetableClashCommandPermissions
-			with AutowiringSmallGroupServiceComponent
-			with Unaudited with ReadOnly
-	}
+  def apply(smallGroupSet: SmallGroupSet): SmallGroupSetTimetableClashCommandInternal with ComposableCommand[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandPermissions with AutowiringSmallGroupServiceComponent with Unaudited with ReadOnly = {
+    new SmallGroupSetTimetableClashCommandInternal(smallGroupSet)
+      with ComposableCommand[Seq[(SmallGroup, Seq[User])]]
+      with SmallGroupSetTimetableClashCommandPermissions
+      with AutowiringSmallGroupServiceComponent
+      with Unaudited with ReadOnly
+  }
 }
 
 class SmallGroupSetTimetableClashCommandInternal(val smallGroupSet: SmallGroupSet)
-	extends CommandInternal[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[Seq[(SmallGroup, Seq[User])]] with SmallGroupSetTimetableClashCommandState {
+  self: SmallGroupServiceComponent =>
 
-	override def applyInternal(): Seq[(SmallGroup, Seq[User])] = {
-		smallGroupService.findPossibleTimetableClashesForGroupSet(smallGroupSet)
-	}
+  override def applyInternal(): Seq[(SmallGroup, Seq[User])] = {
+    smallGroupService.findPossibleTimetableClashesForGroupSet(smallGroupSet)
+  }
 
 }
 
 trait SmallGroupSetTimetableClashCommandState {
-	val smallGroupSet: SmallGroupSet
+  val smallGroupSet: SmallGroupSet
 }
 
 trait SmallGroupSetTimetableClashCommandPermissions extends RequiresPermissionsChecking {
-	self: SmallGroupSetTimetableClashCommandState =>
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
-	}
+  self: SmallGroupSetTimetableClashCommandState =>
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroups.ReadMembership, smallGroupSet)
+  }
 }

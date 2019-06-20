@@ -1,95 +1,98 @@
-<#if command.schemes?size == 1>
+<#escape x as x?html>
 
-	<h1>Use a template for scheme: ${command.schemes?first.displayName}</h1>
+  <#if command.schemes?size == 1>
 
-	<p>Use an AQA-approved template to add points. Which template do you want to use?</p>
+    <h1>Use a template for scheme: ${command.schemes?first.displayName}</h1>
 
-<#else>
+    <p>Use an AQSC-approved template to add points. Which template do you want to use?</p>
 
-	<h1>Use template</h1>
+  <#else>
 
-	<p>
-		Use an AQA-approved template to add points to
-		<a href="#" class="use-popover"
-		   data-content="
-			<ul>
-				<#list schemes as scheme>
-					<li>${scheme.displayName}</li>
-				</#list>
-			</ul>"
-		   data-html="true"
-		   data-placement="right"
-		><@fmt.p schemes?size "scheme" /></a>.
+    <h1>Use template</h1>
 
-		Which template do you want to use?
-	</p>
+    <p>
+      Use an AQSC-approved template to add points to
+      <a href="#" class="use-popover"
+         data-content="
+				<ul>
+					<#list schemes as scheme>
+						<li>${scheme.displayName}</li>
+					</#list>
+				</ul>"
+         data-html="true"
+         data-placement="right"
+      ><@fmt.p schemes?size "scheme" /></a>.
 
-</#if>
+      Which template do you want to use?
+    </p>
 
-<#if errors?has_content>
-	<div class="alert alert-danger">
-		<#list errors.allErrors as error>
-			<p><@spring.message code=error.code arguments=error.arguments/></p>
-		</#list>
-	</div>
-</#if>
+  </#if>
 
-<@f.form action="" method="POST" commandName="command">
+  <#if errors?has_content>
+    <div class="alert alert-danger">
+      <#list errors.allErrors as error>
+        <p><@spring.message code=error.code arguments=error.arguments/></p>
+      </#list>
+    </div>
+  </#if>
 
-	<#list schemes as scheme>
-		<@f.hidden path="schemes"/>
-	</#list>
+  <@f.form action="" method="POST" modelAttribute="command">
 
-	<input type="hidden" name="returnTo" value="${returnTo}" />
+    <#list schemes as scheme>
+      <@f.hidden path="schemes"/>
+    </#list>
 
-	<#assign label>
-		Template
-		<@fmt.help_popover id="templateScheme" content="The list of templates available to select from depends on whether this scheme is using term weeks or calendar dates" />
-	</#assign>
-	<@bs3form.labelled_form_group path="templateScheme" labelText="${label}">
-		<@f.select path="templateScheme" id="templateSchemeSelect" cssClass="form-control">
-			<option value="" style="display: none;">Please select one&hellip;</option>
-			<#list templates as template>
-				<@f.option value="${template.id}" label="${template.templateName}"/>
-			</#list>
-		</@f.select>
-	</@bs3form.labelled_form_group>
+    <input type="hidden" name="returnTo" value="${returnTo}" />
 
-	<div id="templatePoints"></div>
+    <#assign label>
+      Template
+      <@fmt.help_popover id="templateScheme" content="The list of templates available to select from depends on whether this scheme is using term weeks or calendar dates" />
+    </#assign>
+    <@bs3form.labelled_form_group path="templateScheme" labelText="${label}">
+      <@f.select path="templateScheme" id="templateSchemeSelect" cssClass="form-control">
+        <option value="" style="display: none;">Please select one&hellip;</option>
+        <#list templates as template>
+          <@f.option value="${template.id}" label="${template.templateName}"/>
+        </#list>
+      </@f.select>
+    </@bs3form.labelled_form_group>
 
-	<div class="submit-buttons fix-footer">
-		<button class="btn btn-primary" type="submit" value="submit">Apply</button>
-		<a class="btn btn-default" href="<@routes.attendance.manageAddPoints department academicYear />">Cancel</a>
-	</div>
+    <div id="templatePoints"></div>
 
-</@f.form>
+    <div class="submit-buttons fix-footer">
+      <button class="btn btn-primary" type="submit" value="submit">Apply</button>
+      <a class="btn btn-default" href="<@routes.attendance.manageAddPoints department academicYear />">Cancel</a>
+    </div>
 
-<script>
-	//TODO make this better.
-	(function ($) {
-		var $select = $("#templateSchemeSelect");
-		loadTemplatePoints($select.val());
+  </@f.form>
 
-		$select.on('change', function(){
-			var templateSchemeId = $(this).val();
+  <script>
+    //TODO make this better.
+    (function ($) {
+      var $select = $("#templateSchemeSelect");
+      loadTemplatePoints($select.val());
 
-			$('.fix-footer').removeAttr('style').attr('class', 'submit-buttons fix-footer');
-			$('.footer-shadow').remove();
+      $select.on('change', function () {
+        var templateSchemeId = $(this).val();
 
-			loadTemplatePoints(templateSchemeId);
-		});
+        $('.fix-footer').removeAttr('style').attr('class', 'submit-buttons fix-footer');
+        $('.footer-shadow').remove();
 
-		function loadTemplatePoints(templateSchemeId) {
-			if(templateSchemeId != '') {
-				$.get(window.location.pathname + '/' + templateSchemeId,
-					function(data){
-						$("#templatePoints").html(data);
-						$('body').fixHeaderFooter();
-					})
-			} else {
-				$("#templatePoints").html("");
-			}
-		}
+        loadTemplatePoints(templateSchemeId);
+      });
 
-	})(jQuery);
-</script>
+      function loadTemplatePoints(templateSchemeId) {
+        if (templateSchemeId != '') {
+          $.get(window.location.pathname + '/' + templateSchemeId,
+            function (data) {
+              $("#templatePoints").html(data);
+              $('body').fixHeaderFooter();
+            })
+        } else {
+          $("#templatePoints").html("");
+        }
+      }
+
+    })(jQuery);
+  </script>
+</#escape>

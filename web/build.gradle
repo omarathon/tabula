@@ -1,128 +1,145 @@
 plugins {
-    id 'com.moowork.node' version '1.1.1'
-    id 'com.moowork.gulp' version '1.1.1'
+  id 'com.moowork.node' version '1.2.0'
 }
 
 apply plugin: 'war'
+apply plugin: 'com.bmuschko.cargo'
 
 ext.contextPath = 'ROOT'
 war.archiveName = 'ROOT.war'
 
+cargo {
+  containerId = 'tomcat8x'
+  port = 8080
+
+  deployable {
+    context = '/'
+  }
+
+  remote {
+    hostname = '127.0.0.1'
+    username = 'deploy'
+    password = 'deploy'
+  }
+}
+
 dependencies {
-    compile project(':common')
-    testCompile project(path: ':common', configuration: 'testArtifacts')
+  compile project(':common')
+  testCompile project(path: ':common', configuration: 'testArtifacts')
 }
 
 task deployToTomcat(dependsOn: 'war') {
-    doLast {
-        logger.info("----------------------------------------------------")
-        logger.info("Initialising deploy to Tomcat")
-        logger.info("Base name is '${project.archivesBaseName}'")
-        logger.info("Tomcat directory is ${tomcatHome}")
-        logger.info("Deleting ${tomcatHome}\\webapps\\${war.archiveName}")
+  doLast {
+    logger.info("----------------------------------------------------")
+    logger.info("Initialising deploy to Tomcat")
+    logger.info("Base name is '${project.archivesBaseName}'")
+    logger.info("Tomcat directory is ${tomcatHome}")
+    logger.info("Deleting ${tomcatHome}\\webapps\\${war.archiveName}")
 
-        delete "${tomcatHome}/webapps/${contextPath}"
-        delete "${tomcatHome}/webapps/${war.archiveName}"
+    delete "${tomcatHome}/webapps/${contextPath}"
+    delete "${tomcatHome}/webapps/${war.archiveName}"
 
-        logger.info("Copying file from ${war.archivePath} to ${tomcatHome}/webapps")
-        copy {
-            from war.archivePath
-            into "${tomcatHome}/webapps"
-        }
-
-        logger.info("----------------------------------------------------")
+    logger.info("Copying file from ${war.archivePath} to ${tomcatHome}/webapps")
+    copy {
+      from war.archivePath
+      into "${tomcatHome}/webapps"
     }
+
+    logger.info("----------------------------------------------------")
+  }
 }
 
 rebel {
-    web {
-        resource {
-            directory = "build/rootContent/static"
-            target = "/static/"
-        }
+  rebelXmlDirectory = file("build/rootContent/WEB-INF/classes")
 
-        resource {
-            directory = "build/rootContent/WEB-INF"
-            includes = ["build.properties", "static-hashes.properties"]
-            target = "/WEB-INF/"
-        }
-
-        resource {}
-
-        resource {
-            directory = "../common/src/main/webapp"
-            target = "/"
-        }
+  web {
+    resource {
+      directory = "build/rootContent/static"
+      target = "/static/"
     }
+
+    resource {
+      directory = "build/rootContent/WEB-INF"
+      includes = ["build.properties", "static-hashes.properties"]
+      target = "/WEB-INF/"
+    }
+
+    resource {}
+
+    resource {
+      directory = "../common/src/main/webapp"
+      target = "/"
+    }
+  }
 }
+generateRebel.dependsOn('webInf')
 
 task commonWebInf(type: Copy) {
-    from project(':common').file('src/main/webapp/WEB-INF')
-    into file('build/rootContent/WEB-INF')
+  from project(':common').file('src/main/webapp/WEB-INF')
+  into file('build/rootContent/WEB-INF')
 }
 
 task webInf(type: Copy, dependsOn: 'commonWebInf') {
-    from 'src/main/webapp/WEB-INF'
-    into 'build/rootContent/WEB-INF'
+  from 'src/main/webapp/WEB-INF'
+  into 'build/rootContent/WEB-INF'
 }
 
 task buildInformation(dependsOn: 'webInf') {
-    doFirst {
-        mkdir 'build/rootContent/WEB-INF'
+  doFirst {
+    mkdir 'build/rootContent/WEB-INF'
+  }
+
+  outputs.file("build/rootContent/WEB-INF/build.properties")
+
+  doLast {
+    ant.tstamp {
+      format(property: 'buildTime', pattern: 'yyyy-MM-dd\'T\'HH:mm:ssZ')
     }
 
-    outputs.file("build/rootContent/WEB-INF/build.properties")
-
-    doLast {
-        ant.tstamp {
-            format(property: 'buildTime', pattern: 'yyyy-MM-dd\'T\'HH:mm:ssZ')
-        }
-
-        ant.propertyfile(file: "build/rootContent/WEB-INF/build.properties") {
-            entry(key: "build.time", value: ant.buildTime)
-            entry(key: "module.name", value: project.name)
-            entry(key: "module.context", value: '')
-        }
+    ant.propertyfile(file: "build/rootContent/WEB-INF/build.properties") {
+      entry(key: "build.time", value: ant.buildTime)
+      entry(key: "module.name", value: project.name)
+      entry(key: "module.context", value: '')
     }
+  }
 }
 
 task bamboo(dependsOn: ['clean', 'test', 'war']) {}
 task deployApplicationLocally(dependsOn: ['war', 'deployToTomcat']) {}
 
-gulp {
-    colors = true
+task installNpmDependencies(type: NpmTask) {
+  inputs.file('package.json').withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir 'node_modules'
+
+  args = ['ci']
 }
 
-task installGulpDependencies(type: NpmTask) {
-    inputs.file 'package.json'
-    outputs.dir 'node_modules'
+task webpack(type: NpmTask) {
+  inputs.files('webpack.config.babel.js', 'package.json').withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir('build-tooling').withPathSensitivity(PathSensitivity.RELATIVE)
+  inputs.dir('src/main/assets/static').withPathSensitivity(PathSensitivity.RELATIVE)
+  outputs.dir 'build/rootContent/static'
+  outputs.file 'build/rootContent/WEB-INF/static-hashes.properties'
+  outputs.cacheIf { true }
 
-    args = ['install', '-d']
+  if (isDevBuild) {
+    args = ['run', 'dev']
+  } else {
+    args = ['run', 'build']
+  }
 }
 
-gulp_assets.inputs.files 'gulpfile.js', 'src/main/assets/static'
-gulp_assets.outputs.dir 'build/rootContent/static'
-
-// run npm install
-gulp_assets.dependsOn 'installGulpDependencies'
-
-// run gulp install
-gulp_assets.dependsOn 'installGulp'
-
-def srcDir = new File(projectDir, "src/main/static")
-def targetDir = new File(project.buildDir, "static")
-gulp_dist.inputs.dir srcDir
-gulp_dist.outputs.dir targetDir
+webpack.dependsOn 'installNpmDependencies'
 
 war {
-    dependsOn gulp_assets, buildInformation
-    rootSpec.exclude '**/WEB-INF'
-    webInf { from 'build/rootContent/WEB-INF' }
-    from 'build/rootContent'
+  dependsOn webpack, buildInformation
+  rootSpec.exclude '**/WEB-INF'
+  webInf { from 'build/rootContent/WEB-INF' }
+  from 'build/rootContent'
 }
 
 test {
-    onlyIf {
-        !project.hasProperty('integrationTest')
-    }
+  onlyIf {
+    !project.hasProperty('integrationTest')
+  }
 }

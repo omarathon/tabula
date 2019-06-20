@@ -14,24 +14,24 @@ import uk.ac.warwick.tabula.JavaImports._
 @Controller
 @RequestMapping(Array("/exams/grids/{department}/{academicYear}"))
 class ExamGridsDepartmentAndYearController extends ExamsController
-	with DepartmentScopedController with AcademicYearScopedController
-	with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AcademicYearScopedController
+  with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	override val departmentPermission: Permission = Permissions.Department.ExamGrids
+  override val departmentPermission: Permission = Permissions.Department.ExamGrids
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @RequestParam(value = "updatedMarks", required = false) updatedMarks: JInteger): Mav = {
-		Mav("exams/grids/departmentAndYear",
-			"updatedMarks" -> updatedMarks
-		).crumbs(Breadcrumbs.Grids.Home)
-			.secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.departmentAcademicYear(department, year)): _*)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @RequestParam(value = "updatedMarks", required = false) updatedMarks: JInteger): Mav = {
+    Mav("exams/grids/departmentAndYear",
+      "updatedMarks" -> updatedMarks
+    ).crumbs(Breadcrumbs.Grids.Home)
+      .secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.exams.Grids.departmentAcademicYear(department, year)): _*)
+  }
 
 }

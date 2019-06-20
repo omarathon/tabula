@@ -14,47 +14,48 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.{Mav, Routes}
 
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/department/{department}/{academicYear}/markingworkflows/add"))
 class AddMarkingWorkflowController extends CM2MarkingWorkflowController {
 
-	type AddMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with ModifyMarkingWorkflowState
+  type AddMarkingWorkflowCommand = Appliable[CM2MarkingWorkflow] with ModifyMarkingWorkflowState
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("addMarkingWorkflowCommand")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		AddMarkingWorkflowCommand(mandatory(department), mandatory(academicYear))
+  @ModelAttribute("addMarkingWorkflowCommand")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    AddMarkingWorkflowCommand(mandatory(department), mandatory(academicYear))
 
-	@RequestMapping(method=Array(HEAD,GET))
-	def showForm(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@ModelAttribute("addMarkingWorkflowCommand") cmd: AddMarkingWorkflowCommand,
-		errors: Errors): Mav = {
-		commonCrumbs(
-			Mav("cm2/admin/workflows/add_workflow", Map(
-				"availableWorkflows" -> MarkingWorkflowType.values.sorted,
-				"canDeleteMarkers" -> true
-			)),
-			department,
-			academicYear
-		)
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm(
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @ModelAttribute("addMarkingWorkflowCommand") cmd: AddMarkingWorkflowCommand,
+    errors: Errors): Mav = {
+    commonCrumbs(
+      Mav("cm2/admin/workflows/add_workflow", Map(
+        "availableWorkflows" -> MarkingWorkflowType.values.sorted,
+        "canDeleteMarkers" -> true
+      )),
+      department,
+      academicYear
+    )
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submitForm(
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@Valid @ModelAttribute("addMarkingWorkflowCommand") cmd: AddMarkingWorkflowCommand,
-		errors: Errors
-	): Mav = {
-		if (errors.hasErrors) {
-			showForm(department, academicYear, cmd, errors)
-		} else {
-			cmd.apply()
-			Redirect(Routes.cm2.admin.workflows(department, academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submitForm(
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @Valid @ModelAttribute("addMarkingWorkflowCommand") cmd: AddMarkingWorkflowCommand,
+    errors: Errors
+  ): Mav = {
+    if (errors.hasErrors) {
+      showForm(department, academicYear, cmd, errors)
+    } else {
+      cmd.apply()
+      Redirect(Routes.cm2.admin.workflows(department, academicYear))
+    }
+  }
 
 }

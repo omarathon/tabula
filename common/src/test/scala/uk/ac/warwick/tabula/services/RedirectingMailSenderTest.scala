@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.services
+
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.util.mail.AsynchronousWarwickMailSender
 import org.springframework.mail.SimpleMailMessage
@@ -13,14 +14,15 @@ import java.util.Properties
 
 
 class RedirectingMailSenderTest extends TestBase with Mockito {
-	@Test def barelyTest {
-	  val delegate = mock[WarwickMailSender]
+  @Test def barelyTest {
+    val delegate = mock[WarwickMailSender]
 
-	  val session = Session.getDefaultInstance(new Properties)
-	  val mimeMessage = new MimeMessage(session)
-	  delegate.createMimeMessage() returns mimeMessage
+    val session = Session.getDefaultInstance(new Properties)
+    val mimeMessage = new MimeMessage(session)
+    delegate.createMimeMessage() returns mimeMessage
 
-	  val text = """
+    val text =
+      """
 		CONGRATS
 
 		You have won a bike. Pick it up from the basement.
@@ -28,18 +30,18 @@ class RedirectingMailSenderTest extends TestBase with Mockito {
 		(fools)
 	  		"""
 
-	  val sender = new RedirectingMailSender(delegate)
-	  sender.features = emptyFeatures
-	  sender.testEmailTo = "test@warwick.ac.uk"
+    val sender = new RedirectingMailSender(delegate)
+    sender.features = emptyFeatures
+    sender.testEmailTo = "test@warwick.ac.uk"
 
-	  val message = new SimpleMailMessage
-	  message.setTo(Array("ron@example.com", "jim@example.net"))
-	  message.setFrom("no-reply@example.com")
-	  message.setText(text)
-	  sender.send(message)
+    val message = new SimpleMailMessage
+    message.setTo("ron@example.com", "jim@example.net")
+    message.setFrom("no-reply@example.com")
+    message.setText(text)
+    sender.send(message)
 
-	  // This passes because the sender changes the mime message object.
-	  // It should probably make a copy.
-	  verify(delegate, times(1)).send(mimeMessage)
-	}
+    // This passes because the sender changes the mime message object.
+    // It should probably make a copy.
+    verify(delegate, times(1)).send(mimeMessage, false)
+  }
 }

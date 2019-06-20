@@ -18,52 +18,52 @@ import uk.ac.warwick.spring.Wire
 @Controller
 @RequestMapping(Array("/admin/department/{department}/settings/display"))
 class DisplaySettingsController extends AdminController
-	with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	var relationshipService: RelationshipService = Wire[RelationshipService]
+  var relationshipService: RelationshipService = Wire[RelationshipService]
 
-	type DisplaySettingsCommand = Appliable[Department] with PopulateOnForm
+  type DisplaySettingsCommand = Appliable[Department] with PopulateOnForm
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("displaySettingsCommand")
-	def displaySettingsCommand(@PathVariable department: Department): DisplaySettingsCommand =
-		DisplaySettingsCommand(mandatory(department))
+  @ModelAttribute("displaySettingsCommand")
+  def displaySettingsCommand(@PathVariable department: Department): DisplaySettingsCommand =
+    DisplaySettingsCommand(mandatory(department))
 
-	@ModelAttribute("allRelationshipTypes") def allRelationshipTypes: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
+  @ModelAttribute("allRelationshipTypes") def allRelationshipTypes: Seq[StudentRelationshipType] = relationshipService.allStudentRelationshipTypes
 
-	override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
+  override val departmentPermission: Permission = Permissions.Department.ManageDisplaySettings
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def initialView(@PathVariable department: Department, @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand): Mav = {
-		cmd.populate()
-		viewSettings(department)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def initialView(@PathVariable department: Department, @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand): Mav = {
+    cmd.populate()
+    viewSettings(department)
+  }
 
-	private def viewSettings(department: Department) =
-		Mav("admin/display-settings",
-			"department" -> department,
-			"expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional),
-			"returnTo" -> getReturnTo("")
-		).crumbs(
-			Breadcrumbs.Department(department)
-		)
+  private def viewSettings(department: Department) =
+    Mav("admin/display-settings",
+      "department" -> department,
+      "expectedCourseTypes" -> Seq(CourseType.UG, CourseType.PGT, CourseType.PGR, CourseType.Foundation, CourseType.PreSessional),
+      "returnTo" -> getReturnTo("")
+    ).crumbs(
+      Breadcrumbs.Department(department)
+    )
 
-	@RequestMapping(method=Array(POST))
-	def saveSettings(
-		@Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand,
-		errors: Errors,
-		@PathVariable department: Department
-	): Mav = {
-		if (errors.hasErrors){
-			viewSettings(department)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.department(department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def saveSettings(
+    @Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand,
+    errors: Errors,
+    @PathVariable department: Department
+  ): Mav = {
+    if (errors.hasErrors) {
+      viewSettings(department)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.department(department))
+    }
+  }
 }

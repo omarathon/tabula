@@ -11,13 +11,13 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 
 <#macro home><@_u page="/" /></#macro>
 <#macro departmenthome department year=""><#compress>
-	<#local p>/admin/department/${department.code}/<#if year?has_content>${year.startYear?c}/</#if></#local>
-	<@_u page=p />
+  <#local p>/admin/department/${department.code}/<#if year?has_content>${year.startYear?c}/</#if></#local>
+  <@_u page=p />
 </#compress></#macro>
 <#macro modulehome module><@_u page="/admin/module/${module.code}/" /></#macro>
 <#macro depthome module academicYear=""><#compress>
-	<#local p>/admin/department/${module.adminDepartment.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
-	<@_u page=p />
+  <#local p>/admin/department/${module.adminDepartment.code}/<#if academicYear?has_content>${academicYear.startYear?c}/</#if>?moduleFilters=Module(${module.code})</#local>
+  <@_u page=p />
 </#compress></#macro>
 <#macro single_set_info set><@_u page="/admin/module/${set.module.code}/groups/${set.id}/" /></#macro>
 
@@ -78,8 +78,8 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro printRegisters department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/registers" /></#macro>
 <#macro viewNote student occurrence returnTo=""><@_u page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
 <#macro editNote student occurrence returnTo="">
-	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
-	<@_u page="/note/${student.universityId}/${occurrence.id}/edit${returnTo}" />
+  <#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
+  <@_u page="/note/${student.universityId}/${occurrence.id}/edit${returnTo}" />
 </#macro>
 
 <#macro signup_to_group set><@_u page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>

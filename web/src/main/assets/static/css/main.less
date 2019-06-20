@@ -22,6 +22,7 @@
     padding-bottom: 0;
     border-top: none;
   }
+
   p {
     margin-bottom: 1em;
   }
@@ -32,6 +33,7 @@
         width: 12em;
       }
     }
+
     .form-field {
       margin-left: 12.5em;
     }
@@ -80,6 +82,7 @@ body .full-width {
   border: 1px solid #CCCCCC;
   border-radius: 3px 3px 3px 3px;
   width: 218px;
+
   li {
     list-style-type: none;
     float: left;
@@ -115,10 +118,12 @@ body .full-width {
     &.inputContainer {
       line-height: 14px;
       margin-bottom: 0px !important;
+
       input {
         border: 0;
         width: 100%;
         box-shadow: none;
+
         &:focus {
           box-shadow: none;
         }
@@ -141,6 +146,7 @@ body .full-width {
 
     td, th {
       border: 1px solid @tableBorder;
+
       &:hover {
         background-color: @tableBackgroundHover;
       }
@@ -152,6 +158,7 @@ body .full-width {
   #selected-count {
     margin-top: 1em;
   }
+
   #selected-deselect {
     margin-bottom: 1em;
   }
@@ -166,8 +173,10 @@ body .full-width {
   position: fixed;
   right: 0;
   top: 30%;
+
   .dropdown-menu {
     margin-right: 2em;
+
     li {
       display: block;
     }
@@ -207,8 +216,10 @@ ul.drag-list {
       opacity: 0.5;
       cursor: move;
     }
+
     &:hover {
       background-color: @btnInfoBackgroundHighlight;
+
       .handle {
         opacity: 1.0;
       }
@@ -217,6 +228,7 @@ ul.drag-list {
     &.ui-selecting {
       background: @btnPrimaryBackground !important;
     }
+
     &.ui-selected {
       background: @btnPrimaryBackgroundHighlight !important;
     }
@@ -234,6 +246,7 @@ ul.drag-list {
   * {
     position: relative;
     z-index: 11;
+
     &.not-relative {
       position: static;
     }
@@ -339,6 +352,7 @@ input[autocomplete="off"]::-ms-clear {
     background: @tabulaTurquoiseTint;
     line-height: 25px;
     position: relative;
+
     &.active {
       background: @tabulaGreenDark;
       color: white;
@@ -346,6 +360,7 @@ input[autocomplete="off"]::-ms-clear {
 
     &.arrow-right {
       padding-right: 5px;
+
       &:after {
         position: absolute;
         top: 0;
@@ -359,6 +374,7 @@ input[autocomplete="off"]::-ms-clear {
         z-index: 2;
 
       }
+
       &.active:after {
         border-left-color: @tabulaGreenDark;
       }
@@ -367,6 +383,7 @@ input[autocomplete="off"]::-ms-clear {
     &.arrow-left {
       margin-left: 10px;
       padding-left: 25px;
+
       &:before {
         position: absolute;
         top: 0;
@@ -380,12 +397,13 @@ input[autocomplete="off"]::-ms-clear {
       }
     }
 
-    button {
-      padding: 0px;
-      border: 0px;
-      margin: 0px;
+    a, button {
+      padding: 0;
+      border: 0;
+      margin: 0;
       text-decoration: underline;
       color: @link-colour;
+
       &:hover {
         color: @link-hover;
       }

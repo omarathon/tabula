@@ -1,5 +1,0 @@
-<Resource name="jdbc/SITSDS" auth="Container"
-		  type="javax.sql.DataSource" driverClassName="oracle.jdbc.OracleDriver"
-		  url="jdbc:oracle:thin://@tu-sitsdb-01:1521/scdev.warwick.ac.uk"
-		  username="USERNAME" password="PASSWORD" maxTotal="50" maxIdle="3"
-		  maxWaitMillis="-1"/>

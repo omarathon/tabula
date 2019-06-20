@@ -23,64 +23,64 @@ import MonitoringPointReportController._
 import uk.ac.warwick.tabula.web.Mav
 
 object MonitoringPointReportController {
-	type CreateMonitoringPointReportCommand = Appliable[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState with SelfValidating
+  type CreateMonitoringPointReportCommand = Appliable[Seq[MonitoringPointReport]] with CreateMonitoringPointReportCommandState with SelfValidating
 
-	def toJson(request: CreateMonitoringPointReportRequest, result: Seq[MonitoringPointReport]) = Map(
-		"academicYear" -> request.academicYear,
-		"period" -> request.period,
-		"missedPoints" -> result.map { report => report.student.universityId -> report.missed }.toMap
-	)
+  def toJson(request: CreateMonitoringPointReportRequest, result: Seq[MonitoringPointReport]) = Map(
+    "academicYear" -> request.academicYear,
+    "period" -> request.period,
+    "missedPoints" -> result.map { report => report.student.universityId -> report.missed }.toMap
+  )
 }
 
 @Controller
 @RequestMapping(Array("/v1/department/{department}/monitoring-point-reports"))
 class MonitoringPointReportController extends ApiController
-	with MonitoringPointReportCreateApi
+  with MonitoringPointReportCreateApi
 
 // POST - Create a new report
 trait MonitoringPointReportCreateApi {
-	self: ApiController =>
+  self: ApiController =>
 
-	@ModelAttribute("createCommand")
-	def command(@PathVariable department: Department, user: CurrentUser): CreateMonitoringPointReportCommand =
-		CreateMonitoringPointReportCommand(department, user)
+  @ModelAttribute("createCommand")
+  def command(@PathVariable department: Department, user: CurrentUser): CreateMonitoringPointReportCommand =
+    CreateMonitoringPointReportCommand(department, user)
 
-	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors): Mav = {
-		request.copyTo(command, errors)
+  @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+  def create(@RequestBody request: CreateMonitoringPointReportRequest, @ModelAttribute("createCommand") command: CreateMonitoringPointReportCommand, errors: Errors): Mav = {
+    request.copyTo(command, errors)
 
-		globalValidator.validate(command, errors)
-		command.validate(errors)
+    globalValidator.validate(command, errors)
+    command.validate(errors)
 
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val result = command.apply()
-			Mav(new JSONView(Map("success" -> true, "status" -> "ok") ++ toJson(request, result)))
-		}
-	}
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val result = command.apply()
+      Mav(new JSONView(Map("success" -> true, "status" -> "ok") ++ toJson(request, result)))
+    }
+  }
 }
 
 @JsonAutoDetect
 class CreateMonitoringPointReportRequest extends JsonApiRequest[CreateMonitoringPointReportRequestState] {
-	@transient var profileService: ProfileService = Wire[ProfileService]
+  @transient var profileService: ProfileService = Wire[ProfileService]
 
-	@BeanProperty var period: String = _
-	@BeanProperty var academicYear: AcademicYear = _
-	@BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
+  @BeanProperty var period: String = _
+  @BeanProperty var academicYear: AcademicYear = _
+  @BeanProperty var missedPoints: JMap[String, JInteger] = JHashMap()
 
-	override def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors) {
-		state.academicYear = academicYear
-		state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
-			profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {
-				case Some(student: StudentMember) =>
-					Some(student -> missed.intValue())
-				case _ =>
-					errors.rejectValue("missedPoints", "monitoringPointReport.student.notFound", Array(sprCode), "")
-					None
-			}
-		}.toMap
+  override def copyTo(state: CreateMonitoringPointReportRequestState, errors: Errors) {
+    state.academicYear = academicYear
+    state.missedPoints = missedPoints.asScala.flatMap { case (sprCode, missed) =>
+      profileService.getMemberByUniversityId(SprCode.getUniversityId(sprCode)) match {
+        case Some(student: StudentMember) =>
+          Some(student -> missed.intValue())
+        case _ =>
+          errors.rejectValue("missedPoints", "monitoringPointReport.student.notFound", Array(sprCode), "")
+          None
+      }
+    }.toMap
 
-		state.period = period
-	}
+    state.period = period
+  }
 }

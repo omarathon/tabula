@@ -14,91 +14,92 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 object UserSettingsCommand {
 
-	def apply(user: CurrentUser, settings: UserSettings) =
-		new UserSettingsCommand(user, settings)
-		with ComposableCommand[UserSettings]
-		with UserSettingsPermission
-		with UserSettingsCommandValidation
-		with UserSettingsDescription
-		with UserSettingsCommandState
-		with AutowiringUserSettingsServiceComponent
+  def apply(user: CurrentUser, settings: UserSettings) =
+    new UserSettingsCommand(user, settings)
+      with ComposableCommand[UserSettings]
+      with UserSettingsPermission
+      with UserSettingsCommandValidation
+      with UserSettingsDescription
+      with UserSettingsCommandState
+      with AutowiringUserSettingsServiceComponent
 }
 
 class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) extends CommandInternal[UserSettings] {
-	self: UserSettingsServiceComponent =>
+  self: UserSettingsServiceComponent =>
 
-	var alertsSubmission: String = settings.alertsSubmission
-	var weekNumberingSystem: String = settings.weekNumberingSystem
-	var bulkEmailSeparator: String = settings.bulkEmailSeparator
-	var profilesDefaultView: String = settings.profilesDefaultView
+  var alertsSubmission: String = settings.alertsSubmission
+  var weekNumberingSystem: String = settings.weekNumberingSystem
+  var bulkEmailSeparator: String = settings.bulkEmailSeparator
+  var profilesDefaultView: String = settings.profilesDefaultView
 
-	lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
-	var smallGroupEventAttendanceReminderEnabled: Boolean = smallGroupEventAttendanceReminderSettings.enabled.value
+  lazy val smallGroupEventAttendanceReminderSettings = new SmallGroupEventAttendanceReminderNotificationSettings(settings.notificationSettings("SmallGroupEventAttendanceReminder"))
+  var smallGroupEventAttendanceReminderEnabled: Boolean = smallGroupEventAttendanceReminderSettings.enabled.value
 
-	lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(settings.notificationSettings("FinaliseFeedback"))
-	var finaliseFeedbackNotificationEnabled: Boolean = finaliseFeedbackNotificationSettings.enabled.value
+  lazy val finaliseFeedbackNotificationSettings = new FinaliseFeedbackNotificationSettings(settings.notificationSettings("FinaliseFeedback"))
+  var finaliseFeedbackNotificationEnabled: Boolean = finaliseFeedbackNotificationSettings.enabled.value
 
-	override def applyInternal(): UserSettings = transactional() {
-		settings.alertsSubmission = alertsSubmission
-		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
-		settings.bulkEmailSeparator = bulkEmailSeparator
-		settings.profilesDefaultView = profilesDefaultView
-		smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
-		finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
+  override def applyInternal(): UserSettings = transactional() {
+    settings.alertsSubmission = alertsSubmission
+    settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
+    settings.bulkEmailSeparator = bulkEmailSeparator
+    settings.profilesDefaultView = profilesDefaultView
+    smallGroupEventAttendanceReminderSettings.enabled.value = smallGroupEventAttendanceReminderEnabled
+    finaliseFeedbackNotificationSettings.enabled.value = finaliseFeedbackNotificationEnabled
 
-		userSettingsService.save(user, settings)
-		settings
-	}
+    userSettingsService.save(user, settings)
+    settings
+  }
 
 }
 
 trait UserSettingsCommandValidation extends SelfValidating {
 
-	self: UserSettingsCommandState =>
+  self: UserSettingsCommandState =>
 
-	override def validate(errors:Errors) {
-		if (!user.exists) {
-			errors.reject("user.mustBeLoggedIn")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (!user.exists) {
+      errors.reject("user.mustBeLoggedIn")
+    }
+  }
 
 }
 
 trait UserSettingsDescription extends Describable[UserSettings] {
 
-	self: UserSettingsCommandState =>
+  self: UserSettingsCommandState =>
 
-	override def describe(d: Description) {
-		d.properties("user" -> user.apparentId)
-	}
+  override def describe(d: Description) {
+    d.properties("user" -> user.apparentId)
+  }
 
-	override def describeResult(d: Description, result: UserSettings): Unit = {
-		result.activeDepartment.foreach(d.department)
-		d.properties(
-			"user" -> user.apparentId,
-			"alertsSubmission" -> result.alertsSubmission,
-			"hiddenIntros" -> result.hiddenIntros,
-			"weekNumberingSystem" -> result.weekNumberingSystem,
-			"bulkEmailSeparator" -> result.bulkEmailSeparator,
-			"profilesDefaultView" -> result.profilesDefaultView,
-			"activeAcademicYear" -> result.activeAcademicYear
-		)
-	}
+  override def describeResult(d: Description, result: UserSettings): Unit = {
+    result.activeDepartment.foreach(d.department)
+    d.properties(
+      "user" -> user.apparentId,
+      "alertsSubmission" -> result.alertsSubmission,
+      "hiddenIntros" -> result.hiddenIntros,
+      "weekNumberingSystem" -> result.weekNumberingSystem,
+      "bulkEmailSeparator" -> result.bulkEmailSeparator,
+      "profilesDefaultView" -> result.profilesDefaultView,
+      "activeAcademicYear" -> result.activeAcademicYear.toString
+    )
+  }
 }
 
 trait UserSettingsPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: UserSettingsCommandState =>
+  self: UserSettingsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.UserSettings.Update, settings)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.UserSettings.Update, settings)
+  }
 
 }
 
 trait UserSettingsCommandState {
 
-	def user: CurrentUser
-	def settings: UserSettings
+  def user: CurrentUser
+
+  def settings: UserSettings
 
 }

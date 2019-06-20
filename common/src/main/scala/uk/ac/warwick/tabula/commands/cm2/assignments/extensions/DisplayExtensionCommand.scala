@@ -9,53 +9,51 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 case class DisplayExtensionDetail(
-	extension: Option[Extension],
-	student: User,
-	previousExtensions: Seq[Extension],
-	previousSubmissions: Seq[Submission]
-){
-	def studentIdentifier: String = {
-		Option(student.getWarwickId).getOrElse(student.getUserId)
-	}
-	def numAcceptedExtensions: Int = previousExtensions.count(_.approved)
-	def numRejectedExtensions: Int = previousExtensions.count(_.rejected)
+  extension: Option[Extension],
+  student: User,
+  previousExtensions: Seq[Extension],
+  previousSubmissions: Seq[Submission]
+) {
+  def studentIdentifier: String = {
+    Option(student.getWarwickId).getOrElse(student.getUserId)
+  }
+
+  def numAcceptedExtensions: Int = previousExtensions.count(_.approved)
+
+  def numRejectedExtensions: Int = previousExtensions.count(_.rejected)
 }
 
 object DisplayExtensionCommand {
-	def apply(student: User, assignment: Assignment) = new DisplayExtensionCommandInternal(student, assignment)
-			with ComposableCommand[DisplayExtensionDetail]
-			with DisplayExtensionPermissions
-			with AutowiringExtensionServiceComponent
-			with AutowiringSubmissionServiceComponent
-			with ReadOnly with Unaudited
+  def apply(student: User, assignment: Assignment) = new DisplayExtensionCommandInternal(student, assignment)
+    with ComposableCommand[DisplayExtensionDetail]
+    with DisplayExtensionPermissions
+    with AutowiringExtensionServiceComponent
+    with AutowiringSubmissionServiceComponent
+    with ReadOnly with Unaudited
 }
 
 class DisplayExtensionCommandInternal(val student: User, val assignment: Assignment) extends CommandInternal[DisplayExtensionDetail]
-	with DisplayExtensionState with TaskBenchmarking {
+  with DisplayExtensionState with TaskBenchmarking {
 
-	this:  ExtensionServiceComponent with SubmissionServiceComponent  =>
+  this: ExtensionServiceComponent with SubmissionServiceComponent =>
 
-	def applyInternal(): DisplayExtensionDetail = {
+  def applyInternal(): DisplayExtensionDetail = {
+    val extension: Option[Extension] = assignment.requestedOrApprovedExtensions.get(student.getUserId)
+    val previousExtensions = extensionService.getAllExtensionRequests(student)
+    val previousSubmissions = submissionService.getAllSubmissions(student)
 
-		val extension: Option[Extension] = assignment.findExtension(student.getUserId)
-
-		val previousExtensions = extensionService.getPreviousExtensions(student)
-
-		val previousSubmissions = submissionService.getPreviousSubmissions(student)
-
-		DisplayExtensionDetail(extension, student, previousExtensions, previousSubmissions)
-
-		}
+    DisplayExtensionDetail(extension, student, previousExtensions, previousSubmissions)
+  }
 }
 
 trait DisplayExtensionPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DisplayExtensionState =>
+  self: DisplayExtensionState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Assignment.Read, assignment)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.Assignment.Read, assignment)
+  }
 }
 
 trait DisplayExtensionState {
-	val assignment: Assignment
+  val assignment: Assignment
 }

@@ -63,7 +63,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 				   data-hash="${introHash("related-depts", "anywhere")}"
 				   data-title="Related departments"
 				   data-placement="bottom"
-				   data-html="true"
+				   data-html="true" aria-label="Help"
 				   data-content="${introText}"><i class="icon-question-sign fa fa-question-circle"></i></a>
 			</#if>
 			<#-- the dropdown itself -->
@@ -111,10 +111,8 @@ preposition: Text to relate the title to the department name in the second line,
 					   id="departmentsWithPermission-intro"
 					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
 					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
-					   data-title="Other departments"
-					   data-placement="bottom"
-					   data-html="true"
-					   data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+					   data-title="Other departments" aria-label="Help" data-placement="bottom"
+					   data-html="true" data-content="${introText}"><i class="fa fa-question-circle"></i></a>
 				</#if>
 				<#-- the dropdown itself -->
 				<div class="dept-switcher dropdown">
@@ -138,6 +136,17 @@ preposition: Text to relate the title to the department name in the second line,
 		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
 	<#else>
 		${module.code?upper_case} ${module.name}
+	</#if>
+</#compress></#macro>
+
+<#macro module_name_with_link module link withFormatting=true><#compress>
+	<#if withFormatting>
+		<a href="${link}" class="tabula-tooltip" data-title="Return to module management for <@fmt.module_name module false />">
+			<span class="mod-code">${module.code?upper_case}</span>
+		</a>
+		<span class="mod-name">${module.name}</span>
+	<#else>
+		<a href="${link}">${module.code?upper_case}</a> ${module.name}
 	</#if>
 </#compress></#macro>
 
@@ -423,7 +432,7 @@ preposition: Text to relate the title to the department name in the second line,
 	<#local id_attr></#local>
 	<#if id?has_content><#local id_attr>id='${id}'</#local></#if>
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+	<#noescape><${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#nested></${type}></#noescape>
 </#macro>
 
 <#macro bulk_email emails title subject limit=500>
@@ -437,20 +446,18 @@ preposition: Text to relate the title to the department name in the second line,
 	<#if emails?size gt 0>
 		<a class="btn btn-default <#if emails?size gt limit>use-tooltip disabled</#if>"
 			<#if emails?size gt limit>
-		   		title="Emailing is disabled for groups of more than ${limit}"
+        title="Emailing is disabled for groups of more than ${limit}"
 			<#else>
-				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+				href="mailto:${user.email!''}?bcc=<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>&subject=${subject?url}</#if>"
 			</#if> >
 			<i class="icon-envelope-alt fa fa-envelope-o"></i> ${title}
 		</a>
-		<a data-content="There is a known issue with sending emails to long lists of staff or students. If the '${title}' button doesn't work try right-clicking on the button, choosing 'Copy email address' and pasting this into your email client directly."
+		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
 		   data-html="true"
 		   data-trigger="hover"
 		   class="use-popover tabulaPopover-init"
-		   title=""
-		   data-container="body"
-		   data-placement="left"
-		   href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
+		   title="" aria-label="Help" data-container="body"
+		   data-placement="left" href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
 	</#if>
 </#macro>
 
@@ -487,17 +494,14 @@ preposition: Text to relate the title to the department name in the second line,
 	<@bulk_email emails title subject />
 </#macro>
 
-<#macro help_popover id title="" content="" html=false cssClass="">
+<#macro help_popover id title="" content="" html=false cssClass="" placement="">
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
 	   <#if title?has_content> data-title="${title}"</#if>
-	   data-content="${content}"
-	   data-container="body"
+		 <#if placement?has_content> data-placement="${placement}"</#if>
+	   data-content="${content}" data-container="body" aria-label="Help"
 	   <#if html>data-html="true"</#if>
-	>
-		<i class="icon-question-sign fa fa-question-circle"></i>
-	</a>
-
+	><i class="icon-question-sign fa fa-question-circle"></i></a>
 </#macro>
 
 <#macro location location>
@@ -514,12 +518,42 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro format_list_of_members members><#compress>
 	<#list members as item><#--
--->		${item.officialName}<#--
+-->		${item.fullName}<#--
 -->		<#if item_has_next><#--
 -->			<#if item_index == members?size -2>and<#else>,</#if><#--
 -->		</#if><#--
 -->	</#list><#--
 --></#compress></#macro>
+
+<#function strip_html input>
+  <#return input?replace('<[^>]+>','','r') />
+</#function>
+
+<#macro file_type_icon mediaType><#compress>
+	<#if mediaType.toString() == 'application/msword' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mediaType.toString() == 'application/x-tika-ooxml-protected'>
+		<i class="fal fa-fw fa-file-word"></i>
+	<#elseif mediaType.toString() == 'application/vnd.ms-powerpoint' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.presentationml.presentation' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.presentationml.slideshow'>
+		<i class="fal fa-fw fa-file-powerpoint"></i>
+	<#elseif mediaType.toString() == 'application/vnd.ms-excel' || mediaType.toString() == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'>
+		<i class="fal fa-fw fa-file-spreadsheet"></i>
+	<#elseif mediaType.toString() == 'application/pdf'>
+		<i class="fal fa-fw fa-file-pdf"></i>
+	<#elseif mediaType.toString() == 'application/zip'>
+		<i class="fal fa-fw fa-file-archive"></i>
+	<#elseif mediaType.toString() == 'text/csv'>
+		<i class="fal fa-fw fa-file-csv"></i>
+	<#elseif mediaType.type == 'text' || mediaType.toString() == 'application/rtf' || mediaType.toString() == 'message/rfc822'>
+		<i class="fal fa-fw fa-file-alt"></i>
+	<#elseif mediaType.type == 'video'>
+		<i class="fal fa-fw fa-file-video"></i>
+	<#elseif mediaType.type == 'audio'>
+		<i class="fal fa-fw fa-file-audio"></i>
+	<#elseif mediaType.type == 'image'>
+		<i class="fal fa-fw fa-file-image"></i>
+	<#else>
+		<i class="fal fa-fw fa-file"></i>
+	</#if>
+</#compress></#macro>
 
 </#escape>
 

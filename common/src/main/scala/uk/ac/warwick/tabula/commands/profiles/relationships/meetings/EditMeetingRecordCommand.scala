@@ -13,73 +13,76 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import scala.collection.JavaConverters._
 
 object EditMeetingRecordCommand {
-	def apply(meetingRecord: MeetingRecord) =
-		new EditMeetingRecordCommandInternal(meetingRecord)
-			with AutowiringMeetingRecordServiceComponent
-			with AutowiringFeaturesComponent
-			with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
-			with AutowiringFileAttachmentServiceComponent
-			with ComposableCommand[MeetingRecord]
-			with MeetingRecordCommandBindListener
-			with ModifyMeetingRecordValidation
-			with EditMeetingRecordDescription
-			with ModifyMeetingRecordPermissions
-			with EditMeetingRecordCommandState
-			with MeetingRecordCommandRequest
-			with EditMeetingRecordCommandNotifications
-			with PopulateMeetingRecordCommand
+  def apply(meetingRecord: MeetingRecord) =
+    new EditMeetingRecordCommandInternal(meetingRecord)
+      with AutowiringMeetingRecordServiceComponent
+      with AutowiringFeaturesComponent
+      with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
+      with AutowiringFileAttachmentServiceComponent
+      with ComposableCommand[MeetingRecord]
+      with MeetingRecordCommandBindListener
+      with ModifyMeetingRecordValidation
+      with EditMeetingRecordDescription
+      with ModifyMeetingRecordPermissions
+      with EditMeetingRecordCommandState
+      with MeetingRecordCommandRequest
+      with EditMeetingRecordCommandNotifications
+      with PopulateMeetingRecordCommand
 }
 
 
 class EditMeetingRecordCommandInternal(val meetingRecord: MeetingRecord)
-	extends AbstractModifyMeetingRecordCommand {
+  extends AbstractModifyMeetingRecordCommand {
 
-	self: MeetingRecordCommandRequest with EditMeetingRecordCommandState
-		with MeetingRecordServiceComponent with FeaturesComponent
-		with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
+  self: MeetingRecordCommandRequest with EditMeetingRecordCommandState
+    with MeetingRecordServiceComponent with FeaturesComponent
+    with AttendanceMonitoringMeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
-	override def applyInternal(): MeetingRecord = {
-		applyCommon(meetingRecord)
-	}
+  override def applyInternal(): MeetingRecord = {
+    meetingRecord.relationships = relationships.asScala
+    applyCommon(meetingRecord)
+  }
 
 }
 
 trait EditMeetingRecordDescription extends ModifyMeetingRecordDescription {
 
-	self: ModifyMeetingRecordCommandState =>
+  self: ModifyMeetingRecordCommandState with MeetingRecordCommandRequest =>
 
-	override lazy val eventName = "EditMeetingRecord"
+  override lazy val eventName = "EditMeetingRecord"
 
 }
 
 trait EditMeetingRecordCommandState extends ModifyMeetingRecordCommandState {
-	def meetingRecord: AbstractMeetingRecord
-	override def creator: Member = meetingRecord.creator
-	override def relationship: StudentRelationship = meetingRecord.relationship
+  def meetingRecord: AbstractMeetingRecord
+
+  override def allRelationships: Seq[StudentRelationship] = meetingRecord.relationships
+
+  override def creator: Member = meetingRecord.creator
 }
 
 trait EditMeetingRecordCommandNotifications extends Notifies[MeetingRecord, MeetingRecord]
-	with SchedulesNotifications[MeetingRecord, MeetingRecord] with CompletesNotifications[MeetingRecord] {
+  with SchedulesNotifications[MeetingRecord, MeetingRecord] with CompletesNotifications[MeetingRecord] {
 
-	self: EditMeetingRecordCommandState with NotificationHandling =>
+  self: EditMeetingRecordCommandState with NotificationHandling =>
 
-	override def emit(meeting: MeetingRecord) = Seq(
-		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting))
-	)
+  override def emit(meeting: MeetingRecord) = Seq(
+    Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting))
+  )
 
-	override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)
+  override def transformResult(meetingRecord: MeetingRecord) = Seq(meetingRecord)
 
-	override def scheduledNotifications(result: MeetingRecord) = Seq(
-		new ScheduledNotification[MeetingRecord]("editedMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
-	)
+  override def scheduledNotifications(result: MeetingRecord) = Seq(
+    new ScheduledNotification[MeetingRecord]("editedMeetingRecordApproval", result, DateTime.now.plusWeeks(1))
+  )
 
-	override def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
-		CompletesNotificationsResult(
-			commandResult.approvals.asScala.flatMap(approval =>
-				notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
-			),
-			creator.asSsoUser
-		)
-	}
+  override def notificationsToComplete(commandResult: MeetingRecord): CompletesNotificationsResult = {
+    CompletesNotificationsResult(
+      commandResult.approvals.asScala.flatMap(approval =>
+        notificationService.findActionRequiredNotificationsByEntityAndType[MeetingRecordRejectedNotification](approval)
+      ),
+      creator.asSsoUser
+    )
+  }
 
 }

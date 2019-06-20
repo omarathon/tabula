@@ -14,109 +14,113 @@ import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, PDFView}
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/submission-receipt.pdf"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/submission-receipt.pdf"))
 class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	type DownloadSubmissionReceiptAsPdfCommand = Appliable[Submission] with DownloadSubmissionReceiptAsPdfState
+  type DownloadSubmissionReceiptAsPdfCommand = Appliable[Submission] with DownloadSubmissionReceiptAsPdfState
 
-	@ModelAttribute
-	def command(@PathVariable assignment: Assignment, user: CurrentUser): DownloadSubmissionReceiptAsPdfCommand =
-		DownloadSubmissionReceiptAsPdfCommand(assignment, user, user.apparentUser)
+  @ModelAttribute
+  def command(@PathVariable assignment: Assignment, user: CurrentUser): DownloadSubmissionReceiptAsPdfCommand =
+    DownloadSubmissionReceiptAsPdfCommand(assignment, user, user.apparentUser)
 
-	@RequestMapping
-	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
-		new PDFView(
-			"submission-receipt.pdf",
-			"/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
-			Map(
-				"submission" -> command.apply()
-			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
-	}
+  @RequestMapping
+  def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
+    new PDFView(
+      "submission-receipt.pdf",
+      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
+      Map(
+        "submission" -> command.apply()
+      )
+    ) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
+  }
 
 }
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/{student}/submission-receipt.pdf"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/{student}/submission-receipt.pdf"))
 class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	type DownloadSubmissionReceiptAsPdfCommand = Appliable[Submission] with DownloadSubmissionReceiptAsPdfState
+  type DownloadSubmissionReceiptAsPdfCommand = Appliable[Submission] with DownloadSubmissionReceiptAsPdfState
 
-	@ModelAttribute
-	def command(
-		 @PathVariable assignment: Assignment,
-		 @PathVariable student: User,
-		 user: CurrentUser
-	 ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(assignment, user, student)
+  @ModelAttribute
+  def command(
+    @PathVariable assignment: Assignment,
+    @PathVariable student: User,
+    user: CurrentUser
+  ): DownloadSubmissionReceiptAsPdfCommand = DownloadSubmissionReceiptAsPdfCommand(assignment, user, student)
 
-	@RequestMapping
-	def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
-		new PDFView(
-			"submission-receipt.pdf",
-			"/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
-			Map(
-				"submission" -> command.apply()
-			)
-		) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
-	}
+  @RequestMapping
+  def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
+    new PDFView(
+      "submission-receipt.pdf",
+      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
+      Map(
+        "submission" -> command.apply()
+      )
+    ) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent with AutowiringTopLevelUrlComponent
+  }
 
 }
 
 object DownloadSubmissionReceiptAsPdfCommand {
-	val RequiredPermission = Permissions.Submission.Read
+  val RequiredPermission = Permissions.Submission.Read
 
-	def apply(assignment: Assignment, user: CurrentUser, student: User) =
-		new DownloadSubmissionReceiptAsPdfCommandInternal(assignment, user, student)
-			with AutowiringSubmissionServiceComponent
-		  with AutowiringProfileServiceComponent
-			with DownloadSubmissionReceiptAsPdfPermissions
-			with ComposableCommand[Submission]
-			with ReadOnly with Unaudited
+  def apply(assignment: Assignment, user: CurrentUser, student: User) =
+    new DownloadSubmissionReceiptAsPdfCommandInternal(assignment, user, student)
+      with AutowiringSubmissionServiceComponent
+      with AutowiringProfileServiceComponent
+      with DownloadSubmissionReceiptAsPdfPermissions
+      with ComposableCommand[Submission]
+      with ReadOnly with Unaudited
 }
 
 class DownloadSubmissionReceiptAsPdfCommandInternal(val assignment: Assignment, val viewer: CurrentUser, val student: User)
-	extends CommandInternal[Submission]
-		with DownloadSubmissionReceiptAsPdfState {
-	self: SubmissionServiceComponent =>
+  extends CommandInternal[Submission]
+    with DownloadSubmissionReceiptAsPdfState {
+  self: SubmissionServiceComponent =>
 
-	override def applyInternal(): Submission = submissionOption.getOrElse(throw new IllegalStateException)
+  override def applyInternal(): Submission = submissionOption.getOrElse(throw new IllegalStateException)
 }
 
 trait DownloadSubmissionReceiptAsPdfPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadSubmissionReceiptAsPdfState with SubmissionServiceComponent with ProfileServiceComponent =>
+  self: DownloadSubmissionReceiptAsPdfState with SubmissionServiceComponent with ProfileServiceComponent =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
-		if (!viewer.loggedIn) {
-			throw new PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
-		}
+  def permissionsCheck(p: PermissionsChecking) {
+    // We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
+    if (!viewer.loggedIn) {
+      throw PermissionDeniedException(viewer, DownloadSubmissionReceiptAsPdfCommand.RequiredPermission, assignment)
+    }
 
-		notDeleted(mandatory(assignment))
+    notDeleted(mandatory(assignment))
 
-		val submission = mandatory(submissionOption)
-		val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
+    val submission = mandatory(submissionOption)
+    val studentMember = profileService.getMemberByUniversityIdStaleOrFresh(student.getWarwickId)
 
-		mustBeLinked(submission, assignment)
-		p.PermissionCheckAny(
-			Seq(
-				Some(CheckablePermission(Permissions.Submission.Read, submission)),
-				studentMember.map(CheckablePermission(Permissions.Submission.Read, _))
-			).flatten
-		)
-	}
+    mustBeLinked(submission, assignment)
+    p.PermissionCheckAny(
+      Seq(
+        Some(CheckablePermission(Permissions.Submission.Read, submission)),
+        studentMember.map(CheckablePermission(Permissions.Submission.Read, _))
+      ).flatten
+    )
+  }
 }
 
 trait DownloadSubmissionReceiptAsPdfState {
-	self: SubmissionServiceComponent =>
+  self: SubmissionServiceComponent =>
 
-	def assignment: Assignment
-	def viewer: CurrentUser
-	def student: User
+  def assignment: Assignment
 
-	lazy val submissionOption: Option[Submission] = submissionService.getSubmissionByUsercode(assignment, student.getUserId).filter(_.submitted)
+  def viewer: CurrentUser
+
+  def student: User
+
+  lazy val submissionOption: Option[Submission] = submissionService.getSubmissionByUsercode(assignment, student.getUserId).filter(_.submitted)
 }

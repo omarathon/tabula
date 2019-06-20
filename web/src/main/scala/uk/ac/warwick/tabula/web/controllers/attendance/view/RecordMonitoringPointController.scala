@@ -16,64 +16,64 @@ import uk.ac.warwick.tabula.web.Mav
 @RequestMapping(Array("/attendance/view/{department}/{academicYear}/points/{templatePoint}/record"))
 class RecordMonitoringPointController extends AttendanceController with HasMonthNames {
 
-	@ModelAttribute("filterCommand")
-	def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
+  @ModelAttribute("filterCommand")
+  def filterCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    FilterMonitoringPointsCommand(mandatory(department), mandatory(academicYear), user)
 
-	@ModelAttribute("command")
-	def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable templatePoint: AttendanceMonitoringPoint) =
-		RecordMonitoringPointCommand(mandatory(department), mandatory(academicYear), mandatory(templatePoint), user)
+  @ModelAttribute("command")
+  def command(@PathVariable department: Department, @PathVariable academicYear: AcademicYear, @PathVariable templatePoint: AttendanceMonitoringPoint) =
+    RecordMonitoringPointCommand(mandatory(department), mandatory(academicYear), mandatory(templatePoint), user)
 
-	@RequestMapping(method = Array(GET))
-	def form(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
-			with PopulateOnForm with SetFilterPointsResultOnRecordMonitoringPointCommand,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable templatePoint: AttendanceMonitoringPoint
-	): Mav = {
-		val filterResult = filterCommand.apply()
-		cmd.setFilteredPoints(filterResult)
-		cmd.populate()
-		render(filterCommand, department, academicYear, templatePoint)
-	}
+  @RequestMapping(method = Array(GET))
+  def form(
+    @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
+      with PopulateOnForm with SetFilterPointsResultOnRecordMonitoringPointCommand,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable templatePoint: AttendanceMonitoringPoint
+  ): Mav = {
+    val filterResult = filterCommand.apply()
+    cmd.setFilteredPoints(filterResult)
+    cmd.populate()
+    render(filterCommand, department, academicYear, templatePoint)
+  }
 
-	private def render(
-		filterCommand: FiltersStudentsBase,
-		department: Department,
-		academicYear: AcademicYear,
-		templatePoint: AttendanceMonitoringPoint
-	) = {
-		Mav("attendance/pointrecord",
-			"uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
-			"returnTo" -> getReturnTo(Routes.View.points(department, academicYear))
-		).crumbs(
-			Breadcrumbs.View.HomeForYear(academicYear),
-			Breadcrumbs.View.DepartmentForYear(department, academicYear),
-			Breadcrumbs.View.Points(department, academicYear)
-		)
-	}
+  private def render(
+    filterCommand: FiltersStudentsBase,
+    department: Department,
+    academicYear: AcademicYear,
+    templatePoint: AttendanceMonitoringPoint
+  ) = {
+    Mav("attendance/pointrecord",
+      "uploadUrl" -> Routes.View.pointRecordUpload(department, academicYear, templatePoint, filterCommand.serializeFilter),
+      "returnTo" -> getReturnTo(Routes.View.points(department, academicYear))
+    ).crumbs(
+      Breadcrumbs.View.HomeForYear(academicYear),
+      Breadcrumbs.View.DepartmentForYear(department, academicYear),
+      Breadcrumbs.View.Points(department, academicYear)
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def post(
-		@ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
-		@ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
-			with SetFilterPointsResultOnRecordMonitoringPointCommand with SelfValidating,
-		errors: Errors,
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@PathVariable templatePoint: AttendanceMonitoringPoint
-	): Mav = {
-		val filterResult = filterCommand.apply()
-		cmd.setFilteredPoints(filterResult)
-		cmd.validate(errors)
-		if (errors.hasErrors) {
-			render(filterCommand, department, academicYear, templatePoint)
-		} else {
-			cmd.apply()
-			Redirect(Routes.View.points(department, academicYear))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def post(
+    @ModelAttribute("filterCommand") filterCommand: Appliable[FilterMonitoringPointsCommandResult] with FiltersStudentsBase,
+    @ModelAttribute("command") cmd: Appliable[Seq[AttendanceMonitoringCheckpoint]]
+      with SetFilterPointsResultOnRecordMonitoringPointCommand with SelfValidating,
+    errors: Errors,
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @PathVariable templatePoint: AttendanceMonitoringPoint
+  ): Mav = {
+    val filterResult = filterCommand.apply()
+    cmd.setFilteredPoints(filterResult)
+    cmd.validate(errors)
+    if (errors.hasErrors) {
+      render(filterCommand, department, academicYear, templatePoint)
+    } else {
+      cmd.apply()
+      Redirect(Routes.View.points(department, academicYear))
+    }
+  }
 
 }

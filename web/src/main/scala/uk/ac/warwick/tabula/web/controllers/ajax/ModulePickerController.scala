@@ -17,55 +17,55 @@ case class ModulePickerResult(module: Module, hasSmallGroups: Boolean, hasAssign
 @RequestMapping(value = Array("/ajax/modulepicker/query"))
 class ModulePickerController extends BaseController {
 
-	@ModelAttribute("command")
-	def command = ModulePickerCommand()
+  @ModelAttribute("command")
+  def command = ModulePickerCommand()
 
-	@RequestMapping
-	def query(@ModelAttribute("command") cmd: Appliable[Seq[ModulePickerResult]]): Mav = {
-		val results = cmd.apply()
-		Mav(
-			new JSONView(
-				results.map(result => Map(
-					"id" -> result.module.id,
-					"code" -> result.module.code,
-					"name" -> result.module.name,
-					"department" -> result.module.adminDepartment.name,
-					"hasSmallGroups" -> result.hasSmallGroups,
-					"hasAssignments" -> result.hasAssignments
-				))
-			)
-		)
-	}
+  @RequestMapping
+  def query(@ModelAttribute("command") cmd: Appliable[Seq[ModulePickerResult]]): Mav = {
+    val results = cmd.apply()
+    Mav(
+      new JSONView(
+        results.map(result => Map(
+          "id" -> result.module.id,
+          "code" -> result.module.code,
+          "name" -> result.module.name,
+          "department" -> result.module.adminDepartment.name,
+          "hasSmallGroups" -> result.hasSmallGroups,
+          "hasAssignments" -> result.hasAssignments
+        ))
+      )
+    )
+  }
 
 }
 
 class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 
-	self: ModuleAndDepartmentServiceComponent with SmallGroupServiceComponent =>
+  self: ModuleAndDepartmentServiceComponent with SmallGroupServiceComponent =>
 
-	var query: String = _
-	var checkAssignments: Boolean = _
-	var checkGroups: Boolean = _
-	var department: Department = _
+  var query: String = _
+  var checkAssignments: Boolean = _
+  var checkGroups: Boolean = _
+  var department: Department = _
 
-	def applyInternal(): Seq[ModulePickerResult] = {
-		if (!query.hasText) {
-			Seq()
-		} else {
-			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
-			modules.filter(m => Option(department).isEmpty || m.adminDepartment == department).map {
-				case (module) =>
-					ModulePickerResult(module,
-						if (checkGroups) smallGroupService.hasSmallGroups(module) else false,
-						if (checkAssignments) moduleAndDepartmentService.hasAssignments(module) else false)
-			}
-		}
-	}
+  def applyInternal(): Seq[ModulePickerResult] = {
+    if (!query.hasText) {
+      Seq()
+    } else {
+      val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
+      modules.filter(m => Option(department).isEmpty || m.adminDepartment == department).map {
+        case (module) =>
+          ModulePickerResult(module,
+            if (checkGroups) smallGroupService.hasSmallGroups(module) else false,
+            if (checkAssignments) moduleAndDepartmentService.hasAssignments(module) else false)
+      }
+    }
+  }
 
 }
 
 object ModulePickerCommand {
-	def apply() = new ModulePickerCommand with Command[Seq[ModulePickerResult]] with AutowiringModuleAndDepartmentServiceComponent
-	with AutowiringSmallGroupServiceComponent
-	with ReadOnly with Unaudited with Public
+  def apply() = new ModulePickerCommand with Command[Seq[ModulePickerResult]] with AutowiringModuleAndDepartmentServiceComponent
+    with AutowiringSmallGroupServiceComponent
+    with ReadOnly with Unaudited with Public
 }

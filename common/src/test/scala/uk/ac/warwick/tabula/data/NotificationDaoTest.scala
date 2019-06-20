@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import javax.persistence.DiscriminatorValue
-
 import org.hibernate.ObjectNotFoundException
 import org.joda.time.{DateTime, DateTimeUtils}
 import org.junit.{After, Before}
@@ -13,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.{DepartmentalAdministratorRoleDefinition, ModuleManagerRoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.services.{SecurityService, UserLookupService}
+import uk.ac.warwick.tabula.services.{FeedbackService, SecurityService, UserLookupService}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PackageScanner, PersistenceTestBase}
 import uk.ac.warwick.userlookup.User
 
@@ -22,251 +21,266 @@ import scala.collection.JavaConverters._
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
-	val notificationDao = new NotificationDaoImpl
+  val notificationDao = new NotificationDaoImpl
 
-	val agentMember: Member = Fixtures.member(userType=MemberUserType.Staff)
-	val agent: User = agentMember.asSsoUser
+  val agentMember: Member = Fixtures.member(userType = MemberUserType.Staff)
+  val agent: User = agentMember.asSsoUser
 
-	val victim: User = Fixtures.user("heronVictim", "heronVictim")
-	val heron = new Heron(victim)
+  val staff = Fixtures.staff("1234567")
 
-	@Before
-	def setup() {
-		notificationDao.sessionFactory = sessionFactory
-		SSOUserType.userLookup = smartMock[UserLookupService]
-		SSOUserType.userLookup.getUserByUserId("heronVictim") returns victim
-		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
-		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
-	}
+  private trait Fixture {
+    val student = Fixtures.student("9876543")
+    val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
-	@After
-	def teardown() {
-		SSOUserType.userLookup = null
-		DateTimeUtils.setCurrentMillisSystem()
-	}
+    val meeting = new MeetingRecord
+    meeting.creator = staff
 
-	def newHeronNotification(agent: User, heron: Heron): HeronWarningNotification = {
-		Notification.init(new HeronWarningNotification, agent, heron)
-	}
+    val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+    meeting.relationships = Seq(relationship)
+  }
 
-	@Test def saveAndFetch() {
+  @Before
+  def setup() {
+    notificationDao.sessionFactory = sessionFactory
+    SSOUserType.userLookup = smartMock[UserLookupService]
+    SSOUserType.userLookup.getUserByUserId("heronVictim") returns staff.asSsoUser
+  }
 
-			val notification = newHeronNotification(agent, heron)
+  @After
+  def teardown() {
+    SSOUserType.userLookup = null
+    DateTimeUtils.setCurrentMillisSystem()
+  }
 
-			session.save(heron)
+  def newHeronNotification(agent: User, meeting: MeetingRecord): HeronWarningNotification = {
+    Notification.init(new HeronWarningNotification, agent, meeting)
+  }
 
-			notificationDao.getById("heronWarningNotification") should be (None)
-			notificationDao.save(notification)
-			notificationDao.getById(notification.id) should be (Option(notification))
+  @Test def saveAndFetch(): Unit = new Fixture {
+    val notification = newHeronNotification(agent, meeting)
+    session.save(staff)
+    session.save(student)
+    session.save(relationship)
+    session.save(meeting)
 
-			session.flush()
-			session.clear()
+    notificationDao.getById("heronWarningNotification") should be(None)
+    notificationDao.save(notification)
+    notificationDao.getById(notification.id) should be(Option(notification))
 
-			val retrievedNotification = notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
-			retrievedNotification.title should be ("You all need to know. Herons would love to kill you in your sleep")
-			retrievedNotification.url should be ("/beware/herons")
-			retrievedNotification.item.entity should be(heron)
-			retrievedNotification.recipient should be (victim)
-			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
+    session.flush()
+    session.clear()
 
-			session.clear()
-			session.delete(heron)
-			session.flush()
+    val retrievedNotification = notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+    retrievedNotification.title should be("You all need to know. Herons would love to kill you in your sleep")
+    retrievedNotification.url should be("/beware/herons")
+    retrievedNotification.item.entity should be(meeting)
+    retrievedNotification.recipient should be(staff.asSsoUser)
+    retrievedNotification.content.template should be("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
 
-			// If an attached entityreference points to a now non-existent thing, we shouldn't explode
-			// when loading the Notification but only when accessing the lazy entityreference.
+    session.clear()
+    session.delete(meeting)
+    session.flush()
 
-			val notificationWithNoItem = try {
-				 notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
-			} catch {
-				case e: ObjectNotFoundException =>
-					fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
-			}
+    // If an attached entityreference points to a now non-existent thing, we shouldn't explode
+    // when loading the Notification but only when accessing the lazy entityreference.
 
-			// asserts that this type of exception is thrown
-			intercept[ObjectNotFoundException] {
-				notificationWithNoItem.item
-			}
-	}
+    val notificationWithNoItem = try {
+      notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+    } catch {
+      case _: ObjectNotFoundException =>
+        fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
+    }
 
-	@Test
-	def submissionReceived() {
-		val submission = Fixtures.submission()
-		val assignment = Fixtures.assignment("Fun")
-		assignment.addSubmission(submission)
+    // asserts that this type of exception is thrown
+    intercept[ObjectNotFoundException] {
+      notificationWithNoItem.item.entity.id
+    }
+  }
 
-		val module = Fixtures.module("in101")
-		val department = Fixtures.department("in")
-		module.adminDepartment = department
+  @Test
+  def submissionReceived() {
+    val submission = Fixtures.submission()
+    val assignment = Fixtures.assignment("Fun")
+    assignment.addSubmission(submission)
 
-		val permissionsService = mock[PermissionsService]
-		module.permissionsService = permissionsService
-		session.save(module)
+    val module = Fixtures.module("in101")
+    val department = Fixtures.department("in")
+    module.adminDepartment = department
 
-		department.permissionsService = permissionsService
-		session.save(department)
+    val permissionsService = mock[PermissionsService]
+    module.permissionsService = permissionsService
+    session.save(module)
 
-		assignment.module = module
-		session.save(assignment)
+    department.permissionsService = permissionsService
+    session.save(department)
 
-		/** Had to construct this stream and then  extract assignment,module,dept from there to set expectations. If we set expectation
-			* on assignemnet,dept,module objects directly they are somehow still null (expectation don't work). SubmissionReceivedNotification works on stream
-			* elements now and it is possible for expectation to work properly they needd to be of same type - scala.collection.immutable.Stream.ConsWrapper
-			*
-			**/
-		val assignmentWithParents = Fixtures.withParents(assignment)
+    assignment.module = module
+    session.save(assignment)
 
+    assignment.feedbackService = smartMock[FeedbackService]
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
 
-		permissionsService.ensureUserGroupFor(assignmentWithParents.head, ModuleManagerRoleDefinition) returns UserGroup.ofUniversityIds
-		permissionsService.ensureUserGroupFor(assignmentWithParents(1), DepartmentalAdministratorRoleDefinition) returns UserGroup.ofUniversityIds
-		permissionsService.getAllGrantedRolesFor(assignmentWithParents.head) returns Nil
-		permissionsService.getAllGrantedRolesFor(assignmentWithParents(1)) returns Nil
-		permissionsService.getAllGrantedRolesFor(assignmentWithParents(2)) returns Nil
-		permissionsService.getGrantedPermission(assignmentWithParents.head, Permissions.Submission.Delete, RoleOverride.Allow) returns None
-		permissionsService.getGrantedPermission(assignmentWithParents(1), Permissions.Submission.Delete, RoleOverride.Allow) returns None
-		permissionsService.getGrantedPermission(assignmentWithParents(2), Permissions.Submission.Delete, RoleOverride.Allow) returns None
-
-		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
-
-		notification.securityService = mock[SecurityService]
-		notification.permissionsService = permissionsService
-
-		notificationDao.save(notification)
-		notification.target.id should not be null
-	}
+    /** Had to construct this stream and then  extract assignment,module,dept from there to set expectations. If we set expectation
+      * on assignemnet,dept,module objects directly they are somehow still null (expectation don't work). SubmissionReceivedNotification works on stream
+      * elements now and it is possible for expectation to work properly they needd to be of same type - scala.collection.immutable.Stream.ConsWrapper
+      *
+      * */
+    val assignmentWithParents = Fixtures.withParents(assignment)
 
 
-	@Test
-	def scheduledMeetings() {
-		val staff = Fixtures.staff("1234567")
-		val student = Fixtures.student("9876543")
-		val relType = StudentRelationshipType("tutor", "tutor", "tutor", "tutor")
+    permissionsService.ensureUserGroupFor(assignmentWithParents.head, ModuleManagerRoleDefinition) returns UserGroup.ofUniversityIds
+    permissionsService.ensureUserGroupFor(assignmentWithParents(1), DepartmentalAdministratorRoleDefinition) returns UserGroup.ofUniversityIds
+    permissionsService.getAllGrantedRolesFor(assignmentWithParents.head) returns Nil
+    permissionsService.getAllGrantedRolesFor(assignmentWithParents(1)) returns Nil
+    permissionsService.getAllGrantedRolesFor(assignmentWithParents(2)) returns Nil
+    permissionsService.getGrantedPermission(assignmentWithParents.head, Permissions.Submission.Delete, RoleOverride.Allow) returns None
+    permissionsService.getGrantedPermission(assignmentWithParents(1), Permissions.Submission.Delete, RoleOverride.Allow) returns None
+    permissionsService.getGrantedPermission(assignmentWithParents(2), Permissions.Submission.Delete, RoleOverride.Allow) returns None
 
-		val meeting = new ScheduledMeetingRecord
-		meeting.creator = staff
+    val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
 
-		val relationship = StudentRelationship(staff, relType, student, DateTime.now)
-		meeting.relationship = relationship
+    notification.securityService = mock[SecurityService]
+    notification.permissionsService = permissionsService
 
-		session.save(staff)
-		session.save(student)
-		session.save(relType)
-		session.save(relationship)
-		session.save(meeting)
+    notificationDao.save(notification)
+    notification.target.id should not be null
+  }
 
-		val r: StudentRelationship = relationship
 
-		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting))
-		notificationDao.save(notification)
+  @Test
+  def scheduledMeetings() {
+    val staff = Fixtures.staff("1234567")
+    val student = Fixtures.student("9876543")
+    val relType = session.get(classOf[StudentRelationshipType], "personalTutor")
 
-		session.flush()
-		session.clear()
+    val meeting = new ScheduledMeetingRecord
+    meeting.creator = staff
 
-		val retrieved = notificationDao.getById(notification.id).get.asInstanceOf[ScheduledMeetingRecordNotification]
-		retrieved.meeting should be (meeting)
-	}
+    val relationship = StudentRelationship(staff, relType, student, DateTime.now)
+    meeting.relationships = Seq(relationship)
 
-	@Test def recent() {
-		val agent = Fixtures.user()
-		val group = Fixtures.smallGroup("Blissfully unaware group")
-		session.save(group)
-		val now = DateTime.now
-		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
+    session.save(staff)
+    session.save(student)
+    session.save(relationship)
+    session.save(meeting)
 
-		session.save(heron)
+    val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting))
+    notificationDao.save(notification)
 
-		for (i <- 1 to 1000) {
-			val notification = newHeronNotification(agent, heron)
-			notification.created = now.minusMinutes(i)
-			notificationDao.save(notification)
-		}
+    session.flush()
+    session.clear()
 
-		session.flush()
+    val retrieved = notificationDao.getById(notification.id).get.asInstanceOf[ScheduledMeetingRecordNotification]
+    retrieved.meeting should be(meeting)
+  }
 
-		val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
-		everything.size should be (1000)
+  @Test def recent(): Unit = new Fixture {
+    val agent = Fixtures.user()
+    val group = Fixtures.smallGroup("Blissfully unaware group")
+    session.save(group)
+    val now = DateTime.now
+    DateTimeUtils.setCurrentMillisFixed(now.getMillis)
 
-		val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq
-		oneHundred.size should be (100)
+    session.save(staff)
+    session.save(student)
+    session.save(relationship)
+    session.save(meeting)
 
-		def noNewer(mins: Int)(n: Notification[_,_]) = n.created.isBefore(now.minusMinutes(mins))
+    for (i <- 1 to 1000) {
+      val notification = newHeronNotification(agent, meeting)
+      notification.created = now.minusMinutes(i)
+      notificationDao.save(notification)
+    }
 
-		val recent = notificationDao.recent(now.minusMonths(10)).takeWhile(noNewer(25)).toSeq
-		recent.size should be (975)
+    session.flush()
 
-	}
+    val everything = notificationDao.recent(now.minusMonths(10)).all.toSeq
+    everything.size should be(1000)
 
-	/**
-	 * Ensure there's nothing obviously wrong with the Notification subclass mappings. This will detect e.g.
-	 * if an @Entity or @DiscriminatorValue are missing.
-	 */
-	@Test def nooneDied() {
-		val notificationClasses = PackageScanner.subclassesOf[Notification[_,_]]("uk.ac.warwick.tabula.data.model")
-		withClue("Package scanner should find a sensible number of classes") {
-			notificationClasses.size should be > 5
-		}
+    val oneHundred = notificationDao.recent(now.minusMonths(10)).take(100).toSeq
+    oneHundred.size should be(100)
 
-		val user = new User
-		user.setUserId("testid")
+    def noNewer(mins: Int)(n: Notification[_, _]) = n.created.isBefore(now.minusMinutes(mins))
 
-		for (clazz <- notificationClasses) {
-			try {
-				val notification = clazz.getConstructor().newInstance().asInstanceOf[Notification[ToEntityReference,_]]
-				notification.agent = user
+    val recent = notificationDao.recent(now.minusMonths(10)).takeWhile(noNewer(25)).toSeq
+    recent.size should be(975)
 
-				session.save(notification)
+  }
 
-				if (clazz.getAnnotation(classOf[DiscriminatorValue]) == null) {
-					fail(s"Notification $clazz has no @DiscriminatorValue annotation")
-				}
+  /**
+    * Ensure there's nothing obviously wrong with the Notification subclass mappings. This will detect e.g.
+    * if an @Entity or @DiscriminatorValue are missing.
+    */
+  @Test def nooneDied() {
+    val notificationClasses = PackageScanner.subclassesOf[Notification[_, _]]("uk.ac.warwick.tabula.data.model")
+    withClue("Package scanner should find a sensible number of classes") {
+      notificationClasses.size should be > 5
+    }
 
-				// FIXME we do want to flush because it would test things we care about, but many of the subclasses
-				// expect specific properties to be set in order to save successfully. Need to do magic reflection to
-				// work out what this is???
-				//session.flush()
-			} catch {
-				case e: Exception => fail(s"Exception saving $clazz", e)
-			}
-		}
-	}
+    val user = new User
+    user.setUserId("testid")
 
-	@Test def unemailedRecipientIds() {
-		val agent = Fixtures.user()
-		val group = Fixtures.smallGroup("Blissfully unaware group")
-		session.save(group)
-		val now = DateTime.now
-		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
+    for (clazz <- notificationClasses) {
+      try {
+        val notification = clazz.getConstructor().newInstance().asInstanceOf[Notification[ToEntityReference, _]]
+        notification.agent = user
 
-		session.save(heron)
+        session.save(notification)
 
-		val notifications = (1 to 50).map(i => {
-			val notification = newHeronNotification(agent, heron)
-			notification.created = now.minusMinutes(i)
-			notificationDao.save(notification)
-			notification
-		})
+        if (clazz.getAnnotation(classOf[DiscriminatorValue]) == null) {
+          fail(s"Notification $clazz has no @DiscriminatorValue annotation")
+        }
 
-		session.flush()
+        // FIXME we do want to flush because it would test things we care about, but many of the subclasses
+        // expect specific properties to be set in order to save successfully. Need to do magic reflection to
+        // work out what this is???
+        //session.flush()
+      } catch {
+        case e: Exception => fail(s"Exception saving $clazz", e)
+      }
+    }
+  }
 
-		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (50)
+  @Test def unemailedRecipientIds(): Unit = new Fixture {
+    val agent = Fixtures.user()
+    val group = Fixtures.smallGroup("Blissfully unaware group")
+    session.save(group)
+    val now = DateTime.now
+    DateTimeUtils.setCurrentMillisFixed(now.getMillis)
 
-		// attempt to send 10 mails - only 5 actually go
-		for (
-			(n, i) <- notifications.take(10).zipWithIndex;
-			info <- n.recipientNotificationInfos.asScala
-		) {
-			if(i % 2 == 0)
-				info.emailSent = true // half have been sent
-			info.attemptedAt = DateTime.now
-			notificationDao.save(n)
-		}
-		session.flush()
+    session.save(staff)
+    session.save(student)
+    session.save(relationship)
+    session.save(meeting)
 
-		// the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
-		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (40)
+    val notifications = (1 to 50).map(i => {
+      val notification = newHeronNotification(agent, meeting)
+      notification.created = now.minusMinutes(i)
+      notificationDao.save(notification)
+      notification
+    })
 
-		// go forward in time RETRY_DELAY_MINUTES +1  minutes - the 5 unsent mails show up again
-		DateTimeUtils.setCurrentMillisFixed(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1).getMillis)
-		notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be (45)
-	}
+    session.flush()
+
+    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(50)
+
+    // attempt to send 10 mails - only 5 actually go
+    for (
+      (n, i) <- notifications.take(10).zipWithIndex;
+      info <- n.recipientNotificationInfos.asScala
+    ) {
+      if (i % 2 == 0)
+        info.emailSent = true // half have been sent
+      info.attemptedAt = DateTime.now
+      notificationDao.save(n)
+    }
+    session.flush()
+
+    // the half that didn't send won't show up in the unsent queue for another RETRY_DELAY_MINUTES - no point in retrying so soon
+    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(40)
+
+    // go forward in time RETRY_DELAY_MINUTES +1  minutes - the 5 unsent mails show up again
+    DateTimeUtils.setCurrentMillisFixed(now.plusMinutes(NotificationDao.RETRY_DELAY_MINUTES + 1).getMillis)
+    notificationDao.unemailedRecipientIds(Integer.MAX_VALUE).size should be(45)
+  }
 }

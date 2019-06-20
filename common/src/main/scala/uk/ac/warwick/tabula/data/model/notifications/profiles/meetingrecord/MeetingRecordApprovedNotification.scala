@@ -1,41 +1,37 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.userlookup.User
 
 @Entity
+@Proxy
 @DiscriminatorValue("meetingRecordApproved")
 class MeetingRecordApprovedNotification
-	extends Notification[MeetingRecordApproval, Unit]
-	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval]
-	with MyWarwickActivity {
+  extends Notification[MeetingRecordApproval, Unit]
+    with MeetingRecordNotificationTrait
+    with SingleItemNotification[MeetingRecordApproval]
+    with MyWarwickActivity {
 
-	def approval: MeetingRecordApproval = item.entity
-	def meeting: MeetingRecord = approval.meetingRecord
-	def relationship: StudentRelationship = meeting.relationship
+  def approval: MeetingRecordApproval = item.entity
 
-	def verb = "approve"
+  def meeting: MeetingRecord = approval.meetingRecord
 
-	def title: String = {
-		val name =
-			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
-			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
+  def verb = "approve"
 
-		s"${agentRole.capitalize} meeting record with $name approved"
-	}
+  override def titleSuffix: String = "approved"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"role"->agentRole,
-		"dateFormatter" -> dateOnlyFormatter,
-		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "approved"
-	))
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "actor" -> agent,
+    "agentRoles" -> agentRoles,
+    "dateFormatter" -> dateOnlyFormatter,
+    "meetingRecord" -> approval.meetingRecord,
+    "verbed" -> "approved"
+  ))
 
-	def urlTitle = "view the meeting record"
+  def urlTitle = "view the meeting record"
 
-	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
+  def recipients: Seq[User] = Seq(meeting.creator, meeting.student).filterNot(_.asSsoUser == agent).distinct.map(_.asSsoUser)
 }
 

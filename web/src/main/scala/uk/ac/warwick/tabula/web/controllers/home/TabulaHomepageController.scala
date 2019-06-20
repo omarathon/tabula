@@ -8,13 +8,13 @@ import uk.ac.warwick.tabula.web.controllers._
 
 @Controller class TabulaHomepageController extends BaseController {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	@RequestMapping(Array("/")) def home(user: CurrentUser): Mav = {
-	  Mav("home/view",
-			"userNavigation" -> UserNavigationGeneratorImpl(user.apparentUser, forceUpdate = true),
-			"jumbotron" -> true
-		).noLayoutIf(ajax) // All hail our new Jumbotron overlords
-	}
+  @RequestMapping(Array("/")) def home(user: CurrentUser): Mav = {
+    Mav("home/view",
+      "userNavigation" -> UserNavigationGeneratorImpl(user.apparentUser, forceUpdate = true),
+      "jumbotron" -> true
+    ).noLayoutIf(ajax) // All hail our new Jumbotron overlords
+  }
 
 }

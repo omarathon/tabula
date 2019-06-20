@@ -1,42 +1,47 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 @Entity
-@DiscriminatorValue(value="FeedbackChange")
+@Proxy
+@DiscriminatorValue(value = "FeedbackChange")
 class FeedbackChangeNotification extends NotificationWithTarget[AssignmentFeedback, Assignment]
-	with SingleItemNotification[AssignmentFeedback]
-	with SingleRecipientNotification
-	with UniversityIdOrUserIdRecipientNotification
-	with AutowiringUserLookupComponent
-	with AllCompletedActionRequiredNotification {
+  with SingleItemNotification[AssignmentFeedback]
+  with SingleRecipientNotification
+  with UniversityIdOrUserIdRecipientNotification
+  with AutowiringUserLookupComponent
+  with AllCompletedActionRequiredNotification {
 
-	def feedback: AssignmentFeedback = item.entity
-	def assignment: Assignment = target.entity
-	def module: Module = assignment.module
-	def moduleCode: String = module.code.toUpperCase
+  def feedback: AssignmentFeedback = item.entity
 
-	priority = Warning
+  def assignment: Assignment = target.entity
 
-	override def onPreSave(newRecord: Boolean) {
-		recipientUniversityId = feedback.usercode
-	}
+  def module: Module = assignment.module
 
-	def verb = "modify"
+  def moduleCode: String = module.code.toUpperCase
 
-	def title: String = "%s: Your assignment feedback for \"%s\" has been updated".format(moduleCode, assignment.name)
+  priority = Warning
 
-	def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackchanged.ftl", Map(
-		"assignment" -> assignment,
-		"module" -> module
-	))
+  override def onPreSave(newRecord: Boolean) {
+    recipientUniversityId = feedback.usercode
+  }
 
-	def url: String = Routes.assignment(assignment)
-	def urlTitle = "view your new feedback"
+  def verb = "modify"
+
+  def title: String = "%s: Your assignment feedback for \"%s\" has been updated".format(moduleCode, assignment.name)
+
+  def content = FreemarkerModel("/WEB-INF/freemarker/emails/feedbackchanged.ftl", Map(
+    "assignment" -> assignment,
+    "module" -> module
+  ))
+
+  def url: String = Routes.assignment(assignment)
+
+  def urlTitle = "view your new feedback"
 
 }

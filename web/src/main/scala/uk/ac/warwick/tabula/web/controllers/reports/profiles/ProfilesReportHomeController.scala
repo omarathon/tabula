@@ -12,12 +12,12 @@ import uk.ac.warwick.tabula.web.controllers.reports.{ReportsBreadcrumbs, Reports
 @RequestMapping(Array("/reports/{department}/{academicYear}/profiles"))
 class ProfilesReportHomeController extends ReportsController with CurrentAcademicYear {
 
-	@RequestMapping
-	def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
-		Mav("reports/profiles/home").crumbs(
-			ReportsBreadcrumbs.Home.Department(department),
-			ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear)
-		)
-	}
+  @RequestMapping
+  def home(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Mav = {
+    Mav("reports/profiles/home").crumbs(
+      ReportsBreadcrumbs.Home.Department(department),
+      ReportsBreadcrumbs.Home.DepartmentForYear(department, academicYear)
+    )
+  }
 
 }

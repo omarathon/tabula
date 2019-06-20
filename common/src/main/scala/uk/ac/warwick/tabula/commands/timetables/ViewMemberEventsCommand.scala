@@ -19,221 +19,219 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 object ViewMemberEventsCommand extends Logging {
-	val Timeout: FiniteDuration = 15.seconds
+  val Timeout: FiniteDuration = 15.seconds
 
-	private[timetables] type ReturnType = Try[EventOccurrenceList]
-	type TimetableCommand = Appliable[ReturnType] with ViewMemberEventsRequest with SelfValidating
-	val RequiredPermission: Permission = Permissions.Profiles.Read.Timetable
+  private[timetables] type ReturnType = Try[EventOccurrenceList]
+  type TimetableCommand = Appliable[ReturnType] with ViewMemberEventsRequest with SelfValidating
+  val RequiredPermission: Permission = Permissions.Profiles.Read.Timetable
 
-	def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
-		case student: StudentMember =>
-			new ViewStudentEventsCommandInternal(student, currentUser)
-				with ComposableCommand[ReturnType]
-				with ViewMemberEventsPermissions
-				with ViewMemberEventsValidation
-				with Unaudited with ReadOnly
-				with AutowiringStudentTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+  def apply(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
+    case student: StudentMember =>
+      new ViewStudentEventsCommandInternal(student, currentUser)
+        with ComposableCommand[ReturnType]
+        with ViewMemberEventsPermissions
+        with ViewMemberEventsValidation
+        with Unaudited with ReadOnly
+        with AutowiringStudentTimetableEventSourceComponent
+        with AutowiringEventOccurrenceSourceComponent
+        with AutowiringTermBasedEventOccurrenceServiceComponent
 
-		case staff: StaffMember =>
-			new ViewStaffEventsCommandInternal(staff, currentUser)
-				with ComposableCommand[ReturnType]
-				with ViewMemberEventsPermissions
-				with ViewMemberEventsValidation
-				with Unaudited with ReadOnly
-				with AutowiringStaffTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+    case staff: StaffMember =>
+      new ViewStaffEventsCommandInternal(staff, currentUser)
+        with ComposableCommand[ReturnType]
+        with ViewMemberEventsPermissions
+        with ViewMemberEventsValidation
+        with Unaudited with ReadOnly
+        with AutowiringStaffTimetableEventSourceComponent
+        with AutowiringEventOccurrenceSourceComponent
+        with AutowiringTermBasedEventOccurrenceServiceComponent
 
-		case _ =>
-			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
-			throw new ItemNotFoundException
-	}
+    case _ =>
+      logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
+      throw new ItemNotFoundException
+  }
 
-	// Re-usable service
-	def apply(staff: StaffMember, currentUser: CurrentUser, source: StaffTimetableEventSource): TimetableCommand =
-		new ViewStaffEventsCommandInternal(staff, currentUser)
-			with ComposableCommand[ReturnType]
-			with ViewMemberEventsPermissions
-			with ViewMemberEventsValidation
-			with Unaudited with ReadOnly
-			with AutowiringScheduledMeetingEventSourceComponent
-			with AutowiringTermBasedEventOccurrenceServiceComponent
-			with StaffTimetableEventSourceComponent {
-			val staffTimetableEventSource: StaffTimetableEventSource = source
-		}
+  // Re-usable service
+  def apply(staff: StaffMember, currentUser: CurrentUser, source: StaffTimetableEventSource): TimetableCommand =
+    new ViewStaffEventsCommandInternal(staff, currentUser)
+      with ComposableCommand[ReturnType]
+      with ViewMemberEventsPermissions
+      with ViewMemberEventsValidation
+      with Unaudited with ReadOnly
+      with AutowiringEventOccurrenceSourceComponent
+      with AutowiringTermBasedEventOccurrenceServiceComponent
+      with StaffTimetableEventSourceComponent {
+      val staffTimetableEventSource: StaffTimetableEventSource = source
+    }
 
-	def public(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
-		case student: StudentMember =>
-			new ViewStudentEventsCommandInternal(student, currentUser)
-				with ComposableCommand[ReturnType]
-				with PubliclyVisiblePermissions
-				with ViewMemberEventsValidation
-				with Unaudited with ReadOnly
-				with AutowiringStudentTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+  def public(member: Member, currentUser: CurrentUser): TimetableCommand = member match {
+    case student: StudentMember =>
+      new ViewStudentEventsCommandInternal(student, currentUser)
+        with ComposableCommand[ReturnType]
+        with PubliclyVisiblePermissions
+        with ViewMemberEventsValidation
+        with Unaudited with ReadOnly
+        with AutowiringStudentTimetableEventSourceComponent
+        with AutowiringEventOccurrenceSourceComponent
+        with AutowiringTermBasedEventOccurrenceServiceComponent
 
-		case staff: StaffMember =>
-			new ViewStaffEventsCommandInternal(staff, currentUser)
-				with ComposableCommand[ReturnType]
-				with PubliclyVisiblePermissions
-				with ViewMemberEventsValidation
-				with Unaudited with ReadOnly
-				with AutowiringStaffTimetableEventSourceComponent
-				with AutowiringScheduledMeetingEventSourceComponent
-				with AutowiringTermBasedEventOccurrenceServiceComponent
+    case staff: StaffMember =>
+      new ViewStaffEventsCommandInternal(staff, currentUser)
+        with ComposableCommand[ReturnType]
+        with PubliclyVisiblePermissions
+        with ViewMemberEventsValidation
+        with Unaudited with ReadOnly
+        with AutowiringStaffTimetableEventSourceComponent
+        with AutowiringEventOccurrenceSourceComponent
+        with AutowiringTermBasedEventOccurrenceServiceComponent
 
-		case _ =>
-			logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
-			throw new ItemNotFoundException
-	}
+    case _ =>
+      logger.error(s"Don't know how to render timetables for non-student or non-staff users (${member.universityId}, ${member.userType})")
+      throw new ItemNotFoundException
+  }
 }
 
 trait MemberTimetableCommand {
-	self: ViewMemberEventsRequest with EventOccurrenceServiceComponent =>
+  self: ViewMemberEventsRequest with EventOccurrenceServiceComponent =>
 
-	protected def eventsToOccurrences(events: EventList): EventOccurrenceList = {
-		val dateRange = createDateRange()
-		val lastUpdated = events.lastUpdated
+  protected def eventsToOccurrences(events: EventList): EventOccurrenceList = {
+    val dateRange = createDateRange()
+    val lastUpdated = events.lastUpdated
 
-		if (academicYear != null) {
-			EventOccurrenceList(events.events.filter { event => event.year == academicYear }
-				.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
-		} else {
-			EventOccurrenceList(events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
-		}
-	}
+    if (academicYear != null) {
+      EventOccurrenceList(events.events.filter { event => event.year == academicYear }
+        .flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
+    } else {
+      EventOccurrenceList(events.events.flatMap(eventOccurrenceService.fromTimetableEvent(_, dateRange)), lastUpdated)
+    }
+  }
 
-	private def createDateRange(): Interval = {
-		val startDate: LocalDate =
-			Option(start).getOrElse(academicYear.firstDay)
+  private def createDateRange(): Interval = {
+    val startDate: LocalDate =
+      Option(start).getOrElse(academicYear.firstDay)
 
-		val endDate: LocalDate =
-			Option(end).getOrElse(academicYear.lastDay)
+    val endDate: LocalDate =
+      Option(end).getOrElse(academicYear.lastDay)
 
-		new Interval(startDate.toDateTimeAtStartOfDay, endDate.toDateTimeAtStartOfDay)
-	}
+    new Interval(startDate.toDateTimeAtStartOfDay, endDate.toDateTimeAtStartOfDay)
+  }
 
-	protected def sorted(result: EventOccurrenceList): EventOccurrenceList = {
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-		result.map(_.sortBy(_.start))
-	}
+  protected def sorted(result: EventOccurrenceList): EventOccurrenceList = {
+    import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+    result.map(_.sortBy(_.start))
+  }
 
 }
 
 abstract class ViewStudentEventsCommandInternal(val member: StudentMember, currentUser: CurrentUser)
-	extends CommandInternal[ReturnType]
-		with ViewMemberEventsRequest with MemberTimetableCommand {
+  extends CommandInternal[ReturnType]
+    with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StudentTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
+  self: StudentTimetableEventSourceComponent with EventOccurrenceSourceComponent with EventOccurrenceServiceComponent =>
 
-	def applyInternal(): ReturnType = {
-		val timetableOccurrences =
-			studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student)
-				.map(eventsToOccurrences)
+  def applyInternal(): ReturnType = {
+    val timetableOccurrences =
+      studentTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Student)
+        .map(eventsToOccurrences)
 
-		val meetingOccurrences =
-			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student)
-				.map(_.filterNot { event =>
-					event.end.toLocalDate.isBefore(start) || event.start.toLocalDate.isAfter(end)
-				})
+    val meetingOccurrences =
+      eventOccurrenceSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Student, start, end)
 
-		Try(Await.result(
-			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
-		)).map(sorted)
-	}
+    Try(Await.result(
+      Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
+    )).map(sorted)
+  }
+
 
 }
 
 abstract class ViewStaffEventsCommandInternal(val member: StaffMember, currentUser: CurrentUser)
-	extends CommandInternal[ReturnType]
-		with ViewMemberEventsRequest with MemberTimetableCommand {
+  extends CommandInternal[ReturnType]
+    with ViewMemberEventsRequest with MemberTimetableCommand {
 
-	self: StaffTimetableEventSourceComponent with ScheduledMeetingEventSourceComponent with EventOccurrenceServiceComponent =>
+  self: StaffTimetableEventSourceComponent with EventOccurrenceSourceComponent with EventOccurrenceServiceComponent =>
 
-	def applyInternal(): ReturnType = {
-		val timetableOccurrences =
-			staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff)
-				.map(eventsToOccurrences)
+  def applyInternal(): ReturnType = {
+    val timetableOccurrences =
+      staffTimetableEventSource.eventsFor(member, currentUser, TimetableEvent.Context.Staff)
+        .map(eventsToOccurrences)
 
-		val meetingOccurrences =
-			scheduledMeetingEventSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff)
+    val meetingOccurrences =
+      eventOccurrenceSource.occurrencesFor(member, currentUser, TimetableEvent.Context.Staff, start, end)
 
-		Try(Await.result(
-			Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
-		)).map(sorted)
-	}
+    Try(Await.result(
+      Futures.combine(Seq(timetableOccurrences, meetingOccurrences), EventOccurrenceList.combine), ViewMemberEventsCommand.Timeout
+    )).map(sorted)
+  }
 
 }
 
 // State - unmodifiable pre-requisites
 trait ViewMemberEventsState {
-	val member: Member
+  val member: Member
 }
 
 // Request parameters
 trait ViewMemberEventsRequest extends ViewMemberEventsState with TimetableEventsRequest {
-	var academicYear: AcademicYear = _
+  var academicYear: AcademicYear = _
 }
 
 trait ViewMemberEventsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewMemberEventsState =>
+  self: ViewMemberEventsState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(ViewMemberEventsCommand.RequiredPermission, mandatory(member))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(ViewMemberEventsCommand.RequiredPermission, mandatory(member))
+  }
 }
 
 trait ViewMemberEventsValidation extends SelfValidating {
-	self: ViewMemberEventsRequest =>
+  self: ViewMemberEventsRequest =>
 
-	override def validate(errors: Errors) {
-		// Must have either an academic year or a start and an end
-		if (academicYear == null && (start == null || end == null)) {
-			errors.rejectValue("academicYear", "NotEmpty")
-		}
-	}
+  override def validate(errors: Errors) {
+    // Must have either an academic year or a start and an end
+    if (academicYear == null && (start == null || end == null)) {
+      errors.rejectValue("academicYear", "NotEmpty")
+    }
+  }
 }
 
 trait ViewStaffMemberEventsCommandFactory {
-	def apply(staffMember: StaffMember): Appliable[ReturnType] with ViewMemberEventsRequest
+  def apply(staffMember: StaffMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
 class ViewStaffMemberEventsCommandFactoryImpl(currentUser: CurrentUser, source: Option[StaffTimetableEventSource] = None)
-	extends ViewStaffMemberEventsCommandFactory {
+  extends ViewStaffMemberEventsCommandFactory {
 
-	def this(currentUser: CurrentUser, source: StaffTimetableEventSource) {
-		this(currentUser, Some(source))
-	}
+  def this(currentUser: CurrentUser, source: StaffTimetableEventSource) {
+    this(currentUser, Some(source))
+  }
 
-	def apply(staffMember: StaffMember) = source match {
-		case Some(staffTimetableEventSource) =>
-			ViewMemberEventsCommand(
-				staffMember,
-				currentUser,
-				staffTimetableEventSource
-			)
+  def apply(staffMember: StaffMember) = source match {
+    case Some(staffTimetableEventSource) =>
+      ViewMemberEventsCommand(
+        staffMember,
+        currentUser,
+        staffTimetableEventSource
+      )
 
-		case _ =>
-			ViewMemberEventsCommand(
-				staffMember,
-				currentUser
-			)
-	}
+    case _ =>
+      ViewMemberEventsCommand(
+        staffMember,
+        currentUser
+      )
+  }
 }
 
 trait ViewStudentMemberEventsCommandFactory {
-	def apply(student: StudentMember): Appliable[ReturnType] with ViewMemberEventsRequest
+  def apply(student: StudentMember): Appliable[ReturnType] with ViewMemberEventsRequest
 }
 
 class ViewStudentMemberEventsCommandFactoryImpl(currentUser: CurrentUser)
-	extends ViewStudentMemberEventsCommandFactory {
+  extends ViewStudentMemberEventsCommandFactory {
 
-	def apply(student: StudentMember) =
-		ViewMemberEventsCommand(
-			student,
-			currentUser
-		)
+  def apply(student: StudentMember) =
+    ViewMemberEventsCommand(
+      student,
+      currentUser
+    )
 }

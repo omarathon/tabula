@@ -1,37 +1,40 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity, SingleRecipientNotification}
+import org.hibernate.annotations.Proxy
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickActivity}
 import uk.ac.warwick.userlookup.User
 
 @Entity
-@DiscriminatorValue(value="ScheduledMeetingRecordBehalf")
+@Proxy
+@DiscriminatorValue(value = "ScheduledMeetingRecordBehalf")
 class ScheduledMeetingRecordBehalfNotification
-	extends ScheduledMeetingRecordNotification with SingleRecipientNotification
-	with AddsIcalAttachmentToScheduledMeetingNotification
-	with MyWarwickActivity {
+  extends ScheduledMeetingRecordNotification
+    with AddsIcalAttachmentToScheduledMeetingNotification
+    with MyWarwickActivity {
 
-	def this(theVerb: String) {
-		this()
-		verbSetting.value = theVerb
-	}
+  def this(theVerb: String) {
+    this()
+    verbSetting.value = theVerb
+  }
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_behalf_notification.ftl"
+  def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_behalf_notification.ftl"
 
-	def title = s"${agentRole.capitalize} meeting with ${student.getFullName} $verb on your behalf by ${agent.getFullName}"
+  def title = s"Meeting with ${meeting.allParticipantNames} $verb on your behalf by ${agent.getFullName}"
 
-	def student: User = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
+  override def titleFor(user: User): String = s"Meeting with ${meeting.participantNamesExcept(user)} $verb on your behalf by ${agent.getFullName}"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"student" -> student,
-		"role" -> agentRole,
-		"verb" -> verb,
-		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting
-	))
+  def student: User = meeting.student.asSsoUser
 
-	def recipient: User = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "actor" -> agent,
+    "student" -> student,
+    "agentRoles" -> agentRoles,
+    "verb" -> verb,
+    "dateTimeFormatter" -> dateTimeFormatter,
+    "meetingRecord" -> meeting
+  ))
+
+  def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
 
 }

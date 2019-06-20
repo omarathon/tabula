@@ -32,248 +32,256 @@ import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, Auto
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
 
 object AssignmentController {
-	type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest with BindListener with SelfValidating
+  type SubmitAssignmentCommand = Appliable[Submission] with SubmitAssignmentRequest with BindListener with SelfValidating
 }
 
 abstract class AssignmentController extends ApiController
-	with AssignmentToJsonConverter
-	with AssessmentMembershipInfoToJsonConverter
-	with AssignmentStudentToJsonConverter
-	with ReplacingAssignmentStudentMessageResolver
-	with GetAssignmentApiFullOutput {
+  with AssignmentToJsonConverter
+  with AssessmentMembershipInfoToJsonConverter
+  with AssignmentStudentToJsonConverter
+  with ReplacingAssignmentStudentMessageResolver
+  with GetAssignmentApiFullOutput {
 
-	@ModelAttribute("getCommand")
-	def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
-		SubmissionAndFeedbackCommand(module, assignment)
+  @ModelAttribute("getCommand")
+  def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+    SubmissionAndFeedbackCommand(module, assignment)
 
-	def getAssignmentMav(command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, assignment: Assignment): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val results = command.apply()
+  def getAssignmentMav(command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, assignment: Assignment): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val results = command.apply()
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok"
-			) ++ outputJson(assignment, results)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok"
+      ) ++ outputJson(assignment, results)))
+    }
+  }
 }
 
 @Controller
 @RequestMapping(
-	method = Array(RequestMethod.GET),
-	value = Array("/v1/module/{module}/assignments/{assignment}"),
-	params = Array("!universityId"),
-	produces = Array("application/json"))
+  method = Array(RequestMethod.GET),
+  value = Array("/v1/module/{module}/assignments/{assignment}"),
+  params = Array("!universityId"),
+  produces = Array("application/json"))
 class GetAssignmentController extends AssignmentController with GetAssignmentApi with GetAssignmentApiFullOutput {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 }
 
 @Controller
 @RequestMapping(
-	method = Array(RequestMethod.PUT),
-	value = Array("/v1/module/{module}/assignments/{assignment}"),
-	params = Array("!universityId"),
-	produces = Array("application/json"))
+  method = Array(RequestMethod.PUT),
+  value = Array("/v1/module/{module}/assignments/{assignment}"),
+  params = Array("!universityId"),
+  produces = Array("application/json"))
 class EditAssignmentController extends AssignmentController with EditAssignmentApi {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 }
 
 @Controller
 @RequestMapping(
-	method = Array(RequestMethod.DELETE),
-	value = Array("/v1/module/{module}/assignments/{assignment}"),
-	params = Array("!universityId"),
-	produces = Array("application/json"))
+  method = Array(RequestMethod.DELETE),
+  value = Array("/v1/module/{module}/assignments/{assignment}"),
+  params = Array("!universityId"),
+  produces = Array("application/json"))
 class DeleteAssignmentController extends AssignmentController with DeleteAssignmentApi {
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 }
 
 @Controller
 @RequestMapping(value = Array("/v1/module/{module}/assignments/{assignment}"), params = Array("universityId"))
 class AssignmentCreateSubmissionController extends ApiController
-	with CreateSubmissionApi
-	with SubmissionToJsonConverter {
-	validatesSelf[SelfValidating]
+  with CreateSubmissionApi
+  with SubmissionToJsonConverter {
+  validatesSelf[SelfValidating]
 }
 
 trait GetAssignmentApi {
-	self: AssignmentController with GetAssignmentApiOutput =>
+  self: AssignmentController with GetAssignmentApiOutput =>
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		// Return the GET representation
-		getAssignmentMav(command, errors, assignment)
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    // Return the GET representation
+    getAssignmentMav(command, errors, assignment)
 
-	}
+  }
 
-	@InitBinder(Array("getCommand"))
-	def getBinding(binder: WebDataBinder): Unit = {
-		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
-			override def fromString(name: String): CourseworkFilter = CourseworkFilters.of(name)
-			override def toString(filter: CourseworkFilter): String = filter.getName
-		})
-	}
+  @InitBinder(Array("getCommand"))
+  def getBinding(binder: WebDataBinder): Unit = {
+    binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
+      override def fromString(name: String): CourseworkFilter = CourseworkFilters.of(name)
+
+      override def toString(filter: CourseworkFilter): String = filter.getName
+    })
+  }
 }
 
 trait GetAssignmentApiOutput {
-	def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any]
+  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any]
 }
 
 trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
-	self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-	def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
-		"assignment" -> jsonAssignmentObject(assignment),
-		"genericFeedback" -> assignment.genericFeedback,
-		"students" -> results.students.map(jsonAssignmentStudentObject)
-	)
+  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
+    "assignment" -> jsonAssignmentObject(assignment),
+    "genericFeedback" -> assignment.genericFeedback,
+    "students" -> results.students.map(jsonAssignmentStudentObject)
+  )
 }
 
 trait EditAssignmentApi {
-	self: AssignmentController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+  self: AssignmentController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-	@ModelAttribute("editCommand")
-	def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand =
-		new EditAssignmentCommand(module, assignment, user)
+  @ModelAttribute("editCommand")
+  def editCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser): EditAssignmentCommand = {
+    val cmd = new EditAssignmentCommand(module, assignment, user)
+    cmd.cm2Assignment = assignment.cm2Assignment
+    cmd
+  }
 
-	@RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
-	def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentCommand, errors: Errors): Mav = {
-		request.copyTo(command, errors)
 
-		globalValidator.validate(command, errors)
-		command.validate(errors)
-		command.afterBind()
+  @RequestMapping(method = Array(PUT), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array("application/json"))
+  def edit(@RequestBody request: EditAssignmentRequest, @ModelAttribute("editCommand") command: EditAssignmentCommand, errors: Errors): Mav = {
+    request.copyTo(command, errors)
 
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val assignment = command.apply()
+    globalValidator.validate(command, errors)
+    command.validate(errors)
+    command.afterBind()
 
-			// Return the GET representation
-			getAssignmentMav(getCommand(assignment.module, assignment), errors, assignment)
-		}
-	}
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val assignment = command.apply()
+
+      // Return the GET representation
+      getAssignmentMav(getCommand(assignment.module, assignment), errors, assignment)
+    }
+  }
 }
 
 class EditAssignmentRequest extends AssignmentPropertiesRequest[EditAssignmentCommand] {
 
-	// set defaults to null
-	openEnded = null
-	collectMarks = null
-	collectSubmissions = null
-	restrictSubmissions = null
-	allowLateSubmissions = null
-	allowResubmission = null
-	displayPlagiarismNotice = null
-	allowExtensions = null
-	extensionAttachmentMandatory = null
-	allowExtensionsAfterCloseDate = null
-	summative = null
-	dissertation = null
-	includeInFeedbackReportWithoutSubmissions = null
-	automaticallyReleaseToMarkers = null
-	automaticallySubmitToTurnitin = null
+  // set defaults to null
+  openEnded = null
+  collectMarks = null
+  collectSubmissions = null
+  restrictSubmissions = null
+  allowLateSubmissions = null
+  allowResubmission = null
+  displayPlagiarismNotice = null
+  allowExtensions = null
+  extensionAttachmentMandatory = null
+  allowExtensionsAfterCloseDate = null
+  summative = null
+  dissertation = null
+  includeInFeedbackReportWithoutSubmissions = null
+  automaticallyReleaseToMarkers = null
+  automaticallySubmitToTurnitin = null
+  turnitinStoreInRepository = null
+  turnitinExcludeBibliography = null
+  turnitinExcludeQuoted = null
 
 }
 
 trait DeleteAssignmentApi {
-	self: AssignmentController =>
+  self: AssignmentController =>
 
-	@ModelAttribute("deleteCommand")
-	def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
-		val command = new DeleteAssignmentCommand(module, assignment)
-		command.confirm = true
-		command
-	}
+  @ModelAttribute("deleteCommand")
+  def deleteCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): DeleteAssignmentCommand = {
+    val command = new DeleteAssignmentCommand(module, assignment)
+    command.confirm = true
+    command
+  }
 
-	@RequestMapping(method = Array(DELETE), produces = Array("application/json"))
-	def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteAssignmentCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			command.apply()
+  @RequestMapping(method = Array(DELETE), produces = Array("application/json"))
+  def delete(@Valid @ModelAttribute("deleteCommand") command: DeleteAssignmentCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      command.apply()
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok"
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok"
+      )))
+    }
+  }
 }
 
 trait CreateSubmissionApi {
-	self: ApiController with SubmissionToJsonConverter =>
+  self: ApiController with SubmissionToJsonConverter =>
 
-	@ModelAttribute("createCommand")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @RequestParam("universityId") member: Member): SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
-		SubmitAssignmentCommand.onBehalfOf(module, assignment, member)
+  @ModelAttribute("createCommand")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @RequestParam("universityId") member: Member): SubmitAssignmentCommandInternal with ComposableCommand[Submission] with SubmitAssignmentBinding with SubmitAssignmentOnBehalfOfPermissions with SubmitAssignmentDescription with SubmitAssignmentValidation with SubmitAssignmentNotifications with SubmitAssignmentTriggers with AutowiringSubmissionServiceComponent with AutowiringFeaturesComponent with AutowiringZipServiceComponent with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent =
+    SubmitAssignmentCommand.onBehalfOf(module, assignment, member)
 
-	// Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
-	@RequestMapping(method = Array(POST), consumes = Array("multipart/mixed"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
-	def create(@RequestPart("submission") request: CreateSubmissionRequest, @RequestPart("attachments") files: JList[MultipartFile], @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
-		request.copyTo(command, errors)
+  // Two ways into this - either uploading files in advance to the attachments API or submitting a multipart request
+  @RequestMapping(method = Array(POST), consumes = Array("multipart/mixed"), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  def create(@RequestPart("submission") request: CreateSubmissionRequest, @RequestPart("attachments") files: JList[MultipartFile], @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
+    request.copyTo(command, errors)
 
-		command.assignment.attachmentField.map { _.id }.foreach { fieldId =>
-			command.fields.get(fieldId).asInstanceOf[FileFormValue].file.upload.addAll(files)
-		}
+    command.assignment.attachmentField.map(_.id).foreach { fieldId =>
+      command.fields.get(fieldId).asInstanceOf[FileFormValue].file.upload.addAll(files)
+    }
 
-		doCreate(command, errors)
-	}
+    doCreate(command, errors)
+  }
 
-	@RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array(MediaType.APPLICATION_JSON_VALUE))
-	def create(@RequestBody request: CreateSubmissionRequest, @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
-		request.copyTo(command, errors)
+  @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array(MediaType.APPLICATION_JSON_VALUE))
+  def create(@RequestBody request: CreateSubmissionRequest, @ModelAttribute("createCommand") command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse): Mav = {
+    request.copyTo(command, errors)
 
-		doCreate(command, errors)
-	}
+    doCreate(command, errors)
+  }
 
-	private def doCreate(command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse) = {
-		command.onBind(errors)
+  private def doCreate(command: SubmitAssignmentCommand, errors: BindingResult)(implicit response: HttpServletResponse) = {
+    command.onBind(errors)
 
-		globalValidator.validate(command, errors)
-		command.validate(errors)
+    globalValidator.validate(command, errors)
+    command.validate(errors)
 
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else {
-			val submission = command.apply()
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else {
+      val submission = command.apply()
 
-			response.setStatus(HttpStatus.CREATED.value())
-			response.addHeader("Location", toplevelUrl + Routes.api.submission(submission))
+      response.setStatus(HttpStatus.CREATED.value())
+      response.addHeader("Location", toplevelUrl + Routes.api.submission(submission))
 
-			Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"submission" -> jsonSubmissionObject(submission)
-			)))
-		}
-	}
+      Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "submission" -> jsonSubmissionObject(submission)
+      )))
+    }
+  }
 
 }
 
 @JsonAutoDetect
 class CreateSubmissionRequest extends JsonApiRequest[SubmitAssignmentRequest] {
 
-	@BeanProperty var attachments: JList[FileAttachment] = JArrayList()
-	@BeanProperty var wordCount: JInteger = null
-	@BeanProperty var useDisability: JBoolean = null
+  @BeanProperty var attachments: JList[FileAttachment] = JArrayList()
+  @BeanProperty var wordCount: JInteger = null
+  @BeanProperty var useDisability: JBoolean = null
 
-	override def copyTo(state: SubmitAssignmentRequest, errors: Errors): Unit = {
-		attachments.asScala.foreach { attachment =>
-			state.assignment.attachmentField.map { _.id }.foreach { fieldId =>
-				state.fields.get(fieldId).asInstanceOf[FileFormValue].file.attached.add(attachment)
-			}
-		}
+  override def copyTo(state: SubmitAssignmentRequest, errors: Errors): Unit = {
+    attachments.asScala.foreach { attachment =>
+      state.assignment.attachmentField.map(_.id).foreach { fieldId =>
+        state.fields.get(fieldId).asInstanceOf[FileFormValue].file.attached.add(attachment)
+      }
+    }
 
-		Option(wordCount).foreach { value =>
-			state.assignment.wordCountField.map { _.id }.foreach { fieldId =>
-				state.fields.get(fieldId).asInstanceOf[IntegerFormValue].value = value
-			}
-		}
+    Option(wordCount).foreach { value =>
+      state.assignment.wordCountField.map(_.id).foreach { fieldId =>
+        state.fields.get(fieldId).asInstanceOf[IntegerFormValue].value = value
+      }
+    }
 
-		state.useDisability = useDisability
-	}
+    state.useDisability = useDisability
+  }
 
 }

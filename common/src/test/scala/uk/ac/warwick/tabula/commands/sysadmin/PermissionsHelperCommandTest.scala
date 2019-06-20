@@ -13,313 +13,313 @@ import uk.ac.warwick.userlookup.User
 
 class PermissionsHelperCommandTest extends TestBase with Mockito {
 
-	case object EmptyBuiltInDefinition extends BuiltInRoleDefinition {
+  case object EmptyBuiltInDefinition extends BuiltInRoleDefinition {
 
-		override def description = "Empty"
-		def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
-	}
+    override def description = "Empty"
 
-	val securityService: SecurityService = mock[SecurityService]
-	val roleService: RoleService = mock[RoleService]
-	val conversionService: ConversionService = mock[ConversionService]
+    def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
+  }
 
-	private def newCommand() = {
-		val cmd = new PermissionsHelperCommand
-		cmd.securityService = securityService
-		cmd.roleService = roleService
-		cmd.conversionService = conversionService
-		cmd
-	}
+  val securityService: SecurityService = mock[SecurityService]
+  val roleService: RoleService = mock[RoleService]
+  val conversionService: ConversionService = mock[ConversionService]
 
-	@Test def justUser {
-		val user = new User("cuscav")
+  private def newCommand() = {
+    val cmd = new PermissionsHelperCommand
+    cmd.securityService = securityService
+    cmd.roleService = roleService
+    cmd.conversionService = conversionService
+    cmd
+  }
 
-		val cmd = newCommand()
-		cmd.user = user
+  @Test def justUser {
+    val user = new User("cuscav")
 
-		val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
-		val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
+    val cmd = newCommand()
+    cmd.user = user
 
-		roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
-			pd1, pd2
-		))
+    val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
+    val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
-		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+      pd1, pd2
+    ))
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
-			r1, r2
-		))
+    val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+    val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		val result = cmd.applyInternal
-		verify(securityService, times(0)).can(isA[CurrentUser], isA[Permission], isA[PermissionsTarget])
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+      r1, r2
+    ))
 
-		result.canDo should be (false)
-		result.permissions should be (Seq(pd1, pd2))
-		result.roles should be (Seq(r1, r2))
-		result.resolvedScope should be (null)
-		result.scopeMismatch should be (false)
-		result.scopeMissing should be (true)
-	}
+    val result = cmd.applyInternal
+    verify(securityService, times(0)).can(isA[CurrentUser], isA[Permission], isA[PermissionsTarget])
 
-	@Test def scopeMismatch {
-		val user = new User("cuscav")
+    result.canDo should be(false)
+    result.permissions should be(Seq(pd1, pd2))
+    result.roles should be(Seq(r1, r2))
+    result.resolvedScope should be(null)
+    result.scopeMismatch should be(false)
+    result.scopeMissing should be(true)
+  }
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Archive
+  @Test def scopeMismatch {
+    val user = new User("cuscav")
 
-		val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
-		val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Archive
 
-		roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
-			pd1, pd2
-		))
+    val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
+    val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
-		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+      pd1, pd2
+    ))
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
-			r1, r2
-		))
+    val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+    val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+      r1, r2
+    ))
 
-		val result = cmd.applyInternal
+    securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
 
-		result.canDo should be (false)
-		result.permissions should be (Seq(pd1, pd2))
-		result.roles should be (Seq(r1, r2))
-		result.resolvedScope should be (null)
-		result.scopeMismatch should be (true)
-		result.scopeMissing should be (true)
-	}
+    val result = cmd.applyInternal
 
+    result.canDo should be(false)
+    result.permissions should be(Seq(pd1, pd2))
+    result.roles should be(Seq(r1, r2))
+    result.resolvedScope should be(null)
+    result.scopeMismatch should be(true)
+    result.scopeMissing should be(true)
+  }
 
 
-	@Test def scopeMismatchWithScopeless {
-		val user = new User("cuscav")
+  @Test def scopeMismatchWithScopeless {
+    val user = new User("cuscav")
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.UserPicker
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.UserPicker
 
-		val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
-		val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
+    val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
+    val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-		roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
-			pd1, pd2
-		))
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+      pd1, pd2
+    ))
 
-		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
-		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
+    val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+    val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
-			r1, r2
-		))
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+      r1, r2
+    ))
 
-		securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
+    securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
 
-		val result = cmd.applyInternal
+    val result = cmd.applyInternal
 
-		result.canDo should be (false)
-		result.permissions should be (Seq(pd1, pd2))
-		result.roles should be (Seq(r1, r2))
-		result.resolvedScope should be (null)
-		result.scopeMismatch should be (false)
-		result.scopeMissing should be (true)
-	}
+    result.canDo should be(false)
+    result.permissions should be(Seq(pd1, pd2))
+    result.roles should be(Seq(r1, r2))
+    result.resolvedScope should be(null)
+    result.scopeMismatch should be(false)
+    result.scopeMissing should be(true)
+  }
 
-	@Test def scopeResolved {
-		val user = new User("cuscav")
+  @Test def scopeResolved {
+    val user = new User("cuscav")
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Archive
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Archive
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		val dept = Fixtures.department("in")
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (dept)
+    val dept = Fixtures.department("in")
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (dept)
 
-		val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
-		val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
+    val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
+    val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-		roleService.getExplicitPermissionsFor(isA[CurrentUser], isEq(dept)) returns (Stream(
-			pd1, pd2
-		))
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isEq(dept)) returns (Stream(
+      pd1, pd2
+    ))
 
-		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
-		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
+    val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+    val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isEq(dept), isEq(false)) returns (Stream(
-			r1, r2
-		))
+    roleService.getRolesFor(isA[CurrentUser], isEq(dept), isEq(false)) returns (Stream(
+      r1, r2
+    ))
 
-		securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isEq(dept)) returns (true)
+    securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isEq(dept)) returns (true)
 
-		val result = cmd.applyInternal
+    val result = cmd.applyInternal
 
-		result.canDo should be (true)
-		result.permissions should be (Seq(pd1, pd2))
-		result.roles should be (Seq(r1, r2))
-		result.resolvedScope should be (dept)
-		result.scopeMismatch should be (false)
-		result.scopeMissing should be (false)
-	}
+    result.canDo should be(true)
+    result.permissions should be(Seq(pd1, pd2))
+    result.roles should be(Seq(r1, r2))
+    result.resolvedScope should be(dept)
+    result.scopeMismatch should be(false)
+    result.scopeMissing should be(false)
+  }
 
-	@Test def cantResolveScope {
-		val user = new User("cuscav")
+  @Test def cantResolveScope {
+    val user = new User("cuscav")
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Archive
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Archive
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (null)
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (null)
 
-		val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
-		val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
+    val pd1 = PermissionDefinition(Permissions.RolesAndPermissions.Read, None, true)
+    val pd2 = PermissionDefinition(Permissions.Module.Create, None, false)
 
-		roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
-			pd1, pd2
-		))
+    roleService.getExplicitPermissionsFor(isA[CurrentUser], isNull[PermissionsTarget]) returns (Stream(
+      pd1, pd2
+    ))
 
-		val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
-		val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
+    val r1 = new GeneratedRole(EmptyBuiltInDefinition, None, "r1")
+    val r2 = new GeneratedRole(EmptyBuiltInDefinition, None, "r2")
 
-		roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
-			r1, r2
-		))
+    roleService.getRolesFor(isA[CurrentUser], isNull[PermissionsTarget], isEq(false)) returns (Stream(
+      r1, r2
+    ))
 
-		securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
+    securityService.can(isA[CurrentUser], isEq(Permissions.Assignment.Archive), isNull[PermissionsTarget]) returns (false)
 
-		val result = cmd.applyInternal
+    val result = cmd.applyInternal
 
-		result.canDo should be (false)
-		result.permissions should be (Seq(pd1, pd2))
-		result.roles should be (Seq(r1, r2))
-		result.resolvedScope should be (null)
-		result.scopeMismatch should be (true)
-		result.scopeMissing should be (true)
-	}
+    result.canDo should be(false)
+    result.permissions should be(Seq(pd1, pd2))
+    result.roles should be(Seq(r1, r2))
+    result.resolvedScope should be(null)
+    result.scopeMismatch should be(true)
+    result.scopeMissing should be(true)
+  }
 
-	@Test def validatePasses {
-		val user = new User("cuscav")
-		user.setFoundUser(true)
+  @Test def validatePasses {
+    val user = new User("cuscav")
+    user.setFoundUser(true)
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Create
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Create
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		val dept = Fixtures.department("in")
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (dept)
+    val dept = Fixtures.department("in")
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (dept)
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.hasErrors should be (false)
-	}
+    errors.hasErrors should be(false)
+  }
 
-	@Test def validateNoPermissionOrScopePasses {
-		val user = new User("cuscav")
-		user.setFoundUser(true)
+  @Test def validateNoPermissionOrScopePasses {
+    val user = new User("cuscav")
+    user.setFoundUser(true)
 
-		val cmd = newCommand()
-		cmd.user = user
+    val cmd = newCommand()
+    cmd.user = user
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.hasErrors should be (false)
-	}
+    errors.hasErrors should be(false)
+  }
 
-	@Test def validateNoUser {
-		val cmd = newCommand()
-		cmd.permission = Permissions.Assignment.Create
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+  @Test def validateNoUser {
+    val cmd = newCommand()
+    cmd.permission = Permissions.Assignment.Create
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		val dept = Fixtures.department("in")
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (dept)
+    val dept = Fixtures.department("in")
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (dept)
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("user")
-		errors.getFieldError.getCode should be ("permissionsHelper.user.invalid")
-	}
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("user")
+    errors.getFieldError.getCode should be("permissionsHelper.user.invalid")
+  }
 
-	@Test def validateNotFoundUser {
-		val user = new User("cuscav")
-		user.setFoundUser(false)
+  @Test def validateNotFoundUser {
+    val user = new User("cuscav")
+    user.setFoundUser(false)
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Create
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Create
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		val dept = Fixtures.department("in")
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (dept)
+    val dept = Fixtures.department("in")
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (dept)
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("user")
-		errors.getFieldError.getCode should be ("permissionsHelper.user.invalid")
-	}
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("user")
+    errors.getFieldError.getCode should be("permissionsHelper.user.invalid")
+  }
 
-	@Test def validateInvalidScopeType {
-		val user = new User("cuscav")
-		user.setFoundUser(true)
+  @Test def validateInvalidScopeType {
+    val user = new User("cuscav")
+    user.setFoundUser(true)
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Create
-		cmd.scopeType = classOf[PermissionsTarget]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Create
+    cmd.scopeType = classOf[PermissionsTarget]
+    cmd.scope = "in"
 
-		conversionService.canConvert(classOf[String], classOf[PermissionsTarget]) returns (false)
+    conversionService.canConvert(classOf[String], classOf[PermissionsTarget]) returns (false)
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("scopeType")
-		errors.getFieldError.getCode should be ("permissionsHelper.scopeType.invalid")
-	}
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("scopeType")
+    errors.getFieldError.getCode should be("permissionsHelper.scopeType.invalid")
+  }
 
-	@Test def validateInvalidScope {
-		val user = new User("cuscav")
-		user.setFoundUser(true)
+  @Test def validateInvalidScope {
+    val user = new User("cuscav")
+    user.setFoundUser(true)
 
-		val cmd = newCommand()
-		cmd.user = user
-		cmd.permission = Permissions.Assignment.Create
-		cmd.scopeType = classOf[Department]
-		cmd.scope = "in"
+    val cmd = newCommand()
+    cmd.user = user
+    cmd.permission = Permissions.Assignment.Create
+    cmd.scopeType = classOf[Department]
+    cmd.scope = "in"
 
-		val dept = Fixtures.department("in")
-		conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
-		conversionService.convert("in", classOf[Department]) returns (null)
+    val dept = Fixtures.department("in")
+    conversionService.canConvert(classOf[String], classOf[Department]) returns (true)
+    conversionService.convert("in", classOf[Department]) returns (null)
 
-		val errors = new BindException(cmd, "command")
-		cmd.validate(errors)
+    val errors = new BindException(cmd, "command")
+    cmd.validate(errors)
 
-		errors.getErrorCount should be (1)
-		errors.getFieldError.getField should be ("scope")
-		errors.getFieldError.getCode should be ("permissionsHelper.scope.invalid")
-	}
+    errors.getErrorCount should be(1)
+    errors.getFieldError.getField should be("scope")
+    errors.getFieldError.getCode should be("permissionsHelper.scope.invalid")
+  }
 
 }

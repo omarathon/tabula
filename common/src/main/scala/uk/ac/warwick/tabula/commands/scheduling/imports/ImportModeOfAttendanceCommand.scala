@@ -14,54 +14,54 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.scheduling.ModeOfAttendanceInfo
 
 class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo)
-	extends Command[(ModeOfAttendance, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
-	with Unaudited with PropertyCopying {
+  extends Command[(ModeOfAttendance, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
+    with Unaudited with PropertyCopying {
 
-	PermissionCheck(Permissions.ImportSystemData)
+  PermissionCheck(Permissions.ImportSystemData)
 
-	var modeOfAttendanceDao: ModeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
+  var modeOfAttendanceDao: ModeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
-	// A couple of intermediate properties that will be transformed later
-	var code: String = info.code
-	var shortName: String = info.shortName
-	var fullName: String = info.fullName
+  // A couple of intermediate properties that will be transformed later
+  var code: String = info.code
+  var shortName: String = info.shortName
+  var fullName: String = info.fullName
 
-	override def applyInternal(): (ModeOfAttendance, ImportResult) = transactional() ({
-		val modeOfAttendanceExisting = modeOfAttendanceDao.getByCode(code)
+  override def applyInternal(): (ModeOfAttendance, ImportResult) = transactional()({
+    val modeOfAttendanceExisting = modeOfAttendanceDao.getByCode(code)
 
-		logger.debug("Importing mode of attendance " + code + " into " + modeOfAttendanceExisting)
+    logger.debug("Importing mode of attendance " + code + " into " + modeOfAttendanceExisting)
 
-		val isTransient = !modeOfAttendanceExisting.isDefined
+    val isTransient = !modeOfAttendanceExisting.isDefined
 
-		val modeOfAttendance = modeOfAttendanceExisting match {
-			case Some(modeOfAttendance: ModeOfAttendance) => modeOfAttendance
-			case _ => new ModeOfAttendance()
-		}
+    val modeOfAttendance = modeOfAttendanceExisting match {
+      case Some(modeOfAttendance: ModeOfAttendance) => modeOfAttendance
+      case _ => new ModeOfAttendance()
+    }
 
-		val commandBean = new BeanWrapperImpl(this)
-		val modeOfAttendanceBean = new BeanWrapperImpl(modeOfAttendance)
+    val commandBean = new BeanWrapperImpl(this)
+    val modeOfAttendanceBean = new BeanWrapperImpl(modeOfAttendance)
 
-		val hasChanged = copyBasicProperties(properties, commandBean, modeOfAttendanceBean)
+    val hasChanged = copyBasicProperties(properties, commandBean, modeOfAttendanceBean)
 
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + modeOfAttendance)
+    if (isTransient || hasChanged) {
+      logger.debug("Saving changes for " + modeOfAttendance)
 
-			modeOfAttendance.lastUpdatedDate = DateTime.now
-			modeOfAttendanceDao.saveOrUpdate(modeOfAttendance)
-		}
+      modeOfAttendance.lastUpdatedDate = DateTime.now
+      modeOfAttendanceDao.saveOrUpdate(modeOfAttendance)
+    }
 
-		val result =
-			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
-			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
-			else ImportAcademicInformationCommand.ImportResult()
+    val result =
+      if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+      else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+      else ImportAcademicInformationCommand.ImportResult()
 
-		(modeOfAttendance, result)
-	})
+    (modeOfAttendance, result)
+  })
 
-	private val properties = Set(
-		"code", "shortName", "fullName"
-	)
+  private val properties = Set(
+    "code", "shortName", "fullName"
+  )
 
-	override def describe(d: Description): Unit = d.property("shortName" -> shortName)
+  override def describe(d: Description): Unit = d.property("shortName" -> shortName)
 
 }

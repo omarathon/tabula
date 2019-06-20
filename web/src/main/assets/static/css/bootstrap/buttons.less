@@ -17,7 +17,7 @@
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
-  .buttonBackground(@btnBackground, @btnBackgroundHighlight, @grayDark, 0 1px 1px rgba(255,255,255,.75));
+  .buttonBackground(@btnBackground, @btnBackgroundHighlight, @grayDark, 0 1px 1px rgba(255, 255, 255, .75));
   border: 1px solid @btnBorder;
   *border: 0; // Remove the border to prevent IE7's black border on input:focus
   border-bottom-color: darken(@btnBorder, 10%);
@@ -62,7 +62,6 @@
 }
 
 
-
 // Button Sizes
 // --------------------------------------------------
 
@@ -72,6 +71,7 @@
   font-size: @fontSizeLarge;
   .border-radius(@borderRadiusLarge);
 }
+
 .btn-large [class^="icon-"],
 .btn-large [class*=" icon-"] {
   margin-top: 4px;
@@ -83,10 +83,12 @@
   font-size: @fontSizeSmall;
   .border-radius(@borderRadiusSmall);
 }
+
 .btn-small [class^="icon-"],
 .btn-small [class*=" icon-"] {
   margin-top: 0;
 }
+
 .btn-mini [class^="icon-"],
 .btn-mini [class*=" icon-"] {
   margin-top: -1px;
@@ -126,7 +128,6 @@ input[type="button"] {
 }
 
 
-
 // Alternate buttons
 // --------------------------------------------------
 
@@ -137,7 +138,7 @@ input[type="button"] {
 .btn-success.active,
 .btn-info.active,
 .btn-inverse.active {
-  color: rgba(255,255,255,.75);
+  color: rgba(255, 255, 255, .75);
 }
 
 // Set the backgrounds
@@ -145,22 +146,27 @@ input[type="button"] {
 .btn-primary {
   .buttonBackground(@btnPrimaryBackground, @btnPrimaryBackgroundHighlight);
 }
+
 // Warning appears are orange
 .btn-warning {
   .buttonBackground(@btnWarningBackground, @btnWarningBackgroundHighlight);
 }
+
 // Danger and error appear as red
 .btn-danger {
   .buttonBackground(@btnDangerBackground, @btnDangerBackgroundHighlight);
 }
+
 // Success appears as green
 .btn-success {
   .buttonBackground(@btnSuccessBackground, @btnSuccessBackgroundHighlight);
 }
+
 // Info appears as a neutral blue
 .btn-info {
   .buttonBackground(@btnInfoBackground, @btnInfoBackgroundHighlight);
 }
+
 // Inverse appears as dark gray
 .btn-inverse {
   .buttonBackground(@btnInverseBackground, @btnInverseBackgroundHighlight);
@@ -187,10 +193,12 @@ input[type="submit"].btn {
     *padding-top: 7px;
     *padding-bottom: 7px;
   }
+
   &.btn-small {
     *padding-top: 3px;
     *padding-bottom: 3px;
   }
+
   &.btn-mini {
     *padding-top: 1px;
     *padding-bottom: 1px;
@@ -209,18 +217,21 @@ input[type="submit"].btn {
   background-image: none;
   .box-shadow(none);
 }
+
 .btn-link {
   border-color: transparent;
   cursor: pointer;
   color: @linkColor;
   .border-radius(0);
 }
+
 .btn-link:hover,
 .btn-link:focus {
   color: @linkColorHover;
   text-decoration: underline;
   background-color: transparent;
 }
+
 .btn-link[disabled]:hover,
 .btn-link[disabled]:focus {
   color: @grayDark;

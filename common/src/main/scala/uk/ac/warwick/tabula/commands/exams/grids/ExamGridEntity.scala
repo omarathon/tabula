@@ -5,21 +5,23 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model._
 
 case class ExamGridEntity(
-	firstName: String,
-	lastName: String,
-	universityId: String,
-	lastImportDate: Option[DateTime],
-	years: Map[YearOfStudy, Option[ExamGridEntityYear]] // Int = year of study
+  firstName: String,
+  lastName: String,
+  universityId: String,
+  lastImportDate: Option[DateTime],
+  years: Map[YearOfStudy, Option[ExamGridEntityYear]], // Int = year of study
+  yearWeightings: Seq[CourseYearWeighting]
 ) {
-	def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
+  def validYears: Map[YearOfStudy, ExamGridEntityYear] = years.filter { case (_, year) => year.nonEmpty }.mapValues(_.get)
 }
 
 case class ExamGridEntityYear(
-	moduleRegistrations: Seq[ModuleRegistration],
-	cats: BigDecimal,
-	route: Route,
-	overcattingModules: Option[Seq[Module]],
-	markOverrides: Option[Map[Module, BigDecimal]],
-	studentCourseYearDetails: Option[StudentCourseYearDetails],
-	level: Option[Level]
+  moduleRegistrations: Seq[ModuleRegistration],
+  cats: BigDecimal,
+  route: Route,
+  overcattingModules: Option[Seq[Module]],
+  markOverrides: Option[Map[Module, BigDecimal]],
+  studentCourseYearDetails: Option[StudentCourseYearDetails],
+  level: Option[Level],
+  yearOfStudy: YearOfStudy // a pointer back to this ExamGridEntityYears key in the parent ExamGridEntity.years map
 )

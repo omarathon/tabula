@@ -6,21 +6,21 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 
 object SearchAgentsCommand {
-	def apply(user: CurrentUser) =
-	new SearchAgentsCommandInternal(user)
-		with ComposableCommand[Seq[Member]]
-		with Unaudited
-		with SearchProfilesCommandPermissions
+  def apply(user: CurrentUser) =
+    new SearchAgentsCommandInternal(user)
+      with ComposableCommand[Seq[Member]]
+      with Unaudited
+      with SearchProfilesCommandPermissions
 }
 
 class SearchAgentsCommandInternal(user: CurrentUser) extends AbstractSearchProfilesCommand(user, Staff)
-	with CommandInternal[Seq[Member]] {
+  with CommandInternal[Seq[Member]] {
 
-	override def applyInternal(): Seq[Member] =
-		if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
-		else Seq()
+  override def applyInternal(): Seq[Member] =
+    if (validQuery) (usercodeMatches ++ universityIdMatches ++ queryMatches).filter(_.active)
+    else Seq()
 
-	private def queryMatches = {
-		profileQueryService.findWithQuery(query, Seq(), includeTouched = false, userTypes, searchAcrossAllDepartments = true, activeOnly = true)
-	}
+  private def queryMatches = {
+    profileQueryService.findWithQuery(query, Seq(), includeTouched = false, userTypes, searchAcrossAllDepartments = true, activeOnly = true)
+  }
 }

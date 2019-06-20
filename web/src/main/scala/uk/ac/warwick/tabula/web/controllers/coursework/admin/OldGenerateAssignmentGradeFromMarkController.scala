@@ -7,12 +7,13 @@ import uk.ac.warwick.tabula.commands.coursework.feedback.OldGenerateGradesFromMa
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.controllers.AbstractGenerateGradeFromMarkController
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/generate-grade"))
 class OldGenerateAssignmentGradeFromMarkController extends AbstractGenerateGradeFromMarkController[Assignment] {
 
-	@ModelAttribute("command")
-	override def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
+  @ModelAttribute("command")
+  override def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+    OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(assignment))
 
 }

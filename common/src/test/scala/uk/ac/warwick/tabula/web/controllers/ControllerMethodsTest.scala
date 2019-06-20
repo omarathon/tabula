@@ -11,49 +11,50 @@ import uk.ac.warwick.tabula.data.model.Department
 
 class ControllerMethodsTest extends TestBase with ControllerMethods with Mockito {
 
-	var securityService: SecurityService = mock[SecurityService]
-	val user: CurrentUser = {
-		val u = new User("cuscav")
-		u.setIsLoggedIn(true)
-		u.setFoundUser(true)
+  var securityService: SecurityService = mock[SecurityService]
+  val user: CurrentUser = {
+    val u = new User("cuscav")
+    u.setIsLoggedIn(true)
+    u.setFoundUser(true)
 
-		new CurrentUser(u, u)
-	}
+    new CurrentUser(u, u)
+  }
 
-	val dept: Department = Fixtures.department("in", "IT Services")
-	dept.id = "dept"
+  val dept: Department = Fixtures.department("in", "IT Services")
+  dept.id = "dept"
 
-	abstract class TestCommand extends Command[Boolean] {
-		def describe(d:Description) {}
-		def applyInternal = true
-	}
+  abstract class TestCommand extends Command[Boolean] {
+    def describe(d: Description) {}
 
-	case class BasicCommand() extends TestCommand {
-		PermissionCheck(Permissions.Module.Create, dept)
-	}
+    def applyInternal = true
+  }
 
-	@Test def restricted {
-		securityService.check(user, Permissions.Module.Create, dept) throws(new PermissionDeniedException(user, Permissions.Module.Create, dept))
+  case class BasicCommand() extends TestCommand {
+    PermissionCheck(Permissions.Module.Create, dept)
+  }
 
-		restricted(BasicCommand()) should be (None)
+  @Test def restricted {
+    securityService.check(user, Permissions.Module.Create, dept) throws (PermissionDeniedException(user, Permissions.Module.Create, dept))
 
-		reset(securityService)
+    restricted(BasicCommand()) should be(None)
 
-		restricted(BasicCommand()) should be ('defined)
-	}
+    reset(securityService)
 
-	@Test def restrictedBy {
-		securityService.check(user, Permissions.Module.Create, dept) throws (new PermissionDeniedException(user, Permissions.Module.Create, dept))
+    restricted(BasicCommand()) should be('defined)
+  }
 
-		restrictedBy(true)(BasicCommand()) should be (None)
+  @Test def restrictedBy {
+    securityService.check(user, Permissions.Module.Create, dept) throws (PermissionDeniedException(user, Permissions.Module.Create, dept))
 
-		// Restriction doesn't apply because predicate returns false
-		restrictedBy(false)(BasicCommand()) should be ('defined)
+    restrictedBy(true)(BasicCommand()) should be(None)
 
-		reset(securityService)
+    // Restriction doesn't apply because predicate returns false
+    restrictedBy(false)(BasicCommand()) should be('defined)
 
-		restrictedBy(true)(BasicCommand()) should be ('defined)
-		restrictedBy(false)(BasicCommand()) should be ('defined)
-	}
+    reset(securityService)
+
+    restrictedBy(true)(BasicCommand()) should be('defined)
+    restrictedBy(false)(BasicCommand()) should be('defined)
+  }
 
 }

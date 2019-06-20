@@ -8,26 +8,26 @@ case class ModuleAuditor(module: model.Module) extends BuiltInRole(ModuleAuditor
 
 case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "Module Auditor"
+  override def description = "Module Auditor"
 
-	GrantsScopedPermission(
-		Module.Administer,
-		Module.ManageAssignments,
-		Module.ManageSmallGroups,
+  GrantsScopedPermission(
+    Module.Administer,
+    Module.ManageAssignments,
+    Module.ManageSmallGroups,
 
-		Assignment.Read,
+    Assignment.Read,
 
-		Submission.ViewPlagiarismStatus,
-		Submission.Read,
-		Extension.Read,
+    Submission.ViewPlagiarismStatus,
+    Submission.Read,
+    Extension.Read,
 
-		AssignmentFeedback.Read,
-		ExamFeedback.Read,
+    AssignmentFeedback.Read,
+    ExamFeedback.Read,
 
-		SmallGroups.Read,
-		SmallGroups.ReadMembership,
-		SmallGroupEvents.ViewRegister
-	)
+    SmallGroups.Read,
+    SmallGroups.ReadMembership,
+    SmallGroupEvents.ViewRegister
+  )
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
+  def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 }

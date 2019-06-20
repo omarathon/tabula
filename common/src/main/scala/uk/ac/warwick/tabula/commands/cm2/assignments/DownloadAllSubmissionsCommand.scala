@@ -8,51 +8,54 @@ import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 object DownloadAllSubmissionsCommand {
-	type Result = RenderableFile
-	type Command = Appliable[Result] with DownloadAllSubmissionsCommandState
+  type Result = RenderableFile
+  type Command = Appliable[Result] with DownloadAllSubmissionsCommandState
 
-	val AdminPermission = Permissions.Submission.Read
+  val AdminPermission = Permissions.Submission.Read
 
-	def apply(assignment: Assignment, filename: String): Command =
-		new DownloadAllSubmissionsCommandInternal(assignment, filename)
-			with ComposableCommand[Result]
-			with DownloadAllSubmissionsCommandPermissions
-			with DownloadAllSubmissionsCommandDescription
-			with AutowiringZipServiceComponent
-			with ReadOnly
+  def apply(assignment: Assignment, filename: String): Command =
+    new DownloadAllSubmissionsCommandInternal(assignment, filename)
+      with ComposableCommand[Result]
+      with DownloadAllSubmissionsCommandPermissions
+      with DownloadAllSubmissionsCommandDescription
+      with AutowiringZipServiceComponent
+      with ReadOnly
 }
 
 trait DownloadAllSubmissionsCommandState {
-	def assignment: Assignment
-	def filename: String
+  def assignment: Assignment
+
+  def filename: String
 }
 
 class DownloadAllSubmissionsCommandInternal(val assignment: Assignment, val filename: String)
-	extends CommandInternal[Result] with DownloadAllSubmissionsCommandState {
-	self: ZipServiceComponent =>
+  extends CommandInternal[Result] with DownloadAllSubmissionsCommandState {
+  self: ZipServiceComponent =>
 
-	override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getAllSubmissionsZip(assignment), Duration.Inf)
 }
 
 trait DownloadAllSubmissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: DownloadAllSubmissionsCommandState =>
+  self: DownloadAllSubmissionsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit =
-		p.PermissionCheck(AdminPermission, mandatory(assignment))
+  override def permissionsCheck(p: PermissionsChecking): Unit =
+    p.PermissionCheck(AdminPermission, mandatory(assignment))
 }
 
 trait DownloadAllSubmissionsCommandDescription extends Describable[Result] {
-	self: DownloadAllSubmissionsCommandState =>
+  self: DownloadAllSubmissionsCommandState =>
 
-	override lazy val eventName: String = "DownloadAllSubmissions"
+  override lazy val eventName: String = "DownloadAllSubmissions"
 
-	override def describe(d: Description): Unit = d
-		.assignment(assignment)
-		.studentIds(assignment.submissions.flatMap(_.universityId))
-		.studentUsercodes(assignment.submissions.map(_.usercode))
-		.properties(
-			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
+  override def describe(d: Description): Unit = d
+    .assignment(assignment)
+    .studentIds(assignment.submissions.asScala.flatMap(_.universityId))
+    .studentUsercodes(assignment.submissions.asScala.map(_.usercode))
+    .properties(
+      "submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 }

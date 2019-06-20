@@ -12,55 +12,57 @@ import uk.ac.warwick.tabula.services.coursework.docconversion.AutowiringMarksExt
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ExamMarkerAddMarksCommand {
-	def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new OldAdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
-			with AutowiringFeedbackServiceComponent
-			with AutowiringUserLookupComponent
-			with AutowiringMarksExtractorComponent
-			with ComposableCommand[Seq[Feedback]]
-			with MarkerAddMarksDescription
-			with MarkerAddMarksPermissions
-			with OldAdminAddMarksCommandValidation
-			with MarkerAddMarksNotifications
-			with OldAdminAddMarksCommandState
-			with PostExtractValidation
-			with AddMarksCommandBindListener
+  def apply(module: Module, assessment: Assessment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+    new OldAdminAddMarksCommandInternal(module, assessment, submitter, gradeGenerator)
+      with AutowiringFeedbackServiceComponent
+      with AutowiringUserLookupComponent
+      with AutowiringMarksExtractorComponent
+      with ComposableCommand[Seq[Feedback]]
+      with MarkerAddMarksDescription
+      with MarkerAddMarksPermissions
+      with OldAdminAddMarksCommandValidation
+      with MarkerAddMarksNotifications
+      with OldAdminAddMarksCommandState
+      with PostExtractValidation
+      with AddMarksCommandBindListener
 }
 
 trait MarkerAddMarksDescription extends Describable[Seq[Feedback]] {
 
-	self: OldAdminAddMarksCommandState =>
+  self: OldAdminAddMarksCommandState =>
 
-	override lazy val eventName = "MarkerAddMarks"
+  override lazy val eventName = "MarkerAddMarks"
 
-	override def describe(d: Description) {
-		assessment match {
-			case assignment: Assignment => d.assignment(assignment)
-			case exam: Exam => d.exam(exam)
-		}
+  override def describe(d: Description) {
+    assessment match {
+      case assignment: Assignment => d.assignment(assignment)
+      case exam: Exam => d.exam(exam)
+    }
 
-	}
+  }
 }
 
 trait MarkerAddMarksNotifications extends Notifies[Seq[Feedback], Feedback] {
 
-	self: OldAdminAddMarksCommandState =>
+  self: OldAdminAddMarksCommandState =>
 
-	def emit(updatedFeedback: Seq[Feedback]): Seq[ExamMarkedNotification] = updatedFeedback.headOption.flatMap { feedback => HibernateHelpers.initialiseAndUnproxy(feedback) match {
-		case examFeedback: ExamFeedback =>
-			Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback, examFeedback.exam))
-			case _ => None
-	}}.map(Seq(_)).getOrElse(Seq())
+  def emit(updatedFeedback: Seq[Feedback]): Seq[ExamMarkedNotification] = updatedFeedback.headOption.flatMap { feedback =>
+    HibernateHelpers.initialiseAndUnproxy(feedback) match {
+      case examFeedback: ExamFeedback =>
+        Option(Notification.init(new ExamMarkedNotification, submitter.apparentUser, examFeedback.exam))
+      case _ => None
+    }
+  }.map(Seq(_)).getOrElse(Seq())
 
 }
 
 trait MarkerAddMarksPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: OldAdminAddMarksCommandState =>
+  self: OldAdminAddMarksCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(assessment, module)
-		p.PermissionCheck(Permissions.ExamMarkerFeedback.Manage, assessment)
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.mustBeLinked(assessment, module)
+    p.PermissionCheck(Permissions.ExamMarkerFeedback.Manage, assessment)
+  }
 
 }

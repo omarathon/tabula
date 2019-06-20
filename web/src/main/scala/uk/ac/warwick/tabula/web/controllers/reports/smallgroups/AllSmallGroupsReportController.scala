@@ -12,13 +12,14 @@ import uk.ac.warwick.tabula.reports.web.Routes
 @RequestMapping(Array("/reports/{department}/{academicYear}/groups/all"))
 class AllSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.identity)
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.identity)
 
-	val pageRenderPath = "allsmallgroups"
-	val filePrefix = "all-small-group-attendance"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.all(department, year)
+  val pageRenderPath = "allsmallgroups"
+  val filePrefix = "all-small-group-attendance"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.all(department, year)
 
 }
 
@@ -26,13 +27,14 @@ class AllSmallGroupsReportController extends AbstractSmallGroupsReportController
 @RequestMapping(Array("/reports/{department}/{academicYear}/groups/unrecorded"))
 class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.unrecorded(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.unrecorded(academicYear))
 
-	val pageRenderPath = "unrecorded"
-	val filePrefix = "unrecorded-small-group-attendance"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.unrecorded(department, year)
+  val pageRenderPath = "unrecorded"
+  val filePrefix = "unrecorded-small-group-attendance"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.unrecorded(department, year)
 
 }
 
@@ -40,12 +42,13 @@ class UnrecordedSmallGroupsReportController extends AbstractSmallGroupsReportCon
 @RequestMapping(Array("/reports/{department}/{academicYear}/groups/missed"))
 class MissedSmallGroupsReportController extends AbstractSmallGroupsReportController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
-		AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.missed(academicYear))
+  @ModelAttribute("command")
+  def command(@PathVariable("department") department: Department, @PathVariable("academicYear") academicYear: AcademicYear) =
+    AllSmallGroupsReportCommand(mandatory(department), mandatory(academicYear), SmallGroupsReportFilters.missed(academicYear))
 
-	val pageRenderPath = "missed"
-	val filePrefix = "missed-small-group-attendance"
-	def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.missed(department, year)
+  val pageRenderPath = "missed"
+  val filePrefix = "missed-small-group-attendance"
+
+  def urlGeneratorFactory(department: Department): (AcademicYear) => String = year => Routes.SmallGroups.missed(department, year)
 
 }

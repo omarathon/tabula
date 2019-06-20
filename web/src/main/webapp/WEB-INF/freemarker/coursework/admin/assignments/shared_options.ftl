@@ -10,19 +10,19 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
-<#assign command = sharedAssignmentPropertiesForm />
+  <#assign command = sharedAssignmentPropertiesForm />
 
-<#assign submitUrl><@routes.coursework.setupSitsAssignmentsSharedOptions department /></#assign>
-<@f.form method="post" action=submitUrl commandName="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
+  <#assign submitUrl><@routes.coursework.setupSitsAssignmentsSharedOptions department /></#assign>
+  <@f.form method="post" action=submitUrl modelAttribute="sharedAssignmentPropertiesForm" cssClass="form-horizontal">
 
-<#if submitted?? && submitted && !hasErrors>
-	<span class="ajax-response" data-status="success"></span>
-</#if>
+    <#if submitted?? && submitted && !hasErrors>
+      <span class="ajax-response" data-status="success"></span>
+    </#if>
 
-<#-- This is also included by _fields.ftl -->
-<#include "_common_fields.ftl" />
-<#include "_submissions_common_fields.ftl" />
+  <#-- This is also included by _fields.ftl -->
+    <#include "_common_fields.ftl" />
+    <#include "_submissions_common_fields.ftl" />
 
-</@f.form>
+  </@f.form>
 
 </#escape>

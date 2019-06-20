@@ -1,64 +1,86 @@
 apply plugin: 'war'
+apply plugin: 'com.bmuschko.cargo'
 
 ext.contextPath = 'api'
 war.archiveName = 'api.war'
 
+cargo {
+  containerId = 'tomcat8x'
+  port = 8080
+
+  deployable {
+    context = '/api'
+  }
+
+  remote {
+    hostname = '127.0.0.1'
+    username = 'deploy'
+    password = 'deploy'
+  }
+}
+
 dependencies {
-    compile project(':common')
-    testCompile project(path: ':common', configuration: 'testArtifacts')
+  compile project(':common')
+  testCompile project(path: ':common', configuration: 'testArtifacts')
 }
 
 task deployToTomcat(dependsOn: 'war') {
-    doLast {
-        logger.info("----------------------------------------------------")
-        logger.info("Initialising deploy to Tomcat")
-        logger.info("Base name is '${project.archivesBaseName}'")
-        logger.info("Tomcat directory is ${tomcatHome}")
-        logger.info("Deleting ${tomcatHome}\\webapps\\${war.archiveName}")
+  doLast {
+    logger.info("----------------------------------------------------")
+    logger.info("Initialising deploy to Tomcat")
+    logger.info("Base name is '${project.archivesBaseName}'")
+    logger.info("Tomcat directory is ${tomcatHome}")
+    logger.info("Deleting ${tomcatHome}\\webapps\\${war.archiveName}")
 
-        delete "${tomcatHome}/webapps/${contextPath}"
-        delete "${tomcatHome}/webapps/${war.archiveName}"
+    delete "${tomcatHome}/webapps/${contextPath}"
+    delete "${tomcatHome}/webapps/${war.archiveName}"
 
-        logger.info("Copying file from ${war.archivePath} to ${tomcatHome}/webapps")
-        copy {
-            from war.archivePath
-            into "${tomcatHome}/webapps"
-        }
-
-        logger.info("----------------------------------------------------")
+    logger.info("Copying file from ${war.archivePath} to ${tomcatHome}/webapps")
+    copy {
+      from war.archivePath
+      into "${tomcatHome}/webapps"
     }
+
+    logger.info("----------------------------------------------------")
+  }
 }
+
+task bamboo(dependsOn: ['clean', 'test', 'war']) {}
+task deployApplicationLocally(dependsOn: ['war', 'deployToTomcat']) {}
 
 rebel {
-    web {
-        resource {}
+  rebelXmlDirectory = file("build/rootContent/WEB-INF/classes")
 
-        resource {
-            directory = "../common/src/main/webapp"
-            target = "/"
-        }
+  web {
+    resource {}
+
+    resource {
+      directory = "../common/src/main/webapp"
+      target = "/"
     }
+  }
 }
+generateRebel.dependsOn('webInf')
 
 task commonWebInf(type: Copy) {
-    from project(':common').file('src/main/webapp/WEB-INF')
-    into file('build/rootContent/WEB-INF')
+  from project(':common').file('src/main/webapp/WEB-INF')
+  into file('build/rootContent/WEB-INF')
 }
 
 task webInf(type: Copy, dependsOn: 'commonWebInf') {
-    from 'src/main/webapp/WEB-INF'
-    into 'build/rootContent/WEB-INF'
+  from 'src/main/webapp/WEB-INF'
+  into 'build/rootContent/WEB-INF'
 }
 
 war {
-    dependsOn 'webInf'
-    rootSpec.exclude '**/WEB-INF'
-    webInf { from 'build/rootContent/WEB-INF' }
-    from 'build/rootContent'
+  dependsOn 'webInf'
+  rootSpec.exclude '**/WEB-INF'
+  webInf { from 'build/rootContent/WEB-INF' }
+  from 'build/rootContent'
 }
 
 test {
-    onlyIf {
-        !project.hasProperty('integrationTest')
-    }
+  onlyIf {
+    !project.hasProperty('integrationTest')
+  }
 }

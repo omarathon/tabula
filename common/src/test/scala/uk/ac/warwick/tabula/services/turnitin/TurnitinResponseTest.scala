@@ -6,13 +6,14 @@ import scala.xml.XML
 
 class TurnitinResponseTest extends TestBase {
 
-	@Test def submissionsList() = {
-		val response = TurnitinResponse.fromXml( XML.loadString(PartlyScoredSubmissions) )
-		response.submissionsList.size should be (10)
-		response.submissionsList.count(_.hasBeenChecked) should be (4)
-	}
+  @Test def submissionsList(): Unit = {
+    val response = TurnitinResponse.fromXml(XML.loadString(PartlyScoredSubmissions))
+    response.submissionsList.size should be(10)
+    response.submissionsList.count(_.hasBeenChecked) should be(4)
+  }
 
-	val PartlyScoredSubmissions = """
+  val PartlyScoredSubmissions =
+    """
 
 <returndata>
 	<object>

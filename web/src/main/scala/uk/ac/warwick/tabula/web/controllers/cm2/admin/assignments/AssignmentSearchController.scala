@@ -13,33 +13,33 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.tabula.web.views.JSONView
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Profile(Array("cm2Enabled"))
 @Controller
 @RequestMapping(value = Array("/${cm2.prefix}/admin/{module}/assignments"))
 class AssignmentSearchController extends CourseworkController {
-	type SearchAssignmentsCommand = Appliable[Seq[Assignment]] with SearchAssignmentCommandState
+  type SearchAssignmentsCommand = Appliable[Seq[Assignment]] with SearchAssignmentCommandState
 
-	@ModelAttribute("searchAssignmentCommand")
-	def searchAssignmentCommand(@PathVariable module: Module): SearchAssignmentsCommand =
-		SearchAssignmentsCommand(mandatory(module))
+  @ModelAttribute("searchAssignmentCommand")
+  def searchAssignmentCommand(@PathVariable module: Module): SearchAssignmentsCommand =
+    SearchAssignmentsCommand(mandatory(module))
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"), params = Array("query"))
-	def submitSearchJSON(@Valid @ModelAttribute("searchAssignmentCommand") cmd: SearchAssignmentsCommand): Mav = {
-		val assignmentsJson: JList[Map[String, Object]] = toJson(cmd.apply())
-		Mav(new JSONView(assignmentsJson))
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"), params = Array("query"))
+  def submitSearchJSON(@Valid @ModelAttribute("searchAssignmentCommand") cmd: SearchAssignmentsCommand): Mav = {
+    val assignmentsJson: JList[Map[String, String]] = toJson(cmd.apply()).asJava
+    Mav(new JSONView(assignmentsJson))
+  }
 
-	def toJson(assignments: Seq[Assignment]): Seq[Map[String, String]] = {
+  def toJson(assignments: Seq[Assignment]): Seq[Map[String, String]] = {
 
-		def assignmentToJson(assignment: Assignment) = Map[String, String](
-			"name" -> assignment.name,
-			"id" -> assignment.id,
-			"moduleName" -> assignment.module.name,
-			"moduleCode" -> assignment.module.code)
+    def assignmentToJson(assignment: Assignment) = Map[String, String](
+      "name" -> assignment.name,
+      "id" -> assignment.id,
+      "moduleName" -> assignment.module.name,
+      "moduleCode" -> assignment.module.code)
 
-		assignments.map(assignmentToJson)
-	}
+    assignments.map(assignmentToJson)
+  }
 
 }

@@ -15,33 +15,34 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.web.controllers.coursework.admin.markingworkflows.OldDeleteMarkingWorkflowController.DeleteMarkingWorkflowCommand
 
 object OldDeleteMarkingWorkflowController {
-	type DeleteMarkingWorkflowCommand = Appliable[Unit]
-		with SelfValidating with DeleteMarkingWorkflowCommandState
+  type DeleteMarkingWorkflowCommand = Appliable[Unit]
+    with SelfValidating with DeleteMarkingWorkflowCommandState
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/delete/{markingworkflow}"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/department/{department}/markingworkflows/delete/{markingworkflow}"))
 class OldDeleteMarkingWorkflowController extends OldCourseworkController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def cmd(@PathVariable department: Department, @PathVariable markingworkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
-		OldDeleteMarkingWorkflowCommand(department, markingworkflow)
+  @ModelAttribute("command")
+  def cmd(@PathVariable department: Department, @PathVariable markingworkflow: MarkingWorkflow): DeleteMarkingWorkflowCommand =
+    OldDeleteMarkingWorkflowCommand(department, markingworkflow)
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
-		Mav("coursework/admin/markingworkflows/delete").noLayoutIf(ajax)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form(@ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand): Mav = {
+    Mav("coursework/admin/markingworkflows/delete").noLayoutIf(ajax)
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			form(cmd)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.markingWorkflow.list(cmd.department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("command") cmd: DeleteMarkingWorkflowCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      form(cmd)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.markingWorkflow.list(cmd.department))
+    }
+  }
 
 }

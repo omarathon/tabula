@@ -11,28 +11,31 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/assignments/{assignment}/upload-to-sits"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/assignments/{assignment}/upload-to-sits"))
 class UploadFeedbackToSitsController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) =
-		UploadFeedbackToSitsCommand(
-			mandatory(assignment),
-			user,
-			GenerateGradesFromMarkCommand(mandatory(assignment))
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment) =
+    UploadFeedbackToSitsCommand(
+      mandatory(assignment),
+      user,
+      GenerateGradesFromMarkCommand(mandatory(assignment))
+    )
 
-	@RequestMapping(params = Array("!confirm"))
-	def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav =
-		Mav("cm2/admin/assignments/publish/upload_to_sits",
-			"isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation)
-			.crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping(params = Array("!confirm"))
+  def form(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav =
+    Mav("cm2/admin/assignments/publish/upload_to_sits",
+      "isGradeValidation" -> assignment.module.adminDepartment.assignmentGradeValidation)
+      .crumbsList(Breadcrumbs.assignment(assignment))
 
-	@RequestMapping(method = Array(POST), params = Array("confirm"))
-	def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav = {
-		cmd.apply()
-		Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirm"))
+  def submit(@ModelAttribute("command") cmd: Appliable[Seq[Feedback]], @PathVariable assignment: Assignment): Mav = {
+    cmd.apply()
+
+    Mav("cm2/admin/assignments/publish/sits_done")
+      .crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
 }

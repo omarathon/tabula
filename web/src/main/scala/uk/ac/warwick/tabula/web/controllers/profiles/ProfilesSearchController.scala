@@ -16,24 +16,24 @@ import uk.ac.warwick.util.core.StringUtils
 @Controller
 class ProfilesSearchController extends ProfilesController with SearchJSONHelpers {
 
-	type SearchProfilesCommand = Appliable[Seq[Member]] with AbstractSearchProfilesCommandState
+  type SearchProfilesCommand = Appliable[Seq[Member]] with AbstractSearchProfilesCommandState
 
-	val formMav = Mav("profiles/search/", "displayOptionToSave" -> false)
+  val formMav = Mav("profiles/search/", "displayOptionToSave" -> false)
 
-	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand: SearchProfilesCommand = SearchProfilesCommand(currentMember, user)
+  @ModelAttribute("searchProfilesCommand") def searchProfilesCommand: SearchProfilesCommand = SearchProfilesCommand(currentMember, user)
 
-	@RequestMapping(value=Array("/profiles/search"), params=Array("!query"))
-	def home = Redirect(Routes.home)
+  @RequestMapping(value = Array("/profiles/search"), params = Array("!query"))
+  def home = Redirect(Routes.home)
 
-	@RequestMapping(value=Array("/profiles/search"), params=Array("query"))
-	def submitSearch(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
-		if (!StringUtils.hasText(cmd.query)) home
-		else submit(cmd, errors, "profiles/profile/search/results")
-	}
+  @RequestMapping(value = Array("/profiles/search"), params = Array("query"))
+  def submitSearch(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
+    if (!StringUtils.hasText(cmd.query)) home
+    else submit(cmd, errors, "profiles/profile/search/results")
+  }
 
-	@RequestMapping(value=Array("/profiles/search.json"), params=Array("query"))
-	def submitSearchJSON(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
-		submitJson(cmd, errors)
-	}
+  @RequestMapping(value = Array("/profiles/search.json"), params = Array("query"))
+  def submitSearchJSON(@Valid @ModelAttribute("searchProfilesCommand") cmd: SearchProfilesCommand, errors: Errors): Mav = {
+    submitJson(cmd, errors)
+  }
 
 }

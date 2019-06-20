@@ -4,8 +4,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.{BatchSize, Type}
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
@@ -13,108 +12,115 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object Submission {
-	val UseDisabilityFieldName = "use-disability"
+  val UseDisabilityFieldName = "use-disability"
 }
 
-@Entity @Access(AccessType.FIELD)
+@Entity
+@Proxy
+@Access(AccessType.FIELD)
 class Submission extends GeneratedId with PermissionsTarget with ToEntityReference with FeedbackReportGenerator {
 
-	type Entity = Submission
+  type Entity = Submission
 
-	def isLate: Boolean = submittedDate != null && assignment.isLate(this)
-	def isAuthorisedLate: Boolean = submittedDate != null && assignment.isAuthorisedLate(this)
-	def workingDaysLate: Int = assignment.workingDaysLate(this)
-	def deadline: DateTime = assignment.submissionDeadline(this)
+  def isLate: Boolean = submittedDate != null && assignment.isLate(this)
 
-	def feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadlineForSubmission(this)
+  def isAuthorisedLate: Boolean = submittedDate != null && assignment.isAuthorisedLate(this)
 
-	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
-	@JoinColumn(name = "assignment_id")
-	var assignment: Assignment = _
+  def workingDaysLate: Int = assignment.workingDaysLate(this)
 
-	def permissionsParents: Stream[Assignment] = Option(assignment).toStream
+  def deadline: DateTime = assignment.submissionDeadline(this)
 
-	var submitted: Boolean = false
+  def feedbackDeadline: Option[LocalDate] = assignment.feedbackDeadlineForSubmission(this)
 
-	@Column(name = "submitted_date")
-	var submittedDate: DateTime = _
+  @ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
+  @JoinColumn(name = "assignment_id")
+  var assignment: Assignment = _
 
-	@NotNull
-	@Column(name = "userId")
-	var usercode: String = _
+  def permissionsParents: Stream[Assignment] = Option(assignment).toStream
 
-	override def humanReadableId: String = s"Submission by $usercode for ${assignment.humanReadableId}"
+  var submitted: Boolean = false
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
-	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
+  @Column(name = "submitted_date")
+  var submittedDate: DateTime = _
 
-	def suspectPlagiarised: Boolean = plagiarismInvestigation == SuspectPlagiarised
-	def investigationCompleted: Boolean = plagiarismInvestigation == InvestigationCompleted
-	def hasPlagiarismInvestigation: Boolean = suspectPlagiarised || investigationCompleted
+  @NotNull
+  @Column(name = "userId")
+  var usercode: String = _
 
-	/**
-	 * It isn't essential to record University ID as their user ID
-	 * will identify them, but a lot of processes require the university
-	 * number as the way of identifying a person and it'd be expensive
-	 * to go and fetch the value every time. Also if we're keeping
-	 * records for a while, the ITS account can be expunged so we'd lose
-	 * it entirely.
-	 */
-	@Column(name = "universityId")
-	var _universityId: String = _
+  override def humanReadableId: String = s"Submission by $usercode for ${assignment.humanReadableId}"
 
-	def universityId = Option(_universityId)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
+  var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
 
-	def studentIdentifier: String = universityId.getOrElse(usercode)
+  def suspectPlagiarised: Boolean = plagiarismInvestigation == SuspectPlagiarised
+
+  def investigationCompleted: Boolean = plagiarismInvestigation == InvestigationCompleted
+
+  def hasPlagiarismInvestigation: Boolean = suspectPlagiarised || investigationCompleted
+
+  /**
+    * It isn't essential to record University ID as their user ID
+    * will identify them, but a lot of processes require the university
+    * number as the way of identifying a person and it'd be expensive
+    * to go and fetch the value every time. Also if we're keeping
+    * records for a while, the ITS account can be expunged so we'd lose
+    * it entirely.
+    */
+  @Column(name = "universityId")
+  var _universityId: String = _
+
+  def universityId = Option(_universityId)
+
+  def studentIdentifier: String = universityId.getOrElse(usercode)
 
 
-	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
-	@BatchSize(size=200)
-	var values: JSet[SavedFormValue] = new java.util.HashSet
+  @OneToMany(mappedBy = "submission", cascade = Array(ALL))
+  @BatchSize(size = 200)
+  var values: JSet[SavedFormValue] = new java.util.HashSet
 
-	def getValue(field: FormField): Option[SavedFormValue] = {
-		values.find( _.name == field.name )
-	}
+  def getValue(field: FormField): Option[SavedFormValue] = {
+    values.asScala.find(_.name == field.name)
+  }
 
-	def isForUser(user: User): Boolean = usercode == user.getUserId
+  def isForUser(user: User): Boolean = usercode == user.getUserId
 
-	@Deprecated
-	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(usercode)
-	@Deprecated
-	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(usercode)
+  @Deprecated
+  def firstMarker: Option[User] = assignment.getStudentsFirstMarker(usercode)
 
-	def valuesByFieldName: Map[String, String] = (values map { v => (v.name, v.value) }).toMap
+  @Deprecated
+  def secondMarker: Option[User] = assignment.getStudentsSecondMarker(usercode)
 
-	def valuesWithAttachments: mutable.Set[SavedFormValue] = values.filter(_.hasAttachments)
+  def valuesByFieldName: Map[String, String] = values.asScala.map { v => (v.name, v.value) }.toMap
 
-	def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq flatMap { _.attachments }
+  def valuesWithAttachments: mutable.Set[SavedFormValue] = values.asScala.filter(_.hasAttachments)
 
-	def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.originalityReportReceived)
+  def allAttachments: Seq[FileAttachment] = valuesWithAttachments.toSeq.flatMap(_.attachments.asScala)
 
-	def hasOriginalityReport: JBoolean = allAttachments.exists(_.originalityReportReceived)
+  def attachmentsWithOriginalityReport: Seq[FileAttachment] = allAttachments.filter(_.originalityReportReceived)
 
-	def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
+  def hasOriginalityReport: JBoolean = allAttachments.exists(_.originalityReportReceived)
 
-	/** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
-	def zipFileName(attachment: FileAttachment): String = {
-		assignment.module.code + " - " + studentIdentifier + " - " + attachment.name
-	}
+  def isNoteworthy: Boolean = suspectPlagiarised || isAuthorisedLate || isLate
 
-	def zipFilename(attachment: FileAttachment, name: String): String = {
-		assignment.module.code + " - " + name + " - " + attachment.name
-	}
+  /** Filename as we would expect to find this attachment in a downloaded zip of submissions. */
+  def zipFileName(attachment: FileAttachment): String = {
+    assignment.module.code + " - " + studentIdentifier + " - " + attachment.name
+  }
 
-	def useDisability: Boolean = values.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
+  def zipFilename(attachment: FileAttachment, name: String): String = {
+    assignment.module.code + " - " + name + " - " + attachment.name
+  }
 
-	def toEntityReference: SubmissionEntityReference = new SubmissionEntityReference().put(this)
+  def useDisability: Boolean = values.asScala.find(_.name == Submission.UseDisabilityFieldName).exists(_.value.toBoolean)
 
 }
 
 trait FeedbackReportGenerator {
-	def usercode: String
-	def feedbackDeadline: Option[LocalDate]
+  def usercode: String
+
+  def feedbackDeadline: Option[LocalDate]
 }

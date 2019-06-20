@@ -13,32 +13,32 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 @Component
 class SmallGroupSetMemberRoleProvider extends RoleProvider with TaskBenchmarking {
 
-	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
-		scope match {
-			case set: SmallGroupSet => getRoles(user, Seq(set))
-			case _ => Stream.empty
-		}
-	}
+  override def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = benchmarkTask("Get roles for SmallGroupSetMemberRoleProvider") {
+    scope match {
+      case set: SmallGroupSet => getRoles(user, Seq(set))
+      case _ => Stream.empty
+    }
+  }
 
-	private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]) = {
-		val memberSets =
-			sets.toStream
-			.filter { set =>
-				set.visibleToStudents &&
-				set.isStudentMember(user.apparentUser)
-			}
-		  .distinct
+  private def getRoles(user: CurrentUser, sets: Seq[SmallGroupSet]): Stream[Role] = {
+    val memberSets =
+      sets.toStream
+        .filter { set =>
+          set.visibleToStudents &&
+            set.isStudentMember(user.apparentUser)
+        }
+        .distinct
 
-		val memberRoles: Stream[Role] = memberSets.map { set =>
-			customRoleFor(set.module.adminDepartment)(SmallGroupSetMemberRoleDefinition, set).getOrElse(SmallGroupSetMember(set))
-		}
-		val viewerRoles: Stream[Role] = memberSets.filter { _.studentsCanSeeOtherMembers }.map { set =>
-			customRoleFor(set.module.adminDepartment)(SmallGroupSetViewerRoleDefinition, set).getOrElse(SmallGroupSetViewer(set))
-		}
+    val memberRoles: Stream[Role] = memberSets.map { set =>
+      customRoleFor(set.module.adminDepartment)(SmallGroupSetMemberRoleDefinition, set).getOrElse(SmallGroupSetMember(set))
+    }
+    val viewerRoles: Stream[Role] = memberSets.filter(_.studentsCanSeeOtherMembers).map { set =>
+      customRoleFor(set.module.adminDepartment)(SmallGroupSetViewerRoleDefinition, set).getOrElse(SmallGroupSetViewer(set))
+    }
 
-		memberRoles #::: viewerRoles
-	}
+    memberRoles #::: viewerRoles
+  }
 
-	def rolesProvided = Set(classOf[SmallGroupSetMember], classOf[SmallGroupSetViewer])
+  def rolesProvided: Set[Class[_ <: Role]] = Set(classOf[SmallGroupSetMember], classOf[SmallGroupSetViewer])
 
 }

@@ -10,35 +10,37 @@ import uk.ac.warwick.tabula.roles.{Role, RoleBuilder}
 import scala.collection.JavaConverters._
 
 object ListCustomRoleOverridesCommand {
-	case class CustomRoleOverridesInfo(role: Role, overrides: Seq[RoleOverride])
 
-	def apply(department: Department, customRoleDefinition: CustomRoleDefinition) =
-		new ListCustomRoleOverridesCommandInternal(department, customRoleDefinition)
-			with ComposableCommand[CustomRoleOverridesInfo]
-			with ListCustomRoleOverridesCommandPermissions
-			with ReadOnly with Unaudited
+  case class CustomRoleOverridesInfo(role: Role, overrides: Seq[RoleOverride])
+
+  def apply(department: Department, customRoleDefinition: CustomRoleDefinition) =
+    new ListCustomRoleOverridesCommandInternal(department, customRoleDefinition)
+      with ComposableCommand[CustomRoleOverridesInfo]
+      with ListCustomRoleOverridesCommandPermissions
+      with ReadOnly with Unaudited
 }
 
 trait ListCustomRoleOverridesCommandState {
-	def department: Department
-	def customRoleDefinition: CustomRoleDefinition
+  def department: Department
+
+  def customRoleDefinition: CustomRoleDefinition
 }
 
 class ListCustomRoleOverridesCommandInternal(val department: Department, val customRoleDefinition: CustomRoleDefinition) extends CommandInternal[CustomRoleOverridesInfo] with ListCustomRoleOverridesCommandState {
-	override def applyInternal(): CustomRoleOverridesInfo = {
-		// Use Some(null) instead of None so we show scoped permissions too
-		val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
-		val overrides = customRoleDefinition.overrides.asScala
+  override def applyInternal(): CustomRoleOverridesInfo = {
+    // Use Some(null) instead of None so we show scoped permissions too
+    val role = RoleBuilder.build(customRoleDefinition, Some(null), customRoleDefinition.name)
+    val overrides = customRoleDefinition.overrides.asScala
 
-		CustomRoleOverridesInfo(role, overrides)
-	}
+    CustomRoleOverridesInfo(role, overrides)
+  }
 }
 
 trait ListCustomRoleOverridesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ListCustomRoleOverridesCommandState =>
+  self: ListCustomRoleOverridesCommandState =>
 
-	def permissionsCheck(p: PermissionsChecking) {
-		p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
-		p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.mustBeLinked(mandatory(customRoleDefinition), mandatory(department))
+    p.PermissionCheck(Permissions.RolesAndPermissions.Read, customRoleDefinition)
+  }
 }

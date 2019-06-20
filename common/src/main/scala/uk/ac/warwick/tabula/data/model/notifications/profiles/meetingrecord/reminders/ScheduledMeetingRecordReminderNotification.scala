@@ -1,73 +1,70 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.reminders
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordNotification
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification, SingleRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, MyWarwickNotification}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter
 import uk.ac.warwick.userlookup.User
 
 abstract class ScheduledMeetingRecordReminderNotification extends ScheduledMeetingRecordNotification
-	with SingleRecipientNotification
-	with MyWarwickNotification {
+  with MyWarwickNotification {
 
-	verbSetting.value = "remind"
-	priority = Warning
+  verbSetting.value = "remind"
+  priority = Warning
 
-	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
+  def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meetingrecord/scheduled_meeting_record_reminder_notification.ftl"
 
-	def referenceDate: DateTime = meeting.meetingDate
-	def isToday: Boolean = {
-		val today = DateTime.now.withTimeAtStartOfDay()
-		val meetingDate = meeting.meetingDate.withTimeAtStartOfDay()
-		today == meetingDate
-	}
+  def referenceDate: DateTime = meeting.meetingDate
 
-	def title: String = {
-		val name =
-			if (isAgent) meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
-			else meeting.relationship.agentName
+  def isToday: Boolean = {
+    val today = DateTime.now.withTimeAtStartOfDay()
+    val meetingDate = meeting.meetingDate.withTimeAtStartOfDay()
+    today == meetingDate
+  }
 
-		val timeFormat = ConfigurableIntervalFormatter.Hour12OptionalMins
-		val date =
-			if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
-			else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
+  def dateForTitle: String = {
+    val timeFormat = ConfigurableIntervalFormatter.Hour12OptionalMins
 
-		s"${agentRole.capitalize} meeting with $name $date"
-	}
+    if (isToday) s"today at ${timeFormat.formatTime(meeting.meetingDate).get}"
+    else s"at ${timeFormat.formatTime(meeting.meetingDate).get}, ${meeting.meetingDate.toString("EEEE d MMMM yyyy")}"
+  }
 
-	def isAgent: Boolean
+  def title: String = s"Meeting with ${meeting.allParticipantNames} $dateForTitle"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"isAgent" -> isAgent,
-		"role" -> agentRole,
-		"partner" -> (isAgent match {
-			case true => meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage))
-			case false => meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage))
-		}),
-		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting
-	))
+  override def titleFor(user: User): String = s"Meeting with ${meeting.participantNamesExcept(user)} $dateForTitle"
+
+  def isAgent: Boolean
+
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "isAgent" -> isAgent,
+    "agentRoles" -> agentRoles,
+    "otherParticipants" -> meeting.participants.filterNot(_ == meeting.creator),
+    "dateTimeFormatter" -> dateTimeFormatter,
+    "meetingRecord" -> meeting
+  ))
 }
 
 @Entity
-@DiscriminatorValue(value="ScheduledMeetingRecordReminderStudent")
+@Proxy
+@DiscriminatorValue(value = "ScheduledMeetingRecordReminderStudent")
 class ScheduledMeetingRecordReminderStudentNotification extends ScheduledMeetingRecordReminderNotification {
 
-	override def isAgent = false
+  override def isAgent = false
 
-	override def recipient: User = meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
+  override def recipients: Seq[User] = Seq(meeting.student.asSsoUser)
 
 }
 
 @Entity
-@DiscriminatorValue(value="ScheduledMeetingRecordReminderAgent")
+@Proxy
+@DiscriminatorValue(value = "ScheduledMeetingRecordReminderAgent")
 class ScheduledMeetingRecordReminderAgentNotification extends ScheduledMeetingRecordReminderNotification {
 
-	override def isAgent = true
+  override def isAgent = true
 
-	override def recipient: User = meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+  override def recipients: Seq[User] = meeting.agents.map(_.asSsoUser)
 
 }

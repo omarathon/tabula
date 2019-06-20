@@ -9,46 +9,46 @@ import uk.ac.warwick.tabula.services.{AssessmentService, AutowiringUserLookupCom
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
-	this: TransactionalComponent with UserLookupComponent =>
+  this: TransactionalComponent with UserLookupComponent =>
 
-	var assignmentService: AssessmentService = Wire[AssessmentService]
+  var assignmentService: AssessmentService = Wire[AssessmentService]
 
-	var userId: String = _
-	var assignmentId: String = _
-	var approved: Boolean = _
+  var userId: String = _
+  var assignmentId: String = _
+  var approved: Boolean = _
 
-	protected def applyInternal(): Extension = {
-		transactional() {
-			val now = new DateTime()
-			val user = userLookup.getUserByUserId(userId)
-			val e = new Extension()
-			e._universityId = user.getWarwickId
-			e.usercode = user.getUserId
-			e.requestedOn = now
-			e.requestedExpiryDate = now.plusMonths(3)
-			e.reason = "For use in fixture."
-			e.assignment = assignmentService.getAssignmentById(assignmentId).get
+  protected def applyInternal(): Extension = {
+    transactional() {
+      val now = new DateTime()
+      val user = userLookup.getUserByUserId(userId)
+      val e = new Extension()
+      e._universityId = user.getWarwickId
+      e.usercode = user.getUserId
+      e.requestedOn = now
+      e.requestedExpiryDate = now.plusMonths(3)
+      e.reason = "For use in fixture."
+      e.assignment = assignmentService.getAssignmentById(assignmentId).get
 
-			if (approved) {
-				e.approve()
-				e.reviewedOn = now.plusMillis(5) // superquick
-			}
+      if (approved) {
+        e.approve()
+        e.reviewedOn = now.plusMillis(5) // superquick
+      }
 
-			// make sure to manually create the inverse relationship
-			e.assignment.extensions.add(e)
+      // make sure to manually create the inverse relationship
+      e.assignment.addExtension(e)
 
-			e
-		}
-	}
+      e
+    }
+  }
 }
 
 object CreateExtensionFixtureCommand {
-	def apply(): CreateExtensionFixtureCommand with ComposableCommand[Extension] with AutowiringTransactionalComponent with AutowiringUserLookupComponent with PubliclyVisiblePermissions with Unaudited = {
-		new CreateExtensionFixtureCommand
-			with ComposableCommand[Extension]
-			with AutowiringTransactionalComponent
-			with AutowiringUserLookupComponent
-			with PubliclyVisiblePermissions
-			with Unaudited
-	}
+  def apply(): CreateExtensionFixtureCommand with ComposableCommand[Extension] with AutowiringTransactionalComponent with AutowiringUserLookupComponent with PubliclyVisiblePermissions with Unaudited = {
+    new CreateExtensionFixtureCommand
+      with ComposableCommand[Extension]
+      with AutowiringTransactionalComponent
+      with AutowiringUserLookupComponent
+      with PubliclyVisiblePermissions
+      with Unaudited
+  }
 }

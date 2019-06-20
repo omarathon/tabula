@@ -2,9 +2,9 @@
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js">
 <head>
-	<#include "_head.ftl" />
+  <#include "_head.ftl" />
 </head>
 <body style="min-height: 0;">
-	<@tiles.insertAttribute name="body" />
+<@tiles.insertAttribute name="body" />
 </body>
 </html>

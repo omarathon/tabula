@@ -5,8 +5,8 @@ package uk.ac.warwick.tabula.data.model.activitystreams
 //}
 
 /**
- *
- */
-class ActivityStreamEntry  {
+  *
+  */
+class ActivityStreamEntry {
 
 }

@@ -43,9 +43,13 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
   }
 
   def extraProfiles: Iterable[String] = scheduler ++ web ++ cm1Enabled ++ cm2Enabled
+
   def scheduler: Option[String] = extraProfile("scheduling.enabled", "scheduling", default = false)
+
   def web: Option[String] = extraProfile("web.enabled", "web", default = true)
+
   def cm1Enabled: Option[String] = extraProfile("cm1.enabled", "cm1Enabled", default = true)
+
   def cm2Enabled: Option[String] = extraProfile("cm2.enabled", "cm2Enabled", default = true)
 
   /**
@@ -97,6 +101,7 @@ class CompositePropertySource(name: String) extends PropertySource[Unit](name, (
   lazy val resolver = new PropertySourcesPropertyResolver(mutableSources)
 
   def getBoolean(prop: String, default: Boolean): Boolean = resolver.getProperty(prop, classOf[Boolean], default)
+
   def getString(prop: String): Object = getProperty(prop)
 
   override def getProperty(prop: String): String = resolver.getProperty(prop)

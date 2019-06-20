@@ -9,6 +9,7 @@
       <filter ref="forceLoginFilter"/>
       <url-pattern>/admin/*</url-pattern>
       <url-pattern>/cm2/*</url-pattern>
+      <url-pattern>/coursework/*</url-pattern>
       <url-pattern>/reports/*</url-pattern>
       <url-pattern>/zips/*</url-pattern>
       <url-pattern>/groups/*</url-pattern>

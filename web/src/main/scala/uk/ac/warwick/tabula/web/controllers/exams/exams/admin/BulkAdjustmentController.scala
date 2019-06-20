@@ -19,46 +19,46 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 @RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment"))
 class BulkAdjustmentController extends ExamsController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam) =
-		BulkAdjustmentCommand(
-			mandatory(exam),
-			OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)),
-			SpreadsheetHelpers,
-			user
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable exam: Exam) =
+    BulkAdjustmentCommand(
+      mandatory(exam),
+      OldGenerateGradesFromMarkCommand(mandatory(module), mandatory(exam)),
+      SpreadsheetHelpers,
+      user
+    )
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def form: Mav = {
-		Mav("exams/exams/admin/adjustments/bulk/form",
-			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
-			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
-			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
-		)
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def form: Mav = {
+    Mav("exams/exams/admin/adjustments/bulk/form",
+      "StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
+      "MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
+      "GradeHeader" -> BulkAdjustmentCommand.GradeHeader
+    )
+  }
 
-	@RequestMapping(method = Array(POST))
-	def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors): Mav = {
-		if (errors.hasFieldErrors("file"))
-			form
-		else
-			Mav("exams/exams/admin/adjustments/bulk/preview")
-	}
+  @RequestMapping(method = Array(POST))
+  def upload(@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors): Mav = {
+    if (errors.hasFieldErrors("file"))
+      form
+    else
+      Mav("exams/exams/admin/adjustments/bulk/preview")
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
-	def confirm(
-		@Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
-		@PathVariable exam: Exam
-	): Mav = {
-		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
-			upload(cmd, errors)
-		} else {
-			cmd.apply()
-			Redirect(Routes.Exams.admin.exam(exam))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
+  def confirm(
+    @Valid @ModelAttribute("command") cmd: Appliable[Seq[Mark]], errors: Errors,
+    @PathVariable exam: Exam
+  ): Mav = {
+    if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
+      upload(cmd, errors)
+    } else {
+      cmd.apply()
+      Redirect(Routes.Exams.admin.exam(exam))
+    }
+  }
 
 }
 
@@ -66,13 +66,13 @@ class BulkAdjustmentController extends ExamsController {
 @RequestMapping(Array("/exams/exams/admin/module/{module}/{academicYear}/exams/{exam}/feedback/bulk-adjustment/template"))
 class BulkAdjustmentTemplateController extends ExamsController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable exam: Exam): Appliable[ExcelView] =
-		BulkAdjustmentTemplateCommand(mandatory(exam))
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable exam: Exam): Appliable[ExcelView] =
+    BulkAdjustmentTemplateCommand(mandatory(exam))
 
-	@RequestMapping(method = Array(GET, HEAD))
-	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
+    cmd.apply()
+  }
 
 }

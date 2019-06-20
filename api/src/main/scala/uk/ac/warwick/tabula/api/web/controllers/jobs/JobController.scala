@@ -11,19 +11,19 @@ import uk.ac.warwick.tabula.web.views.JSONView
 @Controller
 @RequestMapping(Array("/v1/job/{job}"))
 class JobController extends ApiController
-	with GetJobInformationApi
-	with JobInstanceToJsonConverter
+  with GetJobInformationApi
+  with JobInstanceToJsonConverter
 
 trait GetJobInformationApi {
-	self: ApiController with JobInstanceToJsonConverter =>
+  self: ApiController with JobInstanceToJsonConverter =>
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def getJob(@PathVariable job: JobInstance): Mav = {
-		Mav(new JSONView(Map(
-			"success" -> true,
-			"status" -> "ok",
-			"job" -> jsonJobInstanceObject(mandatory(job))
-		)))
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def getJob(@PathVariable job: JobInstance): Mav = {
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok",
+      "job" -> jsonJobInstanceObject(mandatory(job))
+    )))
+  }
 
 }

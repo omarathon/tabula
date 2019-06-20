@@ -12,100 +12,101 @@ import uk.ac.warwick.tabula.services.{AutowiringZipServiceComponent, ZipService,
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 /**
- * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
- */
+  * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
+  */
 object OldFinaliseFeedbackCommand {
-	def apply(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback], user: User) =
-		new FinaliseFeedbackCommandInternal(assignment, markerFeedbacks, user)
-			with ComposableCommand[Seq[Feedback]]
-			with FinaliseFeedbackPermissions
-			with FinaliseFeedbackDescription
-			with FinaliseFeedbackNotifier
+  def apply(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback], user: User) =
+    new FinaliseFeedbackCommandInternal(assignment, markerFeedbacks, user)
+      with ComposableCommand[Seq[Feedback]]
+      with FinaliseFeedbackPermissions
+      with FinaliseFeedbackDescription
+      with FinaliseFeedbackNotifier
 }
 
 trait FinaliseFeedbackCommandState {
-	def assignment: Assignment
-	def markerFeedbacks: Seq[MarkerFeedback]
+  def assignment: Assignment
+
+  def markerFeedbacks: Seq[MarkerFeedback]
 }
 
 abstract class FinaliseFeedbackCommandInternal(val assignment: Assignment, val markerFeedbacks: Seq[MarkerFeedback], val user: User)
-	extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
+  extends CommandInternal[Seq[Feedback]] with FinaliseFeedbackCommandState with UserAware {
 
-	var fileDao: FileDao = Wire.auto[FileDao]
-	var zipService: ZipService = Wire.auto[ZipService]
+  var fileDao: FileDao = Wire.auto[FileDao]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal(): Seq[Feedback] = {
-		markerFeedbacks.map { markerFeedback =>
-			this.copyToFeedback(markerFeedback)
-		}
-	}
+  override def applyInternal(): Seq[Feedback] = {
+    markerFeedbacks.map { markerFeedback =>
+      this.copyToFeedback(markerFeedback)
+    }
+  }
 
-	private def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
-		val parent = markerFeedback.feedback
+  private def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
+    val parent = markerFeedback.feedback
 
-		parent.clearCustomFormValues()
+    parent.clearCustomFormValues()
 
-		// save custom fields
-		parent.customFormValues.addAll(markerFeedback.customFormValues.map { formValue =>
-			val newValue = new SavedFormValue()
-			newValue.name = formValue.name
-			newValue.feedback = formValue.markerFeedback.feedback
-			newValue.value = formValue.value
-			newValue
-		}.toSet[SavedFormValue])
+    // save custom fields
+    parent.customFormValues.addAll(markerFeedback.customFormValues.asScala.map { formValue =>
+      val newValue = new SavedFormValue()
+      newValue.name = formValue.name
+      newValue.feedback = formValue.markerFeedback.feedback
+      newValue.value = formValue.value
+      newValue
+    }.toSet[SavedFormValue].asJava)
 
-		parent.actualGrade = markerFeedback.grade
-		parent.actualMark = markerFeedback.mark
+    parent.actualGrade = markerFeedback.grade
+    parent.actualMark = markerFeedback.mark
 
-		parent.updatedDate = DateTime.now
+    parent.updatedDate = DateTime.now
 
-		// erase any existing attachments - these will be replaced
-		parent.clearAttachments()
+    // erase any existing attachments - these will be replaced
+    parent.clearAttachments()
 
-		markerFeedback.attachments.foreach(parent.addAttachment)
-		zipService.invalidateIndividualFeedbackZip(parent)
-		parent
-	}
+    markerFeedback.attachments.asScala.foreach(parent.addAttachment)
+    zipService.invalidateIndividualFeedbackZip(parent)
+    parent
+  }
 }
 
 trait FinaliseFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: FinaliseFeedbackCommandState =>
+  self: FinaliseFeedbackCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.AssignmentMarkerFeedback.Manage, mandatory(assignment))
+  }
 }
 
 trait FinaliseFeedbackDescription extends Describable[Seq[Feedback]] {
-	self: FinaliseFeedbackCommandState =>
+  self: FinaliseFeedbackCommandState =>
 
-	override def describe(d: Description) {
-		d.assignment(assignment)
-		d.property("updatedFeedback" -> markerFeedbacks.size)
-	}
+  override def describe(d: Description) {
+    d.assignment(assignment)
+    d.property("updatedFeedback" -> markerFeedbacks.size)
+  }
 
 }
 
 trait FinaliseFeedbackNotifier extends Notifies[Seq[Feedback], Seq[Feedback]] {
-	self: FinaliseFeedbackCommandState with UserAware =>
+  self: FinaliseFeedbackCommandState with UserAware =>
 
-	override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
-		Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot { _.checkedReleased }, assignment))
-	}
+  override def emit(feedbacks: Seq[Feedback]): Seq[Notification[Feedback, Assignment]] = {
+    Seq(Notification.init(new FinaliseFeedbackNotification, user, feedbacks.filterNot(_.checkedReleased), assignment))
+  }
 }
 
 trait FinaliseFeedbackComponent {
-	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback])
+  def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback])
 }
 
 trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
-	self: UserAware =>
+  self: UserAware =>
 
-	def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
-		val finaliseFeedbackCommand = OldFinaliseFeedbackCommand(assignment, markerFeedbacks, user)
-		finaliseFeedbackCommand.apply()
-	}
+  def finaliseFeedback(assignment: Assignment, markerFeedbacks: Seq[MarkerFeedback]) {
+    val finaliseFeedbackCommand = OldFinaliseFeedbackCommand(assignment, markerFeedbacks, user)
+    finaliseFeedbackCommand.apply()
+  }
 }

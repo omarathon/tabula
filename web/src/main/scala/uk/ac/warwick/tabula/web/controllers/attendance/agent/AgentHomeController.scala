@@ -12,30 +12,30 @@ import uk.ac.warwick.tabula.web.controllers.attendance.AttendanceController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
- * Displays the agent home screen, allowing users to choose the relationship type.
- */
+  * Displays the agent home screen, allowing users to choose the relationship type.
+  */
 @Controller
 @RequestMapping(Array("/attendance/agent"))
 class AgentHomeController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
-	@ModelAttribute("command")
-	def createCommand(user: CurrentUser) = HomeCommand(user)
+  @ModelAttribute("command")
+  def createCommand(user: CurrentUser) = HomeCommand(user)
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("command") cmd: Appliable[HomeInformation],
-		@ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
-	): Mav = {
-		val info = cmd.apply()
-		if (info.relationshipTypesMap.keySet.size == 1) {
-			Redirect(Routes.Agent.relationshipForYear(info.relationshipTypesMap.keys.head, activeAcademicYear.getOrElse(AcademicYear.now())))
-		} else {
-			Mav("attendance/agent/home", "relationshipTypesMap" -> info.relationshipTypesMap)
-		}
-	}
+  @RequestMapping
+  def home(
+    @ModelAttribute("command") cmd: Appliable[HomeInformation],
+    @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]
+  ): Mav = {
+    val info = cmd.apply()
+    if (info.relationshipTypesMap.keySet.size == 1) {
+      Redirect(Routes.Agent.relationshipForYear(info.relationshipTypesMap.keys.head, activeAcademicYear.getOrElse(AcademicYear.now())))
+    } else {
+      Mav("attendance/agent/home", "relationshipTypesMap" -> info.relationshipTypesMap)
+    }
+  }
 
 }

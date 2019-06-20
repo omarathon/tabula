@@ -9,43 +9,45 @@ import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver._
 
 import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 
-class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadMemberNoteFilesCommand(val memberNote: MemberNote) extends Command[Option[RenderableFile]] with ReadOnly {
 
-		PermissionCheck(Permissions.MemberNotes.Read, memberNote)
+  PermissionCheck(Permissions.MemberNotes.Read, memberNote)
 
-		var filename: String = _
+  var filename: String = _
 
-		var zipService: ZipService = Wire.auto[ZipService]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-		private var fileFound: Boolean = _
+  private var fileFound: Boolean = _
 
-		/**
-		 * If filename is unset, it returns a renderable Zip of all files.
-		 * If filename is set, it will return a renderable attachment if found.
-		 * In either case if it's not found, None is returned.
-		 */
-		def applyInternal(): Option[RenderableFile] = {
-			val result: Option[RenderableFile] =
-				filename match {
-					case filename: String if filename.hasText => {
-						memberNote.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
-					}
-					case _ => Some(zipped(memberNote))
-				}
+  /**
+    * If filename is unset, it returns a renderable Zip of all files.
+    * If filename is set, it will return a renderable attachment if found.
+    * In either case if it's not found, None is returned.
+    */
+  def applyInternal(): Option[RenderableFile] = {
+    val result: Option[RenderableFile] =
+      filename match {
+        case filename: String if filename.hasText => {
+          memberNote.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
+        }
+        case _ => Some(zipped(memberNote))
+      }
 
-			fileFound = result.isDefined
-			result
-		}
+    fileFound = result.isDefined
+    result
+  }
 
-		private def zipped(memberNote: MemberNote) = zipService.getSomeMemberNoteAttachmentsZip(memberNote)
+  private def zipped(memberNote: MemberNote) = Await.result(zipService.getSomeMemberNoteAttachmentsZip(memberNote), Duration.Inf)
 
-		override def describe(d: Description): Unit = {
-			d.property("filename", filename)
-		}
+  override def describe(d: Description): Unit = {
+    d.property("filename", filename)
+  }
 
-		override def describeResult(d: Description) {
-			d.property("fileFound", fileFound)
-		}
-	}
+  override def describeResult(d: Description) {
+    d.property("fileFound", fileFound)
+  }
+}

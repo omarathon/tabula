@@ -13,52 +13,56 @@ import org.hibernate.stat.Statistics
 import org.joda.time.format.DateTimeFormat
 
 /**
- * Listens for messages
- */
+  * Listens for messages
+  */
 @Component
 class HibernateStatisticsService extends QueueListener with InitializingBean with Logging with Daoisms {
 
-	private val DateFormat = DateTimeFormat.shortDateTime()
+  private val DateFormat = DateTimeFormat.shortDateTime()
 
-	var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
-	var context: String = Wire.property("${module.context}")
+  var queue: Queue = Wire.named[Queue]("settingsSyncTopic")
+  var context: String = Wire.property("${module.context}")
 
-	override def isListeningToQueue = true
-	override def onReceive(item: Any) {
-		logger.info("Updating sessionFactory statistics options " + item + " for " + context)
-		item match {
-			case HibernateStatisticsMessage("enable") => sessionFactory.getStatistics.setStatisticsEnabled(true)
-			case HibernateStatisticsMessage("disable") => sessionFactory.getStatistics.setStatisticsEnabled(false)
-			case HibernateStatisticsMessage("clear") => sessionFactory.getStatistics.clear()
-			case HibernateStatisticsMessage("log") => logger.info("Hibernate stats for " + context + ": " + getStatisticsSummary(sessionFactory.getStatistics))
-		}
-	}
+  override def isListeningToQueue = true
 
-	def getStatisticsSummary(stats: Statistics): String = {
-		s"""
-		|Stats enabled: ${stats.isStatisticsEnabled} (since ${DateFormat.print(stats.getStartTime)})
-		|
-		|Flushes: ${stats.getFlushCount}
-		|Entity loads: ${stats.getEntityLoadCount}
-		|Entity fetches: ${stats.getEntityFetchCount}
-		|Collection loads: ${stats.getCollectionLoadCount}
-		|
-		|Sessions opened: ${stats.getSessionOpenCount}
-		|Sessions closed: ${stats.getSessionCloseCount}
-		|
-		|Query count: ${stats.getQueryExecutionCount}
-		|Slowest query (${stats.getQueryExecutionMaxTime}ms): ${stats.getQueryExecutionMaxTimeQueryString}
+  override def onReceive(item: Any) {
+    logger.info("Updating sessionFactory statistics options " + item + " for " + context)
+    item match {
+      case HibernateStatisticsMessage("enable") => sessionFactory.getStatistics.setStatisticsEnabled(true)
+      case HibernateStatisticsMessage("disable") => sessionFactory.getStatistics.setStatisticsEnabled(false)
+      case HibernateStatisticsMessage("clear") => sessionFactory.getStatistics.clear()
+      case HibernateStatisticsMessage("log") => logger.info("Hibernate stats for " + context + ": " + getStatisticsSummary(sessionFactory.getStatistics))
+    }
+  }
+
+  def getStatisticsSummary(stats: Statistics): String = {
+    s"""
+       		|Stats enabled: ${stats.isStatisticsEnabled} (since ${DateFormat.print(stats.getStartTime)})
+       		|
+       		|Flushes: ${stats.getFlushCount}
+       		|Entity loads: ${stats.getEntityLoadCount}
+       		|Entity fetches: ${stats.getEntityFetchCount}
+       		|Collection loads: ${stats.getCollectionLoadCount}
+       		|
+       		|Sessions opened: ${stats.getSessionOpenCount}
+       		|Sessions closed: ${stats.getSessionCloseCount}
+       		|
+       		|Query count: ${stats.getQueryExecutionCount}
+       		|Slowest query (${stats.getQueryExecutionMaxTime}ms): ${stats.getQueryExecutionMaxTimeQueryString}
 		""".stripMargin
-	}
+  }
 
-	override def afterPropertiesSet() {
-		logger.debug("Registering listener for " + classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
-		queue.addListener(classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value, this)
-	}
+  override def afterPropertiesSet() {
+    logger.debug("Registering listener for " + classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value + " on " + context)
+    queue.addListener(classOf[HibernateStatisticsMessage].getAnnotation(classOf[ItemType]).value, this)
+  }
 
 }
 
-@JsonAutoDetect @ItemType("HibernateStatistics")
+@JsonAutoDetect
+@ItemType("HibernateStatistics")
 case class HibernateStatisticsMessage(@BeanProperty var action: String) {
-	def this() { this(null) }
+  def this() {
+    this(null)
+  }
 }

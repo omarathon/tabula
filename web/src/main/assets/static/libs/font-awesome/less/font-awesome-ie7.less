@@ -41,6 +41,7 @@
     padding-top: 3px;
     margin-bottom: -4px;
     padding-bottom: 3px;
+
     &.icon-large {
       vertical-align: -25%;
     }
@@ -63,7 +64,10 @@
 .btn {
   [class^="icon-"],
   [class*=" icon-"] {
-    &.pull-left, &.pull-right { vertical-align: inherit; }
+    &.pull-left, &.pull-right {
+      vertical-align: inherit;
+    }
+
     &.icon-large {
       margin-top: -.5em;
     }
@@ -75,7 +79,9 @@ a [class*=" icon-"] {
   cursor: pointer;
 }
 
-.ie7icon(@inner) { *zoom: ~"expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '@{inner}')"; }
+.ie7icon(@inner) {
+  *zoom: ~"expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '@{inner}')";
+}
 
 
 .icon-glass {

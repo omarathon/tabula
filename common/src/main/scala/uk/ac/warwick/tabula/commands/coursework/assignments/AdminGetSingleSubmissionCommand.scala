@@ -7,15 +7,18 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
+
 class AdminGetSingleSubmissionCommand(val module: Module, val assignment: Assignment, val submission: Submission) extends Command[RenderableFile] with ReadOnly {
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read, submission)
+  mustBeLinked(assignment, module)
+  PermissionCheck(Permissions.Submission.Read, submission)
 
-	var zipService: ZipService = Wire.auto[ZipService]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal(): RenderableFile = zipService.getSubmissionZip(submission)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getSubmissionZip(submission), Duration.Inf)
 
-	override def describe(d: Description): Unit = d.submission(submission).properties(
-		"studentId" -> submission.studentIdentifier,
-		"attachmentCount" -> submission.allAttachments.size)
+  override def describe(d: Description): Unit = d.submission(submission).properties(
+    "studentId" -> submission.studentIdentifier,
+    "attachmentCount" -> submission.allAttachments.size)
 }

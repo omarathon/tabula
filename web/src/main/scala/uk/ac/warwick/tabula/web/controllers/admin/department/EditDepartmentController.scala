@@ -16,25 +16,25 @@ import uk.ac.warwick.tabula.data.model.Department.FilterRule
 @RequestMapping(value = Array("/admin/department/{department}/edit"))
 class EditDepartmentController extends AdminController {
 
-	validatesSelf[SelfValidating]
-	type EditDepartmentCommand = Appliable[Department] with EditDepartmentCommandState
+  validatesSelf[SelfValidating]
+  type EditDepartmentCommand = Appliable[Department] with EditDepartmentCommandState
 
-	@ModelAttribute("allFilterRules")
-	def allFilterRules: Seq[FilterRule] = Department.FilterRule.allFilterRules
+  @ModelAttribute("allFilterRules")
+  def allFilterRules: Seq[FilterRule] = Department.FilterRule.allFilterRules
 
-	@ModelAttribute("editDepartmentCommand")
-	def command(@PathVariable department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))
+  @ModelAttribute("editDepartmentCommand")
+  def command(@PathVariable department: Department): EditDepartmentCommand = EditDepartmentCommand(mandatory(department))
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def showForm() = Mav("admin/department/edit/form")
+  @RequestMapping(method = Array(HEAD, GET))
+  def showForm() = Mav("admin/department/edit/form")
 
-	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("editDepartmentCommand") command: EditDepartmentCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) showForm()
-		else {
-			val department = command.apply()
-			Redirect(Routes.admin.department(department))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@Valid @ModelAttribute("editDepartmentCommand") command: EditDepartmentCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) showForm()
+    else {
+      val department = command.apply()
+      Redirect(Routes.admin.department(department))
+    }
+  }
 
 }

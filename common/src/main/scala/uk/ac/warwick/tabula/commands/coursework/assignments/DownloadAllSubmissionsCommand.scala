@@ -7,26 +7,28 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 class DownloadAllSubmissionsCommand(
-		val module: Module,
-		val assignment: Assignment,
-		val filename: String)
-		extends Command[RenderableFile] with ReadOnly {
+  val module: Module,
+  val assignment: Assignment,
+  val filename: String)
+  extends Command[RenderableFile] with ReadOnly {
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.Read, assignment)
+  mustBeLinked(assignment, module)
+  PermissionCheck(Permissions.Submission.Read, assignment)
 
-	var zipService: ZipService = Wire.auto[ZipService]
+  var zipService: ZipService = Wire.auto[ZipService]
 
-	override def applyInternal(): RenderableFile = zipService.getAllSubmissionsZip(assignment)
+  override def applyInternal(): RenderableFile = Await.result(zipService.getAllSubmissionsZip(assignment), Duration.Inf)
 
-	override def describe(d: Description): Unit = d
-		.assignment(assignment)
-		.studentIds(assignment.submissions.flatMap(_.universityId))
-		.studentUsercodes(assignment.submissions.map(_.usercode))
-		.properties(
-			"submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
+  override def describe(d: Description): Unit = d
+    .assignment(assignment)
+    .studentIds(assignment.submissions.asScala.flatMap(_.universityId))
+    .studentUsercodes(assignment.submissions.asScala.map(_.usercode))
+    .properties(
+      "submissionCount" -> Option(assignment.submissions).map(_.size).getOrElse(0))
 
 }

@@ -11,46 +11,46 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 
 /**
- * Displays the Attendance home screen.
- * Redirects to the the appropriate page if only one of the following is true:
- * * The user has a profile
- * * The user has view/record permissions on a single department
- * * The user has manage permissions on a single department
- * Otherwise they are shown the home page
- */
+  * Displays the Attendance home screen.
+  * Redirects to the the appropriate page if only one of the following is true:
+  * * The user has a profile
+  * * The user has view/record permissions on a single department
+  * * The user has manage permissions on a single department
+  * Otherwise they are shown the home page
+  */
 abstract class AbstractAttendanceHomeController extends AttendanceController
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@ModelAttribute("command")
-	def createCommand(user: CurrentUser) = HomeCommand(user)
+  @ModelAttribute("command")
+  def createCommand(user: CurrentUser) = HomeCommand(user)
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
-		val info = cmd.apply()
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[HomeInformation], @ModelAttribute("activeAcademicYear") activeAcademicYear: Option[AcademicYear]): Mav = {
+    val info = cmd.apply()
 
-		val hasAnyRelationships = info.relationshipTypesMap.exists { case (_, b) => b }
+    val hasAnyRelationships = info.relationshipTypesMap.exists { case (_, b) => b }
 
-		val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
+    val academicYear = activeAcademicYear.getOrElse(AcademicYear.now())
 
-		if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships) {
-			Redirect(Routes.Profile.home)
-		} else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
-			Redirect(Routes.View.departmentForYear(info.viewPermissions.head, academicYear))
-		} else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
-			Redirect(Routes.Manage.departmentForYear(info.managePermissions.head, academicYear))
-		} else {
-			Mav("attendance/home",
-				"academicYear" -> academicYear,
-				"hasProfile" -> info.hasProfile,
-				"relationshipTypesMap" -> info.relationshipTypesMap,
-				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
-				"hasAnyRelationships" -> hasAnyRelationships,
-				"viewPermissions" -> info.viewPermissions,
-				"managePermissions" -> info.managePermissions
-			).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.homeForYear(year)): _*)
-		}
-	}
+    if (info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.isEmpty && !hasAnyRelationships) {
+      Redirect(Routes.Profile.home)
+    } else if (!info.hasProfile && info.managePermissions.isEmpty && info.viewPermissions.size == 1 && !hasAnyRelationships) {
+      Redirect(Routes.View.departmentForYear(info.viewPermissions.head, academicYear))
+    } else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.isEmpty && !hasAnyRelationships) {
+      Redirect(Routes.Manage.departmentForYear(info.managePermissions.head, academicYear))
+    } else {
+      Mav("attendance/home",
+        "academicYear" -> academicYear,
+        "hasProfile" -> info.hasProfile,
+        "relationshipTypesMap" -> info.relationshipTypesMap,
+        "relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
+        "hasAnyRelationships" -> hasAnyRelationships,
+        "viewPermissions" -> info.viewPermissions,
+        "managePermissions" -> info.managePermissions
+      ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.homeForYear(year)): _*)
+    }
+  }
 }
 
 
@@ -58,8 +58,8 @@ abstract class AbstractAttendanceHomeController extends AttendanceController
 @RequestMapping(Array("/attendance"))
 class AttendanceHomeController extends AbstractAttendanceHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear: Option[AcademicYear] = retrieveActiveAcademicYear(None)
 
 }
 
@@ -67,7 +67,7 @@ class AttendanceHomeController extends AbstractAttendanceHomeController {
 @RequestMapping(Array("/attendance/{academicYear}"))
 class AttendanceHomeForYearController extends AbstractAttendanceHomeController {
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
 }

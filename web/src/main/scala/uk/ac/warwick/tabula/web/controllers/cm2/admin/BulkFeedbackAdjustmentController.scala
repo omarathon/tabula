@@ -21,49 +21,49 @@ import uk.ac.warwick.tabula.web.views.ExcelView
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/bulk-adjustment"))
 class BulkFeedbackAdjustmentController extends CourseworkController {
 
-	type BulkAdjustmentCommand = Appliable[Seq[Mark]] with BulkAdjustmentCommandState
-	validatesSelf[SelfValidating]
+  type BulkAdjustmentCommand = Appliable[Seq[Mark]] with BulkAdjustmentCommandState
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) =
-		BulkAdjustmentCommand(
-			mandatory(assignment),
-			GenerateGradesFromMarkCommand(mandatory(assignment)),
-			SpreadsheetHelpers,
-			user
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment) =
+    BulkAdjustmentCommand(
+      mandatory(assignment),
+      GenerateGradesFromMarkCommand(mandatory(assignment)),
+      SpreadsheetHelpers,
+      user
+    )
 
 
-	@RequestMapping
-	def form(@PathVariable assignment: Assignment): Mav = {
-		Mav("cm2/admin/assignments/feedback/bulk/bulk_adjustment",
-			"StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
-			"MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
-			"GradeHeader" -> BulkAdjustmentCommand.GradeHeader
-		).crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  @RequestMapping
+  def form(@PathVariable assignment: Assignment): Mav = {
+    Mav("cm2/admin/assignments/feedback/bulk/bulk_adjustment",
+      "StudentIdHeader" -> BulkAdjustmentCommand.StudentIdHeader,
+      "MarkHeader" -> BulkAdjustmentCommand.MarkHeader,
+      "GradeHeader" -> BulkAdjustmentCommand.GradeHeader
+    ).crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("!confirmStep"))
-	def upload(@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
-		if (errors.hasFieldErrors("file"))
-			form(assignment)
-		else
-			Mav("cm2/admin/assignments/feedback/bulk/preview").crumbsList(Breadcrumbs.assignment(assignment))
-	}
+  @RequestMapping(method = Array(POST), params = Array("!confirmStep"))
+  def upload(@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand, errors: Errors, @PathVariable assignment: Assignment): Mav = {
+    if (errors.hasFieldErrors("file"))
+      form(assignment)
+    else
+      Mav("cm2/admin/assignments/feedback/bulk/preview").crumbsList(Breadcrumbs.assignment(assignment))
+  }
 
-	@RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
-	def confirm(
-		@Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand,
-		errors: Errors,
-		@PathVariable assignment: Assignment
-	): Mav = {
-		if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
-			upload(cmd, errors, assignment)
-		} else {
-			cmd.apply()
-			Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
-		}
-	}
+  @RequestMapping(method = Array(POST), params = Array("confirmStep=true"))
+  def confirm(
+    @Valid @ModelAttribute("command") cmd: BulkAdjustmentCommand,
+    errors: Errors,
+    @PathVariable assignment: Assignment
+  ): Mav = {
+    if (errors.hasFieldErrors("defaultReason") || errors.hasFieldErrors("defaultComment")) {
+      upload(cmd, errors, assignment)
+    } else {
+      cmd.apply()
+      Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
+    }
+  }
 
 }
 
@@ -72,13 +72,13 @@ class BulkFeedbackAdjustmentController extends CourseworkController {
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/bulk-adjustment/template"))
 class BulkFeedbackAdjustmentTemplateController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment): Appliable[ExcelView] =
-		BulkAdjustmentTemplateCommand(mandatory(assignment))
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment): Appliable[ExcelView] =
+    BulkAdjustmentTemplateCommand(mandatory(assignment))
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
-		cmd.apply()
-	}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[ExcelView]): ExcelView = {
+    cmd.apply()
+  }
 
 }

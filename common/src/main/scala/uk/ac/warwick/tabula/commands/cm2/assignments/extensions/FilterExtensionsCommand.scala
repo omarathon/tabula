@@ -17,104 +17,114 @@ import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedExceptio
 import scala.collection.JavaConverters._
 
 case class FilterExtensionResults(
-	extensions: Seq[ExtensionGraph],
-	total: Int
+  extensions: Seq[ExtensionGraph],
+  total: Int
 )
 
 object FilterExtensionsCommand {
-	def apply(academicYear: AcademicYear, user: CurrentUser) =
-		new FilterExtensionsCommandInternal(academicYear, user)
-			with Command[FilterExtensionResults]
-			with AutowiringUserLookupComponent
-			with AutowiringExtensionServiceComponent
-			with AutowiringModuleAndDepartmentServiceComponent
-			with ReadOnly with Unaudited with Public
+  def apply(academicYear: AcademicYear, user: CurrentUser) =
+    new FilterExtensionsCommandInternal(academicYear, user)
+      with Command[FilterExtensionResults]
+      with AutowiringUserLookupComponent
+      with AutowiringExtensionServiceComponent
+      with AutowiringModuleAndDepartmentServiceComponent
+      with ReadOnly with Unaudited with Public
 }
 
 class FilterExtensionsCommandInternal(val academicYear: AcademicYear, val user: CurrentUser) extends CommandInternal[FilterExtensionResults]
-	with FilterExtensionsState with TaskBenchmarking {
+  with FilterExtensionsState with TaskBenchmarking {
 
-	self: UserLookupComponent with ExtensionServiceComponent with ModuleAndDepartmentServiceComponent =>
+  self: UserLookupComponent with ExtensionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-	import FiltersExtensions._
+  import FiltersExtensions._
 
-	private def includeChildDepartments(department: Department): Set[Department] =
-		Set(department) ++ department.children.asScala.flatMap(includeChildDepartments)
+  private def includeChildDepartments(department: Department): Set[Department] =
+    Set(department) ++ department.children.asScala.flatMap(includeChildDepartments)
 
-	private def departmentsWithPermssion: Set[Department] =
-		moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Extension.Read)
-			.flatMap(includeChildDepartments)
-	private def modulesWithPermssion: Set[Module] =
-		moduleAndDepartmentService.modulesWithPermission(user, Permissions.Extension.Read)
-	private def modulesInDepartmentsWithPermission: Set[Module] =
-		departmentsWithPermssion.flatMap(_.modules.asScala)
+  private def departmentsWithPermssion: Set[Department] =
+    moduleAndDepartmentService.departmentsWithPermission(user, Permissions.Extension.Read)
+      .flatMap(includeChildDepartments)
 
-	lazy val allModules: Seq[Module] = (modulesWithPermssion ++ modulesInDepartmentsWithPermission).toSeq.sortBy(_.code)
-	lazy val allDepartments: Seq[Department] = (departmentsWithPermssion ++ allModules.map(_.adminDepartment)).toSeq.sortBy(_.fullName)
+  private def modulesWithPermssion: Set[Module] =
+    moduleAndDepartmentService.modulesWithPermission(user, Permissions.Extension.Read)
 
-	def applyInternal(): FilterExtensionResults = {
-		// permission to manage extensions are all scoped by dept or module - we can't do normal permissions checking as there could be no scope to check against
-		if (allDepartments.isEmpty)
-			throw new PermissionDeniedException(user, Permissions.Extension.Read, null)
+  private def modulesInDepartmentsWithPermission: Set[Module] =
+    departmentsWithPermssion.flatMap(_.modules.asScala)
 
-		// on the off chance that someone has tried to hack extra departments or modules into the filter remove them
-		departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava
-		modules = modules.asScala.filter(m => allModules.contains(m)).asJava
+  lazy val allModules: Seq[Module] = (modulesWithPermssion ++ modulesInDepartmentsWithPermission).toSeq.sortBy(_.code)
+  lazy val allDepartments: Seq[Department] = (departmentsWithPermssion ++ allModules.map(_.adminDepartment)).toSeq.sortBy(_.fullName)
 
-		// if no more specific module or department restrictions are specified we should filter based on the users permissions
-		val defaultModuleRestrictions = inIfNotEmpty(
-			"module.code", allModules.map(_.code),
-			AliasPaths("module") : _*
-		)
+  def applyInternal(): FilterExtensionResults = {
+    // permission to manage extensions are all scoped by dept or module - we can't do normal permissions checking as there could be no scope to check against
+    if (allDepartments.isEmpty)
+      throw PermissionDeniedException(user, Permissions.Extension.Read, null)
 
-		val defaultDepartmentRestrictions = inIfNotEmpty(
-			"department.code", allDepartments.map(_.code),
-			AliasPaths("department") : _*
-		)
+    // on the off chance that someone has tried to hack extra departments or modules into the filter remove them
+    departments = departments.asScala.filter(d => allDepartments.contains(d)).asJava
+    modules = modules.asScala.filter(m => allModules.contains(m)).asJava
 
-		val restrictions: Seq[ScalaRestriction] = Seq(
-			academicYearRestriction,
-			receivedRestriction,
-			stateRestriction,
-			assignmentRestriction,
-			moduleRestriction.orElse(defaultModuleRestrictions),
-			departmentRestriction.orElse(defaultDepartmentRestrictions)
-		).flatten
+    // if no more specific module or department restrictions are specified we should filter based on the users permissions
+    val defaultModuleRestrictions = inIfNotEmpty(
+      "module.code", allModules.map(_.code),
+      AliasPaths("module"): _*
+    )
 
-		val totalResults = benchmarkTask("countExtensionsByRestrictions") { extensionService.countFilteredExtensions(
-			restrictions = restrictions
-		)}
+    val defaultDepartmentRestrictions = inIfNotEmpty(
+      "department.code", allDepartments.map(_.code),
+      AliasPaths("department"): _*
+    )
 
-		val orders = if (sortOrder.isEmpty) defaultOrder else sortOrder
+    val restrictions: Seq[ScalaRestriction] = Seq(
+      academicYearRestriction,
+      receivedRestriction,
+      stateRestriction,
+      assignmentRestriction,
+      moduleRestriction.orElse(defaultModuleRestrictions),
+      departmentRestriction.orElse(defaultDepartmentRestrictions)
+    ).flatten
 
-		val extensions = benchmarkTask("findExtensionsByRestrictions") { extensionService.filterExtensions(
-			restrictions,
-			buildOrders(orders.asScala),
-			extensionsPerPage,
-			extensionsPerPage * (page-1)
-		)}
+    val totalResults = benchmarkTask("countExtensionsByRestrictions") {
+      extensionService.countFilteredExtensions(
+        restrictions = restrictions
+      )
+    }
 
-		val graphs = extensions.map(e => ExtensionGraph(e, userLookup.getUserByUserId(e.usercode)))
-		FilterExtensionResults(graphs, totalResults)
-	}
+    val orders = if (sortOrder.isEmpty) defaultOrder else sortOrder
+
+    val extensions = benchmarkTask("findExtensionsByRestrictions") {
+      extensionService.filterExtensions(
+        restrictions,
+        buildOrders(orders.asScala),
+        extensionsPerPage,
+        extensionsPerPage * (page - 1)
+      )
+    }
+
+    val graphs = extensions.map(e => ExtensionGraph(e, userLookup.getUserByUserId(e.usercode)))
+    FilterExtensionResults(graphs, totalResults)
+  }
 }
 
 trait FilterExtensionsState extends FiltersExtensions {
-	var page = 1
-	var extensionsPerPage = 50
-	var defaultOrder: JList[Order] = Seq(desc("requestedOn")).asJava
-	var sortOrder: JList[Order] = JArrayList()
+  var page = 1
+  var extensionsPerPage = 50
+  var defaultOrder: JList[Order] = Seq(desc("requestedOn")).asJava
+  var sortOrder: JList[Order] = JArrayList()
 
-	var times: JList[TimeFilter] = JArrayList()
-	var states: JList[ExtensionState] = JArrayList()
-	var assignments: JList[Assignment] = JArrayList()
-	var modules: JList[Module] = JArrayList()
-	var departments: JList[Department] = JArrayList()
+  var times: JList[TimeFilter] = JArrayList()
+  var states: JList[ExtensionState] = JArrayList()
+  var assignments: JList[Assignment] = JArrayList()
+  var modules: JList[Module] = JArrayList()
+  var departments: JList[Department] = JArrayList()
 
-	def academicYear: AcademicYear
-	def user: CurrentUser
-	def allModules: Seq[Module]
-	def allDepartments: Seq[Department]
-	lazy val allStates: Seq[ExtensionState with Product with Serializable] = ExtensionState.all
-	lazy val allTimes: Seq[TimeFilter with Product with Serializable] = TimeFilter.all
+  def academicYear: AcademicYear
+
+  def user: CurrentUser
+
+  def allModules: Seq[Module]
+
+  def allDepartments: Seq[Department]
+
+  lazy val allStates: Seq[ExtensionState] = ExtensionState.all
+  lazy val allTimes: Seq[TimeFilter] = TimeFilter.all
 }

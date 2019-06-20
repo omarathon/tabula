@@ -20,78 +20,80 @@ import uk.ac.warwick.tabula.system.BindListenerBinding
 
 class PermissionsCheckingDataBinderTest extends TestBase with Mockito {
 
-	val securityService: SecurityService = mock[SecurityService]
+  val securityService: SecurityService = mock[SecurityService]
 
-	abstract class TestCommand extends Command[Boolean] {
-		def describe(d:Description) {}
-		def applyInternal = true
-	}
+  abstract class TestCommand extends Command[Boolean] {
+    def describe(d: Description) {}
 
-	case class BasicCommand(scope: PermissionsTarget) extends TestCommand {
-		PermissionCheck(Permissions.Module.Create, scope)
-	}
+    def applyInternal = true
+  }
 
-	case class MultipleCommand(scope: PermissionsTarget) extends TestCommand {
-		PermissionCheck(Permissions.Module.Create, scope)
-		PermissionCheck(Permissions.Module.Delete, scope)
-		PermissionCheck(Permissions.UserPicker)
-	}
+  case class BasicCommand(scope: PermissionsTarget) extends TestCommand {
+    PermissionCheck(Permissions.Module.Create, scope)
+  }
 
-	case class PublicCommand() extends TestCommand with Public
+  case class MultipleCommand(scope: PermissionsTarget) extends TestCommand {
+    PermissionCheck(Permissions.Module.Create, scope)
+    PermissionCheck(Permissions.Module.Delete, scope)
+    PermissionCheck(Permissions.UserPicker)
+  }
 
-	case class AccidentallyPublicCommand() extends TestCommand
+  case class PublicCommand() extends TestCommand with Public
 
-	val dept: Department = Fixtures.department("in", "IT Services")
+  case class AccidentallyPublicCommand() extends TestCommand
 
-	class Binder(obj:Any, name:String, val securityService:SecurityService)
-		extends CustomDataBinder(obj, name)
-		with PermissionsBinding
+  val dept: Department = Fixtures.department("in", "IT Services")
 
-	@Test def basicCheck = withUser("cuscav", "0672089") {
-		new Binder(BasicCommand(dept), "command", securityService)
-	}
+  class Binder(obj: Any, name: String, val securityService: SecurityService)
+    extends CustomDataBinder(obj, name)
+      with PermissionsBinding
 
-	@Test(expected=classOf[PermissionDeniedException]) def basicCheckWithFailure = withUser("cuscav", "0672089") {
-		securityService.check(currentUser, Permissions.Module.Create, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Create, dept))
+  @Test def basicCheck = withUser("cuscav", "0672089") {
+    new Binder(BasicCommand(dept), "command", securityService)
+  }
 
-		new Binder(BasicCommand(dept), "command", securityService)
-	}
+  @Test(expected = classOf[PermissionDeniedException]) def basicCheckWithFailure = withUser("cuscav", "0672089") {
+    securityService.check(currentUser, Permissions.Module.Create, dept) throws (PermissionDeniedException(currentUser, Permissions.Module.Create, dept))
 
-	@Test def multipleChecks = withUser("cuscav", "0672089") {
-		new Binder(MultipleCommand(dept), "command", securityService)
-	}
+    new Binder(BasicCommand(dept), "command", securityService)
+  }
 
-	@Test(expected=classOf[PermissionDeniedException]) def multipleChecksWithFailure = withUser("cuscav", "0672089") {
-		securityService.check(currentUser, Permissions.Module.Delete, dept) throws (new PermissionDeniedException(currentUser, Permissions.Module.Delete, dept))
+  @Test def multipleChecks = withUser("cuscav", "0672089") {
+    new Binder(MultipleCommand(dept), "command", securityService)
+  }
 
-		new Binder(MultipleCommand(dept), "command", securityService)
-	}
+  @Test(expected = classOf[PermissionDeniedException]) def multipleChecksWithFailure = withUser("cuscav", "0672089") {
+    securityService.check(currentUser, Permissions.Module.Delete, dept) throws (PermissionDeniedException(currentUser, Permissions.Module.Delete, dept))
 
-	@Test(expected=classOf[IllegalArgumentException]) def noChecksThrowsException = withUser("cuscav", "0672089") {
-		new Binder(AccidentallyPublicCommand(), "command", securityService) with PermissionsBinding
-	}
+    new Binder(MultipleCommand(dept), "command", securityService)
+  }
 
-	@Test def noChecksButPublic = withUser("cuscav", "0672089") {
-		new Binder(PublicCommand(), "command", securityService)
-	}
+  @Test(expected = classOf[IllegalArgumentException]) def noChecksThrowsException = withUser("cuscav", "0672089") {
+    new Binder(AccidentallyPublicCommand(), "command", securityService) with PermissionsBinding
+  }
 
-	class BindTestCommand() extends TestCommand with Public with BindListener {
-		var bound = false
-		override def onBind(result: BindingResult) {
-			bound = true
-		}
-	}
+  @Test def noChecksButPublic = withUser("cuscav", "0672089") {
+    new Binder(PublicCommand(), "command", securityService)
+  }
 
-	// FIXME this is in the wrong test class
-	@Test def bindListener = withUser("cuscav", "0672089") {
-		val cmd = new BindTestCommand
+  class BindTestCommand() extends TestCommand with Public with BindListener {
+    var bound = false
 
-		cmd.bound should be (false)
+    override def onBind(result: BindingResult) {
+      bound = true
+    }
+  }
 
-		val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
-		binder.bind(new MockHttpServletRequest)
+  // FIXME this is in the wrong test class
+  @Test def bindListener = withUser("cuscav", "0672089") {
+    val cmd = new BindTestCommand
 
-		cmd.bound should be (true)
-	}
+    cmd.bound should be(false)
+
+    val binder = new CustomDataBinder(cmd, "command") with BindListenerBinding
+    binder.bind(new MockHttpServletRequest)
+
+    cmd.bound should be(true)
+  }
 
 }

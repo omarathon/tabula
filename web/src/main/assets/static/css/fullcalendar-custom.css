@@ -1,24 +1,28 @@
 /*
 http://stackoverflow.com/questions/7258655/can-the-default-timeslot-height-be-set-in-fullcalendar
 */
-.fc-agenda-slots td div { height: 40px; }
+.fc-agenda-slots td div {
+	height: 40px;
+}
+
 /*
 Full-calendar uses H2 for the title of the current interval,
 but it should look more like h4
 */
 .fc-header-title h2 {
-  font-size: 21px;
-  font-weight: normal;
-  font-style: normal;
-  letter-spacing: -1px;
+	font-size: 21px;
+	font-weight: normal;
+	font-style: normal;
+	letter-spacing: -1px;
 }
+
 /*
  * On Chrome at least, the default "smaller" font size used for <sup> tags where the
  * parent font is 21px is still 18px, which is 85% i.e. too big. Shrink it down to
  * 70% to make it look reasonable
 */
-.fc-header-title h2 sup{
-   font-size: 70%
+.fc-header-title h2 sup {
+	font-size: 70%
 }
 
 /*
@@ -37,6 +41,7 @@ but it should look more like h4
 	margin-top: 10px;
 	font-size: 0.9em;
 }
+
 .fc-event.tabulaPopover-init {
 	cursor: pointer;
 }

@@ -9,20 +9,21 @@ import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.JSONView
 
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/submission/{assignment}/attempt"))
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/submission/{assignment}/attempt"))
 class SubmissionAttemptController extends CourseworkController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable assignment: Assignment) =
-		SubmissionAttemptCommand(mandatory(assignment), user)
+  @ModelAttribute("command")
+  def command(@PathVariable assignment: Assignment) =
+    SubmissionAttemptCommand(mandatory(assignment), user)
 
-	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {
-		cmd.apply()
-		Mav(new JSONView(Map(
-			"success" -> true
-		)))
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") cmd: Appliable[Unit]): Mav = {
+    cmd.apply()
+    Mav(new JSONView(Map(
+      "success" -> true
+    )))
+  }
 
 }

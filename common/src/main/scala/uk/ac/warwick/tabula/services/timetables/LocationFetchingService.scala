@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.services.timetables
 
+import java.time.Duration
+
 import org.apache.commons.io.IOUtils
-import org.apache.http.HttpEntity
-import org.apache.http.client.methods.{CloseableHttpResponse, HttpGet}
-import org.apache.http.client.utils.{HttpClientUtils, URIBuilder}
-import org.apache.http.util.EntityUtils
+import org.apache.http.client.methods.{CloseableHttpResponse, HttpUriRequest, RequestBuilder}
+import org.apache.http.client.utils.HttpClientUtils
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Location, MapLocation, NamedLocation}
 import uk.ac.warwick.tabula.helpers.Logging
@@ -18,157 +18,173 @@ import scala.util.parsing.json.JSON
 import scala.util.{Failure, Success, Try}
 
 /**
- * A service that takes a location as a String, and tries to turn it into a
- * MapLocation, if at all possible, else it will fall back to a NamedLocation.
- */
-trait LocationFetchingService {
-	def locationFor(name: String): Location
+  * A service that takes a location as a String, and tries to turn it into a
+  * MapLocation, if at all possible, else it will fall back to a NamedLocation.
+  */
+trait LocationFetchingService extends Logging {
+  def mapLocationsFor(name: String): Try[Seq[WAI2GoLocation]]
+
+  def allLocationsFor(name: String): Seq[Location] = mapLocationsFor(name) match {
+    case Success(Nil) =>
+      logger.info(s"No map locations returned for $name, returning NamedLocation")
+      Seq(NamedLocation(name))
+
+    case Success(locations) =>
+      locations.map { loc => MapLocation(loc.name, loc.locationId) }
+
+    case Failure(ex) =>
+      logger.warn(s"Error requesting map location information for $name", ex)
+      Nil
+  }
+
+  def locationFor(name: String): Location = allLocationsFor(name) match {
+    case Seq(singleMatch) => singleMatch
+    case _ => NamedLocation(name)
+  }
 }
 
 class CachedLocationFetchingService(delegate: LocationFetchingService) extends LocationFetchingService with AutowiringCacheStrategyComponent {
 
-	val CacheExpiryTime: Int = 60 * 60 * 48 // 48 hours in seconds
+  val CacheExpiryTime: Duration = Duration.ofDays(2)
 
-	val cacheEntryFactory = new CacheEntryFactory[String, Location] {
-		def create(name: String): Location = delegate.locationFor(name)
+  type CacheEntry = Try[Seq[WAI2GoLocation] with java.io.Serializable]
 
-		def create(names: JList[String]): JMap[String, Location] = {
-			JMap(names.asScala.map(name => (name, create(name))): _*)
-		}
+  val cacheEntryFactory: CacheEntryFactory[String, CacheEntry] = new CacheEntryFactory[String, CacheEntry] {
+    def create(name: String): CacheEntry = delegate.mapLocationsFor(name).asInstanceOf[CacheEntry]
 
-		def isSupportsMultiLookups = true
-		def shouldBeCached(location: Location) = true
-	}
+    def create(names: JList[String]): JMap[String, CacheEntry] = {
+      JMap(names.asScala.map(name => (name, create(name))): _*)
+    }
 
-	lazy val cache: Cache[String, Location] =
-		Caches.newCache("LocationCache", cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+    def isSupportsMultiLookups = true
 
-	def locationFor(name: String): Location = cache.get(name)
+    def shouldBeCached(locations: CacheEntry): Boolean = locations.isSuccess // Don't cache failures
+  }
+
+  lazy val cache: Cache[String, CacheEntry] =
+    Caches.builder("WAI2GoLocationCache", cacheEntryFactory, cacheStrategy)
+      .expireAfterWrite(CacheExpiryTime)
+      .maximumSize(10000) // Ignored by Memcached, just for Caffeine (testing)
+      .build()
+
+  override def mapLocationsFor(name: String): Try[Seq[WAI2GoLocation]] = cache.get(name)
 
 }
 
 trait WAI2GoConfiguration {
-	def baseUri: Uri
-	def cached: Boolean
-	def defaultHeaders: Map[String, String]
-	def defaultParameters: Map[String, String]
-	def queryParameter: String
+  def baseUri: Uri
+
+  def cached: Boolean
+
+  def defaultHeaders: Map[String, String]
+
+  def defaultParameters: Map[String, String]
+
+  def queryParameter: String
 }
 
 trait WAI2GoConfigurationComponent {
-	def wai2GoConfiguration: WAI2GoConfiguration
+  def wai2GoConfiguration: WAI2GoConfiguration
 }
 
 trait AutowiringWAI2GoConfigurationComponent extends WAI2GoConfigurationComponent {
-	val wai2GoConfiguration = new AutowiringWAI2GoConfiguration
-	class AutowiringWAI2GoConfiguration extends WAI2GoConfiguration {
-		val cached = true
+  val wai2GoConfiguration = new AutowiringWAI2GoConfiguration
 
-		val projectId: String = "1"
-		val clientId: String = "3"
+  class AutowiringWAI2GoConfiguration extends WAI2GoConfiguration {
+    val cached = true
 
-		val baseUri: Uri = Uri.parse(s"https://campus-cms.warwick.ac.uk/api/v1/projects/$projectId/autocomplete.json")
-		val defaultHeaders: Map[String, String] = Map(
-			"Authorization" -> "Token 3a08c5091e5e477faa6ea90e4ae3e6c3",
-			"Accept" -> "application/json"
-		)
-		val defaultParameters: Map[String, String] = Map(
-			"client_id" -> clientId,
-			"exact_limit" -> "2",
-			"limit" -> "2"
-		)
-		val queryParameter = "term"
-	}
+    val projectId: String = "1"
+    val clientId: String = "3"
+
+    val baseUri: Uri = Uri.parse(s"https://campus-cms.warwick.ac.uk/api/v1/projects/$projectId/autocomplete.json")
+    val defaultHeaders: Map[String, String] = Map(
+      "Authorization" -> "Token 3a08c5091e5e477faa6ea90e4ae3e6c3",
+      "Accept" -> "application/json"
+    )
+    val defaultParameters: Map[String, String] = Map(
+      "client_id" -> clientId,
+      "exact_limit" -> "2",
+      "limit" -> "2"
+    )
+    val queryParameter = "term"
+  }
+
 }
 
 trait LocationFetchingServiceComponent {
-	def locationFetchingService: LocationFetchingService
+  def locationFetchingService: LocationFetchingService
 }
 
 trait WAI2GoHttpLocationFetchingServiceComponent extends LocationFetchingServiceComponent {
-	self: WAI2GoConfigurationComponent =>
+  self: WAI2GoConfigurationComponent =>
 
-	lazy val locationFetchingService = WAI2GoHttpLocationFetchingService(wai2GoConfiguration)
+  lazy val locationFetchingService = WAI2GoHttpLocationFetchingService(wai2GoConfiguration)
 }
 
-private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) extends LocationFetchingService with Logging {
-	self: ApacheHttpClientComponent =>
+private class WAI2GoHttpLocationFetchingService(config: WAI2GoConfiguration) extends LocationFetchingService {
+  self: ApacheHttpClientComponent =>
 
-	def locationFor(name: String): Location = {
-		logger.info(s"Requesting location info for $name")
+  override def mapLocationsFor(name: String): Try[Seq[WAI2GoLocation]] = {
+    logger.info(s"Requesting location info for $name")
 
-		var response: CloseableHttpResponse = null
+    var response: CloseableHttpResponse = null
 
-		val result: Try[Seq[WAI2GoLocation]] = try {
-			response = httpClient.execute(requestForName(name))
+    try {
+      response = httpClient.execute(requestForName(name))
 
-			if (response.getStatusLine.getStatusCode == 200) {
-				val responseBody = IOUtils.toString(response.getEntity.getContent)
+      if (response.getStatusLine.getStatusCode == 200) {
+        val responseBody = IOUtils.toString(response.getEntity.getContent)
 
-				JSON.parseFull(responseBody) match {
-					case Some(locations: Seq[Map[String, Any]] @unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
-					case _ => Success(Nil)
-				}
-			} else {
-				throw new RuntimeException(s"Got unexpected response status ${response.getStatusLine.toString} from the WAI2Go location service")
-			}
-		} catch {
-			case e: Exception => Failure(e)
-		} finally {
-			HttpClientUtils.closeQuietly(response)
-		}
+        JSON.parseFull(responseBody) match {
+          case Some(locations: Seq[Map[String, Any]]@unchecked) => Success(locations.flatMap(WAI2GoLocation.fromProperties))
+          case _ => Success(Nil)
+        }
+      } else {
+        throw new RuntimeException(s"Got unexpected response status ${response.getStatusLine.toString} from the WAI2Go location service")
+      }
+    } catch {
+      case e: Exception => Failure(e)
+    } finally {
+      HttpClientUtils.closeQuietly(response)
+    }
+  }
 
-		result match {
-			case Success(locations)
-				if locations.size == 1 =>
-					MapLocation(locations.head.name, locations.head.locationId)
+  private def requestForName(name: String): HttpUriRequest = {
+    val request =
+      RequestBuilder.get(config.baseUri.toJavaUri)
+        .addParameter(config.queryParameter, name)
+    config.defaultParameters.foreach { case (n, v) => request.addParameter(n, v) }
+    config.defaultHeaders.foreach { case (n, v) => request.addHeader(n, v) }
 
-			case Success(locations) =>
-				logger.info(s"Multiple locations (or no locations) returned for $name, returning NamedLocation")
-				NamedLocation(name)
-
-			case Failure(ex) =>
-				logger.warn(s"Error requesting location information for $name, returning NamedLocation", ex)
-				NamedLocation(name)
-		}
-	}
-
-	private def requestForName(name: String) = {
-		val uriBuilder = new URIBuilder(config.baseUri.toJavaUri)
-		uriBuilder.addParameter(config.queryParameter, name)
-		config.defaultParameters.foreach { case (n, v) => uriBuilder.addParameter(n, v) }
-
-		val request = new HttpGet(uriBuilder.build())
-		config.defaultHeaders.foreach { case (n, v) => request.addHeader(n, v) }
-
-		request
-	}
+    request.build()
+  }
 }
 
 object WAI2GoHttpLocationFetchingService {
-	def apply(config: WAI2GoConfiguration): LocationFetchingService = {
-		val service = new WAI2GoHttpLocationFetchingService(config) with AutowiringApacheHttpClientComponent
+  def apply(config: WAI2GoConfiguration): LocationFetchingService = {
+    val service = new WAI2GoHttpLocationFetchingService(config) with AutowiringApacheHttpClientComponent
 
-		if (config.cached) {
-			new CachedLocationFetchingService(service)
-		} else {
-			service
-		}
-	}
+    if (config.cached) {
+      new CachedLocationFetchingService(service)
+    } else {
+      service
+    }
+  }
 }
 
 case class WAI2GoLocation(name: String, building: String, floor: String, locationId: String)
-object WAI2GoLocation {
-	def fromProperties(properties: Map[String, Any]): Option[WAI2GoLocation] = {
-		val name = properties.get("value").collect { case s: String => s }
-		val locationId = properties.get("w2gid").collect { case x => x.toString }
-		val building = properties.get("building").collect { case s: String => s }
-		val floor = properties.get("floor").collect { case s: String => s }
 
-		if (name.nonEmpty && locationId.nonEmpty) {
-			Some(WAI2GoLocation(name.get, building.getOrElse(""), floor.getOrElse(""), locationId.get))
-		} else {
-			None
-		}
-	}
+object WAI2GoLocation {
+  def fromProperties(properties: Map[String, Any]): Option[WAI2GoLocation] = {
+    val name = properties.get("value").collect { case s: String => s }
+    val locationId = properties.get("w2gid").collect { case x => x.toString }
+    val building = properties.get("building").collect { case s: String => s }
+    val floor = properties.get("floor").collect { case s: String => s }
+
+    if (name.nonEmpty && locationId.nonEmpty) {
+      Some(WAI2GoLocation(name.get, building.getOrElse(""), floor.getOrElse(""), locationId.get))
+    } else {
+      None
+    }
+  }
 }

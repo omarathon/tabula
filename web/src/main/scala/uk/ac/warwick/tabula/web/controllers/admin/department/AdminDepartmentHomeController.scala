@@ -15,47 +15,47 @@ import uk.ac.warwick.tabula.web.controllers.admin.{AdminController, AdminDepartm
 import scala.collection.JavaConverters._
 
 @Controller
-@RequestMapping(value=Array("/admin/department/{department}"))
+@RequestMapping(value = Array("/admin/department/{department}"))
 class AdminDepartmentHomeController extends AdminController with DepartmentScopedController with AutowiringUserSettingsServiceComponent
-	with AdminDepartmentsModulesAndRoutes with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AdminDepartmentsModulesAndRoutes with AutowiringModuleAndDepartmentServiceComponent with AutowiringCourseAndRouteServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	hideDeletedItems
+  hideDeletedItems
 
-	type AdminDepartmentHomeCommand = Appliable[(Seq[Module], Seq[Route])]
+  type AdminDepartmentHomeCommand = Appliable[(Seq[Module], Seq[Route])]
 
-	override val departmentPermission: Permission = null
+  override val departmentPermission: Permission = null
 
-	@ModelAttribute("activeDepartment")
-	override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
+  @ModelAttribute("activeDepartment")
+  override def activeDepartment(@PathVariable department: Department): Option[Department] = retrieveActiveDepartment(Option(department))
 
-	@ModelAttribute("departmentsWithPermission")
-	override def departmentsWithPermission: Seq[Department] = {
-		def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)
+  @ModelAttribute("departmentsWithPermission")
+  override def departmentsWithPermission: Seq[Department] = {
+    def withSubDepartments(d: Department) = Seq(d) ++ d.children.asScala.toSeq.sortBy(_.fullName)
 
-		val result = ownedDepartmentsModulesAndRoutes(user)
-		(result.departments ++ result.modules.map(_.adminDepartment) ++ result.routes.map(_.adminDepartment))
-			.toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
-	}
+    val result = ownedDepartmentsModulesAndRoutes(user)
+    (result.departments ++ result.modules.map(_.adminDepartment) ++ result.routes.map(_.adminDepartment))
+      .toSeq.sortBy(_.fullName).flatMap(withSubDepartments).distinct
+  }
 
-	@ModelAttribute def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminDepartmentHomeCommand =
-		AdminDepartmentHomeCommand(dept, user)
+  @ModelAttribute def command(@PathVariable("department") dept: Department, user: CurrentUser): AdminDepartmentHomeCommand =
+    AdminDepartmentHomeCommand(dept, user)
 
-	@RequestMapping
-	def adminDepartment(cmd: AdminDepartmentHomeCommand, @PathVariable("department") dept: Department): Mav = {
-		val (modules, routes) = cmd.apply()
+  @RequestMapping
+  def adminDepartment(cmd: AdminDepartmentHomeCommand, @PathVariable("department") dept: Department): Mav = {
+    val (modules, routes) = cmd.apply()
 
-		Mav("admin/department",
-			"department" -> dept,
-			"modules" -> modules,
-			"departmentRoutes" -> routes // Stupid workaround for "routes" being used already in Freemarker
-		)
-	}
+    Mav("admin/department",
+      "department" -> dept,
+      "modules" -> modules,
+      "departmentRoutes" -> routes // Stupid workaround for "routes" being used already in Freemarker
+    )
+  }
 }
 
 @Controller
 @RequestMapping(Array("/admin/department"))
 class AdminDepartmentHomeRedirectController extends AdminController {
-	@RequestMapping
-	def homeScreen(user: CurrentUser) = Redirect(Routes.admin.home)
+  @RequestMapping
+  def homeScreen(user: CurrentUser) = Redirect(Routes.admin.home)
 }

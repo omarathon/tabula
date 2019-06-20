@@ -10,27 +10,28 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/audit/{student}"))
 class FeedbackAuditController extends CourseworkController {
 
-	@ModelAttribute("auditCommand")
-	def listCommand(@PathVariable assignment: Assignment, @PathVariable student: User) =
-		FeedbackAuditCommand(assignment, student)
+  @ModelAttribute("auditCommand")
+  def listCommand(@PathVariable assignment: Assignment, @PathVariable student: User) =
+    FeedbackAuditCommand(assignment, student)
 
-	@RequestMapping(method=Array(GET))
-	def list(@PathVariable assignment: Assignment,
-		@PathVariable student: User,
-		@ModelAttribute("auditCommand") auditCommand: Appliable[FeedbackAuditData]
-	): Mav = {
-		val auditData = auditCommand.apply()
-		Mav("cm2/admin/assignments/feedback_audit",
-			"command" -> auditCommand,
-			"auditData" -> auditData,
-			"assignment" -> assignment,
-			"isModerated" -> Option(assignment.markingWorkflow).exists(_.markingMethod == MarkingMethod.ModeratedMarking), // only needed for CM1 macros
-			"student" -> student
-		).crumbsList(Breadcrumbs.assignment(assignment))
+  @RequestMapping(method = Array(GET))
+  def list(@PathVariable assignment: Assignment,
+    @PathVariable student: User,
+    @ModelAttribute("auditCommand") auditCommand: Appliable[FeedbackAuditData]
+  ): Mav = {
+    val auditData = auditCommand.apply()
+    Mav("cm2/admin/assignments/feedback_audit",
+      "command" -> auditCommand,
+      "auditData" -> auditData,
+      "assignment" -> assignment,
+      "isModerated" -> Option(assignment.markingWorkflow).exists(_.markingMethod == MarkingMethod.ModeratedMarking), // only needed for CM1 macros
+      "student" -> student
+    ).crumbsList(Breadcrumbs.assignment(assignment))
 
-	}
+  }
 }

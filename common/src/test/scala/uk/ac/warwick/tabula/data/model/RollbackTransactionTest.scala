@@ -6,42 +6,42 @@ import uk.ac.warwick.tabula.data.{AutowiringMemberDaoImpl, MemberDaoImpl, Member
 import org.junit.Before
 
 /**
- * This test exists to prove that our TransactionalTesting.transactional(){} function rolls back transactions
- * (or otherwise cleans up the database state) in between each test method
- *
- */
-class RollbackTransactionTest  extends PersistenceTestBase{
+  * This test exists to prove that our TransactionalTesting.transactional(){} function rolls back transactions
+  * (or otherwise cleans up the database state) in between each test method
+  *
+  */
+class RollbackTransactionTest extends PersistenceTestBase {
 
-	val dao = new AutowiringMemberDaoImpl
+  val dao = new AutowiringMemberDaoImpl
 
-	@Before
-	def setup() {
-		dao.sessionFactory = sessionFactory
-	}
+  @Before
+  def setup(): Unit = {
+    dao.sessionFactory = sessionFactory
+  }
 
-	@Test
-	def insertOneThing()= transactional{tx=>
+  @Test
+  def insertOneThing(): Unit = transactional { tx =>
 
-		dao.getAllByUserId("student") should be(Nil)
+    dao.getAllByUserId("student") should be(Nil)
 
-		val m1 = Fixtures.student(universityId = "0000001", userId="student")
-		dao.saveOrUpdate(m1)
-		session.flush()
+    val m1 = Fixtures.student(universityId = "0000001", userId = "student")
+    dao.saveOrUpdate(m1)
+    session.flush()
 
-		dao.getAllByUserId("student") should not be(Nil)
+    dao.getAllByUserId("student") should not be (Nil)
 
-	}
+  }
 
-	@Test
-	def insertOneThingAgain()= transactional{tx=>
+  @Test
+  def insertOneThingAgain(): Unit = transactional { tx =>
 
-			dao.getAllByUserId("student") should be(Nil)
+    dao.getAllByUserId("student") should be(Nil)
 
-		val m1 = Fixtures.student(universityId = "0000001", userId="student")
-		dao.saveOrUpdate(m1)
-		session.flush()
+    val m1 = Fixtures.student(universityId = "0000001", userId = "student")
+    dao.saveOrUpdate(m1)
+    session.flush()
 
-		dao.getAllByUserId("student") should not be(Nil)
+    dao.getAllByUserId("student") should not be (Nil)
 
-	}
+  }
 }

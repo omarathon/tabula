@@ -1,219 +1,261 @@
 package uk.ac.warwick.tabula.commands.scheduling.imports
 
 import org.hibernate.Session
+import org.joda.time.DateTime
 import org.junit.runner.RunWith
 import org.scalatest.junit._
 import org.scalatest.{FlatSpec, Matchers}
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, UpstreamAssessmentGroup, UpstreamAssessmentGroupMember, UpstreamModuleRegistration}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.scheduling.AssignmentImporter
-import uk.ac.warwick.tabula.services.{AssessmentMembershipService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipService, FeedbackService, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
+import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 
 @RunWith(classOf[JUnitRunner])
 class ImportAssignmentsCommandTest extends FlatSpec with Matchers with Mockito {
 
-	trait Fixture {
-		val mockSession: Session = smartMock[Session]
-		val importer: AssignmentImporter = smartMock[AssignmentImporter]
-		val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
-		val moduleService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
-		val command = new ImportAssignmentsCommand {
-			def session: Session = mockSession
-		}
-		command.assignmentImporter = importer
-		command.assessmentMembershipService = membershipService
-		command.moduleAndDepartmentService = moduleService
+  trait Fixture {
+    val mockSession: Session = smartMock[Session]
+    val importer: AssignmentImporter = smartMock[AssignmentImporter]
+    val membershipService: AssessmentMembershipService = smartMock[AssessmentMembershipService]
+    val moduleService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
+    val command = new ImportAssignmentsCommand with ImportAssignmentsAllMembers {
+      def session: Session = mockSession
 
-		moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work
-		membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args =>
-			val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
-			uag.id = "seenGroupId"
-			val registrations = args.asInstanceOf[Array[_]](1).asInstanceOf[Seq[Any]].map(_.asInstanceOf[UpstreamModuleRegistration])
-			uag.replaceMembers(registrations.map(_.universityId))
-			uag
-		}
+      override def assignmentImporter: AssignmentImporter = importer
+    }
+    command.assessmentMembershipService = membershipService
+    command.moduleAndDepartmentService = moduleService
 
-		val registrations: Seq[UpstreamModuleRegistration]
+    moduleService.getModuleByCode(any[String]) returns None // Not necessary for this to work
+    membershipService.replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]]) answers { args =>
+      val uag = args.asInstanceOf[Array[_]](0).asInstanceOf[UpstreamAssessmentGroup]
+      uag.id = "seenGroupId"
+      val registrations = args.asInstanceOf[Array[_]](1).asInstanceOf[Seq[Any]].map(_.asInstanceOf[UpstreamModuleRegistration])
+      uag.replaceMembers(registrations.map(_.universityId))
+      uag
+    }
 
-		importer.allMembers(any[UpstreamModuleRegistration=>Unit]) answers { _ match {
-			case fn: (UpstreamModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
-		}}
+    val registrations: Seq[UpstreamModuleRegistration]
 
-		membershipService.getAssessmentComponents("HI33M-30", inUseOnly = false) returns Seq(
-			new AssessmentComponent {
-				assessmentGroup = "A"
-				sequence = "A01"
-			},
-			new AssessmentComponent {
-				assessmentGroup = "A"
-				sequence = "A02"
-			}
-		)
-		membershipService.getAssessmentComponents("HI100-30", inUseOnly = false) returns Seq(
-			new AssessmentComponent {
-				assessmentGroup = "A"
-				sequence = "A01"
-			}
-		)
-		membershipService.getAssessmentComponents("HI101-30", inUseOnly = false) returns Seq(
-			new AssessmentComponent {
-				assessmentGroup = "A"
-				sequence = "A01"
-			}
-		)
+    importer.allMembers(any[UpstreamModuleRegistration => Unit]) answers {
+      _ match {
+        case fn: (UpstreamModuleRegistration => Unit)@unchecked => registrations.foreach(fn)
+      }
+    }
 
-		val hi900_30: UpstreamAssessmentGroup = {
-			val g = new UpstreamAssessmentGroup
-			g.id = "hi900_30"
-			g.moduleCode = "HI900-30"
-			g.occurrence = "A"
-			g.assessmentGroup = "A"
-			g.academicYear = AcademicYear.parse("13/14")
-			g
-		}
-	}
+    membershipService.getAssessmentComponents("HI33M-30", inUseOnly = false) returns Seq(
+      new AssessmentComponent {
+        assessmentGroup = "A"
+        sequence = "A01"
+      },
+      new AssessmentComponent {
+        assessmentGroup = "A"
+        sequence = "A02"
+      }
+    )
+    membershipService.getAssessmentComponents("HI100-30", inUseOnly = false) returns Seq(
+      new AssessmentComponent {
+        assessmentGroup = "A"
+        sequence = "A01"
+      }
+    )
+    membershipService.getAssessmentComponents("HI101-30", inUseOnly = false) returns Seq(
+      new AssessmentComponent {
+        assessmentGroup = "A"
+        sequence = "A01"
+      }
+    )
 
-	behavior of "doGroupMembers"
+    val hi900_30: UpstreamAssessmentGroup = {
+      val g = new UpstreamAssessmentGroup
+      g.id = "hi900_30"
+      g.moduleCode = "HI900-30"
+      g.occurrence = "A"
+      g.assessmentGroup = "A"
+      g.academicYear = AcademicYear.parse("13/14")
+      g
+    }
+  }
 
-	it should "process all collections" in {
-		new Fixture {
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Nil
+  behavior of "doGroupMembers"
 
-			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "")
-			)
-			command.doGroupMembers()
-			verify(membershipService, times(4)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
-		}
-	}
+  it should "process all collections" in {
+    new Fixture {
+      membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Nil
 
-	/**
-	 * TAB-1265
-	 */
-	it should "process empty groups" in {
-		new Fixture {
-			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "")
-			)
+      val registrations = Seq(
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI101-30", "A", "", "", "", "", "", "", "", "")
+      )
+      command.doGroupMembers()
+      verify(membershipService, times(4)).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[UpstreamModuleRegistration]])
+    }
+  }
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
+  /**
+    * TAB-1265
+    */
+  it should "process empty groups" in {
+    new Fixture {
+      val registrations = Seq(
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100003/1", "3", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI100-30", "A", "", "", "", "", "", "", "", "")
+      )
 
-			command.doGroupMembers()
+      membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
-			verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
-				Seq(
-					registrations.head,
-					registrations(1)
-				)
-			))
+      command.doGroupMembers()
 
-			verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
-				Seq(
-					registrations(2),
-					registrations(3)
-				)
-			))
+      verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+        Seq(
+          registrations.head,
+          registrations(1)
+        )
+      ))
 
-			// The bug is that we don't update any group we don't have moduleregistrations for.
-			verify(membershipService, times(0)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
+      verify(membershipService, times(1)).replaceMembers(anArgThat(hasModuleCode("HI100-30")), isEq(
+        Seq(
+          registrations(2),
+          registrations(3)
+        )
+      ))
 
-		}
-	}
+      // The bug is that we don't update any group we don't have moduleregistrations for.
+      verify(membershipService, times(0)).replaceMembers(anArgThat(hasModuleCode("HI900-30")), isEq(Nil))
 
-	/**
-	 * TAB-3389
-	 */
-	it should "set seat number to null where there is ambiguity" in {
-		new Fixture {
-			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", ""),
-				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "")
-			)
+    }
+  }
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
+  /**
+    * TAB-3389
+    */
+  it should "set seat number to null where there is ambiguity" in {
+    new Fixture {
+      val registrations = Seq(
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "", "", "", "", "", "", "", "")
+      )
 
-			val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
-			membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
-				val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
-				members.append(member)
-			}
+      membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
-			command.doGroupMembers()
+      val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
+      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
+        val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
+        members.append(member)
+      }
 
-			// Duplicates now allowed and handled inside replaceMembers
-			verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
-				Seq(
-					registrations.head,
-					registrations(1),
-					registrations(2),
-					registrations(3)
-				)
-			))
+      command.doGroupMembers()
 
-			// 0100002/1 not passed in (stays null).
-			// Only called once as it only matches the _exact_ group (where sequence is A01)
-			// 0100001/1 set to 1 (duplicate seat number)
-			members.find(_.universityId == "0100002").get.position should be (None)
-			members.find(_.universityId == "0100001").get.position should be (Option(1))
-		}
-	}
+      // Duplicates now allowed and handled inside replaceMembers
+      verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+        Seq(
+          registrations.head,
+          registrations(1),
+          registrations(2),
+          registrations(3)
+        )
+      ))
 
-	/**
-		* TAB-4557
-		*/
-	it should "set marks and grades to null where there is ambiguity" in {
-		new Fixture {
-			val registrations = Seq(
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21"),
-				UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1"),
-				UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1")
-			)
+      // 0100002/1 not passed in (stays null).
+      // Only called once as it only matches the _exact_ group (where sequence is A01)
+      // 0100001/1 set to 1 (duplicate seat number)
+      members.find(_.universityId == "0100002").get.position should be(None)
+      members.find(_.universityId == "0100001").get.position should be(Option(1))
+    }
+  }
 
-			membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
+  /**
+    * TAB-4557
+    */
+  it should "set marks and grades to null where there is ambiguity" in {
+    new Fixture {
+      val registrations = Seq(
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "21", "34", "21", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100001/1", "1", "A", "A01", "HI33M-30", "A", "34", "F", "34", "F", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "2", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", "", "", "", ""),
+        UpstreamModuleRegistration("13/14", "0100002/1", "3", "A", "A01", "HI33M-30", "A", "67", "21", "72", "1", "", "", "", "")
+      )
 
-			val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
-			membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
-				val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
-				members.append(member)
-			}
+      membershipService.getUpstreamAssessmentGroupsNotIn(isEq(Seq("seenGroupId")), any[Seq[AcademicYear]]) returns Seq("hi900_30")
 
-			command.doGroupMembers()
+      val members: ArrayBuffer[UpstreamAssessmentGroupMember] = collection.mutable.ArrayBuffer[UpstreamAssessmentGroupMember]()
+      membershipService.save(any[UpstreamAssessmentGroupMember]) answers { arg =>
+        val member = arg.asInstanceOf[UpstreamAssessmentGroupMember]
+        members.append(member)
+      }
 
-			// Duplicates now allowed and handled inside replaceMembers
-			verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
-				Seq(
-					registrations.head,
-					registrations(1),
-					registrations(2),
-					registrations(3)
-				)
-			))
+      command.doGroupMembers()
 
-			val member1: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100001").get
-			member1.actualMark should be (Some(BigDecimal(34)))
-			member1.actualGrade should be (None)
-			member1.agreedMark should be (Some(BigDecimal(34)))
-			member1.agreedGrade should be (None)
-			val member2: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100002").get
-			member2.actualMark should be (Some(BigDecimal(67)))
-			member2.actualGrade should be (Some("21"))
-			member2.agreedMark should be (Some(BigDecimal(72)))
-			member2.agreedGrade should be (Some("1"))
-		}
-	}
+      // Duplicates now allowed and handled inside replaceMembers
+      verify(membershipService, times(2)).replaceMembers(anArgThat(hasModuleCode("HI33M-30")), isEq(
+        Seq(
+          registrations.head,
+          registrations(1),
+          registrations(2),
+          registrations(3)
+        )
+      ))
 
-	/** Matches on an UpstreamAssessmentGroup's module code. */
-	def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty('moduleCode, code)
+      val member1: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100001").get
+      member1.actualMark should be(Some(BigDecimal(34)))
+      member1.actualGrade should be(None)
+      member1.agreedMark should be(Some(BigDecimal(34)))
+      member1.agreedGrade should be(None)
+      val member2: UpstreamAssessmentGroupMember = members.find(_.universityId == "0100002").get
+      member2.actualMark should be(Some(BigDecimal(67)))
+      member2.actualGrade should be(Some("21"))
+      member2.agreedMark should be(Some(BigDecimal(72)))
+      member2.agreedGrade should be(Some("1"))
+    }
+  }
 
+  /** Matches on an UpstreamAssessmentGroup's module code. */
+  def hasModuleCode(code: String): _root_.uk.ac.warwick.tabula.CustomHamcrestMatchers.HasPropertyMatcher[Nothing] = CustomHamcrestMatchers.hasProperty('moduleCode, code)
+
+  behavior of "removeBlankFeedbackForDeregisteredStudents"
+
+  it should "remove blank feedback for deregistered students" in new Fixture {
+    val registrations: Seq[UpstreamModuleRegistration] = Nil
+
+    val user = new User
+    user.setUserId("custrd")
+
+    val feedback = new AssignmentFeedback
+    val markerFeedback = new MarkerFeedback
+    markerFeedback.feedback = feedback
+    feedback.markerFeedback.add(markerFeedback)
+    feedback.usercode = user.getUserId
+
+    val assignment = new Assignment
+    assignment.cm2Assignment = true
+    assignment.addFeedback(feedback)
+
+    assignment.feedbackService = smartMock[FeedbackService]
+    assignment.feedbackService.loadFeedbackForAssignment(assignment) answers { _ => assignment.feedbacks.asScala }
+
+    command.modifiedAssignments = Set(assignment)
+
+    // User not a member of the assignment, empty feedback - remove
+    membershipService.determineMembershipUsers(assignment) returns Nil
+    command.removeBlankFeedbackForDeregisteredStudents() should contain(feedback)
+
+    // User not a member of the assignment, modified feedback - don't remove
+    markerFeedback.updatedOn = DateTime.now
+    command.removeBlankFeedbackForDeregisteredStudents() should be(empty)
+
+    // User is a member of the assignment, empty feedback - don't remove
+    membershipService.determineMembershipUsers(assignment) returns Seq(user)
+    markerFeedback.updatedOn = null
+    command.removeBlankFeedbackForDeregisteredStudents() should be(empty)
+  }
 
 }

@@ -1,3 +1,9 @@
-gulpfile.js
-gulp/*
-test/assets/js/**/*.js
+**/*.js
+# One day
+#!/src/main/assets/static/js/**/*.js
+!/src/main/assets/static/js/id7/render.js
+!/src/main/assets/static/js/id7/submission-progress.js
+!/src/main/assets/static/js/id7/mitcircs-form.js
+!/src/main/assets/static/js/id7/mitcircs-pending-evidence.js
+!/src/main/assets/static/js/id7/mitcircs-settings.js
+!/src/main/assets/static/js/id7/mitcircs-details.js

@@ -20,42 +20,42 @@ import uk.ac.warwick.tabula.web.controllers.AcademicYearScopedController
 @Controller
 @RequestMapping(Array("/attendance/manage/{department}/{academicYear}/editpoints"))
 class SelectAttendancePointsToEditController extends AttendanceController with HasMonthNames
-	with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
-	with AutowiringMaintenanceModeServiceComponent {
+  with AcademicYearScopedController with AutowiringUserSettingsServiceComponent
+  with AutowiringMaintenanceModeServiceComponent {
 
-	@Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
+  @Autowired var attendanceMonitoringService: AttendanceMonitoringService = _
 
-	@ModelAttribute("activeAcademicYear")
-	override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
+  @ModelAttribute("activeAcademicYear")
+  override def activeAcademicYear(@PathVariable academicYear: AcademicYear): Option[AcademicYear] = retrieveActiveAcademicYear(Option(academicYear))
 
-	@ModelAttribute("findCommand")
-	def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
-		FindPointsCommand(mandatory(department), mandatory(academicYear), None)
+  @ModelAttribute("findCommand")
+  def findCommand(@PathVariable department: Department, @PathVariable academicYear: AcademicYear) =
+    FindPointsCommand(mandatory(department), mandatory(academicYear), None)
 
-	@ModelAttribute("allSchemes")
-	def allSchemes(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
-		attendanceMonitoringService.listSchemes(department, academicYear)
+  @ModelAttribute("allSchemes")
+  def allSchemes(@PathVariable department: Department, @PathVariable academicYear: AcademicYear): Seq[AttendanceMonitoringScheme] =
+    attendanceMonitoringService.listSchemes(department, academicYear)
 
-	@RequestMapping
-	def home(
-		@ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
-		@PathVariable department: Department,
-		@PathVariable academicYear: AcademicYear,
-		@RequestParam(required = false) points: JInteger,
-		@RequestParam(required = false) actionCompleted: String
-	): Mav = {
-		val findCommandResult = findCommand.apply()
-		Mav("attendance/manage/editpoints",
-			"findResult" -> findCommandResult,
-			"allTypes" -> AttendanceMonitoringPointType.values,
-			"allStyles" -> AttendanceMonitoringPointStyle.values,
-			"newPoints" -> Option(points).getOrElse(0),
-			"actionCompleted" -> actionCompleted
-		).crumbs(
-			Breadcrumbs.Manage.HomeForYear(academicYear),
-			Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
-		).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.editPoints(department, year)): _*)
+  @RequestMapping
+  def home(
+    @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
+    @PathVariable department: Department,
+    @PathVariable academicYear: AcademicYear,
+    @RequestParam(required = false) points: JInteger,
+    @RequestParam(required = false) actionCompleted: String
+  ): Mav = {
+    val findCommandResult = findCommand.apply()
+    Mav("attendance/manage/editpoints",
+      "findResult" -> findCommandResult,
+      "allTypes" -> AttendanceMonitoringPointType.values,
+      "allStyles" -> AttendanceMonitoringPointStyle.values,
+      "newPoints" -> Option(points).getOrElse(0),
+      "actionCompleted" -> actionCompleted
+    ).crumbs(
+      Breadcrumbs.Manage.HomeForYear(academicYear),
+      Breadcrumbs.Manage.DepartmentForYear(department, academicYear)
+    ).secondCrumbs(academicYearBreadcrumbs(academicYear)(year => Routes.Manage.editPoints(department, year)): _*)
 
-	}
+  }
 
 }

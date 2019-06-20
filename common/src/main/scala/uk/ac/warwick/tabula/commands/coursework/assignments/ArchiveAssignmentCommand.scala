@@ -9,69 +9,70 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 /** Simply marks an assignment as archived. */
 object ArchiveAssignmentCommand {
-	def apply(module: Module, assignment: Assignment) =
-		new ArchiveAssignmentCommandInternal(module, assignment)
-		with ComposableCommand[Assignment]
-		with ArchiveAssignmentPermissions
-		with ArchiveAssignmentDescription
-		with ArchiveAssignmentCommandState
-		with ArchiveAssignmentNotifications
-		with AutowiringAssessmentServiceComponent
+  def apply(module: Module, assignment: Assignment) =
+    new ArchiveAssignmentCommandInternal(module, assignment)
+      with ComposableCommand[Assignment]
+      with ArchiveAssignmentPermissions
+      with ArchiveAssignmentDescription
+      with ArchiveAssignmentCommandState
+      with ArchiveAssignmentNotifications
+      with AutowiringAssessmentServiceComponent
 }
 
 class ArchiveAssignmentCommandInternal(val module: Module, val assignment: Assignment)
-	extends CommandInternal[Assignment] {
+  extends CommandInternal[Assignment] {
 
-	self: ArchiveAssignmentCommandState with AssessmentServiceComponent =>
+  self: ArchiveAssignmentCommandState with AssessmentServiceComponent =>
 
-	def applyInternal(): Assignment = {
-		transactional() {
-			if (unarchive) assignment.unarchive()
-			else assignment.archive()
+  def applyInternal(): Assignment = {
+    transactional() {
+      if (unarchive) assignment.unarchive()
+      else assignment.archive()
 
-			assessmentService.save(assignment)
-		}
-		assignment
-	}
+      assessmentService.save(assignment)
+    }
+    assignment
+  }
 
 }
 
 trait ArchiveAssignmentPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 
-	self: ArchiveAssignmentCommandState =>
+  self: ArchiveAssignmentCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Assignment.Archive, assignment)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    mustBeLinked(assignment, module)
+    p.PermissionCheck(Permissions.Assignment.Archive, assignment)
+  }
 
 }
 
 trait ArchiveAssignmentDescription extends Describable[Assignment] {
 
-	self: ArchiveAssignmentCommandState =>
+  self: ArchiveAssignmentCommandState =>
 
-	override lazy val eventName = "ArchiveAssignment"
+  override lazy val eventName = "ArchiveAssignment"
 
-	override def describe(d: Description) {
-		d.assignment(assignment)
-		d.property("unarchive" -> unarchive)
-	}
+  override def describe(d: Description) {
+    d.assignment(assignment)
+    d.property("unarchive" -> unarchive)
+  }
 
 }
 
 trait ArchiveAssignmentCommandState {
-	def module: Module
-	def assignment: Assignment
+  def module: Module
 
-	var unarchive: Boolean = false
+  def assignment: Assignment
+
+  var unarchive: Boolean = false
 }
 
 trait ArchiveAssignmentNotifications extends SchedulesNotifications[Assignment, Assignment] {
 
-	override def transformResult(assignment: Assignment): Seq[Assignment] = Seq(assignment)
+  override def transformResult(assignment: Assignment): Seq[Assignment] = Seq(assignment)
 
-	// Clear all notifications
-	override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[_]] = Seq()
+  // Clear all notifications
+  override def scheduledNotifications(assignment: Assignment): Seq[ScheduledNotification[Assignment]] = Seq()
 
 }

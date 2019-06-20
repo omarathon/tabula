@@ -7,16 +7,16 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.web.controllers.coursework.admin.OldFeedbackSummaryController
 
 class OldFeedbackControllersTest extends TestBase with Mockito {
-	val controller = new OldFeedbackSummaryController
-	val command: Appliable[Option[Feedback]] = mock[Appliable[Option[Feedback]]]
-	val feedback = new AssignmentFeedback
-	command.apply() returns Some(feedback)
+  val controller = new OldFeedbackSummaryController
+  val command: Appliable[Option[Feedback]] = mock[Appliable[Option[Feedback]]]
+  val feedback = new AssignmentFeedback
+  command.apply() returns Some(feedback)
 
-	@Test
-	def display() {
-		controller.showForm(command) should be (Mav("coursework/admin/assignments/feedback/read_only",
-			"embedded" -> true,
-			"renderLayout" -> "none",
-			"feedback" -> Some(feedback)))
-	}
+  @Test
+  def display() {
+    controller.showForm(command) should be(Mav("coursework/admin/assignments/feedback/read_only",
+      "embedded" -> true,
+      "renderLayout" -> "none",
+      "feedback" -> Some(feedback)))
+  }
 }

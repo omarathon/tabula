@@ -1,44 +1,45 @@
 package uk.ac.warwick.tabula.commands.coursework.assignments
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department, Module}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.Fixtures
 
-class ArchiveAssignmentsTest  extends TestBase with Mockito {
+class ArchiveAssignmentsTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends AssessmentServiceComponent {
-		val assessmentService: AssessmentService = mock[AssessmentService]
-		def apply(): Seq[Assignment] = Seq()
-	}
+  trait CommandTestSupport extends AssessmentServiceComponent {
+    val assessmentService: AssessmentService = mock[AssessmentService]
 
-	trait Fixture {
-		val department: Department = Fixtures.department("bs")
-		val module: Module = Fixtures.module("bs101")
+    def apply(): Seq[Assignment] = Seq()
+  }
 
-		val assignment: Assignment = Fixtures.assignment("Essay 1")
-		assignment.archive()
-	}
+  trait Fixture {
+    val department: Department = Fixtures.department("bs")
+    val module: Module = Fixtures.module("bs101")
 
-	@Test
-	def commandApply() {
-		new Fixture {
-			val command = new ArchiveAssignmentsCommand(department, Seq(module)) with CommandTestSupport
+    val assignment: Assignment = Fixtures.assignment("Essay 1")
+    assignment.archive()
+  }
 
-			command.assignments = Seq(assignment)
-			assignment.isAlive should be(false)
-			command.applyInternal()
-			verify(command.assessmentService, times(1)).save(assignment)
+  @Test
+  def commandApply() {
+    new Fixture {
+      val command = new ArchiveAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 
-			assignment.unarchive()
-			assignment.isAlive should be(true)
-			command.applyInternal()
-			verify(command.assessmentService, times(2)).save(assignment)
-			assignment.isAlive should be(false)
+      command.assignments = Seq(assignment).asJava
+      assignment.isAlive should be(false)
+      command.applyInternal()
+      verify(command.assessmentService, times(1)).save(assignment)
 
-		}
-	}
+      assignment.unarchive()
+      assignment.isAlive should be(true)
+      command.applyInternal()
+      verify(command.assessmentService, times(2)).save(assignment)
+      assignment.isAlive should be(false)
+
+    }
+  }
 
 }

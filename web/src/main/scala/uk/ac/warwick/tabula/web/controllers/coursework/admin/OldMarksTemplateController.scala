@@ -17,55 +17,58 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 import uk.ac.warwick.tabula.web.views.ExcelView
 import uk.ac.warwick.userlookup.User
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marks-template"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marks-template"))
 class OldAssignmentMarksTemplateController extends OldCourseworkController {
 
-	var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
+  var assignmentMembershipService: AssessmentMembershipService = Wire[AssessmentMembershipService]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
-		OldGenerateMarksTemplateCommand(
-			mandatory(module),
-			mandatory(assignment),
-			assignmentMembershipService.determineMembershipUsers(assignment).map(_.getWarwickId)
-		)
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+    OldGenerateMarksTemplateCommand(
+      mandatory(module),
+      mandatory(assignment),
+      assignmentMembershipService.determineMembershipUsers(assignment).map(_.getWarwickId)
+    )
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
-		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+    new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
+  }
 }
 
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/{marker}/marks-template"))
 class OldAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
-	@ModelAttribute("command")
-	def command(
-		@PathVariable module: Module,
-		@PathVariable assignment: Assignment,
-		@PathVariable marker: User
-	) =
-		OldGenerateOwnMarksTemplateCommand(
-			mandatory(module),
-			mandatory(assignment),
-			assignment.getMarkersSubmissions(mandatory(marker)).flatMap(_.universityId)
-		)
+  @ModelAttribute("command")
+  def command(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+    @PathVariable marker: User
+  ) =
+    OldGenerateOwnMarksTemplateCommand(
+      mandatory(module),
+      mandatory(assignment),
+      assignment.getMarkersSubmissions(mandatory(marker)).flatMap(_.universityId)
+    )
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
-		new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
-	}
+  @RequestMapping(method = Array(HEAD, GET))
+  def generateMarksTemplate(@ModelAttribute("command") cmd: Appliable[SXSSFWorkbook], @PathVariable assignment: Assignment): ExcelView = {
+    new ExcelView(safeAssessmentName(assignment) + " marks.xlsx", cmd.apply())
+  }
 }
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/marker/marks-template"))
 class OldCurrentAssignmentMarkerMarksTemplateController extends OldCourseworkController {
 
-	@RequestMapping
-	def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
-		Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
-	}
+  @RequestMapping
+  def redirect(@PathVariable assignment: Assignment, currentUser: CurrentUser): Mav = {
+    Redirect(Routes.admin.assignment.markerFeedback.marksTemplate(assignment, currentUser.apparentUser))
+  }
 }

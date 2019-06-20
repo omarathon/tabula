@@ -5,40 +5,48 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringTemplate
 import uk.ac.warwick.tabula.web.{BreadCrumb, Routes}
 
 trait SysadminBreadcrumbs {
-	val Breadcrumbs = SysadminBreadcrumbs
+  val Breadcrumbs = SysadminBreadcrumbs
 }
 
 object SysadminBreadcrumbs {
-	case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
 
-	object Departments {
-		case object Home extends BreadCrumb {
-			val title = "Departments"
-			val url = Some(Routes.sysadmin.Departments.home)
-		}
+  case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb
 
-		case class Department(department: model.Department) extends BreadCrumb {
-			val title: String = department.name
-			val url = Some(Routes.sysadmin.Departments.department(department))
-		}
-	}
+  object Departments {
 
-	object AttendanceTemplates {
-		case object Home extends BreadCrumb {
-			val title = "Attendance monitoring templates"
-			val url = Some(Routes.sysadmin.AttendanceTemplates.home)
-		}
+    case object Home extends BreadCrumb {
+      val title = "Departments"
+      val url = Some(Routes.sysadmin.Departments.home)
+    }
 
-		case class Edit(template: AttendanceMonitoringTemplate) extends BreadCrumb {
-			val title = "Edit"
-			val url = Some(Routes.sysadmin.AttendanceTemplates.edit(template))
-		}
-	}
+    case class Department(department: model.Department) extends BreadCrumb {
+      val title: String = department.name
+      val url = Some(Routes.sysadmin.Departments.department(department))
+    }
 
-	object Relationships {
-		case object Home extends BreadCrumb {
-			val title = "Student relationship types"
-			val url = Some(Routes.sysadmin.Relationships.home)
-		}
-	}
+  }
+
+  object AttendanceTemplates {
+
+    case object Home extends BreadCrumb {
+      val title = "Attendance monitoring templates"
+      val url = Some(Routes.sysadmin.AttendanceTemplates.home)
+    }
+
+    case class Edit(template: AttendanceMonitoringTemplate) extends BreadCrumb {
+      val title = "Edit"
+      val url = Some(Routes.sysadmin.AttendanceTemplates.edit(template))
+    }
+
+  }
+
+  object Relationships {
+
+    case object Home extends BreadCrumb {
+      val title = "Student relationship types"
+      val url = Some(Routes.sysadmin.Relationships.home)
+    }
+
+  }
+
 }

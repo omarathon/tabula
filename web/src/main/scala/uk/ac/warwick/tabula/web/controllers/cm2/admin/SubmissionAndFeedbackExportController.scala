@@ -14,55 +14,55 @@ import uk.ac.warwick.tabula.web.views.{CSVView, ExcelView, XmlView}
 import uk.ac.warwick.util.csv.GoodCsvDocument
 
 
-
-@Profile(Array("cm2Enabled")) @Controller
+@Profile(Array("cm2Enabled"))
+@Controller
 @RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}"))
 class SubmissionAndFeedbackExportController extends CourseworkController {
 
-	@ModelAttribute("submissionAndFeedbackCommand")
-	def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
-		SubmissionAndFeedbackCommand(assignment)
+  @ModelAttribute("submissionAndFeedbackCommand")
+  def command(@PathVariable assignment: Assignment): SubmissionAndFeedbackCommand.CommandType =
+    SubmissionAndFeedbackCommand(assignment)
 
 
-	@RequestMapping(Array("/export.csv"))
-	def csv(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): CSVView = {
-		val results = command.apply()
+  @RequestMapping(Array("/export.csv"))
+  def csv(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): CSVView = {
+    val results = command.apply()
 
-		val items = results.students
-		val workflowItems: Seq[WorkflowItems] = for(elem <- items) yield elem.coursework
+    val items = results.students
+    val workflowItems: Seq[WorkflowItems] = for (elem <- items) yield elem.coursework
 
-		val writer = new StringWriter
-		val csvBuilder = new CSVBuilder(workflowItems, assignment, assignment.module)
-		val doc = new GoodCsvDocument(csvBuilder, null)
+    val writer = new StringWriter
+    val csvBuilder = new CSVBuilder(workflowItems, assignment, assignment.module)
+    val doc = new GoodCsvDocument(csvBuilder, null)
 
-		doc.setHeaderLine(true)
-		csvBuilder.headers foreach (header => doc.addHeaderField(header))
-		workflowItems foreach (item => doc.addLine(item))
-		doc.write(writer)
+    doc.setHeaderLine(true)
+    csvBuilder.headers foreach (header => doc.addHeaderField(header))
+    workflowItems foreach (item => doc.addLine(item))
+    doc.write(writer)
 
-		new CSVView(assignment.module.code + "-" + assignment.id + ".csv", writer.toString)
-	}
+    new CSVView(assignment.module.code + "-" + assignment.id + ".csv", writer.toString)
+  }
 
-	@RequestMapping(Array("/export.xml"))
-	def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): XmlView = {
-		val results = command.apply()
+  @RequestMapping(Array("/export.xml"))
+  def xml(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): XmlView = {
+    val results = command.apply()
 
-		val items = results.students
-		val workflowItems: Seq[WorkflowItems] = for(elem <- items) yield elem.coursework
+    val items = results.students
+    val workflowItems: Seq[WorkflowItems] = for (elem <- items) yield elem.coursework
 
-		new XmlView(new XMLBuilder(workflowItems, assignment, assignment.module).toXML, Some(assignment.module.code + "-" + assignment.id + ".xml"))
-	}
+    new XmlView(new XMLBuilder(workflowItems, assignment, assignment.module).toXML, Some(assignment.module.code + "-" + assignment.id + ".xml"))
+  }
 
-	@RequestMapping(Array("/export.xlsx"))
-	def xlsx(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): ExcelView = {
-		val results = command.apply()
+  @RequestMapping(Array("/export.xlsx"))
+  def xlsx(@Valid @ModelAttribute("submissionAndFeedbackCommand") command: SubmissionAndFeedbackCommand.CommandType, @PathVariable assignment: Assignment): ExcelView = {
+    val results = command.apply()
 
-		val items = results.students
-		val workflowItems: Seq[WorkflowItems] = for(elem <- items) yield elem.coursework
+    val items = results.students
+    val workflowItems: Seq[WorkflowItems] = for (elem <- items) yield elem.coursework
 
-		val workbook = new ExcelBuilder(workflowItems, assignment, assignment.module).toXLSX
+    val workbook = new ExcelBuilder(workflowItems, assignment, assignment.module).toXLSX
 
-		new ExcelView(assignment.name + ".xlsx", workbook)
-	}
+    new ExcelView(assignment.name + ".xlsx", workbook)
+  }
 
 }

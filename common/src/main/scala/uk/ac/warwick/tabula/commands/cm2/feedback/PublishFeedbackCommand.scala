@@ -23,283 +23,291 @@ import scala.collection.JavaConverters._
 import scala.language.implicitConversions
 
 object PublishFeedbackCommand {
-	case class PublishFeedbackResults(
-		notifications: Seq[Notification[AssignmentFeedback, Assignment]] = Nil,
-		missingUsers: Seq[MissingUser] = Nil,
-		badEmails: Seq[BadEmail] = Nil
-	)
-	type Command = Appliable[PublishFeedbackResults] with SelfValidating with GradeValidationResults with RecipientChecking with SubmissionsReportGenerator
 
-	abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
-	case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
-	case class BadEmail(u: User, exception: Exception = null) extends RecipientReportItem(u.getWarwickId, u, false)
-	case class GoodUser(u: User) extends RecipientReportItem(u.getWarwickId, u, true)
+  case class PublishFeedbackResults(
+    notifications: Seq[Notification[AssignmentFeedback, Assignment]] = Nil,
+    missingUsers: Seq[MissingUser] = Nil,
+    badEmails: Seq[BadEmail] = Nil
+  )
 
-	case class RecipientCheckReport(users: Seq[RecipientReportItem]) {
-		def hasProblems: Boolean = users.exists(!_.good)
-		def problems: Seq[RecipientReportItem] = users.filterNot(_.good)
-	}
+  type Command = Appliable[PublishFeedbackResults] with SelfValidating with GradeValidationResults with RecipientChecking with SubmissionsReportGenerator
 
-	case class SubmissionsReport(
-		publishable: Set[String],
-		alreadyPublished: Set[String],
-		feedbackOnly: Set[String],
-		submissionOnly: Set[String],
-		withoutAttachments: Set[String],
-		withoutMarks: Set[String],
-		plagiarised: Set[String],
-		hasProblems: Boolean
-	)
+  abstract class RecipientReportItem(val universityId: String, val user: User, val good: Boolean)
 
-	def apply(assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
-		new PublishFeedbackCommandInternal(assignment, submitter, gradeGenerator)
-			with ComposableCommand[PublishFeedbackResults]
-			with AutowiringFeedbackForSitsServiceComponent
-			with AutowiringUserLookupComponent
-			with PublishFeedbackPermissions
-			with PublishFeedbackValidation
-			with PublishFeedbackDescription
-			with PublishFeedbackNotification
-			with PublishFeedbackNotificationCompletion
-			with PublishFeedbackGradeValidationResults
-			with PublishFeedbackRecipientChecking
-			with PublishFeedbackSubmissionsReportGenerator
-			with QueuesFeedbackForSits
+  case class MissingUser(id: String) extends RecipientReportItem(id, null, false)
+
+  case class BadEmail(u: User, exception: Exception = null) extends RecipientReportItem(u.getWarwickId, u, false)
+
+  case class GoodUser(u: User) extends RecipientReportItem(u.getWarwickId, u, true)
+
+  case class RecipientCheckReport(users: Seq[RecipientReportItem]) {
+    def hasProblems: Boolean = users.exists(!_.good)
+
+    def problems: Seq[RecipientReportItem] = users.filterNot(_.good)
+  }
+
+  case class SubmissionsReport(
+    publishable: Set[String],
+    alreadyPublished: Set[String],
+    feedbackOnly: Set[String],
+    submissionOnly: Set[String],
+    withoutAttachments: Set[String],
+    withoutMarks: Set[String],
+    plagiarised: Set[String],
+    hasProblems: Boolean
+  )
+
+  def apply(assignment: Assignment, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks) =
+    new PublishFeedbackCommandInternal(assignment, submitter, gradeGenerator)
+      with ComposableCommand[PublishFeedbackResults]
+      with AutowiringFeedbackForSitsServiceComponent
+      with AutowiringUserLookupComponent
+      with PublishFeedbackPermissions
+      with PublishFeedbackValidation
+      with PublishFeedbackDescription
+      with PublishFeedbackNotification
+      with PublishFeedbackNotificationCompletion
+      with PublishFeedbackGradeValidationResults
+      with PublishFeedbackRecipientChecking
+      with PublishFeedbackSubmissionsReportGenerator
+      with QueuesFeedbackForSits
 }
 
 class PublishFeedbackCommandInternal(val assignment: Assignment, val submitter: CurrentUser, val gradeGenerator: GeneratesGradesFromMarks)
-	extends CommandInternal[PublishFeedbackResults] with PublishFeedbackCommandRequest {
-	self: QueuesFeedbackForSits with UserLookupComponent =>
+  extends CommandInternal[PublishFeedbackResults] with PublishFeedbackCommandRequest {
+  self: QueuesFeedbackForSits with UserLookupComponent =>
 
-	if (!assignment.publishFeedback) throw new ItemNotFoundException(assignment, "Publishing feedback to students is disabled for this assignment")
+  if (!assignment.publishFeedback) throw new ItemNotFoundException(assignment, "Publishing feedback to students is disabled for this assignment")
 
-	def applyInternal(): PublishFeedbackResults = {
-		val allResults = feedbackToRelease.map { feedback =>
-			feedback.released = true
-			feedback.releasedDate = DateTime.now
-			if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
-			generateNotification(userLookup.getUserByUserId(feedback.usercode), feedback)
-		}
+  def applyInternal(): PublishFeedbackResults = {
+    val allResults = feedbackToRelease.map { feedback =>
+      feedback.released = true
+      feedback.releasedDate = DateTime.now
+      if (sendToSits) queueFeedback(feedback, submitter, gradeGenerator)
+      generateNotification(userLookup.getUserByUserId(feedback.usercode), feedback)
+    }
 
-		allResults.foldLeft(PublishFeedbackResults()) { (acc, result) =>
-			PublishFeedbackResults(
-				notifications = acc.notifications ++ result.notifications,
-				missingUsers = acc.missingUsers ++ result.missingUsers,
-				badEmails = acc.badEmails ++ result.badEmails
-			)
-		}
-	}
+    allResults.foldLeft(PublishFeedbackResults()) { (acc, result) =>
+      PublishFeedbackResults(
+        notifications = acc.notifications ++ result.notifications,
+        missingUsers = acc.missingUsers ++ result.missingUsers,
+        badEmails = acc.badEmails ++ result.badEmails
+      )
+    }
+  }
 
-	private def generateNotification(user: User, feedback: Feedback) = {
-		feedback match {
-			case assignmentFeedback: AssignmentFeedback =>
-				if (user.isFoundUser) {
-					val email = user.getEmail
-					if (email.hasText) {
-						val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(assignmentFeedback), assignmentFeedback.assignment)
-						n.recipientUniversityId = user.getUserId
-						PublishFeedbackResults(
-							notifications = Seq(n)
-						)
-					} else {
-						PublishFeedbackResults(
-							badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
-						)
-					}
-				} else {
-					PublishFeedbackResults(
-						missingUsers = Seq(PublishFeedbackCommand.MissingUser(user.getUserId))
-					)
-				}
-			case _ => PublishFeedbackResults()
-		}
-	}
+  private def generateNotification(user: User, feedback: Feedback) = {
+    feedback match {
+      case assignmentFeedback: AssignmentFeedback =>
+        if (user.isFoundUser) {
+          val email = user.getEmail
+          if (email.hasText) {
+            val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(assignmentFeedback), assignmentFeedback.assignment)
+            n.recipientUniversityId = user.getUserId
+            PublishFeedbackResults(
+              notifications = Seq(n)
+            )
+          } else {
+            PublishFeedbackResults(
+              badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
+            )
+          }
+        } else {
+          PublishFeedbackResults(
+            missingUsers = Seq(PublishFeedbackCommand.MissingUser(user.getUserId))
+          )
+        }
+      case _ => PublishFeedbackResults()
+    }
+  }
 }
 
 trait PublishFeedbackNotification extends Notifies[PublishFeedbackResults, Feedback] {
-	override def emit(results: PublishFeedbackResults): Seq[Notification[AssignmentFeedback, Assignment]] = results.notifications
+  override def emit(results: PublishFeedbackResults): Seq[Notification[AssignmentFeedback, Assignment]] = results.notifications
 }
 
 trait PublishFeedbackNotificationCompletion extends CompletesNotifications[PublishFeedbackResults] {
-	self: PublishFeedbackCommandState with NotificationHandling =>
+  self: PublishFeedbackCommandState with NotificationHandling =>
 
-	def notificationsToComplete(commandResult: PublishFeedbackResults): CompletesNotificationsResult = {
-		val feedbackNotifications = commandResult.notifications.flatMap(_.entities).flatMap(feedback =>
-			notificationService.findActionRequiredNotificationsByEntityAndType[FinaliseFeedbackNotification](feedback)
-		)
-		if (!assignment.needsFeedbackPublishing) {
-			CompletesNotificationsResult(
-				feedbackNotifications ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
-					notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
-				submitter.apparentUser
-			)
-		} else {
-			CompletesNotificationsResult(feedbackNotifications, submitter.apparentUser)
-		}
-	}
+  def notificationsToComplete(commandResult: PublishFeedbackResults): CompletesNotificationsResult = {
+    val feedbackNotifications = commandResult.notifications.flatMap(_.entities).flatMap(feedback =>
+      notificationService.findActionRequiredNotificationsByEntityAndType[FinaliseFeedbackNotification](feedback)
+    )
+    if (!assignment.needsFeedbackPublishing) {
+      CompletesNotificationsResult(
+        feedbackNotifications ++
+          notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueGeneralNotification](assignment) ++
+          notificationService.findActionRequiredNotificationsByEntityAndType[FeedbackDueExtensionNotification](assignment),
+        submitter.apparentUser
+      )
+    } else {
+      CompletesNotificationsResult(feedbackNotifications, submitter.apparentUser)
+    }
+  }
 }
 
 trait PublishFeedbackCommandState extends SelectedStudentsState {
-	def assignment: Assignment
-	def submitter: CurrentUser
-	def gradeGenerator: GeneratesGradesFromMarks
+  def assignment: Assignment
+
+  def submitter: CurrentUser
+
+  def gradeGenerator: GeneratesGradesFromMarks
 }
 
 trait PublishFeedbackCommandRequest extends SelectedStudentsRequest with PublishFeedbackCommandState {
-	var confirm: Boolean = false
-	var sendToSits: Boolean = false
+  var confirm: Boolean = false
+  var sendToSits: Boolean = false
 
-	def feedbackToRelease: Seq[Feedback] = {
-		val releaseFeedbacks = feedbacks.filterNot { f => f.isPlaceholder || f.released }
-		if (releaseFeedbacks.nonEmpty) {
-			val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
-			val plagiarisedIds = plagiarisedSubmissions.map { _.usercode }
-			releaseFeedbacks.filter {f => !plagiarisedIds.contains(f.usercode) }
-		} else {
-			Seq()
-		}
-	}
+  def feedbackToRelease: Seq[Feedback] = {
+    val releaseFeedbacks = feedbacks.filterNot { f => f.isPlaceholder || f.released }
+    if (releaseFeedbacks.nonEmpty) {
+      val plagiarisedSubmissions = assignment.submissions.asScala.filter { submission => submission.suspectPlagiarised }
+      val plagiarisedIds = plagiarisedSubmissions.map(_.usercode)
+      releaseFeedbacks.filter { f => !plagiarisedIds.contains(f.usercode) }
+    } else {
+      Seq()
+    }
+  }
 }
 
 trait GradeValidationResults {
-	def validateGrades: ValidateAndPopulateFeedbackResult
+  def validateGrades: ValidateAndPopulateFeedbackResult
 }
 
 trait PublishFeedbackGradeValidationResults extends GradeValidationResults {
-	self: PublishFeedbackCommandRequest with FeedbackForSitsServiceComponent =>
+  self: PublishFeedbackCommandRequest with FeedbackForSitsServiceComponent =>
 
-	lazy val validateGrades: ValidateAndPopulateFeedbackResult =
-		feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease, gradeGenerator)
+  lazy val validateGrades: ValidateAndPopulateFeedbackResult =
+    feedbackForSitsService.validateAndPopulateFeedback(feedbackToRelease, assignment, gradeGenerator)
 }
 
 trait QueuesFeedbackForSits {
-	self: FeedbackForSitsServiceComponent =>
+  self: FeedbackForSitsServiceComponent =>
 
-	def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] =
-		feedbackForSitsService.queueFeedback(feedback, submitter, gradeGenerator)
+  def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] =
+    feedbackForSitsService.queueFeedback(feedback, submitter, gradeGenerator)
 }
 
 trait RecipientChecking {
-	def recipientCheckReport: RecipientCheckReport
+  def recipientCheckReport: RecipientCheckReport
 }
 
 trait PublishFeedbackRecipientChecking extends RecipientChecking {
-	self: PublishFeedbackCommandRequest with UserLookupComponent =>
+  self: PublishFeedbackCommandRequest with UserLookupComponent =>
 
-	private def isGoodEmail(email: String): Boolean = {
-		try {
-			new InternetAddress(email).validate()
-			true
-		} catch {
-			case e: MessagingException => false
-		}
-	}
+  private def isGoodEmail(email: String): Boolean = {
+    try {
+      new InternetAddress(email).validate()
+      true
+    } catch {
+      case e: MessagingException => false
+    }
+  }
 
-	lazy val recipientCheckReport: RecipientCheckReport =
-		RecipientCheckReport(feedbackToRelease.map { feedback =>
-			userLookup.getUserByUserId(feedback.usercode) match {
-				case FoundUser(u) =>
-					if (u.getEmail.hasText && isGoodEmail(u.getEmail)) {
-						GoodUser(u)
-					} else {
-						BadEmail(u)
-					}
-				case NoUser(_) => MissingUser(feedback.usercode)
-			}
-		})
+  lazy val recipientCheckReport: RecipientCheckReport =
+    RecipientCheckReport(feedbackToRelease.map { feedback =>
+      userLookup.getUserByUserId(feedback.usercode) match {
+        case FoundUser(u) =>
+          if (u.getEmail.hasText && isGoodEmail(u.getEmail)) {
+            GoodUser(u)
+          } else {
+            BadEmail(u)
+          }
+        case NoUser(_) => MissingUser(feedback.usercode)
+      }
+    })
 }
 
 trait SubmissionsReportGenerator {
-	def submissionsReport: SubmissionsReport
+  def submissionsReport: SubmissionsReport
 }
 
 trait PublishFeedbackSubmissionsReportGenerator extends SubmissionsReportGenerator {
-	self: PublishFeedbackCommandRequest =>
+  self: PublishFeedbackCommandRequest =>
 
-	lazy val submissionsReport: SubmissionsReport = {
-		val studentSet = students.asScala.toSet
+  lazy val submissionsReport: SubmissionsReport = {
+    val studentSet = students.asScala.toSet
 
-		val plagiarised = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
-		val publishable = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet.diff(plagiarised)
+    val plagiarised = submissions.filter(_.suspectPlagiarised).map(_.usercode).toSet
+    val publishable = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet.diff(plagiarised)
 
-		val alreadyPublished = publishable.intersect(feedbacks.filterNot(_.isPlaceholder).filter(_.released).map(_.usercode).toSet)
+    val alreadyPublished = publishable.intersect(feedbacks.filterNot(_.isPlaceholder).filter(_.released).map(_.usercode).toSet)
 
-		val feedbackUsercodes = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet
-		val submissionUsercodes = submissions.map(_.usercode).toSet
+    val feedbackUsercodes = feedbacks.filterNot(_.isPlaceholder).map(_.usercode).toSet
+    val submissionUsercodes = submissions.map(_.usercode).toSet
 
-		// Subtract the sets from each other to obtain discrepancies
-		val feedbackOnly: Set[String] = publishable.intersect(feedbackUsercodes.diff(submissionUsercodes))
-		val submissionOnly: Set[String] = publishable.intersect(submissionUsercodes.diff(feedbackUsercodes))
+    // Subtract the sets from each other to obtain discrepancies
+    val feedbackOnly: Set[String] = publishable.intersect(feedbackUsercodes.diff(submissionUsercodes))
+    val submissionOnly: Set[String] = publishable.intersect(submissionUsercodes.diff(feedbackUsercodes))
 
-		/**
-			* We want to show a warning if some feedback items are missing either marks or attachments
-			* If however, all feedback items have only marks or attachments then we don't send a warning.
-			*/
-		val withoutAttachments: Set[String] = publishable.intersect(feedbacks
-			.filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
-			.map(_.usercode).toSet)
+    /**
+      * We want to show a warning if some feedback items are missing either marks or attachments
+      * If however, all feedback items have only marks or attachments then we don't send a warning.
+      */
+    val withoutAttachments: Set[String] = publishable.intersect(feedbacks
+      .filter(f => !f.hasAttachments && !f.comments.exists(_.hasText))
+      .map(_.usercode).toSet)
 
-		val withoutMarks: Set[String] = publishable.intersect(feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet)
+    val withoutMarks: Set[String] = publishable.intersect(feedbacks.filter(!_.hasMarkOrGrade).map(_.usercode).toSet)
 
-		val hasProblems: Boolean = {
-			val shouldBeEmpty = Set(feedbackOnly, submissionOnly)
-			val problems = assignment.collectSubmissions && shouldBeEmpty.exists { _.nonEmpty }
+    val hasProblems: Boolean = {
+      val shouldBeEmpty = Set(feedbackOnly, submissionOnly)
+      val problems = assignment.collectSubmissions && shouldBeEmpty.exists(_.nonEmpty)
 
-			if (assignment.collectMarks) {
-				val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
-				problems || shouldBeEmptyWhenCollectingMarks.exists { _.nonEmpty }
-			} else {
-				problems
-			}
-		}
+      if (assignment.collectMarks) {
+        val shouldBeEmptyWhenCollectingMarks = Set(withoutAttachments, withoutMarks)
+        problems || shouldBeEmptyWhenCollectingMarks.exists(_.nonEmpty)
+      } else {
+        problems
+      }
+    }
 
-		SubmissionsReport(
-			publishable,
-			alreadyPublished,
-			feedbackOnly,
-			submissionOnly,
-			withoutAttachments,
-			withoutMarks,
-			plagiarised,
-			hasProblems
-		)
-	}
+    SubmissionsReport(
+      publishable,
+      alreadyPublished,
+      feedbackOnly,
+      submissionOnly,
+      withoutAttachments,
+      withoutMarks,
+      plagiarised,
+      hasProblems
+    )
+  }
 }
 
 trait PublishFeedbackPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: PublishFeedbackCommandState =>
+  self: PublishFeedbackCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.AssignmentFeedback.Publish, mandatory(assignment))
-	}
+  override def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.AssignmentFeedback.Publish, mandatory(assignment))
+  }
 }
 
 trait PublishFeedbackValidation extends SelfValidating {
-	self: PublishFeedbackCommandRequest =>
+  self: PublishFeedbackCommandRequest =>
 
-	override def validate(errors: Errors) {
-		if (!assignment.openEnded && !assignment.isClosed) {
-			errors.reject("feedback.publish.notclosed")
-		} else if (feedbackToRelease.isEmpty) {
-			errors.reject("feedback.publish.nofeedback")
-		}
+  override def validate(errors: Errors) {
+    if (!assignment.openEnded && !assignment.isClosed) {
+      errors.reject("feedback.publish.notclosed")
+    } else if (feedbackToRelease.isEmpty) {
+      errors.reject("feedback.publish.nofeedback")
+    }
 
-		if (!confirm) {
-			errors.rejectValue("confirm", "feedback.publish.confirm")
-		}
-	}
+    if (!confirm) {
+      errors.rejectValue("confirm", "feedback.publish.confirm")
+    }
+  }
 }
 
 trait PublishFeedbackDescription extends Describable[PublishFeedbackResults] {
-	self: PublishFeedbackCommandRequest with UserLookupComponent =>
+  self: PublishFeedbackCommandRequest with UserLookupComponent =>
 
-	override lazy val eventName: String = "PublishFeedback"
+  override lazy val eventName: String = "PublishFeedback"
 
-	override def describe(d: Description) {
-		val students = userLookup.getUsersByUserIds(feedbackToRelease.map(_.usercode)).values.toSeq
-		d.assignment(assignment)
-			.studentIds(students.flatMap(m => Option(m.getWarwickId)))
-			.studentUsercodes(students.map(_.getUserId))
-	}
+  override def describe(d: Description) {
+    val students = userLookup.getUsersByUserIds(feedbackToRelease.map(_.usercode)).values.toSeq
+    d.assignment(assignment)
+      .studentIds(students.flatMap(m => Option(m.getWarwickId)))
+      .studentUsercodes(students.map(_.getUserId))
+  }
 }

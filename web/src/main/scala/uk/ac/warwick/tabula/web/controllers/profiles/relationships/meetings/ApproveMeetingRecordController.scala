@@ -15,32 +15,32 @@ import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 
 @Controller
 @RequestMapping(value = Array("/profiles/*/meeting/{meetingRecord}/approval"))
-class ApproveMeetingRecordController  extends ProfilesController {
+class ApproveMeetingRecordController extends ProfilesController {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("approveMeetingRecordCommand")
-	def getCommand(@PathVariable meetingRecord: MeetingRecord) =
-		ApproveMeetingRecordCommand(mandatory(meetingRecord), user)
+  @ModelAttribute("approveMeetingRecordCommand")
+  def getCommand(@PathVariable meetingRecord: MeetingRecord) =
+    ApproveMeetingRecordCommand(mandatory(meetingRecord), user)
 
 
-	@RequestMapping(method = Array(POST))
-	def approveMeetingRecord(
-		@Valid @ModelAttribute("approveMeetingRecordCommand") command: Appliable[MeetingRecordApproval],
-		errors: Errors,
-		@PathVariable meetingRecord: MeetingRecord
-	): Mav = {
-		if (!errors.hasErrors) {
-			command.apply()
-			if (ajax) {
-				Mav(new JSONView(Map(
-					"status" -> "successful"
-				)))
-			} else {
-				Redirect(Routes.Profile.relationshipType(meetingRecord.relationship.studentCourseDetails.student, meetingRecord.relationship.relationshipType))
-			}
-		} else {
-			Mav(new JSONErrorView(errors, Map("formId" -> "meeting-%s".format(meetingRecord.id))))
-		}
-	}
+  @RequestMapping(method = Array(POST))
+  def approveMeetingRecord(
+    @Valid @ModelAttribute("approveMeetingRecordCommand") command: Appliable[MeetingRecordApproval],
+    errors: Errors,
+    @PathVariable meetingRecord: MeetingRecord
+  ): Mav = {
+    if (!errors.hasErrors) {
+      command.apply()
+      if (ajax) {
+        Mav(new JSONView(Map(
+          "status" -> "successful"
+        )))
+      } else {
+        Redirect(Routes.Profile.relationshipType(meetingRecord.relationships.head.studentCourseDetails.student, meetingRecord.relationshipTypes.head))
+      }
+    } else {
+      Mav(new JSONErrorView(errors, Map("formId" -> "meeting-%s".format(meetingRecord.id))))
+    }
+  }
 }

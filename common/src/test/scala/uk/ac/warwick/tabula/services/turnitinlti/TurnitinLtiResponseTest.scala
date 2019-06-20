@@ -4,17 +4,18 @@ import uk.ac.warwick.tabula.TestBase
 
 class TurnitinLtiResponseTest extends TestBase {
 
-	@Test def submissionsList() = {
-		val response = TurnitinLtiResponse.fromJson( SubmittedPaperInfo )
-		val submissionInfo = response.submissionInfo()
-		submissionInfo.overlap should be (Some(67))
-		submissionInfo.similarity should be (Some(3))
-		submissionInfo.publication_overlap should be (Some(35))
-		submissionInfo.student_overlap should be (Some(67))
-		submissionInfo.web_overlap should be (Some(0))
-	}
+  @Test def submissionsList(): Unit = {
+    val response = TurnitinLtiResponse.fromJson(SubmittedPaperInfo)
+    val submissionInfo = response.submissionInfo()
+    submissionInfo.overlap should be(Some(67))
+    submissionInfo.similarity should be(Some(3))
+    submissionInfo.publication_overlap should be(Some(35))
+    submissionInfo.student_overlap should be(Some(67))
+    submissionInfo.web_overlap should be(Some(0))
+  }
 
-	val SubmittedPaperInfo = """
+  val SubmittedPaperInfo =
+    """
 	{
 		"outcome_originalfile":{
 			"roles":[

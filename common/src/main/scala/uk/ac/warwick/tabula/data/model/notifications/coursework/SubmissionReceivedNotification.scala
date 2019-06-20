@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications.coursework
 
 import javax.persistence.{DiscriminatorValue, Entity}
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.cm2.web.Routes
@@ -16,87 +17,98 @@ import scala.collection.immutable.Seq
 import scala.reflect.ClassTag
 
 @Entity
+@Proxy
 @DiscriminatorValue("SubmissionReceived")
 class SubmissionReceivedNotification extends SubmissionNotification {
 
-	override def onPreSave(isNew: Boolean) {
-		// if this submission was noteworthy then the priority is higher
-		if (submission.isNoteworthy) {
-			priority = Warning
-		}
-	}
+  override def onPreSave(isNew: Boolean) {
+    // if this submission was noteworthy then the priority is higher
+    if (submission.isNoteworthy) {
+      priority = Warning
+    }
+  }
 
-	@transient
-	var userSettings: UserSettingsService = Wire[UserSettingsService]
+  @transient
+  var userSettings: UserSettingsService = Wire[UserSettingsService]
 
-	@transient
-	var permissionsService: PermissionsService = Wire[PermissionsService]
+  @transient
+  var permissionsService: PermissionsService = Wire[PermissionsService]
 
-	@transient
-	var securityService: SecurityService = Wire[SecurityService]
+  @transient
+  var securityService: SecurityService = Wire[SecurityService]
 
-	def templateLocation = "/WEB-INF/freemarker/emails/submissionnotify.ftl"
+  def templateLocation = "/WEB-INF/freemarker/emails/submissionnotify.ftl"
 
-	def submissionTitle: String =
-		if (submission == null) "Submission"
-		else if (submission.isAuthorisedLate) "Authorised late submission"
-		else if (submission.isLate) "Late submission"
-		else "Submission"
+  def submissionTitle: String =
+    if (submission == null) "Submission"
+    else if (submission.isAuthorisedLate) "Authorised late submission"
+    else if (submission.isLate) "Late submission"
+    else "Submission"
 
-	def title: String = "%s: %s received for \"%s\"".format(moduleCode, submissionTitle, assignment.name)
+  def title: String = "%s: %s received for \"%s\"".format(moduleCode, submissionTitle, assignment.name)
 
-	def canEmailUser(user: User): Boolean = {
-		// Alert on noteworthy submissions by default
-		val setting = userSettings.getByUserId(user.getUserId).map(_.alertsSubmission).getOrElse(UserSettings.AlertsNoteworthySubmissions)
+  def canEmailUser(user: User): Boolean = {
+    // Alert on noteworthy submissions by default
+    val setting = userSettings.getByUserId(user.getUserId).map(_.alertsSubmission).getOrElse(UserSettings.AlertsNoteworthySubmissions)
 
-		setting match {
-			case UserSettings.AlertsAllSubmissions => true
-			case UserSettings.AlertsNoteworthySubmissions => submission.isNoteworthy
-			case _ => false
-		}
-	}
+    setting match {
+      case UserSettings.AlertsAllSubmissions => true
+      case UserSettings.AlertsNoteworthySubmissions => submission.isNoteworthy
+      case _ => false
+    }
+  }
 
-	def url: String = Routes.admin.assignment.submissionsandfeedback.list(assignment)
+  def url: String = Routes.admin.assignment.submissionsandfeedback.list(assignment)
 
-	def urlTitle = "view all submissions for this assignment"
+  override def urlFor(user: User): String = {
+    val feedback = assignment.findFeedback(submission.usercode)
 
-	def recipients: Seq[User] = {
-		// TAB-2333 Get any user that has Submission.Delete over the submission, or any of its permission parents
-		// Look at Assignment, Module and Department (can't grant explicitly over one Submission atm)
-		val requiredPermission = Permissions.Submission.Delete
+    if (assignment.hasCM2Workflow && feedback.toSeq.flatMap(_.allMarkerFeedback).map(_.marker).contains(user)) {
+      Routes.admin.assignment.markerFeedback(assignment, user)
+    } else {
+      Routes.admin.assignment.submissionsandfeedback.list(assignment)
+    }
+  }
 
-		def usersWithPermission[A <: PermissionsTarget : ClassTag](scope: A) = {
-			val roleGrantedUsers =
-				permissionsService.getAllGrantedRolesFor[A](scope)
-					.filter(_.mayGrant(requiredPermission))
-					.flatMap(_.users.users)
-					.toSet
+  def urlTitle = "view all submissions for this assignment"
 
-			val explicitlyGrantedUsers =
-				permissionsService.getGrantedPermission(scope, requiredPermission, RoleOverride.Allow)
-					.toSet
-					.flatMap { permission: GrantedPermission[A] => permission.users.users }
+  def recipients: Seq[User] = {
+    // TAB-2333 Get any user that has Submission.Delete over the submission, or any of its permission parents
+    // Look at Assignment, Module and Department (can't grant explicitly over one Submission atm)
+    val requiredPermission = Permissions.Submission.Delete
 
-			roleGrantedUsers ++ explicitlyGrantedUsers
-		}
+    def usersWithPermission[A <: PermissionsTarget : ClassTag](scope: A) = {
+      val roleGrantedUsers =
+        permissionsService.getAllGrantedRolesFor[A](scope)
+          .filter(_.mayGrant(requiredPermission))
+          .flatMap(_.users.users)
+          .toSet
 
-		def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
+      val explicitlyGrantedUsers =
+        permissionsService.getGrantedPermission(scope, requiredPermission, RoleOverride.Allow)
+          .toSet
+          .flatMap { permission: GrantedPermission[A] => permission.users.users }
 
-		val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission)
-			.filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
+      roleGrantedUsers ++ explicitlyGrantedUsers
+    }
 
-		// Contact the current marker, if there is one, and the submission has already been released
-		val feedback = assignment.findFeedback(submission.usercode)
+    def withParents(target: PermissionsTarget): Stream[PermissionsTarget] = target #:: target.permissionsParents.flatMap(withParents)
 
-		val currentMarker = if (assignment.hasCM2Workflow) {
-			feedback.toSeq.flatMap(_.markingInProgress).map(_.marker)
-		} else if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
-			feedback.flatMap(_.getCurrentWorkflowFeedback).flatMap(_.getMarkerUser).toSeq
-		} else {
-			Seq()
-		}
+    val adminsWithPermission = withParents(assignment).flatMap(usersWithPermission)
+      .filter { user => securityService.can(new CurrentUser(user, user), requiredPermission, submission) }
 
-		(adminsWithPermission ++ currentMarker).distinct.filter(canEmailUser)
-	}
+    // Contact the current marker, if there is one, and the submission has already been released
+    val feedback = assignment.findFeedback(submission.usercode)
+
+    val currentMarker = if (assignment.hasCM2Workflow) {
+      feedback.toSeq.flatMap(_.markingInProgress).map(_.marker)
+    } else if (assignment.hasWorkflow && feedback.exists(_.isPlaceholder)) {
+      feedback.flatMap(_.getCurrentWorkflowFeedback).flatMap(_.getMarkerUser).toSeq
+    } else {
+      Seq()
+    }
+
+    (adminsWithPermission ++ currentMarker).distinct.filter(canEmailUser)
+  }
 
 }

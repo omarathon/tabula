@@ -9,30 +9,31 @@ import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
-@Profile(Array("cm1Enabled")) @Controller
-@RequestMapping(value=Array("/${cm1.prefix}/admin/marksmanagement/departments"))
+@Profile(Array("cm1Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm1.prefix}/admin/marksmanagement/departments"))
 class OldOpenAndCloseDepartmentsController extends OldCourseworkController {
 
-	type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm
+  type OpenAndCloseDepartmentsCommand = Appliable[DegreeType] with PopulateOnForm
 
-	@ModelAttribute("command")
-	def command: OpenAndCloseDepartmentsCommand = OpenAndCloseDepartmentsCommand()
+  @ModelAttribute("command")
+  def command: OpenAndCloseDepartmentsCommand = OpenAndCloseDepartmentsCommand()
 
-	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand):Mav = {
-		cmd.populate()
-		Mav("coursework/admin/marksmanagement/open_close_departments")
-	}
+  @RequestMapping(method = Array(GET, HEAD))
+  def showForm(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
+    cmd.populate()
+    Mav("coursework/admin/marksmanagement/open_close_departments")
+  }
 
-	@RequestMapping(method=Array(POST))
-	def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
-		val degreeTypeUpdated: DegreeType = cmd.apply()
-		val mav = Mav("coursework/admin/marksmanagement/open_close_departments")
-		if (degreeTypeUpdated == DegreeType.Undergraduate) {
-			mav.addObjects("undergraduateUpdated" -> true)
-		}	else {
-			mav.addObjects("postgraduateUpdated" -> true)
-		}
-		mav
-	}
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("command") cmd: OpenAndCloseDepartmentsCommand): Mav = {
+    val degreeTypeUpdated: DegreeType = cmd.apply()
+    val mav = Mav("coursework/admin/marksmanagement/open_close_departments")
+    if (degreeTypeUpdated == DegreeType.Undergraduate) {
+      mav.addObjects("undergraduateUpdated" -> true)
+    } else {
+      mav.addObjects("postgraduateUpdated" -> true)
+    }
+    mav
+  }
 }

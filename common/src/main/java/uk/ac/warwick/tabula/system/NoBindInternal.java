@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * Runtime annotation to be added to a getter/setter
  * method to indicate that it is not to be bound by
  * Spring binding.
- *
+ * <p>
  * Don't use this annotation directly because the default behaviour
  * is to only add it to the private field. Instead use
  * uk.ac.warwick.tabula.system.NoBind which is an alias to this
@@ -14,4 +14,5 @@ import java.lang.annotation.*;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NoBindInternal {}
+public @interface NoBindInternal {
+}

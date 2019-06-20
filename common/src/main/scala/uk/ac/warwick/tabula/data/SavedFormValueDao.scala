@@ -8,25 +8,26 @@ import org.hibernate.criterion.Restrictions.{eq => is}
 import uk.ac.warwick.spring.Wire
 
 trait SavedFormValueDao {
-	def get(field: FormField, feedback: Feedback): Option[SavedFormValue]
-	def get(field: FormField, feedback: MarkerFeedback): Option[SavedFormValue]
+  def get(field: FormField, feedback: Feedback): Option[SavedFormValue]
+
+  def get(field: FormField, feedback: MarkerFeedback): Option[SavedFormValue]
 }
 
 
 abstract class AbstractSavedFormValueDao extends SavedFormValueDao {
-	self: ExtendedSessionComponent =>
+  self: ExtendedSessionComponent =>
 
-	override def get(field: FormField, feedback: Feedback): Option[SavedFormValue] =
-		session.newCriteria[SavedFormValue]
-			.add(is("name", field.name))
-			.add(is("feedback", feedback))
-			.uniqueResult
+  override def get(field: FormField, feedback: Feedback): Option[SavedFormValue] =
+    session.newCriteria[SavedFormValue]
+      .add(is("name", field.name))
+      .add(is("feedback", feedback))
+      .uniqueResult
 
-	override def get(field: FormField, markerFeedback: MarkerFeedback): Option[SavedFormValue] =
-		session.newCriteria[SavedFormValue]
-			.add(is("name", field.name))
-			.add(is("markerFeedback", markerFeedback))
-			.uniqueResult
+  override def get(field: FormField, markerFeedback: MarkerFeedback): Option[SavedFormValue] =
+    session.newCriteria[SavedFormValue]
+      .add(is("name", field.name))
+      .add(is("markerFeedback", markerFeedback))
+      .uniqueResult
 
 }
 
@@ -34,9 +35,9 @@ abstract class AbstractSavedFormValueDao extends SavedFormValueDao {
 class SavedFormValueDaoImpl extends AbstractSavedFormValueDao with Daoisms
 
 trait SavedFormValueDaoComponent {
-	def savedFormValueDao: SavedFormValueDao
+  def savedFormValueDao: SavedFormValueDao
 }
 
 trait AutowiringSavedFormValueDaoComponent extends SavedFormValueDaoComponent {
-	var savedFormValueDao: SavedFormValueDao = Wire[SavedFormValueDao]
+  var savedFormValueDao: SavedFormValueDao = Wire[SavedFormValueDao]
 }

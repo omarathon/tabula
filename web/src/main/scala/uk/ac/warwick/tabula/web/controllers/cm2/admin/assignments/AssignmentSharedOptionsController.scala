@@ -13,29 +13,30 @@ import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 
 /**
-	* When setting up a batch of assignments using AddSitsAssignmentsController, we need
-	* to open a dialog for entering assignment settings. This controller shows that
-	* form, does validation and then the resulting form fields are injected into the
-	* original HTML page.
-	*/
-@Profile(Array("cm2Enabled")) @Controller
-@RequestMapping(value=Array("/${cm2.prefix}/admin/department/{department}/shared-options"))
+  * When setting up a batch of assignments using AddSitsAssignmentsController, we need
+  * to open a dialog for entering assignment settings. This controller shows that
+  * form, does validation and then the resulting form fields are injected into the
+  * original HTML page.
+  */
+@Profile(Array("cm2Enabled"))
+@Controller
+@RequestMapping(value = Array("/${cm2.prefix}/admin/department/{department}/shared-options"))
 class AssignmentSharedOptionsController extends CourseworkController {
 
-	@ModelAttribute("sharedAssignmentPropertiesForm")
-	def model() = new SharedAssignmentPropertiesForm
+  @ModelAttribute("sharedAssignmentPropertiesForm")
+  def model() = new SharedAssignmentPropertiesForm
 
-	@RequestMapping
-	def showForm(@ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav =
-		Mav("cm2/admin/assignments/shared_options",
-			"turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
-		).noLayout()
+  @RequestMapping
+  def showForm(@ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, @PathVariable department: Department): Mav =
+    Mav("cm2/admin/assignments/shared_options",
+      "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
+    ).noLayout()
 
-	@RequestMapping(method = Array(POST))
-	def submitForm(@Valid @ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav =
-		showForm(form, department).addObjects(
-			"submitted" -> true,
-			"hasErrors" -> errors.hasErrors
-		)
+  @RequestMapping(method = Array(POST))
+  def submitForm(@Valid @ModelAttribute("sharedAssignmentPropertiesForm") form: SharedAssignmentPropertiesForm, errors: Errors, @PathVariable department: Department): Mav =
+    showForm(form, department).addObjects(
+      "submitted" -> true,
+      "hasErrors" -> errors.hasErrors
+    )
 
 }

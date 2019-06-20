@@ -12,64 +12,69 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.attendancemonitoring.{AttendanceMonitoringMeetingRecordService, AttendanceMonitoringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.objectstore.{ObjectStorageService, RichByteSource}
 
+import scala.concurrent.Future
+
 
 class DownloadMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
+  val aprilFool: DateTime = dateTime(2013, DateTimeConstants.APRIL)
 
-	@Test
-	def validMeeting() = withUser("cusdx") { withFakeTime(aprilFool) {
-		val creator = Fixtures.staff("9876543", "staffmember")
-		val student = Fixtures.student(universityId="1170836", userId="studentmember")
+  @Test
+  def validMeeting() = withUser("cusdx") {
+    withFakeTime(aprilFool) {
+      val creator = Fixtures.staff("9876543", "staffmember")
+      val student = Fixtures.student(universityId = "1170836", userId = "studentmember")
 
-		val relationship = ExternalStudentRelationship(
-			"Professor A Tutor",
-			StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
-			student,
-			DateTime.now
-		)
+      val relationship = ExternalStudentRelationship(
+        "Professor A Tutor",
+        StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"),
+        student,
+        DateTime.now
+      )
 
-		val uploadedFile =  new UploadedFile
-		val mpFile = smartMock[MultipartFile]
-		uploadedFile.upload.add(mpFile)
+      val uploadedFile = new UploadedFile
+      val mpFile = smartMock[MultipartFile]
+      uploadedFile.upload.add(mpFile)
 
-		val fileAttach = new FileAttachment
-		fileAttach.name = "Beltane.txt"
-		fileAttach.objectStorageService = smartMock[ObjectStorageService]
-		fileAttach.objectStorageService.fetch(any[String]) returns RichByteSource.empty
-		fileAttach.fileDao = smartMock[FileDao]
-		uploadedFile.attached.add(fileAttach)
+      val fileAttach = new FileAttachment
+      fileAttach.name = "Beltane.txt"
+      fileAttach.objectStorageService = smartMock[ObjectStorageService]
+      fileAttach.objectStorageService.fetch(any[String]) returns Future.successful(RichByteSource.empty)
+      fileAttach.fileDao = smartMock[FileDao]
+      uploadedFile.attached.add(fileAttach)
 
-		val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, relationship)
-			with MeetingRecordCommandRequest
-			with CreateMeetingRecordCommandState
-			with MeetingRecordServiceComponent
-			with FeaturesComponent
-			with AttendanceMonitoringMeetingRecordServiceComponent
-			with FileAttachmentServiceComponent {
-			override val meetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
-			override val features: Features = Features.empty
-			override val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
-			override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
-		}
+      val createMeetingRecordCommand = new CreateMeetingRecordCommandInternal(creator, Seq(relationship))
+        with MeetingRecordCommandRequest
+        with CreateMeetingRecordCommandState
+        with MeetingRecordServiceComponent
+        with FeaturesComponent
+        with AttendanceMonitoringMeetingRecordServiceComponent
+        with FileAttachmentServiceComponent {
+        override val meetingRecordService: MeetingRecordService = smartMock[MeetingRecordService]
+        override val features: Features = Features.empty
+        override val attendanceMonitoringMeetingRecordService: AttendanceMonitoringMeetingRecordService = smartMock[AttendanceMonitoringMeetingRecordService]
+        override val fileAttachmentService: FileAttachmentService = smartMock[FileAttachmentService]
+      }
 
-		createMeetingRecordCommand.title = "Title"
-		createMeetingRecordCommand.format = FaceToFace
-		createMeetingRecordCommand.meetingDateStr  = dateTime(3903, DateTimeConstants.MARCH).toString(DatePickerFormatter) // it's the future
-		createMeetingRecordCommand.meetingTimeStr  = dateTime(3903, DateTimeConstants.MARCH).toString(TimePickerFormatter)
-		createMeetingRecordCommand.meetingEndTimeStr  = dateTime(3903, DateTimeConstants.MARCH).plusHours(1).toString(TimePickerFormatter)
-		createMeetingRecordCommand.description = "Lovely words"
-		createMeetingRecordCommand.file = uploadedFile
+      createMeetingRecordCommand.relationships.add(relationship)
+      createMeetingRecordCommand.title = "Title"
+      createMeetingRecordCommand.format = FaceToFace
+      createMeetingRecordCommand.meetingDateStr = dateTime(3903, DateTimeConstants.MARCH).toString(DatePickerFormatter) // it's the future
+      createMeetingRecordCommand.meetingTimeStr = dateTime(3903, DateTimeConstants.MARCH).toString(TimePickerFormatter)
+      createMeetingRecordCommand.meetingEndTimeStr = dateTime(3903, DateTimeConstants.MARCH).plusHours(1).toString(TimePickerFormatter)
+      createMeetingRecordCommand.description = "Lovely words"
+      createMeetingRecordCommand.file = uploadedFile
 
-		val meeting = createMeetingRecordCommand.applyInternal()
+      val meeting = createMeetingRecordCommand.applyInternal()
 
-		// test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
-		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
+      // test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
+      val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
 
-		// normally for single files the filename is set in the command as it is a path variable (I think!)
-		downloadCommand.filename = "Beltane.txt"
-		val retSingle = downloadCommand.applyInternal()
-		val rendFile = retSingle.get
-		rendFile.filename should be ("Beltane.txt")
-	}}
+      // normally for single files the filename is set in the command as it is a path variable (I think!)
+      downloadCommand.filename = "Beltane.txt"
+      val retSingle = downloadCommand.applyInternal()
+      val rendFile = retSingle.get
+      rendFile.filename should be("Beltane.txt")
+    }
+  }
 }

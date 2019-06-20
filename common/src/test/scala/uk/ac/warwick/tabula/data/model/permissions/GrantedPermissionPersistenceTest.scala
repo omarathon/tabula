@@ -8,28 +8,28 @@ import uk.ac.warwick.tabula.helpers.ReflectionsSetup
 class GrantedPermissionPersistenceTest extends PersistenceTestBase with ReflectionsSetup {
 
 
-	@Test def saveAndLoad {
-		transactional { t =>
-			val department = new Department
-			department.code = "IN"
-			department.fullName = "IT Services"
+  @Test def saveAndLoad {
+    transactional { t =>
+      val department = new Department
+      department.code = "IN"
+      department.fullName = "IT Services"
 
-			session.save(department)
-			session.flush()
+      session.save(department)
+      session.flush()
 
-			val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
-			permission.users.knownType.addUserId("cuscav")
+      val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
+      permission.users.knownType.addUserId("cuscav")
 
-			session.save(permission)
-			session.flush()
-			session.clear()
+      session.save(permission)
+      session.flush()
+      session.clear()
 
-			session.load(classOf[GrantedPermission[_]], permission.id) match {
-				case permission: GrantedPermission[Department @unchecked] =>
-					permission.scope.code should be ("IN")
-				case _ => fail("What is this!")
-			}
-		}
-	}
+      session.load(classOf[GrantedPermission[_]], permission.id) match {
+        case permission: GrantedPermission[Department@unchecked] =>
+          permission.scope.code should be("IN")
+        case _ => fail("What is this!")
+      }
+    }
+  }
 
 }

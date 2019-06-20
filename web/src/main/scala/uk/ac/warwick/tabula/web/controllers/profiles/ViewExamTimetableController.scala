@@ -14,20 +14,22 @@ import scala.util.{Failure, Success, Try}
 @RequestMapping(Array("/profiles/view/{member}/exams"))
 class ViewExamTimetableController extends ProfilesController {
 
-	@ModelAttribute("command")
-	def command(@PathVariable member: Member) = ViewExamTimetableCommand(mandatory(member), user)
+  @ModelAttribute("command")
+  def command(@PathVariable member: Member) = ViewExamTimetableCommand(mandatory(member), user)
 
-	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Try[ExamTimetableFetchingService.ExamTimetable]]): Mav = {
-		cmd.apply() match {
-			case Success(examTimetable) => Mav("profiles/timetables/exams",
-				"timetable" -> examTimetable
-			)
-			case Failure(t) => Mav("profiles/timetables/exams",
-				"error" -> t.getMessage
-			)
-		}
+  @RequestMapping
+  def home(@ModelAttribute("command") cmd: Appliable[Try[ExamTimetableFetchingService.ExamTimetable]], @PathVariable member: Member): Mav = {
+    cmd.apply() match {
+      case Success(examTimetable) => Mav("profiles/timetables/exams",
+        "timetable" -> examTimetable,
+        "isSelf" -> (user.universityId == member.universityId),
+      )
+      case Failure(t) => Mav("profiles/timetables/exams",
+        "error" -> t.getMessage,
+        "isSelf" -> (user.universityId == member.universityId),
+      )
+    }
 
-	}
+  }
 
 }

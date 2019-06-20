@@ -1,45 +1,55 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
-
-import org.hibernate.annotations.Type
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
+
+import scala.collection.JavaConverters._
 
 /**
-	* Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
-	*/
+  * Tabula store for a Formed Module Collection (CAM_FMC) from SITS.
+  */
 @Entity
+@Proxy
 class UpstreamModuleList {
 
-	def this(code: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
-		this()
-		this.code = code
-		this.academicYear = academicYear
-		this.route = route
-		this.yearOfStudy = yearOfStudy
-	}
+  def this(code: String, name:String, shortName: String, academicYear: AcademicYear, route: Route, yearOfStudy: Integer) {
+    this()
+    this.code = code
+    this.name = name
+    this.shortName = shortName
+    this.academicYear = academicYear
+    this.route = route
+    this.yearOfStudy = yearOfStudy
+  }
 
-	@Id
-	var code: String = _
-	def id: String = code
+  @Id
+  var code: String = _
 
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	var academicYear: AcademicYear = _
+  var name: String = _
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "routeCode", referencedColumnName="code")
-	var route: Route = _
+  var shortName: String = _
 
-	var yearOfStudy: JInteger = _
+  def id: String = code
 
-	@OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	val entries: JSet[UpstreamModuleListEntry] = JHashSet()
+  @Basic
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+  var academicYear: AcademicYear = _
 
-	def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "routeCode", referencedColumnName = "code")
+  var route: Route = _
+
+  var yearOfStudy: JInteger = _
+
+  // Where the last 3 letters of the FMC_CODE are OXU or OXX
+  def genericAndUnusualOptions: Boolean = Seq("OXU", "OXX").contains(code.takeRight(3))
+
+  @OneToMany(mappedBy = "list", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+  @BatchSize(size = 200)
+  val entries: JSet[UpstreamModuleListEntry] = JHashSet()
+
+  def matches(moduleCode: String): Boolean = entries.asScala.exists(_.pattern.matcher(moduleCode).matches())
 
 }

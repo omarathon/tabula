@@ -9,48 +9,52 @@ import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, Smal
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 abstract class DepartmentSmallGroupSetMembershipItemType(val value: String)
+
 case object DepartmentSmallGroupSetMembershipStaticType extends DepartmentSmallGroupSetMembershipItemType("static")
+
 case object DepartmentSmallGroupSetMembershipIncludeType extends DepartmentSmallGroupSetMembershipItemType("include")
+
 case object DepartmentSmallGroupSetMembershipExcludeType extends DepartmentSmallGroupSetMembershipItemType("exclude")
 
 /**
- * Item in list of members for displaying in view.
- */
+  * Item in list of members for displaying in view.
+  */
 case class DepartmentSmallGroupSetMembershipItem(
-	itemType: DepartmentSmallGroupSetMembershipItemType, // static, include or exclude
-	firstName: String,
-	lastName: String,
-	universityId: String,
-	userId: String
+  itemType: DepartmentSmallGroupSetMembershipItemType, // static, include or exclude
+  firstName: String,
+  lastName: String,
+  universityId: String,
+  userId: String
 ) {
-	def itemTypeString: String = itemType.value
+  def itemTypeString: String = itemType.value
 }
 
 object ListDepartmentSmallGroupSetsCommand {
-	def apply(department: Department, academicYear: AcademicYear) =
-		new ListDepartmentSmallGroupSetsCommandInternal(department, academicYear)
-			with ComposableCommand[Seq[DepartmentSmallGroupSet]]
-			with ListDepartmentSmallGroupSetsPermissions
-			with AutowiringSmallGroupServiceComponent
-			with ReadOnly with Unaudited
+  def apply(department: Department, academicYear: AcademicYear) =
+    new ListDepartmentSmallGroupSetsCommandInternal(department, academicYear)
+      with ComposableCommand[Seq[DepartmentSmallGroupSet]]
+      with ListDepartmentSmallGroupSetsPermissions
+      with AutowiringSmallGroupServiceComponent
+      with ReadOnly with Unaudited
 }
 
 class ListDepartmentSmallGroupSetsCommandInternal(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState {
-	self: SmallGroupServiceComponent =>
+  extends CommandInternal[Seq[DepartmentSmallGroupSet]] with ListDepartmentSmallGroupSetsCommandState {
+  self: SmallGroupServiceComponent =>
 
-	def applyInternal(): Seq[DepartmentSmallGroupSet] = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
+  def applyInternal(): Seq[DepartmentSmallGroupSet] = smallGroupService.getDepartmentSmallGroupSets(department, academicYear)
 }
 
 trait ListDepartmentSmallGroupSetsCommandState {
-	def department: Department
-	def academicYear: AcademicYear
+  def department: Department
+
+  def academicYear: AcademicYear
 }
 
 trait ListDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ListDepartmentSmallGroupSetsCommandState =>
+  self: ListDepartmentSmallGroupSetsCommandState =>
 
-	def permissionsCheck(p:PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.SmallGroups.Create, mandatory(department))
+  }
 }

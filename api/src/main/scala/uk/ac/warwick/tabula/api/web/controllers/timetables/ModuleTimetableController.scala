@@ -19,37 +19,37 @@ import uk.ac.warwick.tabula.{DateFormats, RequestFailedException}
 import scala.util.{Failure, Success}
 
 object ModuleTimetableController {
-	type ViewModuleTimetableCommand = ViewModuleTimetableCommand.CommandType
+  type ViewModuleTimetableCommand = ViewModuleTimetableCommand.CommandType
 }
 
 @Controller
 @RequestMapping(Array("/v1/module/{module}/timetable"))
 class ModuleTimetableController extends ApiController
-	with GetModuleTimetableApi
-	with TimetableEventToJsonConverter
-	with AutowiringProfileServiceComponent
+  with GetModuleTimetableApi
+  with TimetableEventToJsonConverter
+  with AutowiringProfileServiceComponent
 
 trait GetModuleTimetableApi {
-	self: ApiController with TimetableEventToJsonConverter =>
+  self: ApiController with TimetableEventToJsonConverter =>
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("getTimetableCommand")
-	def command(@PathVariable module: Module): ViewModuleTimetableCommand =
-		ViewModuleTimetableCommand(module, user)
+  @ModelAttribute("getTimetableCommand")
+  def command(@PathVariable module: Module): ViewModuleTimetableCommand =
+    ViewModuleTimetableCommand(module, user)
 
-	@RequestMapping(method = Array(GET), produces = Array("application/json"))
-	def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewModuleTimetableCommand, errors: Errors): Mav = {
-		if (errors.hasErrors) {
-			Mav(new JSONErrorView(errors))
-		} else command.apply() match {
-			case Success(result) => Mav(new JSONView(Map(
-				"success" -> true,
-				"status" -> "ok",
-				"events" -> result.events.map(jsonTimetableEventObject),
-				"lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
-			)))
-			case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
-		}
-	}
+  @RequestMapping(method = Array(GET), produces = Array("application/json"))
+  def showModuleTimetable(@Valid @ModelAttribute("getTimetableCommand") command: ViewModuleTimetableCommand, errors: Errors): Mav = {
+    if (errors.hasErrors) {
+      Mav(new JSONErrorView(errors))
+    } else command.apply() match {
+      case Success(result) => Mav(new JSONView(Map(
+        "success" -> true,
+        "status" -> "ok",
+        "events" -> result.events.map(jsonTimetableEventObject),
+        "lastUpdated" -> result.lastUpdated.map(DateFormats.IsoDateTime.print).orNull
+      )))
+      case Failure(t) => throw new RequestFailedException("The timetabling service could not be reached", t)
+    }
+  }
 }

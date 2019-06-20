@@ -12,42 +12,42 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 
 object TurnitinLtiSubmitAssignmentCommand {
-	def apply(user: CurrentUser) =
-		new TurnitinLtiSubmitAssignmentCommandInternal(user)
-			with TurnitinLtiSubmitAssignmentCommandPermissions
-			with ComposableCommand[TurnitinLtiResponse]
-			with ReadOnly with Unaudited
-			with TurnitinLtiSubmitAssignmentCommandState
-			with TurnitinLtiSubmitAssignmentValidation
-			with AutowiringTurnitinLtiServiceComponent
+  def apply(user: CurrentUser) =
+    new TurnitinLtiSubmitAssignmentCommandInternal(user)
+      with TurnitinLtiSubmitAssignmentCommandPermissions
+      with ComposableCommand[TurnitinLtiResponse]
+      with ReadOnly with Unaudited
+      with TurnitinLtiSubmitAssignmentCommandState
+      with TurnitinLtiSubmitAssignmentValidation
+      with AutowiringTurnitinLtiServiceComponent
 }
 
 class TurnitinLtiSubmitAssignmentCommandInternal(val user: CurrentUser) extends CommandInternal[TurnitinLtiResponse] {
 
-	self: TurnitinLtiSubmitAssignmentCommandState with TurnitinLtiServiceComponent =>
+  self: TurnitinLtiSubmitAssignmentCommandState with TurnitinLtiServiceComponent =>
 
-	override def applyInternal(): TurnitinLtiResponse = transactional() {
-		turnitinLtiService.submitAssignment(assignment, user)
-	}
+  override def applyInternal(): TurnitinLtiResponse = transactional() {
+    turnitinLtiService.submitAssignment(assignment, user)
+  }
 
 }
 
 trait TurnitinLtiSubmitAssignmentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.ImportSystemData)
-	}
+  def permissionsCheck(p: PermissionsChecking) {
+    p.PermissionCheck(Permissions.ImportSystemData)
+  }
 }
 
 trait TurnitinLtiSubmitAssignmentValidation extends SelfValidating {
-	self: TurnitinLtiSubmitAssignmentCommandState =>
+  self: TurnitinLtiSubmitAssignmentCommandState =>
 
-	override def validate(errors: Errors) {
-		if (null == assignment) {
-			errors.rejectValue("assignment", "turnitin.assignment.empty")
-		}
-	}
+  override def validate(errors: Errors) {
+    if (null == assignment) {
+      errors.rejectValue("assignment", "turnitin.assignment.empty")
+    }
+  }
 }
 
 trait TurnitinLtiSubmitAssignmentCommandState {
-	var assignment: Assignment = _
+  var assignment: Assignment = _
 }

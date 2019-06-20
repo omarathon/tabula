@@ -6,50 +6,52 @@ import uk.ac.warwick.tabula.exams.web.Routes
 import uk.ac.warwick.tabula.web.BreadCrumb
 
 trait ExamsBreadcrumbs {
-	val Breadcrumbs = ExamsBreadcrumbs
+  val Breadcrumbs = ExamsBreadcrumbs
 }
 
 object ExamsBreadcrumbs {
-	abstract class Abstract extends BreadCrumb
-	case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
-	object Exams {
+  abstract class Abstract extends BreadCrumb
 
-		case object HomeDefaultYear extends Abstract {
-			val title = "Manage Exams"
-			val url = Some(Routes.Exams.homeDefaultYear)
-		}
+  case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
-		case class Home(academicYear: AcademicYear) extends Abstract {
-			val title = "Manage Exams"
-			val url = Some(Routes.Exams.home(academicYear))
-		}
+  object Exams {
 
-		case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title: String = department.name
-			val url = Some(Routes.Exams.admin.department(department, academicYear))
-		}
+    case object HomeDefaultYear extends Abstract {
+      val title = "Manage Exams"
+      val url = Some(Routes.Exams.homeDefaultYear)
+    }
 
-		case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
-			val title: String = module.code.toUpperCase
-			val url = Some(Routes.Exams.admin.module(module, academicYear))
-			override val tooltip: String = module.name
-		}
+    case class Home(academicYear: AcademicYear) extends Abstract {
+      val title = "Manage Exams"
+      val url = Some(Routes.Exams.home(academicYear))
+    }
 
-	}
+    case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
+      val title: String = department.name
+      val url = Some(Routes.Exams.admin.department(department, academicYear))
+    }
 
-	object Grids {
+    case class Module(module: model.Module, academicYear: AcademicYear) extends Abstract {
+      val title: String = module.code.toUpperCase
+      val url = Some(Routes.Exams.admin.module(module, academicYear))
+      override val tooltip: String = module.name
+    }
 
-		case object Home extends Abstract {
-			val title = "Manage Exam Grids"
-			val url = Some(Routes.Grids.home)
-		}
+  }
 
-		case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
-			val title: String = department.name
-			val url = Some(Routes.Grids.departmentAcademicYear(department, academicYear))
-		}
+  object Grids {
 
-	}
+    case object Home extends Abstract {
+      val title = "Manage Exam Grids"
+      val url = Some(Routes.Grids.home)
+    }
+
+    case class Department(department: model.Department, academicYear: AcademicYear) extends Abstract {
+      val title: String = department.name
+      val url = Some(Routes.Grids.departmentAcademicYear(department, academicYear))
+    }
+
+  }
 
 }

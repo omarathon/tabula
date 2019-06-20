@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.permissions.Permissions.Profiles.MeetingRecord
 case class MeetingRecordApprover(approval: model.MeetingRecordApproval) extends BuiltInRole(MeetingRecordApproverRoleDefinition, approval)
 
 case object MeetingRecordApproverRoleDefinition extends UnassignableBuiltInRoleDefinition {
-	override def description = "Meeting Record Approver"
+  override def description = "Meeting Record Approver"
 
-	GrantsScopedPermission(
-		MeetingRecord.Approve
-	)
+  GrantsScopedPermission(
+    MeetingRecord.Approve
+  )
 }

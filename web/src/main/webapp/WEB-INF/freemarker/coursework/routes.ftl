@@ -9,7 +9,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 -->
 
 <#macro _u page context=cm1Context>
-	<@url context=context page=page />
+  <@url context=context page=page />
 </#macro>
 
 <#macro home><@_u page="/" /></#macro>
@@ -21,9 +21,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro marksmanagementdepts><@_u page="/admin/marksmanagement/departments" /></#macro>
 
 <#macro ratefeedback feedback><#compress>
-    <#assign assignment=feedback.assignment />
-    <#assign module=assignment.module />
-    <@_u page="/module/${module.code}/${assignment.id}/rate" />
+  <#assign assignment=feedback.assignment />
+  <#assign module=assignment.module />
+  <@_u page="/module/${module.code}/${assignment.id}/rate" />
 </#compress></#macro>
 <#macro assignmentdelete assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
@@ -111,11 +111,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro extensionsettings department><@_u page="/admin/department/${department.code}/settings/extensions" /></#macro>
 <#macro manage_extensions department academicYear=''>
-	<#if academicYear?has_content>
-		<@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/manage/extensions" />
-	<#else>
-		<@_u page="/admin/department/${department.code}/manage/extensions" />
-	</#if>
+  <#if academicYear?has_content>
+    <@_u page="/admin/department/${department.code}/${academicYear.startYear?c}/manage/extensions" />
+  <#else>
+    <@_u page="/admin/department/${department.code}/manage/extensions" />
+  </#if>
 </#macro>
 
 <#macro extensiondetail assignment usercode><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/extensions/detail/${usercode}" /></#macro>

@@ -1,43 +1,38 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord
 
 import javax.persistence.{DiscriminatorValue, Entity}
-
+import org.hibernate.annotations.Proxy
 import uk.ac.warwick.tabula.data.model._
 
 @Entity
+@Proxy
 @DiscriminatorValue("meetingRecordRejected")
 class MeetingRecordRejectedNotification
-	extends Notification[MeetingRecordApproval, Unit]
-	with MeetingRecordNotificationTrait
-	with SingleItemNotification[MeetingRecordApproval]
-	with AllCompletedActionRequiredNotification {
+  extends Notification[MeetingRecordApproval, Unit]
+    with MeetingRecordNotificationTrait
+    with SingleItemNotification[MeetingRecordApproval]
+    with AllCompletedActionRequiredNotification {
 
-	priority = NotificationPriority.Warning
+  priority = NotificationPriority.Warning
 
-	def approval: MeetingRecordApproval = item.entity
-	def meeting: MeetingRecord = approval.meetingRecord
-	def relationship: StudentRelationship = meeting.relationship
+  def approval: MeetingRecordApproval = item.entity
 
-	def verb = "return"
+  def meeting: MeetingRecord = approval.meetingRecord
 
-	def title: String = {
-		val name =
-			if (meeting.creator.universityId == meeting.relationship.studentId) meeting.relationship.agentName
-			else meeting.relationship.studentMember.flatMap { _.fullName }.getOrElse("student")
+  def verb = "return"
 
-		s"${agentRole.capitalize} meeting record with $name returned with comments"
-	}
+  def titleSuffix: String = "returned with comments"
 
-	def content = FreemarkerModel(FreemarkerTemplate, Map(
-		"actor" -> agent,
-		"role"->agentRole,
-		"dateFormatter" -> dateOnlyFormatter,
-		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "returned",
-		"reason" -> approval.comments
-	))
+  def content = FreemarkerModel(FreemarkerTemplate, Map(
+    "actor" -> agent,
+    "agentRoles" -> agentRoles,
+    "dateFormatter" -> dateOnlyFormatter,
+    "meetingRecord" -> approval.meetingRecord,
+    "verbed" -> "returned",
+    "reason" -> approval.comments
+  ))
 
-	def urlTitle = "edit the record and submit it for approval again"
+  def urlTitle = "edit the record and submit it for approval again"
 
-	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
+  def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }

@@ -9,74 +9,74 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 
 
 object ModifyAssignmentOptionsCommand {
-	def apply(assignment: Assignment) =
-		new ModifyAssignmentOptionsCommandInternal(assignment)
-			with ComposableCommand[Assignment]
-			with ModifyAssignmentOptionsPermissions
-			with ModifyAssignmentOptionsDescription
-			with ModifyAssignmentOptionsCommandState
-			with ModifyAssignmentOptionsValidation
-			with AutowiringAssessmentServiceComponent
-			with SharedAssignmentOptionsProperties
+  def apply(assignment: Assignment) =
+    new ModifyAssignmentOptionsCommandInternal(assignment)
+      with ComposableCommand[Assignment]
+      with ModifyAssignmentOptionsPermissions
+      with ModifyAssignmentOptionsDescription
+      with ModifyAssignmentOptionsCommandState
+      with ModifyAssignmentOptionsValidation
+      with AutowiringAssessmentServiceComponent
+      with SharedAssignmentOptionsProperties
 }
 
 class ModifyAssignmentOptionsCommandInternal(override val assignment: Assignment)
-	extends CommandInternal[Assignment] with PopulateOnForm {
-	self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
+  extends CommandInternal[Assignment] with PopulateOnForm {
+  self: AssessmentServiceComponent with ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
 
-	override def applyInternal(): Assignment = {
-		this.copyTo(assignment)
-		assessmentService.save(assignment)
-		assignment
-	}
+  override def applyInternal(): Assignment = {
+    this.copyTo(assignment)
+    assessmentService.save(assignment)
+    assignment
+  }
 
-	override def populate(): Unit = {
-		copySharedOptionsFrom(assignment)
-	}
+  override def populate(): Unit = {
+    copySharedOptionsFrom(assignment)
+  }
 
 }
 
 trait ModifyAssignmentOptionsCommandState {
-	self: AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
+  self: AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
-	def assignment: Assignment
+  def assignment: Assignment
 
-	def copyTo(assignment: Assignment) {
-		copySharedOptionsTo(assignment)
-	}
+  def copyTo(assignment: Assignment) {
+    copySharedOptionsTo(assignment)
+  }
 }
 
 trait ModifyAssignmentOptionsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ModifyAssignmentOptionsCommandState =>
+  self: ModifyAssignmentOptionsCommandState =>
 
-	override def permissionsCheck(p: PermissionsChecking): Unit = {
-		notDeleted(assignment)
-		p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
-	}
+  override def permissionsCheck(p: PermissionsChecking): Unit = {
+    notDeleted(assignment)
+    p.PermissionCheck(Permissions.Assignment.Update, assignment.module)
+  }
 }
 
 trait ModifyAssignmentOptionsDescription extends Describable[Assignment] {
-	self: ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
+  self: ModifyAssignmentOptionsCommandState with SharedAssignmentOptionsProperties =>
 
-	override lazy val eventName: String = "ModifyAssignmentOptions"
+  override lazy val eventName: String = "ModifyAssignmentOptions"
 
-	override def describe(d: Description) {
-		d.assignment(assignment)
-		d.properties(
-			"minimumFileAttachmentLimit" -> minimumFileAttachmentLimit,
-			"maximumFileAttachmentLimit" -> fileAttachmentLimit,
-			"individualFileSizeLimit" -> individualFileSizeLimit,
-			"fileAttachmentTypes" -> fileAttachmentTypes,
-			"wordCountMax" -> wordCountMax,
-			"wordCountMin" -> wordCountMin
-		)
-	}
+  override def describe(d: Description) {
+    d.assignment(assignment)
+    d.properties(
+      "minimumFileAttachmentLimit" -> minimumFileAttachmentLimit,
+      "maximumFileAttachmentLimit" -> fileAttachmentLimit,
+      "individualFileSizeLimit" -> individualFileSizeLimit,
+      "fileAttachmentTypes" -> fileAttachmentTypes,
+      "wordCountMax" -> wordCountMax,
+      "wordCountMin" -> wordCountMin
+    )
+  }
 }
 
 trait ModifyAssignmentOptionsValidation extends SelfValidating {
-	self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
+  self: ModifyAssignmentOptionsCommandState with AssessmentServiceComponent with SharedAssignmentOptionsProperties =>
 
-	override def validate(errors: Errors) {
-		validateSharedOptions(errors)
-	}
+  override def validate(errors: Errors) {
+    validateSharedOptions(errors)
+  }
 }

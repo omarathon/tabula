@@ -11,61 +11,61 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 import uk.ac.warwick.userlookup.User
 
 object StudentCourseworkUpcomingCommand {
-	def apply(memberOrUser: MemberOrUser): Appliable[StudentAssignments] =
-		new StudentCourseworkUpcomingCommandInternal(memberOrUser)
-			with ComposableCommand[StudentAssignments]
-			with StudentCourseworkUpcomingCommandPermissions
-			with AutowiringAssessmentServiceComponent
-			with AutowiringAssessmentMembershipServiceComponent
-			with AutowiringFeaturesComponent
-			with StudentCourseworkCommandHelper
-			with ReadOnly with Unaudited
+  def apply(memberOrUser: MemberOrUser): Appliable[StudentAssignments] =
+    new StudentCourseworkUpcomingCommandInternal(memberOrUser)
+      with ComposableCommand[StudentAssignments]
+      with StudentCourseworkUpcomingCommandPermissions
+      with AutowiringAssessmentServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with AutowiringFeaturesComponent
+      with StudentCourseworkCommandHelper
+      with ReadOnly with Unaudited
 }
 
 class StudentCourseworkUpcomingCommandInternal(val memberOrUser: MemberOrUser) extends StudentCourseworkCommandInternal
-	with StudentCourseworkUpcomingCommandState {
+  with StudentCourseworkUpcomingCommandState {
 
-	self: AssessmentServiceComponent with
-		  AssessmentMembershipServiceComponent with
-		  FeaturesComponent with
-			StudentCourseworkCommandHelper =>
+  self: AssessmentServiceComponent with
+    AssessmentMembershipServiceComponent with
+    FeaturesComponent with
+    StudentCourseworkCommandHelper =>
 
-	override lazy val overridableAssignmentsWithFeedback = Nil
-	override lazy val overridableAssignmentsWithSubmission = Nil
+  override lazy val overridableAssignmentsWithFeedback = Nil
+  override lazy val overridableAssignmentsWithSubmission = Nil
 
-	// find enrolled assignments that require submission in the next month
-	override lazy val overridableEnrolledAssignments: Seq[Assignment] = {
-		val user = memberOrUser.asUser
-		val monthFromNow = DateTime.now.plusMonths(1)
+  // find enrolled assignments that require submission in the next month
+  override lazy val overridableEnrolledAssignments: Seq[Assignment] = {
+    val user = memberOrUser.asUser
+    val monthFromNow = DateTime.now.plusMonths(1)
 
-		assessmentMembershipService
-			.getEnrolledAssignments(user, None)
-			.filter(a => a.submittable(user) && !a.openEnded && a.submissionDeadline(user).isBefore(monthFromNow) && a.submissionDeadline(user).isAfterNow)
-			.sortBy(_.submissionDeadline(user))(Ordering.fromLessThan(_ isBefore _))
-	}
+    assessmentMembershipService
+      .getEnrolledAssignments(user, None)
+      .filter(a => a.submittable(user) && !a.openEnded && a.submissionDeadline(user).isBefore(monthFromNow) && a.submissionDeadline(user).isAfterNow)
+      .sortBy(_.submissionDeadline(user))(Ordering.fromLessThan(_ isBefore _))
+  }
 
-	override val usercode: String = memberOrUser.usercode
-	override val user: User = memberOrUser.asUser
+  override val usercode: String = memberOrUser.usercode
+  override val user: User = memberOrUser.asUser
 
-	override def applyInternal() = StudentAssignments(
-		enrolledAssignments = enrolledAssignmentsInfo,
-		historicAssignments = Nil
-	)
+  override def applyInternal() = StudentAssignments(
+    enrolledAssignments = enrolledAssignmentsInfo,
+    historicAssignments = Nil
+  )
 
 }
 
 trait StudentCourseworkUpcomingCommandState {
-	def memberOrUser: MemberOrUser
+  def memberOrUser: MemberOrUser
 }
 
 trait StudentCourseworkUpcomingCommandPermissions extends RequiresPermissionsChecking {
-	self: StudentCourseworkUpcomingCommandState =>
-	def permissionsCheck(p: PermissionsChecking) {
-		memberOrUser.asMember.foreach { member =>
-			p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
-			p.PermissionCheck(Permissions.Submission.Read, member)
-			p.PermissionCheck(Permissions.AssignmentFeedback.Read, member)
-			p.PermissionCheck(Permissions.Extension.Read, member)
-		}
-	}
+  self: StudentCourseworkUpcomingCommandState =>
+  def permissionsCheck(p: PermissionsChecking) {
+    memberOrUser.asMember.foreach { member =>
+      p.PermissionCheck(Permissions.Profiles.Read.Coursework, member)
+      p.PermissionCheck(Permissions.Submission.Read, member)
+      p.PermissionCheck(Permissions.AssignmentFeedback.Read, member)
+      p.PermissionCheck(Permissions.Extension.Read, member)
+    }
+  }
 }

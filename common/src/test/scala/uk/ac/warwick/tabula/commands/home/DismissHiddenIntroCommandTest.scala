@@ -6,79 +6,79 @@ import uk.ac.warwick.tabula.{Mockito, NoCurrentUser, TestBase}
 
 class DismissHiddenIntroCommandTest extends TestBase with Mockito {
 
-	val user = NoCurrentUser()
-	val settings = new UserSettings("userId")
+  val user = NoCurrentUser()
+  val settings = new UserSettings("userId")
 
-	val service: UserSettingsService = mock[UserSettingsService]
+  val service: UserSettingsService = mock[UserSettingsService]
 
-	@Test def setupWithNonExisting {
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.dismiss should be (false)
-	}
+  @Test def setupWithNonExisting {
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.dismiss should be(false)
+  }
 
-	@Test def setupWithExisting {
-		settings.hiddenIntros = Seq("hash")
+  @Test def setupWithExisting {
+    settings.hiddenIntros = Seq("hash")
 
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.dismiss should be (true)
-	}
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.dismiss should be(true)
+  }
 
-	@Test def dismissNonExisting {
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.service = service
+  @Test def dismissNonExisting {
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.service = service
 
-		cmd.dismiss = true
+    cmd.dismiss = true
 
-		cmd.applyInternal()
+    cmd.applyInternal()
 
-		settings.hiddenIntros should be (Seq("hash"))
+    settings.hiddenIntros should be(Seq("hash"))
 
-		verify(service, times(1)).save(user, settings)
-	}
+    verify(service, times(1)).save(user, settings)
+  }
 
-	@Test def dismissExisting {
-		settings.hiddenIntros = Seq("hash", "otherhash")
+  @Test def dismissExisting {
+    settings.hiddenIntros = Seq("hash", "otherhash")
 
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.service = service
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.service = service
 
-		cmd.dismiss = true
+    cmd.dismiss = true
 
-		cmd.applyInternal()
+    cmd.applyInternal()
 
-		settings.hiddenIntros should be (Seq("hash", "otherhash"))
+    settings.hiddenIntros should be(Seq("hash", "otherhash"))
 
-		verify(service, times(1)).save(user, settings)
-	}
+    verify(service, times(1)).save(user, settings)
+  }
 
-	@Test def undismissExisting {
-		settings.hiddenIntros = Seq("hash", "otherhash")
+  @Test def undismissExisting {
+    settings.hiddenIntros = Seq("hash", "otherhash")
 
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.service = service
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.service = service
 
-		cmd.dismiss = false
+    cmd.dismiss = false
 
-		cmd.applyInternal()
+    cmd.applyInternal()
 
-		settings.hiddenIntros should be (Seq("otherhash"))
+    settings.hiddenIntros should be(Seq("otherhash"))
 
-		verify(service, times(1)).save(user, settings)
-	}
+    verify(service, times(1)).save(user, settings)
+  }
 
-	@Test def undismissNonExisting {
-		settings.hiddenIntros = Seq("otherhash")
+  @Test def undismissNonExisting {
+    settings.hiddenIntros = Seq("otherhash")
 
-		val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
-		cmd.service = service
+    val cmd = new DismissHiddenIntroCommand(user, settings, "hash")
+    cmd.service = service
 
-		cmd.dismiss = false
+    cmd.dismiss = false
 
-		cmd.applyInternal()
+    cmd.applyInternal()
 
-		settings.hiddenIntros should be (Seq("otherhash"))
+    settings.hiddenIntros should be(Seq("otherhash"))
 
-		verify(service, times(1)).save(user, settings)
-	}
+    verify(service, times(1)).save(user, settings)
+  }
 
 }

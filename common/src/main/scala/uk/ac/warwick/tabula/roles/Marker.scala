@@ -8,17 +8,17 @@ case class Marker(assessment: Assessment) extends BuiltInRole(MarkerRoleDefiniti
 
 case object MarkerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
-	override def description = "Marker"
+  override def description = "Marker"
 
-	GrantsScopedPermission(
-		AssignmentFeedback.Read,
-		AssignmentMarkerFeedback.DownloadMarksTemplate,
-		AssignmentMarkerFeedback.Manage,
-		ExamFeedback.Read,
-		ExamMarkerFeedback.DownloadMarksTemplate,
-		ExamMarkerFeedback.Manage,
-		Submission.Read,
-		Submission.ViewPlagiarismStatus
-	)
+  GrantsScopedPermission(
+    AssignmentFeedback.Read,
+    AssignmentMarkerFeedback.DownloadMarksTemplate,
+    AssignmentMarkerFeedback.Manage,
+    ExamFeedback.Read,
+    ExamMarkerFeedback.DownloadMarksTemplate,
+    ExamMarkerFeedback.Manage,
+    Submission.Read,
+    Submission.ViewPlagiarismStatus
+  )
 
 }

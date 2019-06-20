@@ -13,35 +13,36 @@ import uk.ac.warwick.tabula.web.controllers.coursework.OldCourseworkController
 
 import scala.collection.JavaConverters._
 
-@Profile(Array("cm1Enabled")) @Controller
+@Profile(Array("cm1Enabled"))
+@Controller
 @RequestMapping(Array("/${cm1.prefix}/admin/module/{module}/assignments/{assignment}/feedback/{feedback}/check-sits"))
 class OldCheckAssignmentSitsUploadController extends OldCourseworkController with AutowiringProfileServiceComponent {
 
-	validatesSelf[SelfValidating]
+  validatesSelf[SelfValidating]
 
-	@ModelAttribute("command")
-	def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedback: AssignmentFeedback) =
-		CheckSitsUploadCommand(mandatory(feedback))
+  @ModelAttribute("command")
+  def command(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable feedback: AssignmentFeedback) =
+    CheckSitsUploadCommand(mandatory(feedback))
 
-	@RequestMapping
-	def page(
-		@ModelAttribute("command") cmd: Appliable[CheckSitsUploadCommand.Result],
-		errors: Errors,
-		@PathVariable feedback: AssignmentFeedback
-	): Mav = {
-		val sprCodes = feedback.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid)).flatMap {
-			case s: StudentMember => Some(s.freshStudentCourseDetails.map(_.sprCode))
-			case _ => None
-		}.getOrElse(Seq())
-		if (errors.hasErrors) {
-			Mav("coursework/admin/assignments/publish/check_sits")
-		} else {
-			Mav("coursework/admin/assignments/publish/check_sits",
-				"result" -> cmd.apply(),
-				"assessmentGroupPairs" -> feedback.assessmentGroups.asScala.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
-				"sprCodes" -> sprCodes
-			)
-		}
-	}
+  @RequestMapping
+  def page(
+    @ModelAttribute("command") cmd: Appliable[CheckSitsUploadCommand.Result],
+    errors: Errors,
+    @PathVariable feedback: AssignmentFeedback
+  ): Mav = {
+    val sprCodes = feedback.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid)).flatMap {
+      case s: StudentMember => Some(s.freshStudentCourseDetails.map(_.sprCode))
+      case _ => None
+    }.getOrElse(Seq())
+    if (errors.hasErrors) {
+      Mav("coursework/admin/assignments/publish/check_sits")
+    } else {
+      Mav("coursework/admin/assignments/publish/check_sits",
+        "result" -> cmd.apply(),
+        "assessmentGroupPairs" -> feedback.assessmentGroups.map(assessGroup => (assessGroup.occurrence, assessGroup.assessmentComponent.sequence)),
+        "sprCodes" -> sprCodes
+      )
+    }
+  }
 
 }
