@@ -38,12 +38,12 @@ object ReleaseToMarkerNotification {
 
   def renderNoCollectingSubmissions(
     assignment: Assignment,
-    numReleasedFeedbacks: Int,
+    feedbacksCount: Int,
     workflowVerb: String
   ): FreemarkerModel = {
     FreemarkerModel(templateLocation, Map(
       "assignment" -> assignment,
-      "numReleasedFeedbacks" -> numReleasedFeedbacks,
+      "feedbacksCount" -> feedbacksCount,
       "workflowVerb" -> workflowVerb
     ))
   }
@@ -90,7 +90,7 @@ class ReleaseToMarkerNotification
   } else {
     ReleaseToMarkerNotification.renderNoCollectingSubmissions(
       assignment = assignment,
-      numReleasedFeedbacks = items.size,
+      feedbacksCount = items.size,
       workflowVerb = workflowVerb
     )
   }
