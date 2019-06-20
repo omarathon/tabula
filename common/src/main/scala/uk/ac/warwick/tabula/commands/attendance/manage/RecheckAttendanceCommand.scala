@@ -80,7 +80,8 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
         case SmallGroup =>
           val eventAttendance = smallGroupService.findAttendanceForStudentsBetweenDates(students, academicYear, startDate.toLocalDateTime, endDate.toLocalDateTime)
 
-          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance, onlyRecordable = false)
+          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance, onlyRecordable = false) ++
+            attendanceMonitoringEventAttendanceService.getMissedCheckpoints(eventAttendance, onlyRecordable = false).map(_._1)
         case Standard =>
           Nil
       }
