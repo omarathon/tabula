@@ -45,9 +45,9 @@ class MitCircsSubmissionAddSharingNotification extends MitCircsSubmissionSharing
 @Proxy
 @DiscriminatorValue("MitCircsSubmissionRemoveSharing")
 class MitCircsSubmissionRemoveSharingNotification extends MitCircsSubmissionSharingNotification {
-  override def verb: String = "un-shared"
+  override def verb: String = "unshared"
 
-  override def title: String = s"${agent.getFullName} has un-shared their mitigating circumstances submission MIT-${item.entity.key}"
+  override def title: String = s"${agent.getFullName} has unshared their mitigating circumstances submission MIT-${item.entity.key}"
 
   override def content: FreemarkerModel = FreemarkerModel(unsharedTemplateLocation, Map(
     "agent" -> agent,

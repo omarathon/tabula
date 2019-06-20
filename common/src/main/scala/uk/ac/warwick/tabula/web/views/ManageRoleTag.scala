@@ -72,7 +72,12 @@ class ManageRoleTag extends TemplateDirectiveModel {
         }
 
       val allPermissions = definition.allPermissions(Option(scope)).keys
-      val deniedPermissions = allPermissions.filterNot(securityService.canDelegate(user, _, scope))
+      val deniedPermissions = allPermissions.filterNot { permission =>
+        if (allowUnassignableRoles)
+          securityService.can(user, permission, scope)
+        else
+          securityService.canDelegate(user, permission, scope)
+      }
 
       val canDelegate = deniedPermissions.isEmpty || user.god
 
