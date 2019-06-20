@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.io.InputStreamReader
+import java.io.{InputStream, InputStreamReader}
 import java.net.URI
 import java.nio.charset.StandardCharsets
 import java.util.zip.GZIPInputStream
@@ -19,6 +19,8 @@ import org.apache.http.impl.conn.DefaultSchemePortResolver
 import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 import org.apache.http._
+import play.api.libs.json.{JsValue, Json}
+import uk.ac.warwick.tabula.system.SecureXmlEntityResolver
 
 import scala.xml.XML
 
@@ -49,24 +51,34 @@ trait ApacheHttpClientUtils {
     new BasicHeader("Authorization", s"Basic $encodedCredentials")
   }
 
-  def xmlResponseHandler[A](block: xml.Elem => A): AbstractResponseHandler[A] =
-    new AbstractResponseHandler[A] {
-      override def handleEntity(entity: HttpEntity): A = {
-        val in = (entity.getContent, entity.getContentEncoding) match {
-          case (stm, enc) if enc != null && enc.getValue == "gzip" => new GZIPInputStream(stm)
-          case (stm, _) => stm
-        }
-
-        try {
-          val charset = Option(ContentType.getLenientOrDefault(entity).getCharset).getOrElse(StandardCharsets.UTF_8)
-          val reader = new InputStreamReader(in, charset)
-          val xml = XML.withSAXParser(ApacheHttpClientUtils.saxParserFactory.newSAXParser).load(reader)
-          block(xml)
-        } finally {
-          IOUtils.closeQuietly(in)
-          EntityUtils.consumeQuietly(entity)
-        }
+  def gzipResponseHandler[A](block: (HttpEntity, InputStream) => A): AbstractResponseHandler[A] =
+    (entity: HttpEntity) => {
+      val in: InputStream = (entity.getContent, entity.getContentEncoding) match {
+        case (stm, enc) if enc != null && enc.getValue == "gzip" => new GZIPInputStream(stm)
+        case (stm, _) => stm
       }
+
+      try {
+        block(entity, in)
+      } finally {
+        IOUtils.closeQuietly(in)
+        EntityUtils.consumeQuietly(entity)
+      }
+    }
+
+  def xmlResponseHandler[A](block: xml.Elem => A): AbstractResponseHandler[A] =
+    gzipResponseHandler { case (entity, in) =>
+      val charset = Option(ContentType.getLenientOrDefault(entity).getCharset).getOrElse(StandardCharsets.UTF_8)
+      val reader = new InputStreamReader(in, charset)
+      val parser = ApacheHttpClientUtils.saxParserFactory.newSAXParser
+      parser.getParser.setEntityResolver(new SecureXmlEntityResolver)
+      val xml = XML.withSAXParser(parser).load(reader)
+      block(xml)
+    }
+
+  def jsonResponseHandler[A](block: JsValue => A): AbstractResponseHandler[A] =
+    gzipResponseHandler { case (_, in) =>
+      block(Json.parse(in))
     }
 
   def statusCodeFilteringHandler[A](expected: Int)(block: HttpEntity => A): ResponseHandler[A] =

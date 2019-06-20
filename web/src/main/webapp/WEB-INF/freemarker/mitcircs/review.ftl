@@ -1,12 +1,26 @@
 <#import "*/mitcircs_components.ftl" as components />
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
+<#assign isSelf = submission.student.universityId == user.universityId />
+
 <#escape x as x?html>
   <h1>MIT-${submission.key}</h1>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
-        <@components.detail label="State" condensed=true>${submission.state.description}</@components.detail>
+        <#if !isSelf>
+          <@components.detail label="State" condensed=true>
+            ${submission.state.description}
+            <#if submission.state.entryName == "Outcomes Recorded">
+              <#if submission.outcomesLastRecordedBy??>
+                by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+              </#if>
+              <#if submission.outcomesLastRecordedOn??>
+                at <@fmt.date date=submission.outcomesLastRecordedOn />
+              </#if>
+            </#if>
+          </@components.detail>
+        </#if>
 
         <#-- Identity information about the student -->
         <#assign student = submission.student />
@@ -31,6 +45,24 @@
           </#if>
         </#if>
 
+        <@components.detail label="Reasonable adjustments" condensed=true>
+          <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
+            <#if student.reasonableAdjustments?has_content>
+              <ul class="fa-ul">
+                <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+                  <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+                </#list>
+              </ul>
+            </#if>
+
+            <#if student.reasonableAdjustmentsNotes?has_content>
+              <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
+            </#if>
+          <#else>
+            <span class="very-subtle">None recorded</span>
+          </#if>
+        </@components.detail>
+
         <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail label="End date" condensed=true>
@@ -54,31 +86,38 @@
           </@components.detail>
         </#if>
       </div>
-      <div class="col-sm-6 col-md-4">
-        <div class="row form-horizontal">
-          <div class="col-sm-4 control-label">Actions</div>
-          <div class="col-sm-8">
-            <#if canManage>
-              <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
-              <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
-              <#if submission.state.entryName == "Submitted">
-                <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
-              <#elseif submission.state.entryName == "Ready For Panel">
-                <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
+      <#if !isSelf>
+        <div class="col-sm-6 col-md-5 col-lg-4">
+          <div class="row form-horizontal">
+            <div class="col-sm-4 control-label">Actions</div>
+            <div class="col-sm-8">
+              <#if canManage>
+                <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
+
+                <#if !submission.withdrawn>
+                  <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
+                </#if>
+
+                <#if submission.state.entryName == "Submitted">
+                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
+                <#elseif submission.state.entryName == "Ready For Panel">
+                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
+                </#if>
+                <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+
+                <#if submission.canRecordAcuteOutcomes>
+                  <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
+                </#if>
+                <#if submission.canRecordOutcomes>
+                  <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
+                </#if>
+              <#elseif submission.panel??>
+                <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
               </#if>
-              <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
-              <#if submission.canRecordAcuteOutcomes>
-                <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
-              </#if>
-              <#if submission.canRecordOutcomes>
-                <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
-              </#if>
-            <#elseif submission.panel??>
-              <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
-            </#if>
+            </div>
           </div>
         </div>
-      </div>
+      </#if>
     </div>
     <@components.section "Details">
       <#noescape>${submission.formattedReason}</#noescape>
@@ -131,7 +170,7 @@
       </@components.section>
     </#if>
 
-    <#if submission.panel??>
+    <#if submission.panel?? && !isSelf>
       <@components.section "Panel">
         <@components.panelDetails panel=submission.panel show_name=true />
       </@components.section>
@@ -140,8 +179,11 @@
     <#if canManage>
       <#assign notesUrl><@routes.mitcircs.notes submission /></#assign>
       <@components.asyncSection "notes" "Notes" notesUrl />
-      <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
-      <@components.asyncSection "messages" "Messages" messageUrl />
+
+      <#if !submission.draft && !submission.withdrawn>
+        <#assign messageUrl><@routes.mitcircs.messages submission /></#assign>
+        <@components.asyncSection "messages" "Messages" messageUrl />
+      </#if>
     </#if>
   </section>
 </#escape>

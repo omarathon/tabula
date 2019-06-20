@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.StudentViewMitCircsSubmissionCommand._
+import uk.ac.warwick.tabula.data.HibernateHelpers
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmission
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
@@ -28,8 +29,12 @@ abstract class StudentViewMitCircsSubmissionCommandInternal(val submission: Miti
   self: MitCircsSubmissionServiceComponent =>
 
   override def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
+    // TODO this needs a check that it is the student currently logged in (could be the person submitting on their behalf)
     submission.lastViewedByStudent = DateTime.now
-    submission
+    mitCircsSubmissionService.saveOrUpdate(submission)
+    // TODO find out why this is necessary for related submissions which themselves are linked to a related submission
+    Option(submission.relatedSubmission).foreach(HibernateHelpers.initialiseAndUnproxy)
+    HibernateHelpers.initialiseAndUnproxy(submission)
   }
 }
 

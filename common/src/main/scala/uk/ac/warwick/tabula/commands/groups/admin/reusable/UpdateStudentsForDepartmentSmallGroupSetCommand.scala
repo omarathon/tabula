@@ -52,7 +52,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandInternal(val department: De
     } else {
       set.members.knownType.staticUserIds = Set.empty
       set.members.knownType.excludedUserIds = Set.empty
-      set.memberQuery = ""
+      set.memberQuery = null
       set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).toSet
     }
 

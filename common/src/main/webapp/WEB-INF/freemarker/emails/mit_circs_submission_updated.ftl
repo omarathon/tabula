@@ -1,1 +1,1 @@
-Mitigating circumstances submission MIT-${submission.key} has been updated
+The mitigating circumstances submission MIT-${submission.key} has been updated.

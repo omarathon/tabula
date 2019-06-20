@@ -26,7 +26,7 @@ trait SubmissionService {
 
   def getAllSubmissions(user: User): Seq[Submission]
 
-  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
+  def getSubmissionsBetweenDates(usercode: String, startInclusive: DateTime, endInclusive: DateTime): Seq[Submission]
 
   def delete(submission: Submission): Unit
 }

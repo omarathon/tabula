@@ -298,6 +298,12 @@
     </#if>
   </@spring.bind>
 
+    <div class="alert alert-info hidden" id="point-conditions-changed-alert">
+      The conditions for automatically marking this monitoring point as ‘attended’ have changed.
+      When you select <strong>Save</strong>, any students who will be affected are shown
+      and you can choose to apply the changes or leave the point unchanged.
+    </div>
+
   <script>
     jQuery(function ($) {
       // Show relavant extra options when changing assignment type

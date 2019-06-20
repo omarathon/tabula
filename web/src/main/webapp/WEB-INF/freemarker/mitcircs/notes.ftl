@@ -1,27 +1,28 @@
 <#escape x as x?html>
-  <#-- TODO need to check in what states it's valid to add a note? -->
-  <@f.form id="mitCircsNoteForm" method="POST" modelAttribute="addCommand" class="dirty-check double-submit-protection" enctype="multipart/form-data">
-    <div class="panel panel-default panel-form">
-      <div class="panel-heading">
-        <div class="pull-right form-inline">
-          <@bs3form.filewidget
-            basename="file"
-            labelText=""
-            types=[]
-            multiple=true
-            required=false
-            customHelp=" "
-          />
+  <#if submission.canAddNote>
+    <@f.form id="mitCircsNoteForm" method="POST" modelAttribute="addCommand" class="dirty-check double-submit-protection" enctype="multipart/form-data">
+      <div class="panel panel-default panel-form">
+        <div class="panel-heading">
+          <div class="pull-right form-inline">
+            <@bs3form.filewidget
+              basename="file"
+              labelText=""
+              types=[]
+              multiple=true
+              required=false
+              customHelp=" "
+            />
 
-          <button type="submit" class="btn btn-sm btn-primary">Save</button>
+            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+          </div>
+          <label class="control-label" for="text">Add a note</label>
         </div>
-        <label class="control-label" for="text">Add a note</label>
+        <div class="panel-body">
+          <@f.textarea path="text" class="form-control" rows="5" aria\-label="Add a note" />
+        </div>
       </div>
-      <div class="panel-body">
-        <@f.textarea path="text" class="form-control" rows="5" aria\-label="Add a note" />
-      </div>
-    </div>
-  </@f.form>
+    </@f.form>
+  </#if>
 
   <#macro render_note note>
     <div class="panel panel-default">

@@ -13,13 +13,13 @@ import org.joda.time.{DateTime, LocalTime}
 import org.springframework.stereotype.Service
 import org.springframework.validation.BindingResult
 import org.xml.sax.InputSource
-import org.xml.sax.helpers.XMLReaderFactory
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Linked
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.XmlUtils
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.groups.docconversion.SmallGroupSetSpreadsheetContentsHandler._
 import uk.ac.warwick.tabula.services.timetables._
@@ -182,7 +182,7 @@ abstract class SmallGroupSetSpreadsheetHandlerImpl extends SmallGroupSetSpreadsh
       override def syllabusPlusLocationService: SyllabusPlusLocationService = locationService
     }
     val parser = {
-      val p = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+      val p = XmlUtils.getXmlReader
       p.setContentHandler(new XSSFSheetXMLHandler(styles, sst, handler, false))
       p
     }

@@ -5,7 +5,7 @@ import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.Projections._
 import org.hibernate.criterion.Order._
 import org.hibernate.sql.JoinType
-import org.joda.time.LocalTime
+import org.joda.time.{DateTime, LocalTime}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -135,6 +135,8 @@ trait SmallGroupDao {
   def listSmallGroupsWithoutLocation(academicYear: AcademicYear, department: Option[Department]): Seq[SmallGroupEvent]
 
   def findSmallGroupsByNameOrModule(query: FindSmallGroupQuery): Seq[SmallGroup]
+
+  def findAttendanceForStudentsInWeeks(students: Seq[StudentMember], academicYear: AcademicYear, startWeek: Int, endWeek: Int): Seq[SmallGroupEventAttendance]
 }
 
 case class FindSmallGroupQuery(
@@ -318,6 +320,19 @@ class SmallGroupDaoImpl extends SmallGroupDao
       .add(is("universityId", studentId))
       .add(is("addedManually", true))
       .seq
+
+  def findAttendanceForStudentsInWeeks(students: Seq[StudentMember], academicYear: AcademicYear, startWeek: Int, endWeek: Int): Seq[SmallGroupEventAttendance] = {
+    session.newCriteria[SmallGroupEventAttendance]
+      .createAlias("occurrence", "occurrence")
+      .createAlias("occurrence.event", "event")
+      .createAlias("event.group", "group")
+      .createAlias("group.groupSet", "groupSet")
+      .add(safeIn("universityId", students.map(_.universityId)))
+      .add(is("groupSet.academicYear", academicYear))
+      .add(ge("occurrence.week", startWeek))
+      .add(le("occurrence.week", endWeek))
+      .seq
+  }
 
   def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, academicYear: AcademicYear, modules: Seq[Module]): Seq[SmallGroupEventAttendance] = {
     if (modules.isEmpty) {

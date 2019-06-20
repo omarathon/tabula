@@ -23,13 +23,16 @@ class MitCircsRecordOutcomesController extends BaseController {
     MitCircsRecordOutcomesCommand(mandatory(Option(submission).filter(_.canRecordOutcomes).orNull), user.apparentUser)
 
   @RequestMapping
-  def form(@PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {
+  def form(@PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav =
     Mav("mitcircs/submissions/record_outcomes", Map(
       "boardRecommendations" -> MitCircsExamBoardRecommendation.values,
       "outcomeGrading" -> MitigatingCircumstancesGrading.values,
       "rejectionReasons" -> MitigatingCircumstancesRejectionReason.values,
-    ))
-  }
+    )).crumbs(
+      MitCircsBreadcrumbs.Admin.Home(submission.department),
+      MitCircsBreadcrumbs.Admin.Review(submission),
+      MitCircsBreadcrumbs.Admin.PanelOutcomes(submission, active = true),
+    )
 
   @RequestMapping(method = Array(POST))
   def save(
@@ -37,12 +40,11 @@ class MitCircsRecordOutcomesController extends BaseController {
     errors: Errors,
     @PathVariable submission: MitigatingCircumstancesSubmission,
     currentUser: CurrentUser
-  ): Mav = {
+  ): Mav =
     if (errors.hasErrors) form(submission, currentUser)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Admin.review(submission))
     }
-  }
 
 }

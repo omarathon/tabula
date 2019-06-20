@@ -19,7 +19,13 @@
         <#assign submission = info.submission />
         <tr>
           <td><input type="checkbox" name="submissions" value="${submission.key}"></td>
-          <td><a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a></td>
+          <td>
+            <#if !submission.draft>
+              <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+            <#else>
+              MIT-${submission.key}
+            </#if>
+          </td>
           <td>
             <@pl.profile_link submission.student.universityId />
             ${submission.student.universityId}

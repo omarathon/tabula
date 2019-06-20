@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.services.elasticsearch.ProfileIndexService
 import uk.ac.warwick.tabula.services.scheduling._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
-import scala.collection.JavaConverters._
 import scala.util.Try
 
 class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
@@ -360,7 +359,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     profileService.getMemberByUniversityIdStaleOrFresh(universityId).flatMap {
       case member@(_: StaffMember | _: ApplicantMember) => Some(updateMissingForStaffOrApplicant(member))
       case stu: StudentMember =>
-        val sitsRows = profileImporter.multipleStudentInformationQuery.executeByNamedParam(Map("universityIds" -> Seq(universityId).asJava).asJava).asScala
+        val sitsRows = profileImporter.sitsStudentRows(Seq(universityId))
         val universityIdsSeen = sitsRows.map(_.universityId.getOrElse("")).distinct
         val scjCodesSeen = sitsRows.map(_.scjCode).distinct
         val studentCourseYearKeysSeen = sitsRows.map(row => new StudentCourseYearKey(row.scjCode, row.sceSequenceNumber)).distinct

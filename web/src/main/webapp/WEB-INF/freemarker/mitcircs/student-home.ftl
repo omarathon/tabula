@@ -53,7 +53,9 @@
                 <@fmt.date date=submission.lastModified /> by <#if submission.lastModifiedBy == user.apparentUser>you<#else>${submission.lastModifiedBy.fullName}</#if>
               </td>
               <td>
-                <#if submission.approvedOn??>
+                <#if submission.withdrawn>
+                  <span class="very-subtle">(withdrawn)</span>
+                <#elseif submission.approvedOn??>
                   <@fmt.date date=submission.approvedOn />
                 <#else>
                   <span class="very-subtle">(draft)</span>
@@ -64,12 +66,30 @@
         <tbody>
       </table>
     <#else>
-      <p>You have not declared any mitigating circumstances.</p>
+      <p><#if isSelf>You have<#else>This student has</#if> not declared any mitigating circumstances.</p>
     </#if>
   <#else>
     <div class="alert alert-info">
       You do not have permission to see the personal circumstances of this student.
     </div>
+  </#if>
+
+  <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
+    <h2>Reasonable adjustments</h2>
+
+    <#if student.reasonableAdjustments?has_content>
+      <ul class="fa-ul">
+        <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+          <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+        </#list>
+      </ul>
+    </#if>
+
+    <#if student.reasonableAdjustmentsNotes?has_content>
+      <h3>Notes to department</h3>
+
+      <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
+    </#if>
   </#if>
 
 </#escape>

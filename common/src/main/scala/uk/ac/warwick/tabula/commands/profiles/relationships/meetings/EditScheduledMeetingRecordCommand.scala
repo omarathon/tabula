@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -30,67 +31,25 @@ object EditScheduledMeetingRecordCommand {
       with AutowiringFileAttachmentServiceComponent
       with EditScheduledMeetingRecordNotifications
       with PopulateScheduledMeetingRecordCommand
+      with AbstractScheduledMeetingCommandInternal
 }
 
 class EditScheduledMeetingRecordCommand(val editor: Member, val meetingRecord: ScheduledMeetingRecord)
-  extends CommandInternal[ScheduledMeetingRecordResult] with EditScheduledMeetingRecordState with BindListener {
-
-  self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
+  extends CommandInternal[ScheduledMeetingRecordResult] with EditScheduledMeetingRecordState {
+  self: MeetingRecordServiceComponent
+    with FileAttachmentServiceComponent
+    with AbstractScheduledMeetingCommandInternal =>
 
   def applyInternal(): ScheduledMeetingRecordResult = {
-
-    def persistAttachments(meeting: ScheduledMeetingRecord) {
-      // delete attachments that have been removed
-
-      if (meeting.attachments != null) {
-        val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-        val filesToRemove = meeting.attachments.asScala -- filesToKeep
-        meeting.attachments = JArrayList[FileAttachment](filesToKeep)
-        fileAttachmentService.deleteAttachments(filesToRemove)
-      }
-
-      file.attached.asScala.foreach { attachment =>
-        attachment.meetingRecord = meeting
-        meeting.attachments.add(attachment)
-        attachment.temporary = false
-      }
-    }
-
-    meetingRecord.title = title
-    meetingRecord.description = description
-
     val meetingDate = DateTimePickerFormatter.parseDateTime(meetingRecord.meetingDate.toString(DateTimePickerFormatter))
     val newMeetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr)
-
     val isRescheduled = !meetingDate.equals(newMeetingDate)
 
-    if ((!meetingDateStr.isEmptyOrWhitespace) && (!meetingTimeStr.isEmptyOrWhitespace) && (!meetingEndTimeStr.isEmptyOrWhitespace)) {
-      meetingRecord.meetingDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingTimeStr).getHourOfDay)
-      meetingRecord.meetingEndDate = DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).withHourOfDay(DateTimePickerFormatter.parseDateTime(meetingDateStr + " " + meetingEndTimeStr).getHourOfDay)
-    }
-    meetingRecord.lastUpdatedDate = DateTime.now
-    meetingRecord.format = format
-
-    meetingRecord.meetingLocation =
-      if (meetingLocation.hasText) {
-        if (meetingLocationId.hasText) {
-          MapLocation(meetingLocation, meetingLocationId)
-        } else {
-          NamedLocation(meetingLocation)
-        }
-      } else {
-        null
-      }
-
+    applyCommon(meetingRecord)
     persistAttachments(meetingRecord)
     meetingRecordService.saveOrUpdate(meetingRecord)
     ScheduledMeetingRecordResult(meetingRecord, isRescheduled)
   }
-
-  def onBind(result: BindingResult) {
-    file.onBind(result)
-  }
-
 }
 
 trait PopulateScheduledMeetingRecordCommand extends PopulateOnForm {
@@ -138,26 +97,7 @@ trait EditScheduledMeetingRecordCommandValidation extends SelfValidating with Sc
   }
 }
 
-trait ModifyScheduledMeetingRecordState {
-  var title: String = _
-  var description: String = _
-
-  var meetingDateStr: String = _
-  var meetingTimeStr: String = _
-  var meetingEndTimeStr: String = _
-
-  var format: MeetingFormat = _
-
-  var meetingLocation: String = _
-  var meetingLocationId: String = _
-
-  var file: UploadedFile = new UploadedFile
-  var attachedFiles: JList[FileAttachment] = _
-
-  var attachmentTypes: Seq[String] = Seq[String]()
-
-  var relationships: JList[StudentRelationship] = JArrayList()
-}
+trait ModifyScheduledMeetingRecordState extends AbstractScheduledMeetingRecordCommandState
 
 trait EditScheduledMeetingRecordState extends ModifyScheduledMeetingRecordState {
   def editor: Member
@@ -190,37 +130,17 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
   }
 }
 
-trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
+trait EditScheduledMeetingRecordNotification
+  extends AbstractScheduledMeetingRecordNotifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
   self: EditScheduledMeetingRecordState =>
 
   def emit(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecordNotification with AddsIcalAttachmentToScheduledMeetingNotification] = {
-    val meeting = result.meetingRecord
-    val user = editor.asSsoUser
-    val verb =
-      if (result.isRescheduled) "rescheduled"
-      else "updated"
-
-    val inviteeNotification = Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting)
-    if (!meeting.universityIdInRelationship(user.getWarwickId)) {
-      val behalfNotification = Notification.init(new ScheduledMeetingRecordBehalfNotification(verb), user, meeting)
-      Seq(inviteeNotification, behalfNotification)
-    } else {
-      Seq(inviteeNotification)
-    }
-  }
-}
-
-trait EditScheduledMeetingRecordNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
-
-  override def transformResult(result: ScheduledMeetingRecordResult) = Seq(result.meetingRecord)
-
-  override def scheduledNotifications(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = {
-    Seq(
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderStudent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordReminderAgent", meetingRecord, meetingRecord.meetingDate.withTimeAtStartOfDay),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate),
-      new ScheduledNotification[ScheduledMeetingRecord]("ScheduledMeetingRecordConfirm", meetingRecord, meetingRecord.meetingDate.plusDays(5))
+    super.emit(
+      meeting = result.meetingRecord,
+      user = editor.asSsoUser,
+      verb = if (result.isRescheduled) "rescheduled" else "updated",
     )
   }
-
 }
+
+trait EditScheduledMeetingRecordNotifications extends AbstractScheduledMeetingRecordScheduledNotifications

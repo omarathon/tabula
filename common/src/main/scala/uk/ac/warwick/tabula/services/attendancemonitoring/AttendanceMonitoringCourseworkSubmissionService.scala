@@ -16,7 +16,7 @@ trait AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent extends
 }
 
 trait AttendanceMonitoringCourseworkSubmissionService {
-  def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint]
+  def getCheckpoints(submission: Submission, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint]
 
   def updateCheckpoints(submission: Submission): (Seq[AttendanceMonitoringCheckpoint], Seq[AttendanceMonitoringCheckpointTotal])
 }
@@ -25,15 +25,15 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
 
   self: ProfileServiceComponent with AttendanceMonitoringServiceComponent with AssessmentServiceComponent =>
 
-  def getCheckpoints(submission: Submission): Seq[AttendanceMonitoringCheckpoint] = {
-
+  def getCheckpoints(submission: Submission, onlyRecordable: Boolean = true): Seq[AttendanceMonitoringCheckpoint] = {
     val member = submission.universityId.flatMap(uid => profileService.getMemberByUniversityId(uid))
     member.flatMap {
       case studentMember: StudentMember =>
         val relevantPoints = getRelevantPoints(
           attendanceMonitoringService.listStudentsPointsForDate(studentMember, None, submission.submittedDate),
           submission,
-          studentMember
+          studentMember,
+          onlyRecordable
         )
         val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
           val checkpoint = new AttendanceMonitoringCheckpoint
@@ -61,7 +61,7 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
     }
   }
 
-  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], submission: Submission, studentMember: StudentMember): Seq[AttendanceMonitoringPoint] = {
+  private def getRelevantPoints(points: Seq[AttendanceMonitoringPoint], submission: Submission, studentMember: StudentMember, onlyRecordable: Boolean): Seq[AttendanceMonitoringPoint] = {
     points.filter(point =>
       // Is it the correct type
       point.pointType == AttendanceMonitoringPointType.AssignmentSubmission
@@ -71,10 +71,12 @@ abstract class AbstractAttendanceMonitoringCourseworkSubmissionService extends A
         && (!submission.isLate || (submission.submittedDate != null && point.isDateValidForPoint(submission.submittedDate.toLocalDate)))
         // Is the submission's assignment or module valid
         && isAssignmentOrModuleValidForPoint(point, submission.assignment)
+        && (!onlyRecordable || (
         // Is there no existing checkpoint
-        && attendanceMonitoringService.getCheckpoints(Seq(point), Seq(studentMember)).isEmpty
-        // The student hasn't been sent to SITS for this point
-        && !attendanceMonitoringService.studentAlreadyReportedThisTerm(studentMember, point)
+        attendanceMonitoringService.getCheckpoints(Seq(point), Seq(studentMember)).isEmpty
+          // The student hasn't been sent to SITS for this point
+          && !attendanceMonitoringService.studentAlreadyReportedThisTerm(studentMember, point))
+      )
     )
   }
 

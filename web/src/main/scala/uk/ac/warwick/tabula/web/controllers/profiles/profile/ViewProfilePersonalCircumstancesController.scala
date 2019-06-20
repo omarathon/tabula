@@ -7,11 +7,9 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 
-
 @Controller
 @RequestMapping(Array("/profiles/view/{student}/personalcircs"))
 class ViewProfilePersonalCircumstancesController extends AbstractViewProfileController {
-
 
   @RequestMapping
   def render(@PathVariable student: StudentMember): Mav = {
