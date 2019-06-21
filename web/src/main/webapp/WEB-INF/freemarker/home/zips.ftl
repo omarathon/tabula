@@ -40,7 +40,7 @@
           if (data.succeeded) {
             $progressBar.width("100%").removeClass('active progress-bar-striped');
             $zipProgress.empty();
-            $zipProgress.show();
+            $('.zip-complete').show();
           } else {
             $progressBar.width(data.progress + "%");
             if (data.status) {
