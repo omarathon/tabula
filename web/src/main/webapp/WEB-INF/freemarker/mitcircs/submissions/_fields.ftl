@@ -231,7 +231,7 @@
 </#assign>
 <@mitcirc.question_section
   question = "Please upload any supporting evidence relevant to your submission"
-  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances."
+  hint = "Claims submitted without some independent supporting evidence will not normally be considered for mitigating circumstances. If your supporting evidence is particularly sensitive, then instead of uploading it here, you may prefer to show it to a member of staff (eg your personal tutor) who will then certify the evidence on your behalf."
   cssClass = "mitcircs-form__fields__section__evidence-upload"
   helpPopover = evidenceGeneralHelp
 >
