@@ -1,4 +1,5 @@
 <#import "../_filters.ftl" as filters />
+<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 
 <#escape x as x?html>
   <div id="profile-modal" class="modal fade profile-subset"></div>
@@ -163,9 +164,31 @@
       <div class="mitcircs-submission-action__buttons">
         <div class="btn-group-group">
           <button type="submit" formaction="<@routes.mitcircs.createPanel department academicYear />" disabled="disabled" class="requires-selected btn btn-default">Create panel</button>
+          <button type="button" class="requires-selected btn btn-default" disabled="disabled" data-toggle="modal" data-target="#addToPanelModal">Add to panel</button>
         </div>
-      </div>
+        <div class="modal fade" id="addToPanelModal" tabindex="-1" role="dialog">
+          <@modal.wrapper>
+            <@modal.header>
+              <h3 class="modal-title">Select a panel</h3>
+            </@modal.header>
+            <@modal.body>
+              <@bs3form.form_group path=panel>
+                <select name="panel" class="form-control">
+                  <option></option>
+                  <#list panels as panel>
+                    <option value="${panel.id}" data-formaction="<@routes.mitcircs.editPanel panel />">${panel.name}</option>
+                  </#list>
+                </select>
+              </@bs3form.form_group>
+            </@modal.body>
+            <@modal.footer>
+              <button type="submit" disabled="disabled" class="btn btn-primary mitcircs-submission-action__buttons__add-to-panel">Confirm</button>
+              <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </@modal.footer>
+          </@modal.wrapper>
+        </div>
 
+      </div>
       <div class="filter-results mitcircs-submission-list">
         <i class="fal fa-spinner fa-spin"></i> Loading&hellip;
       </div>
