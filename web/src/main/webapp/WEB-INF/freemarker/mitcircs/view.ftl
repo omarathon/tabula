@@ -64,6 +64,10 @@
               <#if isSelf && submission.evidencePending>
                 <p><a href="<@routes.mitcircs.pendingEvidence submission />" class="btn btn-default btn-block">Upload pending evidence</a></p>
               </#if>
+
+              <#if submission.draft && can.do("MitigatingCircumstancesSubmission.Share", submission)>
+                <p><a href="<@routes.mitcircs.shareSubmission submission />" class="btn btn-default btn-block">Share submission</a></p>
+              </#if>
             </#if>
           </div>
         </div>

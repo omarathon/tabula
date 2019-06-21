@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
+
 object WithdrawMitCircsSubmissionCommand {
   type Result = CreateMitCircsSubmissionCommand.Result
   type Command =
@@ -44,6 +46,12 @@ abstract class WithdrawMitCircsSubmissionCommandInternal(val submission: Mitigat
     require(isSelf, "Only the student themselves can withdraw a mitigating circumstances submission")
 
     submission.withdraw()
+
+    // Remove any existing share permissions
+    val removeSharingCommand = MitCircsShareSubmissionCommand.remove(submission, currentUser)
+    removeSharingCommand.usercodes.addAll(removeSharingCommand.grantedRole.toSeq.flatMap(_.users.knownType.allIncludedIds).asJava)
+    removeSharingCommand.apply()
+
     submission.lastModified = DateTime.now
     submission.lastModifiedBy = currentUser
     mitCircsSubmissionService.saveOrUpdate(submission)

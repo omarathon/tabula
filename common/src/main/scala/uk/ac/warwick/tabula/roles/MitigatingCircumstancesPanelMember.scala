@@ -6,11 +6,11 @@ import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesPanel
 case class MitigatingCircumstancesPanelMember(panel: MitigatingCircumstancesPanel) extends BuiltInRole(MitigatingCircumstancesPanelMemberRoleDefinition, panel)
 
 case object MitigatingCircumstancesPanelMemberRoleDefinition extends UnassignableBuiltInRoleDefinition {
-  override def description = "A member of a mitigating circumstances panel"
+  override def description = "member of a mitigating circumstances panel"
+
+  GeneratesSubRole(MitigatingCircumstancesViewerRoleDefinition)
 
   GrantsScopedPermission(
-    MitigatingCircumstancesSubmission.Read,
-
     Profiles.Read.ReasonableAdjustments,
     Profiles.Read.ReasonableAdjustmentsNotes,
   )

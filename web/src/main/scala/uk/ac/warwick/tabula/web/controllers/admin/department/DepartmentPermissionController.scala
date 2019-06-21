@@ -1,37 +1,34 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
-import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
-
-import scala.collection.JavaConverters._
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, GrantRoleCommandState, GrantRoleCommand, RevokeRoleCommand}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, UserLookupService}
-import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
+import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.services.{AutowiringMaintenanceModeServiceComponent, AutowiringModuleAndDepartmentServiceComponent, AutowiringUserSettingsServiceComponent, UserLookupService}
+import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.controllers.DepartmentScopedController
+import uk.ac.warwick.tabula.web.controllers.admin.AdminController
+
+import scala.collection.JavaConverters._
 
 trait DepartmentPermissionControllerMethods extends AdminController
   with DepartmentScopedController with AutowiringUserSettingsServiceComponent with AutowiringModuleAndDepartmentServiceComponent
   with AutowiringMaintenanceModeServiceComponent {
 
-  type GrantRoleCommand = Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department]
-  type RevokeRoleCommand = Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department]
-
   @ModelAttribute("addCommand")
-  def addCommandModel(@PathVariable department: Department): GrantRoleCommand = GrantRoleCommand(department)
+  def addCommandModel(@PathVariable department: Department): GrantRoleCommand.Command[Department] = GrantRoleCommand(department)
 
   @ModelAttribute("removeCommand")
-  def removeCommandModel(@PathVariable department: Department): RevokeRoleCommand = RevokeRoleCommand(department)
+  def removeCommandModel(@PathVariable department: Department): RevokeRoleCommand.Command[Department] = RevokeRoleCommand(department)
 
-  // Should really be a RolesAndPermissions one, but they're not ganted to any role, so just allow dept admins
+  // Should really be a RolesAndPermissions one, but they're not granted to any role, so just allow dept admins
   override val departmentPermission: Permission = Permissions.Department.ArrangeRoutesAndModules
 
   @ModelAttribute("activeDepartment")
@@ -75,7 +72,7 @@ class DepartmentAddPermissionController extends AdminController with DepartmentP
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=add"))
-  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors): Mav = {
+  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand.Command[Department], errors: Errors): Mav = {
     val department = command.scope
     if (errors.hasErrors) {
       form(department)
@@ -95,7 +92,7 @@ class DepartmentRemovePermissionController extends AdminController with Departme
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=remove"))
-  def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
+  def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand.Command[Department],
     errors: Errors): Mav = {
     val department = command.scope
     if (errors.hasErrors) {

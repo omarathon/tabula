@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.admin.routes
 
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
+import org.springframework.validation.{BindException, Errors}
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand, RoleCommandRequestMutableRoleDefinition, RoleCommandState}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
@@ -33,14 +33,14 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
   @Test def createCommands {
     Seq(listController, addController, removeController).foreach { controller =>
       new Fixture {
-        val addCommand: controller.GrantRoleCommand = controller.addCommandModel(route)
-        val removeCommand: controller.RevokeRoleCommand = controller.removeCommandModel(route)
+        val addCommand: GrantRoleCommand.Command[Route] = controller.addCommandModel(route)
+        val removeCommand: RevokeRoleCommand.Command[Route] = controller.removeCommandModel(route)
 
         addCommand should be(anInstanceOf[Appliable[GrantedRole[Route]]])
-        addCommand should be(anInstanceOf[GrantRoleCommandState[Route]])
+        addCommand should be(anInstanceOf[RoleCommandState[Route]])
 
         removeCommand should be(anInstanceOf[Appliable[GrantedRole[Route]]])
-        removeCommand should be(anInstanceOf[RevokeRoleCommandState[Route]])
+        removeCommand should be(anInstanceOf[RoleCommandState[Route]])
       }
     }
   }
@@ -74,7 +74,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(route, RouteManagerRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Route]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Route] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Route = route
@@ -82,6 +82,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(addedRole)
 
         def apply: GrantedRole[Route] = addedRole
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -104,7 +106,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(route, RouteManagerRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Route]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Route] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Route = route
@@ -115,6 +117,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           null
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -136,7 +140,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(route, RouteManagerRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Route]]] with RevokeRoleCommandState[Route] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Route]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Route] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Route = route
@@ -144,6 +148,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(removedRole)
 
         def apply: Option[GrantedRole[Route]] = Some(removedRole)
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -166,7 +172,7 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(route, RouteManagerRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Route]]] with RevokeRoleCommandState[Route] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Route]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Route] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Route = route
@@ -177,6 +183,8 @@ class RoutePermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           None
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")

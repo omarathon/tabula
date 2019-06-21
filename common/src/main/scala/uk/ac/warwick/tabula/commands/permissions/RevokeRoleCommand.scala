@@ -1,24 +1,28 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, CommandInternal, Describable, Description, SelfValidating}
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect._
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
+import scala.collection.JavaConverters._
+import scala.reflect._
+
 object RevokeRoleCommand {
-  def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] =
+  type Result[A <: PermissionsTarget] = Option[GrantedRole[A]]
+  type Command[A <: PermissionsTarget] = Appliable[Result[A]] with RoleCommandRequest with RoleCommandState[A] with SelfValidating
+
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with RoleCommandRequestMutableRoleDefinition =
     new RevokeRoleCommandInternal(scope)
       with ComposableCommand[Option[GrantedRole[A]]]
+      with RoleCommandRequestMutableRoleDefinition
       with RevokeRoleCommandPermissions
       with RevokeRoleCommandValidation
       with RevokeRoleCommandDescription[A]
@@ -26,15 +30,24 @@ object RevokeRoleCommand {
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
 
-  def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] = {
-    val command = apply(scope)
-    command.roleDefinition = defin
-    command
-  }
+  def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Command[A] =
+    new RevokeRoleCommandInternal(scope)
+      with ComposableCommand[Option[GrantedRole[A]]]
+      with RoleCommandRequest
+      with RevokeRoleCommandPermissions
+      with RevokeRoleCommandValidation
+      with RevokeRoleCommandDescription[A]
+      with AutowiringPermissionsServiceComponent
+      with AutowiringSecurityServiceComponent
+      with AutowiringUserLookupComponent {
+      override val roleDefinition: RoleDefinition = defin
+    }
 }
 
-class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[Option[GrantedRole[A]]] with RevokeRoleCommandState[A] {
-  self: PermissionsServiceComponent with UserLookupComponent =>
+abstract class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[Option[GrantedRole[A]]] with RoleCommandState[A] {
+  self: RoleCommandRequest
+    with PermissionsServiceComponent
+    with UserLookupComponent =>
 
   lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -59,12 +72,12 @@ class RevokeRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
 }
 
 trait RevokeRoleCommandValidation extends SelfValidating {
-  self: RevokeRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+  self: RoleCommandRequest
+    with RoleCommandState[_ <: PermissionsTarget]
+    with SecurityServiceComponent =>
 
   def validate(errors: Errors) {
-    if (usercodes.asScala.forall {
-      _.isEmptyOrWhitespace
-    }) {
+    if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
       grantedRole.map(_.users).foreach { users =>
@@ -80,11 +93,16 @@ trait RevokeRoleCommandValidation extends SelfValidating {
     if (roleDefinition == null) {
       errors.rejectValue("roleDefinition", "NotEmpty")
     } else {
-      if (!roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
+      if (!allowUnassignableRoles && !roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
       val user = RequestInfo.fromThread.get.user
 
       val permissionsToRevoke = roleDefinition.allPermissions(Some(scope)).keys
-      val deniedPermissions = permissionsToRevoke.filterNot(securityService.canDelegate(user, _, scope))
+      val deniedPermissions = permissionsToRevoke.filterNot { permission =>
+        if (allowUnassignableRoles)
+          securityService.can(user, permission, scope)
+        else
+          securityService.canDelegate(user, permission, scope)
+      }
       if (deniedPermissions.nonEmpty && !user.god) {
         errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.map(_.description).mkString("\n"), scope), "")
       }
@@ -92,19 +110,8 @@ trait RevokeRoleCommandValidation extends SelfValidating {
   }
 }
 
-trait RevokeRoleCommandState[A <: PermissionsTarget] {
-  self: PermissionsServiceComponent =>
-
-  def scope: A
-
-  var roleDefinition: RoleDefinition = _
-  var usercodes: JList[String] = JArrayList()
-
-  def grantedRole: Option[GrantedRole[A]]
-}
-
 trait RevokeRoleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: RevokeRoleCommandState[_ <: PermissionsTarget] =>
+  self: RoleCommandState[_ <: PermissionsTarget] =>
 
   override def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.RolesAndPermissions.Delete, mandatory(scope))
@@ -112,10 +119,14 @@ trait RevokeRoleCommandPermissions extends RequiresPermissionsChecking with Perm
 }
 
 trait RevokeRoleCommandDescription[A <: PermissionsTarget] extends Describable[Option[GrantedRole[A]]] {
-  self: RevokeRoleCommandState[A] =>
+  self: RoleCommandRequest
+    with RoleCommandState[A] =>
+
+  override lazy val eventName: String = "RevokeRole"
 
   def describe(d: Description): Unit = d.properties(
     "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
     "usercodes" -> usercodes.asScala.mkString(","),
-    "roleDefinition" -> roleDefinition.getName)
+    "roleDefinition" -> roleDefinition.getName
+  )
 }
