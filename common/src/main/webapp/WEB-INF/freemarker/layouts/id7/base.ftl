@@ -38,9 +38,10 @@
       </div>
     </#if>
     <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content>
+
       <#function getUrlForAcadYear crumbs acadYear>
         <#list crumbs as crumb>
-          <#if crumb.title == acadYear && crumb.linked>
+          <#if crumb.title?ends_with(acadYear) && crumb.linked>
             <#return crumb.url>
           </#if>
         </#list>
@@ -50,7 +51,7 @@
       <#function hasUniqueAcadYearLink crumbs acadYear>
           <#local result = 0>
           <#list crumbs as crumb>
-            <#if crumb.title?contains(acadYear) && crumb.linked>
+            <#if crumb.title?ends_with(acadYear) && crumb.linked>
               <#local result = result + 1>
             </#if>
           </#list>
