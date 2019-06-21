@@ -37,16 +37,20 @@
         Proxying as <strong>${proxyingAs.fullName}</strong>.
       </div>
     </#if>
-    <#if enableAcademicYearBanner!false && activeAcademicYear?? && academicYearNow?? && activeAcademicYear.toString != academicYearNow.toString>
-      <#if (info.requestedUri!"")?contains("/" + activeAcademicYear.storeValue)>
-          <#assign changeAcademicYear=info.requestedUri?replace("/" + activeAcademicYear.storeValue, "/" + academicYearNow.storeValue) />
-      <#else>
-          <#assign changeAcademicYear=url("/academic_year/" + academicYearNow.storeValue) + "?returnTo=" + (info.requestedUri!"")?url  />
+    <#if enableAcademicYearBanner!false && activeAcademicYear?? && academicYearNow??>
+      <#assign activeAcadYear=activeAcademicYear.toString />
+      <#assign currentAcadYear=academicYearNow.toString />
+      <#if activeAcadYear != currentAcadYear>
+          <#if (info.requestedUri!"")?contains("/" + activeAcademicYear.storeValue)>
+              <#assign changeAcademicYear=info.requestedUri?replace("/" + activeAcademicYear.storeValue, "/" + academicYearNow.storeValue) />
+          <#else>
+              <#assign changeAcademicYear=url("/academic_year/" + academicYearNow.storeValue) + "?returnTo=" + (info.requestedUri!"")?url  />
+          </#if>
+        <div class="page-notice">
+          The information below is for the ${activeAcademicYear.toString} academic year.
+          To view current information, <a class="text-decoration-underline" href="${changeAcademicYear}">go to ${academicYearNow.toString}</a>.
+        </div>
       </#if>
-      <div class="page-notice">
-        This page is for the ${activeAcademicYear.toString} academic year.
-        To view current information, <a class="text-decoration-underline" href="${changeAcademicYear}">go to ${academicYearNow.toString}</a>.
-      </div>
     </#if>
 
 
