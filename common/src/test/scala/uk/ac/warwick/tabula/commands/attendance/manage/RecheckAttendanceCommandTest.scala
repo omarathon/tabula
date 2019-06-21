@@ -170,7 +170,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
       checkpoint = proposedCheckpoint,
       currentState = NotRecorded,
       proposedState = Attended,
-      alreadyReported = false
+      alreadyReported = false,
+      appendAttendanceNote = None
     )
   }
 
@@ -221,7 +222,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
       checkpoint = proposedCheckpoint,
       currentState = NotRecorded,
       proposedState = Attended,
-      alreadyReported = false
+      alreadyReported = false,
+      appendAttendanceNote = None
     )
   }
 
@@ -273,7 +275,8 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
       checkpoint = proposedCheckpoint,
       currentState = NotRecorded,
       proposedState = Attended,
-      alreadyReported = false
+      alreadyReported = false,
+      appendAttendanceNote = None
     )
   }
 

@@ -79,7 +79,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
       // Is it the correct type
       point.pointType == AttendanceMonitoringPointType.Meeting
         // Is the meeting's date inside the point's weeks
-        && point.isDateValidForPoint(meeting.meetingDate.toLocalDate)
+        && point.containsDate(meeting.meetingDate.toLocalDate)
         // Is the meeting's relationship valid
         && meeting.relationships.map(_.relationshipType).exists(point.meetingRelationships.contains)
         // Is the meeting's format valid
@@ -101,7 +101,7 @@ abstract class AbstractAttendanceMonitoringMeetingRecordService extends Attendan
         relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list)
       ).filterNot(m => m.id == meeting.id).filter(m =>
         m.isAttendanceApproved
-          && point.isDateValidForPoint(m.meetingDate.toLocalDate)
+          && point.containsDate(m.meetingDate.toLocalDate)
           && point.meetingFormats.contains(m.format)
       ) ++ Seq(meeting)
 

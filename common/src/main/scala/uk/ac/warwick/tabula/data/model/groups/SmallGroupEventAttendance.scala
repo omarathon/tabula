@@ -3,10 +3,12 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 import javax.validation.constraints._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model.{GeneratedId, Module}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Access(AccessType.FIELD)
@@ -62,4 +64,15 @@ class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with 
 
   def permissionsParents = Stream(occurrence)
 
+  def date: Option[LocalDate] = occurrence.date
+
+  def event: SmallGroupEvent = occurrence.event
+
+  def academicYear: AcademicYear = occurrence.academicYear
+
+  def attended: Boolean = state == Attended
+
+  def missed: Boolean = state == MissedAuthorised || state == MissedUnauthorised
+
+  def module: Module = occurrence.module
 }
