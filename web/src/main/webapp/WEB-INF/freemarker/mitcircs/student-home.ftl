@@ -75,21 +75,33 @@
   </#if>
 
   <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
-    <h2>Reasonable adjustments</h2>
+    <section class="mitcircs__reasonable-adjustments media">
+      <div class="media-left">
+        <i class="fal fa-info-circle"></i>
+      </div>
+      <div class="media-body">
+        <header class="mitcircs__reasonable-adjustments__header media-heading">
+          <h2>Reasonable adjustments</h2>
+          <span class="mitcircs__reasonable-adjustments__header__aside">(provided by Wellbeing Support Services)</span>
+        </header>
 
-    <#if student.reasonableAdjustments?has_content>
-      <ul class="fa-ul">
-        <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
-          <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
-        </#list>
-      </ul>
-    </#if>
+        <#if student.reasonableAdjustments?has_content>
+          <ul class="fa-ul">
+              <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+                <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+              </#list>
+          </ul>
+        </#if>
 
-    <#if student.reasonableAdjustmentsNotes?has_content>
-      <h3>Notes to department</h3>
+        <#if student.reasonableAdjustmentsNotes?has_content>
+          <aside>
+            <h3>Notes from Wellbeing Support</h3>
 
-      <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
-    </#if>
+              <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
+          </aside>
+        </#if>
+      </div>
+    </section>
   </#if>
 
 </#escape>
