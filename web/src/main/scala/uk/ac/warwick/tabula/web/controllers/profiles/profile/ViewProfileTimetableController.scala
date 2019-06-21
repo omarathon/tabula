@@ -15,8 +15,6 @@ import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
 class ViewProfileTimetableController extends AbstractViewProfileController
   with AutowiringScientiaConfigurationComponent with SystemClockComponent {
 
-  override def enableAcademicYearBanner: Boolean = false
-
   @RequestMapping(Array("/{member}/timetable"))
   def viewByMemberMapping(
     @PathVariable member: Member,

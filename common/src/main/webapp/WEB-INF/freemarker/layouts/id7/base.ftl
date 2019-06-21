@@ -37,23 +37,36 @@
         Proxying as <strong>${proxyingAs.fullName}</strong>.
       </div>
     </#if>
-    <#if enableAcademicYearBanner!false && activeAcademicYear?? && academicYearNow??>
-      <#assign activeAcadYear=activeAcademicYear.toString />
-      <#assign currentAcadYear=academicYearNow.toString />
-      <#if activeAcadYear != currentAcadYear>
-          <#if (info.requestedUri!"")?contains("/" + activeAcademicYear.storeValue)>
-              <#assign changeAcademicYear=info.requestedUri?replace("/" + activeAcademicYear.storeValue, "/" + academicYearNow.storeValue) />
-          <#else>
-              <#assign changeAcademicYear=url("/academic_year/" + academicYearNow.storeValue) + "?returnTo=" + (info.requestedUri!"")?url  />
+    <#if secondBreadcrumbs?has_content>
+      <#function findActiveAcadYear crumbs>
+        <#list crumbs as crumb>
+          <#if crumb.active!false == true>
+            <#return crumb.title>
           </#if>
-        <div class="page-notice">
-          The information below is for the ${activeAcademicYear.toString} academic year.
-          To view current information, <a class="text-decoration-underline" href="${changeAcademicYear}">go to ${academicYearNow.toString}</a>.
-        </div>
+        </#list>
+      </#function>
+
+      <#function getUrlForAcadYear crumbs acadYear>
+        <#list crumbs as crumb>
+          <#if crumb.title == acadYear>
+            <#return crumb.url>
+          </#if>
+        </#list>
+        <#return "#">
+      </#function>
+
+      <#assign currentAcadYear=academicYearNow.toString />
+      <#assign activeAcadYear=findActiveAcadYear(secondBreadcrumbs) />
+
+      <#if activeAcadYear?has_content>
+        <#if activeAcadYear != currentAcadYear>
+          <div class="page-notice">
+            The information below is for the ${activeAcademicYear.toString} academic year.
+            To view current information, <a class="text-decoration-underline" href="${getUrlForAcadYear(secondBreadcrumbs currentAcadYear)}">go to ${currentAcadYear}</a>.
+          </div>
+        </#if>
       </#if>
     </#if>
-
-
     <div class="id7-utility-masthead">
       <nav class="id7-utility-bar">
         <ul>
