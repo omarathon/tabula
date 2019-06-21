@@ -43,7 +43,7 @@
       <#function getUrlForAcadYear crumbs acadYear>
         <#local result = []>
         <#list crumbs as crumb>
-          <#if crumb.linked && crumb.url?ends_with("/" + acadYear.startYear?string) >
+          <#if crumb.linked && crumb.academicYearScoped && crumb.scopedAcademicYear.startYear == acadYear.startYear >
             <#local result = result + [crumb]>
           </#if>
         </#list>

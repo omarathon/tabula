@@ -68,7 +68,11 @@ trait AcademicYearScopedController extends TaskBenchmarking {
 
   def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: AcademicYear => String): Seq[BreadCrumb] =
     availableAcademicYears.map(year =>
-      Breadcrumbs.Standard(year.getLabel, Some(urlGenerator(year)), "").setActive(year.startYear == activeAcademicYear.startYear)
+      Breadcrumbs.AcademicYearScoped(
+        title = year.getLabel,
+        url = Some(urlGenerator(year)),
+        tooltip = "",
+        scopedAcademicYear = Some(year),
+      ).setActive(year.startYear == activeAcademicYear.startYear)
     )
-
 }

@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web
 
+import uk.ac.warwick.tabula.AcademicYear
+
 /**
   * An object that can be rendered as part of the breadcrumb navigation on the page.
   */
@@ -11,6 +13,9 @@ trait BreadCrumb {
 
   val tooltip: String = ""
   val active: Boolean = false // ID7 navigation active
+
+  val scopedAcademicYear: Option[AcademicYear] = None
+  def isAcademicYearScoped: Boolean = scopedAcademicYear.isDefined
 }
 
 object BreadCrumb {
@@ -23,6 +28,21 @@ object BreadCrumb {
 object Breadcrumbs {
 
   case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb {
+    def setActive(thisActive: Boolean): BreadCrumb = {
+      if (!this.active && thisActive) {
+        Active(this.title, this.url, this.tooltip)
+      } else {
+        this
+      }
+    }
+  }
+
+  case class AcademicYearScoped(
+    title: String,
+    url: Option[String],
+    override val tooltip: String,
+    override val scopedAcademicYear: Option[AcademicYear],
+  ) extends BreadCrumb {
     def setActive(thisActive: Boolean): BreadCrumb = {
       if (!this.active && thisActive) {
         Active(this.title, this.url, this.tooltip)
