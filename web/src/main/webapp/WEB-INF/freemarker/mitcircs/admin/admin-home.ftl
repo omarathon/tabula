@@ -164,7 +164,11 @@
       <div class="mitcircs-submission-action__buttons">
         <div class="btn-group-group">
           <button type="submit" formaction="<@routes.mitcircs.createPanel department academicYear />" disabled="disabled" class="requires-selected btn btn-default">Create panel</button>
-          <button type="button" class="requires-selected btn btn-default" disabled="disabled" data-toggle="modal" data-target="#addToPanelModal">Add to panel</button>
+          <#if panels?has_content>
+            <button type="button" class="requires-selected btn btn-default" disabled="disabled" data-toggle="modal" data-target="#addToPanelModal">Add to panel</button>
+          <#else>
+            <button type="button"  class="btn btn-default" disabled="disabled" data-toggle="tooltip" title="There are no panels for ${academicYear.toString}">Add to panel</button>
+          </#if>
         </div>
         <div class="modal fade" id="addToPanelModal" tabindex="-1" role="dialog">
           <@modal.wrapper>
