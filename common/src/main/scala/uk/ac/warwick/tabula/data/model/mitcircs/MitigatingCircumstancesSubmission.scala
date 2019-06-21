@@ -337,7 +337,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isEvidencePending: Boolean = !isWithdrawn && pendingEvidenceDue != null
   def isAcute: Boolean = Option(acuteOutcome).isDefined
 
-  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
+  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
   def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (state != OutcomesRecorded || isAcute)
   def canWithdraw: Boolean = state != OutcomesRecorded
   def canReopen: Boolean = isWithdrawn

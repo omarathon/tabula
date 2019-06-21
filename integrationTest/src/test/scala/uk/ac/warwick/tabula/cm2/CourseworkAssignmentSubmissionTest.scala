@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.cm2
 
+import org.openqa.selenium.By
 import uk.ac.warwick.tabula.BrowserTest
 
 class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixtures {
@@ -15,7 +16,12 @@ class CourseworkAssignmentSubmissionTest extends BrowserTest with CourseworkFixt
     withAssignment("xxx01", "Min 2 attachments", optionSettings = options) { assignmentId =>
 
       as(P.Student1) {
-        click on linkText("Min 2 attachments")
+        val submitLink = eventually {
+          id("main").webElement.findElement(By.xpath("//*[contains(text(),'Min 2 attachments')]"))
+            .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Submit assignment"))
+        }
+        click on submitLink
+
         currentUrl should endWith(assignmentId)
 
         click on find(cssSelector("input[type=file]")).get

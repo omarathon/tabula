@@ -22,7 +22,7 @@
     </@bs3form.labelled_form_group>
 
     <div class="submit-buttons">
-      <button type="submit" class="btn btn-primary">Create panel</button>
+      <button type="submit" class="btn btn-primary" name="submit">Create panel</button>
       <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.adminhome department academicYear/>">Cancel</a>
     </div>
   </@f.form>
