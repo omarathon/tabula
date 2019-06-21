@@ -48,7 +48,7 @@
 
       <#function getUrlForAcadYear crumbs acadYear>
         <#list crumbs as crumb>
-          <#if crumb.title == acadYear>
+          <#if crumb.title == acadYear && crumb.linked>
             <#return crumb.url>
           </#if>
         </#list>
