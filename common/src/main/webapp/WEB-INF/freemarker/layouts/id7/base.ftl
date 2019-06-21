@@ -38,7 +38,7 @@
       </div>
     </#if>
 
-    <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content>
+    <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content && academicYearNow?has_content>
 
       <#function getUrlForAcadYear crumbs acadYear>
         <#local result = []>
@@ -50,7 +50,7 @@
         <#return result>
       </#function>
 
-      <#if activeAcademicYear?has_content && activeAcademicYear.startYear != academicYearNow.startYear>
+      <#if activeAcademicYear.startYear != academicYearNow.startYear>
         <#assign currentYearLinks=getUrlForAcadYear(secondBreadcrumbs, academicYearNow)>
         <div class="page-notice">
           The information below is for the ${activeAcademicYear.toString} academic year.
