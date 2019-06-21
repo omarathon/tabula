@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.commands.mitcircs.submission.EditMitCircsPanelCommand._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
@@ -10,14 +9,13 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
 
 object EditMitCircsPanelCommand {
   type Result = MitigatingCircumstancesPanel
-  type Command = Appliable[Result] with EditMitCircsPanelState with EditMitCircsPanelRequest with SelfValidating
+  type Command = Appliable[Result] with EditMitCircsPanelState with EditMitCircsPanelRequest with SelfValidating with PopulateOnForm
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Modify
 
   def apply(panel: MitigatingCircumstancesPanel): Command =
@@ -27,7 +25,7 @@ object EditMitCircsPanelCommand {
       with ModifyMitCircsPanelValidation
       with EditMitCircsPanelPermissions
       with EditMitCircsPanelDescription
-      with EditMitCircsPanelBindListener
+      with EditMitCircsPanelPopulate
       with AutowiringMitCircsPanelServiceComponent
       with AutowiringUserLookupComponent
 }
@@ -58,6 +56,7 @@ abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstanc
       panel.location = null
     }
 
+    (panel.submissions -- submissions.asScala).foreach(panel.removeSubmission)
     submissions.asScala.foreach(panel.addSubmission)
 
     panel.chair = chair.maybeText.map(userLookup.getUserByUserId).orNull
@@ -84,11 +83,11 @@ trait EditMitCircsPanelDescription extends Describable[Result] {
     d.mitigatingCircumstancesPanel(panel)
 }
 
-trait EditMitCircsPanelBindListener extends BindListener {
+trait EditMitCircsPanelPopulate extends PopulateOnForm {
 
   self: EditMitCircsPanelState with EditMitCircsPanelRequest =>
 
-  override def onBind(result: BindingResult) {
+  override def populate(): Unit = {
     submissions.addAll((panel.submissions -- submissions.asScala.toSet).asJavaCollection)
   }
 }

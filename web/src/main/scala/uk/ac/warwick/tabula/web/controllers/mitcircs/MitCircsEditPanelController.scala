@@ -24,7 +24,7 @@ class MitCircsEditPanelController extends BaseController {
 
   @RequestMapping(params = Array("!submit"))
   def form(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, @PathVariable panel: MitigatingCircumstancesPanel): Mav = {
-
+    command.populate()
     val (thisPanel, others) = command.submissions.asScala.partition(_.panel.exists(_ == panel))
     val (hasPanel, noPanel) = others.partition(_.panel.isDefined)
 
