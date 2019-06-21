@@ -37,15 +37,7 @@
         Proxying as <strong>${proxyingAs.fullName}</strong>.
       </div>
     </#if>
-    <#if secondBreadcrumbs?has_content>
-      <#function findActiveAcadYear crumbs>
-        <#list crumbs as crumb>
-          <#if crumb.active!false == true>
-            <#return crumb.title>
-          </#if>
-        </#list>
-      </#function>
-
+    <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content>
       <#function getUrlForAcadYear crumbs acadYear>
         <#list crumbs as crumb>
           <#if crumb.title == acadYear && crumb.linked>
@@ -55,14 +47,29 @@
         <#return "#">
       </#function>
 
+      <#function hasUniqueAcadYearLink crumbs acadYear>
+          <#local result = 0>
+          <#list crumbs as crumb>
+            <#if crumb.title?contains(acadYear) && crumb.linked>
+              <#local result = result + 1>
+            </#if>
+          </#list>
+          <#if result == 1>
+            <#return true>
+          </#if>
+          <#return false>
+      </#function>
+
       <#assign currentAcadYear=academicYearNow.toString />
-      <#assign activeAcadYear=findActiveAcadYear(secondBreadcrumbs) />
+      <#assign activeAcadYear=activeAcademicYear.toString />
 
       <#if activeAcadYear?has_content>
         <#if activeAcadYear != currentAcadYear>
           <div class="page-notice">
-            The information below is for the ${activeAcademicYear.toString} academic year.
-            To view current information, <a class="text-decoration-underline" href="${getUrlForAcadYear(secondBreadcrumbs currentAcadYear)}">go to ${currentAcadYear}</a>.
+            The information below is for the ${activeAcadYear} academic year.
+            <#if hasUniqueAcadYearLink(secondBreadcrumbs currentAcadYear)>
+              To view current information, <a class="text-decoration-underline" href="${getUrlForAcadYear(secondBreadcrumbs currentAcadYear)}">go to ${currentAcadYear}</a>.
+            </#if>
           </div>
         </#if>
       </#if>
