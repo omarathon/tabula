@@ -37,44 +37,30 @@
         Proxying as <strong>${proxyingAs.fullName}</strong>.
       </div>
     </#if>
+
     <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content>
 
       <#function getUrlForAcadYear crumbs acadYear>
+        <#local result = []>
         <#list crumbs as crumb>
-          <#if crumb.title?ends_with(acadYear) && crumb.linked>
-            <#return crumb.url>
+          <#if crumb.linked && crumb.url?ends_with("/" + acadYear.startYear?string) >
+            <#local result = result + [crumb]>
           </#if>
         </#list>
-        <#return "#">
+        <#return result>
       </#function>
 
-      <#function hasUniqueAcadYearLink crumbs acadYear>
-          <#local result = 0>
-          <#list crumbs as crumb>
-            <#if crumb.title?ends_with(acadYear) && crumb.linked>
-              <#local result = result + 1>
-            </#if>
-          </#list>
-          <#if result == 1>
-            <#return true>
+      <#if activeAcademicYear?has_content && activeAcademicYear.startYear != academicYearNow.startYear>
+        <#assign currentYearLinks=getUrlForAcadYear(secondBreadcrumbs, academicYearNow)>
+        <div class="page-notice">
+          The information below is for the ${activeAcademicYear.toString} academic year.
+          <#if currentYearLinks?size = 1>
+            To view current information, <a class="text-decoration-underline" href="${currentYearLinks[0].url}">go to ${activeAcademicYear.toString}</a>.
           </#if>
-          <#return false>
-      </#function>
-
-      <#assign currentAcadYear=academicYearNow.toString />
-      <#assign activeAcadYear=activeAcademicYear.toString />
-
-      <#if activeAcadYear?has_content>
-        <#if activeAcadYear != currentAcadYear>
-          <div class="page-notice">
-            The information below is for the ${activeAcadYear} academic year.
-            <#if hasUniqueAcadYearLink(secondBreadcrumbs currentAcadYear)>
-              To view current information, <a class="text-decoration-underline" href="${getUrlForAcadYear(secondBreadcrumbs currentAcadYear)}">go to ${currentAcadYear}</a>.
-            </#if>
-          </div>
-        </#if>
+        </div>
       </#if>
     </#if>
+
     <div class="id7-utility-masthead">
       <nav class="id7-utility-bar">
         <ul>
