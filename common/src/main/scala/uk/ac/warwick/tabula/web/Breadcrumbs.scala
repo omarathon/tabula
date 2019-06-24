@@ -15,25 +15,38 @@ trait BreadCrumb {
   val active: Boolean = false // ID7 navigation active
 
   val scopedAcademicYear: Option[AcademicYear] = None
+
   def isAcademicYearScoped: Boolean = scopedAcademicYear.isDefined
 }
+
+trait Activeable[T] {
+  def setActive(thisActive: T): BreadCrumb
+}
+
+trait ActiveableByBoolean extends Activeable[Boolean]
 
 object BreadCrumb {
   /**
     * Expose Breadcrumb() method for standard breadcrumbs.
     */
-  def apply(title: String, url: String, tooltip: String = null) = Breadcrumbs.Standard(title, Some(url), tooltip)
+  def apply(
+    title: String,
+    url: String,
+    tooltip: String = null,
+    active: Boolean = false,
+  ) = Breadcrumbs.Standard(title, Some(url), tooltip, active)
 }
 
 object Breadcrumbs {
 
-  case class Standard(title: String, url: Option[String], override val tooltip: String) extends BreadCrumb {
-    def setActive(thisActive: Boolean): BreadCrumb = {
-      if (!this.active && thisActive) {
-        Active(this.title, this.url, this.tooltip)
-      } else {
-        this
-      }
+  case class Standard(
+    title: String,
+    url: Option[String],
+    override val tooltip: String,
+    override val active: Boolean = false,
+  ) extends BreadCrumb with ActiveableByBoolean {
+    override def setActive(thisActive: Boolean): BreadCrumb = {
+      if (this.active && !thisActive) this.copy(active = thisActive) else this
     }
   }
 
@@ -42,25 +55,10 @@ object Breadcrumbs {
     url: Option[String],
     override val tooltip: String,
     override val scopedAcademicYear: Option[AcademicYear],
-  ) extends BreadCrumb {
-    def setActive(thisActive: Boolean): BreadCrumb = {
-      if (!this.active && thisActive) {
-        Active(this.title, this.url, this.tooltip)
-      } else {
-        this
-      }
-    }
-  }
-
-  case class Active(override val title: String, override val url: Option[String], override val tooltip: String) extends BreadCrumb {
-    override val active = true
-
-    def setActive(thisActive: Boolean): BreadCrumb = {
-      if (this.active && !thisActive) {
-        Standard(this.title, this.url, this.tooltip)
-      } else {
-        this
-      }
+    override val active: Boolean = false,
+  ) extends BreadCrumb with ActiveableByBoolean {
+    override def setActive(thisActive: Boolean): BreadCrumb = {
+      if (this.active && !thisActive) this.copy(active = thisActive) else this
     }
   }
 
