@@ -57,13 +57,7 @@ abstract class ReviewMitCircsSubmissionCommandInternal(val submission: Mitigatin
           .filter { s => s != submission && !s.isWithdrawn && !s.isDraft },
       relevantExtensions =
         extensionService.getAllExtensionRequests(submission.student.asSsoUser)
-          .filter { e =>
-            val expiryDate = e.requestedExpiryDate.orElse(e.expiryDate)
-            expiryDate.exists { e =>
-              !e.isBefore(submission.startDate.toDateTimeAtStartOfDay) &&
-              Option(submission.endDate).forall(_.toDateTimeAtStartOfDay.plusDays(1).isAfter(e))
-            }
-          },
+          .sortBy { e => e.requestedExpiryDate.orElse(e.expiryDate) },
     )
   }
 }
