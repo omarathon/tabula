@@ -674,6 +674,14 @@ object ProfileImporter extends Logging {
     override def mapRow(rs: ResultSet, rowNumber: Int): MembershipMember = membershipToMember(rs)
   }
 
+  private val usercodeOverrides: Map[UniversityId, String] =
+    Wire.property("${membership.usercode_overrides}")
+      .split(',')
+      .filter(_.hasText)
+      .map(_.split(":", 2))
+      .map { case Array(universityId, usercode) => universityId -> usercode }
+      .toMap
+
   private def membershipToMember(rs: ResultSet, guessUsercode: Boolean = true, dateTimeFormater: DateTimeFormatter = ISODateTimeFormat.dateHourMinuteSecondMillis()) =
     MembershipMember(
       universityId = rs.getString("universityId"),
@@ -685,7 +693,7 @@ object ProfileImporter extends Logging {
       preferredSurname = rs.getString("preferredSurname"),
       position = rs.getString("jobTitle"),
       dateOfBirth = rs.getString("dateOfBirth").maybeText.map(dateTimeFormater.parseLocalDate).orNull,
-      usercode = rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null),
+      usercode = usercodeOverrides.getOrElse(rs.getString("universityId"), rs.getString("cn").maybeText.getOrElse(if (guessUsercode) s"u${rs.getString("universityId")}" else null)),
       startDate = rs.getString("startDate").maybeText.flatMap(d => Try(dateTimeFormater.parseLocalDate(d)).toOption).orNull,
       endDate = rs.getString("endDate").maybeText.map(dateTimeFormater.parseLocalDate).getOrElse(LocalDate.now.plusYears(100)),
       modified = sqlDateToDateTime(rs.getDate("last_modification_date")),
