@@ -8,18 +8,20 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 import scala.collection.JavaConverters._
+import scala.reflect.classTag
 
 object ExtensionSettingsCommand {
   type Result = Department
   type Command = Appliable[Result] with ExtensionSettingsCommandState with SelfValidating
 
-  val AdminPermission = Permissions.Department.ManageExtensionSettings
+  val AdminPermission: Permission = Permissions.Department.ManageExtensionSettings
 
   def apply(department: Department): Command =
     new ExtensionSettingsCommandInternal(department)
@@ -29,6 +31,7 @@ object ExtensionSettingsCommand {
       with ExtensionSettingsCommandDescription
       with AutowiringFeaturesComponent
       with AutowiringModuleAndDepartmentServiceComponent
+      with AutowiringPermissionsServiceComponent
 }
 
 trait ExtensionSettingsCommandState {
@@ -47,14 +50,29 @@ trait ExtensionSettingsCommandRequest {
 
 class ExtensionSettingsCommandInternal(val department: Department)
   extends CommandInternal[Result] with ExtensionSettingsCommandState with ExtensionSettingsCommandRequest {
-  self: ModuleAndDepartmentServiceComponent with FeaturesComponent =>
+  self: ModuleAndDepartmentServiceComponent
+    with FeaturesComponent
+    with PermissionsServiceComponent =>
 
   override def applyInternal(): Result = transactional() {
     if (features.extensions) {
       department.allowExtensionRequests = allowExtensionRequests
       department.extensionGuidelineSummary = extensionGuidelineSummary
       department.extensionGuidelineLink = extensionGuidelineLink
+
+      // Collect any users that we're changing the permissions of
+      val oldUserIds = department.extensionManagers.knownType.includedUserIds
+      val newUserIds = extensionManagers.asScala.toSet
+
+      val removedUsers = oldUserIds.diff(newUserIds)
+      val addedUsers = newUserIds.diff(oldUserIds)
+
       department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala.toSet
+
+      // Clear permissions cache otherwise added extension managers still won't be able to see the screen
+      (removedUsers ++ addedUsers).foreach { usercode =>
+        permissionsService.clearCachesForUser((usercode, classTag[Department]))
+      }
 
       moduleAndDepartmentService.saveOrUpdate(department)
     }
