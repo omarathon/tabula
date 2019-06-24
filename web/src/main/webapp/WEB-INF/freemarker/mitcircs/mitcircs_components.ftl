@@ -132,7 +132,15 @@
               <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
           </td>
-          <#if panel><td>${submission.panel.name}</td></#if>
+          <#if panel>
+            <td>
+              <#if submission.panel??>
+                ${submission.panel.name}
+              <#else>
+                <span class="very-subtle">None</span>
+              </#if>
+            </td>
+          </#if>
           <#if actions>
             <td>
               <button class="remove btn btn-sm">Remove</button>
