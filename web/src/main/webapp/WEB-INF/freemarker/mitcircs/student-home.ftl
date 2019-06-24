@@ -50,7 +50,7 @@
                 </#if>
               </td>
               <td>
-                <@fmt.date date=submission.lastModified /> by <#if submission.lastModifiedBy == user.apparentUser>you<#else>${submission.lastModifiedBy.fullName}</#if>
+                <@fmt.date date=submission.lastModified />
               </td>
               <td>
                 <#if submission.withdrawn>
