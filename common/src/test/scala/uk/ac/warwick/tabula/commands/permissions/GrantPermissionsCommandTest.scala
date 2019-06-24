@@ -1,19 +1,19 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import uk.ac.warwick.tabula.{MockUserLookup, TestBase, Mockito, Fixtures}
-import uk.ac.warwick.tabula.services.permissions.{PermissionsServiceComponent, PermissionsService}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{UserLookupComponent, SecurityServiceComponent, SecurityService}
+import uk.ac.warwick.tabula.commands.{Appliable, Describable, DescriptionImpl, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{SecurityService, SecurityServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.{Fixtures, MockUserLookup, Mockito, TestBase}
+
 import scala.reflect._
 
 class GrantPermissionsCommandTest extends TestBase with Mockito {
 
-  trait CommandTestSupport[A <: PermissionsTarget] extends GrantPermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
+  trait CommandTestSupport[A <: PermissionsTarget] extends PermissionsCommandRequestMutablePermission with PermissionsCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
     val permissionsService: PermissionsService = mock[PermissionsService]
     val securityService: SecurityService = mock[SecurityService]
     val userLookup = new MockUserLookup()
@@ -195,7 +195,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
     department.id = "department-id"
 
     val command = new GrantPermissionsCommandDescription[Department] with CommandTestSupport[Department] {
-      val eventName: String = "test"
+      override lazy val eventName: String = "test"
 
       val scope: Department = department
       val grantedPermission = None
@@ -221,7 +221,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
     val command = GrantPermissionsCommand(department)
 
     command should be(anInstanceOf[Appliable[GrantedPermission[Department]]])
-    command should be(anInstanceOf[GrantPermissionsCommandState[Department]])
+    command should be(anInstanceOf[PermissionsCommandState[Department]])
     command should be(anInstanceOf[GrantPermissionsCommandPermissions])
     command should be(anInstanceOf[SelfValidating])
     command should be(anInstanceOf[GrantPermissionsCommandValidation])

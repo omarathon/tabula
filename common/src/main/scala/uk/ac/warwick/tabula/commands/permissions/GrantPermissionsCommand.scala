@@ -1,28 +1,29 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, CommandInternal, Describable}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
-import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
-import uk.ac.warwick.tabula.validators.UsercodeListValidator
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
-import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.validators.UsercodeListValidator
+
+import scala.collection.JavaConverters._
+import scala.reflect._
 
 object GrantPermissionsCommand {
-  def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A] =
+  type Result[A <: PermissionsTarget] = GrantedPermission[A]
+  type Command[A <: PermissionsTarget] = Appliable[Result[A]] with PermissionsCommandRequest with PermissionsCommandState[A] with SelfValidating
+
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with PermissionsCommandRequestMutablePermission =
     new GrantPermissionsCommandInternal(scope)
       with ComposableCommand[GrantedPermission[A]]
+      with PermissionsCommandRequestMutablePermission
       with GrantPermissionsCommandPermissions
       with GrantPermissionsCommandValidation
       with GrantPermissionsCommandDescription[A]
@@ -31,10 +32,11 @@ object GrantPermissionsCommand {
       with AutowiringUserLookupComponent
 }
 
-class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
-  extends CommandInternal[GrantedPermission[A]] with GrantPermissionsCommandState[A] {
-
-  self: PermissionsServiceComponent with UserLookupComponent =>
+abstract class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A)
+  extends CommandInternal[GrantedPermission[A]] with PermissionsCommandState[A] {
+  self: PermissionsCommandRequest
+    with PermissionsServiceComponent
+    with UserLookupComponent =>
 
   lazy val grantedPermission: Option[GrantedPermission[A]] = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
@@ -56,12 +58,12 @@ class GrantPermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sco
 }
 
 trait GrantPermissionsCommandValidation extends SelfValidating {
-  self: GrantPermissionsCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+  self: PermissionsCommandRequest
+    with PermissionsCommandState[_ <: PermissionsTarget]
+    with SecurityServiceComponent =>
 
   def validate(errors: Errors) {
-    if (usercodes.asScala.forall {
-      _.isEmptyOrWhitespace
-    }) {
+    if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
       grantedPermission.map(_.users).foreach { users =>
@@ -85,20 +87,23 @@ trait GrantPermissionsCommandValidation extends SelfValidating {
   }
 }
 
-trait GrantPermissionsCommandState[A <: PermissionsTarget] {
-  self: PermissionsServiceComponent =>
-
+trait PermissionsCommandState[A <: PermissionsTarget] {
   def scope: A
-
-  var permission: Permission = _
-  var usercodes: JList[String] = JArrayList()
-  var overrideType: Boolean = _
-
   def grantedPermission: Option[GrantedPermission[A]]
 }
 
+trait PermissionsCommandRequestMutablePermission extends PermissionsCommandRequest {
+  var permission: Permission = _
+}
+
+trait PermissionsCommandRequest {
+  def permission: Permission
+  var usercodes: JList[String] = JArrayList()
+  var overrideType: Boolean = _
+}
+
 trait GrantPermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: GrantPermissionsCommandState[_ <: PermissionsTarget] =>
+  self: PermissionsCommandState[_ <: PermissionsTarget] =>
 
   override def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
@@ -106,13 +111,17 @@ trait GrantPermissionsCommandPermissions extends RequiresPermissionsChecking wit
 }
 
 trait GrantPermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
-  self: GrantPermissionsCommandState[A] =>
+  self: PermissionsCommandRequest
+    with PermissionsCommandState[A] =>
+
+  override lazy val eventName: String = "GrantPermissions"
 
   def describe(d: Description): Unit = d.properties(
     "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
     "usercodes" -> usercodes.asScala.mkString(","),
     "permission" -> permission.getName,
-    "overrideType" -> overrideType)
+    "overrideType" -> overrideType
+  )
 }
 
 

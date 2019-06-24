@@ -74,6 +74,13 @@ class OwnDataRoleProvider extends RoleProvider with TaskBenchmarking {
     }
   }
 
-  def rolesProvided = Set(classOf[Submitter], classOf[FeedbackRecipient], classOf[SettingsOwner])
+  def rolesProvided: Set[Class[_ <: Role]] = Set(
+    classOf[Submitter],
+    classOf[FeedbackRecipient],
+    classOf[SettingsOwner],
+    classOf[SmallGroupMember],
+    classOf[MemberNoteCreator],
+    classOf[MitigatingCircumstancesSubmitter]
+  )
 
 }

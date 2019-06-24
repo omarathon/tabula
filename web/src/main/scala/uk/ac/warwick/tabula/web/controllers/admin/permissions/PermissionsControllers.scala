@@ -1,17 +1,16 @@
 package uk.ac.warwick.tabula.web.controllers.admin.permissions
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.permissions._
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.permissions.{GrantedPermission, GrantedRole}
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.helpers.ReflectionHelper
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
@@ -30,19 +29,13 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
 
   validatesSelf[SelfValidating]
 
-  type GrantRoleCommand = Appliable[GrantedRole[A]] with GrantRoleCommandState[A]
-  type RevokeRoleCommand = Appliable[Option[GrantedRole[A]]] with RevokeRoleCommandState[A]
+  @ModelAttribute("addCommand") def addCommandModel(@PathVariable target: A): GrantRoleCommand.Command[A] = GrantRoleCommand(mandatory(target))
 
-  type GrantPermissionsCommand = Appliable[GrantedPermission[A]] with GrantPermissionsCommandState[A]
-  type RevokePermissionsCommand = Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A]
+  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable target: A): RevokeRoleCommand.Command[A] = RevokeRoleCommand(mandatory(target))
 
-  @ModelAttribute("addCommand") def addCommandModel(@PathVariable target: A): GrantRoleCommand = GrantRoleCommand(mandatory(target))
+  @ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand.Command[A] = GrantPermissionsCommand(mandatory(target))
 
-  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable target: A): RevokeRoleCommand = RevokeRoleCommand(mandatory(target))
-
-  @ModelAttribute("addSingleCommand") def addSingleCommandModel(@PathVariable target: A): GrantPermissionsCommand = GrantPermissionsCommand(mandatory(target))
-
-  @ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand = RevokePermissionsCommand(mandatory(target))
+  @ModelAttribute("removeSingleCommand") def removeSingleCommandModel(@PathVariable target: A): RevokePermissionsCommand.Command[A] = RevokePermissionsCommand(mandatory(target))
 
   var userLookup: UserLookupService = Wire[UserLookupService]
   var permissionsService: PermissionsService = Wire[PermissionsService]
@@ -75,7 +68,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
     form(target, usercodes, Some(role), action)
 
   @RequestMapping(method = Array(POST), params = Array("_command=add"))
-  def addRole(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors): Mav = {
+  def addRole(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand.Command[A], errors: Errors): Mav = {
     val target = command.scope
     if (errors.hasErrors) {
       form(target)
@@ -87,7 +80,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
   }
 
   @RequestMapping(method = Array(POST), params = Array("_command=remove"))
-  def removeRole(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
+  def removeRole(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand.Command[A],
     errors: Errors): Mav = {
     val target = command.scope
     if (errors.hasErrors) {
@@ -100,7 +93,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
   }
 
   @RequestMapping(method = Array(POST), params = Array("_command=addSingle"))
-  def addPermission(@Valid @ModelAttribute("addSingleCommand") command: GrantPermissionsCommand, errors: Errors): Mav = {
+  def addPermission(@Valid @ModelAttribute("addSingleCommand") command: GrantPermissionsCommand.Command[A], errors: Errors): Mav = {
     val target = command.scope
     if (errors.hasErrors) {
       form(target)
@@ -112,7 +105,7 @@ abstract class PermissionsControllerMethods[A <: PermissionsTarget : ClassTag] e
   }
 
   @RequestMapping(method = Array(POST), params = Array("_command=removeSingle"))
-  def removePermission(@Valid @ModelAttribute("removeSingleCommand") command: RevokePermissionsCommand,
+  def removePermission(@Valid @ModelAttribute("removeSingleCommand") command: RevokePermissionsCommand.Command[A],
     errors: Errors): Mav = {
     val target = command.scope
     if (errors.hasErrors) {
@@ -234,7 +227,7 @@ case class AdminLink(title: String, href: String)
 @Controller
 @RequestMapping(value = Array("/admin/permissions/member/{target}"))
 class MemberPermissionsController extends PermissionsControllerMethods[Member] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member): Seq[AdminLink] = Seq(
     AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
   )
 }
@@ -242,7 +235,7 @@ class MemberPermissionsController extends PermissionsControllerMethods[Member] {
 @Controller
 @RequestMapping(value = Array("/admin/permissions/department/{target}"))
 class DepartmentPermissionsController extends PermissionsControllerMethods[Department] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") department: Department): Seq[AdminLink] = Seq(
     AdminLink("Coursework Management", Routes.cm2.admin.department(mandatory(department), AcademicYear.now())),
     AdminLink("Small Group Teaching", Routes.groups.admin(mandatory(department), AcademicYear.now())),
     AdminLink("Monitoring Points - View and record", Routes.attendance.View.departmentForYear(mandatory(department), AcademicYear.now())),
@@ -254,7 +247,7 @@ class DepartmentPermissionsController extends PermissionsControllerMethods[Depar
 @Controller
 @RequestMapping(value = Array("/admin/permissions/module/{target}"))
 class ModulePermissionsController extends PermissionsControllerMethods[Module] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") module: Module): Seq[AdminLink] = Seq(
     AdminLink("Coursework Management", Routes.cm2.admin.department(mandatory(module).adminDepartment, AcademicYear.now())),
     AdminLink("Small Group Teaching", Routes.groups.admin(mandatory(module).adminDepartment, AcademicYear.now())),
     AdminLink("Administration & Permissions", Routes.admin.module(mandatory(module)))
@@ -264,7 +257,7 @@ class ModulePermissionsController extends PermissionsControllerMethods[Module] {
 @Controller
 @RequestMapping(value = Array("/admin/permissions/route/{target}"))
 class RoutePermissionsController extends PermissionsControllerMethods[Route] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") route: Route) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") route: Route): Seq[AdminLink] = Seq(
     AdminLink("Administration & Permissions", Routes.admin.route(mandatory(route)))
   )
 }
@@ -272,7 +265,7 @@ class RoutePermissionsController extends PermissionsControllerMethods[Route] {
 @Controller
 @RequestMapping(value = Array("/admin/permissions/assignment/{target}"))
 class AssignmentPermissionsController extends PermissionsControllerMethods[Assignment] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") assignment: Assignment) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") assignment: Assignment): Seq[AdminLink] = Seq(
     AdminLink("Manage", Routes.cm2.admin.assignment.submissionsandfeedback(mandatory(assignment)))
   )
 }
@@ -280,7 +273,7 @@ class AssignmentPermissionsController extends PermissionsControllerMethods[Assig
 @Controller
 @RequestMapping(value = Array("/admin/permissions/smallgroupset/{target}"))
 class SmallGroupSetPermissionsController extends PermissionsControllerMethods[SmallGroupSet] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") set: SmallGroupSet) = Seq(
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") set: SmallGroupSet): Seq[AdminLink] = Seq(
     AdminLink("Manage", Routes.groups.admin.module(mandatory(set).module, mandatory(set).academicYear))
   )
 }

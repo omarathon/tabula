@@ -23,7 +23,9 @@ class MitCircsForm {
           $dl.append($('<dt></dt>').text($issueType.find('label').text().trim()));
           $dl.append($('<dd></dd>').text($issueType.data('evidenceguidance')));
         });
-        $('.mitcircs-form__fields__section__evidence-upload .mitcircs-form__fields__section__hint').empty().append($dl);
+        const $hintContainer = $('.mitcircs-form__fields__section__evidence-upload .mitcircs-form__fields__section__hint');
+        $hintContainer.find('dl').remove();
+        $hintContainer.append($dl);
       })
       .trigger('change');
 

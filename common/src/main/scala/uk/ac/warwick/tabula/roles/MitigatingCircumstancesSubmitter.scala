@@ -8,8 +8,11 @@ case class MitigatingCircumstancesSubmitter(student: MitigatingCircumstancesStud
 case object MitigatingCircumstancesSubmitterRoleDefinition extends UnassignableBuiltInRoleDefinition {
   override def description = "In a department that manages mitigating circumstances in Tabula"
 
+  GeneratesSubRole(MitigatingCircumstancesViewerRoleDefinition)
+
   GrantsScopedPermission(
     MitigatingCircumstancesSubmission.Read,
-    MitigatingCircumstancesSubmission.Modify
+    MitigatingCircumstancesSubmission.Modify,
+    MitigatingCircumstancesSubmission.Share,
   )
 }

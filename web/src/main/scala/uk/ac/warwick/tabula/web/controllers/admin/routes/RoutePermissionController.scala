@@ -1,29 +1,26 @@
 package uk.ac.warwick.tabula.web.controllers.admin.routes
 
-import scala.collection.JavaConverters._
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, RevokeRoleCommand, GrantRoleCommandState, GrantRoleCommand}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand}
+import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.admin.AdminController
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
+import scala.collection.JavaConverters._
 
 trait RoutePermissionControllerMethods extends AdminController {
 
-  type GrantRoleCommand = Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route]
-  type RevokeRoleCommand = Appliable[Option[GrantedRole[Route]]] with RevokeRoleCommandState[Route]
+  @ModelAttribute("addCommand") def addCommandModel(@PathVariable route: Route): GrantRoleCommand.Command[Route] =
+    GrantRoleCommand(route)
 
-  @ModelAttribute("addCommand") def addCommandModel(@PathVariable route: Route): GrantRoleCommand = GrantRoleCommand(route)
-
-  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable route: Route): RevokeRoleCommand = RevokeRoleCommand(route)
+  @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable route: Route): RevokeRoleCommand.Command[Route] = RevokeRoleCommand(route)
 
   var userLookup: UserLookupService = Wire.auto[UserLookupService]
 
@@ -60,7 +57,7 @@ class RouteAddPermissionController extends AdminController with RoutePermissionC
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=add"))
-  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors): Mav = {
+  def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand.Command[Route], errors: Errors): Mav = {
     val route = command.scope
     if (errors.hasErrors) {
       form(route)
@@ -79,7 +76,7 @@ class RouteRemovePermissionController extends AdminController with RoutePermissi
   validatesSelf[SelfValidating]
 
   @RequestMapping(method = Array(POST), params = Array("_command=remove"))
-  def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
+  def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand.Command[Route],
     errors: Errors): Mav = {
     val route = command.scope
     if (errors.hasErrors) {

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.admin.department
 
-import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommandState, RevokeRoleCommandState}
+import org.springframework.validation.{BindException, Errors}
+import uk.ac.warwick.tabula.commands.permissions.{GrantRoleCommand, RevokeRoleCommand, RoleCommandRequestMutableRoleDefinition, RoleCommandState}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -31,14 +31,14 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
   @Test def createCommands {
     Seq(listController, addController, removeController).foreach { controller =>
       new Fixture {
-        val addCommand: controller.GrantRoleCommand = controller.addCommandModel(department)
-        val removeCommand: controller.RevokeRoleCommand = controller.removeCommandModel(department)
+        val addCommand: GrantRoleCommand.Command[Department] = controller.addCommandModel(department)
+        val removeCommand: RevokeRoleCommand.Command[Department] = controller.removeCommandModel(department)
 
         addCommand should be(anInstanceOf[Appliable[GrantedRole[Department]]])
-        addCommand should be(anInstanceOf[GrantRoleCommandState[Department]])
+        addCommand should be(anInstanceOf[RoleCommandState[Department]])
 
         removeCommand should be(anInstanceOf[Appliable[GrantedRole[Department]]])
-        removeCommand should be(anInstanceOf[RevokeRoleCommandState[Department]])
+        removeCommand should be(anInstanceOf[RoleCommandState[Department]])
       }
     }
   }
@@ -72,7 +72,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Department]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Department] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Department = department
@@ -80,6 +80,8 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(addedRole)
 
         def apply: GrantedRole[Department] = addedRole
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -102,7 +104,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val addedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-      val command = new Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department] with PermissionsServiceComponent {
+      val command = new Appliable[GrantedRole[Department]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Department] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Department = department
@@ -113,6 +115,8 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           null
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -134,7 +138,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Department]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Department] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Department = department
@@ -142,6 +146,8 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
         def grantedRole = Some(removedRole)
 
         def apply: Option[GrantedRole[Department]] = Some(removedRole)
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")
@@ -164,7 +170,7 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
     new Fixture {
       val removedRole = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 
-      val command = new Appliable[Option[GrantedRole[Department]]] with RevokeRoleCommandState[Department] with PermissionsServiceComponent {
+      val command = new Appliable[Option[GrantedRole[Department]]] with RoleCommandRequestMutableRoleDefinition with RoleCommandState[Department] with PermissionsServiceComponent with SelfValidating {
         val permissionsService = null
 
         def scope: Department = department
@@ -175,6 +181,8 @@ class DepartmentPermissionControllerTest extends TestBase with Mockito {
           fail("Should not be called")
           None
         }
+
+        override def validate(errors: Errors): Unit = {}
       }
       command.usercodes.add("cuscav")
       command.usercodes.add("cusebr")

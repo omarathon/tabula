@@ -81,7 +81,7 @@
 <#macro checkboxesWithOther enumValues enumField otherField additionalDescriptions = {}>
   <#list enumValues as value>
     <div
-      class="checkbox <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>"
+      class="checkbox clearfix <#if value.entryName == "Other">mitcircs-form__fields__checkbox-with-other</#if>"
       <#if value.evidenceGuidance??>data-evidenceguidance="${value.evidenceGuidance}"</#if>
     >
       <label>
