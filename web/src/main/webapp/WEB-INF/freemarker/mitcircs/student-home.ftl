@@ -74,6 +74,45 @@
     </div>
   </#if>
 
+  <#if submissionsWithAcuteOutcomes?has_content>
+    <h2>Acute mitigating circumstances</h2>
+
+    <ul class="list-unstyled">
+      <#list submissionsWithAcuteOutcomes as submission>
+        <li>
+          <strong>MIT-${submission.key}</strong> -
+          <@fmt.date date=submission.startDate includeTime=false relative=false />
+          &mdash;
+          <#if submission.endDate??>
+            <@fmt.date date=submission.endDate includeTime=false relative=false />
+          <#else>
+            <span class="very-subtle">(ongoing)</span>
+          </#if>
+          <br />
+          Outcomes recorded
+          <#if submission.outcomesLastRecordedBy??>
+            by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+          </#if>
+          <#if submission.outcomesLastRecordedOn??>
+            at <@fmt.date date=submission.outcomesLastRecordedOn />
+          </#if>
+
+          <#if submission.acuteOutcome??>
+            <br />${submission.acuteOutcome.description}
+          </#if>
+
+          <ul>
+            <#list submission.affectedAssessments as assessment>
+              <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+                <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+              </#if>
+            </#list>
+          </ul>
+        </li>
+      </#list>
+    </ul>
+  </#if>
+
   <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
     <section class="mitcircs__reasonable-adjustments media">
       <div class="media-left">
