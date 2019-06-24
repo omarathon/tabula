@@ -81,6 +81,8 @@
                         <dd>Some of the evidence that you have provided is not in English. For evidence to be considered it must be legible and in English. Evidence obtained overseas which is written in another language must be accompanied by a certified translation.</dd>
                         <dt><a role="button">Impact not described</a></dt>
                         <dd>The evidence that you provide must state how the reported circumstances have impacted on your ability to study and/or complete assessments.</dd>
+                        <dt><a role="button">Independent evidence</a></dt>
+                        <dd>Your submission must be accompanied by independent third party evidence. Evidence produced by family or friends is not sufficient.</dd>
                       </dl>
                     </@modal.body>
                   </@modal.wrapper>
