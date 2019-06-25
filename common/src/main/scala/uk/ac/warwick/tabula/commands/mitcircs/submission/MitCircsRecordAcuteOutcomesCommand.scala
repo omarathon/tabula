@@ -130,8 +130,12 @@ trait MitCircsRecordAcuteOutcomesNotifications extends Notifies[Result, Mitigati
   self: MitCircsRecordAcuteOutcomesRequest
     with MitCircsRecordAcuteOutcomesState =>
 
+  var oldGrading: MitigatingCircumstancesGrading = submission.outcomeGrading
+  var oldState: MitigatingCircumstancesSubmissionState = submission.state
+
   override def emit(submission: Result): Seq[Notification[MitigatingCircumstancesSubmission, Unit]] =
-    if (confirm && outcomeGrading != MitigatingCircumstancesGrading.Rejected)
+    // Generate notifications if it's confirmed (not draft) and the grading isn't rejected OR it's rejected and it previously wasn't
+    if (confirm && (outcomeGrading != MitigatingCircumstancesGrading.Rejected || (oldState == MitigatingCircumstancesSubmissionState.OutcomesRecorded && Option(oldGrading).exists(_ != MitigatingCircumstancesGrading.Rejected))))
       Seq(Notification.init(new MitCircsRecordAcuteOutcomesNotification, user, submission))
     else Nil
 }
