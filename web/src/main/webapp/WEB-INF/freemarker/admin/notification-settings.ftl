@@ -182,6 +182,83 @@
       </div>
     </div>
 
+    <#if department.enableMitCircs>
+      <div class="modal fade" id="mitcircs-acute-outcomes-modal">
+        <@modal.wrapper>
+          <@modal.header>
+            <h3 class="modal-title">Mitigating circumstances acute outcome notifications</h3>
+          </@modal.header>
+          <@modal.body>
+            <h5>Why are they sent?</h5>
+
+            <p>When a mitigating circumstances submission has acute outcomes recorded such as granting
+              extensions or waiving late penalties, it may not be the responsibility of the Mitigating
+              Circumstances Officer to actually make those changes.</p>
+
+            <p>Tabula will send a notification when the Mitigating Circumstances Officer records acute
+              outcomes and submits them.</p>
+
+            <h5>When are they sent?</h5>
+
+            <p>Each time the acute outcomes are submitted or changed.</p>
+
+            <h5>Who will receive them?</h5>
+
+            <p>You can select who will receive notifications when they are turned on, unless an individual
+              has opted out of these notifications.</p>
+          </@modal.body>
+        </@modal.wrapper>
+      </div>
+
+      <div class="striped-section collapsible checkbox-toggle <#if command.mitCircsRecordAcuteOutcomesNotificationEnabled>expanded</#if>">
+        <div class="row">
+          <div class="col-md-10">
+            <h4 class="section-title" style="display: inline-block;">
+              Mitigating circumstances acute outcome notifications
+            </h4>
+            <a data-toggle="modal" data-target="#mitcircs-acute-outcomes-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
+          </div>
+          <div class="col-md-2">
+            <@bs3form.checkbox path="mitCircsRecordAcuteOutcomesNotificationEnabled">
+              <@f.checkbox path="mitCircsRecordAcuteOutcomesNotificationEnabled" id="mitCircsRecordAcuteOutcomesNotificationEnabled" cssClass="toggle-collapsible" />
+              Currently
+              <span class="toggle-collapsible-on <#if !command.mitCircsRecordAcuteOutcomesNotificationEnabled>hidden</#if>">on</span>
+              <span class="toggle-collapsible-off <#if command.mitCircsRecordAcuteOutcomesNotificationEnabled>hidden</#if>">off</span>
+            </@bs3form.checkbox>
+          </div>
+        </div>
+        <div class="striped-section-contents">
+          <div class="item-info row">
+            <div class="col-md-6">
+              <p>Send notifications to:</p>
+
+              <@bs3form.checkbox path="mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers">
+                <@f.checkbox path="mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers" id="mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers" />
+                Extension Managers
+              </@bs3form.checkbox>
+
+              <@bs3form.checkbox path="mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators">
+                <@f.checkbox path="mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators" id="mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators" />
+                Departmental Administrators
+              </@bs3form.checkbox>
+            </div>
+            <div class="col-md-6">
+              <p>Send to all selected groups or only to the first group with someone in it (e.g. Departmental Administrators will only be notified if there are no
+                Extension Managers and the outcome isn't extension-related).</p>
+              <@bs3form.radio>
+                <@f.radiobutton path="mitCircsRecordAcuteOutcomesNotificationNotifyFirstNonEmptyGroupOnly" value="false" />
+                Notify all selected groups of people
+              </@bs3form.radio>
+              <@bs3form.radio>
+                <@f.radiobutton path="mitCircsRecordAcuteOutcomesNotificationNotifyFirstNonEmptyGroupOnly" value="true" />
+                Only notify the first matching group of people
+              </@bs3form.radio>
+            </div>
+          </div>
+        </div>
+      </div>
+    </#if>
+
     <@bs3form.form_group>
       <input type="submit" value="Save" class="btn btn-primary">
       <a class="btn btn-default" href="${returnTo}">Cancel</a>

@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesGrading, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-// TODO - pointless as is but I imagine that we may want to split submissions into a few lists later so plumbing this in now
 case class HomeInformation(
-  submissions: Seq[MitigatingCircumstancesSubmission]
+  submissions: Seq[MitigatingCircumstancesSubmission],
+  submissionsWithAcuteOutcomes: Seq[MitigatingCircumstancesSubmission],
 )
 
 object StudentHomeCommand {
@@ -25,15 +25,25 @@ abstract class StudentHomeCommandInternal(val student: StudentMember) extends Co
 
   override def applyInternal(): HomeInformation = {
     val submissions = mitCircsSubmissionService.submissionsForStudent(student)
-    HomeInformation(submissions)
+    val submissionsWithAcuteOutcomes = submissions.filter {
+      s => s.state == MitigatingCircumstancesSubmissionState.OutcomesRecorded && s.isAcute && s.outcomeGrading != MitigatingCircumstancesGrading.Rejected
+    }
+
+    HomeInformation(
+      submissions,
+      submissionsWithAcuteOutcomes
+    )
   }
 }
 
 trait StudentHomePermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
   self: StudentHomeCommandState =>
 
-  def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student))
+  def permissionsCheck(p: PermissionsChecking): Unit = {
+    p.PermissionCheckAny(Seq(
+      CheckablePermission(Permissions.MitigatingCircumstancesSubmission.Modify, MitigatingCircumstancesStudent(student)),
+      CheckablePermission(Permissions.MitigatingCircumstancesSubmission.ViewOutcomes, MitigatingCircumstancesStudent(student))
+    ))
   }
 }
 

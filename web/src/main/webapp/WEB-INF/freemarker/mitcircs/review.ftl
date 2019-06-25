@@ -103,6 +103,7 @@
         </div>
       </#if>
     </div>
+
     <@components.section "Details">
       <#noescape>${submission.formattedReason}</#noescape>
     </@components.section>
@@ -225,10 +226,90 @@
       </@components.detail>
     </@components.section>
 
-    <#if submission.panel?? && !isSelf>
-      <@components.section "Panel">
-        <@components.panelDetails panel=submission.panel show_name=true />
-      </@components.section>
+    <#if !isSelf>
+      <#if submission.panel??>
+        <@components.section "Panel">
+          <@components.panelDetails panel=submission.panel show_name=true />
+        </@components.section>
+      </#if>
+
+      <#if submission.state.entryName == "Outcomes Recorded" && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
+        <@components.section "Outcomes">
+          <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
+            <@components.detail label="Mitigation grade" condensed=true>
+              ${submission.outcomeGrading.description}
+              <#if submission.outcomeGrading.entryName == "Rejected" && submission.rejectionReasons?has_content>
+                &ndash;
+                <#list submission.rejectionReasons as rejectionReason>
+                  <#if rejectionReason.entryName == "Other">${submission.rejectionReasonsOther}<#else>${rejectionReason.description}</#if><#if rejectionReason_has_next>,</#if>
+                </#list>
+              </#if>
+            </@components.detail>
+          </#if>
+
+          <#if canManage>
+            <@components.detail "Grading reasoning">
+              <#noescape>${submission.formattedOutcomeReasons}</#noescape>
+            </@components.detail>
+          </#if>
+
+          <#if submission.outcomeGrading.entryName != "Rejected">
+            <#if submission.acute>
+              <@components.detail label="Outcome" condensed=true>
+                <#if submission.acuteOutcome??>
+                  ${submission.acuteOutcome.description}
+                <#else>
+                  <span class="very-subtle">None</span>
+                </#if>
+              </@components.detail>
+
+              <#if submission.affectedAssessments?has_content>
+                <@components.detail "Affected assessments">
+                  <ul class="list-unstyled">
+                    <#list submission.affectedAssessments as assessment>
+                      <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+                        <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                      </#if>
+                    </#list>
+                  </ul>
+                </@components.detail>
+              </#if>
+            <#else>
+              <@components.detail "Recommendations to board">
+                <ul class="list-unstyled">
+                  <#list submission.boardRecommendations as recommendation>
+                    <li>
+                      <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                      <#if recommendation.assessmentSpecific!false>(all assessments)</#if>
+                    </li>
+                  </#list>
+
+                  <#list submission.affectedAssessments as assessment>
+                    <#if assessment.boardRecommendations?has_content>
+                      <li>
+                        ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                        <ul>
+                          <#list assessment.boardRecommendations as recommendation>
+                            <li>
+                              <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                            </li>
+                          </#list>
+                        </ul>
+                      </li>
+                    </#if>
+                  </#list>
+                </ul>
+              </@components.detail>
+
+              <#if canManage>
+                <@components.detail "Comments for board">
+                  <#noescape>${submission.formattedBoardRecommendationComments}</#noescape>
+                </@components.detail>
+              </#if>
+            </#if>
+          </#if>
+        </@components.section>
+      </#if>
     </#if>
 
     <#if canManage>
