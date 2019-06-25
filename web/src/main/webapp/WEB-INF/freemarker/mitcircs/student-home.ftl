@@ -19,10 +19,14 @@
 
   <h1>Personal Circumstances</h1>
 
+  <#assign isPGR = ((student.mostSignificantCourse.courseType.code)!"") == 'PG(R)' />
   <#if hasPermission>
-    <div class="pull-right">
-      <a class="btn btn-primary" href="<@routes.mitcircs.newSubmission student />">Declare mitigating circumstances<#if !isSelf> on this student's behalf</#if></a>
-    </div>
+    <#if !isPGR>
+      <div class="pull-right">
+        <a class="btn btn-primary" href="<@routes.mitcircs.newSubmission student />">Declare mitigating circumstances<#if !isSelf> on this student's behalf</#if></a>
+      </div>
+    </#if>
+      
     <h2>Mitigating circumstances submissions</h2>
     <#if submissions?has_content>
       <table class="table table-condensed">

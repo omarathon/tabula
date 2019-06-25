@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.mitcircs.RenderMitCircsAttachmentCommand
 import uk.ac.warwick.tabula.commands.mitcircs.submission._
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.mitcircs.{IssueType, MitCircsContact, MitigatingCircumstancesSubmission}
-import uk.ac.warwick.tabula.data.model.{Member, Module, StudentMember}
+import uk.ac.warwick.tabula.data.model.{CourseType, Member, Module, StudentMember}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.services.mitcircs.MitCircsSubmissionService
@@ -77,8 +77,13 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
 
   type CreateCommand = Appliable[MitigatingCircumstancesSubmission] with MitCircsSubmissionState with SelfValidating
 
-  @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand =
+  @ModelAttribute("command") def create(@PathVariable student: StudentMember, user: CurrentUser): CreateCommand = {
+    if (student.mostSignificantCourse.courseType.contains(CourseType.PGR)) {
+      throw new ItemNotFoundException(student, "PGRs cannot raise mitigating circumstances submissions")
+    }
+
     CreateMitCircsSubmissionCommand(mandatory(student), user.apparentUser)
+  }
 
   @ModelAttribute("student") def student(@PathVariable student: StudentMember): StudentMember = student
 
