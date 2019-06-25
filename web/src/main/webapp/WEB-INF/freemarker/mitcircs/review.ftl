@@ -253,57 +253,59 @@
             </@components.detail>
           </#if>
 
-          <#if submission.acute>
-            <@components.detail label="Outcome" condensed=true>
-              <#if submission.acuteOutcome??>
-                ${submission.acuteOutcome.description}
-              <#else>
-                <span class="very-subtle">None</span>
-              </#if>
-            </@components.detail>
+          <#if submission.outcomeGrading.entryName != "Rejected">
+            <#if submission.acute>
+              <@components.detail label="Outcome" condensed=true>
+                <#if submission.acuteOutcome??>
+                  ${submission.acuteOutcome.description}
+                <#else>
+                  <span class="very-subtle">None</span>
+                </#if>
+              </@components.detail>
 
-            <#if submission.affectedAssessments?has_content>
-              <@components.detail "Affected assessments">
+              <#if submission.affectedAssessments?has_content>
+                <@components.detail "Affected assessments">
+                  <ul class="list-unstyled">
+                    <#list submission.affectedAssessments as assessment>
+                      <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+                        <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                      </#if>
+                    </#list>
+                  </ul>
+                </@components.detail>
+              </#if>
+            <#else>
+              <@components.detail "Recommendations to board">
                 <ul class="list-unstyled">
+                  <#list submission.boardRecommendations as recommendation>
+                    <li>
+                      <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                      <#if recommendation.assessmentSpecific!false>(all assessments)</#if>
+                    </li>
+                  </#list>
+
                   <#list submission.affectedAssessments as assessment>
-                    <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                      <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                    <#if assessment.boardRecommendations?has_content>
+                      <li>
+                        ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                        <ul>
+                          <#list assessment.boardRecommendations as recommendation>
+                            <li>
+                              <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                            </li>
+                          </#list>
+                        </ul>
+                      </li>
                     </#if>
                   </#list>
                 </ul>
               </@components.detail>
-            </#if>
-          <#else>
-            <@components.detail "Recommendations to board">
-              <ul class="list-unstyled">
-                <#list submission.boardRecommendations as recommendation>
-                  <li>
-                    <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
-                    <#if recommendation.assessmentSpecific!false>(all assessments)</#if>
-                  </li>
-                </#list>
 
-                <#list submission.affectedAssessments as assessment>
-                  <#if assessment.boardRecommendations?has_content>
-                    <li>
-                      ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
-                      <ul>
-                        <#list assessment.boardRecommendations as recommendation>
-                          <li>
-                            <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
-                          </li>
-                        </#list>
-                      </ul>
-                    </li>
-                  </#if>
-                </#list>
-              </ul>
-            </@components.detail>
-
-            <#if canManage>
-              <@components.detail "Comments for board">
-                <#noescape>${submission.formattedBoardRecommendationComments}</#noescape>
-              </@components.detail>
+              <#if canManage>
+                <@components.detail "Comments for board">
+                  <#noescape>${submission.formattedBoardRecommendationComments}</#noescape>
+                </@components.detail>
+              </#if>
             </#if>
           </#if>
         </@components.section>

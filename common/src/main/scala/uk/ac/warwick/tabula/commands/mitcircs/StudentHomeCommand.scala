@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesGrading, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -25,7 +25,9 @@ abstract class StudentHomeCommandInternal(val student: StudentMember) extends Co
 
   override def applyInternal(): HomeInformation = {
     val submissions = mitCircsSubmissionService.submissionsForStudent(student)
-    val submissionsWithAcuteOutcomes = submissions.filter { s => s.state == MitigatingCircumstancesSubmissionState.OutcomesRecorded && s.isAcute }
+    val submissionsWithAcuteOutcomes = submissions.filter {
+      s => s.state == MitigatingCircumstancesSubmissionState.OutcomesRecorded && s.isAcute && s.outcomeGrading != MitigatingCircumstancesGrading.Rejected
+    }
 
     HomeInformation(
       submissions,

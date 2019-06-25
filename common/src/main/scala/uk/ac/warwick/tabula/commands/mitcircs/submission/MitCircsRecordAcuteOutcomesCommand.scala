@@ -1,24 +1,24 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
-import MitCircsRecordAcuteOutcomesCommand._
 import org.joda.time.DateTime
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.AssessmentType
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.mitcircs.submission.MitCircsRecordAcuteOutcomesCommand._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
+import uk.ac.warwick.tabula.data.model.mitcircs._
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsRecordAcuteOutcomesNotification
+import uk.ac.warwick.tabula.data.model.{AssessmentType, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAcuteOutcome, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
 object MitCircsRecordAcuteOutcomesCommand {
-
   type Result = MitigatingCircumstancesSubmission
   type Command = Appliable[Result] with MitCircsRecordAcuteOutcomesState with MitCircsRecordAcuteOutcomesRequest with SelfValidating
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Manage
@@ -29,14 +29,15 @@ object MitCircsRecordAcuteOutcomesCommand {
     with MitCircsRecordAcuteOutcomesValidation
     with MitCircsRecordAcuteOutcomesPermissions
     with MitCircsRecordAcuteOutcomesDescription
+    with MitCircsRecordAcuteOutcomesNotifications
     with MitCircsSubmissionSchedulesNotifications
     with AutowiringMitCircsSubmissionServiceComponent
 }
 
 class MitCircsRecordAcuteOutcomesCommandInternal(val submission: MitigatingCircumstancesSubmission, val user: User) extends CommandInternal[Result]
   with MitCircsRecordAcuteOutcomesState with MitCircsRecordAcuteOutcomesValidation {
-
-  self: MitCircsRecordAcuteOutcomesRequest with MitCircsSubmissionServiceComponent =>
+  self: MitCircsRecordAcuteOutcomesRequest
+    with MitCircsSubmissionServiceComponent =>
 
   def applyInternal(): Result = transactional() {
     require(submission.canRecordAcuteOutcomes, "Cannot record acute outcomes for this submission")
@@ -123,4 +124,14 @@ trait MitCircsRecordAcuteOutcomesRequest {
   var rejectionReasonsOther: String = submission.rejectionReasonsOther
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = submission.acuteOutcome
   var confirm: Boolean = false
+}
+
+trait MitCircsRecordAcuteOutcomesNotifications extends Notifies[Result, MitigatingCircumstancesSubmission] {
+  self: MitCircsRecordAcuteOutcomesRequest
+    with MitCircsRecordAcuteOutcomesState =>
+
+  override def emit(submission: Result): Seq[Notification[MitigatingCircumstancesSubmission, Unit]] =
+    if (confirm && outcomeGrading != MitigatingCircumstancesGrading.Rejected)
+      Seq(Notification.init(new MitCircsRecordAcuteOutcomesNotification, user, submission))
+    else Nil
 }
