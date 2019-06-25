@@ -55,7 +55,8 @@
         <div class="page-notice">
           The information below is for the ${activeAcademicYear.toString} academic year.
           <#if currentYearLinks?size = 1>
-            To view current information, <a class="text-decoration-underline" href="${currentYearLinks[0].url}">go to ${activeAcademicYear.toString}</a>.
+            <#assign currentYearLink=currentYearLinks[0]>
+            To view current information, <a class="text-decoration-underline" href="${currentYearLink.url}">go to ${currentYearLink.scopedAcademicYear.toString}</a>.
           </#if>
         </div>
       </#if>

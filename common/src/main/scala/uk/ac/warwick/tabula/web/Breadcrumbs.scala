@@ -45,9 +45,7 @@ object Breadcrumbs {
     override val tooltip: String,
     override val active: Boolean = false,
   ) extends BreadCrumb with ActiveableByBoolean {
-    override def setActive(thisActive: Boolean): BreadCrumb = {
-      if (this.active && !thisActive) this.copy(active = thisActive) else this
-    }
+    override def setActive(thisActive: Boolean): BreadCrumb = this.copy(active = thisActive)
   }
 
   case class AcademicYearScoped(
@@ -57,9 +55,7 @@ object Breadcrumbs {
     override val scopedAcademicYear: Option[AcademicYear],
     override val active: Boolean = false,
   ) extends BreadCrumb with ActiveableByBoolean {
-    override def setActive(thisActive: Boolean): BreadCrumb = {
-      if (this.active && !thisActive) this.copy(active = thisActive) else this
-    }
+    override def setActive(thisActive: Boolean): BreadCrumb = this.copy(active = thisActive)
   }
 
 }
