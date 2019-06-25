@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.commands.admin.department
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, CommandInternal, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Describable, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.notifications.coursework.FinaliseFeedbackNotificationSettings
 import uk.ac.warwick.tabula.data.model.notifications.groups.reminders.SmallGroupEventAttendanceReminderNotificationSettings
+import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsRecordAcuteOutcomesNotificationSettings
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringUserLookupComponent, ModuleAndDepartmentServiceComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object NotificationSettingsCommand {
   def apply(department: Department) =
@@ -52,6 +53,20 @@ trait NotificationSettingsCommandState {
   //	var finaliseFeedbackNotificationNamedUsers: JList[String] = JArrayList()
 
   var finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly: Boolean = _
+
+  lazy val mitCircsRecordAcuteOutcomesNotificationSettings = new MitCircsRecordAcuteOutcomesNotificationSettings(department.notificationSettings("MitCircsRecordAcuteOutcomes"))
+
+  var mitCircsRecordAcuteOutcomesNotificationEnabled: Boolean = _
+
+  var mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers: Boolean = _
+  var mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators: Boolean = _
+
+  // Not currently in use
+  //	var mitCircsRecordAcuteOutcomesNotificationNotifyNamedUsers: Boolean = _
+  //	var mitCircsRecordAcuteOutcomesNotificationrNotifyNamedUsersFirst: Boolean = _
+  //	var mitCircsRecordAcuteOutcomesNotificationNamedUsers: JList[String] = JArrayList()
+
+  var mitCircsRecordAcuteOutcomesNotificationNotifyFirstNonEmptyGroupOnly: Boolean = _
 }
 
 trait PopulateNotificationSettingsCommandState {
@@ -86,6 +101,20 @@ trait PopulateNotificationSettingsCommandState {
   //	)
 
   finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly = finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value
+
+  mitCircsRecordAcuteOutcomesNotificationEnabled = mitCircsRecordAcuteOutcomesNotificationSettings.enabled.value
+
+  mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers = mitCircsRecordAcuteOutcomesNotificationSettings.notifyExtensionManagers.value
+  mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators = mitCircsRecordAcuteOutcomesNotificationSettings.notifyDepartmentAdministrators.value
+
+  // Not currently in use
+  //	mitCircsRecordAcuteOutcomesNotificationNotifyNamedUsers = mitCircsRecordAcuteOutcomesNotificationSettings.notifyNamedUsers.value
+  //	mitCircsRecordAcuteOutcomesNotificationNotifyNamedUsersFirst = mitCircsRecordAcuteOutcomesNotificationSettings.notifyNamedUsersFirst.value
+  //	mitCircsRecordAcuteOutcomesNotificationNamedUsers.addAll(
+  //		mitCircsRecordAcuteOutcomesNotificationSettings.namedUsers.value.map(_.getUserId).filter(_.hasText).asJavaCollection
+  //	)
+
+  mitCircsRecordAcuteOutcomesNotificationNotifyFirstNonEmptyGroupOnly = mitCircsRecordAcuteOutcomesNotificationSettings.notifyFirstNonEmptyGroupOnly.value
 }
 
 class NotificationSettingsCommandInternal(val department: Department) extends CommandInternal[Department] with NotificationSettingsCommandState {
@@ -118,6 +147,18 @@ class NotificationSettingsCommandInternal(val department: Department) extends Co
 
     finaliseFeedbackNotificationSettings.notifyFirstNonEmptyGroupOnly.value = finaliseFeedbackNotificationNotifyFirstNonEmptyGroupOnly
 
+    mitCircsRecordAcuteOutcomesNotificationSettings.enabled.value = mitCircsRecordAcuteOutcomesNotificationEnabled
+
+    mitCircsRecordAcuteOutcomesNotificationSettings.notifyExtensionManagers.value = mitCircsRecordAcuteOutcomesNotificationNotifyExtensionManagers
+    mitCircsRecordAcuteOutcomesNotificationSettings.notifyDepartmentAdministrators.value = mitCircsRecordAcuteOutcomesNotificationNotifyDepartmentAdministrators
+
+    // Not currently in use
+    //		mitCircsRecordAcuteOutcomesNotificationSettings.notifyNamedUsers.value = mitCircsRecordAcuteOutcomesNotificationNotifyNamedUsers
+    //		mitCircsRecordAcuteOutcomesNotificationSettings.notifyNamedUsersFirst.value = mitCircsRecordAcuteOutcomesNotificationNotifyNamedUsersFirst
+    //		mitCircsRecordAcuteOutcomesNotificationSettings.namedUsers.value = mitCircsRecordAcuteOutcomesNotificationNamedUsers.asScala.map(userLookup.getUserByUserId).filter(_.isFoundUser).toList
+
+    mitCircsRecordAcuteOutcomesNotificationSettings.notifyFirstNonEmptyGroupOnly.value = mitCircsRecordAcuteOutcomesNotificationNotifyFirstNonEmptyGroupOnly
+
     moduleAndDepartmentService.saveOrUpdate(department)
     department
   }
@@ -140,4 +181,5 @@ trait NotificationSettingsDescription extends Describable[Department] {
     d.department(department)
       .property("SmallGroupEventAttendanceReminder", department.notificationSettings("SmallGroupEventAttendanceReminder"))
       .property("FinaliseFeedback", department.notificationSettings("FinaliseFeedback"))
+      .property("MitCircsRecordAcuteOutcomes", department.notificationSettings("MitCircsRecordAcuteOutcomes"))
 }
