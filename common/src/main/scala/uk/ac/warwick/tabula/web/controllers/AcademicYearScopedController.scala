@@ -50,6 +50,9 @@ trait AcademicYearScopedController extends TaskBenchmarking {
     }
   }
 
+  @ModelAttribute("academicYearNow")
+  def academicYearNow: AcademicYear = AcademicYear.now()
+
   /**
     * One of these should be overriden to just call retrieveActiveAcademicYear,
     * but with the PathVariable-provided academic year as an argument (or null),
@@ -65,7 +68,11 @@ trait AcademicYearScopedController extends TaskBenchmarking {
 
   def academicYearBreadcrumbs(activeAcademicYear: AcademicYear)(urlGenerator: AcademicYear => String): Seq[BreadCrumb] =
     availableAcademicYears.map(year =>
-      Breadcrumbs.Standard(year.getLabel, Some(urlGenerator(year)), "").setActive(year.startYear == activeAcademicYear.startYear)
+      Breadcrumbs.AcademicYearScoped(
+        title = year.getLabel,
+        url = Some(urlGenerator(year)),
+        tooltip = "",
+        scopedAcademicYear = Some(year),
+      ).setActive(year.startYear == activeAcademicYear.startYear)
     )
-
 }
