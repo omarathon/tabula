@@ -109,7 +109,7 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     }
 
     When("I click the dangerous button")
-    click on id("marking-workflow-modal").webElement.findElement(By.className("btn-danger"))
+    id("marking-workflow-modal").webElement.findElement(By.className("btn-danger")).submit()
 
     Then("I should have two marking workflows left")
     eventually {
