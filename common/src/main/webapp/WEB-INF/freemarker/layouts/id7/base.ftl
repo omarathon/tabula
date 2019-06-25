@@ -50,14 +50,12 @@
         <#return result>
       </#function>
 
-      <#if activeAcademicYear.startYear != academicYearNow.startYear>
-        <#assign currentYearLinks=getUrlForAcadYear(secondBreadcrumbs, academicYearNow)>
+      <#assign currentYearLinks=getUrlForAcadYear(secondBreadcrumbs, academicYearNow)>
+      <#if activeAcademicYear.startYear != academicYearNow.startYear && currentYearLinks?size = 1>
         <div class="page-notice">
           The information below is for the ${activeAcademicYear.toString} academic year.
-          <#if currentYearLinks?size = 1>
-            <#assign currentYearLink=currentYearLinks[0]>
-            To view current information, <a class="text-decoration-underline" href="${currentYearLink.url}">go to ${currentYearLink.scopedAcademicYear.toString}</a>.
-          </#if>
+          <#assign currentYearLink=currentYearLinks[0]>
+          To view current information, <a class="text-decoration-underline" href="${currentYearLink.url}">go to ${currentYearLink.scopedAcademicYear.toString}</a>.
         </div>
       </#if>
     </#if>
