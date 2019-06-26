@@ -59,7 +59,7 @@ class AttendanceMonitoringPoint extends GeneratedId with AttendanceMonitoringPoi
   @Column(name = "end_date")
   var endDate: LocalDate = _
 
-  def isDateValidForPoint(date: LocalDate): Boolean =
+  def containsDate(date: LocalDate): Boolean =
     date == startDate || date == endDate || (startDate.isBefore(date) && endDate.isAfter(date))
 
   def isStartDateInFuture: Boolean =

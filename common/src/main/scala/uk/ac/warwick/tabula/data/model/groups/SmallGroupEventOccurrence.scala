@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.groups
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy}
 import org.joda.time.{LocalDate, LocalDateTime}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -39,6 +40,10 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
   def endDateTime: Option[LocalDateTime] = event.endDateTimeForWeek(week)
 
   override def humanReadableId: String = s"${event.humanReadableId} week $week"
+
+  def academicYear: AcademicYear = event.academicYear
+
+  def module: Module = event.module
 }
 
 object SmallGroupEventOccurrence {

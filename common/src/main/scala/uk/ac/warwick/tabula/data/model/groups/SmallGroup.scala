@@ -5,7 +5,7 @@ import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -187,4 +187,8 @@ class SmallGroup
   }
 
   def hasScheduledEvents: Boolean = events.exists(!_.isUnscheduled)
+
+  def academicYear: AcademicYear = groupSet.academicYear
+
+  def module: Module = groupSet.module
 }
