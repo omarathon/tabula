@@ -738,6 +738,7 @@ exports.initCollapsible = function ($el) {
         var $titleElement  = $(this);
 
         if ($titleElement.find('a').length === 0) {
+          $titleElement.removeAttr('tabindex');
           var $replacementLink = $('<a>').addClass('collapse-trigger');
           $replacementLink.attr('href', '#');
           $replacementLink.html($titleElement.html());
@@ -753,7 +754,9 @@ exports.initCollapsible = function ($el) {
 
       $title.find('a.collapse-trigger').on('click keydown', function (e) {
         // if a keypress, only care about 13
-
+        if (event.type === 'keydown' && e.key !== 'Enter') {
+          return;
+        }
 
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
