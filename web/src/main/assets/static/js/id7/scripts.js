@@ -743,7 +743,7 @@ exports.initCollapsible = function ($el) {
           $replacementLink.html($titleElement.html());
           $replacementLink.contents()
             .filter(function() { return this.nodeType !== 1; })
-            .wrap('<span class="label">');
+            .wrap('<span class="collapse-label">');
           $replacementLink.find('span').text($.trim($replacementLink.find('span').text()));
           $titleElement.html('');
           $titleElement.prepend($replacementLink);
@@ -751,16 +751,21 @@ exports.initCollapsible = function ($el) {
       });
       // End view polyfill
 
-      $title.find('a.collapse-trigger').on('click', function (e) {
+      $title.find('a.collapse-trigger').on('click keydown', function (e) {
+        // if a keypress, only care about 13
+
+
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
           return;
         }
 
-        if (($(e.target).is('a, button') && !$(e.target).hasClass('collapse-trigger'))|| $(e.target).closest('a, button').length) {
+        if (!$(e.target).parent().hasClass('collapse-trigger') && ($(e.target).is('a, button') || $(e.target).closest('a, button').length)) {
           // Ignore if we're clicking a button
           return;
         }
+
+        $icon = $(e.target).parent().find('i');
 
         if (open()) {
           $section.removeClass('expanded');
