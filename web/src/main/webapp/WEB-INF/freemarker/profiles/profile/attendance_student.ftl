@@ -39,7 +39,7 @@
           <a class="pull-right btn btn-primary btn-sm" href="<@routes.attendance.profileRecord student academicYear returnTo />">Record attendance</a>
         </#if>
         <h3 class="section-title">
-          Monitoring points
+          <a href="#" class="collapse-trigger">Monitoring points</a>
         </h3>
         <div class="missed-info">
           <#if !monitoringPointAttendanceCommandResult.hasAnyMissedPoints>

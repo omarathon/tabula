@@ -732,13 +732,31 @@ exports.initCollapsible = function ($el) {
         }
       });
     } else {
-      $title.css('cursor', 'pointer').on('click', function (e) {
+      // Begin view polyfill
+      // Do not rely on this, fix the templates instead.
+      $title.each(function() {
+        var $titleElement  = $(this);
+
+        if ($titleElement.find('a').length === 0) {
+          var $replacementLink = $('<a>').addClass('collapse-trigger');
+          $replacementLink.attr('href', '#');
+          $replacementLink.html($titleElement.html());
+          $replacementLink.contents()
+            .filter(function() { return this.nodeType !== 1; })
+            .wrap('<span class="label">');
+          $titleElement.html('');
+          $titleElement.prepend($replacementLink);
+        }
+      });
+      // End view polyfill
+
+      $title.find('a.collapse-trigger').on('click', function (e) {
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
           return;
         }
 
-        if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
+        if (($(e.target).is('a, button') && !$(e.target).hasClass('collapse-trigger'))|| $(e.target).closest('a, button').length) {
           // Ignore if we're clicking a button
           return;
         }
