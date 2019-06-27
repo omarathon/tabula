@@ -21,7 +21,7 @@
             Submitted
           </#if>
         </@components.detail>
-        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
+        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@components.detail>
         <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
         <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
@@ -36,7 +36,7 @@
         </#if>
         <#if submission.contacted>
           <@components.detail "Discussed submission with">
-            <@components.enumListWithOther submission.contacts submission.contactOther!"" />
+            <@components.enumListWithOther enumValues=submission.contacts otherValue=submission.contactOther!"" condensed=false />
           </@components.detail>
         <#else>
           <@components.detail "Reason for not discussing submission">
