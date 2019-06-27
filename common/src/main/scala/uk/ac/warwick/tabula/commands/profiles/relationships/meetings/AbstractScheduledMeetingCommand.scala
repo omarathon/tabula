@@ -3,17 +3,16 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.DateFormats.DateTimePickerFormatter
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports.{JList, _}
 import uk.ac.warwick.tabula.commands.{Notifies, SchedulesNotifications, UploadedFile}
-import uk.ac.warwick.tabula.JavaImports._
-
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
-import uk.ac.warwick.tabula.data.model.{FileAttachment, MapLocation, MeetingFormat, Member, MyWarwickActivity, NamedLocation, Notification, ScheduledMeetingRecord, ScheduledNotification, StudentRelationship}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import scala.collection.JavaConverters._
 
 trait AbstractScheduledMeetingCommandInternal extends BindListener {
   self: AbstractScheduledMeetingRecordCommandState
@@ -110,4 +109,9 @@ trait AbstractScheduledMeetingRecordScheduledNotifications
   extends SchedulesNotifications[ScheduledMeetingRecord, ScheduledMeetingRecord]
     with AbstractScheduledMeetingRecordNotificationProcess {
   override def transformResult(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledMeetingRecord] = Seq(meetingRecord)
+}
+
+trait AbstractScheduledMeetingRecordResultScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord]
+  with AbstractScheduledMeetingRecordNotificationProcess {
+  override def transformResult(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecord] = Seq(result.meetingRecord)
 }
