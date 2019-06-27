@@ -229,7 +229,7 @@
   }
 }
 
-.mitcircs-details {
+.mitcircs-details, .mitcircs__acute-outcomes {
   .form-horizontal .control-label {
     font-weight: normal;
     color: @gray-light;
@@ -584,6 +584,34 @@
   visibility: hidden;
 }
 
+.mitcircs__acute-outcomes {
+  margin-top: 15px;
+
+
+  &__header__aside {
+    color: #666;
+    font-size: 85%;
+    //float: right;
+  }
+
+  &__affectedAssessments {
+
+    .list-unstyled {
+      margin-top: 0;
+    }
+
+    .fa-warning {
+      color: @brand-warning;
+      cursor: pointer;
+    }
+
+    .fa-check-circle-o {
+      color: @brand-success;
+      cursor: pointer;
+    }
+  }
+}
+
 .mitcircs__reasonable-adjustments {
   border: 1px solid #797979;
   background: #fffbf0;
@@ -608,3 +636,4 @@
     }
   }
 }
+
