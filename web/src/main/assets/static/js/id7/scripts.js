@@ -666,11 +666,6 @@ exports.initCollapsible = function ($el) {
       else $icon.addClass('fa fa-fw fa-chevron-right');
 
       var $title = $section.find('.section-title');
-
-      $title.keyup(function (e) {
-        if (e.keyCode === 13) $(e.target).click();
-      });
-
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend(' ').prepend($icon);
       } else {
@@ -752,11 +747,7 @@ exports.initCollapsible = function ($el) {
       });
       // End view polyfill
 
-      $title.find('a.collapse-trigger').on('click keydown', function (e) {
-        // if a keypress, only care about 13
-        if (e.type === 'keydown' && e.key !== 'Enter') {
-          return;
-        }
+      $title.find('a.collapse-trigger').on('click', function (e) {
 
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
