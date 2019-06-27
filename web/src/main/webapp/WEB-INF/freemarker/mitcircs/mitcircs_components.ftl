@@ -75,15 +75,26 @@
 
 <#macro attachments submission>
   <#if submission.attachments?has_content>
-    <ul class="unstyled">
-      <#list submission.attachments as attachment>
-        <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
-        <li id="attachment-${attachment.id}" class="attachment">
-          <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
-          <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
-        </li>
-      </#list>
-    </ul>
+    <table class="mitcircs-attachments table table-consensed">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Date uploaded</th>
+        </tr>
+      </thead>
+      <tbody>
+        <#list submission.attachments as attachment>
+          <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+          <tr id="attachment-${attachment.id}" class="attachment mitcircs-attachments__attachment">
+            <td>
+              <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+              <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
+            </td>
+            <td><@fmt.date date=attachment.dateUploaded /></td>
+          </tr>
+        </#list>
+      </tbody>
+    </table>
   </#if>
 </#macro>
 
