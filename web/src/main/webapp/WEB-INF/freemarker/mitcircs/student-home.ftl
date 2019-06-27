@@ -34,12 +34,12 @@
       <table class="table table-condensed">
         <thead>
           <tr>
-            <th>Reference</th>
-            <th>Issue types</th>
-            <th>Start date</th>
-            <th>End date</th>
-            <th>Last modified</th>
-            <th>Submitted</th>
+            <th class="col-sm-1">Reference</th>
+            <th class="col-sm-3">Issue types</th>
+            <th class="col-sm-2">Start date</th>
+            <th class="col-sm-2">End date</th>
+            <th class="col-sm-2">Last modified</th>
+            <th class="col-sm-2">Submitted</th>
           </tr>
         </thead>
         <tbody>
