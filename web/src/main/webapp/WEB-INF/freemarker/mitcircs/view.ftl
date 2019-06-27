@@ -97,7 +97,7 @@
                 </span>
               </td>
               <td>${assessment.name}</td>
-              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
+              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
             </tr>
           </#list>
           </tbody>

@@ -174,9 +174,9 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#macro>
 
-<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true stripHtml=false><#--
+<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true stripHtml=false excludeCurrentYear=false><#--
 	--><#noescape><#--
-		--><#local result = dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime) /><#--
+		--><#local result = dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime, excludeCurrentYear) /><#--
 		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>

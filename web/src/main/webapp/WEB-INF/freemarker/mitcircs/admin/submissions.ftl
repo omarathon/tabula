@@ -33,17 +33,17 @@
             ${submission.student.lastName}
           </td>
           <td>
-            <@fmt.date date=submission.startDate includeTime=false relative=false />
+            <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
             &mdash;
             <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false relative=false />
+              <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
             <#else>
               <span class="very-subtle">(ongoing)</span>
             </#if>
           </td>
           <td><@components.stage_progress_bar info.stages?values /></td>
           <td>
-            <@fmt.date date=submission.lastModified />
+            <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
               <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>

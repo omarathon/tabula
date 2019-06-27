@@ -47,22 +47,22 @@
             <tr>
               <td><a href="<@routes.mitcircs.viewSubmission submission />">MIT-${submission.key}</a></td>
               <td><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></td>
-              <td><@fmt.date date=submission.startDate includeTime=false /></td>
+              <td><@fmt.date date=submission.startDate includeTime=false shortMonth=true excludeCurrentYear=true /></td>
               <td>
                 <#if submission.endDate??>
-                  <@fmt.date date=submission.endDate includeTime=false />
+                  <@fmt.date date=submission.endDate includeTime=false shortMonth=true excludeCurrentYear=true />
                 <#else>
                   <span class="very-subtle">(not set)</span>
                 </#if>
               </td>
               <td>
-                <@fmt.date date=submission.lastModified />
+                <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
               </td>
               <td>
                 <#if submission.withdrawn>
                   <span class="very-subtle">(withdrawn)</span>
                 <#elseif submission.approvedOn??>
-                  <@fmt.date date=submission.approvedOn />
+                  <@fmt.date date=submission.approvedOn shortMonth=true excludeCurrentYear=true />
                 <#else>
                   <span class="very-subtle">(draft)</span>
                 </#if>
@@ -90,10 +90,10 @@
           <h5 class="mitcircs__acute-outcomes__header">
             MIT-${submission.key}&nbsp;
             <span class="mitcircs__acute-outcomes__header__aside">
-              <@fmt.date date=submission.startDate includeTime=false relative=false />
+              <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
               &mdash;
               <#if submission.endDate??>
-                  <@fmt.date date=submission.endDate includeTime=false relative=false />
+                <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
               <#else>
                 <span class="very-subtle">(ongoing)</span>
               </#if>
@@ -136,7 +136,7 @@
                           <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})</span>
                         </td>
                         <td>${assessment.name}</td>
-                        <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
+                        <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
                         <td>
                           <#if mapGet(info.affectedAssessments, assessment)??>
                             <ul class="list-unstyled">
