@@ -143,4 +143,5 @@ trait EditScheduledMeetingRecordNotification
   }
 }
 
-trait EditScheduledMeetingRecordNotifications extends AbstractScheduledMeetingRecordScheduledNotifications
+trait EditScheduledMeetingRecordNotifications extends  AbstractScheduledMeetingRecordResultScheduledNotifications
+
