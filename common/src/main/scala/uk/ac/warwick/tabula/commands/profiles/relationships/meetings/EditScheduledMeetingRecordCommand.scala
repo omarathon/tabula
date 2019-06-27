@@ -144,4 +144,3 @@ trait EditScheduledMeetingRecordNotification
 }
 
 trait EditScheduledMeetingRecordNotifications extends  AbstractScheduledMeetingRecordResultScheduledNotifications
-
