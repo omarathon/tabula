@@ -111,7 +111,6 @@ trait AbstractScheduledMeetingRecordScheduledNotifications
   override def transformResult(meetingRecord: ScheduledMeetingRecord): Seq[ScheduledMeetingRecord] = Seq(meetingRecord)
 }
 
-
 trait AbstractScheduledMeetingRecordResultScheduledNotifications extends SchedulesNotifications[ScheduledMeetingRecordResult, ScheduledMeetingRecord]
   with AbstractScheduledMeetingRecordNotificationProcess {
   override def transformResult(result: ScheduledMeetingRecordResult): Seq[ScheduledMeetingRecord] = Seq(result.meetingRecord)
