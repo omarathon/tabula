@@ -6,9 +6,17 @@
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 </#if>
 
-<#macro enumListWithOther enumValues otherValue>
-  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
-</#macro>
+<#macro enumListWithOther enumValues otherValue condensed=true><#compress>
+  <#if condensed>
+    <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
+  <#elseif enumValues?has_content>
+    <ul class="list-unstyled">
+      <#list enumValues as value>
+        <li>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if></li>
+      </#list>
+    </ul>
+  </#if>
+</#compress></#macro>
 
 <#macro detail label condensed=false>
   <div class="row form-horizontal mitcircs-details__detail <#if condensed>mitcircs-details__detail--condensed</#if>">
