@@ -6,7 +6,7 @@ import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.commands.mitcircs.submission.AffectedAssessmentItem
-import uk.ac.warwick.tabula.data.model.{AssessmentType, GeneratedId, Module}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, Assignment, GeneratedId, Module}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
@@ -84,6 +84,12 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
+  def matches(assignment: Assignment): Boolean = {
+    assignment.module == module && assignment.academicYear == academicYear && assignment.assessmentGroups.asScala.exists { ag =>
+      ag.assessmentComponent.sequence == sequence
+    }
+  }
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
