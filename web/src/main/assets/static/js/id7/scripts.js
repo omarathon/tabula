@@ -754,7 +754,7 @@ exports.initCollapsible = function ($el) {
 
       $title.find('a.collapse-trigger').on('click keydown', function (e) {
         // if a keypress, only care about 13
-        if (event.type === 'keydown' && e.key !== 'Enter') {
+        if (e.type === 'keydown' && e.key !== 'Enter') {
           return;
         }
 
@@ -763,19 +763,23 @@ exports.initCollapsible = function ($el) {
           return;
         }
 
-        if (!$(e.target).parent().hasClass('collapse-trigger') && ($(e.target).is('a, button') || $(e.target).closest('a, button').length)) {
+        const $eventTarget = $(e.target);
+        if (!$(this).hasClass('collapse-trigger') && ($eventTarget.is('a, button') || $eventTarget.closest('a, button').length)) {
           // Ignore if we're clicking a button
           return;
         }
 
-        $icon = $(e.target).parent().find('i');
+        $icon = $(this).find('i');
 
         if (open()) {
           $section.removeClass('expanded');
           $icon.removeClass().addClass('fa fa-fw fa-chevron-right');
+          $(this).attr('aria-expanded', 'false');
+          e.preventDefault();
         } else {
           populateContent(function () {
             $section.addClass('expanded');
+            $(this).attr('aria-expanded', 'true');
             $icon.removeClass().addClass('fa fa-fw fa-chevron-down');
 
             if ($section.data('name')) {
