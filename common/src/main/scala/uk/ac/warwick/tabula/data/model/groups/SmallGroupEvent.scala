@@ -6,7 +6,7 @@ import org.hibernate.annotations.{Proxy, Type}
 import org.hibernate.validator.constraints.URL
 import org.joda.time.{LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.ToString
+import uk.ac.warwick.tabula.{AcademicYear, ToString}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -82,6 +82,8 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 
   def isUnscheduled: Boolean = day == null || (startTime == null && endTime == null)
 
+  def scheduled: Boolean = day != null
+
   def isSingleEvent: Boolean = weekRanges.size == 1 && weekRanges.head.isSingleWeek
 
   @OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
@@ -137,15 +139,14 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
   def allWeeks: Seq[WeekRange.Week] = weekRanges.flatMap(_.toWeeks)
 
   def dateForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDate] = {
-    val weeksForYear = group.groupSet.academicYear.weeks
-    day match {
-      case null => None
-      case d: DayOfWeek => weeksForYear.get(week).map(_.firstDay.withDayOfWeek(d.jodaDayOfWeek))
-    }
+    Option(day).flatMap(d => academicYear.weeks.get(week).map(_.firstDay.withDayOfWeek(d.jodaDayOfWeek)))
   }
 
   def startDateTimeForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDateTime] = dateForWeek(week).map(_.toLocalDateTime(startTime))
 
   def endDateTimeForWeek(week: SmallGroupEventOccurrence.WeekNumber): Option[LocalDateTime] = dateForWeek(week).map(_.toLocalDateTime(endTime))
 
+  def academicYear: AcademicYear = group.academicYear
+
+  def module: Module = group.module
 }

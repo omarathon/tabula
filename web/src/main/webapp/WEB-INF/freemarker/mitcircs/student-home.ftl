@@ -19,10 +19,14 @@
 
   <h1>Personal Circumstances</h1>
 
+  <#assign isPGR = ((student.mostSignificantCourse.courseType.code)!"") == 'PG(R)' />
   <#if hasPermission>
-    <div class="pull-right">
-      <a class="btn btn-primary" href="<@routes.mitcircs.newSubmission student />">Declare mitigating circumstances<#if !isSelf> on this student's behalf</#if></a>
-    </div>
+    <#if !isPGR>
+      <div class="pull-right">
+        <a class="btn btn-primary" href="<@routes.mitcircs.newSubmission student />">Declare mitigating circumstances<#if !isSelf> on this student's behalf</#if></a>
+      </div>
+    </#if>
+      
     <h2>Mitigating circumstances submissions</h2>
     <#if submissions?has_content>
       <table class="table table-condensed">
@@ -50,7 +54,7 @@
                 </#if>
               </td>
               <td>
-                <@fmt.date date=submission.lastModified /> by <#if submission.lastModifiedBy == user.apparentUser>you<#else>${submission.lastModifiedBy.fullName}</#if>
+                <@fmt.date date=submission.lastModified />
               </td>
               <td>
                 <#if submission.withdrawn>
@@ -74,22 +78,73 @@
     </div>
   </#if>
 
+  <#if submissionsWithAcuteOutcomes?has_content>
+    <h2>Acute mitigating circumstances</h2>
+
+    <ul class="list-unstyled">
+      <#list submissionsWithAcuteOutcomes as submission>
+        <li>
+          <strong>MIT-${submission.key}</strong> -
+          <@fmt.date date=submission.startDate includeTime=false relative=false />
+          &mdash;
+          <#if submission.endDate??>
+            <@fmt.date date=submission.endDate includeTime=false relative=false />
+          <#else>
+            <span class="very-subtle">(ongoing)</span>
+          </#if>
+          <br />
+          Outcomes recorded
+          <#if submission.outcomesLastRecordedBy??>
+            by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+          </#if>
+          <#if submission.outcomesLastRecordedOn??>
+            at <@fmt.date date=submission.outcomesLastRecordedOn />
+          </#if>
+
+          <#if submission.acuteOutcome??>
+            <br />${submission.acuteOutcome.description}
+          </#if>
+
+          <ul>
+            <#list submission.affectedAssessments as assessment>
+              <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+                <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+              </#if>
+            </#list>
+          </ul>
+        </li>
+      </#list>
+    </ul>
+  </#if>
+
   <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
-    <h2>Reasonable adjustments</h2>
+    <section class="mitcircs__reasonable-adjustments media">
+      <div class="media-left">
+        <i class="fal fa-info-circle"></i>
+      </div>
+      <div class="media-body">
+        <header class="mitcircs__reasonable-adjustments__header media-heading">
+          <h2>Reasonable adjustments</h2>
+          <span class="mitcircs__reasonable-adjustments__header__aside">(provided by Wellbeing Support Services)</span>
+        </header>
 
-    <#if student.reasonableAdjustments?has_content>
-      <ul class="fa-ul">
-        <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
-          <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
-        </#list>
-      </ul>
-    </#if>
+        <#if student.reasonableAdjustments?has_content>
+          <ul class="fa-ul">
+              <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+                <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+              </#list>
+          </ul>
+        </#if>
 
-    <#if student.reasonableAdjustmentsNotes?has_content>
-      <h3>Notes to department</h3>
+        <#if student.reasonableAdjustmentsNotes?has_content>
+          <aside>
+            <h3>Notes from Wellbeing Support</h3>
 
-      <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
-    </#if>
+              <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
+          </aside>
+        </#if>
+      </div>
+    </section>
   </#if>
 
 </#escape>

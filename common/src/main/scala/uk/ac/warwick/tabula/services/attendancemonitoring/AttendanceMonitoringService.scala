@@ -6,7 +6,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, Department, StudentMember}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.UserLookupService.UniversityId
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
@@ -124,6 +125,8 @@ trait AttendanceMonitoringService {
   def getAllAttendanceInAcademicYear(student: StudentMember, academicYear: AcademicYear): Seq[AttendanceMonitoringCheckpoint]
 
   def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote]
+
+  def appendToAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint, text: String, user: User, absenceType: AbsenceType = AbsenceType.Other): AttendanceMonitoringNote
 
   def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote]
 
@@ -337,9 +340,15 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
     val schemes = benchmarkTask(s"membersHelper.findBy $universityId") {
       membersHelper.findBy(user)
     }
+    val relevantSchemes =  schemes.filter {  scheme =>
+      val members = scheme.members.members
+      //  Ensure this scheme belongs to the right student account (when multiple accounts/Uni Ids of the same student mapped to same user code. Cache returns by user id account and that could belong to different uni id(TAB-7197)
+      members.contains(universityId) || members.contains(userId)
+    }
+
     departmentOption match {
-      case Some(department) => schemes.filter(s => s.department == department && s.academicYear == academicYear)
-      case None => schemes.filter(_.academicYear == academicYear)
+      case Some(department) => relevantSchemes.filter(s => s.department == department && s.academicYear == academicYear)
+      case None => relevantSchemes.filter(_.academicYear == academicYear)
     }
   }
 
@@ -380,6 +389,28 @@ abstract class AbstractAttendanceMonitoringService extends AttendanceMonitoringS
 
   def getAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint): Option[AttendanceMonitoringNote] = {
     attendanceMonitoringDao.getAttendanceNote(student, point)
+  }
+
+  override def appendToAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint, text: String, user: User, absenceType: AbsenceType): AttendanceMonitoringNote = {
+    val attendanceNote = findOrInitialiseAttendanceNote(student, point, absenceType)
+
+    attendanceNote.note = Seq(attendanceNote.note, text).filter(_.hasText).mkString("\n")
+
+    attendanceNote.updatedBy = user.getUserId
+    attendanceNote.updatedDate = DateTime.now
+    saveOrUpdate(attendanceNote)
+
+    attendanceNote
+  }
+
+  private def findOrInitialiseAttendanceNote(student: StudentMember, point: AttendanceMonitoringPoint, absenceType: AbsenceType = AbsenceType.Other): AttendanceMonitoringNote = {
+    attendanceMonitoringDao.getAttendanceNote(student, point).getOrElse {
+      val note = new AttendanceMonitoringNote
+      note.student = student
+      note.point = point
+      note.absenceType = absenceType
+      note
+    }
   }
 
   def getAttendanceNoteMap(student: StudentMember): Map[AttendanceMonitoringPoint, AttendanceMonitoringNote] = {

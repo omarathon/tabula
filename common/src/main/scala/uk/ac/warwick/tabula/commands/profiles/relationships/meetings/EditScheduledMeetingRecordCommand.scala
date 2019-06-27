@@ -1,18 +1,14 @@
 package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
-import org.joda.time.DateTime
-import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.DateFormats._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordBehalfNotification, ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification}
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{AddsIcalAttachmentToScheduledMeetingNotification, ScheduledMeetingRecordNotification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, AutowiringMeetingRecordServiceComponent, FileAttachmentServiceComponent, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -143,4 +139,4 @@ trait EditScheduledMeetingRecordNotification
   }
 }
 
-trait EditScheduledMeetingRecordNotifications extends AbstractScheduledMeetingRecordScheduledNotifications
+trait EditScheduledMeetingRecordNotifications extends AbstractScheduledMeetingRecordResultScheduledNotifications

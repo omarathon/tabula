@@ -17,17 +17,17 @@ object MitigatingCircumstancesRejectionReason extends Enum[MitigatingCircumstanc
 
   case object NoIndependentEvidence extends MitigatingCircumstancesRejectionReason(
     description = "No independent documentary evidence was supplied to support the claim",
-    helpText = "Letters from family and friends are not normally sufficient."
+    helpText = "For example, letters from family and friends are not normally sufficient."
   )
 
   case object TimingNotAdverse extends MitigatingCircumstancesRejectionReason(
-    description = "There was sufficient evidence to show that the timing of the circumstances would not have adversely affected the assessment",
+    description = "There was insufficient evidence to show that the timing of the circumstances adversely affected the assessment",
     helpText = "Circumstances which are real but far away in time from the assessments being claimed for are unlikely to succeed."
   )
 
   case object ReasonableAdjustmentExists extends MitigatingCircumstancesRejectionReason(
     description = "Already mitigated via a reasonable adjustment",
-    helpText = "The circumstance is a disability for which reasonable adjustments have already been made."
+    helpText = "The circumstance has led to reasonable adjustments which have already been made by Wellbeing Support Services."
   )
 
   case object DuplicateSubmission extends MitigatingCircumstancesRejectionReason(
@@ -37,12 +37,11 @@ object MitigatingCircumstancesRejectionReason extends Enum[MitigatingCircumstanc
 
   case object Other extends MitigatingCircumstancesRejectionReason(
     description = "Other",
-    helpText = "Describe any other reasons why this submission was rejected here."
+    helpText = "Describe any other reasons why this submission was rejected."
   )
 
   override val values: immutable.IndexedSeq[MitigatingCircumstancesRejectionReason] = findValues
 }
 
 class MitigatingCircumstancesRejectionReasonUserType extends EnumSeqUserType(MitigatingCircumstancesRejectionReason)
-
 class MitigatingCircumstancesRejectionReasonConverter extends EnumTwoWayConverter(MitigatingCircumstancesRejectionReason)

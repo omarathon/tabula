@@ -36,8 +36,8 @@
     </#if>
   </#macro>
 
-  <#macro roleTable permsUrl cssClass scope roleDefinition roleName>
-    <@manageRole scope=scope roleName=roleDefinition>
+  <#macro roleTable permsUrl cssClass scope roleDefinition roleName allowUnassignableRoles=false>
+    <@manageRole scope=scope roleName=roleDefinition allowUnassignableRoles=allowUnassignableRoles>
       <div class="permission-list ${cssClass}">
         <div class="row">
           <div class="col-md-12">

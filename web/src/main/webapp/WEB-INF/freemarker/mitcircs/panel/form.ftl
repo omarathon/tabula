@@ -12,7 +12,7 @@
 
     <#if hasPanel?has_content>
       <@bs3form.labelled_form_group path="" labelText="Submissions being moved to this panel">
-        <p>The following submissions have already been added to another panel. They will be moved to this panel.</p>
+        <p>The following <@fmt.p number=hasPanel?size singular="submission has" plural="submissions have" shownumber=false /> already been added to another panel. <@fmt.p number=hasPanel?size singular="It" plural="They" shownumber=false /> will be moved to this panel.</p>
         <@components.submissionTable submissions=hasPanel panel=true />
       </@bs3form.labelled_form_group>
     </#if>
@@ -22,7 +22,7 @@
     </@bs3form.labelled_form_group>
 
     <div class="submit-buttons">
-      <button type="submit" class="btn btn-primary">Create panel</button>
+      <button type="submit" name="submit" class="btn btn-primary">Create panel</button>
       <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.adminhome department academicYear/>">Cancel</a>
     </div>
   </@f.form>

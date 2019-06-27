@@ -150,6 +150,10 @@
       &__hint {
         color: @hint-colour;
         font-size: @hint-font-size;
+
+        ol& {
+          list-style-type: lower-latin;
+        }
       }
 
       &__assessments-table {
@@ -249,32 +253,32 @@
 
     // act like a col-sm-*
     @media (min-width: @grid-float-breakpoint) {
-      div.control-label, summary.control-label, .content {
+      > div.control-label, > summary.control-label, > .content {
         position: relative;
         min-height: 1px;
         padding-right: @grid-gutter-width / 2;
         float: left;
       }
 
-      div.control-label, summary.control-label {
+      > div.control-label, > summary.control-label {
         // need to keep the labels in line with the labels in the left column of the actions
         // the left column is col-sm-6 col-md-7 with a nested row containing col-3 for the label
         // this means the label is (sm) 6/12 * 3/12 of a page wide = 18/144 = 1/8
         width: percentage(1/8);
       }
 
-      .content {
+      > .content {
         width: percentage(7/8);
       }
     }
 
     @media (min-width: @screen-md-min) {
-      div.control-label, summary.control-label {
+      > div.control-label, > summary.control-label {
         // this means the label is (md) 7/12 * 3/12 of a page wide = 21/144 = 7/48
         width: percentage(7/48);
       }
 
-      .content {
+      > .content {
         width: percentage(41/48);
       }
     }
@@ -314,7 +318,7 @@
 
   &__body {
     padding: @panel-body-padding;
-    max-height: calc(75vh - 300px);
+    max-height: 100vh;
     overflow-y: auto;
 
     &__message {
@@ -578,4 +582,29 @@
 .datetimepicker .datetimepicker-hours th.switch,
 .datetimepicker .datetimepicker-minutes th.switch {
   visibility: hidden;
+}
+
+.mitcircs__reasonable-adjustments {
+  border: 1px solid #797979;
+  background: #fffbf0;
+  padding: (@grid-gutter-width / 2);
+
+  .media-left i {
+    vertical-align: text-top;
+    margin-top: -2px;
+    font-size: @font-size-h3;
+  }
+
+  &__header h2 {
+    display: inline-block;
+    font-size: @font-size-h3;
+  }
+
+  aside {
+    margin-top: @grid-gutter-width;
+
+    h3 {
+      font-size: @font-size-h5;
+    }
+  }
 }

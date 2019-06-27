@@ -1,10 +1,12 @@
 <#import "*/mitcircs_components.ftl" as components />
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
 <#assign isSelf = submission.student.universityId == user.universityId />
 
 <#escape x as x?html>
   <h1>MIT-${submission.key}</h1>
+  <div id="profile-modal" class="modal fade profile-subset"></div>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
@@ -44,24 +46,6 @@
             </#if>
           </#if>
         </#if>
-
-        <@components.detail label="Reasonable adjustments" condensed=true>
-          <#if student.reasonableAdjustments?has_content || student.reasonableAdjustmentsNotes?has_content>
-            <#if student.reasonableAdjustments?has_content>
-              <ul class="fa-ul">
-                <#list student.reasonableAdjustments?sort_by('id') as reasonableAdjustment>
-                  <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
-                </#list>
-              </ul>
-            </#if>
-
-            <#if student.reasonableAdjustmentsNotes?has_content>
-              <#noescape>${student.formattedReasonableAdjustmentsNotes!''}</#noescape>
-            </#if>
-          <#else>
-            <span class="very-subtle">None recorded</span>
-          </#if>
-        </@components.detail>
 
         <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
         <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
@@ -109,7 +93,7 @@
                   <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
                 </#if>
                 <#if submission.canRecordOutcomes>
-                  <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record outcomes</a></p>
+                  <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record panel outcomes</a></p>
                 </#if>
               <#elseif submission.panel??>
                 <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
@@ -119,6 +103,7 @@
         </div>
       </#if>
     </div>
+
     <@components.section "Details">
       <#noescape>${submission.formattedReason}</#noescape>
     </@components.section>
@@ -170,10 +155,161 @@
       </@components.section>
     </#if>
 
-    <#if submission.panel?? && !isSelf>
-      <@components.section "Panel">
-        <@components.panelDetails panel=submission.panel show_name=true />
-      </@components.section>
+    <@components.section "Supplemental information">
+      <@components.detail "Reasonable adjustments">
+        <#if reasonableAdjustments?has_content || reasonableAdjustmentsNotes?has_content>
+          <#if reasonableAdjustments?has_content>
+            <ul class="fa-ul">
+              <#list reasonableAdjustments?sort_by('id') as reasonableAdjustment>
+                <li><span class="fa-li"><i class="fal fa-check"></i></span>${reasonableAdjustment.description}</li>
+              </#list>
+            </ul>
+          </#if>
+
+          <#if reasonableAdjustmentsNotes?has_content>
+            <#noescape>${formattedReasonableAdjustmentsNotes!''}</#noescape>
+          </#if>
+        <#else>
+          <span class="very-subtle">None recorded</span>
+        </#if>
+      </@components.detail>
+
+      <@components.detail "Other submissions">
+        <@components.submissionTable submissions=otherMitigatingCircumstancesSubmissions actions=false panel=false />
+      </@components.detail>
+
+      <@components.detail "Extensions">
+        <#if relevantExtensions?has_content>
+          <table class="students table table-condensed">
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>Assignment</th>
+                <th class="status-col">Status</th>
+                <th class="duration-col duration-col-department-wide">Length of extension</th>
+                <th class="deadline-col">Submission Deadline</th>
+              </tr>
+            </thead>
+            <tbody>
+              <#list relevantExtensions as extension>
+                <tr>
+                  <td>${extension.assignment.module.code?upper_case}</td>
+                  <td>${extension.assignment.name}</td>
+                  <td>
+                    <#if extension.awaitingReview>
+                      <span class="label label-warning">Awaiting review</span>
+                    <#elseif extension.approved>
+                      <span class="label label-success">Approved</span>
+                    <#elseif extension.rejected>
+                      <span class="label label-important">Rejected</span>
+                    </#if>
+                  </td>
+                  <td class="duration-col">
+                    <#if (extension.duration > 0)>
+                      <@fmt.p extension.duration "day" />
+                    <#elseif (extension.requestedExtraDuration > 0) >
+                      <@fmt.p extension.requestedExtraDuration "day" /> requested
+                    <#else>
+                      N/A
+                    </#if>
+                  </td>
+                  <td class="deadline-col <#if extension.approved>approved<#else>very-subtle</#if>">
+                    <@fmt.date date=extension.assignment.submissionDeadline(extension.usercode) />
+                  </td>
+                </tr>
+              </#list>
+            </tbody>
+          </table>
+        <#else>
+          <span class="very-subtle">None between the affected dates</span>
+        </#if>
+      </@components.detail>
+    </@components.section>
+
+    <#if !isSelf>
+      <#if submission.panel??>
+        <@components.section "Panel">
+          <@components.panelDetails panel=submission.panel show_name=true />
+        </@components.section>
+      </#if>
+
+      <#if submission.state.entryName == "Outcomes Recorded" && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
+        <@components.section "Outcomes">
+          <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
+            <@components.detail label="Mitigation grade" condensed=true>
+              ${submission.outcomeGrading.description}
+              <#if submission.outcomeGrading.entryName == "Rejected" && submission.rejectionReasons?has_content>
+                &ndash;
+                <#list submission.rejectionReasons as rejectionReason>
+                  <#if rejectionReason.entryName == "Other">${submission.rejectionReasonsOther}<#else>${rejectionReason.description}</#if><#if rejectionReason_has_next>,</#if>
+                </#list>
+              </#if>
+            </@components.detail>
+          </#if>
+
+          <#if canManage>
+            <@components.detail "Grading reasoning">
+              <#noescape>${submission.formattedOutcomeReasons}</#noescape>
+            </@components.detail>
+          </#if>
+
+          <#if submission.outcomeGrading.entryName != "Rejected">
+            <#if submission.acute>
+              <@components.detail label="Outcome" condensed=true>
+                <#if submission.acuteOutcome??>
+                  ${submission.acuteOutcome.description}
+                <#else>
+                  <span class="very-subtle">None</span>
+                </#if>
+              </@components.detail>
+
+              <#if submission.affectedAssessments?has_content>
+                <@components.detail "Affected assessments">
+                  <ul class="list-unstyled">
+                    <#list submission.affectedAssessments as assessment>
+                      <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
+                        <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                      </#if>
+                    </#list>
+                  </ul>
+                </@components.detail>
+              </#if>
+            <#else>
+              <@components.detail "Recommendations to board">
+                <ul class="list-unstyled">
+                  <#list submission.boardRecommendations as recommendation>
+                    <li>
+                      <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                      <#if recommendation.assessmentSpecific!false>(all assessments)</#if>
+                    </li>
+                  </#list>
+
+                  <#list submission.affectedAssessments as assessment>
+                    <#if assessment.boardRecommendations?has_content>
+                      <li>
+                        ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                        <ul>
+                          <#list assessment.boardRecommendations as recommendation>
+                            <li>
+                              <#if recommendation.entryName == "Other">${submission.boardRecommendationOther}<#else>${recommendation.description}</#if>
+                            </li>
+                          </#list>
+                        </ul>
+                      </li>
+                    </#if>
+                  </#list>
+                </ul>
+              </@components.detail>
+
+              <#if canManage>
+                <@components.detail "Comments for board">
+                  <#noescape>${submission.formattedBoardRecommendationComments}</#noescape>
+                </@components.detail>
+              </#if>
+            </#if>
+          </#if>
+        </@components.section>
+      </#if>
     </#if>
 
     <#if canManage>

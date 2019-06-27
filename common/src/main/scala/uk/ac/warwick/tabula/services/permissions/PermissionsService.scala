@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, GrantedPermission, GrantedRole}
 import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup}
-import uk.ac.warwick.tabula.data.{AutowiringPermissionsDaoComponent, PermissionsDao, PermissionsDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringPermissionsDaoComponent, HibernateHelpers, PermissionsDao, PermissionsDaoComponent}
 import uk.ac.warwick.tabula.helpers.{Logging, RequestLevelCaching}
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget}
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, RoleDefinition}
@@ -263,19 +263,21 @@ abstract class AbstractPermissionsService extends PermissionsService {
     }
     )
 
-  def getAllPermissionDefinitionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ensureFoundUserSet(user) {
+  def getAllPermissionDefinitionsFor[A <: PermissionsTarget : ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ensureFoundUserSet(user) { transactional(readOnly = true) {
     val scopesWithGrantedRole =
       getGrantedRolesFor[A](user)
         .filter(_.mayGrant(targetPermission))
         .map(_.scope)
+        .toSet
 
     val scopesWithGrantedPermission =
       getGrantedPermissionsFor[A](user)
         .filter { perm => perm.overrideType == GrantedPermission.Allow && perm.permission == targetPermission }
         .map(_.scope)
+        .toSet
 
-    Set() ++ scopesWithGrantedRole ++ scopesWithGrantedPermission
-  }
+    scopesWithGrantedRole ++ scopesWithGrantedPermission
+  }}
 
   def ensureUserGroupFor[A <: PermissionsTarget : ClassTag](scope: A, roleDefinition: RoleDefinition): UnspecifiedTypeUserGroup = transactional() {
     getGrantedRole(scope, roleDefinition) match {

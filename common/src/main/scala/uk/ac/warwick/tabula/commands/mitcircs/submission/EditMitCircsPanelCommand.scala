@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 
 object EditMitCircsPanelCommand {
   type Result = MitigatingCircumstancesPanel
-  type Command = Appliable[Result] with EditMitCircsPanelState with EditMitCircsPanelRequest with SelfValidating
+  type Command = Appliable[Result] with EditMitCircsPanelState with EditMitCircsPanelRequest with SelfValidating with PopulateOnForm
   val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Modify
 
   def apply(panel: MitigatingCircumstancesPanel): Command =
@@ -25,6 +25,7 @@ object EditMitCircsPanelCommand {
       with ModifyMitCircsPanelValidation
       with EditMitCircsPanelPermissions
       with EditMitCircsPanelDescription
+      with EditMitCircsPanelPopulate
       with AutowiringMitCircsPanelServiceComponent
       with AutowiringUserLookupComponent
 }
@@ -55,6 +56,7 @@ abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstanc
       panel.location = null
     }
 
+    (panel.submissions -- submissions.asScala).foreach(panel.removeSubmission)
     submissions.asScala.foreach(panel.addSubmission)
 
     panel.chair = chair.maybeText.map(userLookup.getUserByUserId).orNull
@@ -81,6 +83,15 @@ trait EditMitCircsPanelDescription extends Describable[Result] {
     d.mitigatingCircumstancesPanel(panel)
 }
 
+trait EditMitCircsPanelPopulate extends PopulateOnForm {
+
+  self: EditMitCircsPanelState with EditMitCircsPanelRequest =>
+
+  override def populate(): Unit = {
+    submissions.addAll((panel.submissions -- submissions.asScala.toSet).asJavaCollection)
+  }
+}
+
 trait EditMitCircsPanelState {
   def panel: MitigatingCircumstancesPanel
 }
@@ -100,20 +111,17 @@ trait EditMitCircsPanelRequest extends ModifyMitCircsPanelRequest {
   }
 
   Option(panel.location).foreach {
-    case NamedLocation(name) =>
-      location = name
+    case NamedLocation(n) =>
+      location = n
 
-    case MapLocation(name, id, _) =>
-      location = name
+    case MapLocation(n, id, _) =>
+      location = n
       locationId = id
 
-    case AliasedMapLocation(_, MapLocation(name, id, _)) =>
-      location = name
+    case AliasedMapLocation(_, MapLocation(n, id, _)) =>
+      location = n
       locationId = id
   }
-
-  submissions.clear()
-  submissions.addAll(panel.submissions.asJavaCollection)
 
   Option(panel.chair).foreach(u => chair = u.getUserId)
   Option(panel.secretary).foreach(u => secretary = u.getUserId)

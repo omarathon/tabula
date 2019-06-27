@@ -38,6 +38,28 @@
       </div>
     </#if>
 
+    <#if secondBreadcrumbs?has_content && activeAcademicYear?has_content && academicYearNow?has_content>
+
+      <#function getUrlForAcadYear crumbs acadYear>
+        <#local result = []>
+        <#list crumbs as crumb>
+          <#if crumb.linked && crumb.academicYearScoped && crumb.scopedAcademicYear.startYear == acadYear.startYear >
+            <#local result = result + [crumb]>
+          </#if>
+        </#list>
+        <#return result>
+      </#function>
+
+      <#assign currentYearLinks=getUrlForAcadYear(secondBreadcrumbs, academicYearNow)>
+      <#if activeAcademicYear.startYear != academicYearNow.startYear && currentYearLinks?size = 1>
+        <div class="page-notice">
+          The information below is for the ${activeAcademicYear.toString} academic year.
+          <#assign currentYearLink=currentYearLinks[0]>
+          To view current information, <a class="text-decoration-underline" href="${currentYearLink.url}">go to ${currentYearLink.scopedAcademicYear.toString}</a>.
+        </div>
+      </#if>
+    </#if>
+
     <div class="id7-utility-masthead">
       <nav class="id7-utility-bar">
         <ul>

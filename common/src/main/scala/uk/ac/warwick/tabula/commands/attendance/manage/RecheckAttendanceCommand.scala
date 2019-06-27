@@ -40,9 +40,16 @@ class RecheckAttendanceCommandInternal(val department: Department, val academicY
         attendanceMonitoringService.deleteCheckpointDangerously(change.checkpoint)
       }
 
-      proposedChangesToNonReportedPoints.filterNot(_.proposedState == NotRecorded).map { change =>
-        attendanceMonitoringService.setAttendance(change.student, Map(change.point -> change.proposedState), user.userId, autocreated = true)
-      }.flatMap(_._1)
+      proposedChangesToNonReportedPoints.filterNot(_.proposedState == NotRecorded).flatMap { change =>
+        val (checkpoints, _) = attendanceMonitoringService.setAttendance(change.student, Map(change.point -> change.proposedState), user.userId, autocreated = true)
+
+        checkpoints.headOption.map { checkpoint =>
+          change.appendAttendanceNote.map { attendanceNote =>
+            attendanceMonitoringService.appendToAttendanceNote(checkpoint.student, checkpoint.point, attendanceNote, user.apparentUser)
+          }
+          checkpoint
+        }
+      }
     }
   }
 }
@@ -53,13 +60,14 @@ case class AttendanceChange(
   checkpoint: AttendanceMonitoringCheckpoint,
   currentState: AttendanceState,
   proposedState: AttendanceState,
-  alreadyReported: Boolean
+  alreadyReported: Boolean,
+  appendAttendanceNote: Option[String]
 )
 
 trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
   self: AttendanceMonitoringServiceComponent with ProfileServiceComponent with SubmissionServiceComponent with MeetingRecordServiceComponent with SmallGroupServiceComponent with AttendanceMonitoringCourseworkSubmissionServiceComponent with AttendanceMonitoringMeetingRecordServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent with ModuleAndDepartmentServiceComponent =>
 
-  lazy val autoRecordedCheckpoints: Seq[AttendanceMonitoringCheckpoint] = {
+  lazy val autoRecordedCheckpoints: Seq[(AttendanceMonitoringCheckpoint, Option[String])] = {
     pointsToEdit.flatMap { point =>
       val students = profileService.getAllMembersWithUniversityIds(point.scheme.members.members.toSeq).collect {
         case student: StudentMember => Some(student)
@@ -72,16 +80,18 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
         case AssignmentSubmission =>
           val submissions = students.flatMap(student => submissionService.getSubmissionsBetweenDates(student.userId, startDate, endDate))
 
-          submissions.flatMap(attendanceMonitoringCourseworkSubmissionService.getCheckpoints(_, onlyRecordable = false))
+          submissions.flatMap(attendanceMonitoringCourseworkSubmissionService.getCheckpoints(_, onlyRecordable = false)).map(_ -> None)
         case Meeting =>
           val meetingRecords = students.flatMap(student => meetingRecordService.listBetweenDates(student, startDate, endDate))
 
-          meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints(_, onlyRecordable = false))
+          meetingRecords.flatMap(attendanceMonitoringMeetingRecordService.getCheckpoints(_, onlyRecordable = false)).map(_ -> None)
         case SmallGroup =>
           val eventAttendance = smallGroupService.findAttendanceForStudentsBetweenDates(students, academicYear, startDate.toLocalDateTime, endDate.toLocalDateTime)
 
-          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance, onlyRecordable = false) ++
-            attendanceMonitoringEventAttendanceService.getMissedCheckpoints(eventAttendance, onlyRecordable = false).map(_._1)
+          attendanceMonitoringEventAttendanceService.getCheckpoints(eventAttendance, onlyRecordable = false).map(_ -> None) ++
+            attendanceMonitoringEventAttendanceService.getMissedCheckpoints(eventAttendance, onlyRecordable = false).map {
+              case (checkpoint, eventNotes) => checkpoint -> attendanceMonitoringEventAttendanceService.summariseSmallGroupEventAttendanceNotes(eventNotes)
+            }
         case Standard =>
           Nil
       }
@@ -99,11 +109,12 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
 
         val checkpoints = attendanceMonitoringService.getAllCheckpoints(point)
 
-        val proposedCheckpoints = autoRecordedCheckpoints.filter(_.point == point)
+        val proposedCheckpoints = autoRecordedCheckpoints.filter(_._1.point == point)
 
         students.flatMap { student =>
           val existingCheckpoint = checkpoints.find(_.student == student)
-          val proposedCheckpoint = proposedCheckpoints.find(_.student == student)
+          val proposedCheckpoint = proposedCheckpoints.find(_._1.student == student).map(_._1)
+          val proposedNotes = proposedCheckpoints.find(_._1.student == student).flatMap(_._2)
 
           if (existingCheckpoint.map(_.state) == proposedCheckpoint.map(_.state)) {
             None
@@ -114,7 +125,8 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
               checkpoint = existingCheckpoint.orElse(proposedCheckpoint).get,
               currentState = existingCheckpoint.map(_.state).getOrElse(NotRecorded),
               proposedState = proposedCheckpoint.map(_.state).getOrElse(NotRecorded),
-              alreadyReported = attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point)
+              alreadyReported = attendanceMonitoringService.studentAlreadyReportedThisTerm(student, point),
+              appendAttendanceNote = proposedNotes
             ))
           } else {
             None

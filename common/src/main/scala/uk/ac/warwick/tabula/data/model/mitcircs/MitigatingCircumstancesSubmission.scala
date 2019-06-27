@@ -238,6 +238,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def outcomeReasons: String = Option(encryptedOutcomeReasons).map(_.toString).orNull
   def outcomeReasons_=(outcomeReasons: String): Unit = encryptedOutcomeReasons = outcomeReasons
 
+  def formattedOutcomeReasons: String = formattedHtml(outcomeReasons)
+
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
   var boardRecommendations: Seq[MitCircsExamBoardRecommendation] = _
 
@@ -254,6 +256,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   // free text for use when the boardRecommendations type includes Other
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
+
+  def formattedBoardRecommendationComments: String = formattedHtml(boardRecommendationComments)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonUserType")
   var rejectionReasons: Seq[MitigatingCircumstancesRejectionReason] = _
@@ -337,8 +341,8 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isEvidencePending: Boolean = !isWithdrawn && pendingEvidenceDue != null
   def isAcute: Boolean = Option(acuteOutcome).isDefined
 
-  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state != OutcomesRecorded || !isAcute)
-  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && (state != OutcomesRecorded || isAcute)
+  def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
+  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (state != OutcomesRecorded || isAcute)
   def canWithdraw: Boolean = state != OutcomesRecorded
   def canReopen: Boolean = isWithdrawn
   def canAddNote: Boolean = !isWithdrawn && !isDraft

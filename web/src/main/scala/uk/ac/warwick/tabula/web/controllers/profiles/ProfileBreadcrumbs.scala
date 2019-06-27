@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.web.controllers.profiles
 
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.web.BreadCrumb
-import uk.ac.warwick.tabula.web.Breadcrumbs.Active
+import uk.ac.warwick.tabula.web.{Activeable, BreadCrumb}
+import uk.ac.warwick.tabula.web.Breadcrumbs.Standard
 
 trait ProfileBreadcrumbs {
   val Breadcrumbs = ProfileBreadcrumbs
@@ -39,12 +39,11 @@ object ProfileBreadcrumbs {
     case object PersonalCircumstances extends ProfileBreadcrumbIdentifier("personal")
 
 
-    abstract class ProfileBreadcrumb extends BreadCrumb {
+    abstract class ProfileBreadcrumb extends BreadCrumb with Activeable[ProfileBreadcrumbIdentifier] {
       def identifier: ProfileBreadcrumbIdentifier
-
       def setActive(activeIdentifier: ProfileBreadcrumbIdentifier): BreadCrumb = {
         if (this.identifier == activeIdentifier) {
-          Active(this.title, this.url, this.tooltip)
+          Standard(this.title, this.url, this.tooltip).setActive(true)
         } else {
           this
         }

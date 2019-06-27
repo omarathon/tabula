@@ -19,7 +19,7 @@ import language.implicitConversions
   *
   */
 class Tap[A](val any: A) extends AnyVal {
-  def tap(f: (A) => Unit): A = {
+  def tap(f: A => Unit): A = {
     f(any)
     any
   }

@@ -22,6 +22,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro withdrawSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}/withdraw" /></#macro>
 <#macro reopenSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/edit/${submission.key?c}/reopen" /></#macro>
 <#macro pendingEvidence submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/pendingevidence/${submission.key?c}" /></#macro>
+<#macro shareSubmission submission><@_u context='/profiles' page="/view/${submission.student.universityId}/personalcircs/mitcircs/share/${submission.key?c}" /></#macro>
 
 <#-- Helper for new/edit -->
 <#macro affectedAssessments student><@_u context='/profiles' page="/view/${student.universityId}/personalcircs/affected-assessments" /></#macro>

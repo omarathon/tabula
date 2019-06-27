@@ -14,6 +14,7 @@ case object MitigatingCircumstancesOfficerRoleDefinition extends BuiltInRoleDefi
     MitigatingCircumstancesSubmission.Manage,
     MitigatingCircumstancesSubmission.Read,
     MitigatingCircumstancesSubmission.ViewGrading,
+    MitigatingCircumstancesSubmission.ViewOutcomes,
     // commands checking this check against MitigatingCircumstancesStudent so we don't propagate permissions outside of the students home department
     MitigatingCircumstancesSubmission.Modify,
 

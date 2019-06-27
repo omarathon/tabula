@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand, Describable, Description, SelfValidating}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -18,9 +18,13 @@ import scala.collection.JavaConverters._
 import scala.reflect._
 
 object GrantRoleCommand {
-  def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedRole[A]] with GrantRoleCommandState[A] =
+  type Result[A <: PermissionsTarget] = GrantedRole[A]
+  type Command[A <: PermissionsTarget] = Appliable[Result[A]] with RoleCommandRequest with RoleCommandState[A] with SelfValidating
+
+  def apply[A <: PermissionsTarget : ClassTag](scope: A): Command[A] with RoleCommandRequestMutableRoleDefinition =
     new GrantRoleCommandInternal(scope)
       with ComposableCommand[GrantedRole[A]]
+      with RoleCommandRequestMutableRoleDefinition
       with GrantRoleCommandPermissions
       with GrantRoleCommandValidation
       with GrantRoleCommandDescription[A]
@@ -28,15 +32,24 @@ object GrantRoleCommand {
       with AutowiringSecurityServiceComponent
       with AutowiringUserLookupComponent
 
-  def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Appliable[GrantedRole[A]] with GrantRoleCommandState[A] = {
-    val command = apply(scope)
-    command.roleDefinition = defin
-    command
-  }
+  def apply[A <: PermissionsTarget : ClassTag](scope: A, defin: RoleDefinition): Command[A] =
+    new GrantRoleCommandInternal(scope)
+      with ComposableCommand[GrantedRole[A]]
+      with RoleCommandRequest
+      with GrantRoleCommandPermissions
+      with GrantRoleCommandValidation
+      with GrantRoleCommandDescription[A]
+      with AutowiringPermissionsServiceComponent
+      with AutowiringSecurityServiceComponent
+      with AutowiringUserLookupComponent {
+      override val roleDefinition: RoleDefinition = defin
+    }
 }
 
-class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with GrantRoleCommandState[A] {
-  self: PermissionsServiceComponent with UserLookupComponent =>
+abstract class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedRole[A]] with RoleCommandState[A] {
+  self: RoleCommandRequest
+    with PermissionsServiceComponent
+    with UserLookupComponent =>
 
   lazy val grantedRole: Option[GrantedRole[A]] = permissionsService.getGrantedRole(scope, roleDefinition)
 
@@ -58,12 +71,13 @@ class GrantRoleCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) 
 }
 
 trait GrantRoleCommandValidation extends SelfValidating {
-  self: GrantRoleCommandState[_ <: PermissionsTarget] with SecurityServiceComponent with UserLookupComponent =>
+  self: RoleCommandRequest
+    with RoleCommandState[_ <: PermissionsTarget]
+    with SecurityServiceComponent
+    with UserLookupComponent =>
 
   def validate(errors: Errors) {
-    if (usercodes.asScala.forall {
-      _.isEmptyOrWhitespace
-    }) {
+    if (usercodes.asScala.forall(_.isEmptyOrWhitespace)) {
       errors.rejectValue("usercodes", "NotEmpty")
     } else {
       val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
@@ -78,31 +92,40 @@ trait GrantRoleCommandValidation extends SelfValidating {
     if (roleDefinition == null) {
       errors.rejectValue("roleDefinition", "NotEmpty")
     } else {
-      if (!roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
+      if (!allowUnassignableRoles && !roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
       val user = RequestInfo.fromThread.get.user
 
       val permissionsToAdd = roleDefinition.allPermissions(Some(scope)).keys
-      val deniedPermissions = permissionsToAdd.filterNot(securityService.canDelegate(user, _, scope))
-      if (deniedPermissions.nonEmpty && (!user.god)) {
+      val deniedPermissions = permissionsToAdd.filterNot { permission =>
+        if (allowUnassignableRoles)
+          securityService.can(user, permission, scope)
+        else
+          securityService.canDelegate(user, permission, scope)
+      }
+      if (deniedPermissions.nonEmpty && !user.god) {
         errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.map(_.description).mkString("\n"), scope), "")
       }
     }
   }
 }
 
-trait GrantRoleCommandState[A <: PermissionsTarget] {
-  self: PermissionsServiceComponent =>
-
+trait RoleCommandState[A <: PermissionsTarget] {
   def scope: A
-
-  var roleDefinition: RoleDefinition = _
-  var usercodes: JList[String] = JArrayList()
-
   def grantedRole: Option[GrantedRole[A]]
+  val allowUnassignableRoles: Boolean = false
+}
+
+trait RoleCommandRequestMutableRoleDefinition extends RoleCommandRequest {
+  var roleDefinition: RoleDefinition = _
+}
+
+trait RoleCommandRequest {
+  def roleDefinition: RoleDefinition
+  var usercodes: JList[String] = JArrayList()
 }
 
 trait GrantRoleCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: GrantRoleCommandState[_ <: PermissionsTarget] =>
+  self: RoleCommandState[_ <: PermissionsTarget] =>
 
   override def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.RolesAndPermissions.Create, mandatory(scope))
@@ -110,12 +133,16 @@ trait GrantRoleCommandPermissions extends RequiresPermissionsChecking with Permi
 }
 
 trait GrantRoleCommandDescription[A <: PermissionsTarget] extends Describable[GrantedRole[A]] {
-  self: GrantRoleCommandState[A] =>
+  self: RoleCommandRequest
+    with RoleCommandState[A] =>
+
+  override lazy val eventName: String = "GrantRole"
 
   def describe(d: Description): Unit = d.properties(
     "scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
     "usercodes" -> usercodes.asScala.mkString(","),
-    "roleDefinition" -> roleDefinition.getName)
+    "roleDefinition" -> roleDefinition.getName
+  )
 }
 
 

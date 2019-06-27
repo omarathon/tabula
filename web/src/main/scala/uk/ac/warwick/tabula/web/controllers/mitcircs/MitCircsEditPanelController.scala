@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.mitcircs.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
+import scala.collection.JavaConverters._
+
 @Controller
 @RequestMapping(value = Array("/mitcircs/panel/{panel}/edit"))
 class MitCircsEditPanelController extends BaseController {
@@ -20,18 +22,26 @@ class MitCircsEditPanelController extends BaseController {
   def command(@PathVariable panel: MitigatingCircumstancesPanel): EditMitCircsPanelCommand.Command =
     EditMitCircsPanelCommand(mandatory(panel))
 
-  @RequestMapping
-  def form(@PathVariable panel: MitigatingCircumstancesPanel): Mav =
-    Mav("mitcircs/panel/edit")
-      .crumbs(
-        MitCircsBreadcrumbs.Admin.HomeForYear(panel.department, panel.academicYear),
-        MitCircsBreadcrumbs.Admin.ListPanels(panel.department, panel.academicYear),
-        MitCircsBreadcrumbs.Admin.Panel(panel),
-      )
+  @RequestMapping(params = Array("!submit"))
+  def form(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, @PathVariable panel: MitigatingCircumstancesPanel): Mav = {
+    command.populate()
+    val (thisPanel, others) = command.submissions.asScala.partition(_.panel.exists(_ == panel))
+    val (hasPanel, noPanel) = others.partition(_.panel.isDefined)
 
-  @PostMapping
+    Mav("mitcircs/panel/edit",
+      "thisPanel" -> thisPanel,
+      "hasPanel" -> hasPanel,
+      "noPanel" -> noPanel,
+    ).crumbs(
+      MitCircsBreadcrumbs.Admin.HomeForYear(panel.department, panel.academicYear),
+      MitCircsBreadcrumbs.Admin.ListPanels(panel.department, panel.academicYear),
+      MitCircsBreadcrumbs.Admin.Panel(panel),
+    )
+  }
+
+  @PostMapping(params = Array("submit"))
   def submit(@ModelAttribute("command") command: EditMitCircsPanelCommand.Command, errors: Errors, @PathVariable panel: MitigatingCircumstancesPanel): Mav =
-    if (errors.hasErrors) form(panel)
+    if (errors.hasErrors) form(command, panel)
     else {
       val p = command.apply()
       RedirectForce(Routes.Admin.Panels.view(p))
