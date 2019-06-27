@@ -9,7 +9,7 @@
           Add a new template
         </a>
       </div>
-      <h2 class="section-title">Templates</h2>
+      <h2 class="section-title"><a class="collapse-trigger icon-container" href="#">Templates</a></h2>
       <div class="striped-section-contents">
         <div class="item-info">
           <em>No templates exist</em>
@@ -25,7 +25,7 @@
             Add a new template
           </a>
         </div>
-        <h2 class="section-title">Templates</h2>
+        <h2 class="section-title"><a class="collapse-trigger icon-container" href="#">Templates</a></h2>
         <div class="striped-section-contents">
           <#assign templateCount = 0 />
           <#list templates as template>

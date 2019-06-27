@@ -68,8 +68,10 @@
 				<div class="section-title row">
 					<div class="col-md-4">
 						<span class="h4">
-							<span class="icon-container"></span>
-							<@fmt.groupset_name set />
+              <a class="collapse-trigger" href="#">
+                <span class="icon-container"></span>
+                <@fmt.groupset_name set />
+              </a>
 						</span>
 					</div>
 
@@ -581,7 +583,7 @@
           </@dropdown_menu>
 				</div>
 
-				<h4 class="section-title with-button"><@fmt.module_name module /></h4>
+				<h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#"><@fmt.module_name module /></a></h4>
 
 				<#if has_groups>
           <div class="striped-section-contents">
@@ -1089,7 +1091,7 @@
   <div class="striped-section <#if groups?keys?has_content>collapsible expanded</#if>"
        data-name="${module_anchor(module)}">
     <div class="clearfix">
-      <h4 class="section-title">${groupSet.name}</h4>
+      <h4 class="section-title icon-container"><a class="collapse-trigger icon-container" href="#">${groupSet.name}</a></h4>
 
       <div class="striped-section-contents">
         <#list groups?keys as group>
@@ -1179,7 +1181,7 @@
            data-href="<@routes.groups.moduleAttendanceInYear module academicYear/>"
            data-name="${module_anchor(module)}">
 				<div class="clearfix">
-					<h4 class="section-title with-button"><@fmt.module_name module /></h4>
+					<h4 class="section-title with-button"><a class="collapse-trigge icon-containerr" href="#"><@fmt.module_name module /></a></h4>
 
 					<div class="striped-section-contents">
 			    </div>

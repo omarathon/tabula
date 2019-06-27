@@ -4,20 +4,22 @@
   <div class="set-info striped-section collapsible">
     <div class="clearfix">
       <div class="section-title row">
-        <div class="col-md-8 icon-container">
-          <span class="h6 colour-h6">${timetabledEvent.module.code?upper_case} ${timetabledEvent.eventType.displayName}s</span>
-        </div>
-        <div class="col-md-2">
-          <@fmt.p timetabledEvent.events?size "group" />
-        </div>
-        <div class="col-md-2">
-          <#local studentsCount = 0 />
-          <#list timetabledEvent.events as event>
-            <#local studentsCount = studentsCount + event.students?size />
-          </#list>
+        <a class="collapse-trigger" href="#">
+          <div class="col-md-8 icon-container">
+            <span class="h6 colour-h6">${timetabledEvent.module.code?upper_case} ${timetabledEvent.eventType.displayName}s</span>
+          </div>
+          <div class="col-md-2">
+            <@fmt.p timetabledEvent.events?size "group" />
+          </div>
+          <div class="col-md-2">
+            <#local studentsCount = 0 />
+            <#list timetabledEvent.events as event>
+              <#local studentsCount = studentsCount + event.students?size />
+            </#list>
 
-          <@fmt.p studentsCount "student" />
-        </div>
+            <@fmt.p studentsCount "student" />
+          </div>
+        </a>
       </div>
 
       <div class="striped-section-contents">

@@ -734,7 +734,7 @@ exports.initCollapsible = function ($el) {
 
         if ($titleElement.find('a').length === 0) {
           $titleElement.removeAttr('tabindex');
-          var $replacementLink = $('<a>').addClass('collapse-trigger');
+          var $replacementLink = $('<a>').addClass('collapse-trigger icon-container');
           $replacementLink.attr('href', '#');
           $replacementLink.html($titleElement.html());
           $replacementLink.contents()
