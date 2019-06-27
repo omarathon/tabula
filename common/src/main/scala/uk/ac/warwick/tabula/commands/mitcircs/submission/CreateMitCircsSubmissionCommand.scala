@@ -291,11 +291,9 @@ trait MitCircsSubmissionSchedulesNotifications extends SchedulesNotifications[Re
   override def transformResult(submission: Result): Seq[MitigatingCircumstancesSubmission] = Seq(submission)
 
   override def scheduledNotifications(submission: MitigatingCircumstancesSubmission): Seq[ScheduledNotification[MitigatingCircumstancesSubmission]] = {
-    // TODO is it always valid to send these? Might depend on state
-    // (i.e. should we remind the student about pending evidence if the outcomes have been recorded?)
     val pendingEvidenceReminders =
       if (submission.isEvidencePending) {
-        Seq(-1, 0, 1)
+        Seq(-1, 0, 1, 4, 7, 10, 13, 16)
           .map(day => submission.pendingEvidenceDue.plusDays(day).toDateTimeAtStartOfDay)
           .filter(_.isAfterNow)
           .map(when => new ScheduledNotification[MitigatingCircumstancesSubmission]("PendingEvidenceReminder", submission, when))
