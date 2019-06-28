@@ -107,11 +107,20 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
       submission.state match {
         case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
           if (submission.messages.isEmpty) {
-            StageProgress(
-              stage = InitialAssessment,
-              started = false,
-              messageCode = "workflow.mitCircs.InitialAssessment.notAssessed",
-            )
+            if (submission.state == MitigatingCircumstancesSubmissionState.Submitted) {
+              StageProgress(
+                stage = InitialAssessment,
+                started = false,
+                messageCode = "workflow.mitCircs.InitialAssessment.notAssessed",
+              )
+            } else {
+              StageProgress(
+                stage = InitialAssessment,
+                started = false,
+                messageCode = "workflow.mitCircs.InitialAssessment.skipped",
+                skipped = true,
+              )
+            }
           } else if (submission.messages.last.studentSent) {
             StageProgress(
               stage = InitialAssessment,
