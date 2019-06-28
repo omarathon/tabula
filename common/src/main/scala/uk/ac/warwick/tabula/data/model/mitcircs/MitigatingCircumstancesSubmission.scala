@@ -95,7 +95,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def panel: Option[MitigatingCircumstancesPanel] = Option(_panel)
   def panel_=(panel: MitigatingCircumstancesPanel): Unit = _panel = panel
 
-  @Column(nullable = false)
+  @Column(nullable = true) // Nullable for drafts
   var startDate: LocalDate = _
 
   @Column(nullable = true)

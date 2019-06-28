@@ -89,7 +89,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: CreateCommand, errors: Errors, @PathVariable student: StudentMember): Mav = {
-    if (errors.hasErrors) form(student)
+    if (errors.hasErrors) form(student).addObjects("errors" -> errors)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
@@ -123,7 +123,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    if (errors.hasErrors) form(submission.student)
+    if (errors.hasErrors) form(submission.student).addObjects("errors" -> errors)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))

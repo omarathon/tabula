@@ -111,7 +111,7 @@
             </span>
 
             <span class="mitcircs-submission-filters__filter mitcircs-submission-filters__filter--state">
-              <#assign placeholder = "Select a state" />
+              <#assign placeholder = "All states" />
               <#assign currentfilter><@filters.current_filter_value "state" placeholder; state>${state.description}</@filters.current_filter_value></#assign>
               <@filters.filter "state" "command.state" placeholder currentfilter allSubmissionStates; state>
                 <input type="checkbox" name="${status.expression}" value="${state.entryName}" data-short-value="${state.description}"

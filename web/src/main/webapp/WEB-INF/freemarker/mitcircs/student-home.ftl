@@ -47,7 +47,7 @@
             <tr>
               <td><a href="<@routes.mitcircs.viewSubmission submission />">MIT-${submission.key}</a></td>
               <td><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></td>
-              <td><@fmt.date date=submission.startDate includeTime=false shortMonth=true excludeCurrentYear=true /></td>
+              <td><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">(not set)</span></#if></td>
               <td>
                 <#if submission.endDate??>
                   <@fmt.date date=submission.endDate includeTime=false shortMonth=true excludeCurrentYear=true />

@@ -15,7 +15,7 @@ class ViewProfilePersonalCircumstancesController extends AbstractViewProfileCont
 
   @RequestMapping
   def render(@PathVariable student: StudentMember): Mav = {
-    val command = restricted(StudentHomeCommand(mandatory(student)))
+    val command = restricted(StudentHomeCommand(mandatory(student), user))
     val info = command.map(_.apply())
 
     Mav("mitcircs/student-home",

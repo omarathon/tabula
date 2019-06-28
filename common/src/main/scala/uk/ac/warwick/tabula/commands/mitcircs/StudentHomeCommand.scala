@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.commands.mitcircs
 
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
+import uk.ac.warwick.tabula.commands.mitcircs.StudentHomeCommand._
 import uk.ac.warwick.tabula.data.model.{Assignment, StudentMember}
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesGrading, MitigatingCircumstancesStudent, MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringAssessmentMembershipServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -29,19 +28,32 @@ case class AcuteOutcomesAssignmentInfo (
 )
 
 object StudentHomeCommand {
-  def apply(student: StudentMember) = new StudentHomeCommandInternal(student)
-    with ComposableCommand[HomeInformation]
-    with StudentHomePermissions
-    with AutowiringMitCircsSubmissionServiceComponent
-    with AutowiringAssessmentMembershipServiceComponent
-    with ReadOnly with Unaudited
+  type Result = HomeInformation
+  type Command = Appliable[Result] with PermissionsChecking
+
+  def apply(student: StudentMember, user: CurrentUser): Command =
+    new StudentHomeCommandInternal(student, user)
+      with ComposableCommand[Result]
+      with StudentHomePermissions
+      with AutowiringMitCircsSubmissionServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
+      with ReadOnly with Unaudited
 }
 
-abstract class StudentHomeCommandInternal(val student: StudentMember) extends CommandInternal[HomeInformation] with StudentHomeCommandState {
-  self: MitCircsSubmissionServiceComponent with AssessmentMembershipServiceComponent =>
+abstract class StudentHomeCommandInternal(val student: StudentMember, val user: CurrentUser)
+  extends CommandInternal[Result]
+    with StudentHomeCommandState {
+  self: MitCircsSubmissionServiceComponent
+    with AssessmentMembershipServiceComponent =>
 
   override def applyInternal(): HomeInformation = {
-    val submissions = mitCircsSubmissionService.submissionsForStudent(student)
+    val isSelf = user.universityId == student.universityId
+
+    // An MCO can only see the submission if it's in a state where a message can be added
+    val submissions =
+      mitCircsSubmissionService.submissionsForStudent(student)
+        .filter { s => isSelf || s.canAddMessage }
+
     val submissionsWithAcuteOutcomes = submissions.filter {
       s => s.state == MitigatingCircumstancesSubmissionState.OutcomesRecorded && s.isAcute && s.outcomeGrading != MitigatingCircumstancesGrading.Rejected
     }
@@ -79,4 +91,5 @@ trait StudentHomePermissions extends RequiresPermissionsChecking with Permission
 
 trait StudentHomeCommandState {
   def student: StudentMember
+  def user: CurrentUser
 }
