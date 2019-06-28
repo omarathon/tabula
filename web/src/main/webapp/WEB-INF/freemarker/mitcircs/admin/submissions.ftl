@@ -33,12 +33,16 @@
             ${submission.student.lastName}
           </td>
           <td>
-            <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
-            &mdash;
-            <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+            <#if submission.startDate??>
+              <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              &mdash;
+              <#if submission.endDate??>
+                <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              <#else>
+                <span class="very-subtle">(ongoing)</span>
+              </#if>
             <#else>
-              <span class="very-subtle">(ongoing)</span>
+              <span class="very-subtle">TBC</span>
             </#if>
           </td>
           <td><@components.stage_progress_bar info.stages?values /></td>

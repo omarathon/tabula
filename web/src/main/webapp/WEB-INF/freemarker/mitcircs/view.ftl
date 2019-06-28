@@ -22,7 +22,7 @@
           </#if>
         </@components.detail>
         <@components.detail label="Issue type" condensed=true><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@components.detail>
-        <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
+        <@components.detail label="Start date" condensed=true><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false /><#else><span class="very-subtle">TBC</span></#if></@components.detail>
         <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
         </@components.detail>
@@ -34,13 +34,19 @@
             </a>
           </@components.detail>
         </#if>
-        <#if submission.contacted>
-          <@components.detail "Discussed submission with">
-            <@components.enumListWithOther enumValues=submission.contacts otherValue=submission.contactOther!"" condensed=false />
-          </@components.detail>
+        <#if submission.contacted??>
+          <#if submission.contacted>
+            <@components.detail "Discussed submission with">
+              <@components.enumListWithOther enumValues=submission.contacts otherValue=submission.contactOther!"" condensed=false />
+            </@components.detail>
+          <#else>
+            <@components.detail "Reason for not discussing submission">
+              ${submission.noContactReason}
+            </@components.detail>
+          </#if>
         <#else>
-          <@components.detail "Reason for not discussing submission">
-            ${submission.noContactReason}
+          <@components.detail "Discussed submission with">
+            <span class="very-subtle">TBC</span>
           </@components.detail>
         </#if>
       </div>

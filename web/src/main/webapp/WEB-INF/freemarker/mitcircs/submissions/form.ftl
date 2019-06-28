@@ -47,6 +47,19 @@
 
     <article class="col-md-8 col-md-pull-4 mitcircs-form__fields">
       <@f.form id="mitigatingCircumstancesForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
+        <#if errors?? && errors.hasErrors()>
+          <div class="alert alert-danger">
+            <#if errors.hasGlobalErrors()>
+              <#list errors.globalErrors as e>
+                <div><@spring.message message=e /></div>
+              </#list>
+            <#else>
+              <#-- there were errors but they're all field errors. -->
+              <div>There was a problem with your submission that needs fixing, please see the errors below.</div>
+            </#if>
+          </div>
+        </#if>
+
         <#include "_fields.ftl" />
 
         <div class="fix-footer">

@@ -119,68 +119,70 @@ trait MitCircsSubmissionValidation extends SelfValidating {
     with ModuleAndDepartmentServiceComponent =>
 
   override def validate(errors: Errors) {
-    // validate dates
-    if(startDate == null) errors.rejectValue("startDate", "mitigatingCircumstances.startDate.required")
-    else if(endDate == null && !noEndDate) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
-    else if(!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
+    // Only validate at submission time, allow drafts to be saved that would be invalid
+    if (approve) {
+      // validate dates
+      if (startDate == null) errors.rejectValue("startDate", "mitigatingCircumstances.startDate.required")
+      else if (endDate == null && !noEndDate) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
+      else if (!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
 
-    // validate issue types
-    if(issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
-    else if(issueTypes.contains(IssueType.Other) && !issueTypeDetails.hasText)
-      errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
+      // validate issue types
+      if (issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
+      else if (issueTypes.contains(IssueType.Other) && !issueTypeDetails.hasText)
+        errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
 
-    // validate contact
-    if(contacted) {
-      if (contacts.isEmpty)
-        errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
-      else if(contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
-        errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
-    } else {
-      if(!noContactReason.hasText)
-        errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
+      // validate contact
+      if (contacted) {
+        if (contacts.isEmpty)
+          errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
+        else if (contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
+          errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
+      } else {
+        if (!noContactReason.hasText)
+          errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
+      }
+
+      // validate reason
+      if (!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
+
+      if (Option(relatedSubmission).exists(_.student != student))
+        errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
+
+      // validate affected issue types
+      affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+        errors.pushNestedPath(s"affectedAssessments[$index]")
+
+        if (!item.moduleCode.hasText)
+          errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
+        else if (moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty)
+          errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
+
+        if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
+
+        if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.notFound")
+
+        if (item.assessmentType == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
+
+        errors.popNestedPath()
+      }
+
+      // validate evidence
+      if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !Option(relatedSubmission).exists(_.hasEvidence)) {
+        errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
+        errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.required")
+      }
+
+      // validate pending evidence
+      if (!pendingEvidence.hasText && pendingEvidenceDue != null) {
+        errors.rejectValue("pendingEvidence", "mitigatingCircumstances.pendingEvidence.required")
+      } else if (pendingEvidence.hasText && pendingEvidenceDue == null) {
+        errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.required")
+      }
+
+      if (pendingEvidenceDue != null && !pendingEvidenceDue.isAfter(LocalDate.now)) {
+        errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.future")
+      }
     }
-
-    // validate reason
-    if(!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
-
-    if(Option(relatedSubmission).exists(_.student != student))
-      errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
-
-    // validate affected issue types
-    affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
-      errors.pushNestedPath(s"affectedAssessments[$index]")
-
-      if (!item.moduleCode.hasText)
-        errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
-      else if (moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty)
-        errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
-
-      if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
-
-      if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.notFound")
-
-      if (item.assessmentType == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
-
-      errors.popNestedPath()
-    }
-
-    // validate evidence
-    if(attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !Option(relatedSubmission).exists(_.hasEvidence)) {
-      errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
-      errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.required")
-    }
-
-    // validate pending evidence
-    if(!pendingEvidence.hasText && pendingEvidenceDue != null) {
-      errors.rejectValue("pendingEvidence", "mitigatingCircumstances.pendingEvidence.required")
-    } else if (pendingEvidence.hasText && pendingEvidenceDue == null) {
-      errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.required")
-    }
-
-    if(pendingEvidenceDue != null && !pendingEvidenceDue.isAfter(LocalDate.now)) {
-      errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.future")
-    }
-
   }
 }
 
