@@ -50,34 +50,39 @@
         <#include "_fields.ftl" />
 
         <div class="fix-footer">
-          <button type="submit" class="btn btn-primary" name="approve" value="false">Save draft</button>
-          <#if command.self>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#approve-modal">Submit</button>
-            <div id="approve-modal" class="modal fade">
-              <@modal.wrapper>
-                <@modal.header>
-                  <h6 class="modal-title">Submit mitigating circumstances</h6>
-                </@modal.header>
-                <@modal.body>
-                  <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
+          <p>
+            <button type="submit" class="btn btn-primary" name="approve" value="false">Save draft</button>
+            <#if command.self>
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#approve-modal">Submit</button>
+            </#if>
 
-                  <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
-                </@modal.body>
-                <@modal.footer>
-                  <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                </@modal.footer>
-              </@modal.wrapper>
-            </div>
-          </#if>
-
-          <#if submission??>
-            <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewSubmission submission />">Cancel</a>
-          <#else>
-            <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.studenthome student />">Cancel</a>
-          </#if>
+            <#if submission??>
+              <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewSubmission submission />">Cancel</a>
+            <#else>
+              <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.studenthome student />">Cancel</a>
+            </#if>
+          </p>
         </div>
       </@f.form>
     </article>
   </section>
+
+  <#if command.self>
+    <div id="approve-modal" class="modal fade">
+      <@modal.wrapper>
+        <@modal.header>
+          <h6 class="modal-title">Submit mitigating circumstances</h6>
+        </@modal.header>
+        <@modal.body>
+          <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
+
+          <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
+        </@modal.body>
+        <@modal.footer>
+          <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        </@modal.footer>
+      </@modal.wrapper>
+    </div>
+  </#if>
 </#escape>

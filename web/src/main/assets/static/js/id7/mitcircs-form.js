@@ -363,6 +363,8 @@ function init() {
   $('#mitigatingCircumstancesForm').each((i, el) => {
     $(el).data('tabula.mitigatingCircumstancesForm', new MitCircsForm(el));
   });
+
+  $('.mitcircs-form.fix-area').fixHeaderFooter();
 }
 
 $(() => init());
