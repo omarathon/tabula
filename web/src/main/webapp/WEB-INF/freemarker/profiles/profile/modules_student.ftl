@@ -56,7 +56,8 @@
           <h3 class="section-title">
             <a class="collapse-trigger icon-container" href="#">
               <@fmt.module_name moduleRegistration.module />
-              <span class="mod-reg-summary">
+            </a>
+            <span class="mod-reg-summary">
               <#if showModuleResults>
                 <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
                 <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
@@ -66,7 +67,6 @@
               </#if>
               </#if>
             </span>
-          </a>
           </h3>
           <div class="striped-section-contents ">
             <div class="item-info">
