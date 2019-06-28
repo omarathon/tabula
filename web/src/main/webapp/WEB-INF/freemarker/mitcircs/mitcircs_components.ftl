@@ -209,36 +209,55 @@
 </#macro>
 
 <#macro panelsTable panels>
-  <table class="table table-condensed">
+  <table class="table table-condensed table-sortable">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Location</th>
-        <th>Chair</th>
-        <th>Secretary</th>
-        <th>Members</th>
-        <th>Submissions</th>
+        <th class="sortable">Name</th>
+        <th class="sortable">Date</th>
+        <th class="sortable">Location</th>
+        <th class="sortable">Chair</th>
+        <th class="sortable">Secretary</th>
+        <th class="sortable">Members</th>
+        <th class="sortable">Submissions</th>
       </tr>
     </thead>
     <tbody>
       <#list panels as panel>
         <tr>
           <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
-          <td>
+          <td data-sortby="${(panel.date.toString("yyyy-MM-dd HH:mm"))!'1970-01-01 00:00'}">
             <#if panel.date??>
               <@fmt.date date=panel.date includeTime=false relative=false shortMonth=true excludeCurrentYear=true />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
             <#else>
-                <span class="very-subtle">TBC</span>
+              <span class="very-subtle">TBC</span>
             </#if>
           </td>
           <td><#if panel.location??><@fmt.location panel.location /></#if></td>
-          <td><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
-          <td><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
+          <td data-sortby="${(panel.chair.lastName)!'TBC'}, ${(panel.chair.firstName)!'TBC'}"><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
+          <td data-sortby="${(panel.secretary.lastName)!'TBC'}, ${(panel.secretary.firstName)!'TBC'}"><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
           <td><#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list></td>
           <td><#if panel.submissions??>${panel.submissions?size}<#else>0</#if></td>
         </tr>
       </#list>
     </tbody>
   </table>
+
+  <script type="text/javascript">
+    (function ($) {
+      $('.table-sortable').sortableTable({
+        // Default is to sort by the date of the panel, ascending
+        sortList: [[1, 0]],
+
+        // If there's a data-sortby, use that as the sort value
+        textExtraction: function (node) {
+          var $el = $(node);
+          if ($el.data('sortby')) {
+            return $el.data('sortby');
+          } else {
+            return $el.text().trim();
+          }
+        }
+      });
+    })(jQuery);
+  </script>
 </#macro>
