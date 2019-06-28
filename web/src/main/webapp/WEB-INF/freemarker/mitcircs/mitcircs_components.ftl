@@ -98,7 +98,7 @@
               <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
               <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
             </td>
-            <td><@fmt.date date=attachment.dateUploaded /></td>
+            <td><@fmt.date date=attachment.dateUploaded shortMonth=true excludeCurrentYear=true /></td>
           </tr>
         </#list>
       </tbody>
@@ -137,16 +137,16 @@
             ${submission.student.lastName}
           </td>
           <td>
-            <@fmt.date date=submission.startDate includeTime=false relative=false />
+            <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
             &mdash;
             <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false relative=false />
+              <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
             <#else>
               <span class="very-subtle">(ongoing)</span>
             </#if>
           </td>
           <td>
-            <@fmt.date date=submission.lastModified />
+            <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
               <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
@@ -218,7 +218,7 @@
           <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
           <td>
             <#if panel.date??>
-              <@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
+              <@fmt.date date=panel.date includeTime=false relative=false shortMonth=true excludeCurrentYear=true />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
             <#else>
                 <span class="very-subtle">TBC</span>
             </#if>

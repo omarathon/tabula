@@ -128,7 +128,7 @@
                 </span>
               </td>
               <td>${assessment.name}</td>
-              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
+              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
             </tr>
           </#list>
           </tbody>
@@ -214,7 +214,7 @@
                     </#if>
                   </td>
                   <td class="deadline-col <#if extension.approved>approved<#else>very-subtle</#if>">
-                    <@fmt.date date=extension.assignment.submissionDeadline(extension.usercode) />
+                    <@fmt.date date=extension.assignment.submissionDeadline(extension.usercode) shortMonth=true excludeCurrentYear=true />
                   </td>
                 </tr>
               </#list>
