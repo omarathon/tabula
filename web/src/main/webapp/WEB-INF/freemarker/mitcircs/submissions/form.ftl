@@ -63,26 +63,26 @@
             </#if>
           </p>
         </div>
+
+        <#if command.self>
+          <div id="approve-modal" class="modal fade">
+            <@modal.wrapper>
+              <@modal.header>
+                <h6 class="modal-title">Submit mitigating circumstances</h6>
+              </@modal.header>
+              <@modal.body>
+                <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
+
+                <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
+              </@modal.body>
+              <@modal.footer>
+                <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+              </@modal.footer>
+            </@modal.wrapper>
+          </div>
+        </#if>
       </@f.form>
     </article>
   </section>
-
-  <#if command.self>
-    <div id="approve-modal" class="modal fade">
-      <@modal.wrapper>
-        <@modal.header>
-          <h6 class="modal-title">Submit mitigating circumstances</h6>
-        </@modal.header>
-        <@modal.body>
-          <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
-
-          <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
-        </@modal.body>
-        <@modal.footer>
-          <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        </@modal.footer>
-      </@modal.wrapper>
-    </div>
-  </#if>
 </#escape>
