@@ -33,9 +33,7 @@
           cssClass = "mitcircs-form__fields__section__optional-question"
         >
           <@mitcirc.radios acuteOutcomes "acuteOutcome" />
-          <@bs3form.errors path="acuteOutcome" />
         </@mitcirc.question_section>
-
 
         <@mitcirc.question_section
           question = "Affected assessments"
