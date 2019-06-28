@@ -46,7 +46,7 @@
               MIT-${submission.key}
             </#if>
           </td>
-          <td>
+          <td data-sortby="${submission.student.lastName}, ${submission.student.firstName}, ${submission.student.universityId}">
             <@pl.profile_link submission.student.universityId />
             ${submission.student.universityId}
             ${submission.student.firstName}

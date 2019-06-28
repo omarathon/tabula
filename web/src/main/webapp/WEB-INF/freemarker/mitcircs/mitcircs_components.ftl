@@ -58,8 +58,13 @@
       <#local state = 'default' />
       <#local icon = 'fa-circle-o' />
       <#if progress.completed>
-        <#local state = 'success' />
-        <#local icon = 'fa-check-circle-o' />
+        <#if progress.health.toString == 'Good'>
+          <#local state = 'success' />
+          <#local icon = 'fa-check-circle-o' />
+        <#else>
+          <#local state = 'danger' />
+          <#local icon = 'fa-times-circle-o' />
+        </#if>
       <#elseif progress.skipped>
         <#local state = 'primary' />
         <#local icon = 'fa-arrow-circle-o-right' />
