@@ -762,7 +762,7 @@ exports.initCollapsible = function ($el) {
           return;
         }
 
-        $icon = $(this).find('i');
+        $icon = $(this).find('i').filter('.fa,.fal,.far,.fas,.fab').first();
 
         if (open()) {
           $section.removeClass('expanded');
