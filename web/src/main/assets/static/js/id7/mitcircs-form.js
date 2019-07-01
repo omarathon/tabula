@@ -87,6 +87,17 @@ class MitCircsForm {
     this.lastStartDate = undefined;
     this.lastEndDate = undefined;
 
+    // If there are errors in the table, activate the first tab with errors
+    this.$assessmentsTable.prev('.nav-tabs').find('[data-toggle="tab"]').each((i, a) => {
+      const $tbody = $($(a).attr('href'));
+      if ($tbody.find('.form-errors').length > 0) {
+        $(a).tab('show');
+        return false; // break
+      }
+
+      return true;
+    });
+
     const $dateFields = $form.find('input[name="noEndDate"], input[name="endDate"], input[name="startDate"]');
     $dateFields.on('input change', this.updateAssessments.bind(this));
     this.updateAssessments();
@@ -117,11 +128,18 @@ class MitCircsForm {
         deadline = undefined;
       }
 
+      let assessmentType = 'A';
+      if (this.$assessmentsTable.find('tbody#assessment-table-exams').hasClass('active')) {
+        assessmentType = 'E';
+      } else if (this.$assessmentsTable.find('tbody#assessment-table-other').hasClass('active')) {
+        assessmentType = 'O';
+      }
+
       const assessmentComponent = {
         name: $titleField.val().trim(),
         inUse: true,
         selected: true,
-        assessmentType: this.$assessmentsTable.find('tbody#assessment-table-exams').hasClass('active') ? 'E' : 'A',
+        assessmentType,
       };
       const upstreamAssessmentGroups = [];
       const tabulaAssignments = [];
@@ -323,6 +341,8 @@ class MitCircsForm {
 
       if (assessmentComponent.assessmentType === 'E') {
         $tbody.filter('#assessment-table-exams').append($tr);
+      } else if (assessmentComponent.assessmentType === 'O') {
+        $tbody.filter('#assessment-table-other').append($tr);
       } else {
         $tbody.filter('#assessment-table-assignments').append($tr);
       }

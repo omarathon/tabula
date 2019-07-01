@@ -127,12 +127,8 @@
           <tbody>
           <#list submission.affectedAssessments as assessment>
             <tr>
-              <td><#if assessment.assessmentType.code == "A">Assignment<#else>Exam</#if></td>
-              <td>
-                <span class="mod-code">
-                  ${assessment.module.code?upper_case}</span> <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})
-                </span>
-              </td>
+              <td><@components.assessmentType assessment /></td>
+              <td><@components.assessmentModule assessment /></td>
               <td>${assessment.name}</td>
               <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
             </tr>
@@ -272,7 +268,7 @@
                   <ul class="list-unstyled">
                     <#list submission.affectedAssessments as assessment>
                       <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                        <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                        <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                       </#if>
                     </#list>
                   </ul>
@@ -291,7 +287,7 @@
                   <#list submission.affectedAssessments as assessment>
                     <#if assessment.boardRecommendations?has_content>
                       <li>
-                        ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                        <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                         <ul>
                           <#list assessment.boardRecommendations as recommendation>
                             <li>

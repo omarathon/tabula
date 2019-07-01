@@ -1,4 +1,6 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftl" as components />
+
 <#escape x as x?html>
   <h1>Record acute outcomes for MIT-${submission.key}</h1>
 
@@ -52,8 +54,8 @@
               <#if assessment.assessmentType.code == "A">
                 <div class="checkbox">
                   <label>
-                      <@f.checkbox path="acuteOutcomeApplies" value="true" />
-                      ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                    <@f.checkbox path="acuteOutcomeApplies" value="true" />
+                    <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                   </label>
                 </div>
               </#if>

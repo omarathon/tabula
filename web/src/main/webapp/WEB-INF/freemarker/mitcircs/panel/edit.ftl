@@ -34,7 +34,7 @@
     </#if>
 
     <div class="submit-buttons">
-      <button type="submit" name="submit" class="btn btn-primary">Edit panel</button>
+      <button type="submit" name="submit" class="btn btn-primary">Save panel details</button>
       <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.viewPanel panel/>">Cancel</a>
     </div>
   </@f.form>

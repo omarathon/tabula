@@ -261,3 +261,22 @@
     })(jQuery);
   </script>
 </#macro>
+
+<#macro assessmentType assessment><#compress>
+  <#if assessment.assessmentType.code == "E">
+    Exam
+  <#elseif assessment.assessmentType.code == "O">
+    Other
+  <#else>
+    Assignment
+  </#if>
+</#compress></#macro>
+
+<#macro assessmentModule assessment formatted=true>
+  <#if formatted>
+    <span class="mod-code">${((assessment.module.code)!assessment.moduleCode)?upper_case}</span>
+    <span class="mod-name"><#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})</span>
+  <#else>
+    ${((assessment.module.code)!assessment.moduleCode)?upper_case} <#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})
+  </#if>
+</#macro>
