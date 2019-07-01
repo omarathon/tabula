@@ -16,12 +16,25 @@ class MitCircsOutcomesForm {
       .find('.mitcircs-form__fields__section__nested-checkboxes')
       .each((i, container) => {
         const $container = $(container);
-        const $target = $($(container).data('target'));
-        const $targetValue = $(container).data('target-value');
+        const $checkboxes = $container.find('input[type="checkbox"]');
+        const $target = $($container.data('target'));
+        const targetValue = $container.data('target-value');
+        const matchState = !!$container.data('match-state');
 
-        $target.on('input change', () => {
-          $container.collapse( $target.filter(':checked').val() === $targetValue ? 'show' : 'hide');
-        }).trigger('change');
+        const onChange = (initial) => {
+          const $selected = $target.filter(':checked');
+          const isSelected = targetValue ? ($selected.val() === targetValue) : $selected.length > 0;
+
+          $container.collapse(isSelected ? 'show' : 'hide');
+          $checkboxes.prop('disabled', !isSelected);
+
+          if (!initial && matchState) {
+            $checkboxes.prop('checked', isSelected);
+          }
+        };
+
+        $target.on('input change', () => onChange(false));
+        onChange(true);
       });
 
     $form
@@ -34,7 +47,6 @@ class MitCircsOutcomesForm {
           $container.collapse(enabled ? 'show' : 'hide');
         }).trigger('change');
       });
-
   }
 
 }
