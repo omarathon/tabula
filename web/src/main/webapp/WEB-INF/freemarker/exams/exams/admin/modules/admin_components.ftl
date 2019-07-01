@@ -37,7 +37,7 @@
           </ul>
         </div>
 
-        <h2 class="section-title"><a class="collapse-trigger icon-container" href="#"><@fmt.module_name module /></a></h2>
+        <h2 class="section-title"><@fmt.module_name module /></h2>
       </div>
 
 
