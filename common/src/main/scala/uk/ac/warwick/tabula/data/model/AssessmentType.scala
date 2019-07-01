@@ -21,6 +21,7 @@ object AssessmentType {
   // so can't define a set of case objects for all possible values.
   val Assignment = AssessmentType("A")
   val Exam = AssessmentType("E")
+  val Other = AssessmentType("O")
 }
 
 // usertype for hib, converter for spring

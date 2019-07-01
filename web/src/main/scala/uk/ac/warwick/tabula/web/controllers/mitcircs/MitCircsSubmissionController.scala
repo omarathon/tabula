@@ -27,6 +27,10 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
   var mitCircsSubmissionService: MitCircsSubmissionService = Wire[MitCircsSubmissionService]
 
+  @ModelAttribute("registeredYears")
+  def registeredYears(@PathVariable student: StudentMember): Seq[AcademicYear] =
+    student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).map(_.academicYear).distinct.sorted.reverse
+
   @ModelAttribute("registeredModules")
   def registeredModules(@PathVariable student: StudentMember): ListMap[AcademicYear, Seq[Module]] = {
     val builder = ListMap.newBuilder[AcademicYear, Seq[Module]]
@@ -41,6 +45,10 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
     builder.result()
   }
+
+  @ModelAttribute("includeEngagementCriteria")
+  def includeEngagementCriteria(@PathVariable student: StudentMember): Boolean =
+    student.mostSignificantCourse.award.code == "MBCHB"
 
   @ModelAttribute("previousSubmissions")
   def previousSubmissions(

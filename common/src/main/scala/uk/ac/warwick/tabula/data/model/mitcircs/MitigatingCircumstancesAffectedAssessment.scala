@@ -12,6 +12,11 @@ import uk.ac.warwick.tabula.{AcademicYear, ToString}
 
 import scala.collection.JavaConverters._
 
+object MitigatingCircumstancesAffectedAssessment {
+  val EngagementCriteriaModuleCode = "OE"
+  val OtherModuleCode = "O"
+}
+
 @Entity
 @Proxy
 @Access(AccessType.FIELD)
@@ -50,7 +55,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   /**
     * A link to the Tabula representation of a Module.
     */
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, optional = true)
   @JoinColumn(name = "module_id")
   var module: Module = _
 

@@ -1,4 +1,6 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftl" as components />
+
 <#escape x as x?html>
   <h1>Record outcomes for MIT-${submission.key}</h1>
 
@@ -60,7 +62,7 @@
                       <div class="checkbox nested">
                         <label>
                           <@f.checkbox path="boardRecommendations" value="${value.entryName}" />
-                          ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                          <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                         </label>
                       </div>
                     </@spring.nestedPath>
