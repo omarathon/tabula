@@ -1,4 +1,6 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftl" as components />
+
 <#escape x as x?html>
   <h1>Record acute outcomes for MIT-${submission.key}</h1>
 
@@ -62,7 +64,7 @@
                   <@f.hidden path="deadline" />
                   <label class="col-md-7">
                     <@f.checkbox path="acuteOutcomeApplies" value="true" />
-                    ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                    <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                   </label>
                   <div class="col-md-2 grant-extensions collapse">
                     <#if assessment.deadline??><@fmt.date date=assessment.deadline shortMonth=true includeTime=false /><#else><span class="very-subtle">Unknown</span></#if>

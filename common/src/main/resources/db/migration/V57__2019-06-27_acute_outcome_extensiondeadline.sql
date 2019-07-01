@@ -1,0 +1,1 @@
+alter table mitigatingcircumstancesaffectedassessment add column extensionDeadline timestamp(6);

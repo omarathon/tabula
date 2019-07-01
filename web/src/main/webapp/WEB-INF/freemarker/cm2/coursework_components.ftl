@@ -15,7 +15,7 @@
     <#local has_assignments = (assignments!?size gt 0) />
     <div id="${id}" class="striped-section student-assignment-list collapsible<#if expand_by_default> expanded</#if>" data-name="${id}">
       <div class="clearfix">
-        <h4 class="section-title" tabindex="0">${title}</h4>
+        <h4 class="section-title"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
         <#if hide_late_formative && has_late_formative>
           <div class="checkbox">
             <label>
@@ -457,7 +457,7 @@
 		<div id="${id}" class="striped-section marker-assignment-list<#if has_assignments> collapsible<#if expand_by_default> expanded</#if><#else> empty</#if>"
          data-name="${id}">
 			<div class="clearfix">
-				<h4 class="section-title">${title}</h4>
+				<h4 class="section-title"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
 
 				<#if has_assignments>
           <div class="striped-section-contents">
@@ -714,7 +714,7 @@
 					</ul>
 				</div>
 
-				<h4 class="section-title with-button">${title}</h4>
+				<h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
 
 				<#if has_assignments>
           <div class="striped-section-contents">

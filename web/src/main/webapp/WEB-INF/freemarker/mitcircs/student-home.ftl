@@ -132,10 +132,7 @@
                   <tbody>
                     <#list info.affectedAssessments?keys as assessment>
                       <tr>
-                        <td>
-                          <span class="mod-code">${assessment.module.code?upper_case}</span>
-                          <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})</span>
-                        </td>
+                        <td><@components.assessmentModule assessment /></td>
                         <td>${assessment.name}</td>
                         <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
                         <td><#if assessment.extensionDeadline??><@fmt.date date=assessment.extensionDeadline shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">None specified</span></#if></td>

@@ -61,7 +61,7 @@
       <div class="pull-right">
         <a href="<@url page="/sysadmin/attendancetemplates/${template.id}/points/add" />" class="btn btn-primary new-point">Create new point</a>
       </div>
-      <h2 class="section-title">Monitoring points</h2>
+      <h2 class="section-title"><a class="collapse-trigger icon-container" href="#">Monitoring points</a></h2>
       <div class="striped-section-contents">
         <#if template.points?size == 0>
           <div class="item-info">

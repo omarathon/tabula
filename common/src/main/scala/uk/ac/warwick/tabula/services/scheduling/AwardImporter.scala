@@ -107,7 +107,8 @@ class SandboxAwardImporter extends AwardImporter {
       new ImportAwardCommand(AwardInfo("MBA", "MBA", "Master of Business Administration")),
       new ImportAwardCommand(AwardInfo("PHD", "PhD", "Doctor of Philosophy")),
       new ImportAwardCommand(AwardInfo("MA", "MA", "Master of Arts")),
-      new ImportAwardCommand(AwardInfo("PGCERT", "PG Cert", "Postgraduate Certificate"))
+      new ImportAwardCommand(AwardInfo("PGCERT", "PG Cert", "Postgraduate Certificate")),
+      new ImportAwardCommand(AwardInfo("MBCHB", "MBCHB", "Bachelor of Medicine and Bachelor of Surgery")),
     )
 }
 

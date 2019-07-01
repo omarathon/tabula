@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.exams.grids.GenerateExamGridCheckAndApplyOv
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails.YearOfStudy
 import uk.ac.warwick.tabula.data.model.{Department, ModuleRegistration, UpstreamRouteRuleLookup}
 import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.exams.grids._
@@ -62,6 +63,9 @@ class GenerateExamGridCheckAndApplyOvercatCommandInternal(val department: Depart
 
       entity -> years
     }
+
+    // Bust the request-level cache since we've updated SCYDs
+    RequestLevelCache.evictAll()
 
     // Re-fetch the entities to account for the newly chosen subset
     GenerateExamGridCheckAndApplyOvercatCommand.Result(fetchEntities, updatedEntities.toMap)

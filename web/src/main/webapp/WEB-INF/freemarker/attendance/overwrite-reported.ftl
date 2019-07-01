@@ -50,12 +50,12 @@
         AttendanceRecording.bindButtonGroupHandler();
       </script>
 
-      <div class="striped-section expanded">
+      <div class="striped-section collapsible expanded">
         <h2 class="section-title with-contents">
-          <#if monitoringPointReport??>
+          <a class="collapse-trigger icon-container" href="#"><#if monitoringPointReport??>
             ${monitoringPointReport.monitoringPeriod},
             ${monitoringPointReport.academicYear.toString}
-          </#if>
+          </#if></a>
         </h2>
         <div class="striped-section-contents">
           <div class="item-info point clearfix">

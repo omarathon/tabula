@@ -14,7 +14,7 @@
   <#else>
 
     <div class="monitoring-points-profile striped-section collapsible">
-      <h3 class="section-title">Monitoring points</h3>
+      <h3 class="section-title"><a class="collapse-trigger icon-container" href="#">Monitoring points</a></h3>
       <div class="missed-info">
         <#if !hasAnyMissed>
           <#if isSelf>
@@ -118,7 +118,7 @@
     </div>
 
     <div class="monitoring-points-profile attendance-notes striped-section collapsible expanded">
-      <h3 class="section-title">Attendance notes</h3>
+      <h3 class="section-title"><a class="collapse-trigger icon-container" href="#">Attendance notes</a></h3>
       <div class="attendance-note-info">
         <#if isSelf>
           You have <@fmt.p notes?size "attendance note" />

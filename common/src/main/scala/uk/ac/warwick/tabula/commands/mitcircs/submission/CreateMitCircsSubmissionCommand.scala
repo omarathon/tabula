@@ -157,8 +157,11 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
         if (!item.moduleCode.hasText)
           errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
-        else if (moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty)
-          errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
+        else if (
+          item.moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode &&
+          item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
+          moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
+        ) errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
 
         if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
 
@@ -265,8 +268,12 @@ class AffectedAssessmentItem {
   var extensionDeadline: DateTime = _
 
   def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
-    this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))
-      .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module with code $moduleCode"))
+    if (moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode && moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode) {
+      this.module = moduleAndDepartmentService.getModuleByCode(Module.stripCats(moduleCode).getOrElse(moduleCode))
+        .getOrElse(throw new IllegalArgumentException(s"Couldn't find a module with code $moduleCode"))
+    } else {
+      this.module = null
+    }
   }
 }
 

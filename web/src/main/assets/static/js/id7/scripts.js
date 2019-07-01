@@ -662,19 +662,24 @@ exports.initCollapsible = function ($el) {
       };
 
     if (!checkboxToggle) {
+      let toTrim;
       if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
       else $icon.addClass('fa fa-fw fa-chevron-right');
 
       var $title = $section.find('.section-title');
-
-      $title.keyup(function (e) {
-        if (e.keyCode === 13) $(e.target).click();
-      });
-
       if ($title.find('.icon-container').length) {
-        $title.find('.icon-container').first().prepend(' ').prepend($icon);
+        $title.find('.icon-container').first().prepend($icon);
+        if ($icon.get(0).nextSibling === null) {
+          toTrim = $title.find('.icon-container').first().get(0).nextSibling;
+        } else {
+          toTrim = $icon.get(0).nextSibling;
+        }
       } else {
-        $title.prepend(' ').prepend($icon);
+        $title.prepend($icon);
+        toTrim = $icon.get(0).nextSibling;
+      }
+      if (toTrim !== null) {
+        toTrim.textContent = $.trim(toTrim.textContent);
       }
     }
 
@@ -732,23 +737,50 @@ exports.initCollapsible = function ($el) {
         }
       });
     } else {
-      $title.css('cursor', 'pointer').on('click', function (e) {
+      // Begin view polyfill
+      // Do not rely on this, fix the templates instead.
+      $title.each(function() {
+        var $titleElement  = $(this);
+
+        if ($titleElement.find('a').length === 0) {
+          $titleElement.removeAttr('tabindex');
+          var $replacementLink = $('<a>').addClass('collapse-trigger icon-container');
+          $replacementLink.attr('href', '#');
+          $replacementLink.html($titleElement.html());
+          $replacementLink.contents()
+            .filter(function() { return this.nodeType !== 1; })
+            .wrap('<span class="collapse-label">');
+          $replacementLink.find('span').text($.trim($replacementLink.find('span').text()));
+          $titleElement.html('');
+          $titleElement.prepend($replacementLink);
+        }
+      });
+      // End view polyfill
+
+      $title.find('a.collapse-trigger').on('click', function (e) {
+
         // Ignore clicks where we are clearing a dropdown
         if ($(this).parent().find('.dropdown-menu').is(':visible')) {
           return;
         }
 
-        if ($(e.target).is('a, button') || $(e.target).closest('a, button').length) {
+        const $eventTarget = $(e.target);
+        if (!$(this).hasClass('collapse-trigger') && ($eventTarget.is('a, button') || $eventTarget.closest('a, button').length)) {
           // Ignore if we're clicking a button
           return;
         }
 
+        $icon = $(this).find('i').filter('.fa,.fal,.far,.fas,.fab').first();
+
         if (open()) {
           $section.removeClass('expanded');
           $icon.removeClass().addClass('fa fa-fw fa-chevron-right');
+          $(this).attr('aria-expanded', 'false');
+          e.preventDefault();
         } else {
           populateContent(function () {
             $section.addClass('expanded');
+            $(this).attr('aria-expanded', 'true');
             $icon.removeClass().addClass('fa fa-fw fa-chevron-down');
 
             if ($section.data('name')) {
