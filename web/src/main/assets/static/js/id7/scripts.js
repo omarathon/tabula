@@ -662,17 +662,22 @@ exports.initCollapsible = function ($el) {
       };
 
     if (!checkboxToggle) {
+      let toTrim;
       if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
       else $icon.addClass('fa fa-fw fa-chevron-right');
 
       var $title = $section.find('.section-title');
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend($icon);
+        toTrim = $title.find('.icon-container').first().get(0).nextSibling;
+
       } else {
         $title.prepend($icon);
+        toTrim = $icon.get(0).nextSibling;
       }
-      const toTrim = $icon.get(0).nextSibling;
-      toTrim.textContent = $.trim(toTrim.textContent);
+      if (toTrim !== null) {
+        toTrim.textContent = $.trim(toTrim.textContent);
+      }
     }
 
     var populateContent = function (onComplete) {
