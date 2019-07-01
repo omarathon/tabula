@@ -11,8 +11,14 @@
         <@components.detail label="State" condensed=true>
           <#if submission.state.entryName == 'Draft'>
             Draft
+            <#if isSelf>
+              <a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-xs">Edit &amp; submit</a></p>
+            </#if>
           <#elseif submission.state.entryName == 'Created On Behalf Of Student'>
             Needs sign-off
+            <#if isSelf>
+              <a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-xs">Edit &amp; submit</a></p>
+            </#if>
           <#elseif submission.state.entryName == 'Withdrawn'>
             Withdrawn
           <#elseif submission.state.entryName == 'Outcomes Recorded'>
@@ -58,7 +64,11 @@
 
             <#if canModify>
               <#if submission.isEditable(user.apparentUser)>
-                <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+                <#if isSelf && submission.draft>
+                  <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-block">Edit &amp; submit submission</a></p>
+                <#else>
+                  <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+                </#if>
               </#if>
 
               <#if isSelf && submission.canWithdraw && !submission.withdrawn>
