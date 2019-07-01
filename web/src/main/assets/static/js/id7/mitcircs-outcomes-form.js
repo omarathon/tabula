@@ -48,7 +48,7 @@ class MitCircsOutcomesForm {
         }).trigger('change');
       });
 
-    const $extensionContainer = $('.grant-extensions');
+    const $extensionContainer = $('.grant-extensions', $form);
     const $extensionFields = $extensionContainer.find(':input');
 
     const extensionFieldDisable = ($fields, disableAll = false) => {
@@ -71,7 +71,7 @@ class MitCircsOutcomesForm {
     $('.mitcircs-form__fields__section__affected-assessments input[type=checkbox]').on('input change', (e) => {
       const $checkbox = $(e.target);
       $checkbox.closest('.row').find('.date-time-picker').filter(':visible').prop('disabled', !$checkbox.is(':checked'));
-    });
+    }).trigger('change');
   }
 
 }

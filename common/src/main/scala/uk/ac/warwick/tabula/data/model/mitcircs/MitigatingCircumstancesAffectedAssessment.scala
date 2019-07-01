@@ -91,7 +91,6 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
 
-  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
   @Column(name = "extensionDeadline")
   private var _extensionDeadline: DateTime = _
   def extensionDeadline: Option[DateTime] = Option(_extensionDeadline)

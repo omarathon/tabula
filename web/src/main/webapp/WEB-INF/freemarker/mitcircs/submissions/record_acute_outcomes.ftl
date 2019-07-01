@@ -45,7 +45,7 @@
           <#assign hasAssignments = false />
           <#list command.affectedAssessments as assessment>
             <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-              <#if assessment.assessmentType.code != "E">
+              <#if assessment.assessmentType.code == "A">
                 <#if !hasAssignments>
                   <div class="checkbox row grant-extensions collapse">
                     <div class="col-md-7"><strong>Assessment</strong></div>
@@ -83,7 +83,7 @@
           <#-- Hide the exam components at the end so they don't mess with the checkbox styles -->
           <#list command.affectedAssessments as assessment>
             <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-              <#if assessment.assessmentType.code == "E">
+              <#if assessment.assessmentType.code != "A">
                 <@f.hidden path="name" />
                 <@f.hidden path="module" />
                 <@f.hidden path="moduleCode" />
