@@ -68,8 +68,7 @@
 				<div class="section-title row">
 					<div class="col-md-4">
 						<span class="h4">
-              <a class="collapse-trigger" href="#">
-                <span class="icon-container"></span>
+              <a class="collapse-trigger icon-container" href="#">
                 <@fmt.groupset_name set />
               </a>
 						</span>
