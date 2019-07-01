@@ -75,9 +75,8 @@
 
 <@mitcirc.question_section
   question = "Which assessments have been affected?"
-  hint = "If there are particular coursework submissions or exams that you believe have been affected, please
-    list them here. To make this easier, we've listed the assignments and exams that we think fall within the
-    period you've selected."
+  hint = "Please tell us which coursework submissions or exams have been affected by your mitigating circumstances.
+    To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
 >
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
@@ -145,6 +144,7 @@
           <td class="mitcircs-form__fields__section__assessments-table__name">
             <@f.hidden path="name" />
             ${item.name}
+            <@f.errors cssClass="error form-errors" />
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__deadline">
             <div class="input-group">
@@ -175,6 +175,8 @@
       </#if>
     </tbody>
   </table>
+
+  <@f.errors path="affectedAssessments" cssClass="error form-errors text-danger" />
 </@mitcirc.question_section>
 
 <@mitcirc.question_section
