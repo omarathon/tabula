@@ -669,8 +669,11 @@ exports.initCollapsible = function ($el) {
       var $title = $section.find('.section-title');
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend($icon);
-        toTrim = $title.find('.icon-container').first().get(0).nextSibling;
-
+        if ($icon.get(0).nextSibling === null) {
+          toTrim = $title.find('.icon-container').first().get(0).nextSibling;
+        } else {
+          toTrim = $icon.get(0).nextSibling;
+        }
       } else {
         $title.prepend($icon);
         toTrim = $icon.get(0).nextSibling;
