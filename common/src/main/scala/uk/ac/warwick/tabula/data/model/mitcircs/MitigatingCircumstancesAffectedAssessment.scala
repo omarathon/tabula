@@ -4,7 +4,7 @@ import java.io.Serializable
 
 import javax.persistence._
 import org.hibernate.annotations.{Proxy, Type}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.commands.mitcircs.submission.AffectedAssessmentItem
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Assignment, GeneratedId, Module}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -31,6 +31,7 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
     this.assessmentType = item.assessmentType
     this.deadline = item.deadline
     this.boardRecommendations = item.boardRecommendations.asScala
+    this.extensionDeadline = item.extensionDeadline
   }
 
   /**
@@ -84,6 +85,12 @@ class MitigatingCircumstancesAffectedAssessment extends GeneratedId
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesAcuteOutcomeUserType")
   var acuteOutcome: MitigatingCircumstancesAcuteOutcome = _
+
+  @Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+  @Column(name = "extensionDeadline")
+  private var _extensionDeadline: DateTime = _
+  def extensionDeadline: Option[DateTime] = Option(_extensionDeadline)
+  def extensionDeadline_=(d: DateTime): Unit = _extensionDeadline = d
 
   def matches(assignment: Assignment): Boolean = {
     assignment.module == module && assignment.academicYear == academicYear && assignment.assessmentGroups.asScala.exists { ag =>

@@ -47,6 +47,31 @@ class MitCircsOutcomesForm {
           $container.collapse(enabled ? 'show' : 'hide');
         }).trigger('change');
       });
+
+    const $extensionContainer = $('.grant-extensions');
+    const $extensionFields = $extensionContainer.find(':input');
+
+    const extensionFieldDisable = ($fields, disableAll = false) => {
+      $fields.each((index, field) => {
+        const $field = $(field);
+        const isEnabled = !disableAll && $field.closest('.row').find(':checkbox').is(':checked:visible');
+        $(field).prop('disabled', !isEnabled)
+      });
+    };
+
+    const extensionFieldToggle = () => {
+      const isExtensions = $form.find(':input[name=acuteOutcome]:checked').val() === "Extension";
+      $extensionContainer.collapse(isExtensions ? 'show' : 'hide');
+      extensionFieldDisable($extensionFields, !isExtensions);
+    };
+
+    $form.on('input change', ':input[name=acuteOutcome]', extensionFieldToggle);
+    extensionFieldToggle();
+
+    $('.mitcircs-form__fields__section__affected-assessments input[type=checkbox]').on('input change', (e) => {
+      const $checkbox = $(e.target);
+      $checkbox.closest('.row').find('.date-time-picker').filter(':visible').prop('disabled', !$checkbox.is(':checked'));
+    });
   }
 
 }

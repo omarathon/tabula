@@ -41,6 +41,8 @@
                 <@f.hidden path="academicYear" />
                 <@f.hidden path="assessmentType" />
                 <@f.hidden path="deadline" />
+                <@f.hidden path="acuteOutcomeApplies" />
+                <@f.hidden path="extensionDeadline" />
               </@spring.nestedPath>
             </#list>
           </#if>
