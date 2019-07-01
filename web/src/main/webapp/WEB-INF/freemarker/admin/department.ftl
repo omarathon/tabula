@@ -111,7 +111,7 @@
                 </#if>
               </div>
 
-              <h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#"><@fmt.module_name module /></a></h4>
+              <h4 class="section-title with-button"><@fmt.module_name module /></h4>
             </div>
           </div>
         </#list>
@@ -147,7 +147,7 @@
                 </#if>
               </div>
 
-              <h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#"><@fmt.route_name route true /></a></h4>
+              <h4 class="section-title with-button"><@fmt.route_name route true /></h4>
             </div>
           </div>
         </#list>
