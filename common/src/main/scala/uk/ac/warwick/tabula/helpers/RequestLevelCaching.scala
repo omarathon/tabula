@@ -16,6 +16,8 @@ trait RequestLevelCaching[A, B] {
 
   // This uses an IdentityHashMap instead of the regular HashMap, which uses reference equality rather than equals()/hashCode()
   def cachedByIdentity(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
+
+  def evictAll() = RequestLevelCache.evictAll()
 }
 
 class RequestLevelCachingError extends Error
@@ -53,6 +55,8 @@ object RequestLevelCache {
         requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
         default
     }
+
+  def evictAll(): Unit = EarlyRequestInfo.fromThread.foreach(_.requestLevelCache.shutdown())
 }
 
 class RequestLevelCache {
