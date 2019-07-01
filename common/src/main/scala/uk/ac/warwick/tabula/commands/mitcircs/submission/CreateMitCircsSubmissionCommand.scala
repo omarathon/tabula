@@ -148,6 +148,9 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       if (Option(relatedSubmission).exists(_.student != student))
         errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
 
+      if (affectedAssessments.isEmpty)
+        errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
+
       // validate affected issue types
       affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
         errors.pushNestedPath(s"affectedAssessments[$index]")
@@ -161,7 +164,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
         if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.notFound")
 
-        if (item.assessmentType == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
+        if (item.assessmentType == null) errors.rejectValue("assessmentType", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
 
         errors.popNestedPath()
       }
