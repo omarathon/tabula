@@ -45,8 +45,8 @@
       <h3 class="section-title">
         <a class="collapse-trigger icon-container" href="#">
           Find students
-          <span class="very-subtle">Select students by route, year of study etc.</span>
         </a>
+        <span class="very-subtle">Select students by route, year of study etc.</span>
       </h3>
       <div class="striped-section-contents">
         <div class="item-info">
@@ -211,8 +211,8 @@
       <h3 class="section-title">
         <a class="collapse-trigger icon-container" href="#">
           Manually add students
-          <small class="very-subtle">Add a list of students by university ID or username</small>
         </a>
+        <small class="very-subtle">Add a list of students by university ID or username</small>
       </h3>
       <div class="striped-section-contents">
         <div class="item-info">
