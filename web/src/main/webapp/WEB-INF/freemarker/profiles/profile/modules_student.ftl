@@ -54,17 +54,19 @@
         <#assign moduleRegistration = moduleRegistrationAndComponent.moduleRegistration />
         <div class="striped-section collapsible">
           <h3 class="section-title">
-            <@fmt.module_name moduleRegistration.module />
+            <a class="collapse-trigger icon-container" href="#">
+              <@fmt.module_name moduleRegistration.module />
+            </a>
             <span class="mod-reg-summary">
-						<#if showModuleResults>
-              <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
-              <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
-              <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
-							<#if moduleRegistration.passedCats??>
-              <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
-            </#if>
-            </#if>
-					</span>
+              <#if showModuleResults>
+                <span class="mod-reg-summary-item"><strong>CATS:</strong> ${(moduleRegistration.cats)!}</span>
+                <span class="mod-reg-summary-item"><strong>Mark:</strong> ${(moduleRegistration.agreedMark)!"-"}</span>
+                <#if moduleRegistration.agreedGrade??><span class="mod-reg-summary-item"><strong>Grade:</strong> ${(moduleRegistration.agreedGrade)!}</span></#if>
+                <#if moduleRegistration.passedCats??>
+                <span class="mod-reg-summary-item"><strong>Passed CATS:</strong> <#if moduleRegistration.passedCats>${(moduleRegistration.cats)!}<#else>0</#if></span>
+              </#if>
+              </#if>
+            </span>
           </h3>
           <div class="striped-section-contents ">
             <div class="item-info">

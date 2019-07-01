@@ -23,24 +23,26 @@
   <div class="set-info striped-section collapsible">
     <div class="clearfix">
       <div class="section-title row ">
-        <div class="col-md-6 icon-container">
-          <#if setError == "true">
-            <span class="label label-danger">Has errors</span>
-          </#if>
-          <@command_type_label holder.commandType />
-          <span class="h6 colour-h6">
-						${holder.command.module.code?upper_case} ${holder.command.format.description}s: "${holder.command.name}"
-					</span>
-        </div>
-        <div class="col-md-2">
-          ${holder.command.allocationMethod.description}
-        </div>
-        <div class="col-md-4">
-          <#if holder.command.allocationMethod.dbValue == "Linked" && holder.command.linkedDepartmentSmallGroupSet??>
-            <i class="fa fa-link"></i>
-            ${holder.command.linkedDepartmentSmallGroupSet.name}
-          </#if>
-        </div>
+        <a class="collapse-trigger icon-container" href="#">
+          <div class="col-md-6 icon-container">
+            <#if setError == "true">
+              <span class="label label-danger">Has errors</span>
+            </#if>
+            <@command_type_label holder.commandType />
+            <span class="h6 colour-h6">
+              ${holder.command.module.code?upper_case} ${holder.command.format.description}s: "${holder.command.name}"
+            </span>
+          </div>
+          <div class="col-md-2">
+            ${holder.command.allocationMethod.description}
+          </div>
+          <div class="col-md-4">
+            <#if holder.command.allocationMethod.dbValue == "Linked" && holder.command.linkedDepartmentSmallGroupSet??>
+              <i class="fa fa-link"></i>
+              ${holder.command.linkedDepartmentSmallGroupSet.name}
+            </#if>
+          </div>
+        </a>
       </div>
 
       <div class="striped-section-contents">

@@ -3,13 +3,13 @@
   <h1>Attendance monitoring templates</h1>
 
   <#if templates?size == 0>
-    <div class="striped-section">
+    <div class="striped-section collapsible expanded">
       <div class="pull-right">
         <a href="<@url page="/sysadmin/attendancetemplates/add" />" class="btn btn-primary btn-medium pull-right">
           Add a new template
         </a>
       </div>
-      <h2 class="section-title">Templates</h2>
+      <h2 class="section-title with-button"><a class="collapse-trigger icon-container" href="#">Templates</a></h2>
       <div class="striped-section-contents">
         <div class="item-info">
           <em>No templates exist</em>
@@ -25,7 +25,7 @@
             Add a new template
           </a>
         </div>
-        <h2 class="section-title">Templates</h2>
+        <h2 class="section-title"><a class="collapse-trigger icon-container" href="#">Templates</a></h2>
         <div class="striped-section-contents">
           <#assign templateCount = 0 />
           <#list templates as template>

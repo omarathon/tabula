@@ -43,7 +43,6 @@
     .mod-name:before {
       content: '// ';
       position: relative;
-      bottom: 1px;
     }
 
     .ass-name {

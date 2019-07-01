@@ -26,20 +26,22 @@
 
           <div class="striped-section collapsible">
             <h4 class="section-title" id="${studentKey}-title" title="Expand">
-              <span class="very-subtle pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
-              <#if agentMember??>
-                ${agentMember.fullName}
-                <#if ((agentMember.homeDepartment.code)!'') != department.code>
-                  <span class="very-subtle">${(agentMember.homeDepartment.name)!''}</span>
+              <a class="collapse-trigger icon-container" href="#">
+                <span class="very-subtle pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
+                <#if agentMember??>
+                  ${agentMember.fullName}
+                  <#if ((agentMember.homeDepartment.code)!'') != department.code>
+                    <span class="very-subtle">${(agentMember.homeDepartment.name)!''}</span>
+                  </#if>
+                  <#assign agentId = agentMember.universityId />
+                <#else>
+                  ${agent}
+                  <#if !agent?starts_with("Not ")>
+                    <span class="very-subtle">External to Warwick</span>
+                  </#if>
+                  <#assign agentId = agent />
                 </#if>
-                <#assign agentId = agentMember.universityId />
-              <#else>
-                ${agent}
-                <#if !agent?starts_with("Not ")>
-                  <span class="very-subtle">External to Warwick</span>
-                </#if>
-                <#assign agentId = agent />
-              </#if>
+              </a>
             </h4>
 
             <div id="${studentKey}" class="striped-section-contents">

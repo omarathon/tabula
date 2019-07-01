@@ -43,7 +43,9 @@
     <div class="find-students striped-section collapsible <#if expandFind>expanded</#if>"
          data-submitparam="${ManageDepartmentSmallGroupsMappingParameters.findStudents}">
       <h3 class="section-title">
-        Find students
+        <a class="collapse-trigger icon-container" href="#">
+          Find students
+        </a>
         <span class="very-subtle">Select students by route, year of study etc.</span>
       </h3>
       <div class="striped-section-contents">
@@ -207,7 +209,9 @@
 
     <div class="manually-added striped-section collapsible <#if expandManual>expanded</#if>">
       <h3 class="section-title">
-        Manually add students
+        <a class="collapse-trigger icon-container" href="#">
+          Manually add students
+        </a>
         <small class="very-subtle">Add a list of students by university ID or username</small>
       </h3>
       <div class="striped-section-contents">
