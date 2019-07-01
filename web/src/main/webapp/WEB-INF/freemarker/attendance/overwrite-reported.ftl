@@ -50,7 +50,7 @@
         AttendanceRecording.bindButtonGroupHandler();
       </script>
 
-      <div class="striped-section expanded">
+      <div class="striped-section collapsible expanded">
         <h2 class="section-title with-contents">
           <a class="collapse-trigger icon-container" href="#"><#if monitoringPointReport??>
             ${monitoringPointReport.monitoringPeriod},

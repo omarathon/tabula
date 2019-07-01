@@ -207,7 +207,7 @@ showResetButton=false
 </#macro>
 
 <#macro groupedPointsBySection pointsMap sectionName>
-  <div class="striped-section expanded">
+  <div class="striped-section collapsible expanded">
     <h2 class="section-title with-contents"><a class="collapse-trigger icon-container" href="#">${sectionName}</a></h2>
     <div class="striped-section-contents">
       <#list pointsMap[sectionName] as groupedPoint>
