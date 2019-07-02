@@ -49,10 +49,10 @@ abstract class StudentHomeCommandInternal(val student: StudentMember, val user: 
   override def applyInternal(): HomeInformation = {
     val isSelf = user.universityId == student.universityId
 
-    // An MCO can only see the submission if it's in a state where a message can be added
+    // An MCO can only see the submission if it's not withdrawn or a student-initiated draft
     val submissions =
       mitCircsSubmissionService.submissionsForStudent(student)
-        .filter { s => isSelf || s.canAddMessage }
+        .filter { s => isSelf || (!s.isWithdrawn && s.state != MitigatingCircumstancesSubmissionState.Draft) }
 
     val submissionsWithAcuteOutcomes = submissions.filter {
       s => s.state == MitigatingCircumstancesSubmissionState.OutcomesRecorded && s.isAcute && s.outcomeGrading != MitigatingCircumstancesGrading.Rejected

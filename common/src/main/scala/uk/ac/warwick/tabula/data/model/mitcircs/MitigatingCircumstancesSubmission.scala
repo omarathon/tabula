@@ -74,8 +74,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   var outcomesLastRecordedBy: User = _
 
-  @Column(name = "outcomesLastRecordedOn", nullable = false)
-  var outcomesLastRecordedOn: DateTime = DateTime.now()
+  @Column(name = "outcomesLastRecordedOn", nullable = true)
+  var outcomesLastRecordedOn: DateTime = _
+
+  @Column(name = "outcomesSubmittedOn", nullable = true)
+  var outcomesSubmittedOn: DateTime = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
@@ -311,6 +314,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def outcomesRecorded(): Unit = {
     require(Seq(Submitted, ReadyForPanel, OutcomesRecorded).contains(_state), "Cannot record outcomes until this has been submitted by the student")
+
+    // Only trigger this the first time that outcomes are submitted
+    if (_state != OutcomesRecorded) {
+      outcomesSubmittedOn = DateTime.now
+    }
+
     _state = OutcomesRecorded
   }
 
@@ -346,7 +355,10 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def canWithdraw: Boolean = state != OutcomesRecorded
   def canReopen: Boolean = isWithdrawn
   def canAddNote: Boolean = !isWithdrawn && !isDraft
-  def canAddMessage: Boolean = !isWithdrawn && state != Draft // Allow CreatedOnBehalfOf
+  def canAddMessage: Boolean =
+    !isWithdrawn &&
+    state != Draft && // Allow CreatedOnBehalfOf
+    Option(outcomesSubmittedOn).forall(_.plusMonths(1).isAfterNow) // TAB-7330 Don't allow messages one month after outcomes
 
   override def toStringProps: Seq[(String, Any)] = Seq(
     "id" -> id,
