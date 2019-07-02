@@ -125,6 +125,7 @@
                       <th class="col-sm-2">Module</th>
                       <th class="col-sm-4">Name</th>
                       <th class="col-sm-2">Deadline</th>
+                      <th class="col-sm-2">Extension to be awarded</th>
                       <th class="col-sm-4">Tabula assignments</th>
                     </tr>
                   </thead>
@@ -134,6 +135,7 @@
                         <td><@components.assessmentModule assessment /></td>
                         <td>${assessment.name}</td>
                         <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
+                        <td><#if assessment.extensionDeadline??><@fmt.date date=assessment.extensionDeadline shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">None specified</span></#if></td>
                         <td>
                           <#if mapGet(info.affectedAssessments, assessment)??>
                             <ul class="list-unstyled">

@@ -142,6 +142,8 @@
             <@f.hidden path="sequence" />
             <@f.hidden path="academicYear" />
             <@f.hidden path="assessmentType" />
+            <@f.hidden path="acuteOutcomeApplies" />
+            <@f.hidden path="extensionDeadline" />
             <input type="checkbox" checked>
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__module">

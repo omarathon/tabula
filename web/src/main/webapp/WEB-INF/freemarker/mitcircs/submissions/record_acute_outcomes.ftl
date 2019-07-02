@@ -40,24 +40,57 @@
         <@mitcirc.question_section
           question = "Affected assessments"
           hint = "Please select all of the assessments that this mitigation should apply to."
-          cssClass = "mitcircs-form__fields__section__optional-question"
+          cssClass = "mitcircs-form__fields__section__optional-question mitcircs-form__fields__section__affected-assessments"
         >
+          <#assign hasAssignments = false />
           <#list command.affectedAssessments as assessment>
             <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-              <@f.hidden path="name" />
-              <@f.hidden path="module" />
-              <@f.hidden path="moduleCode" />
-              <@f.hidden path="sequence" />
-              <@f.hidden path="academicYear" />
-              <@f.hidden path="assessmentType" />
-              <@f.hidden path="deadline" />
               <#if assessment.assessmentType.code == "A">
-                <div class="checkbox">
-                  <label>
+                <#if !hasAssignments>
+                  <div class="checkbox row grant-extensions collapse">
+                    <div class="col-md-7"><strong>Assessment</strong></div>
+                    <div class="col-md-2"><strong>Deadline</strong></div>
+                    <div class="col-md-3"><strong>Extension deadline</strong></div>
+                  </div>
+                  <#assign hasAssignments = true />
+                </#if>
+                <div class="checkbox row">
+                  <@f.hidden path="name" />
+                  <@f.hidden path="module" />
+                  <@f.hidden path="moduleCode" />
+                  <@f.hidden path="sequence" />
+                  <@f.hidden path="academicYear" />
+                  <@f.hidden path="assessmentType" />
+                  <@f.hidden path="deadline" />
+                  <label class="col-md-7">
                     <@f.checkbox path="acuteOutcomeApplies" value="true" />
                     <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                   </label>
+                  <div class="col-md-2 grant-extensions collapse">
+                    <#if assessment.deadline??><@fmt.date date=assessment.deadline shortMonth=true includeTime=false /><#else><span class="very-subtle">Unknown</span></#if>
+                  </div>
+                  <div class="col-md-3 grant-extensions collapse">
+                    <div class="input-group extensionDeadlineContainer">
+                      <@f.input path="extensionDeadline" autocomplete="off" cssClass="form-control other-input date-time-picker" />
+                      <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    </div>
+                    <@bs3form.errors path="extensionDeadline" />
+                  </div>
                 </div>
+              </#if>
+            </@spring.nestedPath>
+          </#list>
+          <#-- Hide the exam components at the end so they don't mess with the checkbox styles -->
+          <#list command.affectedAssessments as assessment>
+            <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
+              <#if assessment.assessmentType.code != "A">
+                <@f.hidden path="name" />
+                <@f.hidden path="module" />
+                <@f.hidden path="moduleCode" />
+                <@f.hidden path="sequence" />
+                <@f.hidden path="academicYear" />
+                <@f.hidden path="assessmentType" />
+                <@f.hidden path="deadline" />
               </#if>
             </@spring.nestedPath>
           </#list>

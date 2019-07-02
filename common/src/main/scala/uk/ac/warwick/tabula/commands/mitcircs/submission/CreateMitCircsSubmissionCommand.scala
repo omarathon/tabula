@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.JavaImports._
@@ -165,7 +165,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
         if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
 
-        if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.notFound")
+        if (!item.name.hasText) errors.rejectValue("name", "mitigatingCircumstances.affectedAssessments.name.required")
 
         if (item.assessmentType == null) errors.rejectValue("assessmentType", "mitigatingCircumstances.affectedAssessments.assessmentType.notFound")
 
@@ -189,6 +189,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
         errors.rejectValue("pendingEvidenceDue", "mitigatingCircumstances.pendingEvidenceDue.future")
       }
     }
+
   }
 }
 
@@ -252,6 +253,7 @@ class AffectedAssessmentItem {
     this.deadline = assessment.deadline
     this.boardRecommendations = assessment.boardRecommendations.asJava
     this.acuteOutcomeApplies = Option(assessment.acuteOutcome).isDefined
+    this.extensionDeadline = assessment.extensionDeadline.orNull
   }
 
   var moduleCode: String = _
@@ -263,6 +265,7 @@ class AffectedAssessmentItem {
   var deadline: LocalDate = _
   var boardRecommendations: JList[AssessmentSpecificRecommendation] = JArrayList()
   var acuteOutcomeApplies: Boolean = _
+  var extensionDeadline: DateTime = _
 
   def onBind(moduleAndDepartmentService: ModuleAndDepartmentService): Unit = {
     if (moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode && moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode) {

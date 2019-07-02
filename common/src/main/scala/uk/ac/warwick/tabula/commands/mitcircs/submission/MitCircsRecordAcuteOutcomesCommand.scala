@@ -99,6 +99,19 @@ trait MitCircsRecordAcuteOutcomesValidation extends SelfValidating {
       if (outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
       else if (outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
         errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
+
+      affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+        errors.pushNestedPath(s"affectedAssessments[$index]")
+        val incorrectExtensionDeadline = { for {
+          deadline <- Option(item.deadline)
+          extensionDeadline <- Option(item.extensionDeadline)
+        } yield deadline.toDateTimeAtStartOfDay.isAfter(extensionDeadline) }.getOrElse(false)
+
+        if (incorrectExtensionDeadline) {
+          errors.rejectValue("extensionDeadline", "mitigatingCircumstances.affectedAssessments.extensionDeadline.after")
+        }
+        errors.popNestedPath()
+      }
     }
   }
 }
