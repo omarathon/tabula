@@ -111,7 +111,7 @@
   </#if>
 </#macro>
 
-<#macro submissionTable submissions actions=true panel=false>
+<#macro submissionTable submissions actions=true panel=false forPanel=false>
   <#if submissions?has_content>
     <table class="mitcircs-panel-form__submissions table table-condensed">
       <thead>
@@ -129,7 +129,11 @@
         <tr>
           <td>
             <#if !submission.draft>
-              <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+              <#if forPanel>
+                <a href="<@routes.mitcircs.reviewSubmissionPanel submission />">MIT-${submission.key}</a>
+              <#else>
+                <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+              </#if>
             <#else>
               MIT-${submission.key}
             </#if>

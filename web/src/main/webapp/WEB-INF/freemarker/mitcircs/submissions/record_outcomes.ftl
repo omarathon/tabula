@@ -92,9 +92,8 @@
             <button type="submit" class="btn btn-primary" name="confirm" value="false">Save as draft</button>
           </#if>
           <button type="submit" class="btn btn-primary" name="confirm" value="true">Submit</button>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.reviewSubmission submission />">Cancel</a>
+          <a class="btn btn-default dirty-check-ignore" href="<#if fromPanel && submission.panel??><@routes.mitcircs.reviewSubmissionPanel submission /><#else><@routes.mitcircs.reviewSubmission submission /></#if>">Cancel</a>
         </div>
-
       </@f.form>
     </article>
   </section>

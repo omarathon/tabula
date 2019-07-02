@@ -70,14 +70,14 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   var lastModifiedBy: User = _
 
-  @Column(nullable = false)
+  @Column(nullable = true)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   var outcomesLastRecordedBy: User = _
 
-  @Column(name = "outcomesLastRecordedOn", nullable = true)
+  @Column(nullable = true)
   var outcomesLastRecordedOn: DateTime = _
 
-  @Column(name = "outcomesSubmittedOn", nullable = true)
+  @Column(nullable = true)
   var outcomesSubmittedOn: DateTime = _
 
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
@@ -185,7 +185,11 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   private val _attachments: JSet[FileAttachment] = JHashSet()
-  def attachments: Seq[FileAttachment] = _attachments.asScala.toSeq.sortBy(_.dateUploaded)
+  def attachments: Seq[FileAttachment] = {
+    // files attached to messages sent before outcomes were recorded are treated as evidence
+    val messageEvidence = messages.filter(m => m.studentSent && Option(outcomesLastRecordedOn).forall(m.createdDate.isBefore)).flatMap(_.attachments)
+    (_attachments.asScala.toSeq ++ messageEvidence).sortBy(_.dateUploaded)
+  }
 
   def addAttachment(attachment: FileAttachment) {
     if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")

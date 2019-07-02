@@ -228,6 +228,16 @@
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
       <@bs3form.errors path="noContactReason" />
     </@bs3form.form_group>
+
+    <div class="mitcircs-form__fields__section__hint">
+      <p>Depending on your circumstances, you might find it helpful to talk to one or more of the following:</p>
+
+      <ul>
+        <li>Your personal tutor or another member of staff in your department</li>
+        <li>Your GP or other healthcare professional</li>
+        <li>Warwick’s <a href="https://warwick.ac.uk/supportservices" target="_blank">Wellbeing Support Services</a></li>
+      </ul>
+    </div>
   </div>
 </@mitcirc.question_section>
 

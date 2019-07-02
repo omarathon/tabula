@@ -2,14 +2,13 @@
 import $ from 'jquery';
 
 class MitCircsOutcomesForm {
-
   constructor(form) {
     this.form = form;
     this.init();
   }
 
   init() {
-    const {form} = this;
+    const { form } = this;
     const $form = $(form);
 
     $form
@@ -73,7 +72,6 @@ class MitCircsOutcomesForm {
       $checkbox.closest('.row').find('.date-time-picker').filter(':visible').prop('disabled', !$checkbox.is(':checked'));
     }).trigger('change');
   }
-
 }
 
 function init() {
