@@ -28,11 +28,15 @@ class MitCircsViewController extends AbstractViewProfileController with Autowiri
   @RequestMapping
   def render(@ModelAttribute("command") cmd: StudentViewMitCircsSubmissionCommand.Command, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
     val submission = cmd.apply()
+    val isSelf = user.universityId.maybeText.contains(submission.student.universityId)
 
     // TAB-7293 If the current user has review permissions bounce them to the review page unless the state would allow them to edit it
     if (
+      // Don't bounce students to the review page
+      !isSelf
+
       // Not editable by the current user (i.e. not created on behalf of the student)
-      !submission.isEditable(user.apparentUser)
+      && !submission.isEditable(user.apparentUser)
 
       // Not explicitly granted the viewer role (i.e. sharing)
       && !roleService.hasRole(user, RoleBuilder.build(MitCircsShareSubmissionCommand.roleDefinition, Some(submission), MitCircsShareSubmissionCommand.roleDefinition.getName))
@@ -43,7 +47,7 @@ class MitCircsViewController extends AbstractViewProfileController with Autowiri
     } else {
       Mav("mitcircs/view",
         "submission" -> submission,
-        "isSelf" -> user.universityId.maybeText.contains(submission.student.universityId)
+        "isSelf" -> isSelf
       ).crumbs(breadcrumbsStudent(activeAcademicYear, submission.student.mostSignificantCourse, ProfileBreadcrumbs.Profile.PersonalCircumstances): _*)
     }
   }
