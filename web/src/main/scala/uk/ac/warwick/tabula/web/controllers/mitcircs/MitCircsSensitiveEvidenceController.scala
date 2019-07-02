@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.mitcircs
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping, RequestParam}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.mitcircs.submission.{MitCircsSensitiveEvidenceCommand, MitCircsSensitiveEvidenceState}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -24,20 +24,34 @@ class MitCircsSensitiveEvidenceController extends BaseController {
     MitCircsSensitiveEvidenceCommand(mandatory(submission), user.apparentUser)
 
   @RequestMapping
-  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
-    Mav("mitcircs/submissions/sensitive_evidence")
-      .crumbs(
+  def form(@ModelAttribute("student") student: StudentMember, @PathVariable submission: MitigatingCircumstancesSubmission, @RequestParam(defaultValue = "false") fromPanel: Boolean): Mav = {
+    val mav = Mav("mitcircs/submissions/sensitive_evidence", "fromPanel" -> fromPanel)
+
+    if (fromPanel && submission.panel.nonEmpty)
+      mav.crumbs(
+        MitCircsBreadcrumbs.Admin.Home(submission.department),
+        MitCircsBreadcrumbs.Admin.Panel(submission.panel.get),
+        MitCircsBreadcrumbs.Admin.ReviewPanel(submission),
+        MitCircsBreadcrumbs.Admin.SensitiveEvidence(submission, active = true),
+      )
+    else
+      mav.crumbs(
         MitCircsBreadcrumbs.Admin.Home(submission.department),
         MitCircsBreadcrumbs.Admin.Review(submission),
         MitCircsBreadcrumbs.Admin.SensitiveEvidence(submission, active = true),
       )
+  }
 
   @RequestMapping(method = Array(POST))
-  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav =
-    if (errors.hasErrors) form(submission.student, submission)
+  def save(@Valid @ModelAttribute("command") cmd: Command, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission, @RequestParam(defaultValue = "false") fromPanel: Boolean): Mav =
+    if (errors.hasErrors) form(submission.student, submission, fromPanel)
     else {
       val submission = cmd.apply()
-      RedirectForce(Routes.Admin.review(submission))
+      if (fromPanel && submission.panel.nonEmpty) {
+        RedirectForce(Routes.Admin.Panels.review(submission))
+      } else {
+        RedirectForce(Routes.Admin.review(submission))
+      }
     }
 
 }

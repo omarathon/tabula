@@ -32,6 +32,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#-- Review submission (as the MCO) -->
 <#macro reviewSubmission submission><@_u page = "/submission/${submission.key?c}" /></#macro>
+<#macro reviewSubmissionPanel submission><@_u page = "/panel/${submission.panel.id}/submission/${submission.key?c}" /></#macro>
 <#macro sensitiveEvidence submission><@_u page="/submission/${submission.key?c}/sensitiveevidence" /></#macro>
 <#macro readyForPanel submission><@_u page="/submission/${submission.key?c}/ready" /></#macro>
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
