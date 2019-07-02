@@ -2,14 +2,13 @@
 import $ from 'jquery';
 
 class MitCircsOutcomesForm {
-
   constructor(form) {
     this.form = form;
     this.init();
   }
 
   init() {
-    const {form} = this;
+    const { form } = this;
     const $form = $(form);
 
     $form
@@ -48,7 +47,6 @@ class MitCircsOutcomesForm {
         }).trigger('change');
       });
   }
-
 }
 
 function init() {

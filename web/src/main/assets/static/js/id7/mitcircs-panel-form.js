@@ -2,14 +2,13 @@
 import $ from 'jquery';
 
 class MitCircsPanelForm {
-
   constructor(form) {
     this.form = form;
     this.init();
   }
 
   init() {
-    const {form} = this;
+    const { form } = this;
     const $form = $(form);
 
     $form.on('click', '.mitcircs-panel-form__submissions button.remove', (e) => {
@@ -22,7 +21,6 @@ class MitCircsPanelForm {
       }
     });
   }
-
 }
 
 function init() {

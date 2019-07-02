@@ -5,7 +5,30 @@
 <#assign isSelf = submission.student.universityId == user.universityId />
 
 <#escape x as x?html>
-  <h1>MIT-${submission.key}</h1>
+  <#if pagination??>
+    <div class="btn-toolbar dept-toolbar mitcircs-pagination">
+      <div class="btn-group">
+        <span class="mitcircs-pagination__count">${pagination.index} of ${pagination.total}</span>
+        <#if pagination.previous??>
+          <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.previous />" title="Previous submission 'MIT-${pagination.previous.key}' (type 'k')" data-container="body" data-pagination="previous"><i class="fal fa-chevron-up"></i></a>
+        <#else>
+          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-up"></i></a>
+        </#if>
+        <#if pagination.next??>
+          <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.next />" title="Next submission 'MIT-${pagination.next.key}' (type 'j')" data-container="body" data-pagination="next"><i class="fal fa-chevron-down"></i></a>
+        <#else>
+          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
+        </#if>
+      </div>
+    </div>
+
+    <div class="deptheader">
+      <h1>MIT-${submission.key}</h1>
+    </div>
+  <#else>
+    <h1>MIT-${submission.key}</h1>
+  </#if>
+
   <div id="profile-modal" class="modal fade profile-subset"></div>
   <section class="mitcircs-details">
     <div class="row">
@@ -82,16 +105,20 @@
             <div class="col-sm-4 control-label">Actions</div>
             <div class="col-sm-8">
               <#if canManage>
-                <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
+                <#if pagination?? && panel??>
+                  <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
+                <#else>
+                  <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
+                </#if>
 
                 <#if !submission.withdrawn>
-                  <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
+                  <p><a href="<@routes.mitcircs.sensitiveEvidence submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
                 </#if>
 
                 <#if submission.state.entryName == "Submitted">
-                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
+                  <p><a href="<@routes.mitcircs.readyForPanel submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
                 <#elseif submission.state.entryName == "Ready For Panel">
-                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
+                  <p><a href="<@routes.mitcircs.readyForPanel submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
                 </#if>
                 <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
 
@@ -99,7 +126,7 @@
                   <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
                 </#if>
                 <#if submission.canRecordOutcomes>
-                  <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record panel outcomes</a></p>
+                  <p><a href="<@routes.mitcircs.recordOutcomes submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Record panel outcomes</a></p>
                 </#if>
               <#elseif submission.panel??>
                 <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
