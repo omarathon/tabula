@@ -54,12 +54,12 @@ class MitCircsOutcomesForm {
       $fields.each((index, field) => {
         const $field = $(field);
         const isEnabled = !disableAll && $field.closest('.row').find(':checkbox').is(':checked:visible');
-        $(field).prop('disabled', !isEnabled)
+        $(field).prop('disabled', !isEnabled);
       });
     };
 
     const extensionFieldToggle = () => {
-      const isExtensions = $form.find(':input[name=acuteOutcome]:checked').val() === "Extension";
+      const isExtensions = $form.find(':input[name=acuteOutcome]:checked').val() === 'Extension';
       $extensionContainer.collapse(isExtensions ? 'show' : 'hide');
       extensionFieldDisable($extensionFields, !isExtensions);
     };
