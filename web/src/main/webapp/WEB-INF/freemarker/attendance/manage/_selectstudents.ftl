@@ -55,7 +55,7 @@
 
   <div class="striped-section collapsible" data-populate=".striped-section-contents .item-info" data-form="form.add-student-to-scheme"
        data-href="<@routes.attendance.manageAddStudentsAllStudents scheme />">
-    <h3 class="section-title">View all students on this scheme</h3>
+    <h3 class="section-title"><a class="collapse-trigger icon-container" href="#">View all students on this scheme</a></h3>
     <div class="striped-section-contents">
       <div class="item-info">
 
@@ -65,7 +65,9 @@
 
   <div class="find-students striped-section collapsible <#if expandFind>expanded</#if>" data-submitparam="${ManageSchemeMappingParameters.findStudents}">
     <h3 class="section-title">
-      Find students
+      <a class="collapse-trigger icon-container" href="#">
+        Find students
+      </a>
       <span class="very-subtle">Select students by route, year of study etc.</span>
     </h3>
     <div class="striped-section-contents">
@@ -292,8 +294,11 @@
 
   <div class="manually-added striped-section collapsible <#if expandManual>expanded</#if>">
     <h3 class="section-title">
-      Manually add students
+      <a class="collapse-trigger icon-container" href="#">
+        Manually add students
+      </a>
       <span class="very-subtle">Add a list of students by University ID or usercode</span>
+
     </h3>
     <div class="striped-section-contents">
       <div class="item-info">

@@ -5,7 +5,30 @@
 <#assign isSelf = submission.student.universityId == user.universityId />
 
 <#escape x as x?html>
-  <h1>MIT-${submission.key}</h1>
+  <#if pagination??>
+    <div class="btn-toolbar dept-toolbar mitcircs-pagination">
+      <div class="btn-group">
+        <span class="mitcircs-pagination__count">${pagination.index} of ${pagination.total}</span>
+        <#if pagination.previous??>
+          <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.previous />" title="Previous submission 'MIT-${pagination.previous.key}' (type 'k')" data-container="body" data-pagination="previous"><i class="fal fa-chevron-up"></i></a>
+        <#else>
+          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-up"></i></a>
+        </#if>
+        <#if pagination.next??>
+          <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.next />" title="Next submission 'MIT-${pagination.next.key}' (type 'j')" data-container="body" data-pagination="next"><i class="fal fa-chevron-down"></i></a>
+        <#else>
+          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
+        </#if>
+      </div>
+    </div>
+
+    <div class="deptheader">
+      <h1>MIT-${submission.key}</h1>
+    </div>
+  <#else>
+    <h1>MIT-${submission.key}</h1>
+  </#if>
+
   <div id="profile-modal" class="modal fade profile-subset"></div>
   <section class="mitcircs-details">
     <div class="row">
@@ -47,8 +70,8 @@
           </#if>
         </#if>
 
-        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
-        <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
+        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@components.detail>
+        <@components.detail label="Start date" condensed=true><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false /><#else><span class="very-subtle">TBC</span></#if></@components.detail>
         <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
         </@components.detail>
@@ -60,13 +83,19 @@
             </a>
           </@components.detail>
         </#if>
-        <#if submission.contacted>
-          <@components.detail "Discussed submission with">
-            <@components.enumListWithOther submission.contacts submission.contactOther!"" />
-          </@components.detail>
+        <#if submission.contacted??>
+          <#if submission.contacted>
+            <@components.detail "Discussed submission with">
+              <@components.enumListWithOther enumValues=submission.contacts otherValue=submission.contactOther!"" condensed=false />
+            </@components.detail>
+          <#else>
+            <@components.detail "Reason for not discussing submission">
+              ${submission.noContactReason}
+            </@components.detail>
+          </#if>
         <#else>
-          <@components.detail "Reason for not discussing submission">
-            ${submission.noContactReason}
+          <@components.detail "Discussed submission with">
+            <span class="very-subtle">TBC</span>
           </@components.detail>
         </#if>
       </div>
@@ -76,16 +105,20 @@
             <div class="col-sm-4 control-label">Actions</div>
             <div class="col-sm-8">
               <#if canManage>
-                <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
+                <#if pagination?? && panel??>
+                  <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
+                <#else>
+                  <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
+                </#if>
 
                 <#if !submission.withdrawn>
-                  <p><a href="<@routes.mitcircs.sensitiveEvidence submission />" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
+                  <p><a href="<@routes.mitcircs.sensitiveEvidence submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
                 </#if>
 
                 <#if submission.state.entryName == "Submitted">
-                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
+                  <p><a href="<@routes.mitcircs.readyForPanel submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Ready for panel</a></p>
                 <#elseif submission.state.entryName == "Ready For Panel">
-                  <p><a href="<@routes.mitcircs.readyForPanel submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
+                  <p><a href="<@routes.mitcircs.readyForPanel submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
                 </#if>
                 <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
 
@@ -93,7 +126,7 @@
                   <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
                 </#if>
                 <#if submission.canRecordOutcomes>
-                  <p><a href="<@routes.mitcircs.recordOutcomes submission />" class="btn btn-default btn-block">Record panel outcomes</a></p>
+                  <p><a href="<@routes.mitcircs.recordOutcomes submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Record panel outcomes</a></p>
                 </#if>
               <#elseif submission.panel??>
                 <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
@@ -121,14 +154,10 @@
           <tbody>
           <#list submission.affectedAssessments as assessment>
             <tr>
-              <td><#if assessment.assessmentType.code == "A">Assignment<#else>Exam</#if></td>
-              <td>
-                <span class="mod-code">
-                  ${assessment.module.code?upper_case}</span> <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})
-                </span>
-              </td>
+              <td><@components.assessmentType assessment /></td>
+              <td><@components.assessmentModule assessment /></td>
               <td>${assessment.name}</td>
-              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
+              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
             </tr>
           </#list>
           </tbody>
@@ -214,7 +243,7 @@
                     </#if>
                   </td>
                   <td class="deadline-col <#if extension.approved>approved<#else>very-subtle</#if>">
-                    <@fmt.date date=extension.assignment.submissionDeadline(extension.usercode) />
+                    <@fmt.date date=extension.assignment.submissionDeadline(extension.usercode) shortMonth=true excludeCurrentYear=true />
                   </td>
                 </tr>
               </#list>
@@ -240,9 +269,7 @@
               ${submission.outcomeGrading.description}
               <#if submission.outcomeGrading.entryName == "Rejected" && submission.rejectionReasons?has_content>
                 &ndash;
-                <#list submission.rejectionReasons as rejectionReason>
-                  <#if rejectionReason.entryName == "Other">${submission.rejectionReasonsOther}<#else>${rejectionReason.description}</#if><#if rejectionReason_has_next>,</#if>
-                </#list>
+                <@components.enumListWithOther submission.rejectionReasons submission.rejectionReasonsOther!"" />
               </#if>
             </@components.detail>
           </#if>
@@ -268,7 +295,7 @@
                   <ul class="list-unstyled">
                     <#list submission.affectedAssessments as assessment>
                       <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                        <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
+                        <li><@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}</li>
                       </#if>
                     </#list>
                   </ul>
@@ -287,7 +314,7 @@
                   <#list submission.affectedAssessments as assessment>
                     <#if assessment.boardRecommendations?has_content>
                       <li>
-                        ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
+                        <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
                         <ul>
                           <#list assessment.boardRecommendations as recommendation>
                             <li>

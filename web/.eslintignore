@@ -3,7 +3,11 @@
 #!/src/main/assets/static/js/**/*.js
 !/src/main/assets/static/js/id7/render.js
 !/src/main/assets/static/js/id7/submission-progress.js
+!/src/main/assets/static/js/id7/mitcircs-admin-home.js
+!/src/main/assets/static/js/id7/mitcircs-details.js
 !/src/main/assets/static/js/id7/mitcircs-form.js
+!/src/main/assets/static/js/id7/mitcircs-outcomes-form.js
+!/src/main/assets/static/js/id7/mitcircs-pagination.js
+!/src/main/assets/static/js/id7/mitcircs-panel-form.js
 !/src/main/assets/static/js/id7/mitcircs-pending-evidence.js
 !/src/main/assets/static/js/id7/mitcircs-settings.js
-!/src/main/assets/static/js/id7/mitcircs-details.js

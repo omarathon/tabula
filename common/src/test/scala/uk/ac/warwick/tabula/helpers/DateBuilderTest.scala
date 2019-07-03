@@ -25,14 +25,15 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
       // Test default settings
       format(anotherDay) should be("12:13&#8194;Sat 10<sup>th</sup> March 2012")
 
-      format(anotherDay, false, false, false, true, true, false, false, true) should be("12:13&#8194;Sat 10<sup>th</sup> March 2012")
-      format(anotherDay, true, true, true, true, true, false, false, true) should be("12:13:14 (GMT)&#8194;Sat 10<sup>th</sup> March 2012")
+      format(anotherDay, false, false, false, true, true, false, false, true, false) should be("12:13&#8194;Sat 10<sup>th</sup> March 2012")
+      format(anotherDay, true, true, true, true, true, false, false, true, false) should be("12:13:14 (GMT)&#8194;Sat 10<sup>th</sup> March 2012")
 
-      format(yesterday, false, true, false, true, true, false, false, true) should be("13:36&#8194;Yesterday")
-      format(tomorrow, true, true, false, false, true, false, false, true) should be("13:36:00&#8194;tomorrow")
-      format(today, false, false, false, true, true, false, false, true) should be("13:36&#8194;Today")
+      format(yesterday, false, true, false, true, true, false, false, true, false) should be("13:36&#8194;Yesterday")
+      format(tomorrow, true, true, false, false, true, false, false, true, false) should be("13:36:00&#8194;tomorrow")
+      format(today, false, false, false, true, true, false, false, true, false) should be("13:36&#8194;Today")
 
-      format(today, false, false, false, true, false, false, false, true) should be("13:36&#8194;Thu 12<sup>th</sup> April 2012")
+      format(today, false, false, false, true, false, false, false, true, false) should be("13:36&#8194;Thu 12<sup>th</sup> April 2012")
+      format(today, false, false, false, true, false, false, true, true, true) should be("13:36&#8194;Thu 12<sup>th</sup> Apr")
 
       // Freemarker exec
       implicit val fmConfig = newFreemarkerConfiguration

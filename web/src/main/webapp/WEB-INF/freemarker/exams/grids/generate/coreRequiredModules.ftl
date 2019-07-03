@@ -40,7 +40,7 @@
     <#list coreRequiredModulesCommand.allModules?keys?sort_by('code') as route>
       <div class="striped-section collapsible <#if coreRequiredModulesCommand.allModules?keys?size == 1>expanded</#if>">
         <h4 class="section-title" title="Expand">
-          ${route.code?upper_case} ${route.name}
+          <a class="collapse-trigger icon-container" href="#">${route.code?upper_case} ${route.name}</a>
         </h4>
 
         <div class="striped-section-contents">

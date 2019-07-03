@@ -1,3 +1,5 @@
+<#import "*/mitcircs_components.ftl" as components />
+
 <#escape x as x?html>
   <#if !isSelf>
     <details class="indent">
@@ -32,35 +34,35 @@
       <table class="table table-condensed">
         <thead>
           <tr>
-            <th>Reference</th>
-            <th>Issue types</th>
-            <th>Start date</th>
-            <th>End date</th>
-            <th>Last modified</th>
-            <th>Submitted</th>
+            <th class="col-sm-1">Reference</th>
+            <th class="col-sm-3">Issue types</th>
+            <th class="col-sm-2">Start date</th>
+            <th class="col-sm-2">End date</th>
+            <th class="col-sm-2">Last modified</th>
+            <th class="col-sm-2">Submitted</th>
           </tr>
         </thead>
         <tbody>
           <#list submissions as submission>
             <tr>
               <td><a href="<@routes.mitcircs.viewSubmission submission />">MIT-${submission.key}</a></td>
-              <td><#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></td>
-              <td><@fmt.date date=submission.startDate includeTime=false /></td>
+              <td><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></td>
+              <td><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">(not set)</span></#if></td>
               <td>
                 <#if submission.endDate??>
-                  <@fmt.date date=submission.endDate includeTime=false />
+                  <@fmt.date date=submission.endDate includeTime=false shortMonth=true excludeCurrentYear=true />
                 <#else>
                   <span class="very-subtle">(not set)</span>
                 </#if>
               </td>
               <td>
-                <@fmt.date date=submission.lastModified />
+                <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
               </td>
               <td>
                 <#if submission.withdrawn>
                   <span class="very-subtle">(withdrawn)</span>
                 <#elseif submission.approvedOn??>
-                  <@fmt.date date=submission.approvedOn />
+                  <@fmt.date date=submission.approvedOn shortMonth=true excludeCurrentYear=true />
                 <#else>
                   <span class="very-subtle">(draft)</span>
                 </#if>
@@ -81,37 +83,94 @@
   <#if submissionsWithAcuteOutcomes?has_content>
     <h2>Acute mitigating circumstances</h2>
 
-    <ul class="list-unstyled">
-      <#list submissionsWithAcuteOutcomes as submission>
+    <ul class="list-unstyled mitcircs__acute-outcomes">
+      <#list submissionsWithAcuteOutcomes as info>
+        <#assign submission = info.submission />
         <li>
-          <strong>MIT-${submission.key}</strong> -
-          <@fmt.date date=submission.startDate includeTime=false relative=false />
-          &mdash;
-          <#if submission.endDate??>
-            <@fmt.date date=submission.endDate includeTime=false relative=false />
-          <#else>
-            <span class="very-subtle">(ongoing)</span>
-          </#if>
-          <br />
-          Outcomes recorded
-          <#if submission.outcomesLastRecordedBy??>
-            by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
-          </#if>
-          <#if submission.outcomesLastRecordedOn??>
-            at <@fmt.date date=submission.outcomesLastRecordedOn />
-          </#if>
+          <h5 class="mitcircs__acute-outcomes__header">
+            MIT-${submission.key}&nbsp;
+            <span class="mitcircs__acute-outcomes__header__aside">
+              <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              &mdash;
+              <#if submission.endDate??>
+                <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              <#else>
+                <span class="very-subtle">(ongoing)</span>
+              </#if>
+            </span>
+          </h5>
 
           <#if submission.acuteOutcome??>
-            <br />${submission.acuteOutcome.description}
+            <div class="row form-horizontal mitcircs__acute-outcomes__section ">
+              <div class="control-label">Outcomes</div>
+              <div class="content form-control-static">
+                ${submission.acuteOutcome.description} —  Outcomes recorded
+                <#if submission.outcomesLastRecordedBy??>
+                  by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
+                </#if>
+                <#if submission.outcomesLastRecordedOn??>
+                  at <@fmt.date date=submission.outcomesLastRecordedOn />
+                </#if>
+              </div>
+            </div>
           </#if>
 
-          <ul>
-            <#list submission.affectedAssessments as assessment>
-              <#if ((assessment.acuteOutcome.entryName)!"") == ((submission.acuteOutcome.entryName)!"")>
-                <li>${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}</li>
-              </#if>
-            </#list>
-          </ul>
+          <#if info.affectedAssessments?has_content>
+            <div class="row form-horizontal mitcircs__acute-outcomes__section ">
+              <div class="control-label">Affected assessments</div>
+              <div class="content form-control-static">
+                <table class="table table-default mitcircs__acute-outcomes__affectedAssessments">
+                  <thead>
+                    <tr>
+                      <th class="col-sm-2">Module</th>
+                      <th class="col-sm-4">Name</th>
+                      <th class="col-sm-2">Deadline</th>
+                      <th class="col-sm-2">Extension to be awarded</th>
+                      <th class="col-sm-4">Tabula assignments</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <#list info.affectedAssessments?keys as assessment>
+                      <tr>
+                        <td><@components.assessmentModule assessment /></td>
+                        <td>${assessment.name}</td>
+                        <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
+                        <td><#if assessment.extensionDeadline??><@fmt.date date=assessment.extensionDeadline shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">None specified</span></#if></td>
+                        <td>
+                          <#if mapGet(info.affectedAssessments, assessment)??>
+                            <ul class="list-unstyled">
+                              <#list mapGet(info.affectedAssessments, assessment) as assignmentInfo>
+                                <#assign assignment = assignmentInfo.assignment />
+                                <#assign url><#compress>
+                                  <#if submission.acuteOutcome.entryName == "WaiveLatePenalties">
+                                    <@routes.cm2.feedbackAdjustment assignment />
+                                  <#elseif submission.acuteOutcome.entryName == "Extension">
+                                    <@routes.cm2.assignmentextensions assignment />
+                                  <#else>
+                                    <@routes.cm2.assignmentSubmissionSummary assignment />
+                                  </#if>
+                                </#compress></#assign>
+                                <li>
+                                  <a href="${url}">${assignment.name}</a>
+                                  <#if submission.acuteOutcome.entryName == "Extension">
+                                    <#if assignmentInfo.hasExtension>
+                                      <i class="fa fa-check-circle-o" data-toggle="tooltip" title="Extension granted"></i>
+                                    <#else>
+                                      <i class="fa fa-warning" data-toggle="tooltip" title="No extension granted"></i>
+                                    </#if>
+                                  </#if>
+                                </li>
+                              </#list>
+                            </ul>
+                          </#if>
+                        </td>
+                      </tr>
+                    </#list>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </#if>
         </li>
       </#list>
     </ul>

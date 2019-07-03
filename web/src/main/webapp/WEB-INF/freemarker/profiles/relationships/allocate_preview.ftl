@@ -68,8 +68,10 @@
 
     <div class="striped-section removals collapsible">
       <h4 class="relationship-change-summary section-title">
-        <span class="emphasis">${command.renderRemovals?keys?size}</span>
-        <@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} removed
+        <a class="collapse-trigger icon-container" href="#">
+          <span class="emphasis">${command.renderRemovals?keys?size}</span>
+          <@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} removed
+        </a>
       </h4>
 
       <div class="striped-section-contents">
@@ -81,8 +83,10 @@
 
     <div class="striped-section additions collapsible">
       <h4 class="relationship-change-summary section-title">
-        <span class="emphasis">${command.renderAdditions?keys?size}</span>
-        <@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} added
+        <a class="collapse-trigger icon-container" href="#">
+          <span class="emphasis">${command.renderAdditions?keys?size}</span>
+          <@fmt.p number=command.renderRemovals?keys?size singular="student" shownumber=false />: ${relationshipType.description?lower_case} added
+        </a>
       </h4>
 
       <div class="striped-section-contents">

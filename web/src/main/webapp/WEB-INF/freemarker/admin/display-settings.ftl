@@ -230,6 +230,17 @@
                   </p>
 
                   <p>
+                    You might want to include the following in your departmental guidance:
+                  </p>
+
+                  <ul>
+                    <li>When the mitigating circumstances panel meets</li>
+                    <li>Who will be on the mitigating circumstances panel (i.e. to let the student know who will see their submission and evidence)</li>
+                    <li>When the deadlines are for submitting mitigating circumstances claims</li>
+                    <li>Who they can talk to to get help with creating and submitting their mitigating circumstances claim</li>
+                  </ul>
+
+                  <p>
                     You can use simple syntax to format the guidance, such as using <code>**asterisks**</code> around words to make them
                     <strong>bold</strong>, <code>_underscores_</code> to make them <em>italic</em>. To make a link, use syntax like
                     <code style="white-space: nowrap;">[text to link](https://warwick.ac.uk/your/link)</code>.

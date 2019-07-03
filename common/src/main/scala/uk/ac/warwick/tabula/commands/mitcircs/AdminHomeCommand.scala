@@ -2,16 +2,16 @@ package uk.ac.warwick.tabula.commands.mitcircs
 
 import org.hibernate.criterion.Order
 import org.joda.time.LocalDate
-import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.{MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
+import uk.ac.warwick.tabula.data.{MitigatingCircumstancesSubmissionFilter, ScalaRestriction}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, AutowiringMitCircsWorkflowProgressServiceComponent, MitCircsSubmissionServiceComponent, MitCircsWorkflowProgressServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.{AcademicYear, WorkflowStage, WorkflowStages}
 
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
@@ -107,7 +107,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var includesEndDate: LocalDate = _
   var approvedStartDate: LocalDate = _
   var approvedEndDate: LocalDate = _
-  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList(MitigatingCircumstancesSubmissionState.Submitted)
+  var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList()
 
   override val defaultOrder: Seq[Order] = Seq(Order.desc("_lastModified"))
   override val sortOrder: JList[Order] = JArrayList() // Not used

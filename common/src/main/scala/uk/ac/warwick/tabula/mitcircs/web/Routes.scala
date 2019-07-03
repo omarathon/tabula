@@ -32,6 +32,7 @@ object Routes {
       def apply(department: Department): String = s"$context/admin/${encoded(department.code)}/panels"
       def apply(department: Department, academicYear: AcademicYear): String = s"$context/admin/${encoded(department.code)}/${encoded(academicYear.startYear.toString)}/panels"
       def view(panel: MitigatingCircumstancesPanel) = s"$context/panel/${encoded(panel.id)}"
+      def review(submission: MitigatingCircumstancesSubmission): String = s"$context/panel/${encoded(submission.panel.get.id)}/submission/${encoded(submission.key.toString)}"
     }
   }
 

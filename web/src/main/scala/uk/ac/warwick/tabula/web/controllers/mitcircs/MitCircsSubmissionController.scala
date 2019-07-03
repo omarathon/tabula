@@ -27,6 +27,10 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
   var mitCircsSubmissionService: MitCircsSubmissionService = Wire[MitCircsSubmissionService]
 
+  @ModelAttribute("registeredYears")
+  def registeredYears(@PathVariable student: StudentMember): Seq[AcademicYear] =
+    student.freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).map(_.academicYear).distinct.sorted.reverse
+
   @ModelAttribute("registeredModules")
   def registeredModules(@PathVariable student: StudentMember): ListMap[AcademicYear, Seq[Module]] = {
     val builder = ListMap.newBuilder[AcademicYear, Seq[Module]]
@@ -41,6 +45,10 @@ abstract class AbstractMitCircsFormController extends AbstractViewProfileControl
 
     builder.result()
   }
+
+  @ModelAttribute("includeEngagementCriteria")
+  def includeEngagementCriteria(@PathVariable student: StudentMember): Boolean =
+    student.mostSignificantCourse.award.code == "MBCHB"
 
   @ModelAttribute("previousSubmissions")
   def previousSubmissions(
@@ -89,7 +97,7 @@ class CreateMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: CreateCommand, errors: Errors, @PathVariable student: StudentMember): Mav = {
-    if (errors.hasErrors) form(student)
+    if (errors.hasErrors) form(student).addObjects("errors" -> errors)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))
@@ -123,7 +131,7 @@ class EditMitCircsController extends AbstractMitCircsFormController {
 
   @RequestMapping(method = Array(POST))
   def save(@Valid @ModelAttribute("command") cmd: EditCommand, errors: Errors, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
-    if (errors.hasErrors) form(submission.student)
+    if (errors.hasErrors) form(submission.student).addObjects("errors" -> errors)
     else {
       val submission = cmd.apply()
       RedirectForce(Routes.Profile.PersonalCircumstances.view(submission))

@@ -1,4 +1,6 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftl" as components />
+
 <#escape x as x?html>
   <h1>Record outcomes for MIT-${submission.key}</h1>
 
@@ -41,6 +43,8 @@
                 <@f.hidden path="academicYear" />
                 <@f.hidden path="assessmentType" />
                 <@f.hidden path="deadline" />
+                <@f.hidden path="acuteOutcomeApplies" />
+                <@f.hidden path="extensionDeadline" />
               </@spring.nestedPath>
             </#list>
           </#if>
@@ -50,21 +54,21 @@
                 <@f.checkbox path="boardRecommendations" value="${value.entryName}" /> ${value.description}
               </label>
               <#if value.entryName == "Other">
-                  <@f.input path="boardRecommendationOther" cssClass="form-control other-input" />
+                <@f.input path="boardRecommendationOther" cssClass="form-control other-input" />
               </#if>
               <#if value.helpText??><@fmt.help_popover id="${value.entryName}" content="${value.helpText}" placement="left"/></#if>
               <#if value.assessmentSpecific!false && command.affectedAssessments?has_content>
-                <section class="mitcircs-form__fields__section__nested-checkboxes collapse" data-target=":input[name=boardRecommendations][value=${value.entryName}]">
-                    <#list command.affectedAssessments as assessment>
-                        <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
-                          <div class="checkbox nested">
-                            <label>
-                                <@f.checkbox path="boardRecommendations" value="${value.entryName}" />
-                                ${assessment.module.code?upper_case} ${assessment.module.name} (${assessment.academicYear.toString}) &mdash; ${assessment.name}
-                            </label>
-                          </div>
-                        </@spring.nestedPath>
-                    </#list>
+                <section class="mitcircs-form__fields__section__nested-checkboxes collapse" data-target=":input[name=boardRecommendations][value=${value.entryName}]" data-match-state="true">
+                  <#list command.affectedAssessments as assessment>
+                    <@spring.nestedPath path="affectedAssessments[${assessment_index}]">
+                      <div class="checkbox nested">
+                        <label>
+                          <@f.checkbox path="boardRecommendations" value="${value.entryName}" />
+                          <@components.assessmentModule assessment=assessment formatted=false /> &mdash; ${assessment.name}
+                        </label>
+                      </div>
+                    </@spring.nestedPath>
+                  </#list>
                 </section>
               </#if>
             </div>
@@ -88,9 +92,8 @@
             <button type="submit" class="btn btn-primary" name="confirm" value="false">Save as draft</button>
           </#if>
           <button type="submit" class="btn btn-primary" name="confirm" value="true">Submit</button>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.reviewSubmission submission />">Cancel</a>
+          <a class="btn btn-default dirty-check-ignore" href="<#if fromPanel && submission.panel??><@routes.mitcircs.reviewSubmissionPanel submission /><#else><@routes.mitcircs.reviewSubmission submission /></#if>">Cancel</a>
         </div>
-
       </@f.form>
     </article>
   </section>

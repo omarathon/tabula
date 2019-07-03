@@ -11,6 +11,7 @@ trait HibernateExtensionPersistenceComponent extends ExtensionPersistenceCompone
   def delete(attachment: FileAttachment): Unit = {
     Option(attachment.extension).foreach(_.removeAttachment(attachment))
     Option(attachment.mitigatingCircumstancesSubmission).foreach(_.removeAttachment(attachment))
+    Option(attachment.mitigatingCircumstancesMessage).foreach(_.removeAttachment(attachment))
     session.delete(attachment)
   }
 

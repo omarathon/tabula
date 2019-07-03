@@ -48,10 +48,10 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.8.2",
-    "@universityofwarwick/id7": "2.3.9",
+    "@universityofwarwick/id7": "2.4.1",
     "core-js": "3.1.4",
     "fixed-header-table": "1.3.0",
-    "jquery": "3.4.0",
+    "jquery": "3.4.1",
     "jquery-caret-plugin": "1.5.3",
     "jquery-ui": "1.12.1",
     "lodash-es": "4.17.11",

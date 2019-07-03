@@ -25,6 +25,11 @@ object MitCircsBreadcrumbs {
       val url = Some(Routes.mitcircs.Admin.review(submission))
     }
 
+    case class ReviewPanel(submission: model.mitcircs.MitigatingCircumstancesSubmission, override val active: Boolean = false) extends BreadCrumb {
+      val title: String = s"MIT-${submission.key}"
+      val url = Some(Routes.mitcircs.Admin.Panels.review(submission))
+    }
+
     case class SensitiveEvidence(submission: model.mitcircs.MitigatingCircumstancesSubmission, override val active: Boolean = false) extends BreadCrumb {
       val title: String = "Sensitive evidence"
       val url = Some(Routes.mitcircs.Admin.sensitiveEvidence(submission))

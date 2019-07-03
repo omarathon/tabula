@@ -1,17 +1,37 @@
 <#import "*/mitcircs_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
+<#function stage_sortby stages>
+  <#local result = '' />
+
+  <#list stages?reverse as progress>
+    <#local stageResult = '1' /> <#-- not started -->
+    <#if progress.completed>
+      <#local stageResult = '4' />
+    <#elseif progress.skipped>
+      <#local stageResult = '2' />
+    <#elseif progress.started>
+      <#local stageResult = '3' />
+    </#if>
+
+    <#local result = "${result}${stageResult}" />
+  </#list>
+
+  <#return result />
+</#function>
+
 <#escape x as x?html>
   <#if submissions?has_content>
-    <table class="table table-condensed">
+    <table class="table table-condensed table-sortable">
       <thead>
         <tr>
           <th><input type="checkbox" class="check-all" title="Select all/none"></th>
-          <th>Reference</th>
-          <th>Student</th>
-          <th>Affected dates</th>
-          <th>Progress</th>
-          <th>Last updated</th>
+          <th class="sortable">Reference</th>
+          <th class="sortable">Student</th>
+          <th class="sortable">Affected dates</th>
+          <th class="col-sm-2 sortable">Progress</th>
+          <th class="sortable">Panel</th>
+          <th class="col-sm-2 sortable">Last updated</th>
         </tr>
       </thead>
       <tbody>
@@ -26,24 +46,37 @@
               MIT-${submission.key}
             </#if>
           </td>
-          <td>
+          <td data-sortby="${submission.student.lastName}, ${submission.student.firstName}, ${submission.student.universityId}">
             <@pl.profile_link submission.student.universityId />
             ${submission.student.universityId}
             ${submission.student.firstName}
             ${submission.student.lastName}
           </td>
-          <td>
-            <@fmt.date date=submission.startDate includeTime=false relative=false />
-            &mdash;
-            <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false relative=false />
+          <td data-sortby="${(submission.startDate.toString())!'1970-01-01'}">
+            <#if submission.startDate??>
+              <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              &mdash;
+              <#if submission.endDate??>
+                <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              <#else>
+                <span class="very-subtle">(ongoing)</span>
+              </#if>
             <#else>
-              <span class="very-subtle">(ongoing)</span>
+              <span class="very-subtle">TBC</span>
             </#if>
           </td>
-          <td><@components.stage_progress_bar info.stages?values /></td>
-          <td>
-            <@fmt.date date=submission.lastModified />
+          <td data-sortby="${stage_sortby(info.stages?values)}"><@components.stage_progress_bar info.stages?values /></td>
+          <td<#if !submission.panel??> data-sortby="<#if submission.acute>zzz-1<#else>zzz-2</#if>"</#if>>
+            <#if submission.panel??>
+              <a href="<@routes.mitcircs.viewPanel submission.panel />">${submission.panel.name}</a>
+            <#elseif submission.acute>
+              <span class="very-subtle">N/A</span>
+            <#else>
+              <span class="very-subtle">TBC</span>
+            </#if>
+          </td>
+          <td data-sortby="${submission.lastModified.millis}">
+            <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
               <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
@@ -59,6 +92,21 @@
   <script type="text/javascript">
     (function ($) {
       $('a.ajax-modal').ajaxModalLink();
+
+      $('.table-sortable').sortableTable({
+        // Default is to sort by last updated date, descending
+        sortList: [[6, 1]],
+
+        // If there's a data-sortby, use that as the sort value
+        textExtraction: function (node) {
+          var $el = $(node);
+          if ($el.data('sortby')) {
+            return $el.data('sortby');
+          } else {
+            return $el.text().trim();
+          }
+        }
+      });
 
       // We probably just grew a scrollbar, so let's trigger a window resize
       $(window).trigger('resize.ScrollToFixed');

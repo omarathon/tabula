@@ -132,8 +132,9 @@
       <#if datePair._2()?size == 1>
         <div class="striped-section collapsible">
           <h4 class="section-title" title="Expand">
-            <span class="very-subtle pull-right"><@fmt.p datePair._2()?first._2()?size "change" /></span>
-            <@fmt.date date=datePair._1() relative=false includeTime=false />
+            <a class="collapse-trigger icon-container" href="#">
+              <span class="very-subtle pull-right"><@fmt.p datePair._2()?first._2()?size "change" /></span><@fmt.date date=datePair._1() relative=false includeTime=false />
+            </a>
           </h4>
           <@relationships datePair._2()?first._2() />
         </div>
@@ -141,8 +142,9 @@
         <#list datePair._2() as dateTimePair>
           <div class="striped-section collapsible">
             <h4 class="section-title" title="Expand">
-              <span class="very-subtle pull-right"><@fmt.p dateTimePair._2()?size "change" /></span>
-              <@fmt.date date=dateTimePair._1() relative=false includeTime=true />
+              <a class="collapse-trigger icon-container" href="#">
+                <span class="very-subtle pull-right"><@fmt.p dateTimePair._2()?size "change" /></span><@fmt.date date=dateTimePair._1() relative=false includeTime=true />
+              </a>
             </h4>
             <@relationships dateTimePair._2() />
           </div>

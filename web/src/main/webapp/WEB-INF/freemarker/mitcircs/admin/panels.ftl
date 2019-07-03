@@ -10,8 +10,8 @@
   </div>
 
   <#function route_function dept>
-      <#local result><@routes.mitcircs.listPanels dept academicYear /></#local>
-      <#return result />
+    <#local result><@routes.mitcircs.listPanels dept academicYear /></#local>
+    <#return result />
   </#function>
   <@fmt.id7_deptheader "Mitigating Circumstances Panels" route_function "in" />
 

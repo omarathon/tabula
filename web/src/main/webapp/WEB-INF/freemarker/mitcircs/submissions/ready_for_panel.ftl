@@ -44,7 +44,7 @@
     </#if>
     <@modal.footer>
       <button type="submit" class="btn btn-primary">Confirm</button>
-      <a class="btn btn-default dirty-check-ignore" href="<@routes.mitcircs.reviewSubmission submission />">Cancel</a>
+      <a class="btn btn-default dirty-check-ignore" href="<#if fromPanel && submission.panel??><@routes.mitcircs.reviewSubmissionPanel submission /><#else><@routes.mitcircs.reviewSubmission submission /></#if>">Cancel</a>
     </@modal.footer>
   </@f.form>
 </#escape>

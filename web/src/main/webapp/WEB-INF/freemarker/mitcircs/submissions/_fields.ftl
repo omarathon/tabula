@@ -1,5 +1,6 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftl" as components />
 
 <@mitcirc.identity_section student />
 
@@ -75,13 +76,13 @@
 
 <@mitcirc.question_section
   question = "Which assessments have been affected?"
-  hint = "If there are particular coursework submissions or exams that you believe have been affected, please
-    list them here. To make this easier, we've listed the assignments and exams that we think fall within the
-    period you've selected."
+  hint = "Please tell us which coursework submissions or exams have been affected by your mitigating circumstances.
+    To make this easier, we've listed the assignments and exams that we think fall within the period you've selected."
 >
   <ul class="nav nav-tabs" role="tablist">
     <li role="presentation" class="active"><a href="#assessment-table-assignments" aria-controls="assessment-table-assignments" role="tab" data-toggle="tab">Assignments</a></li>
     <li role="presentation"><a href="#assessment-table-exams" aria-controls="assessment-table-exams" role="tab" data-toggle="tab">Exams</a></li>
+    <li role="presentation"><a href="#assessment-table-other" aria-controls="assessment-table-other" role="tab" data-toggle="tab">Other</a></li>
   </ul>
 
   <table class="table table-striped table-condensed table-hover table-checkable mitcircs-form__fields__section__assessments-table tab-content" data-endpoint="<@routes.mitcircs.affectedAssessments student />">
@@ -106,11 +107,15 @@
           <label class="control-label sr-only" for="new-assessment-module">Module</label>
           <select id="new-assessment-module" class="form-control input-sm">
             <option></option>
-            <#list registeredModules?keys as year>
+            <#list registeredYears as year>
               <optgroup label="${year.toString}">
-                <#list mapGet(registeredModules, year) as module>
+                <#list (mapGet(registeredModules, year))![] as module>
                   <option value="${module.code}" data-name="${module.name}"><@fmt.module_name module=module withFormatting=false /></option>
                 </#list>
+                <#if includeEngagementCriteria>
+                  <option value="OE" data-name="Engagement criteria">Engagement criteria</option>
+                </#if>
+                <option value="O" data-name="Other">Other</option>
               </optgroup>
             </#list>
           </select>
@@ -137,20 +142,28 @@
             <@f.hidden path="sequence" />
             <@f.hidden path="academicYear" />
             <@f.hidden path="assessmentType" />
+            <@f.hidden path="acuteOutcomeApplies" />
+            <@f.hidden path="extensionDeadline" />
             <input type="checkbox" checked>
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__module">
-            <span class="mod-code">${item.module.code?upper_case}</span> <span class="mod-name">${item.module.name} (${item.academicYear.toString})</span>
+            <@components.assessmentModule item />
+            <@f.errors path="moduleCode" cssClass="error form-errors text-danger" />
+            <@f.errors path="sequence" cssClass="error form-errors text-danger" />
+            <@f.errors path="academicYear" cssClass="error form-errors text-danger" />
+            <@f.errors path="assessmentType" cssClass="error form-errors text-danger" />
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__name">
             <@f.hidden path="name" />
             ${item.name}
+            <@f.errors path="name" cssClass="error form-errors text-danger" />
           </td>
           <td class="mitcircs-form__fields__section__assessments-table__deadline">
             <div class="input-group">
               <@f.input path="deadline" autocomplete="off" cssClass="form-control input-sm date-picker" />
               <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
             </div>
+            <@f.errors path="deadline" cssClass="error form-errors text-danger" />
           </td>
         </tr>
       </@spring.nestedPath>
@@ -174,7 +187,18 @@
         </#list>
       </#if>
     </tbody>
+    <tbody id="assessment-table-other" role="tabpanel" class="tab-pane">
+      <#if command.affectedAssessments?has_content>
+        <#list command.affectedAssessments as item>
+          <#if item.assessmentType?? && item.assessmentType.code == 'O'>
+            <@affectedAssessment item item_index />
+          </#if>
+        </#list>
+      </#if>
+    </tbody>
   </table>
+
+  <@f.errors path="affectedAssessments" cssClass="error form-errors text-danger" />
 </@mitcirc.question_section>
 
 <@mitcirc.question_section
@@ -204,6 +228,16 @@
       <@f.textarea path="noContactReason" cssClass="form-control" rows="5" />
       <@bs3form.errors path="noContactReason" />
     </@bs3form.form_group>
+
+    <div class="mitcircs-form__fields__section__hint">
+      <p>Depending on your circumstances, you might find it helpful to talk to one or more of the following:</p>
+
+      <ul>
+        <li>Your personal tutor or another member of staff in your department</li>
+        <li>Your GP or other healthcare professional</li>
+        <li>Warwick’s <a href="https://warwick.ac.uk/supportservices" target="_blank">Wellbeing Support Services</a></li>
+      </ul>
+    </div>
   </div>
 </@mitcirc.question_section>
 

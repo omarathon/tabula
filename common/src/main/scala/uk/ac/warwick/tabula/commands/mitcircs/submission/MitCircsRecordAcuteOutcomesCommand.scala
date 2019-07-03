@@ -90,14 +90,29 @@ trait MitCircsRecordAcuteOutcomesPermissions extends RequiresPermissionsChecking
 trait MitCircsRecordAcuteOutcomesValidation extends SelfValidating {
   self: MitCircsRecordAcuteOutcomesRequest =>
 
-  def validate(errors: Errors) {
-    if(outcomeGrading == null) errors.rejectValue("outcomeGrading", "mitigatingCircumstances.outcomes.outcomeGrading.required")
-    if(!outcomeReasons.hasText) errors.rejectValue("outcomeReasons", "mitigatingCircumstances.outcomes.outcomeReasons.required")
-    if(acuteOutcome == null) errors.rejectValue("acuteOutcome", "mitigatingCircumstances.outcomes.acuteOutcome.required")
+  def validate(errors: Errors): Unit = {
+    if (confirm) {
+      if (outcomeGrading == null) errors.rejectValue("outcomeGrading", "mitigatingCircumstances.outcomes.outcomeGrading.required")
+      if (!outcomeReasons.hasText) errors.rejectValue("outcomeReasons", "mitigatingCircumstances.outcomes.outcomeReasons.required")
+      if (acuteOutcome == null) errors.rejectValue("acuteOutcome", "mitigatingCircumstances.outcomes.acuteOutcome.required")
 
-    if(outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
-    else if(outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
-      errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
+      if (outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
+      else if (outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
+        errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
+
+      affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
+        errors.pushNestedPath(s"affectedAssessments[$index]")
+        val incorrectExtensionDeadline = { for {
+          deadline <- Option(item.deadline)
+          extensionDeadline <- Option(item.extensionDeadline)
+        } yield deadline.toDateTimeAtStartOfDay.isAfter(extensionDeadline) }.getOrElse(false)
+
+        if (incorrectExtensionDeadline) {
+          errors.rejectValue("extensionDeadline", "mitigatingCircumstances.affectedAssessments.extensionDeadline.after")
+        }
+        errors.popNestedPath()
+      }
+    }
   }
 }
 

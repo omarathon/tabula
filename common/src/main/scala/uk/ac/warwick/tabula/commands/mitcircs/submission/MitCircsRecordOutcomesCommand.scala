@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{AssessmentSpecificRecommendation, MitCircsExamBoardRecommendation, MitigatingCircumstancesAffectedAssessment, MitigatingCircumstancesGrading, MitigatingCircumstancesRejectionReason, MitigatingCircumstancesSubmission}
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsSubmissionServiceComponent, MitCircsSubmissionServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
@@ -101,16 +101,31 @@ trait MitCircsRecordOutcomesPermissions extends RequiresPermissionsChecking with
 trait MitCircsRecordOutcomesValidation extends SelfValidating {
   self: MitCircsRecordOutcomesRequest =>
 
-  def validate(errors: Errors) {
-    if(outcomeGrading == null) errors.rejectValue("outcomeGrading", "mitigatingCircumstances.outcomes.outcomeGrading.required")
-    if(!outcomeReasons.hasText) errors.rejectValue("outcomeReasons", "mitigatingCircumstances.outcomes.outcomeReasons.required")
+  def validate(errors: Errors): Unit = {
+    if (confirm) {
+      if (outcomeGrading == null) errors.rejectValue("outcomeGrading", "mitigatingCircumstances.outcomes.outcomeGrading.required")
+      if (!outcomeReasons.hasText) errors.rejectValue("outcomeReasons", "mitigatingCircumstances.outcomes.outcomeReasons.required")
 
-    if(boardRecommendations.contains(MitCircsExamBoardRecommendation.Other) && !boardRecommendationOther.hasText)
-      errors.rejectValue("boardRecommendationOther", "mitigatingCircumstances.outcomes.boardRecommendationsOther.required")
+      if (boardRecommendations.contains(MitCircsExamBoardRecommendation.Other) && !boardRecommendationOther.hasText)
+        errors.rejectValue("boardRecommendationOther", "mitigatingCircumstances.outcomes.boardRecommendationsOther.required")
 
-    if(outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
-    else if(outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
-      errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
+      // Check for each assessment-specific board recommendation that there is at least one affected assessment with that outcome
+      boardRecommendations.asScala
+        .collect { case r: AssessmentSpecificRecommendation => r }
+        .filter { r => affectedAssessments.asScala.forall(!_.boardRecommendations.contains(r)) }
+        .foreach { r =>
+          errors.rejectValue(
+            "boardRecommendations",
+            "mitigatingCircumstances.outcomes.boardRecommendations.assessmentSpecificNoAssessments",
+            Array[Object](r.description),
+            s"Please check affected assessments for ${r.description} or de-select it"
+          )
+        }
+
+      if (outcomeGrading == Rejected && rejectionReasons.isEmpty) errors.rejectValue("rejectionReasons", "mitigatingCircumstances.outcomes.rejectionReasons.required")
+      else if (outcomeGrading == Rejected && rejectionReasons.contains(MitigatingCircumstancesRejectionReason.Other) && !rejectionReasonsOther.hasText)
+        errors.rejectValue("rejectionReasonsOther", "mitigatingCircumstances.outcomes.rejectionReasonsOther.required")
+    }
   }
 }
 

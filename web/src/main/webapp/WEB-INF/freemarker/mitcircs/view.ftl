@@ -11,8 +11,14 @@
         <@components.detail label="State" condensed=true>
           <#if submission.state.entryName == 'Draft'>
             Draft
+            <#if isSelf>
+              <a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-xs">Edit &amp; submit</a></p>
+            </#if>
           <#elseif submission.state.entryName == 'Created On Behalf Of Student'>
             Needs sign-off
+            <#if isSelf>
+              <a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-xs">Edit &amp; submit</a></p>
+            </#if>
           <#elseif submission.state.entryName == 'Withdrawn'>
             Withdrawn
           <#elseif submission.state.entryName == 'Outcomes Recorded'>
@@ -21,8 +27,8 @@
             Submitted
           </#if>
         </@components.detail>
-        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther submission.issueTypes submission.issueTypeDetails!"" /></@components.detail>
-        <@components.detail label="Start date" condensed=true><@fmt.date date=submission.startDate includeTime=false /></@components.detail>
+        <@components.detail label="Issue type" condensed=true><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@components.detail>
+        <@components.detail label="Start date" condensed=true><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false /><#else><span class="very-subtle">TBC</span></#if></@components.detail>
         <@components.detail label="End date" condensed=true>
           <#if submission.endDate??><@fmt.date date=submission.endDate includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
         </@components.detail>
@@ -34,13 +40,19 @@
             </a>
           </@components.detail>
         </#if>
-        <#if submission.contacted>
-          <@components.detail "Discussed submission with">
-            <@components.enumListWithOther submission.contacts submission.contactOther!"" />
-          </@components.detail>
+        <#if submission.contacted??>
+          <#if submission.contacted>
+            <@components.detail "Discussed submission with">
+              <@components.enumListWithOther enumValues=submission.contacts otherValue=submission.contactOther!"" condensed=false />
+            </@components.detail>
+          <#else>
+            <@components.detail "Reason for not discussing submission">
+              ${submission.noContactReason}
+            </@components.detail>
+          </#if>
         <#else>
-          <@components.detail "Reason for not discussing submission">
-            ${submission.noContactReason}
+          <@components.detail "Discussed submission with">
+            <span class="very-subtle">TBC</span>
           </@components.detail>
         </#if>
       </div>
@@ -52,7 +64,11 @@
 
             <#if canModify>
               <#if submission.isEditable(user.apparentUser)>
-                <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+                <#if isSelf && submission.draft>
+                  <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-primary btn-block">Edit &amp; submit submission</a></p>
+                <#else>
+                  <p><a href="<@routes.mitcircs.editSubmission submission />" class="btn btn-default btn-block">Edit submission</a></p>
+                </#if>
               </#if>
 
               <#if isSelf && submission.canWithdraw && !submission.withdrawn>
@@ -90,14 +106,10 @@
           <tbody>
           <#list submission.affectedAssessments as assessment>
             <tr>
-              <td><#if assessment.assessmentType.code == "A">Assignment<#else>Exam</#if></td>
-              <td>
-                <span class="mod-code">
-                  ${assessment.module.code?upper_case}</span> <span class="mod-name">${assessment.module.name} (${assessment.academicYear.toString})
-                </span>
-              </td>
+              <td><@components.assessmentType assessment /></td>
+              <td><@components.assessmentModule assessment /></td>
               <td>${assessment.name}</td>
-              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false /><#else><span class="very-subtle">Unknown</span></#if></td>
+              <td><#if assessment.deadline??><@fmt.date date=assessment.deadline includeTime=false shortMonth=true excludeCurrentYear=true /><#else><span class="very-subtle">Unknown</span></#if></td>
             </tr>
           </#list>
           </tbody>

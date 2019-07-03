@@ -6,9 +6,17 @@
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 </#if>
 
-<#macro enumListWithOther enumValues otherValue>
-  <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
-</#macro>
+<#macro enumListWithOther enumValues otherValue condensed=true><#compress>
+  <#if condensed>
+    <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
+  <#elseif enumValues?has_content>
+    <ul class="list-unstyled">
+      <#list enumValues as value>
+        <li>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if></li>
+      </#list>
+    </ul>
+  </#if>
+</#compress></#macro>
 
 <#macro detail label condensed=false>
   <div class="row form-horizontal mitcircs-details__detail <#if condensed>mitcircs-details__detail--condensed</#if>">
@@ -50,8 +58,13 @@
       <#local state = 'default' />
       <#local icon = 'fa-circle-o' />
       <#if progress.completed>
-        <#local state = 'success' />
-        <#local icon = 'fa-check-circle-o' />
+        <#if progress.health.toString == 'Good'>
+          <#local state = 'success' />
+          <#local icon = 'fa-check-circle-o' />
+        <#else>
+          <#local state = 'danger' />
+          <#local icon = 'fa-times-circle-o' />
+        </#if>
       <#elseif progress.skipped>
         <#local state = 'primary' />
         <#local icon = 'fa-arrow-circle-o-right' />
@@ -75,19 +88,30 @@
 
 <#macro attachments submission>
   <#if submission.attachments?has_content>
-    <ul class="unstyled">
-      <#list submission.attachments as attachment>
-        <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
-        <li id="attachment-${attachment.id}" class="attachment">
-          <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
-          <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
-        </li>
-      </#list>
-    </ul>
+    <table class="mitcircs-attachments table table-consensed">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Date uploaded</th>
+        </tr>
+      </thead>
+      <tbody>
+        <#list submission.attachments as attachment>
+          <#local mimeTypeDetectionResult = mimeTypeDetector(attachment) />
+          <tr id="attachment-${attachment.id}" class="attachment mitcircs-attachments__attachment">
+            <td>
+              <@fmt.file_type_icon mimeTypeDetectionResult.mediaType />
+              <a href="<@routes.mitcircs.renderAttachment submission attachment />" <#if mimeTypeDetectionResult.serveInline>data-inline="true"</#if>><#compress>${attachment.name}</#compress></a>
+            </td>
+            <td><@fmt.date date=attachment.dateUploaded shortMonth=true excludeCurrentYear=true /></td>
+          </tr>
+        </#list>
+      </tbody>
+    </table>
   </#if>
 </#macro>
 
-<#macro submissionTable submissions actions=true panel=false>
+<#macro submissionTable submissions actions=true panel=false forPanel=false>
   <#if submissions?has_content>
     <table class="mitcircs-panel-form__submissions table table-condensed">
       <thead>
@@ -105,7 +129,11 @@
         <tr>
           <td>
             <#if !submission.draft>
-              <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+              <#if forPanel>
+                <a href="<@routes.mitcircs.reviewSubmissionPanel submission />">MIT-${submission.key}</a>
+              <#else>
+                <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
+              </#if>
             <#else>
               MIT-${submission.key}
             </#if>
@@ -118,16 +146,20 @@
             ${submission.student.lastName}
           </td>
           <td>
-            <@fmt.date date=submission.startDate includeTime=false relative=false />
-            &mdash;
-            <#if submission.endDate??>
-              <@fmt.date date=submission.endDate includeTime=false relative=false />
+            <#if submission.startDate??>
+              <@fmt.date date=submission.startDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              &mdash;
+              <#if submission.endDate??>
+                <@fmt.date date=submission.endDate includeTime=false relative=false shortMonth=true excludeCurrentYear=true />
+              <#else>
+                <span class="very-subtle">(ongoing)</span>
+              </#if>
             <#else>
-              <span class="very-subtle">(ongoing)</span>
+              <span class="very-subtle">TBC</span>
             </#if>
           </td>
           <td>
-            <@fmt.date date=submission.lastModified />
+            <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
               <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
@@ -181,36 +213,74 @@
 </#macro>
 
 <#macro panelsTable panels>
-  <table class="table table-condensed">
+  <table class="table table-condensed table-sortable">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Location</th>
-        <th>Chair</th>
-        <th>Secretary</th>
-        <th>Members</th>
-        <th>Submissions</th>
+        <th class="sortable">Name</th>
+        <th class="sortable">Date</th>
+        <th class="sortable">Location</th>
+        <th class="sortable">Chair</th>
+        <th class="sortable">Secretary</th>
+        <th class="sortable">Members</th>
+        <th class="sortable">Submissions</th>
       </tr>
     </thead>
     <tbody>
       <#list panels as panel>
         <tr>
           <td><a href="<@routes.mitcircs.viewPanel panel />">${panel.name}</a></td>
-          <td>
+          <td data-sortby="${(panel.date.toString("yyyy-MM-dd HH:mm"))!'1970-01-01 00:00'}">
             <#if panel.date??>
-              <@fmt.date date=panel.date includeTime=false relative=false />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
+              <@fmt.date date=panel.date includeTime=false relative=false shortMonth=true excludeCurrentYear=true />: <@fmt.time panel.startTime /> &mdash; <@fmt.time panel.endTime />
             <#else>
-                <span class="very-subtle">TBC</span>
+              <span class="very-subtle">TBC</span>
             </#if>
           </td>
           <td><#if panel.location??><@fmt.location panel.location /></#if></td>
-          <td><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
-          <td><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
+          <td data-sortby="${(panel.chair.lastName)!'TBC'}, ${(panel.chair.firstName)!'TBC'}"><#if panel.chair??>${panel.chair.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
+          <td data-sortby="${(panel.secretary.lastName)!'TBC'}, ${(panel.secretary.firstName)!'TBC'}"><#if panel.secretary??>${panel.secretary.fullName}<#else><span class="very-subtle">TBC</span></#if></td>
           <td><#list panel.members as member>${member.fullName}<#if member_has_next>, </#if></#list></td>
           <td><#if panel.submissions??>${panel.submissions?size}<#else>0</#if></td>
         </tr>
       </#list>
     </tbody>
   </table>
+
+  <script type="text/javascript">
+    (function ($) {
+      $('.table-sortable').sortableTable({
+        // Default is to sort by the date of the panel, ascending
+        sortList: [[1, 0]],
+
+        // If there's a data-sortby, use that as the sort value
+        textExtraction: function (node) {
+          var $el = $(node);
+          if ($el.data('sortby')) {
+            return $el.data('sortby');
+          } else {
+            return $el.text().trim();
+          }
+        }
+      });
+    })(jQuery);
+  </script>
+</#macro>
+
+<#macro assessmentType assessment><#compress>
+  <#if assessment.assessmentType.code == "E">
+    Exam
+  <#elseif assessment.assessmentType.code == "O">
+    Other
+  <#else>
+    Assignment
+  </#if>
+</#compress></#macro>
+
+<#macro assessmentModule assessment formatted=true>
+  <#if formatted>
+    <span class="mod-code">${((assessment.module.code)!assessment.moduleCode)?upper_case}</span>
+    <span class="mod-name"><#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})</span>
+  <#else>
+    ${((assessment.module.code)!assessment.moduleCode)?upper_case} <#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})
+  </#if>
 </#macro>

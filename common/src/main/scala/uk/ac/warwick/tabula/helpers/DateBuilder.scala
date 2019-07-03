@@ -11,6 +11,8 @@ import scala.collection.JavaConverters._
 object DateBuilder {
 
   private val dayAndDateFormat = DateTimeFormat.forPattern("EEE d")
+  private val monthFormat = DateTimeFormat.forPattern(" MMMM")
+  private val shortMonthFormat = DateTimeFormat.forPattern(" MMM")
   private val monthAndYearFormat = DateTimeFormat.forPattern(" MMMM yyyy")
   private val shortMonthAndYearFormat = DateTimeFormat.forPattern(" MMM yyyy")
   private val formatterMap = new DateTimeFormatterCache
@@ -32,16 +34,18 @@ object DateBuilder {
     relative: Boolean = true,
     split: Boolean = false,
     shortMonth: Boolean = false,
-    includeTime: Boolean = true): String = {
+    includeTime: Boolean = true,
+    excludeCurrentYear: Boolean = false,
+  ): String = {
     if (includeTime) {
       val pattern = new StringBuilder
       pattern.append("HH:mm")
       if (includeSeconds) pattern.append(":ss")
       if (includeTimezone) pattern.append(" (z)")
       //if (includeAt) pattern.append(" 'at'")
-      (formatterMap.retrieve(pattern.toString()) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth)
+      (formatterMap.retrieve(pattern.toString()) print date).trim() + (if (split) "<br />" else "&#8194;") + datePart(date, capitalise, relative, shortMonth, excludeCurrentYear)
     } else {
-      datePart(date, capitalise, relative, shortMonth)
+      datePart(date, capitalise, relative, shortMonth, excludeCurrentYear)
     }
   }
 
@@ -53,14 +57,19 @@ object DateBuilder {
     case _ => "th"
   }
 
-  def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean): String = {
+  def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean, excludeCurrentYear: Boolean): String = {
     val today = LocalDate.now.toDateTimeAtStartOfDay
     val thatDay = new LocalDate(date.getMillis, date.getChronology).toDateTimeAtStartOfDay
 
     lazy val absoluteDate = (dayAndDateFormat print date) +
       "<sup>" + ordinal(date.getDayOfMonth) + "</sup>" +
-      (if (shortMonth) (shortMonthAndYearFormat print date)
-      else (monthAndYearFormat print date))
+      (if (excludeCurrentYear && today.getYear == thatDay.getYear) {
+        (if (shortMonth) (shortMonthFormat print date)
+        else (monthFormat print date))
+      } else {
+        (if (shortMonth) (shortMonthAndYearFormat print date)
+        else (monthAndYearFormat print date))
+      })
 
     if (!relative) absoluteDate
     else if (today isEqual thatDay) relativeWords(capitalise)('today)
@@ -86,7 +95,7 @@ class DateBuilder extends TemplateMethodModelEx {
     }
 
     args.tail match {
-      case Seq(secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean) =>
+      case Seq(secs: JBoolean, at: JBoolean, tz: JBoolean, caps: JBoolean, relative: JBoolean, split: JBoolean, shortMonth: JBoolean, includeTime: JBoolean, excludeCurrentYear: JBoolean) =>
         format(date = date,
           includeSeconds = secs,
           includeAt = at,
@@ -95,7 +104,9 @@ class DateBuilder extends TemplateMethodModelEx {
           relative = relative,
           split = split,
           shortMonth = shortMonth,
-          includeTime = includeTime)
+          includeTime = includeTime,
+          excludeCurrentYear = excludeCurrentYear,
+        )
       case _ => throw new IllegalArgumentException("Bad args")
     }
   }
