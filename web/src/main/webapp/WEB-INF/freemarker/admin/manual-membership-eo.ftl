@@ -34,7 +34,7 @@
     </table>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('table.sortable').sortableTable();
     });

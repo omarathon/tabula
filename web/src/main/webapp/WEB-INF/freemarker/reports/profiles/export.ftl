@@ -23,7 +23,7 @@
           Download reports as a .zip file</a></p>
     </div>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         var updateProgress = function () {
           $.get('<@routes.reports.profileExportReportProgress department academicYear jobId />', function (data) {

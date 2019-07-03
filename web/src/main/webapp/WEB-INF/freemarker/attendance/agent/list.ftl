@@ -118,7 +118,7 @@
 
     <div id="profile-modal" class="modal fade profile-subset"></div>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(window).on('load', function () {
         GlobalScripts.scrollableTableSetup();
       });

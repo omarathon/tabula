@@ -10,7 +10,7 @@
       <@fmt.help_popover id="auto-grade-${markingId}-help" content="The grades available depends on the mark entered and the SITS mark scheme in use" />
       <@f.errors path="${gradePath}" cssClass="error" />
     </@form.field>
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         var $gradeInput = $('#auto-grade-${markingId}').hide()
           , $markInput = $gradeInput.closest('form').find('input[name=${markPath}]')
@@ -200,7 +200,7 @@
       </div>
     </div>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('.fix-area').fixHeaderFooter();
         // Fire a resize to get the fixed button in the right place
@@ -458,7 +458,7 @@
         </div>
       </#if>
     </#if>
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('#sendToSits').on('change', function () {
           var $validationDiv = $('.grade-validation');

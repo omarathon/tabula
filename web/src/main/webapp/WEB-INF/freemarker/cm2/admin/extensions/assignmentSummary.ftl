@@ -98,7 +98,7 @@
       </tbody>
     </table>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       (function ($) {
         // add a custom parser for the date column
         $.tablesorter.addParser({

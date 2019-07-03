@@ -150,7 +150,7 @@
                 </#if>
                 <#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
                 <#if !column_has_next>
-                  <script>
+                  <script nonce="${nonce()}">
                     jQuery('#examGridSpinner').find('.progress-bar')
                       .attr('aria-valuenow', '${entity_index+1}')
                       .css('width', '${((entity_index+1)/entities?size)*100}%');

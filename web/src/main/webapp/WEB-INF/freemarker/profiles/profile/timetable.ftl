@@ -98,7 +98,7 @@
     </div>
   </#if>
 
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .fc-event.allday {
       font-weight: bold;
       color: white !important;
@@ -131,7 +131,7 @@
     }
   </style>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     function once(func) {
       var result;
       var n = 2;

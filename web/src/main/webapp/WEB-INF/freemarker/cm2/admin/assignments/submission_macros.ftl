@@ -44,7 +44,7 @@
       </#if>
     </p>
   </div>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $("#tool-tip-${attachment.id}").popover({
         placement: 'right',

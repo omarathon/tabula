@@ -32,7 +32,7 @@
         </@f.select>
       </@bs3form.labelled_form_group>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(function ($) {
           $('#sourceAcademicYear').on('change', function (e) {
             var $form = $(this).closest('form');
@@ -103,7 +103,7 @@
     </@f.form>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('input[type=checkbox][name$=copyEvents]').each(function () {
         var $eventsCb = $(this);

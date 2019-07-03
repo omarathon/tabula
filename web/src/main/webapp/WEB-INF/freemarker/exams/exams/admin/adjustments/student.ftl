@@ -69,7 +69,7 @@
 
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       Exams.prepareAjaxForm($('#adjust-form-${marking_macros.extractId(command.student)}'), function (resp) {
         var $resp = $(resp);

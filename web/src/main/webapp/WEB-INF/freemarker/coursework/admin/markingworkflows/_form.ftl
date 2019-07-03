@@ -98,7 +98,7 @@ Adding or editing a new marking workflow
       </div>
 
     <#-- Script to change marker labels to reflect type dependant role names -->
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           $('#markingMethod').change(function () {
             var $selectedOption = $(this).find('option:selected')

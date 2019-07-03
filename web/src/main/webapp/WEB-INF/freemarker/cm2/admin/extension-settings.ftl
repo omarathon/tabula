@@ -34,7 +34,7 @@
 
         <@bs3form.labelled_form_group path="extensionManagers" labelText="Extension managers">
           <@bs3form.flexipicker path="extensionManagers" placeholder="Extension managers" list=true multiple=true auto_multiple=false />
-          <script>
+          <script nonce="${nonce()}">
             jQuery('#extension-manager-list').on('click', function (e) {
               e.preventDefault();
               var name = jQuery(this).data('expression');

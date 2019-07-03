@@ -236,7 +236,7 @@
         </#list>
         </tbody>
       </table>
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           $('body').on('click', '.cancel-scheduled-change', function () {
             var $this = $(this), $form = $this.closest('.popover').data('creator').closest('form');

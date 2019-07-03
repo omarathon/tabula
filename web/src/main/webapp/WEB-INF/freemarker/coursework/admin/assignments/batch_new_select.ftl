@@ -333,7 +333,7 @@ first page of the form to setup a bunch of assignments from SITS.
         </div>
       </div>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         // Give a heads up if you're about to navigate away from your progress
         jQuery(window).on('beforeunload.backattack', function () {
           return "If you leave this page without clicking either the Submit button or the Back button above it, you will lose your progress.";
@@ -347,7 +347,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
     </#if>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       //<[![CDATA[
       <#include "batch_new_select_js.ftl" />
       //]]>

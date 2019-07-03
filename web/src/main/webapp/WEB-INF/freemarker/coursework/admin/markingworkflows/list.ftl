@@ -74,7 +74,7 @@
   <div class="modal-body"></div>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   jQuery(function ($) {
 
     $('.marking-workflows').on('click', 'a[data-toggle=modal]', function (e) {

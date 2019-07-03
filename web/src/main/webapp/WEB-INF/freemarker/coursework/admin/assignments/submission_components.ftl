@@ -22,7 +22,7 @@
       </#if>
     </p>
   </div>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $("#tool-tip-${attachment.id}").popover({
         placement: 'right',
@@ -51,7 +51,7 @@
       <a target="_blank" href="${r.reportUrl}">View full report</a>
     </p>
   </div>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $("#tool-tip-urkund-${attachment.id}").popover({
         placement: 'right',

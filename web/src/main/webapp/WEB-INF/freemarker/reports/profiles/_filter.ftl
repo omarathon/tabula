@@ -58,7 +58,7 @@
       </tbody>
     </table>
   </form>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('table.students').sortableTable();
     });

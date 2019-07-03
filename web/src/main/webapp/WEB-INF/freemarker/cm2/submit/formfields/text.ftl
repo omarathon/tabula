@@ -20,7 +20,7 @@
     <div class="help-block">${helpText}</div>
   </#if>
   <#if previewable>
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         var $studentBlock = $("form[studentid=${command.student.userId}]");
         var $feedbackTextArea = $studentBlock.find("textarea[id='fields[${field.id}].value']");

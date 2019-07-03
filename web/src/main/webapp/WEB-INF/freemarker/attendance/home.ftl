@@ -73,7 +73,7 @@
                 href="/help">help page</a>.
       </p>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(function ($) {
           $('#email-support-link').on('click', function (e) {
             e.stopPropagation();

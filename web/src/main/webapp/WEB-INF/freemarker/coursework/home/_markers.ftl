@@ -53,7 +53,7 @@
       </div>
     </#list>
   </div>
-  <script>
+  <script nonce="${nonce()}">
     jQuery("a.disabled").on('click', function (e) {
       e.preventDefault(e)
     })

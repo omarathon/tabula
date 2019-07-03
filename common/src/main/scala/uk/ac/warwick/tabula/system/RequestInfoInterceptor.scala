@@ -34,7 +34,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   @Autowired var emergencyMessage: EmergencyMessageService = _
 
   override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
-    implicit val req = request
+    implicit val req: HttpServletRequest = request
     RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled, emergencyMessage)))
     true
   }
@@ -69,6 +69,8 @@ object RequestInfoInterceptor {
       new RequestLevelCache()
     }
 
+    val nonce = EarlyRequestInfo.fromThread.map(_.nonce).getOrElse(CspInterceptor.generateNonce())
+
     var emergencyMessage = ""
     if (emergencyMessageService.enabled) {
       emergencyMessage = emergencyMessageService.message.getOrElse("")
@@ -84,7 +86,8 @@ object RequestInfoInterceptor {
       hasEmergencyMessage = emergencyMessageService.enabled,
       emergencyMessage = emergencyMessage,
       userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
-      ipAddress = request.getRemoteAddr.textOrEmpty
+      ipAddress = request.getRemoteAddr.textOrEmpty,
+      nonce = nonce
     )
   }
 

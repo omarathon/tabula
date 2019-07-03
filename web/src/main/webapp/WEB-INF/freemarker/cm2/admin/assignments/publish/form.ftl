@@ -32,7 +32,7 @@
     </#if>
   </#macro>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       "use strict";
       var submitButton = $('#publish-submit'),

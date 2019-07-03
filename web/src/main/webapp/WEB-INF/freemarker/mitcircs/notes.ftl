@@ -70,7 +70,7 @@
     </#list>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function($) {
       // be sure to bind the confirm-submit handler before other handlers on submit buttons
       $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message]', '.panel').on('click', function confirmBeforeSubmit(event) {

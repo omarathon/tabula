@@ -4,7 +4,7 @@
     <@components.admin_assignment_list moduleInfo.module moduleInfo.assignments academicYear false />
   </#list>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     // We probably just grew a scrollbar, so let's trigger a window resize
     (function ($) {
       $(window).trigger('resize.ScrollToFixed');

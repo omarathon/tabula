@@ -115,7 +115,7 @@
           </div>
         </div>
 
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             var $xhr = null;
             $('#meetingDateStr').on('change', function () {
@@ -165,7 +165,7 @@
             </li>
           </#list>
         </ul>
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             $('.remove-attachment').on('click', function (e) {
               $(this).closest("li.attachment").remove();

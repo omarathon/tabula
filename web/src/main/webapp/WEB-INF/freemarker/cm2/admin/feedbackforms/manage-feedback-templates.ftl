@@ -20,7 +20,7 @@
     multiple=true
     />
 
-    <script>
+    <script nonce="${nonce()}">
       var frameLoad = function (frame) {
         if (jQuery(frame).contents().find("form").length == 0) {
           jQuery("#feedback-template-model").modal('hide');
@@ -86,7 +86,7 @@
                       </#list>
                     </ul>
                   </div>
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="${nonce()}">
                     jQuery(function ($) {
                       var markup = $('#tip-content-${template.id}').html();
                       $("#tool-tip-${template.id}").popover({

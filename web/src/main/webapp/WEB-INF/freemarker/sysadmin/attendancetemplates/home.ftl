@@ -46,7 +46,7 @@
       <input type="submit" value="Reorder" class="btn btn-primary" />
     </form>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('.striped-section-contents').sortable({
           axis: 'y',

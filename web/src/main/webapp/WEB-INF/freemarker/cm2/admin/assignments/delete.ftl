@@ -31,7 +31,7 @@
     </div>
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('#confirmCheck').change(function () {
         $('.submit-buttons input[type=submit]').attr('disabled', !this.checked).toggleClass('disabled', !this.checked);

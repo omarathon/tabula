@@ -351,7 +351,7 @@
     </@modal.wrapper>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $table = $('table.member-notes');
       $table.tablesorter({

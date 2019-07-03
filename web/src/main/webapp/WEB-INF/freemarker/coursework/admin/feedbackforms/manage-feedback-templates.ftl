@@ -14,7 +14,7 @@
         <#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
       </div>
     </@form.labelled_row>
-    <script>
+    <script nonce="${nonce()}">
       var frameLoad = function (frame) {
         if (jQuery(frame).contents().find("form").length == 0) {
           jQuery("#feedback-template-model").modal('hide');
@@ -72,7 +72,7 @@
                         </li>
                       </#list></ul>
                   </div>
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="${nonce()}">
                     jQuery(function ($) {
                       var markup = $('#tip-content-${template.id}').html();
                       $("#tool-tip-${template.id}").popover({

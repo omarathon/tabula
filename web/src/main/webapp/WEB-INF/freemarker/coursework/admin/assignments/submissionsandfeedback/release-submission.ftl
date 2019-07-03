@@ -29,7 +29,7 @@
             </#list></ul>
         </#if>
       </div>
-      <script>
+      <script nonce="${nonce()}">
         var listHtml = jQuery(".invalid-submissions-list").html();
         jQuery(".invalid-submissions").on('click', function (e) {
           e.preventDefault()

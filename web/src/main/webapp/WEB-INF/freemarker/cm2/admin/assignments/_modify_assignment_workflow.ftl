@@ -21,7 +21,7 @@
   </@bs3form.labelled_form_group>
 </div>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="${nonce()}">
   (function ($) {
     "use strict";
 

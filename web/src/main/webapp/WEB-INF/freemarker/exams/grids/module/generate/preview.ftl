@@ -267,7 +267,7 @@
 
   <div class="modal fade" id="edit-overcatting-modal"></div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
 

@@ -246,7 +246,7 @@
     </tbody>
   </table>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $('.table-sortable').sortableTable({
         // Default is to sort by the date of the panel, ascending

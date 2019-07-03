@@ -14,7 +14,7 @@
     <@f.errors path="fileAttachmentTypes" cssClass="error" />
     <@f.input path="fileAttachmentTypes"  type="hidden" />
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
         var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
         textListController.transformInput = function (text) {

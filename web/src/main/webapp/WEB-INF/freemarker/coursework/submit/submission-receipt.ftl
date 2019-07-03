@@ -11,7 +11,7 @@
 </#if>
 
 <head>
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }

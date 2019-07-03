@@ -40,7 +40,7 @@
     </@f.form>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('#format').on('change', function () {
         var value = $(this).val();

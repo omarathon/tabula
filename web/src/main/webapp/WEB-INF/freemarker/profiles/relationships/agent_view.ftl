@@ -130,7 +130,7 @@
     <p class="alert alert-info">No students are currently visible for ${department.name} in Tabula.</p>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $(function () {
         $('.related_students').tablesorter({
@@ -152,7 +152,7 @@
       });
     })(jQuery);
   </script>
-  <style>
+  <style nonce="${nonce()}">
     div.tooltip-inner {
       max-width: 350px;
     }

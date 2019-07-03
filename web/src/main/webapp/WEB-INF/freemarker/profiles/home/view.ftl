@@ -164,7 +164,7 @@
       </p>
     </#if>
   </#if>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('a.view-old').on('click', function (e) {
         e.preventDefault();

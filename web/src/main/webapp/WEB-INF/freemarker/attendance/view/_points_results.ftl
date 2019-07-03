@@ -99,7 +99,7 @@
     </div>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     // Enable any freshly loaded popovers
     jQuery('.use-popover').tabulaPopover({
       trigger: 'click',

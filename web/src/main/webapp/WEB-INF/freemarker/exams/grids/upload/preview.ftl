@@ -43,7 +43,7 @@
         </tbody>
       </table>
 
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           $('#toggleInvalidRows').on('click', function () {
             $(this).text($('#invalidRows').is(':visible') ? 'Show details' : 'Hide details');
@@ -123,7 +123,7 @@
 
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
       $('.fix-area').fixHeaderFooter();
     })(jQuery);

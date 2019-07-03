@@ -269,7 +269,7 @@
     </div>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var prependClearLink = function ($list) {
         if (!$list.find('input:checked').length) {

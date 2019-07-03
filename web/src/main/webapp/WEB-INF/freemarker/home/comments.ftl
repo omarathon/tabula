@@ -163,7 +163,7 @@
   </div>
 
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
 
       // save user agent

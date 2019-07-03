@@ -9,7 +9,7 @@
   <p class="status"></p>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   (function ($) {
     var updateFragment = function () {
       $.get('${url('/sysadmin/jobs/job-status')}', {id: '${jobId}'}, function (data) {

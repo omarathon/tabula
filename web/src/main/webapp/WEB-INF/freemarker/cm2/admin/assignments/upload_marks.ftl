@@ -170,7 +170,7 @@
     </div>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       var $rowTemplate = $('.mark-row-template .mark-row');
 

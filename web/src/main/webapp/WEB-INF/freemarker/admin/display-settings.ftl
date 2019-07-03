@@ -162,7 +162,7 @@
           </#list>
 
             <@bs3form.errors path="studentRelationshipDisplayed" />
-            <script>
+            <script nonce="${nonce()}">
               jQuery(function ($) {
                 $('#relationship-options').find('input[name^=studentRelationshipDisplayed]').on('change', function () {
                   var $this = $(this);
@@ -270,7 +270,7 @@
     </@f.form>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
     })

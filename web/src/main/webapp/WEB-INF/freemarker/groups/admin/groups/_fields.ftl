@@ -99,7 +99,7 @@
     </@bs3form.checkbox>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       // Set up radios to show/hide self-sign up options fields.
       $("input:radio[name='allocationMethod']").radioControlled({mode: 'hidden'});

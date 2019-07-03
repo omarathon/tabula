@@ -50,7 +50,7 @@
       </tbody>
     </table>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       (function ($) {
         var tsOptions = {
           sortList: [[2, 0], [1, 0]],

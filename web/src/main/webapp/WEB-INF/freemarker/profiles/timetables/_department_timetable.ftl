@@ -201,7 +201,7 @@
     </div>
   </div>
 
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .fc-event.allday {
       font-weight: bold;
       color: white !important;
@@ -234,7 +234,7 @@
     }
   </style>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     // TIMETABLE STUFF
     jQuery(function ($) {
       var weeks = <#noescape>${weekRangesDumper()}</#noescape>;

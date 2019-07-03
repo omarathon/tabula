@@ -34,7 +34,7 @@
     <#import "*/_profile_link.ftl" as pl />
     <div id="profile-modal" class="modal fade profile-subset"></div>
 
-    <script>
+    <script nonce="${nonce()}">
       (function ($) {
         $(function () {
           $('.fix-area').fixHeaderFooter();
@@ -61,7 +61,7 @@
 										<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 									</span>
 
-                  <script>
+                  <script nonce="${nonce()}">
                     jQuery('.studentsLoadingMessage').show();
                     jQuery(function ($) {
                       $('.studentsLoadingMessage').hide();
@@ -149,7 +149,7 @@
         <form id="recordAttendance" action="" method="post" class="dirty-check">
           <div class="striped-section expanded no-title">
             <div class="striped-section-contents attendees">
-              <script>
+              <script nonce="${nonce()}">
                 AttendanceRecording.bindButtonGroupHandler();
               </script>
               <input type="hidden" name="returnTo" value="${returnTo}" />
@@ -249,7 +249,7 @@
                           </#if>
                         </div>
                       </div>
-                      <script>
+                      <script nonce="${nonce()}">
                         AttendanceRecording.createButtonGroup('#checkpointMap-${student.universityId}-${point.id}');
                       </script>
                     </div>

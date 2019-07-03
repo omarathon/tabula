@@ -20,7 +20,7 @@
       <a href="<@routes.groups.departmenthome department academicYear />" class="btn btn-default">Return to Small Group Teaching</a>
     </p>
 
-    <script>
+    <script nonce="${nonce()}">
       (function ($) {
 
         var updateProgress = function () {

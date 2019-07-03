@@ -61,7 +61,7 @@
     </#if>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(window).on('load', function () {
       GlobalScripts.scrollableTableSetup();
     });

@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
 
       var updateProgress = function () {

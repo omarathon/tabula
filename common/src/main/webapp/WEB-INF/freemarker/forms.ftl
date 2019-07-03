@@ -312,7 +312,7 @@ Include by default as "form", e.g.
               </#if>
             </small>
 
-            <script><!--
+            <script nonce="${nonce()}"><!--
 
               jQuery(function ($) {
                 var $container = $('#${elementId}'),

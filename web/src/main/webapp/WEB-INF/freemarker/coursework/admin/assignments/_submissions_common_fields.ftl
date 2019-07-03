@@ -121,7 +121,7 @@ so that they can be passed around between requests.
             </@form.row>
 
             <#if (assignment.countUnapprovedExtensions gt 0)!false>
-              <script>
+              <script nonce="${nonce()}">
                 jQuery(function ($) {
                   $('#allowExtensions').change(function () {
                     if ($(this).is(':checked')) {
@@ -177,7 +177,7 @@ so that they can be passed around between requests.
             <@f.errors path="fileAttachmentTypes" cssClass="error" />
             <@f.input path="fileAttachmentTypes"  type="hidden" />
             <@script "/static/js/textList.js" />
-            <script type="text/javascript">
+            <script type="text/javascript" nonce="${nonce()}">
               jQuery(function ($) {
                 var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
                 textListController.transformInput = function (text) {
@@ -266,7 +266,7 @@ so that they can be passed around between requests.
     </details>
   </fieldset>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
 
       var updateSubmissionsDetails = function () {

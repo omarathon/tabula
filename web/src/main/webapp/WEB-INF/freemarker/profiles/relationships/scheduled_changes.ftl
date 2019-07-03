@@ -155,7 +155,7 @@
 
   <p><a href="<@routes.profiles.relationship_agents department relationshipType />" class="btn btn-default">Cancel</a></p>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.striped-section-contents table').bigList({
         'onSomeChecked': function () {
