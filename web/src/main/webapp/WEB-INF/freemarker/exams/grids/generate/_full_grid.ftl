@@ -148,7 +148,15 @@
                 <#else>
                   <#assign columnValue = ""/>
                 </#if>
-                <#if columnValue?has_content><#noescape>${columnValue.toHTML}</#noescape></#if>
+                <#if columnValue?has_content>
+                  <#if !entity_has_next>
+                    <#--if this is the last row, we need to have the tootip on the top left-->
+                    <#noescape>${columnValue.toHTML?replace("tabula-tooltip", "tabula-tooltip-top-left")}</#noescape>
+                  <#else>
+                    <#--other wise we just render tooltip on the left-->
+                    <#noescape>${columnValue.toHTML?replace("tabula-tooltip", "tabula-tooltip-left")}</#noescape>
+                  </#if>
+                </#if>
                 <#if !column_has_next>
                   <script>
                     jQuery('#examGridSpinner').find('.progress-bar')
