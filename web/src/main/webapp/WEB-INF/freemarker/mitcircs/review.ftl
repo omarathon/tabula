@@ -182,6 +182,10 @@
         <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.sensitiveEvidenceSeenOn includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
+    <#elseif submission.hasSensitiveEvidence>
+      <@components.section "Sensitive evidence">
+        <p>The student has declared that there is sensitive evidence related to this submission that they would rather discuss in person.</p>
+      </@components.section>
     </#if>
 
     <@components.section "Supplemental information">

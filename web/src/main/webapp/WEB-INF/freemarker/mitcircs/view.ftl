@@ -134,6 +134,10 @@
         <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.sensitiveEvidenceSeenOn includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
       </@components.section>
+    <#elseif submission.hasSensitiveEvidence>
+      <@components.section "Sensitive evidence">
+        <p>There is sensitive evidence that relates to this submission that needs to be discussed in person.</p>
+      </@components.section>
     </#if>
 
     <#if !submission.draft && !submission.withdrawn>

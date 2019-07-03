@@ -306,6 +306,14 @@
     required=false
     customHelp=" "
   />
+
+  <div class="checkbox">
+    <label>
+      <@f.checkbox path="hasSensitiveEvidence" value="true" /> I have sensitive evidence that I would prefer to show to a member of staff in person
+      <@bs3form.errors path="hasSensitiveEvidence" />
+    </label>
+  </div>
+
 </@mitcirc.question_section>
 
 <@mitcirc.question_section

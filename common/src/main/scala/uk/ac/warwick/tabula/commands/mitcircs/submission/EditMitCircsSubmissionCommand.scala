@@ -74,6 +74,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
     submission.pendingEvidence = pendingEvidence
     submission.pendingEvidenceDue = pendingEvidenceDue
+    submission.hasSensitiveEvidence = hasSensitiveEvidence
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: Set[FileAttachment] = submission.attachments.toSet -- attachedFiles.asScala
@@ -140,6 +141,7 @@ trait EditMitCircsSubmissionRequest extends MitCircsSubmissionRequest {
   pendingEvidenceDue = submission.pendingEvidenceDue
   attachedFiles = JHashSet(submission.attachments.toSet)
   relatedSubmission = submission.relatedSubmission
+  hasSensitiveEvidence = submission.hasSensitiveEvidence
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {

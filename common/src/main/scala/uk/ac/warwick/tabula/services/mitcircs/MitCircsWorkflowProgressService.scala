@@ -176,6 +176,21 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
           completed = true,
         )
 
+      case MitigatingCircumstancesSubmissionState.Submitted if submission.hasSensitiveEvidence  => if (submission.sensitiveEvidenceSeenBy == null) {
+        StageProgress(
+          stage = ReadyForPanel,
+          started = true,
+          messageCode = "workflow.mitCircs.ReadyForPanel.sensitiveEvidenceNeedsReview"
+        )
+      } else {
+        StageProgress(
+          stage = ReadyForPanel,
+          started = true,
+          preconditionsMet = true,
+          messageCode = "workflow.mitCircs.ReadyForPanel.sensitiveEvidenceReviewed"
+        )
+      }
+
       case _ =>
         StageProgress(
           stage = ReadyForPanel,
