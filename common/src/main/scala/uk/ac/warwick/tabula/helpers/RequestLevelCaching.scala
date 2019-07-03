@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import java.util
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 import org.slf4j.LoggerFactory
@@ -79,7 +80,7 @@ class RequestLevelCache {
   def getIdentityCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
     case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
     case _ =>
-      val cache = new util.IdentityHashMap[A, B]().asScala
+      val cache = Collections.synchronizedMap(new util.IdentityHashMap[A, B]()).asScala
 
       // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
