@@ -42,15 +42,11 @@ object RequestLevelCache {
       _.requestLevelCache.getCacheByName[A, B](cacheName)
     } match {
       case Some(cache) => {
-        // key/value null not allowed for concurrent maps -you get NPE
-        if (cache.isInstanceOf[scala.collection.concurrent.Map[A, B]]) {
-          if (key != null && default != null) {
-            cache.getOrElseUpdate(key, default)
-          } else {
-            default // return without adding in the cache
-          }
-        } else {
-          cache.getOrElseUpdate(key, default) // non concurrent maps (IdentityHashMap example)
+        def op = default
+        try {
+          cache.getOrElseUpdate(key, op)
+        } catch {
+          case e: NullPointerException => op
         }
       }
       case _ =>
