@@ -41,7 +41,18 @@ object RequestLevelCache {
     EarlyRequestInfo.fromThread.map {
       _.requestLevelCache.getCacheByName[A, B](cacheName)
     } match {
-      case Some(cache) => cache.getOrElseUpdate(key, default)
+      case Some(cache) => {
+        // key/value null not allowed for concurrent maps -you get NPE
+        if (cache.isInstanceOf[scala.collection.concurrent.Map[A, B]]) {
+          if (key != null && default != null) {
+            cache.getOrElseUpdate(key, default)
+          } else {
+            default // return without adding in the cache
+          }
+        } else {
+          cache.getOrElseUpdate(key, default) // non concurrent maps (IdentityHashMap example)
+        }
+      }
       case _ =>
         // Include error to get stack trace
         requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
@@ -81,7 +92,6 @@ class RequestLevelCache {
     case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
     case _ =>
       val cache = Collections.synchronizedMap(new util.IdentityHashMap[A, B]()).asScala
-
       // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
   }
