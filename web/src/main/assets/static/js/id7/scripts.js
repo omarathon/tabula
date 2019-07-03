@@ -1259,7 +1259,14 @@ $(function () {
   if (window !== window.top) {
     // this is an iframe
     (function () {
-      var bodyHeight = $('body').height();
+      var bodyHeight;
+      try {
+        bodyHeight = $('body').height();
+      } catch (e) {
+        // Hello, Firefox 59
+        bodyHeight = document.body.clientHeight;
+      }
+
       setInterval(function () {
         var newBodyHeight = $('body').height();
         if (newBodyHeight !== bodyHeight) {
