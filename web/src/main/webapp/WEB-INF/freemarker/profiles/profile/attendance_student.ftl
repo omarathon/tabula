@@ -34,13 +34,13 @@
       </div>
     <#else>
       <div class="monitoring-points-profile striped-section collapsible expanded">
-        <#if can.do("MonitoringPoints.Record", student)>
-          <#assign returnTo><@routes.profiles.profile_attendance studentCourseDetails academicYear /></#assign>
-          <a class="pull-right btn btn-primary btn-sm" href="<@routes.attendance.profileRecord student academicYear returnTo />">Record attendance</a>
-        </#if>
         <h3 class="section-title">
           <a href="#" class="collapse-trigger">Monitoring points</a>
         </h3>
+        <#if can.do("MonitoringPoints.Record", student)>
+            <#assign returnTo><@routes.profiles.profile_attendance studentCourseDetails academicYear /></#assign>
+          <a class="pull-right btn btn-primary btn-sm" href="<@routes.attendance.profileRecord student academicYear returnTo />">Record attendance</a>
+        </#if>
         <div class="missed-info">
           <#if !monitoringPointAttendanceCommandResult.hasAnyMissedPoints>
             <#if isSelf>
