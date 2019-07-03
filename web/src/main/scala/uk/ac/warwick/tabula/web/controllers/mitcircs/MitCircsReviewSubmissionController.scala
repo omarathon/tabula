@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesPanel, M
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import MitCircsReviewPanelSubmissionController._
+import uk.ac.warwick.tabula.CurrentUser
 
 abstract class AbstractMitCircsReviewSubmissionController extends BaseController with FormattedHtml {
   @ModelAttribute("command")
@@ -15,7 +16,7 @@ abstract class AbstractMitCircsReviewSubmissionController extends BaseController
     ReviewMitCircsSubmissionCommand(mandatory(Option(submission).filterNot(_.isDraft).orNull))
 
   @RequestMapping
-  def render(@ModelAttribute("command") cmd: ReviewMitCircsSubmissionCommand.Command, @PathVariable submission: MitigatingCircumstancesSubmission): Mav = {
+  def render(@ModelAttribute("command") cmd: ReviewMitCircsSubmissionCommand.Command, @PathVariable submission: MitigatingCircumstancesSubmission, currentUser: CurrentUser): Mav = {
     val result = cmd.apply()
     Mav("mitcircs/review",
       "submission" -> result.submission,
@@ -24,9 +25,10 @@ abstract class AbstractMitCircsReviewSubmissionController extends BaseController
       "formattedReasonableAdjustmentsNotes" -> formattedHtml(result.reasonableAdjustmentsNotes),
       "otherMitigatingCircumstancesSubmissions" -> result.otherMitigatingCircumstancesSubmissions,
       "relevantExtensions" -> result.relevantExtensions,
+      "isPanelChair" -> submission.panel.exists(_.chair == currentUser.apparentUser)
     ).crumbs(
       MitCircsBreadcrumbs.Admin.Home(submission.department),
-      MitCircsBreadcrumbs.Admin.Review(submission, active = true),
+      MitCircsBreadcrumbs.Admin.Review(submission, active = true)
     )
   }
 }

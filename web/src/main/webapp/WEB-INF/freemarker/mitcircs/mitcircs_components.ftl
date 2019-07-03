@@ -6,6 +6,25 @@
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 </#if>
 
+<#function stage_sortby stages>
+  <#local result = '' />
+
+  <#list stages?reverse as progress>
+    <#local stageResult = '1' /> <#-- not started -->
+    <#if progress.completed>
+      <#local stageResult = '4' />
+    <#elseif progress.skipped>
+      <#local stageResult = '2' />
+    <#elseif progress.started>
+      <#local stageResult = '3' />
+    </#if>
+
+    <#local result = "${result}${stageResult}" />
+  </#list>
+
+  <#return result />
+</#function>
+
 <#macro enumListWithOther enumValues otherValue condensed=true><#compress>
   <#if condensed>
     <#list enumValues as value>${value.description}<#if value.entryName == "Other"> (${otherValue?trim})</#if><#if value_has_next>, </#if></#list>
@@ -111,16 +130,17 @@
   </#if>
 </#macro>
 
-<#macro submissionTable submissions actions=true panel=false forPanel=false>
+<#macro submissionTable submissions actions=true panel=false forPanel=false submissionStages={}>
   <#if submissions?has_content>
-    <table class="mitcircs-panel-form__submissions table table-condensed">
+    <table class="mitcircs-panel-form__submissions table table-condensed table-sortable">
       <thead>
       <tr>
-        <th>Reference</th>
-        <th>Student</th>
-        <th>Affected dates</th>
-        <th>Last updated</th>
-        <#if panel><th>Current panel</th></#if>
+        <th class="sortable header">Reference</th>
+        <th class="sortable header">Student</th>
+        <th class="sortable header">Affected dates</th>
+        <th class="sortable header">Last updated</th>
+        <#if panel><th class="sortable header">Current panel</th></#if>
+        <#if submissionStages?has_content><th class="col-sm-2 sortable header">Progress</th></#if>
         <th></th>
       </tr>
       </thead>
@@ -172,6 +192,10 @@
                 <span class="very-subtle">None</span>
               </#if>
             </td>
+          </#if>
+          <#if submissionStages?has_content && mapGet(submissionStages, submission)??>
+            <#assign stages = mapGet(submissionStages, submission)/>
+            <td data-sortby="${stage_sortby(stages?values)}"><@stage_progress_bar stages?values /></td>
           </#if>
           <#if actions>
             <td>

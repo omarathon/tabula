@@ -35,6 +35,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro reviewSubmissionPanel submission><@_u page = "/panel/${submission.panel.id}/submission/${submission.key?c}" /></#macro>
 <#macro sensitiveEvidence submission><@_u page="/submission/${submission.key?c}/sensitiveevidence" /></#macro>
 <#macro readyForPanel submission><@_u page="/submission/${submission.key?c}/ready" /></#macro>
+<#macro approveOutcomes submission><@_u page="/submission/${submission.key?c}/approve" /></#macro>
 <#macro notes submission><@_u page="/submission/${submission.key?c}/notes" /></#macro>
 <#macro renderNoteAttachment note file><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/supporting-file/${file.name}" /></#macro>
 <#macro deleteNote note><@_u page="/submission/${note.submission.key?c}/notes/${note.id}/delete" /></#macro>

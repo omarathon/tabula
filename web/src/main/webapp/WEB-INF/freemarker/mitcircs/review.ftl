@@ -111,7 +111,7 @@
                   <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
                 </#if>
 
-                <#if !submission.withdrawn>
+                <#if submission.canConfirmSensitiveEvidence>
                   <p><a href="<@routes.mitcircs.sensitiveEvidence submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
                 </#if>
 
@@ -128,9 +128,17 @@
                 <#if submission.canRecordOutcomes>
                   <p><a href="<@routes.mitcircs.recordOutcomes submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Record panel outcomes</a></p>
                 </#if>
-              <#elseif submission.panel??>
-                <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
-              </#if>
+                <#elseif submission.panel??>
+                  <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
+                </#if>
+                <#if isPanelChair>
+                  <div class="modal fade" id="approveModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+                  <#if submission.canApproveOutcomes>
+                    <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#approveModal">Approve outcomes</a></p>
+                  <#elseif submission.state.entryName == "Approved By Chair">
+                    <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#approveModal">Unapprove outcomes</a></p>
+                  </#if>
+                </#if>
             </div>
           </div>
         </div>
