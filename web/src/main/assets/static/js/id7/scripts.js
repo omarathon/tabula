@@ -771,12 +771,12 @@ exports.initCollapsible = function ($el) {
         }
 
         $icon = $(this).find('i').filter('.fa,.fal,.far,.fas,.fab').first();
+        e.preventDefault();
 
         if (open()) {
           $section.removeClass('expanded');
           $icon.removeClass().addClass('fa fa-fw fa-chevron-right');
           $(this).attr('aria-expanded', 'false');
-          e.preventDefault();
         } else {
           populateContent(function () {
             $section.addClass('expanded');
