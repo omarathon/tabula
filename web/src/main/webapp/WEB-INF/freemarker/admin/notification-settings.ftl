@@ -53,7 +53,7 @@
       <div class="row">
         <div class="col-md-10">
           <h4 class="section-title" style="display: inline-block;">
-            <a class="collapse-trigger icon-container" href="#">Small group attendance notifications</a>
+            Small group attendance notifications
           </h4>
           <a data-toggle="modal" data-target="#small-group-attendance-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
         </div>
@@ -138,7 +138,7 @@
       <div class="row">
         <div class="col-md-10">
           <h4 class="section-title" style="display: inline-block;">
-            <a class="collapse-trigger icon-container" href="#">Coursework marking workflow "send to administrator" notifications</a>
+            Coursework marking workflow "send to administrator" notifications
           </h4>
           <a data-toggle="modal" data-target="#coursework-marking-workflow-admin-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
         </div>
@@ -214,7 +214,7 @@
         <div class="row">
           <div class="col-md-10">
             <h4 class="section-title" style="display: inline-block;">
-              <a class="collapse-trigger icon-container" href="#">Mitigating circumstances acute outcome notifications</a>
+              Mitigating circumstances acute outcome notifications
             </h4>
             <a data-toggle="modal" data-target="#mitcircs-acute-outcomes-modal" aria-label="Help"><i class="fa fa-question-circle"></i></a>
           </div>
