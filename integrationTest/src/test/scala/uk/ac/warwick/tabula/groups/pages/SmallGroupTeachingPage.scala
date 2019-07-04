@@ -184,7 +184,7 @@ trait GroupSetList {
     } else {
       Some(setInfoElements.next().underlying).map { section =>
         if (section.getAttribute("class").indexOf("collapsible") != -1 && section.getAttribute("class").indexOf("expanded") == -1) {
-          click on section.findElement(By.className("section-title"))
+          click on section.findElement(By.className("section-title")).findElement(By.className("mod-code"))
 
           eventually {
             section.getAttribute("class") should include("expanded")
