@@ -58,7 +58,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "report-uri" -> Some(cspReportUrl),
 
       // CSPv3 report group
-      "report-to" -> Some("csp")
+      "report-to" -> Some("csp-reports")
     )
 
   override def preHandle(
@@ -79,9 +79,13 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
     response.setHeader(
       "Report-To",
       Json.stringify(Json.obj(
-        "url" -> cspReportUrl,
-        "group" -> "csp",
-        "max-age" -> 365.days.toSeconds
+        "group" -> "csp-reports",
+        "max_age" -> 365.25.days.toSeconds,
+        "endpoints" -> Json.arr(
+          Json.obj(
+            "url" -> cspReportUrl
+          )
+        )
       ))
     )
 

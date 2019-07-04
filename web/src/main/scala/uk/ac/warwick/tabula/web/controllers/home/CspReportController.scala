@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.{PostMapping, RequestBody, Reques
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(Array("/csp-report"))
@@ -24,6 +26,26 @@ class CspReportController extends BaseController {
       put("user-agent", request.getHeader("User-Agent").maybeText.getOrElse("-"))
     }})
     SecurityLogger.info("{}", StructuredArguments.entries(json))
+
+    Mav(new JSONView(Map(
+      "success" -> true,
+      "status" -> "ok"
+    )))
+  }
+
+  @PostMapping(consumes = Array("application/reports+json"), produces = Array("application/json"))
+  def consumeReport(@RequestBody reports: util.List[util.Map[String, Object]]): Mav = {
+    reports.asScala.filter { d => Option(d.get("type")).asInstanceOf[Option[String]].contains("csp") && d.containsKey("body") }.foreach { data =>
+      val json = JHashMap(data.get("body").asInstanceOf[Map[String, Object]])
+
+      if (data.containsKey("user_agent")) {
+        json.put("user-agent", data.get("user_agent"))
+      } else {
+        json.put("user-agent", "-")
+      }
+
+      SecurityLogger.info("{}", StructuredArguments.entries(json))
+    }
 
     Mav(new JSONView(Map(
       "success" -> true,
