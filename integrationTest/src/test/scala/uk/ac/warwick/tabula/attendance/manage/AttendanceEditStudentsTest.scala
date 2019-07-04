@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.manage
 
-import org.joda.time.{DateTimeConstants, DateTime}
+import org.joda.time.DateTime
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.AttendanceFixture
@@ -23,7 +23,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     pageSource should include("0 from SITS")
 
     When("I add a student manually")
-    click on cssSelector(".manually-added .section-title")
+    click on cssSelector(".manually-added .section-title a.collapse-trigger")
     eventually {
       findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
         _.isDisplayed
@@ -43,7 +43,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     pageSource should include("(0 from SITS, plus 2 added manually)")
 
     When("I choose a route")
-    click on cssSelector(".find-students .section-title")
+    click on cssSelector(".find-students .section-title a.collapse-trigger")
     eventually {
       findAll(cssSelector(".find-students div.student-filter")).forall {
         _.isDisplayed
@@ -132,7 +132,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     } else {
 
       When("I reset all manually added students")
-      click on cssSelector(".manually-added .section-title")
+      click on cssSelector(".manually-added .section-title a.collapse-trigger")
       eventually {
         findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
           _.isDisplayed
