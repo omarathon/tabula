@@ -1,4 +1,5 @@
 <#import "*/cm2_macros.ftl" as cm2 />
+<#escape x as x?html>
 <#if detail.extension.requestedOn?has_content>
   <div>
     <label>Request received:</label> <@fmt.date date=detail.extension.requestedOn />
@@ -106,3 +107,4 @@ modelAttribute="modifyExtensionCommand"
 
 <@cm2.previousExtensions detail.extension.id detail.studentIdentifier detail.student.fullName detail.numAcceptedExtensions detail.numRejectedExtensions detail.previousExtensions />
 <@cm2.previousSubmissions detail.extension.id detail.studentIdentifier detail.student.fullName detail.previousSubmissions />
+</#escape>

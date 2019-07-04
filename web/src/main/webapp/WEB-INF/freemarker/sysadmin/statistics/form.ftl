@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Internal statistics</h1>
 
 <div class="alert alert-danger">
@@ -87,3 +88,4 @@
 
   })
 </script>
+</#escape>

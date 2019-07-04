@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.web.views
 
-import uk.ac.warwick.spring.Wire
-
-import scala.collection.JavaConverters._
-
+import freemarker.ext.beans.BeansWrapper
+import freemarker.template.{Configuration, TemplateDateModel, TemplateExceptionHandler}
 import org.springframework.beans.factory.annotation.Required
 import org.springframework.web.context.ServletContextAware
 import org.springframework.web.servlet.tags.form.FormTag
-
-import freemarker.ext.beans.BeansWrapper
-import freemarker.template.{ObjectWrapper, Configuration, TemplateDateModel, TemplateExceptionHandler}
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.JavaConverters._
 
 /**
   * Adapted from http://code.google.com/p/sweetscala

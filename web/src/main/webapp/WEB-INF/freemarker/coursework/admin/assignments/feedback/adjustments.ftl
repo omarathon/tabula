@@ -13,6 +13,7 @@
   </#if>
 </#function>
 
+<#escape x as x?html>
 <div class="content feedback-adjustment feedback-summary">
 
   <#if command.submission??>
@@ -133,3 +134,4 @@
 
   </@f.form>
 </div>
+</#escape>

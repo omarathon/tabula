@@ -1,5 +1,6 @@
 <#import "*/marking_macros.ftl" as marking />
 
+<#escape x as x?html>
 <div class="online-marking">
   <#if command.assignment.collectSubmissions>
     <div class="details">
@@ -77,7 +78,4 @@
     </@f.form>
   </div>
 </div>
-
-
-
-
+</#escape>

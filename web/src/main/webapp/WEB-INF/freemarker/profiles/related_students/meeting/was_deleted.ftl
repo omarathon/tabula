@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#assign heading>
   <h2>Record a meeting</h2>
 </#assign>
@@ -33,3 +34,4 @@
 <#if iframe!false>
   </div> <#--container -->
 </#if>
+</#escape>

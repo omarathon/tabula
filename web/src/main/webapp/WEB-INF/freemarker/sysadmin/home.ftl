@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Web system administrating system screen page</h1>
 
 <#if user.masquerading>
@@ -174,3 +175,4 @@
 
   </div>
 </div>
+</#escape>

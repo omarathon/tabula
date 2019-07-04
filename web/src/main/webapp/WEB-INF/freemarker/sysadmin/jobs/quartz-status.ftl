@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Quartz status</h1>
 
 <p>Trigger key ${key}</p>
@@ -78,3 +79,4 @@
     setInterval(updateFragment, 2000);
   })(jQuery);
 </script>
+</#escape>

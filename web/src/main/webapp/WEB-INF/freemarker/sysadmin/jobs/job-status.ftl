@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Job status</h1>
 
 <p>Job ID ${jobId}</p>
@@ -32,3 +33,4 @@
 
   })(jQuery);
 </script>
+</#escape>

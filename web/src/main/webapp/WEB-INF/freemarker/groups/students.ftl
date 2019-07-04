@@ -2,6 +2,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/modal_macros.ftl" as modal />
 
+<#escape x as x?html>
 <@modal.wrapper cssClass="modal-lg">
   <@modal.header>
     <#if command.group??>
@@ -89,3 +90,4 @@
 
   </@modal.body>
 </@modal.wrapper>
+</#escape>

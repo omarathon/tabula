@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Marking workflows<#if isExams> available for exams</#if></h1>
 
 <#if isExams>
@@ -97,3 +98,4 @@
 
   });
 </script>
+</#escape>

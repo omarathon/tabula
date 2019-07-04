@@ -1,4 +1,5 @@
 <#import "*/modal_macros.ftl" as modal />
+<#escape x as x?html>
 <#if errors?? && errors>
   <@modal.header>
     <h3 class="modal-title">
@@ -54,3 +55,4 @@
     </#if>
   </@modal.body>
 </#if>
+</#escape>

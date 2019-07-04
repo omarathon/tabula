@@ -1,6 +1,7 @@
 <#import "_feedback_summary.ftl" as fs />
 <#import "*/courses_macros.ftl" as courses_macros />
 
+<#escape x as x?html>
 <div class="well">
   <@fs.feedbackSummary firstMarkerFeedback false />
 </div>
@@ -90,3 +91,4 @@
     </@f.form>
   </#if>
 </div>
+</#escape>

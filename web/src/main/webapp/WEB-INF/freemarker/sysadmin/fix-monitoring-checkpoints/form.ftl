@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Fix monitoring checkpoints for attended meetings</h1>
 
 <#if checkpoints?size == 0>
@@ -34,3 +35,4 @@
   </form>
 
 </#if>
+</#escape>

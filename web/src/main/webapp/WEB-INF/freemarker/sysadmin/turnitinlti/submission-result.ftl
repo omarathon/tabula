@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Turnitin LTI - submission details</h1>
 
 <#if response.success>
@@ -10,3 +11,4 @@
 <#else>
   Something went wrong
 </#if>
+</#escape>
