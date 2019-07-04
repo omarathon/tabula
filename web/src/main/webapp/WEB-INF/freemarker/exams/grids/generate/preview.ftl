@@ -2,12 +2,12 @@
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
 
-  <#function route_function dept>
-    <#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
-    <#return selectCourseCommand />
-  </#function>
+    <#function route_function dept>
+        <#local selectCourseCommand><@routes.exams.generateGrid dept academicYear /></#local>
+        <#return selectCourseCommand />
+    </#function>
 
-  <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
+    <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
   <div class="fix-area">
     <div class="exam-grid-preview">
@@ -33,33 +33,33 @@
           <div class="alert alert-info <#if user?? && user.sysadmin>col-sm-8<#else>col-sm-12</#if>">
             <h3>Your <#if gridOptionsCommand.showFullLayout>full<#else>short</#if> grid</h3>
 
-            <#if oldestImport??>
-              <p>
-                This grid has been generated from the data available in SITS at
-                <@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
-                time, you'll need to generate the grid again to see the most recent information.
-              </p>
-            </#if>
-
-            <#if !(info.maintenance!false)>
-              <form action="<@routes.exams.generateGrid department academicYear />" method="post">
-                <@form_fields.select_course_fields />
-                <@form_fields.grid_options_fields />
-
+              <#if oldestImport??>
                 <p>
-                  <button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+                  This grid has been generated from the data available in SITS at
+                    <@fmt.date date=oldestImport capitalise=false at=true relative=true />. If data changes in SITS after this
+                  time, you'll need to generate the grid again to see the most recent information.
+                </p>
+              </#if>
+
+              <#if !(info.maintenance!false)>
+                <form action="<@routes.exams.generateGrid department academicYear />" method="post">
+                    <@form_fields.select_course_fields />
+                    <@form_fields.grid_options_fields />
+
+                  <p>
+                    <button type="submit" class="btn btn-primary" name="${GenerateExamGridMappingParameters.usePreviousSettings}">
+                      Refresh SITS data and regenerate grid
+                    </button>
+                  </p>
+                </form>
+              <#else>
+                <p>
+                  <button class="btn btn-primary use-tooltip" disabled
+                          title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
                     Refresh SITS data and regenerate grid
                   </button>
                 </p>
-              </form>
-            <#else>
-              <p>
-                <button class="btn btn-primary use-tooltip" disabled
-                        title="Tabula has been placed in a read-only mode. Refreshing SITS data is not currently possible.">
-                  Refresh SITS data and regenerate grid
-                </button>
-              </p>
-            </#if>
+              </#if>
 
             <p>
               <strong>
@@ -70,59 +70,61 @@
             </p>
           </div>
 
-          <#if user?? && user.sysadmin>
-            <div class="alert col-sm-4">
-              <h3>Check for missing students</h3>
-              <p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
-              <form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
-                <@bs3form.form_group>
-                  <@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
-                    <span class="input-group-btn">
+            <#if user?? && user.sysadmin>
+              <div class="alert col-sm-4">
+                <h3>Check for missing students</h3>
+                <p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
+                <form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
+                    <@bs3form.form_group>
+                        <@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
+                          <span class="input-group-btn">
 										<button class="btn btn-default" type="submit">Check</button>
 									</span>
-                  </@bs3form.flexipicker>
-                </@bs3form.form_group>
-                <@form_fields.select_course_fields />
-              </form>
-              <div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
-            </div>
-          </#if>
+                        </@bs3form.flexipicker>
+                    </@bs3form.form_group>
+                    <@form_fields.select_course_fields />
+                </form>
+                <div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+              </div>
+            </#if>
 
         </div>
 
-        <#if !routeRules?has_content>
-          <div class="alert alert-info">
-            <h3>Over catted marks</h3>
-            <p>There were no Pathway Module Rules defined in SITS for this route, year of study, and academic year.</p>
-            <p>Therefore for students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your
-              course regulations.</p>
-            <p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#"
-                                                                                                                                         class="show-more">Show
-                More</a></p>
-            <div class="more hidden">
-              <p>Each course normally consists of modules each with a CATs score and to pass that course you must achieve the minimum number of CATs.</p>
-              <p>
-                The University allows students to study additional modules, if they so wish for their own education and to potentially achieve a higher mark.
-                Any student who studies more than the normal load of CATs has been deemed to have over-catted.
-              </p>
-              <p>
-                So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the
-                student has taken.
-                If this is higher than the mean module mark, it will be the mark they are awarded, as long as the combination satisfies the course regulations.
-              </p>
-              <p>
-                The regulations governing each course vary widely but always have a minimum number of CATS and the maximum number of CATS to be taken.
-                Usually a course is made up of sets of modules from which the student must pick modules.
-                Some courses may not allow certain combinations of modules to be taken in a year or over several years.
-              </p>
-              <p>
-                Unless Pathway Module Rules are defined it is not possible for Tabula to be sure that the final over-catted mark it derives complies with the
-                regulations,
-                and we ask the exam board to choose the final over-catted mark to ensure that it meets with all the regulations. <a href="#" class="show-less">Less</a>
-              </p>
+          <#if !routeRules?has_content>
+            <div class="alert alert-info">
+              <h3>Over catted marks</h3>
+              <p>There were no Pathway Module Rules defined in SITS for this route, year of study, and academic year.</p>
+              <p>Therefore for students who have elected to overcat you will need to review the marks generated and choose the best mark that meets all of your
+                course regulations.</p>
+              <p>'Select Edit' to add the best mark. If you download the grid without adding these marks these marks will remain blank. <a href="#"
+                                                                                                                                           class="show-more">Show
+                  More</a></p>
+              <div class="more hidden">
+                <p>Each course normally consists of modules each with a CATs score and to pass that course you must achieve the minimum number of CATs.</p>
+                <p>
+                  The University allows students to study additional modules, if they so wish for their own education and to potentially achieve a higher mark.
+                  Any student who studies more than the normal load of CATs has been deemed to have over-catted.
+                </p>
+                <p>
+                  So that no student is ever disadvantaged by overcatting the calculation works out the highest scoring combination of modules from those the
+                  student has taken.
+                  If this is higher than the mean module mark, it will be the mark they are awarded, as long as the combination satisfies the course
+                  regulations.
+                </p>
+                <p>
+                  The regulations governing each course vary widely but always have a minimum number of CATS and the maximum number of CATS to be taken.
+                  Usually a course is made up of sets of modules from which the student must pick modules.
+                  Some courses may not allow certain combinations of modules to be taken in a year or over several years.
+                </p>
+                <p>
+                  Unless Pathway Module Rules are defined it is not possible for Tabula to be sure that the final over-catted mark it derives complies with the
+                  regulations,
+                  and we ask the exam board to choose the final over-catted mark to ensure that it meets with all the regulations. <a href="#"
+                                                                                                                                      class="show-less">Less</a>
+                </p>
+              </div>
             </div>
-          </div>
-        </#if>
+          </#if>
 
         <div class="key clearfix">
           <table class="table table-condensed">
@@ -141,83 +143,83 @@
               <td>${department.name}</td>
             </tr>
             <tr>
-              <#if selectCourseCommand.courses?size == 1>
-                <th>Course:</th>
-                <td>${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}</td>
-              <#else>
-                <th>Courses:</th>
-                <#assign popover>
-                  <ul><#list selectCourseCommand.courses?sort_by('code') as course>
-                      <li>${course.code?upper_case} ${course.name}</li>
-                    </#list></ul>
-                </#assign>
-                <td>
-                  <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
-                  <div class="visible-print">
-                    <#noescape>${popover}</#noescape>
-                  </div>
-                </td>
-              </#if>
+                <#if selectCourseCommand.courses?size == 1>
+                  <th>Course:</th>
+                  <td>${selectCourseCommand.courses?first.code?upper_case} ${selectCourseCommand.courses?first.name}</td>
+                <#else>
+                  <th>Courses:</th>
+                    <#assign popover>
+                      <ul><#list selectCourseCommand.courses?sort_by('code') as course>
+                          <li>${course.code?upper_case} ${course.name}</li>
+                          </#list></ul>
+                    </#assign>
+                  <td>
+                    <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
+                    <div class="visible-print">
+                        <#noescape>${popover}</#noescape>
+                    </div>
+                  </td>
+                </#if>
             </tr>
             <tr>
-              <#if !selectCourseCommand.routes?has_content>
-                <th>Routes:</th>
-                <td>All routes</td>
-              <#elseif selectCourseCommand.routes?size == 1>
-                <th>Route:</th>
-                <td>${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}</td>
-              <#else>
-                <th>Routes:</th>
-                <#assign popover>
-                  <ul><#list selectCourseCommand.routes?sort_by('code') as route>
-                      <li>${route.code?upper_case} ${route.name}</li>
-                    </#list></ul>
-                </#assign>
-                <td>
-                  <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
-                  <div class="visible-print">
-                    <#noescape>${popover}</#noescape>
-                  </div>
-                </td>
-              </#if>
+                <#if !selectCourseCommand.routes?has_content>
+                  <th>Routes:</th>
+                  <td>All routes</td>
+                <#elseif selectCourseCommand.routes?size == 1>
+                  <th>Route:</th>
+                  <td>${selectCourseCommand.routes?first.code?upper_case} ${selectCourseCommand.routes?first.name}</td>
+                <#else>
+                  <th>Routes:</th>
+                    <#assign popover>
+                      <ul><#list selectCourseCommand.routes?sort_by('code') as route>
+                          <li>${route.code?upper_case} ${route.name}</li>
+                          </#list></ul>
+                    </#assign>
+                  <td>
+                    <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
+                    <div class="visible-print">
+                        <#noescape>${popover}</#noescape>
+                    </div>
+                  </td>
+                </#if>
             </tr>
             <tr>
-              <#if selectCourseCommand.yearOfStudy??>
-                <th>Year of study:</th>
-                <td>${selectCourseCommand.yearOfStudy}</td>
-              <#elseif selectCourseCommand.levelCode??>
-                <th>Study level:</th>
-                <td>${selectCourseCommand.levelCode}</td>
-              </#if>
+                <#if selectCourseCommand.yearOfStudy??>
+                  <th>Year of study:</th>
+                  <td>${selectCourseCommand.yearOfStudy}</td>
+                <#elseif selectCourseCommand.levelCode??>
+                  <th>Study level:</th>
+                  <td>${selectCourseCommand.levelCode}</td>
+                </#if>
             </tr>
             <tr>
               <th>Normal CAT load:</th>
               <td>
-                <#if normalLoadLookup.routes?size == 1>
-                  <#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)?has_content>
-                    ${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
+                  <#if normalLoadLookup.routes?size == 1>
+                      <#if normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)?has_content>
+                          ${normalLoadLookup.withoutDefault(normalLoadLookup.routes?first)}
+                      <#else>
+                          <#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
+                          ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+                      </#if>
                   <#else>
-                    <#assign defaultNormalLoad>${normalLoadLookup.apply(normalLoadLookup.routes?first)}</#assign>
-                    ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+                      <#assign popover>
+                        <ul><#list normalLoadLookup.routes?sort_by('code') as route>
+                            <li>${route.code?upper_case}:
+                                <#if normalLoadLookup.withoutDefault(route)?has_content>
+                                    ${normalLoadLookup.withoutDefault(route)}
+                                <#else>
+                                    <#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
+                                    ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
+                                </#if>
+                            </li>
+                            </#list></ul>
+                      </#assign>
+                    <a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+                    <div class="visible-print">
+                        <#noescape>${popover}</#noescape>
+                    </div>
                   </#if>
-                <#else>
-                  <#assign popover>
-                    <ul><#list normalLoadLookup.routes?sort_by('code') as route>
-                        <li>${route.code?upper_case}:
-                          <#if normalLoadLookup.withoutDefault(route)?has_content>
-                            ${normalLoadLookup.withoutDefault(route)}
-                          <#else>
-                            <#assign defaultNormalLoad>${normalLoadLookup.apply(route)}</#assign>
-                            ${defaultNormalLoad} <@fmt.help_popover id="normal-load" cssClass="hidden-print" content="Could not find a Pathway Module Rule for the normal load so using the default value of ${defaultNormalLoad}" />
-                          </#if>
-                        </li>
-                      </#list></ul>
-                  </#assign>
-                  <a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
-                  <div class="visible-print">
-                    <#noescape>${popover}</#noescape>
-                  </div>
-                </#if>
               </td>
             </tr>
             <tr>
@@ -274,60 +276,60 @@
           </table>
         </div>
 
-        <#if gridOptionsCommand.showFullLayout>
-          <#include "_full_grid.ftl" />
-        <#else>
-          <#include "_short_form_grid.ftl" />
-        </#if>
+          <#if gridOptionsCommand.showFullLayout>
+              <#include "_full_grid.ftl" />
+          <#else>
+              <#include "_short_form_grid.ftl" />
+          </#if>
       </div>
 
-      <#if totalPages gt 1>
-        <form action="<@routes.exams.generateGridPreview department academicYear />" method="get" id="gridPreviewPagination">
-          <@form_fields.select_course_fields />
-          <@form_fields.grid_options_fields />
+        <#if totalPages gt 1>
+          <form action="<@routes.exams.generateGridPreview department academicYear />" method="get" id="gridPreviewPagination">
+              <@form_fields.select_course_fields />
+              <@form_fields.grid_options_fields />
 
-          <input type="hidden" name="page" value="" />
+            <input type="hidden" name="page" value="" />
 
-          <ul class="pagination" style="margin-top: 0;">
-            <#if currentPage lte 1>
-              <li class="disabled"><span>&laquo;</span></li>
-            <#else>
-              <li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>
-            </#if>
+            <ul class="pagination" style="margin-top: 0;">
+                <#if currentPage lte 1>
+                  <li class="disabled"><span>&laquo;</span></li>
+                <#else>
+                  <li><a href="#" data-page="${currentPage - 1}">&laquo;</a></li>
+                </#if>
 
-            <#list 1..totalPages as page>
-              <#if currentPage == page>
-                <li class="active"><span>${page}</span></li>
-              <#else>
-                <li><a href="#" data-page="${page}">${page}</a></li>
-              </#if>
-            </#list>
+                <#list 1..totalPages as page>
+                    <#if currentPage == page>
+                      <li class="active"><span>${page}</span></li>
+                    <#else>
+                      <li><a href="#" data-page="${page}">${page}</a></li>
+                    </#if>
+                </#list>
 
-            <#if currentPage gte totalPages>
-              <li class="disabled"><span>&raquo;</span></li>
-            <#else>
-              <li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>
-            </#if>
-          </ul>
-        </form>
+                <#if currentPage gte totalPages>
+                  <li class="disabled"><span>&raquo;</span></li>
+                <#else>
+                  <li><a href="#" data-page="${currentPage + 1}">&raquo;</a></li>
+                </#if>
+            </ul>
+          </form>
 
-        <script nonce="${nonce()}">
-          jQuery(function ($) {
-            var $form = $('#gridPreviewPagination');
+          <script nonce="${nonce()}">
+            jQuery(function ($) {
+              var $form = $('#gridPreviewPagination');
 
-            $form.find('a[data-page]').on('click', function (e) {
-              e.preventDefault();
+              $form.find('a[data-page]').on('click', function (e) {
+                e.preventDefault();
 
-              $form.find('input[name=page]').val($(this).data('page'));
-              $form.submit();
+                $form.find('input[name=page]').val($(this).data('page'));
+                $form.submit();
+              });
             });
-          });
-        </script>
-      </#if>
+          </script>
+        </#if>
 
       <form action="<@routes.exams.generateGrid department academicYear />" id="examGridDocuments" class="dirty-check" method="post" target="_blank">
-        <@form_fields.select_course_fields />
-        <@form_fields.grid_options_fields />
+          <@form_fields.select_course_fields />
+          <@form_fields.grid_options_fields />
 
         <div class="fix-footer hidden-print">
           <div class="btn-group dropup">
@@ -347,9 +349,9 @@
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.marksRecordConfidential}">Confidential marks record
                 </button>
               </li>
-              <#-- Removed for - TAB-6217 -->
-              <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>-->
-              <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passListConfidential}">Confidential pass list</button></li>-->
+                <#-- Removed for - TAB-6217 -->
+                <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passList}">Pass list</button></li>-->
+                <#--<li><button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.passListConfidential}">Confidential pass list</button></li>-->
               <li>
                 <button class="btn btn-link" type="submit" name="${GenerateExamGridMappingParameters.transcript}">Transcript</button>
               </li>
@@ -435,35 +437,31 @@
       $('#examGridSpinner').hide();
       $('#examGridContainer table.grid').parent().doubleScroll();
 
-      // fix the grid scrollbar to the footer
-      var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
-      var $grid = $('.grid');
+      if (navigator.platform !== 'MacIntel') {
+        // fix the grid scrollbar to the footer
+        var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
+        var $grid = $('.grid');
+        $scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
 
-      $scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
+        function reflowScroll() {
+          setTimeout(function () {
+            $scrollWrapper
+            // Update the width of the scroll track to match the container
+              .width($scrollWrapper.parent().width())
+              // Update the scroll bar so it reflects the width of the grid
+              .children().width($grid.width()).end()
+            // Reset the scroll bar to the initial position
+              .scrollLeft(0);
+          }, 0);
+        }
 
-      function reflowScroll() {
-        setTimeout(function () {
-          $scrollWrapper
-          // Update the width of the scroll track to match the container
-            .width($scrollWrapper.parent().width())
-            // Update the scroll bar so it reflects the width of the grid
-            .children().width($grid.width()).end()
-          // Reset the scroll bar to the initial position
-            .scrollLeft(0);
-        }, 0);
+        $(window).on('id7:reflow', reflowScroll);
+        reflowScroll();
       }
-
-      $(window).on('id7:reflow', reflowScroll);
-      reflowScroll();
 
       setTimeout(function () {
         $('.key table').css('max-width', '');
       }, 1);
-
-      // Chrome has "Safari" in its ua
-      if (!(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1)) {
-        $('.table-responsive').css('overflow-x', 'hidden');
-      }
 
       $('.use-popover').on('shown.bs.popover', function (e) {
         var $target = $(e.target).popover().data('bs.popover').tip();
@@ -486,7 +484,6 @@
           }
         });
       })
-
     });
   </script>
 

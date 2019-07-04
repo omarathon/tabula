@@ -1078,7 +1078,7 @@ h2 {
       text-decoration: underline;
       color: white;
 
-      &:hover {
+      &:hover, &:focus {
         color: white;
       }
 
@@ -1453,26 +1453,25 @@ a.white-text-decoration {
   display: inline-block;
 
   &::before, &::after {
-    position: absolute;
-    display: block;
     top: -@tooltip-arrow-width;
     left: 50%;
+    position: absolute;
+    display: block;
     z-index: @zindex-tooltip;
     opacity: 0;
     transition: opacity .15s linear;
   }
 
   &::before {
-    content: '';
     transform: translateX(-50%);
     border-width: @tooltip-arrow-width @tooltip-arrow-width 0 @tooltip-arrow-width;
-    border-style: solid;
     border-color: @tooltip-bg transparent transparent transparent;
+    content: '';
+    border-style: solid;
   }
 
   &::after {
     content: attr(data-title);
-    transform: translateX(-50%) translateY(-100%);
 
     // Our parent element can be arbitrary since tooltips are by default inserted as a sibling of their target element.
     // So reset our font and text properties to avoid inheriting weird values.
@@ -1480,15 +1479,44 @@ a.white-text-decoration {
     font-size: @font-size-small;
 
     .tooltip-inner;
-    min-width: 150px;
-
     pointer-events: none;
+
+    transform: translateX(-50%) translateY(-100%);
+    min-width: 150px;
   }
 
   &:hover {
     &::before, &::after {
       opacity: @tooltip-opacity;
     }
+  }
+}
+
+.tabula-tooltip-left[data-title]:not([data-title=""]):extend(.tabula-tooltip[data-title]:not([data-title=""]) all) {
+  &::before, &::after {
+    left: -@tooltip-arrow-width;
+    top: calc(-50% - @tooltip-arrow-width);
+  }
+
+  &::before {
+    transform: translate(-@tooltip-arrow-width, calc(100% + @tooltip-arrow-width * 3));
+    border-width: @tooltip-arrow-width 0 @tooltip-arrow-width @tooltip-arrow-width;
+    border-color: transparent transparent transparent @tooltip-bg;
+  }
+
+  &::after {
+    transform: translate(calc(-100% - @tooltip-arrow-width));
+    min-height: calc(@tooltip-arrow-width * 12);
+  }
+}
+
+.tabula-tooltip-top-left[data-title]:not([data-title=""]):extend(.tabula-tooltip-left[data-title]:not([data-title=""]) all) {
+  &::before, &::after {
+    top: calc(-100% - @tooltip-arrow-width);
+  }
+
+  &::before {
+    transform: translate(-@tooltip-arrow-width, calc(100% + @tooltip-arrow-width * 6));
   }
 }
 
