@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.WorkflowStages.StageProgress
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.OutcomesRecorded
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.{WorkflowProgress, WorkflowStage, WorkflowStageHealth, WorkflowStages}
@@ -114,7 +114,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   case object InitialAssessment extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress =
       submission.state match {
-        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
+        case MitigatingCircumstancesSubmissionState.Submitted | MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded | MitigatingCircumstancesSubmissionState.ApprovedByChair =>
           if (submission.messages.isEmpty) {
             if (submission.state == MitigatingCircumstancesSubmissionState.Submitted) {
               StageProgress(
@@ -168,7 +168,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
           skipped = true,
         )
 
-      case MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded =>
+      case MitigatingCircumstancesSubmissionState.ReadyForPanel | MitigatingCircumstancesSubmissionState.OutcomesRecorded | MitigatingCircumstancesSubmissionState.ApprovedByChair =>
         StageProgress(
           stage = ReadyForPanel,
           started = true,
@@ -236,7 +236,7 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
   // Panel agrees reject / mild / moderate / severe outcome and duration
   case object Outcomes extends MitCircsWorkflowStage {
     override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = submission.state match {
-      case OutcomesRecorded =>
+      case OutcomesRecorded | ApprovedByChair =>
         StageProgress(
           stage = Outcomes,
           started = true,
@@ -254,6 +254,37 @@ object MitCircsWorkflowStage extends Enum[MitCircsWorkflowStage] {
 
 
     override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Submission), Seq(Submission, SelectedForPanel))
+  }
+
+  case object Approved extends MitCircsWorkflowStage {
+    override def progress(department: Department)(submission: MitigatingCircumstancesSubmission): WorkflowStages.StageProgress = submission.state match {
+
+      case MitigatingCircumstancesSubmissionState.OutcomesRecorded if submission.isAcute =>
+        StageProgress(
+          stage = Approved,
+          started = true,
+          messageCode = "workflow.mitCircs.Approved.skipped",
+          skipped = true,
+        )
+
+      case ApprovedByChair =>
+        StageProgress(
+          stage = Approved,
+          started = true,
+          messageCode = "workflow.mitCircs.Approved.approved",
+          completed = true
+        )
+
+      case _ =>
+        StageProgress(
+          stage = Approved,
+          started = false,
+          messageCode = "workflow.mitCircs.Approved.notApproved",
+        )
+    }
+
+
+    override val preconditions: Seq[Seq[WorkflowStage]] = Seq(Seq(Outcomes))
   }
 
   override val values: immutable.IndexedSeq[MitCircsWorkflowStage] = findValues

@@ -35,6 +35,8 @@ function init() {
   $('.mitcircs-submission-actions').each((i, el) => {
     $(el).data('tabula.mitCircsAdminHome', new MitCircsAdminHome(el));
   });
+
+  $('.table-sortable').sortableTable();
 }
 
 $(() => init());
