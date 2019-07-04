@@ -69,18 +69,4 @@
       <@render_note note />
     </#list>
   </div>
-
-  <script type="text/javascript" nonce="${nonce()}">
-    jQuery(function($) {
-      // be sure to bind the confirm-submit handler before other handlers on submit buttons
-      $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message]', '.panel').on('click', function confirmBeforeSubmit(event) {
-        var $button = $(this);
-        // eslint-disable-next-line no-alert
-        if (!window.confirm($button.data('message'))) {
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        }
-      });
-    });
-  </script>
 </#escape>

@@ -28,7 +28,17 @@
         $('#feedback-template-list').on('click', 'a[data-toggle=modal]', function (e) {
           $this = $(this);
           target = $this.attr('data-url');
-          $("#feedback-template-model .modal-body").html('<iframe src="' + target + '" onLoad="frameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+
+          var $iframe = $('<iframe />').attr({
+            src: target,
+            frameBorder: 0,
+            scrolling: 'no',
+          });
+          $iframe.on('load', function () {
+            frameLoad(this);
+          });
+          $("#feedback-template-model .modal-body").empty().append($iframe);
+          $iframe[0].style.width = '100%';
         });
 
         $('#feedback-template-model').on('click', 'input[type=submit]', function (e) {

@@ -105,7 +105,7 @@
           </div>
 
           <div class="id7-header-text clearfix">
-            <div class="pull-right btn-toolbar hidden-xs" style="margin-top: 12px; margin-left: 12px;">
+            <div class="pull-right btn-toolbar hidden-xs">
               <#if user?? && user.loggedIn>
                 <a class="btn btn-brand btn-sm" href="/settings">Tabula settings</a>
               </#if>
@@ -283,8 +283,6 @@
                   class="icon-user fa fa-user icon-white fa fa-white"></i> Masquerade</a>
       </div>
     </#if>
-
-    <div style="clear:both;"></div>
   </footer>
 </div>
 <div class="id7-right-border"></div>

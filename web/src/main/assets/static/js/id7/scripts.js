@@ -1477,3 +1477,24 @@ $(function () {
     e.preventDefault();
   });
 });
+
+$(function () {
+  // be sure to bind the confirm-submit handler before other handlers on submit buttons
+  $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message], input[type="submit"][data-toggle~="confirm-submit"][data-message], input[type="button"][data-toggle~="confirm-submit"][data-message]').on('click', function confirmBeforeSubmit(event) {
+    const $button = $(this);
+    // eslint-disable-next-line no-alert
+    if (!window.confirm($button.data('message'))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  });
+
+  $('form[data-confirm-submit]').on('submit', function (event) {
+    const $form = $(this);
+    // eslint-disable-next-line no-alert
+    if (!window.confirm($form.data('confirm-submit'))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  });
+});
