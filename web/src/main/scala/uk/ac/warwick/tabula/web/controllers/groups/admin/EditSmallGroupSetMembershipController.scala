@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin
 
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
@@ -9,7 +8,7 @@ import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, Path
 import uk.ac.warwick.tabula.commands.groups.admin.{EditSmallGroupSetMembershipCommand, ModifiesSmallGroupSetMembership}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating, UpstreamGroup, UpstreamGroupPropertyEditor}
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupMembershipStyle, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.groups.GroupsController
@@ -27,8 +26,11 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 
   protected def renderPath: String
 
+  protected def newOrEdit: String
+
   protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand, model: Map[String, _] = Map()): Mav = {
     Mav(renderPath, model ++ Map(
+      "SmallGroupMembershipStyle" -> SmallGroupMembershipStyle,
       "department" -> cmd.module.adminDepartment,
       "module" -> cmd.module,
       "availableUpstreamGroups" -> cmd.availableUpstreamGroups,
@@ -42,10 +44,17 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
     @PathVariable("smallGroupSet") set: SmallGroupSet,
     @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand
   ): Mav = {
-    cmd.copyGroupsFrom(set)
-    cmd.afterBind()
+    if (set.membershipStyle == SmallGroupMembershipStyle.SitsQuery) {
+      Mav("redirect:" + (newOrEdit match {
+        case "new" => Routes.admin.createAddStudentsBySitsQuery(set)
+        case "edit" => Routes.admin.editAddStudentsBySitsQuery(set)
+      }))
+    } else {
+      cmd.copyGroupsFrom(set)
+      cmd.afterBind()
 
-    render(set, cmd)
+      render(set, cmd)
+    }
   }
 
   @RequestMapping(method = Array(POST), params = Array("action=update"))
@@ -91,6 +100,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
 @Controller
 class CreateSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSetMembershipController {
 
+  override protected def newOrEdit: String = "new"
   override val renderPath = "groups/admin/groups/newstudents"
 
   @RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.createAndEditProperties))
@@ -127,6 +137,7 @@ class CreateSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSet
 @Controller
 class EditSmallGroupSetAddStudentsController extends AbstractEditSmallGroupSetMembershipController {
 
+  override protected def newOrEdit: String = "edit"
   override val renderPath = "groups/admin/groups/editstudents"
 
   @RequestMapping(method = Array(POST), params = Array("action!=update", ManageSmallGroupsMappingParameters.editAndEditProperties))

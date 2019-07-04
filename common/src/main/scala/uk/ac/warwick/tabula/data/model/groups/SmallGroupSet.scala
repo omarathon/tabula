@@ -128,6 +128,13 @@ class SmallGroupSet
   @Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
   var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
+  @Column(name = "membership_style")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupMembershipStyleUserType")
+  var membershipStyle: SmallGroupMembershipStyle = SmallGroupMembershipStyle.Default
+
+  @Column(name = "member_query")
+  var memberQuery: String = _
+
   @Column(name = "self_group_switching")
   var allowSelfGroupSwitching: Boolean = true
 

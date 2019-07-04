@@ -66,6 +66,17 @@
     </@bs3form.labelled_form_group>
   </#if>
 
+    <@bs3form.labelled_form_group path="membershipStyle" labelText="Students selected by">
+        <@bs3form.radio>
+            <@f.radiobutton path="membershipStyle" value="SitsQuery" />
+          SITS query
+        </@bs3form.radio>
+      <@bs3form.radio>
+        <@f.radiobutton path="membershipStyle" value="AssessmentComponents" />
+          Assessment components
+      </@bs3form.radio>
+    </@bs3form.labelled_form_group>
+
   <#if features.smallGroupTeachingStudentSignUp>
     <@bs3form.checkbox path="studentsCanSeeTutorName">
       <@f.checkbox path="studentsCanSeeTutorName" id="studentsCanSeeTutorName" />

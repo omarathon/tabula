@@ -122,6 +122,8 @@ trait SmallGroupDao {
 
   def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]]
 
+  def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]]
+
   def delete(occurrence: SmallGroupEventOccurrence)
 
   def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance]
@@ -131,6 +133,8 @@ trait SmallGroupDao {
   def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 
   def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
+
+  def listSetsForMembershipUpdate: Seq[SmallGroupSet]
 
   def listSmallGroupsWithoutLocation(academicYear: AcademicYear, department: Option[Department]): Seq[SmallGroupEvent]
 
@@ -448,6 +452,17 @@ class SmallGroupDaoImpl extends SmallGroupDao
       .groupBy(_.department)
   }
 
+  def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]] = {
+    session.newCriteria[SmallGroupSet]
+      .add(is("academicYear", year))
+      .add(is("deleted", false))
+      .add(is("archived", false))
+      .add(isNotNull("memberQuery"))
+      .addOrder(asc("name"))
+      .seq
+      .groupBy(_.module.adminDepartment)
+  }
+
   def delete(occurrence: SmallGroupEventOccurrence): Unit = session.delete(occurrence)
 
   def findAttendedSmallGroupEvents(studentId: String): Seq[SmallGroupEventAttendance] =
@@ -607,6 +622,14 @@ class SmallGroupDaoImpl extends SmallGroupDao
     session.newQuery[DepartmentSmallGroupSet](
       """
 					from DepartmentSmallGroupSet
+					where memberQuery is not null and length(memberQuery) > 0
+			"""
+    ).seq
+
+  def listSetsForMembershipUpdate: Seq[SmallGroupSet] =
+    session.newQuery[SmallGroupSet](
+      """
+					from SmallGroupSet
 					where memberQuery is not null and length(memberQuery) > 0
 			"""
     ).seq

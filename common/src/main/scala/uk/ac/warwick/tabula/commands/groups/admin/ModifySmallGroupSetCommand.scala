@@ -63,6 +63,8 @@ trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
 
   var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
+  var membershipStyle: SmallGroupMembershipStyle = SmallGroupMembershipStyle.Default
+
   var allowSelfGroupSwitching: Boolean = true
   var studentsCanSeeTutorName: Boolean = false
   var studentsCanSeeOtherMembers: Boolean = false
@@ -190,6 +192,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
     academicYear = set.academicYear
     format = set.format
     allocationMethod = set.allocationMethod
+    membershipStyle = set.membershipStyle
     allowSelfGroupSwitching = set.allowSelfGroupSwitching
     studentsCanSeeTutorName = set.studentsCanSeeTutorName
     studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
@@ -202,6 +205,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
     set.academicYear = academicYear
     set.format = format
     set.allocationMethod = allocationMethod
+    set.membershipStyle = membershipStyle
     set.collectAttendance = collectAttendance
 
     set.allowSelfGroupSwitching = allowSelfGroupSwitching

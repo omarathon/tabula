@@ -122,6 +122,8 @@ trait SmallGroupService {
 
   def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]]
 
+  def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]]
+
   def delete(occurrence: SmallGroupEventOccurrence)
 
   def findReleasedSmallGroupsByTutor(user: CurrentUser): Seq[SmallGroup]
@@ -137,6 +139,8 @@ trait SmallGroupService {
   def listMemberDataForAllocation(members: Seq[Member], academicYear: AcademicYear): Map[Member, MemberAllocationData]
 
   def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet]
+
+  def listSetsForMembershipUpdate: Seq[SmallGroupSet]
 
   def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent]
 
@@ -370,6 +374,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
   def findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[DepartmentSmallGroupSet]] =
     smallGroupDao.findDepartmentSmallGroupSetsLinkedToSITSByDepartment(year)
 
+  def findSmallGroupSetsLinkedToSITSByDepartment(year: AcademicYear): Map[Department, Seq[SmallGroupSet]] =
+    smallGroupDao.findSmallGroupSetsLinkedToSITSByDepartment(year)
+
   def delete(occurrence: SmallGroupEventOccurrence) {
     if (occurrence.attendance.asScala.exists { attendance => attendance.state != AttendanceState.NotRecorded })
       throw new IllegalStateException("Tried to delete event with linked event occurrence")
@@ -477,6 +484,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
   def listDepartmentSetsForMembershipUpdate: Seq[DepartmentSmallGroupSet] =
     smallGroupDao.listDepartmentSetsForMembershipUpdate
+
+  def listSetsForMembershipUpdate: Seq[SmallGroupSet] =
+    smallGroupDao.listSetsForMembershipUpdate
 
   def listSmallGroupsWithoutLocation(academicYear: AcademicYear): Seq[SmallGroupEvent] =
     smallGroupDao.listSmallGroupsWithoutLocation(academicYear, department = None)
