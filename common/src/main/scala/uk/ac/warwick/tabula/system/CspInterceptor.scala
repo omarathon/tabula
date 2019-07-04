@@ -7,8 +7,8 @@ import freemarker.template.TemplateMethodModelEx
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import play.api.libs.json.Json
-import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, EarlyRequestInfo, RequestInfo}
 import uk.ac.warwick.tabula.system.CspInterceptor._
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, EarlyRequestInfo, RequestInfo}
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._

@@ -8,11 +8,12 @@ import org.slf4j.{Logger, LoggerFactory}
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PostMapping, RequestBody, RequestMapping}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(Array("/csp-report"))
