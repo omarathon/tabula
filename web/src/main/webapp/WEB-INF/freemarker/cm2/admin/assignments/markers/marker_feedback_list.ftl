@@ -260,7 +260,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.marking-tab-section > h4 > [data-toggle=collapse]').on('click', function (e) {
         e.preventDefault();

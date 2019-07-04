@@ -304,7 +304,7 @@
       and you can choose to apply the changes or leave the point unchanged.
     </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       // Show relavant extra options when changing assignment type
       var $specificAssignmentInput = $('form input[name=assignmentSubmissionType]');

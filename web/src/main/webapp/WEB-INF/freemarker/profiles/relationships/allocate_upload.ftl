@@ -132,7 +132,7 @@
     </@f.form>
   </#if>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
     });

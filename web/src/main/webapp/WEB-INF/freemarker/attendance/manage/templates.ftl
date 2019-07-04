@@ -66,7 +66,7 @@
 
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     //TODO make this better.
     (function ($) {
       var $select = $("#templateSchemeSelect");

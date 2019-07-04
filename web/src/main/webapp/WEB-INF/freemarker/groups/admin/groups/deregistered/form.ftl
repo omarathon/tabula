@@ -50,7 +50,7 @@
     </@f.form>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       <#-- dynamically attach check-all checkbox -->
       $('.for-check-all').append($('<input />', {type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none', checked: 'checked'}));

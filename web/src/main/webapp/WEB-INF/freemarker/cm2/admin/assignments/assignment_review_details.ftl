@@ -165,7 +165,7 @@
   </div>
 </#escape>
 
-<style type="text/css">
+<style type="text/css" nonce="${nonce()}">
   pre.review-dtls {
     border: none;
     background-color: transparent;

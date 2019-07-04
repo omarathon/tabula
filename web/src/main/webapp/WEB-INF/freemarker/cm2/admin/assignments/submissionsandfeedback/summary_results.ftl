@@ -177,7 +177,7 @@
     </#if>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       var $overlapPercentageCheckbox = $('.dropdown-menu.filter-list input[type=checkbox][value="PlagiarismStatuses.WithOverlapPercentage"]');
       var checked = $overlapPercentageCheckbox.is(':checked');

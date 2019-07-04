@@ -280,7 +280,7 @@
 
   </div> <!-- end tabbable -->
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       <!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
       $('#studentslist').css('min-height', function () {

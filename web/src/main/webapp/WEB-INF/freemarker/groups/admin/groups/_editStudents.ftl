@@ -62,7 +62,7 @@
       </@bs3form.form_group>
     </div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
         $('#enrolment').find('.table-sortable').sortableTable();
       });

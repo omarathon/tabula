@@ -105,7 +105,7 @@
       </div>
     </@modal.footer>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
         $("input:radio[name='specificScheduledDate']").radioControlled({
           'selector': '.additional',

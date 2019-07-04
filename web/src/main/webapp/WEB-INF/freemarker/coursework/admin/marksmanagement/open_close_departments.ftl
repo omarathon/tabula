@@ -55,7 +55,7 @@
     </@f.form>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
 
       $('.fix-area').fixHeaderFooter();

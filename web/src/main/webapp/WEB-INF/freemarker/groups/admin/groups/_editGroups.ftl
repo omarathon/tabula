@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .existing-group.deleted label {
       text-decoration: line-through;
       color: @grayLight;
@@ -141,7 +141,7 @@
       </button>
     </@bs3form.form_group>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
 
         $('button[data-toggle="add"]').each(function () {

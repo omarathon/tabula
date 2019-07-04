@@ -70,7 +70,7 @@
     <p>There are no mitigating circumstances submissions for ${department.name}.</p>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $('a.ajax-modal').ajaxModalLink();
 

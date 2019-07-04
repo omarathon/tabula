@@ -58,7 +58,7 @@
       <div class="form-group"><input class="btn btn-primary" type="submit" value="Send"></div>
     </@f.form>
 
-    <script>
+    <script nonce="${nonce()}">
 
       jQuery('#app-comment-form').submit(function (event) {
 

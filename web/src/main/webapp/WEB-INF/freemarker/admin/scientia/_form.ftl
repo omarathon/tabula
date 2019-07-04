@@ -13,7 +13,7 @@
 
   <@f.hidden path="mapLocationId" id="mapLocationId" />
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('#mapLocation')
         .on('change', function () {

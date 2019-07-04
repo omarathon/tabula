@@ -9,7 +9,7 @@
         <p class="hint"><i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em></p>
       </div>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
           $('.marker-information').load('<@routes.cm2.markerHome />');
         })(jQuery);
@@ -23,7 +23,7 @@
     <@components.marker_assignment_list id="marker-upcoming" title="Upcoming" assignments=markerInformation.upcomingAssignments verb="" expand_by_default=(!markerInformation.actionRequiredAssignments?has_content && !markerInformation.noActionRequiredAssignments?has_content) show_actions=showMarkingActions marker=marker />
     <@components.marker_assignment_list id="marker-completed" title="Completed" assignments=markerInformation.completedAssignments verb="Review" expand_by_default=(!markerInformation.actionRequiredAssignments?has_content && !markerInformation.noActionRequiredAssignments?has_content && !markerInformation.upcomingAssignments?has_content) show_actions=showMarkingActions marker=marker />
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       (function ($) {
         $('.use-tooltip').tooltip({ sanitize: false, });
         GlobalScripts.initCollapsible();

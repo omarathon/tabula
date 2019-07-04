@@ -138,7 +138,7 @@
   </@bs3form.labelled_form_group>
 </#if>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="${nonce()}">
   (function ($) {
     "use strict";
     $('select[name=workflowType]').on('change', function () {

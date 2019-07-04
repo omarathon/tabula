@@ -114,7 +114,7 @@
                 </li>
               </#list>
             </ul>
-            <script>
+            <script nonce="${nonce()}">
               jQuery(function ($) {
                 $(".remove-attachment").on("click", function (e) {
                   e.preventDefault();
@@ -148,7 +148,7 @@
         </div>
       </@f.form>
 
-      <script>
+      <script nonce="${nonce()}">
         (function ($) {
           $form = $(".extension-request");
           var $expiryDateField = $form.find('.date-time-picker');

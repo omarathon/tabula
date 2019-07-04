@@ -172,7 +172,7 @@
     </@modal.footer>
   </@modal.wrapper>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $modalBody = $('.modal-body'), $modalFooter = $('.modal-footer'), $modalFooterButtons = $modalFooter.find('button');
 

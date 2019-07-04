@@ -67,7 +67,7 @@
         Try uploading to SITS again and if the problem persists contact the Web Team using the "Need help?" button above.</p>
     </div>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         var showNextStatus = function () {
           var $status = $('div.status.hidden:first').removeClass('hidden');

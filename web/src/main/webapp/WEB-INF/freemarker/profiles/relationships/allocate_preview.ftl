@@ -146,7 +146,7 @@
       </div>
     </@f.form>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('table.sortable').sortableTable();
         $("input:radio[name='specificScheduledDate']").radioControlled({

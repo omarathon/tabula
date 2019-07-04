@@ -66,7 +66,7 @@
     <button class="btn btn-primary" type="submit">Skip import and generate grid</button>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var updateProgress = function () {
         $.ajax({

@@ -62,7 +62,7 @@
     </@modal.wrapper>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.permission-list').on('click', 'a[data-toggle=modal]', function (e) {
         var $this = $(this);

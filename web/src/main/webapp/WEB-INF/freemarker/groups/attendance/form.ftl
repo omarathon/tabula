@@ -2,7 +2,7 @@
   <#import "*/modal_macros.ftl" as modal />
   <#import "*/_profile_link.ftl" as pl />
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $(function () {
         $('.select-all').change(function (e) {
@@ -254,7 +254,7 @@
             </@spring.bind>
           </td>
         </tr>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}');
           AttendanceRecording.wireButtons('#student-${student.universityId}');
         </script>
@@ -262,7 +262,7 @@
 
       <div class="attendees">
         <form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
-          <script type="text/javascript">
+          <script type="text/javascript" nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
           </script>
 
@@ -273,7 +273,7 @@
 								<span class="studentsLoadingMessage">
 									<i class="fa fa-spinner fa-spin"></i><em> Loading&hellip;</em>
 								</span>
-                <script type="text/javascript">
+                <script type="text/javascript" nonce="${nonce()}">
                   jQuery(function ($) {
                     $('.studentsLoadingMessage').hide();
                   });
@@ -400,7 +400,7 @@
     </div>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     var sorterFieldLookup = {
       2: 'firstName', // I don't know why this is one-fewer than the header index, but there you go
       3: 'lastName',

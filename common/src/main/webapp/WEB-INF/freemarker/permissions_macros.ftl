@@ -78,7 +78,7 @@
                   <div class="pull-right">
                     <#if can_delegate>
                       <form action="${permsUrl}" method="post" class="remove-permissions"
-                            onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
+                            data-confirm-submit="Are you sure you want to remove permission for this user?">
                         <input type="hidden" name="_command" value="remove">
                         <input type="hidden" name="roleDefinition" value="${roleDefinition}">
                         <input type="hidden" name="usercodes" value="${u.userId}">

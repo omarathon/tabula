@@ -51,7 +51,7 @@
     </@modal.wrapper>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
 
       $('.custom-roles').on('click', 'a[data-toggle=modal]', function (e) {

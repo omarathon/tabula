@@ -27,7 +27,7 @@
     </p>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var updateProgress = function () {
         $.post({

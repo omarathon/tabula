@@ -10,7 +10,7 @@
 
   <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var updateButton = function () {
         if ($('input[name="students"]:checked').length > 0) {

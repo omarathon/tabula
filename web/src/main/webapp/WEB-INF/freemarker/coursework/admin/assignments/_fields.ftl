@@ -62,7 +62,7 @@ the comments textarea needs to maintain newlines.
         </@f.select>
       </@form.labelled_row>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(function ($) {
           $('#academicYear').on('change', function (e) {
             var $form = $(this).closest('form');
@@ -102,7 +102,7 @@ the comments textarea needs to maintain newlines.
         </@form.labelled_row>
       </div> <!-- span6 -->
       <div style="clear:both;"></div>
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           var assignmentPickerMappings;
           $(".assignment-picker-input").typeahead({
@@ -160,7 +160,7 @@ the comments textarea needs to maintain newlines.
   </#if>
   <#include "_submissions_common_fields.ftl" />
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
 
 

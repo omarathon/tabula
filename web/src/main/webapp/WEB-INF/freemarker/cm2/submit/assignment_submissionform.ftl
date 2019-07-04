@@ -97,7 +97,7 @@
         <p>Some of the information in your submission was not accepted. Please check the errors in red below and resubmit the form.</p>
       </div>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(function ($) {
           $(".alert-danger").each(function () {
             $("html, body").animate({
@@ -186,7 +186,7 @@
     </div>
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('form#submitAssignmentCommand').on('submit', function (e) {
         e.preventDefault();

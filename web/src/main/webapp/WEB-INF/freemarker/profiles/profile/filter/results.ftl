@@ -58,7 +58,7 @@
     </table>
 
     <#if !student_table_script_included??>
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
           $(function () {
             <#if totalResults lte filterStudentsCommand.studentsPerPage>
@@ -181,7 +181,7 @@
     </#if>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('nav ul.pagination a').on('click', function (e) {
         e.preventDefault();

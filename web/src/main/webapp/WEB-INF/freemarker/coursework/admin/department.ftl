@@ -132,7 +132,7 @@
                 </@fmt.permission_button>
 
                 <#-- Run this script inline to allow us to build the modal and load the URL before the rest of the page has loaded -->
-                <script type="text/javascript">
+                <script type="text/javascript" nonce="${nonce()}">
                   (function ($) {
                     $('#feedback-report-button').on('click', 'a[data-toggle=modal]', function (e) {
                       e.preventDefault();
@@ -174,7 +174,7 @@
 
     <div id="feedback-report-modal" class="modal fade"></div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
       jQuery(document.body).on('loaded.collapsible', '.module-info', function () {
         var $module = jQuery(this);
@@ -193,7 +193,7 @@
 
       <#if !expand_by_default>
       <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           GlobalScripts.initCollapsible(jQuery('#module-${module.code}').filter(':not(.empty)'));
         </script>
       </#if>

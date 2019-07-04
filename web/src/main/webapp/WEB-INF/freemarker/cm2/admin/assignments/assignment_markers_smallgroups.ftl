@@ -107,7 +107,7 @@
       </div>
     </#list>
 
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         (function ($) {
           // show / hide sets and enable their inputs
           $('.set-selector').on('change', function () {

@@ -251,7 +251,7 @@
     </div>
   </#if>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.attendance-notes').bigList({
         onChange: function () {

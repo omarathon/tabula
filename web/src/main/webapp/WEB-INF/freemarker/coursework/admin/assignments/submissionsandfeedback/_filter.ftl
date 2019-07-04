@@ -35,7 +35,7 @@
     </#list>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.filter-form select[name=filter]').on('keyup change', function () {
         var $select = $(this);

@@ -4,7 +4,7 @@
   <#if nonempty(sets?keys)>
     <@components.single_module_attendance_contents module sets />
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery('.use-popover').tabulaPopover({
         trigger: 'click',
         container: 'body'

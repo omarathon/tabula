@@ -31,7 +31,7 @@
   </div>
 
   <div class="form-group">
-    <button class="btn btn-danger" onclick="return confirm('A notification will be sent to each User Access Manager. Continue?')">Send</button>
+    <button type="submit" class="btn btn-danger" data-toggle="confirm-submit" data-message="A notification will be sent to each User Access Manager. Continue?">Send</button>
     <a class="btn btn-default" href="${url('/sysadmin')}">Cancel</a>
   </div>
 </@f.form>

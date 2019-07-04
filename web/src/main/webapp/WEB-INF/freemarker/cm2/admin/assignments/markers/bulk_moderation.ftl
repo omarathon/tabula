@@ -68,7 +68,7 @@
       </@modal.footer>
     </@f.form>
   </@modal.wrapper>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       "use strict";
       $('#previousMarker').on('change', function () {

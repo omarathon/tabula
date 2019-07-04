@@ -103,7 +103,7 @@
             <#if (info.maintenance)!false>
               <span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="left"
                     data-content="This system has been placed in a read-only mode. You will be able to download files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
-              <script>
+              <script nonce="${nonce()}">
                 jQuery(function ($) {
                   $('#maintenance-mode-label').popover();
                 });
@@ -114,7 +114,7 @@
               <span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="left"
                     data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i
                         class="icon-sun fa fa-sun-o"></i> Sandbox</span>
-              <script>
+              <script nonce="${nonce()}">
                 jQuery(function ($) {
                   $('#sandbox-label').popover();
                 });
@@ -265,7 +265,7 @@
                 </ul>
               </div>
             </div>
-            <script type="text/javascript">
+            <script type="text/javascript" nonce="${nonce()}">
               jQuery('#hide-sysadmin-only-content').on('click', function () {
                 jQuery('#sysadmin-link').fadeOut('slow')
                 jQuery('.sysadmin-only-content').hide('slow');
@@ -287,7 +287,7 @@
 </div>
 
 <#if googleAnalyticsCode?has_content>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', '${googleAnalyticsCode}']);
     _gaq.push(['_trackPageview']);

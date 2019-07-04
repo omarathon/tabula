@@ -67,7 +67,7 @@
       </@attendance_macros.scrollablePointsTable>
 
       <#if !student_table_script_included??>
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           (function ($) {
             $(function () {
               $(".scrollable-points-table .left table, .scrollable-points-table .right table").addClass('tablesorter')
@@ -128,7 +128,7 @@
     </div>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.pagination a').on('click', function (e) {
         e.preventDefault();

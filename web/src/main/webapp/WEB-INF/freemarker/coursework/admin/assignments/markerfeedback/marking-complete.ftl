@@ -38,7 +38,7 @@
                 <li>${markerFeedback.feedback.studentIdentifier}</li>
               </#list></ul>
           </div>
-          <script>
+          <script nonce="${nonce()}">
             var listHtml = jQuery(".released-feedback-list").html();
             jQuery(".released-feedback")
               .on('click', function (e) {

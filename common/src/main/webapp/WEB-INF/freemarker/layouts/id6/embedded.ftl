@@ -18,7 +18,7 @@
   <@stylesheet "/static/css/ielt8.css" />
   <![endif]-->
   <!--[if lt IE 9]>
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     #container {
       behavior: url(/static/css/pie.htc);
     }

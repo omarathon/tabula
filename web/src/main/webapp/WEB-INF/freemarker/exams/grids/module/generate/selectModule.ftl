@@ -38,7 +38,7 @@
     </div>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $picker = $('.creation-form #module-picker');
       var $button = $('.creation-form .buttons .btn');

@@ -16,7 +16,7 @@
       </form>
     </div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
         $('.view-selector input[name="view"]').on('change', function () {
           var $this = $(this);

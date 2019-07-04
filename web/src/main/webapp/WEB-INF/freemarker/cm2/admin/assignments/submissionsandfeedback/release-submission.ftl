@@ -26,7 +26,7 @@
               <li>${student}</li></#list></ul>
         </#if>
       </div>
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(function ($) {
           $("#invalid-students").popover({
             html: true,

@@ -46,7 +46,7 @@
     <@attendance_macros.attendanceButtons />
 
     <@f.form method="post" modelAttribute="command">
-      <script>
+      <script nonce="${nonce()}">
         AttendanceRecording.bindButtonGroupHandler();
       </script>
 
@@ -105,7 +105,7 @@
                 <div class="text-error"><@f.errors path="state" cssClass="error"/></div>
               </#if>
             </@spring.bind>
-            <script>
+            <script nonce="${nonce()}">
               AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
             </script>
           </div>

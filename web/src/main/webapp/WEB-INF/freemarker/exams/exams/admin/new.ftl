@@ -21,7 +21,7 @@
   </#if>
 </#escape>
 
-<script>
+<script nonce="${nonce()}">
   jQuery(function ($) {
 
     $('#newExamForm').on('submit', function () {

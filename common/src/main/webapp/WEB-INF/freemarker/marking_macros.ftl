@@ -15,7 +15,7 @@
   </#macro>
 
   <#macro autoGradeOnlineScripts markPath markingId generateUrl>
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         var $gradeInput = $('#auto-grade-${markingId}').hide()
           , $markInput = $gradeInput.closest('form').find('input[name="${markPath}"]')
@@ -192,7 +192,7 @@
       </div>
     </div>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('.fix-area').fixHeaderFooter();
         // Fire a resize to get the fixed button in the right place
@@ -509,7 +509,7 @@
       </@modal.wrapper>
     </div>
     </#if>
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           $('#sendToSits').on('change', function () {
             var $validationDiv = $('.grade-validation');
@@ -599,7 +599,7 @@
     </@bs3form.static>
     </@bs3form.labelled_form_group>
 
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           var $form = $('form[studentid=${command.student.userId}]');
 
