@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.groups.admin.reusable.{DepartmentSmallGroupSetMembershipIncludeType, DepartmentSmallGroupSetMembershipItem, DepartmentSmallGroupSetMembershipItemType, DepartmentSmallGroupSetMembershipStaticType}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{Department, Module}
-import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
@@ -20,7 +16,6 @@ object UpdateStudentsForSmallGroupSetCommand {
       with ComposableCommand[SmallGroupSet]
       with UpdateStudentsForDepartmentSmallGroupSetPermissions
       with UpdateStudentsForDepartmentSmallGroupSetDescription
-      with RemovesUsersFromDepartmentGroupsCommand
       with AutowiringUserLookupComponent
       with AutowiringSmallGroupServiceComponent
 }
@@ -38,39 +33,10 @@ object UpdateStudentsForSmallGroupSetCommandFactoryImpl
 
 class UpdateStudentsForSmallGroupSetCommandInternal(val department: Department, val module: Module, val set: SmallGroupSet)
   extends CommandInternal[SmallGroupSet] with UpdateStudentsForSmallGroupSetCommandState {
-  self: UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups =>
+  self: UserLookupComponent with SmallGroupServiceComponent =>
 
   override def applyInternal(): SmallGroupSet = {
-    val autoDeregister = module.adminDepartment.autoGroupDeregistration
-
-    val oldUsers =
-      if (autoDeregister) set.members.users.toSet
-      else Set[User]()
-
-    if (linkToSits) {
-      set.members.knownType.staticUserIds = staticStudentIds.asScala.toSet
-      set.members.knownType.includedUserIds = includedStudentIds.asScala.toSet
-      set.members.knownType.excludedUserIds = excludedStudentIds.asScala.toSet
-      set.memberQuery = filterQueryString
-    } else {
-      set.members.knownType.staticUserIds = Set.empty
-      set.members.knownType.excludedUserIds = Set.empty
-      set.memberQuery = null
-      set.members.knownType.includedUserIds = ((staticStudentIds.asScala diff excludedStudentIds.asScala) ++ includedStudentIds.asScala).toSet
-    }
-
-    val newUsers =
-      if (autoDeregister) set.members.users
-      else Set[User]()
-
-    // TAB-1561
-    if (autoDeregister) {
-      for {
-        user <- oldUsers -- newUsers
-        group <- set.groups.asScala
-        if group.students.includesUser(user)
-      } removeFromGroup(user, group)
-    }
+    UpdateEntityMembershipByMemberQuery.updateEntityMembership(this, MemberQueryMembershipAdapter(set))
 
     smallGroupService.saveOrUpdate(set)
 
@@ -78,7 +44,7 @@ class UpdateStudentsForSmallGroupSetCommandInternal(val department: Department, 
   }
 }
 
-trait UpdateStudentsForSmallGroupSetCommandState {
+trait UpdateStudentsForSmallGroupSetCommandState extends UpdateEntityMembershipByMemberQueryCommandState {
   self: UserLookupComponent =>
 
   def department: Department
@@ -101,14 +67,6 @@ trait UpdateStudentsForSmallGroupSetCommandState {
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }
-
-  // Bind variables
-
-  var includedStudentIds: JList[String] = LazyLists.create()
-  var excludedStudentIds: JList[String] = LazyLists.create()
-  var staticStudentIds: JList[String] = LazyLists.create()
-  var filterQueryString: String = ""
-  var linkToSits = true
 }
 
 trait UpdateStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
@@ -131,10 +89,3 @@ trait UpdateStudentsForDepartmentSmallGroupSetDescription extends Describable[Sm
   }
 }
 
-trait RemovesUsersFromDepartmentGroups {
-  def removeFromGroup(user: User, group: SmallGroup)
-}
-
-trait RemovesUsersFromDepartmentGroupsCommand extends RemovesUsersFromDepartmentGroups {
-  def removeFromGroup(user: User, group: SmallGroup): Unit = new RemoveUserFromSmallGroupCommand(user, group).apply()
-}

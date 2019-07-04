@@ -352,6 +352,7 @@ class SmallGroupSet
     if (!transient) newSet.id = id
     newSet.academicYear = academicYear
     newSet.allocationMethod = allocationMethod
+    newSet.membershipStyle = membershipStyle
     newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
@@ -380,5 +381,7 @@ class SmallGroupSet
   def postLoad() {
     ensureSettings
   }
+
+  def department: Department = module.adminDepartment
 }
 

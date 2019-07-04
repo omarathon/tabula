@@ -20,11 +20,9 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
     case ug: UserGroup => ug.userLookup = userLookup
   }
 
-  private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups {
+  private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent {
     val userLookup: MockUserLookup = UpdateStudentsForDepartmentSmallGroupSetCommandTest.this.userLookup
     val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-
-    def removeFromGroup(user: User, group: DepartmentSmallGroup): Unit = group.students.remove(user)
   }
 
   private trait Fixture {
