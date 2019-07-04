@@ -42,7 +42,7 @@ object RequestLevelCache {
       _.requestLevelCache.getCacheByName[A, B](cacheName)
     } match {
       case Some(cache) => {
-        def op = default
+        lazy val op = default
         try {
           cache.getOrElseUpdate(key, op)
         } catch {
