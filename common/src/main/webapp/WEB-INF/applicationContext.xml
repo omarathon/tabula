@@ -410,6 +410,10 @@
     <mapping>
       <filter ref="csrfFilter"/>
       <url-pattern>/*</url-pattern>
+      <excluded-url-pattern>/static/*</excluded-url-pattern>
+      <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+      <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>/error/*</excluded-url-pattern>
     </mapping>
     <mapping>
       <filter ref="staticContentHeadersFilter"/>
