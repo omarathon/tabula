@@ -1,0 +1,10 @@
+{
+  "name": "tabula-integrationtest",
+  "version": "0.0.0",
+  "description": "Tabula integration tests",
+  "private": true,
+  "dependencies": {
+    "chromedriver": "75.0.1",
+    "puppeteer": "1.15.0"
+  }
+}
