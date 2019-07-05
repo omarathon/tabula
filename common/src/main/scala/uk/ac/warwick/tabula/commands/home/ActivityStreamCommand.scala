@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.home
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
+import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, PubliclyVisiblePermissions, RequiresPermissionsChecking}
@@ -42,7 +42,7 @@ trait ActivityStreamPermissions extends RequiresPermissionsChecking with Permiss
   override def permissionsCheck(p: PermissionsChecking): Unit = {
     // Check that the user is logged in (i.e. that it has dismiss notifications)
     // This is granted on the global scope
-    p.PermissionCheck(Permissions.Notification.Dismiss, null)
+    p.PermissionCheck(Permissions.Notification.Dismiss, PermissionsTarget.Global)
 
     // Check that the current user matches the user in the request
     if (user.apparentId != request.user.getUserId)
