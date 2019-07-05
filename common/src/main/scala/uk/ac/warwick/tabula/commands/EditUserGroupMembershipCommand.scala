@@ -1,11 +1,10 @@
-package uk.ac.warwick.tabula.commands.groups.admin.reusable
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.UniversityId
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
-import uk.ac.warwick.tabula.data.model.{Department, UserGroupMembershipItem, UserGroupMembershipType}
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{Department, MemberQueryMembershipAdapter, Module, UserGroupMembershipItem, UserGroupMembershipType}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -18,24 +17,43 @@ case class AddUsersToEditUserGroupMembershipCommandResult(
   missingUsers: Seq[String]
 )
 
-object EditDepartmentSmallGroupSetMembershipCommand {
-  def apply(department: Department, set: DepartmentSmallGroupSet) =
-    new EditDepartmentSmallGroupSetMembershipCommandInternal(department, set)
+object EditUserGroupMembershipCommand {
+  def apply(theDepartment: Department, theSet: DepartmentSmallGroupSet) =
+    new EditUserGroupMembershipCommandInternal(MemberQueryMembershipAdapter(theSet))
       with AutowiringUserLookupComponent
       with ComposableCommand[EditUserGroupMembershipCommandResult]
-      with PopulateEditDepartmentSmallGroupSetMembershipCommand
-      with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand
-      with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand
-      with ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand
+      with PopulateEditUserGroupMembershipCommand
+      with AddsUsersToEditUserGroupMembershipCommand
+      with RemovesUsersFromEditUserGroupMembershipCommand
+      with ResetsMembershipInEditUserGroupMembershipCommand
       with EditDepartmentSmallGroupSetMembershipPermissions
-      with Unaudited with ReadOnly
+      with Unaudited with ReadOnly {
+      override def department: Department = theDepartment
+
+      override def set: DepartmentSmallGroupSet = theSet
+    }
+
+  def apply(theModule: Module, theSet: SmallGroupSet) =
+    new EditUserGroupMembershipCommandInternal(MemberQueryMembershipAdapter(theSet))
+      with AutowiringUserLookupComponent
+      with ComposableCommand[EditUserGroupMembershipCommandResult]
+      with PopulateEditUserGroupMembershipCommand
+      with AddsUsersToEditUserGroupMembershipCommand
+      with RemovesUsersFromEditUserGroupMembershipCommand
+      with ResetsMembershipInEditUserGroupMembershipCommand
+      with EditSmallGroupSetMembershipPermissions
+      with Unaudited with ReadOnly {
+      override def module: Module = theModule
+
+      override def set: SmallGroupSet = theSet
+    }
 }
 
 /**
   * Not persisted, just used to validate users entered and render student table
   */
-class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
-  extends CommandInternal[EditUserGroupMembershipCommandResult] with EditDepartmentSmallGroupSetMembershipCommandState {
+class EditUserGroupMembershipCommandInternal(val adapter: MemberQueryMembershipAdapter)
+  extends CommandInternal[EditUserGroupMembershipCommandResult] with EditUserGroupMembershipCommandState {
   self: UserLookupComponent =>
 
   override def applyInternal(): EditUserGroupMembershipCommandResult = {
@@ -59,19 +77,19 @@ class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Depar
 
 }
 
-trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnForm {
+trait PopulateEditUserGroupMembershipCommand extends PopulateOnForm {
 
-  self: EditDepartmentSmallGroupSetMembershipCommandState =>
+  self: EditUserGroupMembershipCommandState =>
 
   override def populate(): Unit = {
-    includedStudentIds = set.members.knownType.includedUserIds.toSeq.asJava
-    excludedStudentIds = set.members.knownType.excludedUserIds.toSeq.asJava
+    includedStudentIds = adapter.includedUserIds.toSeq.asJava
+    excludedStudentIds = adapter.excludedUserIds.toSeq.asJava
   }
 
 }
 
-trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
-  self: EditDepartmentSmallGroupSetMembershipCommandState with UserLookupComponent =>
+trait AddsUsersToEditUserGroupMembershipCommand {
+  self: EditUserGroupMembershipCommandState with UserLookupComponent =>
 
   def addUsers(): AddUsersToEditUserGroupMembershipCommandResult = {
     def getUserForString(entry: String): Option[User] = {
@@ -92,11 +110,11 @@ trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
       entry -> getUserForString(entry)
     }.toMap
 
-    val missingUsers = massAddedUserMap.filter(!_._2.isDefined).keys.toSeq
+    val missingUsers = massAddedUserMap.filter(_._2.isEmpty).keys.toSeq
     val validUsers = massAddedUserMap.filter(_._2.isDefined).values.flatten.toSeq
 
-    includedStudentIds = (includedStudentIds.asScala.toSeq ++ validUsers.map(_.getWarwickId)).distinct.asJava
-    excludedStudentIds = (excludedStudentIds.asScala.toSeq diff includedStudentIds.asScala.toSeq).distinct.asJava
+    includedStudentIds = (includedStudentIds.asScala ++ validUsers.map(_.getWarwickId)).distinct.asJava
+    excludedStudentIds = (excludedStudentIds.asScala diff includedStudentIds.asScala).distinct.asJava
 
     // Users processed, so reset fields
     massAddUsers = ""
@@ -106,18 +124,18 @@ trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
 
 }
 
-trait RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand {
+trait RemovesUsersFromEditUserGroupMembershipCommand {
 
-  self: EditDepartmentSmallGroupSetMembershipCommandState =>
+  self: EditUserGroupMembershipCommandState =>
 
   def removeUsers(): Unit = {
     excludedStudentIds = (excludedStudentIds.asScala ++ excludeIds.asScala).distinct.asJava
   }
 }
 
-trait ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand {
+trait ResetsMembershipInEditUserGroupMembershipCommand {
 
-  self: EditDepartmentSmallGroupSetMembershipCommandState =>
+  self: EditUserGroupMembershipCommandState =>
 
   def resetMembership(): Unit = {
     includedStudentIds = (includedStudentIds.asScala diff resetStudentIds.asScala).asJava
@@ -135,7 +153,9 @@ trait ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand {
 
 
 trait EditDepartmentSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: EditDepartmentSmallGroupSetMembershipCommandState =>
+  def set: DepartmentSmallGroupSet
+
+  def department: Department
 
   override def permissionsCheck(p: PermissionsChecking) {
     mustBeLinked(set, department)
@@ -144,10 +164,19 @@ trait EditDepartmentSmallGroupSetMembershipPermissions extends RequiresPermissio
 
 }
 
-trait EditDepartmentSmallGroupSetMembershipCommandState {
-  def set: DepartmentSmallGroupSet
+trait EditSmallGroupSetMembershipPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+  def set: SmallGroupSet
 
-  def department: Department
+  def module: Module
+
+  override def permissionsCheck(p: PermissionsChecking) {
+    mustBeLinked(set, module)
+    p.PermissionCheck(Permissions.SmallGroups.Update, mandatory(set))
+  }
+}
+
+trait EditUserGroupMembershipCommandState {
+  def adapter: MemberQueryMembershipAdapter
 
   // Bind variables
 

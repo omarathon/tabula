@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.groups.admin.reusable._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
@@ -22,9 +21,10 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   type UpdateStudentsForUserGroupCommand = Appliable[DepartmentSmallGroupSet]
   type FindStudentsForUserGroupCommand = Appliable[FindStudentsForUserGroupCommandResult] with PopulateOnForm with FindStudentsForUserGroupCommandState with UpdatesFindStudentsForUserGroupCommand
-  type EditDepartmentSmallGroupSetMembershipCommand = Appliable[EditUserGroupMembershipCommandResult] with PopulateOnForm with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand with ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand
+  type EditDepartmentSmallGroupSetMembershipCommand = Appliable[EditUserGroupMembershipCommandResult] with PopulateOnForm with AddsUsersToEditUserGroupMembershipCommand with RemovesUsersFromEditUserGroupMembershipCommand with ResetsMembershipInEditUserGroupMembershipCommand
 
-  @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
+  @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters")
+  def params: ManageDepartmentSmallGroupsMappingParameters.type = ManageDepartmentSmallGroupsMappingParameters
 
   @ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForUserGroupCommand =
     UpdateStudentsForUserGroupCommand(mandatory(department), mandatory(set))
@@ -35,7 +35,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @ModelAttribute("editMembershipCommand")
   def editMembershipCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetMembershipCommand =
-    EditDepartmentSmallGroupSetMembershipCommand(mandatory(department), mandatory(set))
+    EditUserGroupMembershipCommand(mandatory(department), mandatory(set))
 
   protected val renderPath: String
 
