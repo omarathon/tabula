@@ -456,6 +456,7 @@ abstract class Description {
   }
 
   def markingWorkflow(markingWorkflow: CM2MarkingWorkflow): Description = {
+    if (markingWorkflow.department != null) department(markingWorkflow.department)
     property("markingWorkflow" -> markingWorkflow.id)
   }
 
