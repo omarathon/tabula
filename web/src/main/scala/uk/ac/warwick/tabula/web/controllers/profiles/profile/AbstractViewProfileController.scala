@@ -120,7 +120,7 @@ abstract class AbstractViewProfileController extends ProfilesController
         case fresh =>
           fresh
       }
-      scyds.map(scyd =>
+      scyds.toSeq.sortBy { scyd => (scyd.academicYear, scyd.studentCourseDetails.course.code) }.map(scyd =>
         BaseBreadcumbs.Standard(
           title = "%s %s".format(scyd.studentCourseDetails.course.code, scyd.academicYear.getLabel),
           url = Some(urlGenerator(scyd)),
@@ -130,7 +130,7 @@ abstract class AbstractViewProfileController extends ProfilesController
           )
         ).setActive(scyd == chooseScyd)
       )
-    }).getOrElse(Nil).toSeq
+    }).getOrElse(Nil)
   }
 
   @ModelAttribute("activeAcademicYear")
