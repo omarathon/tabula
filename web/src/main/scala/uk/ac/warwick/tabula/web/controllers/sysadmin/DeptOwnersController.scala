@@ -30,10 +30,10 @@ class SysadminDeptDetailsController extends BaseSysadminController {
 trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 
   @ModelAttribute("addCommand") def addCommandModel(@PathVariable department: Department): GrantRoleCommand.Command[Department] =
-    GrantRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
+    GrantRoleCommand(mandatory(department))
 
   @ModelAttribute("removeCommand") def removeCommandModel(@PathVariable department: Department): RevokeRoleCommand.Command[Department] =
-    RevokeRoleCommand(mandatory(department), DepartmentalAdministratorRoleDefinition)
+    RevokeRoleCommand(mandatory(department))
 
   def form(@PathVariable department: Department): Mav = {
     Mav("sysadmin/departments/permissions", "department" -> department).crumbs(
