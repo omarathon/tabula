@@ -37,7 +37,7 @@
   </div>
 
   <div class="alert alert-danger" style="display: none;">
-    <p>There was a problem generating the report. If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a>.</p>
+    <p>There was a problem generating the report. If the problem persists, please contact the <a href="tabula:webteam@warwick.ac.uk">Student Information Systems team</a>.</p>
   </div>
 
   <div class="report-target"></div>

@@ -7,8 +7,7 @@
     <p>The token for this error is <strong>${token}</strong></p>
   </#if>
 
-  <p>If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web
-      Team</a><#if token??>, quoting the token above and any additional details</#if>.</p>
+  <p>If the problem persists, please contact the <a href="mailto:tabula@warwick.ac.uk">Student Information Systems team</a><#if token??>, quoting the token above and any additional details</#if>.</p>
 
   <#if exception??>
     <p>
