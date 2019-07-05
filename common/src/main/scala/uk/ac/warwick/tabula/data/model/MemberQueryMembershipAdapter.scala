@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.groups.admin.reusable.RemoveUserFromDepartmentSmallGroupCommand
-import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringScheme
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.userlookup.User
@@ -33,31 +32,9 @@ sealed trait MemberQueryMembershipAdapter {
 }
 
 object MemberQueryMembershipAdapter {
-  def apply(scheme: AttendanceMonitoringScheme): MemberQueryMembershipAdapter = new AttendanceMonitoringSchemeMemberQueryMembershipAdapter(scheme)
-
   def apply(set: DepartmentSmallGroupSet): MemberQueryMembershipAdapter = new DepartmentSmallGroupSetMemberQueryMembershipAdapter(set)
 
   def apply(set: SmallGroupSet): MemberQueryMembershipAdapter = new SmallGroupSetMemberQueryMembershipAdapter(set)
-}
-
-class AttendanceMonitoringSchemeMemberQueryMembershipAdapter(scheme: AttendanceMonitoringScheme) extends MemberQueryMembershipAdapter {
-  override def memberQuery: String = scheme.memberQuery
-
-  override def memberQuery_=(query: String): Unit = scheme.memberQuery = query
-
-  override def staticUserIds: Set[String] = scheme.members.knownType.staticUserIds
-
-  override def staticUserIds_=(ids: Set[String]): Unit = scheme.members.knownType.staticUserIds = ids
-
-  override def includedUserIds: Set[String] = scheme.members.knownType.includedUserIds
-
-  override def includedUserIds_=(ids: Set[String]): Unit = scheme.members.knownType.includedUserIds = ids
-
-  override def excludedUserIds: Set[String] = scheme.members.knownType.excludedUserIds
-
-  override def excludedUserIds_=(ids: Set[String]): Unit = scheme.members.knownType.excludedUserIds = ids
-
-  override def users: Set[User] = scheme.members.users
 }
 
 class DepartmentSmallGroupSetMemberQueryMembershipAdapter(set: DepartmentSmallGroupSet) extends MemberQueryMembershipAdapter with AutoDeregistration[DepartmentSmallGroup] {

@@ -1,18 +1,17 @@
-package uk.ac.warwick.tabula.commands.groups.admin.reusable
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
-import uk.ac.warwick.tabula.data.model.{Department, Route, SitsStatus, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, Route, SitsStatus, StudentMember, _}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
-import uk.ac.warwick.tabula.data.model.{UserGroupMembershipType, _}
 
 import scala.collection.JavaConverters._
 
-class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
+class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
   private trait CommandTestSupport extends ProfileServiceComponent with UserLookupComponent with FiltersStudents {
     val profileService: ProfileService = smartMock[ProfileService]
@@ -29,7 +28,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   }
 
   private trait CommandFixture extends Fixture {
-    val command = new FindStudentsForDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
+    val command = new FindStudentsForUserGroupCommandInternal(department, AcademicYear.now(), MemberQueryMembershipAdapter(set)) with CommandTestSupport
   }
 
   @Test def apply() {
@@ -54,15 +53,15 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
       // Enable searching
       command.findStudents = "submit"
 
-      val result: FindStudentsForDepartmentSmallGroupSetCommandResult = command.applyInternal()
+      val result: FindStudentsForUserGroupCommandResult = command.applyInternal()
       // 2 results from search, even with 1 removed
       result.membershipItems.size should be(2)
       // 1 marked static
-      result.membershipItems.count(_.itemType == EntityMembershipStaticType) should be(1)
+      result.membershipItems.count(_.itemType == Static) should be(1)
       // 1 marked removed
-      result.membershipItems.count(_.itemType == EntityMembershipExcludeType) should be(1)
+      result.membershipItems.count(_.itemType == Exclude) should be(1)
       // 0 marked included (not displayed if not in search)
-      result.membershipItems.count(_.itemType == EntityMembershipIncludeType) should be(0)
+      result.membershipItems.count(_.itemType == Include) should be(0)
 
       result.membershipItems.size should be(result.staticStudentIds.size)
       result.staticStudentIds.asScala should be(Seq(student1.universityId, student2.universityId))
@@ -72,9 +71,10 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   @Test def populate() {
     new Fixture {
       val (d, s) = (department, set)
-      val command = new PopulateFindStudentsForDepartmentSmallGroupSetCommand with FindStudentsForDepartmentSmallGroupSetCommandState with FiltersStudents with DeserializesFilterImpl {
+      val command = new PopulateFindStudentsForUserGroupCommand with FindStudentsForUserGroupCommandState with FiltersStudents with DeserializesFilterImpl {
         val department: Department = d
-        val set: DepartmentSmallGroupSet = s
+        val academicYear: AcademicYear = AcademicYear.now()
+        val adapter: MemberQueryMembershipAdapter = MemberQueryMembershipAdapter(set)
         val profileService: ProfileService = smartMock[ProfileService]
         val sitsStatusDao: SitsStatusDao = smartMock[SitsStatusDao]
         val moduleAndDepartmentService: ModuleAndDepartmentService = smartMock[ModuleAndDepartmentService]
@@ -90,8 +90,8 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
       set.members.knownType.excludedUserIds = Set("0000004")
       set.memberQuery = "sprStatuses=C"
 
-      command.profileService.allSprStatuses(department) returns (Seq(currentStatus, withdrawnStatus))
-      command.sitsStatusDao.getByCode("C") returns (Some(currentStatus))
+      command.profileService.allSprStatuses(department) returns Seq(currentStatus, withdrawnStatus)
+      command.sitsStatusDao.getByCode("C") returns Some(currentStatus)
 
       command.populate()
 
@@ -107,7 +107,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   @Test def permissions() {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
-      val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
+      val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
         val department: Department = theDepartment
         val set: DepartmentSmallGroupSet = theSet
       }
@@ -120,7 +120,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment() {
-    val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
+    val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department = null
       val set = new DepartmentSmallGroupSet
     }
@@ -130,7 +130,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet() {
-    val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
+    val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department: Department = Fixtures.department("in")
       val set = null
     }
@@ -140,7 +140,7 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet() {
-    val command = new FindStudentsForDepartmentSmallGroupSetPermissions with FindStudentsForDepartmentSmallGroupSetCommandState {
+    val command = new FindStudentsForDepartmentSmallGroupSetPermissions {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
 
@@ -153,15 +153,15 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
 
   @Test def wires() {
     new Fixture {
-      val command = FindStudentsForDepartmentSmallGroupSetCommand(department, set)
+      val command = FindStudentsForUserGroupCommand(department, set)
 
-      command should be(anInstanceOf[Appliable[FindStudentsForDepartmentSmallGroupSetCommandResult]])
+      command should be(anInstanceOf[Appliable[FindStudentsForUserGroupCommandResult]])
       command should be(anInstanceOf[FindStudentsForDepartmentSmallGroupSetPermissions])
-      command should be(anInstanceOf[FindStudentsForDepartmentSmallGroupSetCommandState])
+      command should be(anInstanceOf[FindStudentsForUserGroupCommandState])
       command should be(anInstanceOf[PopulateOnForm])
       command should be(anInstanceOf[ReadOnly])
       command should be(anInstanceOf[Unaudited])
-      command should be(anInstanceOf[UpdatesFindStudentsForDepartmentSmallGroupSetCommand])
+      command should be(anInstanceOf[UpdatesFindStudentsForUserGroupCommand])
     }
   }
 

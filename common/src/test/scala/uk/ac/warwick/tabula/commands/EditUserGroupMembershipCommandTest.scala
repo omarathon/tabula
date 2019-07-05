@@ -1,10 +1,9 @@
-package uk.ac.warwick.tabula.commands.groups.admin.reusable
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
-import uk.ac.warwick.tabula.data.model.{Department, UserGroupMembershipItem, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -12,12 +11,12 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
+class EditUserGroupMembershipCommandTest extends TestBase with Mockito {
 
   val userLookup = new MockUserLookup
 
   private trait CommandTestSupport extends UserLookupComponent {
-    val userLookup: MockUserLookup = EditDepartmentSmallGroupSetMembershipCommandTest.this.userLookup
+    val userLookup: MockUserLookup = EditUserGroupMembershipCommandTest.this.userLookup
   }
 
   private trait Fixture {
@@ -66,7 +65,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
   private trait CommandFixture extends Fixture {
     val command =
-      new EditDepartmentSmallGroupSetMembershipCommandInternal(department, set)
+      new EditUserGroupMembershipCommandInternal(MemberQueryMembershipAdapter(set))
         with CommandTestSupport
   }
 
@@ -76,7 +75,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
       command.includedStudentIds.add(user2.getWarwickId)
       command.excludedStudentIds.add(user3.getWarwickId)
 
-      val result: EditDepartmentSmallGroupSetMembershipCommandResult = command.applyInternal()
+      val result: EditUserGroupMembershipCommandResult = command.applyInternal()
       result.includedStudentIds.asScala should be(Seq(user1.getWarwickId, user2.getWarwickId))
       result.excludedStudentIds.asScala should be(Seq(user3.getWarwickId))
       result.membershipItems should be(Seq(
@@ -89,8 +88,8 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
   private trait AddsCommandFixture extends Fixture {
     val command =
-      new EditDepartmentSmallGroupSetMembershipCommandInternal(department, set)
-        with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand
+      new EditUserGroupMembershipCommandInternal(MemberQueryMembershipAdapter(set))
+        with AddsUsersToEditUserGroupMembershipCommand
         with CommandTestSupport
   }
 
@@ -111,7 +110,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
       command.userLookup.registerUserObjects(MemberOrUser(validStudent).asUser)
       command.userLookup.registerUserObjects(MemberOrUser(validStudentWithUsercode).asUser)
 
-      val result: AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult = command.addUsers()
+      val result: AddUsersToEditUserGroupMembershipCommandResult = command.addUsers()
       result.missingUsers.size should be(2)
       result.missingUsers.contains(invalidNoone) should be (true)
       result.missingUsers.contains(invalidStaff.universityId) should be (true)
@@ -124,7 +123,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
   @Test def permissions {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
-      val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
+      val command = new EditDepartmentSmallGroupSetMembershipPermissions {
         val department: Department = theDepartment
         val set: DepartmentSmallGroupSet = theSet
       }
@@ -137,7 +136,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
-    val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
+    val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department = null
       val set = new DepartmentSmallGroupSet
     }
@@ -147,7 +146,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
-    val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
+    val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department: Department = Fixtures.department("in")
       val set = null
     }
@@ -157,7 +156,7 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
-    val command = new EditDepartmentSmallGroupSetMembershipPermissions with EditDepartmentSmallGroupSetMembershipCommandState {
+    val command = new EditDepartmentSmallGroupSetMembershipPermissions {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
 
@@ -170,17 +169,17 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
 
   @Test def wires {
     new Fixture {
-      val command = EditDepartmentSmallGroupSetMembershipCommand(department, set)
+      val command = EditUserGroupMembershipCommand(department, set)
 
-      command should be(anInstanceOf[Appliable[EditDepartmentSmallGroupSetMembershipCommandResult]])
+      command should be(anInstanceOf[Appliable[EditUserGroupMembershipCommandResult]])
       command should be(anInstanceOf[EditDepartmentSmallGroupSetMembershipPermissions])
-      command should be(anInstanceOf[EditDepartmentSmallGroupSetMembershipCommandState])
+      command should be(anInstanceOf[EditUserGroupMembershipCommandState])
       command should be(anInstanceOf[PopulateOnForm])
       command should be(anInstanceOf[ReadOnly])
       command should be(anInstanceOf[Unaudited])
-      command should be(anInstanceOf[AddsUsersToEditDepartmentSmallGroupSetMembershipCommand])
-      command should be(anInstanceOf[RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand])
-      command should be(anInstanceOf[ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand])
+      command should be(anInstanceOf[AddsUsersToEditUserGroupMembershipCommand])
+      command should be(anInstanceOf[RemovesUsersFromEditUserGroupMembershipCommand])
+      command should be(anInstanceOf[ResetsMembershipInEditUserGroupMembershipCommand])
     }
   }
 

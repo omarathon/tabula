@@ -165,8 +165,6 @@ trait UpdatesFindStudentsForUserGroupCommand {
 }
 
 trait FindStudentsForSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: FindStudentsForUserGroupCommandState =>
-
   def set: SmallGroupSet
 
   def module: Module
@@ -178,8 +176,6 @@ trait FindStudentsForSmallGroupSetPermissions extends RequiresPermissionsCheckin
 }
 
 trait FindStudentsForDepartmentSmallGroupSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-  self: FindStudentsForUserGroupCommandState =>
-
   def set: DepartmentSmallGroupSet
 
   def department: Department

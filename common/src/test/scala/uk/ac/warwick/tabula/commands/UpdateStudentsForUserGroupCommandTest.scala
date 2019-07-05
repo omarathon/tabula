@@ -1,9 +1,8 @@
-package uk.ac.warwick.tabula.commands.groups.admin.reusable
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, MemberQueryMembershipAdapter, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, UserGroupCacheManager, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -72,7 +71,9 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   }
 
   private trait CommandFixture extends Fixture {
-    val command = new UpdateStudentsForUserGroupCommandInternal(department, set) with CommandTestSupport
+    val command = new UpdateStudentsForUserGroupCommandInternal[DepartmentSmallGroupSet](MemberQueryMembershipAdapter(set)) with CommandTestSupport {
+      override def save(): DepartmentSmallGroupSet = set
+    }
   }
 
   @Test def linkToSits {
@@ -157,7 +158,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   @Test def permissions {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
-      val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
         val department: Department = theDepartment
         val set: DepartmentSmallGroupSet = theSet
       }
@@ -170,7 +171,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
-    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department = null
       val set = new DepartmentSmallGroupSet
     }
@@ -180,7 +181,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
-    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       val set = null
     }
@@ -190,7 +191,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
-    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
 
@@ -204,7 +205,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   @Test def describe {
     new Fixture {
       val (dept, s) = (department, set)
-      val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForDepartmentSmallGroupSetDescription with CommandTestSupport {
         override lazy val eventName = "test"
         val department: Department = dept
         val set: DepartmentSmallGroupSet = s
