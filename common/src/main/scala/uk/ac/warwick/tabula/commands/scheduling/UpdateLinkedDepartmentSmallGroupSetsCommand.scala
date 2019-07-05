@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.admin.reusable.{FindStudentsForDepartmentSmallGroupSetCommandFactory, FindStudentsForDepartmentSmallGroupSetCommandFactoryImpl, UpdateStudentsForDepartmentSmallGroupSetCommandFactory, UpdateStudentsForDepartmentSmallGroupSetCommandFactoryImpl}
+import uk.ac.warwick.tabula.commands.groups.admin.reusable.{UpdateStudentsForDepartmentSmallGroupSetCommandFactory, UpdateStudentsForDepartmentSmallGroupSetCommandFactoryImpl}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 object UpdateLinkedDepartmentSmallGroupSetsCommand {
   def apply() =
     new UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
-      FindStudentsForDepartmentSmallGroupSetCommandFactoryImpl,
+      FindStudentsForUserGroupCommandFactoryImpl,
       UpdateStudentsForDepartmentSmallGroupSetCommandFactoryImpl
     ) with ComposableCommandWithoutTransaction[Seq[DepartmentSmallGroupSet]]
       with AutowiringFeaturesComponent
@@ -26,7 +26,7 @@ object UpdateLinkedDepartmentSmallGroupSetsCommand {
 }
 
 class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
-  findStudentsCommandFactory: FindStudentsForDepartmentSmallGroupSetCommandFactory,
+  findStudentsCommandFactory: FindStudentsForUserGroupCommandFactory,
   updateCommandFactory: UpdateStudentsForDepartmentSmallGroupSetCommandFactory
 ) extends CommandInternal[Seq[DepartmentSmallGroupSet]] with Logging with TaskBenchmarking {
 

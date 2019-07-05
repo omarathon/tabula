@@ -14,13 +14,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-case class EditDepartmentSmallGroupSetMembershipCommandResult(
-  includedStudentIds: JList[String],
-  excludedStudentIds: JList[String],
-  membershipItems: Seq[UserGroupMembershipItem]
-)
-
-case class AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult(
+case class AddUsersToEditUserGroupMembershipCommandResult(
   missingUsers: Seq[String]
 )
 
@@ -28,7 +22,7 @@ object EditDepartmentSmallGroupSetMembershipCommand {
   def apply(department: Department, set: DepartmentSmallGroupSet) =
     new EditDepartmentSmallGroupSetMembershipCommandInternal(department, set)
       with AutowiringUserLookupComponent
-      with ComposableCommand[EditDepartmentSmallGroupSetMembershipCommandResult]
+      with ComposableCommand[EditUserGroupMembershipCommandResult]
       with PopulateEditDepartmentSmallGroupSetMembershipCommand
       with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand
       with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand
@@ -41,10 +35,10 @@ object EditDepartmentSmallGroupSetMembershipCommand {
   * Not persisted, just used to validate users entered and render student table
   */
 class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Department, val set: DepartmentSmallGroupSet)
-  extends CommandInternal[EditDepartmentSmallGroupSetMembershipCommandResult] with EditDepartmentSmallGroupSetMembershipCommandState {
+  extends CommandInternal[EditUserGroupMembershipCommandResult] with EditDepartmentSmallGroupSetMembershipCommandState {
   self: UserLookupComponent =>
 
-  override def applyInternal(): EditDepartmentSmallGroupSetMembershipCommandResult = {
+  override def applyInternal(): EditUserGroupMembershipCommandResult = {
     def toMembershipItem(universityId: String, itemType: UserGroupMembershipType) = {
       val user = userLookup.getUserByWarwickUniId(universityId)
       UserGroupMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
@@ -56,7 +50,7 @@ class EditDepartmentSmallGroupSetMembershipCommandInternal(val department: Depar
       (excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
     }
 
-    EditDepartmentSmallGroupSetMembershipCommandResult(
+    EditUserGroupMembershipCommandResult(
       includedStudentIds,
       excludedStudentIds,
       membershipItems
@@ -79,7 +73,7 @@ trait PopulateEditDepartmentSmallGroupSetMembershipCommand extends PopulateOnFor
 trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
   self: EditDepartmentSmallGroupSetMembershipCommandState with UserLookupComponent =>
 
-  def addUsers(): AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult = {
+  def addUsers(): AddUsersToEditUserGroupMembershipCommandResult = {
     def getUserForString(entry: String): Option[User] = {
       if (UniversityId.isValid(entry)) {
         val user = userLookup.getUserByWarwickUniId(entry)
@@ -107,7 +101,7 @@ trait AddsUsersToEditDepartmentSmallGroupSetMembershipCommand {
     // Users processed, so reset fields
     massAddUsers = ""
 
-    AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult(missingUsers)
+    AddUsersToEditUserGroupMembershipCommandResult(missingUsers)
   }
 
 }

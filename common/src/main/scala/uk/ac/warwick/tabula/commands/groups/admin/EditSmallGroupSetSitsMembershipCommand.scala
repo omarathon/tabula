@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.{Department, UserGroupMembershipItem, UserGroupMembershipType, Module}
+import uk.ac.warwick.tabula.data.model.{Department, Module, UserGroupMembershipItem, UserGroupMembershipType}
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -13,12 +13,6 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-
-case class EditSmallGroupSetSitsMembershipCommandResult(
-  includedStudentIds: JList[String],
-  excludedStudentIds: JList[String],
-  membershipItems: Seq[UserGroupMembershipItem]
-)
 
 case class AddUsersToEditSmallGroupSetSitsMembershipCommandResult(
   missingUsers: Seq[String]
@@ -28,7 +22,7 @@ object EditSmallGroupSetSitsMembershipCommand {
   def apply(department: Department, module: Module, set: SmallGroupSet) =
     new EditSmallGroupSetSitsMembershipCommandInternal(department, module, set)
       with AutowiringUserLookupComponent
-      with ComposableCommand[EditSmallGroupSetSitsMembershipCommandResult]
+      with ComposableCommand[EditUserGroupMembershipCommandResult]
       with PopulateEditSmallGroupSetSitsMembershipCommand
       with AddsUsersToEditSmallGroupSetSitsMembershipCommand
       with RemovesUsersFromEditSmallGroupSetSitsMembershipCommand
@@ -41,10 +35,10 @@ object EditSmallGroupSetSitsMembershipCommand {
   * Not persisted, just used to validate users entered and render student table
   */
 class EditSmallGroupSetSitsMembershipCommandInternal(val department: Department, val module: Module, val set: SmallGroupSet)
-  extends CommandInternal[EditSmallGroupSetSitsMembershipCommandResult] with EditSmallGroupSetSitsMembershipCommandState {
+  extends CommandInternal[EditUserGroupMembershipCommandResult] with EditSmallGroupSetSitsMembershipCommandState {
   self: UserLookupComponent =>
 
-  override def applyInternal(): EditSmallGroupSetSitsMembershipCommandResult = {
+  override def applyInternal(): EditUserGroupMembershipCommandResult = {
     def toMembershipItem(universityId: String, itemType: UserGroupMembershipType) = {
       val user = userLookup.getUserByWarwickUniId(universityId)
       UserGroupMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
@@ -56,7 +50,7 @@ class EditSmallGroupSetSitsMembershipCommandInternal(val department: Department,
       (excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
     }
 
-    EditSmallGroupSetSitsMembershipCommandResult(
+    EditUserGroupMembershipCommandResult(
       includedStudentIds,
       excludedStudentIds,
       membershipItems
