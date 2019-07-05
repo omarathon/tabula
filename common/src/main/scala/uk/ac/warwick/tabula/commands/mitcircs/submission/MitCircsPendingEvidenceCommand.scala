@@ -48,7 +48,9 @@ class MitCircsPendingEvidenceCommandInternal(val submission: MitigatingCircumsta
   self: MitCircsSubmissionServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = {

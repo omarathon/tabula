@@ -107,7 +107,10 @@ trait ExtractRelationshipsFromFileCommandBindListener extends BindListener {
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         if (!file.attached.isEmpty) {
           file.attached.asScala.filter(_.hasData).foreach { attachment =>
             extractDataFromFile(attachment, result).foreach { case (studentId, agents) =>

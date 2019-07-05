@@ -150,7 +150,10 @@ trait ImportSmallGroupSetsFromSpreadsheetBinding extends BindListener with Loggi
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         commands = file.attached.asScala.filter(_.hasData).flatMap { attachment =>
           val extractedSets = smallGroupSetSpreadsheetHandler.readXSSFExcelFile(department, academicYear, attachment.asByteSource.openStream(), result)
 

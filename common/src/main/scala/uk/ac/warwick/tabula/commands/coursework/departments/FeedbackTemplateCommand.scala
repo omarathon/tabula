@@ -24,7 +24,9 @@ abstract class FeedbackTemplateCommand(val department: Department)
 
   override def onBind(result: BindingResult) {
     transactional() {
+      result.pushNestedPath("file")
       file.onBind(result)
+      result.popNestedPath()
     }
   }
 

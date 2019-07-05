@@ -204,7 +204,9 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
   }
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
 
     // ZIP has been uploaded. unpack it
     if (archive != null && !archive.isEmpty) {
@@ -256,13 +258,22 @@ abstract class OldUploadFeedbackCommand[A](val module: Module, val assignment: A
       }
 
       if (items != null) {
-        for (item <- items.asScala) {
-          if (item.file != null) item.file.onBind(result)
+        for ((item, i) <- items.asScala.zipWithIndex) {
+          result.pushNestedPath(s"items[$i]")
+
+          if (item.file != null) {
+            result.pushNestedPath("file")
+            item.file.onBind(result)
+            result.popNestedPath()
+          }
+
           if (item.student == null) {
             item.student = Option(userLookup.getUserByWarwickUniId(item.uniNumber)).filterNot(_.getUserType == "Applicant")
           }
         }
       }
+
+      result.popNestedPath()
     }
 
   }

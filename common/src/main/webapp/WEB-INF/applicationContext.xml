@@ -45,6 +45,9 @@
     </property>
   </bean>
 
+  <!-- enable component scan for virusscan service -->
+  <context:component-scan base-package="uk.ac.warwick.util.virusscan" />
+
   <!-- For sub-modules to implement their own component scanning -->
   <import resource="spring-component-scan-context.xml"/>
 

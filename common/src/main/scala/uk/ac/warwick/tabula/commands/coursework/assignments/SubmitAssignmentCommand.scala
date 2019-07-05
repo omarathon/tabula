@@ -161,8 +161,12 @@ abstract class SubmitAssignmentCommandInternal(val module: Module, val assignmen
 trait SubmitAssignmentBinding extends BindListener {
   self: SubmitAssignmentRequest =>
 
-  override def onBind(result: BindingResult) {
-    for ((key, field) <- fields.asScala) field.onBind(result)
+  override def onBind(result: BindingResult): Unit = {
+    for ((key, field) <- fields.asScala) {
+      result.pushNestedPath(s"fields[$key]")
+      field.onBind(result)
+      result.popNestedPath()
+    }
   }
 }
 

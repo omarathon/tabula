@@ -28,6 +28,7 @@ dependencies {
   compile "uk.ac.warwick.util:warwickutils-hibernate4:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-csv:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
+  compile "uk.ac.warwick.util:warwickutils-virusscan:${warwickUtilsVersion}"
 
   compile 'uk.ac.warwick.sso:sso-client:2.69.1'
 

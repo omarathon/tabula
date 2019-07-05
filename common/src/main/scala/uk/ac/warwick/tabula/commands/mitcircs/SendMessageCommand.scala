@@ -53,7 +53,9 @@ abstract class SendMessageCommandInternal(val submission: MitigatingCircumstance
   self: MitCircsSubmissionServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
   override def applyInternal(): MitigatingCircumstancesMessage = transactional() {

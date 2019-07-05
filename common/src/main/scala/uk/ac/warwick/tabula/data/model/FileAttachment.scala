@@ -208,7 +208,7 @@ class FileAttachment extends GeneratedId {
 
   @transient lazy val mimeType: String = asByteSource.metadata match {
     case Some(metadata) if metadata.contentType != MediaType.OCTET_STREAM.toString => metadata.contentType
-    case _ => Option(asByteSource).filterNot(_.isEmpty).map { source => detectMimeType(source.openStream()) }.getOrElse(MediaType.OCTET_STREAM.toString)
+    case _ => Option(asByteSource).filterNot(_.isEmpty).map { source => detectMimeType(source.openStream()).toString }.getOrElse(MediaType.OCTET_STREAM.toString)
   }
 }
 

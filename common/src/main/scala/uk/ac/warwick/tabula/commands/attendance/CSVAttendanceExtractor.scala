@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.helpers.DetectMimeType
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent}
@@ -28,16 +28,19 @@ class CSVAttendanceExtractorInternal extends BindListener {
   var file: UploadedFile = new UploadedFile
 
   override def onBind(result: BindingResult): Unit = {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
-  private def detectMimeType(uploadedFile: UploadedFile) = DetectMimeType.detectMimeType(uploadedFile.attached.get(0).asByteSource.openStream())
+  private def detectMimeType(uploadedFile: UploadedFile) =
+    DetectMimeType.detectMimeType(uploadedFile.attached.get(0).asByteSource.openStream())
 
   def extract(errors: Errors): Map[StudentMember, AttendanceState] = {
     if (file.attached.isEmpty) {
       errors.reject("file.missing")
       Map()
-    } else if (!detectMimeType(file).startsWith("text/")) {
+    } else if (detectMimeType(file).getType != "text") {
       errors.reject("file.format.csv")
       Map()
     } else {
@@ -62,7 +65,7 @@ class CSVAttendanceExtractorInternal extends BindListener {
         Map()
       } else {
         val uniIDs = goodRows.map(_ ("0"))
-        val students = profileService.getAllMembersWithUniversityIds(uniIDs).collect { case (s: StudentMember) => s }
+        val students = profileService.getAllMembersWithUniversityIds(uniIDs).collect { case s: StudentMember => s }
         val studentRows = goodRows.filter { row =>
           students.find(_.universityId == row("0")) match {
             case None =>
