@@ -1,11 +1,12 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
 <#import "*/modal_macros.ftl" as modal />
+<#escape x as x?html>
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js">
 <head>
   <#include "_head.ftl" />
 </head>
-<body class="tabula-page ${component.bodyClass?default('component-page')} ${bodyClasses?default('')}">
+<body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}">
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">
   <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -145,6 +146,7 @@
     </div>
 
     <div class="id7-navigation" id="primary-nav">
+      <#noescape>
       <#assign navigation><#compress>
         <#if userNavigation?has_content>
           ${(userNavigation.collapsed)!""}
@@ -164,6 +166,7 @@
           ${navigation}
         </nav>
       </#if>
+      </#noescape>
       <#if breadcrumbs?has_content>
         <nav class="navbar navbar-secondary <#if siblingBreadcrumbs!false>sibling-breadcrumbs</#if>" role="navigation">
           <ul class="nav navbar-nav">
@@ -184,12 +187,12 @@
             <#list secondBreadcrumbs as crumb>
               <li <#if crumb.active>class="active"</#if>>
                 <a
-                        <#if crumb.active> <#-- can't click active tertiary nav as already on that page -->
-                          data-page-url="<@url page=crumb.url!"" />"
-                        <#else>
-                          href="<@url page=crumb.url!"" />"
-                        </#if>
-                        <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>
+                  <#if crumb.active> <#-- can't click active tertiary nav as already on that page -->
+                    data-page-url="<@url page=crumb.url!"" />"
+                  <#else>
+                    href="<@url page=crumb.url!"" />"
+                  </#if>
+                  <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>
                 >
                   ${crumb.title}
                 </a>
@@ -304,3 +307,4 @@
 </#if>
 </body>
 </html>
+</#escape>

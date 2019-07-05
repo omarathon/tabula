@@ -46,7 +46,8 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
     val whitelistedPaths = Seq(
       "emails/",
       "notifications/",
-      "layouts/",
+      "layouts/base-id-switch.ftl",
+      "layouts/nonav-id-switch.ftl",
       "multiple_upload_help.ftl",
       "errors/assignment_permissionDenied.ftl",
       "sysadmin/jobs/job-status-fragment.ftl",
@@ -114,7 +115,6 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
           // Has content that isn't just directives
           strippedContent.hasText
         ) {
-//          fail(s"$relativePath:\n\n$strippedContent")
           Some(relativePath)
         } else None
       } else None

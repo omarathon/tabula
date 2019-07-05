@@ -1,5 +1,6 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
 <#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
+<#escape x as x?html>
 <!doctype html>
 <html lang="en-GB">
 <head>
@@ -33,3 +34,4 @@
 </div>
 </body>
 </html>
+</#escape>
