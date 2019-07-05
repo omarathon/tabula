@@ -346,8 +346,8 @@ Some other useful Gradle commands:
     (Remember Tomcat will still deploy old wars unless you delete them!)
 - `./gradlew test` - run tests, showing stack trace of failures in the console and proper output to a HTML file
 - `./gradlew web:test --tests *.ApplicationTest` - run a specific test
-- `./gradlew -PintegrationTest test` - run functional tests (start Tomcat instance first)
-- `./gradlew -PintegrationTest test --tests *.CourseworkModuleManagerTest` - run a specific functional test
+- `./gradlew -PintegrationTest test -Dtoplevel.url=https://yourhost.warwick.ac.uk` - run functional tests (start Tomcat instance first)
+- `./gradlew -PintegrationTest test -Dtoplevel.url=https://yourhost.warwick.ac.uk --tests *.CourseworkModuleManagerTest` - run a specific functional test
 - `./gradlew cucumber` - run Cucumber tests (against tabula-test.warwick.ac.uk)
 - `./gradlew cucumber -Dserver.environment=production` - run Cucumber tests against production
 - `./gradlew cucumber -Dfeature.name=gzip` - run Cucumber scenarios for a single feature
