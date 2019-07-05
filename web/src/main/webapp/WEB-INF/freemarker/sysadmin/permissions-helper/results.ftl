@@ -1,5 +1,6 @@
 <#import "*/permissions_macros.ftl" as pm />
 
+<#escape x as x?html>
 <h1>Permissions helper - results</h1>
 
 <#if results.scopeMismatch>
@@ -93,3 +94,4 @@
 <h2>Search again</h2>
 
 <#include "_form.ftl" />
+</#escape>

@@ -4,6 +4,7 @@
 
 <#assign finalMarkingStage = (allCompletedMarkerFeedback?? && allCompletedMarkerFeedback?size > 1)>
 
+<#escape x as x?html>
 <div class="content feedback-adjustment feedback-summary">
 
   <#if command.submission??>
@@ -113,3 +114,4 @@
     </div>
   </@f.form>
 </div>
+</#escape>

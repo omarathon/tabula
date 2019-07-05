@@ -1,5 +1,6 @@
 <#import "*/marking_macros.ftl" as marking_macros />
 
+<#escape x as x?html>
 <div class="content feedback-adjustment feedback-summary">
 
   <#if command.feedback??>
@@ -86,3 +87,4 @@
     });
   </script>
 </div>
+</#escape>

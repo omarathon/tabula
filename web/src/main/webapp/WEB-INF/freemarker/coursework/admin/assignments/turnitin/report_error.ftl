@@ -1,4 +1,5 @@
 <#-- There was an error redirecting the user to the Turnitin document viewer -->
+<#escape x as x?html>
 <h1>Whoops</h1>
 <#if problem = "no-object">
   <p>
@@ -15,3 +16,4 @@
 </#if>
 
 <p>You can close this browser tab and return to the coursework application.</p>
+</#escape>

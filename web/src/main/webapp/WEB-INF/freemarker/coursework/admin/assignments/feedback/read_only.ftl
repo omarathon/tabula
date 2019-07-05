@@ -1,5 +1,6 @@
 <#assign assignment = feedback.assignment />
 
+<#escape x as x?html>
 <div class="modal-header">
   <a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
   <h6>Feedback Summary - ${feedback.studentIdentifier}</h6>
@@ -74,3 +75,4 @@
     </form>
   </div>
 </div>
+</#escape>

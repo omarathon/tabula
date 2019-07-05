@@ -1,5 +1,5 @@
 <#--
-	Used in /WEB-INF/freemarker/home/_student.ftl and assignment_submissionform.ftl
+	Used in /WEB-INF/freemarker/home/_student.ftl and _assignment_submissionform.ftl
 -->
 <#import "*/coursework_components.ftl" as components />
 

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>User Access Manager audit</h1>
 
 <@f.form method="post" action="${url('/sysadmin/uam-audit')}" class="double-submit-protection">
@@ -44,3 +45,4 @@
     </li>
   </#list>
 </ul>
+</#escape>

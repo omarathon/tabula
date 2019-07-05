@@ -11,6 +11,7 @@
   </#if>
 </#function>
 
+<#escape x as x?html>
 <div class="content online-feedback feedback-summary">
 
   <#if command.submission?? && !markingStage>
@@ -125,3 +126,4 @@
 
   </@f.form>
 </div>
+</#escape>

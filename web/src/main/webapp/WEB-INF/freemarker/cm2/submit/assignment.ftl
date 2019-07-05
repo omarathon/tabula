@@ -31,17 +31,17 @@
       <#include "_assignment_feedbackdownload.ftl" />
       <#if features.submissions>
         <#if submission??>
-          <#include "assignment_submissionthanks.ftl" />
+          <#include "_assignment_submissionthanks.ftl" />
         </#if>
       </#if>
     <#else>
       <#if features.submissions>
         <#if submission??>
-          <#include "assignment_submissionthanks.ftl" />
+          <#include "_assignment_submissionthanks.ftl" />
         </#if>
 
       <#-- At some point, also check if resubmission is allowed for this assignment -->
-        <#include "assignment_submissionform.ftl" />
+        <#include "_assignment_submissionform.ftl" />
 
         <#if isSelf && submission?? && !canReSubmit>
           <#if assignment.allowResubmission>

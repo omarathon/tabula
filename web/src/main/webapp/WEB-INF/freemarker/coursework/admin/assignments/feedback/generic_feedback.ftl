@@ -1,6 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
+<#escape x as x?html>
 <div class="form onlineFeedback">
 
   <#assign submit_url><@routes.coursework.genericfeedback assignment /></#assign>
@@ -26,3 +27,4 @@
     </div>
   </@f.form>
 </div>
+</#escape>

@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
   <#if user.staff>
-    <#include "search/form.ftl" />
+    <#include "search/_form.ftl" />
     <hr class="full-width" />
   </#if>
 

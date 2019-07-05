@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if user.loggedIn && user.firstName??>
   <h1 class="with-settings">Hello, ${user.firstName}</h1>
 <#else>
@@ -62,3 +63,4 @@
     </p>
   </#if>
 </#if>
+</#escape>
