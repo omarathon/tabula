@@ -34,8 +34,8 @@ object FindStudentsForUserGroupCommand {
       with FiltersStudents
       with DeserializesFilter
       with Unaudited with ReadOnly {
-      override val set: SmallGroupSet = theSet
-      override val module: Module = theModule
+      override def set: SmallGroupSet = theSet
+      override def module: Module = theModule
     }
 
   def apply(department: Department, theSet: DepartmentSmallGroupSet) =
@@ -51,7 +51,7 @@ object FindStudentsForUserGroupCommand {
       with FiltersStudents
       with DeserializesFilter
       with Unaudited with ReadOnly {
-      override val set: DepartmentSmallGroupSet = theSet
+      override def set: DepartmentSmallGroupSet = theSet
     }
 }
 

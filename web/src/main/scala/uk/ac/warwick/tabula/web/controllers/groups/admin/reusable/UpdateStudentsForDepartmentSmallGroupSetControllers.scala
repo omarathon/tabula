@@ -20,14 +20,14 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   validatesSelf[SelfValidating]
 
-  type UpdateStudentsForDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet]
+  type UpdateStudentsForUserGroupCommand = Appliable[DepartmentSmallGroupSet]
   type FindStudentsForUserGroupCommand = Appliable[FindStudentsForUserGroupCommandResult] with PopulateOnForm with FindStudentsForUserGroupCommandState with UpdatesFindStudentsForUserGroupCommand
   type EditDepartmentSmallGroupSetMembershipCommand = Appliable[EditUserGroupMembershipCommandResult] with PopulateOnForm with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand with ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand
 
   @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
 
-  @ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForDepartmentSmallGroupSetCommand =
-    UpdateStudentsForDepartmentSmallGroupSetCommand(mandatory(department), mandatory(set))
+  @ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForUserGroupCommand =
+    UpdateStudentsForUserGroupCommand(mandatory(department), mandatory(set))
 
   @ModelAttribute("findCommand")
   def findCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): FindStudentsForUserGroupCommand =
@@ -172,7 +172,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   }
 
   protected def submit(
-    cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     findCommand: FindStudentsForUserGroupCommand,
     editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -195,7 +195,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array("persist"))
   def save(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -212,7 +212,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndEditProperties))
   def saveAndEditProperties(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -221,7 +221,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups))
   def saveAndAddGroups(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -230,7 +230,7 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAllocate))
   def saveAndAllocate(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -247,7 +247,7 @@ class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsFor
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndEditProperties))
   def saveAndEditProperties(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -256,7 +256,7 @@ class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsFor
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups))
   def saveAndAddGroups(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
@@ -265,7 +265,7 @@ class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsFor
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAllocate))
   def saveAndAllocate(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,

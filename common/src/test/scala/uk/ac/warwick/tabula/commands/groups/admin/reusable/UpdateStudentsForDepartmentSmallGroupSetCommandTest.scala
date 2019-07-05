@@ -11,7 +11,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
+class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
   val userLookup = new MockUserLookup
 
@@ -21,7 +21,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent {
-    val userLookup: MockUserLookup = UpdateStudentsForDepartmentSmallGroupSetCommandTest.this.userLookup
+    val userLookup: MockUserLookup = UpdateStudentsForUserGroupCommandTest.this.userLookup
     val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
   }
 
@@ -72,7 +72,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   private trait CommandFixture extends Fixture {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
+    val command = new UpdateStudentsForUserGroupCommandInternal(department, set) with CommandTestSupport
   }
 
   @Test def linkToSits {
@@ -157,7 +157,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   @Test def permissions {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
-      val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
         val department: Department = theDepartment
         val set: DepartmentSmallGroupSet = theSet
       }
@@ -170,7 +170,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
       val department = null
       val set = new DepartmentSmallGroupSet
     }
@@ -180,7 +180,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       val set = null
     }
@@ -190,7 +190,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
 
@@ -204,7 +204,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   @Test def describe {
     new Fixture {
       val (dept, s) = (department, set)
-      val command = new UpdateStudentsForDepartmentSmallGroupSetDescription with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForUserGroupCommandState with CommandTestSupport {
         override lazy val eventName = "test"
         val department: Department = dept
         val set: DepartmentSmallGroupSet = s
@@ -221,12 +221,12 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 
   @Test def wires {
     new Fixture {
-      val command = UpdateStudentsForDepartmentSmallGroupSetCommand(department, set)
+      val command = UpdateStudentsForUserGroupCommand(department, set)
 
       command should be(anInstanceOf[Appliable[DepartmentSmallGroupSet]])
       command should be(anInstanceOf[Describable[DepartmentSmallGroupSet]])
       command should be(anInstanceOf[UpdateStudentsForDepartmentSmallGroupSetPermissions])
-      command should be(anInstanceOf[UpdateStudentsForDepartmentSmallGroupSetCommandState])
+      command should be(anInstanceOf[UpdateStudentsForUserGroupCommandState])
     }
   }
 

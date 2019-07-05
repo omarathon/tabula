@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.scheduling
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.admin.{UpdateStudentsForSmallGroupSetCommandFactory, UpdateStudentsForSmallGroupSetCommandFactoryImpl}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
@@ -16,7 +15,7 @@ object UpdateLinkedSmallGroupSetsCommand {
   def apply() =
     new UpdateLinkedSmallGroupSetsCommandInternal(
       FindStudentsForUserGroupCommandFactoryImpl,
-      UpdateStudentsForSmallGroupSetCommandFactoryImpl
+      UpdateStudentsForUserGroupCommandFactoryImpl
     ) with ComposableCommandWithoutTransaction[Seq[SmallGroupSet]]
       with AutowiringFeaturesComponent
       with AutowiringProfileServiceComponent
@@ -27,7 +26,7 @@ object UpdateLinkedSmallGroupSetsCommand {
 
 class UpdateLinkedSmallGroupSetsCommandInternal(
   findStudentsCommandFactory: FindStudentsForUserGroupCommandFactory,
-  updateCommandFactory: UpdateStudentsForSmallGroupSetCommandFactory
+  updateCommandFactory: UpdateStudentsForUserGroupCommandFactory
 ) extends CommandInternal[Seq[SmallGroupSet]] with Logging with TaskBenchmarking {
 
   self: FeaturesComponent with SmallGroupServiceComponent =>
@@ -41,13 +40,13 @@ class UpdateLinkedSmallGroupSetsCommandInternal(
 
     setsToUpdate.foreach { set =>
       val staticStudentIds = transactional(readOnly = true) {
-        val cmd = findStudentsCommandFactory.apply(set.module.adminDepartment, set.module, set)
+        val cmd = findStudentsCommandFactory.apply(set.department, set.module, set)
         cmd.populate()
         cmd.doFind = true
         cmd.apply().staticStudentIds
       }
       transactional() {
-        val updateCommand = updateCommandFactory.apply(set.module.adminDepartment, set.module, set)
+        val updateCommand = updateCommandFactory.apply(set.department, set.module, set)
         updateCommand.linkToSits = true
         updateCommand.filterQueryString = set.memberQuery
         updateCommand.staticStudentIds.clear()

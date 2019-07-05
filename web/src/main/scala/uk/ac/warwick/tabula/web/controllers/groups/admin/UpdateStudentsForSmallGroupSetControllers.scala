@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.groups.admin._
-import uk.ac.warwick.tabula.commands.{Appliable, EditUserGroupMembershipCommandResult, FindStudentsForUserGroupCommand, FindStudentsForUserGroupCommandResult, FindStudentsForUserGroupCommandState, PopulateOnForm, SelfValidating, UpdatesFindStudentsForUserGroupCommand}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupMembershipStyle, SmallGroupSet}
 import uk.ac.warwick.tabula.groups.web.Routes
@@ -29,15 +29,15 @@ abstract class UpdateStudentsForSmallGroupSetController extends GroupsController
 
   @ModelAttribute("persistenceCommand")
   def persistenceCommand(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): UpdateStudentsForSmallGroupSetCommand =
-    UpdateStudentsForSmallGroupSetCommand(mandatory(module).adminDepartment, mandatory(module), mandatory(set))
+    UpdateStudentsForUserGroupCommand(mandatory(set.department), mandatory(module), mandatory(set))
 
   @ModelAttribute("findCommand")
   def findCommand(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): FindStudentsForUserGroupCommand =
-    FindStudentsForUserGroupCommand(mandatory(module).adminDepartment , mandatory(module), mandatory(set))
+    FindStudentsForUserGroupCommand(mandatory(set.department), mandatory(module), mandatory(set))
 
   @ModelAttribute("editMembershipCommand")
   def editMembershipCommand(@PathVariable module: Module, @PathVariable("smallGroupSet") set: SmallGroupSet): EditSmallGroupSetSitsMembershipCommand =
-    EditSmallGroupSetSitsMembershipCommand(mandatory(module).adminDepartment, mandatory(module), mandatory(set))
+    EditSmallGroupSetSitsMembershipCommand(mandatory(set.department), mandatory(module), mandatory(set))
 
   protected val newOrEdit: String
 
