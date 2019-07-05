@@ -1,23 +1,23 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
-import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Department, Module}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.{Department, UserGroupMembershipItem, UserGroupMembershipType, Module}
+import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.groups.admin.reusable.{DepartmentSmallGroupSetMembershipExcludeType, DepartmentSmallGroupSetMembershipIncludeType, DepartmentSmallGroupSetMembershipItem, DepartmentSmallGroupSetMembershipItemType}
-import uk.ac.warwick.tabula.helpers.LazyLists
 
 case class EditSmallGroupSetSitsMembershipCommandResult(
   includedStudentIds: JList[String],
   excludedStudentIds: JList[String],
-  membershipItems: Seq[DepartmentSmallGroupSetMembershipItem]
+  membershipItems: Seq[UserGroupMembershipItem]
 )
 
 case class AddUsersToEditSmallGroupSetSitsMembershipCommandResult(
@@ -45,14 +45,14 @@ class EditSmallGroupSetSitsMembershipCommandInternal(val department: Department,
   self: UserLookupComponent =>
 
   override def applyInternal(): EditSmallGroupSetSitsMembershipCommandResult = {
-    def toMembershipItem(universityId: String, itemType: DepartmentSmallGroupSetMembershipItemType) = {
+    def toMembershipItem(universityId: String, itemType: UserGroupMembershipType) = {
       val user = userLookup.getUserByWarwickUniId(universityId)
-      DepartmentSmallGroupSetMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
+      UserGroupMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
     }
 
-    val membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
-      val excludedMemberItems = excludedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipExcludeType))
-      val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipIncludeType))
+    val membershipItems: Seq[UserGroupMembershipItem] = {
+      val excludedMemberItems = excludedStudentIds.asScala.map(toMembershipItem(_, Exclude))
+      val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
       (excludedMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
     }
 

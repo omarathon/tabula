@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Department, Route, SitsStatus, StudentMe
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.data.model.{UserGroupMembershipType, _}
 
 import scala.collection.JavaConverters._
 
@@ -57,11 +58,11 @@ class FindStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mo
       // 2 results from search, even with 1 removed
       result.membershipItems.size should be(2)
       // 1 marked static
-      result.membershipItems.count(_.itemType == DepartmentSmallGroupSetMembershipStaticType) should be(1)
+      result.membershipItems.count(_.itemType == EntityMembershipStaticType) should be(1)
       // 1 marked removed
-      result.membershipItems.count(_.itemType == DepartmentSmallGroupSetMembershipExcludeType) should be(1)
+      result.membershipItems.count(_.itemType == EntityMembershipExcludeType) should be(1)
       // 0 marked included (not displayed if not in search)
-      result.membershipItems.count(_.itemType == DepartmentSmallGroupSetMembershipIncludeType) should be(0)
+      result.membershipItems.count(_.itemType == EntityMembershipIncludeType) should be(0)
 
       result.membershipItems.size should be(result.staticStudentIds.size)
       result.staticStudentIds.asScala should be(Seq(student1.universityId, student2.universityId))

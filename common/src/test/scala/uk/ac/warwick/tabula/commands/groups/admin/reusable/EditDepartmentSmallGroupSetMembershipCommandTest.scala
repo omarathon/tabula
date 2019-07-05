@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.commands.groups.admin.reusable
 
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Department, StaffMember, StudentMember}
+import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
+import uk.ac.warwick.tabula.data.model.{Department, UserGroupMembershipItem, StaffMember, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -79,9 +80,9 @@ class EditDepartmentSmallGroupSetMembershipCommandTest extends TestBase with Moc
       result.includedStudentIds.asScala should be(Seq(user1.getWarwickId, user2.getWarwickId))
       result.excludedStudentIds.asScala should be(Seq(user3.getWarwickId))
       result.membershipItems should be(Seq(
-        DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipIncludeType, "Nick", "Howes", "0672088", "cusebr"),
-        DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipExcludeType, "Matthew", "Jones", "9293883", "cusfal"),
-        DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipIncludeType, "Mathew", "Mannion", "0672089", "cuscav")
+        UserGroupMembershipItem(Include, "Nick", "Howes", "0672088", "cusebr"),
+        UserGroupMembershipItem(Exclude, "Matthew", "Jones", "9293883", "cusfal"),
+        UserGroupMembershipItem(Include, "Mathew", "Mannion", "0672089", "cuscav")
       ))
     }
   }

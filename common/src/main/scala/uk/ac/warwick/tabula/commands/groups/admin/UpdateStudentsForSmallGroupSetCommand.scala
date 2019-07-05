@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.commands.groups.admin.reusable.{DepartmentSmallGroupSetMembershipIncludeType, DepartmentSmallGroupSetMembershipItem, DepartmentSmallGroupSetMembershipItemType, DepartmentSmallGroupSetMembershipStaticType}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, AutowiringUserLookupComponent, SmallGroupServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -53,17 +53,17 @@ trait UpdateStudentsForSmallGroupSetCommandState extends UpdateEntityMembershipB
 
   def set: SmallGroupSet
 
-  def membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
-    def toMembershipItem(universityId: String, itemType: DepartmentSmallGroupSetMembershipItemType) = {
+  def membershipItems: Seq[UserGroupMembershipItem] = {
+    def toMembershipItem(universityId: String, itemType: UserGroupMembershipType) = {
       val user = userLookup.getUserByWarwickUniId(universityId)
-      DepartmentSmallGroupSetMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
+      UserGroupMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
     }
 
     val staticMemberItems =
       ((staticStudentIds.asScala diff excludedStudentIds.asScala) diff includedStudentIds.asScala)
-        .map(toMembershipItem(_, DepartmentSmallGroupSetMembershipStaticType))
+        .map(toMembershipItem(_, Static))
 
-    val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, DepartmentSmallGroupSetMembershipIncludeType))
+    val includedMemberItems = includedStudentIds.asScala.map(toMembershipItem(_, Include))
 
     (staticMemberItems ++ includedMemberItems).sortBy(membershipItem => (membershipItem.lastName, membershipItem.firstName))
   }

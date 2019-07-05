@@ -4,6 +4,7 @@ import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.UserGroupMembershipType._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.helpers.LazyLists
@@ -16,7 +17,7 @@ import scala.collection.JavaConverters._
 
 case class FindStudentsForDepartmentSmallGroupSetCommandResult(
   staticStudentIds: JList[String],
-  membershipItems: Seq[DepartmentSmallGroupSetMembershipItem]
+  membershipItems: Seq[UserGroupMembershipItem]
 )
 
 object FindStudentsForDepartmentSmallGroupSetCommand {
@@ -70,21 +71,21 @@ class FindStudentsForDepartmentSmallGroupSetCommandInternal(val department: Depa
         ).filter(userLookup.getUserByWarwickUniId(_).isFoundUser)
       }.asJava
 
-      def toMembershipItem(universityId: String, itemType: DepartmentSmallGroupSetMembershipItemType) = {
+      def toMembershipItem(universityId: String, itemType: UserGroupMembershipType) = {
         val user = userLookup.getUserByWarwickUniId(universityId)
-        DepartmentSmallGroupSetMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
+        UserGroupMembershipItem(itemType, user.getFirstName, user.getLastName, user.getWarwickId, user.getUserId)
       }
 
       val startResult = studentsPerPage * (page - 1)
       val staticMembershipItemsToDisplay =
-        staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, DepartmentSmallGroupSetMembershipStaticType))
+        staticStudentIds.asScala.slice(startResult, startResult + studentsPerPage).map(toMembershipItem(_, Static))
 
-      val membershipItems: Seq[DepartmentSmallGroupSetMembershipItem] = {
+      val membershipItems: Seq[UserGroupMembershipItem] = {
         staticMembershipItemsToDisplay.map { item =>
           if (excludedStudentIds.asScala.contains(item.universityId))
-            DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipExcludeType, item.firstName, item.lastName, item.universityId, item.userId)
+            UserGroupMembershipItem(Exclude, item.firstName, item.lastName, item.universityId, item.userId)
           else if (includedStudentIds.asScala.contains(item.universityId))
-            DepartmentSmallGroupSetMembershipItem(DepartmentSmallGroupSetMembershipIncludeType, item.firstName, item.lastName, item.universityId, item.userId)
+            UserGroupMembershipItem(Include, item.firstName, item.lastName, item.universityId, item.userId)
           else
             item
         }
