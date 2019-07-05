@@ -21,6 +21,7 @@ class FindStudentsForUserGroupCommandTest extends TestBase with Mockito {
   private trait Fixture {
     val department: Department = Fixtures.department("in", "IT Services")
     val set: DepartmentSmallGroupSet = Fixtures.departmentSmallGroupSet("my set")
+    set.members.asInstanceOf[UserGroup].userLookup = new MockUserLookup
     set.department = department
     val student1: StudentMember = Fixtures.student(universityId = "1234", userId = "1234")
     val student2: StudentMember = Fixtures.student(universityId = "2345", userId = "2345")

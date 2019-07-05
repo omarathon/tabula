@@ -71,7 +71,7 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
   }
 
   private trait CommandFixture extends Fixture {
-    val command = new UpdateStudentsForUserGroupCommandInternal[DepartmentSmallGroupSet](MemberQueryMembershipAdapter(set)) with CommandTestSupport {
+    lazy val command = new UpdateStudentsForUserGroupCommandInternal[DepartmentSmallGroupSet](MemberQueryMembershipAdapter(set)) with CommandTestSupport {
       override def save(): DepartmentSmallGroupSet = set
     }
   }
@@ -93,8 +93,6 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
       set.members.knownType.includedUserIds should be(Set("0000003"))
       set.members.knownType.excludedUserIds should be(Set("0000004"))
       set.memberQuery should be("sprStatuses=C")
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
@@ -115,8 +113,6 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery shouldBe null
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
@@ -125,7 +121,6 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
       department.autoGroupDeregistration = true
 
       set.members.knownType.includedUserIds = Set("0000001", "0000002", "0000003", "0000004")
-      command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
 
       command.linkToSits = false
 
@@ -141,6 +136,8 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
       wireUserLookup(groupB.students)
       groupB.students.knownType.includedUserIds = Set("0000003", "0000004")
 
+      command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
+
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
@@ -150,8 +147,6 @@ class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
       groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
       groupB.students.knownType.includedUserIds should be(Set("0000003")) // 4 has been removed
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
