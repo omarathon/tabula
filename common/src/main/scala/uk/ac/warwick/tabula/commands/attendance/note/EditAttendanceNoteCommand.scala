@@ -42,7 +42,10 @@ abstract class EditAttendanceNoteCommand(
   }
 
   def onBind(result: BindingResult) {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
+
     attendanceNote = attendanceMonitoringService.getAttendanceNote(student, point).getOrElse({
       isNew = true
       val newNote = new AttendanceMonitoringNote

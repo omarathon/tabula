@@ -43,8 +43,15 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     with ExtensionPersistenceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
-    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
+    result.popNestedPath()
+
+    affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
+      result.pushNestedPath(s"affectedAssessments[$i]")
+      assessment.onBind(moduleAndDepartmentService)
+      result.popNestedPath()
+    }
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {

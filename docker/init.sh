@@ -209,6 +209,9 @@ photos.preSharedKey=
 celcat.fetcher.ib.username=
 celcat.fetcher.ib.password=
 
+# Replace with a valid virus scan API key
+virusscan.api.key=
+
 EOF
 
 cat <<EOF > $tomcat_data_path/lib/memcached.properties

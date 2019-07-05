@@ -1,22 +1,25 @@
 package uk.ac.warwick.tabula.commands
 
-import java.io.{OutputStream, InputStream, File}
-import java.nio.charset.Charset
-import com.google.common.hash.{HashCode, HashFunction}
-import com.google.common.io.{CharSource, ByteSink, ByteProcessor, ByteSource}
-import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, MaintenanceModeService}
+import java.io.{File, InputStream}
 
-import scala.collection.JavaConverters._
+import com.google.common.io.ByteSource
+import org.springframework.validation.BindingResult
 import org.springframework.web.multipart.MultipartFile
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.system.NoBind
-import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.{MaintenanceModeEnabledException, MaintenanceModeService}
+import uk.ac.warwick.tabula.system.{BindListener, NoBind}
+import uk.ac.warwick.util.virusscan.{VirusScanResult, VirusScanService}
+
+import scala.collection.JavaConverters._
+import scala.compat.java8.FutureConverters._
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 /**
   * Encapsulates initially-uploaded MultipartFiles with a reference to
@@ -31,9 +34,13 @@ import uk.ac.warwick.tabula.RequestInfo
   * Works well with the filewidget macro in forms.ftl. Remember to set the
   * multipart/form-data encoding type on your form.
   */
-class UploadedFile extends BindListener {
+class UploadedFile extends BindListener with Logging {
   var fileDao: FileDao = Wire[FileDao]
   var maintenanceMode: MaintenanceModeService = Wire[MaintenanceModeService]
+  var virusScanService: VirusScanService = Wire[VirusScanService]
+
+  @NoBind var rejectVirusUploads: Boolean = Wire[String]("${uploads.virusscan.rejectOnVirus:false}").toBoolean
+  @NoBind var rejectVirusUploadsOnError: Boolean = Wire[String]("${uploads.virusscan.rejectOnError:false}").toBoolean
 
   @NoBind var disallowedFilenames: List[String] = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
   @NoBind var disallowedPrefixes: List[String] = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
@@ -88,8 +95,7 @@ class UploadedFile extends BindListener {
     * FileAttachments are marked as "temporary" until persisted by whatever
     * command needs them. This method will throw an exception
     */
-  override def onBind(result: BindingResult) {
-
+  override def onBind(result: BindingResult): Unit = {
     if (maintenanceMode.enabled) {
       throw new MaintenanceModeEnabledException(maintenanceMode.until, maintenanceMode.message)
     }
@@ -103,14 +109,35 @@ class UploadedFile extends BindListener {
 
     // Early exit if we've failed binding
     if (!bindResult.contains(false)) {
-
       if (hasUploads) {
+        // Virus scan
+        permittedUploads.asScala.zipWithIndex.foreach { case (item, index) =>
+          val virusScanResult = Await.result(virusScanService.scan(MultipartFileByteSource(item)).toScala, Duration.Inf)
+          virusScanResult.getStatus match {
+            case VirusScanResult.Status.clean =>
+              // Do nothing
+
+            case VirusScanResult.Status.virus =>
+              logger.warn(s"Virus uploaded${RequestInfo.fromThread.map { info => s" by ${info.user.fullName} (${info.user.userId})" }.getOrElse("")}: ${item.getOriginalFilename} (${virusScanResult.getVirus.get})")
+
+              if (rejectVirusUploads) {
+                result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getVirus.get()), s"The submitted file ${item.getOriginalFilename} contains a virus ${virusScanResult.getVirus.get()}.")
+              }
+            case VirusScanResult.Status.error =>
+              logger.warn(s"Error calling virus scan service for ${item.getOriginalFilename} (${virusScanResult.getError.get})")
+
+              if (rejectVirusUploadsOnError) {
+                result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getError.get()), s"There was an error calling the virus scan service for ${item.getOriginalFilename}: ${virusScanResult.getError.get()}.")
+              }
+          }
+        }
+
         // convert MultipartFiles into FileAttachments
         transactional() {
           val newAttachments = for (item <- permittedUploads.asScala) yield {
             val a = new FileAttachment
             a.name = new File(item.getOriginalFilename).getName
-            a.uploadedData = new MultipartFileByteSource(item)
+            a.uploadedData = MultipartFileByteSource(item)
             RequestInfo.fromThread.foreach { info => a.uploadedBy = info.user.userId }
             fileDao.saveTemporary(a)
             a
@@ -124,9 +151,7 @@ class UploadedFile extends BindListener {
         for (item <- attached.asScala if item.uploadedData != null)
           fileDao.saveTemporary(item)
       }
-
     }
-
   }
 
   private def commaSeparated(csv: String) =
@@ -134,10 +159,8 @@ class UploadedFile extends BindListener {
     else csv.split(",").toList
 }
 
-class MultipartFileByteSource(file: MultipartFile) extends ByteSource {
+case class MultipartFileByteSource(file: MultipartFile) extends ByteSource {
   override def openStream(): InputStream = file.getInputStream
-
   override def size(): Long = file.getSize
-
   override def isEmpty: Boolean = file.isEmpty
 }

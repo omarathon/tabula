@@ -88,7 +88,7 @@ class FileDaoTest extends PersistenceTestBase with Mockito {
       attachment.uploadedData = ByteSource.wrap(bytes)
 
       dao.saveTemporary(attachment)
-      verify(objectStorageService, times(1)).push(attachment.id, attachment.uploadedData, ObjectStorageService.Metadata(26, "application/octet-stream", Some("4931c07015e50baf297aae2ce8571da15c0f2380")))
+      verify(objectStorageService, times(1)).push(attachment.id, attachment.uploadedData, ObjectStorageService.Metadata(26, "text/plain", Some("4931c07015e50baf297aae2ce8571da15c0f2380")))
 
       attachment.id should not be (null)
 

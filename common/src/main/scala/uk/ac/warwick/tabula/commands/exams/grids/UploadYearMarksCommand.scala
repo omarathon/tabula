@@ -88,7 +88,10 @@ trait UploadYearMarksCommandBindListener extends BindListener {
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         if (!file.attached.isEmpty) {
           processFiles(file.attached.asScala)
         }

@@ -119,10 +119,15 @@ trait OnlineFeedbackBindListener extends BindListener {
   override def onBind(result: BindingResult) {
     if (fields != null) {
       for ((key, field) <- fields.asScala) {
+        result.pushNestedPath(s"fields[$key]")
         field.onBind(result)
+        result.popNestedPath()
       }
     }
+
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 }
 

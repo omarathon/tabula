@@ -56,7 +56,9 @@ trait AbstractScheduledMeetingCommandInternal extends BindListener {
   }
 
   def onBind(result: BindingResult) {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 }
 

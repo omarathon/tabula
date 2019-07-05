@@ -40,7 +40,7 @@ class LegacyFilesystemObjectStorageService(attachmentDir: File, createMissingDir
       if (source.isEmpty) None
       else Some(ObjectStorageService.Metadata(
         contentLength = source.size(),
-        contentType = detectMimeType(source.openStream()),
+        contentType = detectMimeType(source.openStream()).toString,
         fileHash = None
       ))
 
