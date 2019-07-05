@@ -421,7 +421,7 @@
 
   <bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter"/>
   <bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter"/>
-  <bean id="csrfFilter" class="uk.ac.warwick.sso.client.CSRFFilter" p:reportOnlyMode="false" />
+  <bean id="csrfFilter" class="uk.ac.warwick.sso.client.CSRFFilter" p:reportOnlyMode="true" />
   <bean id="staticContentHeadersFilter" class="uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter"/>
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter"/>
