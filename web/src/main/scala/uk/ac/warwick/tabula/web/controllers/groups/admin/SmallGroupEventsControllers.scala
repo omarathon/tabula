@@ -53,7 +53,7 @@ abstract class AbstractCreateSmallGroupEventController extends SmallGroupEventsC
   @RequestMapping
   def form(@ModelAttribute("createSmallGroupEventCommand") cmd: CreateSmallGroupEventCommand): Mav = {
     Mav("groups/admin/groups/events/new", "cancelUrl" -> cancelUrl(cmd.set))
-      .crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+      .crumbs(Breadcrumbs.Department(cmd.set.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
   }
 
   protected def submit(cmd: CreateSmallGroupEventCommand, errors: Errors, route: String): Mav = {
@@ -109,7 +109,7 @@ abstract class AbstractEditSmallGroupEventController extends SmallGroupEventsCon
   @RequestMapping
   def form(@ModelAttribute("editSmallGroupEventCommand") cmd: EditSmallGroupEventCommand): Mav = {
     Mav("groups/admin/groups/events/edit", "cancelUrl" -> cancelUrl(cmd.set))
-      .crumbs(Breadcrumbs.Department(cmd.module.adminDepartment, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
+      .crumbs(Breadcrumbs.Department(cmd.set.department, cmd.academicYear), Breadcrumbs.ModuleForYear(cmd.module, cmd.academicYear))
   }
 
   protected def submit(cmd: EditSmallGroupEventCommand, errors: Errors, route: String): Mav = {
@@ -168,7 +168,7 @@ abstract class AbstractUpdateSmallGroupEventFromExternalSystemController extends
     val set = event.group.groupSet
 
     Mav("groups/admin/groups/events/update", "cancelUrl" -> postSaveRoute(event))
-      .crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+      .crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   protected def postSaveRoute(event: SmallGroupEvent): String

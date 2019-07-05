@@ -88,7 +88,7 @@ abstract class UpdateStudentsForSmallGroupSetController extends GroupsController
       "expandManual" -> expandManual,
       "SITSInFlux" -> set.academicYear.isSITSInFlux(LocalDate.now),
       "returnTo" -> getReturnTo("")
-    ).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+    ).crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   @RequestMapping
@@ -134,7 +134,7 @@ abstract class UpdateStudentsForSmallGroupSetController extends GroupsController
   ): Mav = {
     Mav("groups/admin/groups/manuallyaddstudents",
       "returnTo" -> getReturnTo("")
-    ).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+    ).crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.manuallyAddSubmit))

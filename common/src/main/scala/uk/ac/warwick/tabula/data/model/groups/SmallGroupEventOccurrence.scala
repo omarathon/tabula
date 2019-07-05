@@ -44,6 +44,12 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
   def academicYear: AcademicYear = event.academicYear
 
   def module: Module = event.module
+
+  def group: SmallGroup = event.group
+
+  def groupSet: SmallGroupSet = event.groupSet
+
+  def department: Department = event.department
 }
 
 object SmallGroupEventOccurrence {

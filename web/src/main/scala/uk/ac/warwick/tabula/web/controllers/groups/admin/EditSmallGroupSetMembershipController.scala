@@ -31,12 +31,12 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
   protected def render(set: SmallGroupSet, cmd: EditSmallGroupSetMembershipCommand, model: Map[String, _] = Map()): Mav = {
     Mav(renderPath, model ++ Map(
       "SmallGroupMembershipStyle" -> SmallGroupMembershipStyle,
-      "department" -> cmd.module.adminDepartment,
-      "module" -> cmd.module,
+      "department" -> set.department,
+      "module" -> set.module,
       "availableUpstreamGroups" -> cmd.availableUpstreamGroups,
       "linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
       "assessmentGroups" -> cmd.assessmentGroups))
-      .crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+      .crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   @RequestMapping(method = Array(GET, HEAD))
@@ -87,7 +87,7 @@ abstract class AbstractEditSmallGroupSetMembershipController extends GroupsContr
     @Valid @ModelAttribute("command") cmd: EditSmallGroupSetMembershipCommand,
     errors: Errors,
     @PathVariable("smallGroupSet") set: SmallGroupSet
-  ): Mav = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
+  ): Mav = submit(cmd, errors, set, Routes.admin(set.department, set.academicYear))
 
   @InitBinder
   def upstreamGroupBinder(binder: WebDataBinder) {

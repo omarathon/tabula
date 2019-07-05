@@ -191,4 +191,6 @@ class SmallGroup
   def academicYear: AcademicYear = groupSet.academicYear
 
   def module: Module = groupSet.module
+
+  def department: Department = groupSet.department
 }
