@@ -87,7 +87,8 @@ object RequestInfoInterceptor {
       emergencyMessage = emergencyMessage,
       userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
       ipAddress = request.getRemoteAddr.textOrEmpty,
-      nonce = nonce
+      nonce = nonce,
+      csrfToken = "TODO"
     )
   }
 
