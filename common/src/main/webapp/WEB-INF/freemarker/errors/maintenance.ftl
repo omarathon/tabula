@@ -27,7 +27,7 @@
         <p>${exception.messageOrEmpty}</p>
       </#if>
 
-      <p>Need more help? Please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
+      <p>Need more help? Please contact <a href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a></p>
     </div>
   </div>
 </#escape>

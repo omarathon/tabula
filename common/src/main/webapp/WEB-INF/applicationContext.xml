@@ -415,6 +415,14 @@
       <url-pattern>/*</url-pattern>
     </mapping>
     <mapping>
+      <filter ref="csrfFilter"/>
+      <url-pattern>/*</url-pattern>
+      <excluded-url-pattern>/static/*</excluded-url-pattern>
+      <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+      <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>/error/*</excluded-url-pattern>
+    </mapping>
+    <mapping>
       <filter ref="staticContentHeadersFilter"/>
       <url-pattern>/static/*</url-pattern>
     </mapping>
@@ -424,6 +432,7 @@
 
   <bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter"/>
   <bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter"/>
+  <bean id="csrfFilter" class="uk.ac.warwick.sso.client.CSRFFilter" p:reportOnlyMode="true" />
   <bean id="staticContentHeadersFilter" class="uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter"/>
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter"/>
