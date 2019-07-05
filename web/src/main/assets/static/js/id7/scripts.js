@@ -750,7 +750,7 @@ exports.initCollapsible = function ($el) {
           $replacementLink.contents()
             .filter(function() { return this.nodeType !== 1; })
             .wrap('<span class="collapse-label">');
-          $replacementLink.find('span').text($.trim($replacementLink.find('span').text()));
+          $replacementLink.find('span.collapse-label').text($.trim($replacementLink.find('span.collapse-label').text()));
           $titleElement.html('');
           $titleElement.prepend($replacementLink);
         }
