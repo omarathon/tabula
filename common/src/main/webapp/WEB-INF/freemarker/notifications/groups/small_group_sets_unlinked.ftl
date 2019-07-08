@@ -1,5 +1,5 @@
 There <@fmt.p number=sets?size singular="is" plural="are" shownumber=false />
-<@fmt.p sets?size "small group sets" /> in ${department.name} which automatically
+<@fmt.p sets?size "small group set" /> in ${department.name} which automatically
 <@fmt.p number=sets?size singular="updates its" plural="update their" shownumber=false />
 membership based on changes in SITS.
 
