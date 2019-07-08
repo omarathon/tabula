@@ -82,7 +82,7 @@
     any existing students are removed and group allocations are reset.
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function($) {
       function getSelectedMembershipStyle() {
         return $('input[name=membershipStyle]:checked').val();
