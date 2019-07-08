@@ -33,8 +33,8 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // ssl.google-analytics.com for GA
       "script-src" -> Some(s"'self' 'unsafe-inline' 'nonce-$nonce' https://ssl.google-analytics.com 'report-sample'"),
 
-      // The unsafe-inline directive here is IGNORED in favour of nonces in modern browsers
-      "style-src" -> Some(s"'self' 'unsafe-inline' https://fonts.googleapis.com 'nonce-$nonce' 'report-sample'"),
+      // TODO Replace unsafe-inline with a nonce - this will mean that all style="" attributes will need replacing
+      "style-src" -> Some(s"'self' 'unsafe-inline' https://fonts.googleapis.com 'report-sample'"),
 
       "font-src" -> Some("'self' https://fonts.googleapis.com https://fonts.gstatic.com"),
 
