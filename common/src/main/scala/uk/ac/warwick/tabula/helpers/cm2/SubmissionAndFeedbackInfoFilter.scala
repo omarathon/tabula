@@ -154,7 +154,7 @@ object SubmissionAndFeedbackInfoFilters {
         item.coursework.enhancedExtension.isDefined && (item.coursework.enhancedExtension.get.extension.state == ExtensionState.Approved)
     }
 
-    lazy val allSubmissionStates = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed)
+    lazy val allSubmissionStates: Seq[SubmissionAndFeedbackInfoFilter] = Seq(Submitted, Unsubmitted, LateSubmission, DisabilityDisclosed)
   }
 
 
