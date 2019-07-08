@@ -63,6 +63,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     new CreateCommandFixture {
       command.name = "Set name"
       command.academicYear = AcademicYear.now()
+      command.membershipStyle = SmallGroupMembershipStyle.AssessmentComponents
 
       val ac1: AssessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("in101"), 1)
       val upstream1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(ac1)
