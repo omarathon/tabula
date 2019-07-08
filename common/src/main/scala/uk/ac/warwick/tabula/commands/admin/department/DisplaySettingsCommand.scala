@@ -34,6 +34,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   var showStudentName: Boolean = department.showStudentName
   var plagiarismDetection: Boolean = department.plagiarismDetectionEnabled
   var assignmentGradeValidation: Boolean = department.assignmentGradeValidation
+  var assignmentGradeValidationUseDefaultForZero: Boolean = department.assignmentGradeValidationUseDefaultForZero
   var assignmentInfoView: String = department.assignmentInfoView
   var weekNumberingSystem: String = department.weekNumberingSystem
   var autoGroupDeregistration: Boolean = department.autoGroupDeregistration
@@ -69,6 +70,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
     department.showStudentName = showStudentName
     department.plagiarismDetectionEnabled = plagiarismDetection
     department.assignmentGradeValidation = assignmentGradeValidation
+    department.assignmentGradeValidationUseDefaultForZero = assignmentGradeValidationUseDefaultForZero
     department.assignmentInfoView = assignmentInfoView
     department.autoGroupDeregistration = autoGroupDeregistration
     department.studentsCanScheduleMeetings = studentsCanScheduleMeetings

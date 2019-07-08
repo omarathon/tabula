@@ -271,6 +271,10 @@ class Department extends GeneratedId
 
   def assignmentGradeValidation_=(validation: Boolean): Unit = settings += (Settings.AssignmentGradeValidation -> validation)
 
+  def assignmentGradeValidationUseDefaultForZero: Boolean = getBooleanSetting(Settings.AssignmentGradeValidationUseDefaultForZero) getOrElse false
+
+  def assignmentGradeValidationUseDefaultForZero_=(useDefault: Boolean): Unit = settings += (Settings.AssignmentGradeValidationUseDefaultForZero -> useDefault)
+
   def autoMarkMissedMonitoringPoints: Boolean = getBooleanSetting(Settings.AutoMarkMissedMonitoringPoints, default = false)
 
   def autoMarkMissedMonitoringPoints_=(enabled: Boolean) {
@@ -588,6 +592,7 @@ object Department {
     val EnableLevelGrids = "enableLevelGrids"
 
     val AssignmentGradeValidation = "assignmentGradeValidation"
+    val AssignmentGradeValidationUseDefaultForZero = "assignmentGradeValidationUseDefaultForZero"
     val MeetingRecordApprovalType = "meetingRecordApprovalType"
 
     val AutoMarkMissedMonitoringPoints = "autoMarkMissedMonitoringPoints"
