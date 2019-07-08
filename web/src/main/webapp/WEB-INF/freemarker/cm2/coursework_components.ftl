@@ -678,8 +678,10 @@
       </#if>
 		>
 			<div class="clearfix">
-				<div class="btn-group section-manage-button">
-					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
+
+				<h4 class="section-title with-button"><#if has_assignments><a class="collapse-trigger icon-container" href="#"></#if>${title}<#if has_assignments></a></#if>
+        				<div class="btn-group section-manage-button">
+					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" href="#">Manage this module <span class="caret"></span></a>
 					<ul class="dropdown-menu pull-right">
 						<li>
 							<#local perms_url><@routes.admin.moduleperms module /></#local>
@@ -714,7 +716,7 @@
 					</ul>
 				</div>
 
-				<h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
+        </h4>
 
 				<#if has_assignments>
           <div class="striped-section-contents">
