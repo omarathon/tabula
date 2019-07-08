@@ -32,9 +32,7 @@ class FeedbackAdjustmentsListController extends CourseworkController {
     @PathVariable assignment: Assignment,
     @ModelAttribute("listCommand") listCommand: FeedbackAdjustmentListCommand
   ): Mav = {
-    val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition {
-      _.feedback.isDefined
-    }
+    val (studentInfo, noFeedbackStudentInfo) = listCommand.apply().partition(_.feedback.isDefined)
 
     Mav("cm2/admin/assignments/feedback/adjustments_list",
       "studentInfo" -> studentInfo,

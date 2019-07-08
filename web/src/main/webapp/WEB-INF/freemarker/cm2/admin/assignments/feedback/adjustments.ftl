@@ -89,7 +89,7 @@
       </#if>
     </@bs3form.labelled_form_group>
 
-    <@bs3form.labelled_form_group path="adjustedGrade" labelText="">
+    <@bs3form.labelled_form_group path="adjustedGrade" labelText="${isGradeValidation?string('', 'Adjusted grade')}">
       <div class="input-group">
         <#if isGradeValidation>
           <#assign generateUrl><@routes.cm2.generateGradesForMarks command.assignment /></#assign>
