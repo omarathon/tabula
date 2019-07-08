@@ -241,10 +241,11 @@ $(function () {
       if (i % 2 === 0) {
         var $selectRow = $(this), $expandRow = $selectRow.next('tr');
         $selectRow.data('expandRow', $expandRow.remove()).find('td:first').addClass('can-expand').prepend(
-          $('<i/>').addClass('fa fa-fw fa-caret-right')
-        );
+        $('<a href="#">').addClass('expand-trigger').append($('<i/>').addClass('fa fa-fw fa-caret-right')).append($('<span>').addClass('sr-only').text('Toggle row'))
+      );
       }
-    }).end().on('click', 'td.can-expand', function () {
+    }).end().on('click', 'td.can-expand', function (e) {
+      e.preventDefault();
       var $row = $(this).closest('tr');
       if ($row.is('.expanded')) {
         $row.removeClass('expanded').next('tr').remove().end()
