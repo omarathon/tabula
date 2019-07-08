@@ -85,6 +85,24 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     }
   }
 
+  @Test def changeMembershipStyleClearsMembershipAndAllocations: Unit = {
+    new EditCommandFixture {
+      set.members.knownType.includedUserIds = Set("u0000001", "u0000002")
+
+      val group = new SmallGroup()
+      group.groupSet = set
+      group.students.knownType.includedUserIds = Set("u0000001", "u0000002")
+      set.groups.add(group)
+
+      command.membershipStyle = SmallGroupMembershipStyle.AssessmentComponents
+
+      command.applyInternal()
+
+      set.members shouldBe empty
+      group.students shouldBe empty
+    }
+  }
+
   @Test def edit {
     new EditCommandFixture {
       command.name should be(set.name)
