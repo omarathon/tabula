@@ -714,7 +714,7 @@
 					</ul>
 				</div>
 
-				<h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
+				<h4 class="section-title with-button"><#if has_assignments><a class="collapse-trigger icon-container" href="#"></#if>${title}<#if has_assignments></a></#if></h4>
 
 				<#if has_assignments>
           <div class="striped-section-contents">
