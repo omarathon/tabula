@@ -980,38 +980,6 @@
   <div class="group-attendance" id="group-attendance-${group.id}">
     <div class="scrollable-table">
       <div class="scrollable-table-row">
-        <div class="left">
-          <table class="table table-striped table-condensed attendance-table">
-            <thead>
-            <tr>
-              <th class="sortable student">Student</th>
-              <th class="sortable missed"></th>
-            </tr>
-            </thead>
-            <tbody>
-            <#list studentAttendance?keys as student>
-              <#local attendance = mapGet(studentAttendance, student) />
-              <#local missedCount = 0 />
-              <#list instances as instance>
-                <#local state = mapGet(attendance, instance) />
-                <#if state.name == 'MissedUnauthorised'>
-                  <#local missedCount = missedCount + 1 />
-                </#if>
-              </#list>
-              <tr>
-                <td data-sortBy="${student.lastName}, ${student.firstName}" title="${student.fullName}">
-                  <div class="ellipsis">${student.firstName!}</div>
-                  <div class="ellipsis">${student.lastName!}</div>
-                  <@pl.profile_link student.warwickId! />
-                </td>
-                <td>
-                  <span class="badge progress-bar-<#if (missedCount > 2)>danger<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
-                </td>
-              </tr>
-            </#list>
-            </tbody>
-          </table>
-        </div>
         <div class="right">
           <table class="table table-striped table-condensed attendance-table sb-no-wrapper-table-popout">
             <thead>
@@ -1050,6 +1018,38 @@
               <#local attendance = mapGet(studentAttendance, student) />
               <#local notes = mapGet(attendanceNotes, student) />
               <@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group />
+            </#list>
+            </tbody>
+          </table>
+        </div>
+        <div class="left">
+          <table class="table table-striped table-condensed attendance-table">
+            <thead>
+            <tr>
+              <th class="sortable student">Student</th>
+              <th class="sortable missed"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <#list studentAttendance?keys as student>
+              <#local attendance = mapGet(studentAttendance, student) />
+              <#local missedCount = 0 />
+              <#list instances as instance>
+                <#local state = mapGet(attendance, instance) />
+                <#if state.name == 'MissedUnauthorised'>
+                  <#local missedCount = missedCount + 1 />
+                </#if>
+              </#list>
+              <tr>
+                <td data-sortBy="${student.lastName}, ${student.firstName}" title="${student.fullName}">
+                  <div class="ellipsis">${student.firstName!}</div>
+                  <div class="ellipsis">${student.lastName!}</div>
+                  <@pl.profile_link student.warwickId! />
+                </td>
+                <td>
+                  <span class="badge progress-bar-<#if (missedCount > 2)>danger<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
+                </td>
+              </tr>
             </#list>
             </tbody>
           </table>
