@@ -6,7 +6,7 @@
     <table class="table table-condensed table-sortable">
       <thead>
         <tr>
-          <th><input type="checkbox" class="check-all" title="Select all/none"></th>
+          <#if can.do("MitigatingCircumstancesPanel.Modify", department)><th><input type="checkbox" class="check-all" title="Select all/none"></th></#if>
           <th class="sortable">Reference</th>
           <th class="sortable">Student</th>
           <th class="sortable">Affected dates</th>
@@ -19,7 +19,7 @@
       <#list submissions as info>
         <#assign submission = info.submission />
         <tr>
-          <td><input type="checkbox" name="submissions" value="${submission.key}"></td>
+          <#if can.do("MitigatingCircumstancesPanel.Modify", department)><td><input type="checkbox" name="submissions" value="${submission.key}"></td></#if>
           <td>
             <#if !submission.draft>
               <a href="<@routes.mitcircs.reviewSubmission submission />">MIT-${submission.key}</a>
@@ -67,7 +67,7 @@
       <tbody>
     </table>
   <#else>
-    <p>There are no mitigating circumstances submissions for ${department.name}.</p>
+    <p>No mitigating circumstances submissions found.</p>
   </#if>
 
   <script type="text/javascript" nonce="${nonce()}">
