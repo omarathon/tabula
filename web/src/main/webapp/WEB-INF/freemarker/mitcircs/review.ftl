@@ -2,7 +2,7 @@
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
-<#assign isSelf = submission.student.universityId == user.universityId />
+<#assign isSelf = submission.student.universityId == user.universityId!'' />
 
 <#escape x as x?html>
   <#if pagination??>

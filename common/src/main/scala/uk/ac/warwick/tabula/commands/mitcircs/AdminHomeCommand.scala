@@ -31,7 +31,7 @@ case class AdminHomeInformation(
 
 object AdminHomeCommand {
   type Command = Appliable[AdminHomeInformation] with AdminHomeCommandRequest
-  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Manage
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Read
 
   def apply(department: Department, year: AcademicYear): Command =
     new AdminHomeCommandInternal(department, year)
