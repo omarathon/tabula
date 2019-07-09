@@ -89,7 +89,7 @@ object RequestInfoInterceptor {
       userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
       ipAddress = request.getRemoteAddr.textOrEmpty,
       nonce = nonce,
-      csrfToken = request.getAttribute(CSRFFilter.CSRF_TOKEN_PROPERTY_NAME).textOrEmpty
+      csrfToken = request.getAttribute(CSRFFilter.CSRF_TOKEN_PROPERTY_NAME).asInstanceOf[String].textOrEmpty
     )
   }
 
