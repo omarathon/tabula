@@ -33,7 +33,7 @@
 <#-- Capture the content between the macro tags into a string -->
   <#local content><#nested /></#local>
   <#if content?trim?has_content>
-    <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown">${text} <span class="caret"></span></a>
+    <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown" href="#">${text} <span class="caret"></span></a>
     <ul class="dropdown-menu pull-right">
       ${content}
     </ul>
