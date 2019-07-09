@@ -475,6 +475,8 @@ $.fn.tabulaPopover = function (options) {
   // filter already initialized popovers
   $items = $items.not(initClass);
 
+  const tooltipItems = $items.filter('.use-tooltip').toArray(); // boostrap js based tooltip
+
   // set options, with defaults
   var defaults = {
     template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
@@ -505,8 +507,10 @@ $.fn.tabulaPopover = function (options) {
   $('html').on('click.popoverDismiss', function (e) {
     // if clicking anywhere other than the popover itself
     if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
-      $items.popover('hide');
-      $items.tooltip('enable');
+      $('.popover-inner').find('button.close').click();
+      for (var i = 0; i < tooltipItems.length; i++) {
+        $(tooltipItems[i]).tooltip('enable');
+      }
     }
   });
 

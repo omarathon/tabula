@@ -6,7 +6,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, PermissionsService}
+import uk.ac.warwick.tabula.roles.TeachingQualityUser
+import uk.ac.warwick.tabula.services.permissions.{AutowiringCacheStrategyComponent, PermissionsService, RoleService}
 import uk.ac.warwick.tabula.services.{AssessmentService, CourseAndRouteService, ModuleAndDepartmentService, ProfileService, SecurityService}
 import uk.ac.warwick.tabula.web.views.AutowiredTextRendererComponent
 import uk.ac.warwick.tabula.{CurrentUser, Features}
@@ -33,6 +34,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
   var moduleService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
   var routeService: CourseAndRouteService = Wire[CourseAndRouteService]
   var permissionsService: PermissionsService = Wire[PermissionsService]
+  var roleService: RoleService = Wire[RoleService]
   var securityService: SecurityService = Wire[SecurityService]
   var profileService: ProfileService = Wire[ProfileService]
   var assessmentService: AssessmentService = Wire[AssessmentService]
@@ -62,8 +64,11 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
     val examGridsEnabled = features.examGrids && user.isStaff &&
       (canDeptAdmin || moduleService.departmentsWithPermission(user, Permissions.Department.ExamGrids).nonEmpty)
 
-    val canManageMitigatingCircumstances = user.isStaff &&
-      permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Read).nonEmpty
+    val canManageMitigatingCircumstances =
+      user.isStaff && (
+        permissionsService.getAllPermissionDefinitionsFor(user, Permissions.MitigatingCircumstancesSubmission.Read).nonEmpty ||
+        roleService.hasRole(user, TeachingQualityUser())
+      )
 
     val modelMap = Map(
       "user" -> user,
@@ -72,7 +77,7 @@ object UserNavigationGeneratorImpl extends UserNavigationGenerator with Autowire
       "canViewProfiles" -> canViewProfiles,
       "examsEnabled" -> examsEnabled,
       "examGridsEnabled" -> examGridsEnabled,
-      "canManageMitigatingCircumstances" -> canManageMitigatingCircumstances,
+      "canManageMitigatingCircumstances" -> canManageMitigatingCircumstances
     )
 
     UserNavigation(
