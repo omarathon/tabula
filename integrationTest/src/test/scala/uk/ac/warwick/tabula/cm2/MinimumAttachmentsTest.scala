@@ -58,7 +58,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 
     val submitLink = eventually {
       id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment CM2')]"))
-        .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Submit assignment"))
+        .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElements(By.cssSelector(".btn-primary")).get(0)
     }
     click on submitLink
 
@@ -91,7 +91,7 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 
   }
 
-  "Department admin" should "be able to be able to specify the minimum number of attachents for an assignment" in as(P.Admin1) {
+  "Department admin" should "be able to be able to specify the minimum number of attachments for an assignment" in as(P.Admin1) {
     openAdminPage()
     loadCurrentAcademicYearTab()
     openEditOptionsScreen()
