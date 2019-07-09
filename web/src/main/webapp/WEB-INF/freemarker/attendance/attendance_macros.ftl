@@ -70,7 +70,7 @@
   <nav>
     <ul class="pagination pagination-sm">
       <#if currentPage lte 1>
-        <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&raquo;</span></li>
+        <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&laquo;</span></li>
       <#else>
         <li><a href="?page=${currentPage - 1}" data-page="${currentPage - 1}">&laquo;</a></li>
       </#if>

@@ -292,7 +292,7 @@
             <span class="sr-only">There are ${totalPages} page<#if currentPage != 1>s</#if> of results, you are on page ${currentPage}</span>
             <ul class="pagination" style="margin-top: 0;">
                 <#if currentPage lte 1>
-                  <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&raquo;</span></li>
+                  <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&laquo;</span></li>
                 <#else>
                   <li><a data-page="${currentPage - 1}" href="#"><span class="sr-only">Previous page</span>&laquo;</a></li>
                 </#if>
