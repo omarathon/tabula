@@ -137,7 +137,7 @@
               </div>
             </#if>
 
-            <h1>
+            <h1 class="pull-left">
               <span class="id7-current-site-link"><a href="/">Tabula</a></span>
             </h1>
           </div>
