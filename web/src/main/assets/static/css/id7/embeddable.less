@@ -1448,6 +1448,7 @@ a.white-text-decoration {
   }
 }
 
+// default is on the top
 .tabula-tooltip[data-title]:not([data-title=""]) {
   position: relative;
   display: inline-block;
@@ -1485,38 +1486,56 @@ a.white-text-decoration {
     min-width: 150px;
   }
 
-  &:hover {
+  &:hover, &:focus {
     &::before, &::after {
       opacity: @tooltip-opacity;
     }
   }
 }
 
-.tabula-tooltip-left[data-title]:not([data-title=""]):extend(.tabula-tooltip[data-title]:not([data-title=""]) all) {
+.tabula-tooltip-right[data-title]:not([data-title=""]):extend(.tabula-tooltip[data-title]:not([data-title=""]) all) {
   &::before, &::after {
-    left: -@tooltip-arrow-width;
-    top: calc(-50% - @tooltip-arrow-width);
+    top: calc(50% - @tooltip-arrow-width);
+    left: 100%;
   }
 
   &::before {
-    transform: translate(-@tooltip-arrow-width, calc(100% + @tooltip-arrow-width * 3));
+    transform: translateX(@tooltip-arrow-width);
+    border-style: solid;
+    border-width: @tooltip-arrow-width @tooltip-arrow-width @tooltip-arrow-width 0;
+    border-color: transparent @tooltip-bg transparent transparent;
+  }
+
+  &::after {
+    transform: translateX(calc(@tooltip-arrow-width * 2)) translateY(calc(-@tooltip-arrow-width * 5));
+    height: calc(@tooltip-arrow-width * 12);
+    min-width: 180px;
+  }
+}
+
+.tabula-tooltip-left[data-title]:not([data-title=""]):extend(.tabula-tooltip[data-title]:not([data-title=""]) all) {
+  &::before, &::after {
+    top: calc(50% - @tooltip-arrow-width);
+    left: -@tooltip-arrow-width;
+  }
+
+  &::before {
+    transform: translateX(-@tooltip-arrow-width);
+    border-style: solid;
     border-width: @tooltip-arrow-width 0 @tooltip-arrow-width @tooltip-arrow-width;
     border-color: transparent transparent transparent @tooltip-bg;
   }
 
   &::after {
-    transform: translate(calc(-100% - @tooltip-arrow-width));
-    min-height: calc(@tooltip-arrow-width * 12);
+    transform: translateX(calc(-@tooltip-arrow-width - 100%)) translateY(calc(-@tooltip-arrow-width * 5));
+    height: calc(@tooltip-arrow-width * 12);
+    min-width: 180px;
   }
 }
 
 .tabula-tooltip-top-left[data-title]:not([data-title=""]):extend(.tabula-tooltip-left[data-title]:not([data-title=""]) all) {
-  &::before, &::after {
-    top: calc(-100% - @tooltip-arrow-width);
-  }
-
-  &::before {
-    transform: translate(-@tooltip-arrow-width, calc(100% + @tooltip-arrow-width * 6));
+  &::after {
+    transform: translateX(calc(-@tooltip-arrow-width - 100%)) translateY(calc(-100% + @tooltip-arrow-width * 2));
   }
 }
 

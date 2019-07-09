@@ -989,20 +989,17 @@
                 <#local week = instance._2() />
 
                 <th class="instance-date-header">
-                  <div class="instance-date use-tooltip"
-                       data-container="body"
-                       title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
+                  <div class="instance-date tabula-tooltip-<#if (instances?size - instance_index) gt 3>right<#else>left</#if>"
+                       data-title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
                     <@instanceFormat instance academicYear department />
                   </div>
 
                   <#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
                     <#if can.do("SmallGroupEvents.ViewRegister", event)>
                       <div class="eventRegister">
-                        <a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
+                        <a class="btn btn-xs btn-default tabula-tooltip-<#if (instances?size - instance_index) gt 3>right<#else>left</#if> <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
                            href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}"
-                           title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
-                           data-html="true"
-                           data-container="body"
+                           data-title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
                         >
                           Record
                         </a>
