@@ -61,7 +61,10 @@
                     $previewText.html(res);
                   }
                   hidePreviewIfNotNeeded();
-                }
+                },
+                error: function(err) {
+                  // TAB-7304 add error handling
+                },
               });
             }
           }, 300);

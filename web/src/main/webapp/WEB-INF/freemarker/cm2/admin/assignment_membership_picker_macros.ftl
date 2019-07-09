@@ -346,7 +346,10 @@
                 });
                 $('.sits-picker .btn').removeClass('disabled');
                 initEnrolmentMemberTable();
-              }
+              },
+              error: function(err) {
+                // TAB-7304 add error handling
+              },
             });
           }
         });
@@ -379,7 +382,10 @@
               initEnrolment();
               initEnrolmentMemberTable();
               alertPending();
-            }
+            },
+            error: function(err) {
+              // TAB-7304 add error handling
+            },
           });
         });
 

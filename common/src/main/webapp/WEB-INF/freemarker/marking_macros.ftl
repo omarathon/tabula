@@ -273,7 +273,10 @@
                 }
 
               });
-            }
+            },
+            error: function(err) {
+              // TAB-7304 add error handling
+            },
           });
         }
       });

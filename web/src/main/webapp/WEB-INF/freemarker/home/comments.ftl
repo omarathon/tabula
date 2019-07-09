@@ -211,7 +211,10 @@
                     .append($('<a />').attr({'href': link, 'target': '_blank'}).html('More results'))
                 );
               }
-            }
+            },
+            error: function(err) {
+              // TAB-7304 add error handling
+            },
           });
         }
       }).data('tabula-typeahead');

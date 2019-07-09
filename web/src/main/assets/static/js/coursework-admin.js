@@ -846,7 +846,10 @@
         success: function (response) {
           $('.saving').hide();
           $('.saved').show();
-        }
+        },
+        error: function(err) {
+          // TAB-7304 add error handling
+        },
       });
     });
   });

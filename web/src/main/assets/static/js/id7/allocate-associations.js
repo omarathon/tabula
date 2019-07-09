@@ -113,7 +113,10 @@ $(function () {
         data: $fetchForm.serialize(),
         success: function (data) {
           process(data.unallocated)
-        }
+        },
+        error: function(err) {
+          // TAB-7304 add error handling
+        },
       });
     },
     selectOnBlur: false,

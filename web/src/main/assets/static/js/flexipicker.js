@@ -295,7 +295,10 @@
           // that may have been registered against it.
           d.resolve(results);
         }
-      }
+      },
+      error: function(err) {
+        // TAB-7304 add error handling
+      },
     });
     // unset the search when it's done
     this.currentSearch.always(function () {
@@ -422,7 +425,10 @@
           },
           success: function (data) {
             process(data)
-          }
+          },
+          error: function(err) {
+            // TAB-7304 add error handling
+          },
         });
       },
       item: '<li class="flexi-picker-result module"><a href="#"><div class="name"></div><div class=department></div><div class="no-groups" style="display:none;"><i class="icon-exclamation-sign"></i> This module has no small groups set up in Tabula</div><div class="no-assignments" style="display:none;"><i class="icon-exclamation-sign"></i> This module has no assignments set up in Tabula</div></a></li>'
@@ -558,7 +564,10 @@
           },
           success: function (data) {
             process(data)
-          }
+          },
+          error: function(err) {
+            // TAB-7304 add error handling
+          },
         });
       },
       item: '<li class="flexi-picker-result assignment"><a href="#"><div class="name"></div><div class=department></div></a></li>'
@@ -670,7 +679,10 @@
           },
           success: function (data) {
             process(data)
-          }
+          },
+          error: function(err) {
+            // TAB-7304 add error handling
+          },
         });
       },
       item: '<li class="flexi-picker-result route"><a href="#"><div class="name"></div><div class=department></div></a></li>'
@@ -788,7 +800,10 @@
           },
           success: function (data) {
             process(data)
-          }
+          },
+          error: function(err) {
+            // TAB-7304 add error handling
+          },
         });
       },
       item: '<li class="flexi-picker-result location"><a href="#"><div class="name"></div><div class="department"></div></a></li>'

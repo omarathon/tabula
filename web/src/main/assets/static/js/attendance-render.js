@@ -436,6 +436,9 @@
                   trigger: 'click',
                   container: 'body'
                 });
+              },
+              error: function(err) {
+                // TODO
               }
             })
           }

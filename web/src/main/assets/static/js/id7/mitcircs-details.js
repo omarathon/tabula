@@ -134,6 +134,9 @@ class MitCircsDetails {
           $content.html(data);
           bind();
         },
+        error: function(err) {
+          // TAB-7304 add error handling
+        },
         cache: false,
         contentType: false,
         processData: false,
@@ -229,6 +232,9 @@ class MitCircsDetails {
           } else {
             $container.html(data);
           }
+        },
+        error: function(err) {
+          // TAB-7304 add error handling
         },
         cache: false,
         contentType: false,

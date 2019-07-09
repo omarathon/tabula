@@ -117,6 +117,9 @@ jQuery(function ($) {
         data: $fetchForm.serialize(),
         success: function (data) {
           process(data.unallocated)
+        },
+        error: function(err) {
+          // TOOD
         }
       });
     },

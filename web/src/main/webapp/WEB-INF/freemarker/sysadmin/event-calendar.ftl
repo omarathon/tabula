@@ -29,6 +29,9 @@
               'from': start.getTime() / 1000,
               'to': end.getTime() / 1000
             },
+            error: function(err) {
+              // TAB-7304 add error handling
+            },
             success: function (data) {
               //
               // TODO

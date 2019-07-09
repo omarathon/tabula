@@ -300,7 +300,10 @@ $(function () {
             assignments.push(item);
           });
           process(assignments);
-        }
+        },
+        error: function(err) {
+          // TAB-7304 add error handling
+        },
       })
     },
     matcher: function (item) {

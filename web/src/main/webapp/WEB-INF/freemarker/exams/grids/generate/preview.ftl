@@ -481,7 +481,10 @@
           success: function (response) {
             $('.student-checker-modal').find('.modal-content').html(response);
             $('.student-checker-modal').modal('show')
-          }
+          },
+          error: function(err) {
+            // TAB-7304 add error handling
+          },
         });
       })
     });
