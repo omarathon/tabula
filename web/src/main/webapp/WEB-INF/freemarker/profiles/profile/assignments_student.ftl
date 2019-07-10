@@ -1,3 +1,5 @@
+<#import "*/profiles_macros.ftl" as profiles />
+
 <#escape x as x?html>
 
   <#if !isSelf>
@@ -29,14 +31,7 @@
           <#list result.upcoming as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
-                <h4>
-                  <#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
-                    <@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
-                  <#else>
-                    <@fmt.module_name enhancedAssignment.assignment.module />
-                  </#if>
-                </h4>
-                <h4>${enhancedAssignment.assignment.name!}</h4>
+                <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <div class="col-md-4">
                 <#if enhancedAssignment.assignment.openDate?has_content>
@@ -67,24 +62,7 @@
           <#list result.todo as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
-                <#assign assignment = enhancedAssignment.assignment />
-                <h4>
-                  <#if can.do_as_real_user('Submission.Read', assignment.module)>
-                    <#assign module_url><@routes.cm2.depthome assignment.module /></#assign>
-                    <@fmt.module_name_with_link assignment.module module_url />
-                  <#else>
-                    <@fmt.module_name assignment.module />
-                  </#if>
-                </h4>
-                <h4>
-                  <#if can.do_as_real_user('Submission.Read', assignment.module)>
-                    <a href="<@routes.cm2.assignmentSubmissionSummary assignment />">
-                      <span class="ass-name">${assignment.name}</span>
-                    </a>
-                  <#else>
-                    <span class="ass-name">${assignment.name}</span>
-                  </#if>
-                </h4>
+                  <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <#if enhancedAssignment.submissionDeadline?has_content>
                 <div class="col-md-4">
@@ -152,8 +130,7 @@
           <#list result.doing as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-5">
-                <h4><@fmt.module_name enhancedAssignment.assignment.module /></h4>
-                <h4>${enhancedAssignment.assignment.name!}</h4>
+                  <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <div class="col-md-4">
                 <#if enhancedAssignment.feedbackDeadlineWorkingDaysAway?has_content>
@@ -218,14 +195,7 @@
           <#list result.done as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-5">
-                <h4>
-                  <#if can.do('Submission.Read', enhancedAssignment.assignment.module)>
-                    <@fmt.module_name_with_link enhancedAssignment.assignment.module "/coursework/admin/assignments/${enhancedAssignment.assignment.id}"/>
-                  <#else>
-                    <@fmt.module_name enhancedAssignment.assignment.module />
-                  </#if>
-                </h4>
-                <h4>${enhancedAssignment.assignment.name!}</h4>
+                  <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <div class="col-md-4">
                 <#if enhancedAssignment.submissionDeadline?has_content>
