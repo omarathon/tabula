@@ -62,8 +62,11 @@
                   }
                   hidePreviewIfNotNeeded();
                 },
-                error: function(err) {
+                error: function(err, status) {
                   // TAB-7304 add error handling
+                  // hide preview if something went wrong
+                  // report to error api
+                  hidePreviewIfNotNeeded();
                 },
               });
             }

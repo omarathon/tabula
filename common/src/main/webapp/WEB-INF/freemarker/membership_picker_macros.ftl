@@ -525,9 +525,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
               type: 'POST',
               url: '${enrolment_url}',
               data: $('#${classifier}EnrolmentFields').find('input, textarea, select').filter(':not(:disabled)').add('#academicYear').serialize(),
-
-              error: function () {
+              error: function (xhr, status) {
                 // TODO  TAB-7304 do somesomething with error here? display in modal?
+                // report to error api
                 $m.modal('hide');
               },
               success: function (data, status) {
