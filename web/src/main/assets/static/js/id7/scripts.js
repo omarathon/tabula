@@ -1493,6 +1493,26 @@ $(function () {
     }
   });
 
+  $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    let safe = false;
+    if (typeof URL === "function" && (new URL(options.url, window.location.origin)).origin !== window.location.origin) {
+      safe = true;
+    } else if (typeof URL !== "function" && window.navigator.userAgent.indexOf("Trident/7.0") > -1) {
+      const a = $('<a>', {
+        href: url
+      });
+      safe = (a.prop('hostname') === window.location.hostname);
+    }
+
+    if (safe) {
+      const csrfHeaderName = $("meta[name=_csrf_header]").attr('content');
+      const csrfHeaderValue = $("meta[name=_csrf]").attr('content');
+      if (csrfHeaderName !== undefined && csrfHeaderValue !== undefined) {
+        jqXHR.setRequestHeader(csrfHeaderName, csrfHeaderValue);
+      }
+    }
+  });
+
   $('form[data-confirm-submit]').on('submit', function (event) {
     const $form = $(this);
     // eslint-disable-next-line no-alert
