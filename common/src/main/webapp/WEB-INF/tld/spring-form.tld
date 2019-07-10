@@ -14,7 +14,7 @@
       for binding.
     </description>
     <name>form</name>
-    <tag-class>org.springframework.web.servlet.tags.form.FormTag</tag-class>
+    <tag-class>uk.ac.warwick.tabula.helpers.CsrfEnrichedFormTag</tag-class> <!-- Important: Re-add this change after Spring update! -->
     <body-content>JSP</body-content>
     <attribute>
       <description>HTML Standard Attribute</description>

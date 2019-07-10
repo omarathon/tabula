@@ -121,21 +121,21 @@
       </#if>
       <ul class="pagination pagination-sm " style="margin-top: 0;">
         <#if currentPage lte 1>
-          <li class="disabled"><span>&laquo;</span></li>
+          <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&laquo;</span></li>
         <#else>
           <li><a href="?page=${currentPage - 1}" data-page="${currentPage - 1}">&laquo;</a></li>
         </#if>
 
         <#list 1..totalPages as page>
           <#if page == currentPage>
-            <li class="active"><span>${page}</span></li>
+            <li class="active"><span>${page}</span> <span class="sr-only">(current page)</span></li>
           <#else>
             <li><a href="?page=${page}" data-page="${page}">${page}</a></li>
           </#if>
         </#list>
 
         <#if currentPage gte totalPages>
-          <li class="disabled"><span>&raquo;</span></li>
+          <li class="disabled"><span class="sr-only">You cannot move forwards, this is the last page</span><span>&raquo;</span></li>
         <#else>
           <li><a href="?page=${currentPage + 1}" data-page="${currentPage + 1}">&raquo;</a></li>
         </#if>

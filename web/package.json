@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "5.8.2",
-    "@universityofwarwick/id7": "2.4.1",
+    "@universityofwarwick/id7": "2.4.4",
     "core-js": "3.1.4",
     "fixed-header-table": "1.3.0",
     "jquery": "3.4.1",

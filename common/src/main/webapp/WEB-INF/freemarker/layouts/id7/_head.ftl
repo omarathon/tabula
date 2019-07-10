@@ -22,7 +22,8 @@
 <meta name="msapplication-TileImage" content="<@url resource="/static/images/id7/favicons/mstile-144x144.png" />">
 <meta name="msapplication-config" content="<@url resource="/static/images/id7/favicons/browserconfig.xml" />">
 <meta name="theme-color" content="#1c827d">
-<!-- Use the brand colour of the site -->
+<meta name="_csrf_header" content="X-CSRF-Token">
+<meta name="_csrf" content="${currentCsrfToken()}">
 
 <title><#compress>
     <#if component.subsite>Tabula - </#if>

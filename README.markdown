@@ -446,3 +446,8 @@ used in a certain way, or Spring offers multiple ways of doing something and we 
 ### Running code on bind (pre-validation)
 
 - Mixin `BindListener` on your command instead of calling `onBind` from a controller
+
+Updating Spring
+---------------
+
+Please remember that `CsrfEnrichedFormTag` replaces the normal Spring `FormTag`. See `spring-form.tld` when updating. Thanks!
