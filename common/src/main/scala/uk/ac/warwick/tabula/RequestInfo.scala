@@ -31,7 +31,8 @@ class RequestInfo(
   val emergencyMessage: String = "",
   val userAgent: String = "",
   val ipAddress: String = "",
-  val nonce: String = CspInterceptor.generateNonce()
+  val nonce: String = CspInterceptor.generateNonce(),
+  val csrfToken: String = ""
 ) extends EarlyRequestInfo
 
 object RequestInfo {
