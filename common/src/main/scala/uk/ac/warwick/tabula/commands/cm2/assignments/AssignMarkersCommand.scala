@@ -109,8 +109,8 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
             val studentWithMultipleMarkers = parsedRows.groupBy(_.student).filter { case (s, rows) => rows.size > 1 && s.nonEmpty }.values.flatten.toSet
             val newRows = parsedRows.map { r =>
               if (studentWithMultipleMarkers.contains(r)) {
-                val errors = r.errors :+ Error("Student userCode", code = "markingWorkflow.student.noDupes", Array(stage))
-                ParsedRow(r.marker, r.student, r.role, errors, r.rowData)
+                val newErrors = r.errors :+ Error("Student userCode", code = "markingWorkflow.student.noDupes", Array(stage))
+                r.copy(errors = newErrors)
               } else {
                 r
               }
