@@ -137,7 +137,7 @@
           <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="">
             <@spring.bind path=path>
               <div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-                <a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+                <a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">
                   <span class="filter-short-values" data-placeholder="${placeholder}"
                         data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
                   <span class="caret"></span>
@@ -212,7 +212,7 @@
           </@filter>
 
           <div class="btn-group empty-filter">
-            <a class="btn btn-default btn-xs">
+            <a class="btn btn-default btn-xs" href="#">
 							<span class="filter-short-values">
 								<#if findCommand.restrictedStyle.dbValue == "week">
                   Term week points only
