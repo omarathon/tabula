@@ -102,7 +102,7 @@
           </#if>
 
           <#if mapGet(unallocatedStudents, roleName)?has_content>
-            <h2>Students without a ${roleName}</h2>
+            <h2>Unallocated Students (${roleName})</h2>
             <table class="table table-bordered table-condensed table-striped">
               <thead>
               <tr>

@@ -135,10 +135,6 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
           }
           validateConcurrentStages(_allocationMap, result)
           validateSequentialStageMarkers(_allocationMap, result)
-          val stuListAllocatedToMultipleMarkers = allocationMap.map { case (stage, _) =>
-            stage -> allocationPairs(stage).groupBy { case (_, stu) => stu }.collect { case (stu, markerStuList) => stu -> markerStuList.map { case (m, _) => m } }.
-              filter { case (_, markers) => markers.size > 1 }
-          }
         }
       }
     }

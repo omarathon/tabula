@@ -7,7 +7,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.cm2.web.Routes
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheetCommand, AssignMarkersBySpreadsheetState, AssignMarkersState, AssignMarkersTemplateCommand, AssignMarkersTemplateState}
+import uk.ac.warwick.tabula.commands.cm2.assignments.{AssignMarkersBySpreadsheetCommand, AssignMarkersState, AssignMarkersTemplateCommand, AssignMarkersTemplateState}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.AutowiringAssessmentMembershipServiceComponent
 import uk.ac.warwick.tabula.web.Mav
