@@ -14,7 +14,7 @@
       <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="">
         <@spring.bind path=path>
           <div class="btn-group<#if currentFilter == placeholder> empty-filter</#if>">
-            <a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+            <a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">
               <span class="filter-short-values" data-placeholder="${placeholder}"
                     data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
               <span class="caret"></span>
@@ -158,7 +158,7 @@
       <#assign placeholder = "Event sources" />
       <#assign currentfilter><#if command.showTimetableEvents && command.showSmallGroupEvents>Syllabus+, Small Group Teaching<#elseif command.showTimetableEvents>Syllabus+<#elseif command.showSmallGroupEvents>Small Group Teaching<#else>${placeholder}</#if></#assign>
       <div class="btn-group<#if currentfilter == placeholder> empty-filter</#if>">
-        <a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">
+        <a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">
           <span class="filter-short-values" data-placeholder="${placeholder}" data-prefix="">${currentfilter}</span>
           <span class="caret"></span>
         </a>

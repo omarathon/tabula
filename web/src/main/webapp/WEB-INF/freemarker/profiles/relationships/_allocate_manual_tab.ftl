@@ -3,7 +3,7 @@
     <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
       <@spring.bind path=path>
         <div class="btn-group ${cssClass} <#if currentFilter == placeholder> empty-filter</#if>">
-          <a class="btn btn-xs btn-default dropdown-toggle" data-toggle="dropdown">
+          <a class="btn btn-xs btn-default dropdown-toggle" href="#" data-toggle="dropdown">
             <span class="filter-short-values" data-placeholder="${placeholder}"
                   data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
             <span class="caret"></span>
