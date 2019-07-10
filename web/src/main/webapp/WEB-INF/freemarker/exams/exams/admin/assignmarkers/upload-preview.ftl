@@ -33,19 +33,19 @@
         <#list command.sheetErrors as row>
           <#list row.errors as error>
             <tr class="no-bottom-border">
-              <#if error.rowData["student_id"]??>
-                <td>${error.rowData["student_id"]}</td><#else>
+              <#if row.rowData["student_id"]??>
+                <td>${row.rowData["student_id"]}</td><#else>
                 <td></td></#if>
-              <#if error.rowData["student_name"]??>
-                <td>${error.rowData["student_name"]}</td><#else>
+              <#if row.rowData["student_name"]??>
+                <td>${row.rowData["student_name"]}</td><#else>
                 <td></td></#if>
-              <#if error.rowData["agent_id"]??>
-                <td>${error.rowData["agent_id"]}</td><#else>
+              <#if row.rowData["agent_id"]??>
+                <td>${row.rowData["agent_id"]}</td><#else>
                 <td></td></#if>
-              <#if error.rowData[firstRoleKey]??>
-                <td>${error.rowData[firstRoleKey]}</td>
-              <#elseif error.rowData[secondRoleKey]??>
-                <td>${error.rowData[secondRoleKey]}</td>
+              <#if row.rowData[firstRoleKey]??>
+                <td>${row.rowData[firstRoleKey]}</td>
+              <#elseif row.rowData[secondRoleKey]??>
+                <td>${row.rowData[secondRoleKey]}</td>
               <#else>
                 <td></td>
               </#if>

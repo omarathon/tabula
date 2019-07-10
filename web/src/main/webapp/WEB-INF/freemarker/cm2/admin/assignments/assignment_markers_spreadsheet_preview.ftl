@@ -38,17 +38,17 @@
           <#list assignMarkersBySpreadsheetCommand.rowsWithErrors as row>
             <#list row.errors as error>
               <tr class="no-bottom-border">
-                <#if error.rowData["Student usercode"]??>
-                  <td>${error.rowData["Student usercode"]}</td><#else>
+                <#if row.rowData["Student usercode"]??>
+                  <td>${row.rowData["Student usercode"]}</td><#else>
                   <td></td></#if>
-                <#if error.rowData["Student name"]??>
-                  <td>${error.rowData["Student name"]}</td><#else>
+                <#if row.rowData["Student name"]??>
+                  <td>${row.rowData["Student name"]}</td><#else>
                   <td></td></#if>
-                <#if error.rowData["Marker name"]??>
-                  <td>${error.rowData["Marker name"]}</td><#else>
+                <#if row.rowData["Marker name"]??>
+                  <td>${row.rowData["Marker name"]}</td><#else>
                   <td></td></#if>
-                <#if error.rowData["Marker usercode"]??>
-                  <td>${error.rowData["Marker usercode"]}</td><#else>
+                <#if row.rowData["Marker usercode"]??>
+                  <td>${row.rowData["Marker usercode"]}</td><#else>
                   <td></td></#if>
               </tr>
               <tr class="no-top-border">
