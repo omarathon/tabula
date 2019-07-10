@@ -538,6 +538,9 @@
         <entry key="phoneNumberFormatter">
           <bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter"/>
         </entry>
+        <entry key="currentCsrfToken">
+          <bean class="uk.ac.warwick.tabula.helpers.CurrentCsrfToken"/>
+        </entry>
         <entry key="mimeTypeDetector">
           <bean class="uk.ac.warwick.tabula.helpers.MimeTypeDetectorTag"/>
         </entry>

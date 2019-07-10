@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.sso.client.CSRFFilter
 
 /** Provides a limited interface of request-level things, which are required by some objects
   * like CurrentUser before a full RequestInfo can be created.
@@ -87,7 +88,8 @@ object RequestInfoInterceptor {
       emergencyMessage = emergencyMessage,
       userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
       ipAddress = request.getRemoteAddr.textOrEmpty,
-      nonce = nonce
+      nonce = nonce,
+      csrfToken = request.getAttribute(CSRFFilter.CSRF_TOKEN_PROPERTY_NAME).asInstanceOf[String].textOrEmpty
     )
   }
 
