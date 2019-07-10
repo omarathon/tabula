@@ -62,7 +62,7 @@
           <#list result.todo as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-<#if enhancedAssignment.submissionDeadline?has_content>5<#else>9</#if>">
-                  <@profiles.assignmentLinks enhancedAssignment.assignment />
+                <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <#if enhancedAssignment.submissionDeadline?has_content>
                 <div class="col-md-4">
@@ -130,7 +130,7 @@
           <#list result.doing as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-5">
-                  <@profiles.assignmentLinks enhancedAssignment.assignment />
+                <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <div class="col-md-4">
                 <#if enhancedAssignment.feedbackDeadlineWorkingDaysAway?has_content>
@@ -195,7 +195,7 @@
           <#list result.done as enhancedAssignment>
             <div class="row item-info">
               <div class="col-md-5">
-                  <@profiles.assignmentLinks enhancedAssignment.assignment />
+                <@profiles.assignmentLinks enhancedAssignment.assignment />
               </div>
               <div class="col-md-4">
                 <#if enhancedAssignment.submissionDeadline?has_content>
