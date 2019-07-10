@@ -35,7 +35,6 @@ object Assignment {
   val defaultWordCountName = "wordcount"
   final val NotDeletedFilter = "notDeleted"
   final val MaximumFileAttachments = 50
-  final val MaximumWordCount = 1000000
 
   case class MarkerAllocation(role: String, description: String, marker: User, students: Set[User])
 

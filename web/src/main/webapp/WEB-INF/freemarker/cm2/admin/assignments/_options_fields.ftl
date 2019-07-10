@@ -49,7 +49,7 @@
     <@f.input path="wordCountMin" cssClass="form-control" id="wordCountMin" />
   </@bs3form.labelled_form_group>
   <@bs3form.labelled_form_group path="wordCountMax" labelText="Maximum word count">
-    <@f.input path="wordCountMax" cssClass="form-control" id="wordCountMax" placeholder=command.defaultWordCountMax />
+    <@f.input path="wordCountMax" cssClass="form-control" id="wordCountMax" />
     <div class="help-block">
       If you specify a minimum and/or maximum word count, students must declare the word count for their submission.
       In order to submit, the word count they declare must comply with any minimum or maximum you specify.

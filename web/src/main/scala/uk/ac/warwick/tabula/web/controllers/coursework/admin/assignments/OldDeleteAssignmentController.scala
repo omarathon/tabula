@@ -32,7 +32,6 @@ class OldDeleteAssignmentController extends OldCourseworkController {
       "department" -> module.adminDepartment,
       "module" -> module,
       "assignment" -> assignment,
-      "maxWordCount" -> Assignment.MaximumWordCount,
       "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
     ).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
   }
