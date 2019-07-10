@@ -36,7 +36,7 @@
         <#if !isSelf>
           <@components.detail label="State" condensed=true>
             ${submission.state.description}
-            <#if submission.state.entryName == "Outcomes Recorded">
+            <#if submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair" >
               <#if submission.outcomesLastRecordedBy??>
                 by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
               </#if>
@@ -274,7 +274,7 @@
         </@components.section>
       </#if>
 
-      <#if submission.state.entryName == "Outcomes Recorded" && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
+      <#if (submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair") && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
         <@components.section "Outcomes">
           <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
             <@components.detail label="Mitigation grade" condensed=true>
