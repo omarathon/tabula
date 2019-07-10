@@ -114,7 +114,6 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
               } else {
                 r
               }
-
             }
             stage -> newRows
           }

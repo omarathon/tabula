@@ -3,20 +3,20 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor
-import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor.{Error, FirstMarker, NoMarker, ParsedRow, SecondMarker}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
+import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor._
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoComponent}
 
 
 object OldAssignMarkersCommand {
@@ -102,7 +102,6 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
         } else {
           r
         }
-
       }
       stage -> newRows
     }

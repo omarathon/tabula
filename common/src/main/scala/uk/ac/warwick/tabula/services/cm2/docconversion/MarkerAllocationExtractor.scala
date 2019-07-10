@@ -4,13 +4,13 @@ import java.io.InputStream
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.cm2.assignments.AssignMarkersTemplateCommand
 import uk.ac.warwick.tabula.data.model.markingworkflow.CM2MarkingWorkflow
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.{FoundUser, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor._
 import uk.ac.warwick.userlookup.User
-import MarkerAllocationExtractor._
-import uk.ac.warwick.tabula.commands.cm2.assignments.AssignMarkersTemplateCommand
 
 object MarkerAllocationExtractor {
 
@@ -74,22 +74,22 @@ class MarkerAllocationExtractor {
         ) match {
           case Some(FoundUser(user)) => Right(user)
           case _ if validMarkers.exists(_.getUserId == markerId) =>
-            Left(Error(MarkerUsercode,  "workflow.allocateMarkers.nonPrimary",
+            Left(Error(MarkerUsercode, "workflow.allocateMarkers.nonPrimary",
               Array(
                 validMarkers.find(_.getUserId == markerId).get.getUserId, // usercode in marking workflow
                 getUser(markerId).get.getUserId // actual primary usercode
               )
             ))
           case _ if role.isEmpty =>
-            Left(Error(MarkerUsercode,  "workflow.allocateMarkers.unableToWorkOutRole"))
+            Left(Error(MarkerUsercode, "workflow.allocateMarkers.unableToWorkOutRole"))
           case _ if allMarkers.exists(_.getUserId == markerId) =>
-            Left(Error(MarkerUsercode,  "workflow.allocateMarkers.wrongRole", Array(role.get)))
+            Left(Error(MarkerUsercode, "workflow.allocateMarkers.wrongRole", Array(role.get)))
           case _ if getUser(markerId).nonEmpty =>
-            Left(Error(MarkerUsercode,  "workflow.allocateMarkers.notMarker"))
+            Left(Error(MarkerUsercode, "workflow.allocateMarkers.notMarker"))
           case _ =>
-            Left(Error(MarkerUsercode,  "workflow.allocateMarkers.universityId.notFound"))
+            Left(Error(MarkerUsercode, "workflow.allocateMarkers.universityId.notFound"))
         }
-      }).getOrElse(Left(Error(MarkerUsercode,  "workflow.allocateMarkers.universityId.notFound")))
+      }).getOrElse(Left(Error(MarkerUsercode, "workflow.allocateMarkers.universityId.notFound")))
 
 
       val errors = Seq(student, marker).flatMap(_.left.toOption)
