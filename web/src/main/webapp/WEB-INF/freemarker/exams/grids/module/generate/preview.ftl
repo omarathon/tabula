@@ -327,6 +327,10 @@
 
         $(window).on('id7:reflow', reflowScroll);
         reflowScroll();
+
+        // we want to hide the native scroll bar on non-mac platform
+        // after we moved the the original scroll bar to a different place.
+        $('.table-responsive').css('overflow-x', 'hidden');
       }
 
       setTimeout(function () {

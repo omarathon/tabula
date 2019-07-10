@@ -405,6 +405,7 @@ object Permissions {
   }
 
   object MitigatingCircumstancesPanel {
+    case object Read extends Permission("View the details and submissions on mitigating circumstances panels")
     case object Modify extends Permission("Create and modify mitigating circumstances panels")
   }
 }

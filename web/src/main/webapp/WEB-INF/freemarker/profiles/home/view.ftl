@@ -104,7 +104,7 @@
           <#list adminDepartments?sort_by("code") as dept>
             <div class="clearfix">
               <div class="btn-group pull-right">
-                <a class="btn btn-sm btn-default dropdown-toggle" data-toggle="dropdown">Manage <span class="caret"></span></a>
+                <a class="btn btn-sm btn-default dropdown-toggle" href="#" data-toggle="dropdown">Manage <span class="caret"></span></a>
                 <ul class="dropdown-menu pull-right">
                   <#if can.do("Module.Administer", dept)>
                     <li><a href="<@routes.profiles.deptperms dept/>">

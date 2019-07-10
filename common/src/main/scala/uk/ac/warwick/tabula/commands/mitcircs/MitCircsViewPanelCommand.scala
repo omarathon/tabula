@@ -20,7 +20,7 @@ object MitCircsViewPanelCommand {
 
   type Result = MitCircsPanelInfo
   type Command = Appliable[Result] with MitCircsViewPanelState
-  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesSubmission.Read
+  val RequiredPermission: Permission = Permissions.MitigatingCircumstancesPanel.Read
 
   def apply(panel: MitigatingCircumstancesPanel) = new MitCircsViewPanelCommandInternal(panel)
     with ComposableCommand[Result]

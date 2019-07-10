@@ -185,7 +185,7 @@
                     <div class="pull-right">
                       <i class="fa fa-spinner fa-spin invisible"></i>
                       <span class="dropdown">
-												<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
+												<a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">Actions <span class="caret"></span></a>
 												<ul class="dropdown-menu pull-right">
 													<#if canEditMemberNote>
                             <li>
@@ -274,7 +274,7 @@
                     <div class="pull-right">
                       <i class="fa fa-spinner fa-spin invisible"></i>
                       <span class="dropdown">
-												<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
+												<a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">Actions <span class="caret"></span></a>
 												<ul class="dropdown-menu pull-right">
 													<li>
 														<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_circumstances circumstances />"
