@@ -9,7 +9,8 @@ class GrantedPermissionTest extends TestBase {
   val dept: Department = Fixtures.department("in")
   val module: Module = Fixtures.module("in101")
   val assignment: Assignment = Fixtures.assignment("assignment")
-  val member: StaffMember = Fixtures.staff()
+  val staffMember: StaffMember = Fixtures.staff()
+  val studentMember: StudentMember = Fixtures.student()
 
   val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
 
@@ -40,10 +41,18 @@ class GrantedPermissionTest extends TestBase {
     gp.overrideType should be(overrideType)
   }
 
-  @Test def initMember {
-    GrantedPermission.canDefineFor[Member] should be(true)
-    val gp = GrantedPermission(member, permission, overrideType)
-    gp.scope should be(member)
+  @Test def initStaffMember {
+    GrantedPermission.canDefineFor[StaffMember] should be(true)
+    val gp = GrantedPermission(staffMember, permission, overrideType)
+    gp.scope should be(staffMember)
+    gp.permission should be(permission)
+    gp.overrideType should be(overrideType)
+  }
+
+  @Test def initStudentMember {
+    GrantedPermission.canDefineFor[StudentMember] should be(true)
+    val gp = GrantedPermission(studentMember, permission, overrideType)
+    gp.scope should be(studentMember)
     gp.permission should be(permission)
     gp.overrideType should be(overrideType)
   }

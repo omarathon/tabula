@@ -226,8 +226,57 @@ case class AdminLink(title: String, href: String)
 
 @Controller
 @RequestMapping(value = Array("/admin/permissions/member/{target}"))
-class MemberPermissionsController extends PermissionsControllerMethods[Member] {
-  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: Member): Seq[AdminLink] = Seq(
+class MemberPermissionsDispatchController extends AdminController {
+  @RequestMapping
+  def forward(@PathVariable("target") member: Member): Mav = {
+    val string = member match {
+      case _: StudentMember => "student"
+      case _: StaffMember => "staff"
+      case _: EmeritusMember => "emeritus"
+      case _: ApplicantMember => "applicant"
+      case _: OtherMember => "other"
+    }
+
+    Mav(s"forward:/admin/permissions/member/$string/${member.universityId}")
+  }
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/permissions/member/student/{target}"))
+class StudentMemberPermissionsController extends PermissionsControllerMethods[StudentMember] {
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: StudentMember): Seq[AdminLink] = Seq(
+    AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
+  )
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/permissions/member/staff/{target}"))
+class StaffMemberPermissionsController extends PermissionsControllerMethods[StaffMember] {
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: StaffMember): Seq[AdminLink] = Seq(
+    AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
+  )
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/permissions/member/emeritus/{target}"))
+class EmeritusMemberPermissionsController extends PermissionsControllerMethods[EmeritusMember] {
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: EmeritusMember): Seq[AdminLink] = Seq(
+    AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
+  )
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/permissions/member/applicant/{target}"))
+class ApplicantMemberPermissionsController extends PermissionsControllerMethods[ApplicantMember] {
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: ApplicantMember): Seq[AdminLink] = Seq(
+    AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
+  )
+}
+
+@Controller
+@RequestMapping(value = Array("/admin/permissions/member/other/{target}"))
+class OtherMemberPermissionsController extends PermissionsControllerMethods[OtherMember] {
+  @ModelAttribute("adminLinks") def adminLinks(@PathVariable("target") member: OtherMember): Seq[AdminLink] = Seq(
     AdminLink("View profile", Routes.profiles.Profile.identity(mandatory(member)))
   )
 }
