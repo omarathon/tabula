@@ -101,7 +101,6 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   @Min(0)
   var wordCountMin: JInteger = _
 
-  @Max(Assignment.MaximumWordCount)
   var wordCountMax: JInteger = _
 
   @Length(max = 600)
@@ -118,8 +117,6 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
   val maxFileAttachments: Int = 20
 
   val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
-
-  val defaultWordCountMax: JInteger = Assignment.MaximumWordCount
 
   var fileAttachmentTypes: JList[String] = JArrayList()
 
@@ -158,7 +155,7 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
       file.attachmentTypes = fileAttachmentTypes.asScala
       file.individualFileSizeLimit = individualFileSizeLimit
     }
-    if ((wordCountMin == null && wordCountMax == null) || (wordCountMin == 0 && (wordCountMax == 0 || wordCountMax == Assignment.MaximumWordCount))) {
+    if ((wordCountMin == null && wordCountMax == null) || (wordCountMin == 0 && wordCountMax == 0 )) {
       findWordCountField(assignment).foreach(assignment.removeField)
     } else {
       val wordCount = findWordCountField(assignment).getOrElse {
@@ -181,7 +178,6 @@ trait SharedAssignmentOptionsProperties extends FindAssignmentFields {
     // implicitly fix missing bounds
     (Option(wordCountMin), Option(wordCountMax)) match {
       case (Some(min), Some(max)) if (max < min || (max == min && max != 0)) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
-      case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
       case (None, Some(max)) => wordCountMin = 0
       case _ => // It's All Good
     }

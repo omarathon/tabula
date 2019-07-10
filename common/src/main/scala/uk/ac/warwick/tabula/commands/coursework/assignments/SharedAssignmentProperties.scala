@@ -35,7 +35,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 
   @Min(0)
   var wordCountMin: JInteger = _
-  @Max(Assignment.MaximumWordCount)
   var wordCountMax: JInteger = _
   @Length(max = 600)
   var wordCountConventions: String = "Exclude any bibliography or appendices."
@@ -76,7 +75,6 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
     // implicitly fix missing bounds
     (Option(wordCountMin), Option(wordCountMax)) match {
       case (Some(min), Some(max)) if max <= min => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
-      case (Some(min), None) => wordCountMax = Assignment.MaximumWordCount
       case (None, Some(max)) => wordCountMin = 0
       case _ => // It's All Good
     }
