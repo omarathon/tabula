@@ -192,7 +192,7 @@
     <div class="btn-toolbar dept-toolbar">
       <div class="btn-group">
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             Assignments
             <span class="caret"></span>
           </a>
@@ -240,7 +240,7 @@
           </@fmt.permission_button>
         </#if>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             Feedback
             <span class="caret"></span>
           </a>
@@ -270,7 +270,7 @@
           </ul>
         </div>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             Settings
             <span class="caret"></span>
           </a>
