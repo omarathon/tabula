@@ -9,6 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormField
+import scala.collection.JavaConverters._
 
 trait AssessmentDaoComponent {
   val assessmentDao: AssessmentDao
@@ -57,6 +58,8 @@ trait AssessmentDao {
   def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
 
   def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
+
+  def getSummativeAssignmentsByAssessmentComponents(academicYear: AcademicYear, assessmentComponents: Seq[AssessmentComponent]): Seq[Assignment]
 }
 
 @Repository
@@ -204,5 +207,14 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
         .add(is("academicYear", academicYear))
         .add(isNot("deleted", true))
     }, "module", modules).groupBy(_.module)
+  }
+
+  override def getSummativeAssignmentsByAssessmentComponents(academicYear: AcademicYear, assessmentComponents: Seq[AssessmentComponent]): Seq[Assignment] = {
+    session.newCriteria[Assignment]
+      .createAlias("assessmentGroups", "ag")
+      .add(is("academicYear", academicYear))
+      .add(is("summative", true))
+      .add(in("ag.assessmentComponent", assessmentComponents.asJava))
+      .seq
   }
 }

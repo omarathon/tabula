@@ -3,6 +3,24 @@
 
   <@cm2.assignmentHeader "Upload feedback to SITS" assignment "for" />
 
+    <#if command.otherSummativeAssignments?size != 0>
+      <div class="alert alert-info">
+        <p>
+          Other assignments are linked to the same assessment components as this assignment.
+        </p>
+
+        <ul>
+            <#list command.otherSummativeAssignments as other>
+                <li>
+                  <a href="<@routes.cm2.assignmentsubmissionsandfeedback other />">
+                    ${other.name}
+                  </a>
+                </li>
+            </#list>
+        </ul>
+      </div>
+    </#if>
+
   <#if command.gradeValidation.notOnScheme?has_content >
     <div class="alert alert-danger">
       <p>

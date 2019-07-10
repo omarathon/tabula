@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.commands.cm2
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.{Assessment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Assessment, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.{AssessmentDaoComponent, AutowiringAssessmentDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -15,6 +16,7 @@ object UploadFeedbackToSitsCommand {
     new UploadFeedbackToSitsCommandInternal(assessment, currentUser, gradeGenerator)
       with AutowiringFeedbackServiceComponent
       with AutowiringFeedbackForSitsServiceComponent
+      with AutowiringAssessmentDaoComponent
       with ComposableCommand[Seq[Feedback]]
       with UploadFeedbackToSitsDescription
       with UploadFeedbackToSitsPermissions
@@ -59,11 +61,19 @@ trait UploadFeedbackToSitsDescription extends Describable[Seq[Feedback]] {
 
 trait UploadFeedbackToSitsCommandState {
 
-  self: UploadFeedbackToSitsCommandRequest =>
+  self: UploadFeedbackToSitsCommandRequest with AssessmentDaoComponent =>
 
   def assessment: Assessment
 
   lazy val feedbacks: Seq[Feedback] = assessment.fullFeedback.filter(f => students.isEmpty || students.asScala.contains(f.usercode))
+
+  lazy val otherSummativeAssignments: Seq[Assignment] = assessment match {
+    case assignment: Assignment if assignment.summative =>
+      val components = assessment.assessmentGroups.asScala.map(_.assessmentComponent)
+
+      assessmentDao.getSummativeAssignmentsByAssessmentComponents(assessment.academicYear, components).filterNot(_ == assessment)
+    case _ => Nil
+  }
 }
 
 trait UploadFeedbackToSitsCommandRequest {
