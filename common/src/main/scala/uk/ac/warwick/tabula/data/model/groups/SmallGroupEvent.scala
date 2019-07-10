@@ -149,4 +149,8 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
   def academicYear: AcademicYear = group.academicYear
 
   def module: Module = group.module
+
+  def groupSet: SmallGroupSet = group.groupSet
+
+  def department: Department = group.department
 }

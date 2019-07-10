@@ -8,27 +8,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-abstract class DepartmentSmallGroupSetMembershipItemType(val value: String)
-
-case object DepartmentSmallGroupSetMembershipStaticType extends DepartmentSmallGroupSetMembershipItemType("static")
-
-case object DepartmentSmallGroupSetMembershipIncludeType extends DepartmentSmallGroupSetMembershipItemType("include")
-
-case object DepartmentSmallGroupSetMembershipExcludeType extends DepartmentSmallGroupSetMembershipItemType("exclude")
-
-/**
-  * Item in list of members for displaying in view.
-  */
-case class DepartmentSmallGroupSetMembershipItem(
-  itemType: DepartmentSmallGroupSetMembershipItemType, // static, include or exclude
-  firstName: String,
-  lastName: String,
-  universityId: String,
-  userId: String
-) {
-  def itemTypeString: String = itemType.value
-}
-
 object ListDepartmentSmallGroupSetsCommand {
   def apply(department: Department, academicYear: AcademicYear) =
     new ListDepartmentSmallGroupSetsCommandInternal(department, academicYear)

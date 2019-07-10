@@ -24,7 +24,7 @@ abstract class AbstractImportSmallGroupEventsFromExternalSystemController extend
 
   protected def render(set: SmallGroupSet): Mav = {
     Mav("groups/admin/groups/events/import", "cancelUrl" -> postSaveRoute(set))
-      .crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+      .crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   @ModelAttribute("groups") def groups(@PathVariable("smallGroupSet") set: SmallGroupSet): mutable.Buffer[SmallGroup] =

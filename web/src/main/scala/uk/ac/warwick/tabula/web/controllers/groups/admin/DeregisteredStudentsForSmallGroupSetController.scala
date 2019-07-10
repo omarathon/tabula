@@ -50,7 +50,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
     Mav("groups/admin/groups/deregistered/form",
       "returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
     ).crumbs(
-      Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
+      Breadcrumbs.Department(set.department, set.academicYear),
       Breadcrumbs.ModuleForYear(set.module, set.academicYear)
     )
 
@@ -68,7 +68,7 @@ class DeregisteredStudentsForSmallGroupSetController extends GroupsController wi
         "removed" -> removed,
         "returnTo" -> getReturnTo(Breadcrumbs.ModuleForYear(set.module, set.academicYear).url.getOrElse(""))
       ).crumbs(
-        Breadcrumbs.Department(set.module.adminDepartment, set.academicYear),
+        Breadcrumbs.Department(set.department, set.academicYear),
         Breadcrumbs.ModuleForYear(set.module, set.academicYear)
       )
     }

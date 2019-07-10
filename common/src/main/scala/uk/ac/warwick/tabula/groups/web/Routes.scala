@@ -46,6 +46,8 @@ object Routes {
 
     def createAddStudents(set: SmallGroupSet): String = context + "/admin/module/%s/groups/new/%s/students" format(encoded(set.module.code), encoded(set.id))
 
+    def createAddStudentsBySitsQuery(set: SmallGroupSet): String = context + "/admin/module/%s/groups/new/%s/sits-students" format(encoded(set.module.code), encoded(set.id))
+
     def createAddGroups(set: SmallGroupSet): String = context + "/admin/module/%s/groups/new/%s/groups" format(encoded(set.module.code), encoded(set.id))
 
     def createAddEvents(set: SmallGroupSet): String = context + "/admin/module/%s/groups/new/%s/events" format(encoded(set.module.code), encoded(set.id))
@@ -57,6 +59,8 @@ object Routes {
     def edit(set: SmallGroupSet): String = context + "/admin/module/%s/groups/edit/%s" format(encoded(set.module.code), encoded(set.id))
 
     def editAddStudents(set: SmallGroupSet): String = context + "/admin/module/%s/groups/edit/%s/students" format(encoded(set.module.code), encoded(set.id))
+
+    def editAddStudentsBySitsQuery(set: SmallGroupSet): String = context + "/admin/module/%s/groups/edit/%s/sits-students" format(encoded(set.module.code), encoded(set.id))
 
     def editAddGroups(set: SmallGroupSet): String = context + "/admin/module/%s/groups/edit/%s/groups" format(encoded(set.module.code), encoded(set.id))
 

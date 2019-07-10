@@ -11,4 +11,10 @@ object ManageSmallGroupsMappingParameters {
   final val editAndAddGroups = "editAndAddGroups"
   final val editAndAddEvents = "editAndAddEvents"
   final val editAndAllocate = "editAndAllocate"
+
+  final val findStudents = "findStudents"
+  final val manuallyAddForm = "manuallyAddForm"
+  final val manuallyAddSubmit = "manuallyAddSubmit"
+  final val resetMembership = "resetMembership"
+  final val manuallyExclude = "manuallyExclude"
 }
