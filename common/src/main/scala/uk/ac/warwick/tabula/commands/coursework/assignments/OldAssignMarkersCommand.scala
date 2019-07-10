@@ -3,19 +3,20 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor
-import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor.{NoMarker, SecondMarker, FirstMarker, ParsedRow}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringAssessmentServiceComponent, AssessmentServiceComponent}
+import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor._
+import uk.ac.warwick.tabula.services.{AssessmentServiceComponent, AutowiringAssessmentServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
+
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{AutowiringUserGroupDaoComponent, UserGroupDaoComponent}
 
 
 object OldAssignMarkersCommand {
@@ -92,7 +93,18 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
   }
 
   def extractDataFromFile(file: FileAttachment, result: BindingResult): Unit = {
-    val rowData = alloctaionExtractor.extractMarkersFromSpreadsheet(file.asByteSource.openStream(), workflow)
+    val rowData = alloctaionExtractor.extractMarkersFromSpreadsheet(file.asByteSource.openStream(), workflow).map { case (stage, parsedRows) =>
+      val studentWithMultipleMarkers = parsedRows.groupBy(_.student).filter { case (s, rows) => rows.size > 1 && s.nonEmpty }.values.flatten.toSet
+      val newRows = parsedRows.map { r =>
+        if (studentWithMultipleMarkers.contains(r)) {
+          val errors = r.errors :+ Error("Student userCode", code = "markingWorkflow.student.noDupes", Array(stage))
+          ParsedRow(r.marker, r.student, errors, r.position, r.rowData)
+        } else {
+          r
+        }
+      }
+      stage -> newRows
+    }
 
     def rowsToMarkerMap(rows: Seq[ParsedRow]) = {
       rows
