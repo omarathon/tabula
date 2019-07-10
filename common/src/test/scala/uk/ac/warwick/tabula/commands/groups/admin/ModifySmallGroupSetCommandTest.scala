@@ -63,6 +63,7 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
     new CreateCommandFixture {
       command.name = "Set name"
       command.academicYear = AcademicYear.now()
+      command.membershipStyle = SmallGroupMembershipStyle.AssessmentComponents
 
       val ac1: AssessmentComponent = Fixtures.upstreamAssignment(Fixtures.module("in101"), 1)
       val upstream1: UpstreamAssessmentGroup = Fixtures.assessmentGroup(ac1)
@@ -81,6 +82,24 @@ class ModifySmallGroupSetCommandTest extends TestBase with Mockito {
       set.assessmentGroups.size() should be(2)
 
       verify(command.smallGroupService, times(1)).saveOrUpdate(set)
+    }
+  }
+
+  @Test def changeMembershipStyleClearsMembershipAndAllocations: Unit = {
+    new EditCommandFixture {
+      set.members.knownType.includedUserIds = Set("u0000001", "u0000002")
+
+      val group = new SmallGroup()
+      group.groupSet = set
+      group.students.knownType.includedUserIds = Set("u0000001", "u0000002")
+      set.groups.add(group)
+
+      command.membershipStyle = SmallGroupMembershipStyle.AssessmentComponents
+
+      command.applyInternal()
+
+      set.members shouldBe empty
+      group.students shouldBe empty
     }
   }
 

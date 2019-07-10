@@ -1228,7 +1228,7 @@ showResetButton=false
               <input class="btn btn-danger btn-sm use-tooltip"
                      <#if findCommandResult.membershipItems?size == 0>disabled</#if>
                      type="submit"
-                     name="${ManageDepartmentSmallGroupsMappingParameters.manuallyExclude}"
+                     name="manuallyExclude"
                      value="Remove"
                      title="Remove selected students from these groups"
                      style="margin-left: 0.5em;"
@@ -1238,7 +1238,7 @@ showResetButton=false
               <input class="btn btn-danger btn-sm use-tooltip"
                      type="submit"
                      style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
-                     name="${ManageDepartmentSmallGroupsMappingParameters.resetMembership}"
+                     name="resetMembership"
                      value="Reset"
                      data-container="body"
                      title="Restore the manually removed and remove the manually added students selected"

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.commands.scheduling
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringSmallGroupServiceComponent, SmallGroupServiceComponent}
@@ -11,42 +11,42 @@ import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 import scala.collection.JavaConverters._
 
-object UpdateLinkedDepartmentSmallGroupSetsCommand {
+object UpdateLinkedSmallGroupSetsCommand {
   def apply() =
-    new UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
+    new UpdateLinkedSmallGroupSetsCommandInternal(
       FindStudentsForUserGroupCommandFactoryImpl,
       UpdateStudentsForUserGroupCommandFactoryImpl
-    ) with ComposableCommandWithoutTransaction[Seq[DepartmentSmallGroupSet]]
+    ) with ComposableCommandWithoutTransaction[Seq[SmallGroupSet]]
       with AutowiringFeaturesComponent
       with AutowiringProfileServiceComponent
       with AutowiringSmallGroupServiceComponent
-      with UpdateLinkedDepartmentSmallGroupSetsDescription
-      with UpdateLinkedDepartmentSmallGroupSetsPermissions
+      with UpdateLinkedSmallGroupSetsDescription
+      with UpdateLinkedSmallGroupSetsPermissions
 }
 
-class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
+class UpdateLinkedSmallGroupSetsCommandInternal(
   findStudentsCommandFactory: FindStudentsForUserGroupCommandFactory,
   updateCommandFactory: UpdateStudentsForUserGroupCommandFactory
-) extends CommandInternal[Seq[DepartmentSmallGroupSet]] with Logging with TaskBenchmarking {
+) extends CommandInternal[Seq[SmallGroupSet]] with Logging with TaskBenchmarking {
 
   self: FeaturesComponent with SmallGroupServiceComponent =>
 
-  override def applyInternal(): Seq[DepartmentSmallGroupSet] = {
+  override def applyInternal(): Seq[SmallGroupSet] = {
     val setsToUpdate = transactional(readOnly = true) {
-      smallGroupService.listDepartmentSetsForMembershipUpdate
+      smallGroupService.listSetsForMembershipUpdate
     }
 
     logger.info(s"${setsToUpdate.size} sets need membership updating")
 
     setsToUpdate.foreach { set =>
       val staticStudentIds = transactional(readOnly = true) {
-        val cmd = findStudentsCommandFactory.apply(set.department, set)
+        val cmd = findStudentsCommandFactory.apply(set.department, set.module, set)
         cmd.populate()
         cmd.doFind = true
         cmd.apply().staticStudentIds
       }
       transactional() {
-        val updateCommand = updateCommandFactory.apply(set.department, set)
+        val updateCommand = updateCommandFactory.apply(set.department, set.module, set)
         updateCommand.linkToSits = true
         updateCommand.filterQueryString = set.memberQuery
         updateCommand.staticStudentIds.clear()
@@ -64,7 +64,7 @@ class UpdateLinkedDepartmentSmallGroupSetsCommandInternal(
 
 }
 
-trait UpdateLinkedDepartmentSmallGroupSetsPermissions extends RequiresPermissionsChecking {
+trait UpdateLinkedSmallGroupSetsPermissions extends RequiresPermissionsChecking {
 
   override def permissionsCheck(p: PermissionsChecking) {
     p.PermissionCheck(Permissions.SmallGroups.UpdateMembership)
@@ -72,9 +72,9 @@ trait UpdateLinkedDepartmentSmallGroupSetsPermissions extends RequiresPermission
 
 }
 
-trait UpdateLinkedDepartmentSmallGroupSetsDescription extends Describable[Seq[DepartmentSmallGroupSet]] {
+trait UpdateLinkedSmallGroupSetsDescription extends Describable[Seq[SmallGroupSet]] {
 
-  override lazy val eventName = "UpdateLinkedDepartmentSmallGroupSets"
+  override lazy val eventName = "UpdateLinkedSmallGroupSets"
 
   override def describe(d: Description) {
 

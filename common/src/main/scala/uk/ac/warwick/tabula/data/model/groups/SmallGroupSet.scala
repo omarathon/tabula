@@ -128,6 +128,13 @@ class SmallGroupSet
   @Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
   var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
+  @Column(name = "membership_style")
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupMembershipStyleUserType")
+  var membershipStyle: SmallGroupMembershipStyle = SmallGroupMembershipStyle.Default
+
+  @Column(name = "member_query")
+  var memberQuery: String = _
+
   @Column(name = "self_group_switching")
   var allowSelfGroupSwitching: Boolean = true
 
@@ -345,6 +352,7 @@ class SmallGroupSet
     if (!transient) newSet.id = id
     newSet.academicYear = academicYear
     newSet.allocationMethod = allocationMethod
+    newSet.membershipStyle = membershipStyle
     newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
@@ -373,5 +381,7 @@ class SmallGroupSet
   def postLoad() {
     ensureSettings
   }
+
+  def department: Department = module.adminDepartment
 }
 

@@ -27,7 +27,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
   protected def renderPath: String
 
   protected def render(set: SmallGroupSet, model: (String, _)*): Mav = {
-    Mav(renderPath, model: _*).crumbs(Breadcrumbs.Department(set.module.adminDepartment, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
+    Mav(renderPath, model: _*).crumbs(Breadcrumbs.Department(set.department, set.academicYear), Breadcrumbs.ModuleForYear(set.module, set.academicYear))
   }
 
   @RequestMapping(method = Array(GET, HEAD))
@@ -64,7 +64,7 @@ abstract class AbstractEditSmallGroupsController extends GroupsController {
     @Valid @ModelAttribute("command") cmd: EditSmallGroupsCommand,
     errors: Errors,
     @PathVariable("smallGroupSet") set: SmallGroupSet
-  ): Mav = submit(cmd, errors, set, Routes.admin(set.module.adminDepartment, set.academicYear))
+  ): Mav = submit(cmd, errors, set, Routes.admin(set.department, set.academicYear))
 
 }
 
