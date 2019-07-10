@@ -49,7 +49,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 
 	<#-- <div> opened above -->
 		<#if department.parent?? || department.children?has_content>
-			<a class="use-tooltip" title="Related departments" data-toggle="dropdown" data-container="body" data-target=".dropdown">
+			<a href="#" class="use-tooltip" title="Related departments" data-toggle="dropdown" data-container="body" data-target=".dropdown">
 				<i class="icon-caret-down fa fa-caret-down<#if !use_h4> icon-large fa fa-lg</#if>"></i>
 			</a>
 			<#-- cross-app singleton introductory text -->
@@ -99,7 +99,7 @@ preposition: Text to relate the title to the department name in the second line,
 				<h4 class="with-related">${preposition} ${department.name}</h4>
 			</#if>
 			<#if (departmentsWithPermission?has_content && departmentsWithPermission?size > 1)>
-				<a class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher">
+				<a href="#" class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher">
 					<i class="fa fa-caret-down fa-lg"></i>
 				</a>
 				<#-- cross-app singleton introductory text -->
