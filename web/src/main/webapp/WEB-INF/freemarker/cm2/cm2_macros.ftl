@@ -53,21 +53,21 @@
     <#if totalPages gt 1>
       <ul class="pagination pagination-sm pull-right" style="cursor: pointer;">
         <#if currentPage lte 1>
-          <li class="disabled"><span>&laquo;</span></li>
+          <li class="disabled"><span class="sr-only">You cannot move backwards, this is the first page</span><span>&laquo;</span></li>
         <#else>
-          <li><a data-page="${currentPage - 1}">&laquo;</a></li>
+          <li><a data-page="${currentPage - 1}" href="#"><span class="sr-only">Previous page</span>&laquo;</a></li>
         </#if>
         <#list 1..totalPages as page>
           <#if page == currentPage>
-            <li class="active"><span>${page}</span></li>
+            <li class="active"><span>${page}</span> <span class="sr-only">(current page)</span></li>
           <#else>
-            <li><a data-page="${page}">${page}</a></li>
+            <li><a data-page="${page}" href="#"><span class="sr-only">Jump to page </span>${page}</a></li>
           </#if>
         </#list>
         <#if currentPage gte totalPages>
-          <li class="disabled"><span>&raquo;</span></li>
+          <li class="disabled"><span class="sr-only">You cannot move forwards, this is the last page</span><span>&raquo;</span></li>
         <#else>
-          <li><a data-page="${currentPage + 1}">&raquo;</a></li>
+          <li><a data-page="${currentPage + 1}" href="#"><span class="sr-only">Next page</span>&raquo;</a></li>
         </#if>
       </ul>
     </#if>
