@@ -48,7 +48,9 @@ abstract class Features {
   @Value("${features.academicYear.2016:true}") var academicYear2016: Boolean = defaults.academicYear2016
   @Value("${features.academicYear.2017:true}") var academicYear2017: Boolean = defaults.academicYear2017
   @Value("${features.academicYear.2018:true}") var academicYear2018: Boolean = defaults.academicYear2018
-  @Value("${features.academicYear.2019:false}") var academicYear2019: Boolean = defaults.academicYear2019
+  @Value("${features.academicYear.2019:true}") var academicYear2019: Boolean = defaults.academicYear2019
+  @Value("${features.academicYear.2020:false}") var academicYear2020: Boolean = defaults.academicYear2020
+  @Value("${features.academicYear.2021:false}") var academicYear2021: Boolean = defaults.academicYear2021
   @Value("${features.timetableFeedCurrentAcademicYear:true}") var timetableFeedCurrentAcademicYear: Boolean = defaults.timetableFeedCurrentAcademicYear
   @Value("${features.timetableIncludeLectureFeedWBS:false}") var timetableIncludeLectureFeedWBS: Boolean = defaults.timetableIncludeLectureFeedWBS
 
@@ -192,7 +194,9 @@ class FeaturesMessage {
   @BeanProperty var academicYear2016 = true
   @BeanProperty var academicYear2017 = true
   @BeanProperty var academicYear2018 = true
-  @BeanProperty var academicYear2019 = false
+  @BeanProperty var academicYear2019 = true
+  @BeanProperty var academicYear2020 = false
+  @BeanProperty var academicYear2021 = false
   @BeanProperty var timetableFeedCurrentAcademicYear = true
   @BeanProperty var timetableIncludeLectureFeedWBS = false
 
