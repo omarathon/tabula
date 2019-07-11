@@ -3,7 +3,7 @@
   <#import "attendance_macros.ftl" as attendance_macros />
   <#import "*/modal_macros.ftl" as modal />
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
       $(function () {
         $('.fix-area').fixHeaderFooter();
@@ -27,7 +27,7 @@
 
         <form id="recordAttendance" action="" method="post" class="dirty-check">
           <input type="hidden" name="returnTo" value="${returnTo}" />
-          <script>
+          <script nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
           </script>
 
@@ -88,7 +88,7 @@
             <div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>
           </#if>
           </@spring.bind>
-            <script>
+            <script nonce="${nonce()}">
               AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
             </script>
           </#macro>

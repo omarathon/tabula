@@ -30,7 +30,7 @@
 
   </@bs3form.labelled_form_group>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $(".remove-attachment").on("click", function () {
         $(this).closest('form').find('.attendance-file').show();

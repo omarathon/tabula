@@ -1,5 +1,5 @@
 <#compress><#escape x as x?html>
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .roles-table {
       width: auto !important;
     }
@@ -141,7 +141,7 @@
     </tbody>
   </table>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.roles-table th.rotated').each(function () {
         var width = $(this).find('.rotate').width();

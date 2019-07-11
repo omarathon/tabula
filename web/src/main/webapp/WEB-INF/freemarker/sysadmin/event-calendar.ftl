@@ -3,7 +3,7 @@
 
   <div class="fullCalendar" data-viewname="month"></div>
 
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .fc-event.allday {
       font-weight: bold;
       color: white !important;
@@ -12,7 +12,7 @@
     }
   </style>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     // TIMETABLE STUFF
     jQuery(function ($) {
       function getEvents($container) {

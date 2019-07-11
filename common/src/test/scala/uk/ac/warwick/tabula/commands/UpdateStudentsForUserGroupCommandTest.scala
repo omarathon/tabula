@@ -1,9 +1,8 @@
-package uk.ac.warwick.tabula.commands.groups.admin.reusable
+package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{Department, UnspecifiedTypeUserGroup, UserGroup}
+import uk.ac.warwick.tabula.data.model.{Department, MemberQueryMembershipAdapter, UnspecifiedTypeUserGroup, UserGroup}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{SmallGroupService, SmallGroupServiceComponent, UserGroupCacheManager, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -11,7 +10,7 @@ import uk.ac.warwick.userlookup.User
 
 import scala.collection.JavaConverters._
 
-class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with Mockito {
+class UpdateStudentsForUserGroupCommandTest extends TestBase with Mockito {
 
   val userLookup = new MockUserLookup
 
@@ -20,11 +19,9 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
     case ug: UserGroup => ug.userLookup = userLookup
   }
 
-  private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent with RemovesUsersFromDepartmentGroups {
-    val userLookup: MockUserLookup = UpdateStudentsForDepartmentSmallGroupSetCommandTest.this.userLookup
+  private trait CommandTestSupport extends UserLookupComponent with SmallGroupServiceComponent {
+    val userLookup: MockUserLookup = UpdateStudentsForUserGroupCommandTest.this.userLookup
     val smallGroupService: SmallGroupService = smartMock[SmallGroupService]
-
-    def removeFromGroup(user: User, group: DepartmentSmallGroup): Unit = group.students.remove(user)
   }
 
   private trait Fixture {
@@ -74,7 +71,9 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   private trait CommandFixture extends Fixture {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetCommandInternal(department, set) with CommandTestSupport
+    lazy val command = new UpdateStudentsForUserGroupCommandInternal[DepartmentSmallGroupSet](MemberQueryMembershipAdapter(set)) with CommandTestSupport {
+      override def save(): DepartmentSmallGroupSet = set
+    }
   }
 
   @Test def linkToSits {
@@ -94,8 +93,6 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       set.members.knownType.includedUserIds should be(Set("0000003"))
       set.members.knownType.excludedUserIds should be(Set("0000004"))
       set.memberQuery should be("sprStatuses=C")
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
@@ -116,8 +113,6 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       set.members.knownType.includedUserIds should be(Set("0000001", "0000002", "0000003"))
       set.members.knownType.excludedUserIds should be('empty)
       set.memberQuery shouldBe null
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
@@ -126,7 +121,6 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       department.autoGroupDeregistration = true
 
       set.members.knownType.includedUserIds = Set("0000001", "0000002", "0000003", "0000004")
-      command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
 
       command.linkToSits = false
 
@@ -142,6 +136,8 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
       wireUserLookup(groupB.students)
       groupB.students.knownType.includedUserIds = Set("0000003", "0000004")
 
+      command.includedStudentIds.addAll(Seq("0000001", "0000002", "0000003").asJavaCollection)
+
       command.applyInternal() should be(set)
 
       set.members.knownType.staticUserIds should be('empty)
@@ -151,15 +147,13 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 
       groupA.students.knownType.includedUserIds should be(Set("0000001", "0000002"))
       groupB.students.knownType.includedUserIds should be(Set("0000003")) // 4 has been removed
-
-      verify(command.smallGroupService, times(1)).saveOrUpdate(set)
     }
   }
 
   @Test def permissions {
     new Fixture {
       val (theDepartment, theSet) = (department, set)
-      val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
         val department: Department = theDepartment
         val set: DepartmentSmallGroupSet = theSet
       }
@@ -172,7 +166,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoDepartment {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department = null
       val set = new DepartmentSmallGroupSet
     }
@@ -182,7 +176,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsNoSet {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       val set = null
     }
@@ -192,7 +186,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   }
 
   @Test(expected = classOf[ItemNotFoundException]) def permissionsUnlinkedSet {
-    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+    val command = new UpdateStudentsForDepartmentSmallGroupSetPermissions with CommandTestSupport {
       val department: Department = Fixtures.department("in")
       department.id = "set id"
 
@@ -206,7 +200,7 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
   @Test def describe {
     new Fixture {
       val (dept, s) = (department, set)
-      val command = new UpdateStudentsForDepartmentSmallGroupSetDescription with UpdateStudentsForDepartmentSmallGroupSetCommandState with CommandTestSupport {
+      val command = new UpdateStudentsForDepartmentSmallGroupSetDescription with CommandTestSupport {
         override lazy val eventName = "test"
         val department: Department = dept
         val set: DepartmentSmallGroupSet = s
@@ -223,12 +217,12 @@ class UpdateStudentsForDepartmentSmallGroupSetCommandTest extends TestBase with 
 
   @Test def wires {
     new Fixture {
-      val command = UpdateStudentsForDepartmentSmallGroupSetCommand(department, set)
+      val command = UpdateStudentsForUserGroupCommand(department, set)
 
       command should be(anInstanceOf[Appliable[DepartmentSmallGroupSet]])
       command should be(anInstanceOf[Describable[DepartmentSmallGroupSet]])
       command should be(anInstanceOf[UpdateStudentsForDepartmentSmallGroupSetPermissions])
-      command should be(anInstanceOf[UpdateStudentsForDepartmentSmallGroupSetCommandState])
+      command should be(anInstanceOf[UpdateStudentsForUserGroupCommandState])
     }
   }
 

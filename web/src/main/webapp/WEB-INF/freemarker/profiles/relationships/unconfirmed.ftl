@@ -30,7 +30,7 @@
       </tbody>
     </table>
 
-    <script>
+    <script nonce="${nonce()}">
       jQuery(function ($) {
         $('table.unrecorded').tablesorter();
       });

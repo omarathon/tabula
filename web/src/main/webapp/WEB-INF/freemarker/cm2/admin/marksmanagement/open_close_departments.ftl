@@ -49,7 +49,7 @@
   </div>
 
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
       var showDegreeType = function () {
         var value = $('form input[name=updatePostgrads]:checked').val();

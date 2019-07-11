@@ -32,7 +32,7 @@
             <h2 class="section">Search profiles</h2>
           </div>
 
-          <#include "../profile/search/form.ftl" />
+          <#include "../profile/search/_form.ftl" />
 
           <#if universityId?has_content>
             <#assign shownProfileLink=true />
@@ -164,7 +164,7 @@
       </p>
     </#if>
   </#if>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('a.view-old').on('click', function (e) {
         e.preventDefault();

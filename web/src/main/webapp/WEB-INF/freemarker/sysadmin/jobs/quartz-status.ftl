@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Quartz status</h1>
 
 <p>Trigger key ${key}</p>
@@ -9,7 +10,7 @@
   <p class="status"></p>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   (function ($) {
     var updateFragment = function () {
       $.get('${url('/sysadmin/jobs/quartz-status')}', {key: '${key}'}, function (data) {
@@ -78,3 +79,4 @@
     setInterval(updateFragment, 2000);
   })(jQuery);
 </script>
+</#escape>

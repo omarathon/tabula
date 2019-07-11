@@ -218,7 +218,30 @@ table.week-selector {
     text-align: center;
   }
 
+  div.scrollable-table div.right {
+    max-width: calc(100% - 150px);
+  }
+
   .scrollable-table(150px, 90px, 90px, 300px);
+
+  .scrollable-table {
+    display: block;
+  }
+
+  .scrollable-table div.scrollable-table-row {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: baseline;
+    justify-content: flex-end;
+  }
+
+  .scrollable-table div.scrollable-table-row .right {
+    flex-grow: 1;
+  }
+
+  .scrollable-table div.scrollable-table-row .right {
+    flex-shrink: 0;
+  }
 }
 
 .striped-section-contents {

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>User Access Manager audit</h1>
 
 <@f.form method="post" action="${url('/sysadmin/uam-audit')}" class="double-submit-protection">
@@ -31,7 +32,7 @@
   </div>
 
   <div class="form-group">
-    <button class="btn btn-danger" onclick="return confirm('A notification will be sent to each User Access Manager. Continue?')">Send</button>
+    <button type="submit" class="btn btn-danger" data-toggle="confirm-submit" data-message="A notification will be sent to each User Access Manager. Continue?">Send</button>
     <a class="btn btn-default" href="${url('/sysadmin')}">Cancel</a>
   </div>
 </@f.form>
@@ -44,3 +45,4 @@
     </li>
   </#list>
 </ul>
+</#escape>

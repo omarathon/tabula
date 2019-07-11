@@ -1,4 +1,5 @@
 <#-- TODO refactor this into a macro -->
+<#escape x as x?html>
 <#if info.ajax>
 
   <#include "job-status-fragment.ftl" />
@@ -25,7 +26,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
 
       var updateProgress = function () {
@@ -60,3 +61,4 @@
   </script>
 
 </#if>
+</#escape>

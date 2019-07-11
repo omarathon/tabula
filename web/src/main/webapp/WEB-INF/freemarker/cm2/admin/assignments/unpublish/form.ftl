@@ -6,7 +6,7 @@
   <#assign module = assignment.module />
   <#assign department = module.adminDepartment />
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       "use strict";
       var submitButton = $('#publish-submit'),

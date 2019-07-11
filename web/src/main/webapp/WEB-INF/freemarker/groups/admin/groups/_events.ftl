@@ -87,7 +87,7 @@
     </#list>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.events button[data-toggle="delete"]').each(function () {
         var $button = $(this);
@@ -124,7 +124,7 @@
     });
   </script>
 
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     .item-info .events li {
       line-height: 30px;
       padding: 0 3px;

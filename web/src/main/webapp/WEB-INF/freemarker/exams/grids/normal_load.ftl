@@ -152,7 +152,7 @@
 
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     window.ExamGrids.manageNormalLoads();
   </script>
 

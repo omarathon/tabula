@@ -38,7 +38,7 @@
       </div>
     </#if>
   </#if>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('[id^=select-signup]').submit(function (e) {
         e.preventDefault();

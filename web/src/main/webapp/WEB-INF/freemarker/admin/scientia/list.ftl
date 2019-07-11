@@ -50,7 +50,7 @@
     </#list>
     </tbody>
   </table>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('.map[data-lid]').mapPopups({
         placement: 'left',

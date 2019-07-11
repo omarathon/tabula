@@ -85,7 +85,7 @@
             Add ${relationshipType.agentRole}
           </a>
         </#if>
-        <a class="btn btn-default" data-target="#timeline" data-toggle="modal">View timeline</a>
+        <a class="btn btn-default" data-target="#timeline" data-toggle="modal" href="#">View timeline</a>
       </p>
     </div>
   </div>
@@ -236,7 +236,7 @@
         </#list>
         </tbody>
       </table>
-      <script>
+      <script nonce="${nonce()}">
         jQuery(function ($) {
           $('body').on('click', '.cancel-scheduled-change', function () {
             var $this = $(this), $form = $this.closest('.popover').data('creator').closest('form');
@@ -291,7 +291,7 @@
                   <div class="pull-right">
                     <i class="fa fa-spinner fa-spin invisible"></i>
                     <span class="dropdown">
-											<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
+											<a class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" href="#">Actions <span class="caret"></span></a>
 											<ul class="dropdown-menu pull-right">
 												<li>
 													<a href="${editUrl}" class="edit-meeting-record <#if meeting.deleted>disabled</#if>" title="Edit record">Edit</a>

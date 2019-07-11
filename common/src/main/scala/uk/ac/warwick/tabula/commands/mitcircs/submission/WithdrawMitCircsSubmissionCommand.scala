@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.submission.WithdrawMitCircsSubmissionCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Notification
-import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{OutcomesRecorded, ReadyForPanel, Submitted}
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded, ReadyForPanel, Submitted}
 import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmissionState}
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsSubmissionWithdrawnNotification
 import uk.ac.warwick.tabula.permissions.Permission
@@ -77,7 +77,7 @@ trait WithdrawMitCircsSubmissionNotifications extends Notifies[Result, Mitigatin
 
   override def emit(submission: Result): Seq[Notification[Result, MitigatingCircumstancesSubmission]] =
     // Only notify staff if the previous state was a submitted state
-    if (Seq(Submitted, ReadyForPanel, OutcomesRecorded).contains(previousState))
+    if (Seq(Submitted, ReadyForPanel, OutcomesRecorded, ApprovedByChair).contains(previousState))
       Seq(Notification.init(new MitCircsSubmissionWithdrawnNotification, currentUser, submission, submission))
     else
       Nil

@@ -33,7 +33,7 @@
 <#-- Capture the content between the macro tags into a string -->
   <#local content><#nested /></#local>
   <#if content?trim?has_content>
-    <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown">${text} <span class="caret"></span></a>
+    <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown" href="#">${text} <span class="caret"></span></a>
     <ul class="dropdown-menu pull-right">
       ${content}
     </ul>
@@ -46,7 +46,7 @@
 
     <#if !expand_by_default>
     <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         GlobalScripts.initCollapsible(jQuery('#${set_anchor(setItem.set)}'));
       </script>
     </#if>
@@ -494,7 +494,7 @@
     <div id="profile-modal" class="modal fade profile-subset" tabindex="-1"></div>
 
     <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(document.body).on('loaded.collapsible', '.module-info', function () {
         var $module = jQuery(this);
         Groups.zebraStripeGroups($module);
@@ -512,7 +512,7 @@
 
       <#if !expand_by_default>
       <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           GlobalScripts.initCollapsible(jQuery('#module-${module.code}').filter(':not(.empty)'));
         </script>
       </#if>
@@ -980,6 +980,45 @@
   <div class="group-attendance" id="group-attendance-${group.id}">
     <div class="scrollable-table">
       <div class="scrollable-table-row">
+        <div class="right">
+          <table class="table table-striped table-condensed attendance-table sb-no-wrapper-table-popout">
+            <thead>
+            <tr>
+              <#list instances as instance>
+                <#local event = instance._1() />
+                <#local week = instance._2() />
+
+                <th class="instance-date-header">
+                  <div class="instance-date tabula-tooltip-<#if (instances?size - instance_index) gt 3>right<#else>left</#if>"
+                       data-title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
+                    <@instanceFormat instance academicYear department />
+                  </div>
+
+                  <#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
+                    <#if can.do("SmallGroupEvents.ViewRegister", event)>
+                      <div class="eventRegister">
+                        <a class="btn btn-xs btn-default tabula-tooltip-<#if (instances?size - instance_index) gt 3>right<#else>left</#if> <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
+                           href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}"
+                           data-title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
+                        >
+                          Record
+                        </a>
+                      </div>
+                    </#if>
+                  </#if>
+                </th>
+              </#list>
+            </tr>
+            </thead>
+            <tbody>
+            <#list studentAttendance?keys as student>
+              <#local attendance = mapGet(studentAttendance, student) />
+              <#local notes = mapGet(attendanceNotes, student) />
+              <@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group />
+            </#list>
+            </tbody>
+          </table>
+        </div>
         <div class="left">
           <table class="table table-striped table-condensed attendance-table">
             <thead>
@@ -1012,53 +1051,11 @@
             </tbody>
           </table>
         </div>
-        <div class="right">
-          <table class="table table-striped table-condensed attendance-table sb-no-wrapper-table-popout">
-            <thead>
-            <tr>
-              <#list instances as instance>
-                <#local event = instance._1() />
-                <#local week = instance._2() />
-
-                <th class="instance-date-header">
-                  <div class="instance-date use-tooltip"
-                       data-container="body"
-                       title="Tutor<#if (event.tutors.size > 1)>s</#if>: <#if (event.tutors.size < 1)>[no tutor]</#if><#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>">
-                    <@instanceFormat instance academicYear department />
-                  </div>
-
-                  <#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
-                    <#if can.do("SmallGroupEvents.ViewRegister", event)>
-                      <div class="eventRegister">
-                        <a class="btn btn-xs btn-default use-tooltip <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
-                           href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}"
-                           title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
-                           data-html="true"
-                           data-container="body"
-                        >
-                          Record
-                        </a>
-                      </div>
-                    </#if>
-                  </#if>
-                </th>
-              </#list>
-            </tr>
-            </thead>
-            <tbody>
-            <#list studentAttendance?keys as student>
-              <#local attendance = mapGet(studentAttendance, student) />
-              <#local notes = mapGet(attendanceNotes, student) />
-              <@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group />
-            </#list>
-            </tbody>
-          </table>
-        </div>
       </div>
     </div>
 
     <#if studentAttendance?keys?size gt 0>
-      <script type="text/javascript">
+      <script type="text/javascript" nonce="${nonce()}">
         jQuery(window).on('load', function () {
           GlobalScripts.scrollableTableSetup();
         });
@@ -1231,7 +1228,7 @@ showResetButton=false
               <input class="btn btn-danger btn-sm use-tooltip"
                      <#if findCommandResult.membershipItems?size == 0>disabled</#if>
                      type="submit"
-                     name="${ManageDepartmentSmallGroupsMappingParameters.manuallyExclude}"
+                     name="manuallyExclude"
                      value="Remove"
                      title="Remove selected students from these groups"
                      style="margin-left: 0.5em;"
@@ -1241,7 +1238,7 @@ showResetButton=false
               <input class="btn btn-danger btn-sm use-tooltip"
                      type="submit"
                      style="float: right; padding-left: 5px; padding-right: 5px; margin-left: 5px;"
-                     name="${ManageDepartmentSmallGroupsMappingParameters.resetMembership}"
+                     name="resetMembership"
                      value="Reset"
                      data-container="body"
                      title="Restore the manually removed and remove the manually added students selected"

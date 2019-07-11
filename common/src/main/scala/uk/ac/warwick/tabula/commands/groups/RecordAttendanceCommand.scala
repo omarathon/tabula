@@ -195,7 +195,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
     }.toSeq
 
     attendanceMonitoringEventAttendanceService.updateCheckpoints(attendances)
-    if (occurrence.event.group.groupSet.module.adminDepartment.autoMarkMissedMonitoringPoints) {
+    if (occurrence.department.autoMarkMissedMonitoringPoints) {
       attendanceMonitoringEventAttendanceService.updateMissedCheckpoints(attendances, user)
     }
 

@@ -1,7 +1,9 @@
 <#escape x as x?html>
   <#import "*/group_components.ftl" as components />
-  <h1>Create small groups</h1>
-  <h4><span class="muted">for</span> <@fmt.module_name module /></h4>
+  <div class="deptheader">
+    <h1>Create small groups</h1>
+    <h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>
+  </div>
 
   <div class="fix-area">
     <@f.form id="newStudents" method="POST" modelAttribute="command" class="dirty-check">

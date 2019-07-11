@@ -63,6 +63,6 @@
   </@f.form>
 </#escape>
 
-<script type="text/javascript">
+<script type="text/javascript" nonce="${nonce()}">
   jQuery("#groups-table").bigList({});
 </script>

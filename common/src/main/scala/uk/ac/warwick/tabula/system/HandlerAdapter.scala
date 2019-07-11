@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.system
 
-import com.fasterxml.jackson.databind.{SerializationFeature, ObjectMapper}
+import java.util
+
 import com.fasterxml.jackson.databind.module.SimpleModule
+import com.fasterxml.jackson.databind.{ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import org.springframework.core.convert.support.GenericConversionService
 import org.springframework.format.support.DefaultFormattingConversionService
-import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler
-import collection.JavaConverters._
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter
-import uk.ac.warwick.tabula.JavaImports._
-import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite
-import org.springframework.web.method.support.InvocableHandlerMethod
-import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataBinderFactory
+import org.springframework.http.MediaType
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer
+import org.springframework.web.method.support.{HandlerMethodReturnValueHandler, HandlerMethodReturnValueHandlerComposite, InvocableHandlerMethod}
+import org.springframework.web.servlet.mvc.method.annotation.{RequestMappingHandlerAdapter, ServletRequestDataBinderFactory}
+import uk.ac.warwick.tabula.JavaImports._
+
+import scala.collection.JavaConverters._
 
 /**
   * Extension of RequestMappingHandlerAdapter that allows you to place
@@ -50,6 +50,9 @@ class HandlerAdapter extends org.springframework.web.servlet.mvc.method.annotati
       getMessageConverters.add(c)
       c
     }
+
+    // Also support application/csp-report
+    converter.setSupportedMediaTypes(util.Arrays.asList(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"), new MediaType("application", "csp-report")))
 
     val mapper = new ObjectMapper
     mapper.registerModule(DefaultScalaModule)

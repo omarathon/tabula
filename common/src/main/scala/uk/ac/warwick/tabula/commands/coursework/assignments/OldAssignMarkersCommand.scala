@@ -123,7 +123,10 @@ class OldAssignMarkersCommand(val module: Module, val assessment: Assessment)
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         if (!file.attached.isEmpty) {
           extractDataFromFile(file.attached.asScala.head, result)
         }

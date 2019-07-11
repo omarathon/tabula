@@ -9,7 +9,7 @@ You can still upload a single file here if you want.
   To select multiple files at once hold down the Ctrl key and click on each file.
 </div>
 
-<script>
+<script nonce="${nonce()}">
   if (window.Supports.multipleFiles) {
     jQuery('#multifile-column').find('h3').html('Select files');
     jQuery('#multifile-column-description').html(jQuery('#multifile-column-description-enabled').html());

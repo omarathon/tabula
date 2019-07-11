@@ -25,7 +25,7 @@
     </@bs3form.form_group>
   </@f.form>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('#confirmCheck').change(function () {
         $('input[type=submit].btn-danger').attr('disabled', !this.checked).toggleClass('disabled', !this.checked);

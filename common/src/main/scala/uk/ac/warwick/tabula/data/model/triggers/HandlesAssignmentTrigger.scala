@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model.triggers
 
+import org.springframework.validation.BeanPropertyBindingResult
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
@@ -7,7 +8,6 @@ import uk.ac.warwick.tabula.commands.cm2.assignments.ReleaseForMarkingCommand
 import uk.ac.warwick.tabula.commands.coursework.assignments.OldReleaseForMarkingCommand
 import uk.ac.warwick.tabula.commands.coursework.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.commands.cm2.turnitin.{SubmitToTurnitinCommand => CM2SubmitToTurnitinCommand}
-
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AssessmentService
@@ -33,7 +33,7 @@ trait HandlesAssignmentTrigger extends Logging {
         val releaseToMarkersCommand = OldReleaseForMarkingCommand(assignment.module, assignment, new AnonymousUser)
         releaseToMarkersCommand.students = JArrayList(usercodes)
         releaseToMarkersCommand.confirm = true
-        releaseToMarkersCommand.onBind(null)
+        releaseToMarkersCommand.onBind(new BeanPropertyBindingResult(releaseToMarkersCommand, "releaseToMarkersCommand"))
         releaseToMarkersCommand.apply()
       } else if (assignment.hasCM2Workflow) {
         val releaseToMarkersCommand = ReleaseForMarkingCommand(assignment, new AnonymousUser)

@@ -42,7 +42,7 @@
     </div>
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $form = $('#edit-monitoring-point-form');
       var $pointTypes = $form.find('[name=pointType]');

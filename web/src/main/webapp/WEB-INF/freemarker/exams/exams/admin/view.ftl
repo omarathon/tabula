@@ -192,7 +192,7 @@
     </tbody>
   </table>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $('.feedback-table').sortableTable({
         textExtraction: function (node) {

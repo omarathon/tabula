@@ -83,7 +83,7 @@ class TutorReallocationTest extends BrowserTest with GivenWhenThen with Features
     cssSelector(".striped-section table.related_students tr.student").findAllElements.size should be(2)
 
     When("They select a student to reallocate")
-    click on cssSelector(s"#rel-user${P.Marker2.warwickId}-students-title")
+    click on cssSelector(s"#rel-user${P.Marker2.warwickId}-students-title a.collapse-trigger")
     cssSelector("input[name=preselectStudents]").findAllElements.filter(e =>
       e.attribute("value").get == P.Student2.warwickId
     ).foreach(_.underlying.click())

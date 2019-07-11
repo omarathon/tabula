@@ -23,7 +23,7 @@ object DownloadSingleRegisterAsPdfCommand {
 }
 
 class DownloadSingleRegisterAsPdfCommandInternal(val event: SmallGroupEvent, val week: Int, filename: String, user: CurrentUser)
-  extends DownloadRegistersAsPdfCommandInternal(event.group.groupSet.module.adminDepartment, event.group.groupSet.academicYear, filename, user) {
+  extends DownloadRegistersAsPdfCommandInternal(event.department, event.academicYear, filename, user) {
 
   self: DownloadRegistersAsPdfHelper.Dependencies =>
 

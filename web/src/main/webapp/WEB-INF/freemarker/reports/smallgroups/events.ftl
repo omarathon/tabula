@@ -13,7 +13,7 @@
   </@reports_macros.reportLoader>
 
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       if (window.ReportBuilder == undefined)
         return false;

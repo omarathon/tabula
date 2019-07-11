@@ -82,7 +82,7 @@
     <button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.coreRequiredModules}">Next</button>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var updateCheckboxes = function ($table) {
         var checked = $table.find('td input:checked').length;

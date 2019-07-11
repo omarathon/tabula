@@ -27,7 +27,7 @@
 
     <p><a href="<@routes.cm2.departmenthome department academicYear/>">Return to Assignments in ${department.name} (${academicYear.toString})</a></p>
 
-    <script>
+    <script nonce="${nonce()}">
       (function ($) {
 
         var updateProgress = function () {

@@ -10,9 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.commands.MultipartFileByteSource
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, FileAttachmentToken}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{DetectMimeType, Logging}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.objectstore.ObjectStorageService
 import uk.ac.warwick.util.files.hash.FileHasher
@@ -57,7 +58,10 @@ class FileDao extends Daoisms with Logging with SHAFileHasherComponent {
 
       val metadata = ObjectStorageService.Metadata(
         contentLength = file.uploadedData.size(),
-        contentType = MediaType.OCTET_STREAM.toString, // TODO start storing content types
+        contentType = file.uploadedData match {
+          case MultipartFileByteSource(f) => DetectMimeType.detectMimeType(f.getInputStream, f.getOriginalFilename, f.getContentType).toString
+          case _ => DetectMimeType.detectMimeType(file.uploadedData.openStream()).toString
+        },
         fileHash = Some(file.hash)
       )
 

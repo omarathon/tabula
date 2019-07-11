@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.events
 
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.logging.AuditLogger
 import uk.ac.warwick.util.logging.AuditLogger.{Field, RequestInformation}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -25,27 +26,7 @@ class AuditLoggingEventListener extends EventListener {
     event.userAgent.maybeText.foreach { userAgent => info = info.withUserAgent(userAgent) }
     event.ipAddress.maybeText.foreach { ipAddress => info = info.withIpAddress(ipAddress) }
 
-    // We need to convert all Scala collections into Java collections
-    def handle(in: Any): AnyRef = (in match {
-      case Some(x: Object) => handle(x)
-      case Some(null) => null
-      case None => null
-      case jcol: java.util.Collection[_] => jcol.asScala.map(handle).asJavaCollection
-      case jmap: JMap[_, _] => jmap.asScala.mapValues(handle).asJava
-      case smap: scala.collection.SortedMap[_, _] => JLinkedHashMap(smap.mapValues(handle).toSeq: _*)
-      case lmap: scala.collection.immutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(handle).toSeq: _*)
-      case lmap: scala.collection.mutable.ListMap[_, _] => JLinkedHashMap(lmap.mapValues(handle).toSeq: _*)
-      case smap: scala.collection.Map[_, _] => mapAsJavaMapConverter(smap.mapValues(handle)).asJava
-      case sseq: scala.Seq[_] => seqAsJavaListConverter(sseq.map(handle)).asJava
-      case scol: scala.Iterable[_] => asJavaCollectionConverter(scol.map(handle)).asJavaCollection
-      case other: AnyRef => other
-      case _ => null
-    }) match {
-      case null => "-"
-      case notNull => notNull
-    }
-
-    val data = (beforeEvent.extra ++ event.extra).map { case (k, v) => new Field(k) -> handle(v) }
+    val data = (beforeEvent.extra ++ event.extra).map { case (k, v) => new Field(k) -> Logging.convertForStructuredArguments(v) }
 
     logger.log(info, data.asJava)
   }

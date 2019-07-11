@@ -71,7 +71,7 @@
               </#if>
             </a>
           </p>
-          <script>
+          <script nonce="${nonce()}">
             jQuery(function ($) {
               var visible = false;
 
@@ -245,7 +245,7 @@
     </#if>
     </fieldset>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
         var $enrolment = $('.assignmentEnrolment');
 

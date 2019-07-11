@@ -49,7 +49,7 @@ test {
 task installHeadlessChromeDependency(type: NpmTask) {
   outputs.dir 'node_modules/puppeteer/.local-chromium'
   outputs.dir 'node_modules/chromedriver/lib/chromedriver'
-  args = ['install', 'puppeteer', 'chromedriver', '--no-save']
+  args = ['ci']
 }
 
 test.dependsOn 'installHeadlessChromeDependency'

@@ -42,7 +42,7 @@
           <div id="extension-manager-list">
             <@form.flexipicker path="extensionManagers" placeholder="User name" multiple=true list=true />
           </div>
-          <script>
+          <script nonce="${nonce()}">
             jQuery('#extension-manager-list').on('click', function (e) {
               e.preventDefault();
               var name = jQuery(this).data('expression');

@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     (function ($) {
       function buildStatus(field, type, string) {
         return field + " " + type + ((field != 1) ? "s" : "") + string;

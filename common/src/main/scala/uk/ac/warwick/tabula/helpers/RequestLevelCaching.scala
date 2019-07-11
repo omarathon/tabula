@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.helpers
 
 import java.util
+import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
 
 import org.slf4j.LoggerFactory
 import uk.ac.warwick.tabula.EarlyRequestInfo
 import uk.ac.warwick.tabula.helpers.RequestLevelCache.Cache
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.collection.convert.Wrappers.JConcurrentMapWrapper
+import scala.collection.mutable
 
 trait RequestLevelCaching[A, B] {
   def cache: Option[Cache[A, B]] = RequestLevelCache.cache(getClass.getName)
@@ -17,7 +20,7 @@ trait RequestLevelCaching[A, B] {
   // This uses an IdentityHashMap instead of the regular HashMap, which uses reference equality rather than equals()/hashCode()
   def cachedByIdentity(key: A)(default: => B): B = RequestLevelCache.cachedBy(getClass.getName, key)(default)
 
-  def evictAll() = RequestLevelCache.evictAll()
+  def evictAll(): Unit = RequestLevelCache.evictAll()
 }
 
 class RequestLevelCachingError extends Error
@@ -38,7 +41,14 @@ object RequestLevelCache {
     EarlyRequestInfo.fromThread.map {
       _.requestLevelCache.getCacheByName[A, B](cacheName)
     } match {
-      case Some(cache) => cache.getOrElseUpdate(key, default)
+      case Some(cache) => {
+        lazy val op = default
+        try {
+          cache.getOrElseUpdate(key, op)
+        } catch {
+          case e: NullPointerException => op
+        }
+      }
       case _ =>
         // Include error to get stack trace
         requestLevelCachingLogger.debug("Calling a request level cache outside of a request", new RequestLevelCachingError)
@@ -63,13 +73,13 @@ class RequestLevelCache {
 
   import RequestLevelCache._
 
-  private val cacheMap = mutable.Map[String, Cache[_, _]]()
+  //TAB-7331 (Related with CPU Spike)
+  private val cacheMap: scala.collection.concurrent.Map[String, Cache[_, _]] = JConcurrentMapWrapper(new ConcurrentHashMap[String, Cache[_, _]]())
 
   def getCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
     case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
     case _ =>
-      val cache = mutable.Map[A, B]()
-
+      val cache: scala.collection.concurrent.Map[A, B] = JConcurrentMapWrapper(new ConcurrentHashMap[A, B]())
       // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
   }
@@ -77,8 +87,7 @@ class RequestLevelCache {
   def getIdentityCacheByName[A, B](name: String): Cache[A, B] = cacheMap.get(name) match {
     case Some(cache: Cache[_, _]) => cache.asInstanceOf[Cache[A, B]]
     case _ =>
-      val cache = new util.IdentityHashMap[A, B]().asScala
-
+      val cache = Collections.synchronizedMap(new util.IdentityHashMap[A, B]()).asScala
       // If we've put it in the map in some other thread, we return that - otherwise return the one we've just put in
       cacheMap.put(name, cache).getOrElse(cache).asInstanceOf[Cache[A, B]]
   }

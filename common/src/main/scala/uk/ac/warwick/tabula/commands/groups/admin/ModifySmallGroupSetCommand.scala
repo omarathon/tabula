@@ -63,6 +63,8 @@ trait ModifySmallGroupSetCommandState extends CurrentAcademicYear {
 
   var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
+  var membershipStyle: SmallGroupMembershipStyle = SmallGroupMembershipStyle.Default
+
   var allowSelfGroupSwitching: Boolean = true
   var studentsCanSeeTutorName: Boolean = false
   var studentsCanSeeOtherMembers: Boolean = false
@@ -102,7 +104,7 @@ class CreateSmallGroupSetCommandInternal(val module: Module) extends ModifySmall
           set.groups.add(smallGroup)
         }
       }
-    } else {
+    } else if (set.membershipStyle == SmallGroupMembershipStyle.AssessmentComponents) {
       // TAB-2535 Automatically link to any available upstream groups
       for {
         ua <- assessmentMembershipService.getAssessmentComponents(module)
@@ -190,6 +192,7 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
     academicYear = set.academicYear
     format = set.format
     allocationMethod = set.allocationMethod
+    membershipStyle = set.membershipStyle
     allowSelfGroupSwitching = set.allowSelfGroupSwitching
     studentsCanSeeTutorName = set.studentsCanSeeTutorName
     studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
@@ -198,10 +201,25 @@ abstract class ModifySmallGroupSetCommandInternal extends CommandInternal[SmallG
   }
 
   def copyTo(set: SmallGroupSet) {
+    if (membershipStyle != set.membershipStyle) {
+      // If changing the membership style, clear out membership and deregister
+      set.memberQuery = null
+      set.assessmentGroups.clear()
+      set.members.knownType.includedUserIds = Set.empty
+      set.members.knownType.excludedUserIds = Set.empty
+      set.members.knownType.staticUserIds = Set.empty
+      set.groups.asScala.foreach { group =>
+        group.students.knownType.includedUserIds = Set.empty
+        group.students.knownType.excludedUserIds = Set.empty
+        group.students.knownType.staticUserIds = Set.empty
+      }
+    }
+
     set.name = name
     set.academicYear = academicYear
     set.format = format
     set.allocationMethod = allocationMethod
+    set.membershipStyle = membershipStyle
     set.collectAttendance = collectAttendance
 
     set.allowSelfGroupSwitching = allowSelfGroupSwitching

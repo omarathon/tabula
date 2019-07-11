@@ -34,7 +34,10 @@ trait GroupsObjectsWithFileUpload[A >: Null, B >: Null] extends GroupsObjects[A,
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         if (!file.attached.isEmpty) {
           processFiles(file.attached.asScala)
         }

@@ -1,6 +1,6 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#macro reportLoader reportUrl commandName="command" hasDatePicker=true>
-  <script>
+  <script nonce="${nonce()}">
     window.ReportBuilder = {};
     window.ReportBuilder.rowKey = 'students';
   </script>
@@ -37,13 +37,13 @@
   </div>
 
   <div class="alert alert-danger" style="display: none;">
-    <p>There was a problem generating the report. If the problem persists, please contact the <a href="mailto:webteam@warwick.ac.uk">ITS Web Team</a>.</p>
+    <p>There was a problem generating the report. If the problem persists, please contact the <a href="tabula:webteam@warwick.ac.uk">Student Information Systems team</a>.</p>
   </div>
 
   <div class="report-target"></div>
   <form class="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></form>
 
-  <script>
+  <script nonce="${nonce()}">
     var progress = 10, stepProgress = function () {
       progress = progress + 5;
       jQuery('.id7-main-content .loading .bar').width(progress + '%');
@@ -163,7 +163,7 @@
 </#macro>
 
 <#macro attendanceMonitoringReportScript>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       if (window.ReportBuilder == undefined)
         return false;
@@ -242,7 +242,7 @@
 </#macro>
 
 <#macro smallGroupReportScript>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       if (window.ReportBuilder == undefined)
         return false;
@@ -352,7 +352,7 @@
 </#macro>
 
 <#macro smallGroupByModuleReportScript>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       if (window.ReportBuilder == undefined)
         return false;

@@ -67,7 +67,7 @@ so that they can be passed around between requests.
             Confirm that you wish to remove the marking workflow
           </label>
         </div>
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             $('#removeWorkflowPreview').on('change', function () {
               if ($(this).is(':checked')) {

@@ -475,6 +475,8 @@ $.fn.tabulaPopover = function (options) {
   // filter already initialized popovers
   $items = $items.not(initClass);
 
+  const tooltipItems = $items.filter('.use-tooltip').toArray(); // boostrap js based tooltip
+
   // set options, with defaults
   var defaults = {
     template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
@@ -505,8 +507,10 @@ $.fn.tabulaPopover = function (options) {
   $('html').on('click.popoverDismiss', function (e) {
     // if clicking anywhere other than the popover itself
     if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
-      $items.popover('hide');
-      $items.tooltip('enable');
+      $('.popover-inner').find('button.close').click();
+      for (var i = 0; i < tooltipItems.length; i++) {
+        $(tooltipItems[i]).tooltip('enable');
+      }
     }
   });
 
@@ -750,7 +754,7 @@ exports.initCollapsible = function ($el) {
           $replacementLink.contents()
             .filter(function() { return this.nodeType !== 1; })
             .wrap('<span class="collapse-label">');
-          $replacementLink.find('span').text($.trim($replacementLink.find('span').text()));
+          $replacementLink.find('span.collapse-label').text($.trim($replacementLink.find('span.collapse-label').text()));
           $titleElement.html('');
           $titleElement.prepend($replacementLink);
         }
@@ -1259,7 +1263,14 @@ $(function () {
   if (window !== window.top) {
     // this is an iframe
     (function () {
-      var bodyHeight = $('body').height();
+      var bodyHeight;
+      try {
+        bodyHeight = $('body').height();
+      } catch (e) {
+        // Hello, Firefox 59
+        bodyHeight = document.body.clientHeight;
+      }
+
       setInterval(function () {
         var newBodyHeight = $('body').height();
         if (newBodyHeight !== bodyHeight) {
@@ -1468,5 +1479,46 @@ $(function () {
   });
   $(document.body).on('click', 'button.disabled', function (e) {
     e.preventDefault();
+  });
+});
+
+$(function () {
+  // be sure to bind the confirm-submit handler before other handlers on submit buttons
+  $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message], input[type="submit"][data-toggle~="confirm-submit"][data-message], input[type="button"][data-toggle~="confirm-submit"][data-message]').on('click', function confirmBeforeSubmit(event) {
+    const $button = $(this);
+    // eslint-disable-next-line no-alert
+    if (!window.confirm($button.data('message'))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  });
+
+  $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    let safe = false;
+    if (typeof URL === "function" && (new URL(options.url, window.location.origin)).origin === window.location.origin) {
+      safe = true;
+    } else if (typeof URL !== "function" && window.navigator.userAgent.indexOf("Trident/7.0") > -1) {
+      const a = $('<a>', {
+        href: url
+      });
+      safe = (a.prop('hostname') === window.location.hostname);
+    }
+
+    if (safe) {
+      const csrfHeaderName = $("meta[name=_csrf_header]").attr('content');
+      const csrfHeaderValue = $("meta[name=_csrf]").attr('content');
+      if (csrfHeaderName !== undefined && csrfHeaderValue !== undefined) {
+        jqXHR.setRequestHeader(csrfHeaderName, csrfHeaderValue);
+      }
+    }
+  });
+
+  $('form[data-confirm-submit]').on('submit', function (event) {
+    const $form = $(this);
+    // eslint-disable-next-line no-alert
+    if (!window.confirm($form.data('confirm-submit'))) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
   });
 });

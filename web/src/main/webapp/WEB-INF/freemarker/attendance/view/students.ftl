@@ -29,7 +29,7 @@
 
   <#include "/WEB-INF/freemarker/filter_bar.ftl" />
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(window).on('load', function () {
       GlobalScripts.scrollableTableSetup();
     });

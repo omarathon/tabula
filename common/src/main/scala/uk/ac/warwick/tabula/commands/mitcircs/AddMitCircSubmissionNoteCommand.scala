@@ -87,6 +87,8 @@ trait AddMitCircsSubmissionNoteRequestBinding extends BindListener {
   self: AddMitCircsSubmissionNoteRequest =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 }

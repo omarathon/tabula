@@ -2,7 +2,7 @@
 <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
-<#assign isSelf = submission.student.universityId == user.universityId />
+<#assign isSelf = submission.student.universityId == user.universityId!'' />
 
 <#escape x as x?html>
   <#if pagination??>
@@ -36,7 +36,7 @@
         <#if !isSelf>
           <@components.detail label="State" condensed=true>
             ${submission.state.description}
-            <#if submission.state.entryName == "Outcomes Recorded">
+            <#if submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair" >
               <#if submission.outcomesLastRecordedBy??>
                 by ${submission.outcomesLastRecordedBy.fullName!submission.outcomesLastRecordedBy.userId}
               </#if>
@@ -111,7 +111,7 @@
                   <p><a href="<@routes.mitcircs.adminhome submission.department />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to list of submissions</a></p>
                 </#if>
 
-                <#if !submission.withdrawn>
+                <#if submission.canConfirmSensitiveEvidence>
                   <p><a href="<@routes.mitcircs.sensitiveEvidence submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Confirm sensitive evidence</a></p>
                 </#if>
 
@@ -128,9 +128,17 @@
                 <#if submission.canRecordOutcomes>
                   <p><a href="<@routes.mitcircs.recordOutcomes submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block">Record panel outcomes</a></p>
                 </#if>
-              <#elseif submission.panel??>
-                <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
-              </#if>
+                <#elseif submission.panel??>
+                  <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
+                </#if>
+                <#if isPanelChair>
+                  <div class="modal fade" id="approveModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+                  <#if submission.canApproveOutcomes>
+                    <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#approveModal">Approve outcomes</a></p>
+                  <#elseif submission.state.entryName == "Approved By Chair">
+                    <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#approveModal">Unapprove outcomes</a></p>
+                  </#if>
+                </#if>
             </div>
           </div>
         </div>
@@ -181,6 +189,10 @@
       <@components.section "Sensitive evidence">
         <p>Seen by: ${submission.sensitiveEvidenceSeenBy.fullName} on <@fmt.date date=submission.sensitiveEvidenceSeenOn includeTime = false /></p>
         <#noescape>${submission.formattedSensitiveEvidenceComments}</#noescape>
+      </@components.section>
+    <#elseif submission.hasSensitiveEvidence>
+      <@components.section "Sensitive evidence">
+        <p>The student has declared that there is sensitive evidence related to this submission that they would rather discuss in person.</p>
       </@components.section>
     </#if>
 
@@ -262,7 +274,7 @@
         </@components.section>
       </#if>
 
-      <#if submission.state.entryName == "Outcomes Recorded" && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
+      <#if (submission.state.entryName == "Outcomes Recorded" || submission.state.entryName == "Approved By Chair") && (canManage || can.do("MitigatingCircumstancesSubmission.ViewOutcomes", submission))>
         <@components.section "Outcomes">
           <#if submission.outcomeGrading?? && (canManage || can.do("MitigatingCircumstancesSubmission.ViewGrading", submission))>
             <@components.detail label="Mitigation grade" condensed=true>

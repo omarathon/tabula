@@ -23,7 +23,7 @@
               <@fmt.help_popover id="route" content="Formative assignments do not count towards the final module mark." />
             </label>
           </div>
-          <script type="text/javascript">
+          <script type="text/javascript" nonce="${nonce()}">
             jQuery(function ($) {
               $('input[name=lateFormative]:checkbox').on('change', function () {
                 $('span.late_formative').toggleClass('hidden', !this.checked);
@@ -57,7 +57,7 @@
 
   <#if !expand_by_default>
   <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
     </script>
   </#if>
@@ -488,7 +488,7 @@
 
   <#if !expand_by_default>
   <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
     </script>
   </#if>
@@ -678,8 +678,10 @@
       </#if>
 		>
 			<div class="clearfix">
-				<div class="btn-group section-manage-button">
-					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">Manage this module <span class="caret"></span></a>
+
+				<h4 class="section-title with-button"><#if has_assignments><a class="collapse-trigger icon-container" href="#"></#if>${title}<#if has_assignments></a></#if>
+        				<div class="btn-group section-manage-button">
+					<a class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown" href="#">Manage this module <span class="caret"></span></a>
 					<ul class="dropdown-menu pull-right">
 						<li>
 							<#local perms_url><@routes.admin.moduleperms module /></#local>
@@ -714,7 +716,7 @@
 					</ul>
 				</div>
 
-				<h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#">${title}</a></h4>
+        </h4>
 
 				<#if has_assignments>
           <div class="striped-section-contents">
@@ -733,7 +735,7 @@
 
   <#if !expand_by_default>
   <#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       GlobalScripts.initCollapsible(jQuery('#${id}').filter(':not(.empty)'));
     </script>
   </#if>
@@ -982,7 +984,7 @@
       </#if>
     </p>
   </div>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $("#tool-tip-${attachment.id}").popover({
         placement: 'right',
@@ -1458,7 +1460,7 @@
       <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
     </p>
   </div>
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $("#tool-tip-${attachment.id}").popover({
         placement: 'right',

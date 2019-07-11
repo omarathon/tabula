@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Marking workflows<#if isExams> available for exams</#if></h1>
 
 <#if isExams>
@@ -74,7 +75,7 @@
   <div class="modal-body"></div>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   jQuery(function ($) {
 
     $('.marking-workflows').on('click', 'a[data-toggle=modal]', function (e) {
@@ -97,3 +98,4 @@
 
   });
 </script>
+</#escape>

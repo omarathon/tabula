@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.mitcircs.submission.MitCircsRecordAcuteOutcomesCommand._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGrading.Rejected
+import uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesSubmissionState.{ApprovedByChair, OutcomesRecorded}
 import uk.ac.warwick.tabula.data.model.mitcircs._
 import uk.ac.warwick.tabula.data.model.notifications.mitcircs.MitCircsRecordAcuteOutcomesNotification
 import uk.ac.warwick.tabula.data.model.{AssessmentType, Notification}
@@ -150,7 +151,7 @@ trait MitCircsRecordAcuteOutcomesNotifications extends Notifies[Result, Mitigati
 
   override def emit(submission: Result): Seq[Notification[MitigatingCircumstancesSubmission, Unit]] =
     // Generate notifications if it's confirmed (not draft) and the grading isn't rejected OR it's rejected and it previously wasn't
-    if (confirm && (outcomeGrading != MitigatingCircumstancesGrading.Rejected || (oldState == MitigatingCircumstancesSubmissionState.OutcomesRecorded && Option(oldGrading).exists(_ != MitigatingCircumstancesGrading.Rejected))))
+    if (confirm && (outcomeGrading != MitigatingCircumstancesGrading.Rejected || (Seq(OutcomesRecorded, ApprovedByChair).contains(oldState) && Option(oldGrading).exists(_ != MitigatingCircumstancesGrading.Rejected))))
       Seq(Notification.init(new MitCircsRecordAcuteOutcomesNotification, user, submission))
     else Nil
 }

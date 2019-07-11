@@ -3,7 +3,7 @@
 <#escape x as x?html>
 
   <#if user.staff>
-    <#include "search/form.ftl" />
+    <#include "search/_form.ftl" />
     <hr class="full-width" />
   </#if>
 
@@ -351,7 +351,7 @@
     </@modal.wrapper>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $table = $('table.member-notes');
       $table.tablesorter({

@@ -1,5 +1,5 @@
 <#-- Displays validation errors for self sign-up. -->
-
+<#escape x as x?html>
 <h1>
   <#if action="signup">
     Sign up to
@@ -18,3 +18,4 @@
 <p>
   <a class="btn" href="<@routes.groups.home />">Back</a>
 </p>
+</#escape>

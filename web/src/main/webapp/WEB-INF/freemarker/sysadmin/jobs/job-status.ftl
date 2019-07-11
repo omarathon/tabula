@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Job status</h1>
 
 <p>Job ID ${jobId}</p>
@@ -9,7 +10,7 @@
   <p class="status"></p>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   (function ($) {
     var updateFragment = function () {
       $.get('${url('/sysadmin/jobs/job-status')}', {id: '${jobId}'}, function (data) {
@@ -32,3 +33,4 @@
 
   })(jQuery);
 </script>
+</#escape>

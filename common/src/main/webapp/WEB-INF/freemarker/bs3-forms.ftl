@@ -161,7 +161,7 @@ Macros for customised form elements, containers and more complex pickers.
 
           <@errors path="${basename}.upload" />
           <@errors path="${basename}.attached" />
-          <script><!--
+          <script nonce="${nonce()}"><!--
 
             jQuery(function ($) {
               var $container = $('#${elementId}'),

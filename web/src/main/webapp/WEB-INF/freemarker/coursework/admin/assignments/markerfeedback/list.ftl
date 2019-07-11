@@ -289,7 +289,7 @@
         <@workflowActions stage.nextRoleName stage.previousRoleName!"" stage.roleName!""/>
       </div>
     </#list>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       (function ($) {
         var tsOptions = {
           sortList: [<#if assignment.module.adminDepartment.showStudentName>[3, 0], </#if>[2, 0], [1, 0]],

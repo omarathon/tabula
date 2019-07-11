@@ -8,17 +8,18 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.ListMarkerFeedbackCommand.EnhancedFeedbackForOrderAndStage
 import uk.ac.warwick.tabula.commands.cm2.assignments.markers.{ListMarkerFeedbackCommand, ListMarkerFeedbackState}
 import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentAnonymity}
-import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.SubmissionStates._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.PlagiarismStatuses._
 import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.Statuses._
+import uk.ac.warwick.tabula.helpers.cm2.SubmissionAndFeedbackInfoFilters.SubmissionStates._
+import uk.ac.warwick.tabula.helpers.cm2.{SubmissionAndFeedbackInfoFilter, SubmissionAndFeedbackInfoMarkerFilter}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.CourseworkController
 import uk.ac.warwick.userlookup.User
 
 object ListMarkerFeedbackController {
-  val AllPlagiarismFilters = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
-  val AllSubmissionFilters = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted)
-  val AllMarkerStatuses = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
+  val AllPlagiarismFilters: Seq[SubmissionAndFeedbackInfoFilter] = Seq(NotCheckedForPlagiarism, CheckedForPlagiarism, MarkedPlagiarised)
+  val AllSubmissionFilters: Seq[SubmissionAndFeedbackInfoFilter] = Seq(Submitted, Unsubmitted, OnTime, WithExtension, LateSubmission, ExtensionRequested, ExtensionDenied, ExtensionGranted, DisabilityDisclosed)
+  val AllMarkerStatuses: Seq[SubmissionAndFeedbackInfoMarkerFilter] = Seq(MarkedByMarker, NotMarkedByMarker, FeedbackByMarker, NoFeedbackByMarker, NotSentByMarker)
 }
 
 @Profile(Array("cm2Enabled"))

@@ -18,7 +18,7 @@
     >
       <div class="clearfix">
         <div class="btn-group module-manage-button section-manage-button">
-          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Manage <span class="caret"></span></a>
+          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">Manage <span class="caret"></span></a>
           <ul class="dropdown-menu pull-right">
             <#if can_manage>
               <li><a href="<@routes.exams.modulePermissions module />">Edit module permissions</a></li>
@@ -37,7 +37,7 @@
           </ul>
         </div>
 
-        <h2 class="section-title"><@fmt.module_name module /></h2>
+        <h4 class="section-title with-button"><a class="collapse-trigger icon-container" href="#"><@fmt.module_name module /></a></h4>
       </div>
 
 

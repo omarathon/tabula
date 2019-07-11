@@ -5,10 +5,8 @@ import java.util
 import com.google.common.io.ByteSource
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.{TemplateMethodModelEx, TemplateModel}
-import org.apache.tika.detect.DefaultDetector
 import org.apache.tika.io.{IOUtils, TikaInputStream}
-import org.apache.tika.metadata.{HttpHeaders, Metadata, TikaMetadataKeys}
-import org.apache.tika.mime.{MediaType, MimeTypes}
+import org.apache.tika.mime.MediaType
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.helpers.MimeTypeDetector._
 import uk.ac.warwick.tabula.services.fileserver.{RenderableAttachment, RenderableFile}
@@ -23,11 +21,6 @@ case class MimeTypeDetectionResult(
 
 object MimeTypeDetector {
 
-  /**
-    * Uses the magic bytes at the start of the file first, then the filename, then the supplied content type.
-    */
-  private val mimeTypeDetector = new DefaultDetector(MimeTypes.getDefaultMimeTypes)
-
   def detect(file: RenderableFile): MimeTypeDetectionResult =
     detect(file.byteSource, file.filename, file.contentType)
 
@@ -39,11 +32,7 @@ object MimeTypeDetector {
           Option(in).flatMap(bs => Option(bs.openStream())).map { inputStream =>
             val is = TikaInputStream.get(inputStream)
             try {
-              val metadata = new Metadata
-              metadata.set(TikaMetadataKeys.RESOURCE_NAME_KEY, filename)
-              metadata.set(HttpHeaders.CONTENT_TYPE, declaredContentType)
-
-              (mimeTypeDetector.detect(is, metadata), true)
+              (DetectMimeType.detectMimeType(is, filename, declaredContentType), true)
             } finally {
               IOUtils.closeQuietly(is)
             }

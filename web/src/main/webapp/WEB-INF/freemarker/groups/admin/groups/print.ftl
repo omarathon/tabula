@@ -113,7 +113,7 @@
     </@f.form>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $('.small-group-sets-list').bigList({});
     }(jQuery));

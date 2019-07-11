@@ -213,7 +213,7 @@ class MitCircsDetails {
       $modal.modal().modal('show');
     });
 
-    $details.on('submit', '#readyModal', (e) => {
+    $details.on('submit', '#readyModal,#approveModal', (e) => {
       e.stopPropagation();
       e.preventDefault();
       const $form = $(e.target);

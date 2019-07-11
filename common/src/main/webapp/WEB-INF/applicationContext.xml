@@ -45,6 +45,9 @@
     </property>
   </bean>
 
+  <!-- enable component scan for virusscan service -->
+  <context:component-scan base-package="uk.ac.warwick.util.virusscan" />
+
   <!-- For sub-modules to implement their own component scanning -->
   <import resource="spring-component-scan-context.xml"/>
 
@@ -182,6 +185,7 @@
     <bean class="uk.ac.warwick.tabula.data.convert.TimetableEventTypeConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupFormatConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupAllocationMethodConverter"/>
+    <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupMembershipStyleConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.ExtensionConverter"/>
     <bean class="uk.ac.warwick.tabula.data.model.forms.ExtensionStateConverter"/>
     <bean class="uk.ac.warwick.tabula.commands.TimeFilterConverter"/>
@@ -287,6 +291,10 @@
           <bean class="uk.ac.warwick.tabula.system.CacheControlInterceptor"/>
         </constructor-arg>
       </bean>
+    </mvc:interceptor>
+    <mvc:interceptor>
+      <mvc:mapping path="/**"/>
+      <bean class="uk.ac.warwick.tabula.system.CspInterceptor" />
     </mvc:interceptor>
   </mvc:interceptors>
 
@@ -408,6 +416,20 @@
       <url-pattern>/*</url-pattern>
     </mapping>
     <mapping>
+      <filter ref="csrfFilter"/>
+      <url-pattern>/*</url-pattern>
+      <excluded-url-pattern>/static/*</excluded-url-pattern>
+      <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
+      <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>/error/*</excluded-url-pattern>
+      <excluded-url-pattern>/test/*</excluded-url-pattern>
+      <excluded-url-pattern>/service/*</excluded-url-pattern>
+
+      <!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->
+      <excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
+      <excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
+    </mapping>
+    <mapping>
       <filter ref="staticContentHeadersFilter"/>
       <url-pattern>/static/*</url-pattern>
     </mapping>
@@ -417,6 +439,7 @@
 
   <bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter"/>
   <bean id="xfoFilter" class="uk.ac.warwick.tabula.web.filters.XfoFilter"/>
+  <bean id="csrfFilter" class="uk.ac.warwick.sso.client.CSRFFilter" p:reportOnlyMode="true" />
   <bean id="staticContentHeadersFilter" class="uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter"/>
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter"/>
@@ -521,10 +544,16 @@
         <entry key="phoneNumberFormatter">
           <bean class="uk.ac.warwick.tabula.helpers.PhoneNumberFormatter"/>
         </entry>
+        <entry key="currentCsrfToken">
+          <bean class="uk.ac.warwick.tabula.helpers.CurrentCsrfToken"/>
+        </entry>
         <entry key="mimeTypeDetector">
           <bean class="uk.ac.warwick.tabula.helpers.MimeTypeDetectorTag"/>
         </entry>
         <entry key="googleAnalyticsCode" value="${tabula.analytics.code}"/>
+        <entry key="nonce">
+          <bean class="uk.ac.warwick.tabula.system.CspNonceTag" />
+        </entry>
       </map>
     </property>
   </bean>

@@ -80,6 +80,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @Column(nullable = true)
   var outcomesSubmittedOn: DateTime = _
 
+  @Column(nullable = true)
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
+  var outcomesApprovedBy: User = _
+
+  @Column(nullable = true)
+  var outcomesApprovedOn: DateTime = _
+
   @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "universityId", referencedColumnName = "universityId")
   var student: StudentMember = _
@@ -163,18 +170,20 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   var pendingEvidenceDue: LocalDate = _
 
-  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
-  @Column(name = "sensitiveEvidenceComments")
-  private var encryptedSensitiveEvidenceComments: CharSequence = _
-  def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
-  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
-
-  def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
+  @Column(nullable = false)
+  var hasSensitiveEvidence: Boolean = false
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
   var sensitiveEvidenceSeenBy: User = _
 
   var sensitiveEvidenceSeenOn: LocalDate = _
+
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.EncryptedStringUserType")
+  @Column(name = "sensitiveEvidenceComments")
+  private var encryptedSensitiveEvidenceComments: CharSequence = _
+  def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
+  def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
+  def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
 
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
@@ -327,6 +336,21 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _state = OutcomesRecorded
   }
 
+  def approvedByChair(user: User): Unit = {
+    require(_state == OutcomesRecorded)
+    outcomesApprovedOn = DateTime.now
+    outcomesApprovedBy = user
+    _state = ApprovedByChair
+  }
+
+  def unApprovedByChair(): Unit = {
+    require(_state == ApprovedByChair)
+    outcomesApprovedOn = null
+    outcomesApprovedBy = null
+    _state = OutcomesRecorded
+  }
+
+
   def withdraw(): Unit = {
     // A student can withdraw a submission at any time UNLESS it's had outcomes recorded
     require(canWithdraw, "Cannot withdraw a submission that has outcomes recorded")
@@ -351,12 +375,13 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def isWithdrawn: Boolean = state == MitigatingCircumstancesSubmissionState.Withdrawn
 
   def hasEvidence: Boolean = attachments.nonEmpty
-  def isEvidencePending: Boolean = !isWithdrawn && state != OutcomesRecorded && pendingEvidenceDue != null
+  def isEvidencePending: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state) && pendingEvidenceDue != null
   def isAcute: Boolean = Option(acuteOutcome).isDefined
-
+  def canConfirmSensitiveEvidence: Boolean = !isWithdrawn && !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
   def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
-  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (state != OutcomesRecorded || isAcute)
-  def canWithdraw: Boolean = state != OutcomesRecorded
+  def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || isAcute)
+  def canWithdraw: Boolean = !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
+  def canApproveOutcomes = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
   def canReopen: Boolean = isWithdrawn
   def canAddNote: Boolean = !isWithdrawn && !isDraft
   def canAddMessage: Boolean =

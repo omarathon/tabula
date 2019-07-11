@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import org.springframework.web.context.request.{RequestAttributes, RequestContextHolder, ServletRequestAttributes}
 import org.springframework.web.servlet.HandlerMapping
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
+import uk.ac.warwick.tabula.system.CspInterceptor
 import uk.ac.warwick.util.web.Uri
 
 /**
@@ -29,7 +30,9 @@ class RequestInfo(
   val hasEmergencyMessage: Boolean = false,
   val emergencyMessage: String = "",
   val userAgent: String = "",
-  val ipAddress: String = ""
+  val ipAddress: String = "",
+  val nonce: String = CspInterceptor.generateNonce(),
+  val csrfToken: String = ""
 ) extends EarlyRequestInfo
 
 object RequestInfo {
@@ -71,6 +74,7 @@ object RequestInfo {
   */
 trait EarlyRequestInfo {
   val requestLevelCache: RequestLevelCache
+  val nonce: String
 }
 
 object EarlyRequestInfo {
@@ -102,5 +106,6 @@ object EarlyRequestInfo {
 }
 
 class EarlyRequestInfoImpl extends EarlyRequestInfo {
-  val requestLevelCache: RequestLevelCache = new RequestLevelCache()
+  val requestLevelCache: RequestLevelCache = new RequestLevelCache
+  val nonce: String = CspInterceptor.generateNonce()
 }

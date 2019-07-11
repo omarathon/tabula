@@ -77,7 +77,7 @@
     </#if>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var showNextStatus = function () {
         var $status = $('div.status.hidden:first').removeClass('hidden');

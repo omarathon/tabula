@@ -72,7 +72,7 @@
     </#if>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       <#-- controller detects action=refresh and does a bind without submit -->
       $('.modal.refresh-form').on('hide', function (e) {

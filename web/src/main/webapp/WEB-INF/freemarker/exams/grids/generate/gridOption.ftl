@@ -583,7 +583,7 @@
     <button class="btn btn-primary" type="submit">Next</button>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var fixCustomColumnIndexes = function () {
         $('.customColumnTitle').each(function (index) {

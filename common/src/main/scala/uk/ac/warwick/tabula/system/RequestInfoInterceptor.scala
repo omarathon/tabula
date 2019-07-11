@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.helpers.HttpServletRequestUtils._
 import uk.ac.warwick.tabula.helpers.RequestLevelCache
 import uk.ac.warwick.tabula.services.{EmergencyMessageService, MaintenanceModeService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.sso.client.CSRFFilter
 
 /** Provides a limited interface of request-level things, which are required by some objects
   * like CurrentUser before a full RequestInfo can be created.
@@ -34,7 +35,7 @@ class RequestInfoInterceptor extends HandlerInterceptorAdapter {
   @Autowired var emergencyMessage: EmergencyMessageService = _
 
   override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
-    implicit val req = request
+    implicit val req: HttpServletRequest = request
     RequestInfo.open(fromAttributeElse(newRequestInfo(request, maintenance.enabled, emergencyMessage)))
     true
   }
@@ -69,6 +70,8 @@ object RequestInfoInterceptor {
       new RequestLevelCache()
     }
 
+    val nonce = EarlyRequestInfo.fromThread.map(_.nonce).getOrElse(CspInterceptor.generateNonce())
+
     var emergencyMessage = ""
     if (emergencyMessageService.enabled) {
       emergencyMessage = emergencyMessageService.message.getOrElse("")
@@ -84,7 +87,9 @@ object RequestInfoInterceptor {
       hasEmergencyMessage = emergencyMessageService.enabled,
       emergencyMessage = emergencyMessage,
       userAgent = request.getHeader(UserAgentHeader).textOrEmpty,
-      ipAddress = request.getRemoteAddr.textOrEmpty
+      ipAddress = request.getRemoteAddr.textOrEmpty,
+      nonce = nonce,
+      csrfToken = request.getAttribute(CSRFFilter.CSRF_TOKEN_PROPERTY_NAME).asInstanceOf[String].textOrEmpty
     )
   }
 

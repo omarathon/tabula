@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.web.controllers.cm2
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommandRequest
+import uk.ac.warwick.tabula.commands.cm2.feedback.{GenerateGradesFromMarkCommandRequest, GenerateGradesFromMarkCommandState}
 import uk.ac.warwick.tabula.data.model.{Assessment, GradeBoundary}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.cm2.AbstractGenerateGradeFromMarkController.GenerateGradesFromMarkCommand
@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import scala.collection.JavaConverters._
 
 object AbstractGenerateGradeFromMarkController {
-  type GenerateGradesFromMarkCommand = Appliable[Map[String, Seq[GradeBoundary]]] with GenerateGradesFromMarkCommandRequest
+  type GenerateGradesFromMarkCommand = Appliable[Map[String, Seq[GradeBoundary]]] with GenerateGradesFromMarkCommandRequest with GenerateGradesFromMarkCommandState
 }
 
 abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends BaseController {
@@ -23,7 +23,8 @@ abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends 
     universityId: String,
     marks: Map[String, String],
     grades: Map[String, Seq[GradeBoundary]],
-    selectedGrades: Map[String, String]
+    selectedGrades: Map[String, String],
+    useDefaultGradeForZero: Boolean
   ): Option[GradeBoundary] = {
     val mark = marks(universityId)
     if (selectedGrades.get(universityId).flatMap(_.maybeText).nonEmpty
@@ -31,7 +32,7 @@ abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends 
     ) {
       grades(universityId).find(_.grade == selectedGrades(universityId))
     } else {
-      if (mark == "0") {
+      if (!useDefaultGradeForZero && mark == "0") {
         None // TAB-3499
       } else {
         grades(universityId).find(_.isDefault)
@@ -47,7 +48,7 @@ abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends 
     val result = cmd.apply()
     if (result.nonEmpty) {
       val universityId = result.keys.head
-      val default = defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap)
+      val default = defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap, cmd.assessment.module.adminDepartment.assignmentGradeValidationUseDefaultForZero)
 
       Mav("_generatedGrades",
         "grades" -> result.values.toSeq.headOption.getOrElse(Seq()).sorted,
@@ -65,7 +66,7 @@ abstract class AbstractGenerateGradeFromMarkController[A <: Assessment] extends 
   def postMultiple(@ModelAttribute("command") cmd: GenerateGradesFromMarkCommand): Mav = {
     val result = cmd.apply()
     val defaults = result.keys.map(universityId => universityId ->
-      defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap)
+      defaultGrade(universityId, cmd.studentMarks.asScala.toMap, result, cmd.selected.asScala.toMap, cmd.assessment.module.adminDepartment.assignmentGradeValidationUseDefaultForZero)
     ).toMap
 
     Mav("generatedGrades",

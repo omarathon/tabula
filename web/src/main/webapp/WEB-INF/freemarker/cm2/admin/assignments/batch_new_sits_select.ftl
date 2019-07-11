@@ -277,7 +277,7 @@ first page of the form to setup a bunch of assignments from SITS.
       </@modal.wrapper>
     </div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       // Give a heads up if you're about to navigate away from your progress
       jQuery(window).on('beforeunload.backattack', function () {
         return "If you leave this page, you will lose your progress.";

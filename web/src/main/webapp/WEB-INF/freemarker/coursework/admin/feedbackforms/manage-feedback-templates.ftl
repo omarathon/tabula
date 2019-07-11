@@ -14,7 +14,7 @@
         <#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
       </div>
     </@form.labelled_row>
-    <script>
+    <script nonce="${nonce()}">
       var frameLoad = function (frame) {
         if (jQuery(frame).contents().find("form").length == 0) {
           jQuery("#feedback-template-model").modal('hide');
@@ -28,7 +28,17 @@
         $('#feedback-template-list').on('click', 'a[data-toggle=modal]', function (e) {
           $this = $(this);
           target = $this.attr('data-url');
-          $("#feedback-template-model .modal-body").html('<iframe src="' + target + '" onLoad="frameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+
+          var $iframe = $('<iframe />').attr({
+            src: target,
+            frameBorder: 0,
+            scrolling: 'no',
+          });
+          $iframe.on('load', function () {
+            frameLoad(this);
+          });
+          $("#feedback-template-model .modal-body").empty().append($iframe);
+          $iframe[0].style.width = '100%';
         });
 
         $('#feedback-template-model').on('click', 'input[type=submit]', function (e) {
@@ -72,7 +82,7 @@
                         </li>
                       </#list></ul>
                   </div>
-                  <script type="text/javascript">
+                  <script type="text/javascript" nonce="${nonce()}">
                     jQuery(function ($) {
                       var markup = $('#tip-content-${template.id}').html();
                       $("#tool-tip-${template.id}").popover({

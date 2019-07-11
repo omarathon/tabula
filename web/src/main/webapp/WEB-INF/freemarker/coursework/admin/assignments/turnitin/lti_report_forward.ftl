@@ -8,7 +8,7 @@
       <input type="hidden" name="${key}" value="${value}" />
     </#list>
   </form>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('#report-form').submit();
     });

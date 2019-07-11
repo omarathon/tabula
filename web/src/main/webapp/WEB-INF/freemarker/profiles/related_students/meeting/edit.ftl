@@ -97,7 +97,7 @@
         </#list>
       </#if>
 
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             $('#supervisor-ok, #relationship').on("focus click keyup", function () {
               $('#supervisor-ok').closest('.alert-info').removeClass('alert-info').end()
@@ -139,7 +139,7 @@
           </div>
         </div>
 
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             var $xhr = null;
             $('#meetingDateStr').on('change', function () {
@@ -178,7 +178,7 @@
         <div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
           Submitting this record will mark a monitoring point as attended
         </div>
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             $('#meetingDateStr, #format').on('change', function () {
               $.get('<@routes.profiles.meeting_will_create_checkpoint />', {
@@ -213,7 +213,7 @@
             </li>
           </#list>
         </ul>
-        <script>
+        <script nonce="${nonce()}">
           jQuery(function ($) {
             $(".remove-attachment").on("click", function (e) {
               $(this).closest("li.attachment").remove();

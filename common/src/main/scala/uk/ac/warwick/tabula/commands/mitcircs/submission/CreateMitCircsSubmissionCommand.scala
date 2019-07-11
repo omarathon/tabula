@@ -62,8 +62,15 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     with ModuleAndDepartmentServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
-    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
+    result.popNestedPath()
+
+    affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
+      result.pushNestedPath(s"affectedAssessments[$i]")
+      assessment.onBind(moduleAndDepartmentService)
+      result.popNestedPath()
+    }
   }
 
   def applyInternal(): Result = transactional() {
@@ -85,6 +92,7 @@ class CreateMitCircsSubmissionCommandInternal(val student: StudentMember, val cu
     }
     submission.pendingEvidence = pendingEvidence
     submission.pendingEvidenceDue = pendingEvidenceDue
+    submission.hasSensitiveEvidence = hasSensitiveEvidence
     affectedAssessments.asScala.foreach { item =>
       val affected = new MitigatingCircumstancesAffectedAssessment(submission, item)
       submission.affectedAssessments.add(affected)
@@ -173,7 +181,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       }
 
       // validate evidence
-      if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !Option(relatedSubmission).exists(_.hasEvidence)) {
+      if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {
         errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
         errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.required")
       }
@@ -222,6 +230,7 @@ trait MitCircsSubmissionRequest {
   var contactOther: String = _
   var noContactReason: String = _
 
+  var hasSensitiveEvidence: Boolean = _
   var pendingEvidence: String = _
   var pendingEvidenceDue: LocalDate = _
 

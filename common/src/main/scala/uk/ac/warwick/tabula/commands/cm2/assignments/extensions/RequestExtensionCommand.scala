@@ -44,7 +44,9 @@ class RequestExtensionCommandInternal(val assignment: Assignment, val submitter:
   self: RelationshipServiceComponent with ExtensionPersistenceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
   override def applyInternal(): Extension = transactional() {

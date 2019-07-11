@@ -81,6 +81,32 @@
         </@bs3form.radio>
       </@bs3form.labelled_form_group>
 
+      <@bs3form.checkbox path="assignmentGradeValidationUseDefaultForZero">
+        <@f.checkbox path="assignmentGradeValidationUseDefaultForZero" id="assignmentGradeValidationUseDefaultForZero" />
+        Pre-select "F" as the grade when the mark is 0.
+        <div class="help-block">
+          If you turn this option off, the grade field will be blank until the marker or administrator selects an appropriate grade from the drop-down.
+        </div>
+      </@bs3form.checkbox>
+
+      <script nonce="${nonce()}">
+        jQuery(function($) {
+          var $zeroGradeOption = $(':input[name="assignmentGradeValidationUseDefaultForZero"]').closest('.checkbox');
+          var $validateOptions = $(':input[name="assignmentGradeValidation"]');
+
+          $validateOptions.on('change input', function(e) {
+            // Avoid double-trigger when switching between
+            if (e && !$(e.target).is(':checked')) return;
+
+            if ($validateOptions.filter(':checked').val() === 'true') {
+              $zeroGradeOption.show();
+            } else {
+              $zeroGradeOption.hide();
+            }
+          }).trigger('change');
+        });
+      </script>
+
       <@bs3form.checkbox path="plagiarismDetection">
         <@f.checkbox path="plagiarismDetection" id="plagiarismDetection" />
         Enable Turnitin plagiarism detection of assignment submissions
@@ -162,7 +188,7 @@
           </#list>
 
             <@bs3form.errors path="studentRelationshipDisplayed" />
-            <script>
+            <script nonce="${nonce()}">
               jQuery(function ($) {
                 $('#relationship-options').find('input[name^=studentRelationshipDisplayed]').on('change', function () {
                   var $this = $(this);
@@ -241,9 +267,8 @@
                   </ul>
 
                   <p>
-                    You can use simple syntax to format the guidance, such as using <code>**asterisks**</code> around words to make them
-                    <strong>bold</strong>, <code>_underscores_</code> to make them <em>italic</em>. To make a link, use syntax like
-                    <code style="white-space: nowrap;">[text to link](https://warwick.ac.uk/your/link)</code>.
+                    You can use Markdown <i class="fab fa-markdown"></i> syntax <a target="_blank" href="https://warwick.ac.uk/tabula/manual/cm2/markers/markdown/"><i class="icon-question-sign fa fa-question-circle"></i></a>
+                    to format the guidance.
                   </p>
                 </div>
               </@bs3form.labelled_form_group>
@@ -270,7 +295,7 @@
     </@f.form>
   </div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
     })

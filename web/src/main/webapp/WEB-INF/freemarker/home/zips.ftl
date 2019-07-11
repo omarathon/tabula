@@ -19,7 +19,7 @@
 
   <a class="btn btn-default" href="${returnTo}">Done</a>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var $refreshBtn = $('<button />')
         .addClass('btn btn-default btn-sm zip-progress')

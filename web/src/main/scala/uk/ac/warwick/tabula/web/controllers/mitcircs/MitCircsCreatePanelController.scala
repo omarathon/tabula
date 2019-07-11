@@ -61,8 +61,8 @@ abstract class AbstractCreateMitCircsPanelController extends BaseController
     else {
       createCommand.apply()
       activeAcademicYear
-        .map(y => RedirectForce(Routes.Admin.home(department, y)))
-        .getOrElse(RedirectForce(Routes.Admin.home(department)))
+        .map(y => RedirectForce(Routes.Admin.Panels(department, y)))
+        .getOrElse(RedirectForce(Routes.Admin.Panels(department)))
     }
 }
 

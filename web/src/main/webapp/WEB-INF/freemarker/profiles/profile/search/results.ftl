@@ -1,4 +1,4 @@
-<#include "form.ftl" />
+<#include "_form.ftl" />
 <#escape x as x?html>
 
   <section class="results">

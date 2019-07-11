@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Web system administrating system screen page</h1>
 
 <#if user.masquerading>
@@ -44,7 +45,7 @@
 
     <p>
       <@f.form method="post" action="${url('/sysadmin/import')}" modelAttribute="">
-        <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." onclick="return confirm('Really? Could take a minute.')" />
+        <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." data-toggle="confirm-submit" data-message="Really? Could take a minute" />
       </@f.form>
     </p>
 
@@ -53,14 +54,14 @@
       <@f.form method="post" action="${url('/sysadmin/import-department')}" modelAttribute="blankForm">
     <div class="input-group">
       <@f.input id="import-modules-dept" path="deptCode" cssClass="form-control" placeholder="deptCodes" /><span class="input-group-btn"><input
-                class="btn btn-danger" type="submit" value="Modules" onclick="return confirm('Really? Could take a minute.')" /></span>
+                class="btn btn-danger" type="submit" value="Modules" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
     </div>
     </@f.form>
     </p>
 
     <p>
       <@f.form method="post" action="${url('/sysadmin/import-sits')}" modelAttribute="">
-        <input class="btn btn-danger" type="submit" value="SITS assignments" onclick="return confirm('Really? Could take a minute.')">
+        <input class="btn btn-danger" type="submit" value="SITS assignments" data-toggle="confirm-submit" data-message="Really? Could take a minute">
       </@f.form>
     </p>
 
@@ -73,7 +74,7 @@
 
     <p>
       <@f.form method="post" action="${url('/sysadmin/import-module-lists')}" modelAttribute="">
-        <input class="btn btn-danger" type="submit" value="SITS module lists" onclick="return confirm('Really? Could take a minute.')">
+        <input class="btn btn-danger" type="submit" value="SITS module lists" data-toggle="confirm-submit" data-message="Really? Could take a minute">
       </@f.form>
     </p>
 
@@ -81,7 +82,7 @@
       <@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="blankForm">
     <div class="input-group">
       <@f.input id="import-profiles-dept" path="deptCode" cssClass="form-control" placeholder="deptCode (optional)" /><span class="input-group-btn"><input
-                class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')" /></span>
+                class="btn btn-danger" type="submit" value="Profiles" data-toggle="confirm-submit" data-message="Really? Could take a minute" /></span>
     </div>
     </@f.form>
     </p>
@@ -98,7 +99,7 @@
       Recheck missing stamps from
     <div class="input-group">
       <@f.input id="check-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span class="input-group-btn"><input
-                class="btn btn-danger" type="submit" value="Re-check" onclick="return confirm('Really? Could take a while.')" /></span>
+                class="btn btn-danger" type="submit" value="Re-check" data-toggle="confirm-submit" data-message="Really? Could take a while." /></span>
     </div>
     </@f.form>
     </p>
@@ -120,7 +121,7 @@
         <option value="2019">19/20</option>
       </select>
       <span class="input-group-btn"><input class="btn btn-danger" type="submit" value="Re-check"
-                                           onclick="return confirm('Really? Could take a while.')" /></span>
+                                           data-toggle="confirm-submit" data-message="Really? Could take a while." /></span>
     </div>
     </@f.form>
     </p>
@@ -134,7 +135,7 @@
         <div class="input-group">
           <@f.input id="index-${name}-from" path="from" cssClass="date-time-picker form-control" placeholder="Click to pick a date" /><span
                   class="input-group-btn"><input class="btn btn-danger" type="submit" value="Index"
-                                                 onclick="return confirm('Really? Could take a while.')" /></span>
+                                                 data-toggle="confirm-submit" data-message="Really? Could take a while." /></span>
         </div>
         <#if name = 'profiles'>
           For department
@@ -174,3 +175,4 @@
 
   </div>
 </div>
+</#escape>

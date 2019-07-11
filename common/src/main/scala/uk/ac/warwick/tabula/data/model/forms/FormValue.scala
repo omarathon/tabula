@@ -64,7 +64,9 @@ class FileFormValue(val field: FormField) extends FormValue {
   lazy val fileDao: FileDao = Wire.auto[FileDao]
 
   override def onBind(result: BindingResult) {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
   def persist(ssv: SavedFormValue) {

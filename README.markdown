@@ -346,8 +346,8 @@ Some other useful Gradle commands:
     (Remember Tomcat will still deploy old wars unless you delete them!)
 - `./gradlew test` - run tests, showing stack trace of failures in the console and proper output to a HTML file
 - `./gradlew web:test --tests *.ApplicationTest` - run a specific test
-- `./gradlew integrationTest` - run functional tests (start Tomcat instance first)
-- `./gradlew integrationTest --tests *.CourseworkModuleManagerTest` - run a specific functional test
+- `./gradlew -PintegrationTest test -Dtoplevel.url=https://yourhost.warwick.ac.uk` - run functional tests (start Tomcat instance first)
+- `./gradlew -PintegrationTest test -Dtoplevel.url=https://yourhost.warwick.ac.uk --tests *.CourseworkModuleManagerTest` - run a specific functional test
 - `./gradlew cucumber` - run Cucumber tests (against tabula-test.warwick.ac.uk)
 - `./gradlew cucumber -Dserver.environment=production` - run Cucumber tests against production
 - `./gradlew cucumber -Dfeature.name=gzip` - run Cucumber scenarios for a single feature
@@ -446,3 +446,8 @@ used in a certain way, or Spring offers multiple ways of doing something and we 
 ### Running code on bind (pre-validation)
 
 - Mixin `BindListener` on your command instead of calling `onBind` from a controller
+
+Updating Spring
+---------------
+
+Please remember that `CsrfEnrichedFormTag` replaces the normal Spring `FormTag`. See `spring-form.tld` when updating. Thanks!

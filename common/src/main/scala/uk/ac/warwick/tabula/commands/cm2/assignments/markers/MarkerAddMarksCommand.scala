@@ -168,7 +168,10 @@ trait AddMarksCommandBindListener extends BindListener {
 
     if (!result.hasErrors) {
       transactional() {
+        result.pushNestedPath("file")
         file.onBind(result)
+        result.popNestedPath()
+
         file.attached.asScala.filter(_.hasData).foreach(file => {
           try {
             marks.addAll(marksExtractor.readXSSFExcelFile(assignment, file.asByteSource.openStream()))

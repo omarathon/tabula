@@ -43,8 +43,15 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
     with ExtensionPersistenceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
+    result.pushNestedPath("file")
     file.onBind(result)
-    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
+    result.popNestedPath()
+
+    affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
+      result.pushNestedPath(s"affectedAssessments[$i]")
+      assessment.onBind(moduleAndDepartmentService)
+      result.popNestedPath()
+    }
   }
 
   def applyInternal(): MitigatingCircumstancesSubmission = transactional() {
@@ -74,6 +81,7 @@ class EditMitCircsSubmissionCommandInternal(val submission: MitigatingCircumstan
 
     submission.pendingEvidence = pendingEvidence
     submission.pendingEvidenceDue = pendingEvidenceDue
+    submission.hasSensitiveEvidence = hasSensitiveEvidence
     if (submission.attachments != null) {
       // delete attachments that have been removed
       val matchingAttachments: Set[FileAttachment] = submission.attachments.toSet -- attachedFiles.asScala
@@ -140,6 +148,7 @@ trait EditMitCircsSubmissionRequest extends MitCircsSubmissionRequest {
   pendingEvidenceDue = submission.pendingEvidenceDue
   attachedFiles = JHashSet(submission.attachments.toSet)
   relatedSubmission = submission.relatedSubmission
+  hasSensitiveEvidence = submission.hasSensitiveEvidence
 }
 
 trait EditMitCircsSubmissionNotifications extends Notifies[MitigatingCircumstancesSubmission, MitigatingCircumstancesSubmission] {

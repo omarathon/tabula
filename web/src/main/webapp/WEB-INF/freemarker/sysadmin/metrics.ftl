@@ -41,7 +41,7 @@
     </tbody>
   </table>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery('#startDate').datetimepicker({
       format: "dd-M-yyyy",
       weekStart: 1,

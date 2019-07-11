@@ -1,4 +1,5 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
+<#escape x as x?html>
 <!doctype html>
 <html class="iframe" lang="en-GB">
 <head>
@@ -8,3 +9,4 @@
 <@tiles.insertAttribute name="body" />
 </body>
 </html>
+</#escape>

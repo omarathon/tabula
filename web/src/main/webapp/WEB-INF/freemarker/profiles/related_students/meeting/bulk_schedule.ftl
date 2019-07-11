@@ -105,7 +105,7 @@
       </#if>
     </@modal.wrapper>
   </#if>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $(".remove-attachment").on("click", function (e) {
         $(this).closest("li.attachment").remove();

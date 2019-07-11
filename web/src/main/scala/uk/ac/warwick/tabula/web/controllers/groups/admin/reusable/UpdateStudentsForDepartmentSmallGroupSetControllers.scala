@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.web.controllers.groups.admin.reusable
 
 import javax.validation.Valid
-
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.groups.admin.reusable._
-import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.DepartmentSmallGroupSet
 import uk.ac.warwick.tabula.groups.web.Routes
@@ -21,28 +19,30 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   validatesSelf[SelfValidating]
 
-  type UpdateStudentsForDepartmentSmallGroupSetCommand = Appliable[DepartmentSmallGroupSet]
-  type FindStudentsForDepartmentSmallGroupSetCommand = Appliable[FindStudentsForDepartmentSmallGroupSetCommandResult] with PopulateOnForm with FindStudentsForDepartmentSmallGroupSetCommandState with UpdatesFindStudentsForDepartmentSmallGroupSetCommand
-  type EditDepartmentSmallGroupSetMembershipCommand = Appliable[EditDepartmentSmallGroupSetMembershipCommandResult] with PopulateOnForm with AddsUsersToEditDepartmentSmallGroupSetMembershipCommand with RemovesUsersFromEditDepartmentSmallGroupSetMembershipCommand with ResetsMembershipInEditDepartmentSmallGroupSetMembershipCommand
+  type UpdateStudentsForUserGroupCommand = Appliable[DepartmentSmallGroupSet]
+  type FindStudentsForUserGroupCommand = Appliable[FindStudentsForUserGroupCommandResult] with PopulateOnForm with FindStudentsForUserGroupCommandState with UpdatesFindStudentsForUserGroupCommand
+  type EditUserGroupMembershipCommand = Appliable[EditUserGroupMembershipCommandResult] with PopulateOnForm with AddsUsersToEditUserGroupMembershipCommand with RemovesUsersFromEditUserGroupMembershipCommand with ResetsMembershipInEditUserGroupMembershipCommand
 
-  @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters") def params = ManageDepartmentSmallGroupsMappingParameters
+  @ModelAttribute("ManageDepartmentSmallGroupsMappingParameters")
+  def params: ManageDepartmentSmallGroupsMappingParameters.type = ManageDepartmentSmallGroupsMappingParameters
 
-  @ModelAttribute("persistenceCommand") def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForDepartmentSmallGroupSetCommand =
-    UpdateStudentsForDepartmentSmallGroupSetCommand(mandatory(department), mandatory(set))
+  @ModelAttribute("persistenceCommand")
+  def persistenceCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): UpdateStudentsForUserGroupCommand =
+    UpdateStudentsForUserGroupCommand(mandatory(department), mandatory(set))
 
   @ModelAttribute("findCommand")
-  def findCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): FindStudentsForDepartmentSmallGroupSetCommand =
-    FindStudentsForDepartmentSmallGroupSetCommand(mandatory(department), mandatory(set))
+  def findCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): FindStudentsForUserGroupCommand =
+    FindStudentsForUserGroupCommand(mandatory(department), mandatory(set))
 
   @ModelAttribute("editMembershipCommand")
-  def editMembershipCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditDepartmentSmallGroupSetMembershipCommand =
-    EditDepartmentSmallGroupSetMembershipCommand(mandatory(department), mandatory(set))
+  def editMembershipCommand(@PathVariable department: Department, @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet): EditUserGroupMembershipCommand =
+    EditUserGroupMembershipCommand(mandatory(department), mandatory(set))
 
   protected val renderPath: String
 
   private def summaryString(
-    findStudentsCommandResult: FindStudentsForDepartmentSmallGroupSetCommandResult,
-    editMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult
+    findStudentsCommandResult: FindStudentsForUserGroupCommandResult,
+    editMembershipCommandResult: EditUserGroupMembershipCommandResult
   ): String = {
     val sitsCount = (findStudentsCommandResult.staticStudentIds.asScala
       diff editMembershipCommandResult.excludedStudentIds.asScala
@@ -69,9 +69,9 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   protected def render(
     set: DepartmentSmallGroupSet,
-    findStudentsCommandResult: FindStudentsForDepartmentSmallGroupSetCommandResult,
-    editMembershipCommandResult: EditDepartmentSmallGroupSetMembershipCommandResult,
-    addUsersResult: AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult = AddUsersToEditDepartmentSmallGroupSetMembershipCommandResult(Seq()),
+    findStudentsCommandResult: FindStudentsForUserGroupCommandResult,
+    editMembershipCommandResult: EditUserGroupMembershipCommandResult,
+    addUsersResult: AddUsersToEditUserGroupMembershipCommandResult = AddUsersToEditUserGroupMembershipCommandResult(Seq()),
     expandFind: Boolean = false,
     expandManual: Boolean = false
   ): Mav = {
@@ -93,8 +93,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping
   def form(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     findCommand.populate()
@@ -103,15 +103,15 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
       if (findCommand.filterQueryString.length > 0)
         findCommand.apply()
       else
-        FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
+        FindStudentsForUserGroupCommandResult(JArrayList(), Seq())
     val editMembershipCommandResult = editMembershipCommand.apply()
     render(set, findStudentsCommandResult, editMembershipCommandResult)
   }
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.findStudents))
   def findStudents(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     val findStudentsCommandResult = findCommand.apply()
@@ -121,8 +121,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.manuallyAddForm))
   def manuallyAddForm(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     Mav("groups/admin/groups/reusable/manuallyaddstudents",
@@ -135,8 +135,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.manuallyAddSubmit))
   def manuallyAddSubmit(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     val addUsersResult = editMembershipCommand.addUsers()
@@ -148,8 +148,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.manuallyExclude))
   def manuallyExclude(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     editMembershipCommand.removeUsers()
@@ -161,8 +161,8 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.resetMembership))
   def resetMembership(
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = {
     editMembershipCommand.resetMembership()
@@ -173,10 +173,10 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   }
 
   protected def submit(
-    cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    findCommand: FindStudentsForUserGroupCommand,
+    editMembershipCommand: EditUserGroupMembershipCommand,
     set: DepartmentSmallGroupSet,
     route: String
   ): Mav = {
@@ -185,7 +185,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
         if (findCommand.filterQueryString.length > 0)
           findCommand.apply()
         else
-          FindStudentsForDepartmentSmallGroupSetCommandResult(JArrayList(), Seq())
+          FindStudentsForUserGroupCommandResult(JArrayList(), Seq())
       val editMembershipCommandResult = editMembershipCommand.apply()
       render(set, findStudentsCommandResult, editMembershipCommandResult)
     } else {
@@ -196,10 +196,10 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
 
   @RequestMapping(method = Array(POST), params = Array("persist"))
   def save(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable(set.department, set.academicYear))
 
@@ -213,28 +213,28 @@ class CreateDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsF
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndEditProperties))
   def saveAndEditProperties(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.create(set))
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAddGroups))
   def saveAndAddGroups(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.createAddGroups(set))
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.createAndAllocate))
   def saveAndAllocate(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.createAllocate(set))
 
@@ -248,28 +248,28 @@ class EditDepartmentSmallGroupSetAddStudentsController extends UpdateStudentsFor
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndEditProperties))
   def saveAndEditProperties(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.edit(set))
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAddGroups))
   def saveAndAddGroups(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.editAddGroups(set))
 
   @RequestMapping(method = Array(POST), params = Array(ManageDepartmentSmallGroupsMappingParameters.editAndAllocate))
   def saveAndAllocate(
-    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForDepartmentSmallGroupSetCommand,
+    @Valid @ModelAttribute("persistenceCommand") cmd: UpdateStudentsForUserGroupCommand,
     errors: Errors,
-    @ModelAttribute("findCommand") findCommand: FindStudentsForDepartmentSmallGroupSetCommand,
-    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditDepartmentSmallGroupSetMembershipCommand,
+    @ModelAttribute("findCommand") findCommand: FindStudentsForUserGroupCommand,
+    @ModelAttribute("editMembershipCommand") editMembershipCommand: EditUserGroupMembershipCommand,
     @PathVariable("smallGroupSet") set: DepartmentSmallGroupSet
   ): Mav = submit(cmd, errors, findCommand, editMembershipCommand, set, Routes.admin.reusable.editAllocate(set))
 

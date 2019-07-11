@@ -42,7 +42,7 @@
     </button>
   </@bs3form.form_group>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('button[data-toggle="add"]').each(function () {
         var $button = $(this);

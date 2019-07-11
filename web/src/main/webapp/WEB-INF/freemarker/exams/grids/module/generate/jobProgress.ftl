@@ -58,7 +58,7 @@
     <button class="btn btn-primary" type="submit" name="${GenerateModuleExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
   </form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       var updateProgress = function () {
         $.post('<@routes.exams.generateModuleGridProgress department academicYear />', {'jobId': '${jobId}'}, function (data) {

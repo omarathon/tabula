@@ -66,6 +66,36 @@
     </@bs3form.labelled_form_group>
   </#if>
 
+    <@bs3form.labelled_form_group path="membershipStyle" labelText="Students linked by">
+        <@bs3form.radio>
+            <@f.radiobutton path="membershipStyle" value="SitsQuery" />
+          SITS query
+        </@bs3form.radio>
+        <@bs3form.radio>
+            <@f.radiobutton path="membershipStyle" value="AssessmentComponents" />
+          Assessment components
+        </@bs3form.radio>
+    </@bs3form.labelled_form_group>
+
+  <div class="alert alert-danger hide" id="changeMembershipStyleWarning">
+    If you change how students are linked to this small group set,
+    any existing students are removed and group allocations are reset.
+  </div>
+
+  <script nonce="${nonce()}">
+    jQuery(function($) {
+      function getSelectedMembershipStyle() {
+        return $('input[name=membershipStyle]:checked').val();
+      }
+
+      var originalStyle = getSelectedMembershipStyle();
+
+      $('input[name=membershipStyle]').on('change', function () {
+        $('#changeMembershipStyleWarning').toggleClass('hide', getSelectedMembershipStyle() === originalStyle);
+      });
+    });
+  </script>
+
   <#if features.smallGroupTeachingStudentSignUp>
     <@bs3form.checkbox path="studentsCanSeeTutorName">
       <@f.checkbox path="studentsCanSeeTutorName" id="studentsCanSeeTutorName" />
@@ -99,7 +129,7 @@
     </@bs3form.checkbox>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       // Set up radios to show/hide self-sign up options fields.
       $("input:radio[name='allocationMethod']").radioControlled({mode: 'hidden'});

@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-  <style>
+  <style nonce="${nonce()}">
     .feature-flags th {
       text-align: right;
     }

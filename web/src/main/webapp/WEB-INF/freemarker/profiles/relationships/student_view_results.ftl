@@ -26,7 +26,7 @@
     <p class="alert alert-info">No ${relationshipType.studentRole}s are currently visible for you in Tabula.</p>
   </#if>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
 
     (function ($) {
       var $buttons = $('a.new-meeting-record, a.schedule-meeting-record');

@@ -1,6 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
+<#escape x as x?html>
 <div class="form onlineFeedback">
 
   <#assign submit_url><@routes.coursework.genericfeedback assignment /></#assign>
@@ -19,10 +20,11 @@
     <div class="submit-buttons">
       <input class="before-save btn btn-primary" type="submit" value="Save">
       <a class="before-save btn discard-changes" href="">Cancel</a>
-      <a class="saving btn btn-primary disabled" style="display:none" onclick="return false;" href="">
+      <a class="saving btn btn-primary disabled" style="display:none" href="">
         <i class="icon-spinner icon-spin"></i> Saving
       </a>
       <span class="saved label label-success" style="display:none">Changes saved</span>
     </div>
   </@f.form>
 </div>
+</#escape>

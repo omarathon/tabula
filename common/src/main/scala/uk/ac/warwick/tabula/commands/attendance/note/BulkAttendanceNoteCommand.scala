@@ -47,7 +47,9 @@ abstract class BulkAttendanceNoteCommand(
   }
 
   def onBind(result: BindingResult) {
+    result.pushNestedPath("file")
     file.onBind(result)
+    result.popNestedPath()
   }
 
   def applyInternal(): Seq[AttendanceMonitoringNote] = {

@@ -120,7 +120,7 @@
   </table>
 
   <#if feedbackGraphs?size gt 0>
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       (function ($) {
         var tsOptions = {
           <#if showMarkingCompleted>

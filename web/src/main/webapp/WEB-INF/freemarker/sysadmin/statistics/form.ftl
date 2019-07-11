@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <h1>Internal statistics</h1>
 
 <div class="alert alert-danger">
@@ -49,7 +50,7 @@
   <div class="alert alert-danger" id="memcached-response"></div>
 </div>
 
-<script>
+<script nonce="${nonce()}">
   jQuery(function ($) {
 
     var debugResponse = function (data) {
@@ -87,3 +88,4 @@
 
   })
 </script>
+</#escape>

@@ -23,6 +23,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
   var profileService: ProfileService = Wire[ProfileService]
   var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
   var userNavigationGenerator: UserNavigationGenerator = UserNavigationGeneratorImpl
+  var masqueradeUsercodeValidator: MasqueradeUsercodeValidator = MasqueradeCommandUsercodeValidator
 
   type MasqueradeUserCheck = (User, Boolean) => User
   type MasqueradeRequestUsercodeExtractor = () => Option[String]
@@ -49,37 +50,33 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
   }
 
   override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any): Boolean = {
-    def extractMasqueradeUsercodeFromCookie(): Option[String] =
-      request.getCookies.getString(CurrentUser.masqueradeCookie).filter(_.hasText)
-
     val currentUser: CurrentUser = request.getAttribute(SSOClientFilter.USER_KEY) match {
       case FoundUser(user) =>
+        lazy val extractMasqueradeUsercodeFromCookie: Option[String] =
+          request.getCookies.getString(CurrentUser.masqueradeCookie).filter(_.hasText)
+            .filter(masqueradeUsercodeValidator.filterValidUsercodeForMasquerade(user))
+
         // If someone has passed a masquerade user as a query parameter rather than a Cookie, set the equivalent Cookie
         // and use that value instead
         val extractionMethod: MasqueradeRequestUsercodeExtractor =
-          if (extractMasqueradeUsercodeFromCookie().isEmpty && request.getParameter(CurrentUser.masqueradeCookie).hasText) transactional(readOnly = true) {
+          if (extractMasqueradeUsercodeFromCookie.isEmpty && request.getParameter(CurrentUser.masqueradeCookie).maybeText.exists(masqueradeUsercodeValidator.filterValidUsercodeForMasquerade(user))) transactional(readOnly = true) {
             // For auditability
             val cmd = MasqueradeCommand(new CurrentUser(user, user))
             cmd.usercode = request.getParameter(CurrentUser.masqueradeCookie)
 
-            val errors = new BindException(cmd, "masqueradeCommand")
-            cmd.validate(errors)
-
-            if (!errors.hasErrors) {
-              val cookie = cmd.apply()
-              cookie.foreach { c =>
-                response.addCookie(c.cookie)
-              }
-              () => Some(cmd.usercode)
-            } else () => extractMasqueradeUsercodeFromCookie()
-          } else () => extractMasqueradeUsercodeFromCookie()
+            val cookie = cmd.apply()
+            cookie.foreach { c =>
+              response.addCookie(c.cookie)
+            }
+            () => Some(cmd.usercode)
+          } else () => extractMasqueradeUsercodeFromCookie
 
         resolveCurrentUser(user, apparentUser(extractionMethod), godCookieExists(request))
 
       case _ => NoCurrentUser()
     }
     request.setAttribute(CurrentUser.keyName, currentUser)
-    true //allow request to continue
+    true // allow request to continue
   }
 
   private def godCookieExists(request: HttpServletRequest): Boolean =
@@ -99,4 +96,20 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
       realUser
     }
 
+}
+
+trait MasqueradeUsercodeValidator {
+  def filterValidUsercodeForMasquerade(loggedInUser: User)(masqueradeUsercode: String): Boolean
+}
+
+object MasqueradeCommandUsercodeValidator extends MasqueradeUsercodeValidator {
+  override def filterValidUsercodeForMasquerade(loggedInUser: User)(masqueradeUsercode: String): Boolean = {
+    val cmd = MasqueradeCommand(new CurrentUser(loggedInUser, loggedInUser))
+    cmd.usercode = masqueradeUsercode
+
+    val errors = new BindException(cmd, "masqueradeCommand")
+    cmd.validate(errors)
+
+    !errors.hasErrors
+  }
 }

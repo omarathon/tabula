@@ -13,7 +13,7 @@
 
   <div class="very-subtle">Loading, please wait&hellip;</div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       $('#import-form').submit();
     });

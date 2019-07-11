@@ -168,7 +168,7 @@
                   <td class="actions">
                     <#if can_delegate>
                       <form action="${perms_url}" method="post" class="remove-permissions"
-                            onsubmit="return confirm('Are you sure you want to remove permission for this user?');">
+                            data-confirm-submit="Are you sure you want to remove permission for this user?">
                         <input type="hidden" name="_command" value="removeSingle">
                         <input type="hidden" name="permission" value="${permissionName}">
                         <input type="hidden" name="overrideType" value="<#if grantedPermission.overrideType>true<#else>false</#if>">

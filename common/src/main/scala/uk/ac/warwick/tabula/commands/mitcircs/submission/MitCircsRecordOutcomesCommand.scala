@@ -42,7 +42,11 @@ class MitCircsRecordOutcomesCommandInternal(val submission: MitigatingCircumstan
   self: MitCircsRecordOutcomesRequest with MitCircsSubmissionServiceComponent with ModuleAndDepartmentServiceComponent =>
 
   override def onBind(result: BindingResult): Unit = transactional() {
-    affectedAssessments.asScala.foreach(_.onBind(moduleAndDepartmentService))
+    affectedAssessments.asScala.zipWithIndex.foreach { case (assessment, i) =>
+      result.pushNestedPath(s"affectedAssessments[$i]")
+      assessment.onBind(moduleAndDepartmentService)
+      result.popNestedPath()
+    }
   }
 
   def applyInternal(): Result = transactional() {

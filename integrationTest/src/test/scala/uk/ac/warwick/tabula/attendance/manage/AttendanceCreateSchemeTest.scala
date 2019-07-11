@@ -27,7 +27,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
     eventually(currentUrl should endWith(s"students"))
 
     When("I choose a route")
-    click on cssSelector(".find-students .section-title")
+    click on cssSelector(".find-students .section-title a.collapse-trigger")
     eventually {
       findAll(cssSelector(".find-students div.student-filter")).forall {
         _.isDisplayed
@@ -52,7 +52,7 @@ class AttendanceCreateSchemeTest extends AttendanceFixture with GivenWhenThen {
     pageSource should include("(2 from SITS)")
 
     When("I add a student manually")
-    click on cssSelector(".manually-added .section-title")
+    click on cssSelector(".manually-added .section-title a.collapse-trigger")
     eventually {
       findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
         _.isDisplayed

@@ -4,7 +4,7 @@
   <#assign department=module.adminDepartment />
   <#import "*/courses_macros.ftl" as courses_macros />
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {
       "use strict";
       var submitButton = $('#publish-submit'),

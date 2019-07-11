@@ -27,7 +27,7 @@
       </div>
     </div>
     <@components.section  label="Submissions">
-      <@components.submissionTable submissions=(panel.submissions![])?sort_by('key') actions=false panel=false forPanel=true />
+      <@components.submissionTable submissions=(panel.submissions![])?sort_by('key') actions=false panel=false forPanel=true submissionStages=submissionStages />
     </@components.section>
   </section>
 </#escape>

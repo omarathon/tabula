@@ -350,7 +350,7 @@
 
         <p><@fmt.bulk_email_students users /></p>
 
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           (function ($) {
             $('.fixed-container').fixHeaderFooter();
 

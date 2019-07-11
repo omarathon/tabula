@@ -1,5 +1,6 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
 <#assign sso=JspTaglibs["/WEB-INF/tld/sso.tld"]>
+<#escape x as x?html>
 <!doctype html>
 <html lang="en-GB">
 <head>
@@ -18,7 +19,7 @@
   <@stylesheet "/static/css/ielt8.css" />
   <![endif]-->
   <!--[if lt IE 9]>
-  <style type="text/css">
+  <style type="text/css" nonce="${nonce()}">
     #container {
       behavior: url(/static/css/pie.htc);
     }
@@ -33,3 +34,4 @@
 </div>
 </body>
 </html>
+</#escape>

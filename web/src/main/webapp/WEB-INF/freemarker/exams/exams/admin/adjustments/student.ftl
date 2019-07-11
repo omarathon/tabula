@@ -1,5 +1,6 @@
 <#import "*/marking_macros.ftl" as marking_macros />
 
+<#escape x as x?html>
 <div class="content feedback-adjustment feedback-summary">
 
   <#if command.feedback??>
@@ -69,7 +70,7 @@
 
   </@f.form>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       Exams.prepareAjaxForm($('#adjust-form-${marking_macros.extractId(command.student)}'), function (resp) {
         var $resp = $(resp);
@@ -86,3 +87,4 @@
     });
   </script>
 </div>
+</#escape>

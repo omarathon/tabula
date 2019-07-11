@@ -106,7 +106,7 @@
 
     </#if>
   </#if>
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.use-tooltip').tooltip({ sanitize: false, });
     })

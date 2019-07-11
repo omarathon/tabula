@@ -200,7 +200,7 @@
     </div>
   </@f.form>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       $('.fix-area').fixHeaderFooter();
       // Fire a resize to get the fixed button in the right place on change

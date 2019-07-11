@@ -173,7 +173,7 @@
     <button type="button" class="btn btn-default disabled">Create</button>
   </div>
 
-  <script type="text/javascript">
+  <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
       <#assign template_module={"code":"__MODULE_CODE__"} />
       var url = '<@routes.groups.createset template_module />?academicYear=${adminCommand.academicYear.startYear?c}';
@@ -338,7 +338,7 @@
         <div id="profile-modal" class="modal fade profile-subset" tabindex="-1"></div>
 
         <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
-        <script type="text/javascript">
+        <script type="text/javascript" nonce="${nonce()}">
           (function ($) {
             var processContainer = function ($container) {
               Groups.zebraStripeGroups($container);
@@ -365,7 +365,7 @@
 
     <div id="modal-container" class="modal fade"></div>
 
-    <script type="text/javascript">
+    <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {
 
         var prependClearLink = function ($list) {

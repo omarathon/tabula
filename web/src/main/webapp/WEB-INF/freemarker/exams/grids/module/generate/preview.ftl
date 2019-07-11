@@ -267,7 +267,7 @@
 
   <div class="modal fade" id="edit-overcatting-modal"></div>
 
-  <script>
+  <script nonce="${nonce()}">
     jQuery(function ($) {
       $('.fix-area').fixHeaderFooter();
 
@@ -306,35 +306,36 @@
       $('#examGridSpinner').hide();
       $('#examGridContainer table.grid').parent().doubleScroll();
 
-      // fix the grid scrollbar to the footer
-      var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
-      var $grid = $('.grid');
+      if (navigator.platform !== 'MacIntel') {
+        // fix the grid scrollbar to the footer
+        var $scrollWrapper = $('.doubleScroll-scroll-wrapper');
+        var $grid = $('.grid');
 
-      $scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
+        $scrollWrapper.prependTo('.fix-footer').css('margin-bottom', '10px');
 
-      function reflowScroll() {
-        setTimeout(function () {
-          $scrollWrapper
-          // Update the width of the scroll track to match the container
-            .width($scrollWrapper.parent().width())
-            // Update the scroll bar so it reflects the width of the grid
-            .children().width($grid.width()).end()
-          // Reset the scroll bar to the initial position
-            .scrollLeft(0);
-        }, 0);
+        function reflowScroll() {
+          setTimeout(function () {
+            $scrollWrapper
+            // Update the width of the scroll track to match the container
+              .width($scrollWrapper.parent().width())
+              // Update the scroll bar so it reflects the width of the grid
+              .children().width($grid.width()).end()
+            // Reset the scroll bar to the initial position
+              .scrollLeft(0);
+          }, 0);
+        }
+
+        $(window).on('id7:reflow', reflowScroll);
+        reflowScroll();
+
+        // we want to hide the native scroll bar on non-mac platform
+        // after we moved the the original scroll bar to a different place.
+        $('.table-responsive').css('overflow-x', 'hidden');
       }
-
-      $(window).on('id7:reflow', reflowScroll);
-      reflowScroll();
 
       setTimeout(function () {
         $('.key table').css('max-width', '');
       }, 1);
-
-      // Chrome has "Safari" in its ua
-      if (!(navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1)) {
-        $('.table-responsive').css('overflow-x', 'hidden');
-      }
     });
   </script>
 

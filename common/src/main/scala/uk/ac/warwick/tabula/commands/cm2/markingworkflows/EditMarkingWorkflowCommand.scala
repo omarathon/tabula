@@ -138,15 +138,13 @@ trait ModifyMarkingWorkflowValidation extends SelfValidating {
 
 
 trait EditMarkingWorkflowDescription extends Describable[Option[CM2MarkingWorkflow]] {
-  self: ModifyMarkingWorkflowState =>
+  self: EditMarkingWorkflowState =>
 
   override lazy val eventName: String = "EditMarkingWorkflow"
 
-  def describe(d: Description) {
-    d.department(department)
-  }
+  def describe(d: Description): Unit =
+    workflow.foreach(d.markingWorkflow)
 }
-
 
 trait ModifyMarkingWorkflowState {
 

@@ -21,7 +21,7 @@
   </#escape>
 </#if>
 
-<script>
+<script nonce="${nonce()}">
   jQuery(function ($) {
     $('#exams.editExamForm').on('submit', function () {
       $('.upstreamGroupsHidden').remove();
