@@ -123,9 +123,6 @@
             </div>
           </#list>
           <input type="hidden" name="isfile" value="false" />
-          <div class="form-group">
-            <button class="add-mark-row btn btn-default">+ Add</button>
-          </div>
           <div class="buttons form-group">
             <button type="submit" class="btn btn-primary">Save</button>
             <a class="btn btn-default" href="${cancelUrl}">Cancel</a>
