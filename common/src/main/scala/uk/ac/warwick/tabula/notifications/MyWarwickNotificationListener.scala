@@ -43,6 +43,19 @@ trait MyWarwickNotificationListener extends NotificationListener {
         tag
       }
 
+      val notificationText: String = {
+        // Access to restricted properties requires user inside RequestInfo
+        val currentUser = new CurrentUser(notification.recipientNotificationInfos.asScala.head.recipient, notification.recipientNotificationInfos.asScala.head.recipient)
+        val info = new RequestInfo(
+          user = currentUser,
+          requestedUri = null,
+          requestParameters = Map()
+        )
+        RequestInfo.use(info) {
+          textRenderer.renderTemplate(notification.content.template, notification.content.model)
+        }
+      }
+
       val activity = new Activity(
         recipients.toSet.asJava,
         notification.title,
@@ -51,7 +64,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
         } else {
           toplevelUrl + notification.url
         },
-        textRenderer.renderTemplate(notification.content.template, notification.content.model),
+        notificationText,
         notification.notificationType
       )
 
