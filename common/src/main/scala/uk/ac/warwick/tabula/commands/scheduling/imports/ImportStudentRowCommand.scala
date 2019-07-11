@@ -108,7 +108,7 @@ class ImportStudentRowCommandInternal(
     val tier4VisaRequirement = tier4RequirementImporter.hasTier4Requirement(universityId)
     val reasonableAdjustmentsObject = Await.result(reasonableAdjustmentsImporter.getReasonableAdjustments(universityId), Duration.Inf)
     val reasonableAdjustments = reasonableAdjustmentsObject.map(_.reasonableAdjustments.toSet).orNull
-    val reasonableAdjustmentsNotes = reasonableAdjustmentsObject.flatMap(_.notes.maybeText).orNull
+    val reasonableAdjustmentsNotes = reasonableAdjustmentsObject.flatMap(_.notes.flatMap(_.maybeText)).orNull
 
     // We intentionally use single pipes rather than double here - we want all statements to be evaluated
     val hasChanged = (copyMemberProperties(commandBean, memberBean)
