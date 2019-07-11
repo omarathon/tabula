@@ -28,14 +28,14 @@ object ReasonableAdjustmentsImporter {
   case class ReasonableAdjustments(
     universityID: String,
     reasonableAdjustments: Seq[ReasonableAdjustment],
-    notes: String,
-    lastUpdated: OffsetDateTime,
+    notes: Option[String],
+    lastUpdated: Option[OffsetDateTime],
   )
   val readsReasonableAdjustments: Reads[ReasonableAdjustments] = (
     (__ \ "universityID").read[String] and
     (__ \ "reasonableAdjustments").read[Seq[ReasonableAdjustment]](Reads.seq(ReasonableAdjustment.formatsReasonableAdjustment)) and
-    (__ \ "notes").read[String] and
-    (__ \ "lastUpdated").read[OffsetDateTime](readsOffsetDateTime)
+    (__ \ "notes").readNullable[String] and
+    (__ \ "lastUpdated").readNullable[OffsetDateTime](readsOffsetDateTime)
   )(ReasonableAdjustments.apply _)
 
   case class WellbeingCaseManagementConfiguration(
