@@ -103,10 +103,8 @@ abstract class Features {
   @Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType: Boolean = defaults.attendanceMonitoringMeetingPointType
   @Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport: Boolean = defaults.attendanceMonitoringReport
   @Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote: Boolean = defaults.attendanceMonitoringNote
-  @Value("${features.attendanceMonitoring.smallGroupPointType:true}")
-  var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
-  @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
-  var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
+  @Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
+  @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
   @Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules: Boolean = defaults.smallGroupCrossModules
   @Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite: Boolean = defaults.masqueradersCanWrite
   @Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions: Boolean = defaults.masqueradeElevatedPermissions
@@ -155,7 +153,7 @@ abstract class Features {
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
-
+  @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -303,6 +301,7 @@ class FeaturesMessage {
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
   @BeanProperty var mitCircs = false
+  @BeanProperty var renderStackTracesForAllUsers = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
