@@ -422,6 +422,12 @@
       <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
       <excluded-url-pattern>/error/*</excluded-url-pattern>
+      <excluded-url-pattern>/test/*</excluded-url-pattern>
+      <excluded-url-pattern>/service/*</excluded-url-pattern>
+
+      <!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->
+      <excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
+      <excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
     </mapping>
     <mapping>
       <filter ref="staticContentHeadersFilter"/>
