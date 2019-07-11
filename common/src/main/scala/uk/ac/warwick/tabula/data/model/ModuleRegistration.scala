@@ -109,7 +109,7 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
     }.filter(_.universityId == studentCourseDetails.student.universityId)
 
   def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
-    val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).map(_.code.startsWith("P")).getOrElse(false)
+    val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).exists(_.code.startsWith("P"))
     upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
   }
 
