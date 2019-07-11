@@ -108,8 +108,10 @@ class ModuleRegistration() extends GeneratedId with PermissionsTarget with CanBe
       membershipService.getUpstreamAssessmentGroups(this, eagerLoad = true).flatMap(_.members.asScala)
     }.filter(_.universityId == studentCourseDetails.student.universityId)
 
-  def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] =
-    upstreamAssessmentGroupMembers.filter(_ => !studentCourseDetails.statusOnCourse.code.startsWith("P"))
+  def currentUpstreamAssessmentGroupMembers: Seq[UpstreamAssessmentGroupMember] = {
+    val withdrawnCourse = Option(studentCourseDetails.statusOnCourse).map(_.code.startsWith("P")).getOrElse(false)
+    upstreamAssessmentGroupMembers.filterNot(_ => withdrawnCourse)
+  }
 
   override def toString: String = s"${studentCourseDetails.scjCode}-${module.code}-$cats-$academicYear"
 
