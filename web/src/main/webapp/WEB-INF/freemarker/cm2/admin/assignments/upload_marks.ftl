@@ -123,74 +123,12 @@
             </div>
           </#list>
           <input type="hidden" name="isfile" value="false" />
-          <div class="form-group">
-            <button class="add-mark-row btn btn-default">+ Add</button>
-          </div>
           <div class="buttons form-group">
             <button type="submit" class="btn btn-primary">Save</button>
             <a class="btn btn-default" href="${cancelUrl}">Cancel</a>
           </div>
         </@f.form>
-        <div class="hidden mark-row-template">
-          <div class="row mark-row">
-            <div class="col-md-2">
-              <div class="form-group">
-                <input name="id" class="form-control" type="text" placeholder="ID">
-              </div>
-            </div>
-            <#if assignment.showSeatNumbers>
-              <div class="col-md-1">
-                <input type="text" class="form-control" disabled>
-              </div>
-            </#if>
-            <div class="col-md-2">
-              <div class="form-group">
-                <div class="input-group">
-                  <input name="actualMark" class="form-control" type="number" placeholder="Mark">
-                  <div class="input-group-addon">%</div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-1">
-              <div class="form-group">
-                <input name="actualGrade" class="form-control" type="text" placeholder="Grade">
-              </div>
-            </div>
-            <#list assignment.feedbackFields as field>
-              <div class="col-md-${feedbackFieldColumnWidth}">
-                <div class="form-group">
-                  <textarea class="small-textarea form-control" name="${field.name}"
-                            placeholder="${field.label}"></textarea>
-                </div>
-              </div>
-            </#list>
-          </div>
-        </div>
       </div>
     </div>
   </div>
-
-  <script type="text/javascript" nonce="${nonce()}">
-    (function ($) {
-      var $rowTemplate = $('.mark-row-template .mark-row');
-
-      $('.add-mark-row').on('click', function (e) {
-        e.preventDefault();
-        var numExistingRows = $('.marks-web-form .mark-row').length;
-        var $newRow = $rowTemplate.clone();
-        $newRow.find('input,textarea').each(function (i, field) {
-          var fieldName = $(field).attr('name');
-          var fixedFields = ['id', 'actualMark', 'actualGrade'];
-          var newName = function () {
-            if (fixedFields.indexOf(fieldName) !== -1) {
-              return 'marks[' + numExistingRows + '].' + $(field).attr('name');
-            }
-            return 'marks[' + numExistingRows + '].' + 'fieldValues' + '[' + $(field).attr('name') + ']';
-          }();
-          $(field).attr('name', newName);
-        });
-        $(this).before($newRow);
-      });
-    })(jQuery);
-  </script>
 </#escape>
