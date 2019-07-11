@@ -90,7 +90,7 @@
               </#if>
 
               <label class="btn btn-primary message-thread__footer__fields__btn">
-                <input type="file" id="file.upload" name="file.upload" multiple>
+                <input type="file" id="file.upload" name="file.upload" multiple aria-label="Attach files">
                 <i class="fal fa-fw fa-paperclip fa-lg use-tooltip" data-container="body" title="Attach files" aria-label="Attach files"></i>
               </label>
 

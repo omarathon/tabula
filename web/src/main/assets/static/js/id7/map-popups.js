@@ -25,12 +25,13 @@ import _ from 'lodash-es';
 
         var $icon = $('<i />').addClass('fa').addClass('fa-map-marker');
         var $a = $('<a />').addClass('use-popover').attr('href', '#');
+        var $srTitle = $('<span />').addClass('sr-only').text(`View ${$el.text()} on the campus map`);
 
         if (options.expandClickTarget) {
           $a.insertAfter($el);
-          $el.remove().appendTo($a).append('&nbsp;').append($icon);
+          $el.remove().appendTo($a).append('&nbsp;').append($icon).append($srTitle);
         } else {
-          $el.append('&nbsp;').append($a.append($icon));
+          $el.append('&nbsp;').append($a.append($icon).append($srTitle));
         }
 
         $a.tabulaPopover({
