@@ -12,7 +12,8 @@ class GrantedRoleTest extends TestBase {
   module.adminDepartment = dept
 
   val assignment: Assignment = Fixtures.assignment("assignment")
-  val member: StaffMember = Fixtures.staff()
+  val staffMember: StaffMember = Fixtures.staff()
+  val studentMember: StudentMember = Fixtures.student()
 
   val feedback: AssignmentFeedback = Fixtures.assignmentFeedback()
 
@@ -39,10 +40,17 @@ class GrantedRoleTest extends TestBase {
     gr.roleDefinition should be(roleDefinition)
   }
 
-  @Test def initMember {
-    GrantedRole.canDefineFor[Member] should be(true)
-    val gr = GrantedRole(member, roleDefinition)
-    gr.scope should be(member)
+  @Test def initStaffMember {
+    GrantedRole.canDefineFor[StaffMember] should be(true)
+    val gr = GrantedRole(staffMember, roleDefinition)
+    gr.scope should be(staffMember)
+    gr.roleDefinition should be(roleDefinition)
+  }
+
+  @Test def initStudentMember {
+    GrantedRole.canDefineFor[StudentMember] should be(true)
+    val gr = GrantedRole(studentMember, roleDefinition)
+    gr.scope should be(studentMember)
     gr.roleDefinition should be(roleDefinition)
   }
 

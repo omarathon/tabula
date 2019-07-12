@@ -54,7 +54,11 @@ class GrantedRole[A <: PermissionsTarget] extends GeneratedId with HibernateVers
       new MetaValue(targetEntity = classOf[Department], value = "Department"),
       new MetaValue(targetEntity = classOf[Module], value = "Module"),
       new MetaValue(targetEntity = classOf[Route], value = "Route"),
-      new MetaValue(targetEntity = classOf[Member], value = "Member"),
+      new MetaValue(targetEntity = classOf[ApplicantMember], value = "ApplicantMember"),
+      new MetaValue(targetEntity = classOf[EmeritusMember], value = "EmeritusMember"),
+      new MetaValue(targetEntity = classOf[OtherMember], value = "OtherMember"),
+      new MetaValue(targetEntity = classOf[StaffMember], value = "StaffMember"),
+      new MetaValue(targetEntity = classOf[StudentMember], value = "StudentMember"),
       new MetaValue(targetEntity = classOf[Assignment], value = "Assignment"),
       new MetaValue(targetEntity = classOf[SmallGroup], value = "SmallGroup"),
       new MetaValue(targetEntity = classOf[SmallGroupSet], value = "SmallGroupSet"),
@@ -135,7 +139,11 @@ object GrantedRole {
     case t if isSubtype(t, classTag[Department]) => Some("Department")
     case t if isSubtype(t, classTag[Module]) => Some("Module")
     case t if isSubtype(t, classTag[Route]) => Some("Route")
-    case t if isSubtype(t, classTag[Member]) => Some("Member")
+    case t if isSubtype(t, classTag[ApplicantMember]) => Some("ApplicantMember")
+    case t if isSubtype(t, classTag[EmeritusMember]) => Some("EmeritusMember")
+    case t if isSubtype(t, classTag[OtherMember]) => Some("OtherMember")
+    case t if isSubtype(t, classTag[StaffMember]) => Some("StaffMember")
+    case t if isSubtype(t, classTag[StudentMember]) => Some("StudentMember")
     case t if isSubtype(t, classTag[Assignment]) => Some("Assignment")
     case t if isSubtype(t, classTag[SmallGroup]) => Some("SmallGroup")
     case t if isSubtype(t, classTag[SmallGroupSet]) => Some("SmallGroupSet")
