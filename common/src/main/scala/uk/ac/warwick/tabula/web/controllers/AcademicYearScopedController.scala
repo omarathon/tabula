@@ -1,5 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers
 
+import java.time.{LocalDate, Month}
+
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -9,8 +11,6 @@ import uk.ac.warwick.tabula.services.{MaintenanceModeServiceComponent, UserSetti
 import uk.ac.warwick.tabula.web.{BreadCrumb, Breadcrumbs}
 import uk.ac.warwick.tabula.{AcademicYear, Features}
 
-import scala.collection.mutable.ArrayBuffer
-
 trait AcademicYearScopedController extends TaskBenchmarking {
 
   self: BaseController with UserSettingsServiceComponent with MaintenanceModeServiceComponent =>
@@ -19,18 +19,13 @@ trait AcademicYearScopedController extends TaskBenchmarking {
 
   @ModelAttribute("availableAcademicYears")
   def availableAcademicYears: Seq[AcademicYear] = benchmarkTask("availableAcademicYears") {
-    val years = ArrayBuffer[AcademicYear]()
-    if (features.academicYear2012) years += AcademicYear(2012)
-    if (features.academicYear2013) years += AcademicYear(2013)
-    if (features.academicYear2014) years += AcademicYear(2014)
-    if (features.academicYear2015) years += AcademicYear(2015)
-    if (features.academicYear2016) years += AcademicYear(2016)
-    if (features.academicYear2017) years += AcademicYear(2017)
-    if (features.academicYear2018) years += AcademicYear(2018)
-    if (features.academicYear2019) years += AcademicYear(2019)
-    if (features.academicYear2020) years += AcademicYear(2020)
-    if (features.academicYear2021) years += AcademicYear(2021)
-    years
+    AcademicYear(2012).to {
+      if (LocalDate.now().getMonth.getValue >= Month.JUNE.getValue) {
+        AcademicYear.now().next
+      } else {
+        AcademicYear.now()
+      }
+    }
   }
 
   protected def retrieveActiveAcademicYear(academicYearOption: Option[AcademicYear]): Option[AcademicYear] = {
