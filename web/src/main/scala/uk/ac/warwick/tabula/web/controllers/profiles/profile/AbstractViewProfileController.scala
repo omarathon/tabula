@@ -23,8 +23,6 @@ abstract class AbstractViewProfileController extends ProfilesController
   with AutowiringAssessmentServiceComponent
   with RequestLevelCaching[String, Any] {
 
-  @Value("${tabula.yearZero}") var yearZero: Int = 2000
-
   @ModelAttribute("siblingBreadcrumbs")
   def siblingBreadcrumbs = true
 

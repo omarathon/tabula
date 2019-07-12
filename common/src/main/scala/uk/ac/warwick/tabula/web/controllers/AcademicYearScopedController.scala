@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import java.time.{LocalDate, Month}
-
-import org.springframework.beans.factory.annotation.Autowired
+import org.joda.time.LocalDate
+import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import uk.ac.warwick.tabula.data.Transactions._
@@ -16,14 +15,16 @@ trait AcademicYearScopedController extends TaskBenchmarking {
   self: BaseController with UserSettingsServiceComponent with MaintenanceModeServiceComponent =>
 
   @Autowired var features: Features = _
+  @Value("${tabula.yearZero}") var yearZero: Int = 2000
 
   @ModelAttribute("availableAcademicYears")
   def availableAcademicYears: Seq[AcademicYear] = benchmarkTask("availableAcademicYears") {
-    AcademicYear(2012).to {
-      if (LocalDate.now().getMonth.getValue >= Month.JUNE.getValue) {
-        AcademicYear.now().next
+    AcademicYear(yearZero).to {
+      val currentYear = AcademicYear.now()
+      if (currentYear.isSITSInFlux(LocalDate.now)) {
+        currentYear.next
       } else {
-        AcademicYear.now()
+        currentYear
       }
     }
   }
