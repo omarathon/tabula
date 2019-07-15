@@ -23,10 +23,10 @@
     </div>
 
     <div class="deptheader">
-      <h1>MIT-${submission.key}</h1>
+      <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
     </div>
   <#else>
-    <h1>MIT-${submission.key}</h1>
+    <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
   </#if>
 
   <div id="profile-modal" class="modal fade profile-subset"></div>

@@ -41,14 +41,6 @@ abstract class Features {
 
   // FIXME currently requires default to be set twice: in annotation for Spring, and in FeaturesMessage non-Spring tests
 
-  @Value("${features.academicYear.2012:true}") var academicYear2012: Boolean = defaults.academicYear2012
-  @Value("${features.academicYear.2013:true}") var academicYear2013: Boolean = defaults.academicYear2013
-  @Value("${features.academicYear.2014:true}") var academicYear2014: Boolean = defaults.academicYear2014
-  @Value("${features.academicYear.2015:true}") var academicYear2015: Boolean = defaults.academicYear2015
-  @Value("${features.academicYear.2016:true}") var academicYear2016: Boolean = defaults.academicYear2016
-  @Value("${features.academicYear.2017:true}") var academicYear2017: Boolean = defaults.academicYear2017
-  @Value("${features.academicYear.2018:true}") var academicYear2018: Boolean = defaults.academicYear2018
-  @Value("${features.academicYear.2019:false}") var academicYear2019: Boolean = defaults.academicYear2019
   @Value("${features.timetableFeedCurrentAcademicYear:true}") var timetableFeedCurrentAcademicYear: Boolean = defaults.timetableFeedCurrentAcademicYear
   @Value("${features.timetableIncludeLectureFeedWBS:false}") var timetableIncludeLectureFeedWBS: Boolean = defaults.timetableIncludeLectureFeedWBS
 
@@ -103,10 +95,8 @@ abstract class Features {
   @Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType: Boolean = defaults.attendanceMonitoringMeetingPointType
   @Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport: Boolean = defaults.attendanceMonitoringReport
   @Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote: Boolean = defaults.attendanceMonitoringNote
-  @Value("${features.attendanceMonitoring.smallGroupPointType:true}")
-  var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
-  @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}")
-  var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
+  @Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType: Boolean = defaults.attendanceMonitoringSmallGroupPointType
+  @Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType: Boolean = defaults.attendanceMonitoringAssignmentSubmissionPointType
   @Value("${features.smallGroupTeaching.crossModuleSmallGroups:true}") var smallGroupCrossModules: Boolean = defaults.smallGroupCrossModules
   @Value("${features.masqueradersCanWrite:false}") var masqueradersCanWrite: Boolean = defaults.masqueradersCanWrite
   @Value("${features.masqueradeElevatedPermissions:false}") var masqueradeElevatedPermissions: Boolean = defaults.masqueradeElevatedPermissions
@@ -155,7 +145,7 @@ abstract class Features {
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
-
+  @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
 
   private val bean = new BeanWrapperImpl(this)
 
@@ -187,14 +177,6 @@ class FeaturesMessage {
 
   // BeanProperty current required as Utils JsonMessageConverter uses Jackson
   // without the Scala module.
-  @BeanProperty var academicYear2012 = true
-  @BeanProperty var academicYear2013 = true
-  @BeanProperty var academicYear2014 = true
-  @BeanProperty var academicYear2015 = true
-  @BeanProperty var academicYear2016 = true
-  @BeanProperty var academicYear2017 = true
-  @BeanProperty var academicYear2018 = true
-  @BeanProperty var academicYear2019 = false
   @BeanProperty var timetableFeedCurrentAcademicYear = true
   @BeanProperty var timetableIncludeLectureFeedWBS = false
 
@@ -303,6 +285,7 @@ class FeaturesMessage {
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
   @BeanProperty var mitCircs = false
+  @BeanProperty var renderStackTracesForAllUsers = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

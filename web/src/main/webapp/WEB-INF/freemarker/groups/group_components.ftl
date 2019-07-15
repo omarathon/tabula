@@ -918,22 +918,25 @@
       <#local title><@instanceFormat instance academicYear department /></#local>
 
       <#if state.name == 'Attended'>
-        <#local class = "fa-check attended" />
+        <#local class = "fa fa-check attended" />
         <#local title = "${student.fullName} attended: " + title />
       <#elseif state.name == 'MissedAuthorised'>
-        <#local class = "fa-times-circle-o authorised" />
+        <#local class = "fa fa-times-circle-o authorised" />
         <#local title = "${student.fullName} did not attend (authorised absence): " + title />
       <#elseif state.name == 'MissedUnauthorised'>
-        <#local class = "fa-times unauthorised" />
+        <#local class = "fa fa-times unauthorised" />
         <#local title = "${student.fullName} did not attend (unauthorised): " + title />
       <#elseif state.name == 'Late'>
-        <#local class = "fa-exclamation-triangle late" />
+        <#local class = "fa fa-exclamation-triangle late" />
         <#local title = "No data: " + title />
       <#elseif state.name == 'NotExpected'>
-        <#local class = "" />
+        <#local class = "fal fa-user-slash" />
         <#local title = "No longer in group" />
+      <#elseif state.name == 'NotExpectedPast'>
+        <#local class = "fal fa-user-slash" />
+        <#local title = "Wasn't a member of this group" />
       <#else>
-        <#local class = "fa-minus" />
+        <#local class = "fa fa-minus" />
       </#if>
 
       <#local titles = [title] />
@@ -962,8 +965,8 @@
       </#local>
 
       <td>
-				<span class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
-					<i class="fa fa-fw fa-stack-2x ${class}"></i>
+				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
+					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
       </td>

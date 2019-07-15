@@ -39,7 +39,7 @@
 
 <!-- Lato web font -->
 <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic&amp;subset=latin,latin-ext"
-      rel="stylesheet" type="text/css">
+      rel="stylesheet" type="text/css" crossorigin="anonymous">
 
 <@stylesheet "/static/css/id7/render.css" />
 <@stylesheet "/static/css/id7/${component.name?default('common')}.css" />

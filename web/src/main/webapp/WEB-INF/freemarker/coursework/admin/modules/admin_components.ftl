@@ -24,7 +24,7 @@
     >
       <div class="clearfix">
         <div class="btn-group module-manage-button section-manage-button">
-          <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+          <a href="#" class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
           <ul class="dropdown-menu pull-right">
             <#if can_manage>
               <li><a href="<@routes.coursework.moduleperms module />">
@@ -224,7 +224,7 @@
           <div class="assignment-buttons">
             <div class="btn-toolbar">
               <div class="btn-group">
-                <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
+                <a href="#" class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
                 <ul class="dropdown-menu pull-right">
                   <li>
                     <#assign edit_url><@routes.coursework.assignmentedit assignment /></#assign>

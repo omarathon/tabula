@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.NotificationListener
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 
@@ -17,14 +18,13 @@ import scala.language.existentials
 trait MyWarwickNotificationListener extends NotificationListener {
   self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
 
-  private def toMyWarwickActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Option[Activity] = try {
+  private def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
     val recipients = notification.recipientNotificationInfos.asScala
       .filterNot(_.dismissed) // Not if the user has dismissed the notification already
       .map(_.recipient)
       .filter(_.isFoundUser) // Only users found in SSO
-      .map(_.getUserId)
 
-    if (recipients.isEmpty) None
+    if (recipients.isEmpty) Seq()
     else {
       val allEntities = notification match {
         case targetNotification: NotificationWithTarget[_, _] => targetNotification.items.asScala :+ targetNotification.target
@@ -43,31 +43,49 @@ trait MyWarwickNotificationListener extends NotificationListener {
         tag
       }
 
-      val activity = new Activity(
-        recipients.toSet.asJava,
-        notification.title,
-        if (notification.url.toLowerCase.startsWith("https://")) {
-          notification.url
-        } else {
-          toplevelUrl + notification.url
-        },
-        textRenderer.renderTemplate(notification.content.template, notification.content.model),
-        notification.notificationType
-      )
+      def getRecipientActivity(recipient: User): Activity = {
+        val notificationText: String = {
+          // Access to restricted properties requires user inside RequestInfo
+          val currentUser = new CurrentUser(recipient, recipient)
+          val info = new RequestInfo(
+            user = currentUser,
+            requestedUri = null,
+            requestParameters = Map()
+          )
+          RequestInfo.use(info) {
+            textRenderer.renderTemplate(notification.content.template, notification.content.model)
+          }
+        }
 
-      activity.setTags(tags.toSet.asJava)
+        val activity = new Activity(
+          recipients.map(_.getUserId).toSet.asJava,
+          notification.title,
+          if (notification.url.toLowerCase.startsWith("https://")) {
+            notification.url
+          } else {
+            toplevelUrl + notification.url
+          },
+          notificationText,
+          notification.notificationType
+        )
 
-      Some(activity)
+        activity.setTags(tags.toSet.asJava)
+
+        activity
+      }
+
+    recipients.map(recipient => getRecipientActivity(recipient))
+
     }
   } catch {
     // referenced entity probably missing, oh well.
-    case _: ObjectNotFoundException => None
+    case _: ObjectNotFoundException => Seq()
   }
 
   private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
     notification match {
-      case a: MyWarwickNotification => toMyWarwickActivity(notification).map(myWarwickService.sendAsNotification)
-      case a => toMyWarwickActivity(notification).map(myWarwickService.sendAsActivity)
+      case a: MyWarwickNotification => toMyWarwickActivities(notification).map(myWarwickService.sendAsNotification)
+      case a => toMyWarwickActivities(notification).map(myWarwickService.sendAsActivity)
     }
   }
 

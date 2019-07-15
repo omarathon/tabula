@@ -93,7 +93,7 @@
 
       <#if department.plagiarismDetectionEnabled && assignment.collectSubmissions>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+          <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
             Plagiarism
             <span class="caret"></span>
           </a>
@@ -169,7 +169,7 @@
       <#if (assignment.collectSubmissions || assignment.cm2Assignment) && features.markingWorkflows>
         <#if assignment.mustReleaseForMarking!false>
           <div class="btn-group">
-            <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
               Marking
               <span class="caret"></span>
             </a>
@@ -288,7 +288,7 @@
       </#if>
 
       <div class="btn-group">
-        <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
           Feedback
           <span class="caret"></span>
         </a>
@@ -448,7 +448,7 @@
     </div>
     <div class="btn-group">
       <div class="btn-group">
-        <a class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        <a href="#" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
           Save as
           <span class="caret"></span>
         </a>

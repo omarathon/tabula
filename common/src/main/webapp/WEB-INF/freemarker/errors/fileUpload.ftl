@@ -12,13 +12,5 @@
 
   <p>If the problem persists, please contact the <a href="mailto:tabula@warwick.ac.uk">Student Information Systems team</a><#if token??>, quoting the token above and any additional details</#if>.</p>
 
-  <#if exception??>
-    <p>
-      <button type="button" class="btn btn-danger" data-toggle="collapse" data-target="#dev">
-        Show technical details about this error
-      </button>
-    </p>
-
-    <pre id="dev" class="collapse" style="overflow-x:scroll;">${stackTrace}</pre>
-  </#if>
+  <#include "_stackTrace.ftl" />
 </#escape>

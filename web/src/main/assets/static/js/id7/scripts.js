@@ -552,7 +552,10 @@ $.fn.tabulaPopover = function (options) {
   // now that's all done, bind the popover
   $items.each(function () {
     // allow each popover to override the container via a data attribute
-    $(this).popover($.extend({}, options, {container: $(this).data('container')})).addClass(initClass);
+    $(this).popover($.extend({}, options, {
+      container: $(this).data('container'),
+      trigger: $(this).data('trigger')
+    })).addClass(initClass);
   });
 
   // ensure popovers/introductorys override title with data-title attribute where available
@@ -1499,7 +1502,7 @@ $(function () {
       safe = true;
     } else if (typeof URL !== "function" && window.navigator.userAgent.indexOf("Trident/7.0") > -1) {
       const a = $('<a>', {
-        href: url
+        href: options.url
       });
       safe = (a.prop('hostname') === window.location.hostname);
     }

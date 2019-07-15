@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers.cm2.admin.assignments
 
 import javax.validation.Valid
-
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors

@@ -4,16 +4,16 @@ import java.io.InputStream
 
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor._
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
-import uk.ac.warwick.tabula.helpers.{FoundUser, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.helpers.{FoundUser, SpreadsheetHelpers}
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.coursework.docconversion.OldMarkerAllocationExtractor._
 import uk.ac.warwick.userlookup.User
 
 object OldMarkerAllocationExtractor {
 
-  case class Error(field: String, rowData: Map[String, String], code: String, codeArgument: Array[Object] = Array())
+  case class Error(field: String, code: String, codeArgument: Array[Object] = Array())
 
   val AcceptedFileExtensions = Seq(".xlsx")
 
@@ -29,7 +29,8 @@ object OldMarkerAllocationExtractor {
     marker: Option[User],
     student: Option[User],
     errors: Seq[Error],
-    position: MarkerPosition
+    position: MarkerPosition,
+    rowData: Map[String, String]
   )
 
   case class Markers(firstMarkers: Seq[User], secondMarkers: Seq[User]) {
@@ -69,9 +70,9 @@ class OldMarkerAllocationExtractor() {
         case Some(studentId) if studentId.matches("\\d+") =>
           getUser(studentId)
             .map(Right(_))
-            .getOrElse(Left(Error("student_id", rowData, "workflow.allocateMarkers.universityId.notFound")))
-        case Some(studentId) => Left(Error("student_id", rowData, "workflow.allocateMarkers.universityId.badFormat"))
-        case None => Left(Error("student_id", rowData, "workflow.allocateMarkers.universityId.missing"))
+            .getOrElse(Left(Error("student_id", "workflow.allocateMarkers.universityId.notFound")))
+        case Some(studentId) => Left(Error("student_id", "workflow.allocateMarkers.universityId.badFormat"))
+        case None => Left(Error("student_id", "workflow.allocateMarkers.universityId.missing"))
       }
     }
 
@@ -81,21 +82,21 @@ class OldMarkerAllocationExtractor() {
           validMarkers.find { user => user.getWarwickId == markerId && getUser(markerId).exists(_.getUserId == user.getUserId) } match {
             case Some(FoundUser(user)) => Right(Some(user))
             case _ if validMarkers.exists(_.getWarwickId == markerId) =>
-              Left(Error("marker_id", rowData, "workflow.allocateMarkers.nonPrimary",
+              Left(Error("marker_id", "workflow.allocateMarkers.nonPrimary",
                 Array(
                   validMarkers.find(_.getWarwickId == markerId).get.getUserId, // usercode in marking workflow
                   getUser(markerId).get.getUserId // actual primary usercode
                 )
               ))
             case _ if allMarkers.exists(_.getWarwickId == markerId) =>
-              Left(Error("marker_id", rowData, "workflow.allocateMarkers.wrongRole", Array(roleName)))
+              Left(Error("marker_id", "workflow.allocateMarkers.wrongRole", Array(roleName)))
             case _ if getUser(markerId).nonEmpty =>
-              Left(Error("marker_id", rowData, "workflow.allocateMarkers.notMarker"))
+              Left(Error("marker_id", "workflow.allocateMarkers.notMarker"))
             case _ =>
-              Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound"))
+              Left(Error("marker_id", "workflow.allocateMarkers.universityId.notFound"))
           }
         case _ =>
-          Left(Error("marker_id", rowData, "workflow.allocateMarkers.universityId.notFound"))
+          Left(Error("marker_id", "workflow.allocateMarkers.universityId.notFound"))
       }
     }
 
@@ -114,10 +115,10 @@ class OldMarkerAllocationExtractor() {
       case FirstMarker => parseMarker(markers.firstMarkers, markers.allMarkers, workflow.firstMarkerRoleName)
       case SecondMarker => parseMarker(markers.secondMarkers, markers.allMarkers, workflow.secondMarkerRoleName.getOrElse(""))
       case _ if !rowData.get("agent_id").exists(_.hasText) => Right(None)
-      case _ => Left(Error("marker_id", rowData, "workflow.allocateMarkers.unableToWorkOutRole"))
+      case _ => Left(Error("marker_id", "workflow.allocateMarkers.unableToWorkOutRole"))
     }
 
     val errors = Seq(student, marker).flatMap(_.left.toOption)
-    ParsedRow(marker.right.toOption.flatten, student.right.toOption, errors, position)
+    ParsedRow(marker.right.toOption.flatten, student.right.toOption, errors, position, rowData)
   }
 }
