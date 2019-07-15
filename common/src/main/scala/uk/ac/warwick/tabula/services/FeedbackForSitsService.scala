@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{AutowiringFeedbackForSitsDaoComponent, FeedbackForSitsDaoComponent}
 
@@ -58,7 +59,7 @@ abstract class AbstractFeedbackForSitsService extends FeedbackForSitsService {
   def getByFeedbacks(feedbacks: Seq[Feedback]): Map[Feedback, FeedbackForSits] =
     feedbackForSitsDao.getByFeedbacks(feedbacks)
 
-  def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = {
+  def queueFeedback(feedback: Feedback, submitter: CurrentUser, gradeGenerator: GeneratesGradesFromMarks): Option[FeedbackForSits] = transactional() {
     val validatedFeedback = validateAndPopulateFeedback(Seq(feedback), feedback.assessment, gradeGenerator)
     if (validatedFeedback.valid.nonEmpty || feedback.module.adminDepartment.assignmentGradeValidation && validatedFeedback.populated.nonEmpty) {
       val feedbackForSits = getByFeedback(feedback).getOrElse {
