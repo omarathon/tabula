@@ -219,11 +219,13 @@
         });
 
         // Stop 'Enter' from submitting the form
-        $('input[name$=".name"]').closest('form')
+        var $form = $('input[name$=".name"]').closest('form');
+
+        $form
           .off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
           .on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function (e) {
             var code = e.keyCode || e.which;
-            if (code == 13) {
+            if (code === 13 && $form.find('input[type=submit]:focus').length === 0) {
               e.preventDefault();
               return false;
             }
