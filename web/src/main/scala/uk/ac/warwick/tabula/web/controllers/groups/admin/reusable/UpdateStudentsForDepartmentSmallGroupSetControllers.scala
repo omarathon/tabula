@@ -141,6 +141,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   ): Mav = {
     val addUsersResult = editMembershipCommand.addUsers()
     val editMembershipCommandResult = editMembershipCommand.apply()
+    findCommand.populate()
     findCommand.update(editMembershipCommandResult)
     val findStudentsCommandResult = findCommand.apply()
     render(set, findStudentsCommandResult, editMembershipCommandResult, addUsersResult = addUsersResult, expandManual = true)
@@ -154,6 +155,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   ): Mav = {
     editMembershipCommand.removeUsers()
     val editMembershipCommandResult = editMembershipCommand.apply()
+    findCommand.populate()
     findCommand.update(editMembershipCommandResult)
     val findStudentsCommandResult = findCommand.apply()
     render(set, findStudentsCommandResult, editMembershipCommandResult, expandManual = true)
@@ -167,6 +169,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
   ): Mav = {
     editMembershipCommand.resetMembership()
     val editMembershipCommandResult = editMembershipCommand.apply()
+    findCommand.populate()
     findCommand.update(editMembershipCommandResult)
     val findStudentsCommandResult = findCommand.apply()
     render(set, findStudentsCommandResult, editMembershipCommandResult, expandManual = true)
@@ -181,6 +184,7 @@ abstract class UpdateStudentsForDepartmentSmallGroupSetController extends Groups
     route: String
   ): Mav = {
     if (errors.hasErrors) {
+      findCommand.populate()
       val findStudentsCommandResult =
         if (findCommand.filterQueryString.length > 0)
           findCommand.apply()
