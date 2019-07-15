@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.groups.admin.AllocateStudentsToGroupsViewHelpers
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroup, DepartmentSmallGroupSet}
 import uk.ac.warwick.tabula.data.model.{Department, FileAttachment, UserGroup}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -35,14 +35,24 @@ object AllocateStudentsToDepartmentalSmallGroupsCommand {
 }
 
 class AllocateStudentsToDepartmentalSmallGroupsCommandInternal(val department: Department, val set: DepartmentSmallGroupSet, val viewer: CurrentUser)
-  extends CommandInternal[DepartmentSmallGroupSet] with AllocateStudentsToDepartmentalSmallGroupsCommandState {
+  extends CommandInternal[DepartmentSmallGroupSet] with AllocateStudentsToDepartmentalSmallGroupsCommandState with TaskBenchmarking {
 
   self: GroupsObjects[User, DepartmentSmallGroup] with SmallGroupServiceComponent =>
 
   override def applyInternal(): DepartmentSmallGroupSet = transactional() {
+
+    lazy val groupEventOccurrences = benchmarkTask("Get all small group event occurrences for the groups") {
+      mapping.asScala.keys.flatMap(_.linkedGroups.asScala).map(group => group -> smallGroupService.findAttendanceByGroup(group)).toMap
+    }
+
     for ((group, users) <- mapping.asScala) {
       val userGroup = UserGroup.ofUniversityIds
-      users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
+      users.asScala.foreach { user =>
+        userGroup.addUserId(user.getWarwickId)
+        group.linkedGroups.asScala.foreach(g =>
+          smallGroupService.backFillAttendance(user.getWarwickId, groupEventOccurrences(g), viewer)
+        )
+      }
       group.students.copyFrom(userGroup)
       smallGroupService.saveOrUpdate(group)
     }

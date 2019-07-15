@@ -552,7 +552,10 @@ $.fn.tabulaPopover = function (options) {
   // now that's all done, bind the popover
   $items.each(function () {
     // allow each popover to override the container via a data attribute
-    $(this).popover($.extend({}, options, {container: $(this).data('container')})).addClass(initClass);
+    $(this).popover($.extend({}, options, {
+      container: $(this).data('container'),
+      trigger: $(this).data('trigger')
+    })).addClass(initClass);
   });
 
   // ensure popovers/introductorys override title with data-title attribute where available
