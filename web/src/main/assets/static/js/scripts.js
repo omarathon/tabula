@@ -1397,7 +1397,7 @@ jQuery(function ($) {
       safe = true;
     } else if (typeof URL !== "function" && window.navigator.userAgent.indexOf("Trident/7.0") > -1) {
       const a = $('<a>', {
-        href: url
+        href: options.url
       });
       safe = (a.prop('hostname') === window.location.hostname);
     }
