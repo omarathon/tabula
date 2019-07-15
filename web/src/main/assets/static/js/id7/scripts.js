@@ -1,5 +1,8 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import initErrorReporter from '../errorreporter';
+
+initErrorReporter();
 
 /**
  * Cross-app scripting.
