@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence.WeekNumber
 import uk.ac.warwick.tabula.data.model.groups.WeekRange.Week
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventAttendance, SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -34,10 +34,13 @@ object SmallGroupAttendanceState {
 
   case object NotExpected extends SmallGroupAttendanceState // The user is no longer in the group so is not expected to attend
 
-  def from(state: Option[AttendanceState]): SmallGroupAttendanceState = state match {
+  case object NotExpectedPast extends SmallGroupAttendanceState // The user wasn't in the group when this event took place
+
+  def from(attendance: Option[SmallGroupEventAttendance]): SmallGroupAttendanceState = attendance.map(_.state) match {
     case Some(AttendanceState.Attended) => Attended
     case Some(AttendanceState.MissedAuthorised) => MissedAuthorised
     case Some(AttendanceState.MissedUnauthorised) => MissedUnauthorised
+    case Some(AttendanceState.NotRecorded) if attendance.exists(a => !a.expectedToAttend) => NotExpectedPast
     case _ => NotRecorded // null
   }
 }
@@ -103,7 +106,7 @@ object ViewSmallGroupAttendanceCommand {
             _.attendance.asScala.find {
               _.universityId == user.getWarwickId
             }
-          }.flatMap { a => Option(a.state) }
+          }
         )
 
       val state =

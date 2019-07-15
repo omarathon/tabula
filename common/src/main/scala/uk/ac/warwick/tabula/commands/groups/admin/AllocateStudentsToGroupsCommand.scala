@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.commands.groups.admin
 
+import org.joda.time.{DateTime, LocalDateTime}
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.MemberAllocationData
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupAllocationMethod, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.{DepartmentSmallGroupSet, SmallGroup, SmallGroupAllocationMethod, SmallGroupEventAttendance, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -37,14 +39,22 @@ object AllocateStudentsToGroupsCommand {
 }
 
 class AllocateStudentsToGroupsCommandInternal(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
-  extends CommandInternal[SmallGroupSet] with AllocateStudentsToGroupsCommandState {
+  extends CommandInternal[SmallGroupSet] with AllocateStudentsToGroupsCommandState with TaskBenchmarking {
 
   self: GroupsObjects[User, SmallGroup] with SmallGroupServiceComponent =>
 
   override def applyInternal(): SmallGroupSet = transactional() {
+
+    lazy val groupEventOccurrences = benchmarkTask("Get all small group event occurrences for the groups") {
+      mapping.asScala.keys.map(group => group -> smallGroupService.findAttendanceByGroup(group)).toMap
+    }
+
     for ((group, users) <- mapping.asScala) {
       val userGroup = UserGroup.ofUniversityIds
-      users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
+      users.asScala.foreach { user =>
+        userGroup.addUserId(user.getWarwickId)
+        smallGroupService.backFillAttendance(user.getWarwickId, groupEventOccurrences(group), viewer)
+      }
       group.students.copyFrom(userGroup)
       smallGroupService.saveOrUpdate(group)
     }

@@ -32,6 +32,11 @@ class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with 
 
   var updatedDate: DateTime = _
 
+  // TAB-7353 - joinedOn is non-null only if the student joined the parent group after this occurrence was due to take place
+  // it is set to the date that the student joined the parent group
+  var joinedOn: DateTime = _
+  def expectedToAttend: Boolean = Option(joinedOn).isEmpty
+
   @NotNull
   var updatedBy: String = _
 

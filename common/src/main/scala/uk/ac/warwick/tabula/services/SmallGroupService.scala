@@ -88,6 +88,8 @@ trait SmallGroupService {
 
   def findSmallGroupSetsByMember(user: User): Seq[SmallGroupSet]
 
+  def backFillAttendance(studentId: String, occurrences: Seq[SmallGroupEventOccurrence], user: CurrentUser): Seq[SmallGroupEventAttendance]
+
   def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
 
   def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, isPermanent: Boolean = false): Unit
@@ -271,6 +273,26 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
         smallGroupDao.saveOrUpdate(attendance)
       }
     }
+  }
+
+  // TAB-7353 - When adding a student to a group find any unattended event occurrences in the past and pre-fill a NotRecorded
+  def backFillAttendance(studentId: String, occurrences: Seq[SmallGroupEventOccurrence], user: CurrentUser): Seq[SmallGroupEventAttendance] = {
+    val pastOccurrences = occurrences.filter(_.endDateTime.exists(_.isBefore(LocalDateTime.now)))
+    pastOccurrences.flatMap(o =>
+      if(!o.attendance.asScala.exists(_.universityId == studentId)){
+        val attendance = new SmallGroupEventAttendance
+        attendance.occurrence = o
+        attendance.state = AttendanceState.NotRecorded
+        attendance.universityId = studentId
+        attendance.updatedBy = user.userId
+        attendance.updatedDate = DateTime.now
+        attendance.joinedOn = DateTime.now // indicates that the student joined the group after this event
+        smallGroupDao.saveOrUpdate(attendance)
+        Some(attendance)
+      } else {
+        None
+      }
+    )
   }
 
   def saveOrUpdateAttendance(
