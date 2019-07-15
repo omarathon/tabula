@@ -12,7 +12,11 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.SchedulingHelpers._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.elasticsearch.AuditEventQueryService
 import uk.ac.warwick.tabula.services.scheduling.AutowiredJobBean
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 @Component
 @Profile(Array("scheduling"))
@@ -22,15 +26,25 @@ class ImportProfilesJob extends AutowiredJobBean {
 
   private val moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
   private val scheduler = Wire[Scheduler]
+  private val auditEventQueryService = Wire[AuditEventQueryService]
 
   override def executeInternal(context: JobExecutionContext): Unit = {
     if (features.schedulingProfilesImport)
       transactional() {
         exceptionResolver.reportExceptions {
           EarlyRequestInfo.wrap() {
-            moduleAndDepartmentService.allRootDepartments.foreach(dept => {
-              scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
-            })
+            val auditEvents = Await.result(auditEventQueryService.query("eventType:ImportProfiles", 0, 1000), 1.minute)
+
+            moduleAndDepartmentService.allRootDepartments
+              .sortBy { dept =>
+                auditEvents
+                  .filter(event => event.data == "{\"deptCode\":\"%s\"}".format(dept.code))
+                  .find(_.isSuccessful)
+                  .map(_.eventDate.getMillis)
+              }
+              .foreach { dept =>
+                scheduler.scheduleNow[ImportProfilesSingleDepartmentJob]("departmentCode" -> dept.code)
+              }
           }
         }
       }
