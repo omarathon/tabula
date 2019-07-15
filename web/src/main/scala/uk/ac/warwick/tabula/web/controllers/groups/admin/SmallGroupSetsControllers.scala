@@ -134,19 +134,19 @@ class CreateSmallGroupSetEditPropertiesController extends SmallGroupSetsControll
   def saveAndExit(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors): Mav =
     submit(cmd, errors, { _ => Routes.admin(cmd.set.department, cmd.academicYear) })
 
-  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddStudents, "action!=refresh", "action!=update"))
+  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddStudents, "action!=refresh", "action!=update"))
   def submitAndAddStudents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors): Mav =
     submit(cmd, errors, Routes.admin.createAddStudents)
 
-  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddGroups, "action!=refresh", "action!=update"))
+  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddGroups, "action!=refresh", "action!=update"))
   def submitAndAddGroups(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors): Mav =
     submit(cmd, errors, Routes.admin.createAddGroups)
 
-  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAddEvents, "action!=refresh", "action!=update"))
+  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAddEvents, "action!=refresh", "action!=update"))
   def submitAndAddEvents(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors): Mav =
     submit(cmd, errors, Routes.admin.createAddEvents)
 
-  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.editAndAllocate, "action!=refresh", "action!=update"))
+  @RequestMapping(method = Array(POST), params = Array(ManageSmallGroupsMappingParameters.createAndAllocate, "action!=refresh", "action!=update"))
   def submitAndAllocate(@Valid @ModelAttribute("createSmallGroupSetCommand") cmd: EditSmallGroupSetCommand, errors: Errors): Mav =
     submit(cmd, errors, Routes.admin.createAllocate)
 }
