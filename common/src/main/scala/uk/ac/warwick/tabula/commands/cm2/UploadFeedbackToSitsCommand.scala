@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.commands.cm2
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{Assessment, Feedback}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -29,7 +30,7 @@ class UploadFeedbackToSitsCommandInternal(val assessment: Assessment, currentUse
 
   lazy val gradeValidation: ValidateAndPopulateFeedbackResult = feedbackForSitsService.validateAndPopulateFeedback(feedbacks, assessment, gradeGenerator)
 
-  override def applyInternal(): Seq[Feedback] = {
+  override def applyInternal(): Seq[Feedback] = transactional() {
     feedbacks.flatMap(f => feedbackForSitsService.queueFeedback(f, currentUser, gradeGenerator)).map(_.feedback)
   }
 
