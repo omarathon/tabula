@@ -9,7 +9,7 @@
 
   <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
   <#assign generateGridOptionAction><@routes.exams.generateGridOptions department academicYear /></#assign>
-  <@f.form method="post" action="${generateGridOptionAction}" cssClass="dirty-check grid-options">
+  <@f.form method="post" action=generateGridOptionAction cssClass="dirty-check grid-options">
     <input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="false" />
     <@form_fields.select_course_fields />
 
