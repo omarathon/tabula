@@ -1528,3 +1528,15 @@ $(function () {
     }
   });
 });
+
+// TAB-7304 handle ajax error globally
+$(() => {
+  $(document).ajaxError((event, jqXhr, settings) => {
+    const pageErrorToken = $('body').data('error-token');
+    const errorModal = $(`#global-error-modal-${pageErrorToken}`);
+    if (errorModal) errorModal.modal('show');
+
+    // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would have reached backend (and logged)
+    throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${errorToken}`);
+  });
+});
