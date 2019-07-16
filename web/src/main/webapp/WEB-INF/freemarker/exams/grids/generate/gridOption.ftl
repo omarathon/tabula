@@ -9,7 +9,7 @@
 
   <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-  <form action="<@routes.exams.generateGridOptions department academicYear />" class="dirty-check grid-options" method="post">
+  <@f.form method="post" action="<@routes.exams.generateGridOptions department academicYear />" cssClass="dirty-check grid-options">
     <input type="hidden" name="mandatoryModulesAndYearMarkColumns" value="false" />
     <@form_fields.select_course_fields />
 
@@ -581,7 +581,7 @@
     <@bs3form.errors path="gridOptionsCommand" />
 
     <button class="btn btn-primary" type="submit">Next</button>
-  </form>
+  </@f.form>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {
