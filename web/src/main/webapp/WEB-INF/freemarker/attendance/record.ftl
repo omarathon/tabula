@@ -25,7 +25,7 @@
           <h5 class="with-related"><span class="muted">for</span> ${student.fullName}, ${department.name}</h5>
         </div>
 
-        <form id="recordAttendance" action="" method="post" class="dirty-check">
+        <@f.form id="recordAttendance" action="" method="post" cssClass="dirty-check">
           <input type="hidden" name="returnTo" value="${returnTo}" />
           <script nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
@@ -199,7 +199,7 @@
             <input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
             <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
           </div>
-        </form>
+        </@f.form>
       </div>
     </div>
   </#if>
