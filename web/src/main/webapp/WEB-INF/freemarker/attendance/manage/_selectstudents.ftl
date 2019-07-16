@@ -36,7 +36,7 @@
       synchronise with this scheme.
     </div>
     <script nonce="${nonce()}">
-      $(function () {
+      jQuery(function($) {
         $('input[name=linkToSits]').on('change', function () {
           $('#unlinkSitsAlert').toggleClass('hidden', $(this).is(':checked'));
         });
