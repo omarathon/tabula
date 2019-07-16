@@ -7,8 +7,8 @@
   </#function>
 
   <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
-
-  <form action="<@routes.exams.generateGridCoreRequired department academicYear />" class="dirty-check" method="post">
+  <#assign generateGridCoreRequiredAction><@routes.exams.generateGridCoreRequired department academicYear /></#assign>
+  <@f.form action="<@routes.exams.generateGridCoreRequired department academicYear />" cssClass="dirty-check" method="post">
 
     <@form_fields.select_course_fields />
     <@form_fields.grid_options_fields />
@@ -80,7 +80,7 @@
     </#if>
 
     <button class="btn btn-primary" type="submit" name="${GenerateExamGridMappingParameters.coreRequiredModules}">Next</button>
-  </form>
+  </@f.form>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {
