@@ -326,8 +326,8 @@
             });
           </script>
         </#if>
-
-      <form action="<@routes.exams.generateGrid department academicYear />" id="examGridDocuments" class="dirty-check" method="post" target="_blank">
+      <#assign generateGridAction><@routes.exams.generateGrid department academicYear /></#assign>
+      <@f.form action=generateGridAction id="examGridDocuments" cssClass="dirty-check" method="post" target="_blank">
           <@form_fields.select_course_fields />
           <@form_fields.grid_options_fields />
 
@@ -361,7 +361,7 @@
             </ul>
           </div>
         </div>
-      </form>
+      </@f.form>
     </div>
     <div class='modal fade' id='confirmModal'>
       <div class='modal-dialog' role='document'>
