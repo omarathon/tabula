@@ -77,7 +77,6 @@ require('../jquery-scrolltofixed');
 require('../jquery-radiocontrolled');
 require('./flexipicker');
 require('../ajax-popup');
-require('../browser-info');
 require('../combo-typeahead');
 require('./map-popups');
 require('../jquery-biglist');
