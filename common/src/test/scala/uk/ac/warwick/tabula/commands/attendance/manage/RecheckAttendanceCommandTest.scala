@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services.attendancemonitoring._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 
+import scala.collection.JavaConverters._
+
 class RecheckAttendanceCommandTest extends TestBase with Mockito {
 
   trait Fixture {
@@ -28,6 +30,7 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
     val command = new RecheckAttendanceCommandInternal(department, academicYear, templatePoint, currentUser)
       with ComposableCommand[Seq[AttendanceMonitoringCheckpoint]]
       with RecheckAttendanceCommandState
+      with RecheckAttendanceCommandRequest
       with AttendanceMonitoringServiceComponent
       with ProfileServiceComponent
       with SecurityServiceComponent
@@ -72,6 +75,7 @@ class RecheckAttendanceCommandTest extends TestBase with Mockito {
     command.setFindPointsResult(FindPointsResult(termGroupedPoints = Map("Autumn" -> Seq(GroupedPoint(templatePoint, schemes = Seq(scheme), points = Seq(templatePoint)))), monthGroupedPoints = Map.empty, courseworkAssignmentPoints = Nil))
 
     command.profileService.getAllMembersWithUniversityIds(Seq("1234567")) returns Seq(student)
+    command.students = Seq("1234567").asJava
   }
 
   trait CourseworkSubmissionFixture extends Fixture {
