@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.attendance.manage
 
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{CommandInternal, _}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPointType._
@@ -9,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.{Department, StudentMember}
 import uk.ac.warwick.tabula.services.attendancemonitoring._
 import uk.ac.warwick.tabula.services.{SubmissionServiceComponent, _}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import scala.collection.JavaConverters._
 
 
 object RecheckAttendanceCommand {
@@ -24,6 +26,7 @@ object RecheckAttendanceCommand {
       with RecheckAttendanceCommandDescription
       with EditAttendancePointPermissions
       with RecheckAttendanceCommandState
+      with RecheckAttendanceCommandRequest
       with AutowiringAttendanceMonitoringCourseworkSubmissionServiceComponent
       with AutowiringAttendanceMonitoringMeetingRecordServiceComponent
       with AutowiringAttendanceMonitoringEventAttendanceServiceComponent
@@ -31,16 +34,22 @@ object RecheckAttendanceCommand {
       with AutowiringModuleAndDepartmentServiceComponent
 }
 
-class RecheckAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val templatePoint: AttendanceMonitoringPoint, val user: CurrentUser) extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] {
-  self: RecheckAttendanceCommandState with AttendanceMonitoringServiceComponent =>
+class RecheckAttendanceCommandInternal(val department: Department, val academicYear: AcademicYear, val templatePoint: AttendanceMonitoringPoint, val user: CurrentUser) extends CommandInternal[Seq[AttendanceMonitoringCheckpoint]] with PopulateOnForm {
+  self: RecheckAttendanceCommandState with RecheckAttendanceCommandRequest with AttendanceMonitoringServiceComponent =>
+
+  override def populate(): Unit = {
+    students = proposedChangesToNonReportedPoints.map(_.student.universityId).asJava
+  }
 
   override protected def applyInternal(): Seq[AttendanceMonitoringCheckpoint] = {
     transactional() {
-      proposedChangesToNonReportedPoints.filter(_.proposedState == NotRecorded).foreach { change =>
+      val selectedChanges = proposedChangesToNonReportedPoints.filter(c => students.contains(c.student.universityId))
+
+      selectedChanges.filter(_.proposedState == NotRecorded).foreach { change =>
         attendanceMonitoringService.deleteCheckpointDangerously(change.checkpoint)
       }
 
-      proposedChangesToNonReportedPoints.filterNot(_.proposedState == NotRecorded).flatMap { change =>
+      selectedChanges.filterNot(_.proposedState == NotRecorded).flatMap { change =>
         val (checkpoints, _) = attendanceMonitoringService.setAttendance(change.student, Map(change.point -> change.proposedState), user.userId, autocreated = true)
 
         checkpoints.headOption.map { checkpoint =>
@@ -65,7 +74,7 @@ case class AttendanceChange(
 )
 
 trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
-  self: AttendanceMonitoringServiceComponent with ProfileServiceComponent with SubmissionServiceComponent with MeetingRecordServiceComponent with SmallGroupServiceComponent with AttendanceMonitoringCourseworkSubmissionServiceComponent with AttendanceMonitoringMeetingRecordServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent with ModuleAndDepartmentServiceComponent =>
+  self: AttendanceMonitoringServiceComponent with ProfileServiceComponent with SubmissionServiceComponent with MeetingRecordServiceComponent with SmallGroupServiceComponent with AttendanceMonitoringCourseworkSubmissionServiceComponent with AttendanceMonitoringMeetingRecordServiceComponent with AttendanceMonitoringEventAttendanceServiceComponent with ModuleAndDepartmentServiceComponent with RecheckAttendanceCommandRequest =>
 
   lazy val autoRecordedCheckpoints: Seq[(AttendanceMonitoringCheckpoint, Option[String])] = {
     pointsToEdit.flatMap { point =>
@@ -146,6 +155,10 @@ trait RecheckAttendanceCommandState extends EditAttendancePointCommandState {
   lazy val otherToAttended: Seq[AttendanceChange] = proposedChanges.filter(c => c.currentState != Attended && c.proposedState == Attended)
 
   lazy val attendedToOther: Seq[AttendanceChange] = proposedChanges.filter(c => c.currentState == Attended && c.proposedState != Attended)
+}
+
+trait RecheckAttendanceCommandRequest {
+  var students: JList[String] = _
 }
 
 trait RecheckAttendanceCommandDescription extends Describable[Seq[AttendanceMonitoringCheckpoint]] {
