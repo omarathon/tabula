@@ -146,7 +146,7 @@
           </div>
         </div>
 
-        <@f.form id="recordAttendance" action="" method="post" class="dirty-check">
+        <@f.form id="recordAttendance" action="" method="post" cssClass="dirty-check">
           <div class="striped-section expanded no-title">
             <div class="striped-section-contents attendees">
               <script nonce="${nonce()}">

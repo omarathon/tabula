@@ -25,7 +25,7 @@
           <h5 class="with-related"><span class="muted">for</span> ${student.fullName}, ${department.name}</h5>
         </div>
 
-        <@f.form id="recordAttendance" action="" method="post" class="dirty-check">
+        <@f.form id="recordAttendance" action="" method="post" cssClass="dirty-check">
           <input type="hidden" name="returnTo" value="${returnTo}" />
           <script nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
