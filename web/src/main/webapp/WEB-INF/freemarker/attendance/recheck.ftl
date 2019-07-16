@@ -54,7 +54,7 @@
             <thead>
             <tr>
               <th>
-                <input type="checkbox" class="collection-check-all use-tooltip" data-toggle="tooltip" checked title="Select/unselect all"/>
+                <input type="checkbox" class="collection-check-all use-tooltip" data-toggle="tooltip" checked aria-label="Select/unselect all" title="Select/unselect all"/>
               </th>
               <th>University ID</th>
               <th>First name</th>
@@ -68,7 +68,11 @@
             <#list command.proposedChanges as change>
               <tr>
                 <td>
-                  <@f.checkbox path="students" value=change.student.universityId class="collection-checkbox" />
+                  <#if change.alreadyReported>
+                    <input type="checkbox" disabled>
+                  <#else>
+                    <@f.checkbox path="students" value=change.student.universityId class="collection-checkbox" title=change.student.fullName />
+                  </#if>
                 </td>
                 <td>
                     ${change.student.universityId}
