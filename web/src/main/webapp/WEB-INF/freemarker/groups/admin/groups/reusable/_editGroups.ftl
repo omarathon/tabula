@@ -110,11 +110,13 @@
       });
 
       // Stop 'Enter' from submitting the form
-      $('input[name^="groupNames"]').closest('form')
+      var $form = $('input[name^="groupNames"]').closest('form')
+
+      $form
         .off('keyup.inputSubmitProtection keypress.inputSubmitProtection')
         .on('keyup.inputSubmitProtection keypress.inputSubmitProtection', function (e) {
           var code = e.keyCode || e.which;
-          if (code == 13) {
+          if (code === 13 && $(e.target).closest(':input[type="submit"], :button').length === 0) {
             e.preventDefault();
             return false;
           }
