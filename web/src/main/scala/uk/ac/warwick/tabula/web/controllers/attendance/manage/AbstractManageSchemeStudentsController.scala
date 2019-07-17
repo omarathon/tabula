@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.web.controllers.attendance.manage
 
 import javax.validation.Valid
-
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
+import uk.ac.warwick.sso.client.CSRFFilter
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
@@ -80,7 +80,8 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
       "expandFind" -> expandFind,
       "expandManual" -> expandManual,
       "SITSInFlux" -> scheme.academicYear.isSITSInFlux(LocalDate.now),
-      "returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
+      "returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear)),
+      "csrfTokenPropertyName" -> CSRFFilter.CSRF_TOKEN_PROPERTY_NAME
     ).crumbs(
       Breadcrumbs.Manage.HomeForYear(scheme.academicYear),
       Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)

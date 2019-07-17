@@ -16,6 +16,7 @@
   <h1>Edit scheme: ${scheme.displayName}</h1>
 
   <form class="add-student-to-scheme" method="POST">
+    <input type="hidden" name="${csrfTokenPropertyName}" value="${info.csrfToken}" />
     <input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
     <@listStudentIdInputs />
 
