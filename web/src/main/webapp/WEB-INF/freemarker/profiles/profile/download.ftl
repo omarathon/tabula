@@ -19,7 +19,7 @@
     </ul>
 
     <#assign studentCourseDetailsZipPath><@routes.profiles.download studentCourseDetails academicYear/></#assign>
-    <@f.form action=studentCourseDetailsZipPath method="post" target="_blank">
+    <@f.form action=studentCourseDetailsZipPath method="post">
       <p>
         <button type="submit" class="btn btn-primary">Download report</button>
       </p>
