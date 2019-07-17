@@ -94,8 +94,6 @@ trait ControllerViews extends Logging {
 
   def requestInfo: Option[RequestInfo]
 
-  @ModelAttribute("generateUUID")
-  def generateUUID: String = UUID.randomUUID().toString
 }
 
 trait ControllerImports {
