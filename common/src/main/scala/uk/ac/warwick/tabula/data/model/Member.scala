@@ -436,11 +436,11 @@ class StudentMember extends Member with StudentProperties {
       val years = if (basedOnLevel) {
         // groups by level preserving the order in which they appear for this student
         // add index to the scyd list and group by level
-        val ugLevel = baseSCYD.studentCourseDetails.level.exists(_.isUndergrduate)
+        val ugLevel = baseSCYD.studentCourseDetails.courseType.contains(CourseType.UG)
         val (relevantYears, relevantSCYDs) = if (ugLevel) {
-          (baseSCYD.studyLevel.toInt, allSCYDs.filter(_.studentCourseDetails.level.exists(_.isUndergrduate)))
+          (baseSCYD.studyLevel.toInt, allSCYDs.filter(_.studentCourseDetails.courseType.contains(CourseType.UG)))
         } else {
-          (1, allSCYDs.filterNot(_.studentCourseDetails.level.exists(_.isUndergrduate)))
+          (1, allSCYDs.filterNot(_.studentCourseDetails.courseType.contains(CourseType.UG)))
         }
 
         val groupedByLevelUnordered = relevantSCYDs.zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }

@@ -31,9 +31,6 @@ class Level {
 
   def toYearOfStudy: Int = Level.toYearOfStudy(code)
 
-  //Assumption is all UG courses are numeric. If  rule changes in SITS this will need amending.
-  def isUndergrduate = Try(code.toInt).isSuccess
-
   override def toString: String = name
 
   override def equals(other: Any): Boolean = other match {
