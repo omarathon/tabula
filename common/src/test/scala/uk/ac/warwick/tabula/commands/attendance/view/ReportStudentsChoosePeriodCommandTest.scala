@@ -62,8 +62,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   def studentPointMap() {
     new Fixture {
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-      state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
-      state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
+      state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1, point2)
+      state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(point1, point2)
       val result: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = state.studentPointMap
       result(student1) should be(Seq(point1, point2))
       result(student2) should be(Seq(point1, point2))
@@ -74,8 +74,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
   def termPoints() {
     new Fixture {
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-      state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
-      state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
+      state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1, point2)
+      state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(point1, point2)
       val result: Map[String, Seq[AttendanceMonitoringPoint]] = state.termPoints
       result(PeriodType.autumnTerm.toString) should be(Seq(point1))
       result(PeriodType.christmasVacation.toString) should be(Seq(point2))
@@ -87,8 +87,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
     new Fixture {
       state.period = PeriodType.autumnTerm.toString
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-      state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
-      state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
+      state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1)
+      state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(point1)
       state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
@@ -108,8 +108,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
     new Fixture {
       state.period = PeriodType.autumnTerm.toString
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-      state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1)
-      state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1)
+      state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1)
+      state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(point1)
       state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
       state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq()
 
@@ -133,8 +133,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
     new Fixture {
       withFakeTime(fakeNow) {
         state.profileService.findAllStudentsByRestrictions(Matchers.eq(state.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-        state.attendanceMonitoringService.listStudentsPoints(student1, Option(state.department), state.academicYear) returns Seq(point1, point2)
-        state.attendanceMonitoringService.listStudentsPoints(student2, Option(state.department), state.academicYear) returns Seq(point1, point2)
+        state.attendanceMonitoringService.listStudentsPoints(student1, None, state.academicYear) returns Seq(point1, point2)
+        state.attendanceMonitoringService.listStudentsPoints(student2, None, state.academicYear) returns Seq(point1, point2)
         state.attendanceMonitoringService.findNonReportedTerms(state.allStudents, state.academicYear) returns Seq(PeriodType.autumnTerm.toString)
         val result = state.availablePeriods
         result.size should be(2)
@@ -148,8 +148,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
   trait ValidatorFixture extends Fixture {
     validator.profileService.findAllStudentsByRestrictions(Matchers.eq(validator.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-    validator.attendanceMonitoringService.listStudentsPoints(student1, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
-    validator.attendanceMonitoringService.listStudentsPoints(student2, Option(validator.department), validator.academicYear) returns Seq(point1, point2)
+    validator.attendanceMonitoringService.listStudentsPoints(student1, None, validator.academicYear) returns Seq(point1, point2)
+    validator.attendanceMonitoringService.listStudentsPoints(student2, None, validator.academicYear) returns Seq(point1, point2)
     validator.attendanceMonitoringService.findNonReportedTerms(validator.allStudents, validator.academicYear) returns Seq(PeriodType.autumnTerm.toString)
   }
 
@@ -183,8 +183,8 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
   trait CommandFixture extends Fixture {
     command.profileService.findAllStudentsByRestrictions(Matchers.eq(command.department), any[Seq[ScalaRestriction]], any[Seq[ScalaOrder]]) returns Seq(student1, student2)
-    command.attendanceMonitoringService.listStudentsPoints(student1, Option(command.department), command.academicYear) returns Seq(point1, point2)
-    command.attendanceMonitoringService.listStudentsPoints(student2, Option(command.department), command.academicYear) returns Seq(point1, point2)
+    command.attendanceMonitoringService.listStudentsPoints(student1, None, command.academicYear) returns Seq(point1, point2)
+    command.attendanceMonitoringService.listStudentsPoints(student2, None, command.academicYear) returns Seq(point1, point2)
     command.attendanceMonitoringService.findNonReportedTerms(command.allStudents, command.academicYear) returns Seq(PeriodType.autumnTerm.toString)
   }
 

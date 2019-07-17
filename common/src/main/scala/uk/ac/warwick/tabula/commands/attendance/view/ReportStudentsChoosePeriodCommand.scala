@@ -86,7 +86,7 @@ trait ReportStudentsChoosePeriodCommandState extends FilterStudentsAttendanceCom
   }
 
   lazy val studentPointMap: Map[StudentMember, Seq[AttendanceMonitoringPoint]] = benchmarkTask("studentPointMap") {
-    allStudents.map(s => s -> attendanceMonitoringService.listStudentsPoints(s, Option(department), academicYear)).toMap
+    allStudents.map(s => s -> attendanceMonitoringService.listStudentsPoints(s, None, academicYear)).toMap
   }
 
   lazy val termPoints: Map[String, Seq[AttendanceMonitoringPoint]] = benchmarkTask("termPoints") {
