@@ -463,17 +463,17 @@ class StudentMember extends Member with StudentProperties {
       (1 to baseSCYD.yearOfStudy).map(year =>
         year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
       ).toMap
-  }
+    }
 
-  ExamGridEntity(
-    firstName = Option(firstName).getOrElse("[Unknown]"),
-    lastName = Option(lastName).getOrElse("[Unknown]"),
-    universityId = universityId,
-    lastImportDate = Option(lastImportDate),
-    years = years,
-    yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
-  )
-}
+    ExamGridEntity(
+      firstName = Option(firstName).getOrElse("[Unknown]"),
+      lastName = Option(lastName).getOrElse("[Unknown]"),
+      universityId = universityId,
+      lastImportDate = Option(lastImportDate),
+      years = years,
+      yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
+    )
+  }
 }
 
 @Entity
