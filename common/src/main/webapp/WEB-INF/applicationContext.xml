@@ -555,6 +555,9 @@
         <entry key="nonce">
           <bean class="uk.ac.warwick.tabula.system.CspNonceTag" />
         </entry>
+        <entry key="generateUUID">
+          <bean class="uk.ac.warwick.tabula.system.UUIDTag" />
+        </entry>
       </map>
     </property>
   </bean>
