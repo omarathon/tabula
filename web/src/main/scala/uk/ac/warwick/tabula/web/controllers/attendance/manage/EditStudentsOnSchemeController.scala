@@ -38,7 +38,7 @@ class EditStudentsOnSchemeController extends AbstractManageSchemeStudentsControl
 
   @RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.saveAndEditProperties))
   def saveAndEditProperties(
-    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    @Valid @ModelAttribute("persistenceCommand") cmd: Appliable[AttendanceMonitoringScheme],
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],

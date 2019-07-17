@@ -4,7 +4,6 @@ import javax.validation.Valid
 import org.joda.time.LocalDate
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable}
-import uk.ac.warwick.sso.client.CSRFFilter
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.attendance.manage._
 import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
@@ -18,8 +17,8 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 
   validatesSelf[SelfValidating]
 
-  @ModelAttribute("persistanceCommand")
-  def persistanceCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
+  @ModelAttribute("persistenceCommand")
+  def persistenceCommand(@PathVariable scheme: AttendanceMonitoringScheme) =
     AddStudentsToSchemeCommand(mandatory(scheme), user)
 
   @ModelAttribute("findCommand")
@@ -80,8 +79,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
       "expandFind" -> expandFind,
       "expandManual" -> expandManual,
       "SITSInFlux" -> scheme.academicYear.isSITSInFlux(LocalDate.now),
-      "returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear)),
-      "csrfTokenPropertyName" -> CSRFFilter.CSRF_TOKEN_PROPERTY_NAME
+      "returnTo" -> getReturnTo(Routes.Manage.departmentForYear(scheme.department, scheme.academicYear))
     ).crumbs(
       Breadcrumbs.Manage.HomeForYear(scheme.academicYear),
       Breadcrumbs.Manage.DepartmentForYear(scheme.department, scheme.academicYear)
@@ -103,7 +101,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 
   @RequestMapping(Array("/all"))
   def allStudents(
-    @ModelAttribute("persistanceCommand") cmd: AddStudentsToSchemeCommandState
+    @ModelAttribute("persistenceCommand") cmd: AddStudentsToSchemeCommandState
   ): Mav = {
     Mav("attendance/manage/_allstudents", "membershipItems" -> cmd.membershipItems).noLayoutIf(ajax)
   }
@@ -188,7 +186,7 @@ abstract class AbstractManageSchemeStudentsController extends AttendanceControll
 
   @RequestMapping(method = Array(POST), params = Array("persist"))
   def save(
-    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    @Valid @ModelAttribute("persistenceCommand") cmd: Appliable[AttendanceMonitoringScheme],
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult],
     @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],

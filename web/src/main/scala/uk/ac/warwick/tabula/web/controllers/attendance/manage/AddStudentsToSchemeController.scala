@@ -19,7 +19,7 @@ class AddStudentsToSchemeController extends AbstractManageSchemeStudentsControll
 
   @RequestMapping(method = Array(POST), params = Array(ManageSchemeMappingParameters.createAndAddPoints))
   def saveAndAddPoints(
-    @Valid @ModelAttribute("persistanceCommand") cmd: Appliable[AttendanceMonitoringScheme],
+    @Valid @ModelAttribute("persistenceCommand") cmd: Appliable[AttendanceMonitoringScheme],
     errors: Errors,
     @ModelAttribute("findCommand") findCommand: Appliable[FindStudentsForSchemeCommandResult] with FindStudentsForSchemeCommandState,
     @ModelAttribute("editMembershipCommand") editMembershipCommand: Appliable[EditSchemeMembershipCommandResult],
