@@ -1,6 +1,6 @@
 <#escape x as x?html>
-  <#import "../attendance_macros.ftl" as attendance_macros />
-  <#import "../../csrf_macros.ftl" as csrf_macros />
+  <#import "*/attendance_macros.ftl" as attendance_macros />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#macro listStudentIdInputs>
     <#list findCommand.staticStudentIds as id>
