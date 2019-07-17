@@ -1,7 +1,6 @@
 <#escape x as x?html>
   <#import "*/modal_macros.ftl" as modal />
   <#import "*/_profile_link.ftl" as pl />
-  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <script type="text/javascript" nonce="${nonce()}">
     (function ($) {
@@ -266,8 +265,6 @@
           <script type="text/javascript" nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
           </script>
-
-          <@csrf_macros.csrfHiddenInputField />
 
           <table class="table table-striped table-condensed">
             <thead class="fix-header">
