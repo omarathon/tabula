@@ -436,29 +436,44 @@ class StudentMember extends Member with StudentProperties {
       val years = if (basedOnLevel) {
         // groups by level preserving the order in which they appear for this student
         // add index to the scyd list and group by level
-        //student can be on multiple courses but we need only the one based on baseSCYD level
-        val groupedByLevelUnordered = allSCYDs.filter(_.studyLevel == baseSCYD.studyLevel).zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
+        val ugLevel = baseSCYD.studentCourseDetails.level.exists(_.isUndergrduate)
+        val (relevantYears, relevantSCYDs) = if (ugLevel) {
+          (baseSCYD.studyLevel.toInt, allSCYDs.filter(_.studentCourseDetails.level.exists(_.isUndergrduate)))
+        } else {
+          (1, allSCYDs.filterNot(_.studentCourseDetails.level.exists(_.isUndergrduate)))
+        }
+
+        val groupedByLevelUnordered = relevantSCYDs.zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
         // sort by the index
         val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
         // remove the index once sorted
-        val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
-        groupedByLevel.values.toSeq.zipWithIndex
-          .map { case (scyds, index) => (index + 1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index + 1, scyds: _*))) }.toMap
-      } else {
-        (1 to baseSCYD.yearOfStudy).map(year =>
-          year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
-        ).toMap
-      }
+        val groupedByLevelMap = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
 
-      ExamGridEntity(
-        firstName = Option(firstName).getOrElse("[Unknown]"),
-        lastName = Option(lastName).getOrElse("[Unknown]"),
-        universityId = universityId,
-        lastImportDate = Option(lastImportDate),
-        years = years,
-        yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
-      )
-    }
+        (1 to relevantYears).map { yr =>
+          val scydList = if (ugLevel) {
+            groupedByLevelMap.find(_._1 == yr.toString).map(_._2).getOrElse(Seq())
+          } else {
+            groupedByLevelMap.values.flatten.toSeq
+          }
+
+          val yearEntity = Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(yr, scydList: _*))
+          yr -> yearEntity
+        }.toMap
+    } else {
+      (1 to baseSCYD.yearOfStudy).map(year =>
+        year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
+      ).toMap
+  }
+
+  ExamGridEntity(
+    firstName = Option(firstName).getOrElse("[Unknown]"),
+    lastName = Option(lastName).getOrElse("[Unknown]"),
+    universityId = universityId,
+    lastImportDate = Option(lastImportDate),
+    years = years,
+    yearWeightings = courseAndRouteService.findAllCourseYearWeightings(Seq(baseSCYD.studentCourseDetails.course), baseSCYD.studentCourseDetails.sprStartAcademicYear) // year weightings based on the GRID course that we are generating
+  )
+}
 }
 
 @Entity
