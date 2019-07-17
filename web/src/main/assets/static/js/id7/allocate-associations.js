@@ -1,17 +1,20 @@
 /* eslint-env browser */
 import $ from 'jquery';
 
-$(function () {
-  if ($('.allocate-associations').length === 0)
+$(() => {
+  if ($('.allocate-associations').length === 0) {
     return;
+  }
 
+  const $fetchForm = $('form.fetch');
+  const $studentFilter = $('#command').find('.student-filter');
+  function EntityTable($table) {
+    const rowMap = {};
+    const $removeButton = $table.closest('div').find('button.remove-all');
 
-  var $fetchForm = $('form.fetch'), $studentFilter = $('#command').find('.student-filter');
-  var EntityTable = function ($table) {
-    var rowMap = {}, $removeButton = $table.closest('div').find('button.remove-all');
-
-    $table.find('tr[data-forentity]').each(function () {
-      var $this = $(this), entityId = $this.data('forentity');
+    $table.find('tr[data-forentity]').each(() => {
+      const $this = $(this);
+      const entityId = $this.data('forentity');
       if (rowMap[entityId] === undefined) {
         rowMap[entityId] = [];
       }
@@ -19,10 +22,13 @@ $(function () {
       $this.detach();
     });
 
-    $table.on('click', '.btn-default', function () {
-      var $this = $(this), $expandedInput = $this.closest('td').find('input'), $row = $this.closest('tr'), entityId = $row.data('entity');
+    $table.on('click', '.btn-default', () => {
+      const $this = $(this);
+      const $expandedInput = $this.closest('td').find('input');
+      const $row = $this.closest('tr');
+      const entityId = $row.data('entity');
       if ($row.hasClass('expanded')) {
-        $table.find('tr[data-forentity="' + entityId + '"]').detach();
+        $table.find(`tr[data-forentity="${entityId}"]`).detach();
         $row.removeClass('expanded');
         $expandedInput.val('false');
       } else {
@@ -31,32 +37,32 @@ $(function () {
         $expandedInput.val('true');
       }
     });
-    $table.find('tr.expanded').each(function () {
+    $table.find('tr.expanded').each(() => {
       $(this).after(rowMap[$(this).data('entity')]);
     });
 
     $table.sortableTable({
-      textExtraction: function (node) {
-        var $el = $(node);
+      textExtraction: (node) => {
+        const $el = $(node);
         if ($el.data('sortby')) {
           return $el.data('sortby');
-        } else {
-          return $el.text().trim();
         }
-      }
+        return $el.text().trim();
+      },
     });
-    $table.on('sortStart', function () {
+    $table.on('sortStart', () => {
       $table.find('tr[data-forentity]').detach();
-    }).on('sortEnd', function () {
-      $table.find('tr').each(function () {
-        var $row = $(this), entityId = $row.data('entity');
+    }).on('sortEnd', () => {
+      $table.find('tr').each(() => {
+        const $row = $(this);
+        const entityId = $row.data('entity');
         if ($row.hasClass('expanded')) {
           $row.after(rowMap[entityId]);
         }
       });
     });
 
-    $table.on('click tabula.selectDeselectCheckboxes.toggle', 'input', function () {
+    $table.on('click tabula.selectDeselectCheckboxes.toggle', 'input', () => {
       if ($table.find('input:checked').length === 0) {
         $removeButton.prop('disabled', true).attr('title', 'You need to select some personal tutors from which to remove students');
       } else {
@@ -65,23 +71,22 @@ $(function () {
     });
     $removeButton.prop('disabled', true);
 
-    this.getTable = function () {
-      return $table;
-    }
-  };
+    this.getTable = () => $table;
+  }
 
-  var entityTable = new EntityTable($('.entities table'));
+  const entityTable = new EntityTable($('.entities table'));
 
-  var $studentTable = $('.students table'),
-    $distributeSelectedButton = $studentTable.closest('div').find('button.distribute-selected'),
-    $distributeAllButton = $studentTable.closest('div').find('button.distribute-all');
+  const $studentTable = $('.students table');
+  const $distributeSelectedButton = $studentTable.closest('div').find('button.distribute-selected');
+  const $distributeAllButton = $studentTable.closest('div').find('button.distribute-all');
 
-  var checkDistributeButtons = function () {
-    var studentsChecked = $studentTable.find('input:checked').length > 0, entitiesChecked = entityTable.getTable().find('input:checked').length > 0;
+  const checkDistributeButtons = () => {
+    const studentsChecked = $studentTable.find('input:checked').length > 0;
+    const entitiesChecked = entityTable.getTable().find('input:checked').length > 0;
     if (!entitiesChecked) {
       $distributeSelectedButton.add($distributeAllButton).prop({
-        'disabled': true,
-        'title': 'You need to select some students and personal tutors to allocate'
+        disabled: true,
+        title: 'You need to select some students and personal tutors to allocate',
       }).removeClass('btn-primary');
     } else {
       $distributeAllButton.prop('disabled', false).attr('title', 'All students will be equally distributed between selected personal tutors').addClass('btn-primary');
@@ -96,115 +101,96 @@ $(function () {
   entityTable.getTable().on('click tabula.selectDeselectCheckboxes.toggle', 'input', checkDistributeButtons);
   checkDistributeButtons();
 
-  var $studentQuery = $('input[name=query]').on('keypress', function (e) {
+  const $studentQuery = $('input[name=query]').on('keypress', (e) => {
     if (e.which === 13) {
       $(this).closest('form').submit();
     }
   }).attr('autocomplete', 'off');
-  var $typeahead = $studentQuery.typeahead({
-    source: function (query, process) {
+  const $typeahead = $studentQuery.typeahead({
+    source: (query, process) => {
       // Abort any existing search
-      if (self.currentSearch) {
-        self.currentSearch.abort();
-        self.currentSearch = null;
+      if (window.self.currentSearch) {
+        window.self.currentSearch.abort();
+        window.self.currentSearch = null;
       }
-      self.currentSearch = $.ajax({
+      window.self.currentSearch = $.ajax({
         url: $fetchForm.attr('action'),
         data: $fetchForm.serialize(),
-        success: function (data) {
-          process(data.unallocated)
-        }
+        success: (data) => {
+          process(data.unallocated);
+        },
       });
     },
     selectOnBlur: false,
-    item: '<li class="flexi-picker-result"><a href="#"><span class="name"></span> (<span class="universityId"></span>)</a></li>'
+    item: '<li class="flexi-picker-result"><a href="#"><span class="name"></span> (<span class="universityId"></span>)</a></li>',
   }).data('typeahead');
-  $typeahead.sorter = function (items) {
-    return items;
-  };
-  $typeahead.matcher = function () {
-    return true;
-  };
-  $typeahead.render = function (items) {
-    var that = this;
-    items = $(items).map(function (i, item) {
-      if (item != undefined) {
-        i = $(that.options.item);
-        i.find('span.name').html(that.highlighter(item.firstName + ' ' + item.lastName));
-        i.find('span.universityId').html(that.highlighter(item.universityId));
-        return i[0];
-      } else {
-        // no idea what's happened here. Return an empty item.
-        return $(that.options.item)[0];
+  $typeahead.sorter = items => items;
+  $typeahead.matcher = () => true;
+  $typeahead.render = (items) => {
+    const that = this;
+    const result = $(items).map((i, item) => {
+      if (item !== undefined) {
+        const $item = $(that.options.item);
+        $item.find('span.name').html(that.highlighter(`${item.firstName} ${item.lastName}`));
+        $item.find('span.universityId').html(that.highlighter(item.universityId));
+        return $item[0];
       }
+      // no idea what's happened here. Return an empty item.
+      return $(that.options.item)[0];
     });
-    items.first().addClass('active');
-    this.$menu.html(items);
+    result.first().addClass('active');
+    this.$menu.html(result);
     return this;
   };
-  $typeahead.show = function () {
-    var pos = $.extend({}, this.$element.offset(), {
-      height: this.$element[0].offsetHeight
+  $typeahead.show = () => {
+    const pos = $.extend({}, this.$element.offset(), {
+      height: this.$element[0].offsetHeight,
     });
 
     this.$menu.appendTo($('body')).show().css({
-      top: pos.top + pos.height, left: pos.left
+      top: pos.top + pos.height, left: pos.left,
     });
 
     this.shown = true;
     return this;
   };
-  $typeahead.updater = function () {
-    return this.$menu.find('.active .universityId').text();
-  };
-  var oldSelect = $typeahead.select;
-  $typeahead.select = function () {
+  $typeahead.updater = () => this.$menu.find('.active .universityId').text();
+  const oldSelect = $typeahead.select;
+  $typeahead.select = () => {
     oldSelect.call($typeahead);
     $fetchForm.submit();
   };
 
   $('.for-check-all').append(
-    $('<input />', {type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none'})
-  ).find('input').change(function () {
+    $('<input />', {
+      type: 'checkbox',
+      class: 'check-all use-tooltip',
+      title: 'Select all/none',
+    }),
+  ).find('input').change(() => {
     $(this).closest('table').selectDeselectCheckboxes(this);
   });
 
   $('.fix-area').fixHeaderFooter();
 
-  var prependClearLink = function ($list) {
-    if (!$list.find('input:checked').length) {
-      $list.find('.clear-this-filter').remove();
+  const updateClearAllButton = ($el) => {
+    const $filterList = $el.closest('.student-filter');
+
+    if ($filterList.find('.empty-filter').length === $filterList.find('.btn-group').length) {
+      $filterList.find('.clear-all-filters').attr('disabled', 'disabled');
     } else {
-      if (!$list.find('.clear-this-filter').length) {
-        $list.find('> ul').prepend(
-          $('<li />').addClass('clear-this-filter')
-            .append(
-              $('<button />').attr('type', 'button')
-                .addClass('btn btn-link')
-                .html('<i class="fa fa-ban"></i> Clear selected items')
-                .on('click', function () {
-                  $list.find('input:checked').each(function () {
-                    var $checkbox = $(this);
-                    $checkbox.prop('checked', false);
-                    updateFilter($checkbox);
-                  });
-                })
-            ).append($('<hr />'))
-        );
-      }
+      $filterList.find('.clear-all-filters').removeAttr('disabled');
     }
   };
 
-  var updateFilter = function ($el) {
+  const updateFilter = ($el) => {
     // Update the filter content
-    var $list = $el.closest('ul');
-    var shortValues = $list.find(':checked').map(function () {
-      return $(this).data('short-value');
-    }).get();
-    var $fsv = $el.closest('.btn-group').find('.filter-short-values');
+    const $list = $el.closest('ul');
+    const shortValues = $list.find(':checked').map(() => $(this).data('short-value')).get();
+    const $fsv = $el.closest('.btn-group').find('.filter-short-values');
     if (shortValues.length) {
       $el.closest('.btn-group').removeClass('empty-filter');
-      $fsv.html($fsv.data("prefix") + shortValues.join(', '));
+      $fsv.html($fsv.data('prefix') + shortValues.join(', '));
     } else {
       $el.closest('.btn-group').addClass('empty-filter');
       $fsv.html($fsv.data('placeholder'));
@@ -214,40 +200,52 @@ $(function () {
     updateClearAllButton($el);
   };
 
-  var updateClearAllButton = function ($el) {
-    var $filterList = $el.closest(".student-filter");
-
-    if ($filterList.find(".empty-filter").length == $filterList.find(".btn-group").length) {
-      $filterList.find('.clear-all-filters').attr("disabled", "disabled");
-    } else {
-      $filterList.find('.clear-all-filters').removeAttr("disabled");
+  const prependClearLink = ($list) => {
+    if (!$list.find('input:checked').length) {
+      $list.find('.clear-this-filter').remove();
+    } else if (!$list.find('.clear-this-filter').length) {
+      $list.find('> ul').prepend(
+        $('<li />').addClass('clear-this-filter')
+          .append(
+            $('<button />').attr('type', 'button')
+              .addClass('btn btn-link')
+              .html('<i class="fa fa-ban"></i> Clear selected items')
+              .on('click', () => {
+                $list.find('input:checked').each(() => {
+                  const $checkbox = $(this);
+                  $checkbox.prop('checked', false);
+                  updateFilter($checkbox);
+                });
+              }),
+          ).append($('<hr />')),
+      );
     }
   };
 
-  $studentFilter.on('change', function (e) {
-    var $input = $(e.target);
+  $studentFilter.on('change', (e) => {
+    const $input = $(e.target);
     if ($input.is('.prevent-reload')) return;
     updateFilter($input);
   });
 
   // Re-order elements inside the dropdown when opened
-  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function () {
-    var $this = $(this);
+  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', () => {
+    const $this = $(this);
     if (!$this.closest('.btn-group').hasClass('open')) {
       // Re-order before it's opened!
-      var $list = $this.closest('.btn-group').find('.filter-list');
-      var items = $list.find('li.check-list-item').get();
+      const $list = $this.closest('.btn-group').find('.filter-list');
+      const items = $list.find('li.check-list-item').get();
 
-      items.sort(function (a, b) {
-        var aChecked = $(a).find('input').is(':checked');
-        var bChecked = $(b).find('input').is(':checked');
+      items.sort((a, b) => {
+        const aChecked = $(a).find('input').is(':checked');
+        const bChecked = $(b).find('input').is(':checked');
 
         if (aChecked && !bChecked) return -1;
-        else if (!aChecked && bChecked) return 1;
-        else return $(a).data('natural-sort') - $(b).data('natural-sort');
+        if (!aChecked && bChecked) return 1;
+        return $(a).data('natural-sort') - $(b).data('natural-sort');
       });
 
-      $.each(items, function (item, el) {
+      $.each(items, (item, el) => {
         $list.find('> ul').append(el);
       });
 
@@ -256,15 +254,15 @@ $(function () {
   });
 
   $studentFilter.prepend(
-    $('<button class="btn btn-xs btn-default clear-all-filters" type="submit" disabled>Clear filter</button>')
+    $('<button class="btn btn-xs btn-default clear-all-filters" type="submit" disabled>Clear filter</button>'),
   );
 
-  var $clearAllButtons = $('.clear-all-filters').on('click', function () {
-    $(this).closest('.student-filter').find('.filter-list').each(function () {
-      var $list = $(this);
+  const $clearAllButtons = $('.clear-all-filters').on('click', () => {
+    $(this).closest('.student-filter').find('.filter-list').each(() => {
+      const $list = $(this);
 
-      $list.find('input:checked').each(function () {
-        var $checkbox = $(this);
+      $list.find('input:checked').each(() => {
+        const $checkbox = $(this);
         $checkbox.prop('checked', false);
         updateFilter($checkbox);
       });
@@ -273,19 +271,18 @@ $(function () {
     });
   });
 
-  $clearAllButtons.each(function () {
+  $clearAllButtons.each(() => {
     updateClearAllButton($(this));
   });
 
-  var updateFilterFromPicker = function ($picker, name, value, shortValue) {
-    if (value === undefined || value.length === 0)
-      return;
+  const updateFilterFromPicker = ($picker, name, value, shortValue) => {
+    if (value === undefined || value.length === 0) return;
 
-    shortValue = shortValue || value;
+    const v = shortValue || value;
 
-    var $ul = $picker.closest('ul');
+    const $ul = $picker.closest('ul');
 
-    var $li = $ul.find('input[value="' + value + '"]').closest('li');
+    const $li = $ul.find(`input[value="${value}"]`).closest('li');
     if ($li.length) {
       $li.find('input').prop('checked', true);
       if ($ul.find('li.check-list-item:first').find('input').val() !== value) {
@@ -295,50 +292,49 @@ $(function () {
       $('<li/>').addClass('check-list-item').append(
         $('<label/>').addClass('checkbox').append(
           $('<input/>').attr({
-            'type': 'checkbox',
-            'name': name,
-            'value': value,
-            'checked': true
-          }).data('short-value', shortValue)
+            type: 'checkbox',
+            name,
+            value,
+            checked: true,
+          }).data('short-value', v),
         ).append(
-          $picker.val()
-        )
+          $picker.val(),
+        ),
       ).insertBefore($ul.find('li.check-list-item:first'));
     }
 
     updateFilter($picker);
   };
 
-  $('.route-search-query').on('change', function () {
-    var $picker = $(this);
-    if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0)
-      return;
+  $('.route-search-query').on('change', () => {
+    const $picker = $(this);
+    if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0) return;
 
     updateFilterFromPicker($picker, 'routes', $picker.data('routecode'), $picker.data('routecode').toUpperCase());
 
     $picker.data('routecode', '').val('');
   }).routePicker({});
 
-  var $previewForm = $('form.preview'), $uploadForm = $('#uploadCommand');
+  const $previewForm = $('form.preview');
+  const $uploadForm = $('#uploadCommand');
   $previewForm.areYouSure({
-    'dirtyClass': 'dirty'
+    dirtyClass: 'dirty',
   });
   if ($previewForm.find('input[name^=additions]').length > 0 || $previewForm.find('input[name^=removals]').length > 0) {
     $previewForm.addClass('dirty');
   }
-  $fetchForm.on('submit', function () {
+  $fetchForm.on('submit', () => {
     $previewForm.removeClass('dirty');
   });
-  $uploadForm.on('submit', function () {
+  $uploadForm.on('submit', () => {
     $previewForm.removeClass('dirty');
   });
-  $uploadForm.find('.btn.dirty-check-ignore').on('click', function () {
+  $uploadForm.find('.btn.dirty-check-ignore').on('click', () => {
     if ($previewForm.is('.dirty')) {
       $previewForm.removeClass('dirty');
-      window.setTimeout(function () { // Wait for the unload event for the file request
+      window.setTimeout(() => { // Wait for the unload event for the file request
         $previewForm.addClass('dirty');
       }, 100);
     }
   });
-
 });
