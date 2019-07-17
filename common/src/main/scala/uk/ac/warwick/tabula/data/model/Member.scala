@@ -437,10 +437,10 @@ class StudentMember extends Member with StudentProperties {
         // groups by level preserving the order in which they appear for this student
         // add index to the scyd list and group by level
         val ugLevel = baseSCYD.studentCourseDetails.courseType.contains(CourseType.UG)
-        val (relevantYears, relevantSCYDs) = if (ugLevel) {
-          (baseSCYD.studyLevel.toInt, allSCYDs.filter(_.studentCourseDetails.courseType.contains(CourseType.UG)))
+        val relevantSCYDs = if (ugLevel) {
+          allSCYDs.filter(_.studentCourseDetails.courseType.contains(CourseType.UG))
         } else {
-          (1, allSCYDs.filterNot(_.studentCourseDetails.courseType.contains(CourseType.UG)))
+          allSCYDs.filterNot(_.studentCourseDetails.courseType.contains(CourseType.UG))
         }
 
         val groupedByLevelUnordered = relevantSCYDs.zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
@@ -448,17 +448,8 @@ class StudentMember extends Member with StudentProperties {
         val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
         // remove the index once sorted
         val groupedByLevelMap = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
-
-        (1 to relevantYears).map { yr =>
-          val scydList = if (ugLevel) {
-            groupedByLevelMap.find(_._1 == yr.toString).map(_._2).getOrElse(Seq())
-          } else {
-            groupedByLevelMap.values.flatten.toSeq
-          }
-
-          val yearEntity = Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(yr, scydList: _*))
-          yr -> yearEntity
-        }.toMap
+        groupedByLevelMap.values.toSeq.zipWithIndex
+          .map { case (scyds, index) => (index + 1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index + 1, scyds: _*))) }.toMap
     } else {
       (1 to baseSCYD.yearOfStudy).map(year =>
         year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)
