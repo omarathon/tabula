@@ -9,7 +9,8 @@ case object TeachingQualityRoleDefinition extends UnassignableBuiltInRoleDefinit
   override def description = "Teaching quality user"
 
   GrantsGlobalPermission(
-    MitigatingCircumstancesSubmission.Read
+    MitigatingCircumstancesSubmission.Read,
+    MitigatingCircumstancesPanel.Read
   )
 
 }
