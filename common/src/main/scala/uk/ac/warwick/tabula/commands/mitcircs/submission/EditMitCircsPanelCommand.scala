@@ -8,10 +8,12 @@ import uk.ac.warwick.tabula.data.model.{AliasedMapLocation, MapLocation, NamedLo
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
+import scala.reflect.classTag
 
 object EditMitCircsPanelCommand {
   type Result = MitigatingCircumstancesPanel
@@ -28,14 +30,12 @@ object EditMitCircsPanelCommand {
       with EditMitCircsPanelPopulate
       with AutowiringMitCircsPanelServiceComponent
       with AutowiringUserLookupComponent
+      with AutowiringPermissionsServiceComponent
 }
 
 abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstancesPanel)
-  extends CommandInternal[Result]
-    with EditMitCircsPanelState {
-  self: EditMitCircsPanelRequest
-    with MitCircsPanelServiceComponent
-    with UserLookupComponent =>
+  extends CommandInternal[Result] with EditMitCircsPanelState {
+  self: EditMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent with PermissionsServiceComponent =>
 
   override def applyInternal(): Result = transactional() {
     panel.name = name
@@ -61,7 +61,11 @@ abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstanc
 
     panel.chair = chair.maybeText.map(userLookup.getUserByUserId).orNull
     panel.secretary = secretary.maybeText.map(userLookup.getUserByUserId).orNull
-    panel.viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    val viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    panel.viewers = viewers
+    viewers.foreach { usercode =>
+      permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
+    }
 
     mitCircsPanelService.saveOrUpdate(panel)
   }
