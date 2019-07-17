@@ -49,11 +49,11 @@
     </#if>
 
     <#assign receiptFormUrl><@routes.cm2.assignmentreceipt assignment=assignment /></#assign>
-    <form action="${receiptFormUrl}" method="POST">
+    <@f.form action=receiptFormUrl method="post">
       <div class="submit-buttons">
         <button class="btn btn-default" name="resend" value="">Re-send email receipt</button>
       </div>
-    </form>
+    </@f.form>
   </#if>
 
   <#if assignment.hasReleasedFeedback && !feedback??>
