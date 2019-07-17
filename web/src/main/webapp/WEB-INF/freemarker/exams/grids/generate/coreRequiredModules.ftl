@@ -8,7 +8,7 @@
 
   <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
   <#assign generateGridCoreRequiredAction><@routes.exams.generateGridCoreRequired department academicYear /></#assign>
-  <@f.form action="<@routes.exams.generateGridCoreRequired department academicYear />" cssClass="dirty-check" method="post">
+  <@f.form action=generateGridCoreRequiredAction cssClass="dirty-check" method="post">
 
     <@form_fields.select_course_fields />
     <@form_fields.grid_options_fields />
