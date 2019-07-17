@@ -1,5 +1,6 @@
 <#escape x as x?html>
-  <#import "../attendance_macros.ftl" as attendance_macros />
+  <#import "*/attendance_macros.ftl" as attendance_macros />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#macro listStudentIdInputs>
     <#list findCommand.staticStudentIds as id>
@@ -16,6 +17,7 @@
   <h1>Edit scheme: ${scheme.displayName}</h1>
 
   <form class="add-student-to-scheme" method="POST">
+    <@csrf_macros.csrfHiddenInputField />
     <input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
     <@listStudentIdInputs />
 
