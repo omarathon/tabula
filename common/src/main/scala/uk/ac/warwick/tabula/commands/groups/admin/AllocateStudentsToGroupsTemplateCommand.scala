@@ -63,7 +63,7 @@ class AllocateStudentsToGroupsTemplateCommandInternal(val module: Module, val se
       row.createCell(3).setCellFormula(
         "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
       )
-      workbook.getCreationHelper.createFormulaEvaluator().evaluateInCell(row.getCell(3))
+      workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
     }
     formatWorkbook(workbook)
     workbook

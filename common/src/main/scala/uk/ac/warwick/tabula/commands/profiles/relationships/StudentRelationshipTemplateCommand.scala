@@ -100,12 +100,12 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
         row.createCell(4).setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
         )
-        workbook.getCreationHelper.createFormulaEvaluator().evaluateInCell(row.getCell(4))
+        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(4))
 
         row.createCell(5).setCellFormula(
           "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
         )
-        workbook.getCreationHelper.createFormulaEvaluator().evaluateInCell(row.getCell(5))
+        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(5))
       }
     }
 
@@ -121,12 +121,12 @@ class StudentRelationshipTemplateCommandInternal(val department: Department, val
       row.createCell(4).setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
       )
-      workbook.getCreationHelper.createFormulaEvaluator().evaluateInCell(row.getCell(4))
+      workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(4))
 
       row.createCell(5).setCellFormula(
         "IF(AND(ISTEXT($D" + (row.getRowNum + 1) + "), LEN($D" + (row.getRowNum + 1) + ") > 0), VLOOKUP($D" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 3, FALSE), \" \")"
       )
-      workbook.getCreationHelper.createFormulaEvaluator().evaluateInCell(row.getCell(5))
+      workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(5))
     }
 
     formatWorkbook(workbook)
