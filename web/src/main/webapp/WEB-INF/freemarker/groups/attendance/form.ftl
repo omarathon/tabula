@@ -261,7 +261,7 @@
       </#macro>
 
       <div class="attendees">
-        <form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}" class="dirty-check">
+        <@f.form id="recordAttendance" action="" method="post" data\-occurrence="${command.occurrence.id}" class="dirty-check">
           <script type="text/javascript" nonce="${nonce()}">
             AttendanceRecording.bindButtonGroupHandler();
           </script>
@@ -394,7 +394,7 @@
             </div>
 
           </#if>
-        </form>
+        </@f.form>
       </div>
 
     </div>
