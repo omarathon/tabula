@@ -29,9 +29,18 @@ $(() => {
 
         if (options.expandClickTarget) {
           $a.insertAfter($el);
-          $el.remove().appendTo($a).append('&nbsp;').append($icon).append($srTitle);
+          $el.remove()
+            .appendTo($a)
+            .append('&nbsp;')
+            .append($icon)
+            .append($srTitle);
         } else {
-          $el.append('&nbsp;').append($a.append($icon).append($srTitle));
+          $el
+            .append('&nbsp;')
+            .append(
+              $a.append($icon)
+                .append($srTitle),
+            );
         }
 
         $a.tabulaPopover({
