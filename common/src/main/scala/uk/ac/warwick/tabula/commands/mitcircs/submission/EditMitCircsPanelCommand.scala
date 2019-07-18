@@ -61,7 +61,7 @@ abstract class EditMitCircsPanelCommandInternal(val panel: MitigatingCircumstanc
 
     panel.chair = chair.maybeText.map(userLookup.getUserByUserId).orNull
     panel.secretary = secretary.maybeText.map(userLookup.getUserByUserId).orNull
-    val viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    val viewers = (members.asScala.toSet ++ Set(chair, secretary)).filter(_.hasText)
     panel.viewers = viewers
     viewers.foreach { usercode =>
       permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
