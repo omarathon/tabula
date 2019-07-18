@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 
 <#-- FIXME why is this necessary? -->
 <#if JspTaglibs??>
@@ -1515,3 +1516,4 @@
     </@modal.wrapper>
   </div>
 </#macro>
+</#escape>

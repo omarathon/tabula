@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -23,3 +24,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#import "cm2/routes.ftl" as cm2 />
 <#import "profiles/routes.ftl" as profiles />
 <#import "mitcircs/routes.ftl" as mitcircs />
+</#escape>

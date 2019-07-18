@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -204,3 +205,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro feedbackZip feedback><@_u page="/submission/${feedback.assignment.id}/all/feedback.zip" /></#macro>
 <#macro feedbackZip_in_profile feedback><@_u page="/submission/${feedback.assignment.id}/${feedback.universityId}/all/feedback.zip" /></#macro>
+</#escape>

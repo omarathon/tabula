@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#macro student_item student index stages marker={}>
   <li class="student well well-sm" data-student="${student.userId}">
     <div class="name">
@@ -123,3 +124,4 @@
     </div>
   </div>
 </#macro>
+</#escape>

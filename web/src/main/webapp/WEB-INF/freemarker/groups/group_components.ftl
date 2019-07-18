@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 
 <#-- Common template parts for use in other small groups templates. -->
 
@@ -1572,3 +1573,4 @@ showResetButton=false
     </#compress>
   </div>
 </#compress></#macro>
+</#escape>

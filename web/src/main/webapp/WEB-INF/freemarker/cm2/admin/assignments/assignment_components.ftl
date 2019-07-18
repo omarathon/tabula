@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 
 <#macro wizard_link label is_first is_active is_available tooltip="" url="">
   <span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
@@ -159,3 +160,4 @@
 </#macro>
 
 
+</#escape>

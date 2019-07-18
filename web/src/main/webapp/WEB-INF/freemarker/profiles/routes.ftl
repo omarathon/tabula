@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -129,3 +130,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
   <#macro peoplesearchData profile><@_u page="/view/peoplesearch/${profile.universityId}"/></#macro>
 
   <#macro download studentCourseDetails academicYear><@_u page="/view/${studentCourseDetails.urlSafeId}/${academicYear.value}.zip"/></#macro>
+  </#escape>
