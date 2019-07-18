@@ -106,7 +106,6 @@ class AssignMarkersTemplateCommandInternal(val assignment: Assignment) extends C
         row.createCell(3).setCellFormula(
           "IF(TRIM($C" + (row.getRowNum + 1) + ")<>\"\", VLOOKUP($C" + (row.getRowNum + 1) + ", " + markerLookupRange + ", 2, FALSE), \" \")"
         )
-        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
 
         if (assignment.showSeatNumbers) {
           assignment.getSeatNumber(student).foreach(row.createCell(4).setCellValue(_))

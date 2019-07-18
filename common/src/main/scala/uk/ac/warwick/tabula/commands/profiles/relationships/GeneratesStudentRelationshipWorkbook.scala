@@ -34,7 +34,6 @@ trait GeneratesStudentRelationshipWorkbook {
         row.createCell(3).setCellFormula(
           "IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
         )
-        workbook.getCreationHelper.createFormulaEvaluator().evaluateFormulaCell(row.getCell(3))
       }
 
     formatWorkbook(workbook, department, relationshipType)
