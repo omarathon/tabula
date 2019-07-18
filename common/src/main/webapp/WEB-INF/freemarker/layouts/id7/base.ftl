@@ -6,7 +6,7 @@
 <head>
   <#include "_head.ftl" />
 </head>
-<#assign errorToken=generateUUID!.now?string["yyyyddhhmmms"]>
+<#assign errorToken=generateUUID()>
 <body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}" data-error-token=${errorToken}>
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">

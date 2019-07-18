@@ -18,11 +18,12 @@
       <li>Monitoring point attendance</li>
     </ul>
 
-    <form method="post" action="<@routes.profiles.download studentCourseDetails academicYear/>">
+    <#assign studentCourseDetailsZipPath><@routes.profiles.download studentCourseDetails academicYear/></#assign>
+    <@f.form action=studentCourseDetailsZipPath method="post">
       <p>
         <button type="submit" class="btn btn-primary">Download report</button>
       </p>
-    </form>
+    </@f.form>
   <#else>
     <div class="alert alert-danger">
       You don't have permission to download a profile report for this student.
