@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "*/submission_components.ftl" as components />
 
@@ -44,3 +45,5 @@
     </#if>
   </div>
 </div>
+
+</#escape>

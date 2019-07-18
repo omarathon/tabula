@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#assign secondMarkerFeedback = parentFeedback.secondMarkerFeedback />
 <div class="well alert alert-danger">
   <h3 style="color: inherit;">
@@ -57,3 +58,4 @@
     </div>
 
   </div>
+</#escape>

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if command.approved>
   <div class="well alert alert-success">
     <h3 style="color: inherit;">You approved this feedback at <@fmt.date completedDate /></h3>
@@ -58,3 +59,4 @@
 
   </div>
 </#if>
+</#escape>

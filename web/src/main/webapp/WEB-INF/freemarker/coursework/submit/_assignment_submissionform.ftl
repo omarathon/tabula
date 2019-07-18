@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if !submission?? && assignment.collectSubmissions && assignment.alive>
   <#include "_assignment_deadline.ftl" />
 </#if>
@@ -222,3 +223,5 @@
   </#if>
 
 </#if>
+
+</#escape>

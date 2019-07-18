@@ -75,10 +75,7 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
         !whitelistedPaths.exists(relativePath.toString.startsWith) &&
 
         // Is an ftl file
-        MoreFiles.getFileExtension(file) == "ftl" &&
-
-        // Assume files that start with _ are only included from elsewhere, therefore fine
-        !MoreFiles.getNameWithoutExtension(file).startsWith("_")
+        MoreFiles.getFileExtension(file) == "ftl"
       ) {
         val source = MoreFiles.asCharSource(file, StandardCharsets.UTF_8)
         lazy val content = source.read()

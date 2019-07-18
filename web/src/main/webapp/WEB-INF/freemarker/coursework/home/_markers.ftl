@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if nonempty(assignmentsForMarking)>
   <#macro marker_info info>
     <#local assignment = info.assignment />
@@ -59,3 +60,5 @@
     })
   </script>
 </#if>
+
+</#escape>

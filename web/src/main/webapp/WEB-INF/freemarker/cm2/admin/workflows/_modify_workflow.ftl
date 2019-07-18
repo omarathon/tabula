@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#assign cancelAction><@routes.cm2.reusableWorkflowsHome department academicYear /></#assign>
 
 <#function route_function dept>
@@ -26,3 +27,4 @@ modelAttribute="${commandName}"
   </@bs3form.labelled_form_group>
 
 </@f.form>
+</#escape>

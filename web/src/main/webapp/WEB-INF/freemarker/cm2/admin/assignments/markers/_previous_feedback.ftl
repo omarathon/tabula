@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "*/coursework_components.ftl" as components />
 <#assign stages = command.previousMarkerFeedback?keys />
 <#list stages as stage>
@@ -10,3 +11,5 @@
     <@components.marker_feedback_summary markerFeedback stage command.stage command.currentMarkerFeedback />
   </div>
 </#list>
+
+</#escape>

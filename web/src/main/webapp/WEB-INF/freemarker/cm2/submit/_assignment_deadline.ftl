@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#--
 	Used in /WEB-INF/freemarker/home/_student.ftl and _assignment_submissionform.ftl
 -->
@@ -52,3 +53,4 @@
     </div>
   </#if>
 </#if>
+</#escape>

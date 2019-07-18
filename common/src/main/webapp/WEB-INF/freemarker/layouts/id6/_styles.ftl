@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#-- Styles that should be included both in the app and embedded in to Sitebuilder -->
 <@stylesheet "/static/css/bootstrap.css" />
 <@stylesheet "/static/css/render.css" />
@@ -17,3 +18,4 @@
   }
 </style>
 <![endif]-->
+</#escape>
