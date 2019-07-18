@@ -197,7 +197,20 @@ public class TabulaPlanSpec extends AbstractWarwickBuildSpec {
     return Collections.singleton(
       deployment(PROJECT, "ALL", "Tabula")
         .autoTomcatEnvironment("Development", "tabula-dev.warwick.ac.uk", "tabula", "dev", SLACK_CHANNEL)
-        .autoTomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", SLACK_CHANNEL)
+        .tomcatEnvironment("Test", "tabula-test.warwick.ac.uk", "tabula", "test", env -> {
+          String branch = System.getenv("TEST_DEPLOY_BRANCH");
+          if (branch == null || branch.length() == 0) {
+            branch = "develop";
+          }
+
+          env.triggers(new AfterSuccessfulBuildPlanTrigger().triggerByBranch(branch))
+              .notifications(
+                new Notification()
+                  .type(new DeploymentFailedNotification())
+                  .recipients(slackRecipient(SLACK_CHANNEL))
+              );
+          }
+        )
         .tomcatEnvironment("Sandbox", "tabula-sandbox.warwick.ac.uk", "tabula", "sandbox", env -> env
           .triggers(new AfterSuccessfulBuildPlanTrigger().triggerByBranch("master"))
           .notifications(

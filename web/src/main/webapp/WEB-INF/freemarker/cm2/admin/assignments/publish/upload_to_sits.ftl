@@ -248,7 +248,7 @@
       </#if>
     </div>
 
-    <form method="post" action="<@routes.cm2.uploadToSits assignment />">
+    <form method="post" action="<@routes.cm2.uploadToSits assignment />" class="double-submit-protection">
       <#list command.students as student>
         <input type="hidden" name="students" value="${student}" />
       </#list>

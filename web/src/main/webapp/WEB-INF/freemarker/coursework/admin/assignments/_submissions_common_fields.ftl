@@ -228,7 +228,7 @@ so that they can be passed around between requests.
           <@form.label path="wordCountMin">Minimum word count</@form.label>
           <@form.field>
             <@f.errors path="wordCountMin" cssClass="error" />
-            <@f.input path="wordCountMin" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
+            <@f.input path="wordCountMin" cssClass="input-small" />
           </@form.field>
         </@form.row>
 
@@ -236,7 +236,7 @@ so that they can be passed around between requests.
           <@form.label path="wordCountMax">Maximum word count</@form.label>
           <@form.field>
             <@f.errors path="wordCountMax" cssClass="error" />
-            <@f.input path="wordCountMax" cssClass="input-small" maxlength="${maxWordCount?c?length}" />
+            <@f.input path="wordCountMax" cssClass="input-small" />
             <div class="help-block">
               If you specify a minimum and/or maximum word count, students will be required to declare the word count for
               their submissions. They will not be able to submit unless their declaration is within your specified range.

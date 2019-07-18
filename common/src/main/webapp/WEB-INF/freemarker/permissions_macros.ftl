@@ -41,7 +41,7 @@
       <div class="permission-list ${cssClass}">
         <div class="row">
           <div class="col-md-12">
-            <form action="${permsUrl}" method="post" class="add-permissions">
+            <@f.form action="${permsUrl}" method="post" cssClass="add-permissions">
               <input type="hidden" name="_command" value="add">
               <input type="hidden" name="roleDefinition" value="${roleDefinition}">
 
@@ -66,7 +66,7 @@
                 </#if>
 							</span>
               </@bs3form.flexipicker>
-            </form>
+            </@f.form>
           </div>
         </div>
         <#local users = usersWithRole('${roleDefinition}', scope) />
@@ -77,13 +77,13 @@
                 <div class="col-md-12 <#if u_has_next>user</#if>">
                   <div class="pull-right">
                     <#if can_delegate>
-                      <form action="${permsUrl}" method="post" class="remove-permissions"
-                            data-confirm-submit="Are you sure you want to remove permission for this user?">
+                      <@f.form action="${permsUrl}" method="post" cssClass="remove-permissions"
+                            data\-confirm\-submit="Are you sure you want to remove permission for this user?">
                         <input type="hidden" name="_command" value="remove">
                         <input type="hidden" name="roleDefinition" value="${roleDefinition}">
                         <input type="hidden" name="usercodes" value="${u.userId}">
                         <button type="submit" class="btn btn-danger btn-xs removeUser">Remove</button>
-                      </form>
+                      </@f.form>
                     <#else>
                       <#local popoverText>
                         <p>You can't remove a ${roleName} because you don't have permission to:</p>

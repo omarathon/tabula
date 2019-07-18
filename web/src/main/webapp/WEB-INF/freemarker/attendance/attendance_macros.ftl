@@ -194,6 +194,8 @@ showResetButton=false
             <td>
               <#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
                 <input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" />
+              <#else>
+                <span class="use-tooltip" title="Student can only be removed from Manually added students tab below"><input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" disabled /></span>
               </#if>
             </td>
           </#if>

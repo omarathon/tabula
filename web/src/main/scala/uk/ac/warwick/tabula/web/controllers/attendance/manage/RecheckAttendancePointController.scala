@@ -5,7 +5,7 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm}
 import uk.ac.warwick.tabula.commands.attendance.manage.{FindPointsCommand, FindPointsResult, RecheckAttendanceCommand, SetsFindPointsResultOnCommandState}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringPoint
@@ -27,12 +27,13 @@ class RecheckAttendancePointController extends AttendanceController with HasMont
   @GetMapping
   def form(
     @ModelAttribute("findCommand") findCommand: Appliable[FindPointsResult],
-    @ModelAttribute("command") cmd: Appliable[Unit] with SetsFindPointsResultOnCommandState,
+    @ModelAttribute("command") cmd: Appliable[Unit] with SetsFindPointsResultOnCommandState with PopulateOnForm,
     @PathVariable department: Department,
     @PathVariable academicYear: AcademicYear,
     @PathVariable templatePoint: AttendanceMonitoringPoint
   ): Mav = {
     cmd.setFindPointsResult(findCommand.apply())
+    cmd.populate()
     render(cmd, department, academicYear)
   }
 

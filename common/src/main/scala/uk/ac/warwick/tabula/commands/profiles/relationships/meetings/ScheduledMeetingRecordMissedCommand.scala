@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.commands.profiles.relationships.meetings
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.ScheduledMeetingRecordMissedInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.profiles.meetingrecord.{ScheduledMeetingRecordConfirmNotification, ScheduledMeetingRecordMissedInviteeNotification}
 import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, ScheduledNotification}
+import uk.ac.warwick.tabula.events.NotificationHandling
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -17,7 +18,6 @@ object ScheduledMeetingRecordMissedCommand {
       with ScheduledMeetingRecordMissedValidation
       with ScheduledMeetingRecordMissedNotification
       with AutowiringMeetingRecordServiceComponent
-
 }
 
 class ScheduledMeetingRecordMissedCommand(val meetingRecord: ScheduledMeetingRecord)
@@ -66,9 +66,10 @@ trait ScheduledMeetingRecordMissedDescription extends Describable[ScheduledMeeti
 
 trait ScheduledMeetingRecordMissedNotification
   extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord]
-    with SchedulesNotifications[ScheduledMeetingRecord, ScheduledMeetingRecord] {
+    with SchedulesNotifications[ScheduledMeetingRecord, ScheduledMeetingRecord]
+    with CompletesNotifications[ScheduledMeetingRecord] {
 
-  self: ScheduledMeetingRecordMissedState =>
+  self: ScheduledMeetingRecordMissedState with NotificationHandling =>
 
   def emit(meeting: ScheduledMeetingRecord): Seq[ScheduledMeetingRecordMissedInviteeNotification] = {
     val user = meeting.creator.asSsoUser
@@ -79,6 +80,13 @@ trait ScheduledMeetingRecordMissedNotification
 
   // Notifications are cleared before being re-created, so just don't create any more
   def scheduledNotifications(meeting: ScheduledMeetingRecord): Seq[ScheduledNotification[ScheduledMeetingRecord]] = Seq()
+
+  override def notificationsToComplete(meeting: ScheduledMeetingRecord): CompletesNotificationsResult = {
+    CompletesNotificationsResult(
+      notificationService.findActionRequiredNotificationsByEntityAndType[ScheduledMeetingRecordConfirmNotification](meeting),
+      meeting.creator.asSsoUser
+    )
+  }
 }
 
 trait ScheduledMeetingRecordMissedState {

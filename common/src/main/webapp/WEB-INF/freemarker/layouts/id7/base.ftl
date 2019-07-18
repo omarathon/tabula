@@ -6,7 +6,8 @@
 <head>
   <#include "_head.ftl" />
 </head>
-<body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}">
+<#assign errorToken=generateUUID()>
+<body class="tabula-page ${component.bodyClass!'component-page'} ${bodyClasses!''}" data-error-token=${errorToken}>
 <div class="id7-left-border"></div>
 <div class="id7-fixed-width-container">
   <a class="sr-only sr-only-focusable" href="#main">Skip to main content</a>
@@ -305,6 +306,20 @@
     })();
   </script>
 </#if>
+
+<div class="modal global-error-modal fade" id="global-error-modal-${errorToken}" data-errorToken=${errorToken} aria-labelledby="error-modal-title-${errorToken}" aria-hidden="true">
+    <@modal.wrapper>
+        <@modal.header>
+          <h6 class="modal-title" id="error-modal-title-${errorToken}">Tabula has encountered a problem</h6>
+        </@modal.header>
+        <@modal.body>
+          There was an error handling your request, please try again. If the problem persists, please <a href="mailto:tabula@warwick.ac.uk?subject=Tabula%20has%20encountered%20a%20problem%20(error%20token:%20${errorToken})">contact us</a>.
+        </@modal.body>
+        <@modal.footer>
+          <a class="btn btn-primary" data-dismiss="modal">Close</a>
+        </@modal.footer>
+    </@modal.wrapper>
+</div>
 </body>
 </html>
 </#escape>

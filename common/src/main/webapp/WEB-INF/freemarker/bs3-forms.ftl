@@ -121,14 +121,14 @@ Macros for customised form elements, containers and more complex pickers.
             </#if>
 
             <#if multiple>
-              <input type="file" id="${basename}.upload" name="${basename}.upload" multiple>
+              <input type="file" id="${basename}.upload" name="${basename}.upload" multiple <#if !labelText?has_content>aria-label="File(s)"</#if>>
               <noscript>
                 <#list (2..max) as i>
                   <br><input type="file" name="${basename}.upload">
                 </#list>
               </noscript>
             <#else>
-              <input type="file" id="${basename}.upload" name="${basename}.upload">
+              <input type="file" id="${basename}.upload" name="${basename}.upload" <#if !labelText?has_content>aria-label="File"</#if>>
             </#if>
           </div>
 

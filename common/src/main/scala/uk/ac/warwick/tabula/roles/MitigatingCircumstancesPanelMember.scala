@@ -11,6 +11,7 @@ case object MitigatingCircumstancesPanelMemberRoleDefinition extends Unassignabl
   GeneratesSubRole(MitigatingCircumstancesViewerRoleDefinition)
 
   GrantsScopedPermission(
+    MitigatingCircumstancesPanel.Read,
     Profiles.Read.ReasonableAdjustments,
     Profiles.Read.ReasonableAdjustmentsNotes,
   )

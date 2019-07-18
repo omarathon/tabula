@@ -3,7 +3,7 @@
 <#assign isSelf = submission.student.universityId == user.universityId />
 
 <#escape x as x?html>
-  <h1>MIT-${submission.key}</h1>
+  <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">

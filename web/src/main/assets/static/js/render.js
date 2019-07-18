@@ -12,7 +12,6 @@ require('../libs/bootstrap-editable/js/bootstrap-editable');
 require('../libs/bootstrap-datetimepicker/js/bootstrap-datetimepicker');
 window.Spinner = require('../libs/spin-js/spin').Spinner;
 require('../libs/spin-js/jquery.spin');
-require('./browser-info');
 require('./activity-streams');
 
 import moment from 'moment-timezone';

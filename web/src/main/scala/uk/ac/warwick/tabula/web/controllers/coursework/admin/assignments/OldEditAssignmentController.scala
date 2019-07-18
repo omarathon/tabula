@@ -45,7 +45,6 @@ class OldEditAssignmentController extends OldCourseworkController {
       "availableUpstreamGroups" -> form.availableUpstreamGroups,
       "linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
       "assessmentGroups" -> form.assessmentGroups,
-      "maxWordCount" -> Assignment.MaximumWordCount,
       "openDetails" -> openDetails,
       "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
     ).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))

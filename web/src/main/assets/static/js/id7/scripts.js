@@ -1,5 +1,8 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import initErrorReporter from '../errorreporter';
+
+initErrorReporter();
 
 /**
  * Cross-app scripting.
@@ -552,7 +555,10 @@ $.fn.tabulaPopover = function (options) {
   // now that's all done, bind the popover
   $items.each(function () {
     // allow each popover to override the container via a data attribute
-    $(this).popover($.extend({}, options, {container: $(this).data('container')})).addClass(initClass);
+    $(this).popover($.extend({}, options, {
+      container: $(this).data('container'),
+      trigger: $(this).data('trigger')
+    })).addClass(initClass);
   });
 
   // ensure popovers/introductorys override title with data-title attribute where available
@@ -1520,5 +1526,22 @@ $(function () {
       event.preventDefault();
       event.stopImmediatePropagation();
     }
+  });
+});
+
+// TAB-7304 handle ajax error globally
+$(() => {
+  $(document).ajaxError((event, jqXhr, settings) => {
+    // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
+    // we do not want to do anything if state is 0. e.g. user quickly navigated away.
+    if (jqXhr.readyState === 0) return;
+    const pageErrorToken = $('body').data('error-token');
+    if (pageErrorToken) {
+      const errorModal = $(`#global-error-modal-${pageErrorToken}`);
+      if (errorModal) errorModal.modal('show');
+    }
+
+    // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would have reached backend (and logged)
+    throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
   });
 });

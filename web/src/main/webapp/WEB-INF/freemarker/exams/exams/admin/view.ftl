@@ -74,7 +74,7 @@
     </@fmt.permission_button>
 
     <div class="btn-group">
-      <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
         Save As
         <span class="caret"></span>
       </a>

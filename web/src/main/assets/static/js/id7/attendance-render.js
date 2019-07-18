@@ -425,6 +425,8 @@ $(function () {
       $('button.use-tooltip:focus').blur();
     });
   }
+
+  $('.table-biglist').bigList();
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

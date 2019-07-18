@@ -91,7 +91,6 @@ class OldAddAssignmentController extends OldCourseworkController with Autowiring
       "linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
       "assessmentGroups" -> form.assessmentGroups,
       "collectSubmissions" -> form.collectSubmissions,
-      "maxWordCount" -> Assignment.MaximumWordCount,
       "turnitinFileSizeLimit" -> TurnitinLtiService.maxFileSizeInMegabytes
     ).crumbs(Breadcrumbs.Department(module.adminDepartment), Breadcrumbs.Module(module))
   }

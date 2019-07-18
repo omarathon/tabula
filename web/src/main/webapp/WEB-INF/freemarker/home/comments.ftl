@@ -166,15 +166,10 @@
   <script nonce="${nonce()}">
     jQuery(function ($) {
 
-      // save user agent
-      BrowserDetect.init();
       var $form = $('.comment-form');
-      $form.find('[name=os]').val(BrowserDetect.OS);
-      $form.find('[name=browser]').val(BrowserDetect.browser + ' ' + BrowserDetect.version);
-      $form.find('[name=resolution]').val(BrowserDetect.resolution);
-      BrowserDetect.findIP(function (ip) {
-        $form.find('[name=ipAddress]').val(ip);
-      });
+      $form.find('[name=os]').val(navigator.platform);
+      $form.find('[name=resolution]').val('width x height: ' + window.screen.availWidth + ' x ' + window.screen.availHeight);
+
       var $url = $form.find('[name=url]');
       if ($url.val() === '') {
         var currentPageArg = $.grep((window.location.search || '').substr(1).split('&'), function (pair) {

@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.web.controllers.home
 
 
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
-
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
@@ -37,10 +37,12 @@ class AppCommentsController extends BaseController with AutowiringModuleAndDepar
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]] with AppCommentCommandRequest, errors: Errors): Mav = {
+  def submit(@Valid @ModelAttribute("command") cmd: Appliable[Future[JBoolean]] with AppCommentCommandRequest, errors: Errors)(implicit request: HttpServletRequest): Mav = {
     if (errors.hasErrors) {
       form(cmd)
     } else {
+      request.getHeader("user-agent").maybeText.foreach(cmd.browser = _)
+      request.getRemoteAddr.maybeText.foreach(cmd.ipAddress = _)
       cmd.apply()
       Mav("home/comments-success", "previousPage" -> cmd.url)
     }

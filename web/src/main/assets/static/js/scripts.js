@@ -1,4 +1,7 @@
 import $ from "jquery";
+import initErrorReporter from './errorreporter';
+
+initErrorReporter();
 
 const {jQuery, WPopupBox} = window;
 

@@ -79,7 +79,7 @@
 
           <div class="col-md-1">
             <div class="btn-group pull-right">
-              <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
+              <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Actions <span class="caret"></span></a>
               <ul class="dropdown-menu pull-right">
                 <li>
                   <#local edit_url><@routes.exams.editExam exam /></#local>

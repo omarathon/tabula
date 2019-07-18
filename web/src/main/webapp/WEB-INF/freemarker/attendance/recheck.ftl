@@ -50,9 +50,12 @@
               </p>
             </#if>
 
-          <table class="table table-striped">
+          <table class="table table-striped table-hover table-biglist">
             <thead>
             <tr>
+              <th>
+                <input type="checkbox" class="collection-check-all use-tooltip" data-toggle="tooltip" checked aria-label="Select/unselect all" title="Select/unselect all"/>
+              </th>
               <th>University ID</th>
               <th>First name</th>
               <th>Last name</th>
@@ -64,6 +67,13 @@
             <tbody>
             <#list command.proposedChanges as change>
               <tr>
+                <td>
+                  <#if change.alreadyReported>
+                    <input type="checkbox" disabled>
+                  <#else>
+                    <@f.checkbox path="students" value=change.student.universityId class="collection-checkbox" title=change.student.fullName />
+                  </#if>
+                </td>
                 <td>
                     ${change.student.universityId}
                     <@pl.profile_link change.student.universityId />
@@ -109,7 +119,7 @@
 
           <p>
             <#if command.proposedChangesToNonReportedPoints?has_content>
-              <button type="submit" class="btn btn-primary">Apply changes</button>
+              <button type="submit" class="btn btn-primary">Apply selected changes</button>
             </#if>
             <a href="${returnTo}" class="btn btn-default">Leave unchanged</a>
           </p>

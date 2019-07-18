@@ -99,7 +99,7 @@
             <div class="clearfix">
               <div class="btn-group section-manage-button">
                 <#if can_manage>
-                  <a class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Manage <span class="caret"></span></a>
+                  <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Manage <span class="caret"></span></a>
                   <ul class="dropdown-menu pull-right">
                     <li><a href="<@routes.admin.moduleperms module />">
                         Edit module permissions
@@ -135,7 +135,7 @@
             <div class="clearfix">
               <div class="btn-group section-manage-button">
                 <#if can_manage>
-                  <a class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Manage <span class="caret"></span></a>
+                  <a href="#" class="btn btn-default dropdown-toggle" data-toggle="dropdown"> Manage <span class="caret"></span></a>
                   <ul class="dropdown-menu pull-right">
                     <li><a href="<@routes.admin.routeperms route />">
                         Edit route permissions

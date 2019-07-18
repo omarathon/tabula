@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.CM2MarkingWorkflowService.{Allocations, Marker, Student}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor.ParsedRow
+import uk.ac.warwick.tabula.services.cm2.docconversion.MarkerAllocationExtractor.{Error, ParsedRow}
 import uk.ac.warwick.tabula.services.cm2.docconversion.{AutowiringMarkerAllocationExtractorComponent, MarkerAllocationExtractorComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -91,10 +91,6 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
     val fileNames = file.fileNames.map(_.toLowerCase)
     val invalidFiles = fileNames.filter(s => !AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.exists(s.endsWith))
 
-    //		if (file.isMissing) {
-    //			result.rejectValue("file", "file.missing")
-    //		}
-
     if (invalidFiles.nonEmpty) {
       if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString(""), AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.mkString(", ")), "")
       else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", "), AssignMarkersBySpreadsheetCommand.AcceptedFileExtensions.mkString(", ")), "")
@@ -109,7 +105,18 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
         if (!file.attached.isEmpty) {
 
           val sheetData = markerAllocationExtractor
-            .extractMarkersFromSpreadsheet(file.attached.asScala.head.asByteSource.openStream(), assignment.cm2MarkingWorkflow)
+            .extractMarkersFromSpreadsheet(file.attached.asScala.head.asByteSource.openStream(), assignment.cm2MarkingWorkflow).map { case (stage, parsedRows) =>
+            val studentWithMultipleMarkers = parsedRows.groupBy(_.student).filter { case (s, rows) => rows.size > 1 && s.nonEmpty }.values.flatten.toSet
+            val newRows = parsedRows.map { r =>
+              if (studentWithMultipleMarkers.contains(r)) {
+                val newErrors = r.errors :+ Error("Student userCode", code = "markingWorkflow.student.noDupes", Array(stage))
+                r.copy(errors = newErrors)
+              } else {
+                r
+              }
+            }
+            stage -> newRows
+          }
 
           def rowsToAllocations(rows: Seq[ParsedRow]): Allocations = rows
             .filter(_.errors.isEmpty)
@@ -166,11 +173,11 @@ trait ValidateConcurrentStages {
 trait ValidateSequentialStages {
   self: SelfValidating with AssignMarkersState =>
 
-  def validateSequentialStageMarkers(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
-    val allocationPairs: Map[MarkingWorkflowStage, Seq[(Marker, Student)]] = allocationMap.map { case (stage, allocations) =>
-      stage -> allocations.toSeq.flatMap { case (marker, students) => students.map(marker -> _) }
-    }
+  lazy val allocationPairs: Map[MarkingWorkflowStage, Seq[(Marker, Student)]] = allocationMap.map { case (stage, allocations) =>
+    stage -> allocations.toSeq.flatMap { case (marker, students) => students.map(marker -> _) }
+  }
 
+  def validateSequentialStageMarkers(allocationMap: Map[MarkingWorkflowStage, Allocations], errors: Errors): Unit = {
     val unwiseAllocations: Iterable[(MarkingWorkflowStage, (Marker, Student))] = allocationMap.keys.flatMap { stage =>
       allocationPairs(stage).filter(pair =>
         stage.otherStagesInSequence
