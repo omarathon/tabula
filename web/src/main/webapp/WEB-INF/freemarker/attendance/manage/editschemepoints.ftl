@@ -27,7 +27,7 @@
       <p><@fmt.p scheme.points?size "point" /> on this scheme</p>
     </#if>
 
-    <form method="POST">
+    <@f.form method="post">
       <input name="schemes" value="${scheme.id}" type="hidden" />
       <input name="returnTo" value="<@routes.attendance.manageEditSchemePoints findCommand.department findCommand.academicYear scheme />" type="hidden" />
       <button type="button" class="btn btn-default add-blank-point"
@@ -39,7 +39,7 @@
       <button type="button" class="btn btn-default use-template"
               data-href="<@routes.attendance.manageAddPointsTemplate findCommand.department findCommand.academicYear/>">Use template
       </button>
-    </form>
+    </@f.form>
 
     <#include "_findpointsresult.ftl" />
 
