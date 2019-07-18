@@ -40,7 +40,8 @@ class ViewProfileModulesController extends AbstractViewProfileController {
     studentCourseDetails: StudentCourseDetails,
     activeAcademicYear: Option[AcademicYear]
   ): Mav = {
-    val thisAcademicYear = scydToSelect(studentCourseDetails, activeAcademicYear).get.academicYear
+    val scyd = scydToSelect(studentCourseDetails, activeAcademicYear)
+    val thisAcademicYear = scyd.get.academicYear
     val command = restricted(StudentAssessmentProfileCommand(mandatory(studentCourseDetails), thisAcademicYear))
     val studentBreakdown = command.map(_.apply())
     Mav("profiles/profile/modules_student",
@@ -49,6 +50,7 @@ class ViewProfileModulesController extends AbstractViewProfileController {
       "yearMark" -> studentBreakdown.map(_.yearMark),
       "weightedMeanYearMark" -> studentBreakdown.map(_.weightedMeanYearMark),
       "yearWeighting" -> studentBreakdown.flatMap(_.yearWeighting),
+      "yearAbroad" -> scyd.exists(_.yearAbroad),
       "moduleRegistrationsAndComponents" -> studentBreakdown.map(_.modules).getOrElse(Seq()),
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId),
       "member" -> studentCourseDetails.student

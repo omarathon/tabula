@@ -220,6 +220,12 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
       )
     }
 
+  def yearAbroad: Boolean =  {
+    // codes are same that cognos used -TAB-6397 (logic picked up from cognos)
+    val yearAbroadMoaCode = List("YO", "SW", "YOE", "SWE", "YM", "YME", "YV")
+    yearAbroadMoaCode.contains(modeOfAttendance.code) && (blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
+  }
+
   override def postLoad() {
     ensureOvercatting()
   }
