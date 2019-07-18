@@ -28,7 +28,7 @@
   <div class="fix-area">
 
     <#assign copyPointsAction><@routes.attendance.manageAddPointsCopy command.department command.academicYear /></#assign>
-    <@f.form action=copyPointsAction method="post" class="form-inline">
+    <@f.form action=copyPointsAction method="post" cssClass="form-inline">
       <#list command.schemes as scheme>
         <input type="hidden" name="schemes" value="${scheme.id}" />
       </#list>
