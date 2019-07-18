@@ -379,7 +379,7 @@ jQuery.fn.tabulaPrepareSpinners = function tabulaPrepareSpinners(s) {
       window.pendingSpinner = null;
     }
 
-    $spinnable.each((el) => {
+    $spinnable.each((i, el) => {
       const $this = $(el);
 
       if ($this.data('spinContainer')) {
