@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/cm2_macros.ftl" as cm2 />
 <#assign currentPage = command.page />
@@ -182,3 +183,4 @@
       </#if>
   })(jQuery);
 </script>
+</#escape>

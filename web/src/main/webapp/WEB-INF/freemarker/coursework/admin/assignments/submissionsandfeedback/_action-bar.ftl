@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if students??>
   <div class="btn-toolbar">
     <div class="pull-right view-selector">
@@ -354,3 +355,5 @@
     </div>
   </div>
 </#if>
+
+</#escape>

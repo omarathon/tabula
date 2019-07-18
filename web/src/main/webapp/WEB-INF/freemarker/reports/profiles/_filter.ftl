@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if !results?has_content && (command.hasBeenFiltered || command.searchSingle || command.searchMulti)>
   <#if command.noPermissionIds?has_content || command.notFoundIds?has_content>
     <div class="alert alert-danger">
@@ -64,3 +65,4 @@
     });
   </script>
 </#if>
+</#escape>

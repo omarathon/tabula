@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <@bs3form.labelled_form_group path="name" labelText="Name">
   <@f.input path="name" cssClass="form-control"/>
 </@bs3form.labelled_form_group>
@@ -342,3 +343,4 @@
   </script>
 
 </#if>
+</#escape>

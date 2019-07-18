@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "*/coursework_components.ftl" as components />
 
 <div class="well">
@@ -43,3 +44,5 @@
     </#if>
   </div>
 </div>
+
+</#escape>

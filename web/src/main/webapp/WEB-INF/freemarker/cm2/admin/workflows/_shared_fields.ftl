@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#if newRecord || canEditWorkflowType>
   <@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
     <@f.select path="workflowType" class="form-control workflow-modification" >
@@ -172,3 +173,4 @@
 
   })(jQuery);
 </script>
+</#escape>

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <@spring.bind path="markerFeedback">
   <@bs3form.errors path="markerFeedback" />
   <#assign markerFeedback=status.actualValue />
@@ -96,3 +97,4 @@
     <input type="hidden" name="markerFeedback" value="${mf.id}" />
   </#list>
 </@spring.bind>
+</#escape>

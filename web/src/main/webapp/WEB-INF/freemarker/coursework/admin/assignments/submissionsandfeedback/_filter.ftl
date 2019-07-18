@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <@f.form method="post" action="${info.requestedUri.path}" cssClass="form-inline filter-form" modelAttribute="submissionAndFeedbackCommand">
   <div class="filter">
     <label for="filter">Show all</label>
@@ -61,3 +62,4 @@
     });
   </script>
 </@f.form>
+</#escape>

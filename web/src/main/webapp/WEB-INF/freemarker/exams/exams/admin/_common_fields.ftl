@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <@bs3form.labelled_form_group path="name" labelText="Exam name">
   <@f.input path="name" cssClass="form-control" />
 </@bs3form.labelled_form_group>
@@ -43,3 +44,4 @@
     Additional students registered for the exam. Add University IDs, one per line.
   </div>
 </@bs3form.labelled_form_group>
+</#escape>

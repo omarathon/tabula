@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "*/coursework_components.ftl" as components />
 
 <#if command.submission?has_content>
@@ -54,3 +55,4 @@
     </li>
   </ul>
 </#if>
+</#escape>

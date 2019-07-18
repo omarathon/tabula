@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
 <#import "*/mitcircs_components.ftl" as components />
@@ -343,3 +344,4 @@
     </div>
   </@bs3form.form_group>
 </@mitcirc.question_section>
+</#escape>

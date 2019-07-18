@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <@bs3form.labelled_form_group path="absenceType" labelText="Absence type">
   <@f.select path="absenceType" cssClass="form-control">
     <option value="" style="display: none;">Please select one&hellip;</option>
@@ -44,3 +45,4 @@
 <div class="attendance-file" <#if command.attachedFile?has_content>style="display:none;"</#if>>
   <@bs3form.filewidget basename="file" types=[] multiple=false />
 </div>
+</#escape>

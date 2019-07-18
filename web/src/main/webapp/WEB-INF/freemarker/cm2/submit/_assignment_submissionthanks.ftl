@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <div>
   <#if justSubmitted!false>
     <div class="alert alert-info">
@@ -70,3 +71,4 @@
   </#if>
 
 </div>
+</#escape>

@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
 
 <#assign has_assignments = enrolledAssignments?has_content />
@@ -196,3 +197,4 @@
     There are no past assignments to show <#if isSelf>you </#if>in Tabula right now
   </div>
 </#if>
+</#escape>

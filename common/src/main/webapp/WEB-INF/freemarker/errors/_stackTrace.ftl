@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#assign renderStackTracesForAllUsers = (features.renderStackTracesForAllUsers)!false />
 <#assign userIsSysadmin = (user.sysadmin)!false />
 
@@ -11,3 +12,4 @@
 
   <pre id="dev" class="collapse" style="overflow-x:scroll;">${stackTrace}</pre>
 </#if>
+</#escape>
