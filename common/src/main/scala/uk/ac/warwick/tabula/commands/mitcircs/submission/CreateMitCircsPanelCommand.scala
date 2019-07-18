@@ -15,8 +15,10 @@ import CreateMitCircsPanelCommand._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.services.mitcircs.{AutowiringMitCircsPanelServiceComponent, MitCircsPanelServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 
 import scala.collection.JavaConverters._
+import scala.reflect.classTag
 
 object CreateMitCircsPanelCommand {
 
@@ -32,13 +34,12 @@ object CreateMitCircsPanelCommand {
     with CreateMitCircsPanelDescription
     with AutowiringMitCircsPanelServiceComponent
     with AutowiringUserLookupComponent
+    with AutowiringPermissionsServiceComponent
 }
 
 abstract class CreateMitCircsPanelCommandInternal(val department: Department, val year: AcademicYear, val currentUser: User)
   extends CommandInternal[MitigatingCircumstancesPanel] with CreateMitCircsPanelState {
-  self: CreateMitCircsPanelRequest
-    with MitCircsPanelServiceComponent
-    with UserLookupComponent =>
+  self: CreateMitCircsPanelRequest with MitCircsPanelServiceComponent with UserLookupComponent with PermissionsServiceComponent =>
 
   def applyInternal(): MitigatingCircumstancesPanel = transactional() {
     val transientPanel = new MitigatingCircumstancesPanel(department, year)
@@ -56,7 +57,12 @@ abstract class CreateMitCircsPanelCommandInternal(val department: Department, va
     if(chair.hasText) transientPanel.chair = userLookup.getUserByUserId(chair)
     if(secretary.hasText) transientPanel.secretary = userLookup.getUserByUserId(secretary)
     val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
-    panel.viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    val viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    panel.viewers = viewers
+    viewers.foreach { usercode =>
+      permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
+    }
+
     mitCircsPanelService.saveOrUpdate(transientPanel)
   }
 }
