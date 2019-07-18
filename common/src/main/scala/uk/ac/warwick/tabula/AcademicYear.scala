@@ -79,7 +79,10 @@ case class AcademicYear(underlying: JAcademicYear) extends Ordered[AcademicYear]
 
   def compare(that: AcademicYear): Int = this.underlying.compareTo(that.underlying)
 
-  def isSITSInFlux(date: LocalDate): Boolean = false
+  def isSITSInFlux(date: LocalDate): Boolean = {
+    val juneThisYear = new LocalDate(underlying.getStartYear + 1, DateTimeConstants.JUNE, 1)
+    !date.isBefore(juneThisYear)
+  }
 
   def placeholder: Boolean = underlying.isPlaceholder
 
