@@ -1,4 +1,5 @@
 <#ftl strip_text=true />
+<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -126,3 +127,4 @@ TODO grab values from the routes.groups object in code, as that's pretty equival
 <#macro copyModule module><@_u page="/admin/module/${module.code}/groups/copy" /></#macro>
 
 <#macro missing_map_locations department academicYear><@_u page="/admin/department/${department.code}/${academicYear.startYear}/missing-map-locations" /></#macro>
+</#escape>

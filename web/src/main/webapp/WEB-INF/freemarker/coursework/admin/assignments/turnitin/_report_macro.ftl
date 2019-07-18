@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#macro originalityReport attachment>
   <#local r=attachment.originalityReport />
   <span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
@@ -30,3 +31,4 @@
     });
   </script>
 </#macro>
+</#escape>

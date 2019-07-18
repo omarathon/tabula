@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#macro stage_delete stage>
   <#if stage.messageCode?default("")?length gt 0>
     <div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
@@ -57,3 +58,4 @@
     });
   </script>
 </#macro>
+</#escape>

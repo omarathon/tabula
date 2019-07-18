@@ -1,3 +1,4 @@
+<#escape x as x?html>
 <#macro feedbackSummary feedback isModerated showDates=false>
 
   <#if isModerated?? && isModerated && feedback.feedbackPosition.toString == "SecondFeedback">
@@ -86,3 +87,4 @@
     </div>
   </#if>
 </#macro>
+</#escape>
