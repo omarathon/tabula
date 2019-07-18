@@ -656,9 +656,6 @@ jQuery.fn.tabOverflow = function tabOverflow() {
 // collapsible striped section
 // exported so can be called on-demand e.g. after an ajax-load
 // adds a class to prevent double-init
-// collapsible striped section
-// exported so can be called on-demand e.g. after an ajax-load
-// adds a class to prevent double-init
 exports.initCollapsible = ($el) => {
   const $element = (typeof ($el) === 'undefined') ? $('.striped-section.collapsible') : $el;
   $element.filter(':not(.collapsible-init)').each((i, el) => {
