@@ -44,8 +44,7 @@
         (weighted mean: ${weightedMeanYearMark!"-"})
       </#if>
       <strong>Year Weighting:</strong>
-      <#assign percentageWeighting><#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if></#assign>
-      ${percentageWeighting}
+      <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
     </h3>
 
     <#if moduleRegistrationsAndComponents?has_content>
