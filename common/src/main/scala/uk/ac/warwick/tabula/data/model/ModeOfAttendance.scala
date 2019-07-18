@@ -31,4 +31,8 @@ class ModeOfAttendance {
     else fullName
   }
 
+  // codes are same that cognos used
+  def yearAbroad: Boolean =
+    List("YO", "SW", "YOE", "SWE", "YM", "YME", "YV").contains(code)
+
 }

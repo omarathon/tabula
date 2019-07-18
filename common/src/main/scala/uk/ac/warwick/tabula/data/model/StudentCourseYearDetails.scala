@@ -220,6 +220,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
       )
     }
 
+  //Logic picked up from cognos -TAB-6397
+  def yearAbroad: Boolean = modeOfAttendance.yearAbroad && (blockOccurrence == null || blockOccurrence != "I") // doesn't apply to intercalated years
+
   override def postLoad() {
     ensureOvercatting()
   }
