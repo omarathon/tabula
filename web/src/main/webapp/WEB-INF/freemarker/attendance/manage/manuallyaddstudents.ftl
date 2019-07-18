@@ -1,9 +1,11 @@
 <#escape x as x?html>
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <h1>Add students manually</h1>
 
   <form action="" method="POST" class="mass-add-users">
 
+    <@csrf_macros.csrfHiddenInputField />
     <input type="hidden" name="filterQueryString" value="${findCommand.filterQueryString!""}">
     <@f.hidden path="findCommand.linkToSits" />
     <#list findCommand.staticStudentIds as id>
