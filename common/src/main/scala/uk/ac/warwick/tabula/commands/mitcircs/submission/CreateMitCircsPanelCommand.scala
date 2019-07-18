@@ -57,7 +57,7 @@ abstract class CreateMitCircsPanelCommandInternal(val department: Department, va
     if(chair.hasText) transientPanel.chair = userLookup.getUserByUserId(chair)
     if(secretary.hasText) transientPanel.secretary = userLookup.getUserByUserId(secretary)
     val panel = mitCircsPanelService.saveOrUpdate(transientPanel)
-    val viewers = members.asScala.toSet ++ Set(chair, secretary).filter(_.hasText)
+    val viewers = (members.asScala.toSet ++ Set(chair, secretary)).filter(_.hasText)
     panel.viewers = viewers
     viewers.foreach { usercode =>
       permissionsService.clearCachesForUser((usercode, classTag[MitigatingCircumstancesPanel]))
