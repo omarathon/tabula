@@ -171,16 +171,16 @@
       window.ReportBuilder.buildHeader = function () {
         var container = $('<tr/>');
         container.append(
-          $('<th/>').addClass('sortable').html('First name')
+          $('<th/>').addClass('sortable').text('First name')
         ).append(
-          $('<th/>').addClass('sortable').html('Last name')
+          $('<th/>').addClass('sortable').text('Last name')
         ).append(
-          $('<th/>').addClass('sortable').html('University ID')
+          $('<th/>').addClass('sortable').text('University ID')
         );
         $.each(window.ReportBuilder.reportData.points, function (i, point) {
           container.append(
             $('<th/>').addClass('point rotated').append(
-              $('<div/>').addClass('rotate').html(point.name + ' (' + point.intervalString + ')')
+              $('<div/>').addClass('rotate').text(point.name + ' (' + point.intervalString + ')')
             )
           )
         });
@@ -195,15 +195,15 @@
       window.ReportBuilder.buildRow = function (student) {
         var container = $('<tr/>');
         container.append(
-          $('<td/>').html(student.firstName)
+          $('<td/>').text(student.firstName)
         ).append(
-          $('<td/>').html(student.lastName)
+          $('<td/>').text(student.lastName)
         ).append(
           $('<td/>').append(
             $('<a/>').attr({
               'href': '/profiles/view/' + student.universityId,
               'target': '_blank'
-            }).html(student.universityId)
+            }).text(student.universityId)
           )
         );
         var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0;
@@ -228,11 +228,11 @@
         });
         container.append(
           $('<td/>').addClass('unrecorded').append(
-            $('<span/>').addClass('badge progress-bar-' + ((unrecordedCount > 2) ? 'danger' : ((unrecordedCount > 0) ? 'warning' : 'success'))).html(unrecordedCount)
+            $('<span/>').addClass('badge progress-bar-' + ((unrecordedCount > 2) ? 'danger' : ((unrecordedCount > 0) ? 'warning' : 'success'))).text(unrecordedCount)
           )
         ).append(
           $('<td/>').addClass('missed').append(
-            $('<span/>').addClass('badge progress-bar-' + ((missedCount > 2) ? 'danger' : ((missedCount > 0) ? 'warning' : 'success'))).html(missedCount)
+            $('<span/>').addClass('badge progress-bar-' + ((missedCount > 2) ? 'danger' : ((missedCount > 0) ? 'warning' : 'success'))).text(missedCount)
           )
         );
         return container;
@@ -250,16 +250,16 @@
       window.ReportBuilder.buildHeader = function () {
         var container = $('<tr/>');
         container.append(
-          $('<th/>').addClass('sortable').html('First name')
+          $('<th/>').addClass('sortable').text('First name')
         ).append(
-          $('<th/>').addClass('sortable').html('Last name')
+          $('<th/>').addClass('sortable').text('Last name')
         ).append(
-          $('<th/>').addClass('sortable').html('University ID')
+          $('<th/>').addClass('sortable').text('University ID')
         );
         $.each(window.ReportBuilder.reportData.events, function (i, event) {
           container.append(
             $('<th/>').addClass('event rotated').append(
-              $('<div/>').addClass('rotate').html(
+              $('<div/>').addClass('rotate').text(
                 event.moduleCode + ' '
                 + event.setName + ' '
                 + event.format + ' '
@@ -282,15 +282,15 @@
       window.ReportBuilder.buildRow = function (student) {
         var container = $('<tr/>');
         container.append(
-          $('<td/>').html(student.firstName)
+          $('<td/>').text(student.firstName)
         ).append(
-          $('<td/>').html(student.lastName)
+          $('<td/>').text(student.lastName)
         ).append(
           $('<td/>').append(
             $('<a/>').attr({
               'href': '/profiles/view/' + student.universityId,
               'target': '_blank'
-            }).html(student.universityId)
+            }).text(student.universityId)
           )
         );
         var attendance = window.ReportBuilder.reportData.attendance[student.universityId], unrecordedCount = 0, missedCount = 0, authorisedCount = 0;
@@ -316,15 +316,15 @@
         });
         container.append(
           $('<td/>').addClass('unrecorded').append(
-            $('<span/>').addClass('badge progress-bar-' + ((unrecordedCount > 2) ? 'danger' : ((unrecordedCount > 0) ? 'warning' : 'success'))).html(unrecordedCount)
+            $('<span/>').addClass('badge progress-bar-' + ((unrecordedCount > 2) ? 'danger' : ((unrecordedCount > 0) ? 'warning' : 'success'))).text(unrecordedCount)
           )
         ).append(
           $('<td/>').addClass('missed').append(
-            $('<span/>').addClass('badge progress-bar-' + ((missedCount > 2) ? 'danger' : ((missedCount > 0) ? 'warning' : 'success'))).html(missedCount)
+            $('<span/>').addClass('badge progress-bar-' + ((missedCount > 2) ? 'danger' : ((missedCount > 0) ? 'warning' : 'success'))).text(missedCount)
           )
         ).append(
           $('<td/>').addClass('authorised').append(
-            $('<span/>').addClass('badge badge-' + ((authorisedCount > 2) ? 'important' : ((authorisedCount > 0) ? 'warning' : 'success'))).html(authorisedCount)
+            $('<span/>').addClass('badge badge-' + ((authorisedCount > 2) ? 'important' : ((authorisedCount > 0) ? 'warning' : 'success'))).text(authorisedCount)
           )
         );
         return container;
@@ -335,12 +335,12 @@
         container.append(
           $('<th/>').attr('colspan', 2)
         ).append(
-          $('<th/>').html('Tutor/s')
+          $('<th/>').text('Tutor/s')
         );
         $.each(window.ReportBuilder.reportData.events, function (i, event) {
           container.append(
             $('<td/>').addClass('tutors rotated').append(
-              $('<div/>').addClass('rotate').html(event.tutors)
+              $('<div/>').addClass('rotate').text(event.tutors)
             )
           )
         });
@@ -360,16 +360,16 @@
       window.ReportBuilder.buildHeader = function () {
         var container = $('<tr/>');
         container.append(
-          $('<th/>').addClass('sortable').html('First name')
+          $('<th/>').addClass('sortable').text('First name')
         ).append(
-          $('<th/>').addClass('sortable').html('Last name')
+          $('<th/>').addClass('sortable').text('Last name')
         ).append(
-          $('<th/>').addClass('sortable').html('University ID')
+          $('<th/>').addClass('sortable').text('University ID')
         );
         $.each(window.ReportBuilder.reportData.modules, function (i, module) {
           container.append(
             $('<th/>').addClass('module rotated sortable').append(
-              $('<div/>').addClass('rotate').html(module.code.toUpperCase() + ' ' + module.name)
+              $('<div/>').addClass('rotate').text(module.code.toUpperCase() + ' ' + module.name)
             )
           )
         });
@@ -379,15 +379,15 @@
       window.ReportBuilder.buildRow = function (student) {
         var container = $('<tr/>');
         container.append(
-          $('<td/>').html(student.firstName)
+          $('<td/>').text(student.firstName)
         ).append(
-          $('<td/>').html(student.lastName)
+          $('<td/>').text(student.lastName)
         ).append(
           $('<td/>').append(
             $('<a/>').attr({
               'href': '/profiles/view/' + student.universityId,
               'target': '_blank'
-            }).html(student.universityId)
+            }).text(student.universityId)
           )
         );
         var counts = window.ReportBuilder.reportData.counts[student.universityId];
@@ -397,7 +397,7 @@
           } else {
             container.append(
               $('<td/>').addClass('unrecorded').append(
-                $('<span/>').addClass('badge progress-bar-' + ((counts[module.id] > 2) ? 'danger' : ((counts[module.id] > 0) ? 'warning' : 'success'))).html(counts[module.id])
+                $('<span/>').addClass('badge progress-bar-' + ((counts[module.id] > 2) ? 'danger' : ((counts[module.id] > 0) ? 'warning' : 'success'))).text(counts[module.id])
               )
             );
           }
