@@ -126,8 +126,8 @@ jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
       });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
@@ -163,8 +163,8 @@ jQuery.fn.tabulaDateTimeMinutePicker = function tabulaDateTimeMinutePicker() {
       });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
@@ -184,8 +184,8 @@ jQuery.fn.tabulaDatePicker = function tabulaDatePicker() {
     });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDate($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDate($(e.currentTarget));
   });
 };
 
@@ -218,8 +218,8 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
       $(this).prev('input').focus();
     });
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
