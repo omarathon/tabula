@@ -136,7 +136,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           "Attended",
           "label-success",
           "fa fa-check attended",
-          s"Attended: ${point.name} ${pointDuration(point, department)}",
+          s"Attended: ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
           noteText,
@@ -147,7 +147,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           "Missed (authorised)",
           "label-info",
           "fa fa-times-circle-o authorised",
-          s"Missed (authorised): ${point.name} ${pointDuration(point, department)}",
+          s"Missed (authorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
           noteText,
@@ -159,7 +159,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
           "Missed (unauthorised)",
           "label-danger label-important",
           "fa fa-times unauthorised",
-          s"Missed (unauthorised): ${point.name} ${pointDuration(point, department)}",
+          s"Missed (unauthorised): ${pointIdentity(point, department)} ${pointDuration(point, department)}",
           describeCheckpoint(checkpoint),
           noteType,
           noteText,
@@ -167,6 +167,14 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         )
       // Should never be the case, but stops a compile warning
       case _ => AttendanceMonitoringCheckpointFormatterResult("", "", "", "", "", "", "", "")
+    }
+  }
+
+  private def pointIdentity(point: AttendanceMonitoringPoint, department: Department): String = {
+    if (point.department != department) {
+      s"${point.name} (from ${point.scheme.name} in ${point.department.name})"
+    } else {
+      point.name
     }
   }
 
@@ -184,7 +192,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         "Unrecorded",
         "label-warning",
         "fa fa-exclamation-triangle late",
-        s"${point.name} ${pointDuration(point, department)}",
+        s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
         noteText,
@@ -195,7 +203,7 @@ class AttendanceMonitoringCheckpointFormatter extends TemplateMethodModelEx {
         "",
         "",
         "fa fa-minus",
-        s"${point.name} ${pointDuration(point, department)}",
+        s"${pointIdentity(point, department)} ${pointDuration(point, department)}",
         "",
         noteType,
         noteText,

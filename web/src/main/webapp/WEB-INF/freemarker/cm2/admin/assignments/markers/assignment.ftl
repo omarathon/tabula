@@ -127,6 +127,9 @@
                 doFormSubmit = true;
               }
 
+              const $hiddenInputs = $container.parent().find('input[type=hidden]');
+              $form.append($hiddenInputs);
+
               if (doFormSubmit) {
                 $(document.body).append($form);
                 $form.submit();

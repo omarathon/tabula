@@ -1,9 +1,11 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/coursework_components.ftl" as components />
+<#import "*/csrf_macros.ftl" as csrf_macros />
 <#import "*/modal_macros.ftl" as modal />
 <#escape x as x?html>
   <#macro markingTabSection order enhancedMarkerFeedbacks readOnly=true>
     <div class="marking-stage">
+      <@csrf_macros.csrfHiddenInputField />
       <#if order.hasFeedback>
         <#if !readOnly>
           <#if order.headerStage.nextStagesDescription?has_content>

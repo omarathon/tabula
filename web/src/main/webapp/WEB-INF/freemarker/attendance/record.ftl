@@ -13,7 +13,7 @@
   </script>
 
   <#if groupedPointMap?keys?size == 0>
-    <p><em>No monitoring points found for this academic year.</em></p>
+    <p><em>There are no monitoring points for ${student.fullName} in ${department.name} for this academic year.</em></p>
   <#else>
     <div class="recordCheckpointForm">
 

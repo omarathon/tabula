@@ -21,7 +21,7 @@ const exports = {};
 WPopupBox.defaultConfig = { imageroot: '/static/libs/popup/' };
 
 // Tabula-specific rendition of tablesorter plugin for sortable tables
-jQuery.fn.sortableTable = (settings) => {
+jQuery.fn.sortableTable = function sortableTable(settings) {
   const s = settings || {};
 
   const $table = $(this);
@@ -92,7 +92,7 @@ function offsetEndDate($element) {
 }
 
 // Tabula-specific rendition of date and date-time pickers
-jQuery.fn.tabulaDateTimePicker = () => {
+jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
   const $this = $(this);
   // if there is no datepicker bound to this input then add one
   if (!$this.data('datepicker')) {
@@ -126,13 +126,13 @@ jQuery.fn.tabulaDateTimePicker = () => {
       });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
 // 5-minute resolution
-jQuery.fn.tabulaDateTimeMinutePicker = () => {
+jQuery.fn.tabulaDateTimeMinutePicker = function tabulaDateTimeMinutePicker() {
   const $this = $(this);
   // if there is no datepicker bound to this input then add one
   if (!$this.data('datepicker')) {
@@ -163,12 +163,12 @@ jQuery.fn.tabulaDateTimeMinutePicker = () => {
       });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
-jQuery.fn.tabulaDatePicker = () => {
+jQuery.fn.tabulaDatePicker = function tabulaDatePicker() {
   const $this = $(this);
   // if there is no datepicker bound to this input then add one
   if (!$this.data('datepicker')) {
@@ -184,12 +184,12 @@ jQuery.fn.tabulaDatePicker = () => {
     });
   }
 
-  $(this).on('changeDate', () => {
-    offsetEndDate($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDate($(e.currentTarget));
   });
 };
 
-jQuery.fn.tabulaTimePicker = () => {
+jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
   $(this).datetimepicker({
     format: 'hh:ii:ss',
     weekStart: 1,
@@ -218,12 +218,12 @@ jQuery.fn.tabulaTimePicker = () => {
       $(this).prev('input').focus();
     });
 
-  $(this).on('changeDate', () => {
-    offsetEndDateTime($(this));
+  $(this).on('changeDate', (e) => {
+    offsetEndDateTime($(e.currentTarget));
   });
 };
 
-jQuery.fn.selectOffset = () => {
+jQuery.fn.selectOffset = function selectOffset() {
   if ($(this).hasClass('startDateTime')) {
     $(this).on('click', () => {
       const indexValue = $(this).children(':selected').attr('value');
@@ -242,7 +242,7 @@ jQuery.fn.selectOffset = () => {
    Triggers a 'tabula.slideMoreOptions.shown' event on the div when it is revealed and a
    'tabula.slideMoreOptions.hidden' event when it is hidden.
  */
-jQuery.fn.slideMoreOptions = ($slidingDiv, showWhenChecked) => {
+jQuery.fn.slideMoreOptions = function slideMoreOptions($slidingDiv, showWhenChecked) {
   if ($(this).hasClass('slideMoreOptions-init')) {
     return;
   }
@@ -293,7 +293,7 @@ jQuery.fn.slideMoreOptions = ($slidingDiv, showWhenChecked) => {
 
 
 // submit bootstrap form using Ajax
-jQuery.fn.tabulaAjaxSubmit = (successCallback) => {
+jQuery.fn.tabulaAjaxSubmit = function tabulaAjaxSubmit(successCallback) {
   if ($(this).hasClass('tabulaAjaxSubmit-init')) return;
   $(this).addClass('tabulaAjaxSubmit-init');
 
@@ -303,8 +303,8 @@ jQuery.fn.tabulaAjaxSubmit = (successCallback) => {
       $form.find('.submit-buttons .btn').removeClass('disabled');
       $form.removeData('submitOnceSubmitted');
     }
-    $form.find('.spinnable').each(() => {
-      const $spinnable = $(this);
+    $form.find('.spinnable').each((i, el) => {
+      const $spinnable = $(el);
       if ($spinnable.data('spinContainer')) {
         $spinnable.data('spinContainer').spin(false);
       }
@@ -344,7 +344,7 @@ jQuery.fn.tabulaAjaxSubmit = (successCallback) => {
 
   $(this).on('submit', 'form', (e) => {
     e.preventDefault();
-    const $form = $(this).trigger('tabula.ajaxSubmit');
+    const $form = $(e.currentTarget).trigger('tabula.ajaxSubmit');
     $.post($form.attr('action'), $form.serialize(), (data) => {
       if (data.status === 'error') {
         errorHandler($form, data);
@@ -366,7 +366,7 @@ jQuery.fn.tabulaAjaxSubmit = (successCallback) => {
  * $(el).data('spinContainer').spin('small');
  * $(el).data('spinContainer').spin(false);
  */
-jQuery.fn.tabulaPrepareSpinners = (s) => {
+jQuery.fn.tabulaPrepareSpinners = function tabulaPrepareSpinners(s) {
   const selector = s || '.spinnable';
 
   // filter selector and descendants
@@ -379,8 +379,8 @@ jQuery.fn.tabulaPrepareSpinners = (s) => {
       window.pendingSpinner = null;
     }
 
-    $spinnable.each(() => {
-      const $this = $(this);
+    $spinnable.each((i, el) => {
+      const $this = $(el);
 
       if ($this.data('spinContainer')) {
         // turn off any existing spinners
@@ -434,7 +434,7 @@ jQuery.fn.tabulaPrepareSpinners = (s) => {
  * Obviously this won't make it impossible to submit twice, if JS is
  * disabled or altered.
  */
-jQuery.fn.tabulaSubmitOnce = () => {
+jQuery.fn.tabulaSubmitOnce = function tabulaSubmitOnce() {
   const $this = $(this);
 
   if ($this.is('form') && !$this.data('submitOnceHandled')) {
@@ -442,7 +442,7 @@ jQuery.fn.tabulaSubmitOnce = () => {
     $this.removeData('submitOnceSubmitted');
 
     $this.on('submit tabula.ajaxSubmit', (event) => {
-      const $target = $(event.target);
+      const $target = $(event.currentTarget);
       const submitted = $target.data('submitOnceSubmitted');
 
       if (!submitted) {
@@ -485,11 +485,12 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
 
 
   $items.on('click', (e) => {
-    $(this).tooltip('disable');
-    $(this).trigger('mouseout');
+    const $target = $(e.currentTarget);
+    $target.tooltip('disable');
+    $target.trigger('mouseout');
 
     // don't popover disabled
-    if ($(this).hasClass('disabled')) {
+    if ($target.hasClass('disabled')) {
       e.stopImmediatePropagation();
     }
     // Prevent propagation of click event to parent DOM elements
@@ -505,7 +506,7 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   // Click away to dismiss
   $('html').on('click.popoverDismiss', (e) => {
     // if clicking anywhere other than the popover itself
-    if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
+    if ($(e.currentTarget).closest('.popover').length === 0 && $(e.currentTarget).closest('.use-popover').length === 0) {
       $('.popover-inner').find('button.close').click();
       for (let i = 0; i < tooltipItems.length; i += 1) {
         $(tooltipItems[i]).tooltip('enable');
@@ -516,8 +517,8 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   // TAB-945 support popovers within fix-on-scroll
   $items.closest('.fix-on-scroll').on('fixed', () => {
     // Re-position any currently shown popover whenever we trigger a change in fix behaviour
-    $items.each(() => {
-      const $item = $(this);
+    $items.each((i, el) => {
+      const $item = $(el);
       const popover = $item.popover().data('bs.popover');
       const $tip = popover.tip();
       if ($tip.is(':visible')) {
@@ -537,11 +538,11 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
    * for a reference to the new popover itself in the DOM.
    */
   $items.on('shown.bs.popover', (e) => {
-    const $po = $(e.target).popover().data('bs.popover').tip();
-    $po.data('creator', $(e.target));
+    const $po = $(e.currentTarget).popover().data('bs.popover').tip();
+    $po.data('creator', $(e.currentTarget));
   });
   $('body').on('click', '.popover .close', (e) => {
-    const $creator = $(e.target).parents('.popover').data('creator');
+    const $creator = $(e.currentTarget).parents('.popover').data('creator');
     if ($creator) {
       $creator.popover('hide');
       $creator.tooltip('enable');
@@ -549,18 +550,18 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
   });
 
   // now that's all done, bind the popover
-  $items.each(() => {
+  $items.each((i, el) => {
     // allow each popover to override the container via a data attribute
-    $(this).popover($.extend({}, opts, {
-      container: $(this).data('container'),
-      trigger: $(this).data('trigger'),
+    $(el).popover($.extend({}, opts, {
+      container: $(el).data('container'),
+      trigger: $(el).data('trigger'),
     })).addClass(initClass);
   });
 
   // ensure popovers/introductorys override title with data-title attribute where available
-  $items.each(() => {
-    if ($(this).attr('data-title')) {
-      $(this).attr('data-original-title', $(this).attr('data-title'));
+  $items.each((i, el) => {
+    if ($(el).attr('data-title')) {
+      $(el).attr('data-original-title', $(el).attr('data-title'));
     }
   });
 
@@ -571,7 +572,7 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
  Invoke on .nav-tabs to overflow items into a dropdown
  instead of onto another row.
  */
-jQuery.fn.tabOverflow = () => {
+jQuery.fn.tabOverflow = function tabOverflow() {
   const selector = '.nav-tabs';
   let $target = $(this).find(selector).add($(this).filter(selector));
   const initClass = `${selector}-overflow-inited`;
@@ -629,15 +630,15 @@ jQuery.fn.tabOverflow = () => {
   overflow($target);
 
   // on click, move active tab to head, and reflow
-  this.on('click', '.dropdown-menu li', () => {
-    const $tabs = $(this).closest(selector);
-    $tabs.prepend($(this));
+  this.on('click', '.dropdown-menu li', (e) => {
+    const $tabs = $(e.currentTarget).closest(selector);
+    $tabs.prepend($(e.currentTarget));
     reflow($tabs);
   });
 
   // on tabbable sort or custom change, reflow
-  this.on('tabbablechanged sortstop', () => {
-    const $tabs = $(this).find(selector).add($(this).filter(selector));
+  this.on('tabbablechanged sortstop', (e) => {
+    const $tabs = $(e.currentTarget).find(selector).add($(e.currentTarget).filter(selector));
     reflow($tabs);
     // if active item pushed into dropdown, try again
     const hiddenActiveTab = $tabs.find('.dropdown-menu .active');
@@ -656,23 +657,18 @@ jQuery.fn.tabOverflow = () => {
 // exported so can be called on-demand e.g. after an ajax-load
 // adds a class to prevent double-init
 exports.initCollapsible = ($el) => {
-  let $element = $el;
-  if (typeof ($element) === 'undefined') {
-    $element = $('.striped-section.collapsible');
-  }
-
-  $element.filter(':not(.collapsible-init)').each(() => {
-    const $section = $(this).addClass('collapsible-init');
+  const $element = (typeof ($el) === 'undefined') ? $('.striped-section.collapsible') : $el;
+  $element.filter(':not(.collapsible-init)').each((i, el) => {
+    const $section = $(el).addClass('collapsible-init');
     const checkboxToggle = $section.hasClass('checkbox-toggle');
     let $icon = $('<i />');
     const open = () => $section.hasClass('expanded');
+    const $title = $section.find('.section-title');
 
     if (!checkboxToggle) {
       let toTrim;
       if (open()) $icon.addClass('fa fa-fw fa-chevron-down');
       else $icon.addClass('fa fa-fw fa-chevron-right');
-
-      const $title = $section.find('.section-title');
       if ($title.find('.icon-container').length) {
         $title.find('.icon-container').first().prepend($icon);
         if ($icon.get(0).nextSibling === null) {
@@ -731,8 +727,8 @@ exports.initCollapsible = ($el) => {
 
     if (checkboxToggle) {
       const $checkbox = $section.find('input.toggle-collapsible');
-      $checkbox.on('change', () => {
-        if ($(this).is(':checked')) {
+      $checkbox.on('change', (e) => {
+        if ($(e.currentTarget).is(':checked')) {
           $section.addClass('expanded');
           $checkbox.parent().find('.toggle-collapsible-on').removeClass('hidden');
           $checkbox.parent().find('.toggle-collapsible-off').addClass('hidden');
@@ -745,7 +741,6 @@ exports.initCollapsible = ($el) => {
     } else {
       // Begin view polyfill
       // Do not rely on this, fix the templates instead.
-      const $title = $section.find('.section-title');
       $title.each(() => {
         const $titleElement = $(this);
 
@@ -765,27 +760,27 @@ exports.initCollapsible = ($el) => {
       // End view polyfill
       $title.find('a.collapse-trigger').on('click', (e) => {
         // Ignore clicks where we are clearing a dropdown
-        if ($(this).parent().find('.dropdown-menu').is(':visible')) {
+        if ($(e.currentTarget).parent().find('.dropdown-menu').is(':visible')) {
           return;
         }
 
         const $eventTarget = $(e.target);
-        if (!$(this).hasClass('collapse-trigger') && ($eventTarget.is('a, button') || $eventTarget.closest('a, button').length)) {
+        if (!$(e.currentTarget).hasClass('collapse-trigger') && ($eventTarget.is('a, button') || $eventTarget.closest('a, button').length)) {
           // Ignore if we're clicking a button
           return;
         }
 
-        $icon = $(this).find('i').filter('.fa,.fal,.far,.fas,.fab').first();
+        $icon = $(e.currentTarget).find('i').filter('.fa,.fal,.far,.fas,.fab').first();
         e.preventDefault();
 
         if (open()) {
           $section.removeClass('expanded');
           $icon.removeClass().addClass('fa fa-fw fa-chevron-right');
-          $(this).attr('aria-expanded', 'false');
+          $(e.currentTarget).attr('aria-expanded', 'false');
         } else {
           populateContent(() => {
             $section.addClass('expanded');
-            $(this).attr('aria-expanded', 'true');
+            $(e.currentTarget).attr('aria-expanded', 'true');
             $icon.removeClass().addClass('fa fa-fw fa-chevron-down');
 
             if ($section.data('name')) {
@@ -838,8 +833,8 @@ exports.setArgOnUrl = (url, argName, argValue) => {
 };
 
 exports.scrollableTableSetup = () => {
-  $('.scrollable-table .right').find('.table-responsive').on('scroll', () => {
-    const $this = $(this);
+  $('.scrollable-table .right').find('.table-responsive').on('scroll', (e) => {
+    const $this = $(e.currentTarget);
     if ($this.scrollLeft() > 0) {
       $this.parent(':not(.left-shadow)').addClass('left-shadow');
     } else {
@@ -856,7 +851,7 @@ exports.tableSortMatching = (tableArray) => {
       const oldRows = $tbody.find('tr').detach();
       $.each($sourceRows, (j, row) => {
         const $sourceRow = $(row);
-        oldRows.filter(() => $(this).data('sortId') === $sourceRow.data('sortId')).appendTo($tbody);
+        oldRows.filter((idx, node) => $(node).data('sortId') === $sourceRow.data('sortId')).appendTo($tbody);
       });
     });
   };
@@ -866,10 +861,10 @@ exports.tableSortMatching = (tableArray) => {
   $.each(tableArray, (i) => {
     const otherTables = tableArray.slice();
     otherTables.splice(i, 1);
-    this.on('sortEnd', () => {
-      matchSorting($(this), otherTables);
-    }).find('tbody tr').each((tr) => {
-      $(this).data('sortId', tr);
+    this.on('sortEnd', (e) => {
+      matchSorting($(e.currentTarget), otherTables);
+    }).find('tbody tr').each((idx, tr) => {
+      $(tr).data('sortId', idx);
     });
   });
 };
@@ -890,7 +885,7 @@ $(() => {
 
   // repeat these hooks for modals when shown
   $body.on('shown.bs.modal', (e) => {
-    const $m = $(e.target);
+    const $m = $(e.currentTarget);
     $m.find('input.date-time-picker').tabulaDateTimePicker();
     $m.find('input.date-picker').tabulaDatePicker();
     $m.find('input.time-picker').tabulaTimePicker();
@@ -940,7 +935,7 @@ $(() => {
    * wait a few seconds.
    */
   $('a.long-running, button.long-running').click((event) => {
-    const $this = $(this);
+    const $this = $(event.currentTarget);
     const originalText = $this.html();
     if (!$this.hasClass('clicked') && !$this.hasClass('disabled') && !$this.parent().hasClass('disabled')) {
       $this.addClass('clicked').css({ opacity: 0.5 }).width($this.width()).html('Please wait&hellip;');
@@ -980,9 +975,9 @@ $(() => {
     template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>',
   });
 
-  $('.use-introductory:not(.auto)').each(() => {
-    const { template } = $(this).data('bs.popover').options;
-    $(this).data('bs.popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
+  $('.use-introductory:not(.auto)').each((i, el) => {
+    const { template } = $(el).data('bs.popover').options;
+    $(el).data('bs.popover').options.template = template.replace('<input type="checkbox">', '<input type="checkbox" checked="checked">');
   });
 
   // auto-show introductory popover on load, based on class
@@ -991,9 +986,9 @@ $(() => {
   $('.id7-fixed-width-container').on('change', '.introductory .footer input', (e) => {
     // If intro text is changed to reflect new features
     // its hash should change to ensure end users see the new version
-    const hash = $(e.target).parents('.introductory').data('creator').data('hash');
+    const hash = $(e.currentTarget).parents('.introductory').data('creator').data('hash');
     // use this hook to persist showOnLoad state with some ajax shizzle
-    $.post(`/settings/showIntro/${hash}`, { dismiss: $(this).is(':checked') });
+    $.post(`/settings/showIntro/${hash}`, { dismiss: $(e.currentTarget).is(':checked') });
   });
 
   /* details/summary polyfill
@@ -1008,14 +1003,14 @@ $(() => {
 
   // togglers - relies on everything being in a section element
   const $tabulaPage = $('.tabula-page');
-  $tabulaPage.on('click', '.open-all-details', () => {
-    const $container = $(this).closest('section');
+  $tabulaPage.on('click', '.open-all-details', (e) => {
+    const $container = $(e.currentTarget).closest('section');
     $container.find(`details:not(${openSlctr}) summary`).click();
     $container.find('.open-all-details').hide();
     $container.find('.close-all-details').show();
   });
-  $tabulaPage.on('click', '.close-all-details', () => {
-    const $container = $(this).closest('section');
+  $tabulaPage.on('click', '.close-all-details', (e) => {
+    const $container = $(e.currentTarget).closest('section');
     $container.find(`details${openSlctr} summary`).click();
     $container.find('.close-all-details').hide();
     $container.find('.open-all-details').show();
@@ -1039,12 +1034,12 @@ $(() => {
   if ($('.fix-on-scroll').length) {
     const gutter = $('#navigation').height();
 
-    $(window).scroll(() => {
-      const scrollTop = $(this).scrollTop() + gutter;
+    $(window).scroll((e) => {
+      const scrollTop = $(e.currentTarget).scrollTop() + gutter;
 
       if (!$('body.is-smallscreen').length) {
-        $('.fix-on-scroll:visible').each(() => {
-          const $this = $(this);
+        $('.fix-on-scroll:visible').each((i, el) => {
+          const $this = $(el);
 
           let $scrollContainer = $this.closest('.fix-on-scroll-container');
           if ($scrollContainer.length === 0) $scrollContainer = $('body');
@@ -1134,12 +1129,12 @@ $(() => {
       reset();
       const $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
       const $tabs = $tabContainer.find('ul');
-      $panes.children('li').each(() => {
-        let title = $(this).attr('data-title');
+      $panes.children('li').each((i, el) => {
+        let title = $(el).attr('data-title');
         if (!title) {
-          title = $(this).find('h4').html();
+          title = $(el).find('h4').html();
         }
-        const link = `#${$(this).attr('id')}`;
+        const link = `#${$(el).attr('id')}`;
         const $tab = $(`<li><a href="${link}" data-toggle="tab" data-title="${title}"><span class="title">${title}</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>`);
         $tabs.append($tab);
       });
@@ -1163,19 +1158,20 @@ $(() => {
       const $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
       const paneCount = $panes.children('li').length;
       $t.append($cols);
-      $panes.children('li').each((idx) => {
-        const $gadget = $(this).addClass('gadget');
-        const title = $(this).attr('data-title') || $(this).find('h4').first().text();
-        const link = `#${$(this).attr('id')}`;
+      $panes.children('li').each((idx, el) => {
+        const $element = $(el);
+        const $gadget = $element.addClass('gadget');
+        const title = $element.attr('data-title') || $element.find('h4').first().text();
+        const link = `#${$element.attr('id')}`;
         const $tab = $(`<li><a href="${link}" data-toggle="tab" data-title="${title}" title="Click and drag to move"><span class="title">${title}</span> <i class="icon-minus-sign-alt" title="Hide ${title}"></i></a></li>`);
         const $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
-        $(this).find('.agent').removeClass('span4');
+        $element.find('.agent').removeClass('span4');
         $gadgetHeaderTab.children().append($tab);
         $gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
         $gadget.prepend($gadgetHeaderTab).find('.tab-container li > a').tab('show');
 
         // populate columns (dumbly)
-        $(this).appendTo(idx < paneCount / 2 ? $cols.children().first() : $cols.children().last());
+        $element.appendTo(idx < paneCount / 2 ? $cols.children().first() : $cols.children().last());
       });
 
       // make sortable & finish up rendering
@@ -1199,9 +1195,9 @@ $(() => {
     // tab controls
     $t.on('click', '.tab-container .icon-resize-small', (e) => {
       e.stopPropagation();
-      const $a = $(this).parent();
+      const $a = $(e.currentTarget).parent();
       const title = $a.data('title');
-      $(this).attr('title', `Expand ${title}`);
+      $(e.currentTarget).attr('title', `Expand ${title}`);
       $a.data('href', $a.attr('href'))
         .removeAttr('href')
         .removeAttr('data-toggle')
@@ -1216,9 +1212,9 @@ $(() => {
 
     $t.on('click', '.tab-container .icon-resize-full', (e) => {
       e.stopPropagation();
-      const $a = $(this).parent();
+      const $a = $(e.currentTarget).parent();
       const title = $a.data('title');
-      $(this).attr('title', 'Collapse');
+      $(e.currentTarget).attr('title', 'Collapse');
       $a.attr('href', $a.data('href'))
         .removeData('href')
         .attr('data-toggle', 'tab')
@@ -1229,20 +1225,20 @@ $(() => {
 
     $t.on('click', '.tab-container .icon-minus-sign-alt', (e) => {
       e.stopPropagation();
-      const $a = $(this).parent();
+      const $a = $(e.currentTarget).parent();
       $a.closest('.gadget').find('.tab-content').slideUp('fast');
       const title = $a.data('title');
-      $(this).attr('title', `Show ${title}`);
+      $(e.currentTarget).attr('title', `Show ${title}`);
       $a.data('href', $a.attr('href')).removeAttr('href').removeAttr('data-toggle').html($a.html().replace('minus-sign', 'plus-sign'));
       $t.trigger('tabbablechanged');
     });
 
     $t.on('click', '.tab-container .icon-plus-sign-alt', (e) => {
       e.stopPropagation();
-      const $a = $(this).parent();
+      const $a = $(e.currentTarget).parent();
       $a.closest('.gadget').find('.tab-content').slideDown('fast');
       const title = $a.data('title');
-      $(this).attr('title', `Hide ${title}`);
+      $(e.currentTarget).attr('title', `Hide ${title}`);
       $a.attr('href', $a.data('href')).removeData('href').attr('data-toggle', 'tab').html($a.html().replace('plus-sign', 'minus-sign'));
       $t.trigger('tabbablechanged');
     });
@@ -1295,11 +1291,11 @@ $(() => {
     e.stopImmediatePropagation();
   }).find('button[data-dismiss=dropdown]').on('click', (e) => {
     e.stopPropagation();
-    $(this).closest('.dropdown-menu').dropdown('toggle');
+    $(e.currentTarget).closest('.dropdown-menu').dropdown('toggle');
   });
 
-  $('[data-loading-text]').on('click', () => {
-    $(this).button('loading');
+  $('[data-loading-text]').on('click', (e) => {
+    $(e.currentTarget).button('loading');
   });
 
   // SCRIPTS FOR ATTENDANCE NOTES
@@ -1356,7 +1352,7 @@ $(() => {
       }
     };
 
-    const attendanceNoteIframeHandler = () => {
+    const attendanceNoteIframeHandler = function attendanceNoteIframeHandler() {
       attendanceNoteIframeLoad(this);
       $(this).off('load', attendanceNoteIframeHandler);
     };
@@ -1400,12 +1396,12 @@ $(() => {
 
     $('.recordCheckpointForm .fix-area').on('click', 'a.btn.attendance-note', (event) => {
       event.preventDefault();
-      attendanceNoteClickHandler($(this).attr('href'), $(this));
+      attendanceNoteClickHandler($(event.currentTarget).attr('href'), $(event.currentTarget));
     });
 
     // Popovers are created on click so binding directly to A tags won't work
     $('body').on('click', '.popover a.attendance-note-modal', (event) => {
-      const $this = $(this);
+      const $this = $(event.currentTarget);
       let $m = $('#attendance-note-modal');
       event.preventDefault();
       if ($m.length === 0) {
@@ -1420,7 +1416,7 @@ $(() => {
         $this.closest('.popover').find('button.close').trigger('click');
         $m.find('.modal-footer .btn-primary').on('click', (e) => {
           e.preventDefault();
-          const link = $(this).attr('href');
+          const link = $(e.currentTarget).attr('href');
           $m.modal('hide').on('hidden.bs.modal.attendance-note', () => {
             $m.off('hidden.bs.modal.attendance-note');
             attendanceNoteClickHandler(link, $());
@@ -1432,14 +1428,14 @@ $(() => {
   // END SCRIPTS FOR ATTENDANCE NOTES
 
   // Radio-style buttons
-  $('[data-toggle="radio-buttons"]').on('click', 'button', () => {
-    $(this).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
-    $(this).addClass('active');
+  $('[data-toggle="radio-buttons"]').on('click', 'button', (e) => {
+    $(e.currentTarget).closest('[data-toggle="radio-buttons"]').find('button.active').removeClass('active');
+    $(e.currentTarget).addClass('active');
   });
 
   // TAB-5314 when you click on an input-group-addon, focus that field
-  $body.on('click', '.input-group-addon', () => {
-    $(this).closest('.input-group')
+  $body.on('click', '.input-group-addon', (e) => {
+    $(e.currentTarget).closest('.input-group')
       .find(':input:not(:focus):visible')
       .first()
       .focus();
@@ -1453,8 +1449,8 @@ window.GlobalScripts = jQuery.extend(window.GlobalScripts, exports);
 $(() => {
 // If there's an element with an id of 'scroll-container', max-size it to fit to the bottom of
 // the page, with scrollbars if needed
-  $('#scroll-container').each(() => {
-    const scrollable = $(this);
+  $('#scroll-container').each((i, el) => {
+    const scrollable = $(el);
     // window.height includes horizontal scrollbar on mozilla so add 20px of padding.
     const elementHeight = ($(window).height() - scrollable.offset().top) - 20;
     scrollable.css({ 'max-height': elementHeight, 'overflow-y': 'auto' });
@@ -1470,9 +1466,9 @@ $(() => {
 
   $deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
 
-  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden', () => {
+  $deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden', (e) => {
     // what is `this` here? can it ever be checked?
-    if (!$(this).is(':checked')) {
+    if (!$(e.currentTarget).is(':checked')) {
       $('#small-match-options').find('input[type=text]').val('0');
     }
   }).find('input').on('disable.radiocontrolled', () => {
@@ -1526,12 +1522,12 @@ $(() => {
     }
   });
 
-  $('form[data-confirm-submit]').on('submit', (event) => {
-    const $form = $(this);
+  $('form[data-confirm-submit]').on('submit', (e) => {
+    const $form = $(e.currentTarget);
     // eslint-disable-next-line no-alert
     if (!window.confirm($form.data('confirm-submit'))) {
-      event.preventDefault();
-      event.stopImmediatePropagation();
+      e.preventDefault();
+      e.stopImmediatePropagation();
     }
   });
 });

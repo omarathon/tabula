@@ -27,7 +27,8 @@
 
   <div class="fix-area">
 
-    <form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post" class="form-inline">
+    <#assign copyPointsAction><@routes.attendance.manageAddPointsCopy command.department command.academicYear /></#assign>
+    <@f.form action=copyPointsAction method="post" cssClass="form-inline">
       <#list command.schemes as scheme>
         <input type="hidden" name="schemes" value="${scheme.id}" />
       </#list>
@@ -67,7 +68,7 @@
       <@bs3form.form_group>
         <input type="submit" class="btn btn-primary" name="search" value="Display" />
       </@bs3form.form_group>
-    </form>
+    </@f.form>
 
     <form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post">
       <#list command.schemes as scheme>

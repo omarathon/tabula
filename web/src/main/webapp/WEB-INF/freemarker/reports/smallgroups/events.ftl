@@ -23,25 +23,25 @@
       window.ReportBuilder.buildHeader = function () {
         var container = $('<tr/>');
         container.append(
-          $('<th/>').addClass('sortable').html('Department name')
+          $('<th/>').addClass('sortable').text('Department name')
         ).append(
-          $('<th/>').addClass('sortable').html('Event name')
+          $('<th/>').addClass('sortable').text('Event name')
         ).append(
-          $('<th/>').addClass('sortable').html('Module title')
+          $('<th/>').addClass('sortable').text('Module title')
         ).append(
-          $('<th/>').addClass('sortable').html('Day')
+          $('<th/>').addClass('sortable').text('Day')
         ).append(
-          $('<th/>').addClass('sortable').html('Start')
+          $('<th/>').addClass('sortable').text('Start')
         ).append(
-          $('<th/>').addClass('sortable').html('Finish')
+          $('<th/>').addClass('sortable').text('Finish')
         ).append(
-          $('<th/>').addClass('sortable').html('Location')
+          $('<th/>').addClass('sortable').text('Location')
         ).append(
-          $('<th/>').addClass('sortable').html('Size')
+          $('<th/>').addClass('sortable').text('Size')
         ).append(
-          $('<th/>').addClass('sortable').html('Weeks')
+          $('<th/>').addClass('sortable').text('Weeks')
         ).append(
-          $('<th/>').addClass('sortable').html('Staff')
+          $('<th/>').addClass('sortable').text('Staff')
         );
         return container;
       };
@@ -73,25 +73,25 @@
             break;
         }
         container.append(
-          $('<td/>').html(data.departmentName)
+          $('<td/>').text(data.departmentName)
         ).append(
-          $('<td/>').html(data.eventName)
+          $('<td/>').text(data.eventName)
         ).append(
-          $('<td/>').html(data.moduleTitle)
+          $('<td/>').text(data.moduleTitle)
         ).append(
-          $('<td/>').data('sortby', dayAsNumber).html(data.day)
+          $('<td/>').data('sortby', dayAsNumber).text(data.day)
         ).append(
-          $('<td/>').html(data.start)
+          $('<td/>').text(data.start)
         ).append(
-          $('<td/>').html(data.finish)
+          $('<td/>').text(data.finish)
         ).append(
-          $('<td/>').html(data.location)
+          $('<td/>').text(data.location)
         ).append(
-          $('<td/>').html(data.size)
+          $('<td/>').text(data.size)
         ).append(
-          $('<td/>').html(data.weeks)
+          $('<td/>').text(data.weeks)
         ).append(
-          $('<td/>').html(data.staff)
+          $('<td/>').text(data.staff)
         );
         return container;
       };
