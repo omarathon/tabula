@@ -11,6 +11,7 @@
       <filter ref="forceAPILoginMethodFilter"/>
       <url-pattern>/*</url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
       <excluded-url-pattern>/test/*</excluded-url-pattern>
       <excluded-url-pattern>/service/*</excluded-url-pattern>
       <excluded-url-pattern>/error/*</excluded-url-pattern>

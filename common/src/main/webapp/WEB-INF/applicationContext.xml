@@ -385,6 +385,7 @@
       <excluded-url-pattern>/static/*</excluded-url-pattern>
       <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
     </mapping>
     <mapping name="sso">
       <filter ref="ssoClientFilter"/>
@@ -398,6 +399,7 @@
       <excluded-url-pattern>/static/*</excluded-url-pattern>
       <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
       <excluded-url-pattern>/test/*</excluded-url-pattern>
       <excluded-url-pattern>/service/*</excluded-url-pattern>
 
@@ -410,6 +412,7 @@
       <filter ref="sysadminGroupFilter"/>
       <url-pattern>/sysadmin/*</url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
     </mapping>
     <!--<mapping name="postDataLogging">
       <filter ref="postDataLoggingFilter" />
@@ -421,6 +424,7 @@
       <excluded-url-pattern>/static/*</excluded-url-pattern>
       <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
       <excluded-url-pattern>/error/*</excluded-url-pattern>
       <excluded-url-pattern>/test/*</excluded-url-pattern>
       <excluded-url-pattern>/service/*</excluded-url-pattern>
