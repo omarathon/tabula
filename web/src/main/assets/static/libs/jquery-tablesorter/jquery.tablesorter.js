@@ -719,7 +719,7 @@
           // this is to big, perhaps break it out?
           $headers.click(
             function (e) {
-              var totalRows = ($this[0].tBodies[0] && $($this[0].tBodies[0].children).filter('.tr').toArray().length) || 0;
+              var totalRows = ($this[0].tBodies[0] && $($this[0].tBodies[0].children).filter('tr').toArray().length) || 0;
               if (!this.sortDisabled && totalRows > 0) {
                 // Only call sortStart if sorting is
                 // enabled.
