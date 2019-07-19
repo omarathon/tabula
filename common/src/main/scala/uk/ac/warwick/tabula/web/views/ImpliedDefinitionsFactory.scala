@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.web.views
 
-import org.apache.tiles.request.Request
 import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory
-import org.apache.tiles.Attribute
-import org.apache.tiles.Definition
+import org.apache.tiles.request.Request
+import org.apache.tiles.{Attribute, Definition}
 import uk.ac.warwick.tabula.helpers.Logging
+
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
   * DefinitionsFactory for Tiles, which first tries the default behaviour
@@ -19,7 +20,10 @@ import scala.collection.JavaConverters._
 class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with Logging {
 
   final val FreemarkerRoot = "/WEB-INF/freemarker/"
-  final val Extension = ".ftl"
+  final val Extensions = Seq(
+    ".ftlh",
+    ".ftl"
+  )
   final val LayoutAttribute = "renderLayout"
   final val DefaultLayout = "base"
   final val BodyTileAttribute = "body"
@@ -30,13 +34,18 @@ class ImpliedDefinitionsFactory extends UnresolvingLocaleDefinitionsFactory with
    */
   override def getDefinition(name: String, ctx: Request): Definition = {
     if (debugEnabled) logger.debug("Rendering " + name)
-    val name2 = name // TODO figure out why using name directly ends up null
     super.getDefinition(name, ctx) match {
       case definition: Any => definition
-      case _ if !name2.startsWith("/") => new Definition(layoutDefinition(ctx)) {
-        addAll(Map(
-          BodyTileAttribute -> new Attribute(FreemarkerRoot + name2 + Extension)).asJava)
-      }
+      case _ if !name.startsWith("/") =>
+        val template = Extensions
+          .map(extension => FreemarkerRoot + name + extension)
+          .find(f => Try(ctx.getApplicationContext.getResource(f) != null).getOrElse(false))
+
+        new Definition(layoutDefinition(ctx)) {
+          template.foreach { template =>
+            addAll(Map(BodyTileAttribute -> new Attribute(template)).asJava)
+          }
+        }
       case _ => null // Let it be handled by FreemarkerServlet
     }
   }

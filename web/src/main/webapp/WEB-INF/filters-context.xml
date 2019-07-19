@@ -16,6 +16,7 @@
       <url-pattern>/attendance/*</url-pattern>
       <url-pattern>/profiles/*</url-pattern>
       <excluded-url-pattern>*.ftl</excluded-url-pattern>
+      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
       <excluded-url-pattern>/test/*</excluded-url-pattern>
       <excluded-url-pattern>/service/*</excluded-url-pattern>
       <excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>

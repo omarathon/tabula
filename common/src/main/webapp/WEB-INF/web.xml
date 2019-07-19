@@ -118,6 +118,7 @@
   <servlet-mapping>
     <servlet-name>freemarkerServlet</servlet-name>
     <url-pattern>*.ftl</url-pattern>
+    <url-pattern>*.ftlh</url-pattern>
   </servlet-mapping>
 
   <!-- Help JSP taglibs to work properly within Freemarker http://freemarker.sourceforge.net/docs/pgui_misc_servlet.html -->
