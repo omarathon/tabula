@@ -1,4 +1,4 @@
-<#ftl strip_text=true />
+<#ftl strip_text=true output_format="HTML" />
 
 <#-- Common template parts for use in other small groups templates. -->
 
@@ -431,7 +431,7 @@
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
                    data-html="true" aria-label="Help"
-                   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+                   data-content="${popoverContent?esc}"><i class="fa fa-question-circle"></i></a>
               </li>
             </#list>
           </ul>
@@ -461,7 +461,7 @@
                     <a class="use-popover"
                        href="#"
                        data-html="true"
-                       data-content="${popoverContent?html}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+                       data-content="${popoverContent?esc}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
                   </#if>
                 </#if>
               </li>
