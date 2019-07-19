@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -69,4 +68,3 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro renderAttachment submission file><@_u page="/submission/${submission.key?c}/supporting-file/${file.name}" /></#macro>
 
 <#macro dummyDataGeneration department><@_u page="/admin/${department.code}/data-generation" /></#macro>
-</#escape>

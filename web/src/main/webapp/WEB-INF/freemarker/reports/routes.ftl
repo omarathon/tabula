@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 <#--
 		Just a handy place to create macros for generating URLs to various places, to save time
 		if we end up changing any of them.
@@ -66,4 +65,3 @@
 <#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
 <#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>
 <#macro profileExportReportZip department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report/zip?jobId=${jobId}" /></#macro>
-</#escape>

@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#import "attendance_variables.ftl" as attendance_variables />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
@@ -492,4 +491,3 @@ showResetButton=false
     </#if>
   </#if>
 </#macro>
-</#escape>

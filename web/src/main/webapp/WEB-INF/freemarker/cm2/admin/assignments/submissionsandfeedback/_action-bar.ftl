@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
 <#import "*/coursework_components.ftl" as components />
 
@@ -474,5 +473,3 @@
 
 <#assign pdfUrl><@routes.cm2.submissionsPdf assignment/></#assign>
 <@components.downloadPdfModal pdfUrl />
-
-</#escape>

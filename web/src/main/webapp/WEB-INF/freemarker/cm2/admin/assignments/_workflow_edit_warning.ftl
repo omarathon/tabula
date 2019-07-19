@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
 <div id="workflow-edit-warning" class="modal fade">
   <@modal.wrapper>
@@ -38,5 +37,3 @@
 
   })(jQuery);
 </script>
-
-</#escape>

@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 
 <#-- FIXME why is this necessary? -->
 <#if JspTaglibs??>
@@ -309,4 +308,3 @@
     ${((assessment.module.code)!assessment.moduleCode)?upper_case} <#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})
   </#if>
 </#macro>
-</#escape>

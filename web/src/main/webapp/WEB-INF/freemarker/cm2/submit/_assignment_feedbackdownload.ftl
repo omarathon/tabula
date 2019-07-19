@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#if features.collectRatings && feedback.collectRatings && isSelf>
   <div id="feedback-rating-container" class="is-stackable">
     <!-- fallback for noscript -->
@@ -155,5 +154,3 @@
   <a href="<@routes.cm2.feedbackPdf assignment=assignment feedback=feedback/>"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a
     PDF file</a>
 </#if>
-
-</#escape>

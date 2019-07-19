@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#--
 This must include all the fields that are included
 in _feedback_fields.ftl, _submissions_fields.ftl and _options_fields.ftl
@@ -45,5 +44,3 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@f.hidden path="individualFileSizeLimit" />
 <@f.hidden path="comment" />
 <@f.hidden path="feedbackTemplate" />
-
-</#escape>

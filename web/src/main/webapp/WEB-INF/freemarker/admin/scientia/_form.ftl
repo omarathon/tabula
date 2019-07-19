@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <@f.form method="post" modelAttribute="command">
   <@bs3form.labelled_form_group labelText="Syllabus+ name" path="upstreamName">
     <@f.input class="form-control" path="upstreamName" />
@@ -27,5 +26,3 @@
   <button class="btn btn-primary">Save location</button>
   <a class="btn btn-default" href="<@routes.admin.locations />">Cancel</a>
 </@f.form>
-
-</#escape>

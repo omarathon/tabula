@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#--
  Don't forget to add a profile modal container when you use this macro if one doesn't exist on the page already
  <div id="profile-modal" class="modal fade profile-subset"></div>
@@ -8,4 +7,3 @@
     --><i class="icon-info-sign fal fa-info-circle"></i><span class="sr-only">View profile</span><#--
   --></a>
 </#macro>
-</#escape>

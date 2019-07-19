@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#macro extensionButtonContents label assignment>
   <a href="<@routes.cm2.extensionRequest assignment=assignment />?returnTo=<@routes.cm2.assignment assignment=assignment />"
      class="btn btn-default btn-xs">
@@ -245,4 +244,3 @@
   </#if>
 
 </#if>
-</#escape>

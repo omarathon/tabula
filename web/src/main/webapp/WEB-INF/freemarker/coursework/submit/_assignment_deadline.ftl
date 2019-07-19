@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#--
 	Used in /WEB-INF/freemarker/home/_student.ftl and _assignment_submissionform.ftl
 -->
@@ -58,4 +57,3 @@
     <#if showIconsAndButtons><@extensionButton extensionRequested isExtended /></#if>
   </#if>
 </#if>
-</#escape>

@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#import "*/attendance_variables.ftl" as attendance_variables />
 <#import "*/attendance_macros.ftl" as attendance_macros />
 
@@ -42,5 +41,3 @@
     </#if>
   </#list>
 </#if>
-
-</#escape>

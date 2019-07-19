@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#if searchProfilesCommand?has_content>
   <section class="profile-search profile-search-results">
     <@f.form method="get" action="${url('/profiles/search')}" modelAttribute="searchProfilesCommand">
@@ -30,5 +29,3 @@
     </@f.form>
   </section>
 </#if>
-
-</#escape>

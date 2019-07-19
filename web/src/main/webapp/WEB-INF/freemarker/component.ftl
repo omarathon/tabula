@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 
 <#assign requestPath = (info.requestedUri.path!"") />
 
@@ -86,4 +85,3 @@
   <#assign name="home" />
   <#assign nonav=true />
 </#if>
-</#escape>
