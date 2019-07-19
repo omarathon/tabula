@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <#macro identity_info key value>
@@ -112,4 +111,3 @@
   </div>
   <@bs3form.errors path="${enumField}" />
 </#macro>
-</#escape>

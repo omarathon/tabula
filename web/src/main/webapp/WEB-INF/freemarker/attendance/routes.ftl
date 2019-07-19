@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 <#--
 		Just a handy place to create macros for generating URLs to various places, to save time
 		if we end up changing any of them.
@@ -112,4 +111,3 @@
 <#macro viewAgentsHome department academicYear><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents"/></#macro>
 <#macro viewAgents department academicYear relationshipType><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents/${relationshipType.urlPart}"/></#macro>
 <#macro viewAgent department academicYear relationshipType agent><@_u page="/view/${department.code}/${academicYear.startYear?c}/agents/${relationshipType.urlPart}/${agent.universityId}"/></#macro>
-</#escape>

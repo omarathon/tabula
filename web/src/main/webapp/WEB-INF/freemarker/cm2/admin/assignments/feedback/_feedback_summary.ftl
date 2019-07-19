@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#macro feedbackSummary stage markerFeedback>
   <div class="well">
     <div class="feedback-summary-heading">
@@ -79,4 +78,3 @@
     </div>
   </div>
 </#macro>
-</#escape>

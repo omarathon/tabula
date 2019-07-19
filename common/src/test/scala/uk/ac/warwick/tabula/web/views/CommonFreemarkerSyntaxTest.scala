@@ -78,6 +78,19 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
         MoreFiles.getFileExtension(file) == "ftl"
       ) {
         val source = MoreFiles.asCharSource(file, StandardCharsets.UTF_8)
+        lazy val content = source.read()
+        lazy val strippedContent =
+          content
+            .replaceAll("(?s)<#ftl.*?>", "")
+            .replaceAll("(?s)<#import.*?>", "")
+            .replaceAll("(?s)<#macro.*?</#macro>", "")
+            .replaceAll("(?s)<#function.*?</#function>", "")
+            .replaceAll("<#assign [^=>]+=.+>", "")
+            .replaceAll("(?s)<#assign.*?</#assign>", "")
+            .replaceAll("</?#(if|elseif|else).*?>", "")
+            .replaceAll("</?#compress[^>]*>", "")
+            .replaceAll("(?s)<#--.*?-->", "")
+            .trim
 
         val interpolation = Pattern.compile(".*\\$\\{(.*?)\\}.*")
 
@@ -94,7 +107,10 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
               if (!m.group(1).endsWith("?html")) found = true
             }
             found
-          }
+          } &&
+
+          // Has content that isn't just directives
+          strippedContent.hasText
         ) {
           Some(relativePath)
         } else None

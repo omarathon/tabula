@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#macro lateness submission="" assignment="" user=""><#compress>
   <#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
     <#if submission.late>
@@ -91,4 +90,3 @@
     </#if>
   </#if>
 </#macro>
-</#escape>

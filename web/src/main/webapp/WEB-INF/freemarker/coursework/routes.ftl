@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them.
@@ -166,4 +165,3 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro submissionAttachment submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/attachment/${attachment.name?url}" /></#macro>
 <#macro submissionAttachment_in_profile submission attachment><@_u page="/module/${submission.assignment.module.code}/${submission.assignment.id}/${submission.universityId}/attachment/${attachment.name?url}" /></#macro>
-</#escape>

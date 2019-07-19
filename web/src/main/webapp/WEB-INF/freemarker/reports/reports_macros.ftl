@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#macro reportLoader reportUrl commandName="command" hasDatePicker=true>
   <script nonce="${nonce()}">
@@ -408,4 +407,3 @@
     });
   </script>
 </#macro>
-</#escape>

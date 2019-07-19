@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#macro exams_sits_groups command >
 
   <#if command.availableUpstreamGroups?has_content>
@@ -48,4 +47,3 @@
     </div>
   </#if>
 </#macro>
-</#escape>

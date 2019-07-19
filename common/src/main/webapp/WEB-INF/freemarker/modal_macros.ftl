@@ -1,5 +1,4 @@
 <#ftl strip_text=true />
-<#escape x as x?html>
 <#--
 	Macros for generating HTML for Bootstrap modals.
 
@@ -39,4 +38,3 @@
   <#nested />
   <#if enabled></div></div></#if>
 </#macro>
-</#escape>
