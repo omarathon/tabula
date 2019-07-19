@@ -443,7 +443,7 @@
 
       <!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
       <#assign formAction><@routes.profiles.save_meeting_approval meeting /></#assign>
-      <@f.form method="post" class="approval double-submit-protection" id="meeting-${meeting.id}" action=formAction>
+      <@f.form method="post" cssClass="approval double-submit-protection" id="meeting-${meeting.id}" action=formAction>
         <@bs3form.form_group>
           <@bs3form.radio>
             <input type="radio" name="approved" value="true">
@@ -499,7 +499,7 @@
           Please confirm whether this scheduled meeting took place.
         </div>
         <#assign formAction><@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationships[0].relationshipType /></#assign>
-        <@f.form method="post" class="scheduled-action" id="meeting-${meeting.id}"
+        <@f.form method="post" cssClass="scheduled-action" id="meeting-${meeting.id}"
               action=formAction>
           <@bs3form.form_group>
             <@bs3form.radio>
