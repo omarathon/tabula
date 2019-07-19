@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <div class="row">
   <div class="col-md-6">
     <h2>Search for individual students</h2>
@@ -14,4 +13,3 @@
   </div>
 </div>
 <hr />
-</#escape>

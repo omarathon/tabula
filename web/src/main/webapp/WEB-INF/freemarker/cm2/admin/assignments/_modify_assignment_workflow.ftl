@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <div class="reusable-workflow-picker workflow-fields">
   <@bs3form.labelled_form_group path="reusableWorkflow" labelText="Marking workflow name">
     <@f.select path="reusableWorkflow" class="form-control workflow-modification" >
@@ -39,4 +38,3 @@
 
   })(jQuery);
 </script>
-</#escape>

@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <table class="table table-striped table-condensed table-hover table-checkable copy-assignments">
   <thead>
   <tr>
@@ -29,5 +28,3 @@
   </tbody>
 </table>
 
-
-</#escape>

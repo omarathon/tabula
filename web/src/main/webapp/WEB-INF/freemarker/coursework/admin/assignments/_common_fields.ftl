@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#--
 
 This section contains the form fields that can apply to a group of
@@ -144,5 +143,3 @@ so that they can be passed around between requests.
     </@form.field>
   </@form.row>
 </#if>
-
-</#escape>

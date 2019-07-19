@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#--
 
 This must include all the fields that are included
@@ -48,4 +47,3 @@ TODO a way to not have to do these, or at least way to make it obvious when this
 <@f.hidden path="comment" />
 <@f.hidden path="feedbackTemplate" />
 <@f.hidden path="markingWorkflow" />
-</#escape>

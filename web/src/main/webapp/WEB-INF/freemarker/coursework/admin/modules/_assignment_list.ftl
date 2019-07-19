@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <@form.row path "">
   <@form.label path>
     Assignments
@@ -29,4 +28,3 @@
     </#list>
   </@form.field>
 </@form.row>
-</#escape>

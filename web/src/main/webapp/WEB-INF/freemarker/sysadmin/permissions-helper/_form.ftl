@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <@f.form action="${url('/sysadmin/permissions-helper')}" modelAttribute="permissionsHelperCommand">
 
   <@bs3form.labelled_form_group path="user" labelText="User ID">
@@ -45,4 +44,3 @@
     <input class="btn btn-lg btn-primary" type="submit" value="Submit">
   </@bs3form.form_group>
 </@f.form>
-</#escape>

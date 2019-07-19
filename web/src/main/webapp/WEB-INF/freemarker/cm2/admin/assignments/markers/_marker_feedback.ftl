@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <div class="marking-and-feedback"<#if command.stage.populateWithPreviousFeedback && !command.currentMarkerFeedback.hasBeenModified> style="display:none;"</#if>>
   <h4>Marking and feedback</h4>
   <#assign actionUrl><@routes.cm2.markerOnlineFeedback command.assignment command.stage command.marker command.student /></#assign>
@@ -59,4 +58,3 @@
 
   </@f.form>
 </div>
-</#escape>

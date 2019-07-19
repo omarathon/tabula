@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <#assign department=command.department />
 
 <#if saved??>
@@ -70,4 +69,3 @@
     $('.fix-area').fixHeaderFooter();
   })
 </script>
-</#escape>
