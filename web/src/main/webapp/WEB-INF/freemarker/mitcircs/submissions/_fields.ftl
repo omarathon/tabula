@@ -94,7 +94,7 @@
     </colgroup>
     <thead>
       <tr>
-        <th scope="col" class="mitcircs-form__fields__section__assessments-table__checkbox"></th>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__checkbox"><input type="checkbox" class="check-all" title="Select all/none"></th></th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__module">Module</th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__name">Title</th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__deadline">Deadline / exam date</th>
