@@ -529,7 +529,7 @@ exports.initBigList = function ($scope) {
 
         var $checkedBoxes = $(".collection-checkbox:checked", $container);
         if ($container.data('checked') !== 'none') {
-          var $form = $('<form />').attr({method: 'POST', action: this.href}).hide();
+          var $form = window.GlobalScripts.csrfForm.generate().attr({action: this.href}).hide();
           $form.append($checkedBoxes.clone());
           $(document.body).append($form);
           $form.submit();
@@ -581,7 +581,7 @@ exports.initBigList = function ($scope) {
             action = $this.data('href')
           }
 
-          var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+          var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
           var doFormSubmit = false;
 
           if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
@@ -619,7 +619,7 @@ exports.initBigList = function ($scope) {
             action = $this.data('href')
           }
 
-          var $form = $('<form />').attr({method: 'POST', action: action}).hide();
+          var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
           var doFormSubmit = true;
 
           var $checkedBoxes = $(".collection-checkbox", $this.closest('itemContainer'));
