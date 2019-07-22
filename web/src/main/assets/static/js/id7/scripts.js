@@ -1550,3 +1550,6 @@ $(() => {
     throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
   });
 });
+
+// TAB-7334 add tabindex to all modal
+$(() => $('.modal').toArray().map($).forEach(modal => modal.attr('tabindex', -1)));
