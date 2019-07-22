@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import $ from 'jquery';
 
-export class CsrfForm {
+export default class CsrfForm {
   static generate() {
     const $meta = $('meta[name=_csrf]');
     let csrfTokenValue = '';

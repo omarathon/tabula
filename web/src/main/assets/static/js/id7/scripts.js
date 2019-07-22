@@ -1,7 +1,7 @@
 /* eslint-env browser */
 import $ from 'jquery';
 import initErrorReporter from '../errorreporter';
-import {CsrfForm} from "./csrf-form";
+import CsrfForm from './csrf-form';
 
 initErrorReporter();
 
