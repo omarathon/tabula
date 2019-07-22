@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.ScalaFactoryBean
 class ElasticsearchClientFactoryBean extends ScalaFactoryBean[ElasticClient] {
 
   @Value("${elasticsearch.cluster.name}") var clusterName: String = _
+  @Value("${elasticsearch.cluster.tls:false}") var tls: Boolean = _
   @Value("${elasticsearch.cluster.nodes}") var nodes: Array[String] = _
 
   @Value("${elasticsearch.cluster.local_jvm:false}") var localJvmCluster: Boolean = _
@@ -21,7 +22,7 @@ class ElasticsearchClientFactoryBean extends ScalaFactoryBean[ElasticClient] {
     if (localJvmCluster) {
       throw new IllegalStateException("Sorry, local JVM cluster ElasticSearch is no longer supported.")
     } else {
-      ElasticClient(ElasticProperties(s"http://${nodes.mkString(",")}"))
+      ElasticClient(ElasticProperties(if (tls) s"https://${nodes.mkString(",")}" else s"http://${nodes.mkString(",")}"))
     }
   }
 
