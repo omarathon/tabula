@@ -41,7 +41,7 @@
       </button>
     </@f.form>
 
-    <#include "_findpointsresult.ftl" />
+    <#include "_findpointsresult.ftlh" />
 
     <div class="fix-footer submit-buttons">
       <a class="btn btn-default" href="<@routes.attendance.manageHomeForYear findCommand.department findCommand.academicYear />">Done</a>

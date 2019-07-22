@@ -120,7 +120,7 @@
 
       </div>
 
-      <#include "_findpointsresult.ftl" />
+      <#include "_findpointsresult.ftlh" />
     </form>
 
   </div>
