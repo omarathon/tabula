@@ -1,6 +1,7 @@
 /* eslint-env browser */
 import $ from 'jquery';
 import initErrorReporter from '../errorreporter';
+import CsrfForm from './csrf-form';
 
 initErrorReporter();
 
@@ -1441,6 +1442,8 @@ $(() => {
       .focus();
   });
 }); // on ready
+
+exports.csrfForm = CsrfForm;
 
 // take anything we've attached to "exports" and add it to the global "Profiles"
 // we use extend() to add to any existing variable rather than clobber it
