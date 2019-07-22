@@ -32,10 +32,10 @@
 <#macro dropdown_menu text button_size="btn-medium">
 <#-- Capture the content between the macro tags into a string -->
   <#local content><#nested /></#local>
-  <#if content?trim?has_content>
+  <#if content?markup_string?trim?has_content>
     <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown" href="#">${text} <span class="caret"></span></a>
     <ul class="dropdown-menu pull-right">
-      ${content}
+      ${content?no_esc}
     </ul>
   </#if>
 </#macro>
@@ -226,14 +226,14 @@
 
                   <li>
 										<#if set.archived>
-                      <#local archive_caption>Unarchive</#local>
+                      <#local archive_caption = 'Unarchive'>
                     <#else>
-                      <#local archive_caption>Archive</#local>
+                      <#local archive_caption = 'Archive'>
                     </#if>
 
                     <#local archive_url><@routes.groups.archiveset set /></#local>
 
-                    <@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr='${archive_caption}'?lower_case classes='archive-group-link' href=archive_url
+                    <@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr=archive_caption?lower_case classes='archive-group-link' href=archive_url
                     tooltip='Archive small group' data_attr='data-toggle=modal data-target=#modal-container'>
                       ${archive_caption}
                     </@fmt.permission_button>
@@ -965,7 +965,7 @@
       </#local>
 
       <td>
-				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
+				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string?esc}" data-html="true">
 					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
