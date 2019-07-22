@@ -1396,13 +1396,14 @@ jQuery(function ($) {
 
   $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
     let safe = false;
-    if (typeof URL === "function" && (new URL(options.url, window.location.origin)).origin === window.location.origin) {
+    if (typeof URL === 'function' && (new URL(options.url, window.location.origin)).origin === window.location.origin) {
       safe = true;
-    } else if (typeof URL !== "function" && window.navigator.userAgent.indexOf("Trident/7.0") > -1) {
+    } else if (typeof URL !== 'function' && window.navigator.userAgent.indexOf('Trident/7.0') > -1) {
       const a = $('<a>', {
         href: options.url
       });
-      safe = (a.prop('hostname') === window.location.hostname);
+      const linkHostname = a.prop('hostname');
+      safe = (linkHostname === window.location.hostname || linkHostname === '');
     }
 
     if (safe) {

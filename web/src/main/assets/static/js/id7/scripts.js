@@ -1510,7 +1510,8 @@ $(() => {
       const a = $('<a>', {
         href: options.url,
       });
-      safe = (a.prop('hostname') === window.location.hostname);
+      const linkHostname = a.prop('hostname');
+      safe = (linkHostname === window.location.hostname || linkHostname === '');
     }
 
     if (safe) {
