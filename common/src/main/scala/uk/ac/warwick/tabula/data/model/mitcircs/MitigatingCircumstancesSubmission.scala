@@ -194,7 +194,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @OneToMany(mappedBy = "mitigatingCircumstancesSubmission", fetch = FetchType.LAZY, cascade = Array(ALL))
   @BatchSize(size = 200)
   private val _attachments: JSet[FileAttachment] = JHashSet()
-  def attachments: Seq[FileAttachment] = {
+  def attachments: Seq[FileAttachment] = transactional(readOnly = true) {
     // files attached to messages sent before outcomes were recorded are treated as evidence
     val messageEvidence = messages.filter(m => m.studentSent && Option(outcomesSubmittedOn).forall(m.createdDate.isBefore)).flatMap(_.attachments)
     (_attachments.asScala.toSeq ++ messageEvidence).sortBy(_.dateUploaded)
@@ -381,7 +381,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def canRecordOutcomes: Boolean = !isWithdrawn && !isDraft && (state == ReadyForPanel || state == OutcomesRecorded || panel.nonEmpty) && (state != OutcomesRecorded || !isAcute)
   def canRecordAcuteOutcomes: Boolean = !isWithdrawn && !isDraft && state != ReadyForPanel && panel.isEmpty && (!Seq(OutcomesRecorded, ApprovedByChair).contains(state) || isAcute)
   def canWithdraw: Boolean = !Seq(OutcomesRecorded, ApprovedByChair).contains(state)
-  def canApproveOutcomes = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
+  def canApproveOutcomes: Boolean = !isWithdrawn && !isDraft && state == OutcomesRecorded && !isAcute
   def canReopen: Boolean = isWithdrawn
   def canAddNote: Boolean = !isWithdrawn && !isDraft
   def canAddMessage: Boolean =
