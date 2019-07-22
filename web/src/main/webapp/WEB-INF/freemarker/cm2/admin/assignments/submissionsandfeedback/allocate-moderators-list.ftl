@@ -79,7 +79,7 @@
               action = $this.data('href')
             }
 
-            var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
+            var $form = window.GlobalScripts.csrfForm.generate().attr({method: 'POST', action: action}).hide();
             var doFormSubmit = false;
 
             if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
