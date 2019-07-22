@@ -351,6 +351,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
       // The member has re-appeared
       member.missingFromImportSince = null
       memberDao.saveOrUpdate(member)
+    } else if (member.stale && missingFromImport && member.inUseFlag == "Active") {
+      // TAB-7196 - Normally users are marked as withdrawn or inactive in an upstream system (FIM or SITS) and that status is then imported into Tabula
+      // Occasionally they are removed before that happens which means that the Member would incorrectly appear as "Active" in Tabula forever
+      member.inUseFlag = "Inactive"
+      memberDao.saveOrUpdate(member)
     }
     member
   }
@@ -373,7 +378,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           var missingSince = stu.missingFromImportSince
           stu.missingFromImportSince = DateTime.now
           missingSince = stu.missingFromImportSince
-
+          memberDao.saveOrUpdate(stu)
+        } else if (stu.stale && !universityIdsSeen.contains(stu.universityId) && stu.inUseFlag == "Active") {
+          // TAB-7196 - Normally students are marked as withdrawn in SITS and that status is then imported into Tabula
+          // Occasionally they are removed before that happens which means that the Member would appear as "Active" in Tabula forever
+          stu.inUseFlag = "Inactive"
           memberDao.saveOrUpdate(stu)
         }
 
