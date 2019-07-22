@@ -99,8 +99,9 @@ trait ReportStudentsConfirmDescription extends Describable[Seq[MonitoringPointRe
 
   override def describe(d: Description) {
     d.property("monitoringPeriod", period)
-    d.property("academicYear", academicYear.toString)
-    d.property("students", studentMissedReportCounts.map { src => src.student.userId -> src.missed }.toMap)
+      .property("academicYear", academicYear.toString)
+      .studentIds(studentMissedReportCounts.map(_.student.universityId))
+      .property("missedPoints", studentMissedReportCounts.map(src => src.student.userId -> src.missed).toMap)
   }
 }
 
