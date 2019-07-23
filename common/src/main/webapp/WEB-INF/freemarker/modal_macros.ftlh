@@ -49,7 +49,7 @@
     <#if id?has_content>id="${id}"</#if>
     <#if role?has_content>role="${role}"</#if>
     tabindex="-1"
-    class="${cssClass}"
+    class="modal fade ${cssClass}"
     >
   </#if>
   <#nested />
