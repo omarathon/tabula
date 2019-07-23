@@ -1,7 +1,8 @@
 <#escape x as x?html>
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+  <#import "*/_profile_link.ftl" as pl />
 
-    <#import "*/_profile_link.ftl" as pl />
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
     <#macro attendanceState state>
         <#switch state.dbValue>

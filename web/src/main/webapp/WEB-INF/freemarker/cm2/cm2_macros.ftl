@@ -1,9 +1,9 @@
 <#escape x as x?html>
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <#macro previousExtensions extensionId studentIdentifier fullName acceptedExtensions rejectedExtensions previousExtensions>
 
     <#if previousExtensions?has_content>
-      <div id="prev-extensions-${extensionId}" class="modal fade" role="dialog">
+      <@modal.modal id="prev-extensions-${extensionId}" role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -45,7 +45,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </@modal.modal>
     </#if>
   </#macro>
 
@@ -75,7 +75,7 @@
 
   <#macro previousSubmissions extensionId studentIdentifier fullName previousSubmissions>
     <#if previousSubmissions?has_content>
-      <div id="prev-submissions-${extensionId}" class="modal fade" role="dialog">
+      <@modal.modal id="prev-submissions-${extensionId}"  role="dialog">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -115,7 +115,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </@modal.modal>
     </#if>
   </#macro>
 

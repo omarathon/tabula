@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <#assign smallGroupSet = releaseGroupSetCommand.singleGroupToPublish/>
   <#assign submitAction><@routes.groups.releaseset smallGroupSet /></#assign>
   <#if smallGroupSet.releasedToStudents >

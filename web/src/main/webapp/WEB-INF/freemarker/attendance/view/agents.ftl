@@ -1,9 +1,10 @@
 <#escape x as x?html>
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
   <h1>${relationshipType.agentRole?capitalize}s</h1>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="agent-search" style="display: none;">
     <div class="row">

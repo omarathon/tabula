@@ -2,7 +2,7 @@
 
   <#import "../attendance_macros.ftl" as attendance_macros />
   <#import "../attendance_variables.ftl" as attendance_variables />
-
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <div class="pull-right">
     <@fmt.bulk_email_students students=studentAttendance.students />
   </div>
@@ -116,7 +116,7 @@
 
     </div>
 
-    <div id="profile-modal" class="modal fade profile-subset"></div>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
     <script nonce="${nonce()}">
       jQuery(window).on('load', function () {

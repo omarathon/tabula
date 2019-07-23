@@ -1,4 +1,4 @@
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <h1>Custom roles</h1>
 
@@ -42,14 +42,14 @@
     </table>
   </#if>
 
-  <div id="custom-roles-modal" class="modal fade">
+  <@modal.modal id="custom-roles-modal">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title">Delete custom role</h3>
       </@modal.header>
       <@modal.body></@modal.body>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
   <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {

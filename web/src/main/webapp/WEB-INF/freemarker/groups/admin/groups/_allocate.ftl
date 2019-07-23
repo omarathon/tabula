@@ -1,7 +1,7 @@
 <#escape x as x?html>
   <#import "*/group_components.ftl" as components />
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <#if smallGroupSet.linked>
     <div class="alert alert-danger">
       <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -32,8 +32,8 @@
     </li>
   </#macro>
 
-  <div id="timetable-clash-modal" class="modal fade timetable-clash-students"></div>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="timetable-clash-modal" cssClass="timetable-clash-students"></@modal.modal>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <#if (command.isStudentSignup())>
     <div class="alert alert-info">These groups are currently <strong>${smallGroupSet.openForSignups?string("open","closed")}</strong> for self sign-up</div>

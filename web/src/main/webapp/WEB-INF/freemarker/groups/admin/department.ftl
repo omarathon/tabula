@@ -1,4 +1,5 @@
 <#import "*/group_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <div class="btn-toolbar dept-toolbar">
     <#if !modules?has_content && department.children?has_content>
@@ -334,8 +335,8 @@
 
       <div class="small-group-sets-list">
         <#-- List of students modal -->
-        <div id="students-list-modal" class="modal fade" tabindex="-1"></div>
-        <div id="profile-modal" class="modal fade profile-subset" tabindex="-1"></div>
+        <@modal.modal id="students-list-modal"></@modal.modal>
+        <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
         <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
         <script type="text/javascript" nonce="${nonce()}">
@@ -363,7 +364,7 @@
       </div>
     </div>
 
-    <div id="modal-container" class="modal fade"></div>
+    <@modal.modal id="modal-container"></@modal.modal>
 
     <script type="text/javascript" nonce="${nonce()}">
       jQuery(function ($) {

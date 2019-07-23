@@ -1,9 +1,8 @@
 <#import "../_filters.ftl" as filters />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
-
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="btn-toolbar dept-toolbar">
     <div class="btn-group">
@@ -172,7 +171,7 @@
               <button type="button"  class="btn btn-default" disabled="disabled" data-toggle="tooltip" title="There are no panels for ${academicYear.toString}">Add to panel</button>
             </#if>
           </div>
-          <div class="modal fade" id="addToPanelModal" tabindex="-1" role="dialog">
+          <@modal.modal id="addToPanelModal" role="dialog">
             <@modal.wrapper>
               <@modal.header>
                 <h3 class="modal-title">Select a panel</h3>
@@ -192,7 +191,7 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
               </@modal.footer>
             </@modal.wrapper>
-          </div>
+          </@modal.modal>
         </div>
       </#if>
       <div class="filter-results mitcircs-submission-list">

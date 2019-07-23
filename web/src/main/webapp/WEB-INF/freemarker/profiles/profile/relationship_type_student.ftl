@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#if scheduledAgentChange?has_content>
@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <div id="timeline" class="modal fade">
+  <@modal.modal id="timeline">
     <@modal.wrapper>
     <@modal.header>
       <h3 class="modal-title">Changes to ${relationshipType.agentRole}</h3>
@@ -251,9 +251,9 @@
     </#if>
     </@modal.body>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
-  <div id="change-agent" class="modal fade"></div>
+  <@modal.modal id="change-agent"></@modal.modal>
 
   <h2>Record of meetings</h2>
 
@@ -372,7 +372,7 @@
         </p>
       </#if>
 
-      <div id="meeting-modal" class="modal fade" style="display:none;"></div>
+      <@modal.modal id="meeting-modal"></@modal.modal>
     </section>
   </#if>
 

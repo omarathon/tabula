@@ -3,6 +3,7 @@
 <#-- Common template parts for use in other small groups templates. -->
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 
@@ -490,8 +491,8 @@
 <#macro module_info data expand_by_default=true>
   <div class="small-group-modules-list">
     <#-- List of students modal -->
-    <div id="students-list-modal" class="modal fade" tabindex="-1"></div>
-    <div id="profile-modal" class="modal fade profile-subset" tabindex="-1"></div>
+    <@modal.modal id="students-list-modal"></@modal.modal>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
     <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
     <script type="text/javascript" nonce="${nonce()}">

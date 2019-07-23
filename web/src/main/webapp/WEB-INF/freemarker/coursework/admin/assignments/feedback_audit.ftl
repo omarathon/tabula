@@ -1,5 +1,6 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "feedback/_feedback_summary.ftl" as fs>
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <h1>Feedback audit</h1>
   <h5>
@@ -95,5 +96,5 @@
     </#if>
   </#if>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 </#escape>

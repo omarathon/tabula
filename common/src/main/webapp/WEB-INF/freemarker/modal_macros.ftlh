@@ -2,7 +2,7 @@
 <#--
 	Macros for generating HTML for Bootstrap modals.
 
-	Recommended usage is [#import "*/modal_macros.ftl" as modal /]
+	Recommended usage is [#import "*/modal_macros.ftlh" as modal /]
 -->
 
 <#--
@@ -37,4 +37,21 @@
   <#if enabled><div class="modal-dialog ${cssClass}"><div class="modal-content"></#if>
   <#nested />
   <#if enabled></div></div></#if>
+</#macro>
+
+<#--  outer most div  -->
+<#macro modal cssClass="" id="" ariaLabel="" ariaLabelledby="" role="" style="" ariaHidden=true enabled=true>
+  <#if enabled>
+    <div
+    aria-hidden="${ariaHidden?string('true', 'false')}"
+    <#if ariaLabel?has_content>aria-label="${ariaLabel}"</#if>
+    <#if ariaLabelledby?has_content>aria-labelledby="${ariaLabelledby}"</#if>
+    <#if id?has_content>id="${id}"</#if>
+    <#if role?has_content>role="${role}"</#if>
+    tabindex="-1"
+    class="${cssClass}"
+    >
+  </#if>
+  <#nested />
+  <#if enabled></div></#if>
 </#macro>

@@ -1,5 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#function route_function dept>
@@ -33,7 +33,7 @@
         <@fmt.date date=oldestImport capitalise=false at=true relative=true />.
       </p>
     </#if>
-    <div class="modal fade" id="student-import-dates">
+    <@modal.modal id="student-import-dates">
       <@modal.wrapper>
         <@modal.body>
           <table class="table table-condensed table-striped table-hover">
@@ -54,7 +54,7 @@
           </table>
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
     <button class="btn btn-primary" type="submit" name="${GenerateModuleExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
   </form>
 

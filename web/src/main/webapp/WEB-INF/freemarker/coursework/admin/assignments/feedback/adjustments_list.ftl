@@ -1,6 +1,7 @@
 <#import "../turnitin/_report_macro.ftl" as tin />
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#function markingId user>
   <#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
@@ -41,7 +42,7 @@
   <h1>Feedback adjustment</h1>
   <h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <#if studentInfo?size gt 0>
     <table id="feedback-adjustment" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers expanding-table">

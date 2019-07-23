@@ -1,6 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
-<div id="profile-modal" class="modal fade profile-subset"></div>
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <@bs3form.labelled_form_group path="name" labelText="Name">
   <@f.input path="name" cssClass="form-control" />

@@ -1,5 +1,5 @@
 <#import "*/mitcircs_components.ftl" as components />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#assign canManage = can.do("MitigatingCircumstancesSubmission.Manage", submission) />
 <#assign isSelf = submission.student.universityId == user.universityId!'' />
@@ -29,7 +29,7 @@
     <h1>Mitigating circumstances submission MIT-${submission.key}</h1>
   </#if>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">
@@ -120,7 +120,7 @@
                 <#elseif submission.state.entryName == "Ready For Panel">
                   <p><a href="<@routes.mitcircs.readyForPanel submission /><#if pagination?? && panel??>?fromPanel=true</#if>" class="btn btn-default btn-block" data-toggle="modal" data-target="#readyModal">Not ready for panel</a></p>
                 </#if>
-                <div class="modal fade" id="readyModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+                <@modal.modal id="readyModal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
 
                 <#if submission.canRecordAcuteOutcomes>
                   <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
@@ -132,7 +132,7 @@
                   <p><a href="<@routes.mitcircs.viewPanel submission.panel />" class="btn btn-default btn-block"><i class="fal fa-long-arrow-left"></i> Return to panel</a></p>
                 </#if>
                 <#if isPanelChair>
-                  <div class="modal fade" id="approveModal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+                  <@modal.modal id="approveModal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
                   <#if submission.canApproveOutcomes>
                     <p><a href="<@routes.mitcircs.approveOutcomes submission />" class="btn btn-default btn-block" data-toggle="modal" data-target="#approveModal">Approve outcomes</a></p>
                   <#elseif submission.state.entryName == "Approved By Chair">

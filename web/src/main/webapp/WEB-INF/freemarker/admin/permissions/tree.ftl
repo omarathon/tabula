@@ -1,8 +1,10 @@
 <#compress><#escape x as x?html>
   <#import "*/permissions_macros.ftl" as pm />
   <#import "*/_profile_link.ftl" as pl />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
-  <#function roleDescription definition>
+
+    <#function roleDescription definition>
     <#if definition.baseRoleDefinition??>
       <#if definition.replacesBaseDefinition>
         <#return roleDescription(definition.baseRoleDefinition) />
@@ -67,6 +69,6 @@
     <li><@render_tree tree /></li>
   </ul>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 </#escape></#compress>

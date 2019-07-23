@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/coursework_components.ftl" as components />
 
 <div class="clearfix action-bar">

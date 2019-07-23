@@ -4,7 +4,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
 -->
 <#escape x as x?html>
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign commandName="command"/>
 
 <@fmt.deptheader "Setup assignments" "for" department routes.coursework "setupSitsAssignments" "" />
@@ -258,7 +258,7 @@ first page of the form to setup a bunch of assignments from SITS.
     <#if step='options'>
 
     <#-- popup box for 'Set options' button -->
-      <div class="modal hide fade" id="set-options-modal" tabindex="-1" role="dialog" aria-labelledby="set-options-label" aria-hidden="true">
+      <@modal.modal cssClass="hide" id="set-options-modal" role="dialog" ariaLabelledby="set-options-label">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
           <h3 id="set-options-label">Set options</h3>
@@ -270,9 +270,9 @@ first page of the form to setup a bunch of assignments from SITS.
           <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
           <button class="btn btn-primary">Save options</button>
         </div>
-      </div>
+      </@modal.modal>
 
-      <div class="modal hide fade" id="set-dates-modal" tabindex="-1" role="dialog" aria-labelledby="set-options-label" aria-hidden="true">
+      <@modal.modal cssClass="hide" id="set-dates-modal" role="dialog" ariaLabelledby="set-options-label">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
           <h3>Set dates</h3>
@@ -331,7 +331,7 @@ first page of the form to setup a bunch of assignments from SITS.
           <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
           <button class="btn btn-primary">Set dates</button>
         </div>
-      </div>
+      </@modal.modal>
 
       <script type="text/javascript" nonce="${nonce()}">
         // Give a heads up if you're about to navigate away from your progress

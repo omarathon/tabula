@@ -35,7 +35,7 @@
     <h5 class="with-related">for ${exam.name} (${exam.module.code?upper_case})</h5>
   </div>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <#if studentInfo?size gt 0>
     <table id="feedback-adjustment" class="students table table-striped tabula-greenLight sticky-table-headers expanding-table">

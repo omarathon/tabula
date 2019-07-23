@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
 
@@ -339,7 +339,7 @@
     </section>
   </#if>
 
-  <div id="note-modal" class="modal fade">
+  <@modal.modal id="note-modal">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title"><span></span> for ${member.fullName}</h3>
@@ -349,7 +349,7 @@
         <input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
       </@modal.footer>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {

@@ -1,9 +1,10 @@
 <#import "*/group_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign academicYear=smallGroupSet.academicYear />
 
 <#-- List of students modal -->
-<div id="students-list-modal" class="modal fade"></div>
-<div id="profile-modal" class="modal fade profile-subset"></div>
+<@modal.modal id="students-list-modal"></@modal.modal>
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <div class="striped-section-contents">
   <#list groups as group>

@@ -1,6 +1,6 @@
 <#escape x as x?html>
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#assign manualFormAction><@routes.profiles.relationship_allocate department relationshipType /></#assign>
   <#assign uploadFormAction><@routes.profiles.relationship_allocate_upload department relationshipType /></#assign>
@@ -101,6 +101,6 @@
     </div>
   </div>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 </#escape>

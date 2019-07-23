@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <h1>Declare mitigating circumstances<#if !command.self> on behalf of ${student.fullName}</#if></h1>
 
@@ -78,7 +78,7 @@
         </div>
 
         <#if command.self>
-          <div id="approve-modal" class="modal fade">
+          <@modal.modal id="approve-modal">
             <@modal.wrapper>
               <@modal.header>
                 <h6 class="modal-title">Submit mitigating circumstances</h6>
@@ -93,7 +93,7 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
               </@modal.footer>
             </@modal.wrapper>
-          </div>
+          </@modal.modal>
         </#if>
       </@f.form>
     </article>

@@ -1,7 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/coursework_components.ftl" as components />
 <#import "*/csrf_macros.ftl" as csrf_macros />
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <#macro markingTabSection order enhancedMarkerFeedbacks readOnly=true>
     <div class="marking-stage">
@@ -258,7 +258,7 @@
           </div>
         </div>
       </#list>
-      <div id="bulk-adjustment-modal" class="modal fade"></div>
+      <@modal.modal id="bulk-adjustment-modal"></@modal.modal>
     </div>
   </div>
 

@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "../related_students/related_students_macros.ftl" as student_macros />
 
 <#escape x as x?html>
@@ -9,7 +9,7 @@
       </p>
     </div>
     <@student_macros.tableWithMeetingsColumn items=studentCourseDetails meetingsMap=meetingsMap showSelectStudents=true/>
-    <div id="meeting-modal" class="modal fade"></div>
+    <@modal.modal id="meeting-modal"></@modal.modal>
     <!-- TODO Changes required in BulkMeetingRecordController to make it working based on member para (if user should be able to see it). Hiding it for others for time being as it throws permission exception if other users clicks it)-->
     <#if !member?has_content>
       <div class="submit-buttons fix-footer">

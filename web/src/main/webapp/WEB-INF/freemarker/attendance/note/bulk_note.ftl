@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <@modal.wrapper isModal!false 'modal-lg'>
     <#if success??>
       <#assign isAdd = !command.note?has_content && !command.attachment?has_content && !command.absenceType?has_content />

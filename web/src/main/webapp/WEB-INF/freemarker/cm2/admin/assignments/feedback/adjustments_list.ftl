@@ -2,7 +2,7 @@
 <#import "*/coursework_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/marking_macros.ftl" as marking />
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#macro row info>
   <#assign u = info.student />
@@ -32,7 +32,7 @@
     </div>
   </#if>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <#if studentInfo?size gt 0>
     <table id="feedback-adjustment" class="students table table-striped tabula-greenLight sticky-table-headers">

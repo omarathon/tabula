@@ -1,3 +1,5 @@
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+
 <#if newRecord || canEditWorkflowType>
   <@bs3form.labelled_form_group path="workflowType" labelText="Marking workflow type">
     <@f.select path="workflowType" class="form-control workflow-modification" >
@@ -18,7 +20,7 @@
   </@bs3form.labelled_form_group>
 
   <!-- Modal -->
-  <div class="modal fade" id="workflowTypeHelp" tabindex="-1" role="dialog" aria-labelledby="workflowTypeHelp">
+  <@modal.modal id="workflowTypeHelp" role="dialog" ariaLabelledby="workflowTypeHelp">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -48,7 +50,7 @@
         </div>
       </div>
     </div>
-  </div>
+  </@modal.modal>
   <#if features.moderationSelector>
     <@bs3form.labelled_form_group path="sampler" labelText="Moderated assignment selection" cssClass="hidden sampler workflow-modification">
       <div class="radio">

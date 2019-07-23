@@ -1,6 +1,7 @@
 <#escape x as x?html>
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <h1>Deregistered students</h1>
   <h4><span class="muted">for</span> ${smallGroupSet.name}</h4>

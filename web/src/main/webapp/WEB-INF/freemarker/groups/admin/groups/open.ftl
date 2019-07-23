@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <#assign setState = openGroupSetCommand.setState/>
   <#assign smallGroupSet = openGroupSetCommand.singleSetToOpen/>
   <#if openGroupSetCommand.setState.name == 'open'>

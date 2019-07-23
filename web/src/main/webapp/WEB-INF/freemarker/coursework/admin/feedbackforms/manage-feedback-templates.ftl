@@ -1,5 +1,6 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <h1>Feedback forms for ${department.name}</h1>
 
   <#assign submitUrl><@routes.coursework.feedbacktemplates department /></#assign>
@@ -122,7 +123,7 @@
           </#list>
           </tbody>
         </table>
-        <div id="feedback-template-model" class="modal fade">
+        <@modal.modal id="feedback-template-model">
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             <h3>Update feedback template</h3>
@@ -132,7 +133,7 @@
             <input type="submit" value="Confirm" class="btn btn-primary">
             <a data-dismiss="modal" class="close-model btn" href="#">Cancel</a>
           </div>
-        </div>
+        </@modal.modal>
       </#if>
     </div>
   </@f.form>

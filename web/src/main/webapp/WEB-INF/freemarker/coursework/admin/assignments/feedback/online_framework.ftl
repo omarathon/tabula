@@ -1,9 +1,10 @@
 <#assign module = assignment.module />
 <#assign department = module.adminDepartment />
 <#assign feedbackGraphs = studentFeedbackGraphs />
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<div id="profile-modal" class="modal fade profile-subset"></div>
+
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <#function markingId user><#compress>
   <#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>

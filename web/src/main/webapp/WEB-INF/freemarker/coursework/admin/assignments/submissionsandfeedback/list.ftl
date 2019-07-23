@@ -1,10 +1,11 @@
 <#import "_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/submission_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
-  <div id="feedback-modal" class="modal fade"></div>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="feedback-modal"></@modal.modal>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="fixed-container form-post-container">
     <h1>${assignment.name} (${assignment.module.code?upper_case})</h1>

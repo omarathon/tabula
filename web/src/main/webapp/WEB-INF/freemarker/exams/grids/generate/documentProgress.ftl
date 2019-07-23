@@ -1,5 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#function route_function dept>

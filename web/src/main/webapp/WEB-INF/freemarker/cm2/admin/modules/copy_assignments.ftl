@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>
@@ -24,7 +24,7 @@
     </div>
   </form>
 
-  <div class="modal fade" id="confirmModal">
+  <@modal.modal id="confirmModal">
     <@modal.wrapper cssClass="modal-xs">
       <@modal.body>
         <p>Are you sure you want to create these assignments?</p>
@@ -36,7 +36,7 @@
         </div>
       </@modal.footer>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {

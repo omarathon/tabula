@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
   <#import "*/attendance_macros.ftl" as attendance_macros />
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#assign titleHeader>
     <div class="deptheader">
@@ -32,7 +32,7 @@
     <#noescape>${titleHeader}</#noescape>
 
     <#import "*/_profile_link.ftl" as pl />
-    <div id="profile-modal" class="modal fade profile-subset"></div>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
     <script nonce="${nonce()}">
       (function ($) {
@@ -274,16 +274,16 @@
 
   </#if>
 
-  <div id="meetings-modal" class="modal fade" style="display:none;">
+  <@modal.modal id="meetings-modal">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title">Meetings</h3>
       </@modal.header>
       <@modal.body></@modal.body>
     </@modal.wrapper>
-  </div>
-  <div id="small-groups-modal" class="modal fade" style="display:none;"></div>
-  <div id="upload-attendance-modal" class="modal fade" style="display:none;"></div>
+  </@modal.modal>
+  <@modal.modal id="small-groups-modal"></@modal.modal>
+  <@modal.modal id="upload-attendance-modal"></@modal.modal>
 
 
 </#escape>

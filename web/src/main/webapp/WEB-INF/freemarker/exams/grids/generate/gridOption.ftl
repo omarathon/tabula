@@ -1,5 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#function route_function dept>
@@ -71,7 +71,7 @@
       </div>
     </div>
 
-    <div id="short-form-layout-example" class="modal fade">
+    <@modal.modal id="short-form-layout-example">
       <@modal.wrapper>
         <@modal.header><h3 class="modal-title">Short grid</h3></@modal.header>
         <@modal.body>
@@ -79,9 +79,9 @@
           <img src="<@url resource="/static/images/examgrids/short-grid.png"/>">
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
-    <div id="full-layout-example" class="modal fade">
+    <@modal.modal id="full-layout-example">
       <@modal.wrapper>
         <@modal.header><h3 class="modal-title">Full grid</h3></@modal.header>
         <@modal.body>
@@ -89,7 +89,7 @@
           <img src="<@url resource="/static/images/examgrids/full-grid.png"/>">
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
 
     <h3>Student identification</h3>

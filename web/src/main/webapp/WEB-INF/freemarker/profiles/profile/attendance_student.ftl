@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#import "../../attendance/attendance_variables.ftl" as attendance_variables />
 <#import "../../attendance/attendance_macros.ftl" as attendance_macros />

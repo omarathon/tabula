@@ -1,5 +1,5 @@
-<#import "*/modal_macros.ftl" as modal />
-<div id="workflow-edit-warning" class="modal fade">
+<#import "*/modal_macros.ftlh" as modal />
+<@modal.modal id="workflow-edit-warning">
   <@modal.wrapper>
     <@modal.body>
       <p>You have changed this assignment's workflow properties. Any existing marker allocations and markers' feedback will be deleted.</p>
@@ -9,7 +9,7 @@
       <a class="btn btn-default" data-dismiss='modal'>Cancel</a>
     </@modal.footer>
   </@modal.wrapper>
-</div>
+</@modal.modal>
 
 <script type="text/javascript" nonce="${nonce()}">
   (function ($) {

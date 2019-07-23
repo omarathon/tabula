@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
   <div class="message-thread">
@@ -72,7 +72,7 @@
                   <i class="fal fa-fw fa-paste fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#messageTemplates" title="Message templates" aria-label="Message templates"></i>
                 </label>
 
-                <div id="messageTemplates" tabindex="-1" class="modal fade message-thread__footer__message-templates">
+                <@modal.modal id="messageTemplates" cssClass="message-thread__footer__message-templates">
                   <@modal.wrapper>
                     <@modal.header><h4 class="modal-title">Choose a template</h4></@modal.header>
                     <@modal.body>
@@ -86,7 +86,7 @@
                       </dl>
                     </@modal.body>
                   </@modal.wrapper>
-                </div>
+                </@modal.modal>
               </#if>
 
               <label class="btn btn-primary message-thread__footer__fields__btn">
@@ -99,7 +99,7 @@
                   <i class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
                 </label>
 
-                <div id="replyByDateModal" tabindex="-1" class="modal fade message-thread__footer__reply-by-date">
+                <@modal.modal id="replyByDateModal" cssClass="message-thread__footer__reply-by-date">
                   <@modal.wrapper>
                     <@modal.header><h4 class="modal-title">Respond by date</h4></@modal.header>
                     <@modal.body>
@@ -121,7 +121,7 @@
                       <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                     </@modal.footer>
                   </@modal.wrapper>
-                </div>
+                </@modal.modal>
               </#if>
 
               <span class="use-tooltip" data-container="body" title="Send">

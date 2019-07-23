@@ -1,4 +1,5 @@
 <#import "../../_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#macro check label property>
@@ -29,7 +30,7 @@
   <#if result??>
     <#assign sourcemessage>This relationship is imported from SITS <#if result.department??>for ${result.department.shortName}</#if></#assign>
     <hr class="full-width" />
-    <div id="profile-modal" class="modal fade profile-subset"></div>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
     <div class="row">
       <div class="col-md-4">
         <h2>Student details</h2>

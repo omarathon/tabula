@@ -6,7 +6,7 @@
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 </#if>
 
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#macro student_assignment_list id title assignments empty_message expand_by_default=true show_submission_progress=false hide_late_formative=false>
   <span id="${id}-container">
@@ -1499,7 +1499,7 @@
 </#macro>
 
 <#macro downloadPdfModal url id="download-pdf-modal">
-  <div id="${id}" class="modal fade">
+  <@modal.modal id="${id}">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title">Download submissions as PDF</h3>
@@ -1513,5 +1513,5 @@
         <ul class="submissions"></ul>
       </@modal.body>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 </#macro>
