@@ -136,22 +136,22 @@
           <#local membersGroup=status.actualValue />
         </@spring.bind>
 
-        <#local includeText><span class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
-          <#local pendingDeletionText><span class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
-            <#local excludeText><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
-              <#local sitsText><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
+        <#local includeText><span tabindex="0" role="button" class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
+          <#local pendingDeletionText><span tabindex="0" role="button" class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
+            <#local excludeText><span tabindex="0" role="button" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
+              <#local sitsText><span tabindex="0" role="button" class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
 
                 <#local membershipInfo = command.membershipInfo />
                 <#local hasMembers=(membershipInfo.totalCount gt 0 || membershipInfo.includeCount gt 0 || membershipInfo.excludeCount gt 0) />
 
 		<div class="remove-restore assignmentEnrolmentInfo">
 			<#if hasMembers>
-        <span class="use-tooltip"
+        <span tabindex="0" role="button" class="use-tooltip"
               <#if availableUpstreamGroups??>title="This will only remove enrolment for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>>
 					<a class="btn btn-primary disabled remove-users member-action">Remove</a>
 				</span>
 
-        <span class="use-tooltip" title="Re-enrol selected students">
+        <span tabindex="0" role="button" class="use-tooltip" title="Re-enrol selected students">
 					<a class="btn btn-primary restore-users disabled">Restore</a>
 				</span>
       </#if>
@@ -184,7 +184,7 @@
                   <#elseif item.userId?has_content>
                     <@bs3form.selector_check_row "modifyEnrolment" item.userId />
                   <#else>
-                    <i class="fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
+                    <i tabindex="0" role="button" class="fa fa-ban use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
                   </#if>
 								</td>
 								<td class="source">

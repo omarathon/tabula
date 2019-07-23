@@ -136,7 +136,7 @@
               </#if>
               <#if scyd.yearOfStudy??>
                 <strong>Study block or year:</strong> ${(scyd.yearOfStudy)!}
-                <i class="fa fa-question-circle text-primary use-tooltip"
+                <i tabindex="0" role="button" class="fa fa-question-circle text-primary use-tooltip"
                    title="An intake for a particular course or period of study. E.g. an undergraduate in their third year of study with no breaks is in block 3. A third-year undergraduate who temporarily withdrew for one year is in block 4."
                    data-placement="right"></i>
                 <br />

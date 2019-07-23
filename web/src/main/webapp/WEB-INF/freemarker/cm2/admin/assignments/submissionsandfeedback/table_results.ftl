@@ -328,13 +328,13 @@
                         ) />
                         <#if feedbackSitsStatus.code == "failed">
                           <a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
-														<span style="cursor: pointer;" class="label label-danger use-tooltip"
+														<span tabindex="0" role="button" style="cursor: pointer;" class="label label-danger use-tooltip"
                                   title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 														${feedbackSitsStatus.description}
 														</span><#--
 													--></a>
                         <#elseif sitsWarning>
-                          <span class="label label-danger use-tooltip"
+                          <span tabindex="0" role="button" class="label label-danger use-tooltip"
                                 title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 												${feedbackSitsStatus.description}
 													</span>

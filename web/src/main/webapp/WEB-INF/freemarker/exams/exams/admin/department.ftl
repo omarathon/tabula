@@ -8,7 +8,7 @@
 
     <div class="btn-toolbar dept-toolbar">
       <#if !modules?has_content && department.children?has_content>
-        <div class="use-tooltip btn btn-default disabled" title="This department doesn't directly contain any modules. Check subdepartments.">
+        <div tabindex="0" role="button" class="use-tooltip btn btn-default disabled" title="This department doesn't directly contain any modules. Check subdepartments.">
           <a class="btn-default disabled">
             Manage
           </a>

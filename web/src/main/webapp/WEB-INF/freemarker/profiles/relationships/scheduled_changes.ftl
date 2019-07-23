@@ -29,7 +29,7 @@
                 <td>
                   <#if readOnly>
                   <#assign studentDepartment=studentCourseDetails.department />
-                  <div class="use-tooltip" data-html="true" data-container="body"
+                  <div tabindex="0" role="button" class="use-tooltip" data-html="true" data-container="body"
                        data-title="This change can be managed from the student's profile page or from within the ${studentDepartment.name} department.">
                     </#if>
                     <@bs3form.selector_check_row

@@ -149,11 +149,11 @@ showResetButton=false
           <td class="profile_link"><@pl.profile_link item.universityId /></td>
           <td>
             <#if item.itemTypeString == "static">
-              <span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</span>
+              <span tabindex="0" role="button" class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</span>
             <#elseif item.itemTypeString == "exclude">
-              <span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</span>
+              <span tabindex="0" role="button" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</span>
             <#else>
-              <span class="use-tooltip" title="Added manually" data-placement="right">Added</span>
+              <span tabindex="0" role="button" class="use-tooltip" title="Added manually" data-placement="right">Added</span>
             </#if>
           </td>
           <td>${item.firstName}</td>
@@ -198,7 +198,7 @@ showResetButton=false
               <#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
                 <input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" />
               <#else>
-                <span class="use-tooltip" title="Student can only be removed from Manually added students tab below"><input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" disabled /></span>
+                <span tabindex="0" role="button" class="use-tooltip" title="Student can only be removed from Manually added students tab below"><input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" disabled /></span>
               </#if>
             </td>
           </#if>

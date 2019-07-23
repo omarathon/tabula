@@ -121,7 +121,7 @@
       <#list command.allRoutes as route>
         <div class="row">
           <div class="col-xs-2">
-            <label title="${route.code?upper_case} ${route.name}" class="use-tooltip">${route.code?upper_case} ${route.name}</label>
+            <label tabindex="0" role="button" title="${route.code?upper_case} ${route.name}" class="use-tooltip">${route.code?upper_case} ${route.name}</label>
           </div>
           <div class="col-xs-9">
             <#list allYearsOfStudy as year>

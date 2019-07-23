@@ -48,7 +48,7 @@
           </@bs3form.radio>
         <#else>
           <@bs3form.radio>
-            <span class="disabled use-tooltip" title="There are no reusable small group sets to link to">
+            <span tabindex="0" role="button" class="disabled use-tooltip" title="There are no reusable small group sets to link to">
 							<input type="radio" disabled="disabled">
 							Linked
 							<@fmt.help_popover id="allocationMethod-linked" content="Link these groups to a reusable small group set" />

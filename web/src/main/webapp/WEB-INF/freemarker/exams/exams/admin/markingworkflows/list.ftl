@@ -50,7 +50,7 @@
                 <#if usedInAssignments>${formattedAssignmentCount}<#if usedInExams> and </#if></#if>
                 <#if usedInExams>${formattedExamCount}</#if>
               </#assign>
-              <span class="btn btn-xs btn-danger use-tooltip disabled" title="${title}">
+              <span tabindex="0" role="button" class="btn btn-xs btn-danger use-tooltip disabled" title="${title}">
 								<a class="btn-danger disabled">Delete</a>
 							</span>
             <#else>

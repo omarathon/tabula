@@ -34,12 +34,12 @@
     <div class="alert alert-info">
     <#if hasActiveExtension>
       <#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
-      <div>${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
+      <div>${extension_time_remaining} <span tabindex="0" role="button" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
       Extension deadline was <@fmt.date date=extension.expiryDate />
       </div>
     <#else>
       <#assign latenesstooltip><#if isSelf>"<@components.lateness submission assignment user />"<#else>"<@components.lateness submission assignment student />"</#if></#assign>
-      <div>${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
+      <div>${time_remaining} <span tabindex="0" role="button" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></div>
       Deadline was <@fmt.date date=assignment.closeDate />
     </#if>
     </div>

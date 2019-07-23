@@ -154,7 +154,7 @@
 
                 <div class="labels">
                   <#if submission?? && submission.suspectPlagiarised>
-                    <i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+                    <i tabindex="0" role="button" class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
                   </#if>
                 </div>
 
@@ -289,13 +289,13 @@
                         ) />
                         <#if feedbackSitsStatus.code == "failed">
                           <a href="<@routes.coursework.checkSitsUpload feedback />" target="_blank">
-														<span style="cursor: pointer;" class="label label-important use-tooltip"
+														<span tabindex="0" role="button" style="cursor: pointer;" class="label label-important use-tooltip"
                                   title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 															${feedbackSitsStatus.description}
 														</span><#--
 													--></a>
                         <#elseif sitsWarning>
-                          <span class="label label-important use-tooltip"
+                          <span tabindex="0" role="button" class="label label-important use-tooltip"
                                 title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 														${feedbackSitsStatus.description}
 													</span>
@@ -436,7 +436,7 @@
                 <#local progressTooltip><@spring.message code=student.progress.messageCode /></#local>
               </#if>
 
-              <dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;"
+              <dl tabindex="0" role="button" class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;"
                   data-container="body">
                 <dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
                 <dd style="display: none;" class="table-content-container" data-contentid="<@studentIdentifier student.user />">

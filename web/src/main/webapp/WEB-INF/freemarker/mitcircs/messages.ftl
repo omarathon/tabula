@@ -47,11 +47,11 @@
             <#if !studentView && !message.studentSent>
               <#if message.unreadByStudent>
                 <div class="message-thread__body__message__read-indicator message-thread__body__message__read-indicator--unread">
-                  <i title="Message sent" class="fal fa-check use-tooltip"></i>
+                  <i tabindex="0" role="button" title="Message sent" class="fal fa-check use-tooltip"></i>
                 </div>
               <#else>
                 <div class="message-thread__body__message__read-indicator message-thread__body__message__read-indicator--read">
-                  <i title="Message read" class="fal fa-check-double use-tooltip"></i>
+                  <i tabindex="0" role="button" title="Message read" class="fal fa-check-double use-tooltip"></i>
                 </div>
               </#if>
             </#if>
@@ -69,7 +69,7 @@
 
               <#if !studentView>
                 <label class="btn btn-primary message-thread__footer__fields__btn">
-                  <i class="fal fa-fw fa-paste fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#messageTemplates" title="Message templates" aria-label="Message templates"></i>
+                  <i tabindex="0" role="button" class="fal fa-fw fa-paste fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#messageTemplates" title="Message templates" aria-label="Message templates"></i>
                 </label>
 
                 <@modal.modal id="messageTemplates" cssClass="message-thread__footer__message-templates">
@@ -91,12 +91,12 @@
 
               <label class="btn btn-primary message-thread__footer__fields__btn">
                 <input type="file" id="file.upload" name="file.upload" multiple aria-label="Attach files">
-                <i class="fal fa-fw fa-paperclip fa-lg use-tooltip" data-container="body" title="Attach files" aria-label="Attach files"></i>
+                <i tabindex="0" role="button" class="fal fa-fw fa-paperclip fa-lg use-tooltip" data-container="body" title="Attach files" aria-label="Attach files"></i>
               </label>
 
               <#if !studentView>
                 <label class="btn btn-primary message-thread__footer__fields__btn">
-                  <i class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
+                  <i tabindex="0" role="button" class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
                 </label>
 
                 <@modal.modal id="replyByDateModal" cssClass="message-thread__footer__reply-by-date">
@@ -124,7 +124,7 @@
                 </@modal.modal>
               </#if>
 
-              <span class="use-tooltip" data-container="body" title="Send">
+              <span tabindex="0" role="button" class="use-tooltip" data-container="body" title="Send">
                 <button type="submit" class="btn btn-primary message-thread__footer__fields__btn" aria-label="Send">
                   <i class="fal fa-fw fa-paper-plane fa-lg"></i>
                 </button>

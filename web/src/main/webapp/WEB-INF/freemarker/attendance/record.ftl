@@ -108,7 +108,7 @@
                       </#if>
                     </div>
                     ${point.name}
-                    (<span class="use-tooltip" data-html="true" title="
+                    (<span tabindex="0" role="button" class="use-tooltip" data-html="true" title="
 									<@fmt.wholeWeekDateFormat
                   point.startWeek
                   point.endWeek
@@ -135,7 +135,7 @@
                       <@controls pointCheckpointPair/>
                     </div>
                     ${point.name}
-                    (<span class="use-tooltip" data-html="true" title="
+                    (<span tabindex="0" role="button" class="use-tooltip" data-html="true" title="
 									<@fmt.wholeWeekDateFormat
                   point.startWeek
                   point.endWeek

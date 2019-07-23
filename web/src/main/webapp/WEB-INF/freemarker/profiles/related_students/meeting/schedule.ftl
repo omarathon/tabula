@@ -58,7 +58,7 @@
         </#list>
       <#list nonSchedulableRelationships as relationship>
       <@bs3form.checkbox>
-        <span class="text-muted use-tooltip"
+        <span tabindex="0" role="button" class="text-muted use-tooltip"
               title="You can't use Tabula to schedule a meeting with ${relationship.agentName}. This isn't allowed by their department">
 									<input type="checkbox" disabled="disabled" />
 									${relationship.agentName} (${relationship.relationshipType.agentRole})
@@ -67,7 +67,7 @@
       </#list>
       <#list nonManageableRelationships as relationship>
       <@bs3form.checkbox>
-        <span class="text-muted use-tooltip"
+        <span tabindex="0" role="button" class="text-muted use-tooltip"
               title="You don't have permission to manage<#if schedulableRelationships??> scheduled</#if> ${relationship.relationshipType.agentRole} meetings for ${student.firstName}">
 										<input type="checkbox" disabled="disabled" />
 										${relationship.agentName} (${relationship.relationshipType.agentRole})

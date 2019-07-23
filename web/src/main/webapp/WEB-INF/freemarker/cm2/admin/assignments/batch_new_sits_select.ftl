@@ -114,11 +114,11 @@ first page of the form to setup a bunch of assignments from SITS.
         <table class="table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers" id="batch-add-table">
           <thead>
           <tr>
-            <th class="for-check-all"><input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select all/none"></th>
+            <th class="for-check-all"><input tabindex="0" role="button" type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select all/none"></th>
             <th>Module</th>
-            <th><abbr title="Component type" class="use-tooltip">Type</abbr></th>
-            <th><abbr title="Sequence" class="use-tooltip">Seq</abbr></th>
-            <th><abbr title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
+            <th><abbr tabindex="0" role="button" title="Component type" class="use-tooltip">Type</abbr></th>
+            <th><abbr tabindex="0" role="button" title="Sequence" class="use-tooltip">Seq</abbr></th>
+            <th><abbr tabindex="0" role="button" title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
             <th>Component name</th>
             <#if step="options">
               <th></th>

@@ -80,7 +80,7 @@
                       (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
                     </#assign>
 
-                    <span class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
+                    <span tabindex="0" role="button" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
                   <#else>
                     Due in <strong>${durationFormatter(enhancedAssignment.submissionDeadline)}</strong>
                   </#if>
@@ -157,7 +157,7 @@
                     (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
                   </#assign>
 
-                  <span class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
+                  <span tabindex="0" role="button" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
                 </#if>
               </div>
               <div class="col-md-3">
@@ -215,7 +215,7 @@
                     (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
                   </#assign>
 
-                  <span class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
+                  <span tabindex="0" role="button" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
                 </#if>
               </div>
               <div class="col-md-3">
