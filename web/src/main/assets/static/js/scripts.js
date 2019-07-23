@@ -511,6 +511,7 @@ const {jQuery, WPopupBox} = window;
         $creator.popover('hide');
         $creator.tooltip('enable');
       }
+      e.stopPropagation();
     });
 
     // now that's all done, bind the popover
