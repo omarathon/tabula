@@ -99,7 +99,7 @@ preposition: Text to relate the title to the department name in the second line,
 				<h4 class="with-related">${preposition} ${department.name}</h4>
 			</#if>
 			<#if (departmentsWithPermission?has_content && departmentsWithPermission?size > 1)>
-								<#-- the dropdown itself -->
+				<#-- the dropdown itself -->
 				<div class="dept-switcher dropdown">
 					<a href="#" class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher"><#--
 					--><i class="fa fa-caret-down fa-lg"></i><#--
