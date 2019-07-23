@@ -670,7 +670,7 @@
             <div class="row group">
               <div class="col-md-12">
                 <#if setItem.viewerMustSignUp>
-                <div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
+                <div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')?no_esc}>
                   <input type="radio"
                     name="group"
                     value="${group.id}"
@@ -1008,7 +1008,7 @@
                           Record
                         </a>
                       </div>
-                    </#if>
+                      "pull-left              </#if>
                   </#if>
                 </th>
               </#list>
