@@ -109,10 +109,10 @@ Generates the bulk of the picker HTML, inside a fieldset element
           <#local membersGroup=status.actualValue />
         </@spring.bind>
 
-        <#local includeText><span class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
-          <#local pendingDeletionText><span class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
-            <#local excludeText><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
-              <#local sitsText><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
+        <#local includeText><span tabindex="0" role="button" class="use-tooltip" title="Added manually" data-placement="right">Added</#local>
+          <#local pendingDeletionText><span tabindex="0" role="button" class="use-tooltip" title="Deleted manual addition" data-placement="right">Pending deletion</#local>
+            <#local excludeText><span tabindex="0" role="button" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</#local>
+              <#local sitsText><span tabindex="0" role="button" class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</#local>
 
                 <#local membershipInfo = command.membershipInfo />
                 <#local hasMembers=(membershipInfo.totalCount gt 0 || membershipInfo.includeCount gt 0 || membershipInfo.excludeCount gt 0) />
@@ -148,12 +148,12 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				</a>
       </#if>
 
-      <div class="use-tooltip" style="display: inline-block;"
+      <div tabindex="0" role="button" class="use-tooltip" style="display: inline-block;"
            <#if availableUpstreamGroups??>title="This will only remove enrolment for this ${name} in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>>
 				<a class="btn btn-primary disabled remove-users member-action">Remove</a>
 			</div>
 
-      <div class="use-tooltip" style="display: inline-block;" title="Re-enrol selected students">
+      <div tabindex="0" role="button" class="use-tooltip" style="display: inline-block;" title="Re-enrol selected students">
 				<a class="btn btn-primary restore-users disabled">Restore</a>
 			</div>
 
@@ -212,7 +212,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
                     <@form.selector_check_row "modifyEnrolment" item.userId />
                   </#if>
                 <#else>
-                  <i class="icon-ban-circle fa fa-ban use-tooltip"
+                  <i tabindex="0" role="button" class="icon-ban-circle fa fa-ban use-tooltip"
                      title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
                 </#if>
 							</td>

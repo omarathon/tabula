@@ -122,11 +122,11 @@
 
     <#if isTarget!false><strong class="text-success"></#if>
 
-    <span class="permission"><i class="fa fa-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
+    <span class="permission"><i tabindex="0" role="button" class="fa fa-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
     <#if showScopes && scope?? && scope?size != 0>
       on <span class="scope"><i class="fa fa-bookmark"></i> ${scope.toString}</span>
     <#elseif showScopes && permission.scoped>
-      <i class="fa fa-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
+      <i tabindex="0" role="button" class="fa fa-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
     </#if>
 
     <#if isTarget!false></strong></#if>

@@ -274,9 +274,9 @@ preposition: Text to relate the title to the department name in the second line,
 
 <#macro nationality nationality><#--
 --><#if nationality = 'British (ex. Channel Islands & Isle of Man)' || nationality = 'British [NO LONGER IN USE: change to 2826]' || nationality = 'NAT code 000 should be used for British'><#--
-	--><span class="use-tooltip" data-placement="right" title="${nationality}">British</span><#--
+	--><span tabindex="0" role="button" class="use-tooltip" data-placement="right" title="${nationality}">British</span><#--
 --><#elseif nationality?starts_with('(Obsolete) Formerly ')><#--
-	--><span class="use-tooltip" data-placement="right" title="${nationality}">${nationality?substring(20)}</span><#--
+	--><span tabindex="0" role="button" class="use-tooltip" data-placement="right" title="${nationality}">${nationality?substring(20)}</span><#--
 --><#else><#--
 	-->${nationality}<#--
 --></#if></#macro>

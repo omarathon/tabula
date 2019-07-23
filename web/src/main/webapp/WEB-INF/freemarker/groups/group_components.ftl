@@ -966,7 +966,7 @@
       </#local>
 
       <td>
-				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string?esc}" data-html="true">
+				<span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string?esc}" data-html="true">
 					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
