@@ -1008,7 +1008,7 @@
                           Record
                         </a>
                       </div>
-                      "pull-left              </#if>
+                    </#if>
                   </#if>
                 </th>
               </#list>
