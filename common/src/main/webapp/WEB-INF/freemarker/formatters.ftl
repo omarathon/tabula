@@ -99,23 +99,23 @@ preposition: Text to relate the title to the department name in the second line,
 				<h4 class="with-related">${preposition} ${department.name}</h4>
 			</#if>
 			<#if (departmentsWithPermission?has_content && departmentsWithPermission?size > 1)>
-				<a href="#" class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher">
-					<i class="fa fa-caret-down fa-lg"></i>
-				</a>
-				<#-- cross-app singleton introductory text -->
-				<#if showIntro("departmentsWithPermission", "anywhere")>
-					<#assign introText>
-						<p>To view other departments that you have permission to access, click the down arrow next to the department name.</p>
-					</#assign>
-					<a href="#"
-					   id="departmentsWithPermission-intro"
-					   class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
-					   data-hash="${introHash("departmentsWithPermission", "anywhere")}"
-					   data-title="Other departments" aria-label="Help" data-placement="bottom"
-					   data-html="true" data-content="${introText}"><i class="fa fa-question-circle"></i></a>
-				</#if>
-				<#-- the dropdown itself -->
+								<#-- the dropdown itself -->
 				<div class="dept-switcher dropdown">
+					<a href="#" class="use-tooltip" title="Other departments" data-toggle="dropdown" data-container="body" data-target=".dept-switcher"><#--
+					--><i class="fa fa-caret-down fa-lg"></i><#--
+				--></a>
+					<#-- cross-app singleton introductory text -->
+					<#if showIntro("departmentsWithPermission", "anywhere")>
+						<#assign introText>
+							<p>To view other departments that you have permission to access, click the down arrow next to the department name.</p>
+						</#assign>
+						<a href="#"
+							 id="departmentsWithPermission-intro"
+							 class="use-introductory<#if showIntro("departmentsWithPermission", "anywhere")> auto</#if>"
+							 data-hash="${introHash("departmentsWithPermission", "anywhere")}"
+							 data-title="Other departments" aria-label="Help" data-placement="bottom"
+							 data-html="true" data-content="${introText}"><i class="fa fa-question-circle"></i></a>
+					</#if>
 					<ul class="dropdown-menu">
 						<#list departmentsWithPermission as dept>
 							<#if dept.code != activeDepartment.code>
