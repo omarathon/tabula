@@ -1410,6 +1410,9 @@ $(() => {
         $m = $('<div />').attr({
           id: 'attendance-note-modal',
           class: 'modal fade',
+          // TAB-7334 fix tabbing in side modal
+          tabindex: '-1',
+          'aria-hidden': 'true',
         }).appendTo($('body'));
       }
 
