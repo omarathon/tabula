@@ -59,7 +59,7 @@
           <td data-sortby="${submission.lastModified.millis}">
             <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
-              <span tabindex="0" role="button" class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
+              <span tabindex="0" class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
           </td>
         </tr>

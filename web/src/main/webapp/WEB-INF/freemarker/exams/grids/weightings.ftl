@@ -116,7 +116,7 @@
       <#list command.allCourses as course>
         <div class="row">
           <div class="col-xs-2">
-            <label tabindex="0" role="button" title="${course.code?upper_case} ${course.name}" class="use-tooltip">${course.code?upper_case} ${course.name}</label>
+            <label tabindex="0" title="${course.code?upper_case} ${course.name}" class="use-tooltip">${course.code?upper_case} ${course.name}</label>
           </div>
           <div class="col-xs-9">
             <#list allYearsOfStudy as year>

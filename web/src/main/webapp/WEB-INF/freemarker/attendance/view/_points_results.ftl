@@ -43,7 +43,7 @@
                 </#noescape>
               </div>
               ${groupedPoint.templatePoint.name}
-              (<span tabindex="0" role="button" class="use-tooltip" data-html="true" title="
+              (<spantabindex="0" class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
               groupedPoint.templatePoint.startWeek
               groupedPoint.templatePoint.endWeek

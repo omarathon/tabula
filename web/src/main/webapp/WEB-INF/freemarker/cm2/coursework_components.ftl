@@ -176,18 +176,18 @@
 
   <div class="stage-progress-bar time-progress-bar">
     <#if assignment.opened>
-      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="Assignment ready">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="Assignment ready">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x fa-check-circle-o text-success"></i>
 			</span>
     <#else>
-      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x fa-circle-o text-default"></i>
 			</span>
     </#if>
 
-    <div tabindex="0" role="button" class="bar tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+    <div tabindex="0" class="bar tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
       <div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100"
            style="width: ${percentage?c}%;">
       </div>
@@ -206,7 +206,7 @@
       <#local icon = 'fa-exclamation-circle' />
     </#if>
 
-    <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+    <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 			<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 		</span>
@@ -246,7 +246,7 @@
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
           <strong>Assignment open:</strong>
-          <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                 data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
         </#local>
       <#elseif assignment.collectSubmissions && assignment.openEnded>
@@ -300,7 +300,7 @@
       <#else>
         <#if (info.submission?? || !assignment.collectSubmissions) && info.feedbackDeadline??>
           <#local feedbackStatus>
-            <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
+            <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                                                                                   data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
             <#if info.feedbackLate>
               <br />
@@ -318,7 +318,7 @@
         <#elseif !(info.submission??) && info.studentDeadline??>
           <#local feedbackStatus>
             <strong>Assignment due:</strong>
-            <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
+            <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
                   data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
           </#local>
         </#if>
@@ -433,12 +433,12 @@
     <div class="late deadline">
       <#if info.hasActiveExtension>
         <#local latenesstooltip><@lateness assignment user info.submission /></#local>
-        <div class="time-remaining">${extension_time_remaining} <span tabindex="0" role="button" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
+        <div class="time-remaining">${extension_time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
         </div>
         Extension deadline was <@fmt.date date=extension.expiryDate />
       <#else>
         <#local latenesstooltip><@lateness assignment user info.submission /></#local>
-        <div class="time-remaining">${time_remaining} <span tabindex="0" role="button" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
+        <div class="time-remaining">${time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title="${latenesstooltip}" data-container="body">Late</span>
         </div>
         Deadline was <@fmt.date date=assignment.closeDate />
       </#if>
@@ -520,9 +520,9 @@
       </#if>
 
       <#if stageInfo_index gt 0>
-        <div tabindex="0" role="button" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
+        <div tabindex="0" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
-      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -551,10 +551,10 @@
 
       <#local title><@workflowMessage progress.stage.actionCode assignment student /></#local>
       <#if progress_index gt 0>
-        <div tabindex="0" role="button" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
+        <div tabindex="0" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
       <#local title><@workflowMessage progress.messageCode assignment student /></#local>
-      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -604,21 +604,21 @@
       <#if !assignment.opened>
         <div>
           <strong>Submissions open:</strong>
-          <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span>
+          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span>
         </div>
       </#if>
 
       <#if !assignment.openEnded && !assignment.closed>
         <div>
           <strong>Submissions due:</strong>
-          <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
         </div>
       </#if>
 
       <#if info.feedbackDeadline??>
         <div>
           <strong>Student feedback due:</strong>
-          <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
+          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                 data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
         </div>
       </#if>
@@ -792,14 +792,14 @@
             <#if assignment.archived>
               <li><strong>Archived</strong></li></#if>
             <#if !assignment.opened>
-              <li><strong>Assignment opens:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+              <li><strong>Assignment opens:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                                                            data-html="true"><@fmt.date date=assignment.openDate /></span></li>
             </#if>
 
             <#if assignment.openEnded>
               <li><strong>Open-ended</strong></li>
             <#else>
-              <li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span tabindex="0" role="button" class="use-tooltip"
+              <li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <spantabindex="0" class="use-tooltip"
                                                                                                    title="<@fmt.dateToWeek assignment.closeDate />"
                                                                                                    data-html="true"><@fmt.date date=assignment.closeDate /></span>
               </li>
@@ -823,7 +823,7 @@
             </#if>
 
             <#if assignment.feedbackDeadline??>
-              <li><strong>Feedback due:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />"
+              <li><strong>Feedback due:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />"
                                                        data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span></li>
             </#if>
           </ul>
@@ -869,16 +869,16 @@
             <h6>Progress</h6>
 
             <ul class="list-unstyled">
-              <li><strong>Created:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />"
+              <li><strong>Created:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />"
                                                   data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
               <#if assignment.opened>
-                <li><strong>Opened:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+                <li><strong>Opened:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                                                    data-html="true"><@fmt.date date=assignment.openDate /></span></li>
               </#if>
 
               <#if !assignment.openEnded && assignment.closed>
-                <li><strong>Closed:</strong> <span tabindex="0" role="button" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />"
+                <li><strong>Closed:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />"
                                                    data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
               </#if>
 
@@ -1020,7 +1020,7 @@
         <#local title = 'Preconditions not met' />
       </#if>
 
-      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -1382,7 +1382,7 @@
 <#macro submission_details submission=[] showDisabilityDisclosure=false student=""><@compress single_line=true>
   <#if submission?has_content>
     <#if submission.submittedDate??>
-      <span tabindex="0" role="button" class="date tabula-tooltip" data-title="<@lateness submission />">
+      <span tabindex="0" class="date tabula-tooltip" data-title="<@lateness submission />">
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</span>
     </#if>
@@ -1401,12 +1401,12 @@
   <#if submission?has_content>
     <#if submission.late>
       <#if enhancedExtension?has_content && enhancedExtension.extension.approved>
-        <span tabindex="0" role="button" class="label label-danger use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
+        <span tabindex="0" class="label label-danger use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
       <#else>
-        <span tabindex="0" role="button" class="label label-danger use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
+        <span tabindex="0" class="label label-danger use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
       </#if>
     <#elseif submission.authorisedLate>
-      <span tabindex="0" role="button" class="label label-info use-tooltip" data-html="true"
+      <span tabindex="0" class="label label-info use-tooltip" data-html="true"
             title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
     </#if>
     <#if features.disabilityOnSubmission && student.disability??>
@@ -1424,13 +1424,13 @@
         </#local>
       </#if>
       <#if enhancedExtension.within>
-        <span tabindex="0" role="button" class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
+        <span tabindex="0" class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
       <#elseif extension.rejected>
         <span class="label label-info">Extension Rejected</span>
       <#elseif !extension.approved>
         <span class="label label-info">Extension Requested</span>
       <#else>
-        <span tabindex="0" role="button" class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
+        <span tabindex="0" class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
       </#if>
     </#if>
   </#if>

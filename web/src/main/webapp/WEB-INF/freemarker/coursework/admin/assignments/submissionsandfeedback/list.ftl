@@ -189,7 +189,7 @@
               </td>
               <td class="submitted">
                 <#if submission?? && submission.submittedDate??>
-                  <span tabindex="0" role="button" class="date tabula-tooltip" data-title="${lateness!''}">
+                  <span tabindex="0" class="date tabula-tooltip" data-title="${lateness!''}">
 										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 									</span>
                 </#if>
@@ -206,9 +206,9 @@
                   </#if>
                 <#-- Plagiarised -->
                   <#if submission.suspectPlagiarised>
-                    <i tabindex="0" role="button" class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
+                    <i tabindex="0" class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
                   <#elseif submission.investigationCompleted>
-                    <i tabindex="0" role="button" class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
+                    <i tabindex="0" class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
                   </#if>
                 </#if>
                 <@sd.submission_status submission student.coursework.enhancedExtension student.coursework.enhancedFeedback student />
@@ -314,13 +314,13 @@
                       ) />
                       <#if feedbackSitsStatus.code == "failed">
                         <a href="<@routes.coursework.checkSitsUpload student.coursework.enhancedFeedback.feedback />" target="_blank">
-													<span tabindex="0" role="button" style="cursor: pointer;" class="label label-important use-tooltip"
+													<span tabindex="0" style="cursor: pointer;" class="label label-important use-tooltip"
                                 title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 													${feedbackSitsStatus.description}
 													</span><#--
 												--></a>
                       <#elseif sitsWarning>
-                        <span tabindex="0" role="button" class="label label-important use-tooltip"
+                        <span tabindex="0" class="label label-important use-tooltip"
                               title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 													${feedbackSitsStatus.description}
 												</span>

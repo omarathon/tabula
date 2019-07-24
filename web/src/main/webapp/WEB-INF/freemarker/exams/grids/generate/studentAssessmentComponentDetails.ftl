@@ -158,7 +158,7 @@
                           </#if>
 														</#compress></span>
                       <#else>
-                        <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Assessment component">X</span>
+                        <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Assessment component">X</span>
                       </#if>
                     </td>
                   </tr>
@@ -175,7 +175,7 @@
                       <#if component.member.firstDefinedGrade??>
                         <span class="<#if !component.member.isAgreedGrade()>exam-grid-actual-mark</#if>"> ${component.member.firstDefinedGrade}</span>
                       <#else>
-                        <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Assessment component">X</span>
+                        <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Assessment component">X</span>
                       </#if>
                     </td>
                   </tr>
@@ -198,7 +198,7 @@
                   <span class=exam-grid-actual-mark">${mr.actualMark}</span>
                 </#if>
               <#else>
-                <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>
+                <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set for Module registration">X</span>
               </#if>
             </td>
             <td class="assessment_details_col assessment_details_col1">
@@ -207,7 +207,7 @@
               <#elseif mr.actualGrade??>
                 ${mr.actualGrade}
               <#else>
-                <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Module registration">X</span>
+                <span tabindex="0" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set for Module registration">X</span>
               </#if>
             </td>
           </tr>

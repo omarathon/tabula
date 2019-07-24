@@ -22,10 +22,10 @@
     <@listStudentIdInputs />
 
     <p class="progress-arrows">
-      <span tabindex="0" role="button" class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link"
-                                                                                     name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
-      <span tabindex="0" role="button" class="arrow-right arrow-left use-tooltip active">Students</span>
-      <span tabindex="0" role="button" class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link"
+      <span tabindex="0" class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link"
+                                                                        name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
+      <span tabindex="0" class="arrow-right arrow-left use-tooltip active">Students</span>
+      <span tabindex="0" class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link"
                                                                                             name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
     </p>
 

@@ -82,7 +82,7 @@
           <#assign point = groupedPointPair._1() />
           <div class="col-md-10">
             ${point.name}
-            (<span tabindex="0" role="button" class="use-tooltip" data-html="true" title="
+            (<spantabindex="0" class="use-tooltip" data-html="true" title="
 						<@fmt.wholeWeekDateFormat
             point.startWeek
             point.endWeek

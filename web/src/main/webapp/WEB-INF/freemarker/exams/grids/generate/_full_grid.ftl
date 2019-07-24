@@ -4,7 +4,7 @@
   <#macro showMarks entity markType>
     <#list perYearColumns?keys?sort as year>
       <#if gridOptionsCommand.showComponentMarks>
-        <th><span tabindex="0" role="button" class="tabula-tooltip" data-title="${markType.description}">${markType.label}</span></th>
+        <th><span tabindex="0" class="tabula-tooltip" data-title="${markType.description}">${markType.label}</span></th>
       </#if>
       <#list mapGet(perYearColumns, year) as column>
         <td>

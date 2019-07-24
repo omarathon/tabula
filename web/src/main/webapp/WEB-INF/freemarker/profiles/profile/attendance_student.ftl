@@ -94,7 +94,7 @@
                               urlProfile=true/>
 
                             <#if !nonReportedTerms?seq_contains(term) && can.do("MonitoringPoints.OverwriteReported", student)>
-                              <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point />"><span tabindex="0" role="button" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
+                              <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point />"><span tabindex="0" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
                             </#if>
                           <#else>
                             <@attendance_macros.checkpointLabel

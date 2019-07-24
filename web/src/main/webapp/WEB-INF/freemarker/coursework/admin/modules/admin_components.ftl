@@ -99,18 +99,18 @@
           <#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
           <#if workingDaysAway lt 0>
             <#if assignment.hasUnreleasedFeedback>
-              <#assign feedbackLabel><span tabindex="0" role="button" class="label label-important use-tooltip"
+              <#assign feedbackLabel><span tabindex="0" class="label label-important use-tooltip"
                                            title="There is unreleased feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Late feedback</span></#assign>
             <#elseif assignment.submissions?has_content && !assignment.hasReleasedFeedback>
-              <#assign feedbackLabel><span tabindex="0" role="button" class="label label-important use-tooltip"
+              <#assign feedbackLabel><span tabindex="0" class="label label-important use-tooltip"
                                            title="There have been submissions, but no feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Feedback overdue</span></#assign>
             </#if>
           <#elseif workingDaysAway lte 5>
-            <#assign feedbackLabel><span tabindex="0" role="button" class="label use-tooltip" title="The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
+            <#assign feedbackLabel><span tabindex="0" class="label use-tooltip" title="The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
           </#if>
 
           <#assign feedbackDeadline>
-            <div tabindex="0" role="button" class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
+            <divtabindex="0" class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
               <#if workingDaysAway == 0>
                 <b>Feedback due today</b>
               <#elseif workingDaysAway lt 0>
@@ -185,7 +185,7 @@
             <div class="submission-and-feedback-count">
               <i class="icon-file"></i>
               <a href="<@routes.coursework.assignmentsubmissionsandfeedback assignment=assignment />">
-							<span tabindex="0" role="button" class="use-tooltip" title="View all submissions and feedback">
+							<spantabindex="0" class="use-tooltip" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
 						--></span></a>

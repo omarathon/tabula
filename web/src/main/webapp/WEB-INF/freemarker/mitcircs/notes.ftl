@@ -44,7 +44,7 @@
             <#local deleteUrl><@routes.mitcircs.deleteNote note /></#local>
             <@f.form method="post" action=deleteUrl modelAttribute="" cssClass="form-inline double-submit-protection">
               <button type="submit" class="btn btn-xs btn-link" data-toggle="confirm-submit" data-message="Are you sure you want to delete this note?" aria-label="Delete note">
-                <i tabindex="0" role="button" title="Delete note" class="use-tooltip fal fa-times-circle"></i>
+                <i tabindex="0" title="Delete note" class="use-tooltip fal fa-times-circle"></i>
               </button>
             </@f.form>
           </span>
