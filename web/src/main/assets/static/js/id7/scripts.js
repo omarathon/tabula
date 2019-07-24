@@ -28,9 +28,9 @@ jQuery.fn.sortableTable = function sortableTable(settings) {
   const $table = $(this);
   if ($table.tablesorter) {
     const headerSettings = {};
-    $('th', $table).each((index) => {
-      const sortable = $(this).hasClass('sortable');
-      const customSorter = $(this).data('sorter');
+    $('th', $table).each((index, element) => {
+      const sortable = $(element).hasClass('sortable');
+      const customSorter = $(element).data('sorter');
       if (!sortable) {
         headerSettings[index] = { sorter: false };
       } else if (customSorter) {
@@ -122,7 +122,7 @@ jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', () => {
+      .on('click', function () {
         $(this).prev('input').focus();
       });
   }
@@ -215,7 +215,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
     }
   }).next('.add-on')
     .css({ cursor: 'pointer' })
-    .on('click', () => {
+    .on('click', function () {
       $(this).prev('input').focus();
     });
 
@@ -226,7 +226,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
 
 jQuery.fn.selectOffset = function selectOffset() {
   if ($(this).hasClass('startDateTime')) {
-    $(this).on('click', () => {
+    $(this).on('click', function () {
       const indexValue = $(this).children(':selected').attr('value');
       $(this).closest('.dateTimePair')
         .find('.endDateTime')
