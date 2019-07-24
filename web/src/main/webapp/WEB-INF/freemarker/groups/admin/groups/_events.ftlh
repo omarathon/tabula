@@ -57,7 +57,7 @@
                       <a class="btn btn-xs btn-primary" href="${editEventUrl}">Edit</a>
 
                       <#if event.hasRecordedAttendance>
-                        <divtabindex="0" class="use-tooltip" data-container="body" style="display: inline-block;"
+                        <div tabindex="0" class="use-tooltip" data-container="body" style="display: inline-block;"
                              title="This event can't be deleted as there is attendance recorded against it">
                           <button type="button" class="btn btn-danger btn-xs disabled use-tooltip" aria-label="Close">
                             <i class="fa fa-times"></i>

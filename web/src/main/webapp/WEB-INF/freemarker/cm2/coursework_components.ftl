@@ -246,7 +246,7 @@
       <#elseif assignment.collectSubmissions && !assignment.opened>
         <#local submissionStatus>
           <strong>Assignment open:</strong>
-          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+          <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                 data-html="true"><@fmt.date date=assignment.openDate /> - ${durationFormatter(assignment.openDate)}</span>
         </#local>
       <#elseif assignment.collectSubmissions && assignment.openEnded>
@@ -300,7 +300,7 @@
       <#else>
         <#if (info.submission?? || !assignment.collectSubmissions) && info.feedbackDeadline??>
           <#local feedbackStatus>
-            <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
+            <strong>Feedback <#if info.feedbackLate>over</#if>due:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                                                                                   data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
             <#if info.feedbackLate>
               <br />
@@ -318,7 +318,7 @@
         <#elseif !(info.submission??) && info.studentDeadline??>
           <#local feedbackStatus>
             <strong>Assignment due:</strong>
-            <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
+            <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.studentDeadline />"
                   data-html="true"><@fmt.date date=info.studentDeadline /> - ${durationFormatter(info.studentDeadline)}</span>
           </#local>
         </#if>
@@ -604,21 +604,21 @@
       <#if !assignment.opened>
         <div>
           <strong>Submissions open:</strong>
-          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span>
+          <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />" data-html="true"><@fmt.date date=assignment.openDate /></span>
         </div>
       </#if>
 
       <#if !assignment.openEnded && !assignment.closed>
         <div>
           <strong>Submissions due:</strong>
-          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
+          <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />" data-html="true"><@fmt.date date=assignment.closeDate /></span>
         </div>
       </#if>
 
       <#if info.feedbackDeadline??>
         <div>
           <strong>Student feedback due:</strong>
-          <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
+          <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek info.feedbackDeadline />"
                 data-html="true"><@fmt.date date=info.feedbackDeadline includeTime=false /></span>
         </div>
       </#if>
@@ -792,14 +792,14 @@
             <#if assignment.archived>
               <li><strong>Archived</strong></li></#if>
             <#if !assignment.opened>
-              <li><strong>Assignment opens:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+              <li><strong>Assignment opens:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                                                            data-html="true"><@fmt.date date=assignment.openDate /></span></li>
             </#if>
 
             <#if assignment.openEnded>
               <li><strong>Open-ended</strong></li>
             <#else>
-              <li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <spantabindex="0" class="use-tooltip"
+              <li><strong>Assignment <#if assignment.closed>closed<#else>due</#if>:</strong> <span tabindex="0" class="use-tooltip"
                                                                                                    title="<@fmt.dateToWeek assignment.closeDate />"
                                                                                                    data-html="true"><@fmt.date date=assignment.closeDate /></span>
               </li>
@@ -823,7 +823,7 @@
             </#if>
 
             <#if assignment.feedbackDeadline??>
-              <li><strong>Feedback due:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />"
+              <li><strong>Feedback due:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.feedbackDeadline />"
                                                        data-html="true"><@fmt.date date=assignment.feedbackDeadline includeTime=false /></span></li>
             </#if>
           </ul>
@@ -869,16 +869,16 @@
             <h6>Progress</h6>
 
             <ul class="list-unstyled">
-              <li><strong>Created:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />"
+              <li><strong>Created:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.createdDate />"
                                                   data-html="true"><@fmt.date date=assignment.createdDate /></span></li>
 
               <#if assignment.opened>
-                <li><strong>Opened:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
+                <li><strong>Opened:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.openDate />"
                                                    data-html="true"><@fmt.date date=assignment.openDate /></span></li>
               </#if>
 
               <#if !assignment.openEnded && assignment.closed>
-                <li><strong>Closed:</strong> <spantabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />"
+                <li><strong>Closed:</strong> <span tabindex="0" class="use-tooltip" title="<@fmt.dateToWeek assignment.closeDate />"
                                                    data-html="true"><@fmt.date date=assignment.closeDate /></span></li>
               </#if>
 

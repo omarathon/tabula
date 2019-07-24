@@ -36,7 +36,7 @@
         <td>
           <a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/edit" />" class="btn btn-primary btn-xs">Edit</a>
           <#if !relationshipType.empty>
-            <divtabindex="0" class="use-tooltip" title="Can't delete this type as there are relationships associated with it">
+            <div tabindex="0" class="use-tooltip" title="Can't delete this type as there are relationships associated with it">
               <a href="<@url page="/sysadmin/relationships/${relationshipType.urlPart}/delete" />" class="btn btn-danger btn-xs disabled">Delete</a>
             </div>
           <#else>

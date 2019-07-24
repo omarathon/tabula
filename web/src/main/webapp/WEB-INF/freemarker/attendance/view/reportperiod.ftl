@@ -17,7 +17,7 @@
           <@bs3form.radio>
             <input id="period_${period_index}" name="period" type="radio" value="${period._1()}" ${disabledClass}>
             <#if disabledClass?has_content>
-              <spantabindex="0" class="use-tooltip" data-content="All of the chosen students have already reported for this period">
+              <span tabindex="0" class="use-tooltip" data-content="All of the chosen students have already reported for this period">
 							${period._1()}
 						</span>
             <#else>

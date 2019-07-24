@@ -12,7 +12,7 @@
   <div><label class="review-label">${label_info}:</label> <#if assignment_property != ''>${assignment_property}<#else>${defaultValue}</#if></div>
 </#macro>
 <#macro review_date_fld_details label_info assignment_property='' includeTime=true>
-  <div><label class="review-label">${label_info}:</label> <#if assignment_property != ''><spantabindex="0" class="use-tooltip"
+  <div><label class="review-label">${label_info}:</label> <#if assignment_property != ''><span tabindex="0" class="use-tooltip"
                                                                                                title="<@fmt.dateToWeek assignment_property />"
                                                                                                data-html="true"><@fmt.date date=assignment_property includeTime=includeTime /></span></#if>
   </div>

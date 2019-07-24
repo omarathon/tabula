@@ -124,7 +124,7 @@
                 <#list componentInfo as component>
                   <#assign groupAndSequenceAndOccurrence = component._1() />
                   <#assign cName = component._2() />
-                  <th colspan="2"><spantabindex="0" class="use-tooltip" title="" data-container="body"
+                  <th colspan="2"><span tabindex="0" class="use-tooltip" title="" data-container="body"
                                         data-original-title="${cName}">${groupAndSequenceAndOccurrence}</span></th>
                 </#list>
                 <th>Module Mark</th>

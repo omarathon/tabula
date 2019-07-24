@@ -115,7 +115,7 @@
       <tr>
         <#assign permissionName>${permission._1().name}</#assign>
 
-        <td><abbrtabindex="0" class="use-tooltip" title="${permission._1().description}">${permissionName}</abbr></td>
+        <td><abbr tabindex="0" class="use-tooltip" title="${permission._1().description}">${permissionName}</abbr></td>
         <#list permission._2() as roles>
           <td data-name="${roleId(roles._1())}">
             <#if roles._2()?has_content>

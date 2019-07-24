@@ -110,7 +110,7 @@
           </#if>
 
           <#assign feedbackDeadline>
-            <divtabindex="0" class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
+            <div tabindex="0" class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
               <#if workingDaysAway == 0>
                 <b>Feedback due today</b>
               <#elseif workingDaysAway lt 0>
@@ -185,7 +185,7 @@
             <div class="submission-and-feedback-count">
               <i class="icon-file"></i>
               <a href="<@routes.coursework.assignmentsubmissionsandfeedback assignment=assignment />">
-							<spantabindex="0" class="use-tooltip" title="View all submissions and feedback">
+							<span tabindex="0" class="use-tooltip" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
 						--></span></a>

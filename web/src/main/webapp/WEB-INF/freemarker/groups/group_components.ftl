@@ -78,18 +78,18 @@
 					<div class="col-md-2">
 						<#if setItem.isStudentSignUp()>
               <#if setItem.set.openForSignups>
-                <spantabindex="0" class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i> Open for self-signup</span>
+                <span tabindex="0" class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i> Open for self-signup</span>
 							<#else>
-                <spantabindex="0" class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i> Closed for self-signup</span>
+                <span tabindex="0" class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i> Closed for self-signup</span>
               </#if>
 						<#elseif setItem.isLinked()>
-              <spantabindex="0" class="use-tooltip" title="These group allocations may be linked to other modules">Linked</span>
+              <span tabindex="0" class="use-tooltip" title="These group allocations may be linked to other modules">Linked</span>
             <#else>
-              <spantabindex="0" class="use-tooltip" title="These groups are manually allocated">Manually allocated</span>
+              <span tabindex="0" class="use-tooltip" title="These groups are manually allocated">Manually allocated</span>
             </#if>
 
             <#if set.archived>
-              <spantabindex="0" class="use-tooltip" title="These groups have been archived">Archived</span>
+              <span tabindex="0" class="use-tooltip" title="These groups have been archived">Archived</span>
             </#if>
 					</div>
 
@@ -630,23 +630,23 @@
               || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
               || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
               >
-                <spantabindex="0" class="use-tooltip"
+                <span tabindex="0" class="use-tooltip"
                       title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i
                           class="fa fa-lock"></i></span>
               <#else>
-                <spantabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+                <span tabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
               </#if>
             <#else>
               <#if setItem.isStudentSignUp()>
                 <#if setItem.set.openForSignups>
-                  <spantabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+                  <span tabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
                 <#else>
-                  <spantabindex="0" class="use-tooltip" title="This group is closed for self sign-up"><i class="fa fa-lock"></i></span>
+                  <span tabindex="0" class="use-tooltip" title="This group is closed for self sign-up"><i class="fa fa-lock"></i></span>
                 </#if>
               <#elseif setItem.isLinked()>
-                <spantabindex="0" class="use-tooltip" title="Allocations for this group are linked and reused"><i class="fa fa-link"></i></span>
+                <span tabindex="0" class="use-tooltip" title="Allocations for this group are linked and reused"><i class="fa fa-link"></i></span>
               <#else>
-                <spantabindex="0" class="use-tooltip" title="This is a manually allocated group"><i class="fa fa-random"></i></span>
+                <span tabindex="0" class="use-tooltip" title="This is a manually allocated group"><i class="fa fa-random"></i></span>
               </#if>
             </#if>
           </h3>
@@ -1274,11 +1274,11 @@ showResetButton=false
         <tr class="${item.itemTypeString}">
           <td>
             <#if item.itemTypeString == "static">
-              <spantabindex="0" class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="fa fa-list-alt"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="fa fa-list-alt"></i></span>
             <#elseif item.itemTypeString == "exclude">
-              <spantabindex="0" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="fa fa-ban"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="fa fa-ban"></i></span>
             <#else>
-              <spantabindex="0" class="use-tooltip" title="Added manually" data-placement="right"><i class="fa fa-hand-o-up"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Added manually" data-placement="right"><i class="fa fa-hand-o-up"></i></span>
             </#if>
           </td>
           <td>${item.firstName}</td>
@@ -1490,7 +1490,7 @@ showResetButton=false
           <#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
             <td>
               <div class="checkbox">
-                <labeltabindex="0" class="use-tooltip"
+                <label tabindex="0" class="use-tooltip"
                        title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
                        data-html="true"
                        data-container="body"

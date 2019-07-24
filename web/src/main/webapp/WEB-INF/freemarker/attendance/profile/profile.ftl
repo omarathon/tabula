@@ -57,7 +57,7 @@
                     <tr class="point">
                       <td class="point">
                         ${point.name}
-                        (<spantabindex="0" class="use-tooltip" data-html="true" title="
+                        (<span tabindex="0" class="use-tooltip" data-html="true" title="
 													<@fmt.wholeWeekDateFormat
                         point.startWeek
                         point.endWeek

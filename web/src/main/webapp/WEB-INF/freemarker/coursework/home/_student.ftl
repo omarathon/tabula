@@ -11,7 +11,7 @@
       <#if ajax></h4>
     <#else></h2></#if>
     <#if isSelf>
-      <spantabindex="0" class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom"
+      <span tabindex="0" class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom"
             data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
     </#if>
   </div>

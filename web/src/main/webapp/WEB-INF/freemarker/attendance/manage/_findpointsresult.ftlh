@@ -7,7 +7,7 @@
       <@attendance_macros.groupedPointsBySection findResult.termGroupedPoints term; groupedPoint>
         <div class="col-md-12">
           ${groupedPoint.templatePoint.name}
-          (<spantabindex="0" class="use-tooltip" data-html="true" title="
+          (<span tabindex="0" class="use-tooltip" data-html="true" title="
 					<@fmt.wholeWeekDateFormat
           groupedPoint.templatePoint.startWeek
           groupedPoint.templatePoint.endWeek

@@ -124,7 +124,7 @@
                 </@modal.modal>
               </#if>
 
-              <spantabindex="0" class="use-tooltip" data-container="body" title="Send">
+              <span tabindex="0" class="use-tooltip" data-container="body" title="Send">
                 <button type="submit" class="btn btn-primary message-thread__footer__fields__btn" aria-label="Send">
                   <i class="fal fa-fw fa-paper-plane fa-lg"></i>
                 </button>
