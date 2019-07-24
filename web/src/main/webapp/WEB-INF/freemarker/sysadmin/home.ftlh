@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <h1>Web system administrating system screen page</h1>
 
 <#if user.masquerading>
@@ -27,6 +26,7 @@
     <p><a class="btn btn-default" href="<@url page="/sysadmin/objectstorage" />">Object storage</a></p>
     <p><a class="btn btn-default" href="<@url page="/profiles/admin/timetablechecker" />">Timetable feed checker</a></p>
     <p><a class="btn btn-default" href="<@url page="/admin/scientia-rooms" />">Syllabus+ room mappings</a></p>
+    <p><a class="btn btn-default" href="<@url page="/sysadmin/csrf" />">CSRF report/enforce</a></p>
   </div>
 
   <div class="col-md-4">
@@ -175,4 +175,3 @@
 
   </div>
 </div>
-</#escape>

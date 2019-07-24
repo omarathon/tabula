@@ -59,6 +59,8 @@ trait MemberDao {
 
   def getStaffByDepartment(department: Department): Seq[StaffMember]
 
+  def getActiveMembersByDepartment(department: Department): Seq[Member]
+
   def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[String]
 
   def findAllStudentDataByRestrictions(restrictions: Iterable[ScalaRestriction], academicYear: AcademicYear): Seq[AttendanceMonitoringStudentData]
@@ -388,6 +390,15 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
     else {
       session.newCriteria[StaffMember]
         .add(is("homeDepartment", department))
+        .seq
+    }
+
+  def getActiveMembersByDepartment(department: Department): Seq[Member] =
+    if (department == null) Nil
+    else {
+      sessionWithoutFreshFilters.newCriteria[Member]
+        .add(is("homeDepartment", department))
+        .add(is("inUseFlag", "Active"))
         .seq
     }
 

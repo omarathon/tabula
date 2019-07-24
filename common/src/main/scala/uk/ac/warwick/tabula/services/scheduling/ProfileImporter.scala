@@ -29,6 +29,9 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
+object MembershipInformation {
+  def apply(member: Member): MembershipInformation = new MembershipInformation(MembershipMember(member), None)
+}
 case class MembershipInformation(member: MembershipMember, sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
 trait ProfileImporter {
@@ -724,6 +727,29 @@ object ProfileImporter extends Logging {
       new DateTime(_)
     }).orNull
 
+}
+
+object MembershipMember {
+  def apply(m: Member): MembershipMember= new MembershipMember(
+    universityId = m.universityId,
+    departmentCode = m.homeDepartment.code,
+    email = m.email,
+    targetGroup = null,
+    title = m.title,
+    preferredForenames = m.firstName,
+    preferredSurname = m.lastName,
+    position = m.jobTitle,
+    dateOfBirth = m.dateOfBirth,
+    usercode = m.userId,
+    startDate = null,
+    endDate = null,
+    modified = null,
+    phoneNumber = null,
+    gender = null,
+    alternativeEmailAddress = null,
+    userType = m.userType,
+    teachingStaff = null
+  )
 }
 
 case class MembershipMember(
