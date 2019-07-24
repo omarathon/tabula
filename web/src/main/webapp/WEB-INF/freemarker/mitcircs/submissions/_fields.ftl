@@ -63,7 +63,7 @@
   >
     <@bs3form.form_group path="relatedSubmission">
       <@f.select path="relatedSubmission" cssClass="form-control">
-        <option value="">Select a previous submission&hellip;</option>
+        <option value="">No, this does not relate to a previous submission</option>
         <#list previousSubmissions as submission>
           <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></#assign>
           <@f.option value="${submission.key}" label="${label}" />
