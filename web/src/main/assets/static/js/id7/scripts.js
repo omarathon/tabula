@@ -743,7 +743,7 @@ exports.initCollapsible = ($el) => {
     } else {
       // Begin view polyfill
       // Do not rely on this, fix the templates instead.
-      $title.each(() => {
+      $title.each(function() {
         const $titleElement = $(this);
 
         if ($titleElement.find('a').length === 0) {
