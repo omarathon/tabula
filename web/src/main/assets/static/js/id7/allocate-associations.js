@@ -12,8 +12,8 @@ $(() => {
     const rowMap = {};
     const $removeButton = $table.closest('div').find('button.remove-all');
 
-    $table.find('tr[data-forentity]').each(() => {
-      const $this = $(this);
+    $table.find('tr[data-forentity]').each((i, el) => {
+      const $this = $(el);
       const entityId = $this.data('forentity');
       if (rowMap[entityId] === undefined) {
         rowMap[entityId] = [];
@@ -22,8 +22,8 @@ $(() => {
       $this.detach();
     });
 
-    $table.on('click', '.btn-default', () => {
-      const $this = $(this);
+    $table.on('click', '.btn-default', (event) => {
+      const $this = $(event.currentTarget);
       const $expandedInput = $this.closest('td').find('input');
       const $row = $this.closest('tr');
       const entityId = $row.data('entity');
@@ -37,8 +37,9 @@ $(() => {
         $expandedInput.val('true');
       }
     });
-    $table.find('tr.expanded').each(() => {
-      $(this).after(rowMap[$(this).data('entity')]);
+    $table.find('tr.expanded').each((i, el) => {
+      const $this = $(el);
+      $this.after(rowMap[$(this).data('entity')]);
     });
 
     $table.sortableTable({
@@ -53,8 +54,8 @@ $(() => {
     $table.on('sortStart', () => {
       $table.find('tr[data-forentity]').detach();
     }).on('sortEnd', () => {
-      $table.find('tr').each(() => {
-        const $row = $(this);
+      $table.find('tr').each((i, el) => {
+        const $row = $(el);
         const entityId = $row.data('entity');
         if ($row.hasClass('expanded')) {
           $row.after(rowMap[entityId]);
@@ -103,7 +104,7 @@ $(() => {
 
   const $studentQuery = $('input[name=query]').on('keypress', (e) => {
     if (e.which === 13) {
-      $(this).closest('form').submit();
+      $(e.currentTarget).closest('form').submit();
     }
   }).attr('autocomplete', 'off');
   const $typeahead = $studentQuery.typeahead({
@@ -211,8 +212,8 @@ $(() => {
               .addClass('btn btn-link')
               .html('<i class="fa fa-ban"></i> Clear selected items')
               .on('click', () => {
-                $list.find('input:checked').each(() => {
-                  const $checkbox = $(this);
+                $list.find('input:checked').each((i, el) => {
+                  const $checkbox = $(el);
                   $checkbox.prop('checked', false);
                   updateFilter($checkbox);
                 });
