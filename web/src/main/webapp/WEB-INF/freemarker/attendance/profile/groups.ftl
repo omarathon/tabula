@@ -151,7 +151,7 @@
                       <td <#if !weekPair._2()>class="irrelevant"</#if>>
                         <#list mapGet(group.attendance, weekPair._1()) as attendance>
                           <#if !attendance.instance??>
-                            <i tabindex="0" role="button" class="use-popover fa fa-fw irrelevant" data-content="${attendance.reason}"></i>
+                            <i tabindex="0" role="button" class="use-popover fa fa-fw irrelevant" data-content="${attendance.reason}" aria-label="${attendance.reason}"></i>
                           <#else>
                             <#local titles = [] />
 
@@ -204,7 +204,7 @@
                             </#local>
 
                             <i tabindex="0" role="button" class="use-popover fa fa-fw ${class} <#if !attendance.relevant>irrelevant</#if>"
-                               data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
+                               data-content="<#noescape>${renderedTitle}</#noescape>" aria-label="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
                           </#if>
                         </#list>
                       </td>
