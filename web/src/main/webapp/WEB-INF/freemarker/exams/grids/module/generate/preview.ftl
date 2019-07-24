@@ -142,8 +142,8 @@
                     <td>${entity.name}</td>
                     <td>${entity.universityId} </td>
                     <td> ${scd.scjCode}</td>
-                    <td><span class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
-                    <td><span class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
+                    <td><span tabindex="0" role="button" class="tabula-tooltip" data-title="${scd.course.shortName!""}">${scd.course.code}</span></td>
+                    <td><span tabindex="0" role="button" class="tabula-tooltip" data-title="${scd.currentRoute.name!""}">${scd.currentRoute.code?upper_case}</span></td>
                     <td>${mr.academicYear.startYear?c}</td>
                     <td>${mr.cats}</td>
                     <#list componentInfo as component>
@@ -173,7 +173,7 @@
                             </#assign>
                             <span <#if componentmark_class?length gt 0>class="${componentmark_class}"</#if>>${componentDetails.mark}</span>
                           <#else>
-                            <span class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
+                            <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No mark set">X</span>
                           </#if>
                         </td>
                         <td>
@@ -188,7 +188,7 @@
                             <#assign componentgrade_class><#if componentDetails.actualGrade>exam-grid-actual-mark</#if></#assign>
                             <span <#if componentgrade_class?length gt 0>class="${componentgrade_class}"</#if>>${componentDetails.grade}</span>
                           <#else>
-                            <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
+                            <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
                           </#if>
                         </td>
                       <#else>
@@ -202,7 +202,7 @@
                       <#elseif mr.actualMark??>
                         <span class="<#if mr.actualMark?number lt passMark>exam-grid-fail </#if>exam-grid-actual-mark">${mr.actualMark}</span>
                       <#else>
-                        <span class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
+                        <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No marks set">X</span>
                       </#if>
                     </td>
                     <td>
@@ -211,7 +211,7 @@
                       <#elseif mr.actualGrade??>
                         <span class="exam-grid-actual-mark">${mr.actualGrade}</span>
                       <#else>
-                        <span class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
+                        <span tabindex="0" role="button" class="exam-grid-actual-mark tabula-tooltip" data-title="No grade set">X</span>
                       </#if>
                     </td>
                   </tr>

@@ -7,7 +7,7 @@
         <td>${attachment.id}</td>
         <td>
           <#if (attachment.asByteSource.encrypted)!false>
-            <span class="tabula-tooltip" data-title="Encrypted">
+            <span tabindex="0" role="button" class="tabula-tooltip" data-title="Encrypted">
               <i class="fal fa-lock-alt"></i>
             </span>
           </#if>

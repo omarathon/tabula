@@ -176,18 +176,18 @@
 
   <div class="stage-progress-bar time-progress-bar">
     <#if assignment.opened>
-      <span class="fa-stack tabula-tooltip" data-title="Assignment ready">
+      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="Assignment ready">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x fa-check-circle-o text-success"></i>
 			</span>
     <#else>
-      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x fa-circle-o text-default"></i>
 			</span>
     </#if>
 
-    <div class="bar tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+    <div tabindex="0" role="button" class="bar tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
       <div class="progress-bar progress-bar-${state}" role="progressbar" aria-valuenow="${percentage?c}" aria-valuemin="0" aria-valuemax="100"
            style="width: ${percentage?c}%;">
       </div>
@@ -206,7 +206,7 @@
       <#local icon = 'fa-exclamation-circle' />
     </#if>
 
-    <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
+    <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(tooltip)}">
 			<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 			<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 		</span>
@@ -520,9 +520,9 @@
       </#if>
 
       <#if stageInfo_index gt 0>
-        <div class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
+        <div tabindex="0" role="button" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
-      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -551,10 +551,10 @@
 
       <#local title><@workflowMessage progress.stage.actionCode assignment student /></#local>
       <#if progress_index gt 0>
-        <div class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
+        <div tabindex="0" role="button" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
       <#local title><@workflowMessage progress.messageCode assignment student /></#local>
-      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -1020,7 +1020,7 @@
         <#local title = 'Preconditions not met' />
       </#if>
 
-      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" role="button" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -1382,7 +1382,7 @@
 <#macro submission_details submission=[] showDisabilityDisclosure=false student=""><@compress single_line=true>
   <#if submission?has_content>
     <#if submission.submittedDate??>
-      <span class="date tabula-tooltip" data-title="<@lateness submission />">
+      <span tabindex="0" role="button" class="date tabula-tooltip" data-title="<@lateness submission />">
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</span>
     </#if>
