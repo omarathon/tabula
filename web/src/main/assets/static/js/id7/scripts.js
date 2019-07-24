@@ -743,8 +743,8 @@ exports.initCollapsible = ($el) => {
     } else {
       // Begin view polyfill
       // Do not rely on this, fix the templates instead.
-      $title.each((i, el) => {
-        const $titleElement = $(el);
+      $title.each((i1, el1) => {
+        const $titleElement = $(el1);
 
         if ($titleElement.find('a').length === 0) {
           $titleElement.removeAttr('tabindex');
@@ -752,7 +752,7 @@ exports.initCollapsible = ($el) => {
           $replacementLink.attr('href', '#');
           $replacementLink.html($titleElement.html());
           $replacementLink.contents()
-            .filter((i, el) => el.nodeType !== 1)
+            .filter((index, element) => element.nodeType !== 1)
             .wrap('<span class="collapse-label">');
           $replacementLink.find('span.collapse-label').text($.trim($replacementLink.find('span.collapse-label').text()));
           $titleElement.html('');
