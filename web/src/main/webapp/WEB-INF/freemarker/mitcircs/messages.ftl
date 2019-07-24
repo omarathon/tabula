@@ -96,7 +96,7 @@
 
               <#if !studentView>
                 <label class="btn btn-primary message-thread__footer__fields__btn">
-                  <i tabindex="0" class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
+                  <i tabindex="0" role="button" class="fal fa-fw fa-stopwatch fa-lg use-tooltip" data-container="body" data-toggle="modal" data-target="#replyByDateModal" title="Respond by date" aria-label="Respond by date"></i>
                 </label>
 
                 <@modal.modal id="replyByDateModal" cssClass="message-thread__footer__reply-by-date">
