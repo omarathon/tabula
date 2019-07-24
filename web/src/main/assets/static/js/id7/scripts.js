@@ -122,7 +122,7 @@ jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', () => {
+      .on('click', function () {
         $(this).prev('input').focus();
       });
   }
@@ -215,7 +215,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
     }
   }).next('.add-on')
     .css({ cursor: 'pointer' })
-    .on('click', () => {
+    .on('click', function () {
       $(this).prev('input').focus();
     });
 
