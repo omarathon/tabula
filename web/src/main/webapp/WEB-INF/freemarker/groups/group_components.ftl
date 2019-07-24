@@ -437,7 +437,7 @@
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
                    data-html="true" aria-label="Help"
-                   data-content="${popoverContent?markup_string?esc}"><i class="fa fa-question-circle"></i></a>
+                   data-content="${popoverContent?markup_string}"><i class="fa fa-question-circle"></i></a>
               </li>
             </#list>
           </ul>
@@ -467,7 +467,7 @@
                     <a class="use-popover"
                        href="#"
                        data-html="true"
-                       data-content="${popoverContent?markup_string?esc}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+                       data-content="${popoverContent?markup_string}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
                   </#if>
                 </#if>
               </li>
@@ -983,7 +983,7 @@
       </#local>
 
       <td>
-				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string?esc}" data-html="true">
+				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string}" data-html="true">
 					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
@@ -1543,7 +1543,7 @@ showResetButton=false
   <div class="running">
     Running: <#compress>
       <#if event.weekRanges?size gt 0 && event.day??>
-        ${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)?no_esc}
+        ${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)}
       <#elseif event.weekRanges?size gt 0>
         [no day of week selected]
       <#else>
