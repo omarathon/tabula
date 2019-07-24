@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.helpers
 
-import freemarker.core.HTMLOutputFormat
+import freemarker.core.{HTMLOutputFormat, TemplateHTMLOutputModel}
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.{TemplateMethodModelEx, TemplateModel}
 import org.joda.time.LocalDate
@@ -47,11 +47,11 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx with KnowsUserNumberi
   import WeekRangesFormatter.format
 
   /** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
-  override def exec(list: JList[_]): Object = {
+  override def exec(list: JList[_]): TemplateHTMLOutputModel = {
     val user = RequestInfo.fromThread.map(_.user).getOrElse(NoCurrentUser())
+    val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 
     HTMLOutputFormat.INSTANCE.fromMarkup {
-      val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
       args match {
         case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) =>
           format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(user, Some(dept)))
