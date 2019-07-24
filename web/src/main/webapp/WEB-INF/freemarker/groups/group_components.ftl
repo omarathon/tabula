@@ -174,9 +174,10 @@
 								<@dropdown_menu "Actions" "btn-xs">
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if set.openForSignups>
-                      <li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
 												<#local closeset_url><@routes.groups.closeset set /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -190,9 +191,10 @@
                         </@fmt.permission_button>
 											</li>
 										<#else>
-                      <li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
 												<#local openset_url><@routes.groups.openset set /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -209,7 +211,10 @@
                   </#if>
 
 
-                  <li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+                  <li <#if set.fullyReleased>
+                    class="disabled use-tooltip" title="Already published"
+                  </#if>
+                  >
 										<#local notifyset_url><@routes.groups.releaseset set /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
@@ -432,7 +437,7 @@
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
                    data-html="true" aria-label="Help"
-                   data-content="${popoverContent?esc}"><i class="fa fa-question-circle"></i></a>
+                   data-content="${popoverContent?markup_string?esc}"><i class="fa fa-question-circle"></i></a>
               </li>
             </#list>
           </ul>
@@ -462,7 +467,7 @@
                     <a class="use-popover"
                        href="#"
                        data-html="true"
-                       data-content="${popoverContent?esc}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+                       data-content="${popoverContent?markup_string?esc}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
                   </#if>
                 </#if>
               </li>
@@ -670,11 +675,18 @@
             <div class="row group">
               <div class="col-md-12">
                 <#if setItem.viewerMustSignUp>
-                <div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')?no_esc}>
+                <div <#if group.full>
+                    class="pull-left use-tooltip" title="There are no spaces left on this group"
+                  <#else>
+                    class="pull-left"
+                  </#if>
+                >
                   <input type="radio"
                     name="group"
                     value="${group.id}"
-                    ${group.full?string(' disabled ','')}
+                    <#if group.full>
+                      disabled
+                    </#if>
                     class="radio inline group-selection-radio"/>
               </div>
               <div style="margin-left: 20px;">
@@ -803,9 +815,10 @@
                   </li>
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if groupSet.openForSignups>
-                      <li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
+                          class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
                         <#local closeset_url><@routes.groups.closeset groupSet /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -819,9 +832,10 @@
                         </@fmt.permission_button>
                       </li>
                     <#else>
-                      <li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
                         <#local openset_url><@routes.groups.openset groupSet /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -847,7 +861,10 @@
                       Allocate students
                     </@fmt.permission_button>
                   </li>
-                  <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+                  <li <#if groupSet.fullyReleased>
+                    class="disabled use-tooltip" title="Already published"
+                  </#if>
+                  >
                     <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
@@ -1526,7 +1543,7 @@ showResetButton=false
   <div class="running">
     Running: <#compress>
       <#if event.weekRanges?size gt 0 && event.day??>
-        ${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)}
+        ${weekRangesFormatter(event.weekRanges, event.day, event.group.groupSet.academicYear, event.group.groupSet.module.adminDepartment)?no_esc}
       <#elseif event.weekRanges?size gt 0>
         [no day of week selected]
       <#else>
