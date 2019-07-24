@@ -31,6 +31,7 @@
   <context:component-scan base-package="uk.ac.warwick.tabula.notifications"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.documents"/>
+  <context:component-scan base-package="uk.ac.warwick.tabula.system"/>
 
   <!-- enable component scan for mywarwick service -->
   <context:component-scan base-package="uk.ac.warwick.util.mywarwick"/>
@@ -609,6 +610,7 @@
             <value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
             <value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
             <value>uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheBusterMessage</value>
+            <value>uk.ac.warwick.tabula.services.CsrfEnforceMessage</value>
           </list>
         </property>
       </bean>

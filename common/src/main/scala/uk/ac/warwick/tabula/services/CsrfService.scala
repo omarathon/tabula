@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.sso.client.CSRFFilter
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.queue.conversion.ItemType
 
 import scala.beans.BeanProperty
@@ -16,12 +17,13 @@ trait CsrfService {
 }
 
 @Service
-class CsrfServiceImpl(filter: CSRFFilter) extends CsrfService {
+class CsrfServiceImpl(filter: CSRFFilter) extends CsrfService with Logging {
   @Value("${csrf.enforce}") var _enforce: Boolean = _
 
   def enforce: Boolean = _enforce
 
   def enforce_=(e: Boolean): Unit = {
+    logger.info(s"Setting CSRF enforce to {}", e)
     filter.setReportOnlyMode(!e)
     _enforce = e
   }
