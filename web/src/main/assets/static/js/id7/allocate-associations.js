@@ -272,7 +272,7 @@ $(() => {
     });
   });
 
-  $clearAllButtons.each(function ()  {
+  $clearAllButtons.each(function () {
     updateClearAllButton($(this));
   });
 
