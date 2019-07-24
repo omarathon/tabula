@@ -73,7 +73,15 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
       }
     }
 
-    logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
+    val fimMembers = profileImporter.membershipInfoByDepartment(department)
+    val fimUniversityIds = fimMembers.map(_.member.universityId)
+    val tabulaActiveMembers = transactional(readOnly = true) {
+      memberDao.getActiveMembersByDepartment(department)
+        .filterNot(m => fimUniversityIds.contains(m.universityId))
+        .map(MembershipInformation.apply)
+    }
+    val members = fimMembers ++ tabulaActiveMembers
+    logSize(members).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
       benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
         val users: Map[UniversityId, User] =
           if (department.code == ProfileImporter.applicantDepartmentCode)
@@ -291,7 +299,12 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
 
       val importCommandFactory = new ImportCommandFactory
 
-      profileImporter.membershipInfoForIndividual(universityId) match {
+      // Either info from uow_current_members in FIM or from Tabula if the member doesn't exist in FIM
+      val membershipInfo = profileImporter.membershipInfoForIndividual(universityId).orElse(
+        memberDao.getByUniversityIdStaleOrFresh(universityId).map(MembershipInformation.apply)
+      )
+
+      membershipInfo match {
         case Some(membInfo: MembershipInformation) =>
 
           // retrieve details for this student from SITS and store the information in Tabula
@@ -328,7 +341,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           logger.info("Data refreshed for " + universityId)
           members.headOption
         case None =>
-          logger.warn("Student is no longer in uow_current_members in membership - not updating")
+          logger.warn("Student is not in uow_current_members in membership or an existing Tabula member - not updating")
           None
       }
 
@@ -350,6 +363,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
     } else if (member.stale && !missingFromImport) {
       // The member has re-appeared
       member.missingFromImportSince = null
+      memberDao.saveOrUpdate(member)
+    } else if (member.stale && missingFromImport && member.activeNow) {
+      // TAB-7196 - Normally users are marked as withdrawn or inactive in an upstream system (FIM or SITS) and that status is then imported into Tabula
+      // Occasionally they are removed before that happens which means that the Member would incorrectly appear as "Active" in Tabula forever
+      member.inUseFlag = "Inactive"
       memberDao.saveOrUpdate(member)
     }
     member
@@ -373,7 +391,11 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
           var missingSince = stu.missingFromImportSince
           stu.missingFromImportSince = DateTime.now
           missingSince = stu.missingFromImportSince
-
+          memberDao.saveOrUpdate(stu)
+        } else if (stu.stale && !universityIdsSeen.contains(stu.universityId) && stu.activeNow) {
+          // TAB-7196 - Normally students are marked as withdrawn in SITS and that status is then imported into Tabula
+          // Occasionally they are removed before that happens which means that the Member would appear as "Active" in Tabula forever
+          stu.inUseFlag = "Inactive"
           memberDao.saveOrUpdate(stu)
         }
 
