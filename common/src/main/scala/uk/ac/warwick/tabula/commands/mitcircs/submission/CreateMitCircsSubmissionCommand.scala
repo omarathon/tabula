@@ -183,7 +183,7 @@ trait MitCircsSubmissionValidation extends SelfValidating {
       // validate evidence
       if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {
         errors.rejectValue("file.upload", "mitigatingCircumstances.evidence.required")
-        errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.required")
+        errors.rejectValue("pendingEvidence", "mitigatingCircumstances.evidence.pending")
       }
 
       // validate pending evidence
