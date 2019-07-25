@@ -318,6 +318,7 @@
                       <p><i class="fa fa-check fa-fw attended"></i> Attended</p>
                     </#assign>
 										<a class="use-popover"
+                       tabindex="0" role="button"
                        aria-label="Help"
                        data-title="Key"
                        data-placement="bottom"

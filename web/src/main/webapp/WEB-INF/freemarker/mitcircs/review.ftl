@@ -12,12 +12,12 @@
         <#if pagination.previous??>
           <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.previous />" title="Previous submission 'MIT-${pagination.previous.key}' (type 'k')" data-container="body" data-pagination="previous"><i class="fal fa-chevron-up"></i></a>
         <#else>
-          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-up"></i></a>
+          <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-up"></i></a>
         </#if>
         <#if pagination.next??>
           <a class="btn btn-link use-tooltip" href="<@routes.mitcircs.reviewSubmissionPanel pagination.next />" title="Next submission 'MIT-${pagination.next.key}' (type 'j')" data-container="body" data-pagination="next"><i class="fal fa-chevron-down"></i></a>
         <#else>
-          <a class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
+          <a tabindex="0" role="button" class="btn btn-link disabled use-tooltip" title="Not available - this is the first submission" data-container="body"><i class="fal fa-chevron-down"></i></a>
         </#if>
       </div>
     </div>

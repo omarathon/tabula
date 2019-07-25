@@ -44,6 +44,7 @@
               as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
             </#noescape></#assign>
             <a class="use-popover"
+               tabindex="0" role="button"
                id="popover-linkToSits"
                data-content="${popoverContent}"
                data-html="true" aria-label="Help"
@@ -63,6 +64,7 @@
         </p>
         </#noescape></#assign>
         <a class="use-popover"
+           tabindex="0" role="button"
            id="popover-linkToSits"
            data-content="${popoverContent}"
            data-html="true" aria-label="Help"
