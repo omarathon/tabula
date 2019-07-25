@@ -122,7 +122,7 @@ jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', function () {
+      .on('click', function onClick() {
         $(this).prev('input').focus();
       });
   }
@@ -215,7 +215,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
     }
   }).next('.add-on')
     .css({ cursor: 'pointer' })
-    .on('click', function () {
+    .on('click', function onClick() {
       $(this).prev('input').focus();
     });
 
@@ -226,7 +226,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
 
 jQuery.fn.selectOffset = function selectOffset() {
   if ($(this).hasClass('startDateTime')) {
-    $(this).on('click', function () {
+    $(this).on('click', function onClick() {
       const indexValue = $(this).children(':selected').attr('value');
       $(this).closest('.dateTimePair')
         .find('.endDateTime')
