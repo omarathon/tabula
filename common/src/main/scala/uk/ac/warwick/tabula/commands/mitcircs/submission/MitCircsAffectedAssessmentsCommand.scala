@@ -115,6 +115,7 @@ abstract class MitCircsAffectedAssessmentsCommandInternal(val student: StudentMe
     val tabulaAssignments =
       years.flatMap { year => assessmentMembershipService.getEnrolledAssignments(student.asSsoUser, Some(year)) }
         .filter(_.summative)
+        .filterNot(_.openEnded)
         .filter { assignment =>
           assignment.submissionDeadline(student.asSsoUser) match {
             case null => !assignment.openDate.isBefore(startDate.toDateTimeAtStartOfDay)
