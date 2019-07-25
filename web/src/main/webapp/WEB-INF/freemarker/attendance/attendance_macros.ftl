@@ -1,5 +1,6 @@
 <#import "attendance_variables.ftl" as attendance_variables />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#macro attendanceButtons>
   <div style="display:none;" class="forCloning">
@@ -204,7 +205,7 @@ showResetButton=false
       </tbody>
     </table>
 
-    <div id="profile-modal" class="modal fade profile-subset"></div>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
   </#if>
 </#macro>
 

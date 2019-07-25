@@ -1,4 +1,5 @@
 <#escape x as x?html>
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <h1>Marking workflows<#if isExams> available for exams</#if></h1>
 
 <#if isExams>
@@ -67,13 +68,13 @@
   </table>
 </#if>
 
-<div id="marking-workflow-modal" class="modal fade">
+<@modal.modal id="marking-workflow-modal">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
     <h3>Delete marking workflow</h3>
   </div>
   <div class="modal-body"></div>
-</div>
+</@modal.modal>
 
 <script nonce="${nonce()}">
   jQuery(function ($) {

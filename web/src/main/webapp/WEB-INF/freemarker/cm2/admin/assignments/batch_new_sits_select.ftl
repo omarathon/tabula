@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 <#--
 first page of the form to setup a bunch of assignments from SITS.
@@ -215,7 +215,7 @@ first page of the form to setup a bunch of assignments from SITS.
 
   <#if step='options'>
   <#-- popup box for 'Set options' button -->
-    <div class="modal fade" id="set-options-modal">
+    <@modal.modal id="set-options-modal">
       <@modal.wrapper cssClass="modal-lg">
         <@modal.header>
           <h3 class="modal-title">Set options</h3>
@@ -228,8 +228,8 @@ first page of the form to setup a bunch of assignments from SITS.
           </div>
         </@modal.footer>
       </@modal.wrapper>
-    </div>
-    <div class="modal fade" id="set-dates-modal">
+    </@modal.modal>
+    <@modal.modal id="set-dates-modal">
       <@modal.wrapper>
         <@modal.header>
           <h3 class="modal-title">Set dates</h3>
@@ -275,7 +275,7 @@ first page of the form to setup a bunch of assignments from SITS.
           </div>
         </@modal.footer>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
     <script type="text/javascript" nonce="${nonce()}">
       // Give a heads up if you're about to navigate away from your progress

@@ -1,6 +1,6 @@
 <#include "prelude.ftl" />
 <#import "_profile_link.ftl" as pl />
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#--
 
@@ -178,7 +178,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 	<#if hasMembers>
     <div id="enrolment">
-			<div id="profile-modal" class="modal fade profile-subset"></div>
+			<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 			<table id="enrolment-table"
              class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers <#if component.name == 'courses'>tabula-orangeLight</#if>">
 				<thead>
@@ -281,7 +281,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
       <#-- Modal to add students manually -->
       <div class="${classifier}Modals">
-        <div class="modal fade <#if component.name == 'courses'>hide</#if> adder">
+        <@modal.modal cssClass="<#if component.name == 'courses'>hide</#if> adder">
           <@modal.wrapper>
             <@modal.header>
               <h6 class="modal-title">Add students manually</h6>
@@ -303,11 +303,11 @@ Generates the bulk of the picker HTML, inside a fieldset element
               <a class="btn btn-primary disabled spinnable spinner-auto add-students">Add</a>
             </@modal.footer>
           </@modal.wrapper>
-        </div><#-- manual student modal -->
+        </@modal.modal><#-- manual student modal -->
 
 
         <#-- Modal picker to select an upstream assessment group (${name}+occurrence) -->
-        <div class="modal fade <#if component.name == 'courses'>hide</#if> sits-picker">
+        <@modal.modal cssClass="<#if component.name == 'courses'>hide</#if> sits-picker">
           <@modal.wrapper cssClass="modal-lg">
           <@modal.header>
             <h6>SITS link</h6>
@@ -379,7 +379,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
           </@modal.body>
           </#if>
           </@modal.wrapper>
-        </div><#-- link picker modal -->
+        </@modal.modal><#-- link picker modal -->
       </div>
 
 

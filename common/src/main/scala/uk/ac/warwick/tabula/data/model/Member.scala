@@ -7,7 +7,7 @@ import org.hibernate.annotations.{BatchSize, Filter, FilterDef, FilterDefs, Filt
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.exams.grids.ExamGridEntity
+import uk.ac.warwick.tabula.commands.exams.grids.{ExamGridEntity, ExamGridEntityYear}
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpointTotal
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
@@ -433,17 +433,36 @@ class StudentMember extends Member with StudentProperties {
         .flatMap(_.freshOrStaleStudentCourseYearDetails.toSeq.sorted)
         .takeWhile(_ != baseSCYD) ++ Seq(baseSCYD)
 
-      val years = if (basedOnLevel) {
+
+      /** Level grids can be used for UG or non UG ( PG/F etc). If someone is on a UG course there is a possibility some scyd entry will be missing sometimes at the SITS end. We need to ensure that level entry is still there in the map otherwise
+        * it will blow up further. Example - level grid 3 for UG but missing level 2 scyd. Map needs constructing with all three level entries. For PG level grids, there is always just one level that grid generates so you have one entry in the map.
+        */
+      val years: Map[Int, Option[ExamGridEntityYear]] = if (basedOnLevel) {
         // groups by level preserving the order in which they appear for this student
         // add index to the scyd list and group by level
-        //student can be on multiple courses but we need only the one based on baseSCYD level
-        val groupedByLevelUnordered = allSCYDs.filter(_.studyLevel == baseSCYD.studyLevel).zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
+        val ugLevel = baseSCYD.studentCourseDetails.courseType.contains(CourseType.UG)
+        val (relevantYears, relevantSCYDs) = if (ugLevel) {
+          (baseSCYD.studyLevel.toInt, allSCYDs.filter(_.studentCourseDetails.courseType.contains(CourseType.UG)))
+        } else {
+          //Non UG always have one year level
+          (1, allSCYDs.filterNot(_.studentCourseDetails.courseType.contains(CourseType.UG)))
+        }
+
+        val groupedByLevelUnordered = relevantSCYDs.zipWithIndex.groupBy { case (scyd, _) => scyd.studyLevel }
         // sort by the index
         val groupedByLevelWithIndex = ListMap(groupedByLevelUnordered.toSeq.sortBy { case (_, values) => values.head._2 }: _*)
-        // remove the index once sorted
-        val groupedByLevel = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
-        groupedByLevel.values.toSeq.zipWithIndex
-          .map { case (scyds, index) => (index + 1, Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(index + 1, scyds: _*))) }.toMap
+        // remove the index once sorted - This map contains values like 1,2,3,M1 for someone who is currently on PG course but was previously on UG course
+        val groupedByLevelMap: Map[String, Seq[StudentCourseYearDetails]] = groupedByLevelWithIndex.mapValues(_.map { case (scyds, _) => scyds })
+
+        //Generate all level year entries.
+        (1 to relevantYears).map { yr =>
+          val examGridEntity: Option[ExamGridEntityYear] = if (ugLevel) {
+            groupedByLevelMap.find(_._1 == yr.toString).map(_._2).map(scyds => StudentCourseYearDetails.toExamGridEntityYearGrouped(yr, scyds: _*)) // find all scdys records for that ug level and generate ExamGridEntityYear
+          } else {
+            Option(StudentCourseYearDetails.toExamGridEntityYearGrouped(yr, groupedByLevelMap.values.flatten.toSeq: _*)) // for non UG level there is just one entry - M1 or M2 or F so extract all values
+          }
+          yr -> examGridEntity
+        }.toMap
       } else {
         (1 to baseSCYD.yearOfStudy).map(year =>
           year -> allSCYDs.reverse.find(_.yearOfStudy == year).map(_.toExamGridEntityYear)

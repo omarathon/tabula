@@ -1,7 +1,7 @@
 <#escape x as x?html>
   <#import "*/group_components.ftl" as components />
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <#assign mappingById=command.mappingById />
   <#assign membersById=command.membersById />
 
@@ -23,7 +23,7 @@
     </li>
   </#macro>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <noscript>
     <div class="alert alert-info">This page requires Javascript.</div>

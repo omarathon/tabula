@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 <#escape x as x?html>
   <#function route_function dept>
@@ -137,7 +137,7 @@
           </tbody>
         </table>
 
-        <div id="feedback-template-model" class="modal fade">
+        <@modal.modal id="feedback-template-model">
           <@modal.wrapper>
             <@modal.header>
               <h3 class="modal-title">Update feedback template</h3>
@@ -148,7 +148,7 @@
               <a data-dismiss="modal" class="close-model btn btn-default" href="#">Cancel</a>
             </@modal.footer>
           </@modal.wrapper>
-        </div>
+        </@modal.modal>
       </#if>
     </div>
   </@f.form>

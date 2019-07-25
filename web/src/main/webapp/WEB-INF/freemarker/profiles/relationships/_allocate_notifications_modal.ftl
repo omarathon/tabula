@@ -1,7 +1,7 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 <#-- Pre-save modal for notifications -->
-  <div class="modal fade" id="notify-modal" tabindex="-1" role="dialog" aria-labelledby="notify-modal-label" aria-hidden="true">
+  <@modal.modal id="notify-modal" role="dialog" ariaLabelledby="notify-modal-label">
     <@modal.wrapper>
       <@modal.header>
         <h3 id="notify-modal-label" class="modal-title">Send notifications</h3>
@@ -36,5 +36,5 @@
         <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true">Cancel</button>
       </@modal.footer>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 </#escape>

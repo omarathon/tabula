@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <#import "../attendance_macros.ftl" as attendance_macros />
 
   <#macro pagination currentPage totalResults resultsPerPage>
@@ -44,9 +44,9 @@
     </script>
   </#macro>
 
-  <@spring.bind path="persistanceCommand.staticStudentIds">
+  <@spring.bind path="persistenceCommand.staticStudentIds">
     <#if status.error>
-      <div class="alert alert-danger"><@f.errors path="persistanceCommand.staticStudentIds" cssClass="error"/></div>
+      <div class="alert alert-danger"><@f.errors path="persistenceCommand.staticStudentIds" cssClass="error"/></div>
     </#if>
   </@spring.bind>
 

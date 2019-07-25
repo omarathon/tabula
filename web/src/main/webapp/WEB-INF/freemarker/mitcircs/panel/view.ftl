@@ -1,8 +1,9 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/mitcircs_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <h1>${panel.name}</h1>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
   <section class="mitcircs-details">
     <div class="row">
       <div class="col-sm-6 col-md-7">

@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <@modal.wrapper cssClass="modal-xl">
     <@modal.body>
       <div class="exam-grid-preview">

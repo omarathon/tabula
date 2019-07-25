@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <@modal.wrapper>
     <#assign submitAction><@routes.groups.archiveset smallGroupSet /></#assign>
     <@f.form method="post" action="${submitAction}" modelAttribute="archiveSmallGroupSetCommand" cssClass="double-submit-protection">

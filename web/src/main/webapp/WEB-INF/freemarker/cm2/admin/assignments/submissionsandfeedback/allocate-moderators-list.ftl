@@ -1,10 +1,11 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+
 <#escape x as x?html>
   <@cm2.assignmentHeader "Choose moderation sample" assignment />
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <a class="btn btn-primary must-have-selected form-post" href="<@routes.cm2.moderationSamplingAllocation assignment />">
     Send selected for moderation
@@ -79,7 +80,7 @@
               action = $this.data('href')
             }
 
-            var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
+            var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
             var doFormSubmit = false;
 
             if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {

@@ -19,6 +19,9 @@
         </div>
         <div class="panel-body">
           <@f.textarea path="text" class="form-control" rows="5" aria\-label="Add a note" />
+          <div class="help-block">
+            Notes are not shared with students. Notes can only be seen by other mitigating circumstances officers.
+          </div>
         </div>
       </div>
     </@f.form>

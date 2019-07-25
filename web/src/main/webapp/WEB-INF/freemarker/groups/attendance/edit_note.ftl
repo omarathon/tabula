@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <#if success??>
     <#assign isAdd = !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content && !command.attendanceNote.absenceType?has_content />
     <div

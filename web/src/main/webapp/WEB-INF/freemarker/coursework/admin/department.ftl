@@ -1,6 +1,6 @@
 <#escape x as x?html>
   <#import "modules/admin_components.ftl" as components />
-
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
   <#macro longDateRange start end>
     <#local openTZ>${start?string("z")}</#local>
     <#local closeTZ>${start?string("z")}</#local>
@@ -172,7 +172,7 @@
       </#if>
     </#if>
 
-    <div id="feedback-report-modal" class="modal fade"></div>
+    <@modal.modal id="feedback-report-modal"></@modal.modal>
 
     <script type="text/javascript" nonce="${nonce()}">
       <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->

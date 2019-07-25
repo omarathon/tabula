@@ -1,11 +1,12 @@
 <#escape x as x?html>
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
   <div class="deptheader">
     <h1>Deregistered students</h1>
     <h4 class="with-related"><span class="muted">for</span> ${smallGroupSet.name}</h4>
   </div>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <p>Students who are allocated to groups may become deregistered from the set of small
     groups at a later date (for example if they change modules).</p>

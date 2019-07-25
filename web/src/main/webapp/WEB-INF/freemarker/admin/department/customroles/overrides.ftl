@@ -1,5 +1,5 @@
 <#import "*/permissions_macros.ftl" as pm />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
   <h1>${customRoleDefinition.description}</h1>
@@ -53,14 +53,14 @@
 
   <@pm.debugRole role=roleInfo.role showScopes=false />
 
-  <div id="custom-roles-modal" class="modal fade">
+  <@modal.modal id="custom-roles-modal">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title">Delete role override</h3>
       </@modal.header>
       <@modal.body></@modal.body>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
   <script type="text/javascript" nonce="${nonce()}">
     jQuery(function ($) {

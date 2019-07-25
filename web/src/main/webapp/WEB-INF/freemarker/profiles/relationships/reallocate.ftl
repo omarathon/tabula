@@ -1,6 +1,6 @@
 <#escape x as x?html>
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#assign manualFormAction><@routes.profiles.relationship_reallocate department relationshipType agentId /></#assign>
   <#assign previewFormAction><@routes.profiles.relationship_allocate_preview department relationshipType /></#assign>
@@ -19,6 +19,6 @@
     <#include "_allocate_manual_tab.ftl" />
   </div>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 </#escape>

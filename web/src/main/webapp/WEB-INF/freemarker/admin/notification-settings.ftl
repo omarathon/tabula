@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#function route_function dept>
@@ -18,7 +18,7 @@
   <@f.form method="post" class="notification-settings-form" action=submitUrl modelAttribute="command">
     <input type="hidden" name="returnTo" value="${returnTo}">
 
-    <div class="modal fade" id="small-group-attendance-modal">
+    <@modal.modal id="small-group-attendance-modal">
       <@modal.wrapper>
         <@modal.header>
           <h3 class="modal-title">Small group notifications</h3>
@@ -47,7 +47,7 @@
             has opted out of small group attendance notifications.</p>
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
     <div class="striped-section collapsible checkbox-toggle <#if command.smallGroupEventAttendanceReminderEnabled>expanded</#if>">
       <div class="row">
@@ -107,7 +107,7 @@
       </div>
     </div>
 
-    <div class="modal fade" id="coursework-marking-workflow-admin-modal">
+    <@modal.modal id="coursework-marking-workflow-admin-modal">
       <@modal.wrapper>
         <@modal.header>
           <h3 class="modal-title">Coursework marking workflow notifications</h3>
@@ -132,7 +132,7 @@
             has opted out of marking completed notifications.</p>
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
     <div class="striped-section collapsible checkbox-toggle <#if command.finaliseFeedbackNotificationEnabled>expanded</#if>">
       <div class="row">
@@ -183,7 +183,7 @@
     </div>
 
     <#if department.enableMitCircs>
-      <div class="modal fade" id="mitcircs-acute-outcomes-modal">
+      <@modal.modal id="mitcircs-acute-outcomes-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Mitigating circumstances acute outcome notifications</h3>
@@ -208,7 +208,7 @@
               has opted out of these notifications.</p>
           </@modal.body>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
 
       <div class="striped-section collapsible checkbox-toggle <#if command.mitCircsRecordAcuteOutcomesNotificationEnabled>expanded</#if>">
         <div class="row">

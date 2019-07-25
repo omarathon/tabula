@@ -1,10 +1,10 @@
 <#import "*/_filters.ftl" as filters />
 <#import "*/cm2_macros.ftl" as cm2 />
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <@cm2.assignmentHeader "Marking" assignment />
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <#-- Filtering -->
   <div class="fix-area form-post-container">
@@ -118,7 +118,7 @@
                 action = $this.data('href')
               }
 
-              var $form = $('<form></form>').attr({method: 'POST', action: action}).hide();
+              var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
               var doFormSubmit = false;
 
               if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
@@ -126,6 +126,9 @@
                 $form.append($checkedBoxes.clone());
                 doFormSubmit = true;
               }
+
+              const $hiddenInputs = $container.parent().find('input[type=hidden]');
+              $form.append($hiddenInputs);
 
               if (doFormSubmit) {
                 $(document.body).append($form);

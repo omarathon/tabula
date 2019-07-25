@@ -1,6 +1,7 @@
 <#import "*/cm2_macros.ftl" as cm2 />
 <#assign module = assignment.module />
 <#assign department = module.adminDepartment />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#--noinspection FtlWellformednessInspection-->
 
 <#macro row graph>
@@ -48,7 +49,7 @@
   <@cm2.assignmentHeader "Manage extensions" assignment "for" />
 
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="row extension-metadata">
     <div class="col-md-7">

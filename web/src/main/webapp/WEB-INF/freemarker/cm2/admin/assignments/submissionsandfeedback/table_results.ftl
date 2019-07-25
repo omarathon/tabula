@@ -1,9 +1,10 @@
 <#import "*/coursework_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
-  <div id="profile-modal" class="modal fade profile-subset"></div>
-  <div id="feedback-modal" class="modal fade"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
+  <@modal.modal id="feedback-modal"></@modal.modal>
   <#if results.students??>
     <#function hasSubmissionOrFeedback students>
       <#local result = [] />

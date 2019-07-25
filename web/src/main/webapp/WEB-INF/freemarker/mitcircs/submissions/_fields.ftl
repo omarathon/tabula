@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
 <#import "*/mitcircs_components.ftl" as components />
 
@@ -63,7 +63,7 @@
   >
     <@bs3form.form_group path="relatedSubmission">
       <@f.select path="relatedSubmission" cssClass="form-control">
-        <option value="">Select a previous submission&hellip;</option>
+        <option value="">No, this does not relate to a previous submission</option>
         <#list previousSubmissions as submission>
           <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></#assign>
           <@f.option value="${submission.key}" label="${label}" />
@@ -94,7 +94,7 @@
     </colgroup>
     <thead>
       <tr>
-        <th scope="col" class="mitcircs-form__fields__section__assessments-table__checkbox"></th>
+        <th scope="col" class="mitcircs-form__fields__section__assessments-table__checkbox"><input type="checkbox" class="check-all" title="Select all/none"></th></th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__module">Module</th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__name">Title</th>
         <th scope="col" class="mitcircs-form__fields__section__assessments-table__deadline">Deadline / exam date</th>
@@ -279,7 +279,7 @@
             <a target="_blank" href="<@routes.mitcircs.renderAttachment submission attachment />"><#compress> ${attachment.name} </#compress></a>&nbsp;
             <@f.hidden path="attachedFiles" value="${attachment.id}" />
             <a href="" data-toggle="modal" data-target="#confirm-delete-${attachment.id}"><i class="fa fa-times-circle"></i></a>
-            <div class="modal fade" id="confirm-delete-${attachment.id}" tabindex="-1" role="dialog" aria-hidden="true">
+            <@modal.modal id="confirm-delete-${attachment.id}" role="dialog">
               <@modal.wrapper>
                 <@modal.body>Are you sure that you want to delete ${attachment.name}?</@modal.body>
                 <@modal.footer>
@@ -287,7 +287,7 @@
                   <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
                 </@modal.footer>
               </@modal.wrapper>
-            </div>
+            </@modal.modal>
           </li>
         </#list>
       </ul>

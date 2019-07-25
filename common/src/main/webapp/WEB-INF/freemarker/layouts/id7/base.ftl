@@ -1,5 +1,5 @@
 <#assign tiles=JspTaglibs["/WEB-INF/tld/tiles-jsp.tld"]>
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 <!DOCTYPE html>
 <html lang="en-GB" class="no-js">
@@ -250,11 +250,11 @@
       </div>
     </div>
 
-    <div class="modal fade" id="app-comment-modal">
+    <@modal.modal id="app-comment-modal">
       <@modal.wrapper>
         <@modal.body></@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
 
     <#if user?? && user.sysadmin>
       <div id="sysadmin-link">

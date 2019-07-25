@@ -1,4 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#function route_function dept>
@@ -236,7 +237,7 @@
         </form>
       </div>
     </div>
-    <div class='modal fade' id='confirmModal'>
+    <@modal.modal id='confirmModal'>
       <div class='modal-dialog' role='document'>
         <div class='modal-content'>
           <div class='modal-body'>
@@ -262,10 +263,10 @@
           </div>
         </div>
       </div>
-    </div>
+    </@modal.modal>
   </div>
 
-  <div class="modal fade" id="edit-overcatting-modal"></div>
+  <@modal.modal id="edit-overcatting-modal"></@modal.modal>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {

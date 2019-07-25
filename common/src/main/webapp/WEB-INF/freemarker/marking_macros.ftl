@@ -1,6 +1,6 @@
 <#escape x as x?html>
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
     <#local labelText>${gradeLabel} <@fmt.help_popover id="auto-grade-${markingId}-help" content="The grades available depends on the mark entered and the SITS mark scheme in use" /></#local>
@@ -337,7 +337,7 @@
           </p>
         </#if>
       </div>
-      <div id="grade-validation-invalid-modal" class="modal fade">
+      <@modal.modal id="grade-validation-invalid-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Students with invalid grades</h3>
@@ -365,8 +365,8 @@
             </table>
           </@modal.body>
         </@modal.wrapper>
-      </div>
-      <div id="grade-validation-zero-modal" class="modal fade">
+      </@modal.modal>
+      <@modal.modal id="grade-validation-zero-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Students with zero marks and empty grades</h3>
@@ -392,8 +392,8 @@
             </table>
           </@modal.body>
         </@modal.wrapper>
-      </div>
-      <div id="grade-validation-populated-modal" class="modal fade">
+      </@modal.modal>
+      <@modal.modal id="grade-validation-populated-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Students with empty grades</h3>
@@ -419,7 +419,7 @@
             </table>
           </@modal.body>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
     <#else>
       <div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
         <#if gradeValidation.notOnScheme?has_content >
@@ -443,7 +443,7 @@
           </#if>
         </p>
       </div>
-      <div id="grade-validation-modal" class="modal fade">
+      <@modal.modal id="grade-validation-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Students with empty or invalid grades</h3>
@@ -479,9 +479,9 @@
             </table>
           </@modal.body>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
     </#if>
-    <div id="grade-validation-not-on-scheme-modal" class="modal fade">
+    <@modal.modal id="grade-validation-not-on-scheme-modal">
       <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Manually-added students</h3>
@@ -507,7 +507,7 @@
             </table>
           </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
     </#if>
       <script nonce="${nonce()}">
         jQuery(function ($) {

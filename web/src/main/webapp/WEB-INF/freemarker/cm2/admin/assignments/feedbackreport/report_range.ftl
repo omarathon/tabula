@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2 />
 
 <#escape x as x?html>

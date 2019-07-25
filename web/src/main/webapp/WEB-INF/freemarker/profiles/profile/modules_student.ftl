@@ -43,9 +43,8 @@
       <#if (weightedMeanYearMark!"-")?string != (yearMark!"-")?string>
         (weighted mean: ${weightedMeanYearMark!"-"})
       </#if>
-      |
       <strong>Year Weighting:</strong>
-      <#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if>
+      <#if yearAbroad>0%<#else><#if yearWeighting??>${yearWeighting.weightingAsPercentage}%<#else>-</#if></#if>
     </h3>
 
     <#if moduleRegistrationsAndComponents?has_content>

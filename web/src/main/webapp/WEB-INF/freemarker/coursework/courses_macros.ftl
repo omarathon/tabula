@@ -1,6 +1,6 @@
 <#escape x as x?html>
   <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#macro autoGradeOnline gradePath gradeLabel markPath markingId generateUrl>
     <@form.label path="${gradePath}">${gradeLabel}</@form.label>
@@ -334,7 +334,7 @@
             </p>
           </#if>
         </div>
-        <div id="grade-validation-invalid-modal" class="modal hide fade">
+        <@modal.modal id="grade-validation-invalid-modal" cssClass="hide">
           <@modal.header>
             <h2>Students with invalid grades</h2>
           </@modal.header>
@@ -360,8 +360,8 @@
               </tbody>
             </table>
           </@modal.body>
-        </div>
-        <div id="grade-validation-zero-modal" class="modal hide fade">
+        </@modal.modal>
+        <@modal.modal id="grade-validation-zero-modal" cssClass="hide">
           <@modal.header>
             <h2>Students with zero marks and empty grades</h2>
           </@modal.header>
@@ -385,8 +385,8 @@
               </tbody>
             </table>
           </@modal.body>
-        </div>
-        <div id="grade-validation-populated-modal" class="modal hide fade">
+        </@modal.modal>
+        <@modal.modal id="grade-validation-populated-modal" cssClass="modal hide fade">
           <@modal.header>
             <h2>Students with empty grades</h2>
           </@modal.header>
@@ -410,7 +410,7 @@
               </tbody>
             </table>
           </@modal.body>
-        </div>
+        </@modal.modal>
       <#else>
         <div class="grade-validation alert alert-${gradeValidationClass}" style="display:none;">
           <#local total = gradeValidation.populated?keys?size + gradeValidation.invalid?keys?size />
@@ -421,7 +421,7 @@
             have feedback with grades that are empty or invalid. They will not be uploaded.
           </#if>
         </div>
-        <div id="grade-validation-modal" class="modal hide fade">
+        <@modal.modal id="grade-validation-modal" class="modal hide fade">
           <@modal.header>
             <h2>Students with empty or invalid grades</h2>
           </@modal.header>
@@ -455,7 +455,7 @@
               </tbody>
             </table>
           </@modal.body>
-        </div>
+        </@modal.modal>
       </#if>
     </#if>
     <script nonce="${nonce()}">

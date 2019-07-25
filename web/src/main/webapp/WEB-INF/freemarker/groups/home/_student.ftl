@@ -1,5 +1,5 @@
 <#import "*/group_components.ftl" as components />
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
   <#if nonempty(memberGroupsetModules.moduleItems) || user.student || user.alumni>
@@ -13,7 +13,7 @@
       <div id="student-groups-view">
         <@components.module_info memberGroupsetModules />
       </div><!--student-groups-view-->
-      <div class="modal fade timetable-clash-info" id="timetable-clash-modal">
+      <@modal.modal cssClass="timetable-clash-info" id="timetable-clash-modal">
         <@f.form method="post" modelAttribute="command">
           <input type="hidden" name="group" value="" />
           <@modal.wrapper>
@@ -31,7 +31,7 @@
             </@modal.footer>
           </@modal.wrapper>
         </@f.form>
-      </div>
+      </@modal.modal>
     <#else>
       <div class="alert alert-block alert-info">
         There are no groups to show you right now for ${academicYear.toString}

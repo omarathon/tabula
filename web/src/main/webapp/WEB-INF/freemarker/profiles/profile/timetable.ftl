@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#assign isSelf = member.universityId == user.universityId />
@@ -66,7 +66,7 @@
   </p>
 
   <#if member.timetableHash?has_content>
-    <div class="modal fade" id="timetable-ical-modal">
+    <@modal.modal id="timetable-ical-modal">
       <@modal.wrapper>
         <@modal.header>
           <h3 class="modal-title">Subscribe to your timetable</h3>
@@ -95,7 +95,7 @@
           <p><a href="<@routes.profiles.timetable_ical member />"><@routes.profiles.timetable_ical member false /></a></p>
         </@modal.body>
       </@modal.wrapper>
-    </div>
+    </@modal.modal>
   </#if>
 
   <style type="text/css" nonce="${nonce()}">

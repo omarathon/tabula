@@ -1,4 +1,4 @@
-<#import "/WEB-INF/freemarker/modal_macros.ftl" as modal />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
   <#assign formAction><@routes.mitcircs.readyForPanel submission /></#assign>

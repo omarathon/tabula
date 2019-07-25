@@ -2,10 +2,11 @@
   <#import "../attendance_variables.ftl" as attendance_variables />
   <#import "../attendance_macros.ftl" as attendance_macros />
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
   <h1>${agent.fullName}'s ${relationshipType.studentRole}s</h1>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="studentResults">
     <#assign returnTo><@routes.attendance.viewAgent department academicYear relationshipType agent /></#assign>

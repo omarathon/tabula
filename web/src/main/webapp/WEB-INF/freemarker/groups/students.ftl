@@ -1,6 +1,6 @@
 <#import "*/group_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 
 <#escape x as x?html>
 <@modal.wrapper cssClass="modal-lg">

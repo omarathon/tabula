@@ -1,3 +1,4 @@
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <div id="allocatestudents-tab1" class="tab-pane active fix-area allocate-associations">
     <#macro filter path placeholder currentFilter allItems validItems=allItems prefix="" customPicker="" cssClass="">
@@ -244,7 +245,7 @@
         </div>
       </div>
 
-      <div class="modal fade" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
+      <@modal.modal  id="add-agents" role="dialog" ariaLabelledby="add-agents-label">
         <@modal.wrapper>
           <@modal.header>
             <h3 id="add-agents-label" class="modal-title">Add ${relationshipType.agentRole}s</h3>
@@ -265,7 +266,7 @@
             <button type="submit" class="btn btn-primary" name="action" value="${commandActions.AddAdditionalEntities}">Add</button>
           </@modal.footer>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
     </@f.form>
 
     <@f.form modelAttribute="command" action="${previewFormAction}" method="POST" cssClass="preview">

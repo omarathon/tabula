@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <#assign student = studentCourseDetails.student/>
   <#assign agent_role = relationshipType.agentRole />

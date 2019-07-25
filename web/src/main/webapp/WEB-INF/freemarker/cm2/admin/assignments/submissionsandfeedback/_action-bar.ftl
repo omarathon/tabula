@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#import "*/coursework_components.ftl" as components />
 
 <div class="clearfix action-bar">
@@ -23,7 +23,7 @@
         var $this = $(this);
 
         if ($this.is(':checked')) {
-          var $form = $('<form></form>').attr({method: 'POST', action: $this.data('href')}).hide();
+          var $form = window.GlobalScripts.csrfForm.generate().attr({action: $this.data('href')}).hide();
 
           var $inputs = $this.closest(".btn-toolbar").parent().find(".filter-form :input");
           $form.append($inputs.clone());

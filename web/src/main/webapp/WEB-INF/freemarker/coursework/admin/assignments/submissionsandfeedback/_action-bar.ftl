@@ -1,3 +1,4 @@
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#if students??>
   <div class="btn-toolbar">
     <div class="pull-right view-selector">
@@ -22,7 +23,7 @@
           var $this = $(this);
 
           if ($this.is(':checked')) {
-            var $form = $('<form></form>').attr({method: 'POST', action: $this.data('href')}).hide();
+            var $form = window.GlobalScripts.csrfForm.generate().attr({action: $this.data('href')}).hide();
 
             var $inputs = $this.closest(".btn-toolbar").parent().find(".filter-form :input");
             $form.append($inputs.clone());
@@ -338,7 +339,7 @@
 
   </div>
 
-  <div id="download-pdf-modal" class="modal hide fade">
+  <@modal.modal id="download-pdf-modal" cssClass="hide">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
       <h3>Download submissions as PDF</h3>
@@ -352,5 +353,5 @@
         </a></p>
       <ul class="submissions"></ul>
     </div>
-  </div>
+  </@modal.modal>
 </#if>

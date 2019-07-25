@@ -1,5 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
     <#function route_function dept>
@@ -84,7 +84,7 @@
                     </@bs3form.form_group>
                     <@form_fields.select_course_fields />
                 </form>
-                <div class="modal student-checker-modal" tabindex="-1" role="dialog"><@modal.wrapper></@modal.wrapper></div>
+                <@modal.modal cssClass="student-checker-modal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
               </div>
             </#if>
 
@@ -363,7 +363,7 @@
         </div>
       </@f.form>
     </div>
-    <div class='modal fade' id='confirmModal'>
+    <@modal.modal id='confirmModal'>
       <div class='modal-dialog' role='document'>
         <div class='modal-content'>
           <div class='modal-body'>
@@ -388,10 +388,10 @@
           </div>
         </div>
       </div>
-    </div>
+    </@modal.modal>
   </div>
 
-  <div class="modal fade" id="edit-overcatting-modal"></div>
+  <@modal.modal id="edit-overcatting-modal"></@modal.modal>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {

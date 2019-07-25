@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <div class="pull-right">
     <button class="btn btn-default" data-toggle="modal" data-target="#copy-loads-modal">
@@ -7,7 +7,7 @@
     </button>
   </div>
 
-  <div id="copy-loads-modal" class="modal fade">
+  <@modal.modal id="copy-loads-modal">
     <@modal.wrapper cssClass="modal-lg">
       <@modal.header>
         <h3 class="modal-title">Copy from other academic year</h3>
@@ -37,7 +37,7 @@
         </div>
       </@modal.footer>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
   <#function route_function dept>
     <#local result><@routes.exams.manageNormalLoads dept academicYear /></#local>

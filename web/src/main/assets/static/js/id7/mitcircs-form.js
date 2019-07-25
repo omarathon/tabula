@@ -75,6 +75,16 @@ class MitCircsForm {
           .on('hidden.bs.modal', () => $attachmentContainer.remove());
       });
 
+    // check-all on assessment tabs
+    $form.on('change', '.check-all', (e) => {
+      const $checkAll = $(e.target);
+      $checkAll.closest('table')
+        .find('input[type=checkbox]')
+        .prop('checked', $checkAll.is(':checked'))
+        .last()
+        .trigger('change');
+    });
+
     this.initAssessmentsTable();
     $form.on('submit', this.processAssessmentsTableFormFieldsForSubmission.bind(this));
   }

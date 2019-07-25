@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
   <#import "*/_profile_link.ftl" as pl />
 
   <script type="text/javascript" nonce="${nonce()}">
@@ -32,7 +32,7 @@
     </#if>
   </#list>
 
-  <div id="addAdditional-modal" class="modal fade"></div>
+  <@modal.modal id="addAdditional-modal"></@modal.modal>
 
   <div class="recordCheckpointForm" data-check-checkpoints="true">
     <div style="display:none;" class="forCloning">
@@ -54,7 +54,7 @@
       </div>
     </div>
 
-    <div id="profile-modal" class="modal fade profile-subset"></div>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
     <div class="fix-area">
       <div class="deptheader">
         <h1>Record attendance</h1>
@@ -64,7 +64,7 @@
           ${command.event.group.name}</h4>
       </div>
 
-      <div id="print-modal" class="modal fade">
+      <@modal.modal id="print-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Print register</h3>
@@ -114,7 +114,7 @@
             </@modal.footer>
           </form>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
       <div class="pull-right">
         <button type="button" class="btn btn-default" data-toggle="modal" data-target="#print-modal">Print</button>
         <@fmt.bulk_email_students studentMembers />

@@ -107,10 +107,14 @@
 
       var updateCell = function ($cell, value) {
         var groupRunningText = 'Group running on ';
+        var $label = $cell.find('[data-original-title]');
         if (value) {
-          $cell.attr('data-original-title', groupRunningText + $cell.attr('data-original-title'));
+          $label.attr('data-original-title', groupRunningText + $label.data('original-title'));
         } else {
-          $cell.attr('data-original-title', $cell.attr('data-original-title').replace(groupRunningText, ''));
+          var originalTitle = $label.data('original-title');
+          if (originalTitle) {
+            $label.attr('data-original-title', originalTitle.replace(groupRunningText, ''));
+          }
         }
       };
 

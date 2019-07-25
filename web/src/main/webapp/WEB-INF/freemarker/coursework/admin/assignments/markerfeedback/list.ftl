@@ -1,6 +1,7 @@
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/submission_components.ftl" as components />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
 <#function markingId user>
   <#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
@@ -161,7 +162,7 @@
   <h1><@fmt.module_name assignment.module /></h1>
   <h2>Feedback for ${assignment.name}</h2>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <div class="btn-toolbar">
     <#assign disabledClass><#if feedbackToDoCount == 0>disabled</#if></#assign>
@@ -236,7 +237,7 @@
     </div>
   </div>
 
-  <div id="download-pdf-modal" class="modal hide fade">
+  <@modal.modal id="download-pdf-modal" cssClass="hide">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
       <h3>Download submissions as PDF</h3>
@@ -248,7 +249,7 @@
         </a></p>
       <ul class="submissions"></ul>
     </div>
-  </div>
+  </@modal.modal>
 
   <#if markerFeedback?has_content>
     <#list markerFeedback as stage>

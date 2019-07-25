@@ -1,6 +1,6 @@
 <#import "*/coursework_components.ftl" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <#macro studentIdentifier user><#compress>
     <#if user.warwickId??>${user.warwickId}<#else>${user.userId!}</#if>
@@ -13,8 +13,8 @@
       <#return false />
   </#function>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
-  <div id="feedback-modal" class="modal fade"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
+  <@modal.modal id="feedback-modal"></@modal.modal>
 
   <div class="submission-feedback-results" data-popout="false">
     <#if (results.students?size > 0)>

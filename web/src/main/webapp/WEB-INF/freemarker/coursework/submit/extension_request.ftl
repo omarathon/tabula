@@ -57,7 +57,7 @@
           You will receive a notification when your request has been processed.
         </p>
         <#if department.extensionGuidelineSummary??>
-          <#include "/WEB-INF/freemarker/coursework/submit/formfields/guideline.ftl" >
+          <#include "/WEB-INF/freemarker/coursework/submit/formfields/guideline.ftl">
         </#if>
         <#if department.extensionGuidelineLink?has_content>
           <p>You should read the full <a href="${department.extensionGuidelineLink}">extension guidelines</a>

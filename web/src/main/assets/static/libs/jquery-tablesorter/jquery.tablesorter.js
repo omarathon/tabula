@@ -158,7 +158,7 @@
         }
 
         if (table.tBodies.length == 0) return; // In the case of empty tables
-        var rows = table.tBodies[0].children;
+        var rows = $(table).find('tbody tr').toArray();
 
         if (rows[0]) {
 
@@ -250,8 +250,10 @@
           var cacheTime = new Date();
         }
 
-        var totalRows = (table.tBodies[0] && table.tBodies[0].children.length) || 0,
-          totalCells = (table.tBodies[0].children[0] && table.tBodies[0].children[0].cells.length) || 0,
+        var rows = $(table).find('tbody tr').toArray();
+
+        var totalRows = rows.length || 0,
+          totalCells = (rows[0] && rows[0].cells.length) || 0,
           parsers = table.config.parsers,
           cache = {
             row: [],
@@ -261,7 +263,7 @@
         for (var i = 0; i < totalRows; ++i) {
 
           /** Add the table data to main data array */
-          var c = $(table.tBodies[0].children[i]),
+          var c = $(rows[i]),
             cols = [];
 
           // if this is a child row, add it to the last row's children and
@@ -717,7 +719,7 @@
           // this is to big, perhaps break it out?
           $headers.click(
             function (e) {
-              var totalRows = ($this[0].tBodies[0] && $this[0].tBodies[0].children.length) || 0;
+              var totalRows = $this.find('tbody tr').toArray().length || 0;
               if (!this.sortDisabled && totalRows > 0) {
                 // Only call sortStart if sorting is
                 // enabled.

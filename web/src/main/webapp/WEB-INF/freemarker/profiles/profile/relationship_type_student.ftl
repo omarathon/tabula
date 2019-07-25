@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#if scheduledAgentChange?has_content>
@@ -90,7 +90,7 @@
     </div>
   </div>
 
-  <div id="timeline" class="modal fade">
+  <@modal.modal id="timeline">
     <@modal.wrapper>
     <@modal.header>
       <h3 class="modal-title">Changes to ${relationshipType.agentRole}</h3>
@@ -198,7 +198,8 @@
             </td>
             <#if (canEditRelationship!false)>
               <td>
-                <form action="<@routes.profiles.relationship_scheduled_change_cancel relationship />" method="post">
+                <#assign formAction><@routes.profiles.relationship_scheduled_change_cancel relationship /></#assign>
+                <@f.form action=formAction method="post">
                   <input type="hidden" name="notifyStudent" value="false" />
                   <input type="hidden" name="notifyOldAgent" value="false" />
                   <input type="hidden" name="notifyNewAgent" value="false" />
@@ -229,7 +230,7 @@
                   >
                     Cancel
                   </button>
-                </form>
+                </@f.form>
               </td>
             </#if>
           </tr>
@@ -250,9 +251,9 @@
     </#if>
     </@modal.body>
     </@modal.wrapper>
-  </div>
+  </@modal.modal>
 
-  <div id="change-agent" class="modal fade"></div>
+  <@modal.modal id="change-agent"></@modal.modal>
 
   <h2>Record of meetings</h2>
 
@@ -371,7 +372,7 @@
         </p>
       </#if>
 
-      <div id="meeting-modal" class="modal fade" style="display:none;"></div>
+      <@modal.modal id="meeting-modal"></@modal.modal>
     </section>
   </#if>
 
@@ -441,7 +442,8 @@
       </div>
 
       <!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
-      <form method="post" class="approval double-submit-protection" id="meeting-${meeting.id}" action="<@routes.profiles.save_meeting_approval meeting />">
+      <#assign formAction><@routes.profiles.save_meeting_approval meeting /></#assign>
+      <@f.form method="post" cssClass="approval double-submit-protection" id="meeting-${meeting.id}" action=formAction>
         <@bs3form.form_group>
           <@bs3form.radio>
             <input type="radio" name="approved" value="true">
@@ -459,7 +461,7 @@
         <div class="submit-buttons">
           <button type="submit" class="btn btn-primary spinnable spinner-auto">Submit</button>
         </div>
-      </form>
+      </@f.form>
     <#elseif meeting.pendingApproval>
       <p class="very-subtle">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></p>
       <div class="alert alert-info">
@@ -496,9 +498,9 @@
         <div class="alert alert-info">
           Please confirm whether this scheduled meeting took place.
         </div>
-
-        <form method="post" class="scheduled-action" id="meeting-${meeting.id}"
-              action="<@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationships[0].relationshipType />">
+        <#assign formAction><@routes.profiles.choose_action_scheduled_meeting_record meeting studentCourseDetails thisAcademicYear meeting.relationships[0].relationshipType /></#assign>
+        <@f.form method="post" cssClass="scheduled-action" id="meeting-${meeting.id}"
+              action=formAction>
           <@bs3form.form_group>
             <@bs3form.radio>
               <input checked type="radio" name="action" value="confirm"
@@ -521,7 +523,7 @@
 
           <div class="ajaxErrors alert alert-danger" style="display: none;"></div>
           <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
+        </@f.form>
       </#if>
     <#elseif meeting.missed>
       <div class="alert alert-danger">

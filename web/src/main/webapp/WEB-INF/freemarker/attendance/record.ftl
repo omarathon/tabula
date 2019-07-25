@@ -1,7 +1,7 @@
 <#escape x as x?html>
   <#import "attendance_variables.ftl" as attendance_variables />
   <#import "attendance_macros.ftl" as attendance_macros />
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
   <script nonce="${nonce()}">
     (function ($) {
@@ -13,7 +13,7 @@
   </script>
 
   <#if groupedPointMap?keys?size == 0>
-    <p><em>No monitoring points found for this academic year.</em></p>
+    <p><em>There are no monitoring points for ${student.fullName} in ${department.name} for this academic year.</em></p>
   <#else>
     <div class="recordCheckpointForm">
 
@@ -204,14 +204,14 @@
     </div>
   </#if>
 
-  <div id="meetings-modal" class="modal fade" style="display:none;">
+  <@modal.modal id="meetings-modal">
     <@modal.wrapper>
       <@modal.header>
         <h3 class="modal-title">Meetings</h3>
       </@modal.header>
       <@modal.body></@modal.body>
     </@modal.wrapper>
-  </div>
-  <div id="small-groups-modal" class="modal fade" style="display:none;"></div>
+  </@modal.modal>
+  <@modal.modal id="small-groups-modal"></@modal.modal>
 
 </#escape>

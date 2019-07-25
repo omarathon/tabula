@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/modal_macros.ftl" as modal />
+  <#import "*/modal_macros.ftlh" as modal />
 
   <#function route_function dept>
     <#local result><@routes.groups.printRegisters dept academicYear /></#local>
@@ -47,7 +47,7 @@
         </tbody>
       </table>
 
-      <div id="print-modal" class="modal fade">
+      <@modal.modal id="print-modal">
         <@modal.wrapper>
           <@modal.header>
             <h3 class="modal-title">Print register</h3>
@@ -104,7 +104,7 @@
             <button class="btn btn-default" data-dismiss="modal" aria-hidden="true">Close</button>
           </@modal.footer>
         </@modal.wrapper>
-      </div>
+      </@modal.modal>
 
       <div class="submit-buttons fix-footer">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#print-modal">Print</button>

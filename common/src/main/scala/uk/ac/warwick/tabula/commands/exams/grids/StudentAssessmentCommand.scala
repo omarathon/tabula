@@ -105,7 +105,7 @@ class StudentAssessmentCommandInternal(val studentCourseDetails: StudentCourseDe
 
     val yearWeighting = courseAndRouteService.getCourseYearWeighting(
       studentCourseYearDetails.studentCourseDetails.course.code,
-      studentCourseYearDetails.academicYear,
+      studentCourseYearDetails.studentCourseDetails.sprStartAcademicYear,
       studentCourseYearDetails.yearOfStudy
     )
 

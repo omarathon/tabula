@@ -2,8 +2,9 @@
   <#import "../attendance_variables.ftl" as attendance_variables />
   <#import "../attendance_macros.ftl" as attendance_macros />
   <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+  <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
   <#if (filterResult.totalResults > 0)>
 

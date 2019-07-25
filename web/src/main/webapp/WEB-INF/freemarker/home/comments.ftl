@@ -1,4 +1,4 @@
-<#import "*/modal_macros.ftl" as modal />
+<#import "*/modal_macros.ftlh" as modal />
 <#escape x as x?html>
 
   <#macro webTeamForm>
@@ -117,7 +117,7 @@
 
         <@f.form modelAttribute="command" action="${url('/help')}" cssClass="comment-form">
 
-          <div class="modal fade" id="comment-modal">
+          <@modal.modal id="comment-modal">
             <@modal.wrapper>
               <@modal.header><h3 class="modal-title">Email the Web Team</h3></@modal.header>
               <@modal.body>
@@ -130,7 +130,7 @@
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
               </@modal.footer>
             </@modal.wrapper>
-          </div>
+          </@modal.modal>
 
         </@f.form>
 

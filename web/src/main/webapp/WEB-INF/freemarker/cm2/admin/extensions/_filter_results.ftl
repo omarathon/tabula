@@ -1,9 +1,10 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/cm2_macros.ftl" as cm2 />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign currentPage = command.page />
 <#assign totalPages = (results.total / command.extensionsPerPage)?ceiling />
 
-<div id="profile-modal" class="modal fade profile-subset"></div>
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <#function sortClass field>
   <#list command.sortOrder as order>

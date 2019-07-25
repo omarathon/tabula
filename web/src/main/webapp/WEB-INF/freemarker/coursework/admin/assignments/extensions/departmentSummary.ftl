@@ -1,6 +1,7 @@
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<div id="profile-modal" class="modal fade profile-subset"></div>
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+<@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
 <#macro row graph>
   <#assign state = (graph.extension.state.description)!"None" />

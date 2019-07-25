@@ -7,7 +7,7 @@
 
 import log from 'loglevel';
 import _ from 'lodash-es';
-import {postJsonWithCredentials} from '@universityofwarwick/serverpipe';
+import { postJsonWithCredentials } from '@universityofwarwick/serverpipe';
 
 let errors = [];
 let postErrorsThrottled;
@@ -20,9 +20,9 @@ function postErrors() {
       log.info('Errors posted to server');
       errors = errors.slice(errorsToPost.length);
     }).catch((e) => {
-    log.warn('Failed to post errors to server', e);
-    postErrorsThrottled();
-  });
+      log.warn('Failed to post errors to server', e);
+      postErrorsThrottled();
+    });
 }
 
 postErrorsThrottled = _.throttle(postErrors, 5000); // eslint-disable-line prefer-const
@@ -33,7 +33,7 @@ function onError(message, source, line, column, error) {
   errors = errors.concat({
     time: new Date().getTime(),
     message,
-    source: source || error.filename || '', //path to the script where the error was raised (string),
+    source: source || error.filename || '', // path to the script where the error was raised (string),
     line: line || error.lineNumber || '',
     column: column || error.columnNumber || '',
     pageUrl: window.location.href, // page url

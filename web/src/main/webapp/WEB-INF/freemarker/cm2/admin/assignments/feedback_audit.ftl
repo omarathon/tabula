@@ -1,7 +1,7 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "feedback/_feedback_summary.ftl" as fs />
 <#import "/WEB-INF/freemarker/coursework/admin/assignments/feedback/_feedback_summary.ftl" as cm1fs>
-
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#import "*/cm2_macros.ftl" as cm2/>
 
 <#escape x as x?html>
@@ -116,5 +116,5 @@
 
   </#if>
 
-  <div id="profile-modal" class="modal fade profile-subset"></div>
+  <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 </#escape>

@@ -1,8 +1,9 @@
-<#ftl strip_text=true />
+<#ftl strip_text=true output_format="HTML" />
 
 <#-- Common template parts for use in other small groups templates. -->
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 
@@ -32,10 +33,10 @@
 <#macro dropdown_menu text button_size="btn-medium">
 <#-- Capture the content between the macro tags into a string -->
   <#local content><#nested /></#local>
-  <#if content?trim?has_content>
+  <#if content?markup_string?trim?has_content>
     <a class="btn btn-default ${button_size} dropdown-toggle" data-toggle="dropdown" href="#">${text} <span class="caret"></span></a>
     <ul class="dropdown-menu pull-right">
-      ${content}
+      ${content?no_esc}
     </ul>
   </#if>
 </#macro>
@@ -173,9 +174,10 @@
 								<@dropdown_menu "Actions" "btn-xs">
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if set.openForSignups>
-                      <li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
 												<#local closeset_url><@routes.groups.closeset set /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -189,9 +191,10 @@
                         </@fmt.permission_button>
 											</li>
 										<#else>
-                      <li ${(set.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
 												<#local openset_url><@routes.groups.openset set /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -208,7 +211,10 @@
                   </#if>
 
 
-                  <li ${set.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+                  <li <#if set.fullyReleased>
+                    class="disabled use-tooltip" title="Already published"
+                  </#if>
+                  >
 										<#local notifyset_url><@routes.groups.releaseset set /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
@@ -226,14 +232,14 @@
 
                   <li>
 										<#if set.archived>
-                      <#local archive_caption>Unarchive</#local>
+                      <#local archive_caption = 'Unarchive'>
                     <#else>
-                      <#local archive_caption>Archive</#local>
+                      <#local archive_caption = 'Archive'>
                     </#if>
 
                     <#local archive_url><@routes.groups.archiveset set /></#local>
 
-                    <@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr='${archive_caption}'?lower_case classes='archive-group-link' href=archive_url
+                    <@fmt.permission_button permission='SmallGroups.Archive' scope=set action_descr=archive_caption?lower_case classes='archive-group-link' href=archive_url
                     tooltip='Archive small group' data_attr='data-toggle=modal data-target=#modal-container'>
                       ${archive_caption}
                     </@fmt.permission_button>
@@ -431,7 +437,7 @@
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
                    data-html="true" aria-label="Help"
-                   data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
+                   data-content="${popoverContent?markup_string}"><i class="fa fa-question-circle"></i></a>
               </li>
             </#list>
           </ul>
@@ -461,7 +467,7 @@
                     <a class="use-popover"
                        href="#"
                        data-html="true"
-                       data-content="${popoverContent?html}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
+                       data-content="${popoverContent?markup_string}">and <@fmt.p (event.tutors.size - 1) "other" /></a>
                   </#if>
                 </#if>
               </li>
@@ -490,8 +496,8 @@
 <#macro module_info data expand_by_default=true>
   <div class="small-group-modules-list">
     <#-- List of students modal -->
-    <div id="students-list-modal" class="modal fade" tabindex="-1"></div>
-    <div id="profile-modal" class="modal fade profile-subset" tabindex="-1"></div>
+    <@modal.modal id="students-list-modal"></@modal.modal>
+    <@modal.modal id="profile-modal" cssClass="profile-subset"></@modal.modal>
 
     <#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
     <script type="text/javascript" nonce="${nonce()}">
@@ -669,11 +675,18 @@
             <div class="row group">
               <div class="col-md-12">
                 <#if setItem.viewerMustSignUp>
-                <div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
+                <div <#if group.full>
+                    class="pull-left use-tooltip" title="There are no spaces left on this group"
+                  <#else>
+                    class="pull-left"
+                  </#if>
+                >
                   <input type="radio"
                     name="group"
                     value="${group.id}"
-                    ${group.full?string(' disabled ','')}
+                    <#if group.full>
+                      disabled
+                    </#if>
                     class="radio inline group-selection-radio"/>
               </div>
               <div style="margin-left: 20px;">
@@ -802,9 +815,10 @@
                   </li>
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if groupSet.openForSignups>
-                      <li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
+                          class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
                         <#local closeset_url><@routes.groups.closeset groupSet /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -818,9 +832,10 @@
                         </@fmt.permission_button>
                       </li>
                     <#else>
-                      <li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-                      (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-                      }>
+                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
+                        class="disabled use-tooltip" title="Not a self-signup group"
+                      </#if>
+                      >
                         <#local openset_url><@routes.groups.openset groupSet /></#local>
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
@@ -846,7 +861,10 @@
                       Allocate students
                     </@fmt.permission_button>
                   </li>
-                  <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already published' ",'')} >
+                  <li <#if groupSet.fullyReleased>
+                    class="disabled use-tooltip" title="Already published"
+                  </#if>
+                  >
                     <#local notifyset_url><@routes.groups.releaseset groupSet /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
@@ -965,7 +983,7 @@
       </#local>
 
       <td>
-				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?replace('\"', '')}" data-html="true">
+				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string}" data-html="true">
 					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
