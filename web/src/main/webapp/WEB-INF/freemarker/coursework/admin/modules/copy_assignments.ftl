@@ -2,7 +2,7 @@
 <#escape x as x?html>
   <h1>Create assignments from previous for ${title}</h1>
 
-  <@f.form action="" method="post" cssClass="form-horizontal copy-assignments">
+  <form action="" method="post" class="form-horizontal copy-assignments">
 
     <div class="submit-buttons">
       <input class="btn btn-primary" type="submit" value="Confirm">
@@ -44,5 +44,5 @@
       <a class='btn' href='<@url page=cancel />'>Cancel</a>
     </div>
 
-  </@f.form>
+  </form>
 </#escape>

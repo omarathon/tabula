@@ -8,7 +8,7 @@
   </#function>
   <@cm2.departmentHeader "Create assignments from previous" department route_function academicYear />
 
-  <@f.form action="" method="post" cssClass="copy-assignments">
+  <form action="" method="post" class="copy-assignments">
     <div class="submit-buttons">
       <input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
       <a class='btn btn-default' href='<@url page=cancel />'>Cancel</a>
@@ -22,7 +22,7 @@
       <input class="btn btn-primary confirm-btn" type="submit" value="Confirm">
       <a class='btn btn-default' href='<@url page=cancel />'>Cancel</a>
     </div>
-  </@f.form>
+  </form>
 
   <@modal.modal id="confirmModal">
     <@modal.wrapper cssClass="modal-xs">
