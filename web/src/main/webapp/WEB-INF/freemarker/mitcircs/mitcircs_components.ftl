@@ -94,10 +94,10 @@
 
       <#local title><@spring.message code=progress.stage.actionCode /></#local>
       <#if progress_index gt 0>
-        <div class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
+        <div tabindex="0" class="bar bar-${state} tabula-tooltip" data-title="${fmt.strip_html(title)}"></div>
       </#if>
       <#local title><@spring.message code=progress.messageCode /></#local>
-      <span class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
+      <span tabindex="0" class="fa-stack tabula-tooltip" data-title="${fmt.strip_html(title)}">
 				<i class="fa fa-stack-1x fa-circle fa-inverse"></i>
 				<i class="fa fa-stack-1x ${icon} text-${state}"></i>
 			</span>
@@ -181,7 +181,7 @@
           <td>
             <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
-              <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
+              <span tabindex="0" class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
           </td>
           <#if panel>

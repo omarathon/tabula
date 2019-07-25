@@ -17,7 +17,7 @@
         Assign markers
       </@fmt.permission_button>
     <#else>
-      <span class="use-tooltip btn btn-default disabled" data-container="body" title="Marking workflow is not enabled for this exam"><a
+      <span tabindex="0" class="use-tooltip btn btn-default disabled" data-container="body" title="Marking workflow is not enabled for this exam"><a
                 class="btn-default disabled">Assign markers</a></span>
     </#if>
 
@@ -34,7 +34,7 @@
         Release for marking
       </@fmt.permission_button>
     <#else>
-      <span class="use-tooltip btn btn-default disabled" data-container="body" title="This exam has already been released for marking"><a
+      <span tabindex="0" class="use-tooltip btn btn-default disabled" data-container="body" title="This exam has already been released for marking"><a
                 class="disabled btn-default">Release for marking</a></span>
     </#if>
 
@@ -153,12 +153,12 @@
             <td>
               <#if sitsStatus.status.code == "failed">
                 <a href="<@routes.exams.checkSitsUpload feedback />" target="_blank" style="text-decoration: none;">
-									<span class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
+									<span tabindex="0" class="label label-danger use-tooltip" title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 										${sitsStatus.status.description}
 									</span><#--
 								--></a>
               <#elseif sitsWarning>
-                <span class="label label-danger use-tooltip"
+                <span tabindex="0" class="label label-danger use-tooltip"
                       title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 									${sitsStatus.status.description}
 								</span>

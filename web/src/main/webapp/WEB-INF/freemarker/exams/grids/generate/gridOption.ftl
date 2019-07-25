@@ -208,7 +208,7 @@
                         <#if gridOptionsCommand.predefinedColumnIdentifiers?seq_contains("corerequired")>checked</#if>
             /> Core required
             modules <@fmt.help_popover id="corerequired" content="Compulsory modules for all students on the selected course. You can confirm these modules in the next step." /><#if info.maintenanceMode!false>
-              <i class="text-warning fa fa-fw fa-exclamation-triangle use-popover" title="System read-only"
+              <i tabindex="0" role="button" class="text-warning fa fa-fw fa-exclamation-triangle use-popover" title="System read-only"
                  data-content="Tabula has been placed in a read-only mode. It's not currently possible to modify the core required modules for the selected routes. Your previous selections will be used."></i></#if>
           </label>
         </div>

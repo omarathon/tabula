@@ -119,7 +119,7 @@
             </td>
             <td>
               <#if relationship.startDate??>
-                <span class="use-tooltip" data-container="body"
+                <span tabindex="0" class="use-tooltip" data-container="body"
                       title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
 											<@fmt.date date=relationship.startDate includeTime=false />
 										</span>
@@ -129,7 +129,7 @@
             </td>
             <td>
               <#if relationship.endDate??>
-                <span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
 											<@fmt.date date=relationship.endDate includeTime=false />
 										</span>
               <#else>
@@ -186,12 +186,12 @@
             </td>
             <td>
               <#if (relationship.startDate?? && relationship.startDate.afterNow)>
-                <span class="use-tooltip" data-container="body"
+                <span tabindex="0" class="use-tooltip" data-container="body"
                       title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
 											<@fmt.date date=relationship.startDate includeTime=false relative=false shortMonth=true />
 										</span>
               <#elseif (relationship.endDate?? && relationship.endDate.afterNow)>
-                <span class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
 											<@fmt.date date=relationship.endDate includeTime=false relative=false shortMonth=true />
 										</span>
               </#if>
@@ -359,7 +359,7 @@
               <#assign agentFirstName = relationshipsToDisplay[0].agentMember.firstName />
               <#assign tooltipTitle = "You can't use Tabula to schedule a meeting with ${agentFirstName}. This isn't allowed by ${agentFirstName}'s department." />
             </#if>
-            <span class="btn btn-default disabled use-tooltip" title="${tooltipTitle}" data-placement="top">
+            <span tabindex="0" class="btn btn-default disabled use-tooltip" title="${tooltipTitle}" data-placement="top">
 						Schedule meeting
 					</span>
           </#if>

@@ -69,7 +69,7 @@
               <strong>Home department:</strong> ${member.homeDepartment.name}<br />
             </#if>
             <#if user.sysadmin>
-              <span class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
+              <span tabindex="0" class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
               <strong>Last import:</strong> <@fmt.date date=member.lastImportDate />
               <@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="" style="display: inline;">
                 <input type="hidden" name="members" value="${member.universityId}">
@@ -136,7 +136,7 @@
               </#if>
               <#if scyd.yearOfStudy??>
                 <strong>Study block or year:</strong> ${(scyd.yearOfStudy)!}
-                <i class="fa fa-question-circle text-primary use-tooltip"
+                <i tabindex="0" class="fa fa-question-circle text-primary use-tooltip"
                    title="An intake for a particular course or period of study. E.g. an undergraduate in their third year of study with no breaks is in block 3. A third-year undergraduate who temporarily withdrew for one year is in block 4."
                    data-placement="right"></i>
                 <br />

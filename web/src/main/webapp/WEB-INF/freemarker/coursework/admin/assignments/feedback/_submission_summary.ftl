@@ -6,15 +6,15 @@
 
   <div class="labels">
     <#if submission.late>
-      <span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
+      <span tabindex="0" class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
     <#elseif  submission.authorisedLate>
-      <span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+      <span tabindex="0" class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
     </#if>
 
     <#if submission.suspectPlagiarised>
-      <span class="label label-important use-tooltip" title="Suspected of being plagiarised" data-container="body">Plagiarism suspected</span>
+      <span tabindex="0" class="label label-important use-tooltip" title="Suspected of being plagiarised" data-container="body">Plagiarism suspected</span>
     <#elseif submission.investigationCompleted>
-      <span class="label label-info use-tooltip" title="No evidence of plagiarism was found" data-container="body">Plagiarism investigation completed</span>
+      <span tabindex="0" class="label label-info use-tooltip" title="No evidence of plagiarism was found" data-container="body">Plagiarism investigation completed</span>
     </#if>
 
     <#if features.disabilityOnSubmission && command.disability??>

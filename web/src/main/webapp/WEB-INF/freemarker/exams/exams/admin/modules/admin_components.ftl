@@ -66,7 +66,7 @@
               <span class="label label-default">No enrolled students</span>
             <#else>
               <a href="<@routes.exams.viewExam exam />">
-							<span class="use-tooltip" title="View all students and feedback">
+							<span tabindex="0" class="use-tooltip" title="View all students and feedback">
 								<@fmt.p membershipInfo.sitsCount "enrolled student"/> from SITS<#if (membershipInfo.usedIncludeCount > 0)>, with <@fmt.p membershipInfo.usedIncludeCount "additional student"/></#if>
 							</span>
               </a>

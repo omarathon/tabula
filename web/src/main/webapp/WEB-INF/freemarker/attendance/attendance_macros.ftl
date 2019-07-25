@@ -149,11 +149,11 @@ showResetButton=false
           <td class="profile_link"><@pl.profile_link item.universityId /></td>
           <td>
             <#if item.itemTypeString == "static">
-              <span class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</span>
+              <span tabindex="0" class="use-tooltip" title="Automatically linked from SITS" data-placement="right">SITS</span>
             <#elseif item.itemTypeString == "exclude">
-              <span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</span>
+              <span tabindex="0" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right">Removed</span>
             <#else>
-              <span class="use-tooltip" title="Added manually" data-placement="right">Added</span>
+              <span tabindex="0" class="use-tooltip" title="Added manually" data-placement="right">Added</span>
             </#if>
           </td>
           <td>${item.firstName}</td>
@@ -177,6 +177,7 @@ showResetButton=false
                           class="use-tooltip"
                           data-container="body"
                           title="See which schemes apply to this student"
+                          tabindex="0"
                   >
 										<span
                             class="use-popover"
@@ -184,6 +185,7 @@ showResetButton=false
                             data-html="true"
                             data-content="${popovercontent}"
                             data-placement="top"
+                            tabindex="0" role="button"
                     >
 											<@fmt.p item.existingSchemes?size "scheme" />
 										</span>
@@ -196,7 +198,7 @@ showResetButton=false
               <#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
                 <input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" />
               <#else>
-                <span class="use-tooltip" title="Student can only be removed from Manually added students tab below"><input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" disabled /></span>
+                <span tabindex="0" class="use-tooltip" title="Student can only be removed from Manually added students tab below"><input type="checkbox" class="collection-checkbox" name="${checkboxName}" value="${item.universityId}" disabled /></span>
               </#if>
             </td>
           </#if>
@@ -268,7 +270,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true"
+  <span tabindex="0" role="button" class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true"
         data-placement="left">${formatResult.labelText}</span>
   <span class="hidden-desktop visible-print visible-print-inline">
 		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
@@ -320,7 +322,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
+  <span tabindex="0" role="button" class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
 		<i class="fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>"></i>
 		<#if formatResult.noteUrl?has_content><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 	</span>
