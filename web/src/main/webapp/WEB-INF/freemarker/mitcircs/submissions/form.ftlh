@@ -63,7 +63,7 @@
         </div>
       </#if>
 
-      <#include "_fields.ftl" />
+      <#include "_fields.ftlh" />
 
       <div class="fix-footer">
         <p>
