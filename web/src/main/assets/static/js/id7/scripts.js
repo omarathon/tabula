@@ -28,9 +28,9 @@ jQuery.fn.sortableTable = function sortableTable(settings) {
   const $table = $(this);
   if ($table.tablesorter) {
     const headerSettings = {};
-    $('th', $table).each((index) => {
-      const sortable = $(this).hasClass('sortable');
-      const customSorter = $(this).data('sorter');
+    $('th', $table).each((index, element) => {
+      const sortable = $(element).hasClass('sortable');
+      const customSorter = $(element).data('sorter');
       if (!sortable) {
         headerSettings[index] = { sorter: false };
       } else if (customSorter) {
@@ -122,7 +122,7 @@ jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', function () {
+      .on('click', function onClick() {
         $(this).prev('input').focus();
       });
   }
@@ -215,7 +215,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
     }
   }).next('.add-on')
     .css({ cursor: 'pointer' })
-    .on('click', function () {
+    .on('click', function onClick() {
       $(this).prev('input').focus();
     });
 
@@ -226,7 +226,7 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
 
 jQuery.fn.selectOffset = function selectOffset() {
   if ($(this).hasClass('startDateTime')) {
-    $(this).on('click', () => {
+    $(this).on('click', function onClick() {
       const indexValue = $(this).children(':selected').attr('value');
       $(this).closest('.dateTimePair')
         .find('.endDateTime')
@@ -743,8 +743,8 @@ exports.initCollapsible = ($el) => {
     } else {
       // Begin view polyfill
       // Do not rely on this, fix the templates instead.
-      $title.each((i, el) => {
-        const $titleElement = $(el);
+      $title.each((i1, el1) => {
+        const $titleElement = $(el1);
 
         if ($titleElement.find('a').length === 0) {
           $titleElement.removeAttr('tabindex');
@@ -752,7 +752,7 @@ exports.initCollapsible = ($el) => {
           $replacementLink.attr('href', '#');
           $replacementLink.html($titleElement.html());
           $replacementLink.contents()
-            .filter((i, el) => el.nodeType !== 1)
+            .filter((index, element) => element.nodeType !== 1)
             .wrap('<span class="collapse-label">');
           $replacementLink.find('span.collapse-label').text($.trim($replacementLink.find('span.collapse-label').text()));
           $titleElement.html('');
