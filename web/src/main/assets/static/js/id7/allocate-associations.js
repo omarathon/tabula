@@ -39,7 +39,7 @@ $(() => {
     });
     $table.find('tr.expanded').each((i, el) => {
       const $this = $(el);
-      $this.after(rowMap[$(this).data('entity')]);
+      $this.after(rowMap[$this.data('entity')]);
     });
 
     $table.sortableTable({
@@ -168,7 +168,7 @@ $(() => {
       class: 'check-all use-tooltip',
       title: 'Select all/none',
     }),
-  ).find('input').change(() => {
+  ).find('input').change(function () {
     $(this).closest('table').selectDeselectCheckboxes(this);
   });
 
@@ -187,7 +187,7 @@ $(() => {
   const updateFilter = ($el) => {
     // Update the filter content
     const $list = $el.closest('ul');
-    const shortValues = $list.find(':checked').map(() => $(this).data('short-value')).get();
+    const shortValues = $list.find(':checked').map(function () { return $(this).data('short-value'); }).get();
     const $fsv = $el.closest('.btn-group').find('.filter-short-values');
     if (shortValues.length) {
       $el.closest('.btn-group').removeClass('empty-filter');
@@ -230,7 +230,7 @@ $(() => {
   });
 
   // Re-order elements inside the dropdown when opened
-  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', () => {
+  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function () {
     const $this = $(this);
     if (!$this.closest('.btn-group').hasClass('open')) {
       // Re-order before it's opened!
@@ -258,11 +258,11 @@ $(() => {
     $('<button class="btn btn-xs btn-default clear-all-filters" type="submit" disabled>Clear filter</button>'),
   );
 
-  const $clearAllButtons = $('.clear-all-filters').on('click', () => {
-    $(this).closest('.student-filter').find('.filter-list').each(() => {
+  const $clearAllButtons = $('.clear-all-filters').on('click', function () {
+    $(this).closest('.student-filter').find('.filter-list').each(function () {
       const $list = $(this);
 
-      $list.find('input:checked').each(() => {
+      $list.find('input:checked').each(function () {
         const $checkbox = $(this);
         $checkbox.prop('checked', false);
         updateFilter($checkbox);
@@ -272,7 +272,7 @@ $(() => {
     });
   });
 
-  $clearAllButtons.each(() => {
+  $clearAllButtons.each(function () {
     updateClearAllButton($(this));
   });
 
@@ -307,7 +307,7 @@ $(() => {
     updateFilter($picker);
   };
 
-  $('.route-search-query').on('change', () => {
+  $('.route-search-query').on('change', function () {
     const $picker = $(this);
     if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0) return;
 

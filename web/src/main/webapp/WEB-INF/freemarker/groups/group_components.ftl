@@ -1238,7 +1238,7 @@ showResetButton=false
     <table class="manage-student-table table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tablesorter sb-no-wrapper-table-popout">
       <thead>
       <tr>
-        <th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
+        <th style="width: 50px;">Source</th>
         <th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
         <th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
         <th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
