@@ -84,7 +84,7 @@
         </div>
       <#else>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
+          <a tabindex="0" role="button" class="btn btn-default dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
             Submission
             <span class="caret"></span>
           </a>
@@ -151,7 +151,7 @@
         </div>
       <#elseif assignment.collectSubmissions>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle disabled use-tooltip" title="Your department does not use plagiarism detection in Tabula"
+          <a tabindex="0" role="button" class="btn btn-default dropdown-toggle disabled use-tooltip" title="Your department does not use plagiarism detection in Tabula"
              data-container="body">
             Plagiarism
             <span class="caret"></span>
@@ -159,7 +159,7 @@
         </div>
       <#else>
         <div class="btn-group">
-          <a class="btn btn-default dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
+          <a tabindex="0" role="button" class="btn btn-default dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
             Plagiarism
             <span class="caret"></span>
           </a>
@@ -278,7 +278,7 @@
           </div>
         <#else>
           <div class="btn-group">
-            <a class="btn btn-default dropdown-toggle disabled use-tooltip"
+            <a tabindex="0" role="button" class="btn btn-default dropdown-toggle disabled use-tooltip"
                title="This assignment does not use a marking workflow that requires assignments to be released for marking" data-container="body">
               Marking
               <span class="caret"></span>
@@ -361,7 +361,7 @@
               </@fmt.permission_button>
             </li>
           <#else>
-            <li class="disabled"><a class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks">Adjustments</a>
+            <li class="disabled"><a tabindex="0" class="use-tooltip" data-container="body" title="You cannot adjust marks on an assignment that does not collect marks">Adjustments</a>
             </li>
           </#if>
 
@@ -393,7 +393,7 @@
               </@fmt.permission_button>
             </li>
           <#elseif assignment.publishFeedback>
-            <li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish
+            <li class="disabled"><a tabindex="0" class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed.">Publish
                 feedback</a></li>
           </#if>
 
@@ -440,7 +440,7 @@
                 </@fmt.permission_button>
               </li>
             <#else>
-              <li class="disabled"><a class="use-tooltip" data-container="body" title="No marks or grades to upload to SITS.">Upload to SITS</a></li>
+              <li class="disabled"><a tabindex="0" class="use-tooltip" data-container="body" title="No marks or grades to upload to SITS.">Upload to SITS</a></li>
             </#if>
           </#if>
         </ul>

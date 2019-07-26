@@ -436,6 +436,7 @@
 
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
+                   tabindex="0" role="button"
                    data-html="true" aria-label="Help"
                    data-content="${popoverContent?markup_string}"><i class="fa fa-question-circle"></i></a>
               </li>

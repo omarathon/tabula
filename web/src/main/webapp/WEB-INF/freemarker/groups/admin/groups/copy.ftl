@@ -61,6 +61,7 @@
           <th>
             Copy groups?
             <a class="use-popover" data-html="true"
+               tabindex="0" role="button"
                title="Copy groups"
                data-content="Copy groups as well as the set information (these won't have any students on them)">
               <i class="icon-question-sign"></i>
@@ -69,6 +70,7 @@
           <th>
             Copy events?
             <a class="use-popover" data-html="true"
+               tabindex="0" role="button"
                title="Copy events"
                data-content="Copy events to the copied groups">
               <i class="icon-question-sign"></i>
