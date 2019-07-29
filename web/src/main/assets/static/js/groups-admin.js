@@ -377,4 +377,13 @@
     }
   });
 
+  $(function () {
+    $('.manually-added')
+      .find('.for-check-all').append(
+      $('<input/>').addClass('check-all use-tooltip').attr({
+        type: 'checkbox',
+        title: 'Select all/none'
+      }).addClass('collection-check-all')
+    ).end();
+  });
 }(jQuery));

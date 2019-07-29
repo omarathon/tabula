@@ -1289,7 +1289,7 @@ showResetButton=false
           <#if checkboxName?has_content>
             <td>
               <#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
-                <input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+                <input type="checkbox" name="${checkboxName}" value="${item.universityId}" class="collection-checkbox" />
               </#if>
             </td>
           </#if>
