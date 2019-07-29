@@ -77,6 +77,7 @@
             Use suggested mark - ${proposedAdjustment!""}
           </button>
           <a class="use-popover cue-popover" id="popover-${marking.extractId(command.student)}" data-html="true"
+             tabindex="0" role="button"
              data-original-title="Late penalty calculation"
              data-container="body"
              aria-label="Help"

@@ -46,6 +46,7 @@
                   as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
                 </#noescape></#assign>
                 <a class="use-popover"
+                   tabindex="0" role="button"
                    id="popover-linkToSits"
                    data-content="${popoverContent}"
                    data-html="true" aria-label="Help"
@@ -59,6 +60,7 @@
                   Select this option to automatically update the filtered list of students from SITS. If you choose not to link to SITS, these students are imported to Tabula as a static list, which does not update when SITS data changes. Therefore, you need to maintain the list yourself &ndash; e.g. when a student withdraws from their course.
                 </#noescape></#assign>
                 <a class="use-popover"
+                   tabindex="0" role="button"
                    id="popover-linkToSits"
                    data-content="${popoverContent}"
                    data-html="true" aria-label="Help"

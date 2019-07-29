@@ -17,7 +17,7 @@
     <#if (features.extensions || features.feedbackTemplates)>
       <div class="btn-toolbar dept-toolbar">
         <#if !modules?has_content && department.children?has_content>
-          <a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
+          <a tabindex="0" role="button" class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
             <i class="icon-wrench"></i>
             Manage
           </a>

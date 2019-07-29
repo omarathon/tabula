@@ -49,7 +49,7 @@
           <span class="uneditable-input hidden">&nbsp;</span>
           &nbsp;
           Set group numbers
-          <a class="use-popover" data-html="true" data-content="Leave the max group size field empty for no limit" data-original-title="" title="">
+          <a tabindex="0" role="button" class="use-popover" data-html="true" data-content="Leave the max group size field empty for no limit" data-original-title="" title="">
             <i class="icon-question-sign"></i>
           </a>
         </div>

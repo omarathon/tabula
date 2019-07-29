@@ -14,9 +14,9 @@
     <#if !member?has_content>
       <div class="submit-buttons fix-footer">
         <section class="meetings">
-          <a data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for
+          <a tabindex="0" role="button" data-href="<@routes.profiles.create_bulk_meeting_record relationshipType />" class="btn btn-default new-meeting-record disabled">Record meeting for
             selected students</a>
-          <a data-href="<@routes.profiles.schedule_bulk_meeting_record relationshipType />" class="btn btn-default schedule-meeting-record disabled">Schedule meeting for
+          <a tabindex="0" role="button" data-href="<@routes.profiles.schedule_bulk_meeting_record relationshipType />" class="btn btn-default schedule-meeting-record disabled">Schedule meeting for
             selected students</a>
         </section>
       </div>

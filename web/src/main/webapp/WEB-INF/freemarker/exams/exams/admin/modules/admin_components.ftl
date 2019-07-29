@@ -108,7 +108,7 @@
                     </@fmt.permission_button>
                   </li>
                 <#else>
-                  <li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body"
+                  <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container="body"
                                           title="Marks associated with this exam and can't be deleted">Delete Exam</a></li>
                 </#if>
 
@@ -151,12 +151,12 @@
                       </@fmt.permission_button>
                     </li>
                   <#else>
-                    <li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body"
+                    <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container="body"
                                             title="Marking workflow requires students to choose marker">Assign markers</a></li>
                   </#if>
                 <#else>
                   <li class="disabled">
-                    <a class="use-tooltip" data-delay="500" data-container="body" title="Marking workflow is not enabled for this exam">Assign markers</a>
+                    <a tabindex="0" class="use-tooltip" data-delay="500" data-container="body" title="Marking workflow is not enabled for this exam">Assign markers</a>
                   </li>
                 </#if>
 
@@ -174,7 +174,7 @@
                   </li>
                 <#else>
                   <li class="disabled">
-                    <a class="use-tooltip" data-delay="500" data-container="body" title="This exam has already been released for marking">Release for
+                    <a tabindex="0" class="use-tooltip" data-delay="500" data-container="body" title="This exam has already been released for marking">Release for
                       marking</a>
                   </li>
                 </#if>
