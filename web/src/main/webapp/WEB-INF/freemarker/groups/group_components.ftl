@@ -4,6 +4,8 @@
 
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
+<#import "*/csrf_macros.ftl" as csrf_macros />
+
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 
@@ -617,7 +619,8 @@
     <div class="item-info row<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
       <#if setItem.viewerMustSignUp>
       <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.groups.signup_to_group setItem.set />">
-        </#if>
+        <@csrf_macros.csrfHiddenInputField />
+      </#if>
         <div class="col-md-2">
           <h3 class="name">
             <small>
@@ -653,8 +656,8 @@
           </h3>
 
           <span class="format">
-				${groupSet.format.description}
-				</span>
+            ${groupSet.format.description}
+          </span>
         </div>
 
         <div class="${moduleItem.canManageGroups?string('col-md-8','col-md-10')}">
@@ -725,10 +728,11 @@
                     <#if !setItem.viewerMustSignUp >
                       <form id="leave-${setItem.set.id}" method="post" action="<@routes.groups.leave_group setItem.set />">
                         <input type="hidden" name="group" value="${group.id}" />
+                        <@csrf_macros.csrfHiddenInputField />
                         <input type="submit"
-                               class="btn btn-primary pull-right use-tooltip"
-                               title='Leave this group. You will need to sign up for a different group.'
-                               value="Leave" />
+                          class="btn btn-primary pull-right use-tooltip"
+                          title='Leave this group. You will need to sign up for a different group.'
+                          value="Leave" />
                       </form>
                     </#if>
                   </#if>
@@ -1153,8 +1157,8 @@
         </h3>
 
         <span class="format">
-					${set.format.description}
-				</span>
+          ${set.format.description}
+        </span>
       </div>
 
       <div class="col-md-10">
