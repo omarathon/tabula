@@ -1348,7 +1348,7 @@ $(() => {
         $form.removeData('submitOnceSubmitted');
         $m.modal('show');
         $m.on('shown.bs.modal', () => {
-          $f.find('[name="note"]')
+          $f.find('[name="absenceType"]')
             .focus();
         });
       }
