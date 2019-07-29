@@ -1,9 +1,15 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 
-<#escape x as x?html>
-  <h1>Record outcomes for MIT-${submission.key}</h1>
+<h1>Record outcomes for MIT-${submission.key}</h1>
 
+<div class="col-md-4 col-md-push-8">
+  <section class="mitcircs-details">
+    <@components.studentSummary submission true />
+    <@components.submissionSummary submission true />
+  </section>
+</div>
+<div class="col-md-8 col-md-pull-4">
   <section class="mitcircs-form">
 
     <article class="mitcircs-form__fields">
@@ -75,6 +81,7 @@
             <#if value.entryName == "Other"><@bs3form.errors path="boardRecommendationOther" /></#if>
           </#list>
           <@bs3form.errors path="boardRecommendations" />
+          <@bs3form.errors path="boardRecommendations" />
         </@mitcirc.question_section>
 
         <@mitcirc.question_section
@@ -97,4 +104,4 @@
       </@f.form>
     </article>
   </section>
-</#escape>
+</div>
