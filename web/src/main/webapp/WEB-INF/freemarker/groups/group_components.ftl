@@ -917,8 +917,8 @@
         </#if>
 
         <#if setItem.viewerMustSignUp>
-          </form>
-        </#if>
+      </form>
+      </#if>
     </div>
   </#if>
 </#macro>
