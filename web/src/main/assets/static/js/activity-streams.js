@@ -34,7 +34,6 @@ Activity.prototype.render = function () {
 
   return $('<div>', {'class': 'activity ' + priority})
     .data('notification-id', item._id)
-    .append($('<button>', {'class': 'close', title: 'Dismiss'}).html('&times;'))
     .append($('<div>', {'class': 'headline'})
       .append($('<i></i>', {'class': icons[priority]}))
       .append($('<h5>', {'class': 'title'})
@@ -42,6 +41,7 @@ Activity.prototype.render = function () {
       )
       .append($timestamp)
     )
+    .append($('<button>', {'class': 'close', title: 'Dismiss'}).html('&times;'))
     .append($('<div>', {'class': 'content'})
       .append(item.content)
       .append(url)
