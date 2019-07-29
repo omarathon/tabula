@@ -1,6 +1,21 @@
 #!/bin/bash
 set -e
 
+if [ -x "$(command -v ss)" ]; then
+    if ss -alnHt|grep ':443'; then
+         echo "Existing process found already listening on port 443. Please stop it first.";
+         exit -1
+    fi
+    if ss -alnHt|grep ':5432'; then
+         echo "Existing process found already listening on port 5432. Please stop it first.";
+         exit -1
+    fi
+    if ss -alnHt|grep ':8787'; then
+         echo "Existing process found already listening on port 8787. Please stop it first.";
+         exit -1
+    fi
+fi
+
 read -p "Enter the fully qualified domain name of your local machine (e.g. localdev.warwick.ac.uk): " domain
 
 if ! [[ $domain =~ .*\.warwick\.ac.\uk$ ]]
@@ -182,7 +197,7 @@ tabula.database.encryptionKey=cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04=
 objectstore.provider=swift
 objectstore.container=tabula
 objectstore.encryptionKey=cZRYXN05wYqqypMEuJSpnWDV9ynnXIiCNecqeLdmg04=
-objectstore.swift.endpoint=http://tabula-objectstorage:8080/auth/v2.0
+objectstore.swift.endpoint=http://tabula-objectstorage:8080/v2.0
 objectstore.swift.username=swift
 objectstore.swift.password=fingertips
 

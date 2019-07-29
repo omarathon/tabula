@@ -82,7 +82,7 @@ services:
     networks:
       - tabula-internal-net
   objectstore:
-    image: "bouncestorage/swift-aio"
+    image: "bouncestorage/swift-aio:2.21.0"
     container_name: tabula-objectstorage
     restart: unless-stopped
     volumes:
