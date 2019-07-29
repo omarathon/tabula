@@ -381,15 +381,6 @@ abstract class Description {
   }
 
   /**
-    * Record extenuating circumstances, plus the student.
-    */
-  def extenuatingCircumstances(circumstances: ExtenuatingCircumstances): Description = {
-    property("circumstances" -> circumstances.id)
-    if (circumstances.member != null) member(circumstances.member)
-    this
-  }
-
-  /**
     * Record small group set, plus its module and department if available.
     */
   def smallGroupSet(smallGroupSet: SmallGroupSet): Description = {

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, ExtenuatingCircumstances, Member, MemberNote}
+import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, Member, MemberNote}
 import uk.ac.warwick.tabula.services.{AutowiringMemberNoteServiceComponent, MemberNoteServiceComponent}
 
 object DeleteMemberNoteCommand {
@@ -26,24 +26,6 @@ object DeleteMemberNoteCommand {
     }
 }
 
-object DeleteExtenuatingCircumstancesCommand {
-  def apply(circumstances: ExtenuatingCircumstances, member: Member) =
-    new DeleteAbstractMemberNoteCommandInternal(circumstances, member)
-      with AutowiringMemberNoteServiceComponent
-      with ComposableCommand[AbstractMemberNote]
-      with DeleteMemberNoteValidation
-      with DeleteMemberNotePermissions
-      with DeleteMemberNoteCommandState
-      with Describable[AbstractMemberNote] {
-
-      override lazy val eventName = "DeleteExtenuatingCircumstances"
-
-      override def describe(d: Description) {
-        d.extenuatingCircumstances(circumstances)
-      }
-    }
-}
-
 
 class DeleteAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMemberNote, val member: Member)
   extends CommandInternal[AbstractMemberNote] {
@@ -54,7 +36,6 @@ class DeleteAbstractMemberNoteCommandInternal(val abstractMemberNote: AbstractMe
     abstractMemberNote.deleted = true
     HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
       case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
-      case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
     }
     abstractMemberNote
   }

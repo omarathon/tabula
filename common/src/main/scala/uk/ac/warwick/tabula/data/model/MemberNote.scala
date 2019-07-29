@@ -77,23 +77,3 @@ class MemberNote extends AbstractMemberNote {
   var member: Member = _
 
 }
-
-@Entity
-@Proxy
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("circumstances")
-class ExtenuatingCircumstances extends AbstractMemberNote {
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberid")
-  var member: Member = _
-
-  @NotNull
-  @Column(name = "start_date")
-  var startDate: LocalDate = _
-
-  @NotNull
-  @Column(name = "end_date")
-  var endDate: LocalDate = _
-
-}

@@ -51,13 +51,13 @@ class ViewProfileIdentityController extends AbstractViewProfileController
     studentCourseDetails: StudentCourseDetails,
     activeAcademicYear: Option[AcademicYear]
   ): Mav = {
-    val (memberNotes: Seq[MemberNote], extenuatingCircumstances: Seq[ExtenuatingCircumstances]) = {
+    val memberNotes: Seq[MemberNote] = {
       if (securityService.can(user, Permissions.MemberNotes.Delete, studentCourseDetails.student)) {
-        (memberNoteService.listNotes(studentCourseDetails.student), memberNoteService.listExtenuatingCircumstances(studentCourseDetails.student))
+        memberNoteService.listNotes(studentCourseDetails.student)
       } else if (securityService.can(user, Permissions.MemberNotes.Read, studentCourseDetails.student)) {
-        (memberNoteService.listNonDeletedNotes(studentCourseDetails.student), memberNoteService.listNonDeletedExtenuatingCircumstances(studentCourseDetails.student))
+        memberNoteService.listNonDeletedNotes(studentCourseDetails.student)
       } else {
-        (Seq(), Seq())
+        Seq()
       }
     }
     val courseDetails = {
@@ -73,7 +73,6 @@ class ViewProfileIdentityController extends AbstractViewProfileController
       "courseDetails" -> courseDetails,
       "scyd" -> scydToSelect(studentCourseDetails, activeAcademicYear),
       "memberNotes" -> memberNotes,
-      "extenuatingCircumstances" -> extenuatingCircumstances,
       "isSelf" -> (user.universityId.maybeText.getOrElse("") == studentCourseDetails.student.universityId)
     ).crumbs(breadcrumbsStudent(activeAcademicYear, studentCourseDetails, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
       .secondCrumbs(secondBreadcrumbs(activeAcademicYear, studentCourseDetails)(scyd => Routes.Profile.identity(scyd)): _*)

@@ -168,25 +168,16 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
       }
     }
 
-    val (administrativeNotesData, extenuatingCircumstancesData) =
-      if (securityService.can(user, Permissions.MemberNotes.Read, student)) (
-        memberNoteService.listNonDeletedNotes(student)
-          .map(memberNote => AdministrativeNote(
-            date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
-            title = memberNote.title,
-            note = memberNote.note,
-            noteHTML = memberNote.escapedNote,
-            attachments = memberNote.attachments.asScala
-          )),
-        memberNoteService.listNonDeletedExtenuatingCircumstances(student)
-          .map(memberNote => AdministrativeNote(
-            date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
-            title = memberNote.title,
-            note = memberNote.note,
-            noteHTML = memberNote.escapedNote,
-            attachments = memberNote.attachments.asScala
-          ))
-      ) else (Nil, Nil)
+    val administrativeNotesData = if (securityService.can(user, Permissions.MemberNotes.Read, student))
+      memberNoteService.listNonDeletedNotes(student)
+        .map(memberNote => AdministrativeNote(
+          date = memberNote.creationDate.toString(ProfileExportSingleCommand.DateFormat),
+          title = memberNote.title,
+          note = memberNote.note,
+          noteHTML = memberNote.escapedNote,
+          attachments = memberNote.attachments.asScala
+        ))
+      else Nil
 
     // Get coursework
     val assignmentData = benchmarkTask("assignmentData") {
@@ -309,8 +300,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
         "assignmentData" -> assignmentData,
         "smallGroupData" -> smallGroupData.groupBy(_.eventId),
         "meetingData" -> meetingData.groupBy(_.relationshipType),
-        "administrativeNotesData" -> administrativeNotesData,
-        "extenuatingCircumstancesData" -> extenuatingCircumstancesData
+        "administrativeNotesData" -> administrativeNotesData
       )
     )
 
@@ -321,7 +311,6 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
       assignmentData.flatMap(_.attachments) ++
       assignmentData.flatMap(_.feedback).flatMap(_.attachments) ++
       administrativeNotesData.flatMap(_.attachments) ++
-      extenuatingCircumstancesData.flatMap(_.attachments) ++
       meetingData.flatMap(_.attachments)
   }
 

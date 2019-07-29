@@ -339,20 +339,6 @@
   </#if>
 </div>
 
-<div class="page">
-  <h1>Extenuating circumstances</h1>
-
-  <#if extenuatingCircumstancesData?has_content>
-    <#list extenuatingCircumstancesData as note>
-      <@memberNote note />
-    </#list>
-  <#else>
-    <p>
-      <em>No extenuating circumstances found.</em>
-    </p>
-  </#if>
-</div>
-
 <#-- SUMMARY -->
 <div class="page">
   <h1>Attendance Summary</h1>

@@ -5,7 +5,7 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.{CommandInternal, UploadedFile}
 import uk.ac.warwick.tabula.data.HibernateHelpers
-import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, ExtenuatingCircumstances, FileAttachment, MemberNote}
+import uk.ac.warwick.tabula.data.model.{AbstractMemberNote, FileAttachment, MemberNote}
 import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, MemberNoteServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
 
@@ -35,7 +35,6 @@ abstract class ModifyMemberNoteCommandInternal extends CommandInternal[AbstractM
 
     HibernateHelpers.initialiseAndUnproxy(abstractMemberNote) match {
       case memberNote: MemberNote => memberNoteService.saveOrUpdate(memberNote)
-      case circumstances: ExtenuatingCircumstances => memberNoteService.saveOrUpdate(circumstances)
     }
 
     abstractMemberNote
@@ -66,12 +65,6 @@ trait ModifyMemberNoteCommandState extends ModifyAbstractMemberNoteCommandState 
   override def abstractMemberNote: AbstractMemberNote = memberNote
 }
 
-trait ModifyExtenuatingCircumstancesCommandState extends ModifyAbstractMemberNoteCommandState {
-  def circumstances: ExtenuatingCircumstances
-
-  override def abstractMemberNote: AbstractMemberNote = circumstances
-}
-
 trait ModifyMemberNoteCommandRequest {
   var title: String = _
   var note: String = _
@@ -82,21 +75,5 @@ trait ModifyMemberNoteCommandRequest {
     memberNote.note = note
     memberNote.title = title
     memberNote.lastUpdatedDate = DateTime.now
-  }
-}
-
-trait ModifyExtenuatingCircumstancesCommandRequest extends ModifyMemberNoteCommandRequest {
-  var startDate: LocalDate = _
-  var endDate: LocalDate = _
-
-  override def copyTo(memberNote: AbstractMemberNote): Unit = {
-    memberNote match {
-      case circumstance: ExtenuatingCircumstances =>
-        circumstance.startDate = startDate
-        circumstance.endDate = endDate
-      case _ =>
-    }
-
-    super.copyTo(memberNote)
   }
 }
