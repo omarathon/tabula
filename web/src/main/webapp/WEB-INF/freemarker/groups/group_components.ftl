@@ -656,8 +656,8 @@
           </h3>
 
           <span class="format">
-				    ${groupSet.format.description}
-				  </span>
+            ${groupSet.format.description}
+          </span>
         </div>
 
         <div class="${moduleItem.canManageGroups?string('col-md-8','col-md-10')}">
