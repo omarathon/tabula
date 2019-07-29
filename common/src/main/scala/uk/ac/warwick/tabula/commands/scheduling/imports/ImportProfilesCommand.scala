@@ -73,15 +73,7 @@ class ImportProfilesCommand extends CommandWithoutTransaction[Unit] with Logging
       }
     }
 
-    val fimMembers = profileImporter.membershipInfoByDepartment(department)
-    val fimUniversityIds = fimMembers.map(_.member.universityId)
-    val tabulaActiveMembers = transactional(readOnly = true) {
-      memberDao.getActiveMembersByDepartment(department)
-        .filterNot(m => fimUniversityIds.contains(m.universityId))
-        .map(MembershipInformation.apply)
-    }
-    val members = fimMembers ++ tabulaActiveMembers
-    logSize(members).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
+    logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.foreach { case (membershipInfos, batchNumber) =>
       benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
         val users: Map[UniversityId, User] =
           if (department.code == ProfileImporter.applicantDepartmentCode)
