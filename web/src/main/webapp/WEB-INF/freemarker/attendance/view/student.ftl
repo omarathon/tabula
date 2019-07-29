@@ -42,7 +42,7 @@
                     <#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
                   </#if>
                   Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
-                  <a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+                  <a tabindex="0" role="button" class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
 								requirements apply to this student. (${inconsistency})" data-toggle="popover" aria-label="Help"><i class="fa fa-question-circle"></i></a>
                 </#if>
                 <br />
@@ -82,7 +82,7 @@
           <#assign point = groupedPointPair._1() />
           <div class="col-md-10">
             ${point.name}
-            (<span class="use-tooltip" data-html="true" title="
+            (<span tabindex="0" class="use-tooltip" data-html="true" title="
 						<@fmt.wholeWeekDateFormat
             point.startWeek
             point.endWeek

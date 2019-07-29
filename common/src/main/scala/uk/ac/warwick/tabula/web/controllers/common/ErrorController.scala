@@ -4,7 +4,7 @@ import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestHeader
-import uk.ac.warwick.sso.client.CSRFFilter
+import uk.ac.warwick.sso.client.CSRFInterceptor
 import uk.ac.warwick.tabula.system.exceptions.ExceptionResolver
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
@@ -39,7 +39,7 @@ class ErrorController extends BaseController {
 
   @RequestMapping(Array("/error/400"))
   def badRequest(implicit request: HttpServletRequest, response: HttpServletResponse): Mav = {
-    val csrfError = request.getAttribute(CSRFFilter.CSRF_ERROR)
+    val csrfError = request.getAttribute(CSRFInterceptor.CSRF_ERROR)
     if (request.isJsonRequest) {
       Mav(new JSONView(Map(
         "success" -> false,

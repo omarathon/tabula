@@ -63,6 +63,7 @@
         <div class="alert">
           ${count} not have a mark. You will not be able to ${cantDo}.
           <a class="use-popover" id="popover-marks" data-html="true"
+             tabindex="0" role="button"
              data-original-title="<span class='text-info'><strong>No marks</strong></span>"
              data-content="${noMarksIds}">
             <i class="icon-question-sign"></i>
@@ -86,6 +87,7 @@
         <div class="alert">
           ${count} not have any feedback files attached. ${cantDo}.
           <a class="use-popover" id="popover-files" data-html="true"
+             tabindex="0" role="button"
              data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
              data-content="${noFilesIds}">
             <i class="icon-question-sign"></i>

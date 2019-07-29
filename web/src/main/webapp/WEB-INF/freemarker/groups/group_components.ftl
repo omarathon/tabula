@@ -17,7 +17,7 @@
 
 <#macro event_schedule_info event>
   <#if event.unscheduled>
-    <span class="badge progress-bar-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
+    <span tabindex="0" class="badge progress-bar-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
   <#else>
   <#-- Weeks, day/time, location -->
     <#if event.title?has_content><span class="eventTitle">${event.title} - </span></#if>
@@ -78,18 +78,18 @@
 					<div class="col-md-2">
 						<#if setItem.isStudentSignUp()>
               <#if setItem.set.openForSignups>
-                <span class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i> Open for self-signup</span>
+                <span tabindex="0" class="use-tooltip" title="These groups are open for self sign-up"><i class="fa fa-unlock-alt"></i> Open for self-signup</span>
 							<#else>
-                <span class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i> Closed for self-signup</span>
+                <span tabindex="0" class="use-tooltip" title="These groups are closed for self sign-up"><i class="fa fa-lock"></i> Closed for self-signup</span>
               </#if>
 						<#elseif setItem.isLinked()>
-              <span class="use-tooltip" title="These group allocations may be linked to other modules">Linked</span>
+              <span tabindex="0" class="use-tooltip" title="These group allocations may be linked to other modules">Linked</span>
             <#else>
-              <span class="use-tooltip" title="These groups are manually allocated">Manually allocated</span>
+              <span tabindex="0" class="use-tooltip" title="These groups are manually allocated">Manually allocated</span>
             </#if>
 
             <#if set.archived>
-              <span class="use-tooltip" title="These groups have been archived">Archived</span>
+              <span tabindex="0" class="use-tooltip" title="These groups have been archived">Archived</span>
             </#if>
 					</div>
 
@@ -98,7 +98,7 @@
 						<#if !set.archived>
               <#local progressTooltip><@spring.message code=setItem.progress.messageCode /></#local>
 
-              <dl class="progress use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
+              <dl tabindex="0" class="progress use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 								<dt class="progress-bar progress-bar-${setItem.progress.t}"
                     style="width: <#if setItem.progress.percentage == 0>10<#else>${setItem.progress.percentage}</#if>%;"></dt>
 							</dl>
@@ -246,7 +246,7 @@
 										</a>
 									</li>
 
-                  <li<#if !set.canBeDeleted> class="disabled use-tooltip" data-container="body" title="Can't delete smallgroups that have been published to <#if set.allocationMethod.dbValue != 'StudentSignUp'>students or </#if>tutors"</#if>>
+                  <li tabindex="0" <#if !set.canBeDeleted> class="disabled use-tooltip" data-container="body" title="Can't delete smallgroups that have been published to <#if set.allocationMethod.dbValue != 'StudentSignUp'>students or </#if>tutors"</#if>>
 										<#local delete_url><@routes.groups.deleteset set /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Delete'
@@ -436,6 +436,7 @@
 
                 <#local popoverContent><@eventDetails eventItem.event /></#local>
                 <a class="use-popover"
+                   tabindex="0" role="button"
                    data-html="true" aria-label="Help"
                    data-content="${popoverContent?markup_string}"><i class="fa fa-question-circle"></i></a>
               </li>
@@ -630,23 +631,23 @@
               || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
               || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
               >
-                <span class="use-tooltip"
+                <span tabindex="0" class="use-tooltip"
                       title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i
                           class="fa fa-lock"></i></span>
               <#else>
-                <span class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+                <span tabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
               </#if>
             <#else>
               <#if setItem.isStudentSignUp()>
                 <#if setItem.set.openForSignups>
-                  <span class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
+                  <span tabindex="0" class="use-tooltip" title="This group is open for self sign-up"><i class="fa fa-unlock-alt"></i></span>
                 <#else>
-                  <span class="use-tooltip" title="This group is closed for self sign-up"><i class="fa fa-lock"></i></span>
+                  <span tabindex="0" class="use-tooltip" title="This group is closed for self sign-up"><i class="fa fa-lock"></i></span>
                 </#if>
               <#elseif setItem.isLinked()>
-                <span class="use-tooltip" title="Allocations for this group are linked and reused"><i class="fa fa-link"></i></span>
+                <span tabindex="0" class="use-tooltip" title="Allocations for this group are linked and reused"><i class="fa fa-link"></i></span>
               <#else>
-                <span class="use-tooltip" title="This is a manually allocated group"><i class="fa fa-random"></i></span>
+                <span tabindex="0" class="use-tooltip" title="This is a manually allocated group"><i class="fa fa-random"></i></span>
               </#if>
             </#if>
           </h3>
@@ -676,7 +677,7 @@
               <div class="col-md-12">
                 <#if setItem.viewerMustSignUp>
                 <div <#if group.full>
-                    class="pull-left use-tooltip" title="There are no spaces left on this group"
+                    tabindex="0" class="pull-left use-tooltip" title="There are no spaces left on this group"
                   <#else>
                     class="pull-left"
                   </#if>
@@ -983,7 +984,7 @@
       </#local>
 
       <td>
-				<span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string}" data-html="true">
+				<span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="${renderedTitle?markup_string}" data-html="true">
 					<i class="fa-fw fa-stack-2x ${class}"></i>
 					<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 				</span>
@@ -1238,7 +1239,7 @@ showResetButton=false
     <table class="manage-student-table table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tablesorter sb-no-wrapper-table-popout">
       <thead>
       <tr>
-        <th style="width: 50px;" <#if doSorting> class="${sortClass("source", command)} sortable" data-field="source"</#if>>Source</th>
+        <th style="width: 50px;">Source</th>
         <th <#if doSorting> class="${sortClass("firstName", command)} sortable" data-field="firstName"</#if>>First name</th>
         <th <#if doSorting> class="${sortClass("lastName", command)} sortable" data-field="lastName"</#if>>Last name</th>
         <th <#if doSorting> class="${sortClass("universityId", command)} sortable" data-field="universityId"</#if>>ID</th>
@@ -1274,11 +1275,11 @@ showResetButton=false
         <tr class="${item.itemTypeString}">
           <td>
             <#if item.itemTypeString == "static">
-              <span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="fa fa-list-alt"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="fa fa-list-alt"></i></span>
             <#elseif item.itemTypeString == "exclude">
-              <span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="fa fa-ban"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="fa fa-ban"></i></span>
             <#else>
-              <span class="use-tooltip" title="Added manually" data-placement="right"><i class="fa fa-hand-o-up"></i></span>
+              <span tabindex="0" class="use-tooltip" title="Added manually" data-placement="right"><i class="fa fa-hand-o-up"></i></span>
             </#if>
           </td>
           <td>${item.firstName}</td>
@@ -1431,7 +1432,7 @@ showResetButton=false
 </#macro>
 
 <#macro wizard_button label is_first is_active is_available tooltip="" action="">
-  <span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
+  <span tabindex="0" class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
         <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
 		<#if is_available && !is_active>
       <button type="submit" class="btn btn-link" name="${action}">${label}</button>
@@ -1442,7 +1443,7 @@ showResetButton=false
 </#macro>
 
 <#macro wizard_link label is_first is_active is_available tooltip="" url="">
-  <span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
+  <span tabindex="0" class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
         <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
 		<#if is_available && !is_active>
       <a href="${url}">${label}</a>
@@ -1490,7 +1491,7 @@ showResetButton=false
           <#list namedTerm.weekRange.minWeek..namedTerm.weekRange.maxWeek as weekNumber>
             <td>
               <div class="checkbox">
-                <label class="use-tooltip"
+                <label tabindex="0" class="use-tooltip"
                        title="<@fmt.singleWeekFormat weekNumber smallGroupSet.academicYear smallGroupSet.module.adminDepartment />"
                        data-html="true"
                        data-container="body"

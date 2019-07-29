@@ -106,6 +106,7 @@
                     <#if features.disabilityOnSubmission && disabilityMap[item.universityId]??>
                       <#assign disability = disabilityMap[item.universityId] />
                       <a class="use-popover cue-popover" id="popover-disability" data-html="true"
+                         tabindex="0" role="button"
                          data-original-title="Disability disclosed"
                          data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${disability.code}</h6><small>${(disability.sitsDefinition)!}</small></div>"
                       >

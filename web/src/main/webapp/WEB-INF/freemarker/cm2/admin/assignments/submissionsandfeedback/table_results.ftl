@@ -191,7 +191,7 @@
               </td>
               <#if submission?? && submission.submittedDate??>
                 <td class="submitted" data-datesort="${submission.submittedDate.millis?c!''}">
-								<span class="date tabula-tooltip" data-title="${lateness!''}">
+								<span tabindex="0" class="date tabula-tooltip" data-title="${lateness!''}">
 									<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 								</span>
                 </td>
@@ -328,13 +328,13 @@
                         ) />
                         <#if feedbackSitsStatus.code == "failed">
                           <a href="<@routes.cm2.checkSitsUpload enhancedFeedback.feedback />" target="_blank">
-														<span style="cursor: pointer;" class="label label-danger use-tooltip"
+														<span tabindex="0" style="cursor: pointer;" class="label label-danger use-tooltip"
                                   title="There was a problem uploading to SITS. Click to try and diagnose the problem.">
 														${feedbackSitsStatus.description}
 														</span><#--
 													--></a>
                         <#elseif sitsWarning>
-                          <span class="label label-danger use-tooltip"
+                          <span tabindex="0" class="label label-danger use-tooltip"
                                 title="The mark or grade uploaded differs from the current mark or grade. You will need to upload the marks to SITS again.">
 												${feedbackSitsStatus.description}
 													</span>

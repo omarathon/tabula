@@ -39,7 +39,7 @@
     </#compress></a><#--
 		--></#if><#--
 		--><#if submission.submittedDate??> <#compress>
-      <span class="date tabula-tooltip" data-title="<@lateness submission />"><#compress>
+      <span tabindex="0" class="date tabula-tooltip" data-title="<@lateness submission />"><#compress>
 				<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
 			</#compress></span>
     </#compress></#if><#--
@@ -53,16 +53,17 @@
   <#if submission?has_content>
     <#if submission.late>
       <#if enhancedExtension?has_content && enhancedExtension.extension.approved>
-        <span class="label label-important use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
+        <span tabindex="0" class="label label-important use-tooltip" title="<@extensionLateness enhancedExtension.extension submission/>" data-container="body">Late</span>
       <#else>
-        <span class="label label-important use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
+        <span tabindex="0" class="label label-important use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
       </#if>
     <#elseif submission.authorisedLate>
-      <span class="label label-info use-tooltip" data-html="true"
+      <span tabindex="0" class="label label-info use-tooltip" data-html="true"
             title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
     </#if>
     <#if features.disabilityOnSubmission && student.disability??>
       <a class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true"
+         tabindex="0" role="button"
          data-original-title="Disability disclosed"
          data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"
       >
@@ -79,13 +80,13 @@
         </#local>
       </#if>
       <#if enhancedExtension.within>
-        <span class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
+        <span tabindex="0" class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
       <#elseif extension.rejected>
         <span class="label label-info">Extension Rejected</span>
       <#elseif !extension.approved>
         <span class="label label-info">Extension Requested</span>
       <#else>
-        <span class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
+        <span tabindex="0" class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
       </#if>
     </#if>
   </#if>

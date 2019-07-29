@@ -6,7 +6,7 @@
     <#if canManage>
       <a href="<@routes.admin.addLocation />" class="btn btn-primary">Add location</a>
     <#else>
-      <span class="btn btn-primary disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Add location</span>
+      <span tabindex="0" class="btn btn-primary disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Add location</span>
     </#if>
   </p>
 
@@ -42,8 +42,8 @@
             <a href="<@routes.admin.editLocation location />" class="btn btn-default btn-xs">Edit</a>
             <a href="<@routes.admin.deleteLocation location />" class="btn btn-danger btn-xs">Delete</a>
           <#else>
-            <span class="btn btn-default btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Edit</span>
-            <span class="btn btn-danger btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Delete</span>
+            <span tabindex="0" class="btn btn-default btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Edit</span>
+            <span tabindex="0" class="btn btn-danger btn-xs disabled use-tooltip" data-title="You do not have permission to manage Syllabus+ locations">Delete</span>
           </#if>
         </td>
       </tr>

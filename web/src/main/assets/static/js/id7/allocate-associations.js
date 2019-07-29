@@ -12,8 +12,8 @@ $(() => {
     const rowMap = {};
     const $removeButton = $table.closest('div').find('button.remove-all');
 
-    $table.find('tr[data-forentity]').each(() => {
-      const $this = $(this);
+    $table.find('tr[data-forentity]').each((i, el) => {
+      const $this = $(el);
       const entityId = $this.data('forentity');
       if (rowMap[entityId] === undefined) {
         rowMap[entityId] = [];
@@ -22,8 +22,8 @@ $(() => {
       $this.detach();
     });
 
-    $table.on('click', '.btn-default', () => {
-      const $this = $(this);
+    $table.on('click', '.btn-default', (event) => {
+      const $this = $(event.currentTarget);
       const $expandedInput = $this.closest('td').find('input');
       const $row = $this.closest('tr');
       const entityId = $row.data('entity');
@@ -37,8 +37,9 @@ $(() => {
         $expandedInput.val('true');
       }
     });
-    $table.find('tr.expanded').each(() => {
-      $(this).after(rowMap[$(this).data('entity')]);
+    $table.find('tr.expanded').each((i, el) => {
+      const $this = $(el);
+      $this.after(rowMap[$this.data('entity')]);
     });
 
     $table.sortableTable({
@@ -53,8 +54,8 @@ $(() => {
     $table.on('sortStart', () => {
       $table.find('tr[data-forentity]').detach();
     }).on('sortEnd', () => {
-      $table.find('tr').each(() => {
-        const $row = $(this);
+      $table.find('tr').each((i, el) => {
+        const $row = $(el);
         const entityId = $row.data('entity');
         if ($row.hasClass('expanded')) {
           $row.after(rowMap[entityId]);
@@ -103,7 +104,7 @@ $(() => {
 
   const $studentQuery = $('input[name=query]').on('keypress', (e) => {
     if (e.which === 13) {
-      $(this).closest('form').submit();
+      $(e.currentTarget).closest('form').submit();
     }
   }).attr('autocomplete', 'off');
   const $typeahead = $studentQuery.typeahead({
@@ -167,7 +168,7 @@ $(() => {
       class: 'check-all use-tooltip',
       title: 'Select all/none',
     }),
-  ).find('input').change(() => {
+  ).find('input').change(function onChange() {
     $(this).closest('table').selectDeselectCheckboxes(this);
   });
 
@@ -186,7 +187,7 @@ $(() => {
   const updateFilter = ($el) => {
     // Update the filter content
     const $list = $el.closest('ul');
-    const shortValues = $list.find(':checked').map(() => $(this).data('short-value')).get();
+    const shortValues = $list.find(':checked').map(function map() { return $(this).data('short-value'); }).get();
     const $fsv = $el.closest('.btn-group').find('.filter-short-values');
     if (shortValues.length) {
       $el.closest('.btn-group').removeClass('empty-filter');
@@ -211,8 +212,8 @@ $(() => {
               .addClass('btn btn-link')
               .html('<i class="fa fa-ban"></i> Clear selected items')
               .on('click', () => {
-                $list.find('input:checked').each(() => {
-                  const $checkbox = $(this);
+                $list.find('input:checked').each((i, el) => {
+                  const $checkbox = $(el);
                   $checkbox.prop('checked', false);
                   updateFilter($checkbox);
                 });
@@ -229,7 +230,7 @@ $(() => {
   });
 
   // Re-order elements inside the dropdown when opened
-  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', () => {
+  $('.filter-list').closest('.btn-group').find('.dropdown-toggle').on('click.dropdown.data-api', function onClick() {
     const $this = $(this);
     if (!$this.closest('.btn-group').hasClass('open')) {
       // Re-order before it's opened!
@@ -257,11 +258,11 @@ $(() => {
     $('<button class="btn btn-xs btn-default clear-all-filters" type="submit" disabled>Clear filter</button>'),
   );
 
-  const $clearAllButtons = $('.clear-all-filters').on('click', () => {
-    $(this).closest('.student-filter').find('.filter-list').each(() => {
+  const $clearAllButtons = $('.clear-all-filters').on('click', function onClick() {
+    $(this).closest('.student-filter').find('.filter-list').each(function each() {
       const $list = $(this);
 
-      $list.find('input:checked').each(() => {
+      $list.find('input:checked').each(function each2() {
         const $checkbox = $(this);
         $checkbox.prop('checked', false);
         updateFilter($checkbox);
@@ -271,7 +272,7 @@ $(() => {
     });
   });
 
-  $clearAllButtons.each(() => {
+  $clearAllButtons.each(function each() {
     updateClearAllButton($(this));
   });
 
@@ -306,7 +307,7 @@ $(() => {
     updateFilter($picker);
   };
 
-  $('.route-search-query').on('change', () => {
+  $('.route-search-query').on('change', function onChange() {
     const $picker = $(this);
     if ($picker.data('routecode') === undefined || $picker.data('routecode').length === 0) return;
 

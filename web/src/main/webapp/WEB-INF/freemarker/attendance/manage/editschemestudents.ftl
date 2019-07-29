@@ -22,10 +22,10 @@
     <@listStudentIdInputs />
 
     <p class="progress-arrows">
-      <span class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link"
-                                                                                     name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
-      <span class="arrow-right arrow-left use-tooltip active">Students</span>
-      <span class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link"
+      <span tabindex="0" class="arrow-right use-tooltip" title="Save and edit properties"><button type="submit" class="btn btn-link"
+                                                                        name="${ManageSchemeMappingParameters.saveAndEditProperties}">Properties</button></span>
+      <span tabindex="0" class="arrow-right arrow-left use-tooltip active">Students</span>
+      <span tabindex="0" class="arrow-right arrow-left use-tooltip" title="Save and edit points"><button type="submit" class="btn btn-link"
                                                                                             name="${ManageSchemeMappingParameters.createAndAddPoints}">Points</button></span>
     </p>
 
@@ -44,6 +44,7 @@
               as changes for the forthcoming academic year are being made that will make the students on this scheme inaccurate.
             </#noescape></#assign>
             <a class="use-popover"
+               tabindex="0" role="button"
                id="popover-linkToSits"
                data-content="${popoverContent}"
                data-html="true" aria-label="Help"
@@ -63,6 +64,7 @@
         </p>
         </#noescape></#assign>
         <a class="use-popover"
+           tabindex="0" role="button"
            id="popover-linkToSits"
            data-content="${popoverContent}"
            data-html="true" aria-label="Help"

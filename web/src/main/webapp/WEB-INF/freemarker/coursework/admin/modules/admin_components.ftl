@@ -99,18 +99,18 @@
           <#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
           <#if workingDaysAway lt 0>
             <#if assignment.hasUnreleasedFeedback>
-              <#assign feedbackLabel><span class="label label-important use-tooltip"
+              <#assign feedbackLabel><span tabindex="0" class="label label-important use-tooltip"
                                            title="There is unreleased feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Late feedback</span></#assign>
             <#elseif assignment.submissions?has_content && !assignment.hasReleasedFeedback>
-              <#assign feedbackLabel><span class="label label-important use-tooltip"
+              <#assign feedbackLabel><span tabindex="0" class="label label-important use-tooltip"
                                            title="There have been submissions, but no feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Feedback overdue</span></#assign>
             </#if>
           <#elseif workingDaysAway lte 5>
-            <#assign feedbackLabel><span class="label use-tooltip" title="The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
+            <#assign feedbackLabel><span tabindex="0" class="label use-tooltip" title="The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
           </#if>
 
           <#assign feedbackDeadline>
-            <div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
+            <div tabindex="0" class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
               <#if workingDaysAway == 0>
                 <b>Feedback due today</b>
               <#elseif workingDaysAway lt 0>
@@ -140,6 +140,7 @@
                 <#assign urlforstudents><@routes.coursework.assignment assignment /></#assign>
                 <a href="${urlforstudents}" class="linkForStudents">Link for students</a>
                 <a class="use-popover" id="popover-${assignment.id}" data-html="true"
+                   tabindex="0" role="button"
                    data-original-title="<span class='text-info'><strong>Link for students</strong></span>"
                    data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i
                           class="icon-question-sign"></i></a>
@@ -185,7 +186,7 @@
             <div class="submission-and-feedback-count">
               <i class="icon-file"></i>
               <a href="<@routes.coursework.assignmentsubmissionsandfeedback assignment=assignment />">
-							<span class="use-tooltip" title="View all submissions and feedback">
+							<span tabindex="0" class="use-tooltip" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
 						--></span></a>
@@ -272,7 +273,7 @@
                         </@fmt.permission_button>
                       </li>
                     <#else>
-                      <li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
+                      <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
                                               title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
                     </#if>
 
@@ -292,12 +293,12 @@
                         </@fmt.permission_button>
                       </li>
                     <#else>
-                      <li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
+                      <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
                                               title="Marking workflow requires students to choose marker"><i class="icon-user"></i> Assign markers </a></li>
                     </#if>
                   <#else>
                     <li class="disabled">
-                      <a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment">
+                      <a tabindex="0" class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment">
                         <i class="icon-user"></i>
                         Assign markers
                       </a>
@@ -314,7 +315,7 @@
                         </@fmt.permission_button>
                       </li>
                     <#else>
-                      <li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
+                      <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container=".assignment-buttons"
                                               title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
                     </#if>
                     <li>
@@ -338,7 +339,7 @@
                       </@fmt.permission_button>
                     </li>
                   <#else>
-                    <li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body"
+                    <li class="disabled"><a tabindex="0" class="use-tooltip" data-delay="500" data-container="body"
                                             title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-envelope-alt"></i>
                         Publish feedback </a></li>
                   </#if>
