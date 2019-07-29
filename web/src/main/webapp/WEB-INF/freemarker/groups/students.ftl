@@ -59,7 +59,9 @@
                 </#if>
 
                 <div class="name">
-                  <h6>${student.fullName} <@pl.profile_link student.universityId /></h6>
+                  <h6>
+                    <a class="profile-link" href="/profiles/view/${student.universityId}" target="_blank">${student.fullName}</a>
+                  </h6>
                   <#if student.isMember()>
                     ${(student.asMember.mostSignificantCourseDetails.currentRoute.code?upper_case)!""} ${(student.asMember.mostSignificantCourseDetails.currentRoute.name)!""}
                     <br />
