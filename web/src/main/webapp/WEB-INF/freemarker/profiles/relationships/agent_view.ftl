@@ -51,7 +51,8 @@
                     <@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
                   </div>
                 </div>
-                <form class="" action="<@routes.profiles.relationship_reallocate department relationshipType agentId />" method="post">
+                <#assign formAction><@routes.profiles.relationship_reallocate department relationshipType agentId /></#assign>
+                <@f.form action=formAction method="post">
                   <table class="related_students table table-striped table-condensed">
                     <thead>
                     <tr>
@@ -104,7 +105,7 @@
                     <#if canReallocateStudents && can_reallocate>
                       <button type="submit" class="btn btn-primary reallocate">Reallocate students</button></#if>
                   </p>
-                </form>
+                </@f.form>
               </div>
             </div>
           </div>
