@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.forms
 /**
   * represents a submitted value.
   */
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.FetchType._
 import javax.persistence._
 import org.hibernate.annotations.{Cascade, CascadeType, Proxy}
@@ -117,7 +118,7 @@ class SavedFormValue extends GeneratedId with FormattedHtml {
 
   var value: String = _
 
-  def valueFormattedHtml: String = formattedHtml(value)
+  def valueFormattedHtml: TemplateHTMLOutputModel = formattedHtml(value)
 }
 
 object SavedFormValue {

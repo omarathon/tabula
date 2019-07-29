@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
@@ -35,7 +36,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   def note: String = Option(encryptedNote).flatMap(_.toString.maybeText).getOrElse(legacyNote)
   def note_=(note: String): Unit = encryptedNote = note
 
-  def escapedNote: String = formattedHtml(note)
+  def escapedNote: TemplateHTMLOutputModel = formattedHtml(note)
 
   var title: String = _
 

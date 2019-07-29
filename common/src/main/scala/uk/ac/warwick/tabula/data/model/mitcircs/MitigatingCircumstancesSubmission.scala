@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -147,7 +148,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def reason: String = Option(encryptedReason).map(_.toString).orNull
   def reason_=(reason: String): Unit = encryptedReason = reason
 
-  def formattedReason: String = formattedHtml(reason)
+  def formattedReason: TemplateHTMLOutputModel = formattedHtml(reason)
 
   @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
   @JoinColumn(name = "submission_id")
@@ -166,7 +167,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def pendingEvidence: String = Option(encryptedPendingEvidence).map(_.toString).orNull
   def pendingEvidence_=(pendingEvidence: String): Unit = encryptedPendingEvidence = pendingEvidence
 
-  def formattedPendingEvidence: String = formattedHtml(pendingEvidence)
+  def formattedPendingEvidence: TemplateHTMLOutputModel = formattedHtml(pendingEvidence)
 
   var pendingEvidenceDue: LocalDate = _
 
@@ -183,7 +184,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   private var encryptedSensitiveEvidenceComments: CharSequence = _
   def sensitiveEvidenceComments: String = Option(encryptedSensitiveEvidenceComments).map(_.toString).orNull
   def sensitiveEvidenceComments_=(sensitiveEvidenceComments: String): Unit = encryptedSensitiveEvidenceComments = sensitiveEvidenceComments
-  def formattedSensitiveEvidenceComments: String = formattedHtml(sensitiveEvidenceComments)
+  def formattedSensitiveEvidenceComments: TemplateHTMLOutputModel = formattedHtml(sensitiveEvidenceComments)
 
   @Column(name = "approvedOn")
   private var _approvedOn: DateTime = _
@@ -254,7 +255,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def outcomeReasons: String = Option(encryptedOutcomeReasons).map(_.toString).orNull
   def outcomeReasons_=(outcomeReasons: String): Unit = encryptedOutcomeReasons = outcomeReasons
 
-  def formattedOutcomeReasons: String = formattedHtml(outcomeReasons)
+  def formattedOutcomeReasons: TemplateHTMLOutputModel = formattedHtml(outcomeReasons)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitCircsExamBoardRecommendationUserType")
   var boardRecommendations: Seq[MitCircsExamBoardRecommendation] = _
@@ -273,7 +274,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def boardRecommendationComments: String = Option(encryptedBoardRecommendationComments).map(_.toString).orNull
   def boardRecommendationComments_=(boardRecommendationComments: String): Unit = encryptedBoardRecommendationComments = boardRecommendationComments
 
-  def formattedBoardRecommendationComments: String = formattedHtml(boardRecommendationComments)
+  def formattedBoardRecommendationComments: TemplateHTMLOutputModel = formattedHtml(boardRecommendationComments)
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesRejectionReasonUserType")
   var rejectionReasons: Seq[MitigatingCircumstancesRejectionReason] = _

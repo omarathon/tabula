@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
@@ -380,7 +381,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
       }.value = value
   }
 
-  def commentsFormattedHtml: String = formattedHtml(comments)
+  def commentsFormattedHtml: TemplateHTMLOutputModel = formattedHtml(comments)
 
   def hasContent: Boolean = hasMarkOrGrade || hasAttachments || hasOnlineFeedback
 

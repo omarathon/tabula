@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
 import org.hibernate.criterion.Restrictions._
@@ -298,7 +299,7 @@ class Department extends GeneratedId
   def enableMitCircs_=(enabled: Boolean) { settings += (Settings.EnableMitCircs -> enabled) }
 
   def mitCircsGuidance: String = getStringSetting(Settings.MitCircsGuidance).orNull
-  def formattedMitCircsGuidance: String = formattedHtml(mitCircsGuidance.maybeText)
+  def formattedMitCircsGuidance: TemplateHTMLOutputModel = formattedHtml(mitCircsGuidance.maybeText)
   def mitCircsGuidance_=(guidelines: String): Unit = settings += (Settings.MitCircsGuidance -> guidelines)
 
   def nameToShow: ExamGridStudentIdentificationColumnValue =
