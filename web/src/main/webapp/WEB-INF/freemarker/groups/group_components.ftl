@@ -618,8 +618,8 @@
   <#if !groupSet.deleted>
     <div class="item-info row<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
       <#if setItem.viewerMustSignUp>
-        <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.groups.signup_to_group setItem.set />">
-          <@csrf_macros.csrfHiddenInputField />
+      <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.groups.signup_to_group setItem.set />">
+        <@csrf_macros.csrfHiddenInputField />
       </#if>
         <div class="col-md-2">
           <h3 class="name">
@@ -1157,8 +1157,8 @@
         </h3>
 
         <span class="format">
-					${set.format.description}
-				</span>
+          ${set.format.description}
+        </span>
       </div>
 
       <div class="col-md-10">
