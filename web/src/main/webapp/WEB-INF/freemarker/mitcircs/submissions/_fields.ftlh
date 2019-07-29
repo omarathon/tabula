@@ -1,6 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 
 <@mitcirc.identity_section student />
 

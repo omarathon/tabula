@@ -1,4 +1,4 @@
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 
 <#escape x as x?html>
   <#function route_function dept>

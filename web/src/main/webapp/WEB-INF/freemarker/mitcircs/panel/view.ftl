@@ -1,5 +1,5 @@
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <h1>${panel.name}</h1>

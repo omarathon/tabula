@@ -1,4 +1,4 @@
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#escape x as x?html>

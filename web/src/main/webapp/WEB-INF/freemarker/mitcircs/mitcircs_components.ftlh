@@ -37,12 +37,12 @@
   </#if>
 </#compress></#macro>
 
-<#macro detail label condensed=false>
+<#macro detail label condensed=false bigLabel=false>
   <div class="row form-horizontal mitcircs-details__detail <#if condensed>mitcircs-details__detail--condensed</#if>">
-    <div class="col-sm-3 control-label">
+    <div class="col-sm-<#if bigLabel>4<#else>3</#if> control-label">
       ${label}
     </div>
-    <div class="col-sm-9">
+    <div class="col-sm-<#if bigLabel>8<#else>9</#if>">
       <div class="form-control-static">
         <#nested>
       </div>
@@ -306,5 +306,47 @@
     <span class="mod-name"><#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})</span>
   <#else>
     ${((assessment.module.code)!assessment.moduleCode)?upper_case} <#if assessment.moduleCode == "OE">Engagement criteria<#elseif assessment.moduleCode == "O">Other<#else>${assessment.module.name}</#if> (${assessment.academicYear.toString})
+  </#if>
+</#macro>
+
+<#macro studentSummary submission consise=false>
+  <#-- Identity information about the student -->
+  <#assign student = submission.student />
+  <@detail label="Name" condensed=true bigLabel=consise>${student.fullName}</@detail>
+  <@detail label="University ID" condensed=true bigLabel=consise>${student.universityId}</@detail>
+  <#if student.email??><@detail label="Email" condensed=true bigLabel=consise>${student.email}</@detail></#if>
+
+  <#if student.mostSignificantCourseDetails??>
+    <#assign studentCourseDetails = student.mostSignificantCourseDetails />
+    <@detail label="Course" condensed=true bigLabel=consise>${studentCourseDetails.course.name}</@detail>
+
+    <#if studentCourseDetails.latestStudentCourseYearDetails??>
+        <#assign studentCourseYearDetails = studentCourseDetails.latestStudentCourseYearDetails />
+
+        <#if studentCourseYearDetails.yearOfStudy??>
+            <@detail label="Year of study" condensed=true bigLabel=consise>${studentCourseYearDetails.yearOfStudy}</@detail>
+        </#if>
+
+        <#if studentCourseYearDetails.modeOfAttendance??>
+            <@detail label="Mode of study" condensed=true bigLabel=consise>${studentCourseYearDetails.modeOfAttendance.fullNameAliased}</@detail>
+        </#if>
+    </#if>
+  </#if>
+</#macro>
+
+<#macro submissionSummary submission consise=false>
+  <@detail label="Issue type" condensed=true bigLabel=consise><@components.enumListWithOther enumValues=submission.issueTypes otherValue=submission.issueTypeDetails!"" condensed=false /></@detail>
+  <@detail label="Start date" condensed=true bigLabel=consise><#if submission.startDate??><@fmt.date date=submission.startDate includeTime=false shortMonth=consise /><#else><span class="very-subtle">TBC</span></#if></@detail>
+  <@detail label="End date" condensed=true bigLabel=consise>
+    <#if submission.endDate??><@fmt.date date=submission.endDate shortMonth=consise includeTime=false /><#else><span class="very-subtle">Issue ongoing</span></#if>
+  </@detail>
+  <#if submission.relatedSubmission??>
+    <#assign relatedLabel>Related<#if !consise> submission</#if></#assign>
+    <@detail label="${relatedLabel}" condensed=true bigLabel=consise>
+      <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
+        MIT-${submission.relatedSubmission.key}
+          <@enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
+      </a>
+    </@detail>
   </#if>
 </#macro>

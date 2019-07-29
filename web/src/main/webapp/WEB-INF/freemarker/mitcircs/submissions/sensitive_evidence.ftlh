@@ -1,8 +1,15 @@
 <#import "mitcirc_form_macros.ftl" as mitcirc />
+<#import "*/mitcircs_components.ftlh" as components />
 
-<#escape x as x?html>
-  <h1>Sensitive information for MIT-${submission.key}</h1>
+<h1>Sensitive information for MIT-${submission.key}</h1>
 
+<div class="col-md-4 col-md-push-8">
+  <section class="mitcircs-details">
+      <@components.studentSummary submission true />
+      <@components.submissionSummary submission true />
+  </section>
+</div>
+<div class="col-md-8 col-md-pull-4">
   <@f.form id="sensitiveEvidenceForm" method="POST" modelAttribute="command" class="dirty-check double-submit-protection" enctype="multipart/form-data">
 
     <@mitcirc.question_section
@@ -43,4 +50,4 @@
     </div>
 
   </@f.form>
-</#escape>
+</div>
