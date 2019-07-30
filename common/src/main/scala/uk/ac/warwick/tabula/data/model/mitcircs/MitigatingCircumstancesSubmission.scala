@@ -243,6 +243,15 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     lastViewedByOfficer.forall(_.isBefore(lastModified))
   }
 
+  def isUnreadByStudent: Boolean = transactional(readOnly = true) {
+    val lastModified = Seq(
+        Option(_lastModified),
+        messages.filterNot(_.studentSent).sortBy(_.createdDate).lastOption.map(_.createdDate)
+      ).flatten.max
+
+    lastViewedByStudent.forall(_.isBefore(lastModified))
+  }
+
   // Outcomes
 
   @Type(`type` = "uk.ac.warwick.tabula.data.model.mitcircs.MitigatingCircumstancesGradingUserType")
