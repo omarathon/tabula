@@ -233,15 +233,22 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def lastViewedByOfficer: Option[DateTime] = Option(_lastViewedByOfficer)
   def lastViewedByOfficer_=(dt: DateTime): Unit = _lastViewedByOfficer = dt
 
-  def isUnreadByOfficer: Boolean = transactional(readOnly = true) {
-    // Doesn't include notes, whereas normally lastModified does, and only includes student-sent messages
-    val lastModified =
-      Seq(
-        Option(_lastModified),
-        messages.filter(_.studentSent).sortBy(_.createdDate).lastOption.map(_.createdDate),
-      ).flatten.max
+  // Doesn't include notes, whereas normally lastModified does, and filters messages
+  private def lastModifiedIncludingMessages(messageFilter: (MitigatingCircumstancesMessage) => Boolean): DateTime = {
+    Seq(
+      Option(_lastModified),
+      messages.filter(messageFilter).sortBy(_.createdDate).lastOption.map(_.createdDate)
+    ).flatten.max
+  }
 
+  def isUnreadByOfficer: Boolean = transactional(readOnly = true) {
+    val lastModified = lastModifiedIncludingMessages(_.studentSent) // only includes student-sent messages
     lastViewedByOfficer.forall(_.isBefore(lastModified))
+  }
+
+  def isUnreadByStudent: Boolean = transactional(readOnly = true) {
+    val lastModified = lastModifiedIncludingMessages(m => !m.studentSent) // only includes staff-sent messages
+    lastViewedByStudent.forall(_.isBefore(lastModified))
   }
 
   // Outcomes
