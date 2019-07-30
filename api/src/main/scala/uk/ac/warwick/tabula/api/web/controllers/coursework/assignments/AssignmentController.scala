@@ -72,6 +72,16 @@ class GetAssignmentController extends AssignmentController with GetAssignmentApi
 
 @Controller
 @RequestMapping(
+  method = Array(RequestMethod.GET),
+  value = Array("/v2/module/{module}/assignments/{assignment}"),
+  params = Array("!universityId"),
+  produces = Array("application/json"))
+class GetAssignmentControllerV2 extends AssignmentController with GetAssignmentApi with GetAssignmentApiFullOutputV2 {
+  validatesSelf[SelfValidating]
+}
+
+@Controller
+@RequestMapping(
   method = Array(RequestMethod.PUT),
   value = Array("/v1/module/{module}/assignments/{assignment}"),
   params = Array("!universityId"),
@@ -125,11 +135,62 @@ trait GetAssignmentApiOutput {
 trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
   self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
 
-  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults) = Map(
+  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any] = Map(
     "assignment" -> jsonAssignmentObject(assignment),
     "genericFeedback" -> assignment.genericFeedback,
     "students" -> results.students.map(jsonAssignmentStudentObject)
   )
+}
+
+trait GetAssignmentApiFullOutputV2 extends GetAssignmentApiFullOutput {
+  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+
+  override def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any] ={
+    /**
+      * StudentAssignmentFeedback object
+      *
+      * id	A unique identifier for the feedback
+      * member universityId
+      * mark	The given mark for the feedback, or null
+      * grade	The given grade for the feedback, or null
+      * adjustments	An array of adjustments applied to the submission, including reason and comments
+      * genericFeedback	Feedback given to anybody who submitted to the assignment
+      * comments	Feedback given specifically to this student
+      * attachments	An array of JSON objects with two properties, id with a unique identifier and filename
+      * downloadZip	The URL that a student would go to to download all feedback attachments
+      * downloadPdf	The URL that a student would go to to download a PDF version of the feedback
+      */
+    val studentAssignmentFeedbacks: Seq[Map[String, Any]] = assignment.feedbacks.asScala.map { feedback =>
+      Map(
+        "id" -> feedback.id,
+        "member" -> feedback.universityId,
+        "mark" -> JInteger(feedback.latestMark),
+        "grade" -> feedback.latestGrade.orNull,
+        "adjustments" -> feedback.studentViewableAdjustments.map { mark =>
+          Map(
+            "reason" -> mark.reason,
+            "comments" -> mark.comments
+          )
+        },
+        "genericFeedback" -> assignment.genericFeedback,
+        "comments" -> feedback.comments.orNull,
+        "attachments" -> feedback.attachments.asScala.map { attachment =>
+          Map(
+            "filename" -> attachment.name,
+            "id" -> attachment.id
+          )
+        },
+        "downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
+        "downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, feedback))
+      )
+    }
+
+    Map(
+      "assignment" -> jsonAssignmentObject(assignment),
+      "genericFeedback" -> assignment.genericFeedback,
+      "studentAssignmentFeedbacks" -> studentAssignmentFeedbacks
+    )
+  }
 }
 
 trait EditAssignmentApi {
