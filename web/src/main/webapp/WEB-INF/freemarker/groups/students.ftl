@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#import "*/modal_macros.ftlh" as modal />
 

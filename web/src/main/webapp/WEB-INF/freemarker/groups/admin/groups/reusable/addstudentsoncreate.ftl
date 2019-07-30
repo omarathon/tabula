@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
   <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#macro listStudentIdInputs>

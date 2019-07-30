@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 
 <#macro groups_details timetabledEvent>
   <div class="set-info striped-section collapsible">

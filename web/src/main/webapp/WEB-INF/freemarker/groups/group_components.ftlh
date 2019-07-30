@@ -1,4 +1,4 @@
-<#ftl strip_text=true output_format="HTML" />
+<#ftl strip_text=true />
 
 <#-- Common template parts for use in other small groups templates. -->
 

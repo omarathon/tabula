@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <div class="deptheader">
   <h1>Create small groups</h1>
   <h4 class="with-related"><span class="muted">for</span> <@fmt.module_name module /></h4>

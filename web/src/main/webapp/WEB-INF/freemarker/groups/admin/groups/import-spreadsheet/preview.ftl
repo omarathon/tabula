@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 
 <#macro command_type_label commandType>
   <#if commandType == "Create">

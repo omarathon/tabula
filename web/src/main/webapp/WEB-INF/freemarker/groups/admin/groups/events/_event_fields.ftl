@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
 
   <@bs3form.labelled_form_group path="title" labelText="Title">
     <@f.input path="title" cssClass="form-control" />
