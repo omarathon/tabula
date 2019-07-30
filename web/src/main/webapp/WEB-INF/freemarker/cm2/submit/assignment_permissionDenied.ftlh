@@ -53,7 +53,7 @@
           <a href="#" class="btn disabled">${button_text?no_esc}</a>
         <#else>
           <#assign formAction><@routes.cm2.assignmentrequestaccess assignment /></#assign>
-          <@f.form action=formAction method="POST">
+          <@f.form action=formAction?markup_string method="POST">
             <button class="btn" type="submit">${button_text?no_esc}</button>
           </@f.form>
         </#if>
