@@ -53,9 +53,10 @@
         <#if has_requested_access>
           <a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
         <#else>
-          <form action="<@routes.cm2.assignmentrequestaccess assignment />" method="POST">
+          <#assign formAction><@routes.cm2.assignmentrequestaccess assignment /></#assign>
+          <@f.form action=formAction method="POST">
             <button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
-          </form>
+          </@f.form>
         </#if>
       </#if>
     </#if>
