@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.reports.profiles
 
+import freemarker.core.TemplateHTMLOutputModel
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.profiles.PhotosWarwickMemberPhotoUrlGeneratorComponent
@@ -115,7 +116,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
     meetingDate: String,
     title: String,
     format: String,
-    description: String,
+    description: TemplateHTMLOutputModel,
     attachments: Seq[FileAttachment]
   )
 
@@ -123,7 +124,7 @@ class ProfileExportSingleCommandInternal(val student: StudentMember, val academi
     date: String,
     title: String,
     note: String,
-    noteHTML: String,
+    noteHTML: TemplateHTMLOutputModel,
     attachments: Seq[FileAttachment]
   )
 

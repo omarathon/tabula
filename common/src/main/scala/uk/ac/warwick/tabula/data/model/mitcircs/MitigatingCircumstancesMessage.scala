@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model.mitcircs
 
 import java.io.Serializable
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.annotations.{BatchSize, Proxy, Type}
@@ -41,7 +42,7 @@ class MitigatingCircumstancesMessage extends GeneratedId
   def message: String = Option(encryptedMessage).map(_.toString).orNull
   def message_=(message: String): Unit = encryptedMessage = message
 
-  def formattedMessage: String = formattedHtml(message.toString)
+  def formattedMessage: TemplateHTMLOutputModel = formattedHtml(message.toString)
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")

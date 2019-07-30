@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import java.sql.Types
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
@@ -143,7 +144,7 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
   @Column(name = "missed_reason")
   var missedReason: String = _
 
-  def escapedDescription: String = formattedHtml(description)
+  def escapedDescription: TemplateHTMLOutputModel = formattedHtml(description)
 
   def this(creator: Member, relationship: StudentRelationship) {
     this()

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import java.text.BreakIterator
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.hibernate.annotations.{Proxy, Type}
@@ -25,7 +26,7 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
   var note: String = _
 
-  def escapedNote: String = formattedHtml(note)
+  def escapedNote: TemplateHTMLOutputModel = formattedHtml(note)
 
   def truncatedNote: String = {
     Option(note).fold("")(note => {

@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import com.google.common.annotations.VisibleForTesting
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
@@ -181,7 +182,7 @@ class Assignment
 
   var genericFeedback: String = _
 
-  def genericFeedbackFormattedHtml: String = formattedHtml(genericFeedback)
+  def genericFeedbackFormattedHtml: TemplateHTMLOutputModel = formattedHtml(genericFeedback)
 
   @Column(name = "turnitin_id")
   var turnitinId: String = _

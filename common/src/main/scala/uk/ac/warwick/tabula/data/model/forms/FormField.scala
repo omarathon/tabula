@@ -4,6 +4,7 @@ import java.io.StringReader
 import java.sql.Types
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence._
 import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.{Proxy, Type}
@@ -164,7 +165,7 @@ abstract class AssignmentFormField extends FormField {
 class CommentField extends AssignmentFormField with SimpleValue[String] with FormattedHtml {
   override def isReadOnly = true
 
-  def formattedHtml: String = formattedHtml(Option(value))
+  def formattedHtml: TemplateHTMLOutputModel = formattedHtml(Option(value))
 
   override def duplicate(newAssignment: Assignment): CommentField = {
     val newField = new CommentField

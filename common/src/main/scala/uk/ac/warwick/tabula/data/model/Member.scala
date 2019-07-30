@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence._
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder}
@@ -673,7 +674,7 @@ trait StudentProperties extends ApplicantProperties with RestrictedPhoneNumber w
   @Restricted(Array("Profiles.Read.ReasonableAdjustmentsNotes"))
   var reasonableAdjustmentsNotes: String = _
 
-  def formattedReasonableAdjustmentsNotes: String = formattedHtml(reasonableAdjustmentsNotes)
+  def formattedReasonableAdjustmentsNotes: TemplateHTMLOutputModel = formattedHtml(reasonableAdjustmentsNotes)
 }
 
 trait RestrictedPhoneNumber {
