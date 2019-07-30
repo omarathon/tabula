@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
   <h1>Create a set of reusable small groups</h1>
 
   <@f.form id="newGroups" method="POST" modelAttribute="command">

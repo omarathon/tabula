@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
 
   <#if department??>
     <#function route_function dept>

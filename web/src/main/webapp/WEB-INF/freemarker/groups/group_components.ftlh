@@ -1,4 +1,4 @@
-<#ftl strip_text=true output_format="HTML" />
+<#ftl strip_text=true />
 
 <#-- Common template parts for use in other small groups templates. -->
 
@@ -1293,7 +1293,7 @@ showResetButton=false
           <#if checkboxName?has_content>
             <td>
               <#if !onlyShowCheckboxForStatic || item.itemTypeString == "static">
-                <input type="checkbox" name="${checkboxName}" value="${item.universityId}" />
+                <input type="checkbox" name="${checkboxName}" value="${item.universityId}" class="collection-checkbox" />
               </#if>
             </td>
           </#if>

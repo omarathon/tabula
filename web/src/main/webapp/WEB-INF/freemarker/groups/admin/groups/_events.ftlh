@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#assign academicYear=smallGroupSet.academicYear />
 
