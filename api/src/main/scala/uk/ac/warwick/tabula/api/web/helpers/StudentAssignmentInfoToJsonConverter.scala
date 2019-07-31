@@ -4,12 +4,57 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.coursework.assignments.CourseworkCommandTypes
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Submission}
+import uk.ac.warwick.tabula.data.model.{Assignment, AssignmentFeedback, Feedback, Submission}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.{DateFormats, TopLevelUrlComponent}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
+
+object StudentAssignmentInfoHelper {
+  /**
+   * SAF object / StudentAssignmentFeedback object
+   *
+   * id	A unique identifier for the feedback
+   * member universityId
+   * mark	The given mark for the feedback, or null
+   * grade	The given grade for the feedback, or null
+   * adjustments	An array of adjustments applied to the submission, including reason and comments
+   * genericFeedback	Feedback given to anybody who submitted to the assignment
+   * comments	Feedback given specifically to this student
+   * attachments	An array of JSON objects with two properties, id with a unique identifier and filename
+   * downloadZip	The URL that a student would go to to download all feedback attachments
+   * downloadPdf	The URL that a student would go to to download a PDF version of the feedback
+   */
+  def makeFeedbackInfo(
+    feedback: AssignmentFeedback,
+    toplevelUrl: String,
+  ): Map[String, Any] = {
+    val assignment: Assignment = feedback.assignment
+    Map(
+      "id" -> feedback.id,
+      "member" -> feedback.universityId,
+      "mark" -> JInteger(feedback.latestMark),
+      "grade" -> feedback.latestGrade.orNull,
+      "adjustments" -> feedback.studentViewableAdjustments.map { mark =>
+        Map(
+          "reason" -> mark.reason,
+          "comments" -> mark.comments
+        )
+      },
+      "genericFeedback" -> assignment.genericFeedback,
+      "comments" -> feedback.comments.orNull,
+      "attachments" -> feedback.attachments.asScala.map { attachment =>
+        Map(
+          "filename" -> attachment.name,
+          "id" -> attachment.id
+        )
+      },
+      "downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
+      "downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, feedback))
+    )
+  }
+}
 
 trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
   self: TopLevelUrlComponent =>
@@ -104,29 +149,7 @@ trait StudentAssignmentInfoToJsonConverter extends CourseworkCommandTypes {
       )
     }.orNull)
 
-    val feedbackInfo = Map("feedback" -> feedback.map { f =>
-      Map(
-        "id" -> f.id,
-        "mark" -> JInteger(f.latestMark),
-        "grade" -> f.latestGrade.orNull,
-        "adjustments" -> f.studentViewableAdjustments.map { mark =>
-          Map(
-            "reason" -> mark.reason,
-            "comments" -> mark.comments
-          )
-        },
-        "genericFeedback" -> assignment.genericFeedback,
-        "comments" -> f.comments.orNull,
-        "attachments" -> f.attachments.asScala.map { attachment =>
-          Map(
-            "filename" -> attachment.name,
-            "id" -> attachment.id
-          )
-        },
-        "downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
-        "downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, f))
-      )
-    }.orNull)
+    val feedbackInfo = Map("feedback" -> feedback.map(f => StudentAssignmentInfoHelper.makeFeedbackInfo(f, toplevelUrl)).orNull)
 
     val extensionInfo = Map("extension" -> extension.map { e =>
       Map(
