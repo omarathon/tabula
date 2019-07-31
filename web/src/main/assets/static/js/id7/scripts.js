@@ -1,5 +1,6 @@
 /* eslint-env browser */
 import $ from 'jquery';
+import './polyfills';
 import initErrorReporter from '../errorreporter';
 import CsrfForm from './csrf-form';
 
