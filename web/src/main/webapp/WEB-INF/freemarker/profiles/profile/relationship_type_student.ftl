@@ -224,6 +224,7 @@
                           type="button"
                           class="btn btn-default btn-sm use-popover"
                           data-html="true"
+                          data-trigger="click focus"
                           data-title="Cancel scheduled change"
                           data-content="${popover}"
                           data-placement="left"

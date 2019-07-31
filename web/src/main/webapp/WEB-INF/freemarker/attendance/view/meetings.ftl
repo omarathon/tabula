@@ -93,7 +93,7 @@
                     <#if reason_has_next><br /></#if>
                   </#list>
                 </#assign>
-                <a tabindex="0" role="button" class="use-popover" id="popover-meeting-status-${meetingStatus_index}" data-placement="left" data-html="true"
+                <a tabindex="0" role="button" class="use-popover" data-trigger="click focus" id="popover-meeting-status-${meetingStatus_index}" data-placement="left" data-html="true"
                    data-content="${popoverContent}">
                   <i class="fa fa-fw fa-times"></i>
                 </a>

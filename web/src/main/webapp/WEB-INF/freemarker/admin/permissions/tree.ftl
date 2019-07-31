@@ -51,7 +51,7 @@
         </ul>
       </#local>
 
-      <a class="use-popover" data-content="<#noescape>${popoverContent?html}</#noescape>" data-html="true" data-placement="right">
+      <a class="use-popover" data-trigger="click focus" data-content="<#noescape>${popoverContent?html}</#noescape>" data-html="true" data-placement="right">
         ${users?size} people
       </a>
     </#if>

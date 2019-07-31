@@ -26,7 +26,7 @@
               </#if>
               <#if features.disabilityRenderingInProfiles && (student.disability.reportable)!false>
                 <strong>Disability:</strong>
-                <a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
+                <a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true" data-trigger="click focus"
                    data-content="<p>This student has self-reported the following disability code:</p><div class='well'><h6>${student.disability.code}</h6><small>${(student.disability.sitsDefinition)!}</small></div>"> ${student.disability.definition}</a>
                 <br />
               </#if>
@@ -41,7 +41,7 @@
                     <#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
                   </#if>
                   Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
-                  <a tabindex="0" role="button" class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+                  <a tabindex="0" role="button" data-trigger="click focus" class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
 								requirements apply to this student. (${inconsistency})" data-toggle="popover" aria-label="Help"><i class="fa fa-question-circle"></i></a>
                 </#if>
                 <br />

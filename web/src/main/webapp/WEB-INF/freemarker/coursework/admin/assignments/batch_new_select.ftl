@@ -309,7 +309,7 @@ first page of the form to setup a bunch of assignments from SITS.
                   <a href="#" class="use-popover"
                      data-title="Open-ended assignments"
                      data-html="true"
-                     data-trigger="hover"
+                     data-trigger="hover focus"
                      data-content="${popoverText}"
                      data-container="body"
                   >What's this?</a>

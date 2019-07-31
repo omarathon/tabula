@@ -57,7 +57,7 @@
             </div>
           </td>
           <td class="students">
-            <a href="#" class="use-popover" data-title="${relationshipType.studentRole?capitalize}s" data-content="${studentPopoverContent}" data-html="true">
+            <a href="#" class="use-popover" data-trigger="click focus" data-title="${relationshipType.studentRole?capitalize}s" data-content="${studentPopoverContent}" data-html="true">
               ${agentData.students?size}
             </a>
           </td>

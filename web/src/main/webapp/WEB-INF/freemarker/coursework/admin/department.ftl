@@ -181,7 +181,7 @@
         Courses.zebraStripeAssignments($module);
         $module.find('.use-tooltip').tooltip({ sanitize: false, });
         $module.find('.use-popover').tabulaPopover({
-          trigger: 'click',
+          trigger: 'click focus',
           container: '#container'
         });
         AjaxPopup.wireAjaxPopupLinks($module);

@@ -39,7 +39,7 @@
 
               <#local popoverContent><@components.timetableEventDetails event academicYear department /></#local>
               <a class="use-popover"
-                 tabindex="0" role="button"
+                 tabindex="0" role="button" data-trigger="click focus"
                  data-html="true" aria-label="Help"
                  data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
             </div>
