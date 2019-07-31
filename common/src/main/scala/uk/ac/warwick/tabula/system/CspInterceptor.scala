@@ -86,7 +86,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "disown-opener" -> None,
 
       // CSPv2 report endpoint
-      "report-uri" -> Some(cspReportUrl),
+      "report-uri" -> Some(cspReportUrl+"?enforced"),
 
       // CSPv3 report group
       "report-to" -> Some("csp-reports")
