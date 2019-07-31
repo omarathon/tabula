@@ -60,6 +60,37 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // CSPv3 report group
       "report-to" -> Some("csp-reports")
     )
+  
+  def enforcingRules(nonce: String): ListMap[String, Option[String]] =
+    ListMap(
+      "default-src" -> Some("*"),
+
+      // Allow pretty much everything for now
+      // ssl.google-analytics.com for GA
+      "script-src" -> Some(s"'self' 'unsafe-inline' 'unsafe-eval' https://ssl.google-analytics.com 'report-sample'"),
+
+      "font-src" -> Some("'self' https://fonts.googleapis.com https://fonts.gstatic.com"),
+
+      // No Flash or other plugins - when we serve files inline this is overridden
+      "object-src" -> Some("'none'"),
+
+      // My Warwick or web sign-on account popover, or campus map
+      "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
+
+      // AJAX request for My Warwick alert unread count
+      "connect-src" -> Some("'self' https://my.warwick.ac.uk"),
+
+      "frame-ancestors" -> Some("'self'"),
+
+      // see https://mathiasbynens.github.io/rel-noopener/
+      "disown-opener" -> None,
+
+      // CSPv2 report endpoint
+      "report-uri" -> Some(cspReportUrl),
+
+      // CSPv3 report group
+      "report-to" -> Some("csp-reports")
+    )
 
   override def preHandle(
     request: HttpServletRequest,
