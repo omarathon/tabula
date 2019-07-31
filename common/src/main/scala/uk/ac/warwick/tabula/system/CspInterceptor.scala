@@ -45,7 +45,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
 
       // AJAX request for My Warwick alert unread count
-      "connect-src" -> Some("'self' https://my.warwick.ac.uk"),
+      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk"),
 
       "form-action" -> Some("'self'"),
 
@@ -69,17 +69,20 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // ssl.google-analytics.com for GA
       "script-src" -> Some(s"'self' 'unsafe-inline' 'unsafe-eval' https://ssl.google-analytics.com 'report-sample'"),
 
-      "font-src" -> Some("'self' https://fonts.googleapis.com https://fonts.gstatic.com"),
+      // CLogS: csp-report.effective-directive:"font-src" brought up blocked data: URIs, being on the safe side here
+      "font-src" -> Some("'self' data: https://fonts.googleapis.com https://fonts.gstatic.com"),
 
-      // No Flash or other plugins - when we serve files inline this is overridden
-      "object-src" -> Some("'none'"),
+      // I found CLogS reports to suggest this hadn't been properly suppressed for submissions/download URLs
+      // "object-src" -> Some("'none'"),
 
       // My Warwick or web sign-on account popover, or campus map
+      // I checked on CLogS, the only violations I can see are from malware and Chinese browsers
       "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
 
-      // AJAX request for My Warwick alert unread count
-      "connect-src" -> Some("'self' https://my.warwick.ac.uk"),
+      // AJAX request for My Warwick alert unread count, https://campus-cms.warwick.ac.uk via CLogS
+      "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk"),
 
+      // No CLogS reports for violations of this directive
       "frame-ancestors" -> Some("'self'"),
 
       // see https://mathiasbynens.github.io/rel-noopener/
