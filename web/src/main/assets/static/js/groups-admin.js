@@ -390,5 +390,7 @@
           title: 'Select all/none',
         }).addClass('collection-check-all'),
       ).end();
+
+    $('.table-biglist').bigList();
   });
 })(jQuery);

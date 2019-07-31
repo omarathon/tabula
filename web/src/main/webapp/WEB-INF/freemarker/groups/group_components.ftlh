@@ -1240,7 +1240,7 @@ showResetButton=false
 
   <#if (membershipItems?size > 0)>
 
-    <table class="manage-student-table table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tablesorter sb-no-wrapper-table-popout">
+    <table class="manage-student-table table table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tablesorter sb-no-wrapper-table-popout table-biglist">
       <thead>
       <tr>
         <th style="width: 50px;">Source</th>
