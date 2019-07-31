@@ -21,7 +21,7 @@ class CspReportController extends BaseController {
 
   @PostMapping(consumes = Array(MediaType.APPLICATION_JSON_VALUE, "application/csp-report"), produces = Array("application/json"))
   def consumeReport(@RequestBody report: Map[String, Any], request: HttpServletRequest): Mav = {
-    val payload = report.get("csp-report").asInstanceOf[Map[String, Object]]
+    val payload = report("csp-report").asInstanceOf[Map[String, Object]]
     val data = Map(
       "csp-report" -> (payload + ("mode" -> getCspMode(request))),
       "request_headers" -> Map(
@@ -44,7 +44,7 @@ class CspReportController extends BaseController {
   @PostMapping(consumes = Array("application/reports+json"), produces = Array("application/json"))
   def consumeReport(@RequestBody reports: Seq[Map[String, Any]], request: HttpServletRequest): Mav = {
     reports.filter { r => r.get("type").contains("csp") && r.contains("body") }.foreach { report => {
-      val payload = report.get("body").asInstanceOf[Map[String, Object]]
+      val payload = report("body").asInstanceOf[Map[String, Object]]
       val data = Map(
         "csp-report" -> (payload + ("mode" -> getCspMode(request))),
         "request_headers" -> Map(
