@@ -66,7 +66,7 @@
         var $row = $(e.target);
 
         $row.find('.use-popover').tabulaPopover({
-          trigger: 'click',
+          trigger: 'click focus',
           container: '.id7-fixed-width-container'
         });
 

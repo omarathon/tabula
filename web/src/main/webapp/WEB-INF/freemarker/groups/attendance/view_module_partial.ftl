@@ -6,7 +6,7 @@
 
     <script nonce="${nonce()}">
       jQuery('.use-popover').tabulaPopover({
-        trigger: 'click',
+        trigger: 'click focus',
         container: 'body'
       });
     </script>

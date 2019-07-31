@@ -78,6 +78,7 @@
                       <p><i class="fa-check fa fa-fw attended"></i> Attended</p>
                     </#assign>
 										<a class="use-popover"
+                       data-trigger="click focus"
                        data-title="Key"
                        aria-label="Help"
                        data-placement="bottom"

@@ -1374,7 +1374,7 @@
         </p>
       </#local>
 
-      <a href="#" class="use-popover" data-html="true" data-content="${popoverContent?html}">${link_multiple}</a>
+      <a href="#" class="use-popover" data-trigger="click focus" data-html="true" data-content="${popoverContent?html}">${link_multiple}</a>
     </#if>
   </#if>
 </#macro>
@@ -1437,7 +1437,7 @@
 </#macro>
 
 <#macro disability_disclosure student_disability>
-  <a href="#" class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true"
+  <a href="#" class="use-popover cue-popover white-text-decoration" id="popover-disability" data-html="true" data-trigger="click focus"
      data-content="<p>This student has chosen to make the marker of this submission aware of their disability and for it to be taken it into consideration. This student has self-reported the following disability code:</p><div class='well'><h6>${student_disability.code}</h6><small>${(student_disability.sitsDefinition)!}</small></div>"
   >
     <span class="label label-info">Disability disclosed</span>

@@ -81,7 +81,7 @@
                   </#list>
                 </ul>
               </#assign>
-              <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+              <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="right">
                 <@fmt.p groupedPoint.schemes?size "scheme" />
               </a>
             </div>
@@ -106,7 +106,7 @@
                   </#list>
                 </ul>
               </#assign>
-              <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+              <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="right">
                 <@fmt.p groupedPoint.schemes?size "scheme" />
               </a>
             </div>

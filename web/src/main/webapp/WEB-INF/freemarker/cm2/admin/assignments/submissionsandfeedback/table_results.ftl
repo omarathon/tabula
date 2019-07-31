@@ -383,7 +383,7 @@
 
       $('.fixed-container').fixHeaderFooter();
       $('a.ajax-modal').ajaxModalLink();
-      $('.use-popover').tabulaPopover({trigger: 'click', container: 'body'});
+      $('.use-popover').tabulaPopover({trigger: 'click focus', container: 'body'});
 
       // add a custom parser for date columns - works from a data-datesort value that holds the date in millis
       $.tablesorter.addParser({

@@ -140,7 +140,7 @@
                 <#assign urlforstudents><@routes.coursework.assignment assignment /></#assign>
                 <a href="${urlforstudents}" class="linkForStudents">Link for students</a>
                 <a class="use-popover" id="popover-${assignment.id}" data-html="true"
-                   tabindex="0" role="button"
+                   tabindex="0" role="button" data-trigger="click focus"
                    data-original-title="<span class='text-info'><strong>Link for students</strong></span>"
                    data-content="This is the assignment page for students. You can give this web address or URL to students so that they can submit work and receive feedback and/or marks. Copy and paste it into an email or publish it on your module web page."><i
                           class="icon-question-sign"></i></a>

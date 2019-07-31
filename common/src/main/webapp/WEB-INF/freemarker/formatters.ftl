@@ -454,7 +454,7 @@ preposition: Text to relate the title to the department name in the second line,
 		</a>
 		<a data-content="We're aware that there is a bug generating emails with a large number of recipients, and we will address this in an upcoming release."
 		   data-html="true"
-		   data-trigger="hover"
+		   data-trigger="hover focus"
 		   class="use-popover tabulaPopover-init"
 		   title="" aria-label="Help" data-container="body"
 		   data-placement="left" href="#"><i class="icon-question-sign fa fa-question-circle"></i></a>
@@ -497,6 +497,7 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro help_popover id title="" content="" html=false cssClass="" placement="">
 	<a class="help-popover use-popover ${cssClass}"
 	   id="popover-${id}"
+		 data-trigger="click focus"
 	   <#if title?has_content> data-title="${title}"</#if>
 		 <#if placement?has_content> data-placement="${placement}"</#if>
 	   data-content="${content}" data-container="body" aria-label="Help"
