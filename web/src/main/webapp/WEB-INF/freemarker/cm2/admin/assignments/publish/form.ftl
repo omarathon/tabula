@@ -26,7 +26,7 @@
       <@userList collection/>
     </#assign>
 
-    <a class="use-popover" href="#" data-html="true" data-content="${popoverContent}"><@fmt.p collection?size entity /></a>
+    <a class="use-popover" href="#" data-html="true" data-trigger="click focus" data-content="${popoverContent}"><@fmt.p collection?size entity /></a>
     <#if includeTrailingWord>
       ${(collection?size == 1)?string(singular, plural)}
     </#if>
@@ -101,7 +101,7 @@
 
           <p>
             Email addresses for
-            <a class="use-popover" href="#" data-html="true" data-content="${popoverContent}"><@fmt.p recipientCheckReport.problems?size "student" /></a>
+            <a class="use-popover" href="#" data-trigger="click focus" data-html="true" data-content="${popoverContent}"><@fmt.p recipientCheckReport.problems?size "student" /></a>
             not found.
 
             <#if recipientCheckReport.problems?size == 1>

@@ -94,7 +94,7 @@
               Use suggested mark - ${proposedAdjustment!""}
             </button>
             <a class="use-popover" id="popover-${markingId(command.student)}" data-html="true"
-               tabindex="0" role="button"
+               tabindex="0" role="button" data-trigger="click focus"
                data-original-title="Late penalty calculation"
                data-content="The submission was <@fmt.p daysLate "working day" /> late. The suggested penalty
 					   was derived by subtracting ${latePenalty} marks from the actual mark for each day the submission

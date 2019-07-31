@@ -147,7 +147,7 @@
     });
     // Enable any freshly loaded popovers
     jQuery('.use-popover').tabulaPopover({
-      trigger: 'click',
+      trigger: 'click focus',
       container: 'body'
     });
 

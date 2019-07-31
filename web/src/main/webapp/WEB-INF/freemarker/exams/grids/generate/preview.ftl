@@ -154,7 +154,7 @@
                           </#list></ul>
                     </#assign>
                   <td>
-                    <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
+                    <a class="use-popover hidden-print" data-trigger="click focus" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.courses?size} courses</a>
                     <div class="visible-print">
                         <#noescape>${popover}</#noescape>
                     </div>
@@ -176,7 +176,7 @@
                           </#list></ul>
                     </#assign>
                   <td>
-                    <a class="use-popover hidden-print" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
+                    <a class="use-popover hidden-print" data-trigger="click focus" href="#" data-html="true" data-content="${popover}">${selectCourseCommand.routes?size} routes</a>
                     <div class="visible-print">
                         <#noescape>${popover}</#noescape>
                     </div>
@@ -215,7 +215,7 @@
                             </li>
                             </#list></ul>
                       </#assign>
-                    <a href="#" class="use-popover hidden-print" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
+                    <a href="#" class="use-popover hidden-print" data-trigger="click focus" data-html="true" data-content="${popover}">${normalLoadLookup.routes?size} routes</a>
                     <div class="visible-print">
                         <#noescape>${popover}</#noescape>
                     </div>
@@ -470,7 +470,7 @@
       $('.use-popover').on('shown.bs.popover', function (e) {
         var $target = $(e.target).popover().data('bs.popover').tip();
         $target.find('.use-popover').tabulaPopover({
-          trigger: 'click',
+          trigger: 'click focus',
           container: 'body'
         });
       });

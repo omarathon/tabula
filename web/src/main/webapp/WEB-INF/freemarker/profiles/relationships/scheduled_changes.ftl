@@ -102,6 +102,7 @@
                       type="button"
                       class="btn btn-primary use-popover"
                       data-html="true"
+                      data-trigger="click focus"
                       data-title="Apply selected changes now"
                       data-content="${apply_popover}"
               >
@@ -113,6 +114,7 @@
                       type="button"
                       class="btn btn-default use-popover"
                       data-html="true"
+                      data-trigger="click focus"
                       data-title="Cancel selected changes"
                       data-content="${cancel_popover}"
               >

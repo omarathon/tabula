@@ -185,6 +185,7 @@ showResetButton=false
                             data-html="true"
                             data-content="${popovercontent}"
                             data-placement="top"
+                            data-trigger="click focus"
                             tabindex="0" role="button"
                     >
 											<@fmt.p item.existingSchemes?size "scheme" />
@@ -233,7 +234,7 @@ showResetButton=false
       </#list>
     </ul>
   </#local>
-  <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+  <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right" data-trigger="click focus">
     <@fmt.p groupedPoint.schemes?size "scheme" />
   </a>
 </#macro>
@@ -271,7 +272,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span tabindex="0" role="button" class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true"
+  <span tabindex="0" role="button" class="use-popover label ${formatResult.labelClass}" data-content="${popoverContent}" data-html="true" data-trigger="click focus"
         data-placement="left">${formatResult.labelText}</span>
   <span class="hidden-desktop visible-print visible-print-inline">
 		<#if formatResult.metadata?has_content>${formatResult.metadata}<br /></#if>
@@ -323,7 +324,7 @@ showResetButton=false
     <#if formatResult.noteUrl?has_content><p><a class='attendance-note-modal' href='${formatResult.noteUrl}?dt=${.now?string('iso')}'>View attendance note</a>
       </p></#if>
   </#local>
-  <span tabindex="0" role="button" class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true">
+  <span tabindex="0" role="button" class="fa fa-fw fa-stack fa-stack-original-size fa-stack-right use-popover" data-content="${popoverContent}" data-html="true" data-trigger="click focus">
 		<i class="fa fa-fw fa-stack2x ${formatResult.iconClass} <#if nonActivePoint>non-active</#if>"></i>
 		<#if formatResult.noteUrl?has_content><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>
 	</span>

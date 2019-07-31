@@ -93,7 +93,7 @@
                         <@check "Agent is current in upstream systems (FIM or SITS depending on the user)" row.upstreamMember />
                       </ul>
                     </#assign>
-                    <a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body">
+                    <a class="use-popover" href="#" data-html="true" data-content="${popover}" data-container="body" data-trigger="click focus">
                       <strong><#if row.canImport>&#x2714;<#else>&#x2718; see why</#if></strong>
                     </a>
                   </td>

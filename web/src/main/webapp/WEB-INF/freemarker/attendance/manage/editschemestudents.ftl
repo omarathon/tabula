@@ -45,6 +45,7 @@
             </#noescape></#assign>
             <a class="use-popover"
                tabindex="0" role="button"
+               data-trigger="click focus"
                id="popover-linkToSits"
                data-content="${popoverContent}"
                data-html="true" aria-label="Help"
@@ -64,6 +65,7 @@
         </p>
         </#noescape></#assign>
         <a class="use-popover"
+           data-trigger="click focus"
            tabindex="0" role="button"
            id="popover-linkToSits"
            data-content="${popoverContent}"

@@ -13,6 +13,7 @@
     <p>
       Use an AQSC-approved template to add points to
       <a href="#" class="use-popover"
+         data-trigger="click focus"
          data-content="
 				<ul>
 					<#list schemes as scheme>

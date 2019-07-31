@@ -18,7 +18,7 @@
     </#noescape></#assign>
     <p>
       You are copying these points to
-      <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
+      <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="top">
         <@fmt.p command.schemes?size "scheme" />
       </a>
     </p>

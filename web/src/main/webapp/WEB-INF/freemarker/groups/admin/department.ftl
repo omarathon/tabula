@@ -346,7 +346,7 @@
               $container.mapPopups();
               $container.find('.use-tooltip').tooltip({ sanitize: false, });
               $container.find('.use-popover').tabulaPopover({
-                trigger: 'click',
+                trigger: 'click focus',
                 container: 'body'
               });
             };

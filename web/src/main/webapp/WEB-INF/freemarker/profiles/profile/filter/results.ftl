@@ -102,7 +102,7 @@
             });
 
             $('.use-popover').tabulaPopover({
-              trigger: 'click',
+              trigger: 'click focus',
               container: 'body'
             });
           });
