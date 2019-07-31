@@ -102,10 +102,11 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
 
     response.setHeader(
       "Content-Security-Policy-Report-Only",
-      reportingRules(nonce).toSeq.map {
-        case (k, Some(v)) => s"$k $v"
-        case (k, _) => k
-      }.mkString("; ")
+      toHeaderString(reportingRules(nonce))
+    )
+    response.setHeader(
+      "Content-Security-Policy",
+      toHeaderString(enforcingRules(nonce))
     )
     response.setHeader(
       "Report-To",
@@ -121,6 +122,13 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
     )
 
     true // allow request to continue
+  }
+
+  def toHeaderString(input: ListMap[String, Option[String]]): String = {
+    input.toSeq.map {
+      case (k, Some(v)) => s"$k $v"
+      case (k, _) => k
+    }.mkString("; ")
   }
 }
 
