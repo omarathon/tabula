@@ -19,7 +19,7 @@
     <#if assignment.cm2MarkingWorkflow??>
       <#list auditData.feedback.completedFeedbackByStage?keys as stage>
         <#if mapGet(auditData.feedback.completedFeedbackByStage, stage)??>
-          <@fs.markerFeedbackSummarystage mapGet(auditData.feedback.completedFeedbackByStage, stage)/>
+          <@fs.markerFeedbackSummary stage mapGet(auditData.feedback.completedFeedbackByStage, stage)/>
         </#if>
       </#list>
     <#else>
@@ -29,19 +29,19 @@
   <#-- For CM1 assignments we can't cycle through allFeedback as it may contained orphened rejected feedback -->
     <#if auditData.feedback.firstMarkerFeedback??>
       <div class="well">
-        <@cm1fs.markerFeedbackSummaryauditData.feedback.firstMarkerFeedback isModerated true/>
+        <@cm1fs.markerFeedbackSummary auditData.feedback.firstMarkerFeedback isModerated true/>
         <@cm1fs.secondMarkerNotes auditData.feedback.firstMarkerFeedback isModerated />
       </div>
     </#if>
     <#if auditData.feedback.secondMarkerFeedback??>
       <div class="well">
-        <@cm1fs.markerFeedbackSummaryauditData.feedback.secondMarkerFeedback isModerated true/>
+        <@cm1fs.markerFeedbackSummary auditData.feedback.secondMarkerFeedback isModerated true/>
         <@cm1fs.secondMarkerNotes auditData.feedback.secondMarkerFeedback isModerated />
       </div>
     </#if>
     <#if auditData.feedback.thirdMarkerFeedback??>
       <div class="well">
-        <@cm1fs.markerFeedbackSummaryauditData.feedback.thirdMarkerFeedback isModerated true/>
+        <@cm1fs.markerFeedbackSummary auditData.feedback.thirdMarkerFeedback isModerated true/>
         <@cm1fs.secondMarkerNotes auditData.feedback.thirdMarkerFeedback isModerated />
       </div>
     </#if>

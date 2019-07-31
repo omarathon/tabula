@@ -3,7 +3,7 @@
 
 <#escape x as x?html>
 <div class="well">
-  <@fs.markerFeedbackSummaryfirstMarkerFeedback false />
+  <@fs.markerFeedbackSummary firstMarkerFeedback false />
 </div>
 
 <div class="content online-feedback">
