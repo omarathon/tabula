@@ -38,7 +38,7 @@ class CspReportController extends BaseController {
   }
 
   private def getCspMode(request: HttpServletRequest): String = {
-    if (request.getQueryString.contains("enforced")) "enforced" else "reported"
+    if (request.getQueryString != null && request.getQueryString.contains("enforced")) "enforced" else "reported"
   }
 
   @PostMapping(consumes = Array("application/reports+json"), produces = Array("application/json"))
