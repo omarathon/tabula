@@ -192,7 +192,7 @@ preposition: Text to relate the title to the department name in the second line,
 <#macro weekRanges object stripHtml=false><#--
 	--><#noescape><#--
 		--><#local result = weekRangesFormatter(object) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+		--><#if stripHtml>${result?markup_string?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
