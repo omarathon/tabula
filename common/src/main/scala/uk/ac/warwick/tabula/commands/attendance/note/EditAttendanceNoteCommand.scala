@@ -109,7 +109,7 @@ trait AttendanceNoteDescription extends Describable[AttendanceMonitoringNote] {
   }
 
   override def describeResult(d: Description, result: AttendanceMonitoringNote) {
-    d.property("note", result.escapedNote)
+    d.property("note", result.note)
   }
 }
 
