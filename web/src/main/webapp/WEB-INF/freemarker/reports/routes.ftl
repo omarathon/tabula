@@ -65,3 +65,5 @@
 <#macro profileExportReport department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report" /></#macro>
 <#macro profileExportReportProgress department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report?jobId=${jobId}" /></#macro>
 <#macro profileExportReportZip department academicYear jobId><@_u page="/${department.code}/${academicYear.startYear?c}/profiles/export/report/zip?jobId=${jobId}" /></#macro>
+
+<#macro courseworkMissedAssessments department academicYear><@_u page="/${department.code}/${academicYear.startYear?c}/coursework/missed" /></#macro>

@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.web.controllers.reports.attendancemonitoring
 
 import java.io.StringWriter
-import javax.validation.Valid
 
 import freemarker.template.{Configuration, DefaultObjectWrapper}
+import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.reports.attendancemonitoring._
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.helpers.{IntervalFormatter, LazyMaps}
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
