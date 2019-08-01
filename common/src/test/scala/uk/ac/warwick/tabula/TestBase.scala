@@ -1,56 +1,49 @@
 package uk.ac.warwick.tabula
 
 import java.io.{File, InputStream, StringReader}
+import java.util
 import java.util.concurrent.TimeUnit
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import freemarker.cache.{ClassTemplateLoader, MultiTemplateLoader}
+import freemarker.core.{Environment, HTMLOutputFormat}
+import freemarker.template._
+import org.apache.commons.configuration.PropertiesConfiguration
+import org.apache.log4j.NDC
 import org.jclouds.ContextBuilder
 import org.jclouds.blobstore.BlobStoreContext
+import org.joda.time.{DateTime, DateTimeUtils, ReadableInstant}
+import org.junit.rules.Timeout
+import org.junit.{After, Before, Rule}
 import org.scalatest.Matchers
 import org.scalatest.concurrent.ScalaFutures
-import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
-
-import scala.collection.JavaConverters._
-import org.apache.commons.configuration.PropertiesConfiguration
-import org.joda.time.{DateTime, DateTimeUtils, DateTimeZone, ReadableInstant}
-import org.junit.After
-import org.junit.Before
 import org.scalatest.junit.{AssertionsForJUnit, JUnitSuite}
-import org.springframework.core.io.ClassPathResource
-import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.mock.web.MockHttpServletResponse
-import org.springframework.util.FileCopyUtils
-import freemarker.cache.ClassTemplateLoader
-import freemarker.cache.MultiTemplateLoader
-import uk.ac.warwick.sso.client.SSOConfiguration
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.util.core.spring.FileUtils
-import uk.ac.warwick.util.web.Uri
-import org.junit.rules.Timeout
-import org.junit.Rule
-import freemarker.template._
-import java.util
-import java.util.{Locale, TimeZone}
-
-import com.fasterxml.jackson.databind.ObjectMapper
-import freemarker.core.Environment
-import org.apache.log4j.NDC
-import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.springframework.core.io.ClassPathResource
+import org.springframework.mock.web.{MockHttpServletRequest, MockHttpServletResponse}
+import org.springframework.util.FileCopyUtils
+import uk.ac.warwick.sso.client.SSOConfiguration
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.Transactions
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.services.objectstore.{BlobStoreObjectStorageService, ObjectStorageService}
 import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.web.views.ScalaFreemarkerConfiguration
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.util.core.spring.FileUtils
+import uk.ac.warwick.util.web.Uri
+
+import scala.collection.JavaConverters._
 
 /** Base class for tests which boringly uses the JUnit support of
-  * Scalatest, so you do @Test annotated methods as you normally would.
-  * You can use ScalaTest's "should" matchers though, which is nice.
-  *
-  * Also a bunch of methods for generating fake support resources.
-  */
+ * Scalatest, so you do @Test annotated methods as you normally would.
+ * You can use ScalaTest's "should" matchers though, which is nice.
+ *
+ * Also a bunch of methods for generating fake support resources.
+ */
 abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with AssertionsForJUnit with TestHelpers with TestFixtures with Logging {
   // bring in type so we can be lazy and not have to import @Test
   type Test = org.junit.Test
@@ -83,7 +76,7 @@ abstract class TestBase extends JUnitSuite with Matchers with ScalaFutures with 
 }
 
 /** Various test objects
-  */
+ */
 trait TestFixtures {
   def newFreemarkerConfiguration(): ScalaFreemarkerConfiguration = newFreemarkerConfiguration(JHashMap())
 
@@ -106,8 +99,8 @@ trait TestFixtures {
   def emptyFeatures: FeaturesImpl = Features.empty
 
   /** Creates an Assignment with a module and department,
-    * and a few pre-filled fields.
-    */
+   * and a few pre-filled fields.
+   */
   def newDeepAssignment(moduleCode: String = "IN101"): Assignment = {
     val department = new Department
     val module = new Module(moduleCode, department)
@@ -166,8 +159,8 @@ trait TestHelpers extends TestFixtures {
   }
 
   /** Returns a new temporary directory that will get cleaned up
-    * automatically at the end of the test.
-    */
+   * automatically at the end of the test.
+   */
   def createTemporaryDirectory(): File = {
     // try 10 times to find an unused filename.
     // Stream is lazy so it won't try making 10 files every time.
@@ -195,7 +188,7 @@ trait TestHelpers extends TestFixtures {
   }
 
   /** Removes any directories created by #createTemporaryDirectory
-    */
+   */
   @After def deleteTemporaryDirs: Unit = try {
     temporaryFiles.par foreach FileUtils.recursiveDelete
     if (blobStoreContext != null) blobStoreContext.close()
@@ -214,12 +207,12 @@ trait TestHelpers extends TestFixtures {
     }
 
   /** Sets up a pretend requestinfo context with the given pretend user
-    * around the callback.
-    *
-    * Can pass null as the usercode to make an anonymous user.
-    *
-    * withUser("cusebr") { /* ... your code */  }
-    */
+   * around the callback.
+   *
+   * Can pass null as the usercode to make an anonymous user.
+   *
+   * withUser("cusebr") { /* ... your code */  }
+   */
   def withUser(code: String, universityId: String = null, profile: Option[Member] = None)(fn: => Unit) {
     val user = if (code == null) {
       new AnonymousUser()
@@ -267,7 +260,7 @@ trait TestHelpers extends TestFixtures {
   }
 
   /** Fetches a resource as a string. Assumes UTF-8 unless specified.
-    */
+   */
   def resourceAsString(path: String, encoding: String = "UTF-8"): String = new String(resourceAsBytes(path), encoding)
 
   def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
@@ -275,12 +268,12 @@ trait TestHelpers extends TestFixtures {
   def resourceAsStream(path: String): InputStream = new ClassPathResource(path).getInputStream
 
   /**
-    * custom matcher to let you write
-    *
-    * myObject should be ( anInstanceOf[MyType] )
-    *
-    * See https://groups.google.com/forum/#!topic/scalatest-users/UrdRM6XHB4Y
-    */
+   * custom matcher to let you write
+   *
+   * myObject should be ( anInstanceOf[MyType] )
+   *
+   * See https://groups.google.com/forum/#!topic/scalatest-users/UrdRM6XHB4Y
+   */
   def anInstanceOf[T](implicit manifest: Manifest[T]): BePropertyMatcher[AnyRef] = {
     val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]
     new BePropertyMatcher[AnyRef] {
@@ -299,7 +292,7 @@ trait FreemarkerTestHelpers {
   class StubFreemarkerMethodModel extends TemplateMethodModelEx with Mockito {
     val mock: TemplateMethodModelEx = mock[TemplateMethodModelEx]
 
-    def exec(arguments: util.List[_]): AnyRef = Option(mock.exec(arguments)).getOrElse("")
+    def exec(arguments: util.List[_]): AnyRef = Option(mock.exec(arguments)).getOrElse(HTMLOutputFormat.INSTANCE.fromMarkup(""))
   }
 
   class StubFreemarkerDirectiveModel extends TemplateDirectiveModel with TemplateMethodModelEx with Mockito {
@@ -310,9 +303,7 @@ trait FreemarkerTestHelpers {
       mockDirective.execute(env, params, loopVars, body)
     }
 
-    def exec(arguments: util.List[_]): AnyRef = {
-      Option(mockMethod.exec(arguments)).getOrElse("")
-    }
+    def exec(arguments: util.List[_]): AnyRef = Option(mockMethod.exec(arguments)).getOrElse(HTMLOutputFormat.INSTANCE.fromMarkup(""))
   }
 
 }
