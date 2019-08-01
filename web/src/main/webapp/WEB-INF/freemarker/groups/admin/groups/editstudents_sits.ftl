@@ -1,5 +1,6 @@
 <#escape x as x?html>
   <#import "*/group_components.ftlh" as components />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#macro listStudentIdInputs>
     <#list findCommand.staticStudentIds as id>
@@ -26,6 +27,7 @@
   </#if>
 
   <form method="POST">
+    <@csrf_macros.csrfHiddenInputField />
     <input type="hidden" name="filterQueryString" value="${findCommand.serializeFilter}" />
     <@listStudentIdInputs />
 
