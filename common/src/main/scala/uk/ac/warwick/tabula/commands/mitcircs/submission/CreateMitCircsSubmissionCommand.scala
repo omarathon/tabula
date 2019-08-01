@@ -129,37 +129,21 @@ trait MitCircsSubmissionValidation extends SelfValidating {
   override def validate(errors: Errors) {
     // Only validate at submission time, allow drafts to be saved that would be invalid
     if (approve) {
-      // validate dates
-      if (startDate == null) errors.rejectValue("startDate", "mitigatingCircumstances.startDate.required")
-      else if (endDate == null && !noEndDate) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
-      else if (!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
-
       // validate issue types
       if (issueTypes.isEmpty) errors.rejectValue("issueTypes", "mitigatingCircumstances.issueType.required")
       else if (issueTypes.contains(IssueType.Other) && !issueTypeDetails.hasText)
         errors.rejectValue("issueTypeDetails", "mitigatingCircumstances.issueTypeDetails.required")
 
-      // validate contact
-      if (contacted) {
-        if (contacts.isEmpty)
-          errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
-        else if (contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
-          errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
-      } else {
-        if (!noContactReason.hasText)
-          errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
-      }
+      // validate dates
+      if (startDate == null) errors.rejectValue("startDate", "mitigatingCircumstances.startDate.required")
+      else if (endDate == null && !noEndDate) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.required")
+      else if (!noEndDate && endDate.isBefore(startDate)) errors.rejectValue("endDate", "mitigatingCircumstances.endDate.after")
 
-      // validate reason
-      if (!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
-
+      // validate related submissions
       if (Option(relatedSubmission).exists(_.student != student))
         errors.rejectValue("relatedSubmission", "mitigatingCircumstances.relatedSubmission.sameUser")
 
-      if (affectedAssessments.isEmpty)
-        errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
-
-      // validate affected issue types
+      // validate affected assessments
       affectedAssessments.asScala.zipWithIndex.foreach { case (item, index) =>
         errors.pushNestedPath(s"affectedAssessments[$index]")
 
@@ -167,8 +151,8 @@ trait MitCircsSubmissionValidation extends SelfValidating {
           errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.required")
         else if (
           item.moduleCode != MitigatingCircumstancesAffectedAssessment.EngagementCriteriaModuleCode &&
-          item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
-          moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
+            item.moduleCode != MitigatingCircumstancesAffectedAssessment.OtherModuleCode &&
+            moduleAndDepartmentService.getModuleByCode(Module.stripCats(item.moduleCode).getOrElse(item.moduleCode)).isEmpty
         ) errors.rejectValue("moduleCode", "mitigatingCircumstances.affectedAssessments.moduleCode.notFound")
 
         if (item.academicYear == null) errors.rejectValue("academicYear", "mitigatingCircumstances.affectedAssessments.academicYear.notFound")
@@ -179,6 +163,26 @@ trait MitCircsSubmissionValidation extends SelfValidating {
 
         errors.popNestedPath()
       }
+
+      if (affectedAssessments.isEmpty)
+        errors.rejectValue("affectedAssessments", "mitigatingCircumstances.affectedAssessments.required")
+
+      // validate contact
+      Option(contacted).map(_.booleanValue) match {
+        case Some(true) =>
+          if (contacts.isEmpty)
+            errors.rejectValue("contacts", "mitigatingCircumstances.contacts.required")
+          else if (contacts.contains(MitCircsContact.Other) && !contactOther.hasText)
+            errors.rejectValue("contactOther", "mitigatingCircumstances.contactOther.required")
+        case Some(false) =>
+          if (!noContactReason.hasText)
+            errors.rejectValue("noContactReason", "mitigatingCircumstances.noContactReason.required")
+        case None =>
+          errors.rejectValue("contacted", "mitigatingCircumstances.contacted.required")
+      }
+
+      // validate reason
+      if (!reason.hasText) errors.rejectValue("reason", "mitigatingCircumstances.reason.required")
 
       // validate evidence
       if (attachedFiles.isEmpty && file.attached.isEmpty && pendingEvidence.isEmpty && !hasSensitiveEvidence && !Option(relatedSubmission).exists(_.hasEvidence)) {

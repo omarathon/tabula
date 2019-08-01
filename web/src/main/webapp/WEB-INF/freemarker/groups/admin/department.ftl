@@ -1,9 +1,9 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 <#escape x as x?html>
   <div class="btn-toolbar dept-toolbar">
     <#if !modules?has_content && department.children?has_content>
-      <a class="btn btn-default dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
+      <a tabindex="0" role="button" class="btn btn-default dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
         Manage
       </a>
     <#else>
@@ -346,7 +346,7 @@
               $container.mapPopups();
               $container.find('.use-tooltip').tooltip({ sanitize: false, });
               $container.find('.use-popover').tabulaPopover({
-                trigger: 'click',
+                trigger: 'click focus',
                 container: 'body'
               });
             };

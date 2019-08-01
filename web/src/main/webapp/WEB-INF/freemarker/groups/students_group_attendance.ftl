@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#escape x as x?html>
   <div id="student-groups-view">
     <#macro eventsInATerm term>
@@ -108,7 +108,7 @@
                             </#list>
                           </#local>
 
-                          <span tabindex="0" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="<#noescape>${renderedTitle}</#noescape>"
+                          <span tabindex="0" role="button" class="fa-stack fa-stack-original-size fa-stack-right fa-fw use-popover" data-trigger="click focus" data-content="<#noescape>${renderedTitle}</#noescape>"
                                 data-html="true">
 															<i class="fa-fw fa-stack-2x ${class}"></i>
 															<#if mapGet(notes, instance)??><i class="fa fa-fw fa-stack-1x fa-envelope-o fa-filled-white"></i></#if>

@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 
 <#macro command_type_label commandType>
   <#if commandType == "Create">
@@ -155,6 +155,7 @@
 
             <#local popoverContent><@components.eventDetails event /></#local>
             <a class="use-popover"
+               tabindex="0" role="button" data-trigger="click focus"
                data-html="true" aria-label="Help"
                data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
           </li>
@@ -202,6 +203,7 @@
     </div>
   </#local>
   <a class="use-popover"
+     tabindex="0" role="button" data-trigger="click focus"
      data-html="true" aria-label="Help"
      data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 </#macro>
@@ -215,6 +217,7 @@
 
   <#local popoverContent><@components.eventDetails event /></#local>
   <a class="use-popover"
+     tabindex="0" role="button" data-trigger="click focus"
      data-html="true" aria-label="Help"
      data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
 </#macro>

@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
+import freemarker.core.TemplateHTMLOutputModel
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.persistence._
@@ -35,7 +36,7 @@ abstract class AbstractMemberNote extends GeneratedId with CanBeDeleted with Per
   def note: String = Option(encryptedNote).flatMap(_.toString.maybeText).getOrElse(legacyNote)
   def note_=(note: String): Unit = encryptedNote = note
 
-  def escapedNote: String = formattedHtml(note)
+  def escapedNote: TemplateHTMLOutputModel = formattedHtml(note)
 
   var title: String = _
 
@@ -75,25 +76,5 @@ class MemberNote extends AbstractMemberNote {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "memberid")
   var member: Member = _
-
-}
-
-@Entity
-@Proxy
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("circumstances")
-class ExtenuatingCircumstances extends AbstractMemberNote {
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "memberid")
-  var member: Member = _
-
-  @NotNull
-  @Column(name = "start_date")
-  var startDate: LocalDate = _
-
-  @NotNull
-  @Column(name = "end_date")
-  var endDate: LocalDate = _
 
 }

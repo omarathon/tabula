@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.sysadmin.{UserAccessManagerAuditCommand, UserAccessManagerWithDepartments}
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.roles.UserAccessMgrRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.{PermissionsService, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.web.Mav
@@ -26,7 +27,7 @@ class UserAccessManagerAuditController extends BaseSysadminController with Permi
   @RequestMapping(method = Array(POST), value = Array("/sysadmin/uam-audit"))
   def adminModule(
     @ModelAttribute("userAccessManagerAuditCommand") command: Appliable[Seq[UserAccessManagerWithDepartments]],
-  ): Mav = {
+  ): Mav = transactional() {
     command.apply()
     success
   }

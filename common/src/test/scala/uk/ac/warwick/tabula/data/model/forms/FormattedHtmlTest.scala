@@ -16,7 +16,7 @@ class FormattedHtmlTest extends TestBase {
       			""".stripMargin
     val output = formatter.formattedHtml(input)
 
-    output.trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it</p>")
+    output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it</p>")
   }
 
   @Test
@@ -24,7 +24,7 @@ class FormattedHtmlTest extends TestBase {
     val input = "Here is your feedback."
     val output = formatter.formattedHtml(input)
 
-    output.trim should be("<p>Here is your feedback.</p>")
+    output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>")
   }
 
   @Test
@@ -35,7 +35,7 @@ class FormattedHtmlTest extends TestBase {
     // TAB-6685 changed &quot; to &#34;
     // they are the same thing, and &quot; is preferred, but OWASP sanitiser preferred the latter, so i have to chenge this test case
     // this does not technically affect the purpose of this test tho
-    output.trim should be("<p>&lt;a href&#61;&#34;<a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf</a>&#34;&gt;View Generic Feedback&lt;/a&gt;</p>")
+    output.getOutputFormat.getMarkupString(output).trim should be("<p>&lt;a href&#61;&#34;<a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf</a>&#34;&gt;View Generic Feedback&lt;/a&gt;</p>")
   }
 
   @Test
@@ -50,7 +50,7 @@ class FormattedHtmlTest extends TestBase {
       			""".stripMargin
     val output = formatter.formattedHtml(input)
 
-    output.trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it.</p>\n<p><a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">View Generic Feedback</a></p>")
+    output.getOutputFormat.getMarkupString(output).trim should be("<p>Here is your feedback.</p>\n<p>I hope you like it.</p>\n<p><a href=\"http://www2.warwick.ac.uk/fac/soc/economics/current/shared/assessment-feedback/ec226_test_2_16-17.pdf\">View Generic Feedback</a></p>")
   }
 
 }

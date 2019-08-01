@@ -24,7 +24,7 @@
        data-hash="${introHash("sgt-import-events-splus", "anywhere")}"
        data-content="${helpText}"><i class="fa fa-fw fa-question-circle"></i></a>
   <#else>
-    <div class="use-tooltip"
+    <div tabindex="0" class="use-tooltip"
          title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
       <a class="btn btn-default disabled">
         Import events from Syllabus+

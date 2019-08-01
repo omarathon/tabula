@@ -39,11 +39,11 @@
       <#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
       <#if hasActiveExtension>
         <#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
-        <span class="time-remaining">${extension_time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
+        <span class="time-remaining">${extension_time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
         Extension deadline was <@fmt.date date=extension.expiryDate />
       <#else>
         <#assign latenesstooltip><#if isSelf>"<@sd.lateness submission assignment user />"<#else>"<@sd.lateness submission assignment student />"</#if></#assign>
-        <span class="time-remaining">${time_remaining} <span class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
+        <span class="time-remaining">${time_remaining} <span tabindex="0" class="label label-warning use-tooltip" title=${latenesstooltip} data-container="body">Late</span></span>
         Deadline was <@fmt.date date=assignment.closeDate />
       </#if>
     </p>

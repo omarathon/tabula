@@ -13,6 +13,8 @@
         <ul><#list releasedFeedback as markerFeedback>
         <li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul></#assign>
       <a class="use-popover"
+         data-trigger="click focus"
+         tabindex="0" role="button"
          data-html="true"
          data-original-title="<span class='text-info'><strong>Already released</strong></span>"
          data-content="${releasedFeedbackIds}">
@@ -32,6 +34,8 @@
         <ul><#list notReadyToMark as markerFeedback>
         <li>${markerFeedback.feedback.studentIdentifier}</li></#list></ul></#assign>
       <a class="use-popover"
+         data-trigger="click focus"
+         tabindex="0" role="button"
          data-html="true"
          data-original-title="<span class='text-info'><strong>Already released</strong></span>"
          data-content="${notReadyToMarkIds}">
@@ -53,6 +57,7 @@
     <div class="alert alert-info">
       ${count} not have a mark. You will not be able to add a mark for these students later.
       <a class="use-popover" id="popover-marks" data-html="true"
+         tabindex="0" role="button" data-trigger="click focus"
          data-original-title="<span class='text-info'><strong>No marks</strong></span>"
          data-content="${noMarksIds}">
         <i class="fa fa-question-sign"></i>
@@ -69,6 +74,8 @@
     <div class="alert alert-info">
       ${count} not have any feedback files attached. You will not be able to add feedback comments or files for this student later.
       <a class="use-popover" id="popover-files" data-html="true"
+         data-trigger="click focus"
+         tabindex="0" role="button"
          data-original-title="<span class='text-info'><strong>No feedback files</strong></span>"
          data-content="${noFilesIds}">
         <i class="fa fa-question-sign"></i>
@@ -85,6 +92,7 @@
     <div class="alert alert-info">
       ${count} not been given a mark. These students will not be sent to the ${nextStagesDescription?lower_case}.
       <a class="use-popover" id="popover-files" data-html="true" aria-label="Help"
+         tabindex="0" role="button" data-trigger="click focus"
          data-original-title="<span class='text-info'><strong>Not marked</strong></span>"
          data-content="${noContentIds}">
         <i class="fa fa-question-circle"></i>

@@ -130,7 +130,7 @@ class ExamGridColumnValueString(value: String, val isActual: Boolean = false) ex
 case class ExamGridColumnValueWithTooltip(value: String, actual: Boolean, message: String = "") extends ExamGridColumnValueString(value, actual) {
   override def toHTML: String =
     if (message.hasText)
-      s"""<span class="tabula-tooltip" data-title="$message">$value</span>"""
+      s"""<span class="tabula-tooltip" tabindex="0" data-title="$message">$value</span>"""
     else
       s"""<span>$value</span>"""
 }
@@ -203,7 +203,7 @@ case class ExamGridColumnValueOverrideString(value: String, override val isActua
 case class ExamGridColumnValueMissing(message: String = "") extends ExamGridColumnValueString("X", isActual = true) {
   override def toHTML: String =
     if (message.hasText)
-      s"""<span class="exam-grid-actual-mark tabula-tooltip" data-title="$message">X</span>"""
+      s"""<span class="exam-grid-actual-mark tabula-tooltip" tabindex="0" data-title="$message">X</span>"""
     else
       """<span class="exam-grid-actual-mark">X</span>"""
 

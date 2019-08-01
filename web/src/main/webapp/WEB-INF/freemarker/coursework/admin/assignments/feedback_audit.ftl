@@ -18,7 +18,7 @@
   <#list auditData.feedback.allMarkerFeedback as feedback>
     <#if feedback??>
       <div class="well">
-        <@fs.feedbackSummary feedback isModerated true/>
+        <@fs.markerFeedbackSummary feedback isModerated true/>
         <@fs.secondMarkerNotes feedback isModerated />
       </div>
     </#if>

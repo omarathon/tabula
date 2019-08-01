@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 
 <#macro groups_details timetabledEvent>
   <div class="set-info striped-section collapsible">
@@ -39,6 +39,7 @@
 
               <#local popoverContent><@components.timetableEventDetails event academicYear department /></#local>
               <a class="use-popover"
+                 tabindex="0" role="button" data-trigger="click focus"
                  data-html="true" aria-label="Help"
                  data-content="${popoverContent?html}"><i class="fa fa-question-circle"></i></a>
             </div>

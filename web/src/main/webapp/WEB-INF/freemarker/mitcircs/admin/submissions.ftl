@@ -1,4 +1,4 @@
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 <#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#escape x as x?html>
@@ -59,7 +59,7 @@
           <td data-sortby="${submission.lastModified.millis}">
             <@fmt.date date=submission.lastModified shortMonth=true excludeCurrentYear=true />
             <#if submission.unreadByOfficer>
-              <span class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
+              <span tabindex="0" class="tabula-tooltip" data-title="There are unread change(s)"><i class="far fa-envelope text-info"></i></span>
             </#if>
           </td>
         </tr>

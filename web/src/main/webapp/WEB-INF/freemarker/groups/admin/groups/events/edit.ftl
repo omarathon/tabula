@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
 
   <div class="pull-right">
     <#if syllabusPlusEventCount gt 0>
@@ -13,7 +13,7 @@
         Update from Syllabus+
       </a>
     <#else>
-      <div class=" use-tooltip"
+      <div tabindex="0" class=" use-tooltip"
            title="There are no scheduled small groups defined for <@fmt.module_name module false /> in Syllabus+, the central timetabling system">
         <a class="btn btn-default disabled">
           Import events from Syllabus+

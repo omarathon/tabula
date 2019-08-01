@@ -46,7 +46,7 @@ the comments textarea needs to maintain newlines.
              class="use-popover"
              data-title="Open-ended assignments"
              data-html="true"
-             data-trigger="hover"
+             data-trigger="hover focus"
              data-content="${popoverText}"
           ><i class="icon-question-sign"></i></a>
         </label>

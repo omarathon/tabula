@@ -49,7 +49,6 @@ class CommonFreemarkerSyntaxTest extends TestBase with Logging {
       "layouts/base-id-switch.ftl",
       "layouts/nonav-id-switch.ftl",
       "multiple_upload_help.ftl",
-      "errors/assignment_permissionDenied.ftl",
       "sysadmin/jobs/job-status-fragment.ftl",
       "cm2/admin/assignments/feedbackreport/job-status-fragment.ftl",
       "coursework/admin/assignments/feedbackreport/job-status-fragment.ftl",

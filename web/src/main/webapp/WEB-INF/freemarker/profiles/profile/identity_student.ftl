@@ -30,7 +30,7 @@
             </#if>
             <#if features.disabilityRenderingInProfiles && (member.disability.reportable)!false>
               <strong>Disability:</strong>
-              <a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true"
+              <a href="#" class="use-popover cue-popover" id="popover-disability" data-html="true" data-trigger="click focus"
                  data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${member.disability.code}</h6><small>${(member.disability.sitsDefinition)!}</small></div>"> ${member.disability.definition}</a>
               <br />
             </#if>
@@ -45,8 +45,8 @@
                   <#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
                 </#if>
                 Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
-                <a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
-							requirements apply to this student. (${inconsistency})" data-toggle="popover" aria-label="Help"><i class="fa fa-question-circle"></i></a>
+                <a tabindex="0" role="button" class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+							requirements apply to this student. (${inconsistency})" data-trigger="click focus" data-toggle="popover" aria-label="Help"><i class="fa fa-question-circle"></i></a>
               </#if>
               <br />
             </#if>
@@ -69,7 +69,7 @@
               <strong>Home department:</strong> ${member.homeDepartment.name}<br />
             </#if>
             <#if user.sysadmin>
-              <span class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
+              <span tabindex="0" class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
               <strong>Last import:</strong> <@fmt.date date=member.lastImportDate />
               <@f.form method="post" action="${url('/sysadmin/import-profiles')}" modelAttribute="" style="display: inline;">
                 <input type="hidden" name="members" value="${member.universityId}">
@@ -136,7 +136,7 @@
               </#if>
               <#if scyd.yearOfStudy??>
                 <strong>Study block or year:</strong> ${(scyd.yearOfStudy)!}
-                <i class="fa fa-question-circle text-primary use-tooltip"
+                <i tabindex="0" class="fa fa-question-circle text-primary use-tooltip"
                    title="An intake for a particular course or period of study. E.g. an undergraduate in their third year of study with no breaks is in block 3. A third-year undergraduate who temporarily withdrew for one year is in block 4."
                    data-placement="right"></i>
                 <br />
@@ -240,95 +240,6 @@
                  href="#note-modal"
                  data-url="<@routes.profiles.create_member_note member />"
                  title="Create new note"
-              >
-                Create new
-              </a>
-            </p>
-          </#if>
-        </div>
-      </div>
-    </section>
-  </#if>
-
-  <#if features.profilesCircumstances && (extenuatingCircumstances?has_content || canCreateMemberNote)>
-    <section class="circumstances">
-      <div class="row">
-        <div class="col-md-12">
-          <h2>Extenuating circumstances</h2>
-
-          <table class="table table-striped expanding-row-pairs">
-            <thead>
-            <tr>
-              <th>Created by</th>
-              <th>Dates</th>
-            </tr>
-            </thead>
-            <tbody>
-            <#list extenuatingCircumstances as circumstances>
-              <#assign canDeletePurgeCircumstances = can.do("MemberNotes.Delete", circumstances) />
-              <#assign canEditCircumstances = can.do("MemberNotes.Update", circumstances) />
-              <tr <#if circumstances.deleted>class="deleted subtle"</#if>>
-                <td>${(circumstances.creator.fullName)!"[Unknown]"} - Created: <@fmt.date date=circumstances.creationDate includeTime=true /></td>
-                <td>
-                  <#if canEditCircumstances>
-                    <div class="pull-right">
-                      <i class="fa fa-spinner fa-spin invisible"></i>
-                      <span class="dropdown">
-												<a class="btn btn-default btn-xs dropdown-toggle" href="#" data-toggle="dropdown">Actions <span class="caret"></span></a>
-												<ul class="dropdown-menu pull-right">
-													<li>
-														<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.profiles.edit_circumstances circumstances />"
-                               class="edit <#if circumstances.deleted>disabled</#if>" title="Edit extenuating circumstances">Edit</a>
-													</li>
-													<#if canDeletePurgeCircumstances>
-                            <li>
-															<a href="<@routes.profiles.delete_circumstances circumstances />"
-                                 class="delete <#if circumstances.deleted>disabled</#if>">Delete</a>
-														</li>
-                            <li>
-															<a href="<@routes.profiles.restore_circumstances circumstances />" class="restore <#if !circumstances.deleted>disabled</#if>">Restore</a>
-														</li>
-                            <li>
-															<a href="<@routes.profiles.purge_circumstances circumstances />"
-                                 class="purge <#if !circumstances.deleted>disabled</#if>">Purge</a>
-														</li>
-                          </#if>
-												</ul>
-											</span>
-                    </div>
-                  </#if>
-                  ${circumstances.startDate.toDate()?string("dd/MM/yy")} - ${circumstances.endDate.toDate()?string("dd/MM/yy")}
-                </td>
-              </tr>
-              <tr>
-                <td colspan="2">
-                  <#if circumstances.note??>
-                    <#noescape>${circumstances.escapedNote}</#noescape>
-                  </#if>
-                  <#if circumstances.attachments?has_content>
-                    <ul class="deleted-files ${circumstances.deleted?string("","hidden")}">
-                      <#list circumstances.attachments as file>
-                        <li class="muted deleted">${file.name}</li>
-                      </#list>
-                    </ul>
-                    <#assign mbDownloadUrl><@routes.profiles.download_circumstances_attachment circumstances /></#assign>
-                    <div class="deleted-files ${circumstances.deleted?string('hidden','')}">
-                      <@fmt.download_attachments circumstances.attachments mbDownloadUrl />
-                    </div>
-                  </#if>
-                </td>
-              </tr>
-            </#list>
-            </tbody>
-          </table>
-          <#if canCreateMemberNote>
-            <p>
-              <a class="btn btn-primary create"
-                 data-toggle="modal"
-                 data-target="#note-modal"
-                 href="#note-modal"
-                 data-url="<@routes.profiles.create_circumstances member />"
-                 title="Create new extenuating circumstances"
               >
                 Create new
               </a>

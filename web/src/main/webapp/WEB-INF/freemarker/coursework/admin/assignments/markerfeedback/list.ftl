@@ -60,7 +60,7 @@
                 <span class="label label-info">Unsubmitted</span>
               <#else>
                 <#if item.submission.late>
-                  <span class="label label-important use-tooltip" title="<@sd.lateness item.submission />" data-container="body">Late</span>
+                  <span tabindex="0" class="label label-important use-tooltip" title="<@sd.lateness item.submission />" data-container="body">Late</span>
                 </#if>
                 <#if thisFeedback.state.toString == "ReleasedForMarking">
                   <#if isModeration>

@@ -18,7 +18,7 @@
 
       <div class="well ${widthClass}">
 
-        <@fs.feedbackSummary feedback isModerated/>
+        <@fs.markerFeedbackSummary feedback isModerated/>
 
         <#if (allCompletedMarkerFeedback?size > 1 && (feedback.hasComments || feedback.hasContent) && !isCompleted)>
           <div class="copy-comments">

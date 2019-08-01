@@ -116,9 +116,9 @@ first page of the form to setup a bunch of assignments from SITS.
           <tr>
             <th class="for-check-all"><input type="checkbox" checked="checked" class="collection-check-all use-tooltip" title="Select all/none"></th>
             <th>Module</th>
-            <th><abbr title="Component type" class="use-tooltip">Type</abbr></th>
-            <th><abbr title="Sequence" class="use-tooltip">Seq</abbr></th>
-            <th><abbr title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
+            <th><abbr tabindex="0" title="Component type" class="use-tooltip">Type</abbr></th>
+            <th><abbr tabindex="0" title="Sequence" class="use-tooltip">Seq</abbr></th>
+            <th><abbr tabindex="0" title="Occurrence/Cohort" class="use-tooltip">Occ</abbr></th>
             <th>Component name</th>
             <#if step="options">
               <th></th>

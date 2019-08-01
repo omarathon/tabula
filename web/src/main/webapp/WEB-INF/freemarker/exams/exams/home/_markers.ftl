@@ -4,7 +4,7 @@
 
     <#if !exam.released>
       <div class="pull-right btn-group">
-        <a class="btn btn-primary disabled use-tooltip" data-title="You'll be able to mark this exam when an administrator releases it for marking."
+        <a tabindex="0" role="button" class="btn btn-primary disabled use-tooltip" data-title="You'll be able to mark this exam when an administrator releases it for marking."
            data-container="body">Mark</a>
       </div>
     <#else>

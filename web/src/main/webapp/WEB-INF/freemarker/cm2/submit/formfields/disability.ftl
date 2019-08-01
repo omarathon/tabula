@@ -2,7 +2,7 @@
   <@bs3form.labelled_form_group "useDisability">
     <@bs3form.label path="useDisability" for="useDisability">
       Show disability
-      <i class="text-primary fa fa-info-circle use-popover" data-html="true"
+      <i tabindex="0" role="button" class="text-primary fa fa-info-circle use-popover" aria-label="Show disability popover" data-html="true" data-trigger="click focus"
          data-content="<p>You have self-reported the following disability code:</p><div class='well'><h6>${disability.code}</h6>${(disability.sitsDefinition)!}</div>"></i>
     </@bs3form.label>
     <@form.field>

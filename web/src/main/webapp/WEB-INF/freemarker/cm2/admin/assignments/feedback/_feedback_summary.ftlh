@@ -1,4 +1,4 @@
-<#macro feedbackSummary stage markerFeedback>
+<#macro markerFeedbackSummary stage markerFeedback>
   <div class="well">
     <div class="feedback-summary-heading">
       <h3>${stage.description}'s feedback</h3>
@@ -77,4 +77,75 @@
       </#if>
     </div>
   </div>
+</#macro>
+
+<#macro feedbackSummary feedback>
+  <div class="well">
+    <div class="feedback-summary-heading">
+      <h3>Feedback</h3>
+      <#if feedback.updatedDate??>
+        <h5>
+          Added <@fmt.date feedback.updatedDate />
+        </h5>
+      </#if>
+    </div>
+
+    <div class="feedback-details">
+        <#if feedback.actualMark?has_content || feedback.actualGrade?has_content>
+          <div class="mark-grade">
+            <div>
+              <div class="mg-label">
+                Mark:
+              </div>
+              <div>
+                <span class="mark">${feedback.actualMark!""}</span>
+                <span>%</span>
+              </div>
+              <div class="mg-label">
+                Grade:
+              </div>
+              <div class="grade">${feedback.actualGrade!""}</div>
+            </div>
+          </div>
+        <#else>
+          <h5>No mark or grade added.</h5>
+        </#if>
+
+        <#local hasFeedback = false>
+        <#list assignment.feedbackFields as field>
+            <#list feedback.customFormValues as fv>
+                <#if fv.name == field.name>
+                    <#local formValue = fv>
+                    <#break>
+                </#if>
+            </#list>
+
+            <#if formValue?? && formValue.value?has_content>
+                <#local hasFeedback = true>
+              <div class="feedback-comments">
+                <h5>${field.label!field.name}</h5>
+                <p>${formValue.valueFormattedHtml!""}</p>
+              </div>
+            </#if>
+        </#list>
+
+        <#if !hasFeedback>
+          <h5>No feedback comments added.</h5>
+        </#if>
+    </div>
+
+      <#if feedback.attachments?has_content >
+        <div class="feedback-attachments attachments">
+          <h5>Attachments</h5>
+          <div>
+              <#assign downloadMFUrl><@routes.cm2.feedbackFilesDownload feedback/></#assign>
+              <@fmt.download_attachments feedback.attachments downloadMFUrl "for ${stage.description?uncap_first}" "feedback-${feedback.feedback.studentIdentifier}" />
+              <#list feedback.attachments as attachment>
+                <input value="${attachment.id}" name="${attachment.name}" type="hidden" />
+              </#list>
+          </div>
+        </div>
+      </#if>
+    <div style="clear: both;"></div>
+    </div>
 </#macro>

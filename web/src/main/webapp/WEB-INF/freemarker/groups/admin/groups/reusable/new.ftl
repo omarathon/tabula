@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#escape x as x?html>
   <h1>Create a set of reusable small groups</h1>
 

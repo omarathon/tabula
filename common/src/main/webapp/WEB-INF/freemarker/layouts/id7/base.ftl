@@ -307,7 +307,7 @@
   </script>
 </#if>
 
-<div class="modal global-error-modal fade" id="global-error-modal-${errorToken}" data-errorToken=${errorToken} aria-labelledby="error-modal-title-${errorToken}" aria-hidden="true">
+<@modal.modal cssClass="global-error-modal" id="global-error-modal-${errorToken}" ariaLabelledby="error-modal-title-${errorToken}">
     <@modal.wrapper>
         <@modal.header>
           <h6 class="modal-title" id="error-modal-title-${errorToken}">Tabula has encountered a problem</h6>
@@ -319,7 +319,7 @@
           <a class="btn btn-primary" data-dismiss="modal">Close</a>
         </@modal.footer>
     </@modal.wrapper>
-</div>
+</@modal.modal>
 </body>
 </html>
 </#escape>

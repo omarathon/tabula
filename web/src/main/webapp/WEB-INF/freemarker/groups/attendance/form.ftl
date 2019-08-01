@@ -228,7 +228,7 @@
                 </button>
               </#local>
 
-              <a class="use-popover" data-container="body" data-content="${popoverText}" data-html="true" href="#">
+              <a class="use-popover" data-container="body" data-content="${popoverText}" data-html="true" href="#" data-trigger="click focus">
                 Manually added
               </a>
             </#if>
@@ -302,7 +302,7 @@
                     <a href="#"
                        class="use-popover"
                        data-title="Adding a student not normally present to an event occurrence"
-                       data-trigger="click"
+                       data-trigger="click focus"
                        data-placement="bottom"
                        data-html="true"
                        data-content="${helpText}"><i class="icon-question-sign icon-fixed-width"></i></a>
@@ -318,11 +318,13 @@
                       <p><i class="fa fa-check fa-fw attended"></i> Attended</p>
                     </#assign>
 										<a class="use-popover"
+                       tabindex="0" role="button"
                        aria-label="Help"
                        data-title="Key"
                        data-placement="bottom"
                        data-container="body"
                        data-content='${popoverContent}'
+                       data-trigger="click focus"
                        data-html="true"><#compress>
 											<i class="fa fa-question-circle"></i>
                       </#compress></a>

@@ -1,4 +1,4 @@
-<#import "*/group_components.ftl" as components />
+<#import "*/group_components.ftlh" as components />
 <#escape x as x?html>
   <#if sets?has_content>
   <#-- This is the big list of sets -->

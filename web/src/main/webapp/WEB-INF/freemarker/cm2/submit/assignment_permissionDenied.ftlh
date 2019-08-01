@@ -1,5 +1,4 @@
 <#import "*/cm2_macros.ftl" as cm2 />
-<#escape x as x?html>
   <#compress>
     <@cm2.assignmentHeader "Submit assignment" assignment "for" />
 
@@ -51,14 +50,13 @@
         <#assign button_text>Request access for <strong>${user.fullName}</strong> (you)</#assign>
 
         <#if has_requested_access>
-          <a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
+          <a href="#" class="btn disabled">${button_text?no_esc}</a>
         <#else>
-          <form action="<@routes.cm2.assignmentrequestaccess assignment />" method="POST">
-            <button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
-          </form>
+          <#assign formAction><@routes.cm2.assignmentrequestaccess assignment /></#assign>
+          <@f.form action=formAction?markup_string method="POST">
+            <button class="btn" type="submit">${button_text?no_esc}</button>
+          </@f.form>
         </#if>
       </#if>
     </#if>
-
   </#compress>
-</#escape>

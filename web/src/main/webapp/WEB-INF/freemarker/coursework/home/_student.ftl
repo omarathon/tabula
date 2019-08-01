@@ -11,7 +11,7 @@
       <#if ajax></h4>
     <#else></h2></#if>
     <#if isSelf>
-      <span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom"
+      <span tabindex="0" class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom"
             data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
     </#if>
   </div>
@@ -142,12 +142,12 @@
               <#if hasSubmission>
                 Submitted <@fmt.date date=submission.submittedDate />
                 <#if submission.late>
-                  <span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
+                  <span tabindex="0" class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
                 <#elseif submission.authorisedLate>
-                  <span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+                  <span tabindex="0" class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
                 </#if>
               <#elseif isFormative>
-                <span class="label use-tooltip"
+                <span tabindex="0" class="label use-tooltip"
                       title="Formative assignments do not contribute to <#if isSelf>your<#else>a student's</#if> module grade or mark. They provide an opportunity to feedback and/or evaluate <#if isSelf>your<#else>a student's</#if> learning.">Formative, no submission</span>
               </#if>
             </div>

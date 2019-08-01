@@ -1,6 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 <#import "mitcirc_form_macros.ftl" as mitcirc />
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 
 <@mitcirc.identity_section student />
 
@@ -66,7 +66,7 @@
         <option value="">No, this does not relate to a previous submission</option>
         <#list previousSubmissions as submission>
           <#assign label>MIT-${submission.key} <#if submission.issueTypes?has_content><#list submission.issueTypes as type>${type.description}<#if type_has_next>, </#if></#list></#if></#assign>
-          <@f.option value="${submission.key}" label="${label}" />
+          <@f.option value="${submission.key}" label="${label?markup_string}" />
         </#list>
       </@f.select>
       <@bs3form.errors path="relatedSubmission" />
@@ -211,6 +211,7 @@
     <@bs3form.radio_inline>
       <@f.radiobutton path="contacted" value="false" /> No
     </@bs3form.radio_inline>
+    <@bs3form.errors path="contacted" />
   </div>
   <div class="mitcircs-form__fields__contact-subfield mitcircs-form__fields__contact-subfield--yes" style="display: none;">
     <#if personalTutors?has_content>

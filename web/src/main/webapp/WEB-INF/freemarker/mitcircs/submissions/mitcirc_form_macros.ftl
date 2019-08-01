@@ -47,7 +47,7 @@
       <legend>
         <#if showNumber>${questionNumber}.</#if> ${question}
         <#if helpPopover?has_content>
-          <a class="help-popover use-popover tabulaPopover-init" id="popover-evidence" data-html="true" data-placement="left" data-content="${helpPopover}" data-container="body" aria-label="Help" data-original-title="" title="">
+          <a tabindex="0" role="button" class="help-popover use-popover tabulaPopover-init" id="popover-evidence" data-html="true" data-placement="left" data-content="${helpPopover}" data-container="body" aria-label="Help" data-trigger="click focus" data-original-title="" title="">
             <i class="icon-question-sign fa fa-question-circle"></i>
           </a>
         </#if>

@@ -62,7 +62,7 @@
                 <a href="${record_url}" class="btn btn-primary btn-sm <#if !canRecordAny>disabled</#if>">Record</a>
               </div>
               ${groupedPoint.templatePoint.name}
-              (<span class="use-tooltip" data-html="true" title="
+              (<span tabindex="0" class="use-tooltip" data-html="true" title="
 							<@fmt.wholeWeekDateFormat
               groupedPoint.templatePoint.startWeek
               groupedPoint.templatePoint.endWeek
@@ -81,7 +81,7 @@
                   </#list>
                 </ul>
               </#assign>
-              <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+              <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="right">
                 <@fmt.p groupedPoint.schemes?size "scheme" />
               </a>
             </div>
@@ -106,7 +106,7 @@
                   </#list>
                 </ul>
               </#assign>
-              <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="right">
+              <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="right">
                 <@fmt.p groupedPoint.schemes?size "scheme" />
               </a>
             </div>

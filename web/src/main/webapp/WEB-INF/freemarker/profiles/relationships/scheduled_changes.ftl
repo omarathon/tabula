@@ -29,7 +29,7 @@
                 <td>
                   <#if readOnly>
                   <#assign studentDepartment=studentCourseDetails.department />
-                  <div class="use-tooltip" data-html="true" data-container="body"
+                  <div tabindex="0" class="use-tooltip" data-html="true" data-container="body"
                        data-title="This change can be managed from the student's profile page or from within the ${studentDepartment.name} department.">
                     </#if>
                     <@bs3form.selector_check_row
@@ -102,6 +102,7 @@
                       type="button"
                       class="btn btn-primary use-popover"
                       data-html="true"
+                      data-trigger="click focus"
                       data-title="Apply selected changes now"
                       data-content="${apply_popover}"
               >
@@ -113,6 +114,7 @@
                       type="button"
                       class="btn btn-default use-popover"
                       data-html="true"
+                      data-trigger="click focus"
                       data-title="Cancel selected changes"
                       data-content="${cancel_popover}"
               >

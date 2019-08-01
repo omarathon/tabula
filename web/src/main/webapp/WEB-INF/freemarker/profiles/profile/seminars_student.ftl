@@ -1,4 +1,4 @@
-<#import "../../groups/group_components.ftl" as group_components />
+<#import "../../groups/group_components.ftlh" as group_components />
 <#escape x as x?html>
 
   <#if !isSelf>

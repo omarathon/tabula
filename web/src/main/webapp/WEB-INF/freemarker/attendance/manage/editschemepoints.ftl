@@ -9,9 +9,9 @@
   <div class="add-points-to-schemes fix-area">
 
     <p class="progress-arrows">
-      <span class="arrow-right use-tooltip" title="Edit properties"><a
+      <span tabindex="0" class="arrow-right use-tooltip" title="Edit properties"><a
                 href="<@routes.attendance.manageEditScheme findCommand.department findCommand.academicYear scheme />">Properties</a></span>
-      <span class="arrow-right arrow-left use-tooltip" title="Edit students"><a
+      <span tabindex="0" class="arrow-right arrow-left use-tooltip" title="Edit students"><a
                 href="<@routes.attendance.manageEditSchemeStudents findCommand.department findCommand.academicYear scheme />">Students</a></span>
       <span class="arrow-right arrow-left active">Points</span>
     </p>

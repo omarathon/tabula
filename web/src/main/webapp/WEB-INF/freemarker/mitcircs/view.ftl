@@ -1,4 +1,4 @@
-<#import "*/mitcircs_components.ftl" as components />
+<#import "*/mitcircs_components.ftlh" as components />
 <#assign canModify = can.do("MitigatingCircumstancesSubmission.Modify", submission) />
 <#assign isSelf = submission.student.universityId == user.universityId />
 

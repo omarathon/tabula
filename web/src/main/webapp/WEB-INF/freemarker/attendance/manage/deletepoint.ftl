@@ -12,7 +12,7 @@
 
   <p>
     You are deleting this point on
-    <a href="#" class="use-popover" data-content="${popoverContent}" data-html="true" data-placement="top">
+    <a href="#" class="use-popover" data-trigger="click focus" data-content="${popoverContent}" data-html="true" data-placement="top">
       <@fmt.p command.schemesToEdit?size "scheme" />:
     </a>
   </p>

@@ -1,12 +1,12 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
 
   <#if nonempty(sets?keys)>
     <@components.single_module_attendance_contents module sets />
 
     <script nonce="${nonce()}">
       jQuery('.use-popover').tabulaPopover({
-        trigger: 'click',
+        trigger: 'click focus',
         container: 'body'
       });
     </script>

@@ -73,6 +73,7 @@
             <#if isCurrentYearOrLater>
               <a class="btn btn-default" href="<@routes.cm2.reusableWorkflowEdit department academicYear workflow/>">Modify</a>
               <a <#if inUse>
+                tabindex="0" role="button"
                 disabled="disabled"
                 class="btn btn-default use-tooltip"
                 data-toggle=""

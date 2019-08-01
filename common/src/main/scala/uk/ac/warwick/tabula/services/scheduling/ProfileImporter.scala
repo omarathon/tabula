@@ -13,7 +13,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.scheduling.imports._
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{AutowiringMemberDaoComponent, Daoisms}
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -29,6 +30,9 @@ import scala.collection.JavaConverters._
 import scala.collection.immutable.IndexedSeq
 import scala.util.Try
 
+object MembershipInformation {
+  def apply(member: Member): MembershipInformation = new MembershipInformation(MembershipMember(member), None)
+}
 case class MembershipInformation(member: MembershipMember, sitsApplicantInfo: Option[SitsApplicantInfo] = None)
 
 trait ProfileImporter {
@@ -58,7 +62,7 @@ trait ProfileImporter {
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
+class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware with AutowiringMemberDaoComponent {
 
   import ProfileImporter._
 
@@ -123,9 +127,9 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
     }.toSeq
   }
 
-  def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] =
-  // Magic student recruitment department - get membership information directly from SITS for applicants
-    if (department.code == applicantDepartmentCode) {
+  def membershipInfoByDepartment(department: Department): Seq[MembershipInformation] = {
+    val fimMembers = if (department.code == applicantDepartmentCode) {
+      // Magic student recruitment department - get membership information directly from SITS for applicants
       val members = applicantQuery.execute().asScala
       val universityIds = members.map { case (membershipInfo, _) => membershipInfo.universityId }
 
@@ -138,11 +142,21 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
       members
         .filterNot { case (m, _) => universityIdsInMembership.contains(m.universityId) }
         .map { case (m, a) => MembershipInformation(m, Some(a)) }
-    } else {
-      membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
-        MembershipInformation(member)
+      } else {
+        membershipByDepartmentQuery.executeByNamedParam(Map("departmentCode" -> department.code.toUpperCase).asJava).asScala.map { member =>
+          MembershipInformation(member)
+        }
       }
+
+    val fimUniversityIds = fimMembers.map(_.member.universityId)
+    val tabulaActiveMembers = transactional(readOnly = true) {
+      memberDao.getActiveMembersByDepartment(department)
+        .filterNot(m => fimUniversityIds.contains(m.universityId))
+        .map(MembershipInformation.apply)
     }
+
+    fimMembers ++ tabulaActiveMembers
+  }
 
   def head(result: Any): Option[MembershipInformation] = result match {
     case result: List[MembershipMember@unchecked] => result.headOption.map(m => MembershipInformation(m))
@@ -724,6 +738,29 @@ object ProfileImporter extends Logging {
       new DateTime(_)
     }).orNull
 
+}
+
+object MembershipMember {
+  def apply(m: Member): MembershipMember= new MembershipMember(
+    universityId = m.universityId,
+    departmentCode = m.homeDepartment.code,
+    email = m.email,
+    targetGroup = null,
+    title = m.title,
+    preferredForenames = m.firstName,
+    preferredSurname = m.lastName,
+    position = m.jobTitle,
+    dateOfBirth = m.dateOfBirth,
+    usercode = m.userId,
+    startDate = null,
+    endDate = null,
+    modified = null,
+    phoneNumber = null,
+    gender = null,
+    alternativeEmailAddress = null,
+    userType = m.userType,
+    teachingStaff = null
+  )
 }
 
 case class MembershipMember(

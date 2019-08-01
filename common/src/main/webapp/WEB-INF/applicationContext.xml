@@ -31,6 +31,7 @@
   <context:component-scan base-package="uk.ac.warwick.tabula.notifications"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.columns"/>
   <context:component-scan base-package="uk.ac.warwick.tabula.exams.grids.documents"/>
+  <context:component-scan base-package="uk.ac.warwick.tabula.system"/>
 
   <!-- enable component scan for mywarwick service -->
   <context:component-scan base-package="uk.ac.warwick.util.mywarwick"/>
@@ -139,7 +140,6 @@
     <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
-    <bean class="uk.ac.warwick.tabula.data.convert.ExtenuatingCircumstancesIdConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
     <bean class="uk.ac.warwick.tabula.data.convert.UserConverter"/>
@@ -251,6 +251,7 @@
 
   <!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
   <bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor"/>
+  <bean id="csrfInterceptor" class="uk.ac.warwick.sso.client.CSRFInterceptor" p:reportOnlyMode="#{!${csrf.enforce}}" />
 
   <bean id="earlyRequestInfoInterceptor" class="uk.ac.warwick.tabula.system.EarlyRequestInfoInterceptor"/>
   <bean id="requestInfoInterceptor" class="uk.ac.warwick.tabula.system.RequestInfoInterceptor"/>
@@ -259,6 +260,22 @@
     <mvc:interceptor>
       <mvc:mapping path="/**"/>
       <ref bean="earlyRequestInfoInterceptor"/>
+    </mvc:interceptor>
+    <mvc:interceptor>
+      <mvc:mapping path="/**"/>
+      <mvc:exclude-mapping path="/static/*"/>
+      <mvc:exclude-mapping path="/favicon.ico"/>
+      <mvc:exclude-mapping path="*.ftl"/>
+      <mvc:exclude-mapping path="*.flth"/>
+      <mvc:exclude-mapping path="/error/*"/>
+      <mvc:exclude-mapping path="/test/*"/>
+      <mvc:exclude-mapping path="/service/*"/>
+      <mvc:exclude-mapping path="/csp-report"/>
+      <mvc:exclude-mapping path="/errors/js"/>
+      <!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->
+      <mvc:exclude-mapping path="/profiles/timetable/ical"/>
+      <mvc:exclude-mapping path="/profiles/timetable/ical/*"/>
+      <ref bean="csrfInterceptor" />
     </mvc:interceptor>
     <mvc:interceptor>
       <mvc:mapping path="/**"/>
@@ -419,23 +436,6 @@
       <url-pattern>/*</url-pattern>
     </mapping>-->
     <mapping>
-      <filter ref="csrfFilter"/>
-      <url-pattern>/*</url-pattern>
-      <excluded-url-pattern>/static/*</excluded-url-pattern>
-      <excluded-url-pattern>/favicon.ico</excluded-url-pattern>
-      <excluded-url-pattern>*.ftl</excluded-url-pattern>
-      <excluded-url-pattern>*.ftlh</excluded-url-pattern>
-      <excluded-url-pattern>/error/*</excluded-url-pattern>
-      <excluded-url-pattern>/test/*</excluded-url-pattern>
-      <excluded-url-pattern>/service/*</excluded-url-pattern>
-      <excluded-url-pattern>/csp-report</excluded-url-pattern>
-      <excluded-url-pattern>/errors/js</excluded-url-pattern>
-
-      <!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->
-      <excluded-url-pattern>/profiles/timetable/ical</excluded-url-pattern>
-      <excluded-url-pattern>/profiles/timetable/ical/*</excluded-url-pattern>
-    </mapping>
-    <mapping>
       <filter ref="staticContentHeadersFilter"/>
       <url-pattern>/static/*</url-pattern>
     </mapping>
@@ -444,7 +444,6 @@
   <import resource="filters-context.xml"/>
 
   <bean id="forceLoginFilter" class="uk.ac.warwick.sso.client.ForceLoginFilter"/>
-  <bean id="csrfFilter" class="uk.ac.warwick.sso.client.CSRFFilter" p:reportOnlyMode="true" />
   <bean id="staticContentHeadersFilter" class="uk.ac.warwick.tabula.web.filters.StaticContentHeadersFilter"/>
 
   <bean id="postDataLoggingFilter" class="uk.ac.warwick.tabula.web.filters.PostDataLoggingFilter"/>
@@ -609,6 +608,7 @@
             <value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
             <value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
             <value>uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheBusterMessage</value>
+            <value>uk.ac.warwick.tabula.services.CsrfEnforceMessage</value>
           </list>
         </property>
       </bean>

@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
   <h1>Edit reusable small groups: ${smallGroupSet.name}</h1>
 
   <@f.form id="editGroups" method="POST" modelAttribute="command">

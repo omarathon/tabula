@@ -1,5 +1,5 @@
 <#escape x as x?html>
-  <#import "*/group_components.ftl" as components />
+  <#import "*/group_components.ftlh" as components />
   <#import "/WEB-INF/freemarker/modal_macros.ftlh" as modal />
 
   <h1>Attendance for <@fmt.module_name module /></h1>

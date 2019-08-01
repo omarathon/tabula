@@ -1,7 +1,7 @@
 <#ftl strip_text=true />
 
 <#macro wizard_link label is_first is_active is_available tooltip="" url="">
-  <span class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
+  <span tabindex="0" class="arrow-right<#if !is_first> arrow-left</#if><#if is_active> active</#if><#if is_available && !is_active> use-tooltip</#if>"
         <#if is_available && !is_active>title="${tooltip}"</#if>><#compress>
 	<#if is_available && !is_active>
       <a href="${url}">${label}</a>
