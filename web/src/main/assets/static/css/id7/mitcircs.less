@@ -253,6 +253,8 @@
   }
 
   &__section {
+    overflow: hidden; // TAB-7496 is unlikely to happen in practice. Just hide any overflow.
+
     div.control-label, summary.control-label, .content {
       padding-left: @grid-gutter-width / 2;
     }
