@@ -110,7 +110,7 @@ trait BulkAttendanceNoteDescription extends Describable[Seq[AttendanceMonitoring
   }
 
   override def describeResult(d: Description, result: Seq[AttendanceMonitoringNote]) {
-    d.property("note", result.head.escapedNote)
+    d.property("note", result.head.note)
   }
 }
 
