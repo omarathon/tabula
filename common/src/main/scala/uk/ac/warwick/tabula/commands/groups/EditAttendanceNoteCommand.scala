@@ -104,7 +104,7 @@ trait AttendanceNoteDescription extends Describable[SmallGroupEventAttendanceNot
   }
 
   override def describeResult(d: Description, result: SmallGroupEventAttendanceNote) {
-    d.property("note", result.escapedNote)
+    d.property("note", result.note)
   }
 }
 
