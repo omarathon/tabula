@@ -65,7 +65,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  final var creator: User = _ // the user that created this
+  var creator: User = _ // the user that created this
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
