@@ -35,7 +35,7 @@ class FileAttachment extends GeneratedId {
   var hash: String = _
 
   // optional link to a SubmissionValue
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "submission_id")
   var submissionValue: SavedFormValue = _
 
@@ -68,7 +68,7 @@ class FileAttachment extends GeneratedId {
 
 
   // optional link to MitigatingCircumstancesSubmission via MitCircsSubmissionAttachment
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinTable(name = "mitcircssubmissionattachment",
     joinColumns = Array(new JoinColumn(name = "file_attachment_id")),
     inverseJoinColumns = Array(new JoinColumn(name = "submission_id")))

@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import org.springframework.http.{HttpStatus, MediaType}
 import org.springframework.stereotype.Controller
@@ -43,10 +42,18 @@ abstract class AssignmentController extends ApiController
   with GetAssignmentApiFullOutput {
 
   @ModelAttribute("getCommand")
-  def getCommand(@PathVariable module: Module, @PathVariable assignment: Assignment): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
+  def getCommand(
+    @PathVariable module: Module,
+    @PathVariable assignment: Assignment,
+  ): Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults] =
     SubmissionAndFeedbackCommand(module, assignment)
 
-  def getAssignmentMav(command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, assignment: Assignment): Mav = {
+  def getAssignmentMav(
+    command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults],
+    errors: Errors,
+    assignment: Assignment,
+    options: Option[Seq[String]] = None,
+  ): Mav = {
     if (errors.hasErrors) {
       Mav(new JSONErrorView(errors))
     } else {
@@ -55,7 +62,7 @@ abstract class AssignmentController extends ApiController
       Mav(new JSONView(Map(
         "success" -> true,
         "status" -> "ok"
-      ) ++ outputJson(assignment, results)))
+      ) ++ outputJson(assignment, results, options.getOrElse(Nil))))
     }
   }
 }
@@ -67,16 +74,6 @@ abstract class AssignmentController extends ApiController
   params = Array("!universityId"),
   produces = Array("application/json"))
 class GetAssignmentController extends AssignmentController with GetAssignmentApi with GetAssignmentApiFullOutput {
-  validatesSelf[SelfValidating]
-}
-
-@Controller
-@RequestMapping(
-  method = Array(RequestMethod.GET),
-  value = Array("/v2/module/{module}/assignments/{assignment}"),
-  params = Array("!universityId"),
-  produces = Array("application/json"))
-class GetAssignmentControllerV2 extends AssignmentController with GetAssignmentApi with GetAssignmentApiFullOutputV2 {
   validatesSelf[SelfValidating]
 }
 
@@ -112,10 +109,14 @@ trait GetAssignmentApi {
   self: AssignmentController with GetAssignmentApiOutput =>
 
   @RequestMapping(method = Array(GET), produces = Array("application/json"))
-  def getIt(@Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults], errors: Errors, @PathVariable assignment: Assignment): Mav = {
+  def getIt(
+    @Valid @ModelAttribute("getCommand") command: Appliable[SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults],
+    errors: Errors,
+    @PathVariable assignment: Assignment,
+    @RequestParam(value = "options", required = false) options: JList[String],
+  ): Mav = {
     // Return the GET representation
-    getAssignmentMav(command, errors, assignment)
-
+    getAssignmentMav(command, errors, assignment, Option(options).map(_.asScala.distinct))
   }
 
   @InitBinder(Array("getCommand"))
@@ -129,67 +130,35 @@ trait GetAssignmentApi {
 }
 
 trait GetAssignmentApiOutput {
-  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any]
+  def outputJson(
+    assignment: Assignment,
+    results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults,
+    options: Seq[String] = Nil,
+  ): Map[String, Any]
 }
 
 trait GetAssignmentApiFullOutput extends GetAssignmentApiOutput {
-  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
+  self: ApiController
+    with AssignmentToJsonConverter
+    with AssignmentStudentToJsonConverter =>
 
-  def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any] = Map(
-    "assignment" -> jsonAssignmentObject(assignment),
-    "genericFeedback" -> assignment.genericFeedback,
-    "students" -> results.students.map(jsonAssignmentStudentObject)
-  )
-}
-
-trait GetAssignmentApiFullOutputV2 extends GetAssignmentApiFullOutput {
-  self: ApiController with AssignmentToJsonConverter with AssignmentStudentToJsonConverter =>
-
-  override def outputJson(assignment: Assignment, results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults): Map[String, Any] ={
-    /**
-      * StudentAssignmentFeedback object
-      *
-      * id	A unique identifier for the feedback
-      * member universityId
-      * mark	The given mark for the feedback, or null
-      * grade	The given grade for the feedback, or null
-      * adjustments	An array of adjustments applied to the submission, including reason and comments
-      * genericFeedback	Feedback given to anybody who submitted to the assignment
-      * comments	Feedback given specifically to this student
-      * attachments	An array of JSON objects with two properties, id with a unique identifier and filename
-      * downloadZip	The URL that a student would go to to download all feedback attachments
-      * downloadPdf	The URL that a student would go to to download a PDF version of the feedback
-      */
-    val studentAssignmentFeedbacks: Seq[Map[String, Any]] = assignment.feedbacks.asScala.map { feedback =>
-      Map(
-        "id" -> feedback.id,
-        "member" -> feedback.universityId,
-        "mark" -> JInteger(feedback.latestMark),
-        "grade" -> feedback.latestGrade.orNull,
-        "adjustments" -> feedback.studentViewableAdjustments.map { mark =>
-          Map(
-            "reason" -> mark.reason,
-            "comments" -> mark.comments
-          )
-        },
-        "genericFeedback" -> assignment.genericFeedback,
-        "comments" -> feedback.comments.orNull,
-        "attachments" -> feedback.attachments.asScala.map { attachment =>
-          Map(
-            "filename" -> attachment.name,
-            "id" -> attachment.id
-          )
-        },
-        "downloadZip" -> (toplevelUrl + Routes.cm2.assignment.feedback(assignment)),
-        "downloadPdf" -> (toplevelUrl + Routes.cm2.assignment.feedbackPdf(assignment, feedback))
-      )
-    }
-
+  override def outputJson(
+    assignment: Assignment,
+    results: SubmissionAndFeedbackCommand.SubmissionAndFeedbackResults,
+    options: Seq[String] = Seq.empty,
+  ): Map[String, Any] = {
     Map(
       "assignment" -> jsonAssignmentObject(assignment),
       "genericFeedback" -> assignment.genericFeedback,
-      "studentAssignmentFeedbacks" -> studentAssignmentFeedbacks
-    )
+      "students" -> results.students.map { student =>
+        jsonAssignmentStudentObject(student)
+      }
+    ) ++ options.flatMap {
+      case "includeStudentAssignmentFeedbacks" => Some("studentAssignmentFeedbacks" -> assignment.feedbacks.asScala.map { f =>
+        StudentAssignmentInfoHelper.makeFeedbackInfo(f, toplevelUrl)
+      })
+      case _ => None
+    }.toMap
   }
 }
 

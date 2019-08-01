@@ -403,7 +403,7 @@ abstract class Feedback extends GeneratedId with FeedbackAttachments with Permis
     case None => false
   }
 
-  @OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade = Array(ALL))
+  @OneToMany(mappedBy = "feedback", fetch = FetchType.EAGER, cascade = Array(ALL))
   @BatchSize(size = 200)
   var attachments: JSet[FileAttachment] = JHashSet()
 
