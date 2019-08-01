@@ -22,7 +22,8 @@
       </#if>
     </div>
   </#if>
-  <form action="<@routes.reports.profileExportReport department academicYear />" method="post">
+  <#assign profileExportReportAction><@routes.reports.profileExportReport department academicYear /></#assign>
+  <@f.form action=profileExportReportAction method="post">
     <div class="pull-right">
       <input type="submit" class="btn btn-primary generate" disabled title="Use the checkboxes to select students"
              value="Generate reports on selected students" />
@@ -57,7 +58,7 @@
       </#list>
       </tbody>
     </table>
-  </form>
+  </@f.form>
   <script nonce="${nonce()}">
     jQuery(function ($) {
       $('table.students').sortableTable();
