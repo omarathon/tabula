@@ -41,7 +41,7 @@
   </div>
 
   <div class="report-target"></div>
-  <@f.form cssClass="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></@f.form>
+  <form class="report-target-form" style="display: none;" method="POST" action="" enctype="multipart/form-data"></form>
 
   <script nonce="${nonce()}">
     var progress = 10, stepProgress = function () {
