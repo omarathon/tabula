@@ -23,12 +23,13 @@
         <th style="width: 1px;">${feature.name}</th>
         <td>${feature.value?string}</td>
         <td>
-          <form id="${feature.name}_form" action="<@url page="/sysadmin/features"/>" method="POST">
+          <#assign featureFlagFormAction><@url page="/sysadmin/features"/></#assign>
+          <@f.form id="${feature.name}_form" action=featureFlagFormAction method="POST">
             <input type="hidden" name="name" value="${feature.name}">
             Set to
             <input type="submit" name="value" value="false" class="btn btn-default"> or
             <input type="submit" name="value" value="true" class="btn btn-default">
-          </form>
+          </@f.form>
         </td>
       </tr>
     </#list>
