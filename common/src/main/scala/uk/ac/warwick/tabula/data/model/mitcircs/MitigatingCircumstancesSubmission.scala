@@ -96,7 +96,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "department_id")
   var department: Department = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "relatedSubmission")
   var relatedSubmission: MitigatingCircumstancesSubmission = _
 

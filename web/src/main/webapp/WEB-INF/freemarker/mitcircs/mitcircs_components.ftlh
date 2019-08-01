@@ -343,7 +343,7 @@
   <#if submission.relatedSubmission??>
     <#assign relatedLabel>Related<#if !consise> submission</#if></#assign>
     <@detail label="${relatedLabel}" condensed=true bigLabel=consise>
-      <a href="<@routes.mitcircs.viewSubmission submission.relatedSubmission />">
+      <a href="<@routes.mitcircs.reviewSubmission submission.relatedSubmission />">
         MIT-${submission.relatedSubmission.key}
           <@enumListWithOther submission.relatedSubmission.issueTypes submission.relatedSubmission.issueTypeDetails!"" />
       </a>
