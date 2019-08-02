@@ -7,8 +7,9 @@ import freemarker.template.TemplateMethodModelEx
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
 import play.api.libs.json.Json
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.CspInterceptor._
-import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, EarlyRequestInfo, RequestInfo}
+import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, EarlyRequestInfo, Features, RequestInfo}
 
 import scala.collection.immutable.ListMap
 import scala.concurrent.duration._
@@ -19,6 +20,7 @@ object CspInterceptor {
 
 class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUrlComponent {
   lazy val cspReportUrl: String = s"$toplevelUrl/csp-report"
+  var features: Features = Wire[Features]
 
   def reportingRules(nonce: String): ListMap[String, Option[String]] =
     ListMap(
@@ -44,7 +46,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // My Warwick or web sign-on account popover, or campus map
       "frame-src" -> Some("'self' https://my.warwick.ac.uk https://websignon.warwick.ac.uk https://campus.warwick.ac.uk"),
 
-      // AJAX request for My Warwick alert unread count
+      // AJAX request for My Warwick alert unread count and campus-cms (per CLogS reports)
       "connect-src" -> Some("'self' https://my.warwick.ac.uk https://campus-cms.warwick.ac.uk"),
 
       "form-action" -> Some("'self'"),
@@ -107,10 +109,12 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "Content-Security-Policy-Report-Only",
       toHeaderString(reportingRules(nonce))
     )
-    response.setHeader(
-      "Content-Security-Policy",
-      toHeaderString(enforcingRules(nonce))
-    )
+    if (features.enforceCsp) {
+      response.setHeader(
+        "Content-Security-Policy",
+        toHeaderString(enforcingRules(nonce))
+      )
+    }
     response.setHeader(
       "Report-To",
       Json.stringify(Json.obj(
