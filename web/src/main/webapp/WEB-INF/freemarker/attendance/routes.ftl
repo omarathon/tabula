@@ -71,7 +71,10 @@
   <#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
   <@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/record${returnTo}"/>
 </#macro>
-<#macro profileOverwritePoint student point><@_u page="/profile/${student.universityId}/overwrite/${point.id}" /></#macro>
+<#macro profileOverwritePoint student point returnTo="">
+    <#local returnTo><#if returnTo?has_content>?returnTo=${returnTo?url}</#if></#local>
+    <@_u page="/profile/${student.universityId}/overwrite/${point.id}${returnTo}" />
+</#macro>
 <#macro profileMeetings student academicYear point><@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/${point.id}/meetings"/></#macro>
 <#macro profileGroups student academicYear point><@_u page="/profile/${student.universityId}/${academicYear.startYear?c}/${point.id}/groups"/></#macro>
 

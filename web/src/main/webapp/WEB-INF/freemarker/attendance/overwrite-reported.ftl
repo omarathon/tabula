@@ -50,6 +50,7 @@
         AttendanceRecording.bindButtonGroupHandler();
       </script>
 
+      <div class="fix-area">
       <div class="striped-section collapsible expanded">
         <h2 class="section-title with-contents">
           <a class="collapse-trigger icon-container" href="#"><#if monitoringPointReport??>
@@ -111,11 +112,12 @@
           </div>
         </div>
       </div>
+      </div>
 
       <div class="submit-buttons save-row">
         <input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
         <#if monitoringPointReport??>
-          <a class="btn btn-default dirty-check-ignore" href="<@routes.profiles.profile_attendance monitoringPointReport.studentCourseDetails monitoringPointReport.academicYear />">Cancel</a>
+          <a class="btn btn-default dirty-check-ignore" href="${returnTo}">Cancel</a>
         </#if>
       </div>
     </@f.form>

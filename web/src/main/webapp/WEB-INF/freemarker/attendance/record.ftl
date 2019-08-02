@@ -127,7 +127,7 @@
                       has already been uploaded to SITS e:Vision.
 
                       <#if can.do("MonitoringPoints.OverwriteReported", student)>
-                        <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point />"><span tabindex="0" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
+                        <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point returnTo />"><span tabindex="0" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
                       </#if>
                     </div>
                   <#else>
@@ -177,7 +177,7 @@
                       has already been uploaded to SITS e:Vision.
 
                       <#if can.do("MonitoringPoints.OverwriteReported", student)>
-                        <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point />"><span tabindex="0" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
+                        <a class="btn btn-default btn-xs" href="<@routes.attendance.profileOverwritePoint student point returnTo />"><span tabindex="0" class="tabula-tooltip" data-title="This operation is only available to sysadmins"><i class="fal fa-user-crown"></i></span> Overwrite</a>
                       </#if>
                     </div>
                   <#else>
