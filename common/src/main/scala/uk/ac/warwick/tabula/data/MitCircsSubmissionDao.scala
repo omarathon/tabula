@@ -130,7 +130,8 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     // MCOs can never see drafts
     c.add(isNot("_state", MitigatingCircumstancesSubmissionState.Draft))
 
-    c.distinct.seq.sortBy(_.lastModified).reverse
+    val submissions = c.distinct.seq.sortBy(_.lastModified).reverse
+    if(filter.isUnread) submissions.filter(_.isUnreadByOfficer) else submissions
   }
 
   override def getMessageById(id: String): Option[MitigatingCircumstancesMessage] = getById[MitigatingCircumstancesMessage](id)
@@ -172,4 +173,5 @@ case class MitigatingCircumstancesSubmissionFilter(
   approvedStartDate: Option[LocalDate] = None,
   approvedEndDate: Option[LocalDate] = None,
   state: Set[MitigatingCircumstancesSubmissionState] = Set.empty,
+  isUnread: Boolean = false
 )

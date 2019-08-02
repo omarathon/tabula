@@ -61,6 +61,7 @@ abstract class AdminHomeCommandInternal(val department: Department, val year: Ac
           approvedStartDate = Option(approvedStartDate),
           approvedEndDate = Option(approvedEndDate),
           state = state.asScala.toSet,
+          isUnread = isUnread,
         )
       ).map { submission =>
         val progress = workflowProgressService.progress(department)(submission)
@@ -108,6 +109,7 @@ trait AdminHomeCommandRequest extends FiltersStudents with AdminHomeCommandState
   var approvedStartDate: LocalDate = _
   var approvedEndDate: LocalDate = _
   var state: JList[MitigatingCircumstancesSubmissionState] = JArrayList()
+  var isUnread: Boolean = _
 
   override val defaultOrder: Seq[Order] = Seq(Order.desc("_lastModified"))
   override val sortOrder: JList[Order] = JArrayList() // Not used
