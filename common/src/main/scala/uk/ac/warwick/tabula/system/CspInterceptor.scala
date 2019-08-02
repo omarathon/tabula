@@ -67,7 +67,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
 
   def enforcingRules(nonce: String): ListMap[String, Option[String]] =
     ListMap(
-      "default-src" -> Some("*"),
+      "default-src" -> Some("* data:"),
 
       // Allow pretty much everything for now
       // ssl.google-analytics.com for GA
@@ -89,6 +89,9 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // No CLogS reports for violations of this directive
       "frame-ancestors" -> Some("'self'"),
 
+      // style-src, if this isn't here it defaults to the default-src which .. despite being * .. does not allow inlines
+      "style-src" -> Some("* data: 'unsafe-inline' 'report-sample'"),
+
       // see https://mathiasbynens.github.io/rel-noopener/
       "disown-opener" -> None,
 
@@ -96,7 +99,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "report-uri" -> Some(cspReportUrlEnforced),
 
       // CSPv3 report group
-      "report-to" -> Some("csp-reports-enforced")
+      "report-to" -> Some("csp-reports-enforced"),
     )
 
   override def preHandle(
