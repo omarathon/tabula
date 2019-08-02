@@ -6,7 +6,7 @@ import java.util.UUID
 import freemarker.template.TemplateMethodModelEx
 import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter
-import play.api.libs.json.Json
+import play.api.libs.json.{JsObject, Json}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.CspInterceptor._
 import uk.ac.warwick.tabula.{AutowiringTopLevelUrlComponent, EarlyRequestInfo, Features, RequestInfo}
@@ -20,6 +20,8 @@ object CspInterceptor {
 
 class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUrlComponent {
   lazy val cspReportUrl: String = s"$toplevelUrl/csp-report"
+  lazy val cspReportUrlEnforced: String = cspReportUrl + "?enforced=true"
+
   var features: Features = Wire[Features]
 
   def reportingRules(nonce: String): ListMap[String, Option[String]] =
@@ -62,7 +64,7 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       // CSPv3 report group
       "report-to" -> Some("csp-reports")
     )
-  
+
   def enforcingRules(nonce: String): ListMap[String, Option[String]] =
     ListMap(
       "default-src" -> Some("*"),
@@ -91,10 +93,10 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       "disown-opener" -> None,
 
       // CSPv2 report endpoint
-      "report-uri" -> Some(cspReportUrl+"?enforced=true"),
+      "report-uri" -> Some(cspReportUrlEnforced),
 
       // CSPv3 report group
-      "report-to" -> Some("csp-reports")
+      "report-to" -> Some("csp-reports-enforced")
     )
 
   override def preHandle(
@@ -115,17 +117,16 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
         toHeaderString(enforcingRules(nonce))
       )
     }
+    val reportGroupLifetime = 365.25.days.toSeconds
+
+    // "The header’s value is interpreted as a JSON-formatted
+    // array of objects without the outer [ and ]"
+    // Makes perfect sense.
+
     response.setHeader(
       "Report-To",
-      Json.stringify(Json.obj(
-        "group" -> "csp-reports",
-        "max_age" -> 365.25.days.toSeconds,
-        "endpoints" -> Json.arr(
-          Json.obj(
-            "url" -> cspReportUrl
-          )
-        )
-      ))
+      Json.stringify(generateReportingGroup("csp-reports", cspReportUrl, reportGroupLifetime)) +
+        ", " + Json.stringify(generateReportingGroup("csp-reports-enforced", cspReportUrlEnforced, reportGroupLifetime))
     )
 
     true // allow request to continue
@@ -136,6 +137,18 @@ class CspInterceptor extends HandlerInterceptorAdapter with AutowiringTopLevelUr
       case (k, Some(v)) => s"$k $v"
       case (k, _) => k
     }.mkString("; ")
+  }
+
+  def generateReportingGroup(groupName: String, url: String, maxAge: Long): JsObject = {
+    Json.obj(
+      "group" -> groupName,
+      "max_age" -> maxAge,
+      "endpoints" -> Json.arr(
+        Json.obj(
+          "url" -> url
+        )
+      )
+    )
   }
 }
 
