@@ -145,7 +145,7 @@ abstract class Features {
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
-  @Value("${features.enforceCsp:false}") var enforceCsp: Boolean = defaults.enforceCsp
+  @Value("${features.enforceCsp:true}") var enforceCsp: Boolean = defaults.enforceCsp
 
   private val bean = new BeanWrapperImpl(this)
 
