@@ -7,6 +7,7 @@
 
 import log from 'loglevel';
 import _ from 'lodash-es';
+import 'core-js/modules/web.dom-collections.for-each';
 import { postJsonWithCredentials } from '@universityofwarwick/serverpipe';
 
 let errors = [];
