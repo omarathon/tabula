@@ -14,9 +14,11 @@ import scala.concurrent._
 import scala.concurrent.duration.Duration
 import scala.collection.JavaConverters._
 
-trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen with PreMarkedAssignmentData {
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
-  val TEST_MODULE_CODE = "xxx02"
+  val TEST_MODULE_CODE = "xxx01"
+  val TEST_MODULE_CODE1 = "xxx02"
+
   val TEST_ROUTE_CODE = "xx456"
   val TEST_DEPARTMENT_CODE = "xxx"
   val TEST_COURSE_CODE = "Ux456"
@@ -27,9 +29,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     go to Path("/fixtures/setup")
     pageSource should include("Fixture setup successful")
 
-    if(cm1DataRequired) {
-      createPremarkedAssignment(TEST_MODULE_CODE)
-    }
+    createPremarkedCM2Assignment(TEST_MODULE_CODE1, "false")
     createPremarkedCM2Assignment(TEST_MODULE_CODE)
 
     val assessmentFuture = Future {
@@ -455,6 +455,3 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   }
 }
 
-trait PreMarkedAssignmentData {
-  def cm1DataRequired:Boolean = true
-}

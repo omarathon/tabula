@@ -5,17 +5,23 @@ import uk.ac.warwick.tabula.BrowserTest
 
 class DownloadSubmissionMarkerTest extends BrowserTest with CourseworkFixtures {
 
-  override def cm1DataRequired = false
   private def openMarkingScreen(): Unit = {
 
+    When("I select the relevant button on the CM2 assignment")
     //ensure page has loaded table elements otherwise wait.
     eventually {
-      id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
+      val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
+      click on testModulerow
     }
-    When("I select the relevant Review button on the CM2 assignment")
-    //ensure page has loaded table elements otherwise wait.
+
+    When("I expand Completed assignments")
+    val completedAssignmentsBlock = id("main").webElement.findElements(By.cssSelector("div#marker-completed")).get(0)
+    val arrow = completedAssignmentsBlock.findElement(By.cssSelector(".fa-chevron-right"))
+    click on arrow
+
+    Then("The completed assignments for marking should expand")
     eventually {
-      val reviewAssignmentBtn = id("main").webElement.findElements(By.cssSelector(".btn-block")).get(0)
+      val reviewAssignmentBtn = id("main").webElement.findElements(By.cssSelector(".btn-block")).get(1)
       reviewAssignmentBtn.getText should include("Review")
       click on reviewAssignmentBtn
     }

@@ -29,6 +29,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
   val userGroupDao: UserGroupDao = Wire[UserGroupDao]
 
   var moduleCode: String = _
+  var markingComplete: Boolean = _
 
   protected def applyInternal(): Assignment = {
     val module = moduleAndDepartmentService.getModuleByCode(moduleCode).getOrElse(
@@ -90,15 +91,18 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
         f.usercode = student.userId
         f.assignment = assignment
         f.uploaderId = "tabula-functest-admin1"
-        f.actualMark = Some(41)
+        f.actualMark = if (markingComplete) Some(41) else None
         val currentStage = singleMarkerWorkflow.initialStages.head
-        f.outstandingStages = currentStage.nextStages.toSet.asJava
-        feedbackService.saveOrUpdate(f)
 
         val mf = new MarkerFeedback(f)
         mf.marker = markersAUsers.head
         mf.stage = currentStage
-        mf.mark = Some(41)
+        if (markingComplete){
+          f.actualMark = Some(41)
+          mf.mark = Some(41)
+          f.outstandingStages = currentStage.nextStages.toSet.asJava
+        }
+
         feedbackService.saveOrUpdate(f)
         feedbackService.save(mf)
         f
