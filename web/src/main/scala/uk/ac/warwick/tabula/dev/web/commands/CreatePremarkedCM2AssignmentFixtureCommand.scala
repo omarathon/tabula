@@ -91,7 +91,6 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
         f.usercode = student.userId
         f.assignment = assignment
         f.uploaderId = "tabula-functest-admin1"
-        f.actualMark = if (markingComplete) Some(41) else None
         val currentStage = singleMarkerWorkflow.initialStages.head
 
         val mf = new MarkerFeedback(f)
