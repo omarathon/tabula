@@ -143,7 +143,7 @@ abstract class Features {
   @Value("${features.bulkModeration:false}") var bulkModeration: Boolean = defaults.bulkModeration
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
-  @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
+  @Value("${features.mitCircs:true}") var mitCircs: Boolean = defaults.mitCircs
   @Value("${features.acuteOutcomes:false}") var acuteOutcomes: Boolean = defaults.acuteOutcomes
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
 
@@ -283,7 +283,7 @@ class FeaturesMessage {
   @BeanProperty var bulkModeration = false
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
-  @BeanProperty var mitCircs = false
+  @BeanProperty var mitCircs = true
   @BeanProperty var acuteOutcomes = false
   @BeanProperty var renderStackTracesForAllUsers = false
 }
