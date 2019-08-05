@@ -280,6 +280,14 @@
             </div>
           </div>
         </fieldset>
+
+        <#if features.acuteOutcomes>
+          <@bs3form.checkbox path="enableAcuteOutcomes">
+              <@f.checkbox path="enableAcuteOutcomes" id="enableAcuteOutcomes" />
+            Enable acute outcomes
+          </@bs3form.checkbox>
+        </#if>
+
       </#if>
 
       <div class="fix-footer">
