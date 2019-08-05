@@ -2,15 +2,16 @@ package uk.ac.warwick.tabula.commands.coursework.assignments
 
 import java.util.concurrent.TimeoutException
 
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.coursework.assignments.ListSubmissionsCommand._
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Submission}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SubmissionService, SubmissionServiceComponent}
 import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryServiceComponent, AutowiringAuditEventQueryServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
@@ -25,6 +26,7 @@ object ListSubmissionsCommand {
       with ListSubmissionsRequest
       with ListSubmissionsPermissions
       with AutowiringAuditEventQueryServiceComponent
+      with AutowiringSubmissionServiceComponent
       with Unaudited with ReadOnly
 }
 
@@ -41,10 +43,10 @@ trait ListSubmissionsRequest extends ListSubmissionsState {
 abstract class ListSubmissionsCommandInternal(val module: Module, val assignment: Assignment)
   extends CommandInternal[Seq[SubmissionListItem]]
     with ListSubmissionsState {
-  self: ListSubmissionsRequest with AuditEventQueryServiceComponent =>
+  self: ListSubmissionsRequest with AuditEventQueryServiceComponent  with SubmissionServiceComponent =>
 
   override def applyInternal(): Seq[SubmissionListItem] = {
-    val submissions = assignment.submissions.asScala.sortBy(_.submittedDate).reverse
+    val submissions = submissionService.loadSubmissionsForAssignment(assignment).sortBy(_.submittedDate).reverse
     val downloads =
       if (checkIndex) try {
         Await.result(auditEventQueryService.adminDownloadedSubmissions(assignment, submissions), 15.seconds)

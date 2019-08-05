@@ -2,14 +2,23 @@ package uk.ac.warwick.tabula.api.web.helpers
 
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.coursework.assignments.SubmissionAndFeedbackCommand
+import uk.ac.warwick.tabula.data.model.AssignmentFeedback
 import uk.ac.warwick.tabula.data.model.forms.ExtensionState
 import uk.ac.warwick.tabula.{DateFormats, WorkflowStageHealth}
+
+import scala.collection.JavaConverters._
 
 trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
   self: AssignmentStudentMessageResolver with ApiController =>
 
   def jsonAssignmentStudentObject(student: SubmissionAndFeedbackCommand.Student): Map[String, Any] = {
     val userDetails = Map("universityId" -> student.user.getWarwickId)
+
+    // feedback ID -> assignment feedback
+    val assignmentFeedbacks: Map[String, AssignmentFeedback] = student.assignment.feedbacks.asScala.map { assignmentFeedback =>
+      assignmentFeedback.id -> assignmentFeedback
+    }.toMap
+
 
     val workflowDetails = Map(
       "state" -> Map(
@@ -58,12 +67,11 @@ trait AssignmentStudentToJsonConverter extends SubmissionToJsonConverter {
     val feedbackDetails = Map(
       "feedback" -> student.coursework.enhancedFeedback.map { enhancedFeedback =>
         val feedback = enhancedFeedback.feedback
-
         Map(
           "id" -> feedback.id,
           "downloaded" -> enhancedFeedback.downloaded,
           "onlineViewed" -> enhancedFeedback.onlineViewed
-        )
+        ) ++ assignmentFeedbacks.get(feedback.id).map(StudentAssignmentInfoHelper.makeFeedbackInfo(_, toplevelUrl)).getOrElse(Nil)
       }.orNull
     )
 

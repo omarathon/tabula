@@ -7,21 +7,24 @@ import uk.ac.warwick.tabula.services.elasticsearch.{AuditEventQueryService, Audi
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.{DateTime, DateTimeConstants, DateTimeZone}
+import org.mockito.Mockito.when
 import uk.ac.warwick.tabula.commands.coursework.assignments.{ListSubmissionsCommandInternal, ListSubmissionsRequest}
 import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.services.{AutowiringSubmissionServiceComponent, SecurityService, SubmissionService, SubmissionServiceComponent}
 
 // scalastyle:off magic.number
 class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
+  val mockSubmissionService: SubmissionService = mock[SubmissionService]
 
-  private trait CommandTestSupport extends Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest with AuditEventQueryServiceComponent {
+  private trait CommandTestSupport extends Appliable[Seq[SubmissionListItem]] with ListSubmissionsRequest with AuditEventQueryServiceComponent with SubmissionServiceComponent {
     self: CommandInternal[Seq[SubmissionListItem]] =>
 
     val auditEventQueryService: AuditEventQueryService = mock[AuditEventQueryService]
+    override def submissionService: SubmissionService = mockSubmissionService
 
     override def apply(): Seq[SubmissionListItem] = applyInternal()
   }
@@ -70,9 +73,10 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
     val command = new ListSubmissionsCommandInternal(assignment.module, assignment) with CommandTestSupport
 
     val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 10, 44)
-    command.assignment.submissions.addAll(Seq(
+
+    when(mockSubmissionService.loadSubmissionsForAssignment(assignment)) thenReturn Seq(
       submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
-    ).asJava)
+    )
 
     withUser("cusebr") {
       val result = controller.xml(command, assignment)
@@ -90,9 +94,10 @@ class OldSubmissionsInfoControllerTest extends TestBase with Mockito {
 
     val subDate = new DateTime(2012, DateTimeConstants.NOVEMBER, 27, 15, 44)
     assignment.id = "fakeassid"
-    command.assignment.submissions.addAll(Seq(
+
+    when(mockSubmissionService.loadSubmissionsForAssignment(assignment)) thenReturn Seq(
       submission(subDate, assignment, "0123456", Seq("Interesting helicopter.jpg"))
-    ).asJava)
+    )
 
     withUser("cusxad") {
       val actual = controller.csv(command).getAsString
