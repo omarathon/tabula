@@ -449,7 +449,7 @@
       // Every day we stray further from the light
       display: grid;
       grid-template-areas: "icon--student    filter--course-types               . filter--route               .                        filter--mode-of-attendance . filter--year-of-study . filter--spr-status"
-                           "icon--submission filter--affected-assessment-module . filter--state               .                        .                          . .                     . ."
+                           "icon--submission filter--affected-assessment-module . filter--state               .                        filter--unread                           . .                     . ."
                            ".                label--includes-start-date         . filter--includes-start-date label--includes-end-date filter--includes-end-date  . .                     . ."
                            ".                label--approved-start-date         . filter--approved-start-date label--approved-end-date filter--approved-end-date  . .                     . button--clear";
       grid-template-rows: repeat(4, min-content);
@@ -466,6 +466,7 @@
       &__filter--spr-status { grid-area: filter--spr-status; }
       &__filter--affected-assessment-module { grid-area: filter--affected-assessment-module; }
       &__filter--state { grid-area: filter--state; }
+      &__filter--unread { grid-area: filter--unread; }
       &__label--includes-start-date { grid-area: label--includes-start-date; }
       &__filter--includes-start-date { grid-area: filter--includes-start-date; }
       &__label--includes-end-date { grid-area: label--includes-end-date; }

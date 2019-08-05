@@ -120,6 +120,14 @@
               </@filters.filter>
             </span>
 
+            <span class="mitcircs-submission-filters__filter mitcircs-submission-filters__filter--unread">
+              <div class="checkbox">
+                <label>
+                  <input type="checkbox" name="isUnread" value="true"> Unread changes
+                </label>
+              </div>
+            </span>
+
             <label class="control-label mitcircs-submission-filters__label mitcircs-submission-filters__label--includes-start-date" for="includesStartDate">
               Affected dates from
             </label>
