@@ -313,7 +313,8 @@
           <h6 class="modal-title" id="error-modal-title-${errorToken}">Tabula has encountered a problem</h6>
         </@modal.header>
         <@modal.body>
-          There was an error handling your request, please try again. If the problem persists, please <a href="mailto:tabula@warwick.ac.uk?subject=Tabula%20has%20encountered%20a%20problem%20(error%20token:%20${errorToken})">contact us</a>.
+          <p>There was an error handling your request, please try again. If the problem persists, please <a href="mailto:tabula@warwick.ac.uk?subject=Tabula%20has%20encountered%20a%20problem%20(error%20token:%20${errorToken})">contact us</a></p>
+          <p>The token for this error is <strong>${errorToken}</strong></p>
         </@modal.body>
         <@modal.footer>
           <a class="btn btn-primary" data-dismiss="modal">Close</a>
