@@ -88,7 +88,7 @@
               </#if>
               <@modal.modal id="readyModal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
 
-              <#if submission.canRecordAcuteOutcomes>
+              <#if features.acuteOutcomes && submission.canRecordAcuteOutcomes>
                 <p><a href="<@routes.mitcircs.recordAcuteOutcomes submission />" class="btn btn-default btn-block">Record acute outcomes</a></p>
               </#if>
               <#if submission.canRecordOutcomes>

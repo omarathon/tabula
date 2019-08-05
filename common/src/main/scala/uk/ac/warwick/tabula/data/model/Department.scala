@@ -302,6 +302,9 @@ class Department extends GeneratedId
   def formattedMitCircsGuidance: TemplateHTMLOutputModel = formattedHtml(mitCircsGuidance.maybeText)
   def mitCircsGuidance_=(guidelines: String): Unit = settings += (Settings.MitCircsGuidance -> guidelines)
 
+  def enableAcuteOutcomes: Boolean = getBooleanSetting(Settings.EnableAcuteOutcomes, default = false)
+  def enableAcuteOutcomes_=(enabled: Boolean) { settings += (Settings.EnableAcuteOutcomes -> enabled) }
+
   def nameToShow: ExamGridStudentIdentificationColumnValue =
     getStringSetting(Settings.ExamGridOptions.NameToShow).map(ExamGridStudentIdentificationColumnValue(_)).getOrElse(ExamGridStudentIdentificationColumnValue.Default)
 
@@ -603,6 +606,7 @@ object Department {
 
     val EnableMitCircs = "enableMitCircs"
     val MitCircsGuidance = "mitCircsGuidance"
+    val EnableAcuteOutcomes = "enableAcuteOutcomes"
 
     object MissedMonitoringPointsNotificationLevels {
 
