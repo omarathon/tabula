@@ -144,6 +144,7 @@ abstract class Features {
   @Value("${features.profiles.searchPast:true}") var profilesSearchPast: Boolean = defaults.profilesSearchPast
   @Value("${features.skillsforge:true}") var skillsforge: Boolean = defaults.skillsforge
   @Value("${features.mitCircs:false}") var mitCircs: Boolean = defaults.mitCircs
+  @Value("${features.acuteOutcomes:false}") var acuteOutcomes: Boolean = defaults.acuteOutcomes
   @Value("${features.renderStackTracesForAllUsers:false}") var renderStackTracesForAllUsers: Boolean = defaults.renderStackTracesForAllUsers
 
   private val bean = new BeanWrapperImpl(this)
@@ -283,6 +284,7 @@ class FeaturesMessage {
   @BeanProperty var profilesSearchPast = true
   @BeanProperty var skillsforge = true
   @BeanProperty var mitCircs = false
+  @BeanProperty var acuteOutcomes = false
   @BeanProperty var renderStackTracesForAllUsers = false
 }
 
