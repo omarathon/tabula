@@ -27,6 +27,7 @@ class MissedAssessmentsReportCommandInternal(val department: Department, val aca
 
   override protected def applyInternal(): MissedAssessmentsReport = transactional(readOnly = true) {
     val assignments = assessmentService.getDepartmentAssignmentsClosingBetween(department, startDate, endDate)
+      .filter(_.collectSubmissions)
 
     val assignmentMembers = assignments.flatMap(assignment => assignment.membershipInfo.items.map(item => (assignment, item)))
 
