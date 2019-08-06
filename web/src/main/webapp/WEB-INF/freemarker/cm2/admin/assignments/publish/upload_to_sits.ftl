@@ -248,14 +248,15 @@
       </#if>
     </div>
 
-    <form method="post" action="<@routes.cm2.uploadToSits assignment />" class="double-submit-protection">
+    <#assign submitUrl><@routes.cm2.uploadToSits assignment /></#assign>
+    <@f.form method="post" action=submitUrl class="double-submit-protection">
       <#list command.students as student>
         <input type="hidden" name="students" value="${student}" />
       </#list>
       <div class="submit-buttons">
         <button class="btn btn-primary" type="submit" name="confirm">Upload</button>
       </div>
-    </form>
+    </@f.form>
 
   <#else>
     <em>There is no feedback to upload.</em>

@@ -213,14 +213,15 @@
       </#if>
     </div>
 
-    <form method="post" action="<@routes.coursework.uploadToSits assignment />">
+    <#assign submitUrl><@routes.coursework.uploadToSits assignment /></#assign>
+    <@f.form method="post" action=submitUrl>
       <#list command.students as student>
         <input type="hidden" name="students" value="${student}" />
       </#list>
       <div class="submit-buttons">
         <button class="btn btn-primary" type="submit" name="confirm">Upload</button>
       </div>
-    </form>
+    </@f.form>
 
   <#else>
     <em>There is no feedback to upload.</em>
