@@ -9,7 +9,8 @@
 
   <@fmt.id7_deptheader title="Create a new exam grid for ${department.name}" route_function=route_function />
 
-  <form action="<@routes.exams.generateGridSkipImport department academicYear />" class="dirty-check" method="post">
+  <#assign generateGridSkipImportAction><@routes.exams.generateGridSkipImport department academicYear /></#assign>
+  <@f.form action=generateGridSkipImportAction class="dirty-check" method="post">
 
     <@form_fields.select_course_fields />
     <@form_fields.grid_options_fields />
@@ -64,7 +65,7 @@
     </@modal.modal>
 
     <button class="btn btn-primary" type="submit">Skip import and generate grid</button>
-  </form>
+  </@f.form>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {
