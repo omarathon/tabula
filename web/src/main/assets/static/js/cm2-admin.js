@@ -538,7 +538,7 @@ exports.initBigList = function ($scope) {
       });
 
       function goToMarkPlagiarised(action, plagiarised, $checkedBoxes) {
-        var $form = $('<form>').attr({method: 'POST', action: action}).hide();
+        var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
         $form.append($checkedBoxes.clone());
 
         if (!plagiarised) {
