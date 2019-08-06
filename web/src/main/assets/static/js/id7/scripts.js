@@ -1516,18 +1516,8 @@ $(() => {
   });
 
   $.ajaxPrefilter((options, originalOptions, jqXHR) => {
-    let safe = false;
-    if (typeof URL === 'function' && (new URL(options.url, window.location.origin)).origin === window.location.origin) {
-      safe = true;
-    } else if (typeof URL !== 'function' && window.navigator.userAgent.indexOf('Trident/7.0') > -1) {
-      const a = $('<a>', {
-        href: options.url,
-      });
-      const linkHostname = a.prop('hostname');
-      safe = (linkHostname === window.location.hostname || linkHostname === '');
-    }
-
-    if (safe) {
+    const { origin } = window.location;
+    if (new URL(options.url, origin).origin === origin) {
       const csrfHeaderName = $('meta[name=_csrf_header]').attr('content');
       const csrfHeaderValue = $('meta[name=_csrf]').attr('content');
       if (csrfHeaderName !== undefined && csrfHeaderValue !== undefined) {
@@ -1552,6 +1542,17 @@ $(() => {
     // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
     // we do not want to do anything if state is 0. e.g. user quickly navigated away.
     if (jqXhr.readyState === 0) return;
+
+    const targetUrl = settings.url;
+    if (!targetUrl) return;
+
+    const parsedUrl = new URL(targetUrl);
+    if (!parsedUrl) return;
+
+    // TAB-7506 if somehow the browser is making a request to
+    // a different place and failed, we do not throw.
+    if (parsedUrl.hostname !== window.location.hostname) return;
+
     const pageErrorToken = $('body').data('error-token');
     if (pageErrorToken) {
       const errorModal = $(`#global-error-modal-${pageErrorToken}`);
