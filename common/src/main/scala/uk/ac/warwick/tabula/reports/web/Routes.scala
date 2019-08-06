@@ -63,4 +63,12 @@ object Routes {
       context + "/%s/%s/profiles/export" format(encoded(department.code), encoded(academicYear.startYear.toString))
   }
 
+  object Coursework {
+    def home(department: Department, academicYear: AcademicYear): String =
+      context + "/%s/%s/coursework" format(encoded(department.code), encoded(academicYear.startYear.toString))
+
+    def missed(department: Department, academicYear: AcademicYear): String =
+      context + "/%s/%s/coursework/missed" format(encoded(department.code), encoded(academicYear.startYear.toString))
+  }
+
 }

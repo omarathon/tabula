@@ -68,4 +68,18 @@ object ReportsBreadcrumbs {
 
   }
 
+  object Coursework {
+
+    case class Home(department: model.Department, academicYear: AcademicYear) extends BreadCrumb {
+      val title = "Coursework management"
+      val url = Some(Routes.reports.Coursework.home(department, academicYear))
+    }
+
+    case class MissedAssessments(department: model.Department, academicYear: AcademicYear) extends BreadCrumb {
+      val title = "Missed assessments"
+      val url = Some(Routes.reports.Coursework.missed(department, academicYear))
+    }
+
+  }
+
 }

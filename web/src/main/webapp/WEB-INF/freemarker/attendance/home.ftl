@@ -72,16 +72,6 @@
         You do not currently have permission to view or manage any monitoring points. If you think this is incorrect or you need assistance, please visit our <a
                 href="/help">help page</a>.
       </p>
-
-      <script type="text/javascript" nonce="${nonce()}">
-        jQuery(function ($) {
-          $('#email-support-link').on('click', function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            $('#app-feedback-link').click();
-          });
-        });
-      </script>
     </#if>
   </#if>
 

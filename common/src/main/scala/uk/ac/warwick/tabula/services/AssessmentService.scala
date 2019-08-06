@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
-import org.joda.time.DateTime
+
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
@@ -74,6 +75,8 @@ trait AssessmentService {
   def filterAssignmentsByCourseAndYear(assignments: Seq[Assignment], studentCourseYearDetails: StudentCourseYearDetails): Seq[Assignment]
 
   def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+
+  def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment]
 
   def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 
@@ -172,6 +175,8 @@ abstract class AbstractAssessmentService extends AssessmentService {
   }
 
   def getAssignmentsClosingBetween(start: DateTime, end: DateTime): Seq[Assignment] = assessmentDao.getAssignmentsClosingBetween(start, end)
+
+  override def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment] = assessmentDao.getDepartmentAssignmentsClosingBetween(department, startDate, endExclusive)
 
   def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]] =
     assessmentDao.getExamsByModules(modules, academicYear)
