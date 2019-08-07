@@ -1,4 +1,3 @@
-<#compress>
 <#if scheduledDate?has_content>
   <#assign formattedDate><@fmt.date date=scheduledDate stripHtml=true /></#assign>
   <#assign formattedDate =  formattedDate?replace('&#8194;',' ') />
@@ -13,11 +12,10 @@
 * ${rel.studentMember.fullName}<#--
 --><#if rel.replacesRelationships?has_content><#--
 --> (previous <@fmt.p number=rel.replacesRelationships?size singular=relationshipType.agentRole shownumber=false /> <#list rel.replacesRelationships as replaced>${replaced.agentName}<#if replaced_has_next>, </#if></#list>)<#--
--->
-</#if>
+--></#if>
+
 </#list>
 
 <#if previouslyScheduledDate?has_content>
 This change was originally scheduled to happen at ${formattedPreviousDate}.
 </#if>
-</#compress>
