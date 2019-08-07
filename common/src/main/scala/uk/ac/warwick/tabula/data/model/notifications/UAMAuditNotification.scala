@@ -28,15 +28,23 @@ class UAMAuditFirstNotification extends UAMAuditNotification {
   val templateLocation = "/WEB-INF/freemarker/emails/uam_audit_email.ftl"
 
   @transient
-  def permissionConfirmationDeadline: LocalDate = AcademicYear
-    .forDate(this.created)
-    .next
-    .termsAndVacations
+  def deadlineForAcadyear(academicYear: AcademicYear): LocalDate = academicYear.termsAndVacations
     .filter(_.isTerm)
     .head
     .firstDay
     .minusWeeks(1)
     .minusDays(1)
+
+  @transient
+  def permissionConfirmationDeadline: LocalDate = {
+
+    val thisAcademicYear = AcademicYear(this.created.getYear)
+
+    val deadline: LocalDate = deadlineForAcadyear(thisAcademicYear)
+
+    // if deadline is in the past, then we should use the next acad year
+    if (this.created.isAfter(deadline.toDateTimeAtCurrentTime)) deadlineForAcadyear(thisAcademicYear.next) else deadline
+  }
 
   def departments: Seq[Department] = entities
 

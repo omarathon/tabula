@@ -96,7 +96,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
     if (!AcademicYear.now().isSITSInFlux(DateTime.now().toLocalDate)) {
 
       When("I reset both manually added students")
-      click on cssSelector(".manually-added .section-title")
+      click on cssSelector(".manually-added .section-title a.collapse-trigger")
       eventually {
         findAll(cssSelector(".manually-added input[name=manuallyAddForm]")).forall {
           _.isDisplayed
@@ -113,7 +113,7 @@ class AttendanceEditStudentsTest extends AttendanceFixture with GivenWhenThen {
       pageSource should include("2 students on this scheme")
 
       When("I exclude the SITS students")
-      click on cssSelector(".find-students .section-title")
+      click on cssSelector(".find-students .section-title a.collapse-trigger")
       eventually {
         findAll(cssSelector(".find-students div.student-filter")).forall {
           _.isDisplayed

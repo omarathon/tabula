@@ -59,7 +59,8 @@
     "loglevel": "1.6.3",
     "moment-timezone": "github:UniversityofWarwick/moment-timezone#0.5.23-london",
     "spin.js": "4.0.0",
-    "whatwg-fetch": "^3.0.0"
+    "url-polyfill": "1.1.7",
+    "whatwg-fetch": "3.0.0"
   },
   "optionalDependencies": {
     "@fortawesome/fontawesome-pro": "5.8.2"

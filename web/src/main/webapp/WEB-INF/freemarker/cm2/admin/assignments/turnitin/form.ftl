@@ -33,9 +33,9 @@
       </div>
     </#if>
 
-    <form action="" method="POST">
+    <@f.form action="" method="POST">
       <button type="submit" class="btn btn-primary">Send to Turnitin</button>
-    </form>
+    </@f.form>
   </#if>
 
 </#escape>

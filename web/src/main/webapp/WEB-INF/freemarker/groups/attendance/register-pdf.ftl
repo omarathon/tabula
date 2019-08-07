@@ -7,7 +7,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-  <style type="text/css" nonce="${nonce()}">
+  <style type="text/css">
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     }

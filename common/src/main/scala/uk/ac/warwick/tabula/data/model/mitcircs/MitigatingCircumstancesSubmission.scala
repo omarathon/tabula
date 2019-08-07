@@ -65,7 +65,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
-  final var creator: User = _ // the user that created this
+  var creator: User = _ // the user that created this
 
   @Column(nullable = false)
   @Type(`type` = "uk.ac.warwick.tabula.data.model.SSOUserType")
@@ -96,7 +96,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   @JoinColumn(name = "department_id")
   var department: Department = _
 
-  @ManyToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
+  @ManyToOne(cascade = Array(ALL), fetch = FetchType.EAGER)
   @JoinColumn(name = "relatedSubmission")
   var relatedSubmission: MitigatingCircumstancesSubmission = _
 
@@ -213,12 +213,12 @@ class MitigatingCircumstancesSubmission extends GeneratedId
     _attachments.remove(attachment)
   }
 
-  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY)
   @BatchSize(size = 200)
   private val _messages: JSet[MitigatingCircumstancesMessage] = JHashSet()
   def messages: Seq[MitigatingCircumstancesMessage] = _messages.asScala.toSeq.sortBy(_.createdDate)
 
-  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @OneToMany(mappedBy = "submission", fetch = FetchType.LAZY)
   @BatchSize(size = 200)
   private val _notes: JSet[MitigatingCircumstancesNote] = JHashSet()
   def notes: Seq[MitigatingCircumstancesNote] = _notes.asScala.toSeq.sortBy(_.createdDate)
@@ -234,7 +234,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
   def lastViewedByOfficer_=(dt: DateTime): Unit = _lastViewedByOfficer = dt
 
   // Doesn't include notes, whereas normally lastModified does, and filters messages
-  private def lastModifiedIncludingMessages(messageFilter: (MitigatingCircumstancesMessage) => Boolean): DateTime = {
+  private def lastModifiedIncludingMessages(messageFilter: MitigatingCircumstancesMessage => Boolean): DateTime = {
     Seq(
       Option(_lastModified),
       messages.filter(messageFilter).sortBy(_.createdDate).lastOption.map(_.createdDate)

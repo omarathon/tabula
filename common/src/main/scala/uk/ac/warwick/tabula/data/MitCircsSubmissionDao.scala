@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.FlushMode
 import org.hibernate.criterion.Restrictions._
 import org.hibernate.criterion.{DetachedCriteria, Order, Projections, Property}
+import org.hibernate.sql.JoinType
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
@@ -130,7 +131,12 @@ class MitCircsSubmissionDaoImpl extends MitCircsSubmissionDao
     // MCOs can never see drafts
     c.add(isNot("_state", MitigatingCircumstancesSubmissionState.Draft))
 
-    c.distinct.seq.sortBy(_.lastModified).reverse
+    if(filter.isUnread) {
+      c.createAlias("_messages",  "m", joinType = JoinType.LEFT_OUTER_JOIN) // join messages to avoid lazy loading for each submission individually
+      c.distinct.seq.sortBy(_.lastModified).reverse.filter(_.isUnreadByOfficer)
+    } else {
+      c.distinct.seq.sortBy(_.lastModified).reverse
+    }
   }
 
   override def getMessageById(id: String): Option[MitigatingCircumstancesMessage] = getById[MitigatingCircumstancesMessage](id)
@@ -172,4 +178,5 @@ case class MitigatingCircumstancesSubmissionFilter(
   approvedStartDate: Option[LocalDate] = None,
   approvedEndDate: Option[LocalDate] = None,
   state: Set[MitigatingCircumstancesSubmissionState] = Set.empty,
+  isUnread: Boolean = false
 )

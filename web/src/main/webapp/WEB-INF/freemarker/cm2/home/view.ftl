@@ -66,16 +66,6 @@
       </#if>
       visit our <a href="/help">help page</a>.
     </p>
-
-    <script type="text/javascript" nonce="${nonce()}">
-      jQuery(function ($) {
-        $('#email-support-link').on('click', function (e) {
-          e.stopPropagation();
-          e.preventDefault();
-          $('#app-feedback-link').click();
-        });
-      });
-    </script>
   </#if>
 
 </#escape>

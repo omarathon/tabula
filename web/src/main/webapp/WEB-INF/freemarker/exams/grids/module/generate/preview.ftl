@@ -34,14 +34,15 @@
           </#if>
 
           <#if !(info.maintenance!false)>
-            <form action="<@routes.exams.generateModuleGrid department academicYear />" method="post">
+            <#assign generateModuleGridAction><@routes.exams.generateModuleGrid department academicYear /></#assign>
+            <@f.form action=generateModuleGridAction method="post">
               <@form_fields.select_module_fields />
               <p>
                 <button type="submit" class="btn btn-primary">
                   Refresh SITS data and regenerate grid
                 </button>
               </p>
-            </form>
+            </@f.form>
           <#else>
             <p>
               <button class="btn btn-primary use-tooltip" disabled
@@ -224,7 +225,8 @@
       </div>
 
       <div class="fix-footer">
-        <form action="<@routes.exams.generateModuleGrid department academicYear />" method="post" id="examGridDocuments">
+        <#assign generateModuleGridAction><@routes.exams.generateModuleGrid department academicYear /></#assign>
+        <@f.form action=generateModuleGridAction method="post" id="examGridDocuments">
           <@form_fields.select_module_fields />
           <div class="btn-group dropup">
             <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">Download&hellip; <span class="caret"></span></button>
@@ -234,7 +236,7 @@
               </li>
             </ul>
           </div>
-        </form>
+        </@f.form>
       </div>
     </div>
     <@modal.modal id='confirmModal'>

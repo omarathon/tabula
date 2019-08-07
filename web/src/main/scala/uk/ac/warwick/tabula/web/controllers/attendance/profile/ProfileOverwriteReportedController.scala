@@ -47,7 +47,7 @@ class ProfileOverwriteReportedController
   }
 
   private def renderForm(student: StudentMember, point: AttendanceMonitoringPoint): Mav =
-    Mav("attendance/overwrite-reported")
+    Mav("attendance/overwrite-reported", "returnTo" -> getReturnTo(profileAttendance(student, point)))
       .crumbs(Breadcrumbs.Profile.ProfileForYear(student, point.scheme.academicYear))
 
   @PostMapping
@@ -55,7 +55,9 @@ class ProfileOverwriteReportedController
     if (errors.hasErrors) renderForm(student, point)
     else {
       command.apply()
-      RedirectForce(Routes.attendance.Profile.profileForYear(student, point.scheme.academicYear))
+      Redirect(profileAttendance(student, point))
     }
 
+  private def profileAttendance(student: StudentMember, point: AttendanceMonitoringPoint) =
+    Routes.attendance.Profile.profileForYear(student, point.scheme.academicYear)
 }

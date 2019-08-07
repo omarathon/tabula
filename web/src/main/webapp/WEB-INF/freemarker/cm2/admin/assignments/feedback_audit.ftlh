@@ -29,13 +29,13 @@
   <#-- For CM1 assignments we can't cycle through allFeedback as it may contained orphened rejected feedback -->
     <#if auditData.feedback.firstMarkerFeedback??>
       <div class="well">
-        <@cm1fs.markerFeedbackSummary auditData.feedback.firstMarkerFeedback isModerated true/>
+        <@cm1fs.feedbackSummary auditData.feedback.firstMarkerFeedback isModerated true/>
         <@cm1fs.secondMarkerNotes auditData.feedback.firstMarkerFeedback isModerated />
       </div>
     </#if>
     <#if auditData.feedback.secondMarkerFeedback??>
       <div class="well">
-        <@cm1fs.markerFeedbackSummary auditData.feedback.secondMarkerFeedback isModerated true/>
+        <@cm1fs.feedbackSummary auditData.feedback.secondMarkerFeedback isModerated true/>
         <@cm1fs.secondMarkerNotes auditData.feedback.secondMarkerFeedback isModerated />
       </div>
     </#if>
