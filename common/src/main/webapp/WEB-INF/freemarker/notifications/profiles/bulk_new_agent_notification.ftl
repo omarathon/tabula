@@ -13,7 +13,8 @@
 * ${rel.studentMember.fullName}<#--
 --><#if rel.replacesRelationships?has_content><#--
 --> (previous <@fmt.p number=rel.replacesRelationships?size singular=relationshipType.agentRole shownumber=false /> <#list rel.replacesRelationships as replaced>${replaced.agentName}<#if replaced_has_next>, </#if></#list>)<#--
---></#if>
+-->
+</#if>
 </#list>
 
 <#if previouslyScheduledDate?has_content>
