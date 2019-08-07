@@ -42,7 +42,8 @@
               </#if>
 
               <#if !(info.maintenance!false)>
-                <form action="<@routes.exams.generateGrid department academicYear />" method="post">
+                <#assign refreshSITSandGenerateGridAction><@routes.exams.generateGrid department academicYear /></#assign>
+                <@f.form action=refreshSITSandGenerateGridAction method="post">
                     <@form_fields.select_course_fields />
                     <@form_fields.grid_options_fields />
 
@@ -51,7 +52,7 @@
                       Refresh SITS data and regenerate grid
                     </button>
                   </p>
-                </form>
+                </@f.form>
               <#else>
                 <p>
                   <button class="btn btn-primary use-tooltip" disabled
@@ -74,7 +75,8 @@
               <div class="alert col-sm-4">
                 <h3>Check for missing students</h3>
                 <p>Enter the name or university ID of a student to see why they don't appear on this exam grid.</p>
-                <form class="student-checker" action="<@routes.exams.gridCheckStudent department academicYear />" method="post">
+                <#assign gridCheckStudentAction><@routes.exams.gridCheckStudent department academicYear /></#assign>
+                <@f.form class="student-checker" action=gridCheckStudentAction method="post">
                     <@bs3form.form_group>
                         <@bs3form.flexipicker name="member" membersOnly="true" universityId="true" placeholder="Type a name or university ID">
                           <span class="input-group-btn">
@@ -83,7 +85,7 @@
                         </@bs3form.flexipicker>
                     </@bs3form.form_group>
                     <@form_fields.select_course_fields />
-                </form>
+                </@f.form>
                 <@modal.modal cssClass="student-checker-modal" role="dialog"><@modal.wrapper></@modal.wrapper></@modal.modal>
               </div>
             </#if>
@@ -284,7 +286,8 @@
       </div>
 
         <#if totalPages gt 1>
-          <form action="<@routes.exams.generateGridPreview department academicYear />" method="get" id="gridPreviewPagination">
+          <#assign generateGridPreviewAction><@routes.exams.generateGridPreview department academicYear /></#assign>
+          <@f.form action=generateGridPreviewAction method="get" id="gridPreviewPagination">
               <@form_fields.select_course_fields />
               <@form_fields.grid_options_fields />
 
@@ -311,7 +314,7 @@
                   <li><a data-page="${currentPage + 1}" href="#"><span class="sr-only">Next page</span>&raquo;</a></li>
                 </#if>
             </ul>
-          </form>
+          </@f.form>
 
           <script nonce="${nonce()}">
             jQuery(function ($) {
