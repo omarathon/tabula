@@ -16,6 +16,7 @@ object MissedAssessmentsReportCommand {
       with ComposableCommand[MissedAssessmentsReport]
       with AutowiringAssessmentServiceComponent
       with AutowiringProfileServiceComponent
+      with AutowiringAssessmentMembershipServiceComponent
       with ReportPermissions
       with ReportCommandRequestValidation
       with ReadOnly
@@ -23,19 +24,17 @@ object MissedAssessmentsReportCommand {
 }
 
 class MissedAssessmentsReportCommandInternal(val department: Department, val academicYear: AcademicYear) extends CommandInternal[MissedAssessmentsReport] with ReportCommandRequest with ReportCommandState {
-  self: AssessmentServiceComponent with ProfileServiceComponent =>
+  self: AssessmentServiceComponent with ProfileServiceComponent with AssessmentMembershipServiceComponent =>
 
   override protected def applyInternal(): MissedAssessmentsReport = transactional(readOnly = true) {
     val assignments = assessmentService.getDepartmentAssignmentsClosingBetween(department, startDate, endDate)
       .filter(_.collectSubmissions)
 
-    val assignmentMembers = assignments.flatMap(assignment => assignment.membershipInfo.items.map(item => (assignment, item)))
+    val assignmentMembers = assignments.flatMap(assignment => assessmentMembershipService.determineMembershipUsers(assignment).map(user => (assignment, user)))
 
-    val members = profileService.getAllMembersByUsers(assignmentMembers.map(_._2.user))
+    val members = profileService.getAllMembersByUsers(assignmentMembers.map(_._2))
 
-    val entities = assignmentMembers.flatMap { case (assignment, membershipItem) =>
-      val user = membershipItem.user
-
+    val entities = assignmentMembers.flatMap { case (assignment, user) =>
       members.get(user).flatMap { student =>
         val submission = assignment.submissions.asScala.find(_.isForUser(user))
         val workingDaysLateIfSubmittedNow = assignment.workingDaysLateIfSubmittedNow(user.getUserId)
