@@ -5,7 +5,8 @@
 
     <h1 class="with-settings">Students in ${department.name} with no ${relationshipType.agentRole}</h1>
 
-    <form action="<@routes.profiles.relationship_allocate department relationshipType />" method="post">
+    <#assign allocateRelationshipAction><@routes.profiles.relationship_allocate department relationshipType /></#assign>
+    <@f.form action=allocateRelationshipAction method="post">
 
       <#if studentCount gt 0>
         <#if missingStudents?has_content>
@@ -58,7 +59,7 @@
         <p class="alert alert-info">No students are currently visible for ${department.name} in Tabula.</p>
       </#if>
 
-    </form>
+    </@f.form>
   </div>
 
   <script type="text/javascript" nonce="${nonce()}">
