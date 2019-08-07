@@ -9,7 +9,8 @@
 
   <@fmt.id7_deptheader title="Create a new module exam grid for ${department.name}" route_function=route_function />
 
-  <form action="<@routes.exams.generateModuleGridSkipImport department academicYear />" class="dirty-check" method="post">
+  <#assign skipImportGenerateModuleGridAction><@routes.exams.generateModuleGridSkipImport department academicYear /></#assign>
+  <@f.form action=skipImportGenerateModuleGridAction cssClass="dirty-check" method="post">
     <@form_fields.select_module_fields />
     <h2>Importing student data</h2>
     <p class="progress-arrows">
@@ -56,7 +57,7 @@
       </@modal.wrapper>
     </@modal.modal>
     <button class="btn btn-primary" type="submit" name="${GenerateModuleExamGridMappingParameters.previewAndDownload}">Skip import and generate grid</button>
-  </form>
+  </@f.form>
 
   <script nonce="${nonce()}">
     jQuery(function ($) {

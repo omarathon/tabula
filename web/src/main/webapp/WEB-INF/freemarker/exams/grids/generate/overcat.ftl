@@ -37,7 +37,8 @@
         <p>You can change module marks but any changes made at this stage will not be saved back to SITS.</p>
 
         <p class="clearfix">&nbsp;</p>
-        <form action="<@routes.exams.generateGridOvercatting department academicYear scyd/>" method="post">
+        <#assign generateGridOvercattingAction><@routes.exams.generateGridOvercatting department academicYear scyd/></#assign>
+        <@f.form action=generateGridOvercattingAction method="post">
           <input type="hidden" name="basedOnLevel" value="${overcatView.basedOnLevel?c}" />
           <table class="table table-condensed grid overcat">
             <thead>
@@ -160,7 +161,7 @@
             </#if>
             </tbody>
           </table>
-        </form>
+        </@f.form>
       </div>
     </@modal.body>
     <@modal.footer>
