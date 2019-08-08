@@ -95,104 +95,107 @@ function offsetEndDate($element) {
 
 // Tabula-specific rendition of date and date-time pickers
 jQuery.fn.tabulaDateTimePicker = function tabulaDateTimePicker() {
-  const $this = $(this);
+  const $tabulaDateTimePicker = $(this);
   // if there is no datepicker bound to this input then add one
-  if (!$this.data('datepicker')) {
-    $this.datetimepicker({
+  if (!$tabulaDateTimePicker.data('datepicker')) {
+    $tabulaDateTimePicker.datetimepicker({
       format: 'd-M-yyyy hh:ii:ss',
       weekStart: 1,
       minView: 'day',
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3,
-    }).on('show', (ev) => {
-      const d = new Date(ev.date.valueOf());
-      const minutes = d.getUTCMinutes();
-      const seconds = d.getUTCSeconds();
-      const millis = d.getUTCMilliseconds();
+    }).on('show', (showEvent) => {
+      const $target = $(showEvent.currentTarget);
+      const date = new Date(showEvent.date.valueOf());
+      const minutes = date.getUTCMinutes();
+      const seconds = date.getUTCSeconds();
+      const millis = date.getUTCMilliseconds();
 
       if (minutes > 0 || seconds > 0 || millis > 0) {
-        d.setUTCMinutes(0);
-        d.setUTCSeconds(0);
-        d.setUTCMilliseconds(0);
+        date.setUTCMinutes(0);
+        date.setUTCSeconds(0);
+        date.setUTCMilliseconds(0);
 
         const { DPGlobal } = $.fn.datetimepicker;
-        $(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat('dd-M-yyyy hh:ii:ss', 'standard'), 'en', 'standard'));
+        $target.val(DPGlobal.formatDate(date, DPGlobal.parseFormat('dd-M-yyyy hh:ii:ss', 'standard'), 'en', 'standard'));
 
-        $(this).datetimepicker('update');
+        $target.datetimepicker('update');
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', function onClick() {
-        $(this).prev('input').focus();
+      .on('click', (clickEvent) => {
+        $(clickEvent.currentTarget).prev('input').focus();
       });
   }
 
-  $(this).on('changeDate', (e) => {
+  $tabulaDateTimePicker.on('changeDate', (e) => {
     offsetEndDateTime($(e.currentTarget));
   });
 };
 
 // 5-minute resolution
 jQuery.fn.tabulaDateTimeMinutePicker = function tabulaDateTimeMinutePicker() {
-  const $this = $(this);
+  const $tabulaDateTimeMinutePicker = $(this);
   // if there is no datepicker bound to this input then add one
-  if (!$this.data('datepicker')) {
-    $this.datetimepicker({
+  if (!$tabulaDateTimeMinutePicker.data('datepicker')) {
+    $tabulaDateTimeMinutePicker.datetimepicker({
       format: 'dd-M-yyyy hh:ii:ss',
       weekStart: 1,
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3,
-    }).on('show', (ev) => {
-      const d = new Date(ev.date.valueOf());
-      const seconds = d.getUTCSeconds();
-      const millis = d.getUTCMilliseconds();
+    }).on('show', (showEvent) => {
+      const $target = $(showEvent.currentTarget);
+      const date = new Date(showEvent.date.valueOf());
+      const seconds = date.getUTCSeconds();
+      const millis = date.getUTCMilliseconds();
 
       if (seconds > 0 || millis > 0) {
-        d.setUTCSeconds(0);
-        d.setUTCMilliseconds(0);
+        date.setUTCSeconds(0);
+        date.setUTCMilliseconds(0);
 
         const { DPGlobal } = $.fn.datetimepicker;
-        $(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat('dd-M-yyyy hh:ii:ss', 'standard'), 'en', 'standard'));
+        $target.val(DPGlobal.formatDate(date, DPGlobal.parseFormat('dd-M-yyyy hh:ii:ss', 'standard'), 'en', 'standard'));
 
-        $(this).datetimepicker('update');
+        $target.datetimepicker('update');
       }
     }).next('.add-on')
       .css({ cursor: 'pointer' })
-      .on('click', () => {
-        $(this).prev('input').focus();
+      .on('click', (clickEvent) => {
+        $(clickEvent.currentTarget).prev('input').focus();
       });
   }
 
-  $(this).on('changeDate', (e) => {
+  $tabulaDateTimeMinutePicker.on('changeDate', (e) => {
     offsetEndDateTime($(e.currentTarget));
   });
 };
 
 jQuery.fn.tabulaDatePicker = function tabulaDatePicker() {
-  const $this = $(this);
+  const $tabulaDatePicker = $(this);
   // if there is no datepicker bound to this input then add one
-  if (!$this.data('datepicker')) {
-    $this.datetimepicker({
+  if (!$tabulaDatePicker.data('datepicker')) {
+    $tabulaDatePicker.datetimepicker({
       format: 'dd-M-yyyy',
       weekStart: 1,
       minView: 'month',
       autoclose: true,
       fontAwesome: true,
       bootcssVer: 3,
-    }).next('.add-on').css({ cursor: 'pointer' }).on('click', () => {
-      $(this).prev('input').focus();
+    }).next('.add-on').css({ cursor: 'pointer' }).on('click', (event) => {
+      $(event.currentTarget).prev('input').focus();
     });
   }
 
-  $(this).on('changeDate', (e) => {
+  $tabulaDatePicker.on('changeDate', (e) => {
     offsetEndDate($(e.currentTarget));
   });
 };
 
 jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
-  $(this).datetimepicker({
+  const $tabulaTimePicker = $(this);
+  $tabulaTimePicker.datetimepicker({
     format: 'hh:ii:ss',
     weekStart: 1,
     startView: 'day',
@@ -201,35 +204,38 @@ jQuery.fn.tabulaTimePicker = function tabulaTimePicker() {
     fontAwesome: true,
     bootcssVer: 3,
   }).on('show', (ev) => {
-    const d = new Date(ev.date.valueOf());
-    const seconds = d.getUTCSeconds();
-    const millis = d.getUTCMilliseconds();
+    const $target = $(ev.currentTarget);
+    const date = new Date(ev.date.valueOf());
+    const seconds = date.getUTCSeconds();
+    const millis = date.getUTCMilliseconds();
 
     if (seconds > 0 || millis > 0) {
-      d.setUTCSeconds(0);
-      d.setUTCMilliseconds(0);
+      date.setUTCSeconds(0);
+      date.setUTCMilliseconds(0);
 
       const { DPGlobal } = $.fn.datetimepicker;
-      $(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat('hh:ii:ss', 'standard'), 'en', 'standard'));
+      $target.val(DPGlobal.formatDate(date, DPGlobal.parseFormat('hh:ii:ss', 'standard'), 'en', 'standard'));
 
-      $(this).datetimepicker('update');
+      $target.datetimepicker('update');
     }
   }).next('.add-on')
     .css({ cursor: 'pointer' })
-    .on('click', function onClick() {
-      $(this).prev('input').focus();
+    .on('click', (clickEvent) => {
+      $(clickEvent.currentTarget).prev('input').focus();
     });
 
-  $(this).on('changeDate', (e) => {
+  $tabulaTimePicker.on('changeDate', (e) => {
     offsetEndDateTime($(e.currentTarget));
   });
 };
 
 jQuery.fn.selectOffset = function selectOffset() {
-  if ($(this).hasClass('startDateTime')) {
-    $(this).on('click', function onClick() {
-      const indexValue = $(this).children(':selected').attr('value');
-      $(this).closest('.dateTimePair')
+  const $selectOffset = $(this);
+  if ($selectOffset.hasClass('startDateTime')) {
+    $selectOffset.on('click', (event) => {
+      const $target = $(event.currentTarget);
+      const indexValue = $target.children(':selected').attr('value');
+      $target.closest('.dateTimePair')
         .find('.endDateTime')
         .attr('value', indexValue)
         .closest('.control-group')
@@ -245,14 +251,12 @@ jQuery.fn.selectOffset = function selectOffset() {
    'tabula.slideMoreOptions.hidden' event when it is hidden.
  */
 jQuery.fn.slideMoreOptions = function slideMoreOptions($slidingDiv, showWhenChecked) {
-  if ($(this).hasClass('slideMoreOptions-init')) {
-    return;
-  }
-  $(this).addClass('slideMoreOptions-init');
+  const $slideMoreOptions = $(this);
+  if ($slideMoreOptions.hasClass('slideMoreOptions-init')) return;
+  $slideMoreOptions.addClass('slideMoreOptions-init');
 
-  const $this = $(this);
-  const name = $this.attr('name');
-  const $form = $this.closest('form');
+  const name = $slideMoreOptions.attr('name');
+  const $form = $slideMoreOptions.closest('form');
 
   const show = ($div, data) => {
     if (data === 'init') {
@@ -280,24 +284,25 @@ jQuery.fn.slideMoreOptions = function slideMoreOptions($slidingDiv, showWhenChec
   // they are identified as a group because they all have the same name
   const $changeTargets = $(`input[name='${name}']`, $form);
   if (showWhenChecked) {
-    $changeTargets.change((event, data) => {
-      if ($this.is(':checked')) show($slidingDiv, data);
+    $changeTargets.on('change', (event, data) => {
+      if ($slideMoreOptions.is(':checked')) show($slidingDiv, data);
       else hide($slidingDiv, data);
     });
   } else {
-    $changeTargets.change((event, data) => {
-      if ($this.is(':checked')) hide($slidingDiv, data);
+    $changeTargets.on('change', (event, data) => {
+      if ($slideMoreOptions.is(':checked')) hide($slidingDiv, data);
       else show($slidingDiv, data);
     });
   }
-  $this.trigger('change', 'init'); // pass 'init' to suppress animation on load.
+  $slideMoreOptions.trigger('change', 'init'); // pass 'init' to suppress animation on load.
 };
 
 
 // submit bootstrap form using Ajax
 jQuery.fn.tabulaAjaxSubmit = function tabulaAjaxSubmit(successCallback) {
-  if ($(this).hasClass('tabulaAjaxSubmit-init')) return;
-  $(this).addClass('tabulaAjaxSubmit-init');
+  const $tabulaAjaxSubmit = $(this);
+  if ($tabulaAjaxSubmit.hasClass('tabulaAjaxSubmit-init')) return;
+  $tabulaAjaxSubmit.addClass('tabulaAjaxSubmit-init');
 
   const errorHandler = ($form, data) => {
     const scopeSelector = (data.formId !== undefined) ? `#${data.formId} ` : '';
@@ -344,7 +349,7 @@ jQuery.fn.tabulaAjaxSubmit = function tabulaAjaxSubmit(successCallback) {
     });
   };
 
-  $(this).on('submit', 'form', (e) => {
+  $tabulaAjaxSubmit.on('submit', 'form', (e) => {
     e.preventDefault();
     const $form = $(e.currentTarget).trigger('tabula.ajaxSubmit');
     $.post($form.attr('action'), $form.serialize(), (data) => {
@@ -1501,8 +1506,8 @@ $(() => {
 
 $(() => {
   // be sure to bind the confirm-submit handler before other handlers on submit buttons
-  $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message], input[type="submit"][data-toggle~="confirm-submit"][data-message], input[type="button"][data-toggle~="confirm-submit"][data-message]').on('click', function confirmBeforeSubmit(event) {
-    const $button = $(this);
+  $('a[data-toggle~="confirm-submit"][data-message], :button[data-toggle~="confirm-submit"][data-message], input[type="submit"][data-toggle~="confirm-submit"][data-message], input[type="button"][data-toggle~="confirm-submit"][data-message]').on('click', (event) => {
+    const $button = $(event.currentTarget);
     // eslint-disable-next-line no-alert
     if (!window.confirm($button.data('message'))) {
       event.preventDefault();
@@ -1511,18 +1516,8 @@ $(() => {
   });
 
   $.ajaxPrefilter((options, originalOptions, jqXHR) => {
-    let safe = false;
-    if (typeof URL === 'function' && (new URL(options.url, window.location.origin)).origin === window.location.origin) {
-      safe = true;
-    } else if (typeof URL !== 'function' && window.navigator.userAgent.indexOf('Trident/7.0') > -1) {
-      const a = $('<a>', {
-        href: options.url,
-      });
-      const linkHostname = a.prop('hostname');
-      safe = (linkHostname === window.location.hostname || linkHostname === '');
-    }
-
-    if (safe) {
+    const { origin } = window.location;
+    if (new URL(options.url, origin).origin === origin) {
       const csrfHeaderName = $('meta[name=_csrf_header]').attr('content');
       const csrfHeaderValue = $('meta[name=_csrf]').attr('content');
       if (csrfHeaderName !== undefined && csrfHeaderValue !== undefined) {
@@ -1547,6 +1542,17 @@ $(() => {
     // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/readyState
     // we do not want to do anything if state is 0. e.g. user quickly navigated away.
     if (jqXhr.readyState === 0) return;
+
+    const targetUrl = settings.url;
+    if (!targetUrl) return;
+
+    const parsedUrl = new URL(targetUrl);
+    if (!parsedUrl) return;
+
+    // TAB-7506 if somehow the browser is making a request to
+    // a different place and failed, we do not throw.
+    if (parsedUrl.hostname !== window.location.hostname) return;
+
     const pageErrorToken = $('body').data('error-token');
     if (pageErrorToken) {
       const errorModal = $(`#global-error-modal-${pageErrorToken}`);

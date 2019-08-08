@@ -52,6 +52,7 @@ We provide a Docker set up that can be used with `docker-compose` to build and d
 3. You've got a stable hostname. If you're on-campus but don't have a hostname registered to your workstation, contact IT Services.
 4. You've got an SSO provider ID registered with the IT Services Web Team.
 5. You've got a stable IP address and it's whitelisted for the SSO sentry (contact IT Services Web Team if necessary).
+6. You've got the latest LTS version (10, at the time of writing) of Node.js installed, with access to npm
 
 ### Building Tabula
 

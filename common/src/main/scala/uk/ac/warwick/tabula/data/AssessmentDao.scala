@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.FetchMode
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Restrictions._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -55,6 +55,8 @@ trait AssessmentDao {
   def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
 
   def getAssignmentsClosingBetween(startInclusive: DateTime, endExclusive: DateTime): Seq[Assignment]
+
+  def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment]
 
   def getExamsByModules(modules: Seq[Module], academicYear: AcademicYear): Map[Module, Seq[Exam]]
 }
@@ -194,6 +196,17 @@ class AssessmentDaoImpl extends AssessmentDao with Daoisms {
       .add(is("openEnded", false))
       .add(ge("closeDate", startInclusive))
       .add(lt("closeDate", endExclusive))
+      .add(is("_archived", false))
+      .addOrder(asc("closeDate"))
+      .seq
+
+  override def getDepartmentAssignmentsClosingBetween(department: Department, startDate: LocalDate, endExclusive: LocalDate): Seq[Assignment] =
+    session.newCriteria[Assignment]
+      .createAlias("module", "m")
+      .add(is("openEnded", false))
+      .add(is("m.adminDepartment", department))
+      .add(ge("closeDate", startDate.toDateTimeAtStartOfDay))
+      .add(lt("closeDate", endExclusive.toDateTimeAtStartOfDay))
       .add(is("_archived", false))
       .addOrder(asc("closeDate"))
       .seq

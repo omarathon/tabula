@@ -280,6 +280,7 @@
             </div>
           </div>
         </fieldset>
+
       </#if>
 
       <div class="fix-footer">

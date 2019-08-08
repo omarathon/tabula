@@ -5,6 +5,7 @@ import org.hibernate.annotations.Proxy
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
@@ -48,7 +49,8 @@ abstract class BulkRelationshipChangeNotification extends Notification[StudentRe
       "relationshipType" -> relationshipType,
       "modifiedRelationships" -> entities,
       "scheduledDate" -> scheduledDate,
-      "previouslyScheduledDate" -> previouslyScheduledDate
+      "previouslyScheduledDate" -> previouslyScheduledDate,
+      "dateBuilder" -> new DateBuilder
     ) ++ extraModel)
   }
 

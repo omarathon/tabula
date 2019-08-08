@@ -1,4 +1,5 @@
 <#import 'form_fields.ftl' as form_fields />
+<#import "*/csrf_macros.ftl" as csrf_macros />
 <#escape x as x?html>
 
   <#function route_function dept>
@@ -23,6 +24,7 @@
   </div>
 
   <form action="<@routes.exams.generateGrid department academicYear />" class="form-inline select-course" method="post">
+    <@csrf_macros.csrfHiddenInputField />
 
     <@form_fields.grid_options_fields />
 

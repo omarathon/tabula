@@ -12,7 +12,8 @@
 * ${rel.studentMember.fullName}<#--
 --><#if rel.replacedBy?has_content><#--
 --> (new ${relationshipType.agentRole} ${rel.replacedBy.agentName})<#--
--->	</#if>
+--></#if>
+
 </#list>
 
 <#if previouslyScheduledDate?has_content>

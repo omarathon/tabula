@@ -60,3 +60,15 @@
   margin-top: 12px;
   margin-left: 12px;
 }
+
+.dropdown-menu li button {
+  &:extend(.btn-link);
+  display: block;
+  text-align: left;
+  width: 100%;
+}
+
+.dropdown-menu > li > button {
+  &:extend(.dropdown-menu > li > a);
+}
+

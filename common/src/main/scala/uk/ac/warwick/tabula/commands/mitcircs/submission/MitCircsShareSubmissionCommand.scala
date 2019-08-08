@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.commands.mitcircs.submission
 
+import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.mitcircs.submission.MitCircsShareSubmissionCommand._
 import uk.ac.warwick.tabula.commands.permissions._
 import uk.ac.warwick.tabula.commands.{ComposableCommand, Notifies}
@@ -10,7 +11,7 @@ import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
 import uk.ac.warwick.tabula.roles.{MitigatingCircumstancesViewerRoleDefinition, RoleDefinition}
 import uk.ac.warwick.tabula.services.permissions.AutowiringPermissionsServiceComponent
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, UserLookupComponent}
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringUserLookupComponent, SecurityServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 
@@ -35,7 +36,7 @@ object MitCircsShareSubmissionCommand {
       with ComposableCommand[GrantRoleCommand.Result[MitigatingCircumstancesSubmission]]
       with MitCircsShareSubmissionState
       with RoleCommandRequest
-      with GrantRoleCommandValidation
+      with MitCircsShareSubmissionValidation
       with MitCircsShareSubmissionPermissions
       with MitCircsShareSubmissionAddDescription
       with MitCircsShareSubmissionAddNotifications
@@ -63,6 +64,18 @@ object MitCircsShareSubmissionCommand {
       override val roleDefinition: RoleDefinition = MitCircsShareSubmissionCommand.this.roleDefinition
       override val currentUser: User = creator
     }
+}
+
+trait MitCircsShareSubmissionValidation extends GrantRoleCommandValidation {
+  self: RoleCommandState[MitigatingCircumstancesSubmission] with RoleCommandRequest with SecurityServiceComponent with UserLookupComponent =>
+
+  override def validate(errors: Errors) {
+    super.validate(errors)
+
+    val students = userLookup.getUsersByUserIds(usercodes.asScala).values.filter(_.isStudent)
+    if(students.nonEmpty)
+      errors.rejectValue("usercodes", "mitigatingCircumstances.submission.share.noStudents", Array(students.map(_.getFullName).mkString(", ")), "")
+  }
 }
 
 trait MitCircsShareSubmissionState {
