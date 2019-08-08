@@ -9,6 +9,45 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
   val adjustmentDescriptionText = "Your marks before adjustment were"
 
+  private def adjustmentPage() = {
+    When("I go to the adjustments page")
+    eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be (true))
+    click on className("collection-check-all")
+    eventually(pageSource contains "Feedback" should be (true))
+    click on linkText("Feedback")
+    eventually(pageSource contains "Adjustments" should be (true))
+    click on linkText("Adjustments")
+
+    Then("I see a list of students")
+    pageSource contains "Feedback adjustment" should be (true)
+    pageSource contains "tabula-functest-student1" should be (true)
+    pageSource contains "tabula-functest-student3" should be (true)
+  }
+
+  private def bulkAdjustmentPage(assignmentId: String) = {
+    When("I click on the bulk adjustments button")
+    click on linkText("Adjust in bulk")
+
+    Then("I should see the bulk adjustment form")
+    eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
+
+    Then("I upload a valid adjustments file")
+    click on "file.upload"
+    pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
+
+    And("submit the form")
+    click on cssSelector(".btn-primary")
+
+    Then("I should see the preview bulk adjustment page")
+    eventually {
+      pageSource contains "Preview bulk adjustment" should be (true)
+    }
+
+    Then("The hide from student checkbox should be selected by default")
+    checkbox("privateAdjustment").isSelected should be(true)
+
+  }
+
   "Admin" should "be able to make feedback adjustments" in {
     as(P.Admin1) {
       When("I go to the department admin page")
@@ -18,23 +57,10 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
         getModule("XXX02").get
       }
       eventually(click on module.findElement(By.className("mod-code")))
-      Then("I should see the premarked assignment")
-      eventually(pageSource contains "Premarked assignment" should be (true))
-      eventually(click on linkText("Premarked assignment"))
-
-      When("I go to the adjustments page")
-
-      eventually(className("collection-check-all").findElement.exists(_.isDisplayed) should be (true))
-      click on className("collection-check-all")
-      eventually(pageSource contains "Feedback" should be (true))
-      click on linkText("Feedback")
-      eventually(pageSource contains "Adjustments" should be (true))
-      click on linkText("Adjustments")
-
-      Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be (true)
-      pageSource contains "tabula-functest-student1" should be (true)
-      pageSource contains "tabula-functest-student3" should be (true)
+      Then("I should see the premarked assignment CM2")
+      eventually(pageSource contains "Premarked assignment CM2" should be (true))
+      eventually(click on linkText("Premarked assignment CM2"))
+      adjustmentPage
 
       When("I click on a student's ID")
       click on cssSelector("h6.toggle-icon")
@@ -64,9 +90,9 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       eventually(click on getModule("XXX02").get.findElement(By.className("mod-code")))
 
       When("I publish the feedback")
-      // Need to be very specific about which feedback link to click on - as we have 2 assignments with very similar names
+      // find feedback publishing link for cm2 related assignment (XXX02 module)
       val premarkedAssignmentFeedbackLink = eventually {
-        id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment') and not(contains(text(), 'Premarked assignment CM2'))]"))
+        id("main").webElement.findElement(By.xpath("//*[contains(text(),'Premarked assignment CM2')]"))
           .findElement(By.xpath("../../../../div[contains(@class, 'item-info')]")).findElement(By.linkText("Feedback needs publishing (2 of 2)"))
       }
       click on premarkedAssignmentFeedbackLink
@@ -76,8 +102,8 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
       eventually(pageSource contains "The feedback has been published." should be (true))
     }
 
-    eventually(pageSource contains "Premarked assignment" should be (true))
-    eventually(click on partialLinkText("Premarked assignment"))
+    eventually(pageSource contains "Premarked assignment CM2" should be (true))
+    eventually(click on partialLinkText("Premarked assignment CM2"))
     val assignmentId = currentUrl.split("/")(6)
 
     Then("The student can see the adjustment")
@@ -91,33 +117,9 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
     When("Admin goes back in to make non-private adjustments")
     as(P.Admin1) {
-      go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
-      Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be (true)
-      pageSource contains "tabula-functest-student1" should be (true)
-      pageSource contains "tabula-functest-student3" should be (true)
-
-      When("I click on the bulk adjustments button")
-      click on linkText("Adjust in bulk")
-
-      Then("I should see the bulk adjustment form")
-      eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
-
-      Then("I upload a valid adjustments file")
-      click on "file.upload"
-      pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-
-      And("submit the form")
-      click on cssSelector(".btn-primary")
-
-      Then("I should see the preview bulk adjustment page")
-      eventually {
-        pageSource contains "Preview bulk adjustment" should be (true)
-      }
-
-      Then("The hide from student checkbox should be selected by default")
-      checkbox("privateAdjustment").isSelected should be(true)
-
+      go to Path(s"/coursework/admin/assignments/$assignmentId")
+      adjustmentPage()
+      bulkAdjustmentPage(assignmentId)
       Then("I uncheck the hide from student checkbox")
       checkbox("privateAdjustment").clear()
 
@@ -145,32 +147,9 @@ class FeedbackAdjustmentsTest extends BrowserTest with CourseworkFixtures with G
 
     Then("Admin goes back in to make private adjustments")
     as(P.Admin1) {
-      go to Path(s"/coursework/admin/assignments/$assignmentId/feedback/adjustments")
-      Then("I see a list of students")
-      pageSource contains "Feedback adjustment" should be (true)
-      pageSource contains "tabula-functest-student1" should be (true)
-      pageSource contains "tabula-functest-student3" should be (true)
-
-      When("I click on the bulk adjustments button")
-      click on linkText("Adjust in bulk")
-
-      Then("I should see the bulk adjustment form")
-      eventually(currentUrl should include(s"/coursework/admin/assignments/$assignmentId/feedback/bulk-adjustment"))
-
-      Then("I upload a valid adjustments file")
-      click on "file.upload"
-      pressKeys(getClass.getResource("/adjustments.xlsx").getFile)
-
-      And("submit the form")
-      click on cssSelector(".btn-primary")
-
-      Then("I should see the preview bulk adjustment page")
-      eventually {
-        pageSource contains "Preview bulk adjustment" should be (true)
-      }
-
-      Then("The hide from student checkbox should be selected by default")
-      checkbox("privateAdjustment").isSelected should be(true)
+      go to Path(s"/coursework/admin/assignments/$assignmentId")
+      adjustmentPage()
+      bulkAdjustmentPage(assignmentId)
 
       When("I submit the form")
       click on cssSelector("input.btn-primary")

@@ -16,8 +16,8 @@ import scala.collection.JavaConverters._
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver with GivenWhenThen {
 
-  val TEST_MODULE_CODE = "xxx01"
-  val TEST_MODULE_CODE1 = "xxx02"
+  val TEST_MODULE_CODE = "xxx02"
+  val TEST_MODULE_CODE1 = "xxx01"
 
   val TEST_ROUTE_CODE = "xx456"
   val TEST_DEPARTMENT_CODE = "xxx"
@@ -29,8 +29,9 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     go to Path("/fixtures/setup")
     pageSource should include("Fixture setup successful")
 
-    createPremarkedCM2Assignment(TEST_MODULE_CODE1, "false")
-    createPremarkedCM2Assignment(TEST_MODULE_CODE)
+    // create 2 assignments with one Premarked
+    createCM2Assignment(TEST_MODULE_CODE1, "false", "Assignment CM2-01")
+    createCM2Assignment(TEST_MODULE_CODE)
 
     val assessmentFuture = Future {
       And("There is an assessment component for module xxx01")
@@ -299,8 +300,17 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   }
 
   // assumes that you start at the summary screen for an assignment
-  def releaseForMarking(id: String): Unit = {
-    navigateToMarkerAllocation()
+  def releaseForMarking(assignmentId: String): Unit = {
+    When("I click on the relevant assignment edit button again")
+    click on id("main").webElement.findElement(By.cssSelector(s"a[href$$='coursework/admin/assignments/$assignmentId/edit']"))
+    //click on cssSelector(s"a[href$$='coursework/admin/assignments/$id/edit']")
+    Then("I see the edit details screen")
+    eventually(pageSource contains "Edit assignment details" should be (true))
+
+    When("I click on the Markers link")
+    click on partialLinkText("Markers")
+    Then("I see the assign markers screen")
+    eventually(pageSource contains "Assign markers" should be (true))
 
     When("I randomly assign the markers")
     click on partialLinkText("Randomly allocate")
@@ -310,7 +320,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
     When("I submit the marker allocation")
     cssSelector(s"input[name=createAndAddMarkers]").webElement.click()
     Then("I am redirected to the summary screen ")
-    eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
+    eventually(currentUrl should include(s"/admin/assignments/$assignmentId/summary"))
 
     When("I select all the submissions")
     eventually(click on cssSelector(".collection-check-all"))
@@ -323,7 +333,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       click on release
     })
     Then("I reach the release submissions screen")
-    eventually(currentUrl should include(s"/admin/assignments/$id/release-submissions"))
+    eventually(currentUrl should include(s"/admin/assignments/$assignmentId/release-submissions"))
 
     When("I confirm")
     eventually {
@@ -331,7 +341,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       cssSelector(s"input[value=Confirm]").webElement.click()
     }
     Then("The submissions are released")
-    eventually(currentUrl should include(s"/admin/assignments/$id/summary"))
+    eventually(currentUrl should include(s"/admin/assignments/$assignmentId/summary"))
   }
 
   def openMarkingWorkflowSettings(): Unit = {

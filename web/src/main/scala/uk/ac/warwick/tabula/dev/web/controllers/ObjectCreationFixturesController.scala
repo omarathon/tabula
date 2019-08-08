@@ -271,31 +271,16 @@ class CreateAttendanceMonitoringSchemeFixturesController {
 }
 
 @Controller
-@RequestMapping(Array("/fixtures/create/premarkedAssignment"))
-class CreatePremarkedAssignmentFixtureController {
+@RequestMapping(Array("/fixtures/create/cm2Assignment"))
+class CreateCM2AssignmentFixtureController {
 
-  @ModelAttribute("createPremarkedAssignmentFixtureCommand")
+  @ModelAttribute("createCM2AssignmentFixtureCommand")
   def command(): Appliable[Assignment] = {
-    CreatePremarkedAssignmentFixtureCommand()
+    CreateCM2AssignmentFixtureCommand()
   }
 
   @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createPremarkedAssignmentFixtureCommand") cmd: Appliable[Assignment]) {
-    cmd.apply()
-  }
-}
-
-@Controller
-@RequestMapping(Array("/fixtures/create/premarkedCM2Assignment"))
-class CreatePremarkedCM2AssignmentFixtureController {
-
-  @ModelAttribute("createPremarkedCM2AssignmentFixtureCommand")
-  def command(): Appliable[Assignment] = {
-    CreatePremarkedCM2AssignmentFixtureCommand()
-  }
-
-  @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("createPremarkedCM2AssignmentFixtureCommand") cmd: Appliable[Assignment]) {
+  def submit(@ModelAttribute("createCM2AssignmentFixtureCommand") cmd: Appliable[Assignment]) {
     cmd.apply()
   }
 }
