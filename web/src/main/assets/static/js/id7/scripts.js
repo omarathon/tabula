@@ -1564,3 +1564,34 @@ $(() => {
     throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
   });
 });
+
+// TAB-7414
+$(() => {
+  const $filtersWell = $('.filters');
+  if (!$filtersWell.length) return; // only do the following if there's a filter
+
+  $filtersWell.on('keyup', (event) => {
+    if (event.keyCode !== 27) return;
+    $filtersWell.find('.open .dropdown-toggle').click();
+  });
+
+  const getToggle = event => $(event.currentTarget).parents('.open').find('.dropdown-toggle');
+
+  // dismiss dropdown when going back
+  $filtersWell.on('keydown', '.open .filter-list :first', (event) => {
+    if (event.shiftKey && event.keyCode === 9) getToggle(event).click();
+  });
+
+  // dismiss when going next
+  $filtersWell.on('keydown', '.open .filter-list li:last', (event) => {
+    if (event.keyCode === 9) getToggle(event).click();
+  });
+
+  // special handler for radios
+  // tab on any radio should result in dismissing current dropdown menu
+  $filtersWell.on('keydown', '.open .filter-list li', (event) => {
+    const $listItems = $(event.currentTarget);
+    if ($listItems.length !== $listItems.find(':radio').length) return;
+    if (event.keyCode === 9) getToggle(event).click();
+  });
+});
