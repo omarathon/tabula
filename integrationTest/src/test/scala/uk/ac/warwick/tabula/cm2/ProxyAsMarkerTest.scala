@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
- // private val currentYear = AcademicYear.now()
 
   private def openProxyMarkingScreen(): Unit = {
 

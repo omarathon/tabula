@@ -303,7 +303,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
   def releaseForMarking(assignmentId: String): Unit = {
     When("I click on the relevant assignment edit button again")
     click on id("main").webElement.findElement(By.cssSelector(s"a[href$$='coursework/admin/assignments/$assignmentId/edit']"))
-    //click on cssSelector(s"a[href$$='coursework/admin/assignments/$id/edit']")
     Then("I see the edit details screen")
     eventually(pageSource contains "Edit assignment details" should be (true))
 
