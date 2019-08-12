@@ -150,7 +150,7 @@ class MitigatingCircumstancesSubmission extends GeneratedId
 
   def formattedReason: TemplateHTMLOutputModel = formattedHtml(reason)
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL), orphanRemoval = true)
+  @OneToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
   @JoinColumn(name = "submission_id")
   @BatchSize(size = 200)
   @OrderBy("academicYear, moduleCode, sequence")

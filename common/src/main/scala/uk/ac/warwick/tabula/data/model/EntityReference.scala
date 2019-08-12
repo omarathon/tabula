@@ -5,7 +5,7 @@ import org.hibernate.annotations.{Any, AnyMetaDef, MetaValue, Proxy}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceMonitoringCheckpointTotal, AttendanceMonitoringScheme, MonitoringPointReport}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesSubmission}
+import uk.ac.warwick.tabula.data.model.mitcircs.{MitigatingCircumstancesMessage, MitigatingCircumstancesPanel, MitigatingCircumstancesSubmission}
 
 /**
   * Stores a reference to an entity that is being pointed at in a
@@ -51,6 +51,7 @@ class EntityReference[A >: Null <: ToEntityReference] extends GeneratedId {
       new MetaValue(targetEntity = classOf[MonitoringPointReport], value = "MonitoringPointReport"),
       new MetaValue(targetEntity = classOf[MitigatingCircumstancesSubmission], value = "MitigatingCircumstancesSubmission"),
       new MetaValue(targetEntity = classOf[MitigatingCircumstancesMessage], value = "MitigatingCircumstancesMessage"),
+      new MetaValue(targetEntity = classOf[MitigatingCircumstancesPanel], value = "MitigatingCircumstancesPanel"),
     )
   )
   @JoinColumn(name = "entity_id")
