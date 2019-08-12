@@ -17,7 +17,8 @@
       </div>
     </div>
   <#else>
-    <form id="reorderTemplates" action="<@url page="/sysadmin/attendancetemplates/reorder"/>" method="POST">
+    <#assign reorderTemplatesAction><@url page="/sysadmin/attendancetemplates/reorder"/></#assign>
+    <@f.form id="reorderTemplates" action=reorderTemplatesAction method="POST">
       <p style="color: #818285;"><em>Drag and drop to reorder templates.</em></p>
       <div class="striped-section">
         <div class="pull-right">
@@ -44,7 +45,7 @@
         </div>
       </div>
       <input type="submit" value="Reorder" class="btn btn-primary" />
-    </form>
+    </@f.form>
 
     <script nonce="${nonce()}">
       jQuery(function ($) {
