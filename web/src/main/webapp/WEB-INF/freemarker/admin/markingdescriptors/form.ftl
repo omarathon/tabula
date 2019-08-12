@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-  <@f.form method="post" class="double-submit-protection" modelAttribute="command">
+  <@f.form method="post" cssClass="double-submit-protection" modelAttribute="command">
     <@bs3form.labelled_form_group path="text" labelText="Descriptor">
       <@f.textarea path="text" cssClass="form-control" rows="5" />
     </@bs3form.labelled_form_group>
