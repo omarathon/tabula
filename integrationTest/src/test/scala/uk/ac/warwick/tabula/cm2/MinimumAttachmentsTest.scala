@@ -16,9 +16,10 @@ class MinimumAttachmentsTest extends BrowserTest with CourseworkFixtures {
 
     Then("The  module should expand")
     eventually {
-      And("I should find a button to edit the CM2 assignment")
-      println(id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).size())
-      val editAssignmentBtn = id("main").webElement.findElements(By.xpath("//*[contains(text(),'Edit assignment')]")).get(1)
+      And("I should find a link and button to edit the CM2 assignment")
+      id("main").webElement.findElement(By.partialLinkText("Premarked assignment CM2")).isDisplayed should be (true)
+      val editAssignmentBtn = id("main").webElement.findElement(By.partialLinkText("Edit assignment"))
+
       editAssignmentBtn.isDisplayed should be(true)
       editAssignmentBtn.isEnabled should be(true)
       click on editAssignmentBtn

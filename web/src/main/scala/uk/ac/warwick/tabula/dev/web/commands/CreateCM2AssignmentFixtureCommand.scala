@@ -15,7 +15,7 @@ import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 
-class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with Logging {
+class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with Logging {
 
   this: TransactionalComponent =>
 
@@ -29,6 +29,8 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
   val userGroupDao: UserGroupDao = Wire[UserGroupDao]
 
   var moduleCode: String = _
+  var assignmentName: String = _
+  var markingComplete: Boolean = _
 
   protected def applyInternal(): Assignment = {
     val module = moduleAndDepartmentService.getModuleByCode(moduleCode).getOrElse(
@@ -37,7 +39,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 
     val assignment = new Assignment
     assignment.module = module
-    assignment.name = "Premarked assignment CM2"
+    assignment.name = assignmentName
     assignment.setDefaultBooleanProperties()
     assignment.addDefaultFields()
     assignment.openDate = DateTime.now.minusDays(30)
@@ -60,7 +62,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
       assignmentSrv.save(assignment)
 
 
-      val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreatePremarkedCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
+      val markersAUsers: Seq[User] = userLookup.getUsersByUserIds(CreateCM2AssignmentFixtureCommand.firstMarkers).values.toSeq
       val markersBUsers: Seq[User] = JArrayList().asScala
 
       val oldSingleMarkerWorkflow = SingleMarkerWorkflow("Old single marker workflow", module.adminDepartment, markersAUsers)
@@ -73,7 +75,7 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
       cm2MarkingWorkflowService.save(singleMarkerWorkflow)
       assignment.cm2MarkingWorkflow = singleMarkerWorkflow
 
-      val submissions = CreatePremarkedCM2AssignmentFixtureCommand.students.map(student => {
+      val submissions = CreateCM2AssignmentFixtureCommand.students.map(student => {
         val s = new Submission
         s.assignment = assignment
         s.usercode = student.userId
@@ -84,21 +86,23 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
       submissions.foreach(submissionService.saveSubmission)
       assignment.submissions = submissions.asJava
 
-      val feedbacks = CreatePremarkedCM2AssignmentFixtureCommand.students.map(student => {
+      val feedbacks = CreateCM2AssignmentFixtureCommand.students.map(student => {
         val f = new AssignmentFeedback
         f._universityId = student.universityId
         f.usercode = student.userId
         f.assignment = assignment
         f.uploaderId = "tabula-functest-admin1"
-        f.actualMark = Some(41)
         val currentStage = singleMarkerWorkflow.initialStages.head
-        f.outstandingStages = currentStage.nextStages.toSet.asJava
-        feedbackService.saveOrUpdate(f)
 
         val mf = new MarkerFeedback(f)
         mf.marker = markersAUsers.head
         mf.stage = currentStage
-        mf.mark = Some(41)
+        if (markingComplete){
+          f.actualMark = Some(41)
+          mf.mark = Some(41)
+          f.outstandingStages = currentStage.nextStages.toSet.asJava
+        }
+
         feedbackService.saveOrUpdate(f)
         feedbackService.save(mf)
         f
@@ -113,15 +117,15 @@ class CreatePremarkedCM2AssignmentFixtureCommand extends CommandInternal[Assignm
 }
 
 
-object CreatePremarkedCM2AssignmentFixtureCommand {
+object CreateCM2AssignmentFixtureCommand {
 
   case class Student(universityId: String, userId: String)
 
   val students = Seq(Student("3000001", "tabula-functest-student1"), Student("3000003", "tabula-functest-student3"))
   val firstMarkers = Seq("tabula-functest-marker1")
 
-  def apply(): CreatePremarkedCM2AssignmentFixtureCommand with ComposableCommand[Assignment] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited = {
-    new CreatePremarkedCM2AssignmentFixtureCommand
+  def apply(): CreateCM2AssignmentFixtureCommand with ComposableCommand[Assignment] with AutowiringTransactionalComponent with PubliclyVisiblePermissions with Unaudited = {
+    new CreateCM2AssignmentFixtureCommand
       with ComposableCommand[Assignment]
       with AutowiringTransactionalComponent
       with PubliclyVisiblePermissions

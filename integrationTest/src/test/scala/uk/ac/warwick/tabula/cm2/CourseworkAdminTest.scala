@@ -33,7 +33,7 @@ class CourseworkAdminTest extends BrowserTest with CourseworkFixtures {
     }
 
     eventually {
-      getModule("xxx01").isDefined should be (false)
+      getModule("xxx01").get.isDisplayed should be (true)
       getModule("xxx02").get.isDisplayed should be (true)
       getModule("xxx03").isDefined should be (false)
     }

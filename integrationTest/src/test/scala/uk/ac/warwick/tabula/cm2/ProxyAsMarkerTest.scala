@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.{AcademicYear, BrowserTest}
 
 class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
-  private val currentYear = AcademicYear.now()
 
   private def openProxyMarkingScreen(): Unit = {
 
@@ -18,16 +17,16 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
     loadCurrentAcademicYearTab()
 
     eventually {
-      val testModulerow = id("main").webElement.findElements(By.cssSelector("span.mod-code")).get(0)
+      val testModulerow = id("main").webElement.findElement(By.partialLinkText("XXX01"))
       click on testModulerow
     }
 
     eventually {
-      val moderatedMarkingAssignment = id("main").webElement.findElements(By.cssSelector(".striped-section-contents span div h5 a")).get(0)
-      moderatedMarkingAssignment.getText should startWith("Single marking - single use")
-      click on moderatedMarkingAssignment
+      pageSource contains "Single marking - single use" should be (true)
+      When("I click on the Single marking - single use assignment link")
+      click on id("main").webElement.findElement(By.partialLinkText("Single marking - single use"))
     }
-
+    Then("I see the summary assignment  screen")
     currentUrl.contains("/summary") should be(true)
 
     val expandAssignmentUser = eventually(id("main").webElement.findElements(By.className("student")).get(0)) //tabula-functest-student1
@@ -41,11 +40,11 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
   }
 
   "Department admin" should "be able to proxy as marker" in as(P.Admin1) {
+    //xxx01 module related assignment
+    withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { assignmentId =>
 
-    withAssignmentWithWorkflow(SingleMarking, Seq(P.Marker1, P.Marker2)) { id =>
-
-      submitAssignment(P.Student1, "Single marking - single use", id, "/file1.txt", false)
-      submitAssignment(P.Student2, "Single marking - single use", id, "/file2.txt", false)
+      submitAssignment(P.Student1, "Single marking - single use", assignmentId, "/file1.txt", false)
+      submitAssignment(P.Student2, "Single marking - single use", assignmentId, "/file2.txt", false)
 
       as(P.Admin1) {
         click on linkText("Coursework Management")
@@ -57,11 +56,9 @@ class ProxyAsMarkerTest extends BrowserTest with CourseworkFixtures {
 
         currentUrl.contains("/department/xxx") should be(true)
 
-        eventually(click on cssSelector("span.mod-code"))
+        eventually(click on id("main").webElement.findElement(By.partialLinkText("XXX01")))
 
-        eventually {
-          releaseForMarking(id)
-        }
+        eventually(releaseForMarking(assignmentId))
 
         openProxyMarkingScreen()
 
