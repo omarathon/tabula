@@ -1,6 +1,7 @@
 <#compress><#escape x as x?html>
 
   <#import "*/permissions_macros.ftl" as pm />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
   <#assign perms_url = info.requestedUri />
   <#assign display_name = target.humanReadableId />
   <#if target.urlCategory == 'assignment'>
@@ -169,6 +170,7 @@
                     <#if can_delegate>
                       <form action="${perms_url}" method="post" class="remove-permissions"
                             data-confirm-submit="Are you sure you want to remove permission for this user?">
+                        <@csrf_macros.csrfHiddenInputField />
                         <input type="hidden" name="_command" value="removeSingle">
                         <input type="hidden" name="permission" value="${permissionName}">
                         <input type="hidden" name="overrideType" value="<#if grantedPermission.overrideType>true<#else>false</#if>">
