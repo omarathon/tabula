@@ -28,9 +28,9 @@
   <#assign homeUrl><@routes.groups.home /></#assign>
 <#elseif requestPath== '/exams' || requestPath?starts_with('/exams/')>
   <#assign bodyClass="exams-page" />
-  <#assign siteHeader="Exams Management" />
+  <#assign siteHeader="Exam Management" />
   <#assign subsite=true />
-  <#assign title="Exams Management" />
+  <#assign title="Exam Management" />
   <#assign name="exams" />
   <#assign context="/exams" />
   <#assign nonav=false />

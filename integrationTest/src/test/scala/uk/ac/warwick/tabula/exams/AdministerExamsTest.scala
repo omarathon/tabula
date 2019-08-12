@@ -12,7 +12,7 @@ class AdministerExamsTest extends ExamFixtures
 
   "Department admin" should "be able to create and edit exams" in as(P.Admin1) {
     Given("The exams home page")
-    pageTitle should be("Tabula - Exams Management")
+    pageTitle should be("Tabula - Exam Management")
 
     Then("The user should be shown a link to their department exams")
     click on linkText("Go to the Test Services admin page")
