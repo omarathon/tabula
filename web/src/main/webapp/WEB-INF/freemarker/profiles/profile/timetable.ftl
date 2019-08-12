@@ -79,11 +79,12 @@
                 application, or your mobile phone.</p>
               <p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using
                 this private address will break, and you will have to give them the new private address.</p>
-              <form class="form-inline double-submit-protection" method="POST" action="<@routes.profiles.timetable_ical_regenerate />">
+              <#assign regenerateHashAction><@routes.profiles.timetable_ical_regenerate /></#assign>
+              <@f.form cssClass="form-inline double-submit-protection" method="POST" action=regenerateHashAction>
                 <div class="submit-buttons">
                   <button type="submit" class="btn btn-primary">Generate a new private address</button>
                 </div>
-              </form>
+              </@f.form>
             </div>
           </#if>
 
