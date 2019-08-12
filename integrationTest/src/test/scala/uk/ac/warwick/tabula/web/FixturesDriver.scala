@@ -326,14 +326,14 @@ trait FixturesDriver extends SimpleHttpFetching {
     )
   }
 
-  def createCM2Assignment(moduleCode: String, markingComplete: String = "true", moduleName:String = "Premarked assignment CM2"): Unit = {
+  def createCM2Assignment(moduleCode: String, markingComplete: String = "true", assignmentName:String = "Premarked assignment CM2"): Unit = {
     val uri = FunctionalTestProperties.SiteRoot + "/fixtures/create/cm2Assignment"
 
     val req =
       RequestBuilder.post(uri)
         .addParameter("moduleCode", moduleCode)
         .addParameter("markingComplete", markingComplete)
-        .addParameter("moduleName", moduleName)
+        .addParameter("assignmentName", assignmentName)
 
     httpClient.execute(
       req.build(),

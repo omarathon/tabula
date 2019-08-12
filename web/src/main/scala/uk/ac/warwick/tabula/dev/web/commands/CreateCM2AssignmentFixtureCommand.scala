@@ -29,7 +29,7 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
   val userGroupDao: UserGroupDao = Wire[UserGroupDao]
 
   var moduleCode: String = _
-  var moduleName: String = _
+  var assignmentName: String = _
   var markingComplete: Boolean = _
 
   protected def applyInternal(): Assignment = {
@@ -39,7 +39,7 @@ class CreateCM2AssignmentFixtureCommand extends CommandInternal[Assignment] with
 
     val assignment = new Assignment
     assignment.module = module
-    assignment.name = moduleName
+    assignment.name = assignmentName
     assignment.setDefaultBooleanProperties()
     assignment.addDefaultFields()
     assignment.openDate = DateTime.now.minusDays(30)
