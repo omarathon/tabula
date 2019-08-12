@@ -73,17 +73,17 @@
 
         $('.form-post').click(function (event) {
           event.preventDefault();
-          var $this = $(this);
-          if (!$this.hasClass("disabled")) {
+          var $form = window.GlobalScripts.csrfForm.appendCsrfField($(event.currentTrget));
+          if (!$form.hasClass("disabled")) {
             var action = this.href;
-            if ($this.data('href')) {
-              action = $this.data('href')
+            if ($form.data('href')) {
+              action = $form.data('href')
             }
 
             var $form = window.GlobalScripts.csrfForm.generate().attr({action: action}).hide();
             var doFormSubmit = false;
 
-            if ($container.data('checked') !== 'none' || $this.closest('.must-have-selected').length === 0) {
+            if ($container.data('checked') !== 'none' || $form.closest('.must-have-selected').length === 0) {
               var $checkedBoxes = $(".collection-checkbox:checked", $container);
               $form.append($checkedBoxes.clone());
               doFormSubmit = true;

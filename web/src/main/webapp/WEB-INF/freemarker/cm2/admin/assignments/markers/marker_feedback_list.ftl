@@ -304,14 +304,14 @@
 
       $("#bulk-adjustment-modal").on('submit', function (e) {
         e.preventDefault();
-        var $this = $(this);
-        var $form = $this.find("form");
+        var $modal = $(e.currentTarget);
+        var $form = window.GlobalScripts.csrfForm.appendCsrfField($modal.find("form"));
         jQuery.post($form.attr('action'), $form.serialize(), function (data) {
           if (data.status === "successful") {
-            $this.modal('toggle');
+            $modal.modal('toggle');
             window.location = data.redirect;
           } else {
-            $this.html(data);
+            $modal.html(data);
           }
         });
       });

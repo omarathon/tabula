@@ -2,14 +2,15 @@
 import $ from 'jquery';
 
 export default class CsrfForm {
-  static generate() {
+  static getCsrfValue() {
     const $meta = $('meta[name=_csrf]');
-    let csrfTokenValue = '';
-    if ($meta.length > 0 && $meta.attr('content') !== undefined) {
-      csrfTokenValue = $meta.attr('content');
-    }
-    const $form = $('<form>').attr('method', 'POST');
-    $form.append($('<input>').attr('type', 'hidden').attr('value', csrfTokenValue).attr('name', 'urn:websignon:csrf'));
-    return $form;
+    if ($meta.length > 0 && $meta.attr('content') !== undefined) return $meta.attr('content');
+    return '';
   }
+
+  static makeCsrfField = () => $('<input>').attr('type', 'hidden').attr('value', CsrfForm.getCsrfValue()).attr('name', 'urn:websignon:csrf');
+
+  static appendCsrfField = $form => $form.append(CsrfForm.makeCsrfField());
+
+  static generate = () => CsrfForm.appendCsrfField($('<form>').attr('method', 'POST'));
 }
