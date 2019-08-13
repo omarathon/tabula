@@ -1,5 +1,6 @@
 <#escape x as x?html>
   <#import "../attendance_variables.ftl" as attendance_variables />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#if command.schemes?size == 1>
 
@@ -71,6 +72,7 @@
     </@f.form>
 
     <form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post">
+      <@csrf_macros.csrfHiddenInputField />
       <#list command.schemes as scheme>
         <input type="hidden" name="schemes" value="${scheme.id}" />
       </#list>
