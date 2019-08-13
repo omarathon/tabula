@@ -1546,12 +1546,15 @@ $(() => {
     const targetUrl = settings.url;
     if (!targetUrl) return;
 
-    const parsedUrl = new URL(targetUrl);
-    if (!parsedUrl) return;
-
-    // TAB-7506 if somehow the browser is making a request to
-    // a different place and failed, we do not throw.
-    if (parsedUrl.hostname !== window.location.hostname) return;
+    try {
+      const parsedUrl = new URL(targetUrl, window.location.href);
+      // TAB-7506 if somehow the browser is making a request to
+      // a different place and failed, we do not throw.
+      if (parsedUrl && parsedUrl.hostname !== window.location.hostname) return;
+    } catch (e) {
+      // invalid URL, we do not care.
+      return;
+    }
 
     const pageErrorToken = $('body').data('error-token');
     if (pageErrorToken) {
