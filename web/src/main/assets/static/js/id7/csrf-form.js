@@ -8,9 +8,15 @@ export default class CsrfForm {
     return '';
   }
 
-  static makeCsrfField = () => $('<input>').attr('type', 'hidden').attr('value', CsrfForm.getCsrfValue()).attr('name', 'urn:websignon:csrf');
+  static makeCsrfField() {
+    return $('<input>').attr('type', 'hidden').attr('value', CsrfForm.getCsrfValue()).attr('name', 'urn:websignon:csrf');
+  }
 
-  static appendCsrfField = $form => $form.append(CsrfForm.makeCsrfField());
+  static appendCsrfField($form) {
+    return $form.append(CsrfForm.makeCsrfField());
+  }
 
-  static generate = () => CsrfForm.appendCsrfField($('<form>').attr('method', 'POST'));
+  static generate() {
+    return CsrfForm.appendCsrfField($('<form>').attr('method', 'POST'));
+  }
 }
