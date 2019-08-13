@@ -28,11 +28,11 @@
     </tbody>
   </table>
 
-  <form method="post">
+  <@f.form method="post">
     <p>
       <button class="btn btn-primary">Mark checkpoints attended</button>
     </p>
-  </form>
+  </@f.form>
 
 </#if>
 </#escape>
