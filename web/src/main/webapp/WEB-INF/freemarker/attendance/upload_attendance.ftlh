@@ -1,6 +1,6 @@
 <#import "*/modal_macros.ftlh" as modal />
 
-<@f.form action="${uploadUrl}" method="post" enctype="multipart/form-data" style="margin-bottom: 0">
+<@f.form action=uploadUrl method="post" enctype="multipart/form-data" style="margin-bottom: 0">
 
     <@modal.wrapper ajax>
         <#if ajax>
