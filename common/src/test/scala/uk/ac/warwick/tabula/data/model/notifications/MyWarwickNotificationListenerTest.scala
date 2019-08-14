@@ -5,21 +5,21 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.commands.CurrentAcademicYear
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.notifications.cm2.Cm2StudentFeedbackAdjustmentNotification
-import uk.ac.warwick.tabula.data.model.notifications.coursework.FeedbackPublishedNotification
+import uk.ac.warwick.tabula.data.model.notifications.coursework.{FeedbackPublishedNotification, SubmissionDueGeneralNotification}
 import uk.ac.warwick.tabula.notifications.{MyWarwickNotificationListener, MyWarwickServiceComponent}
 import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.util.mywarwick.MyWarwickService
 import uk.ac.warwick.util.mywarwick.model.request.Activity
+
+import scala.collection.JavaConverters._
 
 
 class MyWarwickNotificationListenerTest extends TestBase with Mockito {
 
-  var listener = new MyWarwickNotificationListener with TextRendererComponent
-    with FeaturesComponent
-    with MyWarwickServiceComponent
-    with TopLevelUrlComponent {
+  var listener: MyWarwickNotificationListener with TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =
+    new MyWarwickNotificationListener with TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent {
 
     def textRenderer: TextRenderer = smartMock[TextRenderer]
 
@@ -57,7 +57,7 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       val fpn = new FeedbackPublishedNotification
       val rn = new RecipientNotificationInfo(fpn, user)
       fpn.recipientNotificationInfos.add(rn)
-      val n = Notification.init(fpn, currentUser.apparentUser, Seq(feedback), feedback.assignment)
+      val n: FeedbackPublishedNotification = Notification.init(fpn, currentUser.apparentUser, Seq(feedback), feedback.assignment)
       listener.listen(n)
       verify(listener.myWarwickService, times(1)).sendAsNotification(any[Activity])
     }
@@ -69,11 +69,35 @@ class MyWarwickNotificationListenerTest extends TestBase with Mockito {
       val sfan = new Cm2StudentFeedbackAdjustmentNotification
       val rn = new RecipientNotificationInfo(sfan, user)
       sfan.recipientNotificationInfos.add(rn)
-      val n = Notification.init(sfan, currentUser.apparentUser, Seq(feedback), feedback.assignment)
+      val n: Cm2StudentFeedbackAdjustmentNotification = Notification.init(sfan, currentUser.apparentUser, Seq(feedback), feedback.assignment)
       listener.listen(n)
       verify(listener.myWarwickService, times(1)).sendAsActivity(any[Activity])
     }
   }
 
+  @Test def noDupes() {
+    new Fixture {
+      val notification = new SubmissionDueGeneralNotification
+
+      val user2 = new User("cuslaj")
+      user2.setFoundUser(true)
+      val user3 = new User("cuscav")
+      user3.setFoundUser(true)
+
+      val rn = new RecipientNotificationInfo(notification, user)
+      val rn2 = new RecipientNotificationInfo(notification, user2)
+      val rn3 = new RecipientNotificationInfo(notification, user3)
+
+      notification.recipientNotificationInfos.addAll(Seq(rn, rn2, rn3).asJava)
+      val n: SubmissionDueGeneralNotification = Notification.init(notification, new AnonymousUser, assignment)
+
+      val activities: Seq[Activity] = listener.toMyWarwickActivities(n)
+      val recipients: Seq[String] = activities.flatMap(_.getRecipients.getUsers.asScala.toSeq)
+      recipients.size should be (recipients.toSet.size)
+
+      listener.listen(n)
+      verify(listener.myWarwickService, times(3)).sendAsNotification(any[Activity])
+    }
+  }
 
 }
