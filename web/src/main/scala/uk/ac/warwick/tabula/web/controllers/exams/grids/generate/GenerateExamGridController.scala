@@ -498,6 +498,7 @@ class GenerateExamGridController extends ExamsController
 
   private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
     params.set("clearModel", "true")
+    params.remove("urn:websignon:csrf")
     params.keySet.asScala.filter(_.startsWith("modules[")).foreach(params.remove)
 
     val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
