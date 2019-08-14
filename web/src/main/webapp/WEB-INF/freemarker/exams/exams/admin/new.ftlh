@@ -3,7 +3,7 @@
 <div class="alert alert-info">
   <h4>
     <i class="fal fa-info-circle"></i>
-    Migrate to Coursework Management
+    Create an exam assessment
   </h4>
 
   <p>
@@ -11,18 +11,17 @@
   </p>
 
   <p>
-    Coursework Management replaces Exam Management. To create an exam in Coursework Management, create an assignment and disable submissions. Then, link the
-    assignment to an exam assessment component.
+    You can create an assessment linked to an exam component in Coursework Management.
   </p>
 
   <p>
-    For more information, see the
-    <a target="_blank" href="https://warwick.ac.uk/tabula/manual/cm2/exams">migration guide<i class="new-window-link" title="Link opens in a new window"></i></a>.
+    For more information, see
+    <a target="_blank" href="https://warwick.ac.uk/tabula/manual/cm2/exams">how to create an exam assessment<i class="new-window-link" title="Link opens in a new window"></i></a>.
   </p>
 
   <p>
     <a href="<@routes.cm2.createassignmentdetails module academicYear />" class="btn btn-primary">
-      Continue in Coursework Management <i class="fa fa-chevron-right"></i>
+      Coursework Management
     </a>
   </p>
 </div>
