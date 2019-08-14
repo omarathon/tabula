@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.NotificationListener
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent}
@@ -15,10 +16,10 @@ import uk.ac.warwick.util.mywarwick.model.request.{Activity, Tag}
 import scala.collection.JavaConverters._
 import scala.language.existentials
 
-trait MyWarwickNotificationListener extends NotificationListener {
+trait MyWarwickNotificationListener extends NotificationListener with Logging {
   self: TextRendererComponent with FeaturesComponent with MyWarwickServiceComponent with TopLevelUrlComponent =>
 
-  private def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
+  def toMyWarwickActivities(notification: Notification[_ >: Null <: ToEntityReference, _]): Seq[Activity] = try {
     val recipients = notification.recipientNotificationInfos.asScala
       .filterNot(_.dismissed) // Not if the user has dismissed the notification already
       .map(_.recipient)
@@ -58,7 +59,7 @@ trait MyWarwickNotificationListener extends NotificationListener {
         }
 
         val activity = new Activity(
-          recipients.map(_.getUserId).toSet.asJava,
+          Set(recipient.getUserId).asJava,
           notification.title,
           if (notification.url.toLowerCase.startsWith("https://")) {
             notification.url
@@ -84,8 +85,14 @@ trait MyWarwickNotificationListener extends NotificationListener {
 
   private def postActivity(notification: Notification[_ >: Null <: ToEntityReference, _]): Unit = {
     notification match {
-      case a: MyWarwickNotification => toMyWarwickActivities(notification).map(myWarwickService.sendAsNotification)
-      case a => toMyWarwickActivities(notification).map(myWarwickService.sendAsActivity)
+      case a: MyWarwickNotification => toMyWarwickActivities(notification).map(n => {
+        logger.info(s"Sending MyWarwick notification - ${n.getTitle} to ${n.getRecipients.getUsers.asScala.mkString(", ")}")
+        myWarwickService.sendAsNotification(n)
+      })
+      case a => toMyWarwickActivities(notification).map(a => {
+        logger.info(s"Sending MyWarwick activity - ${a.getTitle} to ${a.getRecipients.getUsers.asScala.mkString(", ")}")
+        myWarwickService.sendAsActivity(a)
+      })
     }
   }
 
