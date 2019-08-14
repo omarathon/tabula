@@ -4,71 +4,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.{AcademicYear, UniversityId}
 
 import scala.collection.JavaConverters._
 
-
-object AddExamCommand {
-  def apply(module: Module, academicYear: AcademicYear) =
-    new AddExamCommandInternal(module, academicYear)
-      with ComposableCommand[Exam]
-      with AddExamPermissions
-      with ExamState
-      with AddExamCommandDescription
-      with ExamValidation
-      with UpdatesStudentMembership
-      with AutowiringAssessmentServiceComponent
-      with AutowiringAssessmentMembershipServiceComponent
-      with HasAcademicYear
-      with AutowiringUserLookupComponent
-      with SpecifiesGroupType
-      with ModifiesExamMembership
-}
-
-class AddExamCommandInternal(val module: Module, val academicYear: AcademicYear)
-  extends CommandInternal[Exam]
-    with ExamState
-    with UpdatesStudentMembership
-    with ModifiesExamMembership
-    with PopulateOnForm {
-
-  self: AssessmentServiceComponent with UserLookupComponent with HasAcademicYear with SpecifiesGroupType
-    with AssessmentMembershipServiceComponent =>
-
-  override def populate(): Unit = {
-    if (availableUpstreamGroups.size == 1) {
-      name = availableUpstreamGroups.head.name
-      upstreamGroups.add(new UpstreamGroup(availableUpstreamGroups.head.assessmentComponent, availableUpstreamGroups.head.group, availableUpstreamGroups.head.currentMembers))
-    }
-  }
-
-  override def applyInternal(): Exam = {
-    val exam = new Exam
-
-    this.copyTo(exam)
-
-    exam.academicYear = academicYear
-    exam.module = module
-    exam.released = false
-
-    assessmentService.save(exam)
-    exam
-  }
-}
-
-trait AddExamPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-
-  self: ExamState =>
-
-  override def permissionsCheck(p: PermissionsChecking) {
-    p.PermissionCheck(Permissions.Assignment.Create, module)
-  }
-
-}
 
 trait ExamState extends UpdatesStudentMembership {
 
@@ -108,15 +48,6 @@ trait ExamState extends UpdatesStudentMembership {
     exam.members.copyFrom(members)
   }
 
-}
-
-
-trait AddExamCommandDescription extends Describable[Exam] {
-  self: ExamState =>
-
-  def describe(d: Description) {
-    d.module(module)
-  }
 }
 
 trait ExamValidation extends SelfValidating {

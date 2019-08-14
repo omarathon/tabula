@@ -22,8 +22,8 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
     }
 
     eventually {
-      When("I expand the the module")
-      val testModule = id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(0)
+      When("I expand Test Module 2")
+      val testModule = id("main").webElement.findElements(By.cssSelector(".fa-chevron-right")).get(1)
       click on testModule
     }
 
@@ -43,7 +43,7 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
     click on feedbackDropdown
 
     Then("The adjustments link is disabled")
-    val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(10)
+    val adjustmentsLinkHolder = id("main").webElement.findElements(By.cssSelector("li")).get(11)
     eventually {
       adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(true)
     }
@@ -57,7 +57,7 @@ class AdjustMarksInBulkTest extends BrowserTest with CourseworkFixtures {
 
     Then("The adjustments link is enabled")
     adjustmentsLinkHolder.getAttribute("class").contains("disabled") should be(false)
-    val adjustmentsLink = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li .form-post")).get(4)
+    val adjustmentsLink = id("main").webElement.findElements(By.cssSelector(".dropdown-menu li .form-post")).get(5)
     adjustmentsLink.isDisplayed should be(true)
 
     When("I click on the adjustments link")

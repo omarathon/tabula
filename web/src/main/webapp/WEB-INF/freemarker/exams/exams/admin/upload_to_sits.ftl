@@ -213,11 +213,12 @@
       </#if>
     </div>
 
-    <form method="post" action="<@routes.exams.uploadToSits exam />">
+    <#assign uploadToSitsAction><@routes.exams.uploadToSits exam /></#assign>
+    <@f.form method="post" action=uploadToSitsAction>
       <div class="submit-buttons">
         <input class="btn btn-primary" type="submit" value="Upload">
       </div>
-    </form>
+    </@f.form>
 
   <#else>
     <em>There is no feedback to upload.</em>

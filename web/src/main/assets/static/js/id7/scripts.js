@@ -1546,12 +1546,15 @@ $(() => {
     const targetUrl = settings.url;
     if (!targetUrl) return;
 
-    const parsedUrl = new URL(targetUrl);
-    if (!parsedUrl) return;
-
-    // TAB-7506 if somehow the browser is making a request to
-    // a different place and failed, we do not throw.
-    if (parsedUrl.hostname !== window.location.hostname) return;
+    try {
+      const parsedUrl = new URL(targetUrl, window.location.href);
+      // TAB-7506 if somehow the browser is making a request to
+      // a different place and failed, we do not throw.
+      if (parsedUrl && parsedUrl.hostname !== window.location.hostname) return;
+    } catch (e) {
+      // invalid URL, we do not care.
+      return;
+    }
 
     const pageErrorToken = $('body').data('error-token');
     if (pageErrorToken) {
@@ -1562,5 +1565,36 @@ $(() => {
     // throw this so it could be handled by /error/js as we cannot assume failed ajax calls would
     // have reached backend (and logged)
     throw Error(`Ajax network error on ${window.location.href} when trying to ${settings.type} to ${settings.url}. error token: ${pageErrorToken || 'NA'}`);
+  });
+});
+
+// TAB-7414
+$(() => {
+  const $filtersWell = $('.filters');
+  if (!$filtersWell.length) return; // only do the following if there's a filter
+
+  $filtersWell.on('keyup', (event) => {
+    if (event.keyCode !== 27) return;
+    $filtersWell.find('.open .dropdown-toggle').click();
+  });
+
+  const getToggle = event => $(event.currentTarget).parents('.open').find('.dropdown-toggle');
+
+  // dismiss dropdown when going back
+  $filtersWell.on('keydown', '.open .filter-list :first', (event) => {
+    if (event.shiftKey && event.keyCode === 9) getToggle(event).click();
+  });
+
+  // dismiss when going next
+  $filtersWell.on('keydown', '.open .filter-list li:last', (event) => {
+    if (event.keyCode === 9) getToggle(event).click();
+  });
+
+  // special handler for radios
+  // tab on any radio should result in dismissing current dropdown menu
+  $filtersWell.on('keydown', '.open .filter-list li', (event) => {
+    const $listItems = $(event.currentTarget);
+    if ($listItems.length !== $listItems.find(':radio').length) return;
+    if (event.keyCode === 9) getToggle(event).click();
   });
 });

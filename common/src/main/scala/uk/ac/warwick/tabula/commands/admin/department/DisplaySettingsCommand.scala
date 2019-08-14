@@ -49,7 +49,6 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
   var autoMarkMissedMonitoringPoints: Boolean = department.autoMarkMissedMonitoringPoints
   var meetingRecordApprovalType: MeetingRecordApprovalType = department.meetingRecordApprovalType
   var enableMitCircs: Boolean = department.enableMitCircs
-  var enableAcuteOutcomes: Boolean = department.enableAcuteOutcomes
   var mitCircsGuidance: String = department.mitCircsGuidance
 
   def populate() {
@@ -89,7 +88,6 @@ class DisplaySettingsCommandInternal(val department: Department) extends Command
     department.meetingRecordApprovalType = meetingRecordApprovalType
     department.enableMitCircs = enableMitCircs
     department.mitCircsGuidance = mitCircsGuidance
-    department.enableAcuteOutcomes = enableAcuteOutcomes
 
     moduleAndDepartmentService.saveOrUpdate(department)
     department

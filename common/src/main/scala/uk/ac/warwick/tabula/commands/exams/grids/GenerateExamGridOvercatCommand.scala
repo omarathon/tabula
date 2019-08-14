@@ -116,7 +116,7 @@ trait GenerateExamGridOvercatDescription extends Describable[Seq[Module]] {
     d.properties(Map(
       "studentCourseYearDetails" -> scyd.id,
       "modules" -> chosenModuleSubset.map { case (_, modules) => modules.map(_.module.id) }.getOrElse(Seq()),
-      "mark" -> chosenModuleSubset.map { case (mark, _) => mark.toString }.getOrElse("")
+      "mark" -> chosenModuleSubset.flatMap { case (mark, _) => Option(mark).map(_.toString) }.getOrElse("")
     ))
   }
 }

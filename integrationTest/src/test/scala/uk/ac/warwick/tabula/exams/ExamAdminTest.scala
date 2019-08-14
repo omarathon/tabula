@@ -6,7 +6,7 @@ class ExamAdminTest extends ExamFixtures with GivenWhenThen {
 
   "Department admin" should "be offered a link to their department" in as(P.Admin1) {
 
-    pageTitle should be("Tabula - Exams Management")
+    pageTitle should be("Tabula - Exam Management")
     click on linkText("Go to the Test Services admin page")
     pageSource contains "Test Services" should be (true)
 

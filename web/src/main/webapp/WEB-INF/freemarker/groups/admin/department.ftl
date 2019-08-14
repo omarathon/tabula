@@ -231,7 +231,7 @@
                         data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
                   <span class="caret"></span>
                 </a>
-                <div class="dropdown-menu filter-list">
+                <div tabindex="-1" class="dropdown-menu filter-list">
                   <button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
                   <ul>
                     <#if allItems?has_content>

@@ -118,29 +118,29 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
     openAdminPage()
     openMarkingWorkflowSettings()
 
-    //There should be existing single marking one at first created via setup
-    listMarkingWorkflow(1)
+    //There should be existing two single marking assignments at first created via setup
+    listMarkingWorkflow(2)
 
     createSingleMarkingWorkflow("Single marker workflow 2")
 
     Then("I should be redirected back to the marking workflow page")
     currentUrl should endWith("/markingworkflows")
 
-    listMarkingWorkflow(2)
+    listMarkingWorkflow(3)
     editMarkingWorkflow()
 
     //create another
     createDoubleMarkingWorkflow("Double marker workflow 3")
     Then("I should be redirected back to the marking workflow page")
     currentUrl should endWith("/markingworkflows")
-    listMarkingWorkflow(3)
+    listMarkingWorkflow(4)
 
     deleteMarkingWorkflow("Single marker workflow 2")
     eventually {
       currentUrl should include("/markingworkflows")
     }
     And("It should have removed the workflow")
-    listMarkingWorkflow(2)
+    listMarkingWorkflow(3)
     And("No row with that workflow should be there")
     val tbody = className("table").webElement.findElement(By.tagName("tbody"))
     val row = tbody.findElements(By.tagName("tr")).asScala.find({

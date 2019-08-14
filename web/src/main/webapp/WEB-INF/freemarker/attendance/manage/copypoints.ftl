@@ -1,5 +1,6 @@
 <#escape x as x?html>
   <#import "../attendance_variables.ftl" as attendance_variables />
+  <#import "*/csrf_macros.ftl" as csrf_macros />
 
   <#if command.schemes?size == 1>
 
@@ -71,6 +72,7 @@
     </@f.form>
 
     <form action="<@routes.attendance.manageAddPointsCopy command.department command.academicYear />" method="post">
+      <@csrf_macros.csrfHiddenInputField />
       <#list command.schemes as scheme>
         <input type="hidden" name="schemes" value="${scheme.id}" />
       </#list>
@@ -143,7 +145,7 @@
                         data-prefix="${prefix}"><#if currentFilter != placeholder>${prefix}</#if>${currentFilter}</span>
                   <span class="caret"></span>
                 </a>
-                <div class="dropdown-menu filter-list">
+                <div tabindex="-1" class="dropdown-menu filter-list">
                   <button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
                   <ul>
                     <#if allItems?has_content>

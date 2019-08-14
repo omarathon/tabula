@@ -1,37 +1,111 @@
 package uk.ac.warwick.tabula.data.model.notifications.profiles
 
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeConstants}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaFreemarkerConfiguration}
 import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 
-class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
+import scala.collection.JavaConverters._
+
+class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with FreemarkerRendering {
+
+  val freeMarkerConfig: ScalaFreemarkerConfiguration = newFreemarkerConfiguration()
 
   val agent: StaffMember = Fixtures.staff("1234567")
   agent.firstName = "Tutor"
   agent.lastName = "Name"
 
+  val agentReplacement: StaffMember = Fixtures.staff("1234568")
+  agentReplacement.firstName = "Other"
+  agentReplacement.lastName = "Tutor"
+
   val student: StudentMember = Fixtures.student("7654321")
   student.firstName = "Student"
   student.lastName = "Name"
 
+  val student2: StudentMember = Fixtures.student("7654322")
+  student2.firstName = "Student2"
+  student2.lastName = "Name2"
+
   val relationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 
   val relationship: StudentRelationship = StudentRelationship(agent, relationshipType, student, DateTime.now)
+  val relationship2: StudentRelationship = StudentRelationship(agent, relationshipType, student2, DateTime.now)
 
   @Test def titleStudent() = withUser("0672089", "cuscav") {
-    val notification = Notification.init(new BulkStudentRelationshipNotification, currentUser.apparentUser, relationship)
+    val notification = Notification.init(new BulkStudentRelationshipNotification, currentUser.apparentUser, Seq(relationship, relationship2))
     notification.title should be("Personal tutor allocation change")
   }
 
-  @Test def titleOldTutor() = withUser("0672089", "cuscav") {
-    val notification = Notification.init(new BulkOldAgentRelationshipNotification, currentUser.apparentUser, relationship)
+  @Test def titleContentOldTutor() = withUser("0672089", "cuscav") {
+    val notification = Notification.init(new BulkOldAgentRelationshipNotification, currentUser.apparentUser, Seq(relationship, relationship2))
     notification.title should be("Change to personal tutees")
+
+    val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+    notificationContent should be(
+      """You are no longer assigned as personal tutor to the following students:
+        |
+        |* Student Name
+        |* Student2 Name2
+        |
+        |""".stripMargin
+    )
   }
 
-  @Test def titleNewTutor() = withUser("0672089", "cuscav") {
-    val notification = Notification.init(new BulkNewAgentRelationshipNotification, currentUser.apparentUser, relationship)
+  @Test def titleContentOldTutorComplex() = withUser("0672089", "cuscav") {
+    val notification = Notification.init(new BulkOldAgentRelationshipNotification, currentUser.apparentUser, Seq(relationship, relationship2))
+    notification.title should be("Change to personal tutees")
+
+    notification.scheduledDate = new DateTime(2019, DateTimeConstants.JANUARY, 15, 15, 30, 0, 0)
+    notification.previouslyScheduledDate = new DateTime(2019, DateTimeConstants.JANUARY, 30, 15, 30, 0, 0)
+    relationship2.replacedBy = StudentRelationship(agentReplacement, relationshipType, student, DateTime.now)
+
+    val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+    notificationContent should be(
+      """As of 15:30 Tue 15th January 2019 you will be no longer assigned as personal tutor to the following students:
+        |
+        |* Student Name
+        |* Student2 Name2 (new personal tutor Other Tutor)
+        |
+        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |""".stripMargin
+    )
+  }
+
+  @Test def titleContentNewTutor() = withUser("0672089", "cuscav") {
+    val notification = Notification.init(new BulkNewAgentRelationshipNotification, currentUser.apparentUser, Seq(relationship, relationship2))
     notification.title should be("Allocation of new personal tutees")
+
+    val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+    notificationContent should be(
+      """You have been assigned as personal tutor to the following students:
+        |
+        |* Student Name
+        |* Student2 Name2
+        |
+        |""".stripMargin
+    )
+  }
+
+  @Test def titleContentNewTutorComplex() = withUser("0672089", "cuscav") {
+    val notification = Notification.init(new BulkNewAgentRelationshipNotification, currentUser.apparentUser, Seq(relationship, relationship2))
+    notification.title should be("Allocation of new personal tutees")
+
+    notification.scheduledDate = new DateTime(2019, DateTimeConstants.JANUARY, 15, 15, 30, 0, 0)
+    notification.previouslyScheduledDate = new DateTime(2019, DateTimeConstants.JANUARY, 30, 15, 30, 0, 0)
+    relationship2.replacesRelationships.add(StudentRelationship(agentReplacement, relationshipType, student, DateTime.now))
+
+    val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+    notificationContent should be(
+      """As of 15:30 Tue 15th January 2019 you will be assigned as personal tutor to the following students:
+        |
+        |* Student Name
+        |* Student2 Name2 (previous personal tutor Other Tutor)
+        |
+        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |""".stripMargin
+    )
   }
 
   val profiles: ProfileService = smartMock[ProfileService]
@@ -90,6 +164,12 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
       notification.newAgents.size should be(2)
       notification.oldAgents.size should be(2)
 
+      val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+      notificationContent should be(
+        """You have been assigned 2 Staff and 3 Staff as your tutors.
+          |
+          |0 Staff and 1 Staff are no longer your tutors.""".stripMargin
+      )
     }
   }
 

@@ -11,11 +11,11 @@
   </p>
 
   <#if locations?size == 0>
-    <form action="/admin/scientia-rooms/populate" method="post">
+    <@f.form action="/admin/scientia-rooms/populate" method="post">
       <p>
         <button class="btn btn-primary">Populate from hard-coded data</button>
       </p>
-    </form>
+    </@f.form>
   </#if>
 
   <table class="table table-bordered table-striped table-condensed sortable">
