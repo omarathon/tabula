@@ -7,6 +7,7 @@ import org.springframework.util.MultiValueMap
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import org.springframework.web.util.UriComponentsBuilder
+import uk.ac.warwick.sso.client.CSRFInterceptor
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.commands.exams.grids._
 import uk.ac.warwick.tabula.data.model._
@@ -233,6 +234,7 @@ class GenerateModuleExamGridController extends ExamsController
 
   private def redirectToAndClearModel(path: String, params: MultiValueMap[String, String]): Mav = {
     params.set("clearModel", "true")
+    params.remove(CSRFInterceptor.CSRF_TOKEN_PROPERTY_NAME)
     val uri = UriComponentsBuilder.fromPath(path).queryParams(params).toUriString
     RedirectForce(uri)
   }
