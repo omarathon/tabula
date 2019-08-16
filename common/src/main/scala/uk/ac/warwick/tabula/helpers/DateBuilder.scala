@@ -50,19 +50,18 @@ object DateBuilder {
   }
 
   def ordinal(day: Int): String = day % 10 match {
-    case _ if (day >= 10 && day <= 20) => "th"
-    case 1 => "st"
-    case 2 => "nd"
-    case 3 => "rd"
-    case _ => "th"
+    case _ if (day >= 10 && day <= 20) => "ᵗʰ"
+    case 1 => "ˢᵗ"
+    case 2 => "ⁿᵈ"
+    case 3 => "ʳᵈ"
+    case _ => "ᵗʰ"
   }
 
   def datePart(date: ReadableDateTime, capitalise: Boolean, relative: Boolean, shortMonth: Boolean, excludeCurrentYear: Boolean): String = {
     val today = LocalDate.now.toDateTimeAtStartOfDay
     val thatDay = new LocalDate(date.getMillis, date.getChronology).toDateTimeAtStartOfDay
 
-    lazy val absoluteDate = (dayAndDateFormat print date) +
-      "<sup>" + ordinal(date.getDayOfMonth) + "</sup>" +
+    lazy val absoluteDate = (dayAndDateFormat print date) + ordinal(date.getDayOfMonth) +
       (if (excludeCurrentYear && today.getYear == thatDay.getYear) {
         (if (shortMonth) (shortMonthFormat print date)
         else (monthFormat print date))
