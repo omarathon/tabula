@@ -23,7 +23,7 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
       val today = new DateTime()
 
       // Test default settings
-      format(anotherDay) should be("12:13&#8194;Sat 10<sup>th</sup> March 2012")
+      format(anotherDay) should be("12:13&#8194;Sat 10ᵗʰ March 2012")
 
       format(anotherDay, false, false, false, true, true, false, false, true, false) should be("12:13&#8194;Sat 10<sup>th</sup> March 2012")
       format(anotherDay, true, true, true, true, true, false, false, true, false) should be("12:13:14 (GMT)&#8194;Sat 10<sup>th</sup> March 2012")
@@ -44,19 +44,19 @@ class DateBuilderTest extends TestBase with FreemarkerRendering {
 
   @Test def ordinals {
     for ((i, o) <- Seq(
-      0 -> "th",
-      1 -> "st",
-      2 -> "nd",
-      3 -> "rd",
-      4 -> "th",
-      5 -> "th",
-      10 -> "th",
-      11 -> "th",
-      12 -> "th",
-      13 -> "th",
-      20 -> "th",
-      21 -> "st",
-      101 -> "st"
+      0 -> "ᵗʰ",
+      1 -> "ˢᵗ",
+      2 -> "ⁿᵈ",
+      3 -> "ʳᵈ",
+      4 -> "ᵗʰ",
+      5 -> "ᵗʰ",
+      10 -> "ᵗʰ",
+      11 -> "ᵗʰ",
+      12 -> "ᵗʰ",
+      13 -> "ᵗʰ",
+      20 -> "ᵗʰ",
+      21 -> "ᵗʰ",
+      101 -> "ᵗʰ"
     )) withClue("Ordinal of " + i) {
       ordinal(i) should be(o)
     }

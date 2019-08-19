@@ -68,7 +68,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
         |* Student Name
         |* Student2 Name2 (new personal tutor Other Tutor)
         |
-        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |This change was originally scheduled to happen at 15:30 Wed 30ᵗʰ January 2019.
         |""".stripMargin
     )
   }
@@ -103,7 +103,7 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
         |* Student Name
         |* Student2 Name2 (previous personal tutor Other Tutor)
         |
-        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |This change was originally scheduled to happen at 15:30 Wed 30ᵗʰ January 2019.
         |""".stripMargin
     )
   }
