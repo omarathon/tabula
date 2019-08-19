@@ -167,7 +167,7 @@ object ConfigurableIntervalFormatter {
 
     def formatDates(interval: Interval): (String, String)
 
-    def ordinal(date: DateTime): String = "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
+    def ordinal(date: DateTime): String = DateBuilder.ordinal(date.getDayOfMonth)
 
     protected val yearFormat: DateTimeFormatter = DateTimeFormat.forPattern(" yyyy")
     protected val monthFormat: DateTimeFormatter = DateTimeFormat.forPattern(" MMM")

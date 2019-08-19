@@ -71,5 +71,5 @@ trait EditAttendanceTemplateDescription extends Describable[AttendanceMonitoring
 trait EditAttendanceTemplateCommandState extends ManageAttendanceTemplateCommandState {
   def template: AttendanceMonitoringTemplate
 
-  def dateString(date: LocalDate) = s"${date.getDayOfMonth}<sup>${DateBuilder.ordinal(date.getDayOfMonth)}</sup> ${date.toString("MMM")}"
+  def dateString(date: LocalDate) = s"${date.getDayOfMonth}${DateBuilder.ordinal(date.getDayOfMonth)} ${date.toString("MMM")}"
 }
