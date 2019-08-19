@@ -110,8 +110,11 @@
               <td class="check-col">
                 <@bs3form.selector_check_row name="markerFeedback" value="${mf.id}" />
               </td>
-              <td class="toggle-icon-large student-col">
+              <td class="student-col">
                 <#assign colspan = 4>
+                <a href="#${mf.stage.name}-${studentId}" class="row-toggle-collapse-link"><#--
+                  #--><i class="fas fa-chevron-right" aria-hidden="true"></i><#-- changes to fa-chevron-down
+                #--><div class="sr-only">Toggle row</div></a>
                 <#if assignment.anonymity.equals(AssignmentAnonymity.FullyAnonymous)>
                   Student${mf.feedback.anonymousId}
                 <#else>

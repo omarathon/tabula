@@ -372,6 +372,12 @@ table.expanding-row-pairs {
       min-width: 240px;
     }
   }
+
+  .expandable-row:not(.collapsed) {
+    td > a.row-toggle-collapse-link > i::before {
+      content: '\f078';
+    }
+  }
 }
 
 .online-marking {
@@ -457,3 +463,4 @@ p.dates {
   height: 400px;
   resize: none;
 }
+

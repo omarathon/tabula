@@ -969,7 +969,7 @@
 
   <span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
   <div id="tip-content-${attachment.id}" class="hide">
-    <p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+    <p>${attachment.name} <img alt="Turnitin logo" src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
     <p class="similarity-subcategories-tooltip">
       Web: ${r.webOverlap}%<br>
       Student papers: ${r.studentOverlap}%<br>
