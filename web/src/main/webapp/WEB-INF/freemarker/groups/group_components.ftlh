@@ -923,10 +923,10 @@
   </#if>
 </#macro>
 
-<#macro instanceFormat instance academicYear department><#compress>
+<#macro instanceFormat instance academicYear department stripHtml = false><#compress>
   <#local event = instance._1() />
   <#local week = instance._2() />
-  <#if event.title?has_content>${event.title} </#if>${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
+  <#if event.title?has_content>${event.title} </#if>${event.day.shortName} <@fmt.time event.startTime stripHtml/>, <@fmt.singleWeekFormat week academicYear department stripHtml/>
 </#compress></#macro>
 
 <#macro studentAttendanceRow student attendance notes instances group>
@@ -1025,7 +1025,7 @@
                       <div class="eventRegister">
                         <a class="btn btn-xs btn-default tabula-tooltip-<#if (instances?size - instance_index) gt 3>right<#else>left</#if> <#if !can.do("SmallGroupEvents.Register", event)>disabled</#if>"
                            href="<@routes.groups.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}"
-                           data-title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department /><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department /></#if>"
+                           data-title="<#if can.do("SmallGroupEvents.Register", event)>Record attendance for <@instanceFormat instance academicYear department true/><#else>You don't have permission to record attendance for <@instanceFormat instance academicYear department true/></#if>"
                         >
                           Record
                         </a>

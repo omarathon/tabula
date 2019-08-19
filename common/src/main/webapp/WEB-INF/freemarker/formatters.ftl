@@ -209,9 +209,10 @@ preposition: Text to relate the title to the department name in the second line,
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week academicYear dept short=false><#--
+<#macro singleWeekFormat week academicYear dept short=false stripHtml=false><#--
 	--><#noescape><#--
-		-->${wholeWeekFormatter(week, week, academicYear, dept, short)}<#--
+		--><#local result = wholeWeekFormatter(week, week, academicYear, dept, short) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
