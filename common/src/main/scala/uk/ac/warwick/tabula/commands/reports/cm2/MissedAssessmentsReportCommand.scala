@@ -48,7 +48,7 @@ class MissedAssessmentsReportCommandInternal(val department: Department, val aca
             assignment = assignment,
             submission = submission,
             extension = extension,
-            workingDaysLate = workingDaysLateIfSubmittedNow
+            workingDaysLate = submission.map(assignment.workingDaysLate).getOrElse(workingDaysLateIfSubmittedNow)
           ))
         } else None
       }
