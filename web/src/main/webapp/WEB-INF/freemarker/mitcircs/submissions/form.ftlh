@@ -1,4 +1,5 @@
 <#import "*/modal_macros.ftlh" as modal />
+<#import "*/mitcircs_components.ftlh" as components />
 <h1>Declare mitigating circumstances<#if !command.self> on behalf of ${student.fullName}</#if></h1>
 
 <#if lastUpdatedByOther?? && lastUpdatedByOther>
@@ -87,9 +88,18 @@
               <h6 class="modal-title">Submit mitigating circumstances</h6>
             </@modal.header>
             <@modal.body>
-              <p>I confirm that the information I have given is true and that I have read and understood the University Guidance on mitigating circumstances.</p>
-
-              <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
+                <p>
+                  I confirm that the information I have given is true and that I have read and understood:
+                  <ul>
+                    <li>the University guidance on mitigating circumstances</li>
+                    <li>the <a data-toggle="collapse" href="#privacyStatement" role="button" aria-expanded="false" aria-controls="privacyStatement">privacy statement</a> in particular how the information I provide will be used</li>
+                  </ul>
+                </p>
+                <p>The University reserves the right to check the legitimacy of any evidence provided. If any submission is found to be fabricated or altered then you may be investigated under Regulation 23, Student Disciplinary Offences.</p>
+              <div class="well collapse" id="privacyStatement">
+                <h6>Privacy statement</h6>
+                <@components.privacyStatement />
+              </div>
             </@modal.body>
             <@modal.footer>
               <button type="submit"  class="btn btn-primary" name="approve" value="true">Confirm</button>
