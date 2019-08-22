@@ -270,6 +270,7 @@
       <mvc:exclude-mapping path="/error/*"/>
       <mvc:exclude-mapping path="/test/*"/>
       <mvc:exclude-mapping path="/service/*"/>
+      <mvc:exclude-mapping path="/v1/**"/>
       <mvc:exclude-mapping path="/csp-report"/>
       <mvc:exclude-mapping path="/errors/js"/>
       <!-- FIXME These should really be in web's filters-context.xml, but that'd require XML trickery -->

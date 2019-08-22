@@ -54,7 +54,7 @@
 </head>
 <body>
 <div id="header">
-  <img src="/static/images/logo-full-black.png" style="width: 30%; float: right;" />
+  <img src="/static/images/logo-full-black.png" alt="The University of Warwick" style="width: 30%; float: right;" />
 
   <h1><@fmt.module_name module /></h1>
   <h2 class="ass-name">${assignment.name}</h2>

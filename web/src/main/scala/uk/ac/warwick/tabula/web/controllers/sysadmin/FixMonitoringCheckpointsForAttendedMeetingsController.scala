@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceMonitoringCheckpoint
 import uk.ac.warwick.tabula.services.AutowiringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.services.attendancemonitoring.AutowiringAttendanceMonitoringMeetingRecordServiceComponent
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.data.Transactions._
 
 @Controller
 @RequestMapping(Array("/sysadmin/fix-monitoring-checkpoints"))
@@ -28,7 +29,9 @@ class FixMonitoringCheckpointsForAttendedMeetingsController extends BaseSysadmin
 
   @PostMapping
   def process: Mav = {
-    meetingRecords.foreach(attendanceMonitoringMeetingRecordService.updateCheckpoints)
+    transactional() {
+      meetingRecords.foreach(attendanceMonitoringMeetingRecordService.updateCheckpoints)
+    }
 
     Mav("sysadmin/fix-monitoring-checkpoints/done")
   }

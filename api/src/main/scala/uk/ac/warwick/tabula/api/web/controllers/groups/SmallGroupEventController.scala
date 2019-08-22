@@ -127,5 +127,6 @@ class SmallGroupEventRequest extends JsonApiRequest[ModifySmallGroupEventCommand
     Option(startTime).foreach(state.startTime = _)
     Option(endTime).foreach(state.endTime = _)
     Option(location).foreach(state.location = _)
+    state.useNamedLocation = true
   }
 }
