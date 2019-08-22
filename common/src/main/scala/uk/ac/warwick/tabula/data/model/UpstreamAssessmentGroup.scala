@@ -139,7 +139,8 @@ trait UpstreamAssessmentGroupMemberProperties {
   @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionStringUserType")
   var resitAgreedGrade: Option[String] = None
 
-
+  @Type(`type` = "uk.ac.warwick.tabula.data.model.OptionBooleanUserType")
+  var resitExpected:  Option[Boolean] = None
 }
 
 /** currentMembers are all members excluding PWD)  **/

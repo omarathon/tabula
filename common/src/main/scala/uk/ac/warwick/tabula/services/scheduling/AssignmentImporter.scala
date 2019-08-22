@@ -75,7 +75,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
     "academic_year_code" -> yearsToImportArray)).asScala
 
   /**
-    * Iterates through ALL module registration elements in ADS (that's many),
+    * Iterates through ALL module registration elements in SITS (that's many),
     * passing each ModuleRegistration item to the given callback for it to process.
     */
   def allMembers(callback: UpstreamModuleRegistration => Unit) {
@@ -109,7 +109,8 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
         resitActualMark = rs.getString("resit_actual_mark"),
         resitActualGrade = rs.getString("resit_actual_grade"),
         resitAgreedMark = rs.getString("resit_agreed_mark"),
-        resitAgreedGrade = rs.getString("resit_agreed_grade")
+        resitAgreedGrade = rs.getString("resit_agreed_grade"),
+        resitExpected = rs.getBoolean("resit_expected")
       ))
     }
   }
@@ -181,7 +182,8 @@ class SandboxAssignmentImporter extends AssignmentImporter {
             resitActualMark = null,
             resitActualGrade = null,
             resitAgreedMark = null,
-            resitAgreedGrade = null
+            resitAgreedGrade = null,
+            resitExpected = false
           )
         )
       }
@@ -376,7 +378,8 @@ object AssignmentImporter {
       sra.sra_actm as resit_actual_mark,
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
-      sra.sra_agrg as resit_agreed_grade
+      sra.sra_agrg as resit_agreed_grade,
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
         from $sitsSchema.srs_scj scj -- Student Course Join  - gives us most significant course
           join $sitsSchema.ins_spr spr -- Student Programme Route - gives us SPR code
             on scj.scj_sprc = spr.spr_code and
@@ -425,7 +428,8 @@ object AssignmentImporter {
       sra.sra_actm as resit_actual_mark,
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
-      sra.sra_agrg as resit_agreed_grade
+      sra.sra_agrg as resit_agreed_grade,
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and
@@ -474,7 +478,8 @@ object AssignmentImporter {
       sra.sra_actm as resit_actual_mark,
       sra.sra_actg as resit_actual_grade,
       sra.sra_agrm as resit_agreed_mark,
-      sra.sra_agrg as resit_agreed_grade
+      sra.sra_agrg as resit_agreed_grade,
+      case when (sas.sas_sass = 'R') then 1 else 0 end as resit_expected
         from $sitsSchema.srs_scj scj
           join $sitsSchema.ins_spr spr
             on scj.scj_sprc = spr.spr_code and

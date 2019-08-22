@@ -255,6 +255,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitActualGrade = studentRegistrations.head.resitActualGrade.maybeText
                   resitAgreedMark = Try(BigDecimal(studentRegistrations.head.resitAgreedMark)).toOption
                   resitAgreedGrade = studentRegistrations.head.resitAgreedGrade.maybeText
+                  resitExpected = Option(studentRegistrations.head.resitExpected)
                 }
               } else {
                 def validInts(strings: Seq[String]): Seq[Int] = strings.filter(s => Try(s.toInt).isSuccess).map(_.toInt)
@@ -288,6 +289,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
                   resitActualGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitActualGrade)), "resit actual grade")
                   resitAgreedMark = resolveDuplicates(validBigDecimals(studentRegistrations.map(_.resitAgreedMark)), "resit agreed mark")
                   resitAgreedGrade = resolveDuplicates(validStrings(studentRegistrations.map(_.resitAgreedGrade)), "resit agreed grade")
+                  resitExpected = resolveDuplicates(studentRegistrations.map(_.resitExpected), "resit expected")
                 }
               }
             }
@@ -304,6 +306,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
               member.resitActualGrade = properties.resitActualGrade
               member.resitAgreedMark = properties.resitAgreedMark
               member.resitAgreedGrade = properties.resitAgreedGrade
+              member.resitExpected = properties.resitExpected
               assessmentMembershipService.save(member)
             }
           }
