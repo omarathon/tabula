@@ -46,7 +46,7 @@ class ScalaFreemarkerConfiguration extends Configuration(Configuration.VERSION_2
   setClassForTemplateLoading(getClass, "/")
 
   @Required
-  def setSharedVariables(vars: JMap[String, Any]) {
+  override def setSharedVariables(vars: JMap[String, _]): Unit = {
     val nonCachingWrapper = createWrapper(false)
     this.setSharedVariable("commandVarName", FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME)
     for ((key, value) <- vars.asScala) this.setSharedVariable(key, nonCachingWrapper.wrap(value.asInstanceOf[Object]))
