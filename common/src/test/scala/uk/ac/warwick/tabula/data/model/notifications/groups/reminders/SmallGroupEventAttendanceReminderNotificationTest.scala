@@ -56,7 +56,7 @@ class SmallGroupEventAttendanceReminderNotificationTest extends TestBase with Fu
 
       // FIXME this format sucks
       department.weekNumberingSystem = WeekRange.NumberingSystem.None
-      notification.title should be("CS118 seminars attendance needs recording for Tuesday, w/c Mon 29th Sep 2014")
+      notification.title should be("CS118 seminars attendance needs recording for Tuesday, w/c Mon 29ᵗʰ Sep 2014")
     }
   }
 

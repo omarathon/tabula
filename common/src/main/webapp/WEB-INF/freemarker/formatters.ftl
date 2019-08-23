@@ -174,10 +174,9 @@ preposition: Text to relate the title to the department name in the second line,
 	</#if>
 </#macro>
 
-<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true stripHtml=false excludeCurrentYear=false><#--
+<#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true excludeCurrentYear=false><#--
 	--><#noescape><#--
-		--><#local result = dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime, excludeCurrentYear) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+		-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime, excludeCurrentYear)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -189,10 +188,9 @@ preposition: Text to relate the title to the department name in the second line,
 --></#macro>
 
 <#-- Format week ranges for a SmallGroupEvent -->
-<#macro weekRanges object stripHtml=false><#--
+<#macro weekRanges object><#--
 	--><#noescape><#--
-		--><#local result = weekRangesFormatter(object) /><#--
-		--><#if stripHtml>${result?markup_string?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+		-->${weekRangesFormatter(object)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -202,10 +200,9 @@ preposition: Text to relate the title to the department name in the second line,
 	--></#noescape><#--
 --></#macro>
 
-<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false stripHtml=false><#--
+<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false><#--
 	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(startWeek, endWeek, academicYear, short) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -215,10 +212,9 @@ preposition: Text to relate the title to the department name in the second line,
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat startWeek endWeek academicYear dept stripHtml=false><#--
+<#macro monitoringPointWeeksFormat startWeek endWeek academicYear dept><#--
 	--><#noescape><#--
-		--><#local result = wholeWeekFormatter(startWeek, endWeek, academicYear, dept, false) /><#--
-		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, dept, false)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -226,10 +222,9 @@ preposition: Text to relate the title to the department name in the second line,
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
 
-<#macro interval start end="" stripHtml=false><#--
+<#macro interval start end=""><#--
 --><#noescape><#--
-	--><#if stripHtml><#if end?has_content>${intervalFormatter(start, end)?replace('<sup>','')?replace('</sup>','')}<#else>${intervalFormatter(start)?replace('<sup>','')?replace('</sup>','')}</#if><#--
-	--><#else><#if end?has_content>${intervalFormatter(start, end)}<#else>${intervalFormatter(start)}</#if></#if><#--
+	--><#if end?has_content>${intervalFormatter(start, end)}<#else>${intervalFormatter(start)}</#if><#--
 --></#noescape><#--
 --></#macro>
 

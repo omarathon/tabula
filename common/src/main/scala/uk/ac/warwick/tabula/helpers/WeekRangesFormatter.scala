@@ -121,7 +121,7 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
         val startDate = weekNumberToDate(weekRange.minWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
         val endDate = weekNumberToDate(weekRange.maxWeek).withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
-        IntervalFormatter.formatDate(startDate, endDate)
+        IntervalFormatter.formatDate(start = startDate, end = endDate)
       }.mkString(separator)
     case _ =>
       /*
@@ -300,7 +300,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
             if (short) startDate.toString("dd/MM")
             else "%s, w/c %s" format(
               vac.periodType.toString,
-              IntervalFormatter.formatDate(startDate)
+              IntervalFormatter.formatDate(start = startDate)
             )
           } else {
             // Date range
@@ -313,7 +313,10 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
             else
               "%s, %s" format(
                 vac.periodType.toString,
-                IntervalFormatter.formatDate(startDate, endDate).replaceAll("\\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\b", "w/c $1")
+                IntervalFormatter.formatDate(
+                  start = startDate,
+                  end = endDate,
+                ).replaceAll("\\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\\b", "w/c $1")
               )
           }
         case term: Term =>
@@ -343,7 +346,6 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
     }
   }
 
-
   def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean): String = {
     import WeekRangesFormatter._
 
@@ -363,7 +365,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
       case _ =>
         groupWeekRangesByTerm(ranges).map {
           case (weekRange, term) =>
-            term.print(weekRange, dayOfWeek, numberingSystem, short)
+            term.print(weekRange = weekRange, dayOfWeek = dayOfWeek, numberingSystem = numberingSystem, short = short)
         }.mkString(separator)
     }
   }
@@ -380,7 +382,7 @@ object WholeWeekFormatter {
     * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
     */
   def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String, short: Boolean): String =
-    formatterMap.retrieve(year) format(ranges, dayOfWeek, numberingSystem, short)
+    formatterMap.retrieve(year).format(ranges = ranges, dayOfWeek = dayOfWeek, numberingSystem = numberingSystem, short = short)
 
   class WholeWeekFormatterCache {
     private val map = JConcurrentMap[AcademicYear, WholeWeekFormatter]()

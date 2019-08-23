@@ -83,7 +83,7 @@
                       <#assign point = pointPair._1() />
                       <tr class="point">
                         <td class="point"
-                            title="${point.name} <@fmt.wholeWeekDateFormat startWeek=point.startWeek endWeek=point.endWeek academicYear=point.scheme.academicYear stripHtml=true/>">
+                            title="${point.name} <@fmt.wholeWeekDateFormat startWeek=point.startWeek endWeek=point.endWeek academicYear=point.scheme.academicYear />">
                           ${point.name} (<@fmt.wholeWeekDateFormat point.startWeek point.endWeek  point.scheme.academicYear/>)
                         </td>
                         <td class="state">
@@ -122,7 +122,7 @@
                     <#list groupedPointMap[month] as pointPair>
                       <#assign point = pointPair._1() />
                       <tr class="point">
-                        <td class="point" title="${point.name} (<@fmt.interval point.startDate point.endDate  true/>)">
+                        <td class="point" title="${point.name} (<@fmt.interval point.startDate point.endDate />)">
                           ${point.name} (<@fmt.interval point.startDate point.endDate />)
                         </td>
                         <td class="state">

@@ -120,7 +120,7 @@
             <td>
               <#if relationship.startDate??>
                 <span tabindex="0" class="use-tooltip" data-container="body"
-                      title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
+                      title="<@fmt.date date=relationship.startDate includeTime=true relative=false />">
 											<@fmt.date date=relationship.startDate includeTime=false />
 										</span>
               <#else>
@@ -129,7 +129,7 @@
             </td>
             <td>
               <#if relationship.endDate??>
-                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false />">
 											<@fmt.date date=relationship.endDate includeTime=false />
 										</span>
               <#else>
@@ -187,11 +187,11 @@
             <td>
               <#if (relationship.startDate?? && relationship.startDate.afterNow)>
                 <span tabindex="0" class="use-tooltip" data-container="body"
-                      title="<@fmt.date date=relationship.startDate includeTime=true relative=false stripHtml=true />">
+                      title="<@fmt.date date=relationship.startDate includeTime=true relative=false />">
 											<@fmt.date date=relationship.startDate includeTime=false relative=false shortMonth=true />
 										</span>
               <#elseif (relationship.endDate?? && relationship.endDate.afterNow)>
-                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false stripHtml=true />">
+                <span tabindex="0" class="use-tooltip" data-container="body" title="<@fmt.date date=relationship.endDate includeTime=true relative=false />">
 											<@fmt.date date=relationship.endDate includeTime=false relative=false shortMonth=true />
 										</span>
               </#if>
