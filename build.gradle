@@ -21,18 +21,19 @@ plugins {
 
 // Some properties that we use to resolve dependencies etc.
 ext {
-  scalaVersion = "2.12.8"
+  scalaVersion = "2.12.9"
   scalaMajorVersion = "2.12"
-  springVersion = "5.1.6.RELEASE"
+  springVersion = "5.1.9.RELEASE"
   hibernateVersion = "5.4.4.Final"
-  jacksonVersion = "2.9.8"
-  jacksonScalaModuleVersion = "2.9.8"
+  jacksonVersion = "2.9.9"
+  jacksonDatabindVersion = "2.9.9.3"
+  jacksonScalaModuleVersion = "2.9.9"
   elasticsearchVersion = "6.5.2"
   elastic4sVersion = "6.5.1"
   poiVersion = "4.1.0"
   tilesVersion = "3.0.8"
   jcloudsVersion = "2.1.2"
-  warwickUtilsVersion = "20190503"
+  warwickUtilsVersion = "20190725"
   surefireVersion = "2.19.1"
 }
 
