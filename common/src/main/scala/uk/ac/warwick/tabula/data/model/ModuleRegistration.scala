@@ -152,7 +152,8 @@ case class UpstreamModuleRegistration(
   resitActualMark: String,
   resitActualGrade: String,
   resitAgreedMark: String,
-  resitAgreedGrade: String
+  resitAgreedGrade: String,
+  resitExpected: Boolean
 ) {
 
   def universityId: String = SprCode.getUniversityId(sprCode)
