@@ -16,6 +16,8 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
   private var unapprovedExtensions: Seq[Extension] = Seq()
 
+  override def resitOnly: Boolean = false
+
   mustBeLinked(notDeleted(mandatory(assignment)), mandatory(module))
   PermissionCheck(Permissions.Assignment.Update, assignment)
 

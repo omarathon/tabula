@@ -73,6 +73,22 @@
     </@spring.bind>
   </@bs3form.labelled_form_group>
 
+  <@bs3form.labelled_form_group path="resitAssessment" labelText="" renderErrors=false>
+      <@bs3form.checkbox path="resitAssessment">
+          <@f.checkbox path="resitAssessment" id="resitAssessment" /> Resit assignment
+          <#assign popoverText>
+            <p>
+              Check this box to mark the assignment as a resit.
+            </p>
+            <ul>
+              <li>Only students that are expected to resit will be added to this assignment.</li>
+              <li>When uploading marks to SITS, these will be uploaded as resit marks.</li>
+            </ul>
+          </#assign>
+          <@fmt.help_popover id="isResitInfo" content="${popoverText}" html=true />
+      </@bs3form.checkbox>
+  </@bs3form.labelled_form_group>
+
   <@bs3form.labelled_form_group path="workflowCategory" labelText="Marking workflow use">
     <#if canEditWorkflowType>
       <@f.select path="workflowCategory" id="workflowCategory" class="form-control">

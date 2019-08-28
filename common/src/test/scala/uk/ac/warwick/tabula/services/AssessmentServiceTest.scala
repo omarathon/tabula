@@ -952,28 +952,28 @@ class AssessmentServiceTest extends PersistenceTestBase with Mockito {
         ))
 
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1), None).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1), None, resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo2), None).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo2), None, resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000002", "0000003"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo3), None).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo3), None, resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005"
         ))
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), None).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), None, resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005"
         ))
 
         // UniversityID Group: 0000001, 0000010, 0000015
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup)).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(universityIdGroup), resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
         ))
 
         // UserID Group: student1/0000001, manual5/0000010, manual10/0000015
 
-        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup)).map(_.getWarwickId).toSet should be(Set(
+        assignmentMembershipService.determineMembershipUsers(Seq(uagInfo1, uagInfo2, uagInfo3), Some(userIdGroup), resitOnly = false).map(_.getWarwickId).toSet should be(Set(
           "0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
         ))
       }

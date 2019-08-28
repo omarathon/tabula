@@ -1,7 +1,7 @@
 <#include "*/prelude.ftl" />
 <#escape x as x?html>
 
-  <#macro upstream_group ug isLinked isInUse>
+  <#macro upstream_group ug isLinked isInUse resitOnly>
     <tr<#if !isInUse> class="text-muted" <#if !isLinked>style="display: none"</#if></#if> data-in-use="${isInUse?string('true','false')}">
       <td>
         <input
@@ -24,7 +24,7 @@
           <span class="label label-primary linked <#if !isLinked>hidden</#if>">Linked</span>
         </label>
       </td>
-      <td class="sortable">${ug.currentMembers?size}</td>
+      <td class="sortable"><#if resitOnly>${ug.resitMembers?size}<#else>${ug.currentMembers?size}</#if></td>
       <td>${ug.group.assessmentGroup}</td>
       <td>${ug.cats!'-'}</td>
       <td>${ug.occurrence}</td>
@@ -41,7 +41,7 @@
           <tr>
             <th class="for-check-all"><input type="checkbox" class="collection-check-all" title="Select all/none" /></th>
             <th class="sortable">Name</th>
-            <th class="sortable">Members</th>
+            <th class="sortable">Members<#if command.assignment.resitAssessment> (Resit Only)</#if></th>
             <th class="sortable">Assessment group</th>
             <th class="sortable">CATS</th>
             <th class="sortable">Occurrence</th>
@@ -52,11 +52,11 @@
           <tbody>
           <#list command.availableUpstreamGroups as available>
             <#local isLinked = available.isLinked(command.assessmentGroups) />
-            <@upstream_group available isLinked true />
+            <@upstream_group available isLinked true command.assignment.resitAssessment />
           </#list>
           <#list command.notInUseUpstreamGroups as notInUse>
             <#local isLinked = notInUse.isLinked(command.assessmentGroups) />
-            <@upstream_group notInUse isLinked false />
+            <@upstream_group notInUse isLinked false command.assignment.resitAssessment />
           </#list>
           </tbody>
         </table>

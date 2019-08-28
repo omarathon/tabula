@@ -27,6 +27,8 @@ object EditAssignmentMembershipCommand {
 trait EditAssignmentMembershipCommandState extends HasAcademicYear {
   def assignment: Assignment
 
+  def resitOnly: Boolean = assignment.resitAssessment
+
   def module: Module = assignment.module
 
   def academicYear: AcademicYear = assignment.academicYear

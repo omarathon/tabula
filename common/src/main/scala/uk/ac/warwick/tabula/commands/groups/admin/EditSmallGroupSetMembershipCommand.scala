@@ -82,7 +82,7 @@ class EditSmallGroupSetMembershipCommandInternal(val module: Module, val set: Sm
 
 trait EditSmallGroupSetMembershipCommandState extends CurrentAcademicYear {
   def module: Module
-
+  def resitOnly: Boolean = false
   def set: SmallGroupSet
 }
 
@@ -122,10 +122,10 @@ trait SmallGroupAutoDeregistration {
 
   def autoDeregister(fn: () => SmallGroupSet): SmallGroupSet = {
     val oldUsers =
-      assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Option(set.members)).toSet
+      assessmentMembershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Option(set.members), resitOnly = false).toSet
 
     val newUsers =
-      assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
+      assessmentMembershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members), resitOnly = false).toSet
 
     val updatedSet = fn()
 

@@ -35,7 +35,8 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
     assignmentMembershipService.isStudentCurrentMember(
       isEq(currentUser.apparentUser),
       isA[Seq[UpstreamAssessmentGroupInfo]],
-      isA[Option[UserGroup]]) returns (true)
+      isA[Option[UserGroup]],
+      isA[Boolean]) returns (true)
 
     provider.getRolesFor(currentUser, assignment) should be(Seq(AssignmentSubmitter(assignment)))
   }
@@ -50,7 +51,8 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
     assignmentMembershipService.isStudentCurrentMember(
       isEq(currentUser.apparentUser),
       isA[Seq[UpstreamAssessmentGroupInfo]],
-      isA[Option[UserGroup]]) returns (false)
+      isA[Option[UserGroup]],
+      isA[Boolean]) returns (false)
 
     provider.getRolesFor(currentUser, assignment) should be(Seq())
   }

@@ -25,6 +25,8 @@ class EditAssignmentEnrolmentCommand(module: Module = null, academicYear: Academ
   // not required
   def assignment: Assignment = null
 
+  override def resitOnly: Boolean = false
+
   // not required
   def contextSpecificValidation(errors: Errors) {}
 

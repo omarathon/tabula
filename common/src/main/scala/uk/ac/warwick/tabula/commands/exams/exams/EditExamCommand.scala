@@ -62,6 +62,8 @@ trait EditExamCommandState extends ExamState {
 
   def exam: Exam
 
+  override def resitOnly: Boolean = false
+
   override def module: Module = exam.module
 
   override def academicYear: AcademicYear = exam.academicYear

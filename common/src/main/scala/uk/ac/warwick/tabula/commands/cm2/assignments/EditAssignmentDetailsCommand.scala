@@ -96,6 +96,7 @@ class EditAssignmentDetailsCommandInternal(override val assignment: Assignment) 
     name = assignment.name
     openDate = assignment.openDate
     openEnded = assignment.openEnded
+    resitAssessment = assignment.resitAssessment
     openEndedReminderDate = assignment.openEndedReminderDate
     closeDate = assignment.closeDate
     workflowCategory = assignment.workflowCategory.getOrElse(WorkflowCategory.NotDecided)

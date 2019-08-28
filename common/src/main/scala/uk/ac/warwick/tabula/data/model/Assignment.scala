@@ -164,6 +164,7 @@ class Assignment
   var summative: JBoolean = _
   var dissertation: JBoolean = _
   var allowExtensions: JBoolean = _
+  var resitAssessment: JBoolean = _
 
   @Column(name = "anonymous_marking_method")
   @Type(`type` = "uk.ac.warwick.tabula.data.model.AssignmentAnonymityUserType")
@@ -267,7 +268,7 @@ class Assignment
     } else None
 
   private def doesAllMembersHaveApprovedExtensions: Boolean =
-    assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Option(members))
+    assessmentMembershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Option(members), resitAssessment)
       .forall(user => approvedExtensions.contains(user.getUserId))
 
   def feedbackDeadlineForSubmission(submission: Submission): Option[LocalDate] = feedbackDeadline.flatMap { wholeAssignmentDeadline =>
@@ -715,7 +716,7 @@ class Assignment
         // users can always submit to assignments if they have a submission or piece of feedback
         submissions.asScala.exists(_.usercode == user.getUserId) ||
           fullFeedback.exists(_.usercode == user.getUserId) ||
-          assessmentMembershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
+          assessmentMembershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members), resitAssessment)
       } else {
         true
       })
@@ -1052,9 +1053,11 @@ class Assignment
 trait BooleanAssignmentDetailProperties {
   @BeanProperty var cm2Assignment: JBoolean = false
   @BeanProperty var openEnded: JBoolean = false
+  @BeanProperty var resitAssessment: JBoolean = false
 
   def copyDetailBooleansTo(assignment: Assignment) {
     assignment.openEnded = openEnded
+    assignment.resitAssessment = resitAssessment
   }
 }
 

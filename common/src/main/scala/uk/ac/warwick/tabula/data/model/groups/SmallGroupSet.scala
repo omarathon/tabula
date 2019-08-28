@@ -230,7 +230,7 @@ class SmallGroupSet
 
   // Gets a breakdown of the membership for this small group set.
   def membershipInfo: AssessmentMembershipInfo = RequestLevelCache.cachedBy("SmallGroupSet.membershipInfo", id) {
-    membershipService.determineMembership(upstreamAssessmentGroupInfos, Some(members))
+    membershipService.determineMembership(upstreamAssessmentGroupInfos, Some(members), resitOnly = false)
   }
 
   def isStudentMember(user: User): Boolean = RequestLevelCache.cachedBy("SmallGroupSet.isStudentMember", s"$id-${user.getUserId}") {
@@ -243,13 +243,13 @@ class SmallGroupSet
       }
 
     memberOfAnyGroup || Option(linkedDepartmentSmallGroupSet).map(_.isStudentMember(user)).getOrElse {
-      membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members))
+      membershipService.isStudentCurrentMember(user, upstreamAssessmentGroupInfos, Option(members), resitOnly = false)
     }
   }
 
   def allStudents: Seq[User] = RequestLevelCache.cachedBy("SmallGroupSet.allStudents", id) {
     Option(linkedDepartmentSmallGroupSet).map(_.allStudents).getOrElse {
-      membershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Some(members))
+      membershipService.determineMembershipUsers(upstreamAssessmentGroupInfos, Some(members), resitOnly = false)
     }
   }
 

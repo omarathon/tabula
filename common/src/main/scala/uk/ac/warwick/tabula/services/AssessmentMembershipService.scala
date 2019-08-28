@@ -91,11 +91,11 @@ trait AssessmentMembershipService {
     */
   def countCurrentMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Int
 
-  def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo
+  def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): AssessmentMembershipInfo
 
   def determineMembership(assessment: Assessment): AssessmentMembershipInfo
 
-  def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
+  def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Seq[User]
 
   def determineMembershipUsers(assessment: Assessment): Seq[User]
 
@@ -107,7 +107,7 @@ trait AssessmentMembershipService {
 
   def determineMembershipIds(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[String]
 
-  def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Boolean
+  def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Boolean
 
   def save(gb: GradeBoundary): Unit
 
@@ -313,11 +313,11 @@ trait AssessmentMembershipMethods extends Logging {
     universityIds.filter(universityId => !profiles.find(_.universityId == universityId).exists(_.deceased))
   }
 
-  private def generateAssessmentMembershipInfo(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], includePWD: Boolean = false): AssessmentMembershipInfo = {
+  private def generateAssessmentMembershipInfo(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], includePWD: Boolean = false, resitOnly: Boolean = false): AssessmentMembershipInfo = {
     val sitsUsers =
       userLookup.getUsersByWarwickUniIds(
         upstream.flatMap { uagInfo =>
-          val members = if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
+          val members = if (resitOnly) uagInfo.resitMembers else if (includePWD) uagInfo.allMembers else uagInfo.currentMembers
           members.map(_.universityId).filter(_.hasText)
         }.distinct
       ).toSeq
@@ -337,31 +337,31 @@ trait AssessmentMembershipMethods extends Logging {
     new AssessmentMembershipInfo(deceasedItemsFilter(sorted))
   }
 
-  def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): AssessmentMembershipInfo =
-    generateAssessmentMembershipInfo(upstream, others)
+  def determineMembership(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): AssessmentMembershipInfo =
+    generateAssessmentMembershipInfo(upstream, others, resitOnly = resitOnly)
 
   def determineMembership(assessment: Assessment): AssessmentMembershipInfo = assessment match {
-    case a: Assignment => determineMembership(a.upstreamAssessmentGroupInfos, Option(a.members))
-    case e: Exam => determineMembership(e.upstreamAssessmentGroupInfos, Option(e.members))
+    case a: Assignment => determineMembership(a.upstreamAssessmentGroupInfos, Option(a.members), resitOnly = a.resitAssessment)
+    case e: Exam => determineMembership(e.upstreamAssessmentGroupInfos, Option(e.members), resitOnly = false)
   }
 
   /**
     * Returns just a list of User objects who are on this assessment group.
     */
-  def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
-    determineMembership(upstream, others).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
+  def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Seq[User] = {
+    determineMembership(upstream, others, resitOnly).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
   }
 
   /**
     * Returns a simple list of User objects for students who are enrolled on this assessment. May be empty.
     */
   def determineMembershipUsers(assessment: Assessment): Seq[User] = assessment match {
-    case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroupInfos, Option(a.members))
+    case a: Assignment => determineMembershipUsers(a.upstreamAssessmentGroupInfos, Option(a.members), a.resitAssessment)
     case e: Exam => determineMembershipUsersWithOrder(e).map(_._1)
   }
 
   def determineMembershipUsersIncludingPWD(assessment: Assessment): Seq[User] = assessment match {
-    case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
+    case a: Assignment => generateAssessmentMembershipInfo(a.upstreamAssessmentGroupInfos, Option(a.members), includePWD = true, a.resitAssessment).items.filter(notExclude).map(toUser).filter(notNull).filter(notAnonymous)
     case e: Exam => generateMembershipUsersWithOrder(e, includePWD = true).map(_._1)
   }
 
@@ -403,7 +403,7 @@ trait AssessmentMembershipMethods extends Logging {
     others match {
       case Some(group) if !group.universityIds =>
         logger.warn("Attempted to use countCurrentWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
-        determineMembershipUsers(upstream, others).size
+        determineMembershipUsers(upstream, others, resitOnly = false).size
       case _ =>
         val sitsUsers = upstream.flatMap(_.currentMembers.map(_.universityId))
 
@@ -414,10 +414,10 @@ trait AssessmentMembershipMethods extends Logging {
     }
   }
 
-  def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
+  def isStudentCurrentMember(user: User, upstream: Seq[UpstreamAssessmentGroupInfo], others: Option[UnspecifiedTypeUserGroup], resitOnly: Boolean): Boolean = {
     if (others.exists(_.excludesUser(user))) false
     else if (others.exists(_.includesUser(user))) true
-    else determineMembership(upstream, others).items.filter(notExclude).exists(_.universityId.contains(user.getWarwickId))
+    else determineMembership(upstream, others, resitOnly).items.filter(notExclude).exists(_.universityId.contains(user.getWarwickId))
   }
 
   private def sameUserIdAs(user: User) = (other: (String, User)) => {

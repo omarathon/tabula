@@ -40,6 +40,7 @@ trait SubmissionInfoToJsonConverter {
         "openDate" -> DateFormats.IsoDateTime.print(assignment.openDate),
         "closeDate" -> (if (assignment.openEnded) null else DateFormats.IsoDateTime.print(assignment.closeDate)),
         "academicYear" -> assignment.academicYear.toString,
+        "resitAssessment" -> assignment.resitAssessment,
         "name" -> assignment.name,
         "collectMarks" -> assignment.collectMarks,
         "markingWorkflow" -> {

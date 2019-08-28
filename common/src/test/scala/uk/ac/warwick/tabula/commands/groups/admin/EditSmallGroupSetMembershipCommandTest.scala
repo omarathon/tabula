@@ -80,8 +80,8 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
       command.academicYear = set.academicYear
 
       command.assessmentMembershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
-      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users.toSeq
-      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns command.members.users.toSeq
+      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members), resitOnly = false) returns set.members.users.toSeq
+      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members), resitOnly = false) returns command.members.users.toSeq
       command.applyInternal()
 
       set.members.users.toSet should be(Set(user1, user2, user3, user4))
@@ -97,8 +97,8 @@ class EditSmallGroupSetMembershipCommandTest extends TestBase with Mockito {
 
       command.assessmentMembershipService = smartMock[AssessmentMembershipService] // Intentionally different to the SmallGroupSet's one
       command.assessmentMembershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
-      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members)) returns set.members.users.toSeq
-      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members)) returns command.members.users.toSeq
+      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(set.members), resitOnly = false) returns set.members.users.toSeq
+      command.assessmentMembershipService.determineMembershipUsers(Seq(), Some(command.members), resitOnly = false) returns command.members.users.toSeq
       command.applyInternal()
 
       set.members.users.toSet should be(Set(user1, user5))

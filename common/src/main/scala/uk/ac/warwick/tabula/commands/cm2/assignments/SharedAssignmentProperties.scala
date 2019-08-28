@@ -27,6 +27,7 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties with Aut
 trait SharedAssignmentDetailProperties extends BooleanAssignmentDetailProperties {
   def copySharedDetailFrom(assignment: Assignment): Unit = {
     openEnded = assignment.openEnded
+    resitAssessment = assignment.resitAssessment
   }
 
   def copySharedDetailTo(assignment: Assignment): Unit = {

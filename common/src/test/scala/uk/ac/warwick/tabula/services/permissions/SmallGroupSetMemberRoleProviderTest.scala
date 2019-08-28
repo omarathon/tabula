@@ -5,11 +5,6 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.roles.SmallGroupSetMember
 import uk.ac.warwick.tabula.services.{UserGroupCacheManager, UserLookupService, AssessmentMembershipService}
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup}
 
@@ -47,8 +42,8 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
     val nonMember = new CurrentUser(nonMemberUser, nonMemberUser)
     userLookup.getUserByWarwickUniId("test2") returns nonMemberUser
 
-    membershipService.isStudentCurrentMember(memberUser, Nil, Some(groupSet.members)) returns true
-    membershipService.isStudentCurrentMember(nonMemberUser, Nil, Some(groupSet.members)) returns false
+    membershipService.isStudentCurrentMember(memberUser, Nil, Some(groupSet.members), resitOnly = false) returns true
+    membershipService.isStudentCurrentMember(nonMemberUser, Nil, Some(groupSet.members), resitOnly = false) returns false
 
     val roleProvider = new SmallGroupSetMemberRoleProvider
   }
