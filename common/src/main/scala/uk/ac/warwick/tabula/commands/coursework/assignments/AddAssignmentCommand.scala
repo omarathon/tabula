@@ -13,6 +13,8 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 
   def assignment: Assignment = null
 
+  def resitOnly: Boolean = false
+
   override def applyInternal(): Assignment = transactional() {
     val assignment = new Assignment(module)
     assignment.addDefaultFields()

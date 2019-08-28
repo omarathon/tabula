@@ -70,6 +70,7 @@ abstract class AbstractCopyAssignmentsCommandInternal
     newAssignment.module = assignment.module
     newAssignment.name = assignment.name
     newAssignment.openEnded = assignment.openEnded
+    newAssignment.resitAssessment = assignment.resitAssessment
     newAssignment.collectMarks = assignment.collectMarks
     newAssignment.collectSubmissions = assignment.collectSubmissions
     newAssignment.restrictSubmissions = assignment.restrictSubmissions

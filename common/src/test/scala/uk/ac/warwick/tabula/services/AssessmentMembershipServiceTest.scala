@@ -53,7 +53,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
 
     val others = Some(other)
 
-    val info = assignmentMembershipService.determineMembership(Seq(uInfo), others)
+    val info = assignmentMembershipService.determineMembership(Seq(uInfo), others, resitOnly = false)
     info.items.size should be(6)
     info.items.head.userId should be(Some("aaaaa"))
     info.items(1).userId should be(Some("bbbbb"))
@@ -78,14 +78,14 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     val excludedGroup = smartMock[UnspecifiedTypeUserGroup]
     excludedGroup.excludesUser(user) returns true
 
-    service.isStudentCurrentMember(user, Nil, Some(excludedGroup)) should be(false)
+    service.isStudentCurrentMember(user, Nil, Some(excludedGroup), resitOnly = false) should be(false)
     verify(excludedGroup, times(0)).includesUser(user) // we quit early
 
     val includedGroup = smartMock[UnspecifiedTypeUserGroup]
     includedGroup.excludesUser(user) returns false
     includedGroup.includesUser(user) returns true
 
-    service.isStudentCurrentMember(user, Nil, Some(includedGroup)) should be(true)
+    service.isStudentCurrentMember(user, Nil, Some(includedGroup), resitOnly = false) should be(true)
 
     val notInGroup = smartMock[UnspecifiedTypeUserGroup]
     notInGroup.excludesUser(user) returns false
@@ -93,7 +93,7 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     notInGroup.users returns Set.empty
     notInGroup.excludes returns Set.empty
 
-    service.isStudentCurrentMember(user, Nil, Some(notInGroup)) should be(false)
+    service.isStudentCurrentMember(user, Nil, Some(notInGroup), resitOnly = false) should be(false)
 
     val module = Fixtures.module("in101")
 
@@ -110,12 +110,12 @@ class AssessmentMembershipServiceTest extends TestBase with Mockito {
     val upstreamWithActiveMembers3 = UpstreamAssessmentGroupInfo(upstream3, upstream3.members.asScala.filter(m => m.universityId != "0123458"))
 
     val upstreams = Seq(upstreamWithActiveMembers1, upstreamWithActiveMembers2, upstreamWithActiveMembers3)
-    service.isStudentCurrentMember(user, upstreams, None) should be(true)
+    service.isStudentCurrentMember(user, upstreams, None, resitOnly = false) should be(true)
 
     // Doesn't affect results from the usergroup itself
-    service.isStudentCurrentMember(user, upstreams, Some(excludedGroup)) should be(false)
-    service.isStudentCurrentMember(user, upstreams, Some(includedGroup)) should be(true)
-    service.isStudentCurrentMember(user, upstreams, Some(notInGroup)) should be(true)
+    service.isStudentCurrentMember(user, upstreams, Some(excludedGroup), resitOnly = false) should be(false)
+    service.isStudentCurrentMember(user, upstreams, Some(includedGroup), resitOnly = false) should be(true)
+    service.isStudentCurrentMember(user, upstreams, Some(notInGroup), resitOnly = false) should be(true)
   }
 
 }

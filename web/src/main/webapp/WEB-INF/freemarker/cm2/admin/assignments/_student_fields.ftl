@@ -4,10 +4,30 @@
   <div class="control-group">
     <label class="control-label">Add students from SITS</label>
     <div class="control">
-      Add students by linking this assignment to one or more of the following assessment components in SITS for ${command.module.code?upper_case}
-      in ${command.academicYear.label}.
+      <p>
+        Add students by linking this assignment to one or more of the following assessment components in SITS for ${command.module.code?upper_case}
+        in ${command.academicYear.label}.
+      </p>
     </div>
   </div>
+
+    <#if assignment.resitAssessment>
+      <#assign sasPopoverText>
+        The field in SITS called <code>Initial SAS status</code> on <code>Student Assessment</code> should be set to <code>R</code> if re-assessment is required. The status is set when you agree an assessment in SITS. Please seek advice from the SIS team if the values you see are different to what you expect to see.
+      </#assign>
+      <#assign sraPopoverText>
+        Marks for this assignment will be uploaded to <code>Student re-assessment (SRA)</code> in SITS.
+        Records are generated automatically from the Student Re-assessment (RAS) process.
+        Marks from <code>SRA</code> will appear as resit marks on exam grids.
+      </#assign>
+      <div class="alert alert-info">
+        <strong>This is a resit assessment</strong>
+        <ul>
+          <li>Only students that are expected to resit will be included. If students are missing from the assessment components below please check that they are marked as expected to resit in SITS <@fmt.help_popover id="sasPopover" content="${sasPopoverText}" html=true />)</li>
+          <li>When uploading marks to SITS, these will be uploaded as resit marks. <@fmt.help_popover id="sraPopover" content="${sraPopoverText}" html=true /></li>
+        </ul>
+      </div>
+    </#if>
 
   <#import "../assignment_membership_picker_macros.ftl" as membership_picker />
 

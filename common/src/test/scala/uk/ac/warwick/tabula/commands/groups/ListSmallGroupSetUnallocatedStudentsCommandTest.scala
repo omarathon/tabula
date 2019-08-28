@@ -91,7 +91,7 @@ class ListSmallGroupSetUnallocatedStudentsCommandTest extends TestBase with Mock
 
     set.membershipService = membershipService
     wireUserLookup(set.members)
-    membershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Some(set.members)) returns (set.members.users.toSeq)
+    membershipService.determineMembershipUsers(set.upstreamAssessmentGroupInfos, Some(set.members), resitOnly = false) returns (set.members.users.toSeq)
 
     allUsers.foreach {
       user => profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))

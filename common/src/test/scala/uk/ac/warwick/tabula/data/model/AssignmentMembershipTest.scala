@@ -65,19 +65,19 @@ class AssignmentMembershipTest extends TestBase with Mockito {
   }
 
   @Test def whenEmpty() {
-    val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody)).items
+    val membership = assignmentMembershipService.determineMembership(Nil, Option(nobody), resitOnly = false).items
     membership.size should be(0)
   }
 
   @Test def emptyWithNone() {
-    val membership = assignmentMembershipService.determineMembership(Nil, None).items
+    val membership = assignmentMembershipService.determineMembership(Nil, None, resitOnly = false).items
     membership.size should be(0)
   }
 
   @Test def plainSits() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
-    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(nobody)).items
+    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(nobody), resitOnly = false).items
     membership.size should be(2)
     membership.head.user.getFullName should be("Roger Aaaaf")
     membership(1).user.getFullName should be("Roger Aaaag")
@@ -86,10 +86,19 @@ class AssignmentMembershipTest extends TestBase with Mockito {
   @Test def plainSitsWithNone() {
     val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
     val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
-    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None).items
+    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = false).items
     membership.size should be(2)
     membership.head.user.getFullName should be("Roger Aaaaf")
     membership(1).user.getFullName should be("Roger Aaaag")
+  }
+
+  @Test def resitOnly() {
+    val upstream = newAssessmentGroup(Seq("0000005", "0000006", "0000007"))
+    upstream.members.get(0).resitExpected = Some(true)
+    val upstreamInfo = UpstreamAssessmentGroupInfo(upstream, upstream.members.asScala.filter(_.universityId != "0000007"))
+    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), None, resitOnly = true).items
+    membership.size should be(1)
+    membership.head.user.getFullName should be("Roger Aaaaf")
   }
 
   @Test def includeAndExclude() {
@@ -99,7 +108,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     others.userLookup = userLookup
     others.addUserId("aaaaa")
     others.excludeUserId("aaaaf")
-    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(others)).items
+    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(others), resitOnly = false).items
 
     membership.size should be(3)
 
@@ -120,7 +129,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
     // test the simpler methods that return a list of Users
 
-    val users = assignmentMembershipService.determineMembershipUsers(Seq(upstreamInfo), Option(others))
+    val users = assignmentMembershipService.determineMembershipUsers(Seq(upstreamInfo), Option(others), resitOnly = false)
     users.size should be(2)
     users.head.getFullName should be("Roger Aaaaa")
     users(1).getFullName should be("Roger Aaaag")
@@ -138,7 +147,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
     others.addUserId("aaaaf")
     others.excludeUserId("aaaah")
     others.userLookup = userLookup
-    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(others)).items
+    val membership = assignmentMembershipService.determineMembership(Seq(upstreamInfo), Option(others), resitOnly = false).items
     membership.size should be(3)
 
     membership.head.user.getFullName should be("Roger Aaaaf")

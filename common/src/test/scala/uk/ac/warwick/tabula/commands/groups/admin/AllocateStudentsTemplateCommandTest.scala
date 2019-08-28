@@ -120,7 +120,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
     wireUserLookup(set.members)
 
     set.membershipService = smartMock[AssessmentMembershipService]
-    set.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users.toSeq)
+    set.membershipService.determineMembershipUsers(Seq(), Some(set.members), resitOnly = false) returns (set.members.users.toSeq)
     set.membershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns (Nil)
   }
 
