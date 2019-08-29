@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringMemberNoteServiceComponent
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs
+import uk.ac.warwick.tabula.web.controllers.profiles.ProfileBreadcrumbs.Profile.IdentityIdentifier
 
 @Controller
 @RequestMapping(Array("/profiles/view"))
@@ -25,6 +26,8 @@ class ViewProfileIdentityController extends AbstractViewProfileController
         viewByCourseAndYear(student.mostSignificantCourseDetails.get, activeAcademicYear)
       case student: StudentMember if student.freshOrStaleStudentCourseDetails.nonEmpty =>
         viewByCourseAndYear(student.freshOrStaleStudentCourseDetails.lastOption.get, activeAcademicYear)
+      case _: ApplicantMember =>
+        Mav("profiles/profile/identity_applicant").crumbs(ProfileBreadcrumbs.Profile.Identity(member).setActive(IdentityIdentifier))
       case _ =>
         Mav("profiles/profile/identity_staff").crumbs(breadcrumbsStaff(member, ProfileBreadcrumbs.Profile.IdentityIdentifier): _*)
     }

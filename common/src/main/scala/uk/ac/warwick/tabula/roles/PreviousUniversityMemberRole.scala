@@ -32,6 +32,7 @@ case object PreviousUniversityMemberRoleDefinition extends UnassignableBuiltInRo
     Profiles.Read.ReasonableAdjustments,
     Profiles.Read.ReasonableAdjustmentsNotes,
     Profiles.Read.PrivateDetails,
+    Profiles.Read.DateOfBirth,
 
     MemberNotes.Read,
     Profiles.Read.ModuleRegistration.Core,

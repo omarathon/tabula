@@ -582,7 +582,7 @@ trait MemberProperties extends StringId {
   @JoinColumn(name = "home_department_id")
   var homeDepartment: Department = _
 
-  @Restricted(Array("Profiles.Read.PrivateDetails"))
+  @Restricted(Array("Profiles.Read.DateOfBirth"))
   var dateOfBirth: LocalDate = _
 
   var jobTitle: String = _
