@@ -30,8 +30,15 @@
             <strong>Username:</strong> ${member.userId}<br />
           </#if>
           <#if member.dateOfBirth??>
-            <strong>Date of birth:</strong> ${member.dateOfBirth}<br />
+            <strong>Date of birth:</strong> <@fmt.date date=member.dateOfBirth includeTime=false relative=false shortMonth=true /><br />
           </#if>
+          <#if member.homeEmail??>
+            <strong>Alternative email:</strong> ${member.homeEmail}<br />
+          </#if>
+          <#if member.mobileNumber??>
+            <strong>Mobile phone:</strong> ${member.mobileNumber}<br />
+          </#if>
+
           <#if user.sysadmin>
             <span tabindex="0" class="tabula-tooltip" data-title="This information is only available to sysadmins"><i class="fal fa-user-crown"></i></span>
             <strong>Last import:</strong> <@fmt.date date=member.lastImportDate />
