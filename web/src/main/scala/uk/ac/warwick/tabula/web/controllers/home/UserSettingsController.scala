@@ -82,6 +82,7 @@ class UserSettingsController extends BaseController {
 
 case class JSONUserSettings(
   alertsSubmission: String,
+  newAssignmentSettings: String,
   weekNumberingSystem: String,
   bulkEmailSeparator: String,
   profilesDefaultView: String
@@ -91,6 +92,7 @@ object JSONUserSettings {
   def apply(u: UserSettings): JSONUserSettings = {
     JSONUserSettings(
       alertsSubmission = u.alertsSubmission,
+      newAssignmentSettings = u.newAssignmentSettings,
       weekNumberingSystem = u.weekNumberingSystem,
       bulkEmailSeparator = u.bulkEmailSeparator,
       profilesDefaultView = u.profilesDefaultView

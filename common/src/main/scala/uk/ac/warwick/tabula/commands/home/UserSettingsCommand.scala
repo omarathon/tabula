@@ -28,6 +28,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
   self: UserSettingsServiceComponent =>
 
   var alertsSubmission: String = settings.alertsSubmission
+  var newAssignmentSettings: String = settings.newAssignmentSettings
   var weekNumberingSystem: String = settings.weekNumberingSystem
   var bulkEmailSeparator: String = settings.bulkEmailSeparator
   var profilesDefaultView: String = settings.profilesDefaultView
@@ -40,6 +41,7 @@ class UserSettingsCommand(val user: CurrentUser, val settings: UserSettings) ext
 
   override def applyInternal(): UserSettings = transactional() {
     settings.alertsSubmission = alertsSubmission
+    settings.newAssignmentSettings = newAssignmentSettings
     settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
     settings.bulkEmailSeparator = bulkEmailSeparator
     settings.profilesDefaultView = profilesDefaultView
@@ -77,6 +79,7 @@ trait UserSettingsDescription extends Describable[UserSettings] {
     d.properties(
       "user" -> user.apparentId,
       "alertsSubmission" -> result.alertsSubmission,
+      "newAssignmentSettings" -> result.newAssignmentSettings,
       "hiddenIntros" -> result.hiddenIntros,
       "weekNumberingSystem" -> result.weekNumberingSystem,
       "bulkEmailSeparator" -> result.bulkEmailSeparator,

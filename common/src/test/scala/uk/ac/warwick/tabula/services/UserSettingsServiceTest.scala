@@ -15,6 +15,7 @@ class UserSettingsServiceTest extends AppContextTestBase {
     val userSettings = new UserSettings
     userSettings.userId = "cuscav"
     userSettings.alertsSubmission = UserSettings.AlertsNoteworthySubmissions
+    userSettings.newAssignmentSettings = UserSettings.NewAssignmentPrefill
 
     withUser("cuscav") {
       service.save(currentUser, userSettings)
@@ -22,6 +23,7 @@ class UserSettingsServiceTest extends AppContextTestBase {
 
     service.getByUserId("cuscav") should be('defined)
     service.getByUserId("cuscav").get.alertsSubmission should be(UserSettings.AlertsNoteworthySubmissions)
+    service.getByUserId("cuscav").get.newAssignmentSettings should be(UserSettings.NewAssignmentPrefill)
 
     // If we save a new empty user settings, we don't overwrite anything existing
     withUser("cuscav") {
@@ -30,5 +32,6 @@ class UserSettingsServiceTest extends AppContextTestBase {
 
     service.getByUserId("cuscav") should be('defined)
     service.getByUserId("cuscav").get.alertsSubmission should be(UserSettings.AlertsNoteworthySubmissions)
+    service.getByUserId("cuscav").get.newAssignmentSettings should be(UserSettings.NewAssignmentPrefill)
   }
 }
