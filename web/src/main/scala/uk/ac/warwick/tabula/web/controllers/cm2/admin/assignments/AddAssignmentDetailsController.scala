@@ -38,6 +38,12 @@ class AddAssignmentDetailsController extends AbstractAssignmentController
 
   @RequestMapping
   def form(@ModelAttribute("command") form: CreateAssignmentDetailsCommand, @PathVariable academicYear: AcademicYear): Mav = {
+    val prefillSetting = userSettingsService.getByUserId(user.apparentId).map(_.newAssignmentSettings).getOrElse(UserSettings.NewAssignmentPrefill)
+
+    prefillSetting match {
+      case UserSettings.NewAssignmentNothing => form.prefillFromRecent = false
+    }
+
     form.prefillFromRecentAssignment()
     showForm(form, academicYear)
   }
