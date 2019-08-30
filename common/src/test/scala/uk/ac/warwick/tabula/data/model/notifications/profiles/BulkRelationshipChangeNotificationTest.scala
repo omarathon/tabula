@@ -63,12 +63,12 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
 
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
     notificationContent should be(
-      """As of 15:30 Tue 15th January 2019 you will be no longer assigned as personal tutor to the following students:
+      """As of 15:30 Tue 15ᵗʰ January 2019 you will be no longer assigned as personal tutor to the following students:
         |
         |* Student Name
         |* Student2 Name2 (new personal tutor Other Tutor)
         |
-        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |This change was originally scheduled to happen at 15:30 Wed 30ᵗʰ January 2019.
         |""".stripMargin
     )
   }
@@ -98,12 +98,12 @@ class BulkRelationshipChangeNotificationTest extends TestBase with Mockito with 
 
     val notificationContent: String = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
     notificationContent should be(
-      """As of 15:30 Tue 15th January 2019 you will be assigned as personal tutor to the following students:
+      """As of 15:30 Tue 15ᵗʰ January 2019 you will be assigned as personal tutor to the following students:
         |
         |* Student Name
         |* Student2 Name2 (previous personal tutor Other Tutor)
         |
-        |This change was originally scheduled to happen at 15:30 Wed 30th January 2019.
+        |This change was originally scheduled to happen at 15:30 Wed 30ᵗʰ January 2019.
         |""".stripMargin
     )
   }

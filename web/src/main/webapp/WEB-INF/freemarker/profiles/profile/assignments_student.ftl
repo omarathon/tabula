@@ -77,7 +77,7 @@
                     <#assign lateness>
                       <@fmt.p enhancedAssignment.assignment.workingDaysLateIfSubmittedNow(member.userId) "working day" /> overdue,
                       ${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
-                      (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
+                      (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true />)
                     </#assign>
 
                     <span tabindex="0" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
@@ -154,7 +154,7 @@
                   <#assign lateness>
                     <@fmt.p enhancedAssignment.submission.workingDaysLate "working day" /> overdue,
                     ${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
-                    (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
+                    (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true />)
                   </#assign>
 
                   <span tabindex="0" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>
@@ -212,7 +212,7 @@
                   <#assign lateness>
                     <@fmt.p enhancedAssignment.submission.workingDaysLate "working day" /> overdue,
                     ${durationFormatter(enhancedAssignment.submissionDeadline)} after ${context}
-                    (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true stripHtml=true />)
+                    (<@fmt.date date=enhancedAssignment.submissionDeadline capitalise=false shortMonth=true />)
                   </#assign>
 
                   <span tabindex="0" class="label label-danger use-tooltip" title="${lateness}" data-html="true">Late</span>

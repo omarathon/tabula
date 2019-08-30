@@ -30,23 +30,23 @@ dependencies {
   compile "uk.ac.warwick.util:warwickutils-mywarwick:${warwickUtilsVersion}"
   compile "uk.ac.warwick.util:warwickutils-virusscan:${warwickUtilsVersion}"
 
-  compile 'uk.ac.warwick.sso:sso-client:2.72'
+  compile 'uk.ac.warwick.sso:sso-client:2.74'
 
-  compile 'org.apache.httpcomponents:httpclient:4.5.6'
-  compile 'org.apache.httpcomponents:httpcore:4.4.10'
-  compile 'org.apache.httpcomponents:httpmime:4.5.6'
+  compile 'org.apache.httpcomponents:httpclient:4.5.9'
+  compile 'org.apache.httpcomponents:httpcore:4.4.11'
+  compile 'org.apache.httpcomponents:httpmime:4.5.9'
   compile 'org.apache.httpcomponents:httpasyncclient:4.1.4'
 
   compile "uk.ac.warwick:spring-scala-glue_${scalaMajorVersion}:1.7"
 
-  compile 'org.apache.tika:tika-core:1.20'
+  compile 'org.apache.tika:tika-core:1.22'
   compile "org.apache.poi:poi:${poiVersion}"
   compile "org.apache.poi:poi-ooxml:${poiVersion}"
   compile "org.apache.poi:poi-ooxml-schemas:${poiVersion}"
   compile 'org.apache.poi:ooxml-schemas:1.4'
   compile "org.apache.poi:poi-scratchpad:${poiVersion}"
 
-  compile 'org.freemarker:freemarker:2.3.28'
+  compile 'org.freemarker:freemarker:2.3.29'
 
   compile "org.hibernate:hibernate-core:${hibernateVersion}"
   compile "org.hibernate:hibernate-entitymanager:${hibernateVersion}"
@@ -56,16 +56,16 @@ dependencies {
   providedCompile 'org.postgresql:postgresql:42.2.5'
 
   // Database migrations
-  compile "org.flywaydb:flyway-core:5.2.4"
+  compile "org.flywaydb:flyway-core:6.0.0"
 
-  compile "org.hibernate:hibernate-validator:6.0.13.Final"
-  annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:6.0.13.Final"
+  compile "org.hibernate:hibernate-validator:6.0.17.Final"
+  annotationProcessor "org.hibernate.validator:hibernate-validator-annotation-processor:6.0.17.Final"
   testCompile "org.glassfish:javax.el:3.0.1-b09"
 
-  compile "joda-time:joda-time:2.10.1"
+  compile "joda-time:joda-time:2.10.3"
   compile "joda-time:joda-time-jsptags:1.1.1"
   compile("org.jadira.usertype:usertype.core:7.0.0.CR1") { exclude group: 'com.h2database' }
-  compile "org.joda:joda-convert:2.1.2"
+  compile "org.joda:joda-convert:2.2.1"
 
   compile "com.google.guava:guava:24.1.1-jre"
   compile "com.google.code.findbugs:jsr305:3.0.2"
@@ -75,7 +75,7 @@ dependencies {
 
   // Upgrade transitive jackson dependencies
   compile "com.fasterxml.jackson.core:jackson-core:${jacksonVersion}"
-  compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${jacksonDatabindVersion}"
   annotationProcessor "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jacksonVersion}"
   compile "com.fasterxml.jackson.dataformat:jackson-dataformat-smile:${jacksonVersion}"
@@ -83,14 +83,15 @@ dependencies {
   annotationProcessor "com.fasterxml.jackson.module:jackson-module-jaxb-annotations:${jacksonVersion}"
 
   // Standalone JSON library
-  compile "com.typesafe.play:play-json_${scalaMajorVersion}:2.7.0"
-  compile "com.typesafe.play:play-json-joda_${scalaMajorVersion}:2.7.0"
+  compile "com.typesafe.play:play-json_${scalaMajorVersion}:2.7.4"
+  compile "com.typesafe.play:play-json-joda_${scalaMajorVersion}:2.7.4"
 
   compile 'org.apache.commons:commons-compress:1.18'
   compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
   compile 'commons-codec:commons-codec:1.11'
   compile 'commons-configuration:commons-configuration:1.10'
   compile 'commons-logging:commons-logging:1.2'
+  compile 'commons-beanutils:commons-beanutils:1.9.4'
 
   compile "org.apache.tiles:tiles-api:${tilesVersion}"
   compile "org.apache.tiles:tiles-core:${tilesVersion}"
@@ -107,21 +108,21 @@ dependencies {
 
   compile "org.springframework.scala:spring-scala_${scalaMajorVersion}:1.0.0.RC1"
 
-  compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.1.16'
-  compile 'com.itextpdf:itextpdf:5.5.13' // Upgrade from above to fix https://snyk.io/vuln/SNYK-JAVA-COMITEXTPDF-32005
+  compile 'org.xhtmlrenderer:flying-saucer-pdf-itext5:9.1.18'
+  compile 'com.itextpdf:itextpdf:5.5.13.1' // Upgrade from above to fix https://snyk.io/vuln/SNYK-JAVA-COMITEXTPDF-32005
 
   compile "uk.co.halfninja:random-name-generator_${scalaMajorVersion}:0.3-warwick"
 
   // libphonenumber, for formatting phone numbers
-  compile 'com.googlecode.libphonenumber:libphonenumber:8.10.3'
+  compile 'com.googlecode.libphonenumber:libphonenumber:8.10.17'
 
   // offline geocoder for libphonenumber
-  compile 'com.googlecode.libphonenumber:geocoder:2.109'
+  compile 'com.googlecode.libphonenumber:geocoder:2.123'
 
-  compile 'com.atlassian.commonmark:commonmark:0.12.1'
-  compile 'com.atlassian.commonmark:commonmark-ext-autolink:0.12.1'
+  compile 'com.atlassian.commonmark:commonmark:0.13.0'
+  compile 'com.atlassian.commonmark:commonmark-ext-autolink:0.13.0'
 
-  compile 'org.mnode.ical4j:ical4j:3.0.5'
+  compile 'org.mnode.ical4j:ical4j:3.0.9'
 
   compile "org.elasticsearch:elasticsearch:${elasticsearchVersion}"
   compile "com.sksamuel.elastic4s:elastic4s-core_${scalaMajorVersion}:${elastic4sVersion}"
@@ -134,26 +135,27 @@ dependencies {
 
   compile 'org.tuckey:urlrewritefilter:4.0.4'
 
-  compile 'org.quartz-scheduler:quartz:2.3.0'
-  compile 'org.quartz-scheduler:quartz-jobs:2.3.0'
+  compile 'org.quartz-scheduler:quartz:2.3.1'
+  compile 'com.mchange:c3p0:0.9.5.4' // Upgrade from above to fix https://snyk.io/vuln/SNYK-JAVA-COMMCHANGE-174481
+  compile 'org.quartz-scheduler:quartz-jobs:2.3.1'
 
   compile 'com.github.mfornos:humanize-slim:1.2.2'
 
-  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20181114.1'
+  compile 'com.googlecode.owasp-java-html-sanitizer:owasp-java-html-sanitizer:20190610.1'
 
-  compile 'com.beachape:enumeratum_2.12:1.5.13'
+  compile "com.beachape:enumeratum_${scalaMajorVersion}:1.5.13"
 
   // Test dependencies
   testCompile "org.springframework:spring-test:${springVersion}"
 
   // FIXME We need this for the sandbox (because it uses jdbc:embedded-datasource to mock up SITS and FIM databases) but that seems incredibly wasteful
-  compile 'org.hsqldb:hsqldb:2.4.1'
+  compile 'org.hsqldb:hsqldb:2.5.0'
 
-  testCompile 'com.opentable.components:otj-pg-embedded:0.12.5'
+  testCompile 'com.opentable.components:otj-pg-embedded:0.13.1'
 
   testCompile "com.sksamuel.elastic4s:elastic4s-testkit_${scalaMajorVersion}:${elastic4sVersion}"
   testCompile "com.sksamuel.elastic4s:elastic4s-embedded_${scalaMajorVersion}:${elastic4sVersion}"
-  testCompile "org.apache.logging.log4j:log4j-core:2.11.1" // Thanks, Elasticsearch
+  testCompile "org.apache.logging.log4j:log4j-core:2.12.1" // Thanks, Elasticsearch
 }
 
 jar.dependsOn(generateRebel)

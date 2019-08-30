@@ -57,7 +57,7 @@ class SmallGroupEventAttendanceReminderNotification
       year = event.group.groupSet.academicYear,
       numberingSystem = event.group.groupSet.module.adminDepartment.weekNumberingSystem,
       short = false
-    ).replace("<sup>", "").replace("</sup>", "")
+    )
 
     "%s attendance needs recording for %s, %s".format(name, dayOfWeek, date)
   }

@@ -41,7 +41,7 @@ object IntervalFormatter {
     val timeFormatter = if (includeTime) Hour24IncludeMins else OmitTimes
     val dateFormatter = if (includeDays) IncludeDays else OmitDays
     val formatter = new ConfigurableIntervalFormatter(timeFormatter, dateFormatter)
-    formatter.format(date)
+    formatter.format(start = date)
   }
 
 }
@@ -74,11 +74,8 @@ class IntervalFormatter extends TemplateMethodModelEx {
   * Does the actual work of formatting; can be called directly or through the convenience methods on IntervalFormatter.
   */
 class ConfigurableIntervalFormatter(val timeFormat: TimeFormats, val dateFormat: DateFormats) {
-
-
   def format(start: DateTime, end: DateTime): String = {
     if (start.toLocalDate == end.toLocalDate) {
-      // don't print the date twice if they're the same
       val timeBit = timeFormat.formatTimes(new Interval(start, end)) match {
         case None => ""
         case Some((startTime, endTime)) => s"$startTime - $endTime, "
@@ -105,7 +102,6 @@ class ConfigurableIntervalFormatter(val timeFormat: TimeFormats, val dateFormat:
     time match {
       case None => date
       case Some(t) => s"$t, $date"
-
     }
   }
 }
@@ -167,7 +163,9 @@ object ConfigurableIntervalFormatter {
 
     def formatDates(interval: Interval): (String, String)
 
-    def ordinal(date: DateTime): String = "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
+    def ordinal(date: DateTime): String = {
+      DateBuilder.ordinal(date.getDayOfMonth)
+    }
 
     protected val yearFormat: DateTimeFormatter = DateTimeFormat.forPattern(" yyyy")
     protected val monthFormat: DateTimeFormatter = DateTimeFormat.forPattern(" MMM")

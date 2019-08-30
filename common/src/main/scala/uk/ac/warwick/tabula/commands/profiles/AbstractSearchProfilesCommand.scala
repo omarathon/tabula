@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.commands.profiles
 import org.hibernate.validator.constraints.NotEmpty
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Command, Description, ReadOnly, Unaudited}
-import uk.ac.warwick.tabula.data.model.{Member, MemberUserType}
+import uk.ac.warwick.tabula.data.model.{ApplicantMember, Member, MemberUserType}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.elasticsearch.AutowiringProfileQueryServiceComponent
@@ -36,14 +36,24 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
   }
 
   private def canRead(member: Member) = securityService.can(user, Permissions.Profiles.Read.Core, member)
+  private def canSearch(member: Member) = securityService.can(user, Permissions.Profiles.ViewSearchResults, member)
 
   def usercodeMatches: Seq[Member] =
     if (!isMaybeUsercode(query)) Seq()
-    else profileService.getAllMembersWithUserId(query).filter { m => userTypes.contains(m.userType) }.filter(canRead)
+    else {
+      val members = profileService.getAllMembersWithUserId(query).filter { m => userTypes.contains(m.userType) }.filter(canRead)
+      // don't return applicants (usercode is faked and is the same as universityId)
+      members.diff(members.collect { case a: ApplicantMember => a })
+    }
 
   def universityIdMatches: Seq[Member] =
     if (!isMaybeUniversityId(query)) Seq()
-    else singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
+    else {
+      singletonByUserType(profileService.getMemberByUniversityId(query)).filter {
+        case m: ApplicantMember => canRead(m) && canSearch(m)
+        case m => canRead(m)
+      }
+    }
 
   override def describe(d: Description): Unit = d.property("query" -> query)
 

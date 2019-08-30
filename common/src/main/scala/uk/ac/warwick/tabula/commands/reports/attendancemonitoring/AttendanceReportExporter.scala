@@ -32,7 +32,7 @@ class AttendanceReportExporter(val processorResult: AttendanceReportProcessorRes
       intervalFormatter.exec(JList(
         wrapper.wrap(p.startDate.toDate),
         wrapper.wrap(p.endDate.toDate)
-      )).replaceAll("<sup>", "").replaceAll("</sup>", "")
+      ))
     })") ++
     Seq("Unrecorded", "Missed (unauthorised)")
 

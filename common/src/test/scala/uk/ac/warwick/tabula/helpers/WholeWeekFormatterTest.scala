@@ -12,13 +12,13 @@ class WholeWeekFormatterTest extends TestBase {
 
     formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 1")
     formatter.format(Seq(WeekRange(7)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 7")
-    formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Christmas vacation, w/c Mon 2<sup>nd</sup> Jan 2012")
-    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Easter vacation, w/c Mon 19<sup>th</sup> Mar 2012")
+    formatter.format(Seq(WeekRange(14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Christmas vacation, w/c Mon 2ⁿᵈ Jan 2012")
+    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Easter vacation, w/c Mon 19ᵗʰ Mar 2012")
 
     formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, week 1")
     formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be("Term 1, weeks 1-2")
     formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = false) should be(
-      "Term 1, weeks 1-10; Christmas vacation, w/c Mon 12<sup>th</sup> Dec 2011 - w/c Mon 2<sup>nd</sup> Jan 2012"
+      "Term 1, weeks 1-10; Christmas vacation, w/c Mon 12ᵗʰ Dec 2011 - w/c Mon 2ⁿᵈ Jan 2012"
     )
 
     formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = true) should be("1")
@@ -27,20 +27,20 @@ class WholeWeekFormatterTest extends TestBase {
     formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term, short = true) should be("19/03")
   }
 
-
   @Test def cumulativeTermNumbering() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
     val formatter = new WholeWeekFormatter(AcademicYear.now())
 
     formatter.format(Seq(WeekRange(4)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 4")
     formatter.format(Seq(WeekRange(10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 10")
-    formatter.format(Seq(WeekRange(13)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Christmas vacation, w/c Mon 26<sup>th</sup> Dec 2011")
+    formatter.format(ranges = Seq(WeekRange(13)), dayOfWeek = DayOfWeek.Tuesday, numberingSystem = WeekRange.NumberingSystem.Cumulative, short = false) should be("Christmas vacation, w/c Mon 26ᵗʰ Dec 2011")
     formatter.format(Seq(WeekRange(15)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 2, week 11")
-    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Easter vacation, w/c Mon 19<sup>th</sup> Mar 2012")
+    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Easter vacation, w/c Mon 19ᵗʰ Mar 2012")
 
     formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, week 1")
     formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be("Term 1, weeks 1-2")
+
     formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = false) should be(
-      "Term 1, weeks 1-10; Christmas vacation, w/c Mon 12<sup>th</sup> Dec 2011 - w/c Mon 2<sup>nd</sup> Jan 2012"
+      "Term 1, weeks 1-10; Christmas vacation, w/c Mon 12ᵗʰ Dec 2011 - w/c Mon 2ⁿᵈ Jan 2012"
     )
 
     formatter.format(Seq(WeekRange(4)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative, short = true) should be("4")
@@ -78,17 +78,24 @@ class WholeWeekFormatterTest extends TestBase {
   @Test def noWeekNumbers() = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
     val formatter = new WholeWeekFormatter(AcademicYear.now())
 
-    formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
-    formatter.format(Seq(WeekRange(5)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 31<sup>st</sup> Oct 2011")
-    formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 16<sup>th</sup> Jan 2012")
-    formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 1<sup>st</sup> Aug 2011")
-    formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 30<sup>th</sup> Jul 2012")
-    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 19<sup>th</sup> Mar 2012")
+    formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3ʳᵈ Oct 2011")
 
-    formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> Oct 2011")
-    formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3<sup>rd</sup> - w/c Mon 10<sup>th</sup> Oct 2011")
+    formatter.format(Seq(WeekRange(5)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 31ˢᵗ Oct 2011")
+
+    formatter.format(Seq(WeekRange(16)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 16ᵗʰ Jan 2012")
+
+    formatter.format(Seq(WeekRange(-8)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 1ˢᵗ Aug 2011")
+
+    formatter.format(Seq(WeekRange(44)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 30ᵗʰ Jul 2012")
+
+    formatter.format(Seq(WeekRange(25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 19ᵗʰ Mar 2012")
+
+    formatter.format(Seq(WeekRange(1, 1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3ʳᵈ Oct 2011")
+
+    formatter.format(Seq(WeekRange(1, 2)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be("w/c Mon 3ʳᵈ - w/c Mon 10ᵗʰ Oct 2011")
+
     formatter.format(Seq(WeekRange(1, 14)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = false) should be(
-      "w/c Mon 3<sup>rd</sup> Oct 2011 - w/c Mon 2<sup>nd</sup> Jan 2012"
+      "w/c Mon 3ʳᵈ Oct 2011 - w/c Mon 2ⁿᵈ Jan 2012"
     )
 
     formatter.format(Seq(WeekRange(1)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None, short = true) should be("03/10")
