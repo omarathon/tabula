@@ -49,13 +49,10 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
   def universityIdMatches: Seq[Member] =
     if (!isMaybeUniversityId(query)) Seq()
     else {
-      val members = singletonByUserType(profileService.getMemberByUniversityId(query)) filter canRead
-      val (applicants, others) = members.partition {
-        case _: ApplicantMember => true
-        case _ => false
+      singletonByUserType(profileService.getMemberByUniversityId(query)).filter {
+        case m: ApplicantMember => canRead(m) && canSearch(m)
+        case m => canRead(m)
       }
-
-      applicants.filter(canSearch) ++ others
     }
 
   override def describe(d: Description): Unit = d.property("query" -> query)
