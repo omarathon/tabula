@@ -102,7 +102,7 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
     relationships.asScala.flatMap(_.studentMember).map(d.member)
     d.properties(
       "creator" -> creator.universityId,
-      "relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", ")
+      "relationship" -> relationships.asScala.mkString(", ")
     )
   }
 
@@ -110,7 +110,7 @@ trait ModifyMeetingRecordDescription extends Describable[MeetingRecord] {
     relationships.asScala.flatMap(_.studentMember).map(d.member)
     d.properties(
       "creator" -> creator.universityId,
-      "relationship" -> relationships.asScala.map(_.relationshipType).distinct.mkString(", "),
+      "relationship" -> relationships.asScala.mkString(", "),
       "meeting" -> meeting.id
     )
     d.fileAttachments(meeting.attachments.asScala)
