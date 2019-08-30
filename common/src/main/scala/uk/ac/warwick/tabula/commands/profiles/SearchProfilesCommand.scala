@@ -2,10 +2,9 @@ package uk.ac.warwick.tabula.commands.profiles
 
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
-import uk.ac.warwick.tabula.data.model.MemberUserType.{Staff, Student}
+import uk.ac.warwick.tabula.data.model.MemberUserType.{Applicant, Staff, Student}
 import uk.ac.warwick.tabula.data.model.{Department, Member}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 import scala.collection.JavaConverters._
@@ -18,11 +17,12 @@ object SearchProfilesCommand {
       with SearchProfilesCommandPermissions
 }
 
-class SearchProfilesCommandInternal(val currentMember: Member, user: CurrentUser) extends AbstractSearchProfilesCommand(user, Student, Staff)
+class SearchProfilesCommandInternal(val currentMember: Member, user: CurrentUser) extends AbstractSearchProfilesCommand(user, Student, Staff, Applicant)
   with CommandInternal[Seq[Member]] {
 
   override def applyInternal(): Seq[Member] =
-    if (validQuery) usercodeMatches ++ universityIdMatches ++ queryMatches
+    if (validQuery)
+      usercodeMatches ++ universityIdMatches ++ queryMatches
     else Seq()
 
   private def queryMatches = {
