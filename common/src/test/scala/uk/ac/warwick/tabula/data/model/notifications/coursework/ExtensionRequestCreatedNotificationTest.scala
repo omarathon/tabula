@@ -55,7 +55,7 @@ class ExtensionRequestCreatedNotificationTest extends TestBase with ExtensionNot
   @Test
   def urlIsAssignmentExtensionsPage(): Unit = new ExtensionFixture {
     val n: ExtensionRequestCreatedNotification = createNotification(extension, student)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=u1234567")
+    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
   }
 
   @Test
@@ -82,7 +82,7 @@ class ExtensionRequestCreatedNotificationTest extends TestBase with ExtensionNot
     val n: ExtensionRequestCreatedNotification = createNotification(extension, student)
     n.content.model("requestedExpiryDate") should be("23 August 2013 at 12:00:00")
     n.content.model.get("reasonForRequest") should be('empty)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=" + student.getUserId)
+    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
     n.content.model("assignment") should be(assignment)
     n.content.model("student") should be(student)
   }

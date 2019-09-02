@@ -22,7 +22,7 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
   @Test
   def urlIsAssignmentExtensionsPage(): Unit = new ExtensionFixture {
     val n: ExtensionRequestRespondedNotification = createNotification(extension, student, admin)
-    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=u1234567")
+    n.url should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
   }
 
   @Test
@@ -52,7 +52,7 @@ class ExtensionRequestRespondedNotificationTest extends TestBase with Mockito wi
     n.content.model.get("agentName").get should be("[Unknown user]")
     n.content.model.get("assignment").get should be(assignment)
     n.content.model.get("verbed").get should be("rejected")
-    n.content.model.get("path").get should be(s"/$cm2Prefix/admin/assignments/123/extensions?usercode=u1234567")
+    n.content.model.get("path").get should be(s"/$cm2Prefix/admin/assignments/123/extensions?extension=${extension.id}")
   }
 
   @Test
