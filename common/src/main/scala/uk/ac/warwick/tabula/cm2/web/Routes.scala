@@ -275,7 +275,7 @@ object Routes {
 
       def extensions(assignment: Assignment): String = assignmentroot(assignment) + "/extensions"
 
-      def extension(assignment: Assignment, student: User): String = extensions(assignment) + s"?usercode=${encoded(student.getUserId)}"
+      def extension(assignment: Assignment, extension: Extension): String = extensions(assignment) + s"?extension=${encoded(extension.id)}"
 
       def extensionAttachment(extension: Extension, filename: String): String = admin() + s"/extensions/${extension.id}/supporting-file/${encoded(filename)}"
 
