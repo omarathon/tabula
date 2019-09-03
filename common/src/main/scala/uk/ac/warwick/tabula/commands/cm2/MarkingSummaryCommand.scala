@@ -194,7 +194,7 @@ trait MarkingSummaryMarkerAssignments extends MarkingSummaryMarkerAssignmentList
   lazy val markerActionRequiredAssignments: Seq[MarkerAssignmentInfo] = benchmarkTask("Get action required assignments") {
     // needed to retrieve CM1 assignments for marking
     lazy val cm1AssignmentsForMarking = benchmarkTask("Get CM1 assignments for marking") {
-      assessmentService.getAssignmentWhereMarker(markerUser, None).sortBy(_.closeDate)
+      assessmentService.getAssignmentWhereMarker(markerUser, None).sortBy(assignment => Option(assignment.closeDate).getOrElse(assignment.openDate))
     }
 
     allMarkerAssignments.diff(markerUpcomingAssignments).diff(markerCompletedAssignments).filter { info =>
