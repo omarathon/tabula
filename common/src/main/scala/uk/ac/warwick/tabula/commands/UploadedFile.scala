@@ -42,6 +42,7 @@ class UploadedFile extends BindListener with Logging {
 
   @NoBind var rejectVirusUploads: Boolean = Wire[String]("${uploads.virusscan.rejectOnVirus:false}").toBoolean
   @NoBind var rejectVirusUploadsOnError: Boolean = Wire[String]("${uploads.virusscan.rejectOnError:false}").toBoolean
+  @NoBind var virusScanMaxSize: Long = Wire[String]("${uploads.virusscan.maxSize:2147483648}").toLong
 
   @NoBind var disallowedFilenames: List[String] = commaSeparated(Wire[String]("${uploads.disallowedFilenames}"))
   @NoBind var disallowedPrefixes: List[String] = commaSeparated(Wire[String]("${uploads.disallowedPrefixes}"))
@@ -113,23 +114,28 @@ class UploadedFile extends BindListener with Logging {
       if (hasUploads) {
         // Virus scan
         permittedUploads.asScala.zipWithIndex.foreach { case (item, index) =>
-          val virusScanResult = Await.result(virusScanService.scan(MultipartFileByteSource(item)).toScala, Duration.Inf)
-          virusScanResult.getStatus match {
-            case VirusScanResult.Status.clean =>
+          val byteSource = MultipartFileByteSource(item)
+          if (byteSource.size() > virusScanMaxSize) {
+            logger.warn(s"Not virus scanning ${item.getOriginalFilename}${RequestInfo.fromThread.map { info => s" by ${info.user.fullName} (${info.user.userId})" }.getOrElse("")}: size exceeds max ${byteSource.size()} > $virusScanMaxSize")
+          } else {
+            val virusScanResult = Await.result(virusScanService.scan(byteSource).toScala, Duration.Inf)
+            virusScanResult.getStatus match {
+              case VirusScanResult.Status.clean =>
               // Do nothing
 
-            case VirusScanResult.Status.virus =>
-              logger.warn(s"Virus uploaded${RequestInfo.fromThread.map { info => s" by ${info.user.fullName} (${info.user.userId})" }.getOrElse("")}: ${item.getOriginalFilename} (${virusScanResult.getVirus.get})")
+              case VirusScanResult.Status.virus =>
+                logger.warn(s"Virus uploaded${RequestInfo.fromThread.map { info => s" by ${info.user.fullName} (${info.user.userId})" }.getOrElse("")}: ${item.getOriginalFilename} (${virusScanResult.getVirus.get})")
 
-              if (rejectVirusUploads) {
-                result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getVirus.get()), s"The submitted file ${item.getOriginalFilename} contains a virus ${virusScanResult.getVirus.get()}.")
-              }
-            case VirusScanResult.Status.error =>
-              logger.warn(s"Error calling virus scan service for ${item.getOriginalFilename} (${virusScanResult.getError.get})")
+                if (rejectVirusUploads) {
+                  result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getVirus.get()), s"The submitted file ${item.getOriginalFilename} contains a virus ${virusScanResult.getVirus.get()}.")
+                }
+              case VirusScanResult.Status.error =>
+                logger.warn(s"Error calling virus scan service for ${item.getOriginalFilename} (${virusScanResult.getError.get})")
 
-              if (rejectVirusUploadsOnError) {
-                result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getError.get()), s"There was an error calling the virus scan service for ${item.getOriginalFilename}: ${virusScanResult.getError.get()}.")
-              }
+                if (rejectVirusUploadsOnError) {
+                  result.rejectValue(s"upload[$index]", "file.virus", Array(item.getOriginalFilename, virusScanResult.getError.get()), s"There was an error calling the virus scan service for ${item.getOriginalFilename}: ${virusScanResult.getError.get()}.")
+                }
+            }
           }
         }
 
