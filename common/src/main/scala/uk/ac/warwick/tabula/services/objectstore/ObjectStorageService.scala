@@ -4,6 +4,7 @@ import java.io.{File, InputStream}
 import java.nio.charset.StandardCharsets
 import java.util.{Base64, Properties}
 
+import com.google.common.base.Optional
 import com.google.common.io.ByteSource
 import com.google.common.net.MediaType
 import javax.crypto.SecretKey
@@ -19,14 +20,15 @@ import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ScalaFactoryBean
+import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.fileserver.RenderableFile
 import uk.ac.warwick.util.files.FileReferenceCreationStrategy.Target
 import uk.ac.warwick.util.files.StaticFileReferenceCreationStrategy
 import uk.ac.warwick.util.files.hash.FileHashResolver
 import uk.ac.warwick.util.files.impl.{AbstractBlobBackedFileData, LocalFilesystemFileStore}
-import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 
 import scala.collection.JavaConverters._
 import scala.concurrent.Future
@@ -65,6 +67,7 @@ object RichByteSource {
     override def openStream(): InputStream = source.openStream()
 
     override lazy val size: Long = source.size()
+    override lazy val sizeIfKnown: Optional[JLong] = source.sizeIfKnown()
     override lazy val isEmpty: Boolean = source.isEmpty
     override val encrypted: Boolean = false
 
@@ -84,6 +87,7 @@ class BlobBackedRichByteSource(blobStore: BlobStore, containerName: String, blob
   override lazy val metadata: Option[ObjectStorageService.Metadata] = fetchMetadata.map(ObjectStorageService.Metadata.apply)
   override lazy val isEmpty: Boolean = metadata.isEmpty
   override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override lazy val sizeIfKnown: Optional[JLong] = if (metadata.nonEmpty) Optional.of(size) else Optional.absent()
   override val encrypted: Boolean = false
 
   override def openStream(): InputStream = try byteSource.openStream() catch {
@@ -102,6 +106,7 @@ private[objectstore] class BlobBackedByteSource(fetchBlob: => Option[Blob], fetc
 
   override lazy val isEmpty: Boolean = metadata.isEmpty
   override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+  override lazy val sizeIfKnown: Optional[JLong] = if (metadata.nonEmpty) Optional.of(size) else Optional.absent()
   override val encrypted: Boolean = false
 }
 
