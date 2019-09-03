@@ -4,9 +4,11 @@ import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
+import com.google.common.base.Optional
 import com.google.common.io.ByteSource
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.AESEncryption._
 import uk.ac.warwick.tabula.helpers.ExecutionContexts.global
 import uk.ac.warwick.tabula.helpers.Logging
@@ -34,6 +36,7 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
     override lazy val metadata: Option[ObjectStorageService.Metadata] = delegate.metadata.map(unwrapMetadata)
     override lazy val isEmpty: Boolean = metadata.isEmpty
     override lazy val size: Long = metadata.map(_.contentLength).getOrElse(-1)
+    override lazy val sizeIfKnown: Optional[JLong] = if (metadata.nonEmpty) Optional.of(size) else Optional.absent()
     override val encrypted: Boolean = true
 
     override def openStream(): InputStream = delegate.metadata.map { md =>

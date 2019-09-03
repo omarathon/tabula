@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands.cm2.feedback
 
 import java.io.{File, FileOutputStream, InputStream}
 
+import com.google.common.base.Optional
 import com.google.common.io.ByteSource
 import org.apache.commons.compress.archivers.zip.ZipFile
 import org.springframework.util.FileCopyUtils
@@ -231,8 +232,7 @@ abstract class UploadFeedbackCommand[A](val assignment: Assignment, val marker: 
 
           f.uploadedData = new ByteSource {
             override def openStream(): InputStream = zip.getInputStream(entry)
-
-            override def size(): Long = entry.getSize
+            override lazy val sizeIfKnown: Optional[JLong] = Optional.of(entry.getSize)
           }
 
           f.uploadedBy = marker.getUserId
