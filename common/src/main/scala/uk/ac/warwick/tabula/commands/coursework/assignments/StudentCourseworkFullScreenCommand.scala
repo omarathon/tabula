@@ -22,7 +22,7 @@ object StudentCourseworkFullScreenCommand {
 }
 
 class StudentCourseworkFullScreenCommandInternal(val memberOrUser: MemberOrUser, val academicYearOption: Option[AcademicYear])
-  extends StudentCourseworkCommtandInternal with StudentCourseworkFullScreenCommandState {
+  extends StudentCourseworkCommandInternal with StudentCourseworkFullScreenCommandState {
 
   self: AssessmentServiceComponent with
     AssessmentMembershipServiceComponent with
