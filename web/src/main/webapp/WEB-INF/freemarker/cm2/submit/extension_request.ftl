@@ -206,7 +206,7 @@
           <#else>
             <input type="submit" class="btn btn-primary" value="Request extension" />
           </#if>
-          <a class="btn" href="${returnTo}">Cancel</a>
+          <a class="btn btn-default" href="${returnTo}">Cancel</a>
         </div>
       </@f.form>
     </#if>
