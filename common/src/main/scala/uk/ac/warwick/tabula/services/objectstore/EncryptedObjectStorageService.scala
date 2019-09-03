@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.services.objectstore
 
-import java.io.InputStream
+import java.io.{File, InputStream}
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 
 import com.google.common.base.Optional
-import com.google.common.io.ByteSource
+import com.google.common.io.{ByteSource, Files}
 import javax.crypto.SecretKey
 import javax.crypto.spec.IvParameterSpec
 import uk.ac.warwick.tabula.JavaImports._
@@ -63,8 +63,17 @@ class EncryptedObjectStorageService(delegate: ObjectStorageService, secretKey: S
         ) ++ metadata.userMetadata
       )
 
-      (encrypted, encryptedMetadata)
-    }.flatMap { case (encrypted, encryptedMetadata) => delegate.push(key, encrypted, encryptedMetadata) }
+      // TAB-7582 Write the encrypted version to a temporary file to avoid encrypting multiple times
+      // for SLOs
+      val tempFile = File.createTempFile(key, ".enc")
+      encrypted.copyTo(Files.asByteSink(tempFile))
+
+      (tempFile, encryptedMetadata)
+    }.flatMap { case (tempFile, encryptedMetadata) =>
+      val future = delegate.push(key, Files.asByteSource(tempFile), encryptedMetadata)
+      future.onComplete { _ => if (!tempFile.delete()) tempFile.deleteOnExit() }
+      future
+    }
 
   override def keyExists(key: String): Future[Boolean] = delegate.keyExists(key)
   override def delete(key: String): Future[Unit] = delegate.delete(key)
