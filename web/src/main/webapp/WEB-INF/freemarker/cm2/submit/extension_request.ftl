@@ -144,7 +144,7 @@
 
         <@bs3form.labelled_form_group "requestedExpiryDate" "Requested extension date">
           <div class="input-group">
-            <@f.input path="requestedExpiryDate" cssClass="form-control date-time-picker" />
+            <@f.input path="requestedExpiryDate" cssClass="form-control date-time-minute-picker" />
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
           </div>
         </@bs3form.labelled_form_group>
@@ -206,7 +206,7 @@
           <#else>
             <input type="submit" class="btn btn-primary" value="Request extension" />
           </#if>
-          <a class="btn" href="${returnTo}">Cancel</a>
+          <a class="btn btn-default" href="${returnTo}">Cancel</a>
         </div>
       </@f.form>
     </#if>
