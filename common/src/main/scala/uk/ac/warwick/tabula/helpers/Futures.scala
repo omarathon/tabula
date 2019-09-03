@@ -68,8 +68,7 @@ trait Futures {
 
 }
 
-object Futures extends Futures {
-}
+object Futures extends Futures
 
 object ExecutionContexts {
   implicit lazy val global: ExecutionContext = new SessionAwareExecutionContext(parallelism = 100)

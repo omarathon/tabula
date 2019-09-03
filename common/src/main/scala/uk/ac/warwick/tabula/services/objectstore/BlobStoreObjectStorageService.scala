@@ -38,6 +38,8 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
   override def push(key: String, in: ByteSource, metadata: ObjectStorageService.Metadata): Future[Unit] = Future {
     Assert.notNull(key, "Key must be defined")
 
+    logger.debug(s"[$key] Pushing blob contentLength=${metadata.contentLength}")
+
     val blob = blobStore.blobBuilder(key)
       .payload(in)
       .contentDisposition(key)
@@ -53,13 +55,17 @@ class BlobStoreObjectStorageService(blobStoreContext: BlobStoreContext, objectCo
         new MultipartUploadSlicingAlgorithm(blobStore.getMinimumMultipartPartSize, blobStore.getMaximumMultipartPartSize, blobStore.getMaximumNumberOfParts)
           .calculateChunkSize(metadata.contentLength)
 
+      logger.debug(s"[$key] Using large object support, chunk size $partSize")
+
       val multipartUpload = blobStore.initiateMultipartUpload(objectContainerName, blob.getMetadata, PutOptions.NONE)
 
-      val parts = slicer.slice(blob.getPayload, partSize).asScala.toList.zipWithIndex.par.map { case (payload, index) =>
+      val parts = slicer.slice(blob.getPayload, partSize).asScala.zipWithIndex.par.map { case (payload, index) =>
+        logger.debug(s"[$key] Uploading multipart part ${index + 1}")
         blobStore.uploadMultipartPart(multipartUpload, index + 1, payload)
-      }.seq
+      }
 
-      blobStore.completeMultipartUpload(multipartUpload, parts.asJava)
+      logger.debug(s"[$key] Completing multipart upload")
+      blobStore.completeMultipartUpload(multipartUpload, parts.toList.asJava)
     } else {
       blobStore.putBlob(objectContainerName, blob, PutOptions.NONE)
     }

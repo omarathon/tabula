@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.commands
 
 import java.io.{File, InputStream}
 
+import com.google.common.base.Optional
 import com.google.common.io.ByteSource
 import org.springframework.validation.BindingResult
 import org.springframework.web.multipart.MultipartFile
@@ -161,6 +162,6 @@ class UploadedFile extends BindListener with Logging {
 
 case class MultipartFileByteSource(file: MultipartFile) extends ByteSource {
   override def openStream(): InputStream = file.getInputStream
-  override def size(): Long = file.getSize
-  override def isEmpty: Boolean = file.isEmpty
+  override lazy val sizeIfKnown: Optional[JLong] = Optional.of(file.getSize)
+  override lazy val isEmpty: Boolean = file.isEmpty
 }
