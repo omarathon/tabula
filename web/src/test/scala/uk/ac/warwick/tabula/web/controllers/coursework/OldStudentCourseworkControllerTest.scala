@@ -36,8 +36,8 @@ class OldStudentCourseworkControllerTest extends TestBase with Mockito {
     assessmentService.filterAssignmentsByCourseAndYear(any[Seq[Assignment]], any[StudentCourseYearDetails]) returns Seq()
     assessmentService.getAssignmentsWithSubmission(any[StudentCourseYearDetails]) returns Seq()
     assessmentMembershipService.getEnrolledAssignments(any[User], isEq(None)) returns Seq()
-    assessmentService.getAssignmentsWithFeedback(any[String]) returns Seq()
-    assessmentService.getAssignmentsWithSubmission(any[String]) returns Seq()
+    assessmentService.getAssignmentsWithFeedback(any[String], isEq(None)) returns Seq()
+    assessmentService.getAssignmentsWithSubmission(any[String], isEq(None)) returns Seq()
   }
 
   @Test
@@ -55,7 +55,7 @@ class OldStudentCourseworkControllerTest extends TestBase with Mockito {
       historicalAssignmentsInfo1.size should be(1)
 
       val memberOrUser = MemberOrUser(Fixtures.user())
-      val fullScreenCommand = new StudentCourseworkFullScreenCommandInternal(memberOrUser) with CommandTestSupport with StudentCourseworkCommandHelper
+      val fullScreenCommand = new StudentCourseworkFullScreenCommandInternal(memberOrUser, None) with CommandTestSupport with StudentCourseworkCommandHelper
       val historicalAssignmentsInfo2: Seq[this.gadgetCommand.AssignmentInfo] = gadgetCommand.getHistoricAssignmentsInfo(Nil, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo)
       historicalAssignmentsInfo2.size should be(1)
     }
