@@ -27,6 +27,10 @@ class UserSettings extends GeneratedId with SettingsMap with HasNotificationSett
 
   def alertsSubmission_=(alert: String): Unit = settings += (Settings.AlertsSubmission -> alert)
 
+  def newAssignmentSettings: String = getStringSetting(Settings.NewAssignmentSettings).getOrElse(NewAssignmentPrefill)
+
+  def newAssignmentSettings_=(prefill: String): Unit = settings += (Settings.NewAssignmentSettings) -> prefill
+
   def hiddenIntros: Seq[String] = getStringSeqSetting(Settings.HiddenIntros).getOrElse(Nil)
 
   def hiddenIntros_=(hiddenIntro: Seq[String]): Unit = settings += (Settings.HiddenIntros -> hiddenIntro)
@@ -93,6 +97,9 @@ object UserSettings {
   val AlertsNoteworthySubmissions = "lateSubmissions"
   val AlertsNoSubmissions = "none"
 
+  val NewAssignmentPrefill = "restoreRecent"
+  val NewAssignmentNothing = "none"
+
   val DefaultBulkEmailSeparator = ";"
 
   val DefaultProfilesDefaultView = "gadget"
@@ -101,6 +108,7 @@ object UserSettings {
 
   object Settings {
     val AlertsSubmission = "alertsSubmission"
+    val NewAssignmentSettings = "newAssignmentSettings"
     val HiddenIntros = "hiddenIntros"
     val WeekNumberingSystem = "weekNumberSystem"
     val BulkEmailSeparator = "bulkEmailSeparator"
