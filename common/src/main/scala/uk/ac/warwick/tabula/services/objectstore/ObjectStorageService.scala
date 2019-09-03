@@ -66,6 +66,7 @@ object RichByteSource {
 
     override def openStream(): InputStream = source.openStream()
 
+    override lazy val size: Long = source.size()
     override lazy val sizeIfKnown: Optional[JLong] = source.sizeIfKnown()
     override lazy val isEmpty: Boolean = source.isEmpty
     override val encrypted: Boolean = false
