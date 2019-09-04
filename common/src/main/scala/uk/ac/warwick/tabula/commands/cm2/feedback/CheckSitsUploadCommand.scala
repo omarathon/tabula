@@ -36,18 +36,17 @@ class CheckSitsUploadCommandInternal(val assignment: Assignment, val feedback: F
 
   override def applyInternal(): Result = {
     if (feedback.assessmentGroups.isEmpty) {
-      CheckSitsUploadCommand.Result(hasAssessmentGroups = false)
+      CheckSitsUploadCommand.Result()
     } else if (feedback.assessmentGroups.size > 1) {
       CheckSitsUploadCommand.Result(
         hasAssessmentGroups = true,
         hasMultipleAssessmentGroups = true
       )
     } else {
-      exportFeedbackToSitsService.getPartialMatchingSasRecords(feedback) match {
+      exportFeedbackToSitsService.getPartialMatchingSITSRecords(feedback) match {
         case Seq() =>
           CheckSitsUploadCommand.Result(
-            hasAssessmentGroups = true,
-            hasAssignmentRow = false
+            hasAssessmentGroups = true
           )
         case Seq(singleRow) =>
           CheckSitsUploadCommand.Result(
