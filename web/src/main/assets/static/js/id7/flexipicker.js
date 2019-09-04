@@ -171,6 +171,8 @@
     this.tabulaMembersOnly = options.tabulaMembersOnly || false;
     this.prefixGroups = options.prefixGroups || '';
     this.universityId = options.universityId || false;
+    this.staffOnly = options.staffOnly || false;
+    this.studentsOnly = options.studentsOnly || false;
 
     this.richResultField = new RichResultField($element[0]);
 
@@ -329,6 +331,8 @@
         includeEmail: this.includeEmail,
         tabulaMembersOnly: this.tabulaMembersOnly,
         universityId: this.universityId,
+        staffOnly: this.staffOnly,
+        studentsOnly: this.studentsOnly,
         query: query,
         exact: options.exact // if true, only returns 100% matches.
       },
@@ -366,7 +370,9 @@
         includeUsers: $this.data('include-users') !== false,
         tabulaMembersOnly: $this.data('members-only'),
         prefixGroups: $this.data('prefix-groups') || '',
-        universityId: $this.data('universityid')
+        universityId: $this.data('universityid'),
+        staffOnly: $this.data('staff-only'),
+        studentsOnly: $this.data('students-only')
       };
       $.extend(allOptions, options || {});
       $this.data('flexi-picker', new FlexiPicker(allOptions));
