@@ -221,7 +221,7 @@ object FlexiPickerController {
 
     private def staffOrStudentOnlyOptionFilter: Map [String, AnyRef] = {
       if (staffOnly) Map("warwickitsclass" -> "Staff")
-      else if (studentsOnly) Map("student" -> "true")
+      else if (studentsOnly) Map("warwickukfedgroup" -> "Student")
       else Map.empty
     }
   }
