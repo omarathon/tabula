@@ -133,7 +133,7 @@
         <#assign staffCustomPicker>
           <div class="staff-search input-group">
             <input class="staff-search-query staff prevent-reload form-control" type="text" value="" placeholder="Search for staff" data-include-groups="false"
-                   data-include-email="false" data-members-only="true" data-staff-only="true"  data-universityid="true" />
+                   data-include-email="false" data-members-only="true" data-staff-only="true" data-universityid="true" />
             <span class="input-group-addon"><i class="fa fa-search"></i></span>
           </div>
         </#assign>
