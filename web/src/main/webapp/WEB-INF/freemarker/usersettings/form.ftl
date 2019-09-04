@@ -25,11 +25,11 @@
       <@bs3form.labelled_form_group path="newAssignmentSettings" labelText="New assignment settings">
         <@bs3form.radio>
           <@f.radiobutton path="newAssignmentSettings" value="restoreRecent" />
-          Pre-fill fields from a recently created assignment
+          Automatically copy details from the assignment I created most recently in the same department
         </@bs3form.radio>
         <@bs3form.radio>
           <@f.radiobutton path="newAssignmentSettings" value="none" />
-          Do not pre-fill anything
+          Do not automatically copy anything
         </@bs3form.radio>
       </@bs3form.labelled_form_group>
     </#if>

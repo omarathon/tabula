@@ -13,6 +13,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#macro>
 
 <#macro home><@_u page="/" /></#macro>
+<#macro userSettings><@_u page="/settings" /></#macro>
+
 
 <#-- Shared -->
 <#macro modulePermissions module><@_u context="/admin" page="/module/${module.code}/permissions"  /></#macro>

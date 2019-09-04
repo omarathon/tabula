@@ -21,8 +21,9 @@ the comments textarea needs to maintain newlines.
     <#if command.prefilled>
       <div class="alert alert-success">
         <i class="icon-info-sign"></i>
-        Some fields have been pre-filled from another recently created assignment for convenience.
-        <a href="<@routes.coursework.createAssignment module />?prefillFromRecent=false">Don't do this</a>
+        Some details have been automatically copied from the assignment you created most recently. You can remove these details
+        <a href="<@routes.coursework.createAssignment module />?prefillFromRecent=false">for this assignment</a> or change this setting <a href='<@routes.userSettings />'>for <em>all</em>
+          new assignments</a>.
       </div>
     </#if>
 
