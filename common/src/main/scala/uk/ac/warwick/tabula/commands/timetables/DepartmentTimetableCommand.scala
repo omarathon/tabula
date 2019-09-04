@@ -108,7 +108,7 @@ class DepartmentTimetableCommandInternal(
     }).map(_.distinct)
 
     errors.appendAll(staff.asScala.filter(staffMember => !staffMembers.exists(_.universityId == staffMember)).map(staffMember =>
-      s"Could not find a student with a University ID of $staffMember"
+      s"Could not find a staff member with a University ID of $staffMember"
     ))
     val staffCommands = staffMembers.map(staffMember => staffMember -> staffMemberTimetableCommandFactory.apply(staffMember))
     val staffEvents = EventList.combine(staffCommands.map { case (staffMember, cmd) =>

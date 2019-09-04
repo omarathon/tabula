@@ -110,7 +110,7 @@ class DepartmentEventsCommandInternal(
     }).map(_.distinct)
 
     errors.appendAll(staff.asScala.filter(staffMember => !staffMembers.exists(_.universityId == staffMember)).map(staffMember =>
-      s"Could not find a student with a University ID of $staffMember"
+      s"Could not find a staff member with a University ID of $staffMember"
     ))
     val staffCommands = staffMembers.map(staffMember => staffMember -> staffMemberEventsCommandFactory.apply(staffMember))
     val staffEvents = EventOccurrenceList.combine(staffCommands.map { case (staffMember, cmd) =>
