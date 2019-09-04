@@ -1,5 +1,3 @@
-<#escape x as x?html>
-
   <#function sortClass field>
     <#list filterStudentsCommand.sortOrder as order>
       <#if order.propertyName == field>
@@ -21,7 +19,7 @@
       <td><h6>${student.firstName}</h6></td>
       <td><h6>${student.lastName}</h6></td>
       <td><a class="profile-link" href="<@routes.profiles.profile student />">${student.universityId}</a></td>
-      <td>${student.groupName}</td>
+      <td>${(student.groupName)!""}</td>
       <#if academicYear?has_content>
         <#assign courseYearDetails = (student.mostSignificantCourseDetails.freshOrStaleStudentCourseYearDetailsForYear(academicYear))!"" />
         <#if !courseYearDetails?has_content>
@@ -198,5 +196,3 @@
       });
     });
   </script>
-
-</#escape>
