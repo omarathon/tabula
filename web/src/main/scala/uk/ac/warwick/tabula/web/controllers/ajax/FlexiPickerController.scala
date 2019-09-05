@@ -220,8 +220,8 @@ object FlexiPickerController {
     }
 
     private def staffOrStudentOnlyOptionFilter: Map [String, AnyRef] = {
-      if (staffOnly) Map("warwickitsclass" -> "Staff")
-      else if (studentsOnly) Map("warwickukfedgroup" -> "Student")
+      if (staffOnly) Map("warwickitsclass" -> "Staff") // this doesn't include PG(R)
+      else if (studentsOnly) Map("warwickukfedgroup" -> "Student") // this includes PG(R)
       else Map.empty
     }
   }
