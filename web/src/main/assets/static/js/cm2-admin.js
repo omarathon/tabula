@@ -1,6 +1,6 @@
 /* eslint-env browser */
 import $ from 'jquery';
-
+import {throttle as _throttle} from 'lodash-es';
 var exports = {};
 
 /**
@@ -74,6 +74,7 @@ $(function () {
           $this.bindFormHelpers();
           $this.data('loaded', true);
           $this.trigger('tabula.formLoaded');
+          $body.trigger('tabula.md-previewable-ready');
         },
         error: function () {
           $content.html("<p>No data is currently available. Please check that you are signed in.</p>");
@@ -81,6 +82,46 @@ $(function () {
       }));
     }
   });
+
+  $body.on('tabula.md-previewable-ready', () => {
+    $body.find('.md-previewable').toArray().map($).forEach(($previewable) => {
+      const $feedbackTextArea = $previewable.find('textarea.user-input');
+      const $previewBlock = $previewable.find('div.preview-container');
+      const $previewText = $previewable.find('div.preview-text');
+
+      const trimPTag = inputString => inputString.replace('<p>', '').replace('</p>', '').trim();
+
+      $previewBlock.hide();
+      $feedbackTextArea.on('change input', () => {
+        $previewText.addClass('loading');
+      });
+
+      $feedbackTextArea.on('change input', _throttle(() => {
+        const input = $feedbackTextArea.val() ? trimPTag($feedbackTextArea.val()) : '';
+        if (input === '' || !$previewBlock.is(':visible')) $previewBlock.hide();
+        $.ajax('/markdown/toHtml', {
+          type: 'POST',
+          data: {
+            markdownString: input,
+          },
+          success: (res) => {
+            if (input === '' || trimPTag(res) === input) {
+              $previewBlock.hide();
+            } else {
+              $previewText.html(res);
+              $previewBlock.show();
+            }
+            $previewText.removeClass('loading');
+          },
+          error: () => {
+            $previewText.removeClass('loading');
+            $previewBlock.hide();
+          },
+        });
+      }, 300));
+    });
+  });
+
   $('#feedback-adjustment').on('tabula.formLoaded', '.detail-row', function (e) {
 
     var $content = $(e.target);
