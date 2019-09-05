@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringUserLookupComponent, ProfileServiceComponent, UserLookupComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.controllers.ajax.FlexiPickerController.{FlexiPickerState, FlexiPickerResult, FlexiPickerCommand}
 import uk.ac.warwick.userlookup.webgroups.{GroupNotFoundException, GroupServiceException}
@@ -135,19 +134,19 @@ object FlexiPickerController {
         if (user.isFoundUser) {
           users = users :+ user
         } else {
-          users = users ++ userLookup.findUsersWithFilter(item("sn", terms(0)).asJava).asScala
+          users = users ++ userLookup.findUsersWithFilter((item("sn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("givenName", terms(0)).asJava).asScala
+            users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
           }
           if (users.size < EnoughResults) {
-            users ++= userLookup.findUsersWithFilter(item("cn", terms(0)).asJava).asScala
+            users ++= userLookup.findUsersWithFilter((item("cn", terms(0)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
           }
         }
       }
       else if (terms.length >= 2) {
-        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1))).asJava).asScala
+        users ++= userLookup.findUsersWithFilter((item("givenName", terms(0)) ++ item("sn", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
         if (users.size < EnoughResults) {
-          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1))).asJava).asScala
+          users ++= userLookup.findUsersWithFilter((item("sn", terms(0)) ++ item("givenName", terms(1)) ++ staffOrStudentOnlyOptionFilter).asJava).asScala
         }
       }
 
@@ -219,6 +218,12 @@ object FlexiPickerController {
       case s: String if s.hasText => Map(name -> (value + "*"))
       case _ => Map.empty
     }
+
+    private def staffOrStudentOnlyOptionFilter: Map [String, AnyRef] = {
+      if (staffOnly) Map("warwickitsclass" -> "Staff") // this doesn't include PG(R)
+      else if (studentsOnly) Map("warwickukfedgroup" -> "Student") // this includes PG(R)
+      else Map.empty
+    }
   }
 
   trait FlexiPickerState {
@@ -230,6 +235,8 @@ object FlexiPickerController {
     var exact = false
     var universityId = false // when returning users, use university ID as value
     var tabulaMembersOnly = false // filter out anyone who isn't in the Tabula members db
+    var staffOnly = false
+    var studentsOnly = false
 
     def hasQuery: Boolean = query.hasText
   }
