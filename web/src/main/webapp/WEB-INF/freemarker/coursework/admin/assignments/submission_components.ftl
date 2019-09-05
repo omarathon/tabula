@@ -17,7 +17,7 @@
       <#if r.turnitinId?has_content>
         <a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
       <#else>
-        Report no longer available in Tabula.
+        This report is no longer available. If you need access to the full report please contact webteam@warwick.ac.uk
       </#if>
     </p>
   </div>
