@@ -12,8 +12,7 @@
       <#if r.turnitinId?has_content>
         <a target="turnitin-viewer" href="<@routes.coursework.turnitinLtiReport assignment attachment />">View full report</a>
       <#else>
-        <a target="turnitin-viewer" href="<@routes.coursework.turnitinReport assignment attachment />">View full report - available via Tabula until end of
-          August 2016</a>
+        Report no longer available in Tabula.
       </#if>
     </p>
   </div>

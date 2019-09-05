@@ -171,12 +171,6 @@ object Routes {
 
       object turnitin {
         def status(assignment: Assignment): String = assignmentroot(assignment) + "/turnitin/status"
-
-        def report(submission: Submission, report: OriginalityReport): String =
-          if (report.turnitinId.hasText)
-            assignmentroot(submission.assignment) + "/turnitin/lti-report/%s".format(encoded(report.attachment.id))
-          else
-            assignmentroot(submission.assignment) + "/turnitin/report/%s".format(encoded(report.attachment.id))
       }
 
       object extension {

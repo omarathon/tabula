@@ -146,7 +146,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro submitToTurnitin assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin"/></#macro>
 <#macro submitToTurnitinStatus assignment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin/status"/></#macro>
 <#macro turnitinLtiReport assignment attachment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin/lti-report/${attachment.id}"/></#macro>
-<#macro turnitinReport assignment attachment><@_u page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin/report/${attachment.id}"/></#macro>
 
 <#-- non admin -->
 <#macro assignment assignment><@_u page="/module/${assignment.module.code}/${assignment.id}"/></#macro>
