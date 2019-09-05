@@ -18,15 +18,15 @@ the comments textarea needs to maintain newlines.
       <#if command.prefilled>
         <div class="alert alert-info">
           <i class="fa fa-info-circle"></i>
-          Some details have been automatically copied from the assignment you created most recently. You can remove these details
+          Some details have been automatically copied from the assignment created most recently in this department. You can remove these details
           <a href='${actionUrl}?prefillFromRecent=false'>for this assignment</a> or change this setting <a href='<@routes.userSettings />'>for <em>all</em>
-          new assignments</a>.
+          new assignments</a> you create.
         </div>
       </#if>
       <#if command.prefillAssignment??>
         <div class="alert alert-info">
           <i class="fa fa-question-circle"></i>
-          Some fields have been pre-filled from assignment ${command.prefillAssignment.name}.
+          Some fields have been copied from assignment ${command.prefillAssignment.name}.
         </div>
       </#if>
       <@f.errors cssClass="error form-errors" />
