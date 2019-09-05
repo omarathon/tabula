@@ -402,6 +402,39 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
   }
 
   @Test
+  def findFinalistUndergraduateUsercodes(): Unit = transactional { tx =>
+    val dept1 = Fixtures.department("hm", "History of Music")
+    session.saveOrUpdate(dept1)
+
+    val stu1 = Fixtures.student(universityId = "1000001", userId = "student1", department = dept1, courseDepartment = dept1)
+    val stu2 = Fixtures.student(universityId = "1000002", userId = "student2", department = dept1, courseDepartment = dept1)
+    val stu3 = Fixtures.student(universityId = "1000003", userId = "student3", department = dept1, courseDepartment = dept1)
+    val stu4 = Fixtures.student(universityId = "1000004", userId = "student4", department = dept1, courseDepartment = dept1)
+
+    stu1.groupName = "Undergraduate - full-time"
+    stu2.groupName = "Undergraduate - full-time"
+    stu3.groupName = "Undergraduate - full-time"
+    stu4.groupName = "Undergraduate - full-time"
+
+    stu1.mostSignificantCourse.levelCode = "2"
+    stu2.mostSignificantCourse.levelCode = "3"
+    stu3.mostSignificantCourse.levelCode = "3"
+    stu4.mostSignificantCourse.levelCode = "F"
+
+    stu1.mostSignificantCourse.courseYearLength = 3
+    stu2.mostSignificantCourse.courseYearLength = 3
+    stu3.mostSignificantCourse.courseYearLength = 4
+    stu4.mostSignificantCourse.courseYearLength = 1
+
+    memberDao.saveOrUpdate(stu1)
+    memberDao.saveOrUpdate(stu2)
+    memberDao.saveOrUpdate(stu3)
+    memberDao.saveOrUpdate(stu4)
+
+    memberDao.findFinalistUndergraduateUsercodes() should contain only "student2"
+  }
+
+  @Test
   def testDeleteByUniversityIds(): Unit = transactional { tx =>
     val app1 = Fixtures.member(
       userType = MemberUserType.Applicant,

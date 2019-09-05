@@ -477,11 +477,10 @@ jQuery.fn.tabulaSubmitOnce = function tabulaSubmitOnce() {
 $.fn.tabulaPopover = function tabulaPopover(options) {
   let $items = this;
   const initClass = 'tabulaPopover-init';
+  const dismissHandlerClass = 'tabulaPopover-dismissHandler';
 
   // filter already initialized popovers
   $items = $items.not(initClass);
-
-  const tooltipItems = $items.filter('.use-tooltip').toArray(); // boostrap js based tooltip
 
   // set options, with defaults
   const defaults = {
@@ -510,16 +509,24 @@ $.fn.tabulaPopover = function tabulaPopover(options) {
     e.stopPropagation();
   });
 
-  // Click away to dismiss
-  $('html').on('click.popoverDismiss', (e) => {
-    // if clicking anywhere other than the popover itself
-    if ($(e.currentTarget).closest('.popover').length === 0 && $(e.currentTarget).closest('.use-popover').length === 0) {
-      $('.popover-inner').find('button.close').click();
-      for (let i = 0; i < tooltipItems.length; i += 1) {
-        $(tooltipItems[i]).tooltip('enable');
-      }
-    }
+  $items.on('hidden.bs.popover', '.use-tooltip', (e) => {
+    const $target = $(e.currentTarget);
+    $target.tooltip('enable');
   });
+
+  // Click away to dismiss (TAB-7577 - make sure to only bind ONCE)
+  $('html')
+    .not(dismissHandlerClass)
+    // unbind in case asynchronous runs get pass our class guard
+    .off('click.popoverDismiss')
+    .on('click.popoverDismiss', (e) => {
+      const $target = $(e.currentTarget);
+      // if clicking anywhere other than the popover itself
+      if ($target.closest('.popover').length === 0 && $target.closest('.use-popover').length === 0) {
+        $('.popover-inner').find('button.close').click();
+      }
+    })
+    .addClass(dismissHandlerClass);
 
   // TAB-945 support popovers within fix-on-scroll
   $items.closest('.fix-on-scroll').on('fixed', () => {

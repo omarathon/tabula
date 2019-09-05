@@ -113,7 +113,7 @@ class ExportFeedbackToSitsCommandTest extends TestBase with ComponentMixins with
       feedbackForSitsDao.feedbackToLoad returns Seq(feedbackForSits)
       cmd.feedbackForSitsDao = feedbackForSitsDao
 
-      exportFeedbackToSitsService.countMatchingSasRecords(feedback) returns 1
+      exportFeedbackToSitsService.countMatchingSitsRecords(feedback) returns 1
       exportFeedbackToSitsService.exportToSits(feedback) returns 1
 
       cmd.exportFeedbackToSitsService = exportFeedbackToSitsService

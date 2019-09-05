@@ -90,6 +90,7 @@ trait ExtensionFixture extends Mockito {
   assignment.module = module
 
   val extension = new Extension
+  extension.id = "someID"
   extension._universityId = student.getWarwickId
   extension.usercode = student.getUserId
   extension.expiryDate = new DateTime(2013, 8, 23, 12, 0)

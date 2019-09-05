@@ -21,6 +21,8 @@ trait UpdatesStudentMembership {
 
   def existingMembers: Option[UnspecifiedTypeUserGroup]
 
+  def resitOnly: Boolean
+
   /**
     * Convert Spring-bound upstream group references to an AssessmentGroup buffer
     */
@@ -121,7 +123,7 @@ trait UpdatesStudentMembership {
     }
 
     // now get implicit membership list from upstream
-    val upstreamMembers = existingGroups.map(assessmentMembershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
+    val upstreamMembers = existingGroups.map(assessmentMembershipService.determineMembershipUsers(_, existingMembers, resitOnly)).getOrElse(Seq())
 
     for (user <- usersToAdd.distinct) {
       if (members.excludes.contains(user)) {
@@ -194,7 +196,7 @@ trait UpdatesStudentMembership {
   /**
     * Returns a sequence of MembershipItems
     */
-  def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+  def membershipInfo: AssessmentMembershipInfo = assessmentMembershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members), resitOnly)
 
 }
 
@@ -209,6 +211,8 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
   val occurrence: String = group.occurrence
   val sequence: String = assessmentComponent.sequence
   val assessmentType: String = Option(assessmentComponent.assessmentType).map(_.value).orNull // TAB-1174 remove Option wrap when non-null is in place
+
+  def resitMembers: Seq[UpstreamAssessmentGroupMember] = currentMembers.filter(_.resitExpected.exists(identity))
 
   def isLinked(assessmentGroups: JList[AssessmentGroup]): Boolean = assessmentGroups.asScala.exists(ag =>
     ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)

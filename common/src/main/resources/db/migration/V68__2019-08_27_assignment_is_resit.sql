@@ -1,0 +1,1 @@
+alter table assignment add column resitAssessment boolean default false;

@@ -598,7 +598,7 @@ class MemberDaoImpl extends MemberDao with Logging with AttendanceMonitoringStud
       .seq
 
   override def findFinalistUndergraduateUsercodes(): Seq[String] =
-    session.newQuery[String]("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode like mostSignificantCourse.courseYearLength")
+    session.newQuery[String]("select userId from StudentMember where groupName like :groupName and mostSignificantCourse.levelCode like cast(mostSignificantCourse.courseYearLength as string)")
       .setParameter("groupName", "Undergraduate%")
       .seq
 

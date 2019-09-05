@@ -12,8 +12,6 @@
           groupedPoint.templatePoint.startWeek
           groupedPoint.templatePoint.endWeek
           groupedPoint.templatePoint.scheme.academicYear
-          false,
-          true
           />
 						 ">	<@fmt.monitoringPointWeeksFormat
             groupedPoint.templatePoint.startWeek

@@ -67,7 +67,7 @@ class DeregisteredStudentsForSmallGroupSetCommandTest extends TestBase with Mock
     group2.students.add(user4)
 
     set.membershipService = mock[AssessmentMembershipService]
-    set.membershipService.determineMembershipUsers(Nil, Some(set.members)) returns set.members.users.toSeq
+    set.membershipService.determineMembershipUsers(Nil, Some(set.members), resitOnly = false) returns set.members.users.toSeq
     set.membershipService.getUpstreamAssessmentGroupInfo(Nil, set.academicYear) returns Nil
 
     set.studentsNotInMembership should be(Seq(user4))

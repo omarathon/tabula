@@ -19,7 +19,7 @@ abstract class ExtensionRequestNotification
 
   def template: String
 
-  def url: String = Routes.admin.assignment.extension(assignment, student)
+  def url: String = Routes.admin.assignment.extension(assignment, extension)
 
   def urlTitle = "review this extension request"
 
