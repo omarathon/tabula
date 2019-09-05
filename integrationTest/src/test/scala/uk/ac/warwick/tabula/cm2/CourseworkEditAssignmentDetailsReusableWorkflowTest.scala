@@ -196,10 +196,11 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   }
 
-  def submitAndContinueClick(): Unit = {
+  private def submitAndContinueClick(): Unit = {
     Then("I click submit button")
-    val button = webDriver.findElement(By.id("command")).findElement(By.cssSelector("input[value='Save and continue']"))
-    button.click()
+    eventually {
+      cssSelector(s"input[value='Save and continue']").webElement.click()
+    }
   }
 
   def amendAssignmentDetails(newTitle: String, newWorkflowId: String, confirmModal: Boolean = true): Unit = {
