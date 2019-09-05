@@ -466,10 +466,11 @@ p.dates {
 
 .md-previewable {
   .preview-text {
-    transition: color 100ms linear;
+    transition: opacity 100ms linear;
+    opacity: 1;
   }
   .preview-text.loading {
-    transition: color 500ms linear;
-    color: #999;
+    transition: opacity 500ms linear;
+    opacity: 0.6;
   }
 }
