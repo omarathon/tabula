@@ -6,6 +6,7 @@ import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 class JSONView(var json: Any) extends View {
   var objectMapper: ObjectMapper = Wire[ObjectMapper]
@@ -22,10 +23,6 @@ class JSONView(var json: Any) extends View {
       val fullJson = json.asInstanceOf[Map[String, Any]]
       val result = fullJson.filterNot {
         case (key, _) => key == "errors"
-      } ++ fullJson.filter {
-        case (key, _) => key == "errors"
-      }.filterNot {
-        case (key, _) => key == "stackTrace"
       }
       objectMapper.writeValue(out, result)
     }
