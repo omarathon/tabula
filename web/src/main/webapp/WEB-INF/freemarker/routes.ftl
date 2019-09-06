@@ -8,6 +8,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 -->
 <#macro home><@url context="/" page="/" /></#macro>
+<#macro userSettings><@url context="/" page="/settings" /></#macro>
 <#macro zipProgress jobId><@url context="/" page="/zips/${jobId}" /></#macro>
 <#macro zipComplete jobId><@url context="/" page="/zips/${jobId}/zip" /></#macro>
 
