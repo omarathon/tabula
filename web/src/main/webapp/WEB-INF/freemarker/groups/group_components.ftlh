@@ -203,21 +203,21 @@
                           </@fmt.permission_button>
                         </li>
                       </#if>
-										<#else>
+                    <#else>
                       <#local openset_url><@routes.groups.openset set /></#local>
-										  <#if set.allocationMethod.dbValue != "StudentSignUp">
-										   <li class="disabled use-tooltip" title="Not a self-signup group">
-                        <@fmt.permission_button
-                        permission='SmallGroups.Update'
-                        scope=set
-                        classes='open-group-link nosignup'
-                        action_descr='open small group'
-                        href='#'
-                        >
-                          Open
-                        </@fmt.permission_button>
-											</li>
-										  <#else>
+                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        <li class="disabled use-tooltip" title="Not a self-signup group">
+                          <@fmt.permission_button
+                            permission='SmallGroups.Update'
+                            scope=set
+                            classes='open-group-link nosignup'
+                            action_descr='open small group'
+                            href='#'
+                           >
+                            Open
+                          </@fmt.permission_button>
+                        </li>
+                      <#else>
                         <li>
                           <@fmt.permission_button
                           permission='SmallGroups.Update'
@@ -239,7 +239,7 @@
                     class="disabled use-tooltip" title="Already published"
                   </#if>
                   >
-										<#local notifyset_url><@routes.groups.releaseset set /></#local>
+                    <#local notifyset_url><@routes.groups.releaseset set /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Update'
                     scope=set
@@ -250,12 +250,12 @@
                     >
                       Publish
                     </@fmt.permission_button>
-									</li>
+                  </li>
 
                   <li class="divider"></li>
 
                   <li>
-										<#if set.archived>
+                    <#if set.archived>
                       <#local archive_caption = 'Unarchive'>
                     <#else>
                       <#local archive_caption = 'Archive'>
@@ -267,11 +267,11 @@
                     tooltip='Archive small group' data_attr='data-toggle=modal data-target=#modal-container'>
                       ${archive_caption}
                     </@fmt.permission_button>
-										</a>
-									</li>
+                    </a>
+                  </li>
 
                   <li tabindex="0" <#if !set.canBeDeleted> class="disabled use-tooltip" data-container="body" title="Can't delete smallgroups that have been published to <#if set.allocationMethod.dbValue != 'StudentSignUp'>students or </#if>tutors"</#if>>
-										<#local delete_url><@routes.groups.deleteset set /></#local>
+                    <#local delete_url><@routes.groups.deleteset set /></#local>
                     <@fmt.permission_button
                     permission='SmallGroups.Delete'
                     scope=set
