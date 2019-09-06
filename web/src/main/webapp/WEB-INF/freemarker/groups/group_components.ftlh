@@ -843,7 +843,7 @@
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if groupSet.openForSignups>
                       <#local closeset_url><@routes.groups.closeset groupSet /></#local>
-                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                      <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
                         <li class="disabled use-tooltip" title="Not a self-signup group">
                           <@fmt.permission_button
                           permission='SmallGroups.Update'
@@ -871,7 +871,7 @@
                       </#if>
                     <#else>
                       <#local openset_url><@routes.groups.openset groupSet /></#local>
-                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                      <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
                         <li class="disabled use-tooltip" title="Not a self-signup group">
                             <@fmt.permission_button
                             permission='SmallGroups.Update'
