@@ -176,39 +176,61 @@
 								<@dropdown_menu "Actions" "btn-xs">
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if set.openForSignups>
-                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
-                        class="disabled use-tooltip" title="Not a self-signup group"
+                      <#local closeset_url><@routes.groups.closeset set /></#local>
+                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        <li class="disabled use-tooltip" title="Not a self-signup group">
+                          <@fmt.permission_button
+                          permission='SmallGroups.Update'
+                          scope=set
+                          classes='close-group-link nosignup'
+                          action_descr='close small group'
+                          href='#'
+                          >
+                            Close
+                          </@fmt.permission_button>
+                        </li>
+                      <#else>
+                        <li>
+                          <@fmt.permission_button
+                          permission='SmallGroups.Update'
+                          scope=set
+                          classes='close-group-link'
+                          action_descr='close small group'
+                          href=closeset_url
+                          data_attr='data-toggle=modal data-target=#modal-container'
+                          >
+                            Close
+                          </@fmt.permission_button>
+                        </li>
                       </#if>
-                      >
-												<#local closeset_url><@routes.groups.closeset set /></#local>
-                        <@fmt.permission_button
-                        permission='SmallGroups.Update'
-                        scope=set
-                        classes='close-group-link'
-                        action_descr='close small group'
-                        href=closeset_url
-                        data_attr='data-toggle=modal data-target=#modal-container'
-                        >
-                          Close
-                        </@fmt.permission_button>
-											</li>
 										<#else>
-                      <li <#if set.allocationMethod.dbValue != "StudentSignUp">
-                        class="disabled use-tooltip" title="Not a self-signup group"
-                      </#if>
-                      >
-												<#local openset_url><@routes.groups.openset set /></#local>
+                      <#local openset_url><@routes.groups.openset set /></#local>
+										  <#if set.allocationMethod.dbValue != "StudentSignUp">
+										   <li class="disabled use-tooltip" title="Not a self-signup group">
                         <@fmt.permission_button
                         permission='SmallGroups.Update'
                         scope=set
-                        classes='open-group-link'
+                        classes='open-group-link nosignup'
                         action_descr='open small group'
-                        href=openset_url
-                        data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+                        href='#'
                         >
                           Open
                         </@fmt.permission_button>
 											</li>
+										  <#else>
+                        <li>
+                          <@fmt.permission_button
+                          permission='SmallGroups.Update'
+                          scope=set
+                          classes='open-group-link'
+                          action_descr='open small group'
+                          href=openset_url
+                          data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+                          >
+                            Open
+                          </@fmt.permission_button>
+                        </li>
+                      </#if>
                     </#if>
                   </#if>
 
@@ -820,39 +842,61 @@
                   </li>
                   <#if features.smallGroupTeachingStudentSignUp>
                     <#if groupSet.openForSignups>
-                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
-                          class="disabled use-tooltip" title="Not a self-signup group"
+                      <#local closeset_url><@routes.groups.closeset groupSet /></#local>
+                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        <li class="disabled use-tooltip" title="Not a self-signup group">
+                          <@fmt.permission_button
+                          permission='SmallGroups.Update'
+                          scope=groupSet
+                          classes='close-group-link nosignup'
+                          action_descr='close small group'
+                          href='#'
+                          >
+                            Close
+                          </@fmt.permission_button>
+                        </li>
+                      <#else>
+                        <li>
+                          <@fmt.permission_button
+                          permission='SmallGroups.Update'
+                          scope=groupSet
+                          classes='close-group-link'
+                          action_descr='close small group'
+                          href=closeset_url
+                          data_attr='data-toggle=modal data-target=#modal-container'
+                          >
+                            Close
+                          </@fmt.permission_button>
+                        </li>
                       </#if>
-                      >
-                        <#local closeset_url><@routes.groups.closeset groupSet /></#local>
-                        <@fmt.permission_button
-                        permission='SmallGroups.Update'
-                        scope=groupSet
-                        classes='close-group-link'
-                        action_descr='close small group'
-                        href=closeset_url
-                        data_attr='data-toggle=modal data-target=#modal-container'
-                        >
-                          Close
-                        </@fmt.permission_button>
-                      </li>
                     <#else>
-                      <li <#if groupSet.allocationMethod.dbValue != "StudentSignUp">
-                        class="disabled use-tooltip" title="Not a self-signup group"
+                      <#local openset_url><@routes.groups.openset groupSet /></#local>
+                      <#if set.allocationMethod.dbValue != "StudentSignUp">
+                        <li class="disabled use-tooltip" title="Not a self-signup group">
+                            <@fmt.permission_button
+                            permission='SmallGroups.Update'
+                            scope=groupSet
+                            classes='open-group-link nosignup'
+                            action_descr='open small group'
+                            href='#'
+                            >
+                              Open
+                            </@fmt.permission_button>
+                        </li>
+                      <#else>
+                        <li>
+                            <@fmt.permission_button
+                            permission='SmallGroups.Update'
+                            scope=groupSet
+                            classes='open-group-link'
+                            action_descr='open small group'
+                            href=openset_url
+                            data_attr='data-toggle=modal data-target=#modal-container data-container=body'
+                            >
+                              Open
+                            </@fmt.permission_button>
+                        </li>
                       </#if>
-                      >
-                        <#local openset_url><@routes.groups.openset groupSet /></#local>
-                        <@fmt.permission_button
-                        permission='SmallGroups.Update'
-                        scope=groupSet
-                        classes='open-group-link'
-                        action_descr='open small group'
-                        href=openset_url
-                        data_attr='data-toggle=modal data-target=#modal-container data-container=body'
-                        >
-                          Open
-                        </@fmt.permission_button>
-                      </li>
                     </#if>
                   </#if>
                   <li>

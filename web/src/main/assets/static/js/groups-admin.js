@@ -82,6 +82,10 @@
         });
       }
     });
+    $('body').on('click', 'a.nosignup', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
 
     $('#modal-container').on('click', "input[type='submit']", function onClick(e) {
       e.preventDefault();
