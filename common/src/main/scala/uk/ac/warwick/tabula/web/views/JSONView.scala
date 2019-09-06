@@ -24,7 +24,7 @@ class JSONView(var json: Any) extends View {
       val fullJson = Try(json.asInstanceOf[Map[String, Any]]).getOrElse(Map.empty)
       val errors = Try(fullJson.get("errors").map(_.asInstanceOf[Array[Map[String, Any]]].flatten.toMap.filterNot {
         case (key, _) => key.equalsIgnoreCase("stackTrace")
-      }).getOrElse(Map.empty)).toOption
+      })).toOption.flatten
 
       if (errors.nonEmpty) {
         objectMapper.writeValue(out, fullJson.filterNot {
