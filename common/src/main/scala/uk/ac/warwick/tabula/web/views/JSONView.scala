@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.web.views
 
-import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import com.fasterxml.jackson.databind.ObjectMapper
+import javax.servlet.http.{HttpServletRequest, HttpServletResponse}
 import org.springframework.web.servlet.View
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.JavaImports._
-import scala.collection.JavaConverters._
+
+import scala.util.Try
 
 class JSONView(var json: Any) extends View {
   var objectMapper: ObjectMapper = Wire[ObjectMapper]
@@ -20,11 +21,18 @@ class JSONView(var json: Any) extends View {
     if (features.renderStackTracesForAllUsers) {
       objectMapper.writeValue(out, json)
     } else {
-      val fullJson = json.asInstanceOf[Map[String, Any]]
-      val result = fullJson.filterNot {
-        case (key, _) => key == "errors"
-      }
-      objectMapper.writeValue(out, result)
+      val fullJson = Try(json.asInstanceOf[Map[String, Any]]).getOrElse(Map.empty)
+      val errors = Try(fullJson.get("errors").map(_.asInstanceOf[Array[Map[String, Any]]].flatten.toMap.filterNot {
+        case (key, _) => key.equalsIgnoreCase("stackTrace")
+      }).getOrElse(Map.empty)).toOption
+
+      if (errors.nonEmpty) {
+        objectMapper.writeValue(out, fullJson.filterNot {
+          case (key, _) => key.equalsIgnoreCase("errors")
+        } ++ Map(
+          "errors" -> errors
+        ))
+      } else objectMapper.writeValue(out, json)
     }
   }
 }
