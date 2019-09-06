@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.web.views
 
+import org.junit.Before
 import org.springframework.mock.web.MockHttpServletRequest
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{CurrentUser, TestBase}
 import org.springframework.mock.web.MockHttpServletResponse
+import uk.ac.warwick.userlookup.User
 
 class JSONViewTest extends TestBase {
 
-  @Test def itWorks {
+  @Test def itWorks() {
     val req = new MockHttpServletRequest
     val res = new MockHttpServletResponse
 
@@ -15,11 +17,11 @@ class JSONViewTest extends TestBase {
     view.features = emptyFeatures
     view.render(null, req, res)
 
-    res.getContentType() should be("application/json")
-    res.getContentAsString() should be("""{"yes":"no","bool":true,"seq":["yes","no"]}""")
+    res.getContentType should be("application/json")
+    res.getContentAsString should be("""{"yes":"no","bool":true,"seq":["yes","no"]}""")
   }
 
-  @Test def notrenderingStackTraceIfFeaturedOff {
+  @Test def notRenderStackTraceIfFeaturedOff() {
     val req = new MockHttpServletRequest
     val res = new MockHttpServletResponse
 
@@ -40,11 +42,11 @@ class JSONViewTest extends TestBase {
 
     view.render(null, req, res)
 
-    res.getContentType() should be("application/json")
-    res.getContentAsString() should be("""{"yes":"no","bool":true,"seq":["yes","no"],"errors":{"message":"wrong"}}""")
+    res.getContentType should be("application/json")
+    res.getContentAsString should be("""{"yes":"no","bool":true,"seq":["yes","no"],"errors":{"message":"wrong"}}""")
   }
 
-  @Test def notrenderingStackTraceIfFeaturedOn {
+  @Test def renderStackTraceIfFeaturedOn() {
     val req = new MockHttpServletRequest
     val res = new MockHttpServletResponse
 
@@ -65,8 +67,8 @@ class JSONViewTest extends TestBase {
 
     view.render(null, req, res)
 
-    res.getContentType() should be("application/json")
-    res.getContentAsString() should be("""{"yes":"no","bool":true,"seq":["yes","no"],"errors":[{"message":"wrong","stacktrace":"not this"}]}""")
+    res.getContentType should be("application/json")
+    res.getContentAsString should be("""{"yes":"no","bool":true,"seq":["yes","no"],"errors":[{"message":"wrong","stacktrace":"not this"}]}""")
   }
 
 }
