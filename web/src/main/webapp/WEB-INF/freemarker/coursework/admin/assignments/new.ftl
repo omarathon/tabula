@@ -30,7 +30,7 @@ the comments textarea needs to maintain newlines.
     <#if command.prefillAssignment??>
       <div class="alert alert-success">
         <i class="icon-info-sign"></i>
-        Some fields have been copied from assignment ${command.prefillAssignment.name}.
+        Some details have been copied from assignment ${command.prefillAssignment.name}.
       </div>
     </#if>
 

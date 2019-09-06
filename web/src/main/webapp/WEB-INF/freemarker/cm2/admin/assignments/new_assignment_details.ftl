@@ -26,7 +26,7 @@ the comments textarea needs to maintain newlines.
       <#if command.prefillAssignment??>
         <div class="alert alert-info">
           <i class="fa fa-question-circle"></i>
-          Some fields have been copied from assignment ${command.prefillAssignment.name}.
+          Some details have been copied from assignment ${command.prefillAssignment.name}.
         </div>
       </#if>
       <@f.errors cssClass="error form-errors" />
