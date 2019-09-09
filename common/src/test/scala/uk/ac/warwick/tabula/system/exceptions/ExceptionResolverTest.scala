@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{Features, ItemNotFoundException, PermissionDeniedException, RequestInfo, TestBase}
+import uk.ac.warwick.tabula.{CurrentUser, Features, ItemNotFoundException, Mockito, PermissionDeniedException, RequestInfo, TestBase}
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -10,9 +10,11 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.multipart.MultipartException
 import uk.ac.warwick.tabula.web.views.JSONView
+import org.mockito.Mockito._
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
-class ExceptionResolverTest extends TestBase {
+class ExceptionResolverTest extends TestBase with Mockito{
 
   val resolver = new ExceptionResolver {
     defaultView = "defaultErrorView"
@@ -102,7 +104,13 @@ class ExceptionResolverTest extends TestBase {
   def renderingStacktraceForAdmin() {
     resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = false
-    withUser("cusebr") {
+    val user = new User("cusebr")
+    currentUser = new CurrentUser(
+      realUser = user,
+      apparentUser = null,
+      sysadmin = true
+    )
+    withCurrentUser(currentUser) {
       val request = new MockHttpServletRequest
       request.setContentType("application/json")
       val exception = new RuntimeException("wrong wrong worn")
