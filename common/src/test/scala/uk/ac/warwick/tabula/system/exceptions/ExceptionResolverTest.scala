@@ -1,10 +1,7 @@
 package uk.ac.warwick.tabula.system.exceptions
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.PermissionDeniedException
-import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{Features, ItemNotFoundException, PermissionDeniedException, RequestInfo, TestBase}
 import uk.ac.warwick.tabula.system.CurrentUserInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -12,6 +9,7 @@ import uk.ac.warwick.tabula.system.RequestInfoInterceptor
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.multipart.MultipartException
+import uk.ac.warwick.tabula.web.views.JSONView
 
 // scalastyle:off magic.number
 class ExceptionResolverTest extends TestBase {
@@ -61,6 +59,42 @@ class ExceptionResolverTest extends TestBase {
       val exception = PermissionDeniedException(user, null, null, null)
       val modelAndView = resolver.doResolve(exception, None)
       modelAndView.viewName should be(resolver.defaultView)
+    }
+  }
+
+  @Test
+  def notRenderingStacktraceIfFeatureDisabled() {
+    resolver.features = emptyFeatures
+    resolver.features.renderStackTracesForAllUsers = false
+    withUser("cusebr") {
+      val request = new MockHttpServletRequest
+      request.setContentType("application/json")
+      val exception = new RuntimeException("wrong wrong worn")
+      val modelAndView = resolver.doResolve(exception, Some(request))
+      val result: Map[String, Any] = modelAndView
+        .view.asInstanceOf[JSONView].json
+        .asInstanceOf[Map[String, Any]]("errors").asInstanceOf[Array[Map[String, Any]]].flatten.toMap
+
+      result.get("stackTrace") should be(None)
+      result.get("message") should contain("wrong wrong worn")
+    }
+  }
+
+  @Test
+  def renderingStacktraceIfFeatureEnabled() {
+    resolver.features = emptyFeatures
+    resolver.features.renderStackTracesForAllUsers = false
+    withUser("cusebr") {
+      val request = new MockHttpServletRequest
+      request.setContentType("application/json")
+      val exception = new RuntimeException("wrong wrong worn")
+      val modelAndView = resolver.doResolve(exception, Some(request))
+      val result: Map[String, Any] = modelAndView
+        .view.asInstanceOf[JSONView].json
+        .asInstanceOf[Map[String, Any]]("errors").asInstanceOf[Array[Map[String, Any]]].flatten.toMap
+
+      result.get("stackTrace") should be(None)
+      result.get("message") should contain("wrong wrong worn")
     }
   }
 
