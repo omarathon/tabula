@@ -172,7 +172,7 @@
       <#if can.do("MitigatingCircumstancesPanel.Modify", department)>
         <div class="mitcircs-submission-action__buttons">
           <div class="btn-group-group">
-            <button type="submit" formaction="<@routes.mitcircs.createPanel department academicYear />" disabled="disabled" class="requires-selected btn btn-default">Create panel</button>
+            <button type="submit" formaction="<@routes.mitcircs.createPanel department academicYear />" class="btn btn-default">Create panel</button>
             <#if panels?has_content>
               <button type="button" class="requires-selected btn btn-default" disabled="disabled" data-toggle="modal" data-target="#addToPanelModal">Add to panel</button>
             <#else>
