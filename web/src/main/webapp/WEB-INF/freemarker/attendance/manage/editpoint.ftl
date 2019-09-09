@@ -31,7 +31,7 @@
 
     <input name="returnTo" value="${returnTo}" type="hidden" />
 
-    <#include "_managepoint.ftl" />
+    <#include "_managepoint.ftlh" />
 
     <div class="form-actions">
       <button class="btn btn-primary spinnable spinner-auto" type="submit" name="<#if hasOverlap>submitConfirm<#else>submit</#if>"
