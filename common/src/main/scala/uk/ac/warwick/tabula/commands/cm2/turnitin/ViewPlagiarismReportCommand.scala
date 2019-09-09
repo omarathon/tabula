@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.commands.cm2.turnitin
 
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.notifications.coursework.TurnitinJobSuccessNotification
@@ -12,7 +11,6 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.turnitinlti.{AutowiringTurnitinLtiServiceComponent, TurnitinLtiServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringOriginalityReportServiceComponent, OriginalityReportServiceComponent}
-import uk.ac.warwick.tabula.services.turnitin.{GotSubmissions, Turnitin}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.web.Uri
@@ -26,7 +24,6 @@ object ViewPlagiarismReportCommand {
       with ViewPlagiarismReportPermissions
       with ViewPlagiarismReportValidation
       with ReadOnly with Unaudited
-      with AutowiringTurnitinApiComponent
       with AutowiringTurnitinLtiServiceComponent
       with AutowiringOriginalityReportServiceComponent
 
@@ -37,7 +34,6 @@ object ViewPlagiarismReportCommand {
       with ViewPlagiarismReportValidation
       with CompletesViewPlagiarismReportNotifications
       with ReadOnly with Unaudited
-      with AutowiringTurnitinApiComponent
       with AutowiringTurnitinLtiServiceComponent
       with AutowiringOriginalityReportServiceComponent
 }
@@ -59,7 +55,7 @@ trait ViewPlagiarismReportRequest extends ViewPlagiarismReportState {
 
 class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attachment: FileAttachment)
   extends CommandInternal[Either[Uri, TurnitinReportError]] with ViewPlagiarismReportRequest with Logging {
-  self: TurnitinApiComponent with TurnitinLtiServiceComponent =>
+  self: TurnitinLtiServiceComponent =>
 
   def this(assignment: Assignment, attachment: FileAttachment, user: CurrentUser) {
     this(assignment, attachment)
@@ -83,35 +79,8 @@ class ViewPlagiarismReportCommandInternal(val assignment: Assignment, val attach
         lastName = viewer.getLastName
       )
       Left(Uri.parse(ltiEndpoint))
-    } else {
-      debug("Getting document viewer URL for FileAttachment %s", attachment.id)
-
-      api.login(viewer.getEmail, viewer.getFirstName, viewer.getLastName) match {
-        case Some(session) =>
-
-          val classId = Turnitin.classIdFor(assignment, api.classPrefix)
-          val className = Turnitin.classNameFor(assignment)
-          val assignmentId = Turnitin.assignmentIdFor(assignment)
-          val assignmentName = Turnitin.assignmentNameFor(assignment)
-          session.listSubmissions(classId, className, assignmentId, assignmentName) match {
-            case GotSubmissions(list) =>
-              val matchingObject = list.find {
-                _.title == attachment.id
-              }
-              val objectId = matchingObject.map(_.objectId)
-              objectId match {
-                case Some(id) =>
-                  debug("Found objectID %s for FileAttachment %s", id, attachment.id)
-                  val link = session.getDocumentViewerLink(id)
-                  debug("Redirecting to %s for FileAttachment %s", link, attachment.id)
-                  Left(link)
-                case None =>
-                  Right(TurnitinReportError.NoObjectError)
-              }
-            case what => Right(TurnitinReportError.ApiError(what.message))
-          }
-        case None => Right(TurnitinReportError.NoSessionError)
-      }
+    }  else {
+      Right(TurnitinReportError.NoTurnitinIdError)
     }
   }
 
@@ -124,7 +93,7 @@ trait ViewPlagiarismReportValidation extends SelfValidating {
     if (viewer == null || !viewer.isFoundUser) errors.rejectValue("viewer", "NotEmpty")
 
     if (attachment.originalityReport == null) {
-      errors.reject("fileattachment.originalityReport.empty")
+      errors.reject("fileattachment.originalityReport.invalid")
     }
   }
 }
@@ -168,18 +137,6 @@ trait TurnitinReportErrorWithMessage {
 
 object TurnitinReportError {
 
-  case object NoObjectError extends TurnitinReportError("no-object")
+  case object NoTurnitinIdError extends TurnitinReportError("fileattachment.originalityReport.invalid")
 
-  case object NoSessionError extends TurnitinReportError("no-session")
-
-  case class ApiError(message: String) extends TurnitinReportError("api-error") with TurnitinReportErrorWithMessage
-
-}
-
-trait AutowiringTurnitinApiComponent extends TurnitinApiComponent {
-  var api: Turnitin = Wire[Turnitin]
-}
-
-trait TurnitinApiComponent {
-  def api: Turnitin
 }
