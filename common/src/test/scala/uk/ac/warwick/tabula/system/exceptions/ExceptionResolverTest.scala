@@ -10,11 +10,10 @@ import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.multipart.MultipartException
 import uk.ac.warwick.tabula.web.views.JSONView
-import org.mockito.Mockito._
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
-class ExceptionResolverTest extends TestBase with Mockito{
+class ExceptionResolverTest extends TestBase {
 
   val resolver = new ExceptionResolver {
     defaultView = "defaultErrorView"
