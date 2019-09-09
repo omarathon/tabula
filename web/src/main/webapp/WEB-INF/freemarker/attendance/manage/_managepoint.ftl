@@ -36,7 +36,7 @@
       <@fmt.help_popover id="startDate" content="You cannot mark a point as attended or missed (unauthorised) before its start date" />
     </#assign>
     <@bs3form.labelled_form_group path="startDate" labelText="${label}">
-      <@f.input type="text" path="startDate" cssClass="form-control date-picker startDateTime" placeholder="Pick the start date" autocomplete="off" />
+      <@f.input type="text" path="startDate" cssClass="form-control date-picker startDateTime" placeholder="Pick the start date" />
       <input class="endoffset" type="hidden" data-end-offset="0" />
     </@bs3form.labelled_form_group>
 
@@ -45,7 +45,7 @@
       <@fmt.help_popover id="endDate" content="A warning will appear for unrecorded attendance after its end date" />
     </#assign>
     <@bs3form.labelled_form_group path="endDate" labelText="${label}">
-      <@f.input type="text" path="endDate" cssClass="form-control date-picker endDateTime" placeholder="Pick the end date" autocomplete="off" />
+      <@f.input type="text" path="endDate" cssClass="form-control date-picker endDateTime" placeholder="Pick the end date" />
     </@bs3form.labelled_form_group>
 
   </#if>

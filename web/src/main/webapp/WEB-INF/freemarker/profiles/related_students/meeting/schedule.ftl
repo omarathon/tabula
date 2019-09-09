@@ -85,7 +85,7 @@
           <div class="col-xs-4">
             <@bs3form.labelled_form_group path="meetingDateStr" labelText="Date of meeting">
               <div class="input-group">
-                <@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" autocomplete="off" />
+                <@f.input type="text" path="meetingDateStr" cssClass="form-control date-picker" placeholder="Pick the date" />
                 <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
               </div>
             </@bs3form.labelled_form_group>
@@ -93,7 +93,7 @@
           <div class="col-xs-4">
             <@bs3form.labelled_form_group path="meetingTimeStr" labelText="Time of meeting">
               <div class="input-group">
-                <@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" autocomplete="off" />
+                <@f.input type="text" path="meetingTimeStr" cssClass="form-control time-picker" placeholder="Pick the time" />
                 <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
               </div>
             </@bs3form.labelled_form_group>
@@ -101,7 +101,7 @@
           <div class="col-xs-4">
             <@bs3form.labelled_form_group path="meetingEndTimeStr" labelText="End time of meeting">
               <div class="input-group">
-                <@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" autocomplete="off" />
+                <@f.input type="text" path="meetingEndTimeStr" cssClass="form-control time-picker" placeholder="Pick the end time" />
                 <span class="input-group-addon"><i class="fa fa-clock-o"></i></span>
               </div>
             </@bs3form.labelled_form_group>
