@@ -11,8 +11,6 @@ import uk.ac.warwick.tabula.web.Mav
 /**
   * Provides access to the Turnitin Document Viewer for a submission
   * that's been submitted to Turnitin.
-  *
-  * Supports both LTI and non-LTI versions
   */
 @Profile(Array("cm1Enabled"))
 @Controller
