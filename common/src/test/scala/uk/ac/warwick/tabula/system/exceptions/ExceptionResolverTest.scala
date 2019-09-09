@@ -103,9 +103,9 @@ class ExceptionResolverTest extends TestBase {
   def renderingStacktraceForAdmin() {
     resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = false
-    val user = new User("cusebr")
+    val systemAdminUser = new User("cusebr")
     currentUser = new CurrentUser(
-      realUser = user,
+      realUser = systemAdminUser,
       apparentUser = null,
       sysadmin = true
     )
