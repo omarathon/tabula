@@ -66,7 +66,7 @@
             <h5>Attachments</h5>
             <div>
               <#assign downloadMFUrl><@routes.cm2.markerFeedbackFilesDownload markerFeedback/></#assign>
-              <@fmt.download_attachments markerFeedback.attachments downloadMFUrl "for ${stage.description?uncap_first}" "feedback-${markerFeedback.feedback.studentIdentifier}" />
+              <@fmt.download_attachments markerFeedback.attachments downloadMFUrl?markup_string "for ${stage.description?uncap_first}" "feedback-${markerFeedback.feedback.studentIdentifier}" />
               <#list markerFeedback.attachments as attachment>
                 <input value="${attachment.id}" name="${attachment.name}" type="hidden" />
               </#list>
@@ -139,7 +139,7 @@
           <h5>Attachments</h5>
           <div>
               <#assign downloadMFUrl><@routes.cm2.feedbackFilesDownload feedback/></#assign>
-              <@fmt.download_attachments feedback.attachments downloadMFUrl "for ${stage.description?uncap_first}" "feedback-${feedback.feedback.studentIdentifier}" />
+              <@fmt.download_attachments feedback.attachments downloadMFUrl?markup_string  "for ${feedback.studentIdentifier}" "feedback-${feedback.studentIdentifier}" />
               <#list feedback.attachments as attachment>
                 <input value="${attachment.id}" name="${attachment.name}" type="hidden" />
               </#list>
