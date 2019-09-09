@@ -1,4 +1,4 @@
-f<#macro markerFeedbackSummary stage markerFeedback>
+<#macro markerFeedbackSummary stage markerFeedback>
   <div class="well">
     <div class="feedback-summary-heading">
       <h3>${stage.description}'s feedback</h3>
@@ -149,4 +149,3 @@ f<#macro markerFeedbackSummary stage markerFeedback>
     <div style="clear: both;"></div>
     </div>
 </#macro>
-
