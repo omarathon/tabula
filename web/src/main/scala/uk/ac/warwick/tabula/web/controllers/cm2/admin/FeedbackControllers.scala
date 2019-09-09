@@ -65,7 +65,7 @@ class DownloadAllFeedbackController extends CourseworkController {
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
 class DownloadSelectedFeedbackController extends CourseworkController {
 
   var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
@@ -76,15 +76,21 @@ class DownloadSelectedFeedbackController extends CourseworkController {
     @PathVariable feedbackId: String
   ) = new AdminGetSingleFeedbackCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
-  @RequestMapping(method = Array(GET))
+  @RequestMapping(method = Array(GET), value = Array("/{filename}.zip"))
   def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable filename: String): Mav = {
     Mav(new RenderableFileView(cmd.apply()))
   }
+
+  @RequestMapping(value = Array("/attachments/*"))
+  def getAll(cmd: AdminGetSingleFeedbackCommand): Mav = {
+    get(cmd, null)
+  }
+
 }
 
 @Profile(Array("cm2Enabled"))
 @Controller
-@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}/{filename}"))
+@RequestMapping(Array("/${cm2.prefix}/admin/assignments/{assignment}/feedback/download/{feedbackId}"))
 class DownloadSelectedFeedbackFileController extends CourseworkController {
 
   var feedbackDao: FeedbackDao = Wire.auto[FeedbackDao]
@@ -94,7 +100,7 @@ class DownloadSelectedFeedbackFileController extends CourseworkController {
     @PathVariable feedbackId: String
   ) = new AdminGetSingleFeedbackFileCommand(mandatory(assignment), mandatory(feedbackDao.getAssignmentFeedback(feedbackId)))
 
-  @RequestMapping(method = Array(GET))
+  @RequestMapping(method = Array(GET), value = Array("/{filename}", "/attachment/{filename}"))
   def get(cmd: AdminGetSingleFeedbackFileCommand, @PathVariable filename: String): Mav = {
     val renderable = cmd.apply().getOrElse {
       throw new ItemNotFoundException()
