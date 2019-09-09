@@ -83,6 +83,24 @@ class ExceptionResolverTest extends TestBase {
   @Test
   def renderingStacktraceIfFeatureEnabled() {
     resolver.features = emptyFeatures
+    resolver.features.renderStackTracesForAllUsers = true
+    withUser("cusebr") {
+      val request = new MockHttpServletRequest
+      request.setContentType("application/json")
+      val exception = new RuntimeException("wrong wrong worn")
+      val modelAndView = resolver.doResolve(exception, Some(request))
+      val result: Map[String, Any] = modelAndView
+        .view.asInstanceOf[JSONView].json
+        .asInstanceOf[Map[String, Any]]("errors").asInstanceOf[Array[Map[String, Any]]].flatten.toMap
+
+      result.get("stackTrace") should not be(None)
+      result.get("message") should contain("wrong wrong worn")
+    }
+  }
+
+  @Test
+  def renderingStacktraceForAdmin() {
+    resolver.features = emptyFeatures
     resolver.features.renderStackTracesForAllUsers = false
     withUser("cusebr") {
       val request = new MockHttpServletRequest
@@ -93,7 +111,7 @@ class ExceptionResolverTest extends TestBase {
         .view.asInstanceOf[JSONView].json
         .asInstanceOf[Map[String, Any]]("errors").asInstanceOf[Array[Map[String, Any]]].flatten.toMap
 
-      result.get("stackTrace") should be(None)
+      result.get("stackTrace") should not be(None)
       result.get("message") should contain("wrong wrong worn")
     }
   }
