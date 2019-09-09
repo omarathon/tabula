@@ -16,11 +16,11 @@
       <p>Select the date range for events (both are inclusive):</p>
 
       <@bs3form.labelled_form_group path="startDate" labelText="Start date">
-        <@f.input path="startDate" cssClass="form-control date-picker" />
+        <@f.input path="startDate" cssClass="form-control date-picker" autocomplete="off" />
       </@bs3form.labelled_form_group>
 
       <@bs3form.labelled_form_group path="endDate" labelText="End date">
-        <@f.input path="endDate" cssClass="form-control date-picker" />
+        <@f.input path="endDate" cssClass="form-control date-picker" autocomplete="off" />
       </@bs3form.labelled_form_group>
 
       <p>Select the group sets to print:</p>
