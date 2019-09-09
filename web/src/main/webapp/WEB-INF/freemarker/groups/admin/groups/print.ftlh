@@ -8,7 +8,7 @@
 
 <div class="fix-area">
   <#assign submitUrl><@routes.groups.printRegisters department academicYear />.pdf</#assign>
-  <@f.form method="post" action=$submitUrl modelAttribute="command">
+  <@f.form method="post" action=submitUrl?markup_string modelAttribute="command">
 
     <@bs3form.errors path="" />
 
