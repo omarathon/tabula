@@ -47,6 +47,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
   @Autowired var contentNegotiationManager: ContentNegotiationManager = _
 
+  @Autowired var features: Features = _
+
   /**
     * If the interesting exception matches one of these exceptions then
     * the given view name will be used instead of defaultView.
@@ -164,9 +166,8 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
     request.foreach { request =>
       if (request.isJsonRequest) {
         mav.viewName = null
-
         val error =
-          if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR)
+          if (httpStatus == HttpStatus.INTERNAL_SERVER_ERROR && (features.renderStackTracesForAllUsers || requestInfo.exists(_.user.sysadmin)))
             Map(
               "message" -> interestingException.getMessage,
               "stackTrace" -> ExceptionHandler.renderStackTrace(interestingException)
