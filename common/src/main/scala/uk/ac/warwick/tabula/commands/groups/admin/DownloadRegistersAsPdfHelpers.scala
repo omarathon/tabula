@@ -43,7 +43,7 @@ object DownloadRegistersAsPdfHelper {
     val Tutor = "tutor"
   }
 
-  final val registerTemplate = "/WEB-INF/freemarker/groups/attendance/register-pdf.ftl"
+  final val registerTemplate = "/WEB-INF/freemarker/groups/attendance/register-pdf.ftlh"
 
   type Dependencies = DownloadRegistersAsPdfCommandRequest with DownloadRegistersAsPdfCommandState
     with GetsOccurrences with PDFGeneratorWithFileStorageComponent with CombinesPdfs

@@ -37,7 +37,7 @@ object DownloadSubmissionsForPrintingCommand {
 object DownloadAdminSubmissionsForPrintingCommand {
   type Command = DownloadSubmissionsForPrintingCommand.Command with DownloadSubmissionsForPrintingCommandState
 
-  final val receiptTemplate = "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl"
+  final val receiptTemplate = "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftlh"
   final val nonPDFTemplate = "/WEB-INF/freemarker/coursework/admin/assignments/submissionsandfeedback/non-pdf-attachments.ftl"
   final val pdfExtension = ".pdf"
 
