@@ -109,7 +109,7 @@ trait ApiAddMarksValidator extends SelfValidating {
             rejectValue("mark", "mark.markPoint")
           }
         } catch {
-          case _@(_: NumberFormatException | _: IllegalArgumentException) => rejectValue("mark", "mark.format")
+          case _@(_: NumberFormatException | _: IllegalArgumentException) => rejectValue("mark", "actualMark.format")
         }
       } else if (assignment.module.adminDepartment.assignmentGradeValidation && item.grade.hasText) {
         rejectValue("grade", "actualMark.validateGrade.adjustedGrade")
