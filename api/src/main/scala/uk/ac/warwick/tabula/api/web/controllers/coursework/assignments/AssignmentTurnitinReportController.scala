@@ -34,7 +34,6 @@ trait GenerateTurnitinReportUriApi {
     ViewPlagiarismReportCommand(mandatory(assignment), mandatory(attachment))
   }
 
-
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   def create(@RequestBody request: GenerateTurnitinReportRequest, @ModelAttribute("generateReportUriCommand") command: ViewPlagiarismReportCommand, errors: BindingResult): Mav = {
     request.copyTo(command, errors)
