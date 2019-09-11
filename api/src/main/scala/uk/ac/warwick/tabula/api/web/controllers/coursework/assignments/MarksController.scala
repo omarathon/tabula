@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.api.commands.coursework.ApiAddMarksCommand
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.MarksController.AddMarksCommand
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkPoint, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkPoint, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists}
 import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -139,12 +139,16 @@ class MarksController extends ApiController {
   /**
    *
    * @param assignment
+   * @param module
    * @param currentUser
    * @return
    */
   @ModelAttribute("command")
-  def command(@PathVariable assignment: Assignment, currentUser: CurrentUser) =
+  def command(@PathVariable assignment: Assignment, @PathVariable module: Module, currentUser: CurrentUser) = {
+    mustBeLinked(assignment, module)
     ApiAddMarksCommand(mandatory(assignment), currentUser, GenerateGradesFromMarkCommand(assignment))
+  }
+
 
   /**
    *
