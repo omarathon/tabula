@@ -1,7 +1,7 @@
 <h1>Edit monitoring point in ${point.scheme.templateName}</h1>
 
 <#assign action><@url page="/sysadmin/attendancetemplates/${point.scheme.id}/points/${point.id}/edit"/></#assign>
-<@f.form action=$action method="POST" modelAttribute="command">
+<@f.form action=action?markup_string method="POST" modelAttribute="command">
 
   <@bs3form.labelled_form_group path="name" labelText="Name">
     <@f.input path="name" cssClass="form-control"/>
