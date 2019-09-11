@@ -29,8 +29,11 @@ trait GenerateTurnitinReportUriApi {
   type ViewPlagiarismReportCommand = ViewPlagiarismReportCommand.CommandType
 
   @ModelAttribute("generateReportUriCommand")
-  def generateReportUriCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable attachment: FileAttachment): ViewPlagiarismReportCommand =
+  def generateReportUriCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable attachment: FileAttachment): ViewPlagiarismReportCommand = {
+    mustBeLinked(mandatory(assignment), mandatory(module))
     ViewPlagiarismReportCommand(mandatory(assignment), mandatory(attachment))
+  }
+
 
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   def create(@RequestBody request: GenerateTurnitinReportRequest, @ModelAttribute("generateReportUriCommand") command: ViewPlagiarismReportCommand, errors: BindingResult): Mav = {
