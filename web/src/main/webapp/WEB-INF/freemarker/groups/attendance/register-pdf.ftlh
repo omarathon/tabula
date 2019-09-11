@@ -1,4 +1,3 @@
-<#escape x as x?html>
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
 
@@ -96,7 +95,7 @@
 </head>
 <body>
 <div id="header">
-  <img src="/static/images/logo-full-black.png" style="width: 30%; float: right;" />
+  <img src="/static/images/id7/logo-divider-gray.png" style="width: 100%;"/>
   <h1><#if event.title?has_content>${event.title}, </#if>${set.module.code?upper_case} ${set.nameWithoutModulePrefix}, ${group.name}</h1>
   <h2 class="sgt-event-details">
     ${event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />
@@ -105,8 +104,6 @@
       <br /><@fmt.p number=event.tutors.users?size singular="Tutor" shownumber=false/>: <#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
     </#if>
   </h2>
-
-  <br style="clear: both;" />
 </div>
 
 <#if !members?has_content>
@@ -146,4 +143,3 @@
 </#if>
 </body>
 </html>
-</#escape>

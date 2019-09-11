@@ -31,7 +31,7 @@ class DownloadSubmissionReceiptAsPdfController extends CourseworkController {
   def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
     new PDFView(
       "submission-receipt.pdf",
-      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
+      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftlh",
       Map(
         "submission" -> command.apply()
       )
@@ -60,7 +60,7 @@ class DownloadSubmissionReceiptForStudentAsPdfController extends CourseworkContr
   def viewAsPdf(command: DownloadSubmissionReceiptAsPdfCommand, user: CurrentUser): PDFView with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent with PhotosWarwickMemberPhotoUrlGeneratorComponent = {
     new PDFView(
       "submission-receipt.pdf",
-      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftl",
+      "/WEB-INF/freemarker/cm2/submit/submission-receipt.ftlh",
       Map(
         "submission" -> command.apply()
       )
