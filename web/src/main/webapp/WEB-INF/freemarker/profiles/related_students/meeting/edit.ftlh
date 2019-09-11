@@ -18,12 +18,12 @@
 
     <#if isModal!false>
       <@modal.header>
-        <#noescape>${heading}</#noescape>
+        ${heading?no_esc}
       </@modal.header>
     <#elseif isIframe!false>
       <div id="container">
     <#else>
-      <#noescape>${heading}</#noescape>
+      ${heading?no_esc}
     </#if>
     <#if isModal!false>
       <div class="modal-body"></div>
