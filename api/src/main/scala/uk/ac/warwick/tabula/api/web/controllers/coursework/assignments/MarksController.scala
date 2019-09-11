@@ -1,26 +1,25 @@
 package uk.ac.warwick.tabula.api.web.controllers.coursework.assignments
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect
 import javax.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Controller
 import org.springframework.util.StringUtils
-import org.springframework.validation.{BindingResult, Errors}
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestBody, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.commands.coursework.ApiAddMarksCommand
+import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.api.web.controllers.coursework.assignments.MarksController.AddMarksCommand
-import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.commands.cm2.feedback.GenerateGradesFromMarkCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Feedback, MarkPoint, MarkerFeedback}
-import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists}
-import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
+import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.helpers.UserOrderingByIds._
+import uk.ac.warwick.tabula.helpers.{FoundUser, LazyLists}
 import uk.ac.warwick.tabula.services.cm2.docconversion.MarksExtractorComponent
+import uk.ac.warwick.tabula.services.{AssessmentMembershipServiceComponent, AutowiringUserLookupComponent, FeedbackServiceComponent, GeneratesGradesFromMarks}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.userlookup.User
@@ -139,12 +138,15 @@ class MarksController extends ApiController {
   /**
    *
    * @param assignment
+   * @param module
    * @param currentUser
    * @return
    */
   @ModelAttribute("command")
-  def command(@PathVariable assignment: Assignment, currentUser: CurrentUser) =
+  def command(@PathVariable assignment: Assignment, @PathVariable module: Module, currentUser: CurrentUser) = {
+    mustBeLinked(assignment, module)
     ApiAddMarksCommand(mandatory(assignment), currentUser, GenerateGradesFromMarkCommand(assignment))
+  }
 
   /**
    *
