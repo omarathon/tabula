@@ -394,6 +394,13 @@ function init() {
     $(el).data('tabula.mitigatingCircumstancesForm', new MitCircsForm(el));
   });
 
+  $('#guidance-video-modal')
+    .on('shown.bs.modal', (e) => {
+      $(e.target).find('video').trigger('play');
+    }).on('hidden.bs.modal', (e) => {
+      $(e.target).find('video').trigger('pause');
+    });
+
   $('.mitcircs-form.fix-area').fixHeaderFooter();
 }
 
