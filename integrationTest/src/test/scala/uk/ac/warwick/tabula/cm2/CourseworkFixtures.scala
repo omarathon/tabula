@@ -167,7 +167,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
       click on addAssignment
     }
 
-    val prefilledReset = linkText("Don't do this")
+    val prefilledReset = linkText("for this assignment")
     if (prefilledReset.findElement.isDefined) {
       click on prefilledReset
     }
