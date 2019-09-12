@@ -26,6 +26,20 @@
       <div class="mitcircs-form__guidance">
         <h2>General guidance</h2>
 
+        <p><i class="fas fa-play-circle">&nbsp;</i><a href="#" data-toggle="modal" data-target="#guidance-video-modal" id="mitigatingCircumstancesVideo">How to declare mitigating circumstances</a></p>
+
+        <@modal.modal id="guidance-video-modal">
+          <@modal.wrapper>
+            <@modal.header></@modal.header>
+            <@modal.body>
+              <video poster="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/mit-circs/declare/mc-students.jpg" controls preload="metadata" width="1920" height="1080">
+                <source src="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/mit-circs/declare/mc-students.mp4" type="video/mp4" width="1920" height="1080">
+                <source src="https://warwick.ac.uk/services/its/servicessupport/web/tabula/manual/cm2/mit-circs/declare/mc-students.webm" type="video/webm" width="1920" height="1080">
+              </video>
+            </@modal.body>
+          </@modal.wrapper>
+        </@modal.modal>
+
         <p>
           Mitigating circumstances processes support students who have experienced sudden, unforeseen and serious issues such as an accident,
           physical or mental health difficulties, or a detrimental change in personal circumstances. Sometimes issues like these can affect
