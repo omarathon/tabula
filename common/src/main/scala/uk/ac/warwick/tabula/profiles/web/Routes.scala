@@ -79,6 +79,7 @@ object Routes {
     def download(scyd: StudentCourseYearDetails): String = s"$context/view/${scyd.studentCourseDetails.urlSafeId}/${scyd.academicYear.value.toString}/download"
 
     object PersonalCircumstances {
+      def apply(): String = context + "/view/me/personalcircs"
       def apply(student: StudentMember): String = context + "/view/%s/personalcircs" format encoded(student.universityId)
       def create(student: StudentMember): String = apply(student) + "/mitcircs/new"
       def edit(submission: MitigatingCircumstancesSubmission): String = apply(submission.student) + "/mitcircs/edit/%s" format encoded(submission.key.toString)
