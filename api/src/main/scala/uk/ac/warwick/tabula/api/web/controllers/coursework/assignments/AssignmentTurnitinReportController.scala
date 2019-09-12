@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.api.commands.JsonApiRequest
 import uk.ac.warwick.tabula.api.web.controllers.ApiController
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.coursework.turnitin.{TurnitinReportErrorWithMessage, ViewPlagiarismReportCommand, ViewPlagiarismReportRequest}
+import uk.ac.warwick.tabula.commands.cm2.turnitin.{TurnitinReportErrorWithMessage, ViewPlagiarismReportCommand, ViewPlagiarismReportRequest}
 import uk.ac.warwick.tabula.data.model.{Assignment, FileAttachment, Module}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONRequestFailedView, JSONView}
@@ -30,7 +30,7 @@ trait GenerateTurnitinReportUriApi {
 
   @ModelAttribute("generateReportUriCommand")
   def generateReportUriCommand(@PathVariable module: Module, @PathVariable assignment: Assignment, @PathVariable attachment: FileAttachment): ViewPlagiarismReportCommand =
-    ViewPlagiarismReportCommand(module, assignment, attachment)
+    ViewPlagiarismReportCommand(mandatory(assignment), mandatory(attachment))
 
   @RequestMapping(method = Array(POST), consumes = Array(MediaType.APPLICATION_JSON_VALUE), produces = Array(MediaType.APPLICATION_JSON_VALUE))
   def create(@RequestBody request: GenerateTurnitinReportRequest, @ModelAttribute("generateReportUriCommand") command: ViewPlagiarismReportCommand, errors: BindingResult): Mav = {

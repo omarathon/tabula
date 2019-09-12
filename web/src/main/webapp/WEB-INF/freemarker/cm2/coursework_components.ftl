@@ -962,42 +962,6 @@
   ${(text!"")?replace("[STUDENT]", studentName)?replace("[FIRST_MARKER]", firstMarkerName)?replace("[SECOND_MARKER]", secondMarkerName)}
 </#compress></#macro>
 
-<#-- Common template parts for use in other submission/coursework templates. -->
-<#macro originalityReport attachment>
-  <#local r=attachment.originalityReport />
-  <#local assignment=attachment.submissionValue.submission.assignment />
-
-  <span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-  <div id="tip-content-${attachment.id}" class="hide">
-    <p>${attachment.name} <img alt="Turnitin logo" src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-    <p class="similarity-subcategories-tooltip">
-      Web: ${r.webOverlap}%<br>
-      Student papers: ${r.studentOverlap}%<br>
-      Publications: ${r.publicationOverlap}%
-    </p>
-    <p>
-      <#if r.turnitinId?has_content>
-        <a target="turnitin-viewer" href="<@routes.cm2.turnitinLtiReport assignment attachment />">View full report</a>
-      <#else>
-        <a target="turnitin-viewer" href="<@routes.cm2.turnitinReport assignment attachment />">View full report - available via Tabula until end of August
-          2016</a>
-      </#if>
-    </p>
-  </div>
-  <script type="text/javascript" nonce="${nonce()}">
-    jQuery(function ($) {
-      $("#tool-tip-${attachment.id}").popover({
-        placement: 'right',
-        html: true,
-        content: function () {
-          return $('#tip-content-${attachment.id}').html();
-        },
-        title: 'Turnitin report summary'
-      });
-    });
-  </script>
-</#macro>
-
 <#macro workflow_stage stage>
   <#if stage.messageCode!?length gt 0>
     <li class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">

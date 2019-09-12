@@ -106,7 +106,10 @@ trait AssignMarkersBySpreadsheetBindListener extends BindListener {
 
           val sheetData = markerAllocationExtractor
             .extractMarkersFromSpreadsheet(file.attached.asScala.head.asByteSource.openStream(), assignment.cm2MarkingWorkflow).map { case (stage, parsedRows) =>
-            val studentWithMultipleMarkers = parsedRows.groupBy(_.student).filter { case (s, rows) => rows.size > 1 && s.nonEmpty }.values.flatten.toSet
+            val studentWithMultipleMarkers: Set[ParsedRow] = parsedRows
+              .filter(row => row.marker.nonEmpty && row.student.nonEmpty)
+              .groupBy(_.student)
+              .filter { case (_, rows) => rows.size > 1 }.values.flatten.toSet
             val newRows = parsedRows.map { r =>
               if (studentWithMultipleMarkers.contains(r)) {
                 val newErrors = r.errors :+ Error("Student userCode", code = "markingWorkflow.student.noDupes", Array(stage))

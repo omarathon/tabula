@@ -196,17 +196,18 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   }
 
-  def submitAndContinueClick(): Unit = {
+  private def submitAndContinueClick(): Unit = {
     Then("I click submit button")
-    val button = webDriver.findElement(By.id("command")).findElement(By.cssSelector("input[value='Save and continue']"))
-    button.click()
+    eventually {
+      cssSelector(s"input[value='Save and continue']").webElement.click()
+    }
   }
 
   def amendAssignmentDetails(newTitle: String, newWorkflowId: String, confirmModal: Boolean = true): Unit = {
     When("I click on the edit button again")
     click on partialLinkText("Edit assignment")
     Then("I see the edit details screen")
-    eventually(pageSource contains "Edit assignment details" should be (true))
+    eventually(pageSource contains "Edit assignment details" should be(true))
     Then("I change assignment Title")
     textField("name").value = newTitle
 
@@ -227,7 +228,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   def amendAssignmentFeedback(checkboxFieldDetails: Seq[(String, Boolean)]): Unit = {
     When("I go to feedback assignemnt page")
-    currentUrl should include("/feedback")
+    eventually(currentUrl should include("/feedback"))
     checkboxFieldDetails.foreach { case (fieldName, checked) =>
       And(s"I amend checkbox $fieldName on feedback details form")
       if (checked) {
@@ -263,7 +264,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   def assignmentSubmissionDetails(checkboxFieldDetails: Seq[(String, Boolean)], radioButtonFieldDetails: Seq[(String, String)]): Unit = {
     When("I go to assignment submissions assignemnt page")
-    currentUrl should include("/submissions")
+    eventually(currentUrl should include("/submissions"))
     checkboxFieldDetails.foreach { case (fieldName, checked) =>
       And(s"I amend checkbox $fieldName on submission details form to $checked")
       if (checked) {
@@ -281,7 +282,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   def assigmentOptions(textFieldDetails: Seq[(String, String)], textAreaFieldDetails: Seq[(String, String)], singleSelFieldDetails: Seq[(String, String)], fileExtList: Seq[String]): Unit = {
     When("I go to assignment options page")
-    currentUrl should include("/options")
+    eventually(currentUrl should include("/options"))
 
     singleSelFieldDetails.foreach { case (fieldName, fieldValue) =>
       And(s"I amend  $fieldName on options details form to $fieldValue")
@@ -324,7 +325,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   def checkUnallocatedStudents(studentCount: Int, studentListId: Seq[String]): Unit = {
     When("I go to marker assignemnt page")
-    currentUrl should include("/markers")
+    eventually(currentUrl should include("/markers"))
     val form = webDriver.findElement(By.id("command"))
     And("I check unallocated student list")
 
@@ -374,7 +375,7 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
   def assigmentReview(workflowType: Option[MarkingWorkflowType], fieldDetails: Map[String, String], markers: Seq[LoginDetails]*): Unit = {
     When("I go to assignment review page")
-    currentUrl should include("/review")
+    eventually(currentUrl should include("/review"))
 
     Then("I cross check valious assignment details")
     //assignment page details
@@ -390,8 +391,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
 
             Seq(ModerationMarker.roleName -> markers.headOption.getOrElse(Nil), ModerationModerator.roleName -> markers.tail.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be (true)
-                pageSource contains marker.usercode should be (true)
+                pageSource contains field should be(true)
+                pageSource contains marker.usercode should be(true)
               }
             }
 
@@ -401,8 +402,8 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
               DblSecondMarker.roleName -> markers.tail.headOption.getOrElse(Nil),
               DblFinalMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be (true)
-                pageSource contains marker.usercode should be (true)
+                pageSource contains field should be(true)
+                pageSource contains marker.usercode should be(true)
               }
             }
 
@@ -410,15 +411,15 @@ class CourseworkEditAssignmentDetailsReusableWorkflowTest extends BrowserTest wi
           case SingleMarking =>
             Seq(SingleMarker.roleName -> markers.headOption.getOrElse(Nil)).foreach { case (field, m) =>
               m.foreach { marker =>
-                pageSource contains field should be (true)
-                pageSource contains marker.usercode should be (true)
+                pageSource contains field should be(true)
+                pageSource contains marker.usercode should be(true)
               }
             }
 
 
           case _ =>
         }
-      case None => pageSource contains "Marking workflow" should be (false)
+      case None => pageSource contains "Marking workflow" should be(false)
     }
     //assignment feedback page details
     checkReviewTabRow(labels, "Automatically release submissions to markers", getFieldValue("automaticallyReleaseToMarkers", fieldDetails))
