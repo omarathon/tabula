@@ -136,6 +136,7 @@ abstract class AbstractAttendanceMonitoringEventAttendanceService extends Attend
     } else {
       val attendances = findAttendanceForPoint(point, attendance.academicYear, student)
         .filterNot(a => a.occurrence == attendance.occurrence)
+        .filter(_.state == AttendanceState.Attended)
       point.smallGroupEventQuantity <= attendances.size + 1
     }
   }

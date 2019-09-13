@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services.attendancemonitoring
 
 import org.joda.time.DateTimeConstants
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState.Attended
 import uk.ac.warwick.tabula.data.model.{Module, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model.groups._
@@ -93,6 +94,7 @@ class AttendanceMonitoringEventAttendanceServiceTest extends TestBase with Mocki
       otherAttendance.occurrence.event = new SmallGroupEvent
       otherAttendance.occurrence.event.day = DayOfWeek.Monday
       otherAttendance.universityId = student.universityId
+      otherAttendance.state = Attended
 
       service.smallGroupService.findAttendanceForStudentInModulesInWeeks(student, 1, 2, academicYear2013, smallGroupPoint.smallGroupEventModules) returns Seq(otherAttendance)
 
